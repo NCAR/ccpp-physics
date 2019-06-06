@@ -119,9 +119,8 @@ contains
          ncontributors_upper                !   
 
     ! Local variables
-    integer :: ncid_lw,dimID,varID,status,igpt,iGas,ij,ierr
-    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4,temp_log_array1,&
-    	temp_log_array2, temp_log_array3, temp_log_array4
+    integer :: ncid_lw,dimID,varID,status,iGas
+    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4
     character(len=264) :: lw_gas_props_file
     integer,parameter :: max_strlen=256
 
@@ -398,7 +397,7 @@ contains
 
     ! Initialize gas concentrations and gas optics class with data
     do iGas=1,Model%nGases
-       call check_error_msg('lw_gas_optics_init',gas_concentrations%set_vmr(Radtend%active_gases(iGas), 0._kind_phys))
+       call check_error_msg('lw_gas_optics_init',gas_concentrations%set_vmr(Radtend%active_gases(iGas,1), 0._kind_phys))
     enddo    
     call check_error_msg('lw_gas_optics_init',lw_gas_props%load(gas_concentrations, gas_names, &
          key_species, band2gpt, band_lims, press_ref, press_ref_trop, temp_ref,  temp_ref_p,   &

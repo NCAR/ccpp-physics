@@ -97,7 +97,7 @@ contains
          errflg
 
     ! Local variables
-    integer :: i, j, k, k1, itop, ibtc
+    integer :: i, j, k, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
 
     ! Initialize CCPP error handling variables

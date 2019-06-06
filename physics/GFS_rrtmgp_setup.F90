@@ -52,9 +52,7 @@ module GFS_rrtmgp_setup
 !! | ialb                     | flag_for_using_climatology_albedo                                             | flag for using climatology alb, based on sfc type             | flag          |    0 | integer   |           | in     | F        |
 !! | iems                     | flag_for_surface_emissivity_control                                           | surface emissivity control flag, use fixed value of 1         | flag          |    0 | integer   |           | in     | F        |
 !! | ntcw                     | index_for_liquid_cloud_condensate                                             | tracer index for cloud condensate (or liquid water)           | index         |    0 | integer   |           | in     | F        |
-!! | num_p2d                  | array_dimension_of_2d_arrays_for_microphysics                                 | number of 2D arrays needed for microphysics                   | count         |    0 | integer   |           | in     | F        |
 !! | num_p3d                  | array_dimension_of_3d_arrays_for_microphysics                                 | number of 3D arrays needed for microphysics                   | count         |    0 | integer   |           | in     | F        |
-!! | npdf3d                   | number_of_3d_arrays_associated_with_pdf-based_clouds                          | number of 3d arrays associated with pdf based clouds/mp       | count         |    0 | integer   |           | in     | F        |
 !! | ntoz                     | index_for_ozone                                                               | tracer index for ozone mixing ratio                           | index         |    0 | integer   |           | in     | F        |
 !! | iovr_sw                  | flag_for_max-random_overlap_clouds_for_shortwave_radiation                    | sw: max-random overlap clouds                                 | flag          |    0 | integer   |           | in     | F        |
 !! | iovr_lw                  | flag_for_max-random_overlap_clouds_for_longwave_radiation                     | lw: max-random overlap clouds                                 | flag          |    0 | integer   |           | in     | F        |
@@ -76,8 +74,8 @@ module GFS_rrtmgp_setup
 !! | errflg                   | ccpp_error_flag                                                               | error flag for error handling in CCPP                         | flag          |    0 | integer   |           | out    | F        |
 !!
    subroutine GFS_rrtmgp_setup_init (                                    &
-          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw,  num_p2d, &
-          num_p3d, npdf3d, ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,  &
+          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw, &
+          num_p3d,  ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,  &
           icliq_sw, crick_proof, ccnorm,                                &
           imp_physics,                                                  &
           norad_precip, idate, iflip,                                   &
@@ -205,9 +203,7 @@ module GFS_rrtmgp_setup
       integer, intent(in) :: ialb
       integer, intent(in) :: iems
       integer, intent(in) :: ntcw
-      integer, intent(in) :: num_p2d
       integer, intent(in) :: num_p3d
-      integer, intent(in) :: npdf3d
       integer, intent(in) :: ntoz
       integer, intent(in) :: iovr_sw
       integer, intent(in) :: iovr_lw

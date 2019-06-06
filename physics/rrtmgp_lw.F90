@@ -10,8 +10,7 @@ module rrtmgp_lw
   use mo_rrtmgp_clr_all_sky,  only: rte_lw
   use mo_gas_concentrations,  only: ty_gas_concs
   use mo_fluxes_byband,       only: ty_fluxes_byband
-  use rrtmgp_lw_cloud_optics, only: rrtmgp_lw_cloud_optics_init
-  use rrtmgp_lw_gas_optics,   only: rrtmgp_lw_gas_optics_init, check_error_msg
+  use rrtmgp_aux,             only: check_error_msg
 
   public rrtmgp_lw_init, rrtmgp_lw_run, rrtmgp_lw_finalize
 contains
@@ -29,12 +28,12 @@ contains
 !! | local_name              | standard_name                                                                                 | long_name                                                          | units | rank | type                  |    kind   | intent | optional |
 !! |-------------------------|-----------------------------------------------------------------------------------------------|--------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
 !! | Model                   | GFS_control_type_instance                                                                     | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type      |           | in     | F        |
+!! | Radtend                 | GFS_radtend_type_instance                                                                     | Fortran DDT containing FV3-GFS radiation tendencies                | DDT   |    0 | GFS_radtend_type      |           | in     | F        |
 !! | ncol                    | horizontal_loop_extent                                                                        | horizontal dimension                                               | count |    0 | integer               |           | in     | F        |
 !! | p_lay                   | air_pressure_at_layer_for_RRTMGP_in_hPa                                                       | air pressure layer                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
 !! | p_lev                   | air_pressure_at_interface_for_RRTMGP_in_hPa                                                   | air pressure level                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
 !! | t_lay                   | air_temperature_at_layer_for_RRTMGP                                                           | air temperature layer                                              | K     |    2 | real                  | kind_phys | in     | F        |
 !! | skt                     | surface_ground_temperature_for_radiation                                                      | surface ground temperature for radiation                           | K     |    1 | real                  | kind_phys | in     | F        |
-!! | sfc_emiss               | surface_longwave_emissivity_in_each_band                                                      | surface lw emissivity in fraction in each LW band                  | frac  |    2 | real                  | kind_phys | in     | F        |
 !! | lw_gas_props            | coefficients_for_lw_gas_optics                                                                | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
 !! | optical_propsLW_clds    | longwave_optical_properties_for_cloudy_atmosphere                                             | Fortran DDT containing RRTMGP optical properties                   | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
 !! | optical_propsLW_aerosol | longwave_optical_properties_for_aerosols                                                      | Fortran DDT containing RRTMGP optical properties                   | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
@@ -49,12 +48,15 @@ contains
 !! | errmsg                  | ccpp_error_message                                                                            | error message for error handling in CCPP                           | none  |    0 | character             | len=*     | out    | F        |
 !! | errflg                  | ccpp_error_flag                                                                               | error flag for error handling in CCPP                              | flag  |    0 | integer               |           | out    | F        |
 !!
-  subroutine rrtmgp_lw_run(Model, ncol, lw_gas_props, p_lay, t_lay, p_lev, skt, &
-       sfc_emiss, gas_concentrations, optical_propsLW_clds, optical_propsLW_aerosol,&
+  subroutine rrtmgp_lw_run(Model, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, skt, &
+       gas_concentrations, optical_propsLW_clds, optical_propsLW_aerosol,&
        lslwr, fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
 
     ! Inputs
-    type(GFS_control_type),   intent(in)    :: Model
+    type(GFS_control_type),   intent(in) :: &
+         Model
+    type(GFS_radtend_type), intent(in) :: &
+         Radtend                 ! Fortran DDT containing FV3-GFS radiation tendencies 
     integer, intent(in) :: &
          ncol                    ! Number of horizontal gridpoints
     real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
@@ -66,8 +68,6 @@ contains
          skt                     ! Surface(skin) temperature              (K)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props                ! DDT containing LW spectral information
-    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol) :: &
-         sfc_emiss               ! Surface emissivity                     (1)
     type(ty_optical_props_1scl),intent(in) :: &
          optical_propsLW_clds, & ! RRTMGP DDT: longwave cloud radiative properties 
          optical_propsLW_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
@@ -129,7 +129,7 @@ contains
          t_lay,                              & ! IN  - temperature at layer interfaes (K)
          p_lev,                              & ! IN  - pressure at layer centers (Pa)
          skt,                                & ! IN  - skin temperature (K)
-         sfc_emiss,                          & ! IN  - surface emissivity in each LW band
+         Radtend%sfc_emiss_byband,           & ! IN  - surface emissivity in each LW band
          optical_propsLW_clds,               & ! IN  - DDT containing cloud optical information 
          flux_allsky,                        & ! OUT - Fluxes, all-sky, 3D (nCol,model%levs,nBand) 
          flux_clrsky,                        & ! OUT - Fluxes, clear-sky, 3D (nCol,model%levs,nBand) 

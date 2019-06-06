@@ -97,12 +97,14 @@ contains
          npairsSWcldy_sw                       !   
 
     ! Local variables
-    integer :: status,ncid_sw_clds,dimid,varID,iGas
+    integer :: status,ncid_sw_clds,dimid,varID
     character(len=264) :: sw_cloud_props_file
 
     ! Initialize
     errmsg = ''
     errflg = 0
+
+    if (Model%rrtmgp_cld_optics .eq. 0) return
 
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
     sw_cloud_props_file = trim(Model%rrtmgp_root)//trim(Model%sw_file_clouds)
@@ -294,14 +296,15 @@ contains
 #endif
 
     ! Load tables data for RRTMGP cloud-optics  
-    call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(Model%rrtmgp_nrghice))
     if (Model%rrtmgp_cld_optics .eq. 1) then
+       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(Model%rrtmgp_nrghice))
        call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_lims_cldy_sw,   &
             radliq_lwr_sw, radliq_upr_sw, radliq_fac_sw, radice_lwr_sw, radice_upr_sw,      &
             radice_fac_sw, lut_extliq_sw, lut_ssaliq_sw, lut_asyliq_sw, lut_extice_sw,      &
             lut_ssaice_sw, lut_asyice_sw))
     endif
     if (Model%rrtmgp_cld_optics .eq. 2) then
+       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(Model%rrtmgp_nrghice))
        call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_lims_cldy_sw,  &
             pade_extliq_sw, pade_ssaliq_sw, pade_asyliq_sw, pade_extice_sw, pade_ssaice_sw, &
             pade_asyice_sw, pade_sizereg_extliq_sw, pade_sizereg_ssaliq_sw,                 &
@@ -315,9 +318,6 @@ contains
 !! |-----------------------|------------------------------------------------------|------------------------------------------------------------------------------|---------|------|-----------------------|-----------|--------|----------|
 !! | Model                 | GFS_control_type_instance                            | Fortran DDT containing FV3-GFS model control parameters                      | DDT     |    0 | GFS_control_type      |           | in     | F        |
 !! | ncol                  | horizontal_loop_extent                               | horizontal dimension                                                         | count   |    0 | integer               |           | in     | F        |
-!! | p_lay                 | air_pressure_at_layer_for_RRTMGP_in_hPa              | air pressure layer                                                           | hPa     |    2 | real                  | kind_phys | in     | F        |
-!! | t_lay                 | air_temperature_at_layer_for_RRTMGP                  | air temperature layer                                                        | K       |    2 | real                  | kind_phys | in     | F        |
-!! | p_lev                 | air_pressure_at_interface_for_RRTMGP_in_hPa          | air pressure level                                                           | hPa     |    2 | real                  | kind_phys | in     | F        |
 !! | cld_frac              | total_cloud_fraction                                 | layer total cloud fraction                                                   | frac    |    2 | real                  | kind_phys | in     | F        |
 !! | cld_lwp               | cloud_liquid_water_path                              | layer cloud liquid water path                                                | g m-2   |    2 | real                  | kind_phys | in     | F        |
 !! | cld_reliq             | mean_effective_radius_for_liquid_cloud               | mean effective radius for liquid cloud                                       | micron  |    2 | real                  | kind_phys | in     | F        |
@@ -343,7 +343,7 @@ contains
   ! #########################################################################################
   ! SUBROTUINE rrtmgp_sw_cloud_optics_run()
   ! #########################################################################################
-  subroutine rrtmgp_sw_cloud_optics_run(Model, ncol, icseed_sw, p_lay, t_lay, p_lev, cld_frac,       & ! IN
+  subroutine rrtmgp_sw_cloud_optics_run(Model, ncol, icseed_sw, cld_frac,       & ! IN
        cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    & ! IN
        aerosols, sw_cloud_props, sw_gas_props, ipsdsw0, nday, idxday,                                     & ! IN
        optical_props_clouds, optical_props_aerosol, cldtausw, errmsg, errflg)                 ! OUT
@@ -362,11 +362,6 @@ contains
                              ! variable isubcsw=2, it provides permutation seed 
                              ! for each column profile that are used for generating 
                              ! random numbers. when isubcsw /=2, it will not be used.
-    real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
-         p_lay,            & ! Pressure @ model layer-centers         (hPa)
-         t_lay               ! Temperature                            (K)
-    real(kind_phys), dimension(ncol,model%levs+1), intent(in) :: &
-         p_lev               ! Pressure @ model layer-interfaces      (hPa)
     real(kind_phys), dimension(ncol,model%levs),intent(in) :: &
          cld_frac,         & ! Total cloud fraction by layer
          cld_lwp,          & ! Cloud liquid water path
@@ -381,7 +376,7 @@ contains
          sw_cloud_props       ! 
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props
-    real(kind_phys), intent(in),dimension(ncol, model%levs, sw_cloud_props%get_nband(),3) :: &
+    real(kind_phys), intent(in),dimension(ncol, model%levs, sw_gas_props%get_nband(),3) :: &
          aerosols            !
 
     ! Outputs
@@ -402,7 +397,7 @@ contains
     real(kind_phys), dimension(sw_gas_props%get_ngpt(),model%levs,ncol) :: rng3D
     real(kind_phys), dimension(sw_gas_props%get_ngpt()*model%levs) :: rng1D
     logical, dimension(ncol,model%levs,sw_gas_props%get_ngpt()) :: cldfracMCICA
-    real(kind_phys), dimension(nday,model%levs,sw_cloud_props%get_nband()) :: &
+    real(kind_phys), dimension(nday,model%levs,sw_gas_props%get_nband()) :: &
          tau_cld, ssa_cld, asy_cld
 
     ! Initialize CCPP error handling variables
@@ -435,10 +430,10 @@ contains
     ! #######################################################################################
     ! Cloud optics [ncol,model%levs,nBands]
     call check_error_msg('rrtmgp_sw_cloud_optics_run',optical_props_cloudsByBand%alloc_2str(&
-         ncol, model%levs, sw_cloud_props%get_band_lims_wavenumber()))
+         ncol, model%levs, sw_gas_props%get_band_lims_wavenumber()))
     ! Aerosol optics [ncol,model%levs,nBands]
     call check_error_msg('rrtmgp_sw_cloud_optics_run',optical_props_aerosol%alloc_2str(     &
-         ncol, model%levs, sw_cloud_props%get_band_lims_wavenumber()))
+         ncol, model%levs, sw_gas_props%get_band_lims_wavenumber()))
     ! Cloud optics [ncol,model%levs,nGpt]
     call check_error_msg('rrtmgp_sw_cloud_optics_run',optical_props_clouds%alloc_2str(      &
          ncol, model%levs, sw_gas_props))
@@ -474,7 +469,7 @@ contains
           optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
           optical_props_cloudsByBand%ssa(:,:,:) = 0._kind_phys
           optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys
-          call rrtmg_sw_cloud_optics(nday, model%levs, sw_cloud_props%get_nband(), cld_lwp(idxday,:), &
+          call rrtmg_sw_cloud_optics(nday, model%levs, sw_gas_props%get_nband(), cld_lwp(idxday,:), &
                cld_reliq(idxday,:), cld_iwp(idxday,:), cld_reice(idxday,:), cld_rwp(idxday,:),   &
                cld_rerain(idxday,:), cld_swp(idxday,:), cld_resnow(idxday,:), cld_frac(idxday,:),&
                tau_cld, ssa_cld, asy_cld)

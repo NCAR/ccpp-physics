@@ -2,8 +2,7 @@
 !!This file contains
 module GFS_rrtmgp_sw_post 
   use machine,                    only: kind_phys
-  use GFS_typedefs,               only: GFS_statein_type,   &
-                                        GFS_coupling_type,  &
+  use GFS_typedefs,               only: GFS_coupling_type,  &
                                         GFS_control_type,   &
                                         GFS_grid_type,      &
                                         GFS_radtend_type,   &
@@ -33,11 +32,9 @@ contains
 !! | Grid              | GFS_grid_type_instance                                                                         | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type        |           | in     | F        |
 !! | Diag              | GFS_diag_type_instance                                                                         | Fortran DDT containing FV3-GFS diagnotics data                               | DDT      |    0 | GFS_diag_type        |           | inout  | F        |
 !! | Radtend           | GFS_radtend_type_instance                                                                      | Fortran DDT containing FV3-GFS radiation tendencies                          | DDT      |    0 | GFS_radtend_type     |           | inout  | F        |
-!! | Statein           | GFS_statein_type_instance                                                                      | Fortran DDT containing FV3-GFS prognostic state data in from dycore          | DDT      |    0 | GFS_statein_type     |           | in     | F        |
 !! | Coupling          | GFS_coupling_type_instance                                                                     | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type    |           | inout  | F        |
 !! | scmpsw            | components_of_surface_downward_shortwave_fluxes                                                | derived type for special components of surface downward shortwave fluxes     | W m-2    |    1 | cmpfsw_type          |           | inout  | T        |
 !! | im                | horizontal_loop_extent                                                                         | horizontal loop extent                                                       | count    |    0 | integer              |           | in     | F        |
-!! | tsfa              | surface_air_temperature_for_radiation                                                          | lowest model layer air temperature for radiation                             | K        |    1 | real                 | kind_phys | in     | F        |
 !! | p_lev             | air_pressure_at_interface_for_RRTMGP_in_hPa                                                    | air pressure level                                                           | hPa      |    2 | real                 | kind_phys | in     | F        |
 !! | nday              | daytime_points_dimension                                                                       | daytime points dimension                                                     | count    |    0 | integer              |           | in     | F        |
 !! | idxday            | daytime_points                                                                                 | daytime points                                                               | index    |    1 | integer              |           | in     | F        |
@@ -46,10 +43,6 @@ contains
 !! | fluxswUP_clrsky   | sw_flux_profile_upward_clrsky                                                                  | RRTMGP upward shortwave clr-sky flux profile                                 | W m-2    |    2 | real                 | kind_phys | in     | F        |
 !! | fluxswDOWN_clrsky | sw_flux_profile_downward_clrsky                                                                | RRTMGP downward shortwave clr-sky flux profile                               | W m-2    |    2 | real                 | kind_phys | in     | F        |
 !! | sw_gas_props      | coefficients_for_sw_gas_optics                                                                 | DDT containing spectral information for RRTMGP SW radiation scheme           | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
-!! | sfc_alb_nir_dir   | surface_shortwave_albedo_near_infrared_direct_in_each_band                                     | surface sw near-infrared direct albedo in each SW band                       | frac     |    2 | real                 | kind_phys | in     | F        |
-!! | sfc_alb_nir_dif   | surface_shortwave_albedo_near_infrared_diffuse_in_each_band                                    | surface sw near-infrared diffuse albedo in each SW band                      | frac     |    2 | real                 | kind_phys | in     | F        |
-!! | sfc_alb_uvvis_dir | surface_shortwave_albedo_uv_visible_direct_in_each_band                                        | surface sw uv-visible direct albedo in each SW band                          | frac     |    2 | real                 | kind_phys | in     | F        |
-!! | sfc_alb_uvvis_dif | surface_shortwave_albedo_uv_visible_diffuse_in_each_band                                       | surface sw uv-visible diffuse albedo in each SW band                         | frac     |    2 | real                 | kind_phys | in     | F        |
 !! | hswc              | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                    | shortwave total sky heating rate                                             | K s-1    |    2 | real                 | kind_phys | out    | F        |
 !! | topflx_sw         | sw_fluxes_top_atmosphere                                                                       | shortwave total sky fluxes at the top of the atm                             | W m-2    |    1 | topfsw_type          |           | inout  | F        |
 !! | sfcflx_sw         | sw_fluxes_sfc                                                                                  | shortwave total sky fluxes at the Earth surface                              | W m-2    |    1 | sfcfsw_type          |           | inout  | F        |
@@ -59,9 +52,8 @@ contains
 !! | errflg            | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                        | flag     |    0 | integer              |           | out    | F        |
 !!
 #endif
-  subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Statein, Coupling,       & 
-       scmpsw, im, p_lev, sw_gas_props, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir,  &
-       sfc_alb_uvvis_dif, tsfa, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky,         &
+  subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling,       & 
+       scmpsw, im, p_lev, sw_gas_props,  nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky,         &
        fluxswUP_clrsky, fluxswDOWN_clrsky, hswc, topflx_sw, sfcflx_sw, flxprf_sw, hsw0,   &
        errmsg, errflg)
 
@@ -70,9 +62,7 @@ contains
          Model             ! Fortran DDT containing FV3-GFS model control parameters
     type(GFS_grid_type), intent(in) :: &
          Grid              ! Fortran DDT containing FV3-GFS grid and interpolation related data 
-    type(GFS_statein_type), intent(in) :: &
-         Statein           ! Fortran DDT containing FV3-GFS prognostic state data in from dycore    
-    type(GFS_coupling_type), intent(inout) :: &
+  type(GFS_coupling_type), intent(inout) :: &
          Coupling          ! Fortran DDT containing FV3-GFS fields to/from coupling with other components 
     type(GFS_radtend_type), intent(inout) :: &
          Radtend           ! Fortran DDT containing FV3-GFS radiation tendencies 
@@ -83,17 +73,10 @@ contains
          nDay              ! Number of daylit columns
     integer, intent(in), dimension(nday) :: &
          idxday            ! Index array for daytime points
-    real(kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  &
-         tsfa              ! Lowest model layer air temperature for radiation 
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props          ! DDT containing SW spectral information
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
          p_lev             ! Pressure @ model layer-interfaces    (hPa)
-    real(kind_phys),dimension(sw_gas_props%get_nband(),size(Grid%xlon,1)),intent(in) :: &
-         sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
-         sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
-         sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
-         sfc_alb_uvvis_dif    ! Shortwave surface albedo (uvvis-diffuse)    
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
          fluxswUP_allsky,   & ! SW All-sky flux                    (W/m2)
          fluxswDOWN_allsky, & ! SW All-sky flux                    (W/m2)
@@ -136,10 +119,13 @@ contains
                           ! visbm - downward uv+vis direct beam flux (W/m2)
                           ! visdf - downward uv+vis diffused flux    (W/m2)
     ! Local variables
-    integer :: i, j, k, k1, itop, ibtc, iBand, iSFC, iTOA
-    real(kind_phys) :: tem0d, tem1, tem2
+    integer :: i, k, iSFC, iTOA
     real(kind_phys), dimension(nDay, Model%levs) :: thetaTendClrSky, thetaTendAllSky
     logical :: l_clrskysw_hr, l_fluxessw2d, top_at_1, l_sfcFluxessw1D
+
+   ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
 
     ! Are any optional outputs requested?
     l_clrskysw_hr   = present(hsw0)
@@ -234,10 +220,10 @@ contains
              Coupling%visbmdi(i) = scmpsw(i)%visbm
              Coupling%visdfdi(i) = scmpsw(i)%visdf
              
-             Coupling%nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(1,i)
-             Coupling%nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(1,i)
-             Coupling%visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(1,i)
-             Coupling%visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(1,i)
+             Coupling%nirbmui(i) = scmpsw(i)%nirbm * Radtend%sfc_alb_nir_dir(1,i)
+             Coupling%nirdfui(i) = scmpsw(i)%nirdf * Radtend%sfc_alb_nir_dif(1,i)
+             Coupling%visbmui(i) = scmpsw(i)%visbm * Radtend%sfc_alb_uvvis_dir(1,i)
+             Coupling%visdfui(i) = scmpsw(i)%visdf * Radtend%sfc_alb_uvvis_dif(1,i)
           enddo
        else                   ! if_nday_block
           Radtend%htrsw(:,:) = 0.0

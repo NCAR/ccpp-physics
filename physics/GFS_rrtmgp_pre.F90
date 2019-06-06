@@ -103,11 +103,6 @@ contains
 !! | faersw             | aerosol_optical_properties_for_shortwave_bands_01-16        | aerosol optical properties for shortwave bands 01-16                          | various  |    4 | real                  | kind_phys | out    | F        |
 !! | alb1d              | surface_albedo_perturbation                                 | surface albedo perturbation                                                   | frac     |    1 | real                  | kind_phys | out    | F        |
 !! | gas_concentrations | Gas_concentrations_for_RRTMGP_suite                         | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | out    | F        |
-!! | sfc_emiss_byband   | surface_longwave_emissivity_in_each_band                    | surface lw emissivity in fraction in each LW band                             | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_nir_dir    | surface_shortwave_albedo_near_infrared_direct_in_each_band  | surface sw near-infrared direct albedo in each SW band                        | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_nir_dif    | surface_shortwave_albedo_near_infrared_diffuse_in_each_band | surface sw near-infrared diffuse albedo in each SW band                       | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_uvvis_dir  | surface_shortwave_albedo_uv_visible_direct_in_each_band     | surface sw uv-visible direct albedo in each SW band                           | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | sfc_alb_uvvis_dif  | surface_shortwave_albedo_uv_visible_diffuse_in_each_band    | surface sw uv-visible diffuse albedo in each SW band                          | frac     |    2 | real                  | kind_phys | out    | F        |
 !! | nday               | daytime_points_dimension                                    | daytime points dimension                                                      | count    |    0 | integer               |           | out    | F        |
 !! | idxday             | daytime_points                                              | daytime points                                                                | index    |    1 | integer               |           | out    | F        |
 !! | errmsg             | ccpp_error_message                                          | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
@@ -119,8 +114,7 @@ contains
        ncol, lw_gas_props, sw_gas_props,                                                        & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, alb1d, cld_frac, cld_lwp,         & ! OUT
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, faerlw, & ! OUT
-       faersw, sfc_emiss_byband, nday, idxday, gas_concentrations, sfc_alb_nir_dir,     & ! OUT
-       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, errmsg, errflg)             ! OUT
+       faersw, nday, idxday, gas_concentrations, errmsg, errflg)             ! OUT
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -155,11 +149,6 @@ contains
     real(kind_phys), dimension(ncol), intent(out) :: &
          tsfg,              & !
          tsfa                 !
-    real(kind_phys),dimension(sw_gas_props%get_nband(),NCOL),intent(out) :: &
-         sfc_alb_nir_dir,   & ! Shortwave surface albedo (nIR-direct) 
-         sfc_alb_nir_dif,   & ! Shortwave surface albedo (nIR-diffuse)
-         sfc_alb_uvvis_dir, & ! Shortwave surface albedo (uvvis-direct)
-         sfc_alb_uvvis_dif    ! Shortwave surface albedo (uvvis-diffuse)
     integer, intent(out)   :: &
          nday                 ! Number of daylit points
     integer, dimension(ncol), intent(out) :: &
@@ -172,8 +161,6 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag
-    real(kind_phys),dimension(sw_gas_props%get_nband(),NCOL),intent(out) :: &
-         sfc_emiss_byband    ! Longwave surface emissivity in each band
     real(kind_phys), dimension(ncol,Model%levr+LTP),intent(out) :: &
          cld_frac,          & ! Total cloud fraction
          cld_lwp,           & ! Cloud liquid water path
@@ -190,13 +177,9 @@ contains
          faerlw               ! Aerosol radiative properties in each LW band.
     
     ! Local variables
-    integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl,i, j, k, k1, k2, lsk, &
-         LP1, lla, llb, lya, lyb, iCol, iBand, iSFC, iTOA, iLay
-    integer,dimension(NCOL) :: ipseed_lw,ipseed_sw
+    integer :: i, j, k, iCol, iBand, iSFC, iTOA, iLay
     integer,dimension(ncol,3) :: mbota,mtopa
     logical :: top_at_1
-    logical,dimension(NCOL,Model%levs) :: &
-         liqmask,icemask
     real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs
     real(kind_phys), dimension(ncol)  :: de_lgth
@@ -204,7 +187,7 @@ contains
     real(kind_phys), dimension(ncol, NSPC1) :: aerodp
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
     real(kind_phys), dimension(ncol, Model%levs) :: relhum, qs_lay, q_lay, deltaZ, tv_lay,&
-         deltaP, o3_lay, delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
+         deltaP, o3_lay
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac) :: tracer
     real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS) :: clouds
@@ -314,6 +297,29 @@ contains
     endif
 
     ! #######################################################################################
+    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile for both 
+    ! LW and SW radiation.
+    ! #######################################################################################
+    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
+         Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
+         Model%lsswr, Model%lslwr, faersw2, faerlw, aerodp)
+    
+    ! Store aerosol optical properties
+    ! SW. 
+    ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
+    ! band ordering was [nIR -> UV -> IR(band)]
+    faersw(1:NCOL,1:Model%levs,1,1)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),1)
+    faersw(1:NCOL,1:Model%levs,1,2)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),2)
+    faersw(1:NCOL,1:Model%levs,1,3)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),3)
+    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),1) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,1)
+    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),2) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,2)
+    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),3) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,3)
+
+    ! Setup surface ground temperature and ground/air skin temperature if required.
+    tsfg(1:NCOL) = Sfcprop%tsfc(1:NCOL)
+    tsfa(1:NCOL) = Sfcprop%tsfc(1:NCOL)
+
+    ! #######################################################################################
     ! Cloud microphysics
     ! #######################################################################################
     call cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,    &
@@ -344,29 +350,6 @@ contains
           enddo
        endif
     endif    
-    
-    ! #######################################################################################
-    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile for both 
-    ! LW and SW radiation.
-    ! #######################################################################################
-    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
-         Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
-         Model%lsswr, Model%lslwr, faersw2, faerlw, aerodp)
-    
-    ! Store aerosol optical properties
-    ! SW. 
-    ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
-    ! band ordering was [nIR -> UV -> IR(band)]
-    faersw(1:NCOL,1:Model%levs,1,1)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),1)
-    faersw(1:NCOL,1:Model%levs,1,2)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),2)
-    faersw(1:NCOL,1:Model%levs,1,3)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),3)
-    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),1) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,1)
-    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),2) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,2)
-    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),3) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,3)
-
-    ! Setup surface ground temperature and ground/air skin temperature if required.
-    tsfg(1:NCOL) = Sfcprop%tsfc(1:NCOL)
-    tsfa(1:NCOL) = Sfcprop%tsfc(1:NCOL)
 
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
@@ -375,7 +358,7 @@ contains
        call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,     &
             Sfcprop%zorl, tsfg, tsfa, Sfcprop%hprim, NCOL,  Radtend%semis)
        do iBand=1,lw_gas_props%get_nband()
-          sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
+          Radtend%sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
        enddo
     endif
 
@@ -413,10 +396,10 @@ contains
       
     ! Spread across all SW bands
     do iBand=1,sw_gas_props%get_nband()
-       sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
-       sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
-       sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
-       sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
+       Radtend%sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
+       Radtend%sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
+       Radtend%sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
+       Radtend%sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
     enddo
 
   end subroutine GFS_rrtmgp_pre_run
@@ -466,10 +449,10 @@ contains
     ! Local variables
     real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
     integer :: i,k
-    real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
-    real(kind_phys) :: es, qs,  clwmin, clwm, clwt, onemrh, value, tem1, tem2
+    real(kind_phys) :: clwmin, clwm, clwt, onemrh, value, tem1, tem2
     real(kind_phys), parameter :: xrc3 = 100.
-    
+    real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
+
     ! #######################################################################################
     !  Obtain cloud information for radiation calculations
     !    (clouds,cldsa,mtopa,mbota)
@@ -554,7 +537,7 @@ contains
        else
           do k=1,model%levs
              do i=1,ncol
-                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                cldcov(i,k) = Tbd%phy_f3d(i,k,Model%indcld)
                 if (tracer(i,k,model%ntcw) .gt. 0 .or. tracer(i,k,model%ntiw) .gt. 0) then
                    cldcov(i,k) = 0.1
                 else
@@ -564,7 +547,7 @@ contains
           enddo
        endif
     elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
-       cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
+    !   cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
     else                                                           ! neither of the other two cases
        cldcov = 0.0
     endif
@@ -703,7 +686,7 @@ contains
                delta_q,              & ! IN  - Total water distribution width
                Model%sup,            & ! IN  - ??? Supersaturation?
                Model%kdt,            & ! IN  - ??? 
-               me,                   & ! IN  - ??? NOT USED IN PROGCLD3()
+               Model%me,             & ! IN  - ??? NOT USED IN PROGCLD3()
                clouds,               & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
                cldsa,                & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
                mtopa,                & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)

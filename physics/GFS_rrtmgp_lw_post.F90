@@ -2,12 +2,10 @@
 !!This file contains
 module GFS_rrtmgp_lw_post 
   use machine,                    only: kind_phys
-  use GFS_typedefs,               only: GFS_statein_type,   &
-                                        GFS_coupling_type,  &
+  use GFS_typedefs,               only: GFS_coupling_type,  &
                                         GFS_control_type,   &
                                         GFS_grid_type,      &
-                                        GFS_radtend_type,   &
-                                        GFS_diag_type
+                                        GFS_radtend_type
   use module_radiation_aerosols, only: NSPC1
   use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
   ! RRTMGP DDT's
@@ -31,9 +29,7 @@ contains
 !! |-------------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|----------------------|-----------|--------|----------|
 !! | Model             | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type     |           | in     | F        |
 !! | Grid              | GFS_grid_type_instance                                                                         | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type        |           | in     | F        |
-!! | Diag              | GFS_diag_type_instance                                                                         | Fortran DDT containing FV3-GFS diagnotics data                               | DDT      |    0 | GFS_diag_type        |           | inout  | F        |
 !! | Radtend           | GFS_radtend_type_instance                                                                      | Fortran DDT containing FV3-GFS radiation tendencies                          | DDT      |    0 | GFS_radtend_type     |           | inout  | F        |
-!! | Statein           | GFS_statein_type_instance                                                                      | Fortran DDT containing FV3-GFS prognostic state data in from dycore          | DDT      |    0 | GFS_statein_type     |           | in     | F        |
 !! | Coupling          | GFS_coupling_type_instance                                                                     | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type    |           | inout  | F        |
 !! | im                | horizontal_loop_extent                                                                         | horizontal loop extent                                                       | count    |    0 | integer              |           | in     | F        |
 !! | tsfa              | surface_air_temperature_for_radiation                                                          | lowest model layer air temperature for radiation                             | K        |    1 | real                 | kind_phys | in     | F        |
@@ -51,7 +47,7 @@ contains
 !! | errflg            | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                        | flag     |    0 | integer              |           | out    | F        |
 !!
 #endif
-  subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Diag, Radtend, Statein, &
+  subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend,  &
               Coupling, im, p_lev,          &
               tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, &
               hlwc, topflx_lw, sfcflx_lw, flxprf_lw, hlw0, errmsg, errflg)
@@ -61,14 +57,10 @@ contains
          Model             ! Fortran DDT containing FV3-GFS model control parameters
     type(GFS_grid_type), intent(in) :: &
          Grid              ! Fortran DDT containing FV3-GFS grid and interpolation related data 
-    type(GFS_statein_type), intent(in) :: &
-         Statein           ! Fortran DDT containing FV3-GFS prognostic state data in from dycore    
-    type(GFS_coupling_type), intent(inout) :: &
+   type(GFS_coupling_type), intent(inout) :: &
          Coupling          ! Fortran DDT containing FV3-GFS fields to/from coupling with other components 
     type(GFS_radtend_type), intent(inout) :: &
          Radtend           ! Fortran DDT containing FV3-GFS radiation tendencies 
-    type(GFS_diag_type), intent(inout) :: &
-         Diag              ! Fortran DDT containing FV3-GFS diagnotics data  
     integer, intent(in) :: &
          im                ! Horizontal loop extent 
     real(kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  &
@@ -110,7 +102,7 @@ contains
                           ! dnfx0 - clear sky dnward flux            (W/m2)
 
     ! Local variables
-    integer :: i, j, k, iBand, iSFC, iTOA
+    integer :: k, iSFC, iTOA
     logical :: l_clrskylw_hr, l_fluxeslw2d, top_at_1
 
    ! Initialize CCPP error handling variables

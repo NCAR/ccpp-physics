@@ -11,8 +11,6 @@ module rrtmgp_sw
   use mo_gas_concentrations,   only: ty_gas_concs
   use mo_fluxes_byband,        only: ty_fluxes_byband
   use module_radsw_parameters, only: cmpfsw_type
-  use rrtmgp_sw_cloud_optics,  only: rrtmgp_sw_cloud_optics_init
-  use rrtmgp_sw_gas_optics,    only: rrtmgp_sw_gas_optics_init
   use rrtmgp_aux,              only: check_error_msg
 
   public rrtmgp_sw_init, rrtmgp_sw_run, rrtmgp_sw_finalize
@@ -42,9 +40,6 @@ contains
 !! | optical_props_aerosol   | shortwave_optical_properties_for_aerosols                                                      | Fortran DDT containing RRTMGP optical properties                         | DDT   |    0 | ty_optical_props_2str |           | in     | F        |
 !! | gas_concentrations      | Gas_concentrations_for_RRTMGP_suite                                                            | DDT containing gas concentrations for RRTMGP radiation scheme            | DDT   |    0 | ty_gas_concs          |           | in     | F        |
 !! | lsswr                   | flag_to_calc_sw                                                                                | flag to calculate SW irradiances                                         | flag  |    0 | logical               |           | in     | F        |
-!! | sfcalb_nir_dir          | surface_shortwave_albedo_near_infrared_direct_in_each_band                                     | surface sw near-infrared direct albedo in each SW band                   | frac  |    2 | real                  | kind_phys | in     | F        |
-!! | sfcalb_nir_dif          | surface_shortwave_albedo_near_infrared_diffuse_in_each_band                                    | surface sw near-infrared diffuse albedo in each SW band                  | frac  |    2 | real                  | kind_phys | in     | F        |
-!! | cossza                  | cosine_of_zenith_angle                                                                         | cosine of the solar zenit angle                                          | none  |    1 | real                  | kind_phys | in     | F        |
 !! | nday                    | daytime_points_dimension                                                                       | daytime points dimension                                                 | count |    0 | integer               |           | in     | F        |
 !! | idxday                  | daytime_points                                                                                 | daytime points                                                           | index |    1 | integer               |           | in     | F        |
 !! | hsw0                    | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step | shortwave clear sky heating rate                                         | K s-1 |    2 | real                  | kind_phys | inout  | T        |
@@ -59,7 +54,7 @@ contains
 !!
   subroutine rrtmgp_sw_run(Model, Radtend, ncol, sw_gas_props, p_lay, t_lay, p_lev, gas_concentrations, &
        optical_props_clds, optical_props_aerosol, &
-       lsswr, sfcalb_nir_dir, sfcalb_nir_dif, cossza,  nday, idxday, hsw0, hswb, scmpsw, &
+       lsswr, nday, idxday, hsw0, hswb, scmpsw, &
        fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
@@ -77,11 +72,6 @@ contains
          p_lev                   ! Pressure @ model layer-interfaces      (hPa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props                ! DDT containing SW spectral information
-    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
-         sfcalb_nir_dir,  & ! Surface albedo direct (near-IR)         (1)
-         sfcalb_nir_dif     ! Surface albedo diffuse (near-IR)        (1)
-    real(kind_phys), dimension(ncol), intent(in) :: &
-         cossza             ! Cosine of solar zenith angle            (1)
     type(ty_optical_props_2str),intent(in) :: &
          optical_props_clds, & ! RRTMGP DDT: longwave cloud radiative properties 
          optical_props_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
@@ -166,8 +156,8 @@ contains
       
        ! Similarly, subset the gas concentrations.
        do iGas=1,Model%nGases
-          call check_error_msg('rrtmgp_sw_run',gas_concentrations%get_vmr(trim(Radtend%active_gases(iGas)),vmrTemp))
-          call check_error_msg('rrtmgp_sw_run',gas_concentrations_daylit%set_vmr(trim(Radtend%active_gases(iGas)),vmrTemp(idxday,:)))
+          call check_error_msg('rrtmgp_sw_run',gas_concentrations%get_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp))
+          call check_error_msg('rrtmgp_sw_run',gas_concentrations_daylit%set_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp(idxday,:)))
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
@@ -188,9 +178,9 @@ contains
             p_lay(idxday,1:Model%levs),               & ! IN  - pressure at layer interfaces (Pa)  
             t_lay(idxday,1:Model%levs),               & ! IN  - temperature at layer interfaes (K)
             p_lev(idxday,1:Model%levs+1),             & ! IN  - pressure at layer centers (Pa)
-            cossza(idxday),                           & ! IN  - Cosine of solar zenith angle
-            sfcalb_nir_dir(:,idxday),                 & ! IN  - Shortwave surface albedo (direct)
-            sfcalb_nir_dif(:,idxday),                 & ! IN  - Shortwave surface albedo (diffuse)
+            Radtend%coszen(idxday),                           & ! IN  - Cosine of solar zenith angle
+            Radtend%sfc_alb_nir_dir(:,idxday),        & ! IN  - Shortwave surface albedo (direct)
+            Radtend%sfc_alb_nir_dif(:,idxday),        & ! IN  - Shortwave surface albedo (diffuse)
             optical_props_clds_daylit,                & ! IN  - DDT containing cloud optical information 
             flux_allsky,                              & ! OUT - Fluxes, all-sky, 3D (nCol,Model%levs,nBand) 
             flux_clrsky,                              & ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
