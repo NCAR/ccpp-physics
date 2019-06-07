@@ -71,50 +71,54 @@ contains
   end subroutine GFS_rrtmgp_pre_init
 
 !> \section arg_table_GFS_rrtmgp_pre_run Argument Table
-!! | local_name         | standard_name                                               | long_name                                                                     | units    | rank |  type                 |   kind    | intent | optional |
-!! |--------------------|-------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model              | GFS_control_type_instance                                   | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | Grid               | GFS_grid_type_instance                                      | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |    0 | GFS_grid_type         |           | in     | F        |
-!! | Sfcprop            | GFS_sfcprop_type_instance                                   | Fortran DDT containing FV3-GFS surface fields                                 | DDT      |    0 | GFS_sfcprop_type      |           | in     | F        |
-!! | Statein            | GFS_statein_type_instance                                   | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type      |           | in     | F        |
-!! | Tbd                | GFS_tbd_type_instance                                       | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
-!! | Coupling           | GFS_coupling_type_instance                                  | Fortran DDT containing FV3-GFS fields needed for coupling                     | DDT      |    0 | GFS_coupling_type     |           | in     | F        |
-!! | Radtend            | GFS_radtend_type_instance                                   | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
-!! | ncol               | horizontal_loop_extent                                      | horizontal loop extent                                                        | count    |    0 | integer               |           | in     | F        |
-!! | lw_gas_props       | coefficients_for_lw_gas_optics                              | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | sw_gas_props       | coefficients_for_sw_gas_optics                              | DDT containing spectral information for RRTMGP SW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | raddt              | time_step_for_radiation                                     | radiation time step                                                           | s        |    0 | real                  | kind_phys | out    | F        |
-!! | p_lay              | air_pressure_at_layer_for_RRTMGP_in_hPa                     | air pressure at vertical layer for radiation calculation                      | hPa      |    2 | real                  | kind_phys | out    | F        |
-!! | p_lev              | air_pressure_at_interface_for_RRTMGP_in_hPa                 | air pressure at vertical interface for radiation calculation                  | hPa      |    2 | real                  | kind_phys | out    | F        |
-!! | t_lay              | air_temperature_at_layer_for_RRTMGP                         | air temperature at vertical layer for radiation calculation                   | K        |    2 | real                  | kind_phys | out    | F        |
-!! | t_lev              | air_temperature_at_interface_for_RRTMGP                     | air temperature  at vertical interface for radiation calculation              | K        |    2 | real                  | kind_phys | out    | F        |
-!! | tsfg               | surface_ground_temperature_for_radiation                    | surface ground temperature for radiation                                      | K        |    1 | real                  | kind_phys | out    | F        |
-!! | tsfa               | surface_air_temperature_for_radiation                       | lowest model layer air temperature for radiation                              | K        |    1 | real                  | kind_phys | out    | F        |
-!! | cld_frac           | total_cloud_fraction                                        | layer total cloud fraction                                                    | frac     |    2 | real                  | kind_phys | out    | F        |
-!! | cld_lwp            | cloud_liquid_water_path                                     | layer cloud liquid water path                                                 | g m-2    |    2 | real                  | kind_phys | out    | F        |
-!! | cld_reliq          | mean_effective_radius_for_liquid_cloud                      | mean effective radius for liquid cloud                                        | micron   |    2 | real                  | kind_phys | out    | F        |
-!! | cld_iwp            | cloud_ice_water_path                                        | layer cloud ice water path                                                    | g m-2    |    2 | real                  | kind_phys | out    | F        |
-!! | cld_reice          | mean_effective_radius_for_ice_cloud                         | mean effective radius for ice cloud                                           | micron   |    2 | real                  | kind_phys | out    | F        |
-!! | cld_swp            | cloud_snow_water_path                                       | layer cloud snow water path                                                   | g m-2    |    2 | real                  | kind_phys | out    | F        |
-!! | cld_resnow         | mean_effective_radius_for_snow_flake                        | mean effective radius for snow cloud                                          | micron   |    2 | real                  | kind_phys | out    | F        |
-!! | cld_rwp            | cloud_rain_water_path                                       | layer cloud rain water path                                                   | g m-2    |    2 | real                  | kind_phys | out    | F        |
-!! | cld_rerain         | mean_effective_radius_for_rain_drop                         | mean effective radius for rain cloud                                          | micron   |    2 | real                  | kind_phys | out    | F        |
-!! | faerlw             | aerosol_optical_properties_for_longwave_bands_01-16         | aerosol optical properties for longwave bands 01-16                           | various  |    4 | real                  | kind_phys | out    | F        |
-!! | faersw             | aerosol_optical_properties_for_shortwave_bands_01-16        | aerosol optical properties for shortwave bands 01-16                          | various  |    4 | real                  | kind_phys | out    | F        |
-!! | alb1d              | surface_albedo_perturbation                                 | surface albedo perturbation                                                   | frac     |    1 | real                  | kind_phys | out    | F        |
-!! | gas_concentrations | Gas_concentrations_for_RRTMGP_suite                         | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | out    | F        |
-!! | nday               | daytime_points_dimension                                    | daytime points dimension                                                      | count    |    0 | integer               |           | out    | F        |
-!! | idxday             | daytime_points                                              | daytime points                                                                | index    |    1 | integer               |           | out    | F        |
-!! | errmsg             | ccpp_error_message                                          | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg             | ccpp_error_flag                                             | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
+!! | local_name         | standard_name                                                 | long_name                                                                     | units    | rank |  type                 |   kind    | intent | optional |
+!! |--------------------|---------------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | Model              | GFS_control_type_instance                                     | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | in     | F        |
+!! | Grid               | GFS_grid_type_instance                                        | Fortran DDT containing FV3-GFS grid and interpolation related data            | DDT      |    0 | GFS_grid_type         |           | in     | F        |
+!! | Sfcprop            | GFS_sfcprop_type_instance                                     | Fortran DDT containing FV3-GFS surface fields                                 | DDT      |    0 | GFS_sfcprop_type      |           | in     | F        |
+!! | Statein            | GFS_statein_type_instance                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore           | DDT      |    0 | GFS_statein_type      |           | in     | F        |
+!! | Tbd                | GFS_tbd_type_instance                                         | Fortran DDT containing FV3-GFS data not yet assigned to a defined container   | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
+!! | Coupling           | GFS_coupling_type_instance                                    | Fortran DDT containing FV3-GFS fields needed for coupling                     | DDT      |    0 | GFS_coupling_type     |           | in     | F        |
+!! | Radtend            | GFS_radtend_type_instance                                     | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
+!! | ncol               | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer               |           | in     | F        |
+!! | lw_gas_props       | coefficients_for_lw_gas_optics                                | DDT containing spectral information for RRTMGP LW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
+!! | sw_gas_props       | coefficients_for_sw_gas_optics                                | DDT containing spectral information for RRTMGP SW radiation scheme            | DDT      |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
+!! | raddt              | time_step_for_radiation                                       | radiation time step                                                           | s        |    0 | real                  | kind_phys | out    | F        |
+!! | p_lay              | air_pressure_at_layer_for_RRTMGP_in_hPa                       | air pressure at vertical layer for radiation calculation                      | hPa      |    2 | real                  | kind_phys | out    | F        |
+!! | p_lev              | air_pressure_at_interface_for_RRTMGP_in_hPa                   | air pressure at vertical interface for radiation calculation                  | hPa      |    2 | real                  | kind_phys | out    | F        |
+!! | t_lay              | air_temperature_at_layer_for_RRTMGP                           | air temperature at vertical layer for radiation calculation                   | K        |    2 | real                  | kind_phys | out    | F        |
+!! | t_lev              | air_temperature_at_interface_for_RRTMGP                       | air temperature  at vertical interface for radiation calculation              | K        |    2 | real                  | kind_phys | out    | F        |
+!! | tsfg               | surface_ground_temperature_for_radiation                      | surface ground temperature for radiation                                      | K        |    1 | real                  | kind_phys | out    | F        |
+!! | tsfa               | surface_air_temperature_for_radiation                         | lowest model layer air temperature for radiation                              | K        |    1 | real                  | kind_phys | out    | F        |
+!! | cld_frac           | total_cloud_fraction                                          | layer total cloud fraction                                                    | frac     |    2 | real                  | kind_phys | out    | F        |
+!! | cld_lwp            | cloud_liquid_water_path                                       | layer cloud liquid water path                                                 | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_reliq          | mean_effective_radius_for_liquid_cloud                        | mean effective radius for liquid cloud                                        | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | cld_iwp            | cloud_ice_water_path                                          | layer cloud ice water path                                                    | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_reice          | mean_effective_radius_for_ice_cloud                           | mean effective radius for ice cloud                                           | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | cld_swp            | cloud_snow_water_path                                         | layer cloud snow water path                                                   | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_resnow         | mean_effective_radius_for_snow_flake                          | mean effective radius for snow cloud                                          | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | cld_rwp            | cloud_rain_water_path                                         | layer cloud rain water path                                                   | g m-2    |    2 | real                  | kind_phys | out    | F        |
+!! | cld_rerain         | mean_effective_radius_for_rain_drop                           | mean effective radius for rain cloud                                          | micron   |    2 | real                  | kind_phys | out    | F        |
+!! | faerlw             | aerosol_optical_properties_for_longwave_bands_01-16           | aerosol optical properties for longwave bands 01-16                           | various  |    4 | real                  | kind_phys | out    | F        |
+!! | faersw             | aerosol_optical_properties_for_shortwave_bands_01-16          | aerosol optical properties for shortwave bands 01-16                          | various  |    4 | real                  | kind_phys | out    | F        |
+!! | mtopa              | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |    2 | integer               |           | out    | F        |
+!! | mbota              | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |    2 | integer               |           | out    | F        |
+!! | cldsa              | cloud_area_fraction_for_radiation                             | fraction of clouds for low, middle, high, total and BL                        | frac     |    2 | real                  | kind_phys | out    | F        |
+!! | aerodp             | atmosphere_optical_thickness_due_to_ambient_aerosol_particles | vertical integrated optical depth for various aerosol species                 | none     |    2 | real                  | kind_phys | out    | F        |
+!! | alb1d              | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real                  | kind_phys | out    | F        |
+!! | gas_concentrations | Gas_concentrations_for_RRTMGP_suite                           | DDT containing gas concentrations for RRTMGP radiation scheme                 | DDT      |    0 | ty_gas_concs          |           | out    | F        |
+!! | nday               | daytime_points_dimension                                      | daytime points dimension                                                      | count    |    0 | integer               |           | out    | F        |
+!! | idxday             | daytime_points                                                | daytime points                                                                | index    |    1 | integer               |           | out    | F        |
+!! | errmsg             | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
+!! | errflg             | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
 !!
   ! Attention - the output arguments lm, im, lmk, lmp must not be set
   ! in the CCPP version - they are defined in the interstitial_create routine
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
-       ncol, lw_gas_props, sw_gas_props,                                                        & ! IN
+       ncol, lw_gas_props, sw_gas_props,                                                & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, alb1d, cld_frac, cld_lwp,         & ! OUT
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, faerlw, & ! OUT
-       faersw, nday, idxday, gas_concentrations, errmsg, errflg)             ! OUT
+       faersw, cldsa, mtopa, mbota, aerodp, nday, idxday, gas_concentrations, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -132,23 +136,23 @@ contains
     type(GFS_tbd_type), intent(in) :: &
          Tbd                  ! Fortran DDT containing FV3-GFS data not yet assigned to a defined container
     integer, intent(in)    :: &
-         ncol                   ! Number of horizontal grid points
+         ncol                 ! Number of horizontal grid points
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props,          & ! RRTMGP DDT containing spectral information for LW calculation
-         sw_gas_props             ! RRTMGP DDT containing spectral information for SW calculation
+         lw_gas_props,      & ! RRTMGP DDT containing spectral information for LW calculation
+         sw_gas_props         ! RRTMGP DDT containing spectral information for SW calculation
 
     ! Outputs
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
-         p_lay,             & !
-         t_lay                !
+         p_lay,             & ! Pressure at model-layer
+         t_lay                ! Temperature at model layer
     real(kind_phys), dimension(ncol,Model%levs+1), intent(out) :: &
-         p_lev,             & !
-         t_lev                !
+         p_lev,             & ! Pressure at model-interface
+         t_lev                ! Temperature at model-interface
     real(kind_phys), intent(out) :: &
-         raddt                !
+         raddt                ! Radiation time-step
     real(kind_phys), dimension(ncol), intent(out) :: &
-         tsfg,              & !
-         tsfa                 !
+         tsfg,              & ! Ground temperature
+         tsfa                 ! Skin temperature
     integer, intent(out)   :: &
          nday                 ! Number of daylit points
     integer, dimension(ncol), intent(out) :: &
@@ -167,24 +171,28 @@ contains
          cld_reliq,         & ! Cloud liquid effective radius
          cld_iwp,           & ! Cloud ice water path
          cld_reice,         & ! Cloud ice effecive radius
-         cld_swp,          & ! Cloud snow water path
-         cld_resnow,       & ! Cloud snow effective radius
-         cld_rwp,          & ! Cloud rain water path
-         cld_rerain          ! Cloud rain effective radius
+         cld_swp,           & ! Cloud snow water path
+         cld_resnow,        & ! Cloud snow effective radius
+         cld_rwp,           & ! Cloud rain water path
+         cld_rerain           ! Cloud rain effective radius
     real(kind_phys), dimension(ncol,Model%levs,sw_gas_props%get_nband(),NF_AESW), intent(out) ::&
          faersw               ! Aerosol radiative properties in each SW band.
     real(kind_phys), dimension(ncol,Model%levs,lw_gas_props%get_nband(),NF_AELW), intent(out) ::&
          faerlw               ! Aerosol radiative properties in each LW band.
-    
+    integer,dimension(ncol,3),intent(out) :: &
+         mbota,             & ! Vertical indices for cloud tops
+         mtopa                ! Vertical indices for cloud bases
+    real(kind_phys), dimension(ncol,5), intent(out) :: &
+         cldsa                ! Fraction of clouds for low, middle, high, total and BL 
+    real(kind_phys), dimension(ncol,NSPC1), intent(out) :: &
+         aerodp               ! Vertical integrated optical depth for various aerosol species  
+
     ! Local variables
     integer :: i, j, k, iCol, iBand, iSFC, iTOA, iLay
-    integer,dimension(ncol,3) :: mbota,mtopa
     logical :: top_at_1
     real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs
     real(kind_phys), dimension(ncol)  :: de_lgth
-    real(kind_phys), dimension(ncol, 5) :: cldsa
-    real(kind_phys), dimension(ncol, NSPC1) :: aerodp
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
     real(kind_phys), dimension(ncol, Model%levs) :: relhum, qs_lay, q_lay, deltaZ, tv_lay,&
          deltaP, o3_lay
@@ -547,7 +555,7 @@ contains
           enddo
        endif
     elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
-    !   cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
+       cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
     else                                                           ! neither of the other two cases
        cldcov = 0.0
     endif
@@ -750,12 +758,7 @@ contains
        endif
        ! *) Thompson / WSM6 cloud micrphysics scheme
     elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then
-       if (Model%kdt == 1) then
-          Tbd%phy_f3d(:,:,1) = 10.
-          Tbd%phy_f3d(:,:,2) = 50.
-          Tbd%phy_f3d(:,:,3) = 250.
-       endif
-       
+ 
        call progcld5 ( & ! IN
             p_lay/100.,               & ! IN  - Pressure at model layer centers                (mb)
             p_lev/100.,               & ! IN  - Pressure at model interfaces                   (mb)
