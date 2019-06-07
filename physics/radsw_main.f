@@ -376,7 +376,7 @@
       subroutine rrtmg_sw_init ()
       end subroutine rrtmg_sw_init
 
-!> \defgroup module_radsw_main GFS radsw Main
+!> \defgroup module_radsw_main GFS RRTMG Shortwave Module
 !! This module includes NCEP's modifications of the RRTMG-SW radiation
 !! code from AER.
 !!

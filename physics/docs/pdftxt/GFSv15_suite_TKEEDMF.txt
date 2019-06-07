@@ -26,25 +26,18 @@ This physics suite is the same as GFSv15 physics suite  with \ref GFS_SATMEDMF r
 
 \section sdf_gfsv15p Suite Definition File 
 
-The GFSv15plus suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v15plus :
+The GFSv15plus suite uses the parameterizations in the following order, as defined in  \c suite_SCM_GFS_v15plus.xml :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v15plus" lib="ccppphys" ver="3">
+<suite name="SCM_GFS_v15plus" lib="ccppphys" ver="3.0.0">
   <!-- <init></init> -->
-  <group name="fast_physics">
-    <subcycle loop="1">
-      <scheme>fv_sat_adj</scheme>
-    </subcycle>
-  </group>
   <group name="time_vary">
     <subcycle loop="1">
       <scheme>GFS_time_vary_pre</scheme>
       <scheme>GFS_rrtmg_setup</scheme>
       <scheme>GFS_rad_time_vary</scheme>
       <scheme>GFS_phys_time_vary</scheme>
-      <scheme>stochastic_physics</scheme>
-      <scheme>stochastic_physics_sfc</scheme>
     </subcycle>
   </group>
   <group name="radiation">
@@ -68,11 +61,12 @@ The GFSv15plus suite uses the parameterizations in the following order, as defin
       <scheme>GFS_suite_interstitial_1</scheme>
       <scheme>dcyc2t3</scheme>
       <scheme>GFS_surface_generic_pre</scheme>
+      <scheme>GFS_surface_composites_pre</scheme>
       <scheme>GFS_suite_interstitial_2</scheme>
     </subcycle>
     <!-- Surface iteration loop -->
     <subcycle loop="2">
-      <scheme>sfc_ex_coef</scheme>
+      <scheme>sfc_diff</scheme>
       <scheme>GFS_surface_loop_control_part1</scheme>
       <scheme>sfc_nst_pre</scheme>
       <scheme>sfc_nst</scheme>
@@ -83,12 +77,13 @@ The GFSv15plus suite uses the parameterizations in the following order, as defin
     </subcycle>
     <!-- End of surface iteration loop -->
     <subcycle loop="1">
+      <scheme>GFS_surface_composites_post</scheme>
       <scheme>dcyc2t3_post</scheme>
       <scheme>sfc_diag</scheme>
       <scheme>sfc_diag_post</scheme>
       <scheme>GFS_surface_generic_post</scheme>
       <scheme>GFS_PBL_generic_pre</scheme>
-      <scheme>hedmf</scheme>
+      <scheme>satmedmfvdif</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
       <scheme>gwdps_pre</scheme>
       <scheme>gwdps</scheme>
@@ -96,6 +91,7 @@ The GFSv15plus suite uses the parameterizations in the following order, as defin
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys_2015</scheme>
+      <scheme>h2ophys</scheme>
       <scheme>GFS_DCNV_generic_pre</scheme>
       <scheme>get_phi_fv3</scheme>
       <scheme>GFS_suite_interstitial_3</scheme>
@@ -115,11 +111,6 @@ The GFSv15plus suite uses the parameterizations in the following order, as defin
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
-    </subcycle>
-  </group>
-  <group name="stochastics">
-    <subcycle loop="1">
-      <scheme>GFS_stochastics</scheme>
     </subcycle>
   </group>
   <!-- <finalize></finalize> -->
@@ -186,51 +177,51 @@ The GFSv15plus suite uses the parameterizations in the following order, as defin
 
 &gfdl_cloud_microphysics_nml
        sedi_transport = .true.
-       do_sedi_heat = .false.
-       rad_snow = .true.
-       rad_graupel = .true.
-       rad_rain = .true.
-       const_vi = .F.
-       const_vs = .F.
-       const_vg = .F.
-       const_vr = .F.
-       vi_max = 1.
-       vs_max = 2.
-       vg_max = 12.
-       vr_max = 12.
-       qi_lim = 1.
-       prog_ccn = .false.
-       do_qa = .false.
-       fast_sat_adj = .false.
-       tau_l2v = 225.
-       tau_v2l = 150.
-       tau_g2v = 900.
-       rthresh = 10.e-6 
-       dw_land  = 0.16
-       dw_ocean = 0.10
-       ql_gen = 1.0e-3
-       ql_mlt = 1.0e-3
-       qi0_crt = 8.0E-5
-       qs0_crt = 1.0e-3
-       tau_i2s = 1000.
-       c_psaci = 0.05
-       c_pgacs = 0.01
-       rh_inc = 0.30
-       rh_inr = 0.30
-       rh_ins = 0.30
-       ccn_l = 300.
-       ccn_o = 100.
-       c_paut = 0.5
-       c_cracw = 0.8
-       use_ppm = .false.
-       use_ccn = .true.
-       mono_prof = .true.
-       z_slope_liq  = .true.
-       z_slope_ice  = .true.
-       de_ice = .false.
-       fix_negative = .true.
-       icloud_f = 1
-       mp_time = 150.
+       do_sedi_heat   = .false.
+       rad_snow       = .true.
+       rad_graupel    = .true.
+       rad_rain       = .true.
+       const_vi       = .F.
+       const_vs       = .F.
+       const_vg       = .F.
+       const_vr       = .F.
+       vi_max         = 1.
+       vs_max         = 2.
+       vg_max         = 12.
+       vr_max         = 12.
+       qi_lim         = 1.
+       prog_ccn       = .false.
+       do_qa          = .false.
+       fast_sat_adj   = .false.
+       tau_l2v        = 225.
+       tau_v2l        = 150.
+       tau_g2v        = 900.
+       rthresh        = 10.e-6 
+       dw_land        = 0.16
+       dw_ocean       = 0.10
+       ql_gen         = 1.0e-3
+       ql_mlt         = 1.0e-3
+       qi0_crt        = 8.0E-5
+       qs0_crt        = 1.0e-3
+       tau_i2s        = 1000.
+       c_psaci        = 0.05
+       c_pgacs        = 0.01
+       rh_inc         = 0.30
+       rh_inr         = 0.30
+       rh_ins         = 0.30
+       ccn_l          = 300.
+       ccn_o          = 100.
+       c_paut         = 0.5
+       c_cracw        = 0.8
+       use_ppm        = .false.
+       use_ccn        = .true.
+       mono_prof      = .true.
+       z_slope_liq    = .true.
+       z_slope_ice    = .true.
+       de_ice         = .false.
+       fix_negative   = .true.
+       icloud_f       = 1
+       mp_time        = 150.
 /
 \endcode
 

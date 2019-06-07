@@ -12,7 +12,7 @@
       subroutine satmedmfvdif_finalize ()
       end subroutine satmedmfvdif_finalize
 
-!> \defgroup satmedmf GFS satmedmfvdif Main
+!> \defgroup satmedmf GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF) Scheme Module 
 !! @{
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF) scheme.

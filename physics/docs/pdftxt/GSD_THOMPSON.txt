@@ -1,6 +1,6 @@
 /**
-\page GSD_THOMPSON Thompson Aerosol-Aware Microphysics Scheme
-\section thompson_descrp  Description
+\page GSD_THOMPSON Aerosol-Aware Thompson Microphysics Scheme
+\section thompson_descrp Description
 
 
 The GSD RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of

@@ -227,7 +227,7 @@ subroutine fv_sat_adj_finalize (errmsg, errflg)
 
 end subroutine fv_sat_adj_finalize
 
-!>\defgroup fast_sat_adj GFDL In-Core Fast Saturation Adjustment
+!>\defgroup fast_sat_adj GFDL In-Core Fast Saturation Adjustment Module
 !> @{
 !! The subroutine 'fv_sat_adj' implements the fast processes in the GFDL
 !! Cloud MP. It is part of the GFDL Cloud MP.

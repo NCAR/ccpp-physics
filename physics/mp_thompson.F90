@@ -1,11 +1,9 @@
 !>\file mp_thompson.F90
-!! This file contains NOAA/GSD's Thompson MP scheme.
+!! This file contains aerosol-aware Thompson MP scheme.
 
 
-!>\defgroup aathompson GSD Aerosol-Aware Thompson MP Module
-!!
-!! Last modified 4 Apr 2019: remove legacy debugging code    D. Heinzeller
-!> @{
+!>\defgroup aathompson Aerosol-Aware Thompson MP Module
+!! This module contains the aerosol-aware Thompson microphysics scheme.
 module mp_thompson
 
       use machine, only : kind_phys
@@ -496,4 +494,3 @@ module mp_thompson
       end subroutine mp_thompson_finalize
 
 end module mp_thompson
-!> @}

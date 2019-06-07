@@ -88,7 +88,7 @@
       subroutine sfc_sice_finalize
       end subroutine sfc_sice_finalize
 
-!>\defgroup gfs_sice_main GFS sfc_sice Main
+!>\defgroup gfs_sice_main GFS Three-layer Thermodynomics Sea-Ice Scheme Module
 !!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 !! \section arg_table_sfc_sice_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |

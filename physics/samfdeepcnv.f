@@ -23,7 +23,7 @@
       subroutine samfdeepcnv_finalize()
       end subroutine samfdeepcnv_finalize
 
-!> \defgroup SAMFdeep GFS samfdeepcnv Main
+!> \defgroup SAMFdeep GFS Scale-Aware Mass-Flux Deep Convection Scheme Module
 !! @{
 !>  \brief This subroutine contains the entirety of the SAMF deep convection
 !! scheme.

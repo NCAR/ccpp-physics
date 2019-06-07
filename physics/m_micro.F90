@@ -137,7 +137,7 @@ end subroutine m_micro_init
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 
-!> \defgroup mg2mg3 CPT Morrison-Gettelman MP scheme Module
+!> \defgroup mg2mg3 Morrison-Gettelman MP scheme Module
 !! This module contains the the entity of MG2 and MG3 schemes. 
 !> @{
 !> \defgroup mg_driver Morrison-Gettelman MP Driver Module
@@ -764,7 +764,7 @@ end subroutine m_micro_init
 !=======================================================================================================================
 !=======================================================================================================================
 !> -# Nucleation of cloud droplets and ice crystals 
-!! Aerosol cloud interactions. Calculate maxCCN tendency using Fountoukis and nenes (2005) or Abdul Razzak and Ghan (2002)
+!! Aerosol cloud interactions. Calculate maxCCN tendency using Fountoukis and Nenes (2005) or Abdul Razzak and Ghan (2002)
 !! liquid Activation Parameterization
 !! Ice activation follows the Barahona & Nenes ice activation scheme, ACP, (2008, 2009).
 !! Written by Donifan Barahona and described in Barahona et al. (2013)
@@ -794,7 +794,7 @@ end subroutine m_micro_init
          AERMASSMIX(:,:,1:5) = 1.e-6
          AERMASSMIX(:,:,6:15) = 2.e-14
        end if
-!>  - Call aerConversion1()
+!>  - Call aerconversion1()
        call AerConversion1 (AERMASSMIX,  AeroProps)
        deallocate(AERMASSMIX)
 
@@ -866,7 +866,7 @@ end subroutine m_micro_init
 
 
 ! ====================================================================
-!> -# Call gw_prof() to Calculate subgrid scale distribution in vertical velocity
+!> -# Call gw_prof() to calculate subgrid scale distribution in vertical velocity
 ! ====================================================================
 
 
@@ -885,7 +885,7 @@ end subroutine m_micro_init
            wparc_cgw(k) = 0.0
          end do
 
-!>  - Subgrid variability from Convective Sources According to Barahona et al. 2014 in prep
+!>  - Subgrid variability from convective sources according to Barahona et al. 2014 (in preparation)
 
          if (kcldtopcvn > 20) then
 
@@ -946,7 +946,7 @@ end subroutine m_micro_init
 
 
 
-!>  - Compute Total variance
+!>  - Compute total variance
 
          do K = 1, LM
            swparc(k) = sqrt(wparc_gw(k)   * wparc_gw(k)                 &
@@ -986,7 +986,7 @@ end subroutine m_micro_init
 !    &,' ccn_param=',ccn_param,' in_param=',in_param                    &
 !    &,' AeroAux%kap=',AeroAux%kap
 
-!> -# Call aerosol_activate() to activate the aerosols.
+!> -# Call aerosol_activate() to activate the aerosols
              call aerosol_activate(tauxr8, plevr8(K), swparc(K),        &
      &            wparc_ls(K), AeroAux, npre8(k), dpre8(k), ccn_diag,   &
      &            ndropr8(k),          npccninr8(K), smaxliq(K),        &
@@ -1081,7 +1081,7 @@ end subroutine m_micro_init
 !===========================End cloud particle nucleation=======================
 !                           -----------------------------
 !
-!> -# Begin Cloud Macrophysics
+!> -# Begin cloud macrophysics
 
 !     do k=1,lm
 !       do i=1,im
@@ -1145,7 +1145,7 @@ end subroutine m_micro_init
 
 !       call macro_cloud (IM, LM, DT_MOIST, PLO, PLE, PK, FRLAND,       &
 !       call macro_cloud (IM, LM, DT_MOIST, PLO, PLE,     FRLAND,       &
-!>  - Call macro_cloud() for cloud macrophysics.
+!>  - Call macro_cloud() for cloud macrophysics
         call macro_cloud (IM, LM, DT_MOIST, alf_fac, PLO, PLE,          &
      &                             CNV_DQLDT,                           &
 !    &                    CNV_MFD, CNV_DQLDT,                           &
@@ -1215,7 +1215,7 @@ end subroutine m_micro_init
 !============ Put cloud fraction back in contact with the PDF (Barahona et al., GMD, 2014)============
 
 !make sure QI , NI stay within T limits
-!>  - Call meltfrz_inst() to calculate instantaneous freezing or condensate.
+!>  - Call meltfrz_inst() to calculate instantaneous freezing or condensate
          call meltfrz_inst(IM, LM, TEMP, QLLS, QLCN, QILS, QICN, NCPL, NCPI)
 
 
@@ -1345,6 +1345,7 @@ end subroutine m_micro_init
 !         else
 !           call init_Aer(AeroAux)
 !         end if
+!>  - Call getinsubset() to extract dust properties 
           call getINsubset(1, AeroAux, AeroAux_b)
           naux = AeroAux_b%nmods
           if (nbincontactdust < naux) then

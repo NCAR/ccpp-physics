@@ -2,8 +2,8 @@
 !! This file is the entity of NOAA/ESRL/GSD RUC LSM Model(WRF version 4.0).
 
 !>\ingroup lsm_ruc_group
-!!\brief This is the entity of RUC LSM model of physics subroutines.
-!! It is a soil/veg/snowpack and ice/snowpack/land-surface model to update soil
+!! This module contains the entity of the RUC LSM model, which is a  
+!! soil/veg/snowpack and ice/snowpack/land-surface model to update soil
 !! moisture, soil temperature, skin temperature, snowpack water content, snowdepth,
 !! and all terms of the surface energy balance and surface water balance.
 MODULE module_sf_ruclsm
@@ -7678,8 +7678,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
 !+---+-----------------------------------------------------------------+
 !>\ingroup lsm_ruc_group
-!> THIS FUNCTION CALCULATES THE LIQUID SATURATION VAPOR MIXING RATIO AS
-!! A FUNCTION OF TEMPERATURE AND PRESSURE (from Thompson scheme)
+!> This function calculates the liquid saturation vapor mixing ratio as 
+!! a function of temperature and pressure (from Thompson scheme).
       REAL FUNCTION RSLF(P,T)
 
       IMPLICIT NONE

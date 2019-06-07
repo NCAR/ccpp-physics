@@ -139,7 +139,8 @@ module lsm_ruc
 !  ====================    end of description    =====================  !
 
 !> \defgroup lsm_ruc_group GSD RUC LSM Model
-!! This module contains GSD RUC Land Surface Model
+!! This module contains the RUC Land Surface Model developed by NOAA/GSD
+!! (Smirnova et al. 2016 \cite Smirnova_2016).
 #if 0
 !> \section arg_table_lsm_ruc_run Argument Table
 !! | local_name      | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |

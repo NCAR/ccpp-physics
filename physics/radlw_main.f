@@ -356,7 +356,7 @@
          subroutine rrtmg_lw_init ()
          end subroutine rrtmg_lw_init
 
-!> \defgroup module_radlw_main GFS radlw Main
+!> \defgroup module_radlw_main GFS RRTMG Longwave Module 
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
