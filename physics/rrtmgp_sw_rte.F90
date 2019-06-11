@@ -1,6 +1,6 @@
 ! ###########################################################################################
 ! ###########################################################################################
-module rrtmgp_sw
+module rrtmgp_sw_rte
   use machine,                 only: kind_phys
   use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type, GFS_statein_type
   use mo_rte_kind,             only: wl
@@ -13,20 +13,20 @@ module rrtmgp_sw
   use module_radsw_parameters, only: cmpfsw_type
   use rrtmgp_aux,              only: check_error_msg
 
-  public rrtmgp_sw_init, rrtmgp_sw_run, rrtmgp_sw_finalize
+  public rrtmgp_sw_rte_init, rrtmgp_sw_rte_run, rrtmgp_sw_rte_finalize
 
 contains
 
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_init
+  ! SUBROUTINE rrtmgp_sw_rte_init
   ! #########################################################################################
-  subroutine rrtmgp_sw_init()
-  end subroutine rrtmgp_sw_init
+  subroutine rrtmgp_sw_rte_init()
+  end subroutine rrtmgp_sw_rte_init
 
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_run
+  ! SUBROUTINE rrtmgp_sw_rte_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_run Argument Table
+!! \section arg_table_rrtmgp_sw_rte_run Argument Table
 !! | local_name              | standard_name                                                                                  | long_name                                                                | units | rank | type                  |    kind   | intent | optional |
 !! |-------------------------|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
 !! | Model                   | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                  | DDT   |    0 | GFS_control_type      |           | in     | F        |
@@ -55,7 +55,7 @@ contains
 !! | errmsg                  | ccpp_error_message                                                                             | error message for error handling in CCPP                                 | none  |    0 | character             | len=*     | out    | F        |
 !! | errflg                  | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                    | flag  |    0 | integer               |           | out    | F        |
 !!
-  subroutine rrtmgp_sw_run(Model, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay, p_lev, gas_concentrations, &
+  subroutine rrtmgp_sw_rte_run(Model, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay, p_lev, gas_concentrations, &
        optical_props_clrsky, optical_props_cloud, optical_props_aerosol, &
        lsswr, nday, idxday, toa_src, hsw0, hswb, scmpsw, &
        fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, errmsg, errflg)
@@ -158,25 +158,25 @@ contains
 
        ! Subset the cloud and aerosol radiative properties over daylit points.
        ! Cloud optics [nDay,Model%levs,nGpts]
-       call check_error_msg('rrtmgp_sw_run',optical_props_cloud_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
+       call check_error_msg('rrtmgp_sw_rte_run',optical_props_cloud_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
        optical_props_cloud_daylit%tau    = optical_props_cloud%tau(idxday,:,:)
        optical_props_cloud_daylit%ssa    = optical_props_cloud%ssa(idxday,:,:)
        optical_props_cloud_daylit%g      = optical_props_cloud%g(idxday,:,:)
        ! Aerosol optics [nDay,Model%levs,nBands]
-       call check_error_msg('rrtmgp_sw_run',optical_props_aerosol_daylit%alloc_2str(nday, Model%levs, sw_gas_props%get_band_lims_wavenumber()))
+       call check_error_msg('rrtmgp_sw_rte_run',optical_props_aerosol_daylit%alloc_2str(nday, Model%levs, sw_gas_props%get_band_lims_wavenumber()))
        optical_props_aerosol_daylit%tau = optical_props_aerosol%tau(idxday,:,:)
        optical_props_aerosol_daylit%ssa = optical_props_aerosol%ssa(idxday,:,:)
        optical_props_aerosol_daylit%g   = optical_props_aerosol%g(idxday,:,:)
        ! Clear-sky optics [nDay,Model%levs,nGpts]
-       call check_error_msg('rrtmgp_sw_run',optical_props_clrsky_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
+       call check_error_msg('rrtmgp_sw_rte_run',optical_props_clrsky_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
        optical_props_clrsky_daylit%tau = optical_props_clrsky%tau(idxday,:,:)
        optical_props_clrsky_daylit%ssa = optical_props_clrsky%ssa(idxday,:,:)
        optical_props_clrsky_daylit%g   = optical_props_clrsky%g(idxday,:,:)
       
        ! Similarly, subset the gas concentrations.
        do iGas=1,Model%nGases
-          call check_error_msg('rrtmgp_sw_run',gas_concentrations%get_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp))
-          call check_error_msg('rrtmgp_sw_run',gas_concentrations_daylit%set_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp(idxday,:)))
+          call check_error_msg('rrtmgp_sw_rte_run',gas_concentrations%get_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp))
+          call check_error_msg('rrtmgp_sw_rte_run',gas_concentrations_daylit%set_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp(idxday,:)))
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
@@ -192,9 +192,9 @@ contains
 
        ! Compute clear-sky fluxes (if requested)
        ! Clear-sky fluxes are gas+aerosol
-       call check_error_msg('rrtmgp_sw_run',optical_props_aerosol_daylit%increment(optical_props_clrsky_daylit))
+       call check_error_msg('rrtmgp_sw_rte_run',optical_props_aerosol_daylit%increment(optical_props_clrsky_daylit))
        if (l_ClrSky_HR) then
-          call check_error_msg('rrtmgp_sw_run',rte_sw(               &
+          call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
                optical_props_clrsky_daylit,        & ! IN  - optical-properties
                top_at_1,                           & ! IN  - veritcal ordering flag
                Radtend%coszen(idxday),             & ! IN  - Cosine of solar zenith angle
@@ -208,8 +208,8 @@ contains
        endif
 
        ! Compute all-sky fluxes
-       call check_error_msg('rrtmgp_sw_run',optical_props_cloud_daylit%increment(optical_props_clrsky_daylit))
-       call check_error_msg('rrtmgp_sw_run',rte_sw(               &
+       call check_error_msg('rrtmgp_sw_rte_run',optical_props_cloud_daylit%increment(optical_props_clrsky_daylit))
+       call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
             optical_props_clrsky_daylit,        & ! IN  - optical-properties
             top_at_1,                           & ! IN  - veritcal ordering flag
             Radtend%coszen(idxday),             & ! IN  - Cosine of solar zenith angle
@@ -222,12 +222,12 @@ contains
        fluxDOWN_allsky(idxday,:) = flux_allsky%flux_dn
 
     endif
-  end subroutine rrtmgp_sw_run
+  end subroutine rrtmgp_sw_rte_run
   
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_finalize
+  ! SUBROUTINE rrtmgp_sw_rte_finalize
   ! #########################################################################################
-  subroutine rrtmgp_sw_finalize()
-  end subroutine rrtmgp_sw_finalize
+  subroutine rrtmgp_sw_rte_finalize()
+  end subroutine rrtmgp_sw_rte_finalize
 
-end module rrtmgp_sw
+end module rrtmgp_sw_rte

@@ -1,6 +1,6 @@
 ! ###########################################################################################
 ! ###########################################################################################
-module rrtmgp_lw
+module rrtmgp_lw_rte
   use machine,                only: kind_phys
   use GFS_typedefs,           only: GFS_control_type, GFS_radtend_type, GFS_statein_type
   use mo_rte_kind,            only: wl
@@ -12,19 +12,19 @@ module rrtmgp_lw
   use mo_source_functions,    only: ty_source_func_lw
   use rrtmgp_aux,             only: check_error_msg
 
-  public rrtmgp_lw_init, rrtmgp_lw_run, rrtmgp_lw_finalize
+  public rrtmgp_lw_rte_init, rrtmgp_lw_rte_run, rrtmgp_lw_rte_finalize
 contains
 
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_init
+  ! SUBROUTINE rrtmgp_lw_rte_init
   ! #########################################################################################
-  subroutine rrtmgp_lw_init()
-  end subroutine rrtmgp_lw_init
+  subroutine rrtmgp_lw_rte_init()
+  end subroutine rrtmgp_lw_rte_init
 
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_run
+  ! SUBROUTINE rrtmgp_lw_rte_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_run Argument Table
+!! \section arg_table_rrtmgp_lw_rte_run Argument Table
 !! | local_name            | standard_name                                                                                 | long_name                                                           | units | rank | type                  |    kind   | intent | optional |
 !! |-----------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
 !! | Model                 | GFS_control_type_instance                                                                     | Fortran DDT containing FV3-GFS model control parameters             | DDT   |    0 | GFS_control_type      |           | in     | F        |
@@ -50,7 +50,7 @@ contains
 !! | errmsg                | ccpp_error_message                                                                            | error message for error handling in CCPP                            | none  |    0 | character             | len=*     | out    | F        |
 !! | errflg                | ccpp_error_flag                                                                               | error flag for error handling in CCPP                               | flag  |    0 | integer               |           | out    | F        |
 !!
-  subroutine rrtmgp_lw_run(Model, Statein, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, &
+  subroutine rrtmgp_lw_rte_run(Model, Statein, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, &
        skt, sources, optical_props_clrsky, optical_props_cloud, optical_props_aerosol, lslwr,&
        fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
 
@@ -134,9 +134,9 @@ contains
 
     ! Compute clear-sky fluxes (if requested)
     ! Clear-sky fluxes are gas+aerosol
-    call check_error_msg('rrtmgp_lw_run',optical_props_aerosol%increment(optical_props_clrsky))
+    call check_error_msg('rrtmgp_lw_rte_run',optical_props_aerosol%increment(optical_props_clrsky))
     if (l_ClrSky_HR) then
-       call check_error_msg('rrtmgp_lw_run',rte_lw(           &
+       call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
             optical_props_clrsky,               & ! IN  - optical-properties
             top_at_1,                           & ! IN  - veritcal ordering flag
             sources,                            & ! IN  - source function
@@ -149,8 +149,8 @@ contains
 
     ! All-sky fluxes
     ! Clear-sky fluxes are (gas+aerosol)+clouds
-    call check_error_msg('rrtmgp_lw_run',optical_props_cloud%increment(optical_props_clrsky))
-    call check_error_msg('rrtmgp_lw_run',rte_lw(           &
+    call check_error_msg('rrtmgp_lw_rte_run',optical_props_cloud%increment(optical_props_clrsky))
+    call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
          optical_props_clrsky,               & ! IN  - optical-properties
          top_at_1,                           & ! IN  - veritcal ordering flag
          sources,                            & ! IN  - source function
@@ -160,13 +160,13 @@ contains
     fluxUP_allsky   = flux_allsky%flux_up
     fluxDOWN_allsky = flux_allsky%flux_dn 
 
-  end subroutine rrtmgp_lw_run
+  end subroutine rrtmgp_lw_rte_run
   
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_lw_finalize
+  ! SUBROUTINE rrtmgp_lw_rte_finalize
   ! #########################################################################################
-  subroutine rrtmgp_lw_finalize()
-  end subroutine rrtmgp_lw_finalize
+  subroutine rrtmgp_lw_rte_finalize()
+  end subroutine rrtmgp_lw_rte_finalize
 
 
-end module rrtmgp_lw
+end module rrtmgp_lw_rte
