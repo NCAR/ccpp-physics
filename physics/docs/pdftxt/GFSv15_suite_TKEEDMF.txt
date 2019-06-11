@@ -1,11 +1,10 @@
 /**
-\page GFS_v15plus_page GFS_v15plus
+\page GFS_v15plus_page GFS_v15plus Suite
 
 \section gfs2p_suite_overview Overview
 
-This physics suite is the same as GFSv15 physics suite  with \ref GFS_SATMEDMF replace of \ref GFS_HEDMF .
+This physics suite is the same as GFS v15 physics suite  with \ref GFS_SATMEDMF replace of \ref GFS_HEDMF .
 
- - \ref fast_sat_adj
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -21,12 +20,11 @@ This physics suite is the same as GFSv15 physics suite  with \ref GFS_SATMEDMF r
  - \ref GFS_SAMFshal
  - \ref GFDL_cloud
  - \ref GFS_CALPRECIPTYPE
- - \ref STOCHY_PHYS
 
 
 \section sdf_gfsv15p Suite Definition File 
 
-The GFSv15plus suite uses the parameterizations in the following order, as defined in  \c suite_SCM_GFS_v15plus.xml :
+The GFS v15plus suite uses the parameterizations in the following order, as defined in  \c SCM_GFS_v15plus :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 

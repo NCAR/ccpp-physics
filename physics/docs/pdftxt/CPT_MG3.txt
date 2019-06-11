@@ -12,7 +12,7 @@ and number concentration of five hydrometeors (cloud water, cloud ice, rain, sno
 - MG2: Gettelman and Morrison (2015) \cite Gettelman_2015_1 \cite Gettelman_2015_2 (CESM2, CAM6)
   - Prognostic precipitation (rain and snow)
   - Sub-stepping and sub-column capable
-- MG3: Gettelman et al. 2019 \cite Gettelman_et_al_2019
+- MG3: Gettelman et al. (2019) \cite Gettelman_et_al_2019
   - Rimed hydrometeors (graupel or hail) are added to stratiform cloud scheme for global models
   - Global climate impacts are limited to small increased in ice mass
   - High (14 km) resolution simulations show local production of rimed ice (graupel) can affect regional 

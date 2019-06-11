@@ -51,57 +51,57 @@ contains
 !> @{
    subroutine cu_gf_deep_run(        &          
                itf,ktf,its,ite, kts,kte  &
-              ,dicycle       &  !< diurnal cycle flag
-              ,ichoice       &  !< choice of closure, use "0" for ensemble average
-              ,ipr           &  !< this flag can be used for debugging prints
-              ,ccn           &  !< not well tested yet
-              ,dtime         &  !<
-              ,imid          &  !< flag to turn on mid level convection
-              ,kpbl          &  !< level of boundary layer height
-              ,dhdt          &  !< boundary layer forcing (one closure for shallow)
-              ,xland         &  !< land mask
-              ,zo            &  !< heights above surface
-              ,forcing       &  !< only diagnostic
-              ,t             &  !< t before forcing
-              ,q             &  !< q before forcing
-              ,z1            &  !< terrain
-              ,tn            &  !< t including forcing
-              ,qo            &  !< q including forcing
-              ,po            &  !< pressure (mb)
-              ,psur          &  !< surface pressure (mb)
-              ,us            &  !< u on mass points
-              ,vs            &  !< v on mass points
-              ,rho           &  !< density
-              ,hfx           &  !< w/m2, positive upward
-              ,qfx           &  !< w/m2, positive upward
-              ,dx            &  !< dx is grid point dependent here
-              ,mconv         &  !< integrated vertical advection of moisture
-              ,omeg          &  !< omega (pa/s)
-              ,csum          &  !< used to implement memory, set to zero if not avail
-              ,cnvwt         &  !< gfs needs this
-              ,zuo           &  !< nomalized updraft mass flux
-              ,zdo           &  !< nomalized downdraft mass flux
-              ,zdm           &  !< nomalized downdraft mass flux from mid scheme
-              ,edto          &  !<
-              ,edtm          &  !<
-              ,xmb_out       &  !< the xmb's may be needed for dicycle
-              ,xmbm_in       &  !<
-              ,xmbs_in       &  !<
-              ,pre           &  !<
-              ,outu          &  !< momentum tendencies at mass points
-              ,outv          &  !<
-              ,outt          &  !< temperature tendencies
-              ,outq          &  !< q tendencies
-              ,outqc         &  !< ql/qice tendencies
-              ,kbcon         &  !<
-              ,ktop          &  !<
-              ,cupclw        &  !< used for direct coupling to radiation, but with tuning factors
-              ,ierr          &  !< ierr flags are error flags, used for debugging
-              ,ierrc         &  !<!    the following should be set to zero if not available
-              ,rand_mom      &  !< for stochastics mom, if temporal and spatial patterns exist
-              ,rand_vmas     &  !< for stochastics vertmass, if temporal and spatial patterns exist
-              ,rand_clos     &  !< for stochastics closures, if temporal and spatial patterns exist
-              ,nranflag      &  !< flag to what you want perturbed
+              ,dicycle       &  ! diurnal cycle flag
+              ,ichoice       &  ! choice of closure, use "0" for ensemble average
+              ,ipr           &  ! this flag can be used for debugging prints
+              ,ccn           &  ! not well tested yet
+              ,dtime         &  !
+              ,imid          &  ! flag to turn on mid level convection
+              ,kpbl          &  ! level of boundary layer height
+              ,dhdt          &  ! boundary layer forcing (one closure for shallow)
+              ,xland         &  ! land mask
+              ,zo            &  ! heights above surface
+              ,forcing       &  ! only diagnostic
+              ,t             &  ! t before forcing
+              ,q             &  ! q before forcing
+              ,z1            &  ! terrain
+              ,tn            &  ! t including forcing
+              ,qo            &  ! q including forcing
+              ,po            &  ! pressure (mb)
+              ,psur          &  ! surface pressure (mb)
+              ,us            &  ! u on mass points
+              ,vs            &  ! v on mass points
+              ,rho           &  ! density
+              ,hfx           &  ! w/m2, positive upward
+              ,qfx           &  ! w/m2, positive upward
+              ,dx            &  ! dx is grid point dependent here
+              ,mconv         &  ! integrated vertical advection of moisture
+              ,omeg          &  ! omega (pa/s)
+              ,csum          &  ! used to implement memory, set to zero if not avail
+              ,cnvwt         &  ! gfs needs this
+              ,zuo           &  ! nomalized updraft mass flux
+              ,zdo           &  ! nomalized downdraft mass flux
+              ,zdm           &  ! nomalized downdraft mass flux from mid scheme
+              ,edto          &  !
+              ,edtm          &  !
+              ,xmb_out       &  ! the xmb's may be needed for dicycle
+              ,xmbm_in       &  !
+              ,xmbs_in       &  !
+              ,pre           &  !
+              ,outu          &  ! momentum tendencies at mass points
+              ,outv          &  !
+              ,outt          &  ! temperature tendencies
+              ,outq          &  ! q tendencies
+              ,outqc         &  ! ql/qice tendencies
+              ,kbcon         &  ! lfc of parcel from k22
+              ,ktop          &  ! cloud top
+              ,cupclw        &  ! used for direct coupling to radiation, but with tuning factors
+              ,ierr          &  ! ierr flags are error flags, used for debugging
+              ,ierrc         &  ! the following should be set to zero if not available
+              ,rand_mom      &  ! for stochastics mom, if temporal and spatial patterns exist
+              ,rand_vmas     &  ! for stochastics vertmass, if temporal and spatial patterns exist
+              ,rand_clos     &  ! for stochastics closures, if temporal and spatial patterns exist
+              ,nranflag      &  ! flag to what you want perturbed
                                 !! 1 = momentum transport 
                                 !! 2 = normalized vertical mass flux profile
                                 !! 3 = closures
@@ -109,10 +109,10 @@ contains
                                 !! implement yourself. pattern is expected to be
                                 !! betwee -1 and +1
 #if ( wrf_dfi_radar == 1 )
-              ,do_capsuppress,cap_suppress_j    &    !<         
+              ,do_capsuppress,cap_suppress_j    &    !         
 #endif
-              ,k22                              &    !<
-              ,jmin,tropics)                         !<
+              ,k22                              &    !
+              ,jmin,tropics)                         !
 
    implicit none
 
@@ -546,7 +546,7 @@ contains
       enddo
 
 !
-!--- calculate moist static energy, heights, qes
+!> - Call cup_env() to calculate moist static energy, heights, qes
 !
       call cup_env(z,qes,he,hes,t,q,po,z1,                         &
            psur,ierr,tcrit,-1,                                     &
@@ -558,7 +558,7 @@ contains
            its,ite, kts,kte)
 
 !
-!--- environmental values on cloud levels
+!> - Call cup_env_clev() to calculate environmental values on cloud levels
 !
       call cup_env_clev(t,qes,q,he,hes,z,po,qes_cup,q_cup,he_cup,  &
            hes_cup,z_cup,p_cup,gamma_cup,t_cup,psur,               &
@@ -571,7 +571,7 @@ contains
            itf,ktf,                                                &
            its,ite, kts,kte)
 !---meltglac-------------------------------------------------
-!--- partition between liq/ice cloud contents
+!> - Call get_partition_liq_ice() to calculate partition between liq/ice cloud contents
       call get_partition_liq_ice(ierr,tn,po_cup,p_liq_ice,melting_layer,&
                                  itf,ktf,its,ite,kts,kte,cumulus)
 !---meltglac-------------------------------------------------
@@ -596,7 +596,7 @@ contains
         enddo
  25     continue
 !
-!--- level where detrainment for downdraft starts
+!> - Compute the level where detrainment for downdraft starts (\p kdet)
 !
         do k=kts,ktf
           if(zo_cup(i,k).gt.z_detr+z1(i))then
@@ -611,7 +611,7 @@ contains
 !
 !
 !
-!------- determine level with highest moist static energy content - k22
+!> - Determine level with highest moist static energy content (\p k22)
 !
       start_k22=2
        do 36 i=its,itf
@@ -627,7 +627,8 @@ contains
          endif
  36   continue
 !
-!--- determine the level of convective cloud base  - kbcon
+!> - call get_cloud_bc() and cup_kbcon() to determine the 
+!! level of convective cloud base (\p kbcon)
 !
 
       do i=its,itf
@@ -720,7 +721,7 @@ contains
           endif
       enddo
 !
-!-- get normalized mass flux, entrainment and detrainmentrates for updraft
+!> - Call rates_up_pdf() to get normalized mass flux, entrainment and detrainmentrates for updraft
 !
       i=0
       !- for mid level clouds we do not allow clouds taller than where stability
@@ -757,7 +758,7 @@ contains
         endif
       enddo
 !
-! calculate mass entrainment and detrainment
+!> - Call get_lateral_massflux() to calculate mass entrainment and detrainment
 !
      if(imid.eq.1)then
       call get_lateral_massflux(itf,ktf, its,ite, kts,kte                                &
@@ -930,7 +931,7 @@ contains
        enddo
       enddo
      !
-     !--- calculate moisture properties of updraft
+!> - Call cup_up_moisture() to calculate moisture properties of updraft
      !
       if(imid.eq.1)then
         call cup_up_moisture('mid',ierr,zo_cup,qco,qrco,pwo,pwavo,               &
@@ -1250,7 +1251,7 @@ contains
         endif
       enddo
 !
-!--- calculate moisture properties of downdraft
+!> - Call cup_dd_moisture() to calculate moisture properties of downdraft
 !
       call cup_dd_moisture(ierrc,zdo,hcdo,heso_cup,qcdo,qeso_cup,                &
            pwdo,qo_cup,zo_cup,dd_massentro,dd_massdetro,jmin,ierr,gammao_cup,    &
@@ -1286,7 +1287,7 @@ contains
         enddo
       enddo
 !
-!--- calculate workfunctions for updrafts
+!> - Call cup_up_aa0() to calculate workfunctions for updrafts
 !
       call cup_up_aa0(aa0,z,zu,dby,gamma_cup,t_cup,                              &
            kbcon,ktop,ierr,                                                      &
@@ -1353,6 +1354,7 @@ contains
         t_star=1.  
 
            !-- calculate pcape from bl forcing only
+!> - Call cup_up_aa1bl() to calculate ECMWF version diurnal cycle closure
             call cup_up_aa1bl(aa1_bl,t,tn,q,qo,dtime,                            &
                               zo_cup,zuo,dbyo_bl,gammao_cup_bl,tn_cup_bl,        &
                               kbcon,ktop,ierr,                                   &
@@ -1463,7 +1465,7 @@ contains
        axx(:)=aa1(:)
 
 !
-!--- determine downdraft strength in terms of windshear
+!> - Call cup_dd_edt() to determine downdraft strength in terms of windshear
 !
       call cup_dd_edt(ierr,us,vs,zo,ktop,kbcon,edt,po,pwavo,  &
            pwo,ccn,pwevo,edtmax,edtmin,edtc,psum,psumh,       &
@@ -1473,7 +1475,8 @@ contains
         if(ierr(i)/=0)cycle
             edto(i)=edtc(i,1)
         enddo
-     !--- get melting profile
+
+!> - Call get_melting_profile() to get melting profile
      call get_melting_profile(ierr,tn_cup,po_cup, p_liq_ice,melting_layer,qrco    &
                              ,pwo,edto,pwdo,melting                                &
                              ,itf,ktf,its,ite, kts,kte, cumulus                    )
@@ -2031,7 +2034,6 @@ contains
 !> @}
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
    subroutine cup_dd_edt(ierr,us,vs,z,ktop,kbcon,edt,p,pwav, &
               pw,ccn,pwev,edtmax,edtmin,edtc,psum2,psumh,    &
               rho,aeroevap,itf,ktf,                          &
@@ -2157,9 +2159,6 @@ contains
    end subroutine cup_dd_edt
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!!\param ierrc
-!!\param zd
    subroutine cup_dd_moisture(ierrc,zd,hcd,hes_cup,qcd,qes_cup,  &
               pwd,q_cup,z_cup,dd_massentr,dd_massdetr,jmin,ierr, &
               gamma_cup,pwev,bu,qrcd,                            &
@@ -2306,8 +2305,17 @@ contains
    end subroutine cup_dd_moisture
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!!\param
+!!\param z   environmental heights
+!!\param qes environmental saturation mixing ratio
+!!\param he  environmental moist static energy
+!!\param hes environmental saturation moist static energy
+!!\param t   environmental temperature
+!!\param q   environmental mixing ratio
+!!\param p   environmental pressure
+!!\param z1  terrain elevation
+!!\param psur    surface pressure
+!!\param  ierr  error value, maybe modified in this routine
+!!\param tcrit   258.K
    subroutine cup_env(z,qes,he,hes,t,q,p,z1,                &
               psur,ierr,tcrit,itest,                        &
               itf,ktf,                                      &
@@ -2320,18 +2328,6 @@ contains
         itf,ktf,                                            &
         its,ite, kts,kte
   !
-  ! ierr error value, maybe modified in this routine
-  ! q           = environmental mixing ratio
-  ! qes         = environmental saturation mixing ratio
-  ! t           = environmental temp
-  ! tv          = environmental virtual temp
-  ! p           = environmental pressure
-  ! z           = environmental heights
-  ! he          = environmental moist static energy
-  ! hes         = environmental saturation moist static energy
-  ! psur        = surface pressure
-  ! z1          = terrain elevation
-  ! 
   !
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                &
         ,intent (in   )                   ::             &
@@ -2439,8 +2435,24 @@ contains
    end subroutine cup_env
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
+!!\param   t      environmental temperature
+!!\param   qes    environmental saturation mixing ratio
+!!\param   q      environmental mixing ratio
+!!\param   he     environmental moist static energy
+!!\param   hes    environmental saturation moist static energy
+!!\param   z      environmental heights
+!!\param   p         environmental pressure
+!!\param   qes_cup   environmental saturation mixing ratio on cloud levels
+!!\param   q_cup     environmental mixing ratio on cloud levels
+!!\param   he_cup    environmental moist static energy on cloud levels
+!!\param   hes_cup   environmental saturation moist static energy on cloud levels
+!!\param   z_cup     environmental heights on cloud levels
+!!\param   p_cup     environmental pressure on cloud levels
+!!\param   gamma_cup gamma on cloud levels
+!!\param   t_cup     environmental temperature on cloud levels
+!!\param   psur      surface pressure
+!!\param   ierr      error value, maybe modified in this routine
+!!\param   z1        terrain elevation
    subroutine cup_env_clev(t,qes,q,he,hes,z,p,qes_cup,q_cup,        &
               he_cup,hes_cup,z_cup,p_cup,gamma_cup,t_cup,psur,      &
               ierr,z1,                                              &
@@ -2453,26 +2465,6 @@ contains
         ,intent (in   )                   ::                        &
         itf,ktf,                                                    &
         its,ite, kts,kte
-  !
-  ! ierr error value, maybe modified in this routine
-  ! q           = environmental mixing ratio
-  ! q_cup       = environmental mixing ratio on cloud levels
-  ! qes         = environmental saturation mixing ratio
-  ! qes_cup     = environmental saturation mixing ratio on cloud levels
-  ! t           = environmental temp
-  ! t_cup       = environmental temp on cloud levels
-  ! p           = environmental pressure
-  ! p_cup       = environmental pressure on cloud levels
-  ! z           = environmental heights
-  ! z_cup       = environmental heights on cloud levels
-  ! he          = environmental moist static energy
-  ! he_cup      = environmental moist static energy on cloud levels
-  ! hes         = environmental saturation moist static energy
-  ! hes_cup     = environmental saturation moist static energy on cloud levels
-  ! gamma_cup   = gamma on cloud levels
-  ! psur        = surface pressure
-  ! z1          = terrain elevation
-  ! 
   !
      real(kind=kind_phys),    dimension (its:ite,kts:kte)                        &
         ,intent (in   )                   ::                     &
@@ -2543,8 +2535,6 @@ contains
    end subroutine cup_env_clev
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
    subroutine cup_forcing_ens_3d(closure_n,xland,aa0,aa1,xaa0,mbdt,dtime,ierr,ierr2,ierr3,&
               xf_ens,axx,forcing,maxens3,mconv,rand_clos,             &
               p_cup,ktop,omeg,zd,zdm,k22,zu,pr_ens,edt,edtm,kbcon,    &
@@ -2927,8 +2917,6 @@ endif
    end subroutine cup_forcing_ens_3d
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
    subroutine cup_kbcon(ierrc,cap_inc,iloop_in,k22,kbcon,he_cup,hes_cup, &
               hkb,ierr,kbmax,p_cup,cap_max,                              &
               ztexec,zqexec,                                             &
@@ -3068,8 +3056,6 @@ endif
    end subroutine cup_kbcon
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
    subroutine cup_maximi(array,ks,ke,maxx,ierr,              &
               itf,ktf,                                       &
               its,ite, kts,kte                     )
@@ -3126,8 +3112,6 @@ endif
    end subroutine cup_maximi
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
    subroutine cup_minimi(array,ks,kend,kt,ierr,              &
               itf,ktf,                                       &
               its,ite, kts,kte                     )
@@ -3943,8 +3927,6 @@ endif
  end function
 !--------------------------------------------------------------------
 !>\ingroup cu_gf_deep_group
-!> This subroutine calcualtes
-!>\param
  subroutine get_cloud_bc(mzp,array,x_aver,k22,add)
     implicit none
     integer, intent(in)     :: mzp,k22
@@ -3971,8 +3953,6 @@ endif
  end subroutine get_cloud_bc
  !========================================================================================
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
  subroutine rates_up_pdf(rand_vmas,ipr,name,ktop,ierr,p_cup,entr_rate_2d,hkbo,heo,heso_cup,z_cup, &
                xland,kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,ktopdby,csum,pmin_lev)
      implicit none

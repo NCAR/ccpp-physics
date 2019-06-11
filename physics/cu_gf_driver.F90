@@ -1,5 +1,5 @@
 !>\file cu_gf_driver.F90
-!! This file is Grell-Freitas cumulus scheme driver.
+!! This file is scale-aware Grell-Freitas cumulus scheme driver.
 
 module cu_gf_driver
 
@@ -267,7 +267,7 @@ contains
 ! 
      tropics(:)=0
 !
-!> - tuning constants for radiation coupling
+!> - Set tuning constants for radiation coupling
 !
    tun_rad_shall(:)=.02
    tun_rad_mid(:)=.15
@@ -556,6 +556,7 @@ contains
           do i=its,itf
            if(xmbs(i).gt.0.)cutens(i)=1.
           enddo
+!> - Call neg_check() for GF shallow convection
           call neg_check('shallow',ipn,dt,qcheck,outqs,outts,outus,outvs,   &
                                  outqcs,prets,its,ite,kts,kte,itf,ktf,ktops)
        endif
@@ -637,6 +638,7 @@ contains
               qcheck(i,k)=qv(i,k) +outqs(i,k)*dt
             enddo
             enddo
+!> - Call neg_check() for middle GF convection
       call neg_check('mid',ipn,dt,qcheck,outqm,outtm,outum,outvm,   &
                      outqcm,pretm,its,ite,kts,kte,itf,ktf,ktopm)
     endif
@@ -718,6 +720,7 @@ contains
               qcheck(i,k)=qv(i,k) +(outqs(i,k)+outqm(i,k))*dt
             enddo
             enddo
+!> - Call neg_check() for deep GF convection
       call neg_check('deep',ipn,dt,qcheck,outq,outt,outu,outv,   &
                       outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 !

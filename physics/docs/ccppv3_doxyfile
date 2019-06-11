@@ -120,7 +120,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_GWDC.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
-                          pdftxt/GFS_SURFACE_PERT.txt    \
+###                          pdftxt/GFS_SURFACE_PERT.txt    \
                           pdftxt/GFS_CALPRECIPTYPE.txt   \
 ###                          pdftxt/rad_cld.txt             \
                           pdftxt/CPT_CSAW.txt            \
@@ -130,10 +130,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GSD_RUCLSM.txt          \
                           pdftxt/GSD_THOMPSON.txt        \
 ###                          pdftxt/GFSphys_namelist.txt    \
-                          pdftxt/GFS_STOCHY_PHYS.txt     \
+###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
 ### in-core MP
-                        ../gfdl_fv_sat_adj.F90    \
+###                      ../gfdl_fv_sat_adj.F90    \
 ### time_vary
                         ../GFS_phys_time_vary.fv3.F90 \
                         ../ozne_def.f                 \
@@ -207,12 +207,12 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
 ### stochy
-                     ../GFS_stochastics.F90   \
-                     ../surface_perturbation.F90 \
+###                     ../GFS_stochastics.F90   \
+###                     ../surface_perturbation.F90 \
 ###                     ../../stochastic_physics/stochastic_physics.F90  \
 ### CPT
                         ../m_micro.F90       \
-                        ../micro_mg2_0.F90   \
+###                        ../micro_mg2_0.F90   \
                         ../micro_mg3_0.F90   \
                         ../micro_mg_utils.F90 \
                         ../cldmacro.F        \

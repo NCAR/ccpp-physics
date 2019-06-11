@@ -4,8 +4,8 @@
 GFDL cloud microphysics (MP) scheme is a six-category MP scheme to replace Zhao-Carr MP scheme, and moves the GFS from
 a total cloud water variable to five predicted hydrometeors (cloud water, cloud ice, rain, snow and graupel).
 This scheme utilizes the "bulk water" microphysical parameterization technique in Lin et al. (1983) \cite lin_et_al_1983 
-and has been significantly improved over years at GFDL (Lord et al.(1984) \cite lord_et_al_1984, 
-Krueger et al.(1995) \cite krueger_et_al_1995, Chen and Lin (2011) \cite chen_and_lin_2011, Chen and Lin (2013) \cite chen_and_lin_2013). 
+and has been significantly improved over years at GFDL (Lord et al. (1984) \cite lord_et_al_1984, 
+Krueger et al. (1995) \cite krueger_et_al_1995, Chen and Lin (2011) \cite chen_and_lin_2011, Chen and Lin (2013) \cite chen_and_lin_2013). 
 Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain() and icloud()) and are feature with time-split between warm-rain (faster) and ice-phase (slower) processes (see 'conversion time scale' in gfdl_cloud_microphys.F90 for default values). 
 
 \image  html  gfdl_cloud_mp_diagram.png "Figure 1: GFDL MP at a glance (Courtesy of S.J. Lin at GFDL)" width=10cm
@@ -43,7 +43,7 @@ h_{var}=\min \left\{0.2,\max\left[0.01, D_{ocean}(\frac{A_{r}}{10^{10}})^{0.25}\
 Where \f$A_{r}\f$ is cell area, \f$D_{land}\f$ and \f$D_{ocean}\f$ are base values for sub-grid variability over land 
 and ocean (larger sub-grid variability appears in larger area). Horizontal sub-grid variability is used in cloud fraction,
 relative humidity calculation, evaporation and condensation processes.  Scale-awareness is achieved by this horizontal subgrid variability and a \f$2^{nd}\f$
-order FV-type vertical reconstruction (Lin et al.(1994) \cite lin_et_al_1994). 
+order FV-type vertical reconstruction (Lin et al. (1994) \cite lin_et_al_1994). 
 
 \section nml_opt Namelist Option
 \ref gfdl_cloud_microphysics_nml 

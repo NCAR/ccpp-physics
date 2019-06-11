@@ -1,25 +1,22 @@
 /**
-\page GSD_CU_GF GSD Grell-Freitas Scale and Aerosol Aware Convection Scheme
+\page GSD_CU_GF Grell-Freitas Scale and Aerosol Aware Convection Scheme
 \section gfcu_descrip  Description
 
-The Rapid Refresh (RAP) uses the Grell-Freitas (GF) convective scheme, while the HRRR allows direct prediction
-of convection at its 3-km horizontal scale. In the RAP, the Grell-Freitas parameterization removes convective
-instability so that the gridscale precipitation scheme does not "convect", convective precipitation is a scheme
-byproduct. Grell-Freitas is an Arakawa-Schubert mass flux type scheme, and is both aerosol and model scale aware.
+The Grell-Freitas scale and aerosol aware convection scheme is an Arakawa-Schubert mass flux type scheme, and is both aerosol and scale aware.
 Aerosol awareness (emulating the impact of aerosols on precipitation processes) is obtained through changing the rate of 
-converstion from cloud droplets to raindrops (Berry 1968 \cite berry_1968 ), and by modifying the precipitation efficiency of the 
-raindrops (the fraction of total condensed water volume in the cloud's lifetime reaching the ground (Jiang et al.(2010) \cite Jiang_2010) )
+conversion from cloud droplets to raindrops (Berry (1968) \cite berry_1968 ), and by modifying the precipitation efficiency of the 
+raindrops (the fraction of total condensed water volume in the cloud's lifetime reaching the ground (Jiang et al. (2010) \cite Jiang_2010) )
 Scale awareness comes through the use of an empirical formula for the fractional area (\f$\sigma\f$) of the model grid column
 containing updrafts and downdrafts (Arakawa et al. (2011) \cite Arakawa_2011 ). The entrainment rate for the updrafts is an inverse function
-of \f$\sigma\f$. As the fractional coverage become large, the resolved motion takes over convective processes (why the HRRR is called 
-"convection allowing") and the Grell-Freitas scheme becomes a shallow convection scheme, simulating the effects of unresolved fair weather 
+of \f$\sigma\f$. As the fractional coverage become large, the resolved motion takes over convective processes  
+and the Grell-Freitas scheme becomes a shallow convection scheme, simulating the effects of unresolved fair weather 
 and towering cumulus on the forecast variables.
 
-The GF scheme still uses an ensemble of convective schemes, but is now limited to options that modulate closure and capping
+The GF scheme uses an ensemble of convective schemes, with options that modulate closure and capping
 inversion thresholds for convection. After calculations for each member of the cloud ensemble in the convective scheme, the ensemble 
 mean time tendency for temperature, moisture, and cloud and precipitation hydrometeors is passed to the rest of the model 
-(Grell and \f$D\acute{e}v\acute{e}nyi\f$, 2002 \cite Grell_2002 ). Additionally, the upward mass flux from parameterized convective updrafts is balanced by
-subsidence in adjacent grid columns, if horizontal resolution of the model using the parameterization is less than 10 km.
+(Grell and \f$D\acute{e}v\acute{e}nyi\f$ (2002) \cite Grell_2002 ). Additionally, the upward mass flux from parameterized convective updrafts is balanced by
+subsidence in adjacent grid columns, if the horizontal grid spacing of the model using the parameterization is less than 10 km.
 
 # Operational Impacts in RAP/HRRR
 

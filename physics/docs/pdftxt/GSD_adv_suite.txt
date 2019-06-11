@@ -1,9 +1,7 @@
 /**
-\page GSD_v0_page GSD_v0 
+\page GSD_v0_page GSD_v0 Suite 
 
 \section gsd_suite_overview Overview
-
-# History of RUC, RAP/HRRR model development at NOAA/GSD
 
 The original Rapid Update Cycle (RUC), implemented in 1994, was designed to provide accurate short-range (0 to 12-hr)
 numerical forecast guidance for weather-sensitive users, including those in the U.S. aviation community. 
@@ -36,11 +34,10 @@ The advanced GSD RAP/HRRR physics suite uses the parameterizations in the follow
  - \ref GFS_GWDC
  - \ref GSD_THOMPSON
  - \ref GFS_CALPRECIPTYPE
- - \ref STOCHY_PHYS
 
 \section sdf_gsdsuite Suite Definition File 
 
-The GSD RAP/HRRR physics suite uses the parameterizations in the following order, as defined in  \c suite_SCM_GSD_v0.xml :
+The GSD RAP/HRRR physics suite uses the parameterizations in the following order, as defined in  \c SCM_GSD_v0:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 

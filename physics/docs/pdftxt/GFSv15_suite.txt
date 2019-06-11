@@ -1,22 +1,20 @@
 /**
-\page GFS_v15_page GFS_v15 
+\page GFS_v15_page GFS_v15 Suite 
 
 \section gfs1_suite_overview Overview
 
-Effective on or about Wednesday, June 12, 2019, beginning with the 1200
-Coordinated Universal Time (UTC) run, the National Centers for Environmental
-Prediction (NCEP) will upgrade the Global Forecast Systems (GFS) from version 14 to 15.
-
-GFS v15 will use the Finite-Volume Cubed-Sphere (FV3) dynamical core 
+Version 15 of the Global Forecast System (GFS) was implemented operationally by the NOAA
+National Centers for Environmental Prediction (NCEP) on June 12, 2019. 
+GFS v15 uses the Finite-Volume Cubed-Sphere (FV3) dynamical core 
 and a revised physics suite when compared to GFS v14.
+
 - Replacement of the Zhao-Carr microphysics with the more advanced \ref GFDL_cloud
 - Updated parameterization of ozone photochemistry with additional production and loss terms 
-- Newly introduced parameterization of middle atmospheric water vapor photochemistry (\ref GFS_H2OPHYS)
+- Newly introduced parameterization of middle atmospheric water vapor photochemistry 
 - Revised bare soil evaporation scheme
 - Modified convective parameterization scheme to reduce excessive cloud top cooling
 
-The GFSv15 physics suite uses the parameterizations in the following order:
- - \ref fast_sat_adj
+The GFS v15 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -32,11 +30,10 @@ The GFSv15 physics suite uses the parameterizations in the following order:
  - \ref GFS_SAMFshal
  - \ref GFDL_cloud
  - \ref GFS_CALPRECIPTYPE
- - \ref STOCHY_PHYS
 
 \section sdf_gfsv15 Suite Definition File 
 
-The GFSv15 suite uses the parameterizations in the following order, as defined in  \c suite_SCM_GFS_v15.xml:
+The GFS v15 suite uses the parameterizations in the following order, as defined in  \c SCM_GFS_v15:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 

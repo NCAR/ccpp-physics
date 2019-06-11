@@ -1,10 +1,9 @@
 /**
-\page MGCSAW_page MGCSAW 
+\page MGCSAW_page MGCSAW Suite
 
 \section MGCSAW_suite_overview Overview
 
 The advanced MGCSAW physics suite uses the parameterizations in the following order:
- - \ref fast_sat_adj
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -21,11 +20,10 @@ The advanced MGCSAW physics suite uses the parameterizations in the following or
  - \ref CPT_MG3
  - \ref mod_cs_conv_aw_adj
  - \ref GFS_CALPRECIPTYPE
- - \ref STOCHY_PHYS
 
 \section sdf_cpt_suite Suite Definition File 
 
-The advanced MGCSAW physics suite uses the parameterizations in the following order, as defined in  \c suite_SCM_MGCSAW.xml :
+The advanced MGCSAW physics suite uses the parameterizations in the following order, as defined in  \c SCM_MGCSAW :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
