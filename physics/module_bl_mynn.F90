@@ -5735,8 +5735,13 @@ ENDIF
     !     d(k)=thl(k) + dtz(k)*flt + tcd(k)*delt &
     !        & -dtz(k)*s_awthl(kts+1) + diss_heat(k)*delt*dheat_opt
     ! So, s_awthl(kts+1) must be less than flt
-    THVk = (THL(kts)*DZ(kts+1)+THL(kts+1)*DZ(kts))/(DZ(kts+1)+DZ(kts))
-    flx1 = MAX(s_aw(kts+1)*(s_awthl(kts+1)/s_aw(kts+1) - THVk),0.0)
+    !GJF: check if s_aw(kts+1) /= 0 before using it; if KTOP=0, s_aw(kts+1) = 0; caught using -fpe0 with intel compiler
+    IF (s_aw(kts+1) /= 0.) THEN
+      THVk = (THL(kts)*DZ(kts+1)+THL(kts+1)*DZ(kts))/(DZ(kts+1)+DZ(kts))
+      flx1 = MAX(s_aw(kts+1)*(s_awthl(kts+1)/s_aw(kts+1) - THVk),0.0)
+    ELSE
+      flx1 = 0.0
+    ENDIF
     !flx1 = -dt/dz(kts)*s_awthl(kts+1)
     !flx1 = (s_awthl(kts+1)-s_awthl(kts))!/(0.5*(dz(k)+dz(k-1)))
     adjustment=1.0
