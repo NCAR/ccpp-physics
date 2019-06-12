@@ -18,13 +18,9 @@ module GFS_rrtmgp_pre
        eps   => con_eps,         & ! Rd/Rv
        epsm1 => con_epsm1,       & ! Rd/Rv-1
        fvirt => con_fvirt,       & ! Rv/Rd-1
-       rog   => con_rog,         & ! Rd/g
-       rocp  => con_rocp           ! Rd/cp
+       rog   => con_rog            ! Rd/g
   use radcons, only: &
-       itsfc,                    & ! Flag for LW sfc. temp.
-       ltp,                      & ! 1-add extra-top layer; 0-no extra layer
-       lextop,                   & ! ltp > 0
-       qmin,qme5, qme6, epsq       ! Minimum vlaues for varius calculations
+       qmin, epsq                  ! Minimum vlaues for varius calculations
   use funcphys, only:            &
        fpvs                        ! Function ot compute sat. vapor pressure over liq.
   use module_radiation_astronomy,only: &
@@ -165,7 +161,7 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag
-    real(kind_phys), dimension(ncol,Model%levr+LTP),intent(out) :: &
+    real(kind_phys), dimension(ncol,Model%levr),intent(out) :: &
          cld_frac,          & ! Total cloud fraction
          cld_lwp,           & ! Cloud liquid water path
          cld_reliq,         & ! Cloud liquid effective radius
@@ -222,23 +218,38 @@ contains
     ! #######################################################################################
     ! Compute some fields needed by RRTMGP
     ! #######################################################################################
-    ! Copy state fields over for use in RRTMGP
-    p_lev(1:NCOL,iSFC:iTOA) = Statein%prsi(1:NCOL,1:Model%levs)
-    p_lev(1:NCOL,iTOA+1)    = spread(lw_gas_props%get_press_min(),dim=1, ncopies=NCOL)
-    p_lay(1:NCOL,iSFC:iTOA) = Statein%prsl(1:NCOL,1:Model%levs)
+
+    ! Pressure at layer-interface
+    p_lev(1:NCOL,iSFC:iTOA+1) = Statein%prsi(1:NCOL,1:Model%levs+1)
+    !
+    ! Pressure at layer-center
+    p_lay(1:NCOL,iSFC:iTOA)   = Statein%prsl(1:NCOL,1:Model%levs)
+    !
+    ! Temperature at layer-center
     t_lay(1:NCOL,iSFC:iTOA) = Statein%tgrs(1:NCOL,1:Model%levs)
-
-    ! Compute layer pressure thicknes
-    deltaP = p_lev(:,iSFC:iTOA)-p_lev(:,iSFC+1:iTOA+1)
-
-    ! Compute temperature at layer-interfaces
+    !
+    ! Temperature at layer-interfaces
     t_lev(1:NCOL,iSFC) = Sfcprop%tsfc(1:NCOL)
     do iCol=1,NCOL
        do iLay=iSFC+1,iTOA
           t_lev(iCol,iLay) = (t_lay(iCol,iLay)+t_lay(iCol,iLay-1))/2._kind_phys
        enddo
-       t_lev(iCol,iTOA+1) = lw_gas_props%get_temp_min()
+       t_lev(iCol,iTOA+1) = t_lev(iCol,iTOA) + (p_lev(iCol,iTOA+1)-p_lev(iCOL,iTOA))*&
+            (t_lev(iCol,iTOA)-t_lay(iCOL,iTOA))/(p_lev(iCol,iTOA)-p_lay(iCOL,iTOA))
     enddo
+
+    ! Guard against case when model uppermost model layer higher than rrtmgp allows.
+    where(p_lev(1:nCol,iTOA+1) .lt. lw_gas_props%get_press_min())
+       ! Set to RRTMGP min(pressure/temperature)
+       p_lev(1:nCol,iTOA+1) = spread(lw_gas_props%get_press_min(),dim=1,ncopies=ncol)
+       t_lev(1:nCol,iTOA+1) = spread(lw_gas_props%get_temp_min(),dim=1,ncopies=ncol)
+       ! Recompute layer pressure/temperature.
+       p_lay(1:NCOL,iTOA) = 0.5_kind_phys*(p_lev(1:NCOL,iTOA) +  p_lev(1:NCOL,iTOA+1))
+       t_lay(1:NCOL,iTOA) = 0.5_kind_phys*(t_lev(1:NCOL,iTOA) +  t_lev(1:NCOL,iTOA+1))
+    end where
+
+    ! Compute layer pressure thicknes
+    deltaP = p_lev(:,iSFC:iTOA)-p_lev(:,iSFC+1:iTOA+1)
 
     ! Compute a bunch of thermodynamic fields needed by the macrophysics schemes. Relative humidity, 
     ! saturation mixing-ratio, vapor mixing-ratio, virtual temperature, layer thickness,...

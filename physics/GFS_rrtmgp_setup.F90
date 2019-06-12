@@ -10,7 +10,6 @@ module GFS_rrtmgp_setup
    &             iswcliq,                                             &
    &             kind_phys
 
-   use radcons, only: ltp, lextop
 
    implicit none
 
@@ -227,9 +226,9 @@ module GFS_rrtmgp_setup
       integer,          intent(out) :: errflg
 
       ! For consistency checks
-      real(kind_phys), dimension(im,levr+ltp,NBDLW,NF_AELW) :: faerlw_check
-      real(kind_phys), dimension(im,levr+ltp,NBDSW,NF_AESW) :: faersw_check
-      real(kind_phys), dimension(im,NSPC1)                  :: aerodp_check
+      real(kind_phys), dimension(im,levr,NBDLW,NF_AELW) :: faerlw_check
+      real(kind_phys), dimension(im,levr,NBDSW,NF_AESW) :: faersw_check
+      real(kind_phys), dimension(im,NSPC1)              :: aerodp_check
       ! End for consistency checks
 
       ! Initialize the CCPP error handling variables
@@ -244,7 +243,7 @@ module GFS_rrtmgp_setup
       if (size(faerlw(1,:,:,:)).ne.size(faerlw_check(1,:,:,:))) then
          write(errmsg,"(3a,4i4,a,4i4)") &
                "Runtime error: dimension mismatch for faerlw,",        &
-               " check definitions of levr, ltp, nbdlw, nf_aelw:",     &
+               " check definitions of Model%levs, nbdlw, nf_aelw:",     &
                " expected shape ", shape(faerlw_check(:,:,:,:)),       &
                " but got ", shape(faerlw(:,:,:,:))
          errflg = 1
@@ -253,7 +252,7 @@ module GFS_rrtmgp_setup
       if (size(faersw(1,:,:,:)).ne.size(faersw_check(1,:,:,:))) then
          write(errmsg,"(3a,4i4,a,4i4)") &
                "Runtime error: dimension mismatch for faersw,",        &
-               " check definitions of levr, ltp, nbdsw, nf_aesw:",     &
+               " check definitions of Model%levs, nbdsw, nf_aesw:",     &
                " expected shape ", shape(faersw_check(:,:,:,:)),       &
                " but got ", shape(faersw(:,:,:,:))
          errflg = 1
@@ -592,7 +591,6 @@ module GFS_rrtmgp_setup
 !       write(0,*)' IVFLIP=',ivflip,' IOVRSW=',iovrsw,' IOVRLW=',iovrlw,&
 !    &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
         print *,' LCRICK=',lcrick,' LCNORM=',lcnorm,' LNOPREC=',lnoprec
-        print *,' LTP =',ltp,', add extra top layer =',lextop
 
         if ( ictmflg==0 .or. ictmflg==-2 ) then
           print *,'   Data usage is limited by initial condition!'
