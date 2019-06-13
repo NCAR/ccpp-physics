@@ -182,6 +182,7 @@ contains
        ! Mandatory outputs
        topflx_sw%upfxc = fluxswUP_allsky(:,iTOA)
        topflx_sw%upfx0 = fluxswUP_clrsky(:,iTOA)
+       topflx_sw%dnfxc = fluxswDOWN_allsky(:,iTOA)
        sfcflx_sw%upfxc = fluxswUP_allsky(:,iSFC)
        sfcflx_sw%upfx0 = fluxswUP_clrsky(:,iSFC)
        sfcflx_sw%dnfxc = fluxswDOWN_allsky(:,iSFC)

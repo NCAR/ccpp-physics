@@ -87,7 +87,7 @@ contains
          errmsg                  ! CCPP error message
     integer, intent(out) :: & 
          errflg                  ! CCPP error flag
-    real(kind_phys), dimension(ncol,model%levs), intent(out) :: &
+    real(kind_phys), dimension(ncol,model%levs+1), intent(out) :: &
          fluxUP_allsky,        & ! All-sky flux                    (W/m2)
          fluxDOWN_allsky,      & ! All-sky flux                    (W/m2)
          fluxUP_clrsky,        & ! Clear-sky flux                  (W/m2)

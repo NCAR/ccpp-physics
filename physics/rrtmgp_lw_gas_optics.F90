@@ -512,7 +512,6 @@ contains
          sources_LW,           & ! OUT -
          tlev=t_lev))            ! IN  -
 
-    print*,'END LW_GAS_OPTICS:'
   end subroutine rrtmgp_lw_gas_optics_run
 
   ! #########################################################################################
