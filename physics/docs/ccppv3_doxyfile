@@ -133,7 +133,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
 ### in-core MP
-###                      ../gfdl_fv_sat_adj.F90    \
+                        ../gfdl_fv_sat_adj.F90    \
 ### time_vary
                         ../GFS_phys_time_vary.fv3.F90 \
                         ../ozne_def.f                 \
@@ -392,7 +392,8 @@ SEARCH_INCLUDES        = YES
 INCLUDE_PATH           =
 INCLUDE_FILE_PATTERNS  =
 PREDEFINED             = CCPP \
-                         GEOS5 
+                         MULTI_GASES \
+                         0 
 EXPAND_AS_DEFINED      =
 SKIP_FUNCTION_MACROS   = YES
 TAGFILES               =

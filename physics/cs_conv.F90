@@ -1859,7 +1859,7 @@ module cs_conv
 !***********************************************************************
 !>\ingroup cs_scheme
 !! This subroutine calculates cloud base properties.
-      SUBROUTINE CUMBAS                            & !< cloud base
+      SUBROUTINE CUMBAS                            & ! cloud base
                ( IJSDIM, KMAX  ,                   & !DD dimensions
                  KB    , GCYM  , KBMX  ,           & ! output
                  ntr   , ntrq  ,                   &
@@ -1881,15 +1881,15 @@ module cs_conv
       logical  lprnt
 !
 !   [OUTPUT]
-      INTEGER    KB    (IJSDIM)         !< cloud base
-      REAL(r8)   GCYM  (IJSDIM, KMAX)   !< norm. mass flux (half lev)
+      INTEGER    KB    (IJSDIM)         ! cloud base
+      REAL(r8)   GCYM  (IJSDIM, KMAX)   ! norm. mass flux (half lev)
       INTEGER    KBMX
-      REAL(r8)   GCHB  (IJSDIM)         !< cloud base MSE
-      REAL(r8)   GCWB  (IJSDIM)         !< cloud base total water
-      REAL(r8)   GCUB  (IJSDIM)         !< cloud base U
-      REAL(r8)   GCVB  (IJSDIM)         !< cloud base V
-      REAL(r8)   GCIB  (IJSDIM)         !< cloud base ice
-      REAL(r8)   GCtrB (IJSDIM,ntrq:ntr)     !< cloud base tracer
+      REAL(r8)   GCHB  (IJSDIM)         ! cloud base MSE
+      REAL(r8)   GCWB  (IJSDIM)         ! cloud base total water
+      REAL(r8)   GCUB  (IJSDIM)         ! cloud base U
+      REAL(r8)   GCVB  (IJSDIM)         ! cloud base V
+      REAL(r8)   GCIB  (IJSDIM)         ! cloud base ice
+      REAL(r8)   GCtrB (IJSDIM,ntrq:ntr)     ! cloud base tracer
 
 !DDsigma added to arglist for AW, subcloud updraft profiles: temperature, water vapor
 !                               total water, cloud water, and cloud ice respectively
@@ -1897,22 +1897,22 @@ module cs_conv
       REAL(r8), dimension(ijsdim,kmax,ntrq:ntr) :: gctrbl   !DDsigmadiag
 !
 !   [INPUT]
-      REAL(r8)   GDH   (IJSDIM, KMAX)        !< moist static energy
-      REAL(r8)   GDW   (IJSDIM, KMAX)        !< total water
-      REAL(r8)   GDq   (IJSDIM, KMAX, ntr)   !< water vapor  and tracer
-      REAL(r8)   GDHS  (IJSDIM, KMAX)        !< saturate MSE
-      REAL(r8)   GDQS  (IJSDIM, KMAX)        !< saturate humidity
-      REAL(r8)   GDQI  (IJSDIM, KMAX)        !< cloud ice
-      REAL(r8)   GDU   (IJSDIM, KMAX)        !< u-velocity
-      REAL(r8)   GDV   (IJSDIM, KMAX)        !< v-velocity
-      REAL(r8)   GDZM  (IJSDIM, KMAX+1)      !< Altitude (half lev)
-      REAL(r8)   GDPM  (IJSDIM, KMAX+1)      !< pressure (half lev)
+      REAL(r8)   GDH   (IJSDIM, KMAX)        ! moist static energy
+      REAL(r8)   GDW   (IJSDIM, KMAX)        ! total water
+      REAL(r8)   GDq   (IJSDIM, KMAX, ntr)   ! water vapor  and tracer
+      REAL(r8)   GDHS  (IJSDIM, KMAX)        ! saturate MSE
+      REAL(r8)   GDQS  (IJSDIM, KMAX)        ! saturate humidity
+      REAL(r8)   GDQI  (IJSDIM, KMAX)        ! cloud ice
+      REAL(r8)   GDU   (IJSDIM, KMAX)        ! u-velocity
+      REAL(r8)   GDV   (IJSDIM, KMAX)        ! v-velocity
+      REAL(r8)   GDZM  (IJSDIM, KMAX+1)      ! Altitude (half lev)
+      REAL(r8)   GDPM  (IJSDIM, KMAX+1)      ! pressure (half lev)
       REAL(r8)   FDQS  (IJSDIM, KMAX)
       REAL(r8)   GAM   (IJSDIM, KMAX)
       INTEGER    ISTS, IENS
 !
 !   [INTERNAL WORK]
-      REAL(r8)   CBASE (IJSDIM)              !< one over cloud base height
+      REAL(r8)   CBASE (IJSDIM)              ! one over cloud base height
 !     REAL(r8)   CBASEP(IJSDIM)              ! cloud base pressure
       REAL(r8)   DELZ, GAMX, wrk
 !     REAL(r8)   DELZ, QSL, GAMX, wrk

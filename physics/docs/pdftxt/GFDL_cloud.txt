@@ -45,9 +45,6 @@ and ocean (larger sub-grid variability appears in larger area). Horizontal sub-g
 relative humidity calculation, evaporation and condensation processes.  Scale-awareness is achieved by this horizontal subgrid variability and a \f$2^{nd}\f$
 order FV-type vertical reconstruction (Lin et al. (1994) \cite lin_et_al_1994). 
 
-\section nml_opt Namelist Option
-\ref gfdl_cloud_microphysics_nml 
-
 \section intro_GFDL_cloud Intraphysics Communication
  + For GFDL Cloud MP: \ref arg_table_gfdl_cloud_microphys_run
  + For GFDL Fast Physics: \ref arg_table_fv_sat_adj_run 

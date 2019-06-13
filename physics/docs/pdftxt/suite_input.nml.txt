@@ -234,7 +234,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>aero_in         <td>gfs_control_type          <td>logical flag for using aerosols in Morrison-Gettelman microphysics   <td>.false.
 <tr><td>iau_delthrs     <td>gfs_control_type          <td>incremental analysis update (IAU) time interval in hours          <td>6
 <tr><td>iaufhrs         <td>gfs_control_type          <td>forecast hours associated with increment files      <td>-1
-<tr><td colspan="4" align= center>\b Parameters \b Specific \b to \b MGCSAW \b Suite 
+<tr><td colspan="4" align= center>\b Parameters \b Specific \b to \b csawmg \b Suite 
 <tr><td>crtrh(3)        <td>gfs_control_type          <td>critical relative humidity at the surface, PBL top and at the top of the atmosphere  <td>0.90,0.90,0.90
 <tr><td>cscnv           <td>gfs_control_type          <td>logical flag for Chikira-Sugiyama deep convection   <td>.false.
 <tr><td>do_aw           <td>gfs_control_type          <td>flag for Arakawa-Wu scale-awere adjustment          <td>.false.
@@ -344,7 +344,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       </ul>
                                                       <td>1
 <tr><td>lsoil_lsm         <td>gfs_control_type  <td>number of soil layers internal to land surface model   <td>-1
-<tr><td colspan="4" align= center>\b Stochastic \Physics \b Specific \b Parameters
+<tr><td colspan="4" align= center>\b Stochastic \b Physics \b Specific \b Parameters
 <tr><td>do_sppt           <td>gfs_control_type  <td>flag for stochastic SPPT option                        <td>.false.
 <tr><td>do_shum           <td>gfs_control_type  <td>flag for stochastic SHUM option                        <td>.false.
 <tr><td>do_skeb           <td>gfs_control_type  <td>flag for stochastic SKEB option                        <td>.false.
