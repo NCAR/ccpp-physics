@@ -1094,7 +1094,7 @@ c
 !   compute tke dissipation rate
 !
 !>  ## Calculate heating due to TKE dissipation and add to the tendency for temperature
-!!  Following Han et al. (2015) \cite han_et_al_2015 , turbulence dissipation contributes to the tendency of temperature in the following way. First, turbulence dissipation is calculated by equation 17 of Han et al. (2015) \cite han_et_al_2015 for the PBL and equation 16 for the surface layer.
+!!  Following Han et al. (2016) \cite Han_2016 , turbulence dissipation contributes to the tendency of temperature in the following way. First, turbulence dissipation is calculated by equation 17 of Han et al. (2016) \cite Han_2016 for the PBL and equation 16 for the surface layer.
       if(dspheat) then
 !
       do k = 1,km1

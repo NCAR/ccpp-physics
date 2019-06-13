@@ -62,8 +62,8 @@ contains
 ! t = current temp (t2di + physics up to now)
 !===================
 
-!> \defgroup cu_gf_group GSD Scale-Aware Grell-Freitas Convection Scheme Module
-!>\defgroup cu_gf_driver GSD Grell-Freitas Convection Scheme Driver
+!> \defgroup cu_gf_group Grell-Freitas Convection Scheme Module
+!>\defgroup cu_gf_driver  Grell-Freitas Convection Scheme Driver Module
 !> \ingroup cu_gf_group
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |

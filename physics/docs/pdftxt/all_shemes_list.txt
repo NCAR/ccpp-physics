@@ -81,7 +81,7 @@ to the parameterization.
 
 The CCPP v3 includes the suite used in the GFS v15 implemented operationally in June 2019 (suite GFS_v15). Additionally, it includes three
 developmental suites which are undergoing testing for possible future implementation in the UFS. Suite GFS_v15plus is identical to suite
-GFS_v15 except for a replacement in the PBL parameterization (Han et al. 2019 \cite Han_2019 ). Suite MGCSAW differs from GFS_v15 as it 
+GFS_v15 except for a replacement in the PBL parameterization (Han et al. 2019 \cite Han_2019 ). Suite csawmg differs from GFS_v15 as it 
 contains different convection and microphysics schemes made available through a NOAA Climate Process Team (CPT) with components developed 
 at multiple research centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Suite GSD_v0 differs from GFS_v15 as it 
 uses the convection, microphysics, and boundary layer schemes employed in the Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR \cite Benjamin_2016 )
@@ -91,7 +91,7 @@ and in <a href="https://dtcenter.org/eval/gmtb/phytest2019/"> the GMTB website <
 
 Table 1.  Physics suite options included in this documentation. 
 \tableofcontents
-|   Phys suites    |      GFS_v15         |      GFS_v15plus     |       MGCSAW        |        GSD_v0        |
+|   Phys suites    |      GFS_v15         |      GFS_v15plus     |       csawmg        |        GSD_v0        |
 |------------------|----------------------|----------------------|---------------------|----------------------|
 | Deep Cu          | \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
 | Shallow Cu       | \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF and \ref cu_gf_sh_group   |

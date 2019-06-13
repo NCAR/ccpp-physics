@@ -1,7 +1,7 @@
 !>\file cu_gf_deep.F90 
 !! This file is the Grell-Freitas deep convection scheme.
 
-!>\defgroup cu_gf_deep_group GSD Grell-Freitas Deep Convection Main
+!>\defgroup cu_gf_deep_group Grell-Freitas Deep Convection Module
 !>\ingroup cu_gf_group
 module cu_gf_deep
      use machine , only : kind_phys
@@ -55,7 +55,7 @@ contains
               ,ichoice       &  ! choice of closure, use "0" for ensemble average
               ,ipr           &  ! this flag can be used for debugging prints
               ,ccn           &  ! not well tested yet
-              ,dtime         &  !
+              ,dtime         &  ! dt over which forcing is applied
               ,imid          &  ! flag to turn on mid level convection
               ,kpbl          &  ! level of boundary layer height
               ,dhdt          &  ! boundary layer forcing (one closure for shallow)
@@ -2316,6 +2316,13 @@ contains
 !!\param psur    surface pressure
 !!\param  ierr  error value, maybe modified in this routine
 !!\param tcrit   258.K
+!!\param itest
+!!\param itf
+!!\param ktf
+!!\param its
+!!\param ite
+!!\param kts
+!!\param kte
    subroutine cup_env(z,qes,he,hes,t,q,p,z1,                &
               psur,ierr,tcrit,itest,                        &
               itf,ktf,                                      &
@@ -2453,6 +2460,7 @@ contains
 !!\param   psur      surface pressure
 !!\param   ierr      error value, maybe modified in this routine
 !!\param   z1        terrain elevation
+!!\param itf,ktf,its,ite,kts,kte   horizontal and vertical dimension
    subroutine cup_env_clev(t,qes,q,he,hes,z,p,qes_cup,q_cup,        &
               he_cup,hes_cup,z_cup,p_cup,gamma_cup,t_cup,psur,      &
               ierr,z1,                                              &
@@ -3163,8 +3171,6 @@ endif
    end subroutine cup_minimi
 
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
    subroutine cup_up_aa0(aa0,z,zu,dby,gamma_cup,t_cup,       &
               kbcon,ktop,ierr,                               &
               itf,ktf,                                       &
@@ -3237,8 +3243,6 @@ endif
 
 !====================================================================
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
    subroutine neg_check(name,j,dt,q,outq,outt,outu,outv,                      &
                         outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 
@@ -3587,8 +3591,6 @@ endif
    end subroutine cup_output_ens_3d
 !-------------------------------------------------------
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
    subroutine cup_up_moisture(name,ierr,z_cup,qc,qrc,pw,pwav,     &
               p_cup,kbcon,ktop,dby,clw_all,xland1,                &
               q,gamma_cup,zu,qes_cup,k22,qe_cup,                  &
@@ -3900,8 +3902,6 @@ endif
 
 !--------------------------------------------------------------------
 !>\ingroup cu_gf_deep_group
-!> This function calculates
-!>\param
  real function satvap(temp2)
       implicit none
       real(kind=kind_phys) :: temp2, temp, toot, toto, eilog, tsot,            &
@@ -4066,8 +4066,6 @@ endif
   end subroutine rates_up_pdf
 !-------------------------------------------------------------------------
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
-!>\param
  subroutine get_zu_zd_pdf_fim(kklev,p,rand_vmas,zubeg,ipr,xland,zuh2,draft,ierr,kb,kt,zu,kts,kte,ktf,max_mass,kpbli,csum,pmin_lev)
 
  implicit none
@@ -4575,7 +4573,6 @@ endif
  end function deriv3
 !=============================================================================================
 !>\ingroup cu_gf_deep_group
-!> This subroutine calcualtes
   subroutine get_lateral_massflux(itf,ktf, its,ite, kts,kte                             &
                                   ,ierr,ktop,zo_cup,zuo,cd,entr_rate_2d                 &
                                   ,up_massentro, up_massdetro ,up_massentr, up_massdetr &
@@ -4693,7 +4690,6 @@ endif
 !---meltglac-------------------------------------------------
 !------------------------------------------------------------------------------------
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
    subroutine get_partition_liq_ice(ierr,tn,po_cup, p_liq_ice,melting_layer           & 
                                    ,itf,ktf,its,ite, kts,kte, cumulus          )
      implicit none
@@ -4785,7 +4781,6 @@ endif
 
 !------------------------------------------------------------------------------------
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
    subroutine get_melting_profile(ierr,tn_cup,po_cup, p_liq_ice,melting_layer,qrco    &
                                  ,pwo,edto,pwdo,melting                                &    
                                  ,itf,ktf,its,ite, kts,kte, cumulus              )
@@ -4860,7 +4855,6 @@ endif
 !---meltglac-------------------------------------------------
 !-----srf-08aug2017-----begin
 !>\ingroup cu_gf_deep_group
-!> This subroutine calculates
  subroutine get_cloud_top(name,ktop,ierr,p_cup,entr_rate_2d,hkbo,heo,heso_cup,z_cup, &
                          kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,klcl,hcot)
      implicit none

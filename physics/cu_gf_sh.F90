@@ -1,21 +1,37 @@
 !>\file cu_gf_sh.F90
 !! This file contains
 
-!>\defgroup cu_gf_sh_group GSD Grell-Freitas Shallow Convection Main
+!>\defgroup cu_gf_sh_group Grell-Freitas Shallow Convection Module
 !> \ingroup cu_gf_group
-!! module cup_gf_sh will call shallow convection as described in Grell and
+module cu_gf_sh
+    use machine , only : kind_phys
+    !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
+    real(kind=kind_phys), parameter:: c1_shal=0. !0.005! .0005
+    real(kind=kind_phys), parameter:: g  =9.81
+    real(kind=kind_phys), parameter:: cp =1004.
+    real(kind=kind_phys), parameter:: xlv=2.5e6
+    real(kind=kind_phys), parameter:: r_v=461.
+    real(kind=kind_phys), parameter:: c0_shal=.001
+    real(kind=kind_phys), parameter:: fluxtune=1.5
+
+contains
+
+!>\ingroup cu_gf_sh_group
+!> GF shallow convection as described in Grell and
 !! Freitas (2014) \cite grell_and_freitas_2014. input variables are:
+!!\param    us               x wind updated by physics
+!!\param    vs               y wind updated by physics
 !!\param    zo               height at model levels
 !!\param    t,tn             temperature without and with forcing at model levels
 !!\param    q,qo             mixing ratio without and with forcing at model levels
 !!\param    po               pressure at model levels (mb)
 !!\param    psur             surface pressure (mb)
 !!\param    z1               surface height
-!!\param    dhdt             forcing for boundary layer equilibrium   
+!!\param    dhdt             forcing for boundary layer equilibrium
 !!\param    hfx,qfx          in w/m2 (positive, if upward from sfc)
 !!\param    kpbl             level of boundaty layer height
 !!\param    xland            land mask (1. for land)
-!!\param    ichoice          which closure to choose 
+!!\param    ichoice          which closure to choose
 !!\n                         1: old g
 !!\n                         2: zws
 !!\n                         3: dhdt
@@ -37,21 +53,10 @@
 !!                       not included (kg/kg)
 !!\param    cnvwt              required for gfs physics
 !!\param    itf,ktf,its,ite, kts,kte are dimensions
-!!\param    ztexec,zqexec    excess temperature and moisture for updraft
-module cu_gf_sh
-    use machine , only : kind_phys
-    !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
-    real(kind=kind_phys), parameter:: c1_shal=0. !0.005! .0005
-    real(kind=kind_phys), parameter:: g  =9.81
-    real(kind=kind_phys), parameter:: cp =1004.
-    real(kind=kind_phys), parameter:: xlv=2.5e6
-    real(kind=kind_phys), parameter:: r_v=461.
-    real(kind=kind_phys), parameter:: c0_shal=.001
-    real(kind=kind_phys), parameter:: fluxtune=1.5
-
-contains
-
+!!\param    ipr               horizontal index of printed column
+!!\param    tropics            =0
 !>\section gen_cu_gf_sh_run GSD cu_gf_sh_run General Algorithm
+!> @{
   subroutine cu_gf_sh_run (                                            &
                          us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
@@ -276,7 +281,7 @@ contains
           !- moisture  excess
           zqexec(i)     = max(flux_tun(i)*qfx(i)/xlv/(rho(i,1)*zws(i)),0.)
          endif
-       !- zws for shallow convection closure (grant 2001)
+       !> - Calculate zws for shallow convection closure (grant 2001)
        !- height of the pbl
        zws(i) = max(0.,flux_tun(i)*0.41*buo_flux*zo(i,kpbl(i))*g/t(i,kpbl(i)))
        zws(i) = 1.2*zws(i)**.3333
@@ -929,4 +934,5 @@ contains
 !             enddo
 
    end subroutine cu_gf_sh_run
+!> @}
 end module cu_gf_sh

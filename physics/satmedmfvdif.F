@@ -448,7 +448,6 @@
 !
 !>  - Compute an empirical cloud fraction based on 
 !! Xu and Randall (1996) \cite xu_and_randall_1996
-!! (see \ref cld_fra).
       do k = 1, km
         do i = 1, im
           plyr(i,k)   = 0.01 * prsl(i,k)   ! pa to mb (hpa)

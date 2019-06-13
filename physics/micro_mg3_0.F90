@@ -272,37 +272,37 @@ subroutine micro_mg_init(                                         &
   !
   !-----------------------------------------------------------------------
 
-  integer,  intent(in)  :: kind         !< Kind used for reals
+  integer,  intent(in)  :: kind         ! Kind used for reals
   real(r8), intent(in)  :: gravit
   real(r8), intent(in)  :: rair
   real(r8), intent(in)  :: rh2o
   real(r8), intent(in)  :: cpair
-  real(r8), intent(in)  :: tmelt_in     !< Freezing point of water (K)
+  real(r8), intent(in)  :: tmelt_in     ! Freezing point of water (K)
   real(r8), intent(in)  :: latvap
   real(r8), intent(in)  :: latice
-  real(r8), intent(in)  :: rhmini_in    !< Minimum rh for ice cloud fraction > 0.
+  real(r8), intent(in)  :: rhmini_in    ! Minimum rh for ice cloud fraction > 0.
   real(r8), intent(in)  :: micro_mg_dcs
   real(r8), intent(in)  :: ts_auto(2)
   real(r8), intent(in)  :: mg_qcvar
 
 !++ag
 !MG3 dense precipitating ice. Note, only 1 can be true, or both false.
-  logical,  intent(in)  :: micro_mg_do_graupel_in  !< .true.  = configure with graupel
-                                                   !< .false. = no graupel (hail possible)
-  logical,  intent(in)  :: micro_mg_do_hail_in     !< .true.  = configure with hail
-                                                   !< .false. = no hail (graupel possible)
+  logical,  intent(in)  :: micro_mg_do_graupel_in  ! .true.  = configure with graupel
+                                                   ! .false. = no graupel (hail possible)
+  logical,  intent(in)  :: micro_mg_do_hail_in     ! .true.  = configure with hail
+                                                   ! .false. = no hail (graupel possible)
 !--ag
 
-  logical,  intent(in)  :: microp_uniform_in !< .true.  = configure uniform for sub-columns
-                                             !< .false. = use w/o sub-columns (standard)
-  logical,  intent(in)  :: do_cldice_in      !< .true.  = do all processes (standard)
-                                             !< .false. = skip all processes affecting cloud ice
-  logical,  intent(in)  :: use_hetfrz_classnuc_in !< use heterogeneous freezing
+  logical,  intent(in)  :: microp_uniform_in ! .true.  = configure uniform for sub-columns
+                                             ! .false. = use w/o sub-columns (standard)
+  logical,  intent(in)  :: do_cldice_in      ! .true.  = do all processes (standard)
+                                             ! .false. = skip all processes affecting cloud ice
+  logical,  intent(in)  :: use_hetfrz_classnuc_in ! use heterogeneous freezing
 
-  character(len=16),intent(in)  :: micro_mg_precip_frac_method_in  !< type of precipitation fraction method
-  real(r8),         intent(in)  :: micro_mg_berg_eff_factor_in     !< berg efficiency factor
-  logical,  intent(in)  ::  allow_sed_supersat_in !< allow supersaturated conditions after sedimentation loop
-  logical,  intent(in)  ::  do_sb_physics_in !< do SB autoconversion and accretion physics
+  character(len=16),intent(in)  :: micro_mg_precip_frac_method_in  ! type of precipitation fraction method
+  real(r8),         intent(in)  :: micro_mg_berg_eff_factor_in     ! berg efficiency factor
+  logical,  intent(in)  ::  allow_sed_supersat_in ! allow supersaturated conditions after sedimentation loop
+  logical,  intent(in)  ::  do_sb_physics_in ! do SB autoconversion and accretion physics
   logical,  intent(in)  ::  do_ice_gmao_in
   logical,  intent(in)  ::  do_liq_liu_in
 
@@ -4444,18 +4444,18 @@ end subroutine micro_mg_tend
 !========================================================================
 
 !>\ingroup mg3_mp
-!! This subroutine calculates effective radius for rain + cloud.
+!! This subroutine calculates effective radius for rain and cloud.
 subroutine calc_rercld(lamr, n0r, lamc, pgam, qric, qcic, ncic, rercld, mgncol,nlev)
-  integer, intent(in) :: mgncol, nlev
-  real(r8), dimension(mgncol,nlev), intent(in) :: lamr          !< rain size parameter (slope)
-  real(r8), dimension(mgncol,nlev), intent(in) :: n0r           !< rain size parameter (intercept)
-  real(r8), dimension(mgncol,nlev), intent(in) :: lamc          !< size distribution parameter (slope)
-  real(r8), dimension(mgncol,nlev), intent(in) :: pgam          !< droplet size parameter
-  real(r8), dimension(mgncol,nlev), intent(in) :: qric          !< in-cloud rain mass mixing ratio
-  real(r8), dimension(mgncol,nlev), intent(in) :: qcic          !< in-cloud cloud liquid
-  real(r8), dimension(mgncol,nlev), intent(in) :: ncic          !< in-cloud droplet number concentration
+  integer, intent(in) :: mgncol, nlev                           ! horizontal and vertical dimension
+  real(r8), dimension(mgncol,nlev), intent(in) :: lamr          ! rain size parameter (slope)
+  real(r8), dimension(mgncol,nlev), intent(in) :: n0r           ! rain size parameter (intercept)
+  real(r8), dimension(mgncol,nlev), intent(in) :: lamc          ! size distribution parameter (slope)
+  real(r8), dimension(mgncol,nlev), intent(in) :: pgam          ! droplet size parameter
+  real(r8), dimension(mgncol,nlev), intent(in) :: qric          ! in-cloud rain mass mixing ratio
+  real(r8), dimension(mgncol,nlev), intent(in) :: qcic          ! in-cloud cloud liquid
+  real(r8), dimension(mgncol,nlev), intent(in) :: ncic          ! in-cloud droplet number concentration
 
-  real(r8), dimension(mgncol,nlev), intent(inout) :: rercld     !< effective radius calculation for rain + cloud
+  real(r8), dimension(mgncol,nlev), intent(inout) :: rercld     ! effective radius calculation for rain + cloud
 
   ! combined size of precip & cloud drops
   real(r8) :: Atmp

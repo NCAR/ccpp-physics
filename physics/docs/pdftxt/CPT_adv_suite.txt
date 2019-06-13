@@ -1,9 +1,9 @@
 /**
-\page MGCSAW_page MGCSAW Suite
+\page csawmg_page csawmg Suite
 
-\section MGCSAW_suite_overview Overview
+\section csawmg_suite_overview Overview
 
-The advanced MGCSAW physics suite uses the parameterizations in the following order:
+The advanced csawmg physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -23,11 +23,11 @@ The advanced MGCSAW physics suite uses the parameterizations in the following or
 
 \section sdf_cpt_suite Suite Definition File 
 
-The advanced MGCSAW physics suite uses the parameterizations in the following order, as defined in  \c SCM_MGCSAW :
+The advanced csawmg physics suite uses the parameterizations in the following order, as defined in  \c SCM_csawmg :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_MGCSAW" lib="ccppphys" ver="3.0.0">
+<suite name="SCM_csawmg" lib="ccppphys" ver="3.0.0">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">

@@ -788,7 +788,7 @@ contains
 !! computed in gpvs(). See documentation for fpvsx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  t     real, temperature in Kelvin
-!>\param[out] fpvs  real, saturation vapor pressure in Pascals
+!\param[out] fpvs  real, saturation vapor pressure in Pascals
   elemental function fpvs(t)
 !$$$     Subprogram Documentation Block
 !
@@ -838,7 +838,7 @@ contains
 !! computed in gpvs(). See documentation for fpvsx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  t        real, temperatue in Kelvin
-!>\param[out] fpvsq    real, saturation vapor pressure in Pascals
+!\param[out] fpvsq    real, saturation vapor pressure in Pascals
   elemental function fpvsq(t)
 !$$$     Subprogram Documentation Block
 !
