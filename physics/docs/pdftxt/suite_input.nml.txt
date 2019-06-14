@@ -6,13 +6,13 @@ various namelists that control aspects of the I/O, dynamics, physics etc. Most p
 two namelists:\b &gfs_physics_nml and \b &gfdl_cloud_microphysics_nml, with additional specifications for stochastic physics in
 namelists \b &stochy_nam and \b &nam_sfcperts.
 
-Namelist \b &gfdl_cloud_microphysics_nml is only relevant when the GFDL microphysics is used, and its variables are defined in
+- Namelist \b &gfdl_cloud_microphysics_nml is only relevant when the GFDL microphysics is used, and its variables are defined in
 module_gfdl_cloud_microphys.F90.
 
-Namelist \b &gfs_physics_nml pertains to all of the suites used, but some of the variables are only relevant for specific 
+- Namelist \b &gfs_physics_nml pertains to all of the suites used, but some of the variables are only relevant for specific 
 parameterizations. Its variables are defined in file GFS_typedefs.F90 in the host model.
 
-Namelist \b &stochy_nam specifies options for the use of SPPT, SKEB and SHUM, while namelist \b &nam_sfcperts specifies whether
+- Namelist \b &stochy_nam specifies options for the use of SPPT, SKEB and SHUM, while namelist \b &nam_sfcperts specifies whether
 and how stochastic perturbations are used in the Noah Land Surface Model.
 
 <table>

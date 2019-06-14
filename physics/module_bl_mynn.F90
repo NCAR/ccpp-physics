@@ -1134,12 +1134,12 @@ CONTAINS
 !! computational expense. This subroutine computes the length scales up and down
 !! and then computes the min, average of the up/down length scales, and also
 !! considers the distance to the surface.
-!!\param dlu  the distance a parcel can be lifted upwards give a finite
-!!  amount of TKE.
+!\param dlu  the distance a parcel can be lifted upwards give a finite
+!  amount of TKE.
 !\param dld  the distance a parcel can be displaced downwards given a
-!!  finite amount of TKE.
-!!\param lb1  the minimum of the length up and length down
-!!\param lb2  the average of the length up and length down
+!  finite amount of TKE.
+!\param lb1  the minimum of the length up and length down
+!\param lb2  the average of the length up and length down
   SUBROUTINE boulac_length0(k,kts,kte,zw,dz,qtke,theta,lb1,lb2)
 
      INTEGER, INTENT(IN) :: k,kts,kte

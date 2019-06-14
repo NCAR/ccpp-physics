@@ -3,6 +3,7 @@
 
 !>\defgroup cu_gf_deep_group Grell-Freitas Deep Convection Module
 !>\ingroup cu_gf_group
+!! This is Grell-Freitas deep convection scheme module
 module cu_gf_deep
      use machine , only : kind_phys
      real(kind=kind_phys), parameter::g=9.81
