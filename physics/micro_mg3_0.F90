@@ -582,7 +582,9 @@ subroutine micro_mg_tend (                                       &
   real(r8), intent(in) :: liqcldf(mgncol,nlev)    !< liquid cloud fraction (no units)
   real(r8), intent(in) :: icecldf(mgncol,nlev)    !< ice cloud fraction (no units)
   real(r8), intent(in) :: qsatfac(mgncol,nlev)    !< subgrid cloud water saturation scaling factor (no units)
-  logical, intent(in)  :: lprnt, iccn, aero_in
+  logical, intent(in)  :: lprnt                   !< control flag for diagnostic print out 
+  logical, intent(in)  :: iccn                    !< flag for IN and CCN forcing for Morrison-Gettelman microphysics 
+  logical, intent(in)  :: aero_in                 !< flag for using aerosols in Morrison-Gettelman microphysics 
 
 
   ! used for scavenging

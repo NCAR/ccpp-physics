@@ -1,6 +1,7 @@
 !>\file cu_gf_driver.F90
 !! This file is scale-aware Grell-Freitas cumulus scheme driver.
 
+
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
@@ -63,8 +64,10 @@ contains
 !===================
 
 !> \defgroup cu_gf_group Grell-Freitas Convection Scheme Module
+!! This is the Grell-Freitas scale and aerosol aware scheme.
 !>\defgroup cu_gf_driver  Grell-Freitas Convection Scheme Driver Module
 !> \ingroup cu_gf_group
+!! This is the Grell-Freitas convection scheme driver module.
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
