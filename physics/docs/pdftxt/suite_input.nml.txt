@@ -181,7 +181,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 1:July 2010 version of mass-flux shallow convective scheme (operational as of 2016) 
                                                       <li> 2: scale- & aerosol-aware mass-flux shallow convective scheme (2017) 
                                                       <li> 3: scale- & aerosol-aware Grell-Freitas scheme (GSD)
-                                                      <li> 4: New Tiedtke scheme (CAPS)
+                                                      <li> 4: new Tiedtke scheme (CAPS)
                                                       <li> 0: modified Tiedtke's eddy-diffusion shallow convective scheme 
                                                       <li> -1: no shallow convection used 
                                                       </ul> 
@@ -191,7 +191,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 1: July 2010 version of SAS convective scheme (operational version as of 2016) 
                                                       <li> 2: scale- & aerosol-aware mass-flux deep convective scheme (2017) 
                                                       <li> 3: scale- & aerosol-aware Grell-Freitas scheme (GSD)
-                                                      <li> 4: New Tiedtke scheme (CAPS)
+                                                      <li> 4: new Tiedtke scheme (CAPS)
                                                       </ul>
                                                       <td>1
 <tr><td>lgfdlmprad      <td>gfs_control_type          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
@@ -294,27 +294,27 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <td>2
 <tr><td>bl_mynn_edmf         <td>gfs_control_type     <td>flag to activate the mass-flux scheme   \n 
                                                       <ul>
-                                                      <li> 0: Deactivate mass-flux scheme 
-                                                      <li> 1: Activate dynamic multiplume mass-flux scheme 
+                                                      <li> 0: deactivate mass-flux scheme 
+                                                      <li> 1: activate dynamic multiplume mass-flux scheme 
                                                       </ul>   
                                                       <td>0
 <tr><td>bl_mynn_edmf_mom     <td>gfs_control_type     <td>flag to activate the transport of momentum \n 
                                                       <ul>
-                                                      <li> 0: Deactivate momentum transport in mass-flux scheme  
-                                                      <li> 1: Activate momentum transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1  
+                                                      <li> 0: deactivate momentum transport in mass-flux scheme  
+                                                      <li> 1: activate momentum transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1  
                                                       </ul>
                                                       <td>1
 <tr><td>bl_mynn_edmf_tke     <td>gfs_control_type     <td>flag to activate the transport of TKE \n 
                                                       <ul>
-                                                      <li> 0: Deactivate TKE transport in mass-flux scheme 
-                                                      <li> 1: Activate TKE transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1
+                                                      <li> 0: deactivate TKE transport in mass-flux scheme 
+                                                      <li> 1: activate TKE transport in dynamic multiplume mass-flux scheme. \p bl_mynn_edmf must be set to 1
                                                       </ul>
                                                       <td>0
 <tr><td>bl_mynn_edmf_part    <td>gfs_control_type     <td>flag to partitioning the MF and ED areas      <td>0  
 <tr><td>bl_mynn_edmf_tkeadvect  <td>gfs_control_type  <td>activate computation of TKE advection (not yet in use for FV3) \n 
                                                       <ul>
-                                                      <li> False: Deactivate TKE advection  
-                                                      <li> True: Activate TKE advection 
+                                                      <li> false: deactivate TKE advection  
+                                                      <li> true: activate TKE advection 
                                                       </ul>  
                                                       <td>.false. 
 <tr><td>bl_mynn_edmf_tkebudget  <td>gfs_control_type  <td>flag to activate TKE budget                  <td>0
@@ -327,20 +327,20 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <td>2
 <tr><td>bl_mynn_edmf_cloudmix   <td>gfs_control_type  <td>flag to activate mixing of cloud species \n 
                                                       <ul>
-                                                      <li> 0: Deactivate the mixing of any water species mixing ratios 
+                                                      <li> 0: deactivate the mixing of any water species mixing ratios 
                                                       <li> 1: activate the mixing of all water species mixing ratios 
                                                       </ul>
                                                       <td>1
 <tr><td>bl_mynn_mixqt           <td>gfs_control_type  <td>flag to mix total water or individual species \n 
                                                       <ul>
-                                                      <li> 0: Mix individual water species separately 
+                                                      <li> 0: mix individual water species separately 
                                                       <li> 1: DO NOT USE 
                                                       </ul>
                                                       <td>0
 <tr><td>icloud_bl               <td>gfs_control_type  <td>flag to coupling SGS clouds to radiation \n 
                                                       <ul>
-                                                      <li> 0: Deactivate coupling subgrid clouds to radiation 
-                                                      <li> 1: Activate subgrid cloud coupling to radiation (highly suggested) 
+                                                      <li> 0: deactivate coupling subgrid clouds to radiation 
+                                                      <li> 1: activate subgrid cloud coupling to radiation (highly suggested) 
                                                       </ul>
                                                       <td>1
 <tr><td>lsoil_lsm         <td>gfs_control_type  <td>number of soil layers internal to land surface model   <td>-1
