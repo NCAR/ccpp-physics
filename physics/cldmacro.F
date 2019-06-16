@@ -625,8 +625,10 @@
        real, intent(inout) :: TE,QV,QLC,CF,QLA,AF,QIC,QIA, NL, NI
 
 !      real, parameter     :: qmin = 1.0e-8,    qmini  = 1.0e-7
-       real, parameter     :: nmin = 1.0e-3,    cfmin  = 1.0e-5
+!      real, parameter     :: nmin = 1.0e-3,    cfmin  = 1.0e-5
+       real, parameter     :: nmin = 1.0,       cfmin  = 1.0e-5
      &,                       RI_cub = 6.4e-14, RL_cub = 1.0e-15
+     &,                       fourb3 = 4.0/3.0
 
        if (AF <= cfmin) then     ! Fix if Anvil cloud fraction too small
          QV = QV + QLA + QIA
@@ -687,13 +689,13 @@
        if (QLA+QLC <= qc_min(1)) then
          NL = 0.0
        elseif (NL <= nmin) then ! make sure NL > 0 if Q >0
-         NL = max((QLA+QLC)/( 1.333 * MAPL_PI *RL_cub*997.0), nmin)
+         NL = max((QLA+QLC)/( fourb3 * MAPL_PI *RL_cub*997.0), nmin)
        endif
 
        if (QIA+QIC <= qc_min(2)) then
          NI = 0.0
        elseif (NI <= nmin) then ! make sure NI > 0 if Q >0
-         NI = max((QIA+QIC)/( 1.333 * MAPL_PI *RI_cub*500.0), nmin)
+         NI = max((QIA+QIC)/( fourb3 * MAPL_PI *RI_cub*500.0), nmin)
        endif
 
        end subroutine fix_up_clouds_2M

@@ -514,13 +514,12 @@
 !! 0.5 and the perturbations go to zero as vegetation fraction  approaches its upper
 !! or lower bound.
         vegfp  = vegfpert(i)                    ! sfc-perts, mgehne
-        ! sfc perts, mgehne
         if (pertvegf(1)>0.0) then
                 ! compute beta distribution parameters for vegetation fraction
                 mv = shdfac
                 sv = pertvegf(1)*mv*(1.-mv)
-                alphav = mv*mv*(1.-mv)/(sv*sv)-mv
-                betav  = alphav*(1.-mv)/mv
+                alphav = mv*mv*(1.0-mv)/(sv*sv)-mv
+                betav  = alphav*(1.0-mv)/mv
                 ! compute beta distribution value corresponding
                 ! to the given percentile albPpert to use as new albedo
                 call ppfbet(vegfp,alphav,betav,iflag,vegftmp)
