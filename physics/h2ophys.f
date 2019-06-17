@@ -19,7 +19,7 @@
       subroutine h2ophys_init()
       end subroutine h2ophys_init
 
-!>\defgroup GFS_h2ophys GFS h2ophys Main
+!>\defgroup GFS_h2ophys GFS Water Vapor Photochemical Production and Loss Module
 !> This subroutine is NRL H2O physics for stratosphere and mesosphere.
 !! \section arg_table_h2ophys_run Argument Table
 !! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |

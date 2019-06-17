@@ -408,7 +408,7 @@ MODULE module_mp_thompson
 !>\ingroup aathompson
 !! This subroutine calculates simplified cloud species equations and create
 !! lookup tables in Thomspson scheme.
-!>\section gen_thompson_init GSD thompson_init General Algorithm
+!>\section gen_thompson_init thompson_init General Algorithm
 !> @{
       SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
                           ids, ide, jds, jde, kds, kde,     &
@@ -501,22 +501,22 @@ MODULE module_mp_thompson
 
 !> - From Martin et al. (1994), assign gamma shape parameter mu for cloud
 !! drops according to general dispersion characteristics (disp=~0.25
-!! for Maritime and 0.45 for Continental).
+!! for maritime and 0.45 for continental)
 !.. disp=SQRT((mu+2)/(mu+1) - 1) so mu varies from 15 for Maritime
 !.. to 2 for really dirty air.  This not used in 2-moment cloud water
 !.. scheme and nu_c used instead and varies from 2 to 15 (integer-only).
       mu_c = MIN(15., (1000.E6/Nt_c + 2.))
 
-!> - Compute Schmidt number to one-third used numerous times.
+!> - Compute Schmidt number to one-third used numerous times
       Sc3 = Sc**(1./3.)
 
-!> - Compute min ice diam from mass, min snow/graupel mass from diam.
+!> - Compute minimum ice diam from mass, min snow/graupel mass from diam
       D0i = (xm0i/am_i)**(1./bm_i)
       xm0s = am_s * D0s**bm_s
       xm0g = am_g * D0g**bm_g
 
-!> - Compute constants various exponents and gamma() assoc with cloud,
-!! rain, snow, and graupel.
+!> - Compute constants various exponents and gamma() associated with cloud,
+!! rain, snow, and graupel
       do n = 1, 15
          cce(1,n) = n + 1.
          cce(2,n) = bm_r + n + 1.
@@ -621,7 +621,7 @@ MODULE module_mp_thompson
       ogg3 = 1./cgg(3)
 
 !+---+-----------------------------------------------------------------+
-!> - Simplify various rate eqns the best we can now.
+!> - Simplify various rate equations
 !+---+-----------------------------------------------------------------+
 
 !>  - Compute rain collecting cloud water and cloud ice
@@ -629,36 +629,36 @@ MODULE module_mp_thompson
       t1_qr_qi = PI*.25*av_r * crg(9)
       t2_qr_qi = PI*.25*am_r*av_r * crg(8)
 
-!>  - Compute Graupel collecting cloud water
+!>  - Compute graupel collecting cloud water
       t1_qg_qc = PI*.25*av_g * cgg(9)
 
-!>  - Compute Snow collecting cloud water
+!>  - Compute snow collecting cloud water
       t1_qs_qc = PI*.25*av_s
 
-!>  - Compute Snow collecting cloud ice
+!>  - Compute snow collecting cloud ice
       t1_qs_qi = PI*.25*av_s
 
-!>  - Compute Evaporation of rain; ignore depositional growth of rain.
+!>  - Compute evaporation of rain; ignore depositional growth of rain
       t1_qr_ev = 0.78 * crg(10)
       t2_qr_ev = 0.308*Sc3*SQRT(av_r) * crg(11)
 
-!>  - Compute Sublimation/depositional growth of snow
+!>  - Compute sublimation/depositional growth of snow
       t1_qs_sd = 0.86
       t2_qs_sd = 0.28*Sc3*SQRT(av_s)
 
-!>  - Compute Melting of snow
+!>  - Compute melting of snow
       t1_qs_me = PI*4.*C_sqrd*olfus * 0.86
       t2_qs_me = PI*4.*C_sqrd*olfus * 0.28*Sc3*SQRT(av_s)
 
-!>  - Compute Sublimation/depositional growth of graupel
+!>  - Compute sublimation/depositional growth of graupel
       t1_qg_sd = 0.86 * cgg(10)
       t2_qg_sd = 0.28*Sc3*SQRT(av_g) * cgg(11)
 
-!>  - Compute Melting of graupel
+!>  - Compute melting of graupel
       t1_qg_me = PI*4.*C_cube*olfus * 0.86 * cgg(10)
       t2_qg_me = PI*4.*C_cube*olfus * 0.28*Sc3*SQRT(av_g) * cgg(11)
 
-!>  - Compute Constants for helping find lookup table indexes.
+!>  - Compute constants for helping find lookup table indexes
       nic2 = NINT(ALOG10(r_c(1)))
       nii2 = NINT(ALOG10(r_i(1)))
       nii3 = NINT(ALOG10(Nt_i(1)))
@@ -669,7 +669,7 @@ MODULE module_mp_thompson
       nig3 = NINT(ALOG10(N0g_exp(1)))
       niIN2 = NINT(ALOG10(Nt_IN(1)))
 
-!>  - Create bins of cloud water (from min diameter up to 100 microns).
+!>  - Create bins of cloud water (from min diameter up to 100 microns)
       Dc(1) = D0c*1.0d0
       dtc(1) = D0c*1.0d0
       do n = 2, nbc
@@ -677,7 +677,7 @@ MODULE module_mp_thompson
          dtc(n) = (Dc(n) - Dc(n-1))
       enddo
 
-!>  - Create bins of cloud ice (from min diameter up to 5x min snow size).
+!>  - Create bins of cloud ice (from min diameter up to 5x min snow size)
       xDx(1) = D0i*1.0d0
       xDx(nbi+1) = 5.0d0*D0s
       do n = 2, nbi
@@ -689,7 +689,7 @@ MODULE module_mp_thompson
          dti(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of rain (from min diameter up to 5 mm).
+!>  - Create bins of rain (from min diameter up to 5 mm)
       xDx(1) = D0r*1.0d0
       xDx(nbr+1) = 0.005d0
       do n = 2, nbr
@@ -701,7 +701,7 @@ MODULE module_mp_thompson
          dtr(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of snow (from min diameter up to 2 cm).
+!>  - Create bins of snow (from min diameter up to 2 cm)
       xDx(1) = D0s*1.0d0
       xDx(nbs+1) = 0.02d0
       do n = 2, nbs
@@ -713,7 +713,7 @@ MODULE module_mp_thompson
          dts(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of graupel (from min diameter up to 5 cm).
+!>  - Create bins of graupel (from min diameter up to 5 cm)
       xDx(1) = D0g*1.0d0
       xDx(nbg+1) = 0.05d0
       do n = 2, nbg
@@ -725,7 +725,7 @@ MODULE module_mp_thompson
          dtg(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of cloud droplet number concentration (1 to 3000 per cc).
+!>  - Create bins of cloud droplet number concentration (1 to 3000 per cc)
       xDx(1) = 1.0d0
       xDx(nbc+1) = 3000.0d0
       do n = 2, nbc
@@ -738,7 +738,7 @@ MODULE module_mp_thompson
       nic1 = DLOG(t_Nc(nbc)/t_Nc(1))
 
 !+---+-----------------------------------------------------------------+
-!> - Create lookup tables for most costly calculations.
+!> - Create lookup tables for most costly calculations
 !+---+-----------------------------------------------------------------+
 
       ! Assign mpicomm to module variable
@@ -876,20 +876,20 @@ MODULE module_mp_thompson
 
 !>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
 !! data were created from a parcel model by Feingold & Heymsfield with
-!! further changes by Eidhammer and Kriedenweis.
+!! further changes by Eidhammer and Kriedenweis
       ! This computation is cheap compared to the others below, and
       ! doing it always ensures that the correct data is in the SIONlib
       ! file containing the precomputed tables *DH
       WRITE (*,*) '  calling table_ccnAct routine'
       call table_ccnAct
 
-!>  - Call table_efrw() and table_Efsw() to creat collision efficiency table 
-!! between rain/snow and cloud water.
+!>  - Call table_efrw() and table_efsw() to creat collision efficiency table 
+!! between rain/snow and cloud water
       WRITE (*,*)'  creating qc collision eff tables'
       call table_Efrw
       call table_Efsw
 
-!>  - Call table_dropevap() to creat rain drop evaporation table.
+!>  - Call table_dropevap() to creat rain drop evaporation table
       WRITE(*,*) '  creating rain evap table'
       call table_dropEvap
 
@@ -898,7 +898,7 @@ MODULE module_mp_thompson
 
       end if precomputed_tables_1
 
-!>  - Call radar_init() to initialize various constants for computing radar reflectivity.
+!>  - Call radar_init() to initialize various constants for computing radar reflectivity
       call cpu_time(stime)
       xam_r = am_r
       xbm_r = bm_r
@@ -925,7 +925,7 @@ MODULE module_mp_thompson
 !$OMP sections
 
 !$OMP section
-!>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table.
+!>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table
       WRITE (*,*) '  creating rain collecting graupel table'
       call cpu_time(stime)
       call qr_acr_qg
@@ -933,7 +933,7 @@ MODULE module_mp_thompson
       if (mpirank==mpiroot) print '("Computing rain collecting graupel table took ",f10.3," seconds.")', etime-stime
 
 !$OMP section
-!>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table.
+!>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table
       WRITE (*,*) '  creating rain collecting snow table'
       call cpu_time(stime)
       call qr_acr_qs
@@ -944,14 +944,14 @@ MODULE module_mp_thompson
 
 !$OMP end parallel
 
-!>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table.
+!>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table
       WRITE (*,*)  '  creating freezing of water drops table'
       call cpu_time(stime)
       call freezeH2O(threads)
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing freezing of water drops table took ",f10.3," seconds.")', etime-stime
 
-!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category.
+!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
       WRITE (*,*) '  creating ice converting to snow table'
       call cpu_time(stime)
       call qi_aut_qs
@@ -989,12 +989,11 @@ MODULE module_mp_thompson
       endif if_micro_init
 
       END SUBROUTINE thompson_init
-
 !> @}
 
 !>\ingroup aathompson
 !!This is a wrapper routine designed to transfer values from 3D to 1D.
-!!\section gen_mpgtdriver GSD Thompson mp_gt_driver General Algorithm
+!!\section gen_mpgtdriver Thompson mp_gt_driver General Algorithm
 !> @{
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
@@ -1477,7 +1476,7 @@ MODULE module_mp_thompson
 !! Previously this code was based on Reisner et al (1998), but few of
 !! those pieces remain.  A complete description is now found in
 !! Thompson et al. (2004, 2008)\cite Thompson_2004 \cite Thompson_2008.
-!>\section gen_mp_thompson  GSD mp_thompson General Algorithm
+!>\section gen_mp_thompson  mp_thompson General Algorithm
 !> @{
       subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq, &
@@ -3697,7 +3696,8 @@ MODULE module_mp_thompson
       enddo
 
       end subroutine mp_thompson
-! >@}
+!>@}
+
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
@@ -4757,9 +4757,11 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 !>\ingroup aathompson
+!! Returns the incomplete gamma function q(a,x) evaluated by its
+!! continued fraction representation as gammcf.
       SUBROUTINE GCF(GAMMCF,A,X,GLN)
-!> RETURNS THE INCOMPLETE GAMMA FUNCTION Q(A,X) EVALUATED BY ITS
-!! CONTINUED FRACTION REPRESENTATION AS GAMMCF.  ALSO RETURNS
+! RETURNS THE INCOMPLETE GAMMA FUNCTION Q(A,X) EVALUATED BY ITS
+! CONTINUED FRACTION REPRESENTATION AS GAMMCF.  ALSO RETURNS
 !     --- LN(GAMMA(A)) AS GLN.  THE CONTINUED FRACTION IS EVALUATED BY
 !     --- A MODIFIED LENTZ METHOD.
 !     --- USES GAMMLN
@@ -4794,6 +4796,8 @@ MODULE module_mp_thompson
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 
 !>\ingroup aathompson
+!! Returns the incomplete gamma function p(a,x) evaluated by
+!! its series representation as gamser.
       SUBROUTINE GSER(GAMSER,A,X,GLN)
 !     --- RETURNS THE INCOMPLETE GAMMA FUNCTION P(A,X) EVALUATED BY ITS
 !     --- ITS SERIES REPRESENTATION AS GAMSER.  ALSO RETURNS LN(GAMMA(A))
@@ -4827,6 +4831,7 @@ MODULE module_mp_thompson
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 
 !>\ingroup aathompson
+!! Returns the value ln(gamma(xx)) for xx > 0.
       REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE

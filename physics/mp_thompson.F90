@@ -1,11 +1,9 @@
 !>\file mp_thompson.F90
-!! This file contains NOAA/GSD's Thompson MP scheme.
+!! This file contains aerosol-aware Thompson MP scheme.
 
 
-!>\defgroup aathompson GSD Aerosol-Aware Thompson MP Module
-!!
-!! Last modified 4 Apr 2019: remove legacy debugging code    D. Heinzeller
-!> @{
+!>\defgroup aathompson Aerosol-Aware Thompson MP Module
+!! This module contains the aerosol-aware Thompson microphysics scheme.
 module mp_thompson
 
       use machine, only : kind_phys
@@ -149,7 +147,7 @@ module mp_thompson
 
 
 #if 0
-!! \section arg_table_mp_thompson_run Argument Table
+!> \section arg_table_mp_thompson_run Argument Table
 !! | local_name      | standard_name                                                         | long_name                                                             | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                                | count      |    0 | integer   |           | in     | F        |
@@ -194,7 +192,7 @@ module mp_thompson
 !!
 #endif
 !>\ingroup aathompson
-!>\section gen_thompson_hrrr GSD Thompson MP General Algorithm
+!>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
       subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
@@ -496,4 +494,3 @@ module mp_thompson
       end subroutine mp_thompson_finalize
 
 end module mp_thompson
-!> @}

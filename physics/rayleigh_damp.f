@@ -11,7 +11,7 @@
       subroutine rayleigh_damp_init ()
       end subroutine rayleigh_damp_init
 
-!>\defgroup rayleigh_main GFS Rayleigh Damping Main
+!>\defgroup rayleigh_main GFS Rayleigh Damping Module
 !!\brief This is the Rayleigh friction calculation with total energy conservation.
 !!
 !! Role of Rayleigh friction, it attempts to resolve two issues:

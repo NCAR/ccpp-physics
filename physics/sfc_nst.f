@@ -21,7 +21,7 @@
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
 
-!>\defgroup gfs_nst_main GFS sfc_nst Main
+!>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Scheme Module
 !> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
 !! | local_name     | standard_name                                                                | long_name                                                   | units         | rank | type      |    kind   | intent | optional |

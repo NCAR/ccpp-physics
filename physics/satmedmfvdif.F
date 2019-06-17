@@ -12,7 +12,7 @@
       subroutine satmedmfvdif_finalize ()
       end subroutine satmedmfvdif_finalize
 
-!> \defgroup satmedmf GFS satmedmfvdif Main
+!> \defgroup satmedmf GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF) Scheme Module 
 !! @{
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF) scheme.
@@ -83,15 +83,14 @@
 !!
 !!\section gen_satmedmfvdif GFS satmedmfvdif General Algorithm
 !! satmedmfvdif_run() computes subgrid vertical turbulence mixing
-!! using scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization
-!! (Han and Bretherton (2019)).
-!! -# For the convective boundary layer, the scheme adopts
-!! EDMF parameterization (Siebesma et al., 2007) to take
-!! into account nonlocal transport by large eddies (mfpblt.f).
-!! -# A new mass-flux parameterization for stratocumulus-top-induced turbulence
-!! mixing has been introduced (previously, it was eddy diffusion form)
-!! [mfscu.f].
-!! -# For local turbulence mixing, a TKE closure model is used.
+!! using the scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization of
+!! Han and Bretherton (2019) \cite Han_2019 .
+!! -# The local turbulent mixing is represented by an eddy-diffusivity scheme which 
+!! is a function of a prognostic TKE.
+!! -# For the convective boundary layer, nonlocal transport by large eddies 
+!! (mfpblt.f), is represented using a mass flux approach (Siebesma et al.(2007) \cite Siebesma_2007 ).
+!! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
+!! (mfscu.f).
 !! \section detail_satmedmfvidf GFS satmedmfvdif Detailed Algorithm 
 !> @{
       subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
@@ -449,7 +448,6 @@
 !
 !>  - Compute an empirical cloud fraction based on 
 !! Xu and Randall (1996) \cite xu_and_randall_1996
-!! (see \ref cld_fra).
       do k = 1, km
         do i = 1, im
           plyr(i,k)   = 0.01 * prsl(i,k)   ! pa to mb (hpa)
@@ -520,7 +518,7 @@
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
       enddo
 !
-!>  - Compute critical bulk richardson number (\f$Rb_{cr}\f$) (crb)
+!>  - Compute critical bulk Richardson number (\f$Rb_{cr}\f$) (crb)
 !!   - For the unstable PBL, crb is a constant (0.25)
 !!   - For the stable boundary layer (SBL), \f$Rb_{cr}\f$ varies
 !!     with the surface Rossby number, \f$R_{0}\f$, as given by 
@@ -573,7 +571,7 @@
       enddo
       enddo
 !
-! Find pbl height based on bulk richardson number (mrf pbl scheme)
+! Find pbl height based on bulk Richardson number (mrf pbl scheme)
 !   and also for diagnostic purpose
 !
 !
@@ -584,7 +582,7 @@
 !>  - Given the thermal's properties and the critical Richardson number, 
 !! a loop is executed to find the first level above the surface (kpblx) where 
 !! the modified Richardson number is greater than the critical Richardson
-!! number, using equation 10a from Toen and Mahrt (1996) \cite troen_and_mahrt_1986 
+!! number, using equation 10a from Troen and Mahrt (1996) \cite troen_and_mahrt_1986 
 !! (also equation 8 from Hong and Pan (1996) \cite hong_and_pan_1996):
       do k = 1, kmpbl
       do i = 1, im
