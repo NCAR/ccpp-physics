@@ -215,7 +215,7 @@ module lsm_ruc
 !! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                         | index         |    0 | integer   |           | in     | F        |
 !! | lndfrac        | land_area_fraction                                                           | fraction of horizontal grid area occupied by land               | frac          |    1 | real      | kind_phys | in     | F        |
 !! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                    | frac          |    1 | real      | kind_phys | in     | F        |
-!! | tice           | sea_ice_temperature                                                          | sea ice surface skin temperature                                | K             |    1 | real      | kind_phys | inout  | F        |
+!! | tice           | sea_ice_temperature_interstitial                                             | sea ice surface skin temperature use as interstitial            | K             |    1 | real      | kind_phys | inout  | F        |
 !! | keepfr         | flag_for_frozen_soil_physics                                                 | flag for frozen soil physics (RUC)                              | flag          |    2 | real      | kind_phys | inout  | F        |
 !! | smois          | volume_fraction_of_soil_moisture_for_land_surface_model                      | volumetric fraction of soil moisture for lsm                    | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | sh2o           | volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model             | volume fraction of unfrozen soil moisture for lsm               | frac          |    2 | real      | kind_phys | inout  | F        |
@@ -1457,7 +1457,8 @@ module lsm_ruc
       integer,                                 intent(in   ) :: lsoil
       logical,               dimension(im),    intent(in   ) :: land, icy
       integer,               dimension(im),    intent(in   ) :: islmsk
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf, tsurf_ocn
+      real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf_ocn
+      real (kind=kind_phys), dimension(im),    intent(inout) :: tsurf
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcref2
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcwlt2
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
@@ -1516,6 +1517,7 @@ module lsm_ruc
       integer,              dimension(1:lsoil)  :: st_levels_input ! 4 - for Noah lsm
       integer,              dimension(1:lsoil)  :: sm_levels_input ! 4 - for Noah lsm
 
+      integer :: ii,jj
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -1530,6 +1532,7 @@ module lsm_ruc
         return
       else if (debug_print) then
         write(0,*) 'Start of RUC LSM initialization'
+        print *,'lsoil, lsoil_ruc =',lsoil, lsoil_ruc
       endif
 
       ipr = 10
@@ -1562,22 +1565,30 @@ module lsm_ruc
       ! For restart runs, can assume that RUC soul data is provided
       if (.not.restart) then
 
-        flag_soil_layers = 1  ! =1 for input from the Noah LSM
-        flag_soil_levels = 0  ! =1 for input from RUC LSM
         flag_sst = 0
 
         num_soil_layers =  lsoil ! 4 - for Noah lsm
 
+      if( lsoil_ruc == lsoil) then
+        ! RUC LSM input
+        smadj = .false.
+        swi_init = .false.
+        flag_soil_layers = 0  ! =1 for input from the Noah LSM
+        flag_soil_levels = 1  ! =1 for input from RUC LSM
+      else
         ! for Noah input set smadj and swi_init to .true.
         smadj = .true.
         swi_init = .true.
+        flag_soil_layers = 1  ! =1 for input from the Noah LSM
+        flag_soil_levels = 0  ! =1 for input from RUC LSM
+      endif
         
         if(lsoil == 4 ) then ! for Noah input
-          st_levels_input = (/ 5, 25, 70, 150/)    ! Noah soil levels
-          sm_levels_input = (/ 5, 25, 70, 150/)    ! Noah soil levels
-        else
+          st_levels_input = (/ 5, 25, 70, 150/)    ! Noah centers of soil layers
+          sm_levels_input = (/ 5, 25, 70, 150/)    ! Noah centers of soil layers
+        elseif(lsoil /= lsoil_ruc) then
           write(errmsg,'(a,i0,a)')                                   &
-                'WARNING in lsm_ruc_init: non-Noah input, lsoil=', lsoil
+                'WARNING in lsm_ruc_init: non-Noah and non-RUC input, lsoil=', lsoil
           errflg = 1
           return
         endif
@@ -1598,8 +1609,6 @@ module lsm_ruc
          print *,'its,ite,jts,jte ',its,ite,jts,jte 
       endif
 
-      ! Noah lsm input
-      if ( flag_soil_layers == 1 ) then
 
         do j=jts,jte !
         do i=its,ite ! i = horizontal loop
@@ -1636,6 +1645,13 @@ module lsm_ruc
           endif
 
           sst(i,j) = tsurf_ocn(i)
+        enddo
+        enddo
+
+      if ( flag_soil_layers == 1 ) then
+      ! Noah lsm input
+        do j=jts,jte !
+        do i=its,ite ! i = horizontal loop
 
           st_input(i,1,j)=tsk(i,j)
           sm_input(i,1,j)=0.
@@ -1783,6 +1799,47 @@ module lsm_ruc
 
         endif ! smadj==.true.
 
+
+      elseif (flag_soil_layers==0) then
+      !  RUC LSM input
+        print *,' RUC LSM input for soil variables'
+        do j=jts,jte
+        do i=its,ite
+          do k=1,lsoil_ruc
+             if(islmsk(i) == 1) then
+               !land 
+               soilm(i,k,j)    = smc(i,k)
+               soiltemp(i,k,j) = stc(i,k)
+               if(soiltemp(i,k,j) < 200.)then
+                  print *,'Bad soil temperature at i,j,k', i,j,k,soiltemp(i,k,j),soilm(i,k,j)
+                    do ii=i-1,i+1
+                    do jj=j-1,j+1
+                     if(soiltemp(ii,k,jj)> 200.) then
+                       soiltemp(i,k,j) = soiltemp(ii,k,jj)
+                       soilm(i,k,j) = soilm(ii,k,jj)
+                       if(k==1) then
+                         tsurf(i) = tsurf(ii)
+                  print *,'corrected skin temperature at i,j', i,j,k,tsurf(i)
+                       endif
+                       goto 11
+                     endif
+                    enddo
+                    enddo
+   11               continue
+                  print *,'corrected soil temperature at i,j,k,ii,jj', i,j,k,ii,jj,soiltemp(i,k,j)
+               endif
+             else
+               !water
+               soilm(i,k,j)    = 1.
+               soiltemp(i,k,j) = tsk(i,j)
+             endif
+          enddo
+        enddo
+        enddo
+
+      endif ! flag_soil_layers==1
+
+
         ! Initialize liquid and frozen soil moisture from total soil moisture
         ! and soil temperature, and also soil moisture availability in the top
         ! layer
@@ -1803,9 +1860,14 @@ module lsm_ruc
           enddo
         enddo
         enddo
+        if(debug_print) then
+          print *,'End of RUC LSM initialization'
+          print *,'tslb(ipr)=',ipr,tslb(ipr,:)
+          print *,'smois(ipr)=',ipr,smois(ipr,:)
+        endif ! debug_print
 
-      endif ! flag_soil_layers==1
 
       end subroutine rucinit
+
 
 end module lsm_ruc
