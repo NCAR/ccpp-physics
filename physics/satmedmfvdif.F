@@ -286,7 +286,7 @@
       kmpbl = km / 2
       kmscu = km / 2
 !>  - Compute physical height of the layer centers and interfaces from 
-!! the geopotential height (zi and zl)
+!! the geopotential height (\p zi and \p zl)
       do k=1,km
         do i=1,im
           zi(i,k) = phii(i,k) * gravi
@@ -307,12 +307,12 @@
           zm(i,k) = zi(i,k+1)
         enddo
       enddo
-!>  - Compute horizontal grid size (gdx)
+!>  - Compute horizontal grid size (\p gdx)
       do i=1,im
         gdx(i) = sqrt(garea(i))
       enddo
 !>  - Initialize tke value at vertical layer centers and interfaces 
-!! from tracer (tke and tkeh)
+!! from tracer (\p tke and \p tkeh)
       do k=1,km
         do i=1,im
           tke(i,k) = max(q1(i,k,ntke), tkmin)
