@@ -12,7 +12,8 @@ Physics processes of GFDL cloud MP are described in Figure 1 (also see warm_rain
 
 Some unique attributes of GFDL cloud microphysics include:
 
-\section fast_phys Fast Physics in FV3 Dynamical Solver
+# Precipitation and Cloud Effects on Dynamics
+
 \image html FV3_structure.png "Figure 1: FV3 structure; Yellow represents external API routines, called once per physics time step; Green are called once per remapping time step; Blue are called once per acoustic time step. " width=10cm
 The leftmost column of Figure 1 shows the external API calls used during a typical process-split model integration procedure. First,
 the solver is called, which advances the solver a full "physics" time step. This updated state is then passed to the physical parameterization
@@ -27,9 +28,17 @@ done independently within each layer to maintain local (within each layer) stabi
 This loop is typically performed once per call to the solver, although it is possible to improve the model's 
 stability by executing the loop (and thereby the vertical remapping) multiple times per solver call.
 
-In current fv3gfs, the fast physics (phase-changes only) is called after the "Lagrangian-to-Eulerain" remapping. When \ref fast_sat_adj is activated (do_sat_adj=.true. in \b fv_core_nml block), it adjusts cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order to have the correct balance.
 
-\section gfdl_fast Horizontal Sub-grid Variability ("Scale-aware")
+At grid spacing of less than ~10 km, model dynamics should be able to "see" and "feel" the cloud and precipitation condensate; heat content,
+heat exchange with the environment, and momentum of condensate should be accounted for. The GFDL microphysics scheme is formulated to 
+accomplish this through strict moist energy conservation during phase changes, and keeping heat and momentum budgets for all condensate.
+This results in thermodynamic consistency between the FV3 microphysics scheme and FV3 dyanmics.
+
+In current fv3gfs, GFDL in-core fast saturation adjustment (phase-changes only) is called after the "Lagrangian-to-Eulerain" remapping. When \ref fast_sat_adj is activated (do_sat_adj=.true. in \b fv_core_nml block), it adjusts cloud water evaporation (cloud water\f$\rightarrow\f$water vapor), cloud water freezing (cloud water\f$\rightarrow\f$cloud ice), and cloud ice deposition (water vapor\f$\rightarrow\f$cloud ice). The process of condensation is an interesting and well known example. Say dynamics lifts a column of air above saturation, then an adjustment is made to temperature and moisture in order to reach saturation. The tendency of the dynamics has been included in this procedure in order to have the correct balance.
+
+# Scale-awareness 
+
+Scale-awareness provided by assumed subgrid variability that is directly proportional to grid spacing. 
 Horizontal sub-grid variability is a function of cell area:
 - Over land:
 \f[
@@ -46,12 +55,12 @@ relative humidity calculation, evaporation and condensation processes.  Scale-aw
 order FV-type vertical reconstruction (Lin et al. (1994) \cite lin_et_al_1994). 
 
 \section intro_GFDL_cloud Intraphysics Communication
- + For GFDL Cloud MP: \ref arg_table_gfdl_cloud_microphys_run
- + For GFDL Fast Physics: \ref arg_table_fv_sat_adj_run 
+ + GFDL Cloud MP: \ref arg_table_gfdl_cloud_microphys_run
+ + GFDL In-core Fast Saturation Adjustment: \ref arg_table_fv_sat_adj_run 
  
 \section Gen_GFDL_cloud  General Algorithm
- + For GFDL Cloud MP:  mpdrv()
- + For GFDL Fast Physics: fv_sat_adj_work()
+ + GFDL Cloud MP: mpdrv()
+ + GFDL In-core Fast Saturation Ajustment: fv_sat_adj_work()
 
 
 */

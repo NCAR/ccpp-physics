@@ -21,7 +21,7 @@ parameterizations in suites.
  - \subpage GSD_RUCLSM
 
 - \b Cumulus \b Parameterizations
- - GFS Scale-Aware Arakawa Schubert (SAS) Scheme
+ - \subpage GFS_SAMF
   - \subpage GFS_SAMFdeep
   - \subpage GFS_SAMFshal
  - \subpage CSAW_scheme
