@@ -99,6 +99,7 @@ contains
 !! | faersw             | aerosol_optical_properties_for_shortwave_bands_01-16          | aerosol optical properties for shortwave bands 01-16                          | various  |    4 | real                  | kind_phys | out    | F        |
 !! | mtopa              | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |    2 | integer               |           | out    | F        |
 !! | mbota              | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |    2 | integer               |           | out    | F        |
+!! | de_lgth            | cloud_decorrelation_length                                    | cloud decorrelation length                                                    | km       |    1 | real                  | kind_phys | out    | F        |
 !! | cldsa              | cloud_area_fraction_for_radiation                             | fraction of clouds for low, middle, high, total and BL                        | frac     |    2 | real                  | kind_phys | out    | F        |
 !! | aerodp             | atmosphere_optical_thickness_due_to_ambient_aerosol_particles | vertical integrated optical depth for various aerosol species                 | none     |    2 | real                  | kind_phys | out    | F        |
 !! | alb1d              | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real                  | kind_phys | out    | F        |
@@ -114,7 +115,7 @@ contains
        ncol, lw_gas_props, sw_gas_props,                                                & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, alb1d, cld_frac, cld_lwp,         & ! OUT
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, faerlw, & ! OUT
-       faersw, cldsa, mtopa, mbota, aerodp, nday, idxday, gas_concentrations, errmsg, errflg)
+       faersw, cldsa, mtopa, mbota, de_lgth, aerodp, nday, idxday, gas_concentrations, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -161,7 +162,7 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag
-    real(kind_phys), dimension(ncol,Model%levr),intent(out) :: &
+    real(kind_phys), dimension(ncol,Model%levs),intent(out) :: &
          cld_frac,          & ! Total cloud fraction
          cld_lwp,           & ! Cloud liquid water path
          cld_reliq,         & ! Cloud liquid effective radius
@@ -180,15 +181,16 @@ contains
          mtopa                ! Vertical indices for cloud bases
     real(kind_phys), dimension(ncol,5), intent(out) :: &
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
+    real(kind_phys), dimension(ncol), intent(out)  :: &
+         de_lgth              !
     real(kind_phys), dimension(ncol,NSPC1), intent(out) :: &
          aerodp               ! Vertical integrated optical depth for various aerosol species  
 
     ! Local variables
-    integer :: i, j, k, iCol, iBand, iSFC, iTOA, iLay
+    integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
     logical :: top_at_1
     real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs
-    real(kind_phys), dimension(ncol)  :: de_lgth
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
     real(kind_phys), dimension(ncol, Model%levs) :: relhum, qs_lay, q_lay, deltaZ, tv_lay,&
          deltaP, o3_lay
@@ -239,10 +241,10 @@ contains
     enddo
 
     ! Guard against case when model uppermost model layer higher than rrtmgp allows.
-    where(p_lev(1:nCol,iTOA+1) .lt. lw_gas_props%get_press_min())
+    where(p_lev(1:nCol,iTOA+1) .lt. sw_gas_props%get_press_min())
        ! Set to RRTMGP min(pressure/temperature)
-       p_lev(1:nCol,iTOA+1) = spread(lw_gas_props%get_press_min(),dim=1,ncopies=ncol)
-       t_lev(1:nCol,iTOA+1) = spread(lw_gas_props%get_temp_min(),dim=1,ncopies=ncol)
+       p_lev(1:nCol,iTOA+1) = spread(sw_gas_props%get_press_min(),dim=1,ncopies=ncol)
+       t_lev(1:nCol,iTOA+1) = spread(sw_gas_props%get_temp_min(),dim=1,ncopies=ncol)
        ! Recompute layer pressure/temperature.
        p_lay(1:NCOL,iTOA) = 0.5_kind_phys*(p_lev(1:NCOL,iTOA) +  p_lev(1:NCOL,iTOA+1))
        t_lay(1:NCOL,iTOA) = 0.5_kind_phys*(t_lev(1:NCOL,iTOA) +  t_lev(1:NCOL,iTOA+1))
@@ -468,7 +470,6 @@ contains
     ! Local variables
     real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
     integer :: i,k
-    real(kind_phys) :: clwmin, clwm, clwt, onemrh, value, tem1, tem2
     real(kind_phys), parameter :: xrc3 = 100.
     real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
 
@@ -570,50 +571,6 @@ contains
     else                                                           ! neither of the other two cases
        cldcov = 0.0
     endif
-
-    ! #######################################################################################
-    ! This is a hack to get the first-column in a file to contain a cloud.
-    ! #######################################################################################
-    ! DJS2019: START        
-    ! Compute layer cloud fraction.
-    clwmin = 0.0
-    cldcov(:,:) = 0.0
-    if (.not. Model%lmfshal) then
-       do k = 1, Model%levs
-          do i = 1, NCOL
-             clwt = 1.0e-6 * (p_lay(i,k)*0.1)
-             if (cld_condensate(i,k,1) > 0.) then
-                onemrh= max( 1.e-10, 1.0-relhum(i,k) )
-                clwm  = clwmin / max( 0.01, p_lay(i,k)*0.1 )
-                tem1  = min(max(sqrt(sqrt(onemrh*qs_lay(i,k))),0.0001),1.0)
-                tem1  = 2000.0 / tem1
-                value = max( min( tem1*(cld_condensate(i,k,1)-clwm), 50.0 ), 0.0 )
-                tem2  = sqrt( sqrt(relhum(i,k)) )
-                cldcov(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-             endif
-          enddo
-       enddo
-    else
-       do k = 1, Model%levs
-          do i = 1, NCOL
-             clwt = 1.0e-6 * (p_lay(i,k)*0.1)
-             if (cld_condensate(i,k,1) .gt. 0) then
-                onemrh= max( 1.e-10, 1.0-relhum(i,k) )
-                clwm  = clwmin / max( 0.01, p_lay(i,k)*0.1 )
-                tem1  = min(max((onemrh*qs_lay(i,k))**0.49,0.0001),1.0)  !jhan
-                if (Model%lmfdeep2) then
-                   tem1  = xrc3 / tem1
-                else
-                   tem1  = 100.0 / tem1
-                endif
-                value = max( min( tem1*(cld_condensate(i,k,1)-clwm), 50.0 ), 0.0 )
-                tem2  = sqrt( sqrt(relhum(i,k)) )
-                cldcov(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-             endif
-          enddo
-       enddo
-    endif
-    ! DJS2019: END
 
     ! #######################################################################################
     ! MICROPHYSICS

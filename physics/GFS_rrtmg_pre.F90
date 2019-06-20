@@ -734,49 +734,6 @@
           cldcov = 0.0
         endif
 
-
-        ! DJS2019: START Hack        
-        ! Compute layer cloud fraction.
-        clwmin = 0.0
-        cldcov(:,:) = 0.0
-        if (.not. Model%lmfshal) then
-          do k = 1, LMK
-             do i = 1, IM
-                clwt = 1.0e-6 * (plyr(i,k)*0.001)
-                if (ccnd(i,k,1) > 0.) then
-                   onemrh= max( 1.e-10, 1.0-rhly(i,k) )
-                   clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
-                   tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
-                   tem1  = 2000.0 / tem1
-                   value = max( min( tem1*(ccnd(i,k,1)-clwm), 50.0 ), 0.0 )
-                   tem2  = sqrt( sqrt(rhly(i,k)) )
-                   cldcov(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-                endif
-             enddo
-          enddo
-       else
-          do k = 1, LMK
-             do i = 1, IM
-                clwt = 1.0e-6 * (plyr(i,k)*0.001)
-                if (ccnd(i,k,1) > 0.) then
-                   onemrh= max( 1.e-10, 1.0-rhly(i,k) )
-                   clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
-                   tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
-                   if (Model%lmfdeep2) then
-                      tem1  = xrc3 / tem1
-                   else
-                      tem1  = 100.0 / tem1
-                   endif
-                   value = max( min( tem1*(ccnd(i,k,1)-clwm), 50.0 ), 0.0 )
-                   tem2  = sqrt( sqrt(rhly(i,k)) )
-                   cldcov(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-                endif
-             enddo
-          enddo
-       endif
-       ! DJS2019: END
-
-
         if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
 

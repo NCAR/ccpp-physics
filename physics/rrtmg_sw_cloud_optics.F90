@@ -2069,11 +2069,11 @@ contains
          asy_cld         ! In-cloud asymmetry parameter            (1) 
 
     ! Local variables
-    integer :: iCol, iLay, iBand, index, ia, istr
+    integer :: iCol, iLay, iBand, index, ia
     real(kind_phys) :: tau_rain, tau_snow, factor, fint, cld_ref_iceTemp,asyw,ssaw,za1,za2
          
     real(kind_phys), dimension(nBandsSW) :: ssa_rain, ssa_snow, asy_rain, asy_snow, &
-         tau_liq, ssa_liq, asy_liq, tau_ice, ssa_ice, asy_ice, forwliq, asycoliq,   &
+         tau_liq, ssa_liq, asy_liq, tau_ice, ssa_ice, asy_ice, asycoliq,   &
          forwice, extcoice, asycoice, ssacoice, fdelta, extcoliq, ssacoliq
 
     ! Initialize
@@ -2098,7 +2098,7 @@ contains
              asy_ice(:)  = 0._kind_phys
              asy_rain(:) = 0._kind_phys
              asy_snow(:) = 0._kind_phys
-             if (cld_frac(iCol,iLay) .gt. 0._kind_phys) then
+             if (cld_frac(iCol,iLay) .gt. 1.e-12_kind_phys) then
                 ! ###########################################################################
                 ! Rain clouds
                 ! ###########################################################################
@@ -2231,20 +2231,20 @@ contains
              ! ###########################################################################
              ! Compute total cloud radiative properties (tau, omega, and g)
              ! ###########################################################################
-             if (cld_frac(iCol,iLay) .gt. 0._kind_phys) then
+             if (cld_frac(iCol,iLay) .gt. 1.e-12_kind_phys) then
                 do iBand = 1,nBandsSW
                    ! Sum up radiative properties by type.
-                   tau_cld(iCol,iLay,iBand) = tau_liq(iBand) + tau_ice(iBand) + tau_rain        + tau_snow
-                   ssa_cld(iCol,iLay,iBand) = ssa_liq(iBand) + ssa_ice(iBand) + ssa_rain(iBand) + ssa_snow(iBand)
-                   asy_cld(iCol,iLay,iBand) = asy_liq(iBand) + asy_ice(iBand) + asy_rain(iBand) + asy_snow(iBand)
+                   tau_cld(iCol,iLay,iBand) = max(1.e-12_kind_phys, tau_liq(iBand) + tau_ice(iBand) + tau_rain        + tau_snow)
+                   ssa_cld(iCol,iLay,iBand) = max(1.e-12_kind_phys, ssa_liq(iBand) + ssa_ice(iBand) + ssa_rain(iBand) + ssa_snow(iBand))
+                   asy_cld(iCol,iLay,iBand) = max(1.e-12_kind_phys, asy_liq(iBand) + asy_ice(iBand) + asy_rain(iBand) + asy_snow(iBand))
                    ! Delta-scale 
-                   asyw = asy_cld(iCol,iLay,iBand)/max(0._kind_phys, ssa_cld(iCol,iLay,iBand))
+                   asyw = asy_cld(iCol,iLay,iBand)/max(1.e-12_kind_phys, ssa_cld(iCol,iLay,iBand))
                    ssaw = min(1._kind_phys-0.000001, ssa_cld(iCol,iLay,iBand)/tau_cld(iCol,iLay,iBand))
                    za1  = asyw * asyw
                    za2  = ssaw * za1
                    tau_cld(iCol,iLay,iBand) = (1._kind_phys - za2) * tau_cld(iCol,iLay,iBand) 
                    ssa_cld(iCol,iLay,iBand) = (ssaw - za2) / (1._kind_phys - za2)
-                   asy_cld(iCol,iLay,iBand) = (asyw - za2/ssaw)/(1-za2/ssaw)
+                   asy_cld(iCol,iLay,iBand) = asyw/(1+asyw)
                 enddo  ! Loop over SW bands
              endif     ! END sum cloudy properties
              !

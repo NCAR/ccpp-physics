@@ -120,11 +120,11 @@ contains
     ! #######################################################################################
     top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levs))
     if (top_at_1) then 
-       iSFC = Model%levs
+       iSFC = Model%levs+1
        iTOA = 1
     else
        iSFC = 1
-       iTOA = Model%levs
+       iTOA = Model%levs+1
     endif
 
     ! #######################################################################################

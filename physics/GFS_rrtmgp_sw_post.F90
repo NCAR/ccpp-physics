@@ -149,51 +149,51 @@ contains
     ! Initialize outputs
     hswc(:,:) = 0.
     topflx_sw = topfsw_type ( 0., 0., 0. )
-    sfcflx_sw = sfcfsw_type ( 0., 0., 0., 0. )
+   ! sfcflx_sw = sfcfsw_type ( 0., 0., 0., 0. )
     if (l_clrskysw_hr) then
        hsw0(:,:) = 0.
     endif
     if (l_fluxessw2D) then
        flxprf_sw = profsw_type ( 0., 0., 0., 0. )
     endif
-    if (l_sfcfluxessw1D) then
-       scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
-    endif
+    !if (l_sfcfluxessw1D) then
+    !   scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
+    !endif
 
     if (Model%lsswr .and. nDay .gt. 0) then
        ! Clear-sky heating-rate (optional)
        if (l_clrskysw_HR) then
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
-               fluxswUP_clrsky,                &
-               fluxswDOWN_clrsky,                &
+               fluxswUP_clrsky(idxday,:),                &
+               fluxswDOWN_clrsky(idxday,:),                &
                p_lev(idxday,1:Model%levs+1),     &
                thetaTendClrSky))
           hsw0(idxday,:)=thetaTendClrSky
        endif
        ! All-sky heating-rate (mandatory)
        call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(    &
-            fluxswUP_allsky,                   &
-            fluxswDOWN_allsky,                   &
+            fluxswUP_allsky(idxday,:),                   &
+            fluxswDOWN_allsky(idxday,:),                   &
             p_lev(idxday,1:Model%levs+1),        &
             thetaTendAllSky))
        hswc(idxday,:) = thetaTendAllSky
        
        ! Copy fluxes from RRTGMP types into model radiation types.
        ! Mandatory outputs
-       topflx_sw%upfxc = fluxswUP_allsky(:,iTOA)
-       topflx_sw%upfx0 = fluxswUP_clrsky(:,iTOA)
-       topflx_sw%dnfxc = fluxswDOWN_allsky(:,iTOA)
-       sfcflx_sw%upfxc = fluxswUP_allsky(:,iSFC)
-       sfcflx_sw%upfx0 = fluxswUP_clrsky(:,iSFC)
-       sfcflx_sw%dnfxc = fluxswDOWN_allsky(:,iSFC)
-       sfcflx_sw%dnfx0 = fluxswDOWN_clrsky(:,iSFC)
+       topflx_sw(idxday)%upfxc = fluxswUP_allsky(idxday,iTOA)
+       topflx_sw(idxday)%upfx0 = fluxswUP_clrsky(idxday,iTOA)
+       topflx_sw(idxday)%dnfxc = fluxswDOWN_allsky(idxday,iTOA)
+       sfcflx_sw(idxday)%upfxc = fluxswUP_allsky(idxday,iSFC)
+       sfcflx_sw(idxday)%upfx0 = fluxswUP_clrsky(idxday,iSFC)
+       sfcflx_sw(idxday)%dnfxc = fluxswDOWN_allsky(idxday,iSFC)
+       sfcflx_sw(idxday)%dnfx0 = fluxswDOWN_clrsky(idxday,iSFC)
 
        ! Optional output
        if(l_fluxessw2D) then
-          flxprf_sw%upfxc = fluxswUP_allsky
-          flxprf_sw%dnfxc = fluxswDOWN_allsky
-          flxprf_sw%upfx0 = fluxswUP_clrsky
-          flxprf_sw%dnfx0 = fluxswDOWN_clrsky
+          flxprf_sw(idxday,:)%upfxc = fluxswUP_allsky(idxday,:)
+          flxprf_sw(idxday,:)%dnfxc = fluxswDOWN_allsky(idxday,:)
+          flxprf_sw(idxday,:)%upfx0 = fluxswUP_clrsky(idxday,:)
+          flxprf_sw(idxday,:)%dnfx0 = fluxswDOWN_clrsky(idxday,:)
        endif
     endif
 

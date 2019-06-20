@@ -120,12 +120,12 @@ contains
          flux_allsky, & ! All-sky flux                      (W/m2)
          flux_clrsky    ! Clear-sky flux                    (W/m2)
     real(kind_phys), dimension(nday,Model%levs+1),target :: &
-         fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky
+         fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
     real(kind_phys), dimension(nday,Model%levs+1,sw_gas_props%get_nband()),target :: &
          fluxSWBB_up_allsky, fluxSWBB_dn_allsky
     real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false., top_at_1
-    integer :: iGas
+    integer :: iGas,iSFC,iTOA
     type(ty_optical_props_2str)  :: &
          optical_props_cloud_daylit,  & ! RRTMGP DDT: longwave cloud radiative properties 
          optical_props_clrsky_daylit, & ! RRTMGP DDT: longwave clear-sky radiative properties 
@@ -141,6 +141,13 @@ contains
 
     ! Vertical ordering?
     top_at_1 = (Statein%prsi(1,1) .lt.  Statein%prsi(1, Model%levs))
+    if (top_at_1) then 
+       iSFC = Model%levs+1
+       iTOA = 1
+    else
+       iSFC = 1
+       iTOA = Model%levs+1
+    endif
 
     ! Are any optional outputs requested? Need to know now to compute correct fluxes.
     l_ClrSky_HR        = present(hsw0)
@@ -180,10 +187,11 @@ contains
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
-       flux_allsky%flux_up => fluxSW_up_allsky
-       flux_allsky%flux_dn => fluxSW_dn_allsky
-       flux_clrsky%flux_up => fluxSW_up_clrsky
-       flux_clrsky%flux_dn => fluxSW_dn_clrsky
+       flux_allsky%flux_up     => fluxSW_up_allsky
+       flux_allsky%flux_dn     => fluxSW_dn_allsky
+       flux_allsky%flux_dn_dir => fluxSW_dn_dir_allsky
+       flux_clrsky%flux_up     => fluxSW_up_clrsky
+       flux_clrsky%flux_dn     => fluxSW_dn_clrsky
        ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
        if (l_AllSky_HR_byband) then
           flux_allsky%bnd_flux_up => fluxSWBB_up_allsky
@@ -220,7 +228,7 @@ contains
        ! Store fluxes
        fluxUP_allsky(idxday,:)   = flux_allsky%flux_up
        fluxDOWN_allsky(idxday,:) = flux_allsky%flux_dn
-
+       scmpsw(idxday)%nirbm      = flux_allsky%flux_dn_dir(:,iSFC)
     endif
   end subroutine rrtmgp_sw_rte_run
   
