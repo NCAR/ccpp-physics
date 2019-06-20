@@ -1,9 +1,6 @@
 !> \file GFS_stochastics.f90
 !! This file contains code previously in GFS_stochastics_driver.
 
-!>\defgroup gfs_stoch GFS Stochastics Main Module
-!! This module
-!! @ {
     module GFS_stochastics
 
       contains
@@ -14,6 +11,10 @@
       subroutine GFS_stochastics_finalize()
       end subroutine GFS_stochastics_finalize
 
+
+!>\defgroup gfs_stoch GFS Stochastics Physics Module
+!! This module
+!> @{
 !> \section arg_table_GFS_stochastics_run Argument Table
 !! | local_name     | standard_name                                                             | long_name                                                    | units   | rank | type      |    kind   | intent | optional |
 !! |----------------|---------------------------------------------------------------------------|--------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
@@ -57,16 +58,14 @@
 !! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                     | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                        | flag    |    0 | integer   |           | out    | F        |
 !!
-!-------------------------------------------------------------------------
-! GFS stochastic_driver
-!-------------------------------------------------------------------------
-!    routine called prior to radiation and physics steps to handle:
-!      1) sets up various time/date variables
-!      2) sets up various triggers
-!      3) defines random seed indices for radiation (in a reproducible way)
-!      5) interpolates coefficients for prognostic ozone calculation
-!      6) performs surface data cycling via the GFS gcycle routine
-!-------------------------------------------------------------------------
+!>\section gfs_stochy_general GFS_stochastics_run General Algorithm
+!! This is the GFS stochastic physics driver.
+!! Routines are called prior to radiation and physics steps to handle:
+!! -# sets up various time/date variables
+!! -# sets up various triggers
+!! -# defines random seed indices for radiation (in a reproducible way)
+!! -# interpolates coefficients for prognostic ozone calculation
+!! -# performs surface data cycling via the GFS gcycle routine
       subroutine GFS_stochastics_run (im, km, do_sppt, use_zmtnblck, do_shum, do_skeb,   &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
                                       sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
@@ -87,6 +86,7 @@
          logical,                               intent(in)    :: use_zmtnblck
          logical,                               intent(in)    :: do_shum
          logical,                               intent(in)    :: do_skeb
+         !logical,                               intent(in)    :: isppt_deep
          real(kind_phys), dimension(1:im),      intent(in)    :: zmtnblck
          ! sppt_wts only allocated if do_sppt == .true.
          real(kind_phys), dimension(:,:),       intent(inout) :: sppt_wts
@@ -125,6 +125,11 @@
          ! drain_cpl, dsnow_cpl only allocated if do_sppt == .true.
          real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
+         ! tconvtend ... vconvtend only allocated if isppt_deep == .true.
+         !real(kind_phys), dimension(:,:),       intent(in)    :: tconvtend
+         !real(kind_phys), dimension(:,:),       intent(in)    :: qconvtend
+         !real(kind_phys), dimension(:,:),       intent(in)    :: uconvtend
+         !real(kind_phys), dimension(:,:),       intent(in)    :: vconvtend
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
 
@@ -161,10 +166,21 @@
                endif
                sppt_wts_inv(i,km-k+1)=sppt_wts(i,k)
 
+               !if(isppt_deep)then
+
+                ! upert = (gu0(i,k) - ugrs(i,k) - uconvtend(i,k)) + uconvtend(i,k) * sppt_wts(i,k)
+                ! vpert = (gv0(i,k) - vgrs(i,k) - vconvtend(i,k)) + vconvtend(i,k) * sppt_wts(i,k)
+                ! tpert = (gt0(i,k) - tgrs(i,k) - dtdtr(i,k) - tconvtend(i,k)) + tconvtend(i,k) * sppt_wts(i,k)
+                ! qpert = (gq0(i,k) - qgrs(i,k) - qconvtend(i,k)) + qconvtend(i,k) * sppt_wts(i,k)
+
+               !else
+
                upert = (gu0(i,k) - ugrs(i,k))   * sppt_wts(i,k)
                vpert = (gv0(i,k) - vgrs(i,k))   * sppt_wts(i,k)
                tpert = (gt0(i,k) - tgrs(i,k) - dtdtr(i,k)) * sppt_wts(i,k)
                qpert = (gq0(i,k) - qgrs(i,k)) * sppt_wts(i,k)
+
+               !endif
 
                gu0(i,k)  = ugrs(i,k)+upert
                gv0(i,k)  = vgrs(i,k)+vpert
@@ -177,6 +193,22 @@
                endif
              enddo
            enddo
+
+           !if(isppt_deep)then
+           !  tprcp(:) = tprcp(:) + (sppt_wts(:,15) - 1 )*rainc(:)
+           !  totprcp(:)  = totprcp(:)  + (sppt_wts(:,15) - 1 )*rainc(:) 
+           !  cnvprcp(:)  = cnvprcp(:)  + (sppt_wts(:,15) - 1 )*rainc(:)
+           !!  ! bucket precipitation adjustment due to sppt
+           !  totprcpb(:) = totprcpb(:)  + (sppt_wts(:,15) - 1 )*rainc(:)
+           !  cnvprcpb(:) = cnvprcpb(:)  + (sppt_wts(:,15) - 1 )*rainc(:)
+
+           !  if (cplflx) then !Need to make proper adjustments for deep convection only perturbations
+           !    rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
+           !    snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
+           !  endif
+
+           !else
+
            ! instantaneous precip rate going into land model at the next time step
            tprcp(:) = sppt_wts(:,15)*tprcp(:)
            totprcp(:) = totprcp(:) + (sppt_wts(:,15) - 1 )*rain(:)
@@ -190,7 +222,9 @@
                rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
                snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
             endif
-         
+
+           !endif
+
          endif
 
          if (do_shum) then
@@ -212,4 +246,4 @@
       end subroutine GFS_stochastics_run
 
     end module GFS_stochastics
-!! @}
+!> @}

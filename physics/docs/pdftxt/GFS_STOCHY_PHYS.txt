@@ -1,0 +1,86 @@
+/**
+\page STOCHY_PHYS GFS Stochastic Physics
+\section des_stochy Description
+Quantification of forecast uncertainties became established in operational numerical weather prediction (NWP) in the 1990s
+using ensemble forecasting techniques (Lewis(2005) \cite Lewis_2005). Building an ensemble forecast system requires the 
+specification of the sources of uncertainties. It seems conventionally to distinguish between uncertainties in the initial 
+conditions (i.e. initial uncertainties) and uncertainties in the forecast model (i.e. model uncertainties). An ensemble 
+that represents only initial uncertainties consistent with the true distribution of initial condition errors is known to be 
+underdispersive and therefore will lack reliability (Wilks (2005) \cite Wilks_2005). This motivates the development of methodologies
+to represent model uncertainties.
+
+Traditionally, physical parameterization schemes were assumed to be deterministic, producing representations of small-scale
+processes unique to the resolved-scale atmospheric state. This assumption becomes increasingly problematic as computational
+advances permit more accurate simulations at finer resolutions where small-scale processes exhibit more stochastic qualities.
+Small-scale convective fluctuations often interact strongly with the nonlinear flow dynamics, with substantial repercussions
+for large-scale model evolution. Producing accurate and reliable probabilistic predictions therefore depends critically on
+representations of parameterization uncertainties.
+
+In the 2015 GFS implementation, new stochastic physics schemes were employed to represent model error to replace
+the artificial additive inflation. The upgraded stochastic physics suite has three components, including:
+- Stochastically Perturbed Physics Tendencies (\b SPPT; Buizza et al. 1999 \cite buizza_et_al_1999 ; Palmer (1997)
+\cite palmer_1997 ; Palmer (2001) \cite Palmer_2001)
+- Stochastically Perturbed Boundary Layer Specific Humidity (\b SHUM; Tompkins and Berner (2008) \cite tompkins_and_berner_2008)
+- Stochastic Kinetic Energy Backscatter (\b SKEB; Berner et al. 2009 \cite berner_et_al_2009; Shutts (2005) \cite Shutts_2005)
+
+These schemes have already been implemented in the hybrid-EnKF data assimilation system of GFS, making them readily available for 
+use in the GEFS. GFS generates radom patterns in spectral space, and transforms patterns to a Gaussian grid. In FV3GFS 2019 
+implementation, FV3GFS will still uses spectral patterns in spectral space, transporms them to a Gaussian grid, then interpolates
+to model's cubed-sphere grid.  
+
+SPPT makes the assumption that the dominant error of the parameterized physics tendency is proportional to the net 
+physics tendency (Buizza et al.(1999) \cite buizza_et_al_1999). SPPT generates perturbed parameterization tendencies \f$P\f$ 
+stochastically by multiplying the net physics tendency \f$P_D\f$ provided by the physics package with a 2D random field \f$r\f$:
+\f[
+P=(1+\mu r)P_{D}
+\f]
+Here, \f$P\f$ denotes the vector of perturbed tendencies of temperature, specific humidity and wind components in a model column.
+The factor \f$\mu\f$ is an optional tapering function that depends on the model level only and has values in the range [0,1].
+In FV3GFS, SPPT perturbs the combined tendencies of wind, temperature, and water vapor produced by the CCPP-Physics parameterizations (excluding
+clear-air radiation). The implementaion use a first-order auto-regrassive  (AR(1)) random pattern generator (see get_stochy_pattern_mod)
+to produce spatially and temporally correlated perturbations with three different horizontal length/time scales 500 km/0.25 days, 
+1000 km/3 days and 2000 km/30 days, and standard deviations of 0.8, 0.4 and 0.2 respectively. Zhu et al.(2018) \cite Zhu_2018 
+show an example of a realization of the three components. The above nine numbers are meant to span the uncertainty at mesoscale, 
+synoptic scale and planetary space and time scales with pattern 1 (500 km decorrelation scale) being the starting point and most 
+important component for the medium-range ensemble prediction system. The patterns are uniform in the vertical, except they are
+reduced in magnitude near the surface and tapered to zero near and above the tropopause. The latter is done to avoid large amplitude
+perturbations of the radiative tendencies in the stratosphere, which are presumed to be more accurate, and the former to avoid
+numerical instabilities in the boundary layer.
+
+SHUM introduces stochastic perturbation to represent model uncertainty of humidity. It perturbs the near-surface humidity state
+to present subgrid distribution and variability through convection. SHUM uses the same random pattern generator as SPPT, but only
+a single spatial-temporal scale is used. The perturbation is maximized in the lowest model level and decreased exponentially with
+height.
+
+SKEB is used to represent uncertainty in representing the upscale impacts from subgrid-scale processes. This is done via a stream
+function forcing based on the dissipation rate. The 2015 GFS implementation of SKEB only considers \b numerical \b dissipation (diffusion) 
+based on the vorticity gradient, and smoothed in spectral space. FV3 core calculates \b Kinetic \b Energy loss at each time step
+in terms of a heat source that is added to the temperature equation. This loss smoothed in grid-point space for SKEB.
+
+\n For the vertical correlation of random patterns, GFS produces a unique random pattern at every model level, then smoothed in the 
+vertical using 40 passes of a 1-2-1 filter. Update to FV3GFS is to use the evolution of the random patterns over time to create
+vertical correlation. The pattern are saved on an independent vertical coordinate and interpolated to model levels. This allows for 
+a seperation of vertical and temporal correlation but only needing to carry one random pattern.
+
+\image html GFS_stochy_spread.png "Figure 3 of Zhu et al.(2018): Global meridional cross section showing the impact of stochastic perturnations for 144-hr forecasts from the average of six spring initializations (left) and six fall initializations (right). Paneled are zonal wind spread (m/s) from no stochastic perturbations (noSP;top), and the difference of Stochastic Total Tendency Perturbation (STTP;upper middle),stochastic kinetic energy backscatter (SKEB;middle),stochastically perturbed parameterization tendencies (SPPT; lower middle), and stochastic perturbed humidity (SHUM;bottom) from noSP.GEFS=Global Ensemble Forecast System." width=10cm
+
+Figure 3 of Zhu et al.(2018) \cite Zhu_2018 shows the impact of the individual stochastic schemes in the current operational GFS  
+on ensemble spread at 144 hr (average of six spring cases and six fall cases) when compared to ensemble spread without introducing 
+stochastic perturbations. The stochastic system used in the control (previously operational GEFS),STTP,produces additional spread 
+in the extratropics but has little impact in the tropics. Of the components in the stochastic physics suite, SKEB produces additional
+spread in similar areas as STTP
+(though slightly muted). The other two components,SPPT and SHUM, both increase spread in the tropics where the control system is 
+deficient. SPPT also has an impact in the spring/summer hemisphere. In combination, these stochastic schemes generally improve forecast
+uncertainty, particularly in the tropics, which may lead to improvements in tropical forecast skill.
+
+In 2019 FV3GFS implementation, only the SHUM and SPPT are included as stochastic physics in the EnKF. The SKEB was not available to 
+be used at the time the code was frozen, and the amplitude parameters for SHUM and SPPT were modified to compensate.  
+
+\section intra_stochy Intraphysics Communication
+\ref arg_table_GFS_stochastics_run
+
+\section gen_stochy  General Algorithm
+\ref gfs_stochy_general
+
+
+*/

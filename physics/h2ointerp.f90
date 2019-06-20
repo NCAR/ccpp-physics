@@ -1,3 +1,10 @@
+!>\file h2ointerp.f90
+!! This file contains subroutines of reading and interpolating h2o
+!! coefficients.
+
+!>\ingroup mod_GFS_phys_time_vary
+!> This module contains subroutines of reading and interpolating
+!! h2o coefficients.
 module h2ointerp
 
    implicit none

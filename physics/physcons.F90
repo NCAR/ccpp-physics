@@ -1,4 +1,4 @@
-!> \file physcons.f90
+!> \file physcons.F90
 !! This file contains module physcons
 
 !  ==========================================================  !!!!!
@@ -28,7 +28,6 @@
 !!!!!  ==========================================================  !!!!!
 
 !> \defgroup physcons GFS Physics Constants Module
-!! @{
 !> This module contains some of the most frequently used math and physics
 !! constants for GCM models.
 
@@ -112,7 +111,8 @@
   real(kind=kind_phys),parameter:: con_amo2   =31.9999                   !< molecular wght of o2 (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_amch4  =16.043                    !< molecular wght of ch4 (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_amn2o  =44.013                    !< molecular wght of n2o (\f$g/mol\f$)
-  real(kind=kind_phys), parameter:: con_thgni  =-38.15                   !< temperature the H.G.Nuc. ice starts
+  real(kind=kind_phys),parameter:: con_thgni  =-38.15                    !< temperature the H.G.Nuc. ice starts
+  real(kind=kind_phys),parameter:: cimin      =0.15                      !< minimum ice concentration
 
 !> \name Miscellaneous physics related constants (For WSM6; Moorthi - Jul 2014)
 ! integer, parameter :: max_lon=16000, max_lat=8000, min_lon=192, min_lat=94
@@ -133,4 +133,3 @@
 !........................................!
       end module physcons                !
 !========================================!
-!! @}

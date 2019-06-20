@@ -18,7 +18,6 @@
  prognostically produced, enabling this scheme to predict precipitation type.
 
  \image  html  GFS_zhaocarr_schematic.png "Figure 1: Schematic illustration of the precipitation scheme" width=10cm
- \image  latex  GFS_zhaocarr_schematic.eps "Schematic illustration of the precipitation scheme" width=10cm
 
  The parameterization of precipitation is required in order to remove
  water from the atmosphere and transport it to the ground.
@@ -30,11 +29,10 @@
  + Melting of snow to form rain below the freezing level (\f$P_{sm1}\f$, \f$P_{sm2}\f$)
  + Evaporation of precipitation (\f$E_{rr}\f$, \f$E_{rs}\f$)
 \image html precpd-micop.png "Figure 2: Microphysical processes simulated in the precipitation scheme " width=10cm
-\image latex precpd-micop.eps "Microphysical processes simulated in the precipitation scheme " width=10cm
  Some processes, such as the freezing of raindrops and the interaction between rain drops and cloud ice, have been ignored
  since the upward motion on the synoptic scale is too weak to advect the raindrops upward. Additionally, precipitation is
  diagnostically calculated directly from the cloud mixing ratio.
-\section intro_zhao Intraphysics Communication
+\section intra_zhao Intraphysics Communication
  + For grid-scale condensation and evaporation of cloud process (\ref arg_table_zhaocarr_gscond_run)
  + For precipitation (snow or rain) production (\ref arg_table_zhaocarr_precpd_run)
 \section Gen_zhao  General Algorithm

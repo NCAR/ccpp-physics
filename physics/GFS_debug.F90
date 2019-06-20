@@ -134,11 +134,17 @@
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Sfcprop
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slmsk'    , Sfcprop%slmsk)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakemsk'  , Sfcprop%lakemsk)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%oceanfrac', Sfcprop%oceanfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%landfrac' , Sfcprop%landfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakefrac' , Sfcprop%lakefrac)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfc'     , Sfcprop%tsfc)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfco'    , Sfcprop%tsfco)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfcl'    , Sfcprop%tsfcl)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tisfc'    , Sfcprop%tisfc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%snowd'    , Sfcprop%snowd)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%zorl'     , Sfcprop%zorl)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorlo'    , Sfcprop%zorlo)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorll'    , Sfcprop%zorll)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%fice'     , Sfcprop%fice)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprim'    , Sfcprop%hprim)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprime'   , Sfcprop%hprime)
@@ -196,16 +202,18 @@
                      end if
                      ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%sh2o',        Sfcprop%sh2o)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%smois',       Sfcprop%smois)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tslb',        Sfcprop%tslb)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%zs',          Sfcprop%zs)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%clw_surf',    Sfcprop%clw_surf)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%qwv_surf',    Sfcprop%qwv_surf)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%cndm_surf',   Sfcprop%cndm_surf)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%flag_frsoil', Sfcprop%flag_frsoil)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%rhofr',       Sfcprop%rhofr)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tsnow',       Sfcprop%tsnow)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%sh2o',         Sfcprop%sh2o)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%smois',        Sfcprop%smois)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tslb',         Sfcprop%tslb)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%zs',           Sfcprop%zs)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%clw_surf',     Sfcprop%clw_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%qwv_surf',     Sfcprop%qwv_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%cndm_surf',    Sfcprop%cndm_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%flag_frsoil',  Sfcprop%flag_frsoil)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%rhofr',        Sfcprop%rhofr)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tsnow',        Sfcprop%tsnow)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%snowfallac  ', Sfcprop%snowfallac)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%acsnow      ', Sfcprop%acsnow)
                      end if
                      ! Radtend
                      call print_var(mpirank,omprank, blkno, 'Radtend%sfcfsw%upfxc', Radtend%sfcfsw(:)%upfxc)
@@ -317,11 +325,6 @@
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomzr      ',    Diag%tdomzr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomip      ',    Diag%tdomip)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdoms       ',    Diag%tdoms)
-                     ! CCPP/RUC only
-                     if (Model%lsm == Model%lsm_ruc) then
-                       call print_var(mpirank,omprank, blkno, 'Diag%snowfallac  ',    Diag%snowfallac)
-                       call print_var(mpirank,omprank, blkno, 'Diag%acsnow      ',    Diag%acsnow)
-                     endif
                      call print_var(mpirank,omprank, blkno, 'Diag%skebu_wts   ',    Diag%skebu_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%skebv_wts   ',    Diag%skebv_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%sppt_wts    ',    Diag%sppt_wts)

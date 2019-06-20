@@ -1,10 +1,10 @@
-module mp_thompson_hrrr_post
+module mp_thompson_post
 
    use machine, only : kind_phys
 
    implicit none
 
-   public :: mp_thompson_hrrr_post_init, mp_thompson_hrrr_post_run, mp_thompson_hrrr_post_finalize
+   public :: mp_thompson_post_init, mp_thompson_post_run, mp_thompson_post_finalize
 
    private
 
@@ -17,7 +17,7 @@ module mp_thompson_hrrr_post
 contains
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_post_init Argument Table
+!! \section arg_table_mp_thompson_post_init Argument Table
 !! | local_name      | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
@@ -27,7 +27,7 @@ contains
 !! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-   subroutine mp_thompson_hrrr_post_init(ncol, area, ttendlim, errmsg, errflg)
+   subroutine mp_thompson_post_init(ncol, area, ttendlim, errmsg, errflg)
 
       implicit none
 
@@ -87,10 +87,10 @@ contains
 
       is_initialized = .true.
 
-   end subroutine mp_thompson_hrrr_post_init
+   end subroutine mp_thompson_post_init
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_post_run Argument Table
+!! \section arg_table_mp_thompson_post_run Argument Table
 !! | local_name      | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | ncol            | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
@@ -106,7 +106,7 @@ contains
 !! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-   subroutine mp_thompson_hrrr_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, &
+   subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, &
                                         mpicomm, mpirank, mpiroot, errmsg, errflg)
 
       implicit none
@@ -137,7 +137,7 @@ contains
 
       ! Check initialization state
       if (.not.is_initialized) then
-         write(errmsg, fmt='((a))') 'mp_thompson_hrrr_post_run called before mp_thompson_hrrr_post_init'
+         write(errmsg, fmt='((a))') 'mp_thompson_post_run called before mp_thompson_post_init'
          errflg = 1
          return
       end if
@@ -155,7 +155,7 @@ contains
 
             if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
 #ifdef DEBUG
-              write(0,*) "mp_thompson_hrrr_post_run mp_tend limiter: i, k, t_old, t_new, t_lim:", &
+              write(0,*) "mp_thompson_post_run mp_tend limiter: i, k, t_old, t_new, t_lim:", &
                          & i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
 #endif
               events = events + 1
@@ -165,27 +165,31 @@ contains
       end do
 
       if (events > 0) then
-        write(0,'(a,i0,a,i0,a)') "mp_thompson_hrrr_post_run: mp_tend_lim applied ", events, "/", nlev*ncol, " times"
+        write(0,'(a,i0,a,i0,a)') "mp_thompson_post_run: mp_tend_lim applied ", events, "/", nlev*ncol, " times"
       end if
 
-   end subroutine mp_thompson_hrrr_post_run
+   end subroutine mp_thompson_post_run
 
 #if 0
-!! \section arg_table_mp_thompson_hrrr_post_finalize Argument Table
+!! \section arg_table_mp_thompson_post_finalize Argument Table
 !! | local_name      | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
 !! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | errmsg          | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-   subroutine mp_thompson_hrrr_post_finalize(errmsg, errflg)
+   subroutine mp_thompson_post_finalize(errmsg, errflg)
 
       implicit none
 
       ! CCPP error handling
       character(len=*),          intent(  out) :: errmsg
       integer,                   intent(  out) :: errflg
-
+      
+      ! initialize ccpp error handling variables
+      errmsg = ''
+      errflg = 0
+      
       ! Check initialization state
       if (.not. is_initialized) return
 
@@ -193,6 +197,6 @@ contains
 
       is_initialized = .false.
 
-   end subroutine mp_thompson_hrrr_post_finalize
+   end subroutine mp_thompson_post_finalize
 
-end module mp_thompson_hrrr_post
+end module mp_thompson_post

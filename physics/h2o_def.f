@@ -1,3 +1,8 @@
+!>\file h2o_def.f 
+!! This file contains array definition in H2O scheme.
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This module defines arrays in H2O scheme.
       module h2o_def
       use machine , only : kind_phys
       implicit none

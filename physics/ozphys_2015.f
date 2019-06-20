@@ -21,9 +21,7 @@
 
 
 !>\defgroup GFS_ozphys_2015 GFS ozphys_2015 Main
-!! @{
-!! \brief The operational GFS currently parameterizes ozone production
-!and
+!! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
@@ -54,18 +52,18 @@
 !! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
 !!
 !> \section genal_ozphys_2015 GFS ozphys_2015_run General Algorithm
-!! @{
+!> @{
+!> -  This code assumes that both prsl and po3 are from bottom to top
+!!     as are all other variables.
+!> -  This code is specifically for NRL parameterization and
+!!     climatological T and O3 are in location 5 and 6 of prdout array
+!!\author June 2015 - Shrinivas Moorthi
       subroutine ozphys_2015_run (                                      &
      &                        ix, im, levs, ko3, dt, oz, tin, po3,      &
      &                        prsl, prdout, pl_coeff, delp, ldiag3d,    &
      &                        ozp1,ozp2,ozp3,ozp4,con_g,                &
      &                        me, errmsg, errflg)
 !
-!     this code assumes that both prsl and po3 are from bottom to top
-!     as are all other variables
-!     This code is specifically for NRL parameterization and
-!     climatological T and O3 are in location 5 and 6 of prdout array
-! June 2015 - Shrinivas Moorthi
 !
       use machine , only : kind_phys
       implicit none
@@ -77,8 +75,9 @@
      &                                    prsl(ix,levs), tin(ix,levs),  &
      &                                    delp(ix,levs),                &
      &                                    prdout(ix,ko3,pl_coeff), dt
-      real(kind=kind_phys), intent(inout) :: ozp1(ix,levs),             &
-     &                  ozp2(ix,levs), ozp3(ix,levs),ozp4(ix,levs)
+      ! These arrays may not be allocated and need assumed array sizes
+      real(kind=kind_phys), intent(inout) ::                            &
+     &                  ozp1(:,:), ozp2(:,:), ozp3(:,:),ozp4(:,:)
       real(kind=kind_phys), intent(inout) :: oz(ix,levs)
 
 
@@ -169,22 +168,21 @@
 !ccpp            ozo(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
           oz(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
         enddo
-        if (ldiag3d) then     !     ozone change diagnostics
-          do i=1,im
-            ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
-!ccpp            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
-            ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-            ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
-            ozp4(i,l) = ozp4(i,l) + prod(i,4)
-     &                              * (colo3(i,l)-coloz(i,l))*dt
-          enddo
-        endif
+!        if (ldiag3d) then     !     ozone change diagnostics
+!          do i=1,im
+!            ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
+!!ccpp            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
+!            ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
+!            ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
+!            ozp4(i,l) = ozp4(i,l) + prod(i,4)
+!     &                              * (colo3(i,l)-coloz(i,l))*dt
+!          enddo
+!        endif
       enddo                                ! vertical loop
 !
       return
       end subroutine ozphys_2015_run
 
-!! @}
-!! @}
+!> @}
 
       end module ozphys_2015

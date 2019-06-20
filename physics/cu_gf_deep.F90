@@ -1,3 +1,8 @@
+!>\file cu_gf_deep.F90 
+!! This file is the Grell-Freitas deep convection scheme.
+
+!>\defgroup cu_gf_deep_group GSD Grell-Freitas Deep Convection Main
+!>\ingroup cu_gf_group
 module cu_gf_deep
      use machine , only : kind_phys
      real(kind=kind_phys), parameter::g=9.81
@@ -5,37 +10,35 @@ module cu_gf_deep
      real(kind=kind_phys), parameter:: xlv=2.5e6
      real(kind=kind_phys), parameter::r_v=461.
      real(kind=kind_phys), parameter :: tcrit=258.
-! tuning constant for cloudwater/ice detrainment
+!> tuning constant for cloudwater/ice detrainment
      real(kind=kind_phys), parameter:: c1= 0.003 !.002 ! .0005
-! parameter to turn on or off evaporation of rainwater as done in sas
+!> parameter to turn on or off evaporation of rainwater as done in sas
      integer, parameter :: irainevap=0
-! max allowed fractional coverage (frh_thresh)
+!> max allowed fractional coverage (frh_thresh)
      real(kind=kind_phys), parameter::frh_thresh = .9
-! rh threshold. if fractional coverage ~ frh_thres, do not use cupa any further
+!> rh threshold. if fractional coverage ~ frh_thres, do not use cupa any further
      real(kind=kind_phys), parameter::rh_thresh = .97
-! tuning constant for j. brown closure (ichoice = 4,5,6)
+!> tuning constant for j. brown closure (ichoice = 4,5,6)
      real(kind=kind_phys), parameter::betajb=1.2
-! tuning for shallow and mid convection. ec uses 1.5
+!> tuning for shallow and mid convection. ec uses 1.5
      integer, parameter:: use_excess=0
      real(kind=kind_phys), parameter :: fluxtune=1.5
-! flag to turn off or modify mom transport by downdrafts
-    !real(kind=kind_phys), parameter :: pgcd = 1.
+!> flag to turn off or modify mom transport by downdrafts
      real(kind=kind_phys), parameter :: pgcd = 0.1
 !
-! aerosol awareness, do not user yet!
-!
+!> aerosol awareness, do not user yet!
      integer, parameter :: autoconv=1
      integer, parameter :: aeroevap=1
      real(kind=kind_phys), parameter :: ccnclean=250.
-! still 16 ensembles for clousres
+!> still 16 ensembles for clousres
      integer, parameter:: maxens3=16
 
 !---meltglac-------------------------------------------------
- logical, parameter :: melt_glac      = .true.  !- turn on/off ice phase/melting
+ logical, parameter :: melt_glac      = .true.  !<- turn on/off ice phase/melting
  real(kind=kind_phys), parameter ::  &
-  t_0     = 273.16,  & ! k
-  t_ice   = 250.16,  & ! k
-  xlf     = 0.333e6    ! latent heat of freezing (j k-1 kg-1)
+  t_0     = 273.16,  & !< k
+  t_ice   = 250.16,  & !< k
+  xlf     = 0.333e6    !< latent heat of freezing (j k-1 kg-1)
 !---meltglac-------------------------------------------------
 !-----srf-08aug2017-----begin
  real(kind=kind_phys), parameter ::    qrc_crit= 2.e-4
@@ -43,75 +46,73 @@ module cu_gf_deep
 
 contains
 
+!>\ingroup cu_gf_deep_group
+!> \section general_gf_deep GF Deep Convection General Algorithm
+!> @{
    subroutine cu_gf_deep_run(        &          
                itf,ktf,its,ite, kts,kte  &
-
-              ,dicycle       &  ! diurnal cycle flag
-              ,ichoice       &  ! choice of closure, use "0" for ensemble average
-              ,ipr           &  ! this flag can be used for debugging prints
-              ,ccn           &  ! not well tested yet
-              ,dtime         &
-              ,imid          &  ! flag to turn on mid level convection
-
-              ,kpbl          &  ! level of boundary layer height
-              ,dhdt          &  ! boundary layer forcing (one closure for shallow)
-              ,xland         &  ! land mask
-
-              ,zo            &  ! heights above surface
-              ,forcing       &  ! only diagnostic
-              ,t             &  ! t before forcing
-              ,q             &  ! q before forcing
-              ,z1            &  ! terrain
-              ,tn            &  ! t including forcing
-              ,qo            &  ! q including forcing
-              ,po            &  ! pressure (mb)
-              ,psur          &  ! surface pressure (mb)
-              ,us            &  ! u on mass points
-              ,vs            &  ! v on mass points
-              ,rho           &  ! density
-              ,hfx           &  ! w/m2, positive upward
-              ,qfx           &  ! w/m2, positive upward
-              ,dx            &  ! dx is grid point dependent here
-              ,mconv         &  ! integrated vertical advection of moisture
-              ,omeg          &  ! omega (pa/s)
-
-              ,csum          &  ! used to implement memory, set to zero if not avail
-              ,cnvwt         &  ! gfs needs this
-              ,zuo           &  ! nomalized updraft mass flux
-              ,zdo           &  ! nomalized downdraft mass flux
-              ,zdm           &  ! nomalized downdraft mass flux from mid scheme
-              ,edto          &
-              ,edtm          &
-              ,xmb_out       &  !the xmb's may be needed for dicycle
-              ,xmbm_in       &
-              ,xmbs_in       &
-              ,pre           &
-              ,outu          &  ! momentum tendencies at mass points
-              ,outv          &
-              ,outt          &  ! temperature tendencies
-              ,outq          &  ! q tendencies
-              ,outqc         &  ! ql/qice tendencies
-              ,kbcon         &
-              ,ktop          &
-              ,cupclw        &  ! used for direct coupling to radiation, but with tuning factors
-              ,ierr          &  ! ierr flags are error flags, used for debugging
-              ,ierrc         &
-!    the following should be set to zero if not available
-              ,rand_mom      &  ! for stochastics mom, if temporal and spatial patterns exist
-              ,rand_vmas     &  ! for stochastics vertmass, if temporal and spatial patterns exist
-              ,rand_clos     &  ! for stochastics closures, if temporal and spatial patterns exist
-              ,nranflag      &  ! flag to what you want perturbed
-                                ! 1 = momentum transport 
-                                ! 2 = normalized vertical mass flux profile
-                                ! 3 = closures
-                                ! more is possible, talk to developer or
-                                ! implement yourself. pattern is expected to be
-                                ! betwee -1 and +1
+              ,dicycle       &  !< diurnal cycle flag
+              ,ichoice       &  !< choice of closure, use "0" for ensemble average
+              ,ipr           &  !< this flag can be used for debugging prints
+              ,ccn           &  !< not well tested yet
+              ,dtime         &  !<
+              ,imid          &  !< flag to turn on mid level convection
+              ,kpbl          &  !< level of boundary layer height
+              ,dhdt          &  !< boundary layer forcing (one closure for shallow)
+              ,xland         &  !< land mask
+              ,zo            &  !< heights above surface
+              ,forcing       &  !< only diagnostic
+              ,t             &  !< t before forcing
+              ,q             &  !< q before forcing
+              ,z1            &  !< terrain
+              ,tn            &  !< t including forcing
+              ,qo            &  !< q including forcing
+              ,po            &  !< pressure (mb)
+              ,psur          &  !< surface pressure (mb)
+              ,us            &  !< u on mass points
+              ,vs            &  !< v on mass points
+              ,rho           &  !< density
+              ,hfx           &  !< w/m2, positive upward
+              ,qfx           &  !< w/m2, positive upward
+              ,dx            &  !< dx is grid point dependent here
+              ,mconv         &  !< integrated vertical advection of moisture
+              ,omeg          &  !< omega (pa/s)
+              ,csum          &  !< used to implement memory, set to zero if not avail
+              ,cnvwt         &  !< gfs needs this
+              ,zuo           &  !< nomalized updraft mass flux
+              ,zdo           &  !< nomalized downdraft mass flux
+              ,zdm           &  !< nomalized downdraft mass flux from mid scheme
+              ,edto          &  !<
+              ,edtm          &  !<
+              ,xmb_out       &  !< the xmb's may be needed for dicycle
+              ,xmbm_in       &  !<
+              ,xmbs_in       &  !<
+              ,pre           &  !<
+              ,outu          &  !< momentum tendencies at mass points
+              ,outv          &  !<
+              ,outt          &  !< temperature tendencies
+              ,outq          &  !< q tendencies
+              ,outqc         &  !< ql/qice tendencies
+              ,kbcon         &  !<
+              ,ktop          &  !<
+              ,cupclw        &  !< used for direct coupling to radiation, but with tuning factors
+              ,ierr          &  !< ierr flags are error flags, used for debugging
+              ,ierrc         &  !<!    the following should be set to zero if not available
+              ,rand_mom      &  !< for stochastics mom, if temporal and spatial patterns exist
+              ,rand_vmas     &  !< for stochastics vertmass, if temporal and spatial patterns exist
+              ,rand_clos     &  !< for stochastics closures, if temporal and spatial patterns exist
+              ,nranflag      &  !< flag to what you want perturbed
+                                !! 1 = momentum transport 
+                                !! 2 = normalized vertical mass flux profile
+                                !! 3 = closures
+                                !! more is possible, talk to developer or
+                                !! implement yourself. pattern is expected to be
+                                !! betwee -1 and +1
 #if ( wrf_dfi_radar == 1 )
-              ,do_capsuppress,cap_suppress_j    &             
+              ,do_capsuppress,cap_suppress_j    &    !<         
 #endif
-              ,k22                              &
-              ,jmin,tropics)
+              ,k22                              &    !<
+              ,jmin,tropics)                         !<
 
    implicit none
 
@@ -2027,8 +2028,10 @@ contains
 !
 
    end subroutine cu_gf_deep_run
+!> @}
 
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
    subroutine cup_dd_edt(ierr,us,vs,z,ktop,kbcon,edt,p,pwav, &
               pw,ccn,pwev,edtmax,edtmin,edtc,psum2,psumh,    &
               rho,aeroevap,itf,ktf,                          &
@@ -2153,7 +2156,10 @@ contains
 
    end subroutine cup_dd_edt
 
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!!\param ierrc
+!!\param zd
    subroutine cup_dd_moisture(ierrc,zd,hcd,hes_cup,qcd,qes_cup,  &
               pwd,q_cup,z_cup,dd_massentr,dd_massdetr,jmin,ierr, &
               gamma_cup,pwev,bu,qrcd,                            &
@@ -2299,6 +2305,9 @@ contains
 
    end subroutine cup_dd_moisture
 
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!!\param
    subroutine cup_env(z,qes,he,hes,t,q,p,z1,                &
               psur,ierr,tcrit,itest,                        &
               itf,ktf,                                      &
@@ -2429,7 +2438,9 @@ contains
 
    end subroutine cup_env
 
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine cup_env_clev(t,qes,q,he,hes,z,p,qes_cup,q_cup,        &
               he_cup,hes_cup,z_cup,p_cup,gamma_cup,t_cup,psur,      &
               ierr,z1,                                              &
@@ -2531,6 +2542,9 @@ contains
 
    end subroutine cup_env_clev
 
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine cup_forcing_ens_3d(closure_n,xland,aa0,aa1,xaa0,mbdt,dtime,ierr,ierr2,ierr3,&
               xf_ens,axx,forcing,maxens3,mconv,rand_clos,             &
               p_cup,ktop,omeg,zd,zdm,k22,zu,pr_ens,edt,edtm,kbcon,    &
@@ -2912,6 +2926,9 @@ endif
 
    end subroutine cup_forcing_ens_3d
 
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine cup_kbcon(ierrc,cap_inc,iloop_in,k22,kbcon,he_cup,hes_cup, &
               hkb,ierr,kbmax,p_cup,cap_max,                              &
               ztexec,zqexec,                                             &
@@ -3050,7 +3067,9 @@ endif
 
    end subroutine cup_kbcon
 
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine cup_maximi(array,ks,ke,maxx,ierr,              &
               itf,ktf,                                       &
               its,ite, kts,kte                     )
@@ -3106,7 +3125,9 @@ endif
 
    end subroutine cup_maximi
 
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine cup_minimi(array,ks,kend,kt,ierr,              &
               itf,ktf,                                       &
               its,ite, kts,kte                     )
@@ -3157,7 +3178,9 @@ endif
 
    end subroutine cup_minimi
 
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine cup_up_aa0(aa0,z,zu,dby,gamma_cup,t_cup,       &
               kbcon,ktop,ierr,                               &
               itf,ktf,                                       &
@@ -3211,23 +3234,27 @@ endif
         do i=its,itf
          aa0(i)=0.
         enddo
-        do 100 k=kts+1,ktf
-        do 100 i=its,itf
-         if(ierr(i).ne.0)go to 100
-         if(k.lt.kbcon(i))go to 100
-         if(k.gt.ktop(i))go to 100
-         dz=z(i,k)-z(i,k-1)
-         da=zu(i,k)*dz*(9.81/(1004.*( &
-                (t_cup(i,k)))))*dby(i,k-1)/ &
-             (1.+gamma_cup(i,k))
-!         if(k.eq.ktop(i).and.da.le.0.)go to 100
-         aa0(i)=aa0(i)+max(0.,da)
-         if(aa0(i).lt.0.)aa0(i)=0.
-100     continue
+        do k=kts+1,ktf
+          do i=its,itf
+           if(ierr(i).ne.0) exit
+           if(k.lt.kbcon(i)) exit
+           if(k.gt.ktop(i)) exit
+           dz=z(i,k)-z(i,k-1)
+           da=zu(i,k)*dz*(9.81/(1004.*( &
+                  (t_cup(i,k)))))*dby(i,k-1)/ &
+               (1.+gamma_cup(i,k))
+  !         if(k.eq.ktop(i).and.da.le.0.)go to 100
+           aa0(i)=aa0(i)+max(0.,da)
+           if(aa0(i).lt.0.)aa0(i)=0.
+          enddo
+        enddo
 
    end subroutine cup_up_aa0
 
 !====================================================================
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine neg_check(name,j,dt,q,outq,outt,outu,outv,                      &
                         outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 
@@ -3334,7 +3361,9 @@ endif
 
    end subroutine neg_check
 
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!\param
    subroutine cup_output_ens_3d(xff_mid,xf_ens,ierr,dellat,dellaq,dellaqc,  &
               outtem,outq,outqc,                                            &
               zu,pre,pw,xmb,ktop,                                           &
@@ -3573,6 +3602,9 @@ endif
 
    end subroutine cup_output_ens_3d
 !-------------------------------------------------------
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
    subroutine cup_up_moisture(name,ierr,z_cup,qc,qrc,pw,pwav,     &
               p_cup,kbcon,ktop,dby,clw_all,xland1,                &
               q,gamma_cup,zu,qes_cup,k22,qe_cup,                  &
@@ -3582,8 +3614,8 @@ endif
               its,ite, kts,kte                     )
 
    implicit none
-  real(kind=kind_phys), parameter :: bdispm = 0.366       !berry--size dispersion (martime)
-  real(kind=kind_phys), parameter :: bdispc = 0.146       !berry--size dispersion (continental)
+  real(kind=kind_phys), parameter :: bdispm = 0.366       !<berry--size dispersion (martime)
+  real(kind=kind_phys), parameter :: bdispc = 0.146       !<berry--size dispersion (continental)
 !
 !  on input
 !
@@ -3883,7 +3915,9 @@ endif
  end subroutine cup_up_moisture
 
 !--------------------------------------------------------------------
-
+!>\ingroup cu_gf_deep_group
+!> This function calculates
+!>\param
  real function satvap(temp2)
       implicit none
       real(kind=kind_phys) :: temp2, temp, toot, toto, eilog, tsot,            &
@@ -3908,6 +3942,9 @@ endif
       end if
  end function
 !--------------------------------------------------------------------
+!>\ingroup cu_gf_deep_group
+!> This subroutine calcualtes
+!>\param
  subroutine get_cloud_bc(mzp,array,x_aver,k22,add)
     implicit none
     integer, intent(in)     :: mzp,k22
@@ -3933,8 +3970,9 @@ endif
 
  end subroutine get_cloud_bc
  !========================================================================================
-
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
  subroutine rates_up_pdf(rand_vmas,ipr,name,ktop,ierr,p_cup,entr_rate_2d,hkbo,heo,heso_cup,z_cup, &
                xland,kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,ktopdby,csum,pmin_lev)
      implicit none
@@ -4047,7 +4085,9 @@ endif
 
   end subroutine rates_up_pdf
 !-------------------------------------------------------------------------
-
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
+!>\param
  subroutine get_zu_zd_pdf_fim(kklev,p,rand_vmas,zubeg,ipr,xland,zuh2,draft,ierr,kb,kt,zu,kts,kte,ktf,max_mass,kpbli,csum,pmin_lev)
 
  implicit none
@@ -4304,6 +4344,8 @@ endif
   end subroutine get_zu_zd_pdf_fim
 
 !-------------------------------------------------------------------------
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
   subroutine cup_up_aa1bl(aa0,t,tn,q,qo,dtime,  &
               z_cup,zu,dby,gamma_cup,t_cup,         &
               kbcon,ktop,ierr,                  &
@@ -4356,19 +4398,23 @@ endif
         do i=its,itf
          aa0(i)=0.
         enddo
-        do 100 i=its,itf
-        do 100 k=kts,kbcon(i)
-        if(ierr(i).ne.0 )go to 100
-!        if(k.gt.kbcon(i))go to 100
+        do i=its,itf
+          do k=kts,kbcon(i)
+            if(ierr(i).ne.0 ) exit
+!           if(k.gt.kbcon(i)) exit
 
-          dz = (z_cup (i,k+1)-z_cup (i,k))*g
-          da = dz*(tn(i,k)*(1.+0.608*qo(i,k))-t(i,k)*(1.+0.608*q(i,k)))/dtime
+            dz = (z_cup (i,k+1)-z_cup (i,k))*g
+            da = dz*(tn(i,k)*(1.+0.608*qo(i,k))-t(i,k)*(1.+0.608*q(i,k)))/dtime
 
-         aa0(i)=aa0(i)+da
-100     continue
+            aa0(i)=aa0(i)+da
+          enddo
+        enddo
+             
 
  end subroutine cup_up_aa1bl
 !---------------------------------------------------------------------- 
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
  subroutine get_inversion_layers(ierr,p_cup,t_cup,z_cup,qo_cup,qeso_cup,k_inv_layers,&           
                      kstart,kend,dtempdz,itf,ktf,its,ite, kts,kte)
                                     
@@ -4468,6 +4514,8 @@ endif
         
  end subroutine get_inversion_layers
 !-----------------------------------------------------------------------------------
+!>\ingroup cu_gf_deep_group
+!> This function calcualtes
  function deriv3(xx, xi, yi, ni, m)
     !============================================================================*/
     ! evaluate first- or second-order derivatives 
@@ -4546,6 +4594,8 @@ endif
     end if
  end function deriv3
 !=============================================================================================
+!>\ingroup cu_gf_deep_group
+!> This subroutine calcualtes
   subroutine get_lateral_massflux(itf,ktf, its,ite, kts,kte                             &
                                   ,ierr,ktop,zo_cup,zuo,cd,entr_rate_2d                 &
                                   ,up_massentro, up_massdetro ,up_massentr, up_massdetr &
@@ -4662,6 +4712,8 @@ endif
  end subroutine get_lateral_massflux
 !---meltglac-------------------------------------------------
 !------------------------------------------------------------------------------------
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
    subroutine get_partition_liq_ice(ierr,tn,po_cup, p_liq_ice,melting_layer           & 
                                    ,itf,ktf,its,ite, kts,kte, cumulus          )
      implicit none
@@ -4752,6 +4804,8 @@ endif
    end  subroutine get_partition_liq_ice
 
 !------------------------------------------------------------------------------------
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
    subroutine get_melting_profile(ierr,tn_cup,po_cup, p_liq_ice,melting_layer,qrco    &
                                  ,pwo,edto,pwdo,melting                                &    
                                  ,itf,ktf,its,ite, kts,kte, cumulus              )
@@ -4825,6 +4879,8 @@ endif
    end  subroutine get_melting_profile
 !---meltglac-------------------------------------------------
 !-----srf-08aug2017-----begin
+!>\ingroup cu_gf_deep_group
+!> This subroutine calculates
  subroutine get_cloud_top(name,ktop,ierr,p_cup,entr_rate_2d,hkbo,heo,heso_cup,z_cup, &
                          kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,klcl,hcot)
      implicit none
@@ -4906,6 +4962,5 @@ endif
      enddo
   end subroutine get_cloud_top
 !------------------------------------------------------------------------------------
-
 
 end module cu_gf_deep

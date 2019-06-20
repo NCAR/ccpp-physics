@@ -1,0 +1,85 @@
+/**
+\page RAD_CLD GFS Cloud-Radiation Interaction
+\section des_radcld Description
+
+The cloud-radiation interaction in the CCPP-Physics can be grouped in terms of three processes:
+- horizontal coverage of cloud, normally referred to as \b cloud \b fraction
+- cloud radii calculation
+- vertical extent of the clouds (gethml())
+
+In the CCPP-Physics, these cloud parameterization is followed by \ref GFS_RRTMG.
+
+\section cld_fra  Cloud Fraction Calculation
+The cloud fraction in the CCPP-physics suite with the Zhao-Carr scheme (progcld1()) is determined following 
+Xu and Randall(1996) \cite xu_and_randall_1996, which is proportional to the grid-scale cloud condensate 
+and relative humidity. It was modified ( Han and Pan (2011) \cite han_and_pan_2011 ) 
+because it tends to produce too much low cloud over  the entire globe with the new shallow convection scheme. Following Xu and Randall (1996) \cite xu_and_randall_1996 ,
+the fractional cloud cover within a grid box (\f$\sigma\f$) is given by:
+\f[
+\sigma=RH^{k_{1}}\left(1-exp\left\{-\frac{k_{2}q_{l}}{\left[(1-RH)q_{s}\right]^{k_{3}}}\right\}\right)
+\f]
+where \f$RH\f$ is relative humidity,\f$q_{l}\f$ is the cloud condensate, \f$q_{s}\f$ is saturation specific humidity,
+\f$k_{1}\f$,\f$k_{2}\f$, and \f$k_{3}\f$ are empirical coefficients. Using data produced from explicit 
+simulations of the observed tropical cloud systems, Xu and Randall(1996) \cite xu_and_randall_1996 have obtained
+empirical values of \f$k_{1}\f$,\f$k_{2}\f$, and \f$k_{3}\f$ that are 0.25, 100 and 0.49, respectively. In the
+previous GFS, values of \f$k_{1}=0.25\f$,\f$k_{2}=2000\f$, and \f$k_{3}=0.25\f$ are used to increase cloud
+cover because the old shallow convection scheme is too efficient in destroying stratocumulus clouds. Now that the 
+new shallow convection scheme can produce sufficient low clouds, the original empirical values of Xu and 
+Randall (1996) \cite xu_and_randall_1996 (i.e., \f$k_{1}=0.25\f$,\f$k_{2}=100\f$, and \f$k_{3}=0.49\f$) are used.
+Maximum-randomly cloud overlapping is used in both longwave radiation and shortwave radiation.
+
+On the other hand, the convective cloudiness in the CCPP-Physics with the Zhao-Carr scheme is taken 
+into account by detaining cloud water
+from upper cumulus layers into the grid-scale cloud condensate, which helps to increase high cirrus clouds.
+To take into account the convective cloudiness contribution from all the cumulus layers. The CCPP-Physics with the Zhao-Carr 
+scheme adds the suspended cloud water in every cumulus layer into the grid-scale cloud condensate only 
+for the cloud fraction and radiation computations. It has been shown (Fig.6 in Han et al.(2017) \cite han_et_al_2017
+)that cloudiness enhancement by the suspended cloud water in the convective updraft is evident in the low
+and middle clouds over the tropical convective regions. The impact of the suspended cloud water on convective
+cloudiness enhancement appears to be rather small.
+
+However, in the CCPP-Physics with the GFDL cloud MP, the calculation of cloud fraction calculation includes all cloud
+hydrometeors:
+\f[
+\sigma=\max\left[0,\min\left(1,\frac{q_{plus}-q_{s}}{q_{plus}-q_{minus}}\right)\right]
+\f]
+where
+\f[
+q_{plus}=(q_{v}+q_{liq}+q_{sol})\times (1+h_{var})
+\f]
+\f[
+q_{minus}=(q_{v}+q_{liq}+q_{sol})\times (1-h_{var})
+\f]
+
+where \f$h_{var}\f$ is the horizontal subgrid variability (see \ref GFDL_cloud)
+and it is calculated in the last step of fast physics in Lagrangian to Eulerian step.
+
+\section cld_radii Cloud Radii Calculation
+Two methods have been used to parameterize cloud properties in the GFS model. The previous 
+method made use of a diagnostic cloud scheme (diagcld1()),  in which cloud properties are determined based on model-predicted 
+temperature, pressure, and boundary layer circulation from Harshvardhan et al. (1989) \cite harshvardhan_et_al_1989 . The
+diagnostic scheme is now replaced with a prognostic scheme (progcld1() with the Zhao-Carr scheme and progcld4() with
+the GFDL cloud MP scheme) that uses cloud condensate information instead (Heymsfield and McFarquhar (1996)
+ \cite heymsfield_and_mcfarquhar_1996).
+
+For the parameterization of effective radius of liquid cloud droplet,\f$r_{ew}\f$, we fix \f$r_{ew}\f$ to a value of \f$10\mu m\f$ over
+the oceans. Over the land, \f$r_{ew}\f$ is defined as:
+\f[
+   r_{ew} = 5+5\times F
+\f]
+where 
+\f[
+F = \min\left[1.0,\max\left[0.0,(273.16-T)\times0.05\right]\right]
+\f]
+Thus, the effective radius of liquid cloud droplets will reach to a  minimum values of \f$5\mu m\f$ when F=0, and to a maximum value of 
+\f$10\mu m\f$ when the ice fraction is increasing.
+
+For ice clouds, following Heymsfield and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996,
+we have made the effective ice droplet radius to be an empirical function of ice water concentration (IWC) and environmental temperature as:
+\f[
+  r_{ei}=\begin{cases}(1250/9.917)IWC^{0.109} & T <-50^0C \\(1250/9.337)IWC^{0.080} & -50^0C \leq T<-40^0C\\(1250/9.208)IWC^{0.055} & -40^0C\leq T <-30^0C\\(1250/9.387)IWC^{0.031} & -30^0C \leq T\end{cases}
+\f]
+
+Currently, the effective radius of rain cloud and snow cloud is set to \f$1000\mu m\f$ and \f$250\mu m\f$,respectively.
+
+*/

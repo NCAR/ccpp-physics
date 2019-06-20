@@ -1,3 +1,11 @@
+!>\file module_sf_ruclsm.F90
+!! This file is the entity of NOAA/ESRL/GSD RUC LSM Model(WRF version 4.0).
+
+!>\ingroup lsm_ruc_group
+!!\brief This is the entity of RUC LSM model of physics subroutines.
+!! It is a soil/veg/snowpack and ice/snowpack/land-surface model to update soil
+!! moisture, soil temperature, skin temperature, snowpack water content, snowdepth,
+!! and all terms of the surface energy balance and surface water balance.
 MODULE module_sf_ruclsm
 
    use machine ,   only : kind_phys
@@ -8,59 +16,161 @@ MODULE module_sf_ruclsm
    private
    !private qsn
 
-   public :: lsmruc, ruclsminit, rslf 
+   public :: lsmruc, ruclsminit, rslf
 
-!\file module_sf_ruclsm.F
-!! This file is the entity of RUC LSM Model(WRF version 4.0).
-
-!>\defgroup RUC_LSM RUC LSM Model
-!!\brief This is the entity of RUC LSM model of physics subroutines.
-!! It is a soil/veg/snowpack and ice/snowpack/land-surface model to update soil
-!! moisture, soil temperature, skin temperature, snowpack water content, snowdepth,
-!! and all terms of the surface energy balance and surface water balance,
-
-!  ---  constant parameters:
+!> CONSTANT PARAMETERS
+!! @{
       real (kind=kind_phys), parameter :: P1000mb = 100000.
       real (kind=kind_phys), parameter :: xls     = 2.85E6
       real (kind=kind_phys), parameter :: rhowater= 1000.
       real (kind=kind_phys), parameter :: piconst = 3.1415926535897931
       real (kind=kind_phys), parameter :: r_v     = 4.6150e+2
-!
-! VEGETATION PARAMETERS
-        INTEGER :: LUCATS 
+!! @}
+
+!> VEGETATION PARAMETERS
+!! @{
+        INTEGER :: LUCATS
         integer, PARAMETER :: NLUS=50
         CHARACTER*8 LUTYPE
+!! @}
 
-! SOIL PARAMETERS
+!> SOIL PARAMETERS
+!! @{
         INTEGER :: SLCATS
         INTEGER, PARAMETER :: NSLTYPE=30
         CHARACTER*8 SLTYPE
+!! @}
 
-! LSM GENERAL PARAMETERS
+!> LSM GENERAL PARAMETERS
+!! @{
         INTEGER :: SLPCATS
         INTEGER, PARAMETER :: NSLOPE=30
         REAL ::  SBETA_DATA,FXEXP_DATA,CSOIL_DATA,SALP_DATA,REFDK_DATA,    &
                  REFKDT_DATA,FRZK_DATA,ZBOT_DATA,  SMLOW_DATA,SMHIGH_DATA, &
                         CZIL_DATA
+!! @}
 
 
 CONTAINS
 
 !-----------------------------------------------------------------
+!>\ingroup lsm_ruc_group
+!> The RUN LSM model is described in Smirnova et al.(1997) 
+!! \cite Smirnova_1997 and Smirnova et al.(2000) \cite Smirnova_2000 
+!>\param dt            time step(second)
+!>\param ktau          number of time step
+!>\param nsl           number of soil layers
+!>\param graupelncv.
+!>\param snowncv
+!>\param rainncv       one time step grid scale precipitation (mm/step)
+!>\param raincv        one time step convective precipitation (mm/step)
+!>\param zs            depth of soil levels (\f$m\f$)
+!>\param rainbl        accumulated rain in mm between the PBL calls
+!>\param snow          snow water equivalent (\f$mm\f$)
+!>\param snowh
+!>\param snowc         flag indicating snow coverage (1 for snow cover)
+!>\param frzfrac       fraction of frozen precipitation
+!>\param frpcpn
+!>\param rhosnf
+!>\param precipfr      time step frozen precipitation (\f$mm\f$)
+!>\param z3d           height(\f$m\f$)
+!>\param p8w           3D pressure (\f$Pa\f$)
+!>\param t3d           temperature (\f$K\f$)
+!>\param qv3d          3D water vapor mixing ratio (\f$Kg Kg^{-1}\f$)
+!>\param qc3d          3D cloud water mixing ratio (\f$Kg Kg^{-1}\f$)
+!>\param rho3d         3D air density (\f$Kg m^{-3}\f$)
+!>\param glw           downward longwave flux at ground surface (\f$Wm^{-2}\f$)
+!>\param gsw           absorbed shortwave flux at ground surface (\f$Wm^{-2}\f$)
+!>\param emiss         surface emissivity (between 0 and 1)
+!>\param chklowq       is either 0 or 1 (so far set equal to 1).used only in MYJPBL
+!>\param chs
+!>\param flqc          surface exchange coefficient for moisture(\f$Kg m^{-2} s^{-1}\f$)
+!>\param flhc          surface exchange coefficient for heat(\f$Wm^{-2}s^{-1}K^{-1}\f$)
+!>\param mavail
+!>\param canwat        canopy moisture content (\f$mm\f$)
+!>\param vegfra        vegetation fraction (between 0 and 100)
+!>\param alb           surface albedo (between 0 and 1)
+!>\param znt           roughness length (\f$m\f$)
+!>\param z0
+!>\param snoalb        maximum snow albedo (between 0 and 1)
+!>\param albbck        snow-free albedo (between 0 and 1)
+!>\param landusef
+!>\param nlcat
+!>\param soilctop
+!>\param nscat
+!>\param qsfc
+!>\param qsg
+!>\param qvg
+!>\param qcg
+!>\param dew
+!>\param soilt1
+!>\param tsnav
+!>\param tbot           soil temperature at lower boundary (\f$K\f$)
+!>\param ivgtyp         USGS vegetation type (24 classes)
+!>\param isltyp         STASGO soil type (16 classes)
+!>\param xland          land mask (1 for land, 2 for water)
+!>\param iswater
+!>\param isice
+!>\param xice
+!>\param xice_threshold
+!>\param cp             heat capacity at constant pressure for dry air (\f$J Kg^{-1} K^{-1}\f$)
+!>\param rv
+!>\param rd
+!>\param g0             acceleration due to gravity (\f$m s^{-2}\f$)
+!>\param pi
+!>\param lv             latent heat of melting (\f$J Kg^{-1}\f$)
+!>\param stbolt         Stefan-Boltzmann constant (\f$W m^{-2} K^{-4}\f$)
+!>\param soilmois       soil moisture content (volumetric fraction)
+!>\param sh2o
+!>\param smavail
+!>\param smmax
+!>\param tso            soil temperature (\f$K\f$)
+!>\param soilt          surface temperature (\f$K\f$)
+!>\param hfx            upward heat flux at the surface (\f$W m^{-2}\f$)
+!>\param qfx            upward moisture flux at the surface (\f$Kg m^{-2} s^{-1}\f$)
+!>\param lh             upward latent heat flux (\f$W m^{-2}\f$)
+!>\param infiltr
+!>\param runoff1
+!>\param runoff2
+!>\param acrunoff       run-total surface runoff (\f$mm\f$)
+!>\param sfcexc
+!>\param sfcevp
+!>\param grdflx         soil heat flux (\f$W m^{-2}\f$; negative, if downward from surface)
+!>\param snowfallac     run-total snowfall accumulation (\f$m\f$)
+!>\param acsnow         run-total SWE of snowfall (\f$mm\f$)
+!>\param snom
+!>\param smfr3d
+!>\param keepfr3dflag
+!>\param myj
+!>\param shdmin
+!>\param shdmax
+!>\param rdlai2d
+!>\param ims            start index for i in memory
+!>\param ime            end index for i in memory
+!>\param jms            start index for j in memory
+!>\param jme            end index for j in memory
+!>\param kms            start index for k in memory
+!>\param kme            end index for k in memory
+!>\param its
+!>\param ite
+!>\param jts
+!>\param jte
+!>\param kts
+!>\param kte
+!!
+!>\section gen_lsmruc GSD RUC LSM General Algorithm
+!! @{
     SUBROUTINE LSMRUC(                                           &
                    DT,init,restart,KTAU,iter,NSL,                &
-!                   lakemodel,lakemask,                           &
                    graupelncv,snowncv,rainncv,raincv,            &
                    ZS,RAINBL,SNOW,SNOWH,SNOWC,FRZFRAC,frpcpn,    &
                    rhosnf,precipfr,                              &
                    Z3D,P8W,T3D,QV3D,QC3D,RHO3D,                  &
-                   GLW,GSW,EMISS,CHKLOWQ, CHS,                   & 
+                   GLW,GSW,EMISS,CHKLOWQ, CHS,                   &
                    FLQC,FLHC,MAVAIL,CANWAT,VEGFRA,ALB,ZNT,       &
-                   Z0,SNOALB,ALBBCK,                             &
-!                   Z0,SNOALB,ALBBCK,LAI,                         &
-                   landusef, nlcat,                              & 
-!                   mosaic_lu, mosaic_soil,                       &
-                   soilctop, nscat,                              & 
+                   Z0,SNOALB,ALBBCK,                             & !Z0,SNOALB,ALBBCK,LAI, &
+                   landusef, nlcat,                              & ! mosaic_lu, mosaic_soil, &
+                   soilctop, nscat,                              &
                    QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
                    TBOT,IVGTYP,ISLTYP,XLAND,                     &
                    ISWATER,ISICE,XICE,XICE_THRESHOLD,            &
@@ -182,8 +292,7 @@ CONTAINS
                                                            FLQC, &
                                                            CHS , &
                                                            XICE, &
-                                                          XLAND, &
-!                                                         ALBBCK, &
+                                                          XLAND, &!   ALBBCK, &
                                                          VEGFRA, &
                                                            TBOT
 
@@ -390,7 +499,7 @@ CONTAINS
          NZS=NSL
          NDDZS=2*(nzs-2)
 
-!---- table TBQ is for resolution of balance equation in VILKA
+!> - Table TBQ is for resolution of balance equation in vilka()
         CQ=173.15-.05
         R273=1./273.15
         R61=6.1153*0.62198
@@ -410,7 +519,7 @@ CONTAINS
 
         END DO
 
-!--- Initialize soil/vegetation parameters
+!> - Initialize soil/vegetation parameters
 !--- This is temporary until SI is added to mass coordinate ---!!!!!
 
      if(init .and. (.not. restart) .and. iter == 1) then
@@ -419,13 +528,13 @@ CONTAINS
 !            do k=1,nsl
 !       keepfr3dflag(i,k,j)=0.
 !            enddo
-!--- initializing snow fraction, thereshold = 32 mm of snow water 
-!    or ~100 mm of snow height
+!>  - Initializing snow fraction, thereshold = 32 mm of snow water 
+!!    or ~100 mm of snow height
 !
 !           snowc(i,j) = min(1.,snow(i,j)/32.)
            soilt1(i,j)=soilt(i,j)
           if(snow(i,j).le.32.) soilt1(i,j)=tso(i,1,j)
-!--- initializing inside snow temp if it is not defined
+!>  - Initializing inside snow temp if it is not defined
         IF((soilt1(i,j) .LT. 170.) .or. (soilt1(i,j) .GT.400.)) THEN
             IF(snow(i,j).gt.32.) THEN
               soilt1(i,j)=0.5*(soilt(i,j)+tso(i,1,j))
@@ -474,9 +583,9 @@ CONTAINS
 ! Temporarily!!!
 !           canwat(i,j)=0.
 
-! For RUC LSM CHKLOWQ needed for MYJPBL should 
-! 1 because is actual specific humidity at the surface, and
-! not the saturation value
+!>  - For RUC LSM CHKLOWQ needed for MYJPBL should 
+!! 1 because is actual specific humidity at the surface, and
+!! not the saturation value
            chklowq(i,j) = 1.
            infiltr(i,j) = 0.
            snoh  (i,j) = 0.
@@ -537,12 +646,12 @@ CONTAINS
          QVATM     = QV3D(i,kms,j)
          QCATM     = QC3D(i,kms,j)
          PATM      = P8w(i,kms,j)*1.e-5
-!-- Z3D(1) is thickness between first full sigma level and the surface, 
-!-- but first mass level is at the half of the first sigma level 
-!-- (u and v are also at the half of first sigma level)
+!> - Z3D(1) is thickness between first full sigma level and the surface, 
+!! but first mass level is at the half of the first sigma level 
+!! (u and v are also at the half of first sigma level)
          CONFLX    = Z3D(i,kms,j)*0.5
          RHO       = RHO3D(I,kms,J)
-! -- initialize snow, graupel and ice fractions in frozen precip
+!> - Initialize snow, graupel and ice fractions in frozen precip
          snowrat = 0.
          grauprat = 0.
          icerat = 0.
@@ -550,7 +659,7 @@ CONTAINS
        IF(FRPCPN) THEN
          prcpncliq = rainncv(i,j)*(1.-frzfrac(i,j))
          prcpncfr = rainncv(i,j)*frzfrac(i,j)
-!- apply the same frozen precipitation fraction to convective precip
+!> - Apply the same frozen precipitation fraction to convective precip
 !tgs - 31 mar17 - add temperature check in case Thompson MP produces
 !                 frozen precip at T > 273.
        if(frzfrac(i,j) > 0. .and. tabs < 273.) then
@@ -572,7 +681,7 @@ CONTAINS
          NEWSNMS  = (prcpncfr + prcpcufr)/DT*1.e-3
 
          if((prcpncfr + prcpcufr) > 0.) then
-! -- calculate snow, graupel and ice fractions in falling frozen precip
+!> - Calculate snow, graupel and ice fractions in falling frozen precip
          snowrat=min(1.,max(0.,snowncv(i,j)/(prcpncfr + prcpcufr)))
          grauprat=min(1.,max(0.,graupelncv(i,j)/(prcpncfr + prcpcufr)))
          icerat=min(1.,max(0.,(prcpncfr-snowncv(i,j)-graupelncv(i,j)) &
@@ -584,8 +693,8 @@ CONTAINS
           if (tabs.le.273.15) then
          PRCPMS    = 0.
          NEWSNMS   = RAINBL(i,j)/DT*1.e-3
-!-- here no info about constituents of frozen precipitation,
-!-- suppose it is all snow
+         !> - If here no info about constituents of frozen precipitation,
+         !! suppose it is all snow
          snowrat = 1.
           else
          PRCPMS    = RAINBL(i,j)/DT*1.e-3
@@ -601,12 +710,12 @@ CONTAINS
          QKMS=CHS(i,j)
          TKMS=CHS(i,j)
         else
-!--- convert exchange coeff QKMS to [m/s]
+!> - Convert exchange coeff QKMS to [m/s]
          QKMS=FLQC(I,J)/RHO/MAVAIL(I,J)
 !         TKMS=FLHC(I,J)/RHO/CP
          TKMS=FLHC(I,J)/RHO/(CP*(1.+0.84*QVATM))  ! mynnsfc uses CPM
         endif
-!--- convert incoming snow and canwat from mm to m
+!> - Convert incoming snow and canwat from mm to m
          SNWE=SNOW(I,J)*1.E-3
          SNHEI=SNOWH(I,J)
          CANWATR=CANWAT(I,J)*1.E-3
@@ -688,7 +797,7 @@ CONTAINS
       endif
     ENDIF
  
-!--- initializing soil and surface properties
+!> - Call soilvegin() to initialize soil and surface properties
      CALL SOILVEGIN  ( debug_print, &
                        soilfrac,nscat,shdmin(i,j),shdmax(i,j),mosaic_lu, mosaic_soil,&
                        NLCAT,ILAND,ISOIL,iswater,MYJ,IFOREST,lufrac,VEGFRA(I,J),     &
@@ -1136,12 +1245,19 @@ endif
 
 !-----------------------------------------------------------------
    END SUBROUTINE LSMRUC
+!! @}
 !-----------------------------------------------------------------
 
-
-
-   SUBROUTINE SFCTMP (debug_print, delt,ktau,conflx,i,j,         &
-!--- input variables
+!>\ingroup lsm_ruc_group
+!! This subroutine solves energy and moisture budgets.
+!! - It computes density of frozen precipitation from empirical 
+!! dependence on temperature at the first atmospheric level.
+!! - Computes amount of liquid and frozen precipitation intercepted by 
+!! the vegetation canopy.
+!! - In there is snow on the ground, the snow fraction is below 0.75,
+!! the snow "mosaic" approach is turned on.
+!! - Updates emissivity and albedo for patch snow.
+   SUBROUTINE SFCTMP (debug_print, delt,ktau,conflx,i,j,         & !--- input variables
                 nzs,nddzs,nroot,meltfactor,                      &
                 ILAND,ISOIL,IVGTYP,ISLTYP,PRCPMS,                &
                 NEWSNMS,SNWE,SNHEI,SNOWFRAC,                     &
@@ -1152,14 +1268,11 @@ endif
                 MAVAIL,CST,VEGFRA,ALB,ZNT,                       &
                 ALB_SNOW,ALB_SNOW_FREE,lai,                      &
                 MYJ,SEAICE,ISICE,                                &
-!--- soil fixed fields
-                QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,    &
+                QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,    & !--- soil fixed fields
                 sat,cn,zsmain,zshalf,DTDZS,DTDZS2,tbq,           &
-!--- constants
-                cp,rovcp,g0,lv,stbolt,cw,c1sn,c2sn,              &
+                cp,rovcp,g0,lv,stbolt,cw,c1sn,c2sn,              & !--- constants
                 KQWRTZ,KICE,KWT,                                 &
-!--- output variables
-                snweprint,snheiprint,rsm,                        &
+                snweprint,snheiprint,rsm,                        & !---output variables
                 soilm1d,ts1d,smfrkeep,keepfr,soilt,soilt1,       &
                 tsnav,dew,qvg,qsg,qcg,                           &
                 SMELT,SNOH,SNFLX,SNOM,SNOWFALLAC,ACSNOW,         &
@@ -2152,7 +2265,9 @@ endif
    END SUBROUTINE SFCTMP
 !---------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!! This function computes water vapor mixing ratio at saturation from
+!! the precomputed table and a given temperature.
        FUNCTION QSN(TN,T)
 !****************************************************************
    REAL,     DIMENSION(1:5001),  INTENT(IN   )   ::  T
@@ -2179,22 +2294,20 @@ endif
   END FUNCTION QSN
 !------------------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!> This subroutine calculates energy and moisture budget for vegetated surfaces
+!! without snow, heat diffusion and Richards eqns in soil.
         SUBROUTINE SOIL (debug_print,                        &
-!--- input variables
-            i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,&
+            i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,& !--- input variables
             PRCPMS,RAINF,PATM,QVATM,QCATM,                   &
             GLW,GSW,GSWin,EMISS,RNET,                        &
             QKMS,TKMS,PC,cst,drip,infwater,rho,vegfrac,lai,  &
             myj,                                             &
-!--- soil fixed fields
-            QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,    &
+            QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,    & !--- soil fixed fields
             sat,cn,zsmain,zshalf,DTDZS,DTDZS2,tbq,           &
-!--- constants
-            xlv,CP,rovcp,G0_P,cw,stbolt,TABS,                &
+            xlv,CP,rovcp,G0_P,cw,stbolt,TABS,                & !--- constants
             KQWRTZ,KICE,KWT,                                 &
-!--- output variables
-            soilmois,tso,smfrkeep,keepfr,                    &
+            soilmois,tso,smfrkeep,keepfr,                    & !--- output variables
             dew,soilt,qvg,qsg,qcg,                           &
             edir1,ec1,ett1,eeta,qfx,hfx,s,evapl,             &
             prcpl,fltot,runoff1,runoff2,mavail,soilice,      &
@@ -2830,18 +2943,19 @@ endif
    END SUBROUTINE SOIL
 !-------------------------------------------------------------------
 
+!>\ingroup lsm_ruc_group
+!! This subroutine is called for sea ice without accumulated snow
+!! on its surface. it solves heat diffusion inside ice and energy
+!! budget at the surface of ice. It computes skin temperature and
+!! temerature inside sea ice.
         SUBROUTINE SICE ( debug_print,                          &
-!--- input variables
-            i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,   &
+            i,j,iland,isoil,delt,ktau,conflx,nzs,nddzs,nroot,   & !--- input variables
             PRCPMS,RAINF,PATM,QVATM,QCATM,GLW,GSW,              &
             EMISS,RNET,QKMS,TKMS,rho,myj,                       &
-!--- sea ice parameters
-            tice,rhosice,capice,thdifice,                       &
+            tice,rhosice,capice,thdifice,                       & !--- sea ice parameters
             zsmain,zshalf,DTDZS,DTDZS2,tbq,                     &
-!--- constants
-            xlv,CP,rovcp,cw,stbolt,tabs,                        &
-!--- output variables
-            tso,dew,soilt,qvg,qsg,qcg,                          &
+            xlv,CP,rovcp,cw,stbolt,tabs,                        & !--- constants
+            tso,dew,soilt,qvg,qsg,qcg,                          & !--- output variables
             eeta,qfx,hfx,s,evapl,prcpl,fltot                    &
                                                                 )
 
@@ -3097,27 +3211,26 @@ endif
    END SUBROUTINE SICE
 !-------------------------------------------------------------------
 
-
-
+!>\ingroup lsm_ruc_group
+!! This subroutine is called for snow covered areas of land. It
+!! solves energy and moisture budgets on the surface of snow, and 
+!! on the interface of snow and soil. It computes skin temperature,
+!! snow temperature, snow depth and snow melt.
         SUBROUTINE SNOWSOIL ( debug_print,                     &
-!--- input variables
-             i,j,isoil,delt,ktau,conflx,nzs,nddzs,nroot,       &
+             i,j,isoil,delt,ktau,conflx,nzs,nddzs,nroot,       & !--- input variables
              meltfactor,rhonewsn,SNHEI_CRIT,                   & ! new
              ILAND,PRCPMS,RAINF,NEWSNOW,snhei,SNWE,SNOWFRAC,   &
              RHOSN,                                            &
              PATM,QVATM,QCATM,                                 &
              GLW,GSW,GSWin,EMISS,RNET,IVGTYP,                  &
              QKMS,TKMS,PC,cst,drip,infwater,                   &
-             rho,vegfrac,alb,znt,lai,                          & 
-             MYJ,                                              &
-!--- soil fixed fields
+             rho,vegfrac,alb,znt,lai,                          &
+             MYJ,                                              & !--- soil fixed fields
              QWRTZ,rhocs,dqm,qmin,ref,wilt,psis,bclh,ksat,     &
              sat,cn,zsmain,zshalf,DTDZS,DTDZS2,tbq,            &
-!--- constants
-             xlv,CP,rovcp,G0_P,cw,stbolt,TABS,                 &
+             xlv,CP,rovcp,G0_P,cw,stbolt,TABS,                 & !--- constants
              KQWRTZ,KICE,KWT,                                  &
-!--- output variables
-             ilnb,snweprint,snheiprint,rsm,                    &
+             ilnb,snweprint,snheiprint,rsm,                    & !--- output variables
              soilmois,tso,smfrkeep,keepfr,                     &
              dew,soilt,soilt1,tsnav,                           &
              qvg,qsg,qcg,SMELT,SNOH,SNFLX,SNOM,                &
@@ -3787,6 +3900,11 @@ print *, 'TSO before calling SNOWTEMP: ', tso
    END SUBROUTINE SNOWSOIL
 !-------------------------------------------------------------------
 
+!>\ingroup lsm_ruc_group
+!! This subroutine is called for sea ice with accumulated snow on
+!! its surface. It solves energy budget on the snow interface with 
+!! atmosphere and snow interface with ice. It calculates skin 
+!! temperature, snow and ice temperatures, snow depth and snow melt.
            SUBROUTINE SNOWSEAICE( debug_print,                  &
             i,j,isoil,delt,ktau,conflx,nzs,nddzs,               &
             meltfactor,rhonewsn,SNHEI_CRIT,                     &  ! new
@@ -3794,14 +3912,11 @@ print *, 'TSO before calling SNOWTEMP: ', tso
             RHOSN,PATM,QVATM,QCATM,                             &
             GLW,GSW,EMISS,RNET,                                 &
             QKMS,TKMS,RHO,myj,                                  &
-!--- sea ice parameters
-            ALB,ZNT,                                            &
+            ALB,ZNT,                                            & !--- sea ice parameters
             tice,rhosice,capice,thdifice,                       &
             zsmain,zshalf,DTDZS,DTDZS2,tbq,                     &
-!--- constants
-            xlv,CP,rovcp,cw,stbolt,tabs,                        &
-!--- output variables
-            ilnb,snweprint,snheiprint,rsm,tso,                  &
+            xlv,CP,rovcp,cw,stbolt,tabs,                        & !--- constants
+            ilnb,snweprint,snheiprint,rsm,tso,                  & !--- output variables
             dew,soilt,soilt1,tsnav,qvg,qsg,qcg,                 &
             SMELT,SNOH,SNFLX,SNOM,eeta,                         &
             qfx,hfx,s,sublim,prcpl,fltot                        &
@@ -4542,23 +4657,21 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
    END SUBROUTINE SNOWSEAICE
 !------------------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!> This subroutine solves energy budget equation and heat diffusion
+!! equation.
            SUBROUTINE SOILTEMP( debug_print,                &
-!--- input variables
-           i,j,iland,isoil,                                 &
+           i,j,iland,isoil,                                 & !--- input variables
            delt,ktau,conflx,nzs,nddzs,nroot,                &
            PRCPMS,RAINF,PATM,TABS,QVATM,QCATM,              &
            EMISS,RNET,                                      &
            QKMS,TKMS,PC,RHO,VEGFRAC,lai,                    &
            THDIF,CAP,DRYCAN,WETCAN,                         &
            TRANSUM,DEW,MAVAIL,soilres,alfa,                 &
-!--- soil fixed fields
-           DQM,QMIN,BCLH,                                   &
+           DQM,QMIN,BCLH,                                   & !---soil fixed fields
            ZSMAIN,ZSHALF,DTDZS,TBQ,                         &
-!--- constants
-           XLV,CP,G0_P,CVW,STBOLT,                          &
-!--- output variables
-           TSO,SOILT,QVG,QSG,QCG,X)
+           XLV,CP,G0_P,CVW,STBOLT,                          & !--- constants
+           TSO,SOILT,QVG,QSG,QCG,X)                           !---output variables
 
 !*************************************************************
 !   Energy budget equation and heat diffusion eqn are 
@@ -4867,10 +4980,11 @@ endif ! 1==2
    END SUBROUTINE SOILTEMP
 !--------------------------------------------------------------------
 
-
-           SUBROUTINE SNOWTEMP( debug_print,                       & 
-!--- input variables
-           i,j,iland,isoil,                                        &
+!>\ingroup lsm_ruc_group
+!> This subroutine solves energy bugdget equation and heat diffusion 
+!! equation to obtain snow and soil temperatures.
+           SUBROUTINE SNOWTEMP( debug_print,                       &
+           i,j,iland,isoil,                                        & !--- input variables
            delt,ktau,conflx,nzs,nddzs,nroot,                       &
            snwe,snwepr,snhei,newsnow,snowfrac,                     &
            beta,deltsn,snth,rhosn,rhonewsn,meltfactor,             &  ! add meltfactor
@@ -4880,13 +4994,10 @@ endif ! 1==2
            QKMS,TKMS,PC,RHO,VEGFRAC,                               &
            THDIF,CAP,DRYCAN,WETCAN,CST,                            &
            TRANF,TRANSUM,DEW,MAVAIL,                               &
-!--- soil fixed fields
-           DQM,QMIN,PSIS,BCLH,                                     &
+           DQM,QMIN,PSIS,BCLH,                                     & !--- soil fixed fields
            ZSMAIN,ZSHALF,DTDZS,TBQ,                                &
-!--- constants
-           XLVM,CP,rovcp,G0_P,CVW,STBOLT,                          &
-!--- output variables
-           SNWEPRINT,SNHEIPRINT,RSM,                               &
+           XLVM,CP,rovcp,G0_P,CVW,STBOLT,                          & !--- constants
+           SNWEPRINT,SNHEIPRINT,RSM,                               & !--- output variables
            TSO,SOILT,SOILT1,TSNAV,QVG,QSG,QCG,                     &
            SMELT,SNOH,SNFLX,S,ILNB,X)
 
@@ -5701,18 +5812,17 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
    END SUBROUTINE SNOWTEMP
 !------------------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!! This subroutine solves moisture budget and computes soil moisture
+!! and surface and sub-surface runoffs.
         SUBROUTINE SOILMOIST ( debug_print,                     &
-!--input parameters
-              DELT,NZS,NDDZS,DTDZS,DTDZS2,RIW,                  &
+              DELT,NZS,NDDZS,DTDZS,DTDZS2,RIW,                  & !--- input parameters
               ZSMAIN,ZSHALF,DIFFU,HYDRO,                        &
               QSG,QVG,QCG,QCATM,QVATM,PRCP,                     &
               QKMS,TRANSP,DRIP,                                 &
               DEW,SMELT,SOILICE,VEGFRAC,SNOWFRAC,soilres,       &
-!--soil properties
-              DQM,QMIN,REF,KSAT,RAS,INFMAX,                     &
-!--output
-              SOILMOIS,SOILIQW,MAVAIL,RUNOFF,RUNOFF2,INFILTRP)
+              DQM,QMIN,REF,KSAT,RAS,INFMAX,                     & !--- soil properties
+              SOILMOIS,SOILIQW,MAVAIL,RUNOFF,RUNOFF2,INFILTRP)    !--- output
 !*************************************************************************
 !   moisture balance equation and Richards eqn.
 !   are solved here 
@@ -5859,7 +5969,7 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
         COSMC(1)=0.
         RHSMC(1)=SOILMOIS(NZS)
 !
-        DO 330 K=1,NZS2
+        DO K=1,NZS2
           KN=NZS-K
           K1=2*KN-3
           X4=2.*DTDZS(K1)*DIFFU(KN-1)
@@ -5872,10 +5982,11 @@ print *, 'D9SN,SOILT,TSOB : ', D9SN,SOILT,TSOB
           print *,'q2,soilmois(kn),DIFFU(KN),x2,HYDRO(KN+1),DTDZS2(KN-1),kn,k' &
                   ,q2,soilmois(kn),DIFFU(KN),x2,HYDRO(KN+1),DTDZS2(KN-1),kn,k
     ENDIF
- 330      RHSMC(K+1)=(SOILMOIS(KN)+Q2*RHSMC(K)                            &
+          RHSMC(K+1)=(SOILMOIS(KN)+Q2*RHSMC(K)                            &
                    +TRANSP(KN)                                            &
                    /(ZSHALF(KN+1)-ZSHALF(KN))                             &
                    *DELT)/DENOM
+        ENDDO
 
 ! --- MOISTURE BALANCE BEGINS HERE
 
@@ -6083,19 +6194,17 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
     END SUBROUTINE SOILMOIST
 !-------------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!! This subroutine computes thermal diffusivity, and diffusional and 
+!! hydraulic condeuctivities in soil.
             SUBROUTINE SOILPROP( debug_print,                     &
-!--- input variables
-         nzs,fwsat,lwsat,tav,keepfr,                              &
+         nzs,fwsat,lwsat,tav,keepfr,                              & !--- input variables
          soilmois,soiliqw,soilice,                                &
          soilmoism,soiliqwm,soilicem,                             &
-!--- soil fixed fields
-         QWRTZ,rhocs,dqm,qmin,psis,bclh,ksat,                     &
-!--- constants
-         riw,xlmelt,CP,G0_P,cvw,ci,                               & 
+         QWRTZ,rhocs,dqm,qmin,psis,bclh,ksat,                     & !--- soil fixed fields
+         riw,xlmelt,CP,G0_P,cvw,ci,                               & !--- constants
          kqwrtz,kice,kwt,                                         &
-!--- output variables
-         thdif,diffu,hydro,cap)
+         thdif,diffu,hydro,cap)                                     !--- output variables
 
 !******************************************************************
 ! SOILPROP computes thermal diffusivity, and diffusional and
@@ -6299,14 +6408,13 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    END SUBROUTINE SOILPROP
 !-----------------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!> This subroutine solves the transpiration function (EQs. 18,19 in
+!! Smirnova et al.(1997) \cite Smirnova_1997)
            SUBROUTINE TRANSF(  debug_print,                      &
-!--- input variables
-              nzs,nroot,soiliqw,tabs,lai,gswin,                  &
-!--- soil fixed fields
-              dqm,qmin,ref,wilt,zshalf,pc,iland,                 &
-!--- output variables
-              tranf,transum)
+              nzs,nroot,soiliqw,tabs,lai,gswin,                  & !--- input variables
+              dqm,qmin,ref,wilt,zshalf,pc,iland,                 & !--- soil fixed fields
+              tranf,transum)                                       !--- output variables
 
 !-------------------------------------------------------------------
 !--- TRANF(K) - THE TRANSPIRATION FUNCTION (Smirnova et al. 1996, EQ. 18,19)
@@ -6486,7 +6594,10 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    END SUBROUTINE TRANSF
 !-----------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!> This subroutine finds the solution of energy budget at the surface
+!! from the pre-computed table of saturated water vapor mixing ratio 
+!! and estimated surface temperature.
        SUBROUTINE VILKA(TN,D1,D2,PP,QS,TS,TT,NSTEP,ii,j,iland,isoil)
 !--------------------------------------------------------------
 !--- VILKA finds the solution of energy budget at the surface
@@ -6528,6 +6639,10 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    END SUBROUTINE VILKA
 !-----------------------------------------------------------------------
 
+!>\ingroup lsm_ruc_group
+!! This subroutine computes effective land and soil parameters in the
+!! grid cell from the weighted contribution of soil and land categories
+!! represented in the grid cell.
      SUBROUTINE SOILVEGIN  ( debug_print,                            &
                              soilfrac,nscat,shdmin, shdmax,          &
                              mosaic_lu, mosaic_soil,                 &
@@ -7002,6 +7117,10 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    END SUBROUTINE SOILVEGIN
 !--------------------------------------------------------------------------
 
+!>\ingroup lsm_ruc_group
+!> This subroutine computes liquid and forezen soil moisture from the
+!! total soil moisture, and also computes soil moisture availability in
+!! the top soil layer.
   SUBROUTINE RUCLSMINIT( debug_print,                              &
                      nzs, isltyp, ivgtyp, xice, mavail,            &
                      sh2o, smfr3d, tslb, smois,                    &
@@ -7149,6 +7268,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !-----------------------------------------------------------------
 
 !-----------------------------------------------------------------
+!>\ingroup lsm_ruc_group
+!> This subroutine specifies vegetation related characteristics.
         SUBROUTINE RUCLSM_SOILVEGPARM( debug_print,MMINLURUC, MMINSL)
 !-----------------------------------------------------------------
 
@@ -7476,7 +7597,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
       END SUBROUTINE RUCLSM_SOILVEGPARM
 !-----------------------------------------------------------------
 
-
+!>\ingroup lsm_ruc_group
+!> This subroutine specifies 19 soiltyp classification according to
+!! STATSGO.
   SUBROUTINE SOILIN (ISLTYP, DQM, REF, PSIS, QMIN, BCLH )
 
 !---    soiltyp classification according to STATSGO(nclasses=16)
@@ -7554,9 +7677,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
   END SUBROUTINE SOILIN
 
 !+---+-----------------------------------------------------------------+
-! THIS FUNCTION CALCULATES THE LIQUID SATURATION VAPOR MIXING RATIO AS
-! A FUNCTION OF TEMPERATURE AND PRESSURE (from Thompson scheme)
-!
+!>\ingroup lsm_ruc_group
+!> THIS FUNCTION CALCULATES THE LIQUID SATURATION VAPOR MIXING RATIO AS
+!! A FUNCTION OF TEMPERATURE AND PRESSURE (from Thompson scheme)
       REAL FUNCTION RSLF(P,T)
 
       IMPLICIT NONE

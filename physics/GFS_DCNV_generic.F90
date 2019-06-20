@@ -11,6 +11,7 @@
       subroutine GFS_DCNV_generic_pre_finalize()
       end subroutine GFS_DCNV_generic_pre_finalize
 
+#if 0
 !> \brief Interstitial scheme called prior to any deep convective scheme to save state variables for calculating tendencies after the deep convective scheme is executed
 !! \section arg_table_GFS_DCNV_generic_pre_run Argument Table
 !! | local_name      | standard_name                                          | long_name                                                                 | units   | rank | type      |    kind   | intent | optional |
@@ -20,34 +21,41 @@
 !! | ldiag3d         | flag_diagnostics_3D                                    | flag for 3d diagnostic fields                                             | flag    |    0 | logical   |           | in     | F        |
 !! | cnvgwd          | flag_convective_gravity_wave_drag                      | flag for conv gravity wave drag                                           | flag    |    0 | logical   |           | in     | F        |
 !! | lgocart         | flag_gocart                                            | flag for 3d diagnostic fields for gocart 1                                | flag    |    0 | logical   |           | in     | F        |
+!! | do_ca           | flag_for_cellular_automata                             | cellular automata main switch                                             | flag    |    0 | logical   |           | in     | F        |
+!! | isppt_deep      | flag_for_combination_of_sppt_with_isppt_deep           | switch for combination with isppt_deep.                                   | flag    |    0 | logical   |           | in     | F        |
 !! | gu0             | x_wind_updated_by_physics                              | zonal wind updated by physics                                             | m s-1   |    2 | real      | kind_phys | in     | F        |
 !! | gv0             | y_wind_updated_by_physics                              | meridional wind updated by physics                                        | m s-1   |    2 | real      | kind_phys | in     | F        |
 !! | gt0             | air_temperature_updated_by_physics                     | temperature updated by physics                                            | K       |    2 | real      | kind_phys | in     | F        |
-!! | gq0_water_vapor | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                          | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | gq0_water_vapor | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics                          | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | save_u          | x_wind_save                                            | x-wind before entering a physics scheme                                   | m s-1   |    2 | real      | kind_phys | inout  | F        |
 !! | save_v          | y_wind_save                                            | y-wind before entering a physics scheme                                   | m s-1   |    2 | real      | kind_phys | inout  | F        |
 !! | save_t          | air_temperature_save                                   | air temperature before entering a physics scheme                          | K       |    2 | real      | kind_phys | inout  | F        |
 !! | save_qv         | water_vapor_specific_humidity_save                     | water vapor specific humidity before entering a physics scheme            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | ca_deep         | fraction_of_cellular_automata_for_deep_convection      | fraction of cellular automata for deep convection                         | frac    |    1 | real      | kind_phys | in     | F        |
 !! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                                  | none    |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag    |    0 | integer   |           | out    | F        |
 !!
-    subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, cnvgwd, lgocart, gu0, gv0, gt0, gq0_water_vapor, &
-      save_u, save_v, save_t, save_qv, errmsg, errflg)
+#endif
+    subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, cnvgwd, lgocart, do_ca,     &
+                                         isppt_deep, gu0, gv0, gt0, gq0_water_vapor,    &
+                                         save_u, save_v, save_t, save_qv, ca_deep,      &
+                                         errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
       integer, intent(in) :: im, levs
-      logical, intent(in) :: ldiag3d, cnvgwd, lgocart
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gv0
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gq0_water_vapor
+      logical, intent(in) :: ldiag3d, cnvgwd, lgocart, do_ca, isppt_deep
+      real(kind=kind_phys), dimension(im,levs), intent(in)    :: gu0
+      real(kind=kind_phys), dimension(im,levs), intent(in)    :: gv0
+      real(kind=kind_phys), dimension(im,levs), intent(in)    :: gt0
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_u
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_v
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_t
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_qv
+      real(kind=kind_phys), dimension(im),      intent(in)    :: ca_deep
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -57,7 +65,15 @@
       errmsg = ''
       errflg = 0
 
-      if (ldiag3d) then
+      if (do_ca) then
+        do k=1,levs
+          do i=1,im
+            gq0_water_vapor(i,k) = gq0_water_vapor(i,k)*(1.0 + ca_deep(i)/500.)
+          enddo
+        enddo
+      endif
+
+      if (ldiag3d .or. isppt_deep) then
         do k=1,levs
           do i=1,im
             save_t(i,k) = gt0(i,k)
@@ -69,7 +85,7 @@
         save_t(1:im,:) = gt0(1:im,:)
       endif   ! end if_ldiag3d/cnvgwd
 
-      if (ldiag3d .or. lgocart) then
+      if (ldiag3d .or. lgocart .or. isppt_deep) then
         save_qv(1:im,:) = gq0_water_vapor(1:im,:)
       endif   ! end if_ldiag3d/lgocart
 
@@ -87,6 +103,7 @@
     subroutine GFS_DCNV_generic_post_finalize ()
     end subroutine GFS_DCNV_generic_post_finalize
 
+#if 0
 !> \section arg_table_GFS_DCNV_generic_post_run Argument Table
 !! | local_name      | standard_name                                                                               | long_name                                                            | units         | rank | type              |    kind   | intent | optional |
 !! |-----------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
@@ -97,6 +114,8 @@
 !! | lgocart         | flag_gocart                                                                                 | flag for 3d diagnostic fields for gocart 1                           | flag          |    0 | logical           |           | in     | F        |
 !! | ras             | flag_for_ras_deep_convection                                                                | flag for ras convection scheme                                       | flag          |    0 | logical           |           | in     | F        |
 !! | cscnv           | flag_for_Chikira_Sugiyama_deep_convection                                                   | flag for Chikira-Sugiyama convection                                 | flag          |    0 | logical           |           | in     | F        |
+!! | do_ca           | flag_for_cellular_automata                                                                  | cellular automata main switch                                        | flag          |    0 | logical           |           | in     | F        |
+!! | isppt_deep      | flag_for_combination_of_sppt_with_isppt_deep                                                | switch for combination with isppt_deep.                              | flag          |    0 | logical           |           | in     | F        |
 !! | frain           | dynamics_to_physics_timestep_ratio                                                          | ratio of dynamics timestep to physics timestep                       | none          |    0 | real              | kind_phys | in     | F        |
 !! | rain1           | lwe_thickness_of_deep_convective_precipitation_amount                                       | deep convective rainfall amount on physics timestep                  | m             |    1 | real              | kind_phys | in     | F        |
 !! | dtf             | time_step_for_dynamics                                                                      | dynamics timestep                                                    | s             |    0 | real              | kind_phys | in     | F        |
@@ -138,21 +157,28 @@
 !! | cnvc            | convective_cloud_cover                                                                      | convective cloud cover                                               | frac          |    2 | real              | kind_phys | inout  | F        |
 !! | cnvw_phy_f3d    | convective_cloud_water_mixing_ratio_in_phy_f3d                                              | convective cloud water mixing ratio in the phy_f3d array             | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | cnvc_phy_f3d    | convective_cloud_cover_in_phy_f3d                                                           | convective cloud cover in the phy_f3d array                          | frac          |    2 | real              | kind_phys | inout  | F        |
+!! | cape            | convective_available_potential_energy_for_coupling                                          | convective available potential energy for coupling DH* CHECK THIS DOESN'T MAKE SENSE!!! *DH | m2 s-2        |    1 | real    | kind_phys | inout   | F        |
+!! | tconvtend       | tendency_of_air_temperature_due_to_deep_convection_for_coupling_on_physics_timestep         | tendency of air temperature due to deep convection                   | K             |    2 | real              | kind_phys | inout  | F        |
+!! | qconvtend       | tendency_of_water_vapor_specific_humidity_due_to_deep_convection_for_coupling_on_physics_timestep | tendency of specific humidity due to deep convection           | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
+!! | uconvtend       | tendency_of_x_wind_due_to_deep_convection_for_coupling_on_physics_timestep                  | tendency_of_x_wind_due_to_deep_convection                            | m s-1         |    2 | real              | kind_phys | inout  | F        |
+!! | vconvtend       | tendency_of_y_wind_due_to_deep_convection_for_coupling_on_physics_timestep                  | tendency_of_y_wind_due_to_deep_convection                            | m s-1         |    2 | real              | kind_phys | inout  | F        |
 !! | errmsg          | ccpp_error_message                                                                          | error message for error handling in CCPP                             | none          |    0 | character         | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                             | error flag for error handling in CCPP                                | flag          |    0 | integer           |           | out    | F        |
 !!
-    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, ras, cscnv,           &
-      frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0, gq0_water_vapor,   &
-      ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,                 &
-      rainc, cldwrk, cnvprcp, cnvprcpb, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf, dqdti, &
-      cnvqci, upd_mfi, dwn_mfi, det_mfi, cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, errmsg, errflg)
+#endif
+    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, ras, cscnv, do_ca,      &
+      isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
+      gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,  &
+      rainc, cldwrk, cnvprcp, cnvprcpb, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf, dqdti,   &
+      cnvqci, upd_mfi, dwn_mfi, det_mfi, cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d,                     &
+      cape, tconvtend, qconvtend, uconvtend, vconvtend, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
       integer, intent(in) :: im, levs
-      logical, intent(in) :: lssav, ldiag3d, lgocart, ras, cscnv
+      logical, intent(in) :: lssav, ldiag3d, lgocart, ras, cscnv, do_ca, isppt_deep
 
       real(kind=kind_phys), intent(in) :: frain, dtf
       real(kind=kind_phys), dimension(im), intent(in) :: rain1, cld1d
@@ -176,6 +202,8 @@
       ! as long as these do not get used when not allocated (it is still invalid Fortran code, though).
       real(kind=kind_phys), dimension(:,:), intent(inout) :: cnvw_phy_f3d, cnvc_phy_f3d
       ! *DH
+      real(kind=kind_phys), dimension(im), intent(inout) :: cape
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: tconvtend, qconvtend, uconvtend, vconvtend
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -187,23 +215,28 @@
       errflg = 0
 
       if (.not. ras .and. .not. cscnv) then
-       if (npdf3d == 3 .and. num_p3d == 4) then
-         do k=1,levs
-           do i=1,im
-             cnvw_phy_f3d(i,k) = cnvw(i,k)
-             cnvc_phy_f3d(i,k) = cnvc(i,k)
-             cnvw(i,k)         = 0.0
-             cnvc(i,k)         = 0.0
-           enddo
-         enddo
-       elseif (npdf3d == 0 .and. ncnvcld3d == 1) then
-         do k=1,levs
-           do i=1,im
-             cnvw_phy_f3d(i,k) = cnvw(i,k)
-             cnvw(i,k)         = 0.0
-           enddo
-         enddo
-       endif
+        if(do_ca) then
+          do i=1,im
+            cape(i)=cld1d(i)
+          enddo
+        endif
+        if (npdf3d == 3 .and. num_p3d == 4) then
+          do k=1,levs
+            do i=1,im
+              cnvw_phy_f3d(i,k) = cnvw(i,k)
+              cnvc_phy_f3d(i,k) = cnvc(i,k)
+              cnvw(i,k)         = 0.0
+              cnvc(i,k)         = 0.0
+            enddo
+          enddo
+        elseif (npdf3d == 0 .and. ncnvcld3d == 1) then
+          do k=1,levs
+            do i=1,im
+              cnvw_phy_f3d(i,k) = cnvw(i,k)
+              cnvw(i,k)         = 0.0
+            enddo
+          enddo
+        endif
       endif ! if (.not. ras .and. .not. cscnv)
 
       do i=1,im
@@ -221,13 +254,13 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
+!              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
               du3dt(i,k) = du3dt(i,k) + (gu0(i,k)-save_u(i,k)) * frain
               dv3dt(i,k) = dv3dt(i,k) + (gv0(i,k)-save_v(i,k)) * frain
 
-              upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
-              dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
-              det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
+!              upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
+!              dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
+!              det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
             enddo
           enddo
         endif ! if (ldiag3d)
@@ -235,17 +268,24 @@
       endif ! if (lssav)
 
       !update dqdt_v to include moisture tendency due to deep convection
-      if (lgocart) then
-        do k=1,levs
-          do i=1,im
-            dqdti  (i,k) = (gq0_water_vapor(i,k)  - save_qv(i,k)) * frain
-            upd_mfi(i,k) = upd_mfi(i,k) + ud_mf(i,k)   * frain
-            dwn_mfi(i,k) = dwn_mfi(i,k) + dd_mf(i,k)   * frain
-            det_mfi(i,k) = det_mfi(i,k) + dt_mf(i,k)   * frain
-            cnvqci (i,k) = cnvqci (i,k) + (clw_ice(i,k)+clw_liquid(i,k))*frain
-          enddo
-        enddo
-      endif ! if (lgocart)
+!      if (lgocart) then
+!        do k=1,levs
+!          do i=1,im
+!            dqdti  (i,k) = (gq0_water_vapor(i,k)  - save_qv(i,k)) * frain
+!            upd_mfi(i,k) = upd_mfi(i,k) + ud_mf(i,k)   * frain
+!            dwn_mfi(i,k) = dwn_mfi(i,k) + dd_mf(i,k)   * frain
+!            det_mfi(i,k) = det_mfi(i,k) + dt_mf(i,k)   * frain
+!            cnvqci (i,k) = cnvqci (i,k) + (clw_ice(i,k)+clw_liquid(i,k))*frain
+!          enddo
+!        enddo
+!      endif ! if (lgocart)
+
+      if (isppt_deep) then
+         tconvtend = gt0 - save_t
+         qconvtend = gq0_water_vapor - save_qv
+         uconvtend = gu0 - save_u
+         vconvtend = gv0 - save_v
+      endif
 
     end subroutine GFS_DCNV_generic_post_run
 

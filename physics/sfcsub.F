@@ -1,3 +1,13 @@
+!>\file sfcsub.F
+!! This file contains gribcode for each parameter.
+
+
+!>\defgroup mod_sfcsub_mod GFS sfcsub Module
+!!\ingroup Noah_LSM
+!> @{
+!>\ingroup mod_sfcsub
+!! This module contains grib code for each parameter-used in subroutines sfccycle()
+!! and setrmsk().
       module sfccyc_module
       implicit none
       save
@@ -28,6 +38,8 @@
       integer            :: soil_type_landice
 !
       end module sfccyc_module
+
+!>\ingroup mod_sfcsub
       subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc
      &,                   iy,im,id,ih,fh
      &,                   rla, rlo, slmask,orog,orog_uf,use_ufo,nst_anl
@@ -35,15 +47,17 @@
      &,                   swdfcs,slcfcs      
      &,                   vmnfcs,vmxfcs,slpfcs,absfcs
      &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs
-     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,f10m
+     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs
      &,                   vegfcs,vetfcs,sotfcs,alffcs
      &,                   cvfcs,cvbfcs,cvtfcs,me,nlunit
      &,                   sz_nml,input_nml_file
-     &,                   ialb,isot,ivegsrc)
+     &,                   ialb,isot,ivegsrc,tile_num_ch,i_index,j_index)
 !
       use machine , only : kind_io8,kind_io4
       use sfccyc_module
       implicit none
+      character(len=*), intent(in) :: tile_num_ch
+      integer,intent(in)           :: i_index(len), j_index(len)
       logical use_ufo, nst_anl
       real (kind=kind_io8) sllnd,slsea,aicice,aicsea,tgice,rlapse,
      &                     orolmx,orolmn,oroomx,oroomn,orosmx,
@@ -128,41 +142,41 @@
 
       integer num_parthds
 !
-!  this is a limited point version of surface program.
-!
-!  this program runs in two different modes:
-!
-!  1.  analysis mode (fh=0.)
-!
-!      this program merges climatology, analysis and forecast guess to create
-!      new surface fields.  if analysis file is given, the program
-!      uses it if date of the analysis matches with iy,im,id,ih (see note
-!      below).
-!
-!  2.  forecast mode (fh.gt.0.)
-!
-!      this program interpolates climatology to the date corresponding to the
-!      forecast hour.  if surface analysis file is given, for the corresponding
-!      dates, the program will use it.
-!
-!   note:
-!
-!      if the date of the analysis does not match given iy,im,id,ih, (and fh),
-!      the program searches an old analysis by going back 6 hours, then 12 hours,
-!      then one day upto nrepmx days (parameter statement in the subrotine fixrd.
-!      now defined as 8).  this allows the user to provide non-daily analysis to
-!      be used.  if matching field is not found, the forecast guess will be used.
-!
-!      use of a combined earlier surface analyses and current analysis is
-!      not allowed (as was done in the old version for snow analysis in which
-!      old snow analysis is used in combination with initial guess), except
-!      for sea surface temperature.  for sst anolmaly interpolation, you need to
-!      set lanom=.true. and must provide sst analysis at initial time.
-!
-!      if you want to do complex merging of past and present surface field analysis,
-!      you need to create a separate file that contains daily surface field.
-!
-!      for a dead start, do not supply fnbgsi or set fnbgsi='        '
+!>  this is a limited point version of surface program.
+!!
+!!  this program runs in two different modes:
+!!
+!!  1.  analysis mode (fh=0.)
+!!
+!!      this program merges climatology, analysis and forecast guess to create
+!!      new surface fields.  if analysis file is given, the program
+!!      uses it if date of the analysis matches with iy,im,id,ih (see note
+!!      below).
+!!
+!!  2.  forecast mode (fh.gt.0.)
+!!
+!!      this program interpolates climatology to the date corresponding to the
+!!      forecast hour.  if surface analysis file is given, for the corresponding
+!!      dates, the program will use it.
+!!
+!!   note:
+!!
+!!      if the date of the analysis does not match given iy,im,id,ih, (and fh),
+!!      the program searches an old analysis by going back 6 hours, then 12 hours,
+!!      then one day upto nrepmx days (parameter statement in the subrotine fixrd.
+!!      now defined as 8).  this allows the user to provide non-daily analysis to
+!!      be used.  if matching field is not found, the forecast guess will be used.
+!!
+!!      use of a combined earlier surface analyses and current analysis is
+!!      not allowed (as was done in the old version for snow analysis in which
+!!      old snow analysis is used in combination with initial guess), except
+!!      for sea surface temperature.  for sst anolmaly interpolation, you need to
+!!      set lanom=.true. and must provide sst analysis at initial time.
+!!
+!!      if you want to do complex merging of past and present surface field analysis,
+!!      you need to create a separate file that contains daily surface field.
+!!
+!!      for a dead start, do not supply fnbgsi or set fnbgsi='        '
 !
 !  lugb           is the unit number used in this subprogram
 !  len ...        number of points on which sfccyc operates
@@ -1060,7 +1074,7 @@
      &           kpdvmn,kpdvmx,kpdslp,kpdabs,
      &           deltsfc, lanom
      &,          imsk, jmsk, slmskh, rla, rlo, gausm, blnmsk, bltmsk,me
-     &,          lprnt, iprnt, fnalbc2, ialb)
+     &,          lprnt,iprnt,fnalbc2,ialb,tile_num_ch,i_index,j_index)
 !     if(lprnt) print *,'tsfclm=',tsfclm(iprnt),' tsfcl2=',tsfcl2(iprnt)
 !
 !  scale surface roughness and albedo to model required units
@@ -1798,9 +1812,16 @@
 !  make reverse orography correction to tg3
 !
         if (use_ufo) then
-          ztsfc = 1.0
           orogd = orog - orog_uf
-          call tsfcor(tg3fcs,orogd,slmask,ztsfc,len,-rlapse)
+!
+! The tiled version of the substrate temperature is properly
+! adjusted to the terrain.  Only invoke when using the old
+! global tg3 grib file.
+!
+          if ( index(fntg3c, "tileX.nc") == 0) then ! global file
+            ztsfc = 1.0
+            call tsfcor(tg3fcs,orogd,slmask,ztsfc,len,-rlapse)
+          endif
           ztsfc = 0.
           call tsfcor(tsffcs,orogd,slmask,ztsfc,len,-rlapse)
         else
@@ -2199,8 +2220,15 @@
 !
 !     if(lprnt) print *,' tsfbc=',tsfanl(iprnt)
       if (use_ufo) then
-        ztsfc = 1.
-        call tsfcor(tg3anl,orogd,slmask,ztsfc,len,rlapse)
+!
+! The tiled version of the substrate temperature is properly
+! adjusted to the terrain.  Only invoke when using the old
+! global tg3 grib file.
+!
+        if ( index(fntg3c, "tileX.nc") == 0) then ! global file
+          ztsfc = 1.
+          call tsfcor(tg3anl,orogd,slmask,ztsfc,len,rlapse)
+        endif
         ztsfc = 0.
         call tsfcor(tsfanl,orogd,slmask,ztsfc,len,rlapse)
       else
@@ -2501,6 +2529,10 @@
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
       return
       end subroutine sfccycle 
+
+!>\ingroup mod_sfcsub
+!! This subroutine counts number of points for the four surface
+!! conditions.
       subroutine count(slimsk,sno,ijmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2553,6 +2585,8 @@
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine monitr(lfld,fld,slimsk,sno,ijmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2617,6 +2651,9 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine figures out the day of the year given imo and idy.
       subroutine dayoyr(iyr,imo,idy,ldy)
       implicit none
       integer ldy,i,idy,iyr,imo
@@ -2632,6 +2669,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine hmskrd(lugb,imsk,jmsk,fnmskh,
      &                  kpds5,slmskh,gausm,blnmsk,bltmsk,me)
       use machine , only : kind_io8,kind_io4
@@ -2665,6 +2704,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine fixrdg(lugb,idim,jdim,fngrib,
      &                  kpds5,gdata,gaus,blno,blto,me)
       use machine      , only : kind_io8,kind_io4
@@ -2681,7 +2722,7 @@
       real (kind=kind_io8), allocatable :: data8(:)
       real (kind=kind_io4), allocatable :: data4(:)
 !
-      logical, allocatable :: lbms(:)
+      logical*1, allocatable :: lbms(:)
 !
       integer kpds(200),kgds(200)
       integer jpds(200),jgds(200), kpds0(200)
@@ -2780,6 +2821,9 @@
       deallocate(lbms)
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine get area of the grib record.
       subroutine getarea(kgds,dlat,dlon,rslat,rnlat,wlon,elon,ijordr
      &,                  me)
       use machine , only : kind_io8,kind_io4
@@ -2930,6 +2974,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine subst(data,imax,jmax,dlon,dlat,ijordr)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2990,6 +3036,10 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine conducts interpolation from lat/lon to Gaussian
+!! grid to other lat/lon grid.
       subroutine la2ga(regin,imxin,jmxin,rinlon,rinlat,rlon,rlat,inttyp,
      &                 gauout,len,lmask,rslmsk,slmask
      &,                outlat, outlon,me)
@@ -3527,6 +3577,8 @@
 !
       return
       end subroutine la2ga
+
+!>\ingroup mod_sfcsub
       subroutine maxmin(f,imax,kmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -3559,6 +3611,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine filanl(tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,
      &                  aisanl,
      &                  tg3anl,cvanl ,cvbanl,cvtanl,
@@ -3656,6 +3710,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine analy(lugb,iy,im,id,ih,fh,len,lsoil,
      &                 slmask,fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
      &                 fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,
@@ -4320,6 +4376,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine filfcs(tsffcs,wetfcs,snofcs,zorfcs,albfcs,
      &                  tg3fcs,cvfcs ,cvbfcs,cvtfcs,
      &                  cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,
@@ -4412,6 +4470,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine bktges(smcfcs,slianl,stcfcs,len,lsoil)
 !
       use machine , only : kind_io8,kind_io4
@@ -4440,6 +4500,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine rof01(aisfld,len,op,crit)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -4486,6 +4548,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine tsfcor(tsfc,orog,slmask,umask,len,rlapse)
 !
       use machine , only : kind_io8,kind_io4
@@ -4555,6 +4619,8 @@
       enddo
       return
       end subroutine snodpth
+
+!>\ingroup mod_sfcsub
       subroutine merge(len,lsoil,iy,im,id,ih,fh,deltsfc,
      &                 sihfcs,sicfcs,
      &                 vmnfcs,vmxfcs,slpfcs,absfcs,
@@ -5006,6 +5072,8 @@
 !$omp end parallel do
       return
       end subroutine merge
+
+!>\ingroup mod_sfcsub
       subroutine newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,
 !cwu [+1l] add sihnew,sicnew,sihanl,sicanl
      &                   sihnew,sicnew,sihanl,sicanl,      
@@ -5102,6 +5170,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcsnow(snoanl,slmask,aisanl,glacir,len,snoval,
      &                  landice,me)
       use machine , only : kind_io8,kind_io4
@@ -5148,6 +5218,8 @@
       endif
       return
       end subroutine qcsnow
+
+!>\ingroup mod_sfcsub
       subroutine qcsice(ais,glacir,amxice,aicice,aicsea,sllnd,slmask,
      &                  rla,rlo,len,me)
       use machine , only : kind_io8,kind_io4
@@ -5247,6 +5319,8 @@
 !     enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setlsi(slmask,aisfld,len,aicice,slifld)
 !
       use machine , only : kind_io8,kind_io4
@@ -5265,6 +5339,7 @@
       enddo
       return
       end
+!>\ingroup mod_sfcsub
       subroutine scale(fld,len,scl)
 !
       use machine , only : kind_io8,kind_io4
@@ -5276,6 +5351,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcmxmn(ttl,fld,slimsk,sno,iceflg,
      &                  fldlmx,fldlmn,fldomx,fldomn,fldimx,fldimn,
      &                  fldjmx,fldjmn,fldsmx,fldsmn,epsfld,
@@ -5693,6 +5770,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setzro(fld,eps,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -5704,6 +5783,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine getscv(snofld,scvfld,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -5717,6 +5798,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine getstc(tsffld,tg3fld,slifld,len,lsoil,stcfld,tsfimx)
 !
       use machine , only : kind_io8,kind_io4
@@ -5750,6 +5833,9 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine calculates layer soil wetness.
       subroutine getsmc(wetfld,len,lsoil,smcfld,me)
 !
       use machine , only : kind_io8,kind_io4
@@ -5768,6 +5854,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine usesgt(sig1t,slianl,tg3anl,len,lsoil,tsfanl,stcanl,
      &                  tsfimx)
 !
@@ -5791,6 +5879,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine snosfc(snoanl,tsfanl,tsfsmx,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5815,6 +5905,8 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine albocn(albclm,slmask,albomx,len)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5831,6 +5923,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcmxice(glacir,amxice,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5851,6 +5945,8 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcsli(slianl,slifcs,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5914,6 +6010,8 @@
 !1111 format(80i1)
 !     return
 !     end
+
+!>\ingroup mod_sfcsub
       subroutine qcbyfc(tsffcs,snofcs,qctsfs,qcsnos,qctsfi,
      &                  len,lsoil,snoanl,aisanl,slianl,tsfanl,albanl,
      &                  zoranl,smcanl,
@@ -6010,6 +6108,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setrmsk(kpds5,slmask,igaul,jgaul,wlon,rnlat,
      &                   data,imax,jmax,rlnout,rltout,lmask,rslmsk
      &,                  gaus,blno, blto, kgds1, kpds4, lbms)
@@ -6484,6 +6584,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,
      &                 wlon,rnlat,rlnout,rltout,gaus,blno, blto)
       use machine , only : kind_io8,kind_io4
@@ -6730,6 +6832,8 @@ cjfe
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine landtyp(vegtype,soiltype,slptype,slmask,len)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -6747,6 +6851,8 @@ cjfe
         endif
       enddo
       return
+
+!>\ingroup mod_sfcsub
       end subroutine landtyp
       subroutine gaulat(gaul,k)
 !
@@ -6772,6 +6878,9 @@ cjfe
       stop
       end
 !-----------------------------------------------------------------------
+!>\ingroup mod_sfcsub
+!! The subroutine conducts time interpolation of anomalies,
+!! and add initial anomaly to date interpolated climatology.
       subroutine anomint(tsfan0,tsfclm,tsfcl0,tsfanl,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -6789,6 +6898,8 @@ cjfe
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,
      &                 slmask,fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
      &                 fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
@@ -6805,10 +6916,13 @@ cjfe
      &                 kpdvmn,kpdvmx,kpdslp,kpdabs,
      &                 deltsfc, lanom
      &,                imsk, jmsk, slmskh, outlat, outlon
-     &,                gaus, blno, blto, me,lprnt,iprnt, fnalbc2, ialb)
+     &,                gaus, blno, blto, me,lprnt,iprnt, fnalbc2, ialb
+     &,                tile_num_ch, i_index, j_index)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
+      character(len=*), intent(in) :: tile_num_ch
+      integer, intent(in) :: i_index(len), j_index(len)
       real (kind=kind_io8) rjday,wei1x,wei2x,rjdayh,wei2m,wei1m,wei1s,
      &                     wei2s,fh,stcmon1s,blto,blno,deltsfc,rjdayh2
       real (kind=kind_io8) wei1y,wei2y
@@ -7147,11 +7261,15 @@ cjfe
         if (ialb == 1) then
 !cbosu    still need facsf and facwf.  read them from the production
 !cbosu    file
-!cbosu
-          call fixrdc(lugb,fnalbc2,kpdalf(1),kpd7,kpd9,slmask
-     &,               alf,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fnalbc2, "tileX.nc") == 0) then ! grib file
+            call fixrdc(lugb,fnalbc2,kpdalf(1),kpd7,kpd9,slmask
+     &,                 alf,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fnalbc2, tile_num_ch, i_index, j_index,
+     &                       kpdalf(1), alf(:,1), 1, len, me)
+          endif
         else
           call fixrdc(lugb,fnalbc,kpdalf(1),kpd7,kpd9,slmask
      &,               alf,len,iret
@@ -7167,11 +7285,16 @@ cjfe
 !  deep soil temperature
 !
         if(fntg3c(1:8).ne.'        ') then
-          kpd7=-1
-          call fixrdc(lugb,fntg3c,kpdtg3,kpd7,kpd9,slmask,
-     &                tg3,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fntg3c, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fntg3c,kpdtg3,kpd7,kpd9,slmask,
+     &                  tg3,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fntg3c, tile_num_ch, i_index, j_index,
+     &                       kpdtg3, tg3, 1, len, me)
+          endif
         endif
 !
 !  vegetation type
@@ -7180,15 +7303,21 @@ cjfe
 !  dataset must be selected.
 !
         if(fnvetc(1:8).ne.'        ') then
-          kpd7=-1
-          call fixrdc(lugb,fnvetc,kpdvet,kpd7,kpd9,slmask,
-     &                vet,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fnvetc, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fnvetc,kpdvet,kpd7,kpd9,slmask,
+     &                  vet,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+            landice_cat=13
+            if (maxval(vet)> 13.0) landice_cat=15
+          else  
+            call fixrdc_tile(fnvetc, tile_num_ch, i_index, j_index,
+     &                       kpdvet, vet, 1, len, me)
+            landice_cat=15
+          endif
           if (me .eq. 0) write(6,*) 'climatological vegetation',
      &                              ' type read in.'
-          landice_cat=13
-          if (maxval(vet)> 13.0) landice_cat=15
         elseif(index(fnsmcc,'soilmgldas') /= 0) then ! new soil moisture climo
           if (me .eq. 0) write(6,*) 'fatal error: must choose'
           if (me .eq. 0) write(6,*) 'climatological veg type when'
@@ -7199,11 +7328,16 @@ cjfe
 !  soil type
 !
         if(fnsotc(1:8).ne.'        ') then
-          kpd7=-1
-          call fixrdc(lugb,fnsotc,kpdsot,kpd7,kpd9,slmask,
-     &                sot,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fnsotc, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fnsotc,kpdsot,kpd7,kpd9,slmask,
+     &                  sot,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fnsotc, tile_num_ch, i_index, j_index,
+     &                       kpdsot, sot, 1, len, me)
+          endif
           if (me .eq. 0) write(6,*) 'climatological soil type read in.'
         endif
 
@@ -7211,44 +7345,65 @@ cjfe
 !  min vegetation cover
 !
         if(fnvmnc(1:8).ne.'        ') then
-          kpd7=-1
-          call fixrdc(lugb,fnvmnc,kpdvmn,kpd7,kpd9,slmask,
-     &                vmn,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fnvmnc, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fnvmnc,kpdvmn,kpd7,kpd9,slmask,
+     &                  vmn,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fnvmnc, tile_num_ch, i_index, j_index,
+     &                       257, vmn, 99, len, me)
+
+          endif
           if (me .eq. 0) write(6,*) 'climatological shdmin read in.'
         endif
 !
 !  max vegetation cover
 !
         if(fnvmxc(1:8).ne.'        ') then
-          kpd7=-1
-          call fixrdc(lugb,fnvmxc,kpdvmx,kpd7,kpd9,slmask,
-     &                vmx,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fnvmxc, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fnvmxc,kpdvmx,kpd7,kpd9,slmask,
+     &                  vmx,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fnvmxc, tile_num_ch, i_index, j_index,
+     &                       256, vmx, 99, len, me)
+          endif
           if (me .eq. 0) write(6,*) 'climatological shdmax read in.'
         endif
 !
 !  slope type
 !
         if(fnslpc(1:8).ne.'        ') then
-          kpd7=-1
-          call fixrdc(lugb,fnslpc,kpdslp,kpd7,kpd9,slmask,
-     &                slp,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fnslpc, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fnslpc,kpdslp,kpd7,kpd9,slmask,
+     &                  slp,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fnslpc, tile_num_ch, i_index, j_index,
+     &                       kpdslp, slp, 1, len, me)
+          endif
           if (me .eq. 0) write(6,*) 'climatological slope read in.'
         endif
 !
 !  max snow albeod
 !
         if(fnabsc(1:8).ne.'        ') then
-          kpd7=-1
-          call fixrdc(lugb,fnabsc,kpdabs,kpd7,kpd9,slmask,
-     &                absm,len,iret
-     &,               imsk, jmsk, slmskh, gaus,blno, blto
-     &,               outlat, outlon, me)
+          if ( index(fnabsc, "tileX.nc") == 0) then ! grib file
+            kpd7=-1
+            call fixrdc(lugb,fnabsc,kpdabs,kpd7,kpd9,slmask,
+     &                  absm,len,iret
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+     &,                 outlat, outlon, me)
+          else
+            call fixrdc_tile(fnabsc, tile_num_ch, i_index, j_index,
+     &                       kpdabs, absm, 1, len, me)
+          endif
           if (me .eq. 0) write(6,*) 'climatological snoalb read in.'
         endif
 !clu ----------------------------------------------------------------------
@@ -7294,13 +7449,20 @@ cjfe
 !cbosu
 !cbosu  new snowfree albedo database is monthly.  
           if (ialb == 1) then
-            kpd7=-1
-            do k = 1, 4
-              call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
-     &                    alb(1,k,nn),len,iret
-     &,                   imsk, jmsk, slmskh, gaus,blno, blto
-     &,                   outlat, outlon, me)
-            enddo
+            if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
+              kpd7=-1
+              do k = 1, 4
+                call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
+     &                      alb(1,k,nn),len,iret
+     &,                     imsk, jmsk, slmskh, gaus,blno, blto
+     &,                     outlat, outlon, me)
+              enddo
+            else
+              do k = 1, 4
+                call fixrdc_tile(fnalbc, tile_num_ch, i_index, j_index,
+     &                           kpdalb(k), alb(:,k,nn), mon, len, me)
+              enddo
+            endif
           endif
 
 !     if(lprnt) print *,' mon1=',mon1,' mon2=',mon2
@@ -7458,11 +7620,16 @@ cjfe
 !  vegetation cover
 !
           if(fnvegc(1:8).ne.'        ') then
-            kpd7=-1
-            call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
-     &                  veg(1,nn),len,iret
-     &,                 imsk, jmsk, slmskh, gaus,blno, blto
-     &,                 outlat, outlon, me)
+            if ( index(fnvegc, "tileX.nc") == 0) then ! grib file
+              kpd7=-1
+              call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
+     &                    veg(1,nn),len,iret
+     &,                   imsk, jmsk, slmskh, gaus,blno, blto
+     &,                   outlat, outlon, me)
+            else
+              call fixrdc_tile(fnvegc, tile_num_ch, i_index, j_index,
+     &                         kpdveg, veg(:,nn), mon, len, me)
+            endif
             if (me .eq. 0) write(6,*) 'climatological vegetation',
      &                                ' cover read in for mon=',mon
           endif
@@ -7568,13 +7735,20 @@ cjfe
           if (ialb == 1) then
             if (me == 0) print*,'bosu 2nd time in clima for month ',
      &                   mon, k1,k2
-            kpd7=-1
-            do k = 1, 4
-              call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
-     &                    alb(1,k,nn),len,iret
-     &,                   imsk, jmsk, slmskh, gaus,blno, blto
-     &,                   outlat, outlon, me)
-            enddo
+            if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
+              kpd7=-1
+              do k = 1, 4
+                call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
+     &                      alb(1,k,nn),len,iret
+     &,                     imsk, jmsk, slmskh, gaus,blno, blto
+     &,                     outlat, outlon, me)
+              enddo
+            else
+              do k = 1, 4
+                call fixrdc_tile(fnalbc, tile_num_ch, i_index, j_index,
+     &                           kpdalb(k), alb(:,k,nn), mon, len, me)
+              enddo
+            endif
           endif
 !
 !  tsf at the current time t
@@ -7691,11 +7865,16 @@ cjfe
 !  vegetation cover
 !
           if(fnvegc(1:8).ne.'        ') then
-            kpd7=-1
-            call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
-     &                  veg(1,nn),len,iret
-     &,                 imsk, jmsk, slmskh, gaus,blno, blto
-     &,                 outlat, outlon, me)
+            if ( index(fnvegc, "tileX.nc") == 0) then ! grib file
+              kpd7=-1
+              call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
+     &                    veg(1,nn),len,iret
+     &,                   imsk, jmsk, slmskh, gaus,blno, blto
+     &,                   outlat, outlon, me)
+            else
+              call fixrdc_tile(fnvegc, tile_num_ch, i_index, j_index,
+     &                         kpdveg, veg(:,nn), mon, len, me)
+            endif
 !           if (me .eq. 0) write(6,*) 'climatological vegetation',
 !    &                                ' cover read in for mon=',mon
           endif
@@ -7887,6 +8066,162 @@ cjfe
 !
       return
       end subroutine clima
+
+!>\ingroup mod_sfcsub
+      subroutine fixrdc_tile(filename_raw, tile_num_ch,
+     &                       i_index, j_index, kpds,
+     &                       var, mon, npts, me)
+      use netcdf
+      use machine ,      only : kind_io8
+      implicit none
+      character(len=*), intent(in)   :: filename_raw
+      character(len=*), intent(in)   :: tile_num_ch
+      integer, intent(in)            :: npts, me, kpds, mon
+      integer, intent(in)            :: i_index(npts)
+      integer, intent(in)            :: j_index(npts)
+      real(kind_io8), intent(out)    :: var(npts)
+      character(len=500)             :: filename
+      character(len=80)              :: errmsg
+      integer                        :: i, ii, ncid, t
+      integer                        :: error, id_dim
+      integer                        :: nx, ny, num_times
+      integer                        :: id_var
+      real(kind=4), allocatable      :: dummy(:,:,:)
+      ii=index(filename_raw,"tileX")
+
+      do i = 1, len(filename)
+        filename(i:i) = " "
+      enddo
+
+      filename = filename_raw(1:ii-1) // tile_num_ch // ".nc"
+
+      if (me == 0) print*, ' in fixrdc_tile for mon=',mon,
+     & ' filename=', trim(filename)
+
+      error=nf90_open(trim(filename), nf90_nowrite, ncid)
+      if (error /= nf90_noerr) call netcdf_err(error)
+
+      error=nf90_inq_dimid(ncid, 'nx', id_dim)
+      if (error /= nf90_noerr) call netcdf_err(error)
+      error=nf90_inquire_dimension(ncid,id_dim,len=nx)
+      if (error /= nf90_noerr) call netcdf_err(error)
+
+      error=nf90_inq_dimid(ncid, 'ny', id_dim)
+      if (error /= nf90_noerr) call netcdf_err(error)
+      error=nf90_inquire_dimension(ncid,id_dim,len=ny)
+      if (error /= nf90_noerr) call netcdf_err(error)
+
+      error=nf90_inq_dimid(ncid, 'time', id_dim)
+      if (error /= nf90_noerr) call netcdf_err(error)
+      error=nf90_inquire_dimension(ncid,id_dim,len=num_times)
+      if (error /= nf90_noerr) call netcdf_err(error)
+
+      select case (kpds)
+        case(11)
+          error=nf90_inq_varid(ncid, 'substrate_temperature', id_var)
+        case(87)
+          error=nf90_inq_varid(ncid, 'vegetation_greenness', id_var)
+        case(159)
+          error=nf90_inq_varid(ncid, 'maximum_snow_albedo', id_var)
+        case(189)
+          error=nf90_inq_varid(ncid, 'visible_black_sky_albedo', id_var)
+        case(190)
+          error=nf90_inq_varid(ncid, 'visible_white_sky_albedo', id_var)
+        case(191)
+          error=nf90_inq_varid(ncid, 'near_IR_black_sky_albedo', id_var)
+        case(192)
+          error=nf90_inq_varid(ncid, 'near_IR_white_sky_albedo', id_var)
+        case(214)
+          error=nf90_inq_varid(ncid, 'facsf', id_var)
+        case(224)
+          error=nf90_inq_varid(ncid, 'soil_type', id_var)
+        case(225)
+          error=nf90_inq_varid(ncid, 'vegetation_type', id_var)
+        case(236)
+          error=nf90_inq_varid(ncid, 'slope_type', id_var)
+        case(256:257)
+          error=nf90_inq_varid(ncid, 'vegetation_greenness', id_var)
+        case default
+          print*,'fatal error in fixrdc_tile of sfcsub.F.'
+          print*,'unknown variable.'
+          call abort
+      end select
+      if (error /= nf90_noerr) call netcdf_err(error)
+
+      allocate(dummy(nx,ny,1))
+
+      if (kpds == 256) then ! max veg greenness
+
+        var = -9999.
+        do t = 1, num_times
+          error=nf90_get_var(ncid, id_var, dummy, start=(/1,1,t/),
+     &                     count=(/nx,ny,1/) )
+          if (error /= nf90_noerr) call netcdf_err(error)
+          do ii = 1,npts
+            var(ii) = max(var(ii), dummy(i_index(ii),j_index(ii),1))
+          enddo
+        enddo
+
+      elseif (kpds == 257) then ! min veg greenness
+
+        var = 9999.
+        do t = 1, num_times
+          error=nf90_get_var(ncid, id_var, dummy, start=(/1,1,t/),
+     &                     count=(/nx,ny,1/) )
+          if (error /= nf90_noerr) call netcdf_err(error)
+          do ii = 1, npts
+            var(ii) = min(var(ii), dummy(i_index(ii),j_index(ii),1))
+          enddo
+        enddo
+
+      else
+
+        error=nf90_get_var(ncid, id_var, dummy, start=(/1,1,mon/),
+     &                   count=(/nx,ny,1/) )
+        if (error /= nf90_noerr) call netcdf_err(error)
+
+        do ii = 1, npts
+          var(ii) = dummy(i_index(ii),j_index(ii),1)
+        enddo
+
+      endif
+
+      deallocate(dummy)
+
+      error=nf90_close(ncid)
+
+      select case (kpds)
+        case(159)  ! max snow alb
+          var = var * 100.0
+        case(214)  ! facsf
+          where (var < 0.0) var = 0.0
+          var = var * 100.0
+        case(189:192)
+          var = var * 100.0
+        case(256:257)
+          var = var * 100.0
+      end select
+
+      return
+
+      end subroutine fixrdc_tile
+
+!>\ingroup mod_sfcsub
+      subroutine netcdf_err(error)
+
+      use netcdf
+      implicit none
+
+      integer,intent(in) :: error
+      character(len=256) :: errmsg
+
+      errmsg = nf90_strerror(error)
+      print*,'fatal error in sfcsub.F: ', trim(errmsg)
+      call abort
+
+      end subroutine netcdf_err
+
+!>\ingroup mod_sfcsub
       subroutine fixrdc(lugb,fngrib,kpds5,kpds7,mon,slmask,
      &                 gdata,len,iret
      &,                imsk, jmsk, slmskh, gaus,blno, blto
@@ -7916,7 +8251,7 @@ cjfe
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
-      logical, allocatable :: lbms(:)
+      logical*1, allocatable :: lbms(:)
 !
       integer, intent(in) :: kpds7
       integer kpds(1000),kgds(1000)
@@ -8063,6 +8398,8 @@ cjfe
       deallocate(lbms)
       return
       end subroutine fixrdc
+
+!>\ingroup mod_sfcsub
       subroutine fixrda(lugb,fngrib,kpds5,slmask,
      &                  iy,im,id,ih,fh,gdata,len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
@@ -8382,6 +8719,8 @@ cjfe
       deallocate(data8)
       return
       end subroutine fixrda
+
+!>\ingroup mod_sfcsub
       subroutine snodpth2(glacir,snwmax,snoanl, len, me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -8403,3 +8742,4 @@ cjfe
       enddo
       return
       end
+!>@}

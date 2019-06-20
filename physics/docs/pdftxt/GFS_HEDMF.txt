@@ -14,13 +14,12 @@ moisture, and momentum due to vertical diffusion throughout the column
 starting from the initial first-order PBL scheme of Troen and Mahrt (1986) 
 \cite troen_and_mahrt_1986, implemented according to Hong and Pan (1996) 
 \cite hong_and_pan_1996 and modified by Han and Pan (2011) 
-\cite han_and_pan_2011 and Han et al.(2015) \cite han_et_al_2015 to 
+\cite han_and_pan_2011 and Han et al.(2016) \cite Han_2016 to 
 include top-down mixing due to stratocumulus layers from Lock et al. (2000) 
 \cite lock_et_al_2000 and replacement of counter-gradient terms with a mass 
 flux scheme according to Siebesma et al.(2007) \cite siebesma_et_al_2007 
 and Soares et al. (2004) \cite soares_et_al_2004. Recently, heating due to 
-TKE dissipation was also added according to Han et al.(2015) 
-\cite han_et_al_2015.
+TKE dissipation was also added according to Han et al.(2016) \cite Han_2016.
 
 This subroutine contains all of logic for the Hybrid EDMF PBL scheme except 
 for the calculation of the updraft properties and mass flux. The scheme 
@@ -45,7 +44,7 @@ scheme of Siebesma et al. (2007) \cite siebesma_et_al_2007 . In order to
 return time tendencies, a fully implicit solution is found using tridiagonal 
 matrices, and time tendencies are "backed out." Before returning, the time 
 tendency of temperature is updated to reflect heating due to TKE 
-dissipation following Han et al. (2015) \cite han_et_al_2015 .
+dissipation following Han et al. (2016) \cite Han_2016 .
 
 \section intra_pbl Intraphysics Communication
 \ref arg_table_hedmf_run

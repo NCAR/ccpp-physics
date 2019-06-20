@@ -77,6 +77,8 @@
 !! | t1             | air_temperature_updated_by_physics                             | updated temperature                                                                                      | K           |    2 | real      | kind_phys | inout  | F        |
 !! | u1             | x_wind_updated_by_physics                                      | updated x-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
 !! | v1             | y_wind_updated_by_physics                                      | updated y-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
+!! | do_ca          | flag_for_cellular_automata                                     | cellular automata main switch                                                                            | flag        |    0 | logical   |           | in     | F        |
+!! | ca_deep        | fraction_of_cellular_automata_for_deep_convection              | fraction of cellular automata for deep convection                                                        | frac        |    1 | real      | kind_phys | in     | F        |
 !! | cldwrk         | cloud_work_function                                            | cloud work function                                                                                      | m2 s-2      |    1 | real      | kind_phys | out    | F        |
 !! | rn             | lwe_thickness_of_deep_convective_precipitation_amount          | deep convective rainfall amount on physics timestep                                                      | m           |    1 | real      | kind_phys | out    | F        |
 !! | kbot           | vertical_index_at_cloud_base                                   | index for cloud base                                                                                     | index       |    1 | integer   |           | out    | F        |
@@ -134,7 +136,7 @@
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
      &    prslp,psp,phil,qtr,q1,t1,u1,v1,                               &
-     &    cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                       &
+     &    do_ca,ca_deep,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,         &
      &    dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                       &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
@@ -148,29 +150,31 @@
 !
       integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
-      real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,
+      real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),
+      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
+      real(kind=kind_phys), intent(in) :: ca_deep(ix)
+      logical, intent(in)  :: do_ca
 
       integer, intent(inout)  :: kcnv(im)
-      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),
-     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),
+      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
+     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),                  &
      &   cnvw(ix,km),  cnvc(ix,km)
 
       integer, intent(out) :: kbot(im), ktop(im)
-      real(kind=kind_phys), intent(out) :: cldwrk(im),
-     &   rn(im),
+      real(kind=kind_phys), intent(out) :: cldwrk(im),                  &
+     &   rn(im),                                                        &
      &   ud_mf(im,km),dd_mf(im,km), dt_mf(im,km)
 
-      real(kind=kind_phys), dimension(im,km), intent(inout) :: 
-     &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn
+      real(kind=kind_phys), dimension(im,km), intent(inout) ::          &
+     &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn                    &
      &,  cnv_fice, cnv_ndrop, cnv_nice, cf_upi
       integer :: mp_phys, mp_phys_mg
 
-      real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,
-     &                     betal,   betas,   asolfac,
+      real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
+     &                     betal,   betas,   asolfac,                   &
      &                     evfact,  evfactl, pgcon
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
