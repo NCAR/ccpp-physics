@@ -116,7 +116,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
                           pdftxt/GFS_RAYLEIGH.txt \
-                          pgftxt/GFS_SAMF.txt     \
+                          pdftxt/GFS_SAMF.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_GWDC.txt     \
                           pdftxt/GFS_SAMFshal.txt \
@@ -137,6 +137,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../gfdl_fv_sat_adj.F90    \
 ### time_vary
                         ../GFS_phys_time_vary.fv3.F90 \
+                        ../GFS_rad_time_vary.fv3.F90  \
                         ../ozne_def.f                 \
                         ../ozinterp.f90               \
                         ../h2o_def.f                 \
@@ -147,7 +148,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../iccninterp.F90          \
                         ../sfcsub.F  \ 
                         ../gcycle.F90  \
-
 ### Radiation
                         ../radlw_main.f                  \
                         ../radsw_main.f                  \
