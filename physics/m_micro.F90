@@ -20,7 +20,7 @@ contains
 !! | local_name             | standard_name                                   | long_name                                                                                   | units       | rank |  type      |   kind    | intent | optional |
 !! |------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | imp_physics            | flag_for_microphysics_scheme                    | choice of microphysics scheme                                                               | flag        |    0 | integer    |           | in     | F        |
-!! | imp_physics_mg         | flag_for_morrison_gettelman_microphysics_scheme | choice of Morrison-Gettelman rmicrophysics scheme                                           | flag        |    0 | integer    |           | in     | F        |
+!! | imp_physics_mg         | flag_for_morrison_gettelman_microphysics_scheme | choice of Morrison-Gettelman microphysics scheme                                            | flag        |    0 | integer    |           | in     | F        |
 !! | fprcp                  | number_of_frozen_precipitation_species          | number of frozen precipitation species                                                      | count       |    0 | integer    |           | in     | F        |
 !! | gravit                 | gravitational_acceleration                      | gravitational acceleration                                                                  | m s-2       |    0 | real       | kind_phys | in     | F        |
 !! | rair                   | gas_constant_dry_air                            | ideal gas constant for dry air                                                              | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
@@ -260,7 +260,7 @@ end subroutine m_micro_init
        use aer_cloud,     only: AerProps, getINsubset,init_aer,         &
      &                          aerosol_activate,AerConversion1
        use cldmacro,      only: macro_cloud,meltfrz_inst,update_cld,    &
-     &                          meltfrz_inst
+     &                          meltfrz_inst, fix_up_clouds_2M
        use cldwat2m_micro,only: mmicro_pcond
        use micro_mg2_0,   only: micro_mg_tend2_0 => micro_mg_tend, qcvar2 => qcvar
        use micro_mg3_0,   only: micro_mg_tend3_0 => micro_mg_tend, qcvar3 => qcvar
@@ -284,7 +284,8 @@ end subroutine m_micro_init
        real,   parameter  :: one=1.0, oneb3=one/3.0, onebcp=one/cp,      &
      &                       kapa=rgas*onebcp,  cpbg=cp/grav,            &
      &                       lvbcp=hvap*onebcp, lsbcp=(hvap+hfus)*onebcp,&
-                             qsmall=1.e-14, rainmin = 1.0e-13
+     &                       qsmall=1.e-14, rainmin = 1.0e-13,           &
+     &                       fourb3=4.0/3.0, RL_cub=1.0e-15, nmin=1.0
 
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag
@@ -627,6 +628,32 @@ end subroutine m_micro_init
        DT_MOIST = dt_i
        dt_r8    = dt_i
 
+       if (kdt == 1) then
+         DO K=1, LM
+           DO I = 1,IM
+             CALL fix_up_clouds_2M(Q1(I,K),   TEMP(i,k), QLLS(I,K),     &
+     &                            QILS(I,K), CLLS(I,K), QLCN(I,K),      &
+     &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
+     &                            NCPI(I,K), qc_min)
+             if (rnw(i,k) <= qc_min(1)) then
+               ncpl(i,k) = 0.0
+             elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+               ncpl(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+             endif
+             if (snw(i,k) <= qc_min(2)) then
+               ncpl(i,k) = 0.0
+             elseif (ncps(i,k) <= nmin) then
+               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+             endif
+             if (qgl(i,k) <= qc_min(2)) then
+               ncgl(i,k) = 0.0
+             elseif (ncgl(i,k) <= nmin) then
+               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+             endif
+
+           enddo
+         enddo
+       endif
        do i=1,im
          KCBL(i)     = max(LM-KCBL(i),10)
          KCT(i)      = 10
@@ -1743,15 +1770,39 @@ end subroutine m_micro_init
 !TVQX1    = SUM( (  Q1 +  QL_TOT + QI_TOT(1:im,:,:))*DM, 3) &
 
 
-      if (.not. skip_macro) then
+      if (skip_macro) then
+        do k=1,lm
+          do i=1,im
+            CALL fix_up_clouds_2M(Q1(I,K),   TEMP(i,k), QLLS(I,K),      &
+     &                            QILS(I,K), CLLS(I,K), QLCN(I,K),      &
+     &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
+     &                            NCPI(I,K), qc_min)
+            if (rnw(i,k) <= qc_min(1)) then
+              ncpl(i,k) = 0.0
+            elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+              ncpl(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+            endif
+            if (snw(i,k) <= qc_min(2)) then
+              ncpl(i,k) = 0.0
+            elseif (ncps(i,k) <= nmin) then
+              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+            if (qgl(i,k) <= qc_min(2)) then
+              ncgl(i,k) = 0.0
+            elseif (ncgl(i,k) <= nmin) then
+              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+          enddo
+        enddo
+      else
         do k=1,lm
           do i=1,im
             QLCN(i,k) = QL_TOT(i,k) * FQA(i,k)
             QLLS(i,k) = QL_TOT(i,k) - QLCN(i,k)
             QICN(i,k) = QI_TOT(i,k) * FQA(i,k)
             QILS(i,k) = QI_TOT(i,k) - QICN(i,k)
-          end do
-        end do
+          enddo
+        enddo
 
 !>  - Call update_cld()
         call update_cld(im, lm,  DT_MOIST,   ALPHT_X, qc_min            &
@@ -1765,8 +1816,24 @@ end subroutine m_micro_init
           do i=1,im
             QL_TOT(I,K) = QLLS(I,K) + QLCN(I,K)
             QI_TOT(I,K) = QILS(I,K) + QICN(I,K)
-          end do
-        end do
+!
+            if (rnw(i,k) <= qc_min(1)) then
+              ncpl(i,k) = 0.0
+            elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+              ncpl(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+            endif
+            if (snw(i,k) <= qc_min(2)) then
+              ncpl(i,k) = 0.0
+            elseif (ncps(i,k) <= nmin) then
+              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+            if (qgl(i,k) <= qc_min(2)) then
+              ncgl(i,k) = 0.0
+            elseif (ncgl(i,k) <= nmin) then
+              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+          enddo
+        enddo
         deallocate(CNV_MFD,CNV_FICE,CNV_NDROP,CNV_NICE)
 !       deallocate(CNV_MFD,CNV_PRC3,CNV_FICE,CNV_NDROP,CNV_NICE)
       endif
@@ -1806,11 +1873,17 @@ end subroutine m_micro_init
              qi_o(i,k)    = QI_TOT(i,ll)
            END DO
          END DO
-         if (.not. skip_macro) then
+         if (skip_macro) then
            DO K=1, LM
              ll = lm-k+1
              DO I = 1,IM
-!              CLLS_io(i,k) = max(0.0, min(CLLS(i,ll)+CLCN(i,ll),1.0))
+               CLLS_io(i,k) = max(0.0, min(CLLS(i,ll)+CLCN(i,ll),1.0))
+             enddo
+           enddo
+         else
+           DO K=1, LM
+             ll = lm-k+1
+             DO I = 1,IM
                CLLS_io(i,k) = CLLS(i,ll)
              enddo
            enddo
@@ -1832,15 +1905,21 @@ end subroutine m_micro_init
              qi_o(i,k)    = QI_TOT(i,k)
            END DO
          END DO
-         if (.not. skip_macro) then
+         if (skip_macro) then
            DO K=1, LM
              DO I = 1,IM
-!              CLLS_io(i,k) = max(0.0, min(CLLS(i,k)+CLCN(i,k),1.0))
+               CLLS_io(i,k) = max(0.0, min(CLLS(i,k)+CLCN(i,k),1.0))
+             enddo
+           enddo
+         else
+           DO K=1, LM
+             DO I = 1,IM
                CLLS_io(i,k) = CLLS(i,k)
              enddo
            enddo
          endif
-       endif
+       endif       ! end of flipv if
+
        DO I = 1,IM
          tx1     = LS_PRC2(i) + LS_SNR(i)
          rn_o(i) = tx1 * dt_i * 0.001

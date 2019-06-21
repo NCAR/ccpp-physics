@@ -33,7 +33,7 @@ end subroutine shoc_finalize
 !! | imp_physics_gfdl           | flag_for_gfdl_microphysics_scheme                                           | choice of GFDL microphysics scheme                                                          | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_zhao_carr      | flag_for_zhao_carr_microphysics_scheme                                      | choice of Zhao-Carr microphysics scheme                                                     | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_zhao_carr_pdf  | flag_for_zhao_carr_pdf_microphysics_scheme                                  | choice of Zhao-Carr microphysics scheme with PDF clouds                                     | flag          |    0 | integer    |           | in     | F        |
-!! | imp_physics_mg             | flag_for_morrison_gettelman_microphysics_scheme                             | choice of Morrison-Gettelman rmicrophysics scheme                                           | flag          |    0 | integer    |           | in     | F        |
+!! | imp_physics_mg             | flag_for_morrison_gettelman_microphysics_scheme                             | choice of Morrison-Gettelman microphysics scheme                                            | flag          |    0 | integer    |           | in     | F        |
 !! | fprcp                      | number_of_frozen_precipitation_species                                      | number of frozen precipitation species                                                      | count         |    0 | integer    |           | in     | F        |
 !! | tcr                        | cloud_phase_transition_threshold_temperature                                | threshold temperature below which cloud starts to freeze                                    | K             |    0 | real       | kind_phys | in     | F        |
 !! | tcrf                       | cloud_phase_transition_denominator                                          | denominator in cloud phase transition = 1/(tcr-tf)                                          | K-1           |    0 | real       | kind_phys | in     | F        |
@@ -110,7 +110,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
-   real(kind=kind_phys), parameter :: epsq    = 1.e-20
+   real(kind=kind_phys), parameter :: epsq = 1.d-20
 
    integer :: i, k
 
@@ -125,7 +125,6 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
 
     if (shocaftcnv) then
       if (imp_physics == imp_physics_mg) then
-       skip_macro = do_shoc
        if (abs(fprcp) == 1 .or. mg3_as_mg2) then
          do k=1,nzm
            do i=1,nx
@@ -147,11 +146,10 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
       endif
     else
       if (imp_physics == imp_physics_mg) then
-       skip_macro = do_shoc
        do k=1,nzm
          do i=1,nx
-           ! DH* THESE ARE NOT IN THE ORIGINAL CODE (AND THEY WERE NEVER) ::: clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
-           ! DH* THESE ARE NOT IN THE ORIGINAL CODE (AND THEY WERE NEVER) ::: clw_liquid(i,k) = gq0_cloud_liquid(i,k)              ! water
+           !clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
+           !clw_liquid(i,k) = gq0_cloud_liquid(i,k)              ! water
            !GF - since gq0(ntlnc/ntinc) are passed in directly, no need to copy
            !ncpl(i,k)  = Stateout%gq0(i,k,ntlnc)
            !ncpi(i,k)  = Stateout%gq0(i,k,ntinc)
@@ -172,7 +170,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
              !qrn(i,k)    = gq0_rain(i,k)
              qsnw(i,k)    = gq0_snow(i,k) + gq0_graupel(i,k)
              qgl(i,k)     = 0.0
-             clw_ice(i,k) = clw_ice(i,k) + gq0_graupel(i,k)
+             !clw_ice(i,k) = clw_ice(i,k) + gq0_graupel(i,k)
            enddo
          enddo
        endif
@@ -221,18 +219,18 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
               cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec, .false., 1, ncpl, ncpi, &
               con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt)
 
-    if (.not.shocaftcnv) then
-      if (imp_physics == imp_physics_mg .and. fprcp > 1) then
-        do k=1,nzm
-          do i=1,nx
-            clw_ice(i,k) = clw_ice(i,k) - gq0_graupel(i,k)
-          enddo
-        enddo
-      endif
-    endif ! .not. shocaftcnv
+    !if (.not.shocaftcnv) then
+    !  if (imp_physics == imp_physics_mg .and. fprcp > 1) then
+    !    do k=1,nzm
+    !      do i=1,nx
+    !        clw_ice(i,k) = clw_ice(i,k) - gq0_graupel(i,k)
+    !      enddo
+    !    enddo
+    !  endif
+    !endif ! .not. shocaftcnv
 
     !GF since gq0(ntlnc/ntinc) are passed in directly, no need to copy back
-    !  if (ntlnc > 0 .and. ntinc > 0 .and. ncld >= 2) then
+    !  if (imp_physics == Model%imp_physics_mg) then
     !    do k=1,nzm
     !      do i=1,nx
     !        Stateout%gq0(i,k,ntlnc) = ncpl(i,k)

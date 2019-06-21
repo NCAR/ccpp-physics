@@ -40,7 +40,7 @@
 !! | q1             | vertically_diffused_tracer_concentration                                    | tracer concentration diffused by PBL scheme           | kg kg-1       |    3 | real      | kind_phys | in     | F        |
 !! | tkh            | atmosphere_heat_diffusivity_from_shoc                                       | diffusivity for heat from the SHOC scheme             | m2 s-1        |    2 | real      | kind_phys | in     | F        |
 !! | prnum          | prandtl_number                                                              | turbulent Prandtl number                              | none          |    2 | real      | kind_phys | inout  | F        |
-!! | ntke           | index_for_turbulent_kinetic_energy                                          | tracer index for turbulent kinetic energy             | index         |    0 | integer   |           | in     | F        |
+!! | ntke           | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array | index   |    0 | integer   |           | in     | F        |
 !! | psk            | dimensionless_exner_function_at_lowest_model_interface                      | dimensionless Exner function at the surface interface | none          |    1 | real      | kind_phys | in     | F        |
 !! | rbsoil         | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | zorl           | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
@@ -71,6 +71,7 @@
 !! | xkzm_m         | atmosphere_momentum_diffusivity_background                                  | background value of momentum diffusivity              | m2 s-1        |    0 | real      | kind_phys | in     | F        |
 !! | xkzm_h         | atmosphere_heat_diffusivity_background                                      | background value of heat diffusivity                  | m2 s-1        |    0 | real      | kind_phys | in     | F        |
 !! | xkzm_s         | diffusivity_background_sigma_level                                          | sigma level threshold for background diffusivity      | none          |    0 | real      | kind_phys | in     | F        |
+!! | xkzminv        | atmosphere_heat_diffusivity_background_maximum                              | max. background val. diffusivity in inversion layers  | m2 s-1        |    0 | real      | kind_phys | in     | F        |
 !! | lprnt          | flag_print                                                                  | flag for printing diagnostics to output               | flag          |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                          | horizontal index of printed column                    | index         |    0 | integer   |           | in     | F        |
 !! | me             | mpi_rank                                                                    | current MPI-rank                                      | index         |    0 | integer   |           | in     | F        |
@@ -88,7 +89,8 @@
      &                     tsea,heat,evap,stress,spd1,kpbl,
      &                     prsi,del,prsl,prslk,phii,phil,delt,
      &                     dusfc,dvsfc,dtsfc,dqsfc,dkt,hpbl,
-     &                     kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,me,
+     &                     kinver,xkzm_m,xkzm_h,xkzm_s,xkzminv,
+     &                     lprnt,ipr,me,
      &                     grav, rd, cp, hvap, fv,
      &                     errmsg,errflg)
 !
@@ -105,7 +107,7 @@
       integer, dimension(im),                   intent(in) ::  kinver
 
       real(kind=kind_phys),                     intent(in) :: delt,
-     &  xkzm_m, xkzm_h, xkzm_s
+     &  xkzm_m, xkzm_h, xkzm_s, xkzminv
       real(kind=kind_phys),                     intent(in) :: grav,
      &  rd, cp, hvap, fv
       real(kind=kind_phys), dimension(im),      intent(in) :: psk,
@@ -208,7 +210,8 @@
         do i=1,im
           xkzo(i,k)  = 0.0
           xkzmo(i,k) = 0.0
-          if (k < kinver(i)) then
+!         if (k < kinver(i)) then
+          if (k <= kinver(i)) then
 !    vertical background diffusivity for heat and momentum
             tem1       = 1.0 - prsi(i,k+1) * tx1(i)
             tem1       = min(1.0, exp(-tem1 * tem1 * 10.0))
@@ -224,16 +227,16 @@
 !
 !  diffusivity in the inversion layer is set to be xkzminv (m^2/s)
 !
-!     do k = 1,kmpbl
-!       do i=1,im
-!         if(zi(i,k+1) > 250.) then
-!           tem1 = (t1(i,k+1)-t1(i,k)) * rdzt(i,k)
-!           if(tem1 > 1.e-5) then
-!              xkzo(i,k)  = min(xkzo(i,k),xkzminv)
-!           endif
-!         endif
-!       enddo
-!     enddo
+      do k = 1,kmpbl
+        do i=1,im
+          if(zi(i,k+1) > 250.) then
+            tem1 = (t1(i,k+1)-t1(i,k)) * rdzt(i,k)
+            if(tem1 > 1.e-5) then
+               xkzo(i,k)  = min(xkzo(i,k),xkzminv)
+            endif
+          endif
+        enddo
+      enddo
 !
 !
       do i = 1,im
@@ -499,8 +502,6 @@
             ttend      = (a1(i,k)-t1(i,k))   * rdt
             qtend      = (a2(i,k)-q1(i,k,1)) * rdt
             tau(i,k)   = tau(i,k)   + ttend
-!     if(lprnt .and. i==ipr .and. k<11) write(0,*)' tau=',tau(ipr,k)
-!    &,' ttend=',ttend,' a1=',a1(ipr,k),' t1=',t1(ipr,k)
             rtg(i,k,1) = rtg(i,k,1) + qtend
             dtsfc(i)   = dtsfc(i)   + cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)   + conq*del(i,k)*qtend

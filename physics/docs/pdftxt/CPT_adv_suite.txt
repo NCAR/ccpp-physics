@@ -118,7 +118,6 @@ The advanced CPT physics suite uses the parameterizations in the following order
       <scheme>m_micro_post</scheme>
       <scheme>cs_conv_aw_adj</scheme>
       <scheme>GFS_MP_generic_post</scheme>
-      <scheme>sfc_sice_post</scheme>
     </subcycle>
   </group>
   <group name="stochastics">
