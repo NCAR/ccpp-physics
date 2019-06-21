@@ -746,7 +746,7 @@ end subroutine solar_time_from_julian
             endif
           endif
         endif
-      endif        ! if ( wet(i,j) .and. .not.icy(i,j) ) then
+      endif        ! if  wet(i,j) .and. .not.icy(i,j)
     enddo
   enddo
 !

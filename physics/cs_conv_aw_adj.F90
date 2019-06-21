@@ -45,6 +45,8 @@ module cs_conv_aw_adj
 !! | cldfrac         | cloud_fraction_for_MG                                         | cloud fraction used by Morrison-Gettelman MP                                     | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | subcldfrac      | subgrid_scale_cloud_fraction_from_shoc                        | subgrid-scale cloud fraction from the SHOC scheme                                | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | prcp            | lwe_thickness_of_explicit_precipitation_amount                | explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep       | m       |    1 | real      | kind_phys | inout  | F        |
+!! | imp_physics     | flag_for_microphysics_scheme                                  | choice of microphysics scheme                                                    | flag    |    0 | integer   |           | in     | F        |
+!! | imp_physics_mg  | flag_for_morrison_gettelman_microphysics_scheme               | choice of Morrison-Gettelman microphysics scheme                                 | flag    |    0 | integer   |           | in     | F        |
 !! | errmsg          | ccpp_error_message                                            | error message for error handling in CCPP                                         | none    |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                               | error flag for error handling in CCPP                                            | flag    |    0 | integer   |           | out    | F        |
 !!
@@ -52,7 +54,7 @@ module cs_conv_aw_adj
    subroutine cs_conv_aw_adj_run(im, levs, do_cscnv, do_aw, do_shoc, &
                 ntrac, ncld, ntcw, ntclamt, nncl, con_g, sigmafrac,  &
                 gt0, gq0, save_t, save_q, prsi, cldfrac, subcldfrac, &
-                prcp, errmsg, errflg)
+                prcp, imp_physics, imp_physics_mg, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -72,6 +74,7 @@ module cs_conv_aw_adj
       real(kind_phys),  dimension(im,levs),       intent(inout) :: cldfrac
       real(kind_phys),  dimension(im,levs),       intent(inout) :: subcldfrac
       real(kind_phys),  dimension(im),            intent(inout) :: prcp
+      integer,                                    intent(in   ) :: imp_physics, imp_physics_mg
       character(len=*),                           intent(  out) :: errmsg
       integer,                                    intent(  out) :: errflg
 
@@ -109,6 +112,14 @@ module cs_conv_aw_adj
           temrain1(i) = temrain1(i) - (prsi(i,k)-prsi(i,k+1)) * tem2 * onebg
         enddo
       enddo
+! add convective clouds if shoc is true and not MG microphysics
+      if (do_shoc .and. imp_physics /= imp_physics_mg) then
+        do k = 1,levs
+          do i = 1,im
+            subcldfrac(i,k) = min(1.0, subcldfrac(i,k) + sigmafrac(i,k))
+          enddo
+        enddo
+      endif
       !
       do n=ntcw,ntcw+nncl-1
         do k = 1,levs

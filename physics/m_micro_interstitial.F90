@@ -23,6 +23,7 @@
 !! | im             | horizontal_loop_extent                                | horizontal loop extent                                                                                                           | count   |    0 | integer    |           | in     | F        |
 !! | levs           | vertical_dimension                                    | number of vertical layers                                                                                                        | count   |    0 | integer    |           | in     | F        |
 !! | do_shoc        | flag_for_shoc                                         | flag for SHOC                                                                                                                    | flag    |    0 | logical    |           | in     | F        |
+!! | skip_macro     | flag_skip_macro                                       | flag to skip cloud macrophysics in Morrison scheme                                                                               | flag    |    0 | logical    |           | inout  | F        |
 !! | fprcp          | number_of_frozen_precipitation_species                | number of frozen precipitation species                                                                                           | count   |    0 | integer    |           | in     | F        |
 !! | mg3_as_mg2     | flag_mg3_as_mg2                                       | flag for controlling prep for Morrison-Gettelman microphysics                                                                    | flag    |    0 | logical    |           | in     | F        |
 !! | gq0_ice        | ice_water_mixing_ratio_updated_by_physics             | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                                                   | kg kg-1 |    2 | real       | kind_phys | in     | F        |
@@ -56,8 +57,8 @@
 !! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP                                                                                            | flag    |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine m_micro_pre_run (im, levs, do_shoc, fprcp, mg3_as_mg2, gq0_ice, gq0_water, gq0_rain,           &
-        gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,  &
+      subroutine m_micro_pre_run (im, levs, do_shoc, skip_macro, fprcp, mg3_as_mg2, gq0_ice, gq0_water, gq0_rain,  &
+        gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,     &
         qrn, qsnw, qgl, ncpr, ncps, ncgl, cld_frc_MG, qlcn, qicn, cf_upi, clw_water, clw_ice, clcn, errmsg, errflg )
 
       use machine, only : kind_phys
@@ -65,6 +66,7 @@
 
       integer, intent(in) :: im, levs, fprcp
       logical, intent(in) :: do_shoc, mg3_as_mg2
+      logical, intent(inout) :: skip_macro
       real(kind=kind_phys), intent(in) :: tcr, tcrf
 
       real(kind=kind_phys), intent(in) ::                               &
@@ -97,6 +99,7 @@
       !       year. I believe this will make the physical interaction more reasonable
       !       Anning 12/5/2015 changed ntcw hold liquid only
       if (do_shoc) then
+        skip_macro = do_shoc
         if (fprcp == 0) then
           do k=1,levs
             do i=1,im
@@ -215,19 +218,24 @@
 !! | qrn            | local_rain_water_mixing_ratio                                            | moist (dry+vapor, no condensates) mixing ratio of rain water local to physics    | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | qsnw           | local_snow_water_mixing_ratio                                            | moist (dry+vapor, no condensates) mixing ratio of snow water local to physics    | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | qgl            | local_graupel_mixing_ratio                                               | moist (dry+vapor, no condensates) mixing ratio of graupel local to physics       | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | gq0_ice        | ice_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics   | kg kg-1 |    2 | real      | kind_phys | in     | F        |
 !! | gq0_rain       | rain_water_mixing_ratio_updated_by_physics                               | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics  | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | gq0_snow       | snow_water_mixing_ratio_updated_by_physics                               | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics  | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | gq0_graupel    | graupel_mixing_ratio_updated_by_physics                                  | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics     | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | gq0_rain_nc    | rain_number_concentration_updated_by_physics                             | number concentration of rain updated by physics                                  | kg-1    |    2 | real      | kind_phys | out    | F        |
 !! | gq0_snow_nc    | snow_number_concentration_updated_by_physics                             | number concentration of snow updated by physics                                  | kg-1    |    2 | real      | kind_phys | out    | F        |
 !! | gq0_graupel_nc | graupel_number_concentration_updated_by_physics                          | number concentration of graupel updated by physics                               | kg-1    |    2 | real      | kind_phys | out    | F        |
+!! | ice            | lwe_thickness_of_ice_amount_on_dynamics_timestep                         | ice fall at this time step                                                       | m       |    1 | real      | kind_phys | out    | F        |
+!! | snow           | lwe_thickness_of_snow_amount_on_dynamics_timestep                        | snow fall at this time step                                                      | m       |    1 | real      | kind_phys | out    | F        |
+!! | graupel        | lwe_thickness_of_graupel_amount_on_dynamics_timestep                     | graupel fall at this time step                                                   | m       |    1 | real      | kind_phys | out    | F        |
+!! | dtp            | time_step_for_physics                                                    | physics timestep                                                                 | s       |    0 | real      | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                                         | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                            | flag    |    0 | integer   |           | out    | F        |
 !!
-      subroutine m_micro_post_run(                                        &
-        im, levs, fprcp, mg3_as_mg2, ncpr, ncps, ncgl, qrn, qsnw, qgl,    &
-        gq0_rain, gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc,        &
-        gq0_graupel_nc, errmsg, errflg)
+      subroutine m_micro_post_run(                                          &
+        im, levs, fprcp, mg3_as_mg2, ncpr, ncps, ncgl, qrn, qsnw, qgl,      &
+        gq0_ice, gq0_rain, gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, &
+        gq0_graupel_nc, ice, snow, graupel, dtp, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
@@ -235,17 +243,33 @@
       integer, intent(in) :: im, levs, fprcp
       logical, intent(in) :: mg3_as_mg2
 
-      real(kind=kind_phys), intent(in) :: ncpr(:,:), ncps(:,:), ncgl(:,:)
-      real(kind=kind_phys), intent(inout) :: qrn(:,:), qsnw(:,:), qgl(:,:)
-      real(kind=kind_phys), intent(inout) :: gq0_rain(:,:), gq0_snow(:,:), &
-        gq0_graupel(:,:), gq0_rain_nc(:,:), gq0_snow_nc(:,:), gq0_graupel_nc(:,:)
+      real(kind=kind_phys), intent(in   ) :: ncpr(1:im,1:levs)
+      real(kind=kind_phys), intent(in   ) :: ncps(1:im,1:levs)
+      real(kind=kind_phys), intent(in   ) :: ncgl(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: qrn(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: qsnw(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: qgl(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: gq0_ice(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: gq0_rain(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: gq0_snow(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: gq0_graupel(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: gq0_rain_nc(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: gq0_snow_nc(1:im,1:levs)
+      real(kind=kind_phys), intent(inout) :: gq0_graupel_nc(1:im,1:levs)
+      real(kind=kind_phys), intent(  out) :: ice(1:im)
+      real(kind=kind_phys), intent(  out) :: snow(1:im)
+      real(kind=kind_phys), intent(  out) :: graupel(1:im)
+      real(kind=kind_phys), intent(in   ) :: dtp
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
+      ! Local variables
+      real(kind=kind_phys), parameter :: qsmall   = 1.0d-20
+      real(kind=kind_phys), parameter :: con_p001 = 0.001d0
+      real(kind=kind_phys), parameter :: con_day  = 86400.0d0
       integer :: i, k
-
-      real(kind=kind_phys), parameter :: qsmall  = 1.0e-20
+      real(kind=kind_phys) :: tem
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -260,7 +284,7 @@
 !    &,           gq0(1,1,1),gq0(1,1,ntcw),gq0(1,1,ntcw+1),' m_micro  ')
 
 !       if (lprnt) write(0,*) ' rain1=',rain1(ipr)*86400.0, &
-!    &' rainc=',diag%rainc(ipr)*86400.0                        &
+!    &' rainc=',diag%rainc(ipr)*86400.0
 !    &,' cn_prc=',cn_prc(ipr),' cn_snr=',cn_snr(ipr)
 !       if(lprnt) write(0,*) ' aftgt0=',Stateout%gt0(ipr,:),' kdt=',kdt
 !       if (lprnt) write(0,*) ' aftlsgq0=',stateout%gq0(ipr,:,1),' kdt=',kdt
@@ -273,6 +297,7 @@
 !       if (lprnt) write(0,*)' qsnwa=',qsnw(ipr,:),' kdt=',kdt
 !       if (lprnt) write(0,*)' qglba',qgl(ipr,:),' kdt=',kdt
 
+      tem = dtp * con_p001 / con_day
       if (abs(fprcp) == 1 .or. mg3_as_mg2) then
         do k=1,levs
           do i=1,im
@@ -283,6 +308,10 @@
             gq0_rain_nc(i,k) = ncpr(i,k)
             gq0_snow_nc(i,k) = ncps(i,k)
           enddo
+        enddo
+        do i=1,im
+          ice(i)  = tem * gq0_ice(i,1)
+          snow(i) = tem * qsnw(i,1)
         enddo
       elseif (fprcp > 1) then
         do k=1,levs
@@ -297,6 +326,11 @@
             gq0_snow_nc(i,k) = ncps(i,k)
             gq0_graupel_nc(i,k) = ncgl(i,k)
           enddo
+        enddo
+        do i=1,im
+          ice(i)     = tem * gq0_ice(i,1)
+          snow(i)    = tem * qsnw(i,1)
+          graupel(i) = tem * qgl(i,1)
         enddo
 
       endif
