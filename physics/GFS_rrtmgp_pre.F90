@@ -568,6 +568,12 @@ contains
        endif
     elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
        cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
+       if (Model%effr_in) then
+          effr_l(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,1)
+          effr_i(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,2)
+          effr_r(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,3)
+          effr_s(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,4)
+       endif
     else                                                           ! neither of the other two cases
        cldcov = 0.0
     endif
