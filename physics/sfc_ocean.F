@@ -37,7 +37,6 @@
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                          | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer          | ratio         |    1 | real      | kind_phys | in     | F        |
 !! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag          |    1 | logical   |           | in     | F        |
-!! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                         | frac          |    1 | real      | kind_phys | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                                   | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                                   | flag          |    1 | logical   |           | in     | F        |
 !! | qsurf          | surface_specific_humidity_over_ocean                                         | surface air saturation specific humidity over ocean                  | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
@@ -55,7 +54,7 @@
 !...................................
 !  ---  inputs:
      &     ( im, cp, rd, eps, epsm1, hvap, rvrdm1, ps, u1, v1, t1, q1,  &
-     &       tskin, cm, ch, prsl1, prslki, wet, fice, ddvel,            &
+     &       tskin, cm, ch, prsl1, prslki, wet, ddvel,                  &
      &       flag_iter,                                                 &
 !  ---  outputs:
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &
@@ -70,7 +69,7 @@
 !    call sfc_ocean                                                     !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tskin, cm, ch,                     !
-!            prsl1, prslki, wet, fice, ddvel, flag_iter,                !
+!            prsl1, prslki, wet, ddvel, flag_iter,                      !
 !       outputs:                                                        !
 !            qsurf, cmm, chh, gflux, evap, hflx, ep )                   !
 !                                                                       !
@@ -102,7 +101,6 @@
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
 !     wet      - logical, =T if any ocean/lak, =F otherwise        im   !
-!     fice     - real, ice fraction                                im   !
 !     ddvel    - real, wind enhancement due to convection (m/s)    im   !
 !     flag_iter- logical,                                          im   !
 !                                                                       !
@@ -128,7 +126,7 @@
      &      rvrdm1
 
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
-     &      t1, q1, tskin, cm, ch, prsl1, prslki, ddvel, fice
+     &      t1, q1, tskin, cm, ch, prsl1, prslki, ddvel
 
       logical, dimension(im), intent(in) :: flag_iter, wet
 
@@ -159,7 +157,7 @@
 !
 !  --- ...  flag for open water
       do i = 1, im
-        flag(i) = (wet(i) .and. fice(i)<1. .and. flag_iter(i))
+        flag(i) = (wet(i) .and. flag_iter(i))
 
 !  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,

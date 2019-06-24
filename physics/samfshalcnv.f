@@ -1880,7 +1880,6 @@ c
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
-        real(kind=kind_phys), dimension(im) :: raincs
         integer :: i, k
 
         ! Initialize CCPP error handling variables
@@ -1888,15 +1887,8 @@ c
         errflg = 0
 
         do i=1,im
-          raincs(i)     = frain * rain1(i)
-          rainc(i) = rainc(i) + raincs(i)
+          rainc(i) = rainc(i) + frain * rain1(i)
         enddo
-        if (lssav) then
-          do i=1,im
-            cnvprcp(i)  = cnvprcp(i)  + raincs(i)
-            cnvprcpb(i) = cnvprcpb(i) + raincs(i)
-          enddo
-        endif
 ! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
         if (shcnvcw .and. num_p3d == 4 .and. npdf3d == 3) then
           do k=1,levs

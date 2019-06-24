@@ -28,6 +28,12 @@
 !! | v1             | y_wind_at_lowest_model_layer_updated_by_physics                              | y component of 1st model layer wind                         | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | t1             | air_temperature_at_lowest_model_layer_updated_by_physics                     | 1st model layer air temperature                             | K             |    1 | real      | kind_phys | in     | F        |
 !! | q1             | water_vapor_specific_humidity_at_lowest_model_layer_updated_by_physics       | 1st model layer specific humidity                           | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
+!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
+!! | fm             | Monin-Obukhov_similarity_function_for_momentum                               | Monin-Obukhov similarity parameter for momentum             | none          |    1 | real      | kind_phys | in     | F        |
+!! | fh             | Monin-Obukhov_similarity_function_for_heat                                   | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
+!! | fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m                        | Monin-Obukhov similarity parameter for momentum             | none          |    1 | real      | kind_phys | in     | F        |
+!! | fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m                             | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | tskin          | surface_skin_temperature                                                     | surface skin temperature                                    | K             |    1 | real      | kind_phys | in     | F        |
 !! | qsurf          | surface_specific_humidity                                                    | surface specific humidity                                   | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | f10m           | ratio_of_wind_at_lowest_model_layer_and_wind_at_10m                          | ratio of fm10 and fm                                        | ratio         |    1 | real      | kind_phys | out    | F        |
@@ -35,12 +41,6 @@
 !! | v10m           | y_wind_at_10m                                                                | y component of wind at 10 m                                 | m s-1         |    1 | real      | kind_phys | out    | F        |
 !! | t2m            | temperature_at_2m                                                            | temperature at 2 m                                          | K             |    1 | real      | kind_phys | out    | F        |
 !! | q2m            | specific_humidity_at_2m                                                      | specific humidity at 2 m                                    | kg kg-1       |    1 | real      | kind_phys | out    | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | surface upward evaporation flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | fm             | Monin-Obukhov_similarity_function_for_momentum                               | Monin-Obukhov similarity parameter for momentum             | none          |    1 | real      | kind_phys | in     | F        |
-!! | fh             | Monin-Obukhov_similarity_function_for_heat                                   | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | fm10           | Monin-Obukhov_similarity_function_for_momentum_at_10m                        | Monin-Obukhov similarity parameter for momentum             | none          |    1 | real      | kind_phys | in     | F        |
-!! | fh2            | Monin-Obukhov_similarity_function_for_heat_at_2m                             | Monin-Obukhov similarity parameter for heat                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -48,9 +48,9 @@
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine sfc_diag_run                                           &
-     &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,          &
-     &                    tskin,qsurf,f10m,u10m,v10m,t2m,q2m,           &
-     &                    prslki,evap,fm,fh,fm10,fh2,errmsg,errflg      &
+     &                   (im,grav,cp,eps,epsm1,ps,u1,v1,t1,q1,prslki,   &
+     &                    evap,fm,fh,fm10,fh2,tskin,qsurf,              &
+     &                    f10m,u10m,v10m,t2m,q2m,errmsg,errflg          &
      &                   )
 !
       use machine , only : kind_phys
@@ -70,7 +70,7 @@
 !     locals
 !
       real(kind=kind_phys), parameter :: qmin=1.0e-8
-      integer ::k,i
+      integer :: k,i
 !
       real(kind=kind_phys) :: fhi, qss, wrk
 !     real(kind=kind_phys) sig2k, fhi, qss

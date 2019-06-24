@@ -59,7 +59,6 @@
 !! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag   |    1 | logical   |           | in     | F        |
 !! | dry            | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction      | flag       |    1 | logical   |           | in     | F        |
 !! | icy            | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction   | flag       |    1 | logical   |           | in     | F        |
-!! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                     | frac       |    1 | real      | kind_phys | in     | F        |
 !! | tskin_ocn      | surface_skin_temperature_over_ocean_interstitial                             | surface skin temperature over ocean (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
 !! | tskin_lnd      | surface_skin_temperature_over_land_interstitial                              | surface skin temperature over land  (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
 !! | tskin_ice      | surface_skin_temperature_over_ice_interstitial                               | surface skin temperature over ice   (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
@@ -135,7 +134,7 @@
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
-     &                    wet,dry,icy,fice,                             &  !intent(in)
+     &                    wet,dry,icy,                                  &  !intent(in)
      &                    tskin_ocn, tskin_lnd, tskin_ice,              &  !intent(in)
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &  !intent(in)
      &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &  !intent(in)
@@ -170,8 +169,7 @@
       real(kind=kind_phys), dimension(im), intent(in)    ::             &
      &                    tskin_ocn, tskin_lnd, tskin_ice,              &
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &
-     &                    fice
+     &                   snwdph_ocn,snwdph_lnd,snwdph_ice
 
       real(kind=kind_phys), dimension(im), intent(inout) ::             &
      &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &
@@ -237,24 +235,24 @@
      &                + max(0.0, min(ddvel(i), 30.0)), 1.0)
           tem1    = 1.0 + rvrdm1 * max(q1(i),1.e-8)
           thv1    = t1(i) * prslki(i) * tem1
-          tvs_ocn = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * tem1
           tvs_lnd = 0.5 * (tsurf_lnd(i)+tskin_lnd(i)) * tem1
           tvs_ice = 0.5 * (tsurf_ice(i)+tskin_ice(i)) * tem1
+          tvs_ocn = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * tem1
           qs1     = fpvs(t1(i))
           qs1     = max(1.0e-8, eps * qs1 / (prsl1(i) + epsm1 * qs1))
 
-          z0_ocn      = 0.01 * z0rl_ocn(i)
-          z0max_ocn   = max(1.0e-6, min(z0_ocn,z1(i)))
-          z0_lnd      = 0.01 * z0rl_lnd(i)
-          z0max_lnd   = max(1.0e-6, min(z0_lnd,z1(i)))
-          z0_ice      = 0.01 * z0rl_ice(i)
-          z0max_ice   = max(1.0e-6, min(z0_ice,z1(i)))
+          z0_lnd    = 0.01 * z0rl_lnd(i)
+          z0max_lnd = max(1.0e-6, min(z0_lnd,z1(i)))
+          z0_ice    = 0.01 * z0rl_ice(i)
+          z0max_ice = max(1.0e-6, min(z0_ice,z1(i)))
+          z0_ocn    = 0.01 * z0rl_ocn(i)
+          z0max_ocn = max(1.0e-6, min(z0_ocn,z1(i)))
 
 !  compute stability dependent exchange coefficients
 !  this portion of the code is presently suppressed
 !
 
-          if (wet(i) .and. fice(i) < 1.) then ! some open ocean
+          if (wet(i)) then ! some open ocean
             ustar_ocn(i) = sqrt(grav * z0_ocn / charnock)
 
 !**  test xubin's new z0
@@ -346,7 +344,7 @@
           ztmax_ice  = max(ztmax_ice,1.0e-6)
 
 ! BWG begin "stability" block, 2019-03-23
-      if (wet(i) .and. fice(i) < 1.) then ! Some open ocean
+      if (wet(i)) then ! Some open ocean
           call stability
 !  ---  inputs:
      &     (z1(i),snwdph_ocn(i),thv1,wind(i),
@@ -382,7 +380,7 @@
 !
 !  update z0 over ocean
 !
-          if (wet(i) .and. fice(i) < 1.) then
+          if (wet(i)) then
             z0_ocn = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
 
 ! mbek -- toga-coare flux algorithm

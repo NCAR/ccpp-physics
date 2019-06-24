@@ -165,8 +165,8 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure (pa)            im   !
 !     prslki   - real,                                             im   !
-!     wet      - logical, =T if any ocn/lak water (F otherwise)    im   !
-!     icy      - logical, =T if "enough" ice (F otherwise)         im   !
+!     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
+!     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
 !     stress   - real, wind stress       (n/m**2)                  im   !
@@ -620,8 +620,8 @@ cc
      &                        zsea1,zsea2,dtz)
           tsurf(i) = max(271.2, tref(i) + dtz )
 
-      if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
-     &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
+!     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
+!    &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
 
 !>  - Call cal_w() to calculate \a w_0 and \a w_d.
           if ( xt(i) > 0.0 ) then
@@ -667,9 +667,9 @@ cc
 !
             if ( nstf_name1 > 1 ) then
               tskin(i) = tsurf(i)
-            endif               ! if ( nstf_name1 > 1  then
-          endif                 ! if(flag_guess(i)) then
-        endif                   ! if(wet(i) .and. .not.icy(i)) then
+            endif               ! if nstf_name1 > 1
+          endif                 ! if flag_guess(i)
+        endif                   ! if wet(i) .and. .not.icy(i)
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
@@ -800,21 +800,6 @@ cc
       errflg = 0
 
       do i=1,im
-        if(icy(i)) then
-            zorl_ocn(i) = zorl_ice(i)
-              cd_ocn(i) = cd_ice(i)
-             cdq_ocn(i) = cdq_ice(i)
-              rb_ocn(i) = rb_ice(i)
-          stress_ocn(i) = stress_ice(i)
-            ffmm_ocn(i) = ffmm_ice(i)
-            ffhh_ocn(i) = ffhh_ice(i)
-          uustar_ocn(i) = uustar_ice(i)
-            fm10_ocn(i) = fm10_ice(i)
-             fh2_ocn(i) = fh2_ice(i)
-        endif
-      enddo
-
-      do i=1,im
         if (wet(i) .and. .not. icy(i)) then
           tem      = (oro(i)-oro_uf(i)) * rlapse
           tseal(i) = tsfc_ocn(i)  + tem
@@ -923,7 +908,7 @@ cc
 
       do i = 1, im
         if (wet(i) .and. .not. icy(i)) then
-              tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
+          tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
         endif
       enddo
 
@@ -938,7 +923,7 @@ cc
      &                    im, 1, dtzm)
         do i = 1, im
           if ( wet(i)  .and. .not. icy(i) ) then
-            tsfc_ocn(i) = max(271.2,tref(i) + dtzm(i)) -                    &
+            tsfc_ocn(i) = max(271.2,tref(i) + dtzm(i)) -                &
      &                    (oro(i)-oro_uf(i))*rlapse
           endif
         enddo

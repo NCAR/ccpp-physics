@@ -327,7 +327,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
             uin, vin, udt, vdt, dz, delp, area, dt_in, land,                    &
             rain, snow, ice, graupel, hydrostatic, phys_hydrostatic,            &
-            p, lradar, refl_10cm, kdt, nsteps_per_reset)
+            p, lradar, refl_10cm,reset)
 
    implicit none
 
@@ -357,7 +357,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
    real, intent (in), dimension (iis:iie, jjs:jje, kks:kke) :: p
    logical, intent (in) :: lradar
    real, intent (out), dimension (iis:iie, jjs:jje, kks:kke) :: refl_10cm
-   integer, intent (in) :: kdt, nsteps_per_reset
+   logical, intent (in) :: reset
 
    ! Local variables
    logical :: melti = .false.
@@ -595,7 +595,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
    ! call mpp_clock_end (gfdl_mp_clock)
     if(lradar) then
        ! Only set melti to true at the output times
-       if(mod(kdt,nsteps_per_reset)==0)then
+       if (reset) then
          melti=.true.
        else
          melti=.false.

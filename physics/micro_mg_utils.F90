@@ -253,7 +253,8 @@ real(r8), parameter :: aimm = 0.66_r8
 
 ! Mass of each raindrop created from autoconversion.
 real(r8), parameter :: droplet_mass_25um = 4._r8/3._r8*pi*rhow*(25.e-6_r8)**3
-real(r8), parameter :: droplet_mass_40um = 4._r8/3._r8*pi*rhow*(40.e-6_r8)**3
+real(r8), parameter :: droplet_mass_40um = 4._r8/3._r8*pi*rhow*(40.e-6_r8)**3, &
+                       droplet_mass_40umi = 1._r8/droplet_mass_40um
 
 !=========================================================
 ! Constants set in initialization
@@ -1014,7 +1015,8 @@ subroutine sb2001v2_liq_autoconversion(pgam,qc,nc,qr,rho,relvar,au,nprc,nprc1,mg
   ! parameters for Seifert and Beheng (2001) autoconversion/accretion                                         
   real(r8), parameter :: kc  = 9.44e9_r8
   real(r8), parameter :: kr  = 5.78e3_r8
-  real(r8), parameter :: auf = kc / (20._r8*2.6e-7_r8) * 1000._r8
+  real(r8), parameter :: auf = kc / (20._r8*2.6e-7_r8) * 1000._r8, &
+                         con_nprc1 = two/2.6e-7_r8*1000._r8
   real(r8) :: dum, dum1, nu, pra_coef, tx1, tx2, tx3, tx4
   integer  :: dumi, i
 
@@ -1045,8 +1047,10 @@ subroutine sb2001v2_liq_autoconversion(pgam,qc,nc,qr,rho,relvar,au,nprc,nprc1,mg
 !        (rho(i)*qc(i)/1000._r8)**4._r8/(rho(i)*nc(i)/1.e6_r8)**2._r8* &
 !        (1._r8+dum1/(1._r8-dum)**2)*1000._r8 / rho(i)
 
-       nprc1(i) = au(i) * two / 2.6e-7_r8 * 1000._r8
-       nprc(i)  = au(i) / droplet_mass_40um
+!      nprc1(i) = au(i) * two / 2.6e-7_r8 * 1000._r8
+!      nprc(i)  = au(i) / droplet_mass_40um
+       nprc1(i) = au(i) * con_nprc1
+       nprc(i)  = au(i) * droplet_mass_40umi
      else
        au(i)    = zero
        nprc1(i) = zero
@@ -1080,7 +1084,8 @@ subroutine sb2001v2_liq_autoconversion(pgam,qc,nc,qr,rho,relvar,au,nprc,nprc1,mg
        real(r8) :: xs,lw, nw, beta6
 !      real(r8), parameter :: dcrit=1.0e-6, miu_disp=1.
 !      real(r8), parameter :: dcrit=1.0e-3, miu_disp=1.
-       real(r8), parameter :: dcrit=2.0e-3, miu_disp=0.8
+       real(r8), parameter :: dcrit = 2.0e-3, miu_disp = 0.8,     &
+                              con_nprc1 = two/2.6e-7_r8*1000._r8
        integer ::  i
 
        do i=1,mgncol
@@ -1099,8 +1104,10 @@ subroutine sb2001v2_liq_autoconversion(pgam,qc,nc,qr,rho,relvar,au,nprc,nprc1,mg
                  / (gamma(relvar(i))*(relvar(i)*relvar(i)))
 
            au(i)   = au(i) * dcrit
-           nprc1(i)= au(i) * (two/2.6e-7_r8*1000._r8)
-           nprc(i) = au(i) / droplet_mass_40um
+!          nprc1(i)= au(i) * (two/2.6e-7_r8*1000._r8)
+!          nprc(i) = au(i) / droplet_mass_40um
+           nprc1(i)= au(i) * con_nprc1
+           nprc(i) = au(i) * droplet_mass_40umi
          else
            au(i)    = zero
            nprc1(i) = zero

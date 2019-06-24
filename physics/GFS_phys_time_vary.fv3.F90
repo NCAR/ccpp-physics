@@ -354,7 +354,8 @@
         real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
         real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
 
-        integer :: i, j, k, iseed, iskip, ix, nb, nblks
+        integer :: i, j, k, iseed, iskip, ix, nb, nblks, kdt_rad
+        real(kind=kind_phys) :: sec_zero
         real(kind=kind_phys) :: wrk(1)
         real(kind=kind_phys) :: rannie(Model%cny)
         real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
@@ -483,12 +484,29 @@
         endif
 
         !--- determine if diagnostics buckets need to be cleared
-        if (mod(Model%kdt,Model%nszero) == 1) then
-          do nb = 1,nblks
-            call Data(nb)%Intdiag%rad_zero  (Model)
-            call Data(nb)%Intdiag%phys_zero (Model)
+        sec_zero = nint(Model%fhzero*con_hr)
+        if (sec_zero >= nint(max(Model%fhswr,Model%fhlwr))) then
+          if (mod(Model%kdt,Model%nszero) == 1) then
+            do nb = 1,nblks
+              call Data(nb)%Intdiag%rad_zero  (Model)
+              call Data(nb)%Intdiag%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-          enddo
+            enddo
+          endif
+        else
+          if (mod(Model%kdt,Model%nszero) == 1) then
+            do nb = 1,nblks
+              call Data(nb)%Intdiag%phys_zero (Model)
+        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+            enddo
+          endif
+          kdt_rad = nint(min(Model%fhswr,Model%fhlwr)/Model%dtp)
+          if (mod(Model%kdt, kdt_rad) == 1) then
+            do nb = 1,nblks
+              call Data(nb)%Intdiag%rad_zero  (Model)
+        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+            enddo
+          endif
         endif
 
       end subroutine GFS_phys_time_vary_run

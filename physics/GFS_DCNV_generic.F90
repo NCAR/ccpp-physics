@@ -139,8 +139,6 @@
 !! | ncnvcld3d       | number_of_convective_3d_cloud_fields                                                        | number of convective 3d clouds fields                                | count         |    0 | integer           |           | in     | F        |
 !! | rainc           | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep                       | convective rain at this time step                                    | m             |    1 | real              | kind_phys | inout  | F        |
 !! | cldwrk          | cumulative_cloud_work_function                                                              | cumulative cloud work function (valid only with sas)                 | m2 s-1        |    1 | real              | kind_phys | inout  | F        |
-!! | cnvprcp         | cumulative_lwe_thickness_of_convective_precipitation_amount                                 | cumulative convective precipitation                                  | m             |    1 | real              | kind_phys | inout  | F        |
-!! | cnvprcpb        | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket                       | cumulative convective precipitation in bucket                        | m             |    1 | real              | kind_phys | inout  | F        |
 !! | dt3dt           | cumulative_change_in_temperature_due_to_deep_convection                                     | cumulative change in temperature due to deep conv.                   | K             |    2 | real              | kind_phys | inout  | F        |
 !! | dq3dt           | cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection                   | cumulative change in water vapor specific humidity due to deep conv. | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | du3dt           | cumulative_change_in_x_wind_due_to_deep_convection                                          | cumulative change in x wind due to deep convection                   | m s-1         |    2 | real              | kind_phys | inout  | F        |
@@ -169,7 +167,7 @@
     subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, ras, cscnv, do_ca,      &
       isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
       gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,  &
-      rainc, cldwrk, cnvprcp, cnvprcpb, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf, dqdti,   &
+      rainc, cldwrk, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf, dqdti,                      &
       cnvqci, upd_mfi, dwn_mfi, det_mfi, cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d,                     &
       cape, tconvtend, qconvtend, uconvtend, vconvtend, errmsg, errflg)
 
@@ -189,7 +187,7 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: clw_ice, clw_liquid
       integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cldwrk, cnvprcp, cnvprcpb
+      real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cldwrk
       ! dt3dt, dq3dt, du3dt, dv3dt upd_mf, dwn_mf, det_mf only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, dq3dt, du3dt, dv3dt
       real(kind=kind_phys), dimension(:,:), intent(inout) :: upd_mf, dwn_mf, det_mf
@@ -246,8 +244,6 @@
       if (lssav) then
         do i=1,im
           cldwrk (i)  = cldwrk (i)  + cld1d(i) * dtf
-          cnvprcp(i)  = cnvprcp(i)  + rainc(i)
-          cnvprcpb(i) = cnvprcpb(i) + rainc(i)
         enddo
 
         if (ldiag3d) then
