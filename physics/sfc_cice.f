@@ -5,7 +5,98 @@
 !! updated ice thickness and concentration to global arrays
 !! where there is no ice, and set temperature to surface skin
 !!temperature.
-      module sfc_tcice_post
+      module sfc_cice_pre
+
+      contains
+!! \section arg_table_sfc_cice_post_init  Argument Table
+!!
+      subroutine sfc_cice_pre_init
+      end subroutine sfc_cice_pre_init
+
+      subroutine sfc_cice_pre_finalize
+      end subroutine sfc_cice_pre_finalize
+
+!! \section arg_table_sfc_cice_pre_run Argument Table
+!! | local_name     | standard_name                                         | long_name                                         | units | rank | type      | kind      | intent | optional |
+!!!|----------------|-------------------------------------------------------|---------------------------------------------------|-------|------|-----------|-----------|--------|----------|
+!! | im             | horizontal_loop_extent                                | horizontal loop extent                            | count |    0 | integer   |           | in     | F        |
+!! | cplflx         | flag_for_flux_coupling                                | flag controlling cplflx collection (default off)  | flag  |    0 | logical   |           | in     | F        |
+!! | slimskin_cpl   |                                                       |                                                   |       |    1 | real      | kind_phys | none   | F        |
+!! | dusfcin_cpl    |  aoi_fld%dusfcin(item,lan)                            |                                                   |       |    1 | real      | kind_phys | none   | F        |
+!! | dvsfcin_cpl    |  aoi_fld%dvsfcin(item,lan)                            |                                                   |       |    1 | real      | kind_phys | none   | F        |
+!! | dtsfcin_cpl    |  aoi_fld%dtsfcin(item,lan)                            |                                                   |       |    1 | real      | kind_phys | none   | F        |
+!! | dqsfcin_cpl    |  aoi_fld%dqsfcin(item,lan)                            |                                                   |       |    1 | real      | kind_phys | none   | F        |
+!! | ulwsfcin_cpl   |  aoi_fld%ulwsfcin(item,lan)                           |                                                   |       |    1 | real      | kind_phys | none   | F        |
+!! | dlwsfc_cpl     | cumulative_surface_downwelling_longwave_flux_for_coupling_multiplied_by_timestep | cumulative sfc downward lw flux mulitplied by timestep | W m-2 s     |    1 | !real    | kind_phys | none   | F        |
+!! | dswsfc_cpl     | cumulative_surface_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep | cumulative sfc downward sw flux multiplied by timestep | W m-2 s     |    1 | !real    | kind_phys | none   | F        |
+!! | dnirbm_cpl     | cumulative_surface_downwelling_direct_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep !| cumulative sfc nir beam downward sw flux multiplied by timestep            | !W m-2 s    
+!! | dusfc_cice     | cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep | cumulative sfc x momentum flux multiplied by timestep| Pa s          |    1 | !real    | kind_phys | none   | F        |
+!! | dvsfc_cice     | cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep | cumulative sfc y momentum flux multiplied by timestep| Pa s          |    1 | !real    | kind_phys | none   | F        |
+!! | dtsfc_cice     | cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep !| cumulative sfc sensible heat flux multiplied by timestep | W m-2 s   |    1 | !real    | kind_phys | none   | F        |
+!! | dqsfc_cice     | cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep !| cumulative sfc latent heat flux multiplied by timestep | W m-2 s     |    1 | !real    | kind_phys | none   | F        |
+!! | islmsk         | sea_land_ice_mask                                     | sea/land/ice mask (=0/1/2)                        | flag  |    1 | integer   | !| in     | F        |
+!! | tice           | sea_ice_temperature_interstitial                      | sea-ice surface temperature use as interstitial   | K     |    1 | real      | !kind_phys | in     | F        |
+!! | tsfc           | surface_skin_temperature                              | surface skin temperature                          | K     |    1 | real      | !kind_phys | in     | F        |
+!! | fice           | sea_ice_concentration                                 | sea-ice concentration [0,1]                       | frac  |    1 | real      | !kind_phys | inout  | F        |
+!! | hice           | sea_ice_thickness                                     | sea-ice thickness                                 | m     |    1 | real      | !kind_phys | inout  | F        |
+!! | tisfc          | sea_ice_temperature                                   | sea-ice surface temperature                       | K     |    1 | real      | !kind_phys | inout  | F        |
+!! | errmsg         | ccpp_error_message                                    |error message for error handling in CCPP          | none  |    0 | character |len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP            | flag  |    0 | integer   |        | out    | F        |
+!!
+
+      subroutine sfc_cice_pre_run(im, cplflx, slimskin_cpl,ulwsfcin_cpl,&
+    &            dusfcin_cpl, dvsfcin_cpl, dtsfcin_cpl, dqsfcin_cpl,    &
+    &            tisfc, tsfco, fice, hice, ulwsfc_cice, dusfc_cice,     &
+    &            dvsfc_cice, dtsfc_cice, dqsfc_cice, tisfc_cice,        &
+    &            tsea_cice, tsea_cice, tsea_cice, fice_cice, hice_cice, &
+    &            errmsg, errflg)
+
+      use machine, only : kind_phys
+
+      implicit none
+
+! --- input
+      integer, intent(in) :: im
+      logical, intent(in) :: cplflx
+      integer, dimension(im), intent(in) :: slimskin_cpl
+      real(kind=kind_phys), dimension(im), intent(in) ::ulwsfcin_cpl,   & 
+     &        dusfcin_cpl, dvsfcin_cpl, dtsfcin_cpl, dqsfcin_cpl,       &
+     &        tisfc, tsfco, fice, hice 
+
+! --- input/output
+      real(kind=kind_phys), dimension(im), intent(inout) :: fice, hice, &
+     &     tisfc
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      if (cplflx) then
+        do i=1,im
+          islmsk_cice(i) = nint(slimskin_cpl(i))
+          flag_cice(i)   = (islmsk_cice(i) == 4)
+
+          ulwsfc_cice(i) = ulwsfcin_cpl(i)
+          dusfc_cice(i)  = dusfcin_cpl(i)
+          dvsfc_cice(i)  = dvsfcin_cpl(i)
+          dtsfc_cice(i)  = dtsfcin_cpl(i)
+          dqsfc_cice(i)  = dqsfcin_cpl(i)
+          tisfc_cice(i)  = tisfc(i)
+          tsea_cice(i)   = tsfco(i)
+          fice_cice(i)   = fice(i)
+          hice_cice(i)   = hice(i)
+          if(flag_cice(i)) tsfc(i) = fice_cice(i)*tisfc_cice(i)
++ (1. - fice_cice(i))*tsea_cice(i)
+        enddo
+      else
+        ! Avoid uninitialized variables - set to default values
+        flag_cice = .false.
+      endif
+
+      end subroutine sfc_cice_pre_run
+
+      end module  sfc_cice_pre
+!!
+      module sfc_cice_post
 
       contains
 !! \section arg_table_sfc_cice_post_init  Argument Table
@@ -132,7 +223,10 @@
       use machine , only : kind_phys
       implicit none
 
-!  ---  constant parameters:
+
+      real (kind=kind_phys), intent(in) :: hvap, cp, rvrdm1, rd
+
+!-  constant parameters:
       real(kind=kind_phys), parameter :: cpinv = 1.0/cp
       real(kind=kind_phys), parameter :: hvapi = 1.0/hvap
       real(kind=kind_phys), parameter :: elocp = hvap/cp
