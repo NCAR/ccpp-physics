@@ -71,7 +71,7 @@
 !! | cldsa             | cloud_area_fraction_for_radiation                             | fraction of clouds for low, middle,high, total and BL                         | frac     |    2 | real             | kind_phys | out    | F        |
 !! | mtopa             | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                          | index    |    2 | integer          |           | out    | F        |
 !! | mbota             | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                         | index    |    2 | integer          |           | out    | F        |
-!! | de_lgth           | cloud_decorrelation_length                                    | cloud decorrelation length                                                    | km       |    1 | real             | kind_phys | out   | F        |
+!! | de_lgth           | cloud_decorrelation_length                                    | cloud decorrelation length                                                    | km       |    1 | real             | kind_phys | out    | F        |
 !! | alb1d             | surface_albedo_perturbation                                   | surface albedo perturbation                                                   | frac     |    1 | real             | kind_phys | out    | F        |
 !! | errmsg            | ccpp_error_message                                            | error message for error handling in CCPP                                      | none     |    0 | character        | len=*     | out    | F        |
 !! | errflg            | ccpp_error_flag                                               | error flag for error handling in CCPP                                         | flag     |    0 | integer          |           | out    | F        |
@@ -800,9 +800,9 @@
         elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then		       ! Thompson / WSM6 cloud micrphysics scheme
 
           if (Model%kdt == 1) then
-            Tbd%phy_f3d(:,:,1) = 10.
-            Tbd%phy_f3d(:,:,2) = 50.
-            Tbd%phy_f3d(:,:,3) = 250.
+            Tbd%phy_f3d(:,:,Model%nleffr) = 10.
+            Tbd%phy_f3d(:,:,Model%nieffr) = 50.
+            Tbd%phy_f3d(:,:,Model%nseffr) = 250.
           endif
 
           call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
