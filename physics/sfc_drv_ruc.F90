@@ -1069,12 +1069,6 @@ module lsm_ruc
           smfrkeep(i,k) = smfrsoil(i,k,j)
         enddo
 
-        !do k = 1, lsoil
-        !  smc(i,k)   = smsoil(i,k,j)
-        !  slc(i,k)   = slsoil(i,k,j)
-        !  stc(i,k)   = stsoil(i,k,j)
-        !enddo
-
 !  --- ...  do not return the following output fields to parent model
 !    ec      - canopy water evaporation (m s-1)
 !    edir    - direct soil evaporation (m s-1)
@@ -1139,6 +1133,17 @@ module lsm_ruc
       deallocate(soilctop)
       deallocate(landusef)
 !
+      ! Update standard (Noah LSM) soil variables for physics
+      ! that require these variables (e.g. sfc_sice), independent
+      ! of whether it is a land point or not
+      do i  = 1, im
+        do k = 1, lsoil
+          smc(i,k) = smois(i,k)
+          slc(i,k) = sh2o(i,k)
+          stc(i,k) = tslb(i,k)
+        enddo
+      enddo
+
       return
 !...................................
       end subroutine lsm_ruc_run
