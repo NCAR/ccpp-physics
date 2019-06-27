@@ -6821,7 +6821,7 @@ cjfe
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,len
-      real (kind=kind_io8) vegtype(len),soiltype(len),slmask(len)    &
+      real (kind=kind_io8) vegtype(len),soiltype(len),slmask(len)       &
      &,                    slptype(len)  
 !
 !  make sure that the soil type and veg type are non-zero over land
