@@ -243,7 +243,8 @@
 !! | cplflx         | flag_for_flux_coupling                                                                                              | flag controlling cplflx collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | cplwav         | flag_for_wave_coupling                                                                                              | flag controlling cplwav collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
 !! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
-!! | lndfrac        | land_area_fraction                                                                                                  | fraction of horizontal grid area occupied by land                                   | frac        |    1 | real       | kind_phys | in     | F        |
+!! | icy            | flag_nonzero_sea_ice_surface_fraction                                                                               | flag indicating presence of some sea ice surface area fraction                      | flag        |    1 | logical    |           | in     | F        |
+!! | wet            | flag_nonzero_wet_surface_fraction                                                                                   | flag indicating presence of some ocean or lake surface area fraction                | flag        |    1 | logical    |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
 !! | ep1d           | surface_upward_potential_latent_heat_flux                                                                           | surface upward potential latent heat flux                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
 !! | gflx           | upward_heat_flux_in_soil                                                                                            | upward soil heat flux                                                               | W m-2       |    1 | real       | kind_phys | in     | F        |
@@ -327,7 +328,7 @@
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, lndfrac, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, &
+      subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, icy, wet, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,&
         adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
         t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
@@ -340,11 +341,10 @@
 
         implicit none
 
-        integer,                              intent(in) :: im
-        logical,                              intent(in) :: cplflx, cplwav, lssav
-        real(kind=kind_phys), dimension(im),  intent(in) :: lndfrac
-
-        real(kind=kind_phys),                 intent(in) :: dtf
+        integer,                                intent(in) :: im
+        logical,                                intent(in) :: cplflx, cplwav, lssav
+        logical, dimension(im),                 intent(in) :: icy, wet
+        real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(im),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw, &
           adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                   &
@@ -362,7 +362,7 @@
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
-        real(kind=kind_phys), parameter :: albdf   = 0.06
+        real(kind=kind_phys), parameter :: albdf   = 0.06d0
 
         integer :: i
         real(kind=kind_phys) :: tem, xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
@@ -413,7 +413,7 @@
   !       them to net SW heat fluxes
 
           do i=1,im
-            if(lndfrac(i) < 1.) then ! Not 100% land
+            if (wet(i) .or. icy(i)) then ! not 100% land
   !  ---  compute open water albedo
               xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
               ocalnirdf_cpl = 0.06

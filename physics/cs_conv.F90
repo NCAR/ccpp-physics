@@ -209,9 +209,9 @@ module cs_conv
 !                                 spblcrit=0.03, & !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.035,& !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.025,& !< minimum cloudbase height in p/ps
-                                  cincrit=-150.0
-!                                 cincrit=-120.0
-!                                 cincrit=-100.0
+                                  cincrit= 150.0
+!                                 cincrit= 120.0
+!                                 cincrit= 100.0
 
 !DD precz0 and  preczh control partitioning of water between detrainment
 !DD   and precipitation. Decrease for more precip
@@ -390,15 +390,15 @@ module cs_conv
 !
 ! input arguments
 !
-   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, NN, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
-   logical, intent(in)     :: otspt(ntracp1,2)   ! otspt(:,1) - on/off switch for tracer transport by updraft and
-                                                 !              downdraft. should not include subgrid PDF and turbulence
-                                                 ! otspt(:,2) - on/off switch for tracer transport by subsidence
-                                                 !              should include subgrid PDF and turbulence
+   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, nn, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
+   logical, intent(in)     :: otspt(1:ntracp1,1:2)! otspt(:,1) - on/off switch for tracer transport by updraft and
+                                                  !              downdraft. should not include subgrid PDF and turbulence
+                                                  ! otspt(:,2) - on/off switch for tracer transport by subsidence
+                                                  !              should include subgrid PDF and turbulence
 
    real(r8), intent(inout) :: t(IM,KMAX)          ! temperature at mid-layer (K)
    real(r8), intent(inout) :: q(IM,KMAX)          ! water vapor array including moisture (kg/kg)
-   real(r8), intent(inout) :: clw(IM,KMAX,NN)     ! tracer array including cloud condensate (kg/kg)
+   real(r8), intent(inout) :: clw(IM,KMAX,nn)     ! tracer array including cloud condensate (kg/kg)
    real(r8), intent(in)    :: pap(IM,KMAX)        ! pressure at mid-layer (Pa)
    real(r8), intent(in)    :: paph(IM,KMAX+1)     ! pressure at boundaries (Pa)
    real(r8), intent(in)    :: zm(IM,KMAX)         ! geopotential at mid-layer (m)
@@ -1177,7 +1177,7 @@ module cs_conv
      ENDDO
      DO I=ISTS,IENS
        IF (JBUOY(I) /= 2) CIN(I) = -999.D0
-       if (cin(i) < cincrit) kb(i) = -1
+       if (cin(i) > cincrit) kb(i) = -1
      ENDDO
 
 !DDsigma some initialization  before summing over cloud type
