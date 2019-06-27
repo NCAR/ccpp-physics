@@ -8,7 +8,7 @@ module maximum_hourly_diagnostics
 
    public maximum_hourly_diagnostics_init, maximum_hourly_diagnostics_run, maximum_hourly_diagnostics_finalize
 
-   ! DH* TODO - THIS CAME FROM PHYSCONS.F90 BUT IS IT BETTER PLACED IN HERE?
+   ! DH* TODO - cleanup use of constants
    real(kind=kind_phys), parameter ::PQ0=379.90516E0, A2A=17.2693882, A3=273.16, A4=35.86, RHmin=1.0E-6
    ! *DH
 

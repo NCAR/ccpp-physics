@@ -1486,11 +1486,9 @@ MODULE module_mp_thompson
                           rainprod, evapprod, &
 #endif
                           kts, kte, dt, ii, jj)
-      ! DH*
 #ifdef MPI
       use mpi
 #endif
-      ! *DH
       implicit none
 
 !..Sub arguments

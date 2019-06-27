@@ -53,7 +53,6 @@ module fv_sat_adj
 !   </tr>
 ! </table>
     ! DH* TODO - MAKE THIS INPUT ARGUMENTS *DH
-    !use constants_mod, only: rvgas, rdgas, grav, hlv, hlf, cp_air
     use physcons, only : rdgas => con_rd_dyn, &
                          rvgas => con_rv_dyn, &
                          grav => con_g_dyn,   &

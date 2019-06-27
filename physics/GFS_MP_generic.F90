@@ -206,7 +206,8 @@
                                                                  srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
                                                                  totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,   &
                                                                  snow_cpl, pwat
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dt3dt, dq3dt
+      ! These arrays are only allocated if ldiag3d is .true.
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt, dq3dt
 
       ! Stochastic physics / surface perturbations
       logical, intent(in) :: do_sppt
@@ -259,7 +260,7 @@
       ! put ice, snow, graupel on dynamics timestep. The way the code in
       ! GFS_physics_driver is written, Diag%{graupel,ice,snow} are on the
       ! physics timestep, while Diag%{rain,rainc} and all totprecip etc
-      ! are on the dynamics timestep. Totally confusing and wrong. *DH
+      ! are on the dynamics timestep. Confusing, but works if frain=1. *DH
       if (imp_physics == imp_physics_gfdl) then
         tprcp   = max(0., rain)               ! clu: rain -> tprcp
         !graupel = frain*graupel0
