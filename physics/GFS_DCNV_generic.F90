@@ -155,7 +155,7 @@
 !! | cnvc            | convective_cloud_cover                                                                      | convective cloud cover                                               | frac          |    2 | real              | kind_phys | inout  | F        |
 !! | cnvw_phy_f3d    | convective_cloud_water_mixing_ratio_in_phy_f3d                                              | convective cloud water mixing ratio in the phy_f3d array             | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | cnvc_phy_f3d    | convective_cloud_cover_in_phy_f3d                                                           | convective cloud cover in the phy_f3d array                          | frac          |    2 | real              | kind_phys | inout  | F        |
-!! | cape            | convective_available_potential_energy_for_coupling                                          | convective available potential energy for coupling DH* CHECK THIS DOESN'T MAKE SENSE!!! *DH | m2 s-2        |    1 | real    | kind_phys | inout   | F        |
+!! | cape            | convective_available_potential_energy_for_coupling                                          | convective available potential energy for coupling                   | m2 s-2        |    1 | real              | kind_phys | inout  | F        |
 !! | tconvtend       | tendency_of_air_temperature_due_to_deep_convection_for_coupling_on_physics_timestep         | tendency of air temperature due to deep convection                   | K             |    2 | real              | kind_phys | inout  | F        |
 !! | qconvtend       | tendency_of_water_vapor_specific_humidity_due_to_deep_convection_for_coupling_on_physics_timestep | tendency of specific humidity due to deep convection           | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | uconvtend       | tendency_of_x_wind_due_to_deep_convection_for_coupling_on_physics_timestep                  | tendency_of_x_wind_due_to_deep_convection                            | m s-1         |    2 | real              | kind_phys | inout  | F        |
@@ -194,12 +194,12 @@
       ! dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi only allocated if ldiag3d == .true. or lgocart == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: cnvw, cnvc
-      ! DH* The following arrays may not be allocated, depending on certain flags and microphysics schemes.
+      ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated (it is still invalid Fortran code, though).
       real(kind=kind_phys), dimension(:,:), intent(inout) :: cnvw_phy_f3d, cnvc_phy_f3d
-      ! *DH
+
       real(kind=kind_phys), dimension(im), intent(inout) :: cape
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: tconvtend, qconvtend, uconvtend, vconvtend
 

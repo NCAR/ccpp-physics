@@ -320,14 +320,13 @@
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: dqdt
 
-      ! DH* The following arrays may not be allocated, depending on certain flags (cplflx, ...).
+      ! The following arrays may not be allocated, depending on certain flags (cplflx, ...).
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
       real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
-      ! *DH
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg

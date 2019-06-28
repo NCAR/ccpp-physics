@@ -315,7 +315,7 @@ contains
    dd_mf =0.
    dt_mf =0.
    tau_ecmwf(:)=0.
-!                                                                      
+!
        j=1
        ht(:)=phil(:,1)/g
        do i=its,ite

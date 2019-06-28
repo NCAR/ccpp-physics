@@ -36,7 +36,7 @@ module ccpp_multi_gases_mod
 !   </tr>
 ! </table>
       use machine, only: kind_dyn
-      ! DH* TODO - MAKE THIS INPUT ARGUMENTS *DH
+      ! DH* TODO - MAKE THIS INPUT ARGUMENTS
       use physcons, only : rdgas => con_rd_dyn, &
                            cp_air => con_cp_dyn
       ! *DH

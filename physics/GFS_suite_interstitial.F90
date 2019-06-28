@@ -262,7 +262,8 @@
 
       integer,              intent(inout), dimension(im) :: kinver
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, adjsfculw, ctei_rml, ctei_r
-      real(kind=kind_phys), intent(inout), dimension(im, levs) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
+      ! These arrays are only allocated if ldiag3d is .true.
+      real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
 
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
