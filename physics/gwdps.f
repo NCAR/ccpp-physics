@@ -151,7 +151,7 @@
       subroutine gwdps_init()
       end subroutine gwdps_init
 
-!> \defgroup gfs_gwdps GFS gwdps Main
+!> \defgroup gfs_gwdps GFS Orographic Gravity Wave Drag and Mountain Blocking Scheme Module
 !! \brief This subroutine includes orographic gravity wave drag and mountain
 !! blocking.
 !!

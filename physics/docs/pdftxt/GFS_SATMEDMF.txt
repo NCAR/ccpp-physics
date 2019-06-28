@@ -8,7 +8,7 @@ counter-gradient(EDCG) scheme is used for the weakly unstable PBL. The new TKE-E
 
 -# Eddy diffusivity (K) is now a function of TKE which is prognostically predicted
 
--# EDMF approach is appled for all the unstable PBL 
+-# EDMF approach is applied for all the unstable PBL 
 
 -# EDMF approach is also applied to the stratocumulus-top-driven turbulence mixing
 
