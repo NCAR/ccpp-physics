@@ -134,7 +134,7 @@ module lsm_ruc
 !     sbsno    - real, sublimation/deposit from snopack (m/s)      im   !
 !     stm      - real, total soil column moisture content (m)      im   !
 !     zorl     - real, surface roughness                           im   !
-!     wet1     - real, normalized soil wetness                     im   !
+!     wetness  - real, normalized soil wetness                     im   !
 !                                                                       !
 !  ====================    end of description    =====================  !
 
@@ -193,7 +193,7 @@ module lsm_ruc
 !! | ch              | surface_drag_coefficient_for_heat_and_moisture_in_air_over_land              | surface exchange coeff heat & moisture over land                | none          |    1 | real      | kind_phys | in     | F        |
 !! | chh             | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land                | thermal exchange coefficient over land                          | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | cmm             | surface_drag_wind_speed_for_momentum_in_air_over_land                        | momentum exchange coefficient over land                         | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | wet1            | normalized_soil_wetness                                                      | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        |
+!! | wetness         | normalized_soil_wetness_for_land_surface_model                               | normalized soil wetness                                         | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | canopy          | canopy_water_amount                                                          | canopy water amount                                             | kg m-2        |    1 | real      | kind_phys | inout  | F        |
 !! | sigmaf          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                      | frac          |    1 | real      | kind_phys | in     | F        |
 !! | sfalb           | surface_diffused_shortwave_albedo                                            | mean surface diffused sw albedo                                 | frac          |    1 | real      | kind_phys | inout  | F        |
@@ -267,7 +267,7 @@ module lsm_ruc
      &       sfcqc, sfcdew, tice, sfcqv,                                &
      &       sncovr1, qsurf, gflux, drain, evap, hflx,                  & ! --- outputs
      &       rhosnf, runof, runoff, srunoff,                            &
-     &       chh, cmm, evbs, evcw, sbsno, stm, wet1,                    &
+     &       chh, cmm, evbs, evcw, sbsno, stm, wetness,                 &
      &       acsnow, snowfallac,                                        &
      &       flag_init, flag_restart, errmsg, errflg                    &
      &     )
@@ -319,7 +319,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
      &       qsurf , gflux , evap , runof , drain ,                     &
      &       runoff, srunoff, hflx, cmm, chh,                           &
-     &       rhosnf, evbs, evcw, sbsno, stm, wet1,                      &
+     &       rhosnf, evbs, evcw, sbsno, stm, wetness,                   &
      &       acsnow, snowfallac
 
       logical,          intent(in)  :: flag_init, flag_restart
@@ -331,7 +331,7 @@ module lsm_ruc
      &       q0, qs1, wind, weasd_old, snwdph_old,                      &
      &       tprcp_old, srflag_old, sr_old, tskin_old, canopy_old,      &
      &       tsnow_old, snowfallac_old, acsnow_old, sfalb_old,          &
-     &       sfcqv_old, sfcqc_old, wet1_old, zorl_old, sncovr1_old
+     &       sfcqv_old, sfcqc_old, wetness_old, zorl_old, sncovr1_old
 
       real (kind=kind_phys), dimension(lsoil_ruc) :: et
 
@@ -426,7 +426,7 @@ module lsm_ruc
                                smc, slc, stc,                            & ! in
                                smcref2, smcwlt2,                         & ! inout
                                lsm_ruc, lsm,                             & ! in
-                               zs, sh2o, smfrkeep, tslb, smois, wet1,    & ! out
+                               zs, sh2o, smfrkeep, tslb, smois, wetness, & ! out
                                errmsg, errflg)
 
         !do i  = 1, im ! n - horizontal loop
@@ -521,7 +521,7 @@ module lsm_ruc
           sfalb_old(i)       = sfalb(i)
           sfcqv_old(i)       = sfcqv(i)
           sfcqc_old(i)       = sfcqc(i)
-          wet1_old(i)        = wet1(i)
+          wetness_old(i)     = wetness(i)
           zorl_old(i)        = zorl(i)
           sncovr1_old(i)     = sncovr1(i)
           do k = 1, lsoil_ruc
@@ -777,8 +777,8 @@ module lsm_ruc
 
         if(stype(i,j) .ne. 14) then
            ! land
-           if (wet1(i) > 0.) then
-            wet(i,j) = wet1(i)
+           if (wetness(i) > 0.) then
+            wet(i,j) = wetness(i)
            else
             wet(i,j) = max(0.0001,smsoil(i,1,j)/0.3)
            endif
@@ -1034,7 +1034,7 @@ module lsm_ruc
         runof (i)  = runoff1(i,j)
         drain (i)  = runoff2(i,j)
 
-        wet1(i) = wet(i,j)
+        wetness(i) = wet(i,j)
 
         ! State variables
         tsnow(i)   = soilt1(i,j)
@@ -1111,7 +1111,7 @@ module lsm_ruc
             sfalb(i)       = sfalb_old(i)
             sfcqv(i)       = sfcqv_old(i)
             sfcqc(i)       = sfcqc_old(i)
-            wet1(i)        = wet1_old(i)
+            wetness(i)     = wetness_old(i)
             zorl(i)        = zorl_old(i)
             sncovr1(i)     = sncovr1_old(i)
             do k = 1, lsoil_ruc
@@ -1157,8 +1157,8 @@ module lsm_ruc
                                smc, slc, stc,                         & ! in
                                smcref2, smcwlt2,                      & ! inout
                                lsm_ruc, lsm,                          & ! in
-                               zs, sh2o, smfrkeep, tslb, smois, wet1, & ! out
-                               errmsg, errflg)
+                               zs, sh2o, smfrkeep, tslb, smois,       & ! out
+                               wetness, errmsg, errflg)
 
       implicit none
 
@@ -1180,7 +1180,7 @@ module lsm_ruc
 
       integer,               dimension(im),    intent(inout) :: soiltyp
       integer,               dimension(im),    intent(inout) :: vegtype
-      real (kind=kind_phys), dimension(im),    intent(inout) :: wet1
+      real (kind=kind_phys), dimension(im),    intent(inout) :: wetness
       real (kind=kind_phys), dimension(im),    intent(inout) :: fice
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smois! ruc
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb ! ruc
@@ -1502,7 +1502,7 @@ module lsm_ruc
 
         do j=jts,jte
         do i=its,ite
-          wet1(i) = mavail(i,j)
+          wetness(i) = mavail(i,j)
           do k = 1, lsoil_ruc
             smois(i,k) = soilm(i,k,j)
             tslb(i,k)  = soiltemp(i,k,j)
