@@ -174,7 +174,6 @@
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%f10m'     , Sfcprop%f10m)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tprcp'    , Sfcprop%tprcp)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%srflag'   , Sfcprop%srflag)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%sr'       , Sfcprop%sr)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slc'      , Sfcprop%slc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%smc'      , Sfcprop%smc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%stc'      , Sfcprop%stc)
@@ -321,10 +320,16 @@
                      call print_var(mpirank,omprank, blkno, 'Diag%epi         ',    Diag%epi)
                      call print_var(mpirank,omprank, blkno, 'Diag%smcwlt2     ',    Diag%smcwlt2)
                      call print_var(mpirank,omprank, blkno, 'Diag%smcref2     ',    Diag%smcref2)
+                     call print_var(mpirank,omprank, blkno, 'Diag%sr          ',    Diag%sr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomr       ',    Diag%tdomr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomzr      ',    Diag%tdomzr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomip      ',    Diag%tdomip)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdoms       ',    Diag%tdoms)
+                     if (Model%lsm == Model%lsm_ruc) then
+                       call print_var(mpirank,omprank, blkno, 'Diag%wet1        ',  Sfcprop%wetness)
+                     else
+                       call print_var(mpirank,omprank, blkno, 'Diag%wet1        ',  Diag%wet1)
+                     end if
                      call print_var(mpirank,omprank, blkno, 'Diag%skebu_wts   ',    Diag%skebu_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%skebv_wts   ',    Diag%skebv_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%sppt_wts    ',    Diag%sppt_wts)

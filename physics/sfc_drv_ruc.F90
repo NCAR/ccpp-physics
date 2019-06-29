@@ -612,7 +612,7 @@ module lsm_ruc
 
       ! Set flag for mixed phase precipitation depending on microphysics scheme.
       ! For GFDL and Thompson, srflag is fraction of frozen precip for convective+explicit precip.
-      if (imp_physics==imp_physics_gfdlmp .or. imp_physics==imp_physics_thompson) then
+      if (imp_physics==imp_physics_gfdl .or. imp_physics==imp_physics_thompson) then
         frpcpn = .true.
       else
         frpcpn = .false.
