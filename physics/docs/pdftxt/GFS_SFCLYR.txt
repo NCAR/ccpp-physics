@@ -12,7 +12,7 @@ in the very stable and very unstable situations.
  \ref Noah_LSM are largely responsible for the quality
  of model forecasts produced for near-surface weather parameters, such
  as 2-meter air temperature (\f$T_{2m}\f$) and surface skin temperature
- (\f$LST\f$). \f$LST\f$ is derived from the surface energy budget, and is
+  (\f$LST\f$). \f$LST\f$ is derived from the surface energy budget, and is
  particularly important to remote sensing and data  assimilation. How
  precise these two parameters can be simulated by the model strongly
  depends on how accurate the surface heat fluxes are parameterized,
@@ -31,10 +31,10 @@ in the very stable and very unstable situations.
 
  In May 2011, the new vegetation-dependent formulations of
  thermal roughness formulation ( 
- Zheng et al.(2012) \cite zheng_et_al_2012)
+ Zheng et al. (2012) \cite zheng_et_al_2012)
  was implemented to deal with the cold \f$LST\f$ bias
  over the arid western continental United States
- (CONUS) during daytime. The thermal roughness length \f$Z_{0H}\f$ is derived by a 
+  (CONUS) during daytime. The thermal roughness length \f$Z_{0H}\f$ is derived by a 
  seasonlly varying formulation dependent on the seasonal cycle of green vegetation
  fraction. In this \f$Z_{0H}\f$ formulation, a key parameter known as \f$C_{zil}\f$
  is specified according to a dependence on canopy height.
@@ -43,7 +43,7 @@ The NCEP GFS global prediction model has experienced a longstanding problem of s
 cold bias in the \f$T_{2m}\f$ forecasts over land in the late afternoon and nighttime
 during moist seasons. This cold bias is closely associated with the nocturnal stable 
 boundary layer and is accompanied by a corresponding warm air temperature bias in the first
-model level above the ground. In 2017, Zheng et al.(2017) \cite zheng_et_al_2017 identified the 
+model level above the ground. In 2017, Zheng et al. (2017) \cite zheng_et_al_2017 identified the 
 bias and introduced a stability parameter constraint \f$(z/L)_{lim}\f$ to prevent the land-atmosphere system from fully decoupling:
 \f[
 (z/L)_{lim}=\frac{ln(\frac{z}{z_{0M}})}{2\alpha(1-\frac{z_{0M}}{z})}
@@ -51,11 +51,11 @@ bias and introduced a stability parameter constraint \f$(z/L)_{lim}\f$ to preven
 
 Here \f$z\f$ is the height, \f$L\f$ is the Obukhov length, \f$z_{0M}\f$ is the momentum roughness length, and \f$\alpha = 5\f$. 
 
-The pertinent features of the GFS stable surface layer parameterization scheme are described in the appendix of Zheng et al.(2017) 
+The pertinent features of the GFS stable surface layer parameterization scheme are described in the appendix of Zheng et al. (2017) 
 \cite zheng_et_al_2017.
 
 \section intra_rough Intraphysics Communication
-\ref arg_table_sfc_ex_coef_run
+\ref arg_table_sfc_diff_run
 
 \section gen_rough  General Algorithm
 \ref general_diff

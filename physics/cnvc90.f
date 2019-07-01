@@ -12,7 +12,7 @@
       subroutine cnvc90_init()
       end subroutine cnvc90_init
 
-!>\defgroup GFS_cnvc90 GFS cnvc90 Main
+!>\defgroup GFS_cnvc90 GFS Convective Cloud Diagnostics Module
 !> @{
 !! This module contains the calculation of fraction of convective cloud,
 !! pressure at bottom of convective cloud and at top of convective
@@ -37,7 +37,7 @@
 !! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
 !!
-!>\section gen_cnvc90_run GFS cnvc90_run General Algorithm
+! \section gen_cnvc_run GFS cnvc90_run General Algorithm
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)
 

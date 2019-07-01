@@ -23,7 +23,7 @@
       end subroutine samfshalcnv_finalize
 
 
-!> \defgroup SAMF_shal GFS samfshalcnv Main
+!> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection Scheme Module
 !! @{
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.

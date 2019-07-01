@@ -158,10 +158,6 @@
 !!\param dpre_in          mass-weighted diameter of prexisting ice crystals (m)
 !!\param ccn_diagr8       array of supersaturations for CCN diagnostics (in-out)
 !!\param Ndropr8          Current droplet number concentration (\f$Kg^{-1}\f$)
-!!\param qc               Liquid water mixing ratio (Kg/Kg)
-!!\param use_average_v    .false. integrate over the updraft distribution. True: use the mean vertical velocity
-!!\param CCN_param        CCN activation parameterization. 1- Fountoukis and Nenes (2005), 2-Abdul_Razzak and Ghan (2002) (def = 2)
-!!\param IN_param         IN activation spectrum (default is 5)
 !!\param cdncr8           Activated cloud droplet number concentration (Kg-1)
 !!\param smaxliqr8        Maximum supersaturation w.r.t liquid during droplet activation
 !!\param incr8            Nucleated ice crystal concentration (Kg-1)
@@ -172,14 +168,20 @@
 !!\param Ncdepr8          Nucleated nc by deposition ice nucleation (Kg-1)
 !!\param Ncdhfr8          Nucleated nc by immersion in aerosol (Kg -1)
 !!\param sc_icer8         Critical saturation ratio in cirrus
-!!\param fdust_depr8      Fraction of deposition ice nuclei that are dust
 !!\param fdust_immr8      Fraction of immersion mixed-phase ice nuclei that are dust
+!!\param fdust_depr8      Fraction of deposition ice nuclei that are dust
 !!\param fdust_dhfr8      Fraction of immersion ice nuclei that are dust (not mixed-phase)
 !!\param nlimr8           Limiting ice nuclei concentration (m-3)
-
-!===================================================================================
-
-
+!!\param use_average_v    .false. integrate over the updraft distribution. True: use the mean vertical velocity
+!!\param CCN_param        CCN activation parameterization. 1- Fountoukis and Nenes (2005), 2-Abdul_Razzak and Ghan (2002) (def = 2)
+!!\param IN_param         IN activation spectrum (default is 5)
+!!\param fd_dust
+!!\param fd_soot
+!!\param pfrz_inc_r8
+!!\param sigma_nuc
+!!\param rhi_cell
+!!\param nccn
+!!
        subroutine aerosol_activate(tparc_in, pparc_in, sigwparc_in,     &
      & wparc_ls, Aer_Props, npre_in, dpre_in, ccn_diagr8, Ndropr8,      &
      & cdncr8, smaxliqr8, incr8, smaxicer8, nheticer8, INimmr8,         &

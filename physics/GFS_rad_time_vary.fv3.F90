@@ -10,14 +10,13 @@
 
       contains
 
-!>\defgroup GFS_rad_time_vary GFS RRTMG Update 
-!!\ingroup RRTMG
-!! @{
 !! \section arg_table_GFS_rad_time_vary_init Argument Table
 !!
       subroutine GFS_rad_time_vary_init
       end subroutine GFS_rad_time_vary_init
 
+!>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
+!> @{
 !> \section arg_table_GFS_rad_time_vary_run Argument Table
 !! | local_name        | standard_name                                          | long_name                                                                     | units    | rank |  type                 |   kind    | intent | optional |
 !! |-------------------|--------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
@@ -105,10 +104,10 @@
          endif
 
       end subroutine GFS_rad_time_vary_run
+!> @}
  
 !> \section arg_table_GFS_rad_time_vary_finalize Argument Table
 !!
       subroutine GFS_rad_time_vary_finalize()
       end subroutine GFS_rad_time_vary_finalize
-!! @}
    end module GFS_rad_time_vary
