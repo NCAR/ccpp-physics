@@ -56,7 +56,7 @@
   real(kind=kind_phys),parameter:: con_solr_old =1.3660e+3_kind_phys               !< solar constant (\f$W/m^{2}\f$)-Liu(2002)
   real(kind=kind_phys),parameter:: con_solr   =1.3608e+3_kind_phys                 !< solar constant (\f$W/m^{2}\f$)-nasa-sorce Tim(2008)
 ! real(kind=kind_phys),parameter:: con_solr   =1.36742732e+3_kind_phys             ! solar constant    (W/m2)-gfdl(1989) - OPR as of Jan 2006
-  ! Selected geophysics/astronomy constants with kind=kind_dyn DH* CHECK IF THIS BREAKS B4B AND IF SO REMOVE _kind_dyn
+  ! Selected geophysics/astronomy constants with kind=kind_dyn
   real(kind=kind_dyn), parameter:: con_g_dyn  =9.80665e+0_kind_dyn                 !< gravity (\f$m/s^{2}\f$)
 
 !> \name Thermodynamics constants
@@ -79,7 +79,7 @@
   real(kind=kind_phys),parameter:: con_jcal   =4.1855E+0_kind_phys                 !< joules per calorie
   real(kind=kind_phys),parameter:: con_rhw0   =1022.0_kind_phys                    !< sea water reference density (\f$kg/m^{3}\f$)
   real(kind=kind_phys),parameter:: con_epsq   =1.0E-12_kind_phys                   !< min q for computing precip type
-  ! Selected thermodynamics constants with kind=kind_dyn  DH* CHECK IF THIS BREAKS B4B AND IF SO REMOVE _kind_dyn
+  ! Selected thermodynamics constants with kind=kind_dyn
   real(kind=kind_dyn), parameter:: con_rd_dyn   =2.8705e+2_kind_dyn                !< gas constant air (\f$J/kg/K\f$)
   real(kind=kind_dyn), parameter:: con_rv_dyn   =4.6150e+2_kind_dyn                !< gas constant H2O (\f$J/kg/K\f$)
   real(kind=kind_dyn), parameter:: con_cp_dyn   =1.0046e+3_kind_dyn                !< spec heat air at p (\f$J/kg/K\f$)

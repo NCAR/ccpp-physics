@@ -845,6 +845,8 @@
 !!\param delp    (IX,NLAY), model layer pressure thickness in mb (100Pa)
 !!\param IX          horizontal dimention
 !!\param NLAY,NLP1    vertical layer/level dimensions
+!!\param lmfshal     flag for mass-flux shallow convection scheme in the cloud fraction calculation    
+!!\param lmfdeep2    flag for mass-flux deep convection scheme in the cloud fraction calculation
 !!\param clouds      (IX,NLAY,NF_CLDS), cloud profiles
 !!\n                 (:,:,1) - layer total cloud fraction
 !!\n                 (:,:,2) - layer cloud liq water path  \f$(g/m^2)\f$
@@ -860,7 +862,7 @@
 !!\param mbot        (IX,3), vertical indices for low, mid, hi cloud bases
 !!\param de_lgth   (IX),   clouds decorrelation length (km)
 !>\section gen_progcld2 progcld2 General Algorithm
-!! @{
+!> @{
       subroutine progcld2                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, f_ice,f_rain,r_rime,flgmin,       &
@@ -1265,7 +1267,7 @@
       return
 !...................................
       end subroutine progcld2
-!! @}
+!> @}
 !-----------------------------------
 
 !> \ingroup module_radiation_clouds
@@ -1279,6 +1281,8 @@
 !!\param qstl       (ix,nlay), layer saturate humidity in gm/gm
 !!\param rhly       (ix,nlay), layer relative humidity (=qlyr/qstl)
 !!\param clw        (ix,nlay), layer cloud condensate amount
+!!\param cnvw       (ix,nlay), layer convective cloud condensate
+!!\param cnvc       (ix,nlay), layer convective cloud cover
 !!\param xlat       (ix), grid latitude in radians, default to pi/2 ->
 !!                   -pi/2 range, otherwise see in-line comment
 !!\param xlon       (ix), grid longitude in radians  (not used)
@@ -1684,6 +1688,8 @@
 !!\param  xlon    (ix), grid longitude in radians (not used)
 !!\param  slmsk   (ix), sea/land mask array (sea:0, land:1, sea-ice:2)
 !!\param  cldtot  (ix,nlay), layer total cloud fraction
+!!\param  dz      (ix,nlay), layer thickness (km)
+!!\param  delp    (ix,nlay), model layer pressure thickness in mb (100Pa)
 !!\param  ix      horizontal dimension
 !!\param  nlay    vertical layer dimension
 !!\param  nlp1    vertical level dimension
@@ -1700,6 +1706,7 @@
 !!\param  clds    fraction of clouds for low, mid, hi cloud tops
 !!\param  mtop    vertical indices for low, mid, hi cloud tops
 !!\param  mbot    vertical indices for low, mid, hi cloud bases
+!!\param  de_lgth clouds decorrelation length (km)
 !>\section gen_progcld4  progcld4 General Algorithm
 !! @{
       subroutine progcld4                                               & 
@@ -2014,6 +2021,8 @@
 !!                 range, otherwise see in-line comment
 !>\param xlon      (ix), grid longitude in radians (not used)
 !>\param slmsk     (ix), sea/land mask array (sea:0, land:1, sea-ice:2)
+!>\param dz        layer thickness (km)
+!>\param delp      model layer pressure thickness in mb (100Pa)
 !>\param ntrac     number of tracers minus one (Model%ntrac-1)
 !>\param ntcw      tracer index for cloud liquid water minus one (Model%ntcw-1)
 !>\param ntiw      tracer index for cloud ice water minus one (Model%ntiw-1)
@@ -2037,6 +2046,7 @@
 !>\param clds      (ix,5), fraction of clouds for low, mid, hi, tot, bl
 !>\param mtop      (ix,3), vertical indices for low, mid, hi cloud tops 
 !>\param mbot      (ix,3), vertical indices for low, mid, hi cloud bases
+!>\param de_lgth   clouds decorrelation length (km)  
 !>\section gen_progcld4o progcld4o General Algorithm
 !! @{
       subroutine progcld4o                                              &
@@ -2677,9 +2687,8 @@
 !!\param plvl    (IX,NLP1), model level pressure in mb (100Pa)
 !!\param tlyr    (IX,NLAY), model layer mean temperature in K
 !!\param tvly    (IX,NLAY), model layer virtual temperature in K
-!!\param qlyr    (IX,NLAY), layer specific humidity in gm/gm
-!!\param clw     (IX,NLAY), layer cloud liquid water amount
-!!\param ciw     (IX,NLAY), layer cloud ice water amount
+!!\param ccnd    (IX,NLAY), layer cloud condensate amount
+!!\param ncnd    number of layer cloud condensate types
 !!\param xlat    (IX), grid latitude in radians, default to pi/2 ->
 !!               -pi/2 range, otherwise see in-line comment
 !!\param xlon    (IX), grid longitude in radians  (not used)

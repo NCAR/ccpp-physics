@@ -23,7 +23,7 @@
       end subroutine samfshalcnv_finalize
 
 
-!> \defgroup SAMF_shal GFS samfshalcnv Main
+!> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection Scheme Module
 !! @{
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
@@ -1869,13 +1869,12 @@ c
 
         real(kind=kind_phys), dimension(im), intent(inout) :: rainc,
      &    cnvprcp, cnvprcpb
-        ! DH* The following arrays may not be allocated, depending on certain flags and microphysics schemes.
+        ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
         ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
         ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
         ! as long as these do not get used when not allocated.
         real(kind=kind_phys), dimension(:,:), intent(inout) ::
      &    cnvw_phy_f3d, cnvc_phy_f3d
-        ! *DH
 
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg

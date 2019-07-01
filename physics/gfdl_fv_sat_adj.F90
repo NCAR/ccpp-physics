@@ -1,5 +1,5 @@
 !>\file gfdl_fv_sat_adj.F90
-!! This file contains the fast saturation adjustment in the GFDL cloud microphysics.
+!! This file contains the GFDL in-core fast saturation adjustment.
 !! and it is an "intermediate physics" implemented in the remapping Lagrangian to 
 !! Eulerian loop of FV3 solver.
 !***********************************************************************
@@ -23,8 +23,8 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 
-!> This module is part of the GFDL Cloud MP and it is the CCPP-compliant 
-!! fast phyiscs called in FV3 dynamics solver.
+!> This module contains the GFDL in-core fast saturation adjustment  
+!! called in FV3 dynamics solver.
 module fv_sat_adj
 ! Modules Included:
 ! <table>
@@ -53,7 +53,6 @@ module fv_sat_adj
 !   </tr>
 ! </table>
     ! DH* TODO - MAKE THIS INPUT ARGUMENTS *DH
-    !use constants_mod, only: rvgas, rdgas, grav, hlv, hlf, cp_air
     use physcons, only : rdgas => con_rd_dyn, &
                          rvgas => con_rv_dyn, &
                          grav => con_g_dyn,   &
@@ -227,7 +226,7 @@ subroutine fv_sat_adj_finalize (errmsg, errflg)
 
 end subroutine fv_sat_adj_finalize
 
-!>\defgroup fast_sat_adj GFDL In-Core Fast Saturation Adjustment
+!>\defgroup fast_sat_adj GFDL In-Core Fast Saturation Adjustment Module
 !> @{
 !! The subroutine 'fv_sat_adj' implements the fast processes in the GFDL
 !! Cloud MP. It is part of the GFDL Cloud MP.

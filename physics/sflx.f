@@ -57,6 +57,7 @@
 !!\param[in] snoalb       real, max albedo over deep snow (fraction)
 !!\param[in] bexpp        real, perturbation of soil type "b" parameter (perturbation)
 !!\param[in] xlaip        real, perturbation of leave area index (perturbation)
+!!\param[in] lheatstrg    logical, flag for canopy heat storage parameterization 
 !!\param[in,out] tbot     real, bottom soil temp (\f$K\f$) (local yearly-mean sfc air temp)
 !!\param[in,out] cmc      real, canopy moisture content (\f$m\f$)
 !!\param[in,out] t1       real, ground/canopy/snowpack eff skin temp (\f$K\f$)
@@ -439,7 +440,7 @@
 
 !  --- ...  bexp sfc-perts, mgehne
 !> - Calculate perturbated soil type "b" parameter.
-!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of LAI
+!! Following Gehne et al. (2019) \cite Gehne_2019 , a perturbation of LAI
 !! "leaf area index" (xlaip) and a perturbation of the empirical exponent parameter
 !! b in the soil hydraulic conductivity calculation (bexpp) are added to account for
 !! the uncertainties of LAI and b associated with different vegetation types and soil 

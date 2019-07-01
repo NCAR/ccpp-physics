@@ -4,27 +4,35 @@
 !WRF:MODEL_LAYER:PHYSICS
 !
 
-!>\defgroup gsd_mynn_edmf GSD MYNN-EDMF PBL Scheme
-!! This module is translated from Nakanishi and Niino (2009) \cite NAKANISHI_2009 
-!! f77 to F90 and put into WRF by Mariusz Pagowski
-!! NOAA/GSD & CIRA/CSU, Feb 2008.
-!! Changes to original code:
-!! -# code is 1D (in z)
-!! -# no advection of TKE, covariances and variances 
-!! -# Cranck-Nicholson replaced with the implicit scheme
-!! -# removed terrain dependent grid since input in WRF in actual distances in z[m]
-!! -# cosmetic changes to adhere to WRF standard (remove common blocks, intent etc)
+!>\defgroup gsd_mynn_edmf GSD MYNN-EDMF PBL Scheme Module
+!! The MYNN-EDMF scheme (Olson et al. 2019 \cite olson_et_al_2019) represents the local
+!! mixing using an eddy-diffusivity approach tied to turbulent kinetic energy (TKE). 
+!! The nonlocal mixing, important for convective boundary layers, is represented using
+!! a mass-flux approach. The scheme can be run with either a 2.5 or 3.0 closure and includes
+!! a partial-condensation scheme, commonly referred to as a cloud PDF or statistical-cloud
+!! scheme, to represent the effects of subgrid-scale (SGS) clouds on buoyancy. 
+!! This module was originally translated from Nakanishi and Niino (2009) \cite NAKANISHI_2009 
+!!  and put into the WRF model by Mariusz Pagowski NOAA/GSD and CIRA/CSU in 2008. It was 
+!! extensively modified by Joseph Olson and Jaymes Kenyon of NOAA/GSD and CU/CIRES.
 !!
-!!Modifications implemented by Joseph Olson and Jaymes Kenyon NOAA/GSD/MDB - CU/CIRES
+!! Changes to original code introduced by M. Pagowski in 2008:
+!! -# Code is 1D (in z)
+!! -# No advection of TKE, covariances and variances 
+!! -# Cranck-Nicholson replaced with the implicit scheme
+!! -# Removed terrain dependent grid since input in WRF in actual distances in z[m]
+!! -# Cosmetic changes to adhere to WRF standard (remove common blocks, intent etc)
+!!
+!! Further modifications implemented by J. Olson and J. Kenyon:
 !!
 !! Departures from original MYNN (Nakanish and Niino (2009) \cite NAKANISHI_2009)
-!! -# Addition of BouLac mixing length in the free atmosphere.
+!! -# Added the of BouLac mixing length in the free atmosphere.
 !! -# Changed the turbulent mixing length to be integrated from the
-!!    surface to the top of the BL + a transition layer depth.
+!!    surface to the top of the BL plus a transition layer depth.
 !!
+!! Changes made in various versions of the WRF model:
 !!\version v3.4.1:    
 !! - Option to use Kitamura/Canuto modification which removes 
-!! the critical Richardson number and negative TKE (default).
+!! the critical Richardson number and negative TKE (default)
 !! - Hybrid PBL height diagnostic, which blends a theta-v-based
 !! definition in neutral/convective BL and a TKE-based definition
 !! in stable conditions.
@@ -32,7 +40,7 @@
 !!\version v3.5.0:    
 !! - TKE advection option (bl_mynn_tkeadvect)
 !!\version v3.5.1:    
-!! - Fog deposition related changes.
+!! - Fog deposition related changes
 !!\version v3.6.0:    
 !! - Removed fog deposition from the calculation of tendencies
 !! - Added mixing of qc, qi, qni
@@ -40,10 +48,10 @@
 !! coupling to shcu schemes  
 !!\version v3.8.0:    
 !! - Added subgrid scale cloud output for coupling to radiation
-!! schemes (activated by setting icloud_bl =1 in phys namelist).
+!! schemes (activated by setting icloud_bl =1 in phys namelist)
 !! - Added WRF_DEBUG prints (at level 3000)
-!! - Added Tripoli and Cotton (1981) \cite Tripoli_1981 correction.
-!! - Added namelist option bl_mynn_cloudmix to test effect of mixing cloud species (default = 1: on). 
+!! - Added Tripoli and Cotton (1981) \cite Tripoli_1981 correction
+!! - Added namelist option bl_mynn_cloudmix to test effect of mixing cloud species (default = 1: on) 
 !! - Added mass-flux option (bl_mynn_edmf, = 1 for DMP mass-flux, 0: off). Related options: 
 !!   -  bl_mynn_edmf_mom = 1 : activate momentum transport in MF scheme
 !!   -  bl_mynn_edmf_tke = 1 : activate TKE transport in MF scheme
@@ -52,56 +60,56 @@
 !! - Added new cloud PDF option (bl_mynn_cloudpdf = 2) from Chaboureau
 !!   and Bechtold (2002) \cite Chaboureau_2002 with modifications 
 !! - Added capability to mix chemical species when env variable
-!!   WRF_CHEM = 1, thanks to Wayne Angevine.
+!!   WRF_CHEM = 1, thanks to Wayne Angevine
 !! - Added scale-aware mixing length, following Junshi Ito's work
-!!   Ito et al. (2015, BLM) \cite Ito_2015.
+!!   Ito et al. (2015, BLM) \cite Ito_2015
 !!\version v3.9.0:    
 !! - Improvement to the mass-flux scheme (dynamic number of plumes,
-!!   better plume/cloud depth, significant speed up, better cloud fraction). 
-!! - Added Stochastic Parameter Perturbation (SPP) implementation.
+!!   better plume/cloud depth, significant speed up, better cloud fraction)
+!! - Added Stochastic Parameter Perturbation (SPP) implementation
 !! -  Many miscellaneous tweaks to the mixing lengths and stratus
-!!    component of the subgrid clouds.
+!!    component of the subgrid clouds
 !!\version v4.0:      
 !! - Removed or added alternatives to WRF-specific functions/modules
-!!   for the sake of portability to other models.
+!!   for the sake of portability to other models
 !! - Further refinement of mass-flux scheme from SCM experiments with
 !!   Wayne Angevine: switch to linear entrainment and back to
-!!   Simpson and Wiggert-type w-equation.
+!!   Simpson and Wiggert-type w-equation
 !! - Addition of TKE production due to radiation cooling at top of 
-!!   clouds (proto-version); not activated by default.
+!!   clouds (proto-version); not activated by default
 !! - Some code rewrites to move if-thens out of loops in an attempt to
-!!   improve computational efficiency.
+!!   improve computational efficiency
 !! - New tridiagonal solver, which is supposedly 14% faster and more
-!!   conservative. Impact seems very small.
+!!   conservative. Impact seems very small
 !! - Many miscellaneous tweaks to the mixing lengths and stratus
-!!   component of the subgrid-scale (SGS) clouds.
+!!   component of the subgrid-scale (SGS) clouds
 !!\version v4.1:
 !! - Big improvements in downward SW radiation due to revision of subgrid clouds
-!!   - better cloud fraction and subgrid scale mixing ratios.
+!!   - better cloud fraction and subgrid scale mixing ratios
 !!   - may experience a small cool bias during the daytime now that high 
-!!     SW-down bias is greatly reduced...
+!!     SW-down bias is greatly reduced
 !! - Some tweaks to increase the turbulent mixing during the daytime for
-!!   bl_mynn_mixlength option 2 to alleviate cool bias (very small impact).
-!! - Improved ensemble spread from changes to SPP in MYNN
+!!   bl_mynn_mixlength option 2 to alleviate cool bias (very small impact)
+!! - Improved ensemble spread from changes to Stochastic Parameter Perturbation (SPP) in MYNN
 !!   - now perturbing eddy diffusivity and eddy viscosity directly
 !!   - now perturbing background rh (in SGS cloud calc only)
 !!   - now perturbing entrainment rates in mass-flux scheme
 !! - Added IF checks (within IFDEFS) to protect mixchem code from being used
-!!   when HRRR smoke is used (no impact on regular non-wrf chem use)
-!! - Important bug fix for wrf chem when transporting chemical species in MF scheme
+!!   when HRRR smoke is used (no impact when WRF-CHEM is not used)
+!! - Important bug fix for WRF-CHEM when transporting chemical species in MF scheme
 !! - Removed 2nd mass-flux scheme (no only bl_mynn_edmf = 1, no option 2)
 !! - Removed unused stochastic code for mass-flux scheme
 !! - Changed mass-flux scheme to be integrated on interface levels instead of
 !!   mass levels - impact is small
-!! - Added option to mix 2nd moments in MYNN as opposed to the scalar_pblmix option.
+!! - Added option to mix second moments in MYNN as opposed to the scalar_pblmix option.
 !!   - activated with bl_mynn_mixscalars = 1; this sets scalar_pblmix = 0
 !!   - added tridagonal solver used in scalar_pblmix option to duplicate tendencies
-!!   - this alone changes the interface call considerably from v4.0.
+!!   - this alone changes the interface call considerably from v4.0
 !! - Slight revision to TKE production due to radiation cooling at top of clouds
 !! - Added the non-Guassian buoyancy flux function of Bechtold and Siebesma (1998) \cite Bechtold_1998
 !!    - improves TKE in SGS clouds
 !! - Added heating due to dissipation of TKE (small impact, maybe + 0.1 C daytime PBL temp)
-!! - Misc changes made for FV3/MPAS compatibility
+!! - Miscellaneous changes made for FV3/MPAS compatibility
 !!
 !!Many of these changes are now documented in Olson et al. (2019,
 !! NOAA Technical Memorandum)
@@ -1126,12 +1134,12 @@ CONTAINS
 !! computational expense. This subroutine computes the length scales up and down
 !! and then computes the min, average of the up/down length scales, and also
 !! considers the distance to the surface.
-!!\param dlu  the distance a parcel can be lifted upwards give a finite
-!!  amount of TKE.
+!\param dlu  the distance a parcel can be lifted upwards give a finite
+!  amount of TKE.
 !\param dld  the distance a parcel can be displaced downwards given a
-!!  finite amount of TKE.
-!!\param lb1  the minimum of the length up and length down
-!!\param lb2  the average of the length up and length down
+!  finite amount of TKE.
+!\param lb1  the minimum of the length up and length down
+!\param lb2  the average of the length up and length down
   SUBROUTINE boulac_length0(k,kts,kte,zw,dz,qtke,theta,lb1,lb2)
 
      INTEGER, INTENT(IN) :: k,kts,kte

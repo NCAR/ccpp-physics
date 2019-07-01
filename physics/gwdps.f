@@ -57,7 +57,8 @@
 
       logical, intent(in) :: lssav, ldiag3d
       real(kind=kind_phys), intent(in) :: dtdt(im,levs)
-      real(kind=kind_phys), intent(inout) :: dt3dt(im,levs)
+      ! dt3dt only allocated only if ldiag3d is .true.
+      real(kind=kind_phys), intent(inout) :: dt3dt(:,:)
       real(kind=kind_phys), intent(in) :: dtf
 
       character(len=*), intent(out) :: errmsg
@@ -150,7 +151,7 @@
       subroutine gwdps_init()
       end subroutine gwdps_init
 
-!> \defgroup gfs_gwdps GFS gwdps Main
+!> \defgroup gfs_gwdps GFS Orographic Gravity Wave Drag and Mountain Blocking Scheme Module
 !! \brief This subroutine includes orographic gravity wave drag and mountain
 !! blocking.
 !!

@@ -24,7 +24,7 @@
       subroutine sfc_diff_finalize
       end subroutine sfc_diff_finalize
 
-!> \defgroup GFS_diff_main GFS sfc_diff Main
+!> \defgroup GFS_diff_main GFS Surface Layer Scheme Module
 !> @{
 !> \brief This subroutine calculates surface roughness length.
 !!

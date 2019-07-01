@@ -794,10 +794,10 @@ subroutine size_dist_param_ice_vect(props, qic, nic, lam, mgncol, n0)
 end subroutine size_dist_param_ice_vect
 
 !>\ingroup micro_mg_utils_mod
+!> Finds the average diameter of particles given their density, and
+!! mass/number concentrations in the air.
+!! Assumes that diameter follows an exponential distribution.
 real(r8) elemental function avg_diameter(q, n, rho_air, rho_sub)
-  !> Finds the average diameter of particles given their density, and
-  !! mass/number concentrations in the air.
-  !! Assumes that diameter follows an exponential distribution.
   real(r8), intent(in) :: q         !< mass mixing ratio
   real(r8), intent(in) :: n         !< number concentration (per volume)
   real(r8), intent(in) :: rho_air   !< local density of the air
@@ -808,9 +808,9 @@ real(r8) elemental function avg_diameter(q, n, rho_air, rho_sub)
 end function avg_diameter
 
 !>\ingroup mg2mg3
+!> Finds a coefficient for process rates based on the relative variance
+!! of cloud water.
 elemental function var_coef_r8(relvar, a) result(res)
-  !> Finds a coefficient for process rates based on the relative variance
-  !! of cloud water.
   real(r8), intent(in) :: relvar
   real(r8), intent(in) :: a
   real(r8) :: res
@@ -820,9 +820,9 @@ elemental function var_coef_r8(relvar, a) result(res)
 end function var_coef_r8
 
 !>\ingroup mg2mg3
+!> Finds a coefficient for process rates based on the relative variance
+!! of cloud water.
 elemental function var_coef_integer(relvar, a) result(res)
-  !> Finds a coefficient for process rates based on the relative variance
-  !! of cloud water.
   real(r8), intent(in) :: relvar
   integer, intent(in) :: a
   real(r8) :: res
