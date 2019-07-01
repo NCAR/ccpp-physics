@@ -264,19 +264,19 @@ contains
     ! Broadcast arrays to all processors
 #ifdef MPI
     if (Model%rrtmgp_cld_optics .eq. 1) then
-       call MPI_BCAST(radliq_lwr_sw,           size(radliq_lwr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radliq_upr_sw,           size(radliq_upr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radliq_fac_sw,           size(radliq_fac_sw),          kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_lwr_sw,           size(radice_lwr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_upr_sw,           size(radice_upr_sw),          kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_fac_sw,           size(radice_fac_sw),          kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radliq_lwr_sw,           1,                            kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radliq_upr_sw,           1,                            kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radliq_fac_sw,           1,                            kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radice_lwr_sw,           1,                            kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radice_upr_sw,           1,                            kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(radice_fac_sw,           1,                            kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_extliq_sw,           size(lut_extliq_sw),          kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_ssaliq_sw,           size(lut_ssaliq_sw),          kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_asyliq_sw,           size(lut_asyliq_sw),          kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_extice_sw,           size(lut_extice_sw),          kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_ssaice_sw,           size(lut_ssaice_sw),          kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(lut_asyice_sw,           size(lut_asyice_sw),          kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(band_lims_cldy_sw),      size(band_lims_cldy_sw),      kind_phys,   mpiroot, mpicomm, ierr)    
+       call MPI_BCAST(band_lims_cldy_sw,       size(band_lims_cldy_sw),      kind_phys,   mpiroot, mpicomm, ierr)    
     endif
     if (Model%rrtmgp_cld_optics .eq. 2) then
        call MPI_BCAST(pade_extliq_sw,          size(pade_extliq_sw),         kind_phys,   mpiroot, mpicomm, ierr)
@@ -285,13 +285,13 @@ contains
        call MPI_BCAST(pade_extice_sw,          size(pade_extice_sw),         kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(pade_ssaice_sw,          size(pade_ssaice_sw),         kind_phys,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(pade_asyice_sw,          size(pade_asyice_sw),         kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_extliq_sw), size(pade_sizereg_extliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_ssaliq_sw), size(pade_sizereg_ssaliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_asyliq_sw), size(pade_sizereg_asyliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_extice_sw), size(pade_sizereg_extice_sw), kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_ssaice_sw), size(pade_sizereg_ssaice_sw), kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_asyice_sw), size(pade_sizereg_asyice_sw), kind_phys,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(band_lims_cldy_sw),      size(band_lims_cldy_sw),      kind_phys,   mpiroot, mpicomm, ierr)    
+       call MPI_BCAST(pade_sizereg_extliq_sw,  size(pade_sizereg_extliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_ssaliq_sw,  size(pade_sizereg_ssaliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_asyliq_sw,  size(pade_sizereg_asyliq_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_extice_sw,  size(pade_sizereg_extice_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_ssaice_sw,  size(pade_sizereg_ssaice_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(pade_sizereg_asyice_sw,  size(pade_sizereg_asyice_sw), kind_phys,   mpiroot, mpicomm, ierr)
+       call MPI_BCAST(band_lims_cldy_sw,       size(band_lims_cldy_sw),      kind_phys,   mpiroot, mpicomm, ierr)    
     endif
 #endif
 

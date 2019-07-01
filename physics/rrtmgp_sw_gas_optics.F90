@@ -117,7 +117,7 @@ contains
 
     ! Local variables
     integer :: status,ncid_sw,dimid,varID,iGas
-    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4
+    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4, temp_log_array1, temp_log_array2, temp_log_array3, temp_log_array4
     character(len=264) :: sw_gas_props_file
 
     ! Initialize
