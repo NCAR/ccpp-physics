@@ -71,8 +71,6 @@ contains
 !! \section arg_table_cu_gf_driver_run Argument Table
 !! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | tottracer      | number_of_total_tracers                                   | number of total tracers                             | count         |    0 | integer   |           | in     | F        |
-!! | ntrac          | number_of_vertical_diffusion_tracers                      | number of tracers to diffuse vertically             | count         |    0 | integer   |           | in     | F        |
 !! | garea          | cell_area                                                 | grid cell area                                      | m2            |    1 | real      | kind_phys | in     | F        |
 !! | im             | horizontal_loop_extent                                    | horizontal loop extent                              | count         |    0 | integer   |           | in     | F        |
 !! | ix             | horizontal_dimension                                      | horizontal dimension                                | count         |    0 | integer   |           | in     | F        |
@@ -99,7 +97,8 @@ contains
 !! | xland          | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                        | flag          |    1 | integer   |           | in     | F        |
 !! | hfx2           | kinematic_surface_upward_sensible_heat_flux               | kinematic surface upward sensible heat flux         | K m s-1       |    1 | real      | kind_phys | in     | F        |
 !! | qfx2           | kinematic_surface_upward_latent_heat_flux                 | kinematic surface upward latent heat flux           | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | clw            | convective_transportable_tracers                          | cloud water and other convective trans. tracers     | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
+!! | cliw           | ice_water_mixing_ratio_convective_transport_tracer             | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array   | kg kg-1   |    2 | real        | kind_phys | inout  | F        |
+!! | clcw           | cloud_condensed_water_mixing_ratio_convective_transport_tracer | moist (dry+vapor, no condensates) mixing ratio of cloud water in the convectively transported tracer array | kg kg-1   |    2 | real        | kind_phys | inout  | F        |
 !! | pbl            | atmosphere_boundary_layer_thickness                       | PBL thickness                                       | m             |    1 | real      | kind_phys | in     | F        |
 !! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                          | kg m-2        |    2 | real      | kind_phys | out    | F        |
 !! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                        | kg m-2        |    2 | real      | kind_phys | out    | F        |
@@ -112,11 +111,12 @@ contains
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
-      subroutine cu_gf_driver_run(tottracer,ntrac,garea,im,ix,km,dt,cactiv, &
-               forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,       &
-               us,vs,t2di,w,qv2di_spechum,p2di,psuri,                       &
-               hbot,htop,kcnv,xland,hfx2,qfx2,clw,                          &
-               pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,errmsg,errflg)
+      subroutine cu_gf_driver_run(garea,im,ix,km,dt,cactiv,           &
+               forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d, &
+               us,vs,t2di,w,qv2di_spechum,p2di,psuri,                 &
+               hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,              &
+               pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,      &
+               errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -137,7 +137,7 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
-   integer, intent(in   ) :: im,ix,km,ntrac,tottracer
+   integer, intent(in   ) :: im,ix,km
 
    real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: t,us,vs
@@ -145,7 +145,7 @@ contains
    real(kind=kind_phys),  dimension( ix,4 ) :: rand_clos
    real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
    real(kind=kind_phys),  dimension( ix , km ),     intent(out ) :: cnvw_moist,cnvc
-   real(kind=kind_phys),  dimension( ix , km,tottracer+2 ), intent(inout ) :: clw
+   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: cliw, clcw
 
 !hj change from ix to im
    integer, dimension (im), intent(inout) :: hbot,htop,kcnv
@@ -260,10 +260,13 @@ contains
      rand_mom(:)    = 0.
      rand_vmas(:)   = 0.
      rand_clos(:,:) = 0.
+!
      its=1
      ite=im
+     itf=ite
      jts=1
      jte=1
+     jtf=jte
      kts=1
      kte=km
      ktf=kte-1
@@ -307,9 +310,6 @@ contains
    iend=ite
    tcrit=258.
 
-   itf=ite
-   ktf=kte-1
-   jtf=jte
    ztm=0.
    ztq=0.
    hfm=0.
@@ -818,9 +818,9 @@ contains
                dsubclwm=0.
                dsubclws=0.
                dp=100.*(p2d(i,k)-p2d(i,k+1))
-               if (clw(i,k,2) .gt. -999.0 .and. clw(i,k+1,2) .gt. -999.0 )then
-                  clwtot = clw(i,k,1) + clw(i,k,2)
-                  clwtot1= clw(i,k+1,1) + clw(i,k+1,2)
+               if (clcw(i,k) .gt. -999.0 .and. clcw(i,k+1) .gt. -999.0 )then
+                  clwtot = cliw(i,k) + clcw(i,k)
+                  clwtot1= cliw(i,k+1) + clcw(i,k+1)
                   dsubclw=((-edt(i)*zd(i,k+1)+zu(i,k+1))*clwtot1   &
                        -(-edt(i)*zd(i,k)  +zu(i,k))  *clwtot  )*g/dp
                   dsubclwm=((-edtm(i)*zdm(i,k+1)+zum(i,k+1))*clwtot1   &
@@ -835,11 +835,11 @@ contains
 !                       +dsubclw*xmb(i)+dsubclws*xmbs(i)+dsubclwm*xmbm(i) &
                       )
                tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
-               if (clw(i,k,2) .gt. -999.0) then
-                clw(i,k,1) = max(0.,clw(i,k,1) + tem * tem1)            ! ice
-                clw(i,k,2) = max(0.,clw(i,k,2) + tem *(1.0-tem1))       ! water
+               if (clcw(i,k) .gt. -999.0) then
+                cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
+                clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
               else
-                clw(i,k,1) = max(0.,clw(i,k,1) + tem)
+                cliw(i,k) = max(0.,cliw(i,k) + tem)
               endif
 
             enddo
