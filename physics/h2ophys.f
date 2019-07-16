@@ -19,8 +19,7 @@
       subroutine h2ophys_init()
       end subroutine h2ophys_init
 
-!>\defgroup GFS_h2ophys GFS h2ophys Main
-!! @{
+!>\defgroup GFS_h2ophys GFS Water Vapor Photochemical Production and Loss Module
 !> This subroutine is NRL H2O physics for stratosphere and mesosphere.
 !! \section arg_table_h2ophys_run Argument Table
 !! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
@@ -41,7 +40,7 @@
 !! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
 !!
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
-!! @{
+!> @{
       subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,   &
      &                     h2opltc, h2o_coeff, ldiag3d, me,             &
      &                     errmsg, errflg)
@@ -150,8 +149,7 @@
 !
       return
       end subroutine h2ophys_run
-!! @}
-!! @}
+!> @}
 
 ! \brief Brief description of the subroutine
 !

@@ -25,13 +25,13 @@
  A sea ice model, in general, may contain subcomponents treating 1) dynamics (ice motion),
  2) ice transport, 3) multiple ice thickness categories (including leads), 4) surface albedo,
  and 5) vertical thermodynamics. GFS sea ice scheme is concerned with a scheme for the
- last of these processes. A three-layer thermodynamic sea ice model (Winton(2000) \cite winton_2000) 
+ last of these processes. A three-layer thermodynamic sea ice model (Winton (2000) \cite winton_2000) 
  has been coupled to GFS. It predicts sea ice/snow thickness,
  the surface temperature and ice temperature structure. In each model grid box, the heat and moisture
  fluxes and albedo are treated separately for the ice and the open water.
 
 \section intra_sice Intraphysics Communication
-+ GFS Sea Ice Driver(\ref arg_table_sfc_sice_run)
++ GFS Sea Ice Driver (\ref arg_table_sfc_sice_run)
 + Three-layer Thermodynamics Sea Ice Model (ice3lay()) \cite winton_2000
 
 \section gen_sice General Algorithm 

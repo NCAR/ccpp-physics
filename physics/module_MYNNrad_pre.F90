@@ -13,10 +13,11 @@
       subroutine mynnrad_pre_finalize ()
       end subroutine mynnrad_pre_finalize
 
-!!
-!> \brief This interstitial code adds the subgrid clouds to the resolved-scale clouds if there is no resolved-scale clouds in that particular grid box.
+!>\defgroup gsd_mynnrad_pre GSD mynnrad_pre_run Module
+!>\ingroup gsd_mynn_edmf
+!! This interstitial code adds the subgrid clouds to the resolved-scale clouds if there is no resolved-scale clouds in that particular grid box.
 #if 0
-!! \section arg_table_mynnrad_pre_run Argument Table
+!> \section arg_table_mynnrad_pre_run Argument Table
 !! | local_name          | standard_name                                                               | long_name                                                                  | units   | rank | type      |    kind   | intent | optional |
 !! |---------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | ix                  | horizontal_dimension                                                        | horizontal dimension                                                       | count   |    0 | integer   |           | in     | F        |
@@ -40,15 +41,6 @@
 !! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
 !!
 #endif
-!
-!    cloud array description:                                          !
-!          clouds(:,:,1)  -  layer total cloud fraction                !
-!          clouds(:,:,2)  -  layer cloud liq water path                !
-!          clouds(:,:,3)  -  mean effective radius for liquid cloud    !
-!          clouds(:,:,4)  -  layer cloud ice water path                !
-!          clouds(:,:,5)  -  mean effective radius for ice cloud       !
-!
-!###===================================================================
 SUBROUTINE mynnrad_pre_run(                &
      &     ix,im,levs,                     &
      &     qc, qi, T3D,                    &

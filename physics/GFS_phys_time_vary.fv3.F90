@@ -1,6 +1,10 @@
-!> \file GFS_phys_time_vary.F90
+!> \file GFS_phys_time_vary.fv3.F90
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
+!>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
+!! This module contains GFS physics time vary subroutines including ozone, stratospheric water vapor, 
+!! aerosol, IN&CCN and surface properties updates. 
+!> @{
    module GFS_phys_time_vary
 
 #ifdef OPENMP
@@ -39,6 +43,8 @@
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
+!>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
+!! @{
       subroutine GFS_phys_time_vary_init (Data, Model, Interstitial, nthrds, errmsg, errflg)
 
          use GFS_typedefs,          only: GFS_control_type, GFS_data_type, GFS_interstitial_type
@@ -108,6 +114,7 @@
 !$OMP sections
 
 !$OMP section
+!> - Call read_o3data() to read ozone data 
          call read_o3data  (Model%ntoz, Model%me, Model%master)
 
          ! Consistency check that the hardcoded values for levozp and
@@ -127,6 +134,7 @@
          end if
 
 !$OMP section
+!> - Call read_h2odata() to read stratospheric water vapor data
          call read_h2odata (Model%h2o_phys, Model%me, Model%master)
 
          ! Consistency check that the hardcoded values for levh2o and
@@ -146,6 +154,7 @@
          end if
 
 !$OMP section
+!> - Call read_aerdata() to read aerosol climatology
          if (Model%aero_in) then
             ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
             ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
@@ -170,6 +179,7 @@
          endif
 
 !$OMP section
+!> - Call read_cidata() to read IN and CCN data
          if (Model%iccn) then
            call read_cidata  ( Model%me, Model%master)
            ! No consistency check needed for in/ccn data, all values are
@@ -201,7 +211,7 @@
          end if
 
 
-         !--- read in and initialize ozone
+!> - Call setindxoz() to initialize ozone data
          if (Model%ntoz > 0) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
@@ -211,7 +221,7 @@
 !$OMP end do
          endif
 
-         !--- read in and initialize stratospheric water
+!> - Call setindxh2o() to initialize stratospheric water vapor data
          if (Model%h2o_phys) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
@@ -221,7 +231,7 @@
 !$OMP end do
          endif
 
-         !--- read in and initialize aerosols
+!> - Call setindxaer() to initialize aerosols data
          if (Model%aero_in) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
@@ -233,7 +243,7 @@
 !$OMP end do
          endif
 
-         !--- read in and initialize IN and CCN
+!> - Call setindxci() to initialize IN and CCN data
          if (Model%iccn) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
@@ -264,6 +274,7 @@
          is_initialized = .true.
 
       end subroutine GFS_phys_time_vary_init
+!! @}
 
 
 !> \section arg_table_GFS_phys_time_vary_finalize Argument Table
@@ -321,6 +332,8 @@
 !! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
 !!
+!>\section gen_GFS_phys_time_vary_run GFS_phys_time_vary_run General Algorithm
+!> @{
       subroutine GFS_phys_time_vary_run (Data, Model, nthrds, errmsg, errflg)
 
         use mersenne_twister,      only: random_setseed, random_number
@@ -341,7 +354,8 @@
         real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
         real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
 
-        integer :: i, j, k, iseed, iskip, ix, nb, nblks
+        integer :: i, j, k, iseed, iskip, ix, nb, nblks, kdt_rad
+        real(kind=kind_phys) :: sec_zero
         real(kind=kind_phys) :: wrk(1)
         real(kind=kind_phys) :: rannie(Model%cny)
         real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
@@ -409,7 +423,7 @@
           enddo
         endif  ! imfdeepcnv, cal_re, random_clds
 
-        !--- o3 interpolation
+!> - Call ozinterpol() to make ozone interpolation
         if (Model%ntoz > 0) then
 !$OMP do schedule (dynamic,1)
           do nb = 1, nblks
@@ -420,7 +434,7 @@
 !$OMP end do
         endif
 
-        !--- h2o interpolation
+!> - Call h2ointerpol() to make stratospheric water vapor data interpolation
         if (Model%h2o_phys) then
 !$OMP do schedule (dynamic,1)
           do nb = 1, nblks
@@ -431,7 +445,7 @@
 !$OMP end do
         endif
 
-        !--- aerosol interpolation
+!> - Call aerinterpol() to make aerosol interpolation
         if (Model%aero_in) then
 !$OMP do schedule (dynamic,1)
          do nb = 1, nblks
@@ -446,7 +460,7 @@
 !$OMP end do
         endif
 
-        !--- ICCN interpolation
+!> - Call ciinterpol() to make IN and CCN data interpolation
         if (Model%iccn) then
 !$OMP do schedule (dynamic,1)
           do nb = 1, nblks
@@ -462,7 +476,7 @@
 
 !$OMP end parallel
 
-        !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
+!> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
         if (Model%nscyc >  0) then
           if (mod(Model%kdt,Model%nscyc) == 1) THEN
             call gcycle (nblks, Model, Data(:)%Grid, Data(:)%Sfcprop, Data(:)%Cldprop)
@@ -470,14 +484,33 @@
         endif
 
         !--- determine if diagnostics buckets need to be cleared
-        if (mod(Model%kdt,Model%nszero) == 1) then
-          do nb = 1,nblks
-            call Data(nb)%Intdiag%rad_zero  (Model)
-            call Data(nb)%Intdiag%phys_zero (Model)
+        sec_zero = nint(Model%fhzero*con_hr)
+        if (sec_zero >= nint(max(Model%fhswr,Model%fhlwr))) then
+          if (mod(Model%kdt,Model%nszero) == 1) then
+            do nb = 1,nblks
+              call Data(nb)%Intdiag%rad_zero  (Model)
+              call Data(nb)%Intdiag%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
-          enddo
+            enddo
+          endif
+        else
+          if (mod(Model%kdt,Model%nszero) == 1) then
+            do nb = 1,nblks
+              call Data(nb)%Intdiag%phys_zero (Model)
+        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+            enddo
+          endif
+          kdt_rad = nint(min(Model%fhswr,Model%fhlwr)/Model%dtp)
+          if (mod(Model%kdt, kdt_rad) == 1) then
+            do nb = 1,nblks
+              call Data(nb)%Intdiag%rad_zero  (Model)
+        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+            enddo
+          endif
         endif
 
       end subroutine GFS_phys_time_vary_run
+!> @}
 
    end module GFS_phys_time_vary
+!> @}

@@ -57,7 +57,8 @@
 
       logical, intent(in) :: lssav, ldiag3d
       real(kind=kind_phys), intent(in) :: dtdt(im,levs)
-      real(kind=kind_phys), intent(inout) :: dt3dt(im,levs)
+      ! dt3dt only allocated only if ldiag3d is .true.
+      real(kind=kind_phys), intent(inout) :: dt3dt(:,:)
       real(kind=kind_phys), intent(in) :: dtf
 
       character(len=*), intent(out) :: errmsg
@@ -150,8 +151,7 @@
       subroutine gwdps_init()
       end subroutine gwdps_init
 
-! \defgroup GFS_ogwd GFS Orographic Gravity Wave Drag
-!> \defgroup gfs_gwdps GFS gwdps Main
+!> \defgroup gfs_gwdps GFS Orographic Gravity Wave Drag and Mountain Blocking Scheme Module
 !! \brief This subroutine includes orographic gravity wave drag and mountain
 !! blocking.
 !!
@@ -224,48 +224,46 @@
 !! in the 1987 implementation.  This choice was meant to encompass a thick
 !! low layer for vertical averages of the environmental (large scale) flow
 !! quantities.  The vertical momentum flux or gravity wave stress in a
-!! grid box due to a single mountain is given as in Pierrehumbert, (1987) (PH):
-!!
-!! \f$ \tau =  \frac {\rho \: U^{3}\: G(F_{r})} {\Delta X \; N } \f$
-!!
-!! emetic \f$ \Delta X \f$ is a grid increment, N is the Brunt Viasala frequency
-!!
-!!
-!! \f$ N(\sigma) = \frac{-g \: \sigma \:
-!!  \frac{\partial\Theta}{\partial\sigma}}{\Theta \:R \:T} \f$
-!!
+!! grid box due to a single mountain is given as in Pierrehumbert(1986) 
+!! \cite pierrehumbert_1986 :
+!! \f[
+!! \tau =  \frac {\rho \: U^{3}\: G(F_{r})} {\Delta X \; N } 
+!! \f]
+!! where \f$ \Delta X \f$ is a grid increment, N is the Brunt Viasala frequency
+!! \f[
+!!  N(\sigma) = \frac{-g \: \sigma \:
+!!  \frac{\partial\Theta}{\partial\sigma}}{\Theta \:R \:T} 
+!! \f]
 !! The environmental variables are calculated from a mass weighted vertical
-!! average over a base layer.  G(Fr) is a monotonically increasing
-!! function of Froude number,
-!!
-!! \f$ F_{r} = \frac{N h^{'}}{U} \f$
-!!
-!! where U is the wind speed calculated as a mass weighted vertical average in
-!! the base layer, and  h', is the vertical displacement caused by the orography
-!! variance.  An effective mountain length for the gravity wave processes,
-!!
-!! \f$ l^{*} =  \frac{\Delta X}{m} \f$
-!!
-!! where m is the number of mountains in a grid box, can then
+!! average over a base layer.  \f$G(F_{r})\f$ is a monotonically increasing
+!! function of Froude number :
+!! \f[
+!!  F_{r} = \frac{N h^{'}}{U} 
+!! \f]
+!! where \f$U\f$ is the wind speed calculated as a mass weighted vertical average in
+!! the base layer, and  \f$h^{'}\f$, is the vertical displacement caused by the orography
+!! variance.  An effective mountain length for the gravity wave processes:
+!! \f[
+!!  l^{*} =  \frac{\Delta X}{m} 
+!! \f]
+!! where \f$m\f$ is the number of mountains in a grid box, can then
 !! be defined to obtain the form of the base level stress
-!!
-!!
-!! \f$ \tau =  \frac {\rho \: U^{3} \: G(F_{r})} {N \;l^{*}} \f$
-!!
+!! \f[
+!!  \tau =  \frac {\rho \: U^{3} \: G(F_{r})} {N \;l^{*}} 
+!! \f]
 !! giving the stress induced from the surface in a model grid box.
-!!   PH gives the form for the function G(Fr) as
-!!
-!!
-!! \f$ G(F_{r}) = \bar{G}\frac{F^{2}_{r}}{F^{2}_{r}\: + \:a^{2}} \f$
-!!
+!! Pierrehumbert(1986) \cite pierrehumbert_1986 gives the form 
+!! for the function \f$G(F_{r})\f$ as
+!! \f[
+!!  G(F_{r}) = \bar{G}\frac{F^{2}_{r}}{F^{2}_{r}\: + \:a^{2}} 
+!! \f]
 !! Where \f$ \bar{G}  \f$  is an order unity non-dimensional saturation
-!! flux set to 1  and 'a' is a function of the mountain aspect ratio also
+!! flux set to 1  and \f$a\f$ is a function of the mountain aspect ratio also
 !!set to 1 in the 1987 implementation of the GFS GWD.  Typical values of
 !! U=10m/s, N=0.01 1/s, l*=100km, and a=1, gives a flux of 1 Pascal and
 !! if this flux is made to go to zero linearly with height then the
 !! decelerations would be about 10/m/s/day which is consistent with
 !! observations in PH.
-!!
 !!
 !! In Kim, Moorthi, Alpert's (1998, 2001) GWD currently in GFS operations,
 !! the GWD scheme has the same physical basis as in Alpert (1987) with the addition
@@ -273,46 +271,53 @@
 !! in G(Fr) to account for effects from the mountain blocking.  A factor,
 !! E m’, is an enhancement factor on the stress in the Alpert '87 scheme.
 !!  The E ranges from no enhancement to an upper limit of 3, E=E(OA)[1-3],
-!!  and is a function of OA, the Orographic Asymmetry defined in KA (1995) as
-!!
-!! Orographic Asymmetry (OA) = \f$  \frac{ \bar{x} \; - \;
-!!  \sum\limits_{j=1}^{N_{b}} x_{j} \; n_{j} }{\sigma_{x}} \f$
-!!
-!! where Nb is the total number of bottom blocks in the mountain barrier,
+!!  and is a function of OA, the Orographic Asymmetry defined in Kim and Arakawa (1995) 
+!! \cite kim_and_arakawa_1995 as
+!! Orographic Asymmetry (OA): 
+!! \f[
+!!  OA=\frac{ \bar{x} \; - \;
+!!  \sum\limits_{j=1}^{N_{b}} x_{j} \; n_{j} }{\sigma_{x}} 
+!! \f]
+!! where \f$N_{b}\f$ is the total number of bottom blocks in the mountain barrier,
 !! \f$ \sigma_{x} \f$ is the standard deviation of the horizontal distance defined by
-!!
-!! \f$ \sigma_{x} = \sqrt{ \frac{\sum\limits_{j=1}^{N_{b}}
-!! \; (x_{j} \; - \; \bar{x} )^2}{N_{x}} } \f$
-!!
-!!
-!! where Nx is the number of grid intervals for the large scale domain being
+!!\f[
+!!  \sigma_{x} = \sqrt{ \frac{\sum\limits_{j=1}^{N_{b}}
+!! \; (x_{j} \; - \; \bar{x} )^2}{N_{x}} } 
+!!\f]
+!! where \f$N_{x}\f$ is the number of grid intervals for the large scale domain being
 !! considered. So the term, E(OA)m’/  \f$ \Delta X \f$ in Kim's scheme represents
 !! a multiplier on G shown in Alpert's eq (1), where m’ is the number of mountains
 !! in a sub-grid scale box. Kim increased the complexity of m’ making it a
 !! function of the fractional area of the sub-grid mountain and the asymmetry
 !! and convexity statistics which are found from running a gravity wave
 !!  model for a large number of cases:
-!!
-!! \f$ m^{'} = C_{m} \Delta X \left[  \frac{1 \; + \;
-!!  \sum\limits_{x} L_{h} }{\Delta X}  \right]^{OA+1}   \f$
-!!
+!! \f[
+!!  m^{'} = C_{m} \Delta X \left[  \frac{1 \; + \;
+!!  \sum\limits_{x} L_{h} }{\Delta X}  \right]^{OA+1} 
+!! \f]
 !! Where, according to Kim,  \f$ \sum \frac{L_{h}}{\Delta X} \f$  is
 !! the fractional area covered by the subgrid-scale orography higher than
 !! a critical height  \f$ h_{c} = Fr_{c} U_{0}/N_{0} \f$ , over the
 !! "low level" vertically averaged layer, for a grid box with the interval
 !! \f$ \Delta X \f$.  Each \f$ L_{n}\f$  is the width of a segment of
 !! orography intersection at the critical height:
-!!
-!! \f$  Fr_{0} = \frac{N_{0} \; h^{'}}{U_{0}}  \f$
-!!
-!! \f$ G^{'}(OC,Fr_{0}) = \frac{Fr_{0}^{2}}{Fr_{0}^{2} \; + \; a^{2}}  \f$
-!!
-!! \f$  a^{2} = \frac{C_{G}}{OC}  \f$
-!!
-!! \f$  E(OA, Fr_{0}) = (OA \; + \; 2)^{\delta} \f$ and \f$  \delta
-!! \; = \; \frac{C_{E} \; Fr_{0}}{Fr_{c}}  \f$  where \f$ Fr_{c} \f$
-!! is as in Alpert.
-!!
+!! \f[
+!! Fr_{0} = \frac{N_{0} \; h^{'}}{U_{0}} 
+!! \f]
+!! \f[
+!! G^{'}(OC,Fr_{0}) = \frac{Fr_{0}^{2}}{Fr_{0}^{2} \; + \; a^{2}} 
+!! \f]
+!! \f[
+!! a^{2} = \frac{C_{G}}{OC} 
+!! \f]
+!! \f[
+!!  E(OA, Fr_{0}) = (OA \; + \; 2)^{\delta} 
+!! \f] 
+!! and 
+!! \f[  
+!! \delta \; = \; \frac{C_{E} \; Fr_{0}}{Fr_{c}}  
+!! \f]
+!! where \f$ Fr_{c} \f$ is as in Alpert.
 !!
 !! This represents a closed scheme, somewhat empirical adjustments
 !! to the original scheme to calculate the surface stress.
@@ -321,31 +326,36 @@
 !! to the presence of convective mixing assumed to occur when the
 !! minimum Richardson number:
 !!
-!! Orographic Convexity (OC) = \f$  \frac{ \sum\limits_{j=1}^{N_{x}}
-!!  \; (h_{j} \; - \; \bar{h})^4 }{N_{x} \;\sigma_{h}^4} \f$  ,
-!!   and where  \f$ \sigma_{h} = \sqrt{ \frac{\sum\limits_{j=1}^{N_{x}}
-!!  \; (h_{j} \; - \; \bar{h} )^2}{N_{x}} } \f$
-!!
+!! Orographic Convexity (OC) = 
+!! \f[  
+!! OC=\frac{ \sum\limits_{j=1}^{N_{x}}
+!!  \; (h_{j} \; - \; \bar{h})^4 }{N_{x} \;\sigma_{h}^4} 
+!! \f]
+!!  and where 
+!!  \f[
+!!  \sigma_{h} = \sqrt{ \frac{\sum\limits_{j=1}^{N_{x}}
+!!  \; (h_{j} \; - \; \bar{h} )^2}{N_{x}} } 
+!!  \f]
 !! This represents a closed scheme, somewhat empirical adjustments
 !! to the original scheme to calculate the surface stress.
 !!
 !! Momentum is deposited by the sub-grid scale gravity waves break due
 !!  to the presence of convective mixing assumed to occur when
 !!  the minimum Richardson number:
-!!
-!! \f$ Ri_{m} = \frac{Ri(1 \; - \; Fr)}{(1 \; + \; \sqrt{Ri}Fr)^2} \f$
-!!
+!! \f[
+!!  Ri_{m} = \frac{Ri(1 \; - \; Fr)}{(1 \; + \; \sqrt{Ri}Fr)^2} 
+!! \f]
 !! Is less than 1/4  Or if critical layers are encountered in a layer
 !! the the momentum flux will vanish.  The critical layer is defined
 !! when the base layer wind becomes perpendicular to the environmental
 !!  wind.  Otherwise, wave breaking occurs at a level where the amplification
 !!  of the wave causes the local Froude number or similarly a truncated
 !!  (first term of the) Scorer parameter, to be reduced below a critical
-!!  value by the saturation hypothesis (Lindzen,).  This is done through
+!!  value by the saturation hypothesis (Lindzen).  This is done through
 !!  eq 1 which can be written as
-!!
-!! \f$ \tau = \rho U N k h^{'2} \f$
-!!
+!! \f[
+!! \tau = \rho U N k h^{'2} 
+!! \f]
 !! For small Froude number this is discretized in the vertical so at each
 !!  level the stress is reduced by ratio of the Froude or truncated Scorer
 !!  parameter, \f$ \frac{U^{2}}{N^{2}} = \frac{N \tau_{l-1}}{\rho U^{3} k} \f$ ,
@@ -363,7 +373,7 @@
 !!  forces.  Improved integration between how the GWD is calculated and
 !! the mountain blocking of wind flow around sub-grid scale orography
 !! is underway at NCEP.  The GFS already has convectively forced GWD
-!!  an independent process.  The next step is to test
+!!  an independent process. 
 !!
 !> \section det_gwdps GFS Orographic GWD Scheme Detailed Algorithm
 !> @{

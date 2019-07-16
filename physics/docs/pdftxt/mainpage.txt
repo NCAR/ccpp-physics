@@ -1,31 +1,22 @@
 /**
 \mainpage Introduction 
 
-Welcome to the GMTB Common Community Physics Package (CCPP) v2.0 scientific documentation. This release 
-of the CCPP contains two parts: CCPP-Physics (a collection of physical parameterizations) and 
-CCPP-Framework (the infrastructure that connects the CCPP-Physics to host models).
+Welcome to the scientific documentation for the parameterizations available in the Common 
+Community Physics Package (CCPP) v3.0 public release.  
 
 The CCPP-Physics is envisioned to contain parameterizations used by NOAA operational models for weather through
 seasonal prediction timescales, as well as developmental schemes under consideration for upcoming 
-operational implementations. This version contains the parameterizations of the default physics suite
-of FV3GFS as of August 2018, along with the microphysics scheme that is used in the operational 
-GFS implemented in July of 2017. In this website you will find documentation on various aspects of each 
-parameterization, including a high-level overview of its function, the input/output argument list, and a description of
-the algorithm. 
+operational implementations. This version contains all parameterizations of the current operational GFS,
+plus additional developmental schemes. The CCPP can currently be used with the Single Column Model (SCM) developed 
+by the Global Model Test Bed (GMTB) of the Developmental Testbed Center, as well as with the atmospheric component
+of NOAA's Unified Forecast System (UFS-Atmosphere), which employs the the non-hydrostatic 
+Finite-Volume Cubed-Sphere (FV3) dynamic core.  
 
-The most significant change with respect to CCPP-Physics v1.0 has been the inclusion of the 
-\ref GFDL_cloud, which is undergoing tests for possibly replacing the operational \ref GFS_ZHAOC
-in the operational NCEP global model in early 2019. With the GFDL microphysics, six prognostics 
-cloud species have been introduced to enable a more physically-based representation of water
-vapor, mixed-phase (liquid/ice) clouds and precipitating rain/snow/graupel hydrometeors. When used with 
-the FV3 dynamic solver, the GFDL microphysics uses a unique condensation adjustment when variables are
-mapped from Lagrangian to Eulerian surfaces.
-
-The public release of CCPP v2 is supported for use with the GMTB Single Column Model. The CCPP v2
-is currently being integrated with FV3GFS and is available for use by those working closely with
-NOAA in the development of the Unified Forecast System (UFS). Future direction for the CCPP includes broad support 
-for use with FV3 and addition of new parameterizations for potential transition to operations. 
-
-You can find more information about <a href="https://dtcenter.org/gmtb/users/ccpp/"> GMTB Common Community Physics Package (CCPP)</a> on the DTC website.  
+In this website you will find documentation on various aspects of each 
+parameterization, including a high-level overview of its function, the input/output argument list, 
+and a description of the algorithm. 
+The latest CCPP public release is Version 3.0 (June 2019), and more details on it may be found on the
+<a href="https://dtcenter.org/gmtb/users/ccpp/"> CCPP website </a> hosted by the Global Model Test
+Bed (GMTB) of the Developmental Testbed Center (DTC).
 
 */

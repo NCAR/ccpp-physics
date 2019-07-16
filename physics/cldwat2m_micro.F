@@ -1,16 +1,25 @@
+!>\file cldwat2m_micro.F
+!! This file contains CAM interface for microphysics.
+
+!>\ingroup mg2mg3
+!>\defgroup cldwat2m_micro_mod Morrison-Gettelman MP cldwat2m_micro Module
+!! This module contains CAM interface for MG microphysics.
+!> @{
+!!\author Andrew Gettelman, Hugh Morrison.
+!!
+!! e-mail: morrison@ucar.edu, andrew@ucar.edu
+!!
+!! Contributions from: Xiaohong Liu and Steve Ghan
+!!
+!! December 2005-May 2010
+!!
+!! Description in: Morrison and Gettelman, 2008 \cite Morrison_2008
+!!                 Gettelman et al., 2010 \cite Gettelman_2010
       module cldwat2m_micro
 
 !---------------------------------------------------------------------------------
 ! Purpose:
 !   CAM Interface for microphysics
-!
-! Author: Andrew Gettelman, Hugh Morrison.
-! Contributions from: Xiaohong Liu and Steve Ghan
-! December 2005-May 2010
-! Description in: Morrison and Gettelman, 2008. J. Climate (MG2008)
-!                 Gettelman et al., 2010 J. Geophys. Res. - Atmospheres (G2010)
-! for questions contact Hugh Morrison, Andrew Gettelman
-! e-mail: morrison@ucar.edu, andrew@ucar.edu
 !---------------------------------------------------------------------------------
 
 #ifdef NEMS_GSM
@@ -160,7 +169,7 @@
       real(r8), private:: lammini, lammaxi, lamminr, lammaxr
      &,                   lammins, lammaxs
 
-! parameters for snow/rain fraction for convective clouds
+!> parameters for snow/rain fraction for convective clouds
       real(r8), private, parameter :: tmax_fsnow = tmelt
      &,                               tmin_fsnow = tmelt-5._r8
 
@@ -175,7 +184,9 @@
        contains
 
 !===============================================================================
-
+!>\ingroup cldwat2m_micro_mod
+!! This subroutine initializes constants for MG microphysics.
+!!\author Andrew Gettelman
       subroutine ini_micro(Dcs_, QCVAR_, ts_auto_ice_)
 
 !-----------------------------------------------------------------------
@@ -491,26 +502,26 @@
        end subroutine ini_micro
 
 !===============================================================================
-!microphysics routine for each timestep goes here...
-
-      subroutine mmicro_pcond ( lchnk, ncol, deltatin, tn, ttend,
-     & pcols, pver,
-     & qn, qtend, cwtend, qc, qi, nc, ni,fprcp,qrn,qsnw,nrn,nsnw,
-     & p, pdel, cldn, liqcldf,
-     & icecldf, cldo, pint, rpdel, zm,        rate1ord_cw2pr_st, naai,
-!    & icecldf, cldo, pint, rpdel, zm, omega, rate1ord_cw2pr_st, naai,
-     & npccnin, rndst,nacon, rhdfda, rhu00, fice, tlat, qvlat, qctend,
-     & qitend, nctend, nitend, effc, effc_fn, effi, prect, preci,
-     & nevapr, evapsnow, prain, prodsnow, cmeout, deffi, pgamrad,
-     & lamcrad,qsout2,dsout2,qrout2, drout2, qcsevap,qisevap,qvres,
-     & cmeiout, vtrmc,vtrmi,qcsedten,qisedten, prao,
-     & prco,mnuccco,mnuccto,
-     & msacwio,psacwso, bergso,bergo,melto,homoo,qcreso,prcio,praio,
-     & qireso, mnuccro,pracso,meltsdt,frzrdt, ncal, ncai, mnuccdo,
-     & nnuccto,
-     & nsout2, nrout2, ncnst, ninst, nimm, miu_disp, nsoot, rnsoot,
-     & ui_scale, dcrit, nnuccdo, nnuccco, nsacwio, nsubio, nprcio,
-     & npraio, npccno, npsacwso, nsubco, nprao, nprc1o, tlataux,
+!>\ingroup cldwat2m_micro_mod
+!! This subroutine is the microphysics routine for each timestep goes here...
+!!\author Hugh Morrison, Andrew Gettelman
+      subroutine mmicro_pcond ( lchnk, ncol, deltatin, tn, ttend,       &
+     & pcols, pver,                                                     &
+     & qn, qtend, cwtend, qc, qi, nc, ni,fprcp,qrn,qsnw,nrn,nsnw,       &
+     & p, pdel, cldn, liqcldf,                                          &
+     & icecldf, cldo, pint, rpdel, zm,        rate1ord_cw2pr_st, naai,  &
+     & npccnin, rndst,nacon, rhdfda, rhu00, fice, tlat, qvlat, qctend,  &
+     & qitend, nctend, nitend, effc, effc_fn, effi, prect, preci,       &
+     & nevapr, evapsnow, prain, prodsnow, cmeout, deffi, pgamrad,       &
+     & lamcrad,qsout2,dsout2,qrout2, drout2, qcsevap,qisevap,qvres,     &
+     & cmeiout, vtrmc,vtrmi,qcsedten,qisedten, prao,                    &
+     & prco,mnuccco,mnuccto,                                            &
+     & msacwio,psacwso, bergso,bergo,melto,homoo,qcreso,prcio,praio,    &
+     & qireso, mnuccro,pracso,meltsdt,frzrdt, ncal, ncai, mnuccdo,      &
+     & nnuccto,                                                         &
+     & nsout2, nrout2, ncnst, ninst, nimm, miu_disp, nsoot, rnsoot,     &
+     & ui_scale, dcrit, nnuccdo, nnuccco, nsacwio, nsubio, nprcio,      &
+     & npraio, npccno, npsacwso, nsubco, nprao, nprc1o, tlataux,        &
      & nbincontactdust, lprint, xlat, xlon, rhc)
 !    & nbincontactdust, ts_auto_ice,xlat,xlon)
 
@@ -4485,7 +4496,9 @@ checked up to here moorthi
 #ifdef CAM
 
 !##############################################################################
-
+!>\ingroup cldwat2m_micro_mod
+!! This subroutine finds the wet bulb temperature for a given t and q
+!! in a longitude hight section.
       subroutine findsp1 (lchnk, ncol, q, t, p, tsp, qsp)
 !-----------------------------------------------------------------------
 !
@@ -4782,7 +4795,9 @@ checked up to here moorthi
        return
       end subroutine findsp1
 
-
+!>\ingroup cldwat2m_micro_mod
+!! This subroutine finds the wet bulb temperature for a given t and q
+!! in a longitude height section.
       subroutine findsp1_water (lchnk, ncol, q, t, p, tsp, qsp)
 !-----------------------------------------------------------------------
 !
@@ -5061,11 +5076,11 @@ checked up to here moorthi
 !--jtb : end of GEOS5 exclusion (begins at top of findsp)
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-! error function in single precision
-!
-!    Copyright(C) 1996 Takuya OOURA (email: ooura@mmm.t.u-tokyo.ac.jp).
-!    You may use, copy, modify this code for any purpose and
-!    without fee. You may distribute this ORIGINAL package.
+!>\ingroup cldwat2m_micro_mod
+!! error function in single precision
+!!\copyright(C) 1996 Takuya OOURA (email: ooura@mmm.t.u-tokyo.ac.jp).
+!! You may use, copy, modify this code for any purpose and
+!! without fee. You may distribute this ORIGINAL package.
 
        function derf(x)
        implicit real (a - h, o - z)
@@ -5178,6 +5193,8 @@ checked up to here moorthi
 
 
 !**********************************
+!>\ingroup cldwat2m_micro_mod
+!! This subroutine
        FUNCTION MUI_HEMP(T)
 
 
@@ -5207,6 +5224,8 @@ checked up to here moorthi
 
 
 !**********************************
+!>\ingroup cldwat2m_micro_mod
+!! This function
        FUNCTION MUI_HEMP_L(lambda)
 
 
@@ -5224,7 +5243,8 @@ checked up to here moorthi
 
 
 
-
+!>\ingroup cldwat2m_micro_mod
+!! This function
        FUNCTION gamma_incomp(muice, x)
 
 
@@ -5244,7 +5264,7 @@ checked up to here moorthi
 
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-
+!>\ingroup cldwat2m_micro_mod
        FUNCTION GAMMA(X)
 
 !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -5507,3 +5527,4 @@ checked up to here moorthi
 
 
       end module cldwat2m_micro
+!> @}

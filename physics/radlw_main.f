@@ -356,7 +356,7 @@
          subroutine rrtmg_lw_init ()
          end subroutine rrtmg_lw_init
 
-!> \defgroup module_radlw_main GFS radlw Main
+!> \defgroup module_radlw_main GFS RRTMG Longwave Module 
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
@@ -1532,6 +1532,8 @@
 !!\param nlay            number of layer number
 !!\param nlp1            number of veritcal levels
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
+!!\param dz              layer thickness (km) 
+!!\param de_lgth         layer cloud decorrelation length (km)  
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
 !!\section gen_cldprop cldprop General Algorithm
@@ -1846,6 +1848,8 @@
 !!\param cldf        layer cloud fraction
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
+!!\param dz          layer thickness
+!!\param de_lgth     layer cloud decorrelation length (km)
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
 !! @{
@@ -2084,7 +2088,7 @@
 !!                                4-h2o/ch4,5-n2o/co2,6-o3/co2
 !!\n                     (:,:,n)n=1,2: the rates of ref press at
 !!                                the 2 sides of the layer
-!!\param facij           factors multiply the reference ks, i,j=0/1 for
+!!\param fac00,fac01,fac10,fac11           factors multiply the reference ks, i,j=0/1 for
 !!                       lower/higher of the 2 appropriate temperatures
 !!                       and altitudes.
 !!\param selffac         scale factor for w. v. self-continuum equals
@@ -2100,8 +2104,7 @@
 !!\param scaleminor,scaleminorn2         scale factors for minor gases
 !!\param indminor        index of lower ref temp for minor gases
 !>\section setcoef_gen setcoef General Algorithm
-!! 
-! ----------------------------------
+!> @{
       subroutine setcoef                                                &
      &     ( pavel,tavel,tz,stemp,h2ovmr,colamt,coldry,colbrd,          & !  ---  inputs:
      &       nlay, nlp1,                                                &
@@ -2358,6 +2361,7 @@
       return
 ! ..................................
       end subroutine setcoef
+!> @}
 ! ----------------------------------
 
 !>\ingroup module_radlw_main
@@ -3766,7 +3770,7 @@
 !!                                 5-n2o/co2,6-o3/co2
 !!\n                      (:,:,n)n=1,2: the rates of ref press at the 2
 !!                                 sides of the layer
-!!\param facij            factors multiply the reference ks, i,j of 0/1
+!!\param fac00,fac01,fac10,fac11            factors multiply the reference ks, i,j of 0/1
 !!                        for lower/higher of the 2 appropriate
 !!                        temperatures and altitudes
 !!\param jp               index of lower reference pressure

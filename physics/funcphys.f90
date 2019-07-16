@@ -2,7 +2,6 @@
 !! This file includes API for basic thermodynamic physics.
 
 !>\defgroup func_phys GFS Physics Function Module
-!! @{
 !! This module provides API for computing basic thermodynamic physics
 !! functions. 
 
@@ -472,7 +471,7 @@ contains
 !! This function should be expanded inline in the calling routine.
 !>\author N Phillips
 !>\param[in] t       real, temperature in Kelvin
-!>\param[out] fpvslx real, saturation vapor pressure in Pascals
+!\param[out] fpvslx real, saturation vapor pressure in Pascals
   elemental function fpvslx(t)
 !$$$     Subprogram Documentation Block
 !
@@ -684,7 +683,7 @@ contains
 !!\n where tr is ttp/t and other values are physical constants. 
 !! This function should be expanded inline in the calling routine.
 !>\param[in]  t        real, temperature in Kelvin
-!>\param[out] fpvsix   real, saturation vapor pressure in Pascals
+!\param[out] fpvsix   real, saturation vapor pressure in Pascals
   elemental function fpvsix(t)
 !$$$     Subprogram Documentation Block
 !
@@ -789,7 +788,7 @@ contains
 !! computed in gpvs(). See documentation for fpvsx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  t     real, temperature in Kelvin
-!>\param[out] fpvs  real, saturation vapor pressure in Pascals
+!\param[out] fpvs  real, saturation vapor pressure in Pascals
   elemental function fpvs(t)
 !$$$     Subprogram Documentation Block
 !
@@ -839,7 +838,7 @@ contains
 !! computed in gpvs(). See documentation for fpvsx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  t        real, temperatue in Kelvin
-!>\param[out] fpvsq    real, saturation vapor pressure in Pascals
+!\param[out] fpvsq    real, saturation vapor pressure in Pascals
   elemental function fpvsq(t)
 !$$$     Subprogram Documentation Block
 !
@@ -903,8 +902,8 @@ contains
 !!\n where tr is ttp/t and other values are physical constants.
 !! The reference for this computation is Emanuel(1994), pages 116-117.
 !! This function should be expanded inline in the calling routine.
-!>\param[in]  t        real, temperature in Kelvin
-!>\param[out] fpvsx    real, saturation vapor pressure in Pascals
+!!\param[in]  t        real, temperature in Kelvin
+!\param[out] fpvsx    real, saturation vapor pressure in Pascals
   elemental function fpvsx(t)
 !$$$     Subprogram Documentation Block
 !
@@ -1079,8 +1078,8 @@ contains
 !! A quadratic interpolation is done between values in a lookup table
 !! computed in gtdpl(). See documentation for ftdplxg() for details.
 !! Input values outside table range are reset to table extrema.
-!>\param[in]  pv      real, vapor pressure in Pascals
-!>\param[out] ftdplq  real, dewpoint temperature in Kelvin
+!!\param[in]  pv      real, vapor pressure in Pascals
+!\param[out] ftdplq  real, dewpoint temperature in Kelvin
   elemental function ftdplq(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1134,8 +1133,8 @@ contains
 !! An approximate dewpoint temperature for function ftdplxg()
 !! is obtained using ftdpl() so gtdpl() must be already called.
 !! See documentation for ftdplxg() for details.
-!>\param[in]  pv      real, vapor pressure in Pascals
-!>\param[out] ftdplx  real, dewpoint temperature in Kelvin
+!!\param[in]  pv      real, vapor pressure in Pascals
+!\param[out] ftdplx  real, dewpoint temperature in Kelvin
   elemental function ftdplx(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1191,9 +1190,9 @@ contains
 !!\n The formula is inverted by iterating Newtonian approximations
 !! for each pvs until t is found to within 1.e-6 Kelvin.
 !! This function can be expanded inline in the calling routine.
-!>\param[in]  tg       real, guess dewpoint temperature in Kelvin
-!>\param[in]  pv       real, vapor pressure in Pascals
-!>\param[out] ftdplxg  real, dewpoint temperature in Kelvin
+!!\param[in]  tg       real, guess dewpoint temperature in Kelvin
+!!\param[in]  pv       real, vapor pressure in Pascals
+!\param[out] ftdplxg  real, dewpoint temperature in Kelvin
   elemental function ftdplxg(tg,pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1315,7 +1314,7 @@ contains
 !! computed in gtdpi(). See documentation for ftdpixg for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  pv     real, vapor pressure in Pascals
-!>\param[out] ftdpi  real, dewpoint temperature in Kelvin
+!\param[out] ftdpi  real, dewpoint temperature in Kelvin
   elemental function ftdpi(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1367,7 +1366,7 @@ contains
 !! computed in gtdpi(). see documentation for ftdpixg() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  pv       real, vapor pressure in Pascals
-!>\param[out] ftdpiq   real, dewpoint temperature in Kelvin
+!\param[out] ftdpiq   real, dewpoint temperature in Kelvin
   elemental function ftdpiq(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1423,7 +1422,7 @@ contains
 !! is obtained using ftdpi() so gtdpi() must be already called.
 !! See documentation for ftdpixg() for details.
 !>\param[in]  pv   real, vapor pressure in Pascals
-!>\param[out] ftdpix   real, dewpoint temperature in Kelvin
+!\param[out] ftdpix   real, dewpoint temperature in Kelvin
   elemental function ftdpix(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1482,7 +1481,7 @@ contains
 !!   This function can be expanded inline in the calling routine.
 !>\param[in]  tg   real, guess dewpoint temperature in Kelvin
 !>\param[in]  pv   real, vapor pressure in Pascals
-!>\param[out] ftdpixg   real, dewpoint temperature in Kelvin
+!\param[out] ftdpixg   real, dewpoint temperature in Kelvin
   elemental function ftdpixg(tg,pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1605,7 +1604,7 @@ contains
 !! computed in gtdp(). See documentation for ftdpxg() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  pv  real, vapor pressure in Pascals
-!>\param[out] ftdp  real, dewpoint temperature in Kelvin
+!\param[out] ftdp  real, dewpoint temperature in Kelvin
   elemental function ftdp(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1657,7 +1656,7 @@ contains
 !! computed in gtdp(). See documentation for ftdpxg() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  pv   real, vapor pressure in Pascals
-!>\param[out] ftdpq   real, dewpoint temperature in Kelvin
+!\param[out] ftdpq   real, dewpoint temperature in Kelvin
   elemental function ftdpq(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1713,7 +1712,7 @@ contains
 !! is obtained using ftdp() so gtdp() must be already called.
 !! See documentation for ftdpxg() for details.
 !>\param[in]  pv   real, vapor pressure in Pascals
-!>\param[out] ftdpx    real, dewpoint temperature in Kelvin
+!\param[out] ftdpx    real, dewpoint temperature in Kelvin
   elemental function ftdpx(pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1777,7 +1776,7 @@ contains
 !! This function can be expanded inline in the calling routine.
 !>\param[in]  tg   real, guess dewpoint temperature in Kelvin
 !>\param[in]  pv   real, vapor pressure in Pascals
-!>\param[out] ftdpxg    real, dewpoint temperature in Kelvin
+!\param[out] ftdpxg    real, dewpoint temperature in Kelvin
   elemental function ftdpxg(tg,pv)
 !$$$     Subprogram Documentation Block
 !
@@ -1938,7 +1937,7 @@ contains
 !!   except zero is returned for too cold or high LCLs.
 !>\param[in]  t  real, LCL temperature in Kelvin
 !>\param[in]  pk  real, LCL pressure over 1e5 Pa to the kappa power
-!>\param[out] fthe     real, equivalent potential temperature in Kelvin
+!\param[out] fthe     real, equivalent potential temperature in Kelvin
   elemental function fthe(t,pk)
 !$$$     Subprogram Documentation Block
 !
@@ -2001,7 +2000,7 @@ contains
 !! except zero is returned for too cold or high LCLs.
 !>\param[in]  t    real, LCL temperature in Kelvin
 !>\param[in]  pk   real, LCL pressure over 1e5 Pa to the kappa power
-!>\param[out] ftheq       real, equivalent potential temperature in Kelvin
+!\param[out] ftheq       real, equivalent potential temperature in Kelvin
   elemental function ftheq(t,pk)
 !$$$     Subprogram Documentation Block
 !
@@ -2086,7 +2085,7 @@ contains
 !! This function should be expanded inline in the calling routine.
 !>\param[in]  t  real, LCL temperature in Kelvin
 !>\param[in]  pk  real, LCL pressure over 1e5 Pa to the kappa power
-!>\param[out] fthex     real, equivalent potential temperature in Kelvin
+!\param[out] fthex     real, equivalent potential temperature in Kelvin
             function fthex(t,pk)
 !$$$     Subprogram Documentation Block
 !
@@ -2284,7 +2283,7 @@ contains
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  the    real, equivalent potential temperature in Kelvin
 !>\param[in]  pk     real, pressure over 1e5 Pa to the kappa power
-!>\param[out] tmaq   real, parcel temperature in Kelvin
+!>\param[out] tma   real, parcel temperature in Kelvin
 !>\param[out] qma    real, parcel specific humidity in kg/kg
   elemental subroutine stmaq(the,pk,tma,qma)
 !$$$     Subprogram Documentation Block
@@ -2570,7 +2569,7 @@ contains
 !! computed in gpkap(). See documentation for fpkapx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  p      real, pressure in Pascals
-!>\param[out] fpkap  real, p over 1e5 Pa to the kappa power
+!\param[out] fpkap  real, p over 1e5 Pa to the kappa power
   elemental function fpkap(p)
 !$$$     Subprogram Documentation Block
 !
@@ -2622,7 +2621,7 @@ contains
 !! computed in gpkap(). see documentation for fpkapx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]   p        real, pressure in Pascals
-!>\param[out]  fpkapq   real, p over 1e5 Pa to the kappa power
+!\param[out]  fpkapq   real, p over 1e5 Pa to the kappa power
   elemental function fpkapq(p)
 !$$$     Subprogram Documentation Block
 !
@@ -2679,7 +2678,7 @@ contains
 !! The pressure range is 40000-110000 Pa and kappa is defined in fpkapx().
 !>\param[in]   p        real, surface pressure in Pascals p should be in the 
 !! range 40000 to 110000
-!>\param[out]  fpkapo   real, p over 1e5 Pa to the kappa power
+!\param[out]  fpkapo   real, p over 1e5 Pa to the kappa power
   function fpkapo(p)
 !$$$   Subprogram  documentation  block
 !
@@ -2740,7 +2739,7 @@ contains
 !> This function raises pressure over 1e5 Pa to the kappa power.
 !! Kappa is equal to rd/cp where rd and cp are physical constants.
 !>\param[in]  p        real, pressure in Pascals
-!>\param[out] fpkapx   real, p over 1e5 Pa to the kappa power
+!\param[out] fpkapx   real, p over 1e5 Pa to the kappa power
   elemental function fpkapx(p)
 !$$$   Subprogram  documentation  block
 !
@@ -2828,7 +2827,7 @@ contains
 !! computed in grkap(). See documentation for frkapx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]   pkap    real, p over 1e5 Pa to the kappa power
-!>\param[out]  frkap   real, pressure in Pascals
+!\param[out]  frkap   real, pressure in Pascals
   elemental function frkap(pkap)
 !$$$     Subprogram Documentation Block
 !
@@ -2879,7 +2878,7 @@ contains
 !! computed in grkap(). see documentation for frkapx() for details.
 !! Input values outside table range are reset to table extrema.
 !>\param[in]   pkap   real, p over 1e5 Pa to the kappa power
-!>\param[out]  frkapq real, pressure in Pascals
+!\param[out]  frkapq real, pressure in Pascals
   elemental function frkapq(pkap)
 !$$$     Subprogram Documentation Block
 !
@@ -2932,7 +2931,7 @@ contains
 !> This function raise pressure over 1e5 Pa to the 1/kappa power.
 !! Kappa is equal to rd/cp where rd and cp are physical constants.
 !>\param[in]   pkap   real, p over 1e5 Pa to the kappa power
-!>\param[out]  frkapx real, pressure in Pascals
+!\param[out]  frkapx real, pressure in Pascals
   elemental function frkapx(pkap)
 !$$$   Subprogram  documentation  block
 !
@@ -3033,7 +3032,7 @@ contains
 !! Input values outside table range are reset to table extrema.
 !>\param[in]  t      real, LCL temperature in Kelvin
 !>\param[in]  tdpd   real, dewpoint depression in Kelvin
-!>\param[out] ftlcl  real, temperature at the LCL in Kelvin
+!\param[out] ftlcl  real, temperature at the LCL in Kelvin
   elemental function ftlcl(t,tdpd)
 !$$$     Subprogram Documentation Block
 !
@@ -3088,7 +3087,7 @@ contains
 !! Input values outside table range are reset to table extrema.
 !>\param[in]   t      real, LCL temperature in Kelvin
 !>\param[in]   tdpd   real, dowpoint depression in Kelvin
-!>\param[out]  ftlcl  real, temperature at the LCL in Kelvin
+!\param[out]  ftlcl  real, temperature at the LCL in Kelvin
   elemental function ftlclq(t,tdpd)
 !$$$     Subprogram Documentation Block
 !
@@ -3156,7 +3155,7 @@ contains
 !! approximates the original exact implicit relationship.
 !>\param[in]    t    real, temperature in Kelvin
 !>\param[in]    tdpd real, dewpoint depression in Kelvin
-!>\param[out]   ftlclo   real, temperature at the LCL in Kelvin
+!\param[out]   ftlclo   real, temperature at the LCL in Kelvin
   function ftlclo(t,tdpd)
 !$$$   Subprogram  documentation  block
 !
@@ -3220,7 +3219,7 @@ contains
 !!   returned temperature is 180 Kelvin.
 !>\param[in]  t      real, temperature in Kelvin
 !>\param[in]  tdpd   real, dewpoint depression in Kelvin
-!>\param[out] ftlclx real, temperature at the LCL in Kelvin
+!\param[out] ftlclx real, temperature at the LCL in Kelvin
   elemental function ftlclx(t,tdpd)
 !$$$   Subprogram  documentation  block
 !
@@ -3341,4 +3340,3 @@ contains
   end subroutine
 !-------------------------------------------------------------------------------
 end module
-!! @}

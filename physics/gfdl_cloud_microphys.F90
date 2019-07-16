@@ -22,7 +22,7 @@ contains
 ! CCPP entry points for gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
-!>@brief The subroutine initializes the GFDL
+!>\brief The subroutine initializes the GFDL
 !! cloud microphysics.
 !!
 !> \section arg_table_gfdl_cloud_microphys_init Argument Table
@@ -56,7 +56,7 @@ contains
        logical,          intent( in) :: do_shoc
        character(len=*), intent(out) :: errmsg
        integer,          intent(out) :: errflg
- 
+
        ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
@@ -82,7 +82,7 @@ contains
    end subroutine gfdl_cloud_microphys_init
 
 ! =======================================================================
-!>@brief The subroutine 'gfdl_cloud_microphys_finalize' terminates the GFDL
+!>\brief The subroutine 'gfdl_cloud_microphys_finalize' terminates the GFDL
 !! cloud microphysics.
 !!
 !! \section arg_table_gfdl_cloud_microphys_finalize  Argument Table
@@ -110,8 +110,7 @@ contains
 
    end subroutine gfdl_cloud_microphys_finalize
 
-!>\defgroup gfdlmp  GFDL MP Module
-!! @{
+!>\defgroup gfdlmp  GFDL Cloud Microphysics Module
 !! This is cloud microphysics package for GFDL global cloud resolving model.
 !! The algorithms are originally derived from Lin et al. (1983) \cite lin_et_al_1983.
 !! most of the key elements have been simplified/improved. This code at this stage
@@ -119,12 +118,12 @@ contains
 !! therefore, it is best to be called GFDL microphysics (GFDL MP) .
 !>\author Shian-Jiann Lin, Linjiong Zhou
 !!
-!>@brief The module contains the GFDL cloud
+!>\brief The module contains the GFDL cloud
 !! microphysics (Chen and Lin (2013) \cite chen_and_lin_2013 ).
 !> The module is paired with \ref fast_sat_adj, which performs the "fast"
 !! processes.
 !!
-!>@brief The subroutine executes the full GFDL cloud microphysics.
+!>\brief The subroutine executes the full GFDL cloud microphysics.
 !! \section arg_table_gfdl_cloud_microphys_run Argument Table
 !! | local_name       | standard_name                                                    | long_name                                                             | units      | rank | type      | kind      | intent| optional |
 !! |------------------|------------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|-------|----------|
@@ -133,7 +132,7 @@ contains
 !! | con_g            | gravitational_acceleration                                       | gravitational acceleration                                            | m s-2      |    0 | real      | kind_phys | in    | F        |
 !! | con_fvirt        | ratio_of_vapor_to_dry_air_gas_constants_minus_one                | rv/rd - 1 (rv = ideal gas constant for water vapor)                   | none       |    0 | real      | kind_phys | in    | F        |
 !! | con_rd           | gas_constant_dry_air                                             | ideal gas constant for dry air                                        | J kg-1 K-1 |    0 | real      | kind_phys | in    | F        |
-!! | frland           | land_area_fraction                                               | land area fraction                                                    | frac       |    1 | real      | kind_phys | in    | F        |
+!! | frland           | land_area_fraction_for_microphysics                              | land area fraction used in microphysics schemes                       | frac       |    1 | real      | kind_phys | in    | F        |
 !! | garea            | cell_area                                                        | area of grid cell                                                     | m2         |    1 | real      | kind_phys | in    | F        |
 !! | gq0              | water_vapor_specific_humidity_updated_by_physics                 | water vapor specific humidity updated by physics                      | kg kg-1    |    2 | real      | kind_phys | inout | F        |
 !! | gq0_ntcw         | cloud_condensed_water_mixing_ratio_updated_by_physics            | cloud condensed water mixing ratio updated by physics                 | kg kg-1    |    2 | real      | kind_phys | inout | F        |
@@ -160,15 +159,14 @@ contains
 !! | phys_hydrostatic | flag_for_hydrostatic_heating_from_physics                        | flag indicating hydrostatic heating from physics                      | flag       |    0 | logical   |           | in    | F        |
 !! | lradar           | flag_for_radar_reflectivity                                      | flag for radar reflectivity                                           | flag       |    0 | logical   |           | in    | F        |
 !! | refl_10cm        | radar_reflectivity_10cm                                          | instantaneous refl_10cm                                               | dBZ        |    2 | real      | kind_phys | inout | F        |
-!! | kdt              | index_of_time_step                                               | current forecast iteration                                            | index      |    0 | integer   |           | in    | F        |
-!! | nsteps_per_reset | number_of_time_steps_per_maximum_hourly_time_interval            | number_of_time_steps_per_maximum_hourly_time_interval                 | count      |    0 | integer   |           | in    | F        |
-!! | effr_in          | flag_for_cloud_effective_radii                                   | flag for cloud effective radii calculations in microphysics           |            |    0 | logical   |           | in    | F        |
+!! | reset            | flag_reset_maximum_hourly_fields                                 | flag for resetting maximum hourly fields                              | flag       |    0 | logical   |           | in    | F        |
+!! | effr_in          | flag_for_cloud_effective_radii                                   | flag for cloud effective radii calculations in GFDL microphysics      |            |    0 | logical   |           | in    | F        |
 !! | rew              | effective_radius_of_stratiform_cloud_liquid_water_particle_in_um | eff. radius of cloud liquid water particle in micrometer              | um         |    2 | real      | kind_phys | inout | F        |
 !! | rei              | effective_radius_of_stratiform_cloud_ice_particle_in_um          | eff. radius of cloud ice water particle in micrometer                 | um         |    2 | real      | kind_phys | inout | F        |
 !! | rer              | effective_radius_of_stratiform_cloud_rain_particle_in_um         | effective radius of cloud rain particle in micrometers                | um         |    2 | real      | kind_phys | inout | F        |
 !! | res              | effective_radius_of_stratiform_cloud_snow_particle_in_um         | effective radius of cloud snow particle in micrometers                | um         |    2 | real      | kind_phys | inout | F        |
 !! | reg              | effective_radius_of_stratiform_cloud_graupel_particle_in_um      | eff. radius of cloud graupel particle in micrometer                   | um         |    2 | real      | kind_phys | inout | F        |
-!! | errmsg           | ccpp_error_message                                               | error message for error handling in CCPP                              | none       |    0 | character | len=*     | out   | F        | 
+!! | errmsg           | ccpp_error_message                                               | error message for error handling in CCPP                              | none       |    0 | character | len=*     | out   | F        |
 !! | errflg           | ccpp_error_flag                                                  | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out   | F        |
 !!
    subroutine gfdl_cloud_microphys_run(                                       &
@@ -177,7 +175,7 @@ contains
       gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
       rain0, ice0, snow0, graupel0, prcp0, sr,                                &
       dtp, hydrostatic, phys_hydrostatic, lradar, refl_10cm,                  &
-      kdt, nsteps_per_reset, effr_in, rew, rei, rer, res, reg, errmsg, errflg)
+      reset, effr_in, rew, rei, rer, res, reg, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -188,11 +186,7 @@ contains
       real(kind=kind_phys), parameter :: one = 1.0d0
       real(kind=kind_phys), parameter :: con_p001= 0.001d0
       real(kind=kind_phys), parameter :: con_day = 86400.d0
-#ifdef TRANSITION
       real(kind=kind_phys), parameter :: rainmin = 1.0d-13
-#else
-      real(kind=kind_phys), parameter :: rainmin = 1.0e-13
-#endif
       ! *DH
 
       ! interface variables
@@ -218,8 +212,7 @@ contains
 
       logical, intent (in) :: lradar
       real(kind=kind_phys), intent(inout), dimension(1:im,1:levs) :: refl_10cm
-      integer, intent (in) :: kdt, nsteps_per_reset
-      logical, intent (in) :: effr_in
+      logical, intent (in) :: reset, effr_in
       real(kind=kind_phys), intent(inout), dimension(1:im,1:levs) :: rew, rei, rer, res, reg
 
       character(len=*), intent(out) :: errmsg
@@ -237,7 +230,6 @@ contains
 #ifdef TRANSITION
       real(kind=kind_phys), volatile :: volatile_var1, volatile_var2
 #endif
-
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -299,7 +291,7 @@ contains
                  qv1, ql1, qr1, qi1, qs1, qg1, qa1, qn1, qv_dt, ql_dt, qr_dt, qi_dt, &
                  qs_dt, qg_dt, qa_dt, pt_dt, pt, w,  uin, vin, u_dt, v_dt, dz, delp, &
                  garea, dtp, frland, rain0, snow0, ice0, graupel0, hydrostatic,      &
-                 phys_hydrostatic, p123, lradar, refl, kdt, nsteps_per_reset)
+                 phys_hydrostatic, p123, lradar, refl, reset)
       tem   = dtp*con_p001/con_day
 
       ! fix negative values
@@ -385,4 +377,3 @@ contains
    end subroutine gfdl_cloud_microphys_run
 
 end module gfdl_cloud_microphys
-!!@}

@@ -95,7 +95,6 @@
 !! | im             | horizontal_loop_extent                                                    | horizontal loop extent                                                  | count         |    0 | integer    |           | in     | F        |
 !! | levs           | vertical_dimension                                                        | vertical layer dimension                                                | count         |    0 | integer    |           | in     | F        |
 !! | ntrac          | number_of_tracers                                                         | number of tracers                                                       | count         |    0 | integer    |           | in     | F        |
-!! | crtrh          | critical_relative_humidity_at_sfc_pbltop_toa                              | critical relative humidity at SFC, PBL top and TOA                      | frac          |    1 | real       | kind_phys | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                    | dynamics timestep                                                       | s             |    0 | real       | kind_phys | in     | F        |
 !! | dtp            | time_step_for_physics                                                     | physics timestep                                                        | s             |    0 | real       | kind_phys | in     | F        |
 !! | slmsk          | sea_land_ice_mask_real                                                    | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | real       | kind_phys | in     | F        |
@@ -103,12 +102,8 @@
 !! | dxmin          | minimum_scaling_factor_for_critical_relative_humidity                     | minimum scaling factor for critical relative humidity                   | m2 rad-2      |    0 | real       | kind_phys | in     | F        |
 !! | dxinv          | inverse_scaling_factor_for_critical_relative_humidity                     | inverse scaling factor for critical relative humidity                   | rad2 m-2      |    0 | real       | kind_phys | in     | F        |
 !! | pgr            | surface_air_pressure                                                      | surface pressure                                                        | Pa            |    1 | real       | kind_phys | in     | F        |
-!! | rhbbot         | critical_relative_humidity_at_surface                                     | critical relative humidity at the surface                               | frac          |    0 | real       | kind_phys | out    | F        |
-!! | rhpbl          | critical_relative_humidity_at_PBL_top                                     | critical relative humidity at the PBL top                               | frac          |    0 | real       | kind_phys | out    | F        |
-!! | rhbtop         | critical_relative_humidity_at_top_of_atmosphere                           | critical relative humidity at the top of atmosphere                     | frac          |    0 | real       | kind_phys | out    | F        |
 !! | frain          | dynamics_to_physics_timestep_ratio                                        | ratio of dynamics timestep to physics timestep                          | none          |    0 | real       | kind_phys | out    | F        |
 !! | islmsk         | sea_land_ice_mask                                                         | landmask: sea/land/ice=0/1/2                                            | flag          |    1 | integer    |           | out    | F        |
-!! | frland         | land_area_fraction                                                        | land area fraction                                                      | frac          |    1 | real       | kind_phys | out    | F        |
 !! | work1          | grid_size_related_coefficient_used_in_scale-sensitive_schemes             | grid size related coefficient used in scale-sensitive schemes           | none          |    1 | real       | kind_phys | out    | F        |
 !! | work2          | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement  | complement to work1                                                     | none          |    1 | real       | kind_phys | out    | F        |
 !! | psurf          | surface_air_pressure_diag                                                 | surface air pressure diagnostic                                         | Pa            |    1 | real       | kind_phys | out    | F        |
@@ -120,8 +115,8 @@
 !! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                                | none          |    0 | character  | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                                   | flag          |    0 | integer    |           | out    | F        |
 !!
-    subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, crtrh, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
-      rhbbot, rhpbl, rhbtop, frain, islmsk, frland, work1, work2, psurf, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
+    subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
+      frain, islmsk, work1, work2, psurf, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -130,12 +125,11 @@
       ! interface variables
       integer,              intent(in) :: im, levs, ntrac
       real(kind=kind_phys), intent(in) :: dtf, dtp, dxmin, dxinv
-      real(kind=kind_phys), intent(in), dimension(3) :: crtrh
       real(kind=kind_phys), intent(in), dimension(im) :: slmsk, area, pgr
 
-      real(kind=kind_phys), intent(out) :: rhbbot, rhpbl, rhbtop, frain
+      real(kind=kind_phys), intent(out) :: frain
       integer,              intent(out), dimension(im) :: islmsk
-      real(kind=kind_phys), intent(out), dimension(im) :: frland, work1, work2, psurf
+      real(kind=kind_phys), intent(out), dimension(im) :: work1, work2, psurf
       real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt, dtdtc
       real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
       character(len=*),     intent(out) :: errmsg
@@ -148,19 +142,11 @@
       errmsg = ''
       errflg = 0
 
-      rhbbot = crtrh(1)
-      rhpbl  = crtrh(2)
-      rhbtop = crtrh(3)
-
       frain = dtf / dtp
 
       do i = 1, im
         islmsk(i)   = nint(slmsk(i))
-        if (islmsk(i) == 1) then
-          frland(i) = 1.0
-        else
-          frland(i) = 0.0
-        endif
+
         work1(i) = (log(area(i)) - dxmin) * dxinv
         work1(i) = max(0.0, min(1.0,work1(i)))
         work2(i) = 1.0 - work1(i)
@@ -276,7 +262,8 @@
 
       integer,              intent(inout), dimension(im) :: kinver
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, adjsfculw, ctei_rml, ctei_r
-      real(kind=kind_phys), intent(inout), dimension(im, levs) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
+      ! These arrays are only allocated if ldiag3d is .true.
+      real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
 
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
@@ -288,7 +275,7 @@
       logical, dimension(im) :: invrsn
       real(kind=kind_phys), dimension(im) :: tx1, tx2
 
-      real(kind=kind_phys), parameter :: qmin    = 1.0e-10
+      real(kind=kind_phys), parameter :: qmin = 1.0d-10
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -521,6 +508,7 @@
       errmsg = ''
       errflg = 0
 
+      ! DH* add gw_dXdt terms here
       gt0(:,:)   = tgrs(:,:)   + dtdt(:,:)   * dtp
       gu0(:,:)   = ugrs(:,:)   + dudt(:,:)   * dtp
       gv0(:,:)   = vgrs(:,:)   + dvdt(:,:)   * dtp
@@ -566,7 +554,7 @@
 !! | xlat                       | latitude                                                                                      | latitude                                                          | radians       |    1 | real       | kind_phys | in     | F        |
 !! | gq0                        | tracer_concentration_updated_by_physics                                                       | tracer concentration updated by physics                           | kg kg-1       |    3 | real       | kind_phys | in     | F        |
 !! | imp_physics                | flag_for_microphysics_scheme                                                                  | choice of microphysics scheme                                     | flag          |    0 | integer    |           | in     | F        |
-!! | imp_physics_mg             | flag_for_morrison_gettelman_microphysics_scheme                                               | choice of Morrison-Gettelman rmicrophysics scheme                 | flag          |    0 | integer    |           | in     | F        |
+!! | imp_physics_mg             | flag_for_morrison_gettelman_microphysics_scheme                                               | choice of Morrison-Gettelman microphysics scheme                  | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_zhao_carr      | flag_for_zhao_carr_microphysics_scheme                                                        | choice of Zhao-Carr microphysics scheme                           | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_zhao_carr_pdf  | flag_for_zhao_carr_pdf_microphysics_scheme                                                    | choice of Zhao-Carr microphysics scheme with PDF clouds           | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_gfdl           | flag_for_gfdl_microphysics_scheme                                                             | choice of GFDL microphysics scheme                                | flag          |    0 | integer    |           | in     | F        |
@@ -583,6 +571,7 @@
 !! | work1                      | grid_size_related_coefficient_used_in_scale-sensitive_schemes                                 | grid size related coefficient used in scale-sensitive schemes     | none          |    1 | real       | kind_phys | in     | F        |
 !! | work2                      | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement                      | complement to work1                                               | none          |    1 | real       | kind_phys | in     | F        |
 !! | kpbl                       | vertical_index_at_top_of_atmosphere_boundary_layer                                            | vertical index at top atmospheric boundary layer                  | index         |    1 | integer    |           | in     | F        |
+!! | kinver                     | index_of_highest_temperature_inversion                                                        | index of highest temperature inversion                            | index         |    1 | integer    |           | in     | F        |
 !! | clw                        | convective_transportable_tracers                                                              | array to contain cloud water and other convective trans. tracers  | kg kg-1       |    3 | real       | kind_phys | inout  | F        |
 !! | rhc                        | critical_relative_humidity                                                                    | critical relative humidity                                        | frac          |    2 | real       | kind_phys | inout  | F        |
 !! | save_qc                    | cloud_condensed_water_mixing_ratio_save             | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme | kg kg-1       |    2 | real       | kind_phys | inout  | F        |
@@ -594,7 +583,7 @@
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,  &
       ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlat, gq0, imp_physics, imp_physics_mg, imp_physics_zhao_carr,&
       imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, prsi, prsl, prslk, rhcbot,     &
-      rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl,                                                                 &
+      rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver,                                                         &
       clw, rhc, save_qc, save_qi, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -605,7 +594,7 @@
       integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw,     &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, dimension(im),                           intent(in) :: islmsk, kpbl
+      integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
       logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol
 
       real(kind=kind_phys),                             intent(in) :: rhcbot, rhcmax, rhcpbl, rhctop
@@ -626,10 +615,13 @@
       ! local variables
       integer :: i,k,n,tracers,kk
       real(kind=kind_phys) :: tem, tem1, tem2
-      real(kind=kind_phys), dimension(im) :: tx1, tx2
+      real(kind=kind_phys), dimension(im) :: tx1, tx2, tx3, tx4
 
-      real(kind=kind_phys),parameter :: slope_mg = 0.02, slope_upmg = 0.04,  &
-                         turnrhcrit = 0.900, turnrhcrit_upper = 0.150
+      !real(kind=kind_phys),parameter :: slope_mg = 0.02, slope_upmg = 0.04,  &
+      !                   turnrhcrit = 0.900, turnrhcrit_upper = 0.150
+      ! in the following inverse of slope_mg and slope_upmg are specified
+      real(kind=kind_phys),parameter :: slope_mg   = 50.0_kind_phys,   &
+                                        slope_upmg = 25.0_kind_phys
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -679,17 +671,22 @@
       endif ! end if_ras or cfscnv or samf
 
       if (ntcw > 0) then
-        if (imp_physics == imp_physics_mg) then ! compute rhc for GMAO macro physics cloud pdf
+        if (imp_physics == imp_physics_mg .and. rhcpbl < 0.5) then ! compute rhc for GMAO macro physics cloud pdf
           do i=1,im
             tx1(i) = 1.0 / prsi(i,1)
-            tx2(i) = 1.0 - rhcmax * work1(i)-rhcbot*work2(i)
+            tx2(i) = 1.0 - rhcmax*work1(i)-rhcbot*work2(i)
+
+            kk     = min(kinver(i), max(2,kpbl(i)))
+            tx3(i) = prsi(i,kk)*tx1(i)
+            tx4(i) = rhcpbl - rhctop*abs(cos(xlat(i)))
           enddo
           do k = 1, levs
             do i = 1, im
-              kk   = max(2,kpbl(i))
               tem  = prsl(i,k) * tx1(i)
-              tem1 = min(max((tem-prsi(i,kk)*tx1(i))/slope_mg, -20.0), 20.0)
-              tem2 = min(max((0.3-0.2*abs(cos(xlat(i)))-tem)/slope_upmg, -20.0), 20.0) ! Anning
+              tem1 = min(max((tem-tx3(i))*slope_mg, -20.0), 20.0)
+              ! Using rhcpbl and rhctop from the namelist instead of 0.3 and 0.2
+              ! and rhcbot represents pbl top critical relative humidity
+              tem2 = min(max((tx4(i)-tem)*slope_upmg, -20.0), 20.0) ! Anning
               if (islmsk(i) > 0) then
                 tem1 = 1.0 / (1.0+exp(tem1+tem1))
               else
@@ -698,7 +695,6 @@
               tem2 = 1.0 / (1.0+exp(tem2))
 
               rhc(i,k) = min(rhcmax, max(0.7, 1.0-tx2(i)*tem1*tem2))
-!             rhc(i,k) = min(rhcmax, rhcmax*work1(i) + (1.0-tx2(i)*tem1*tem2)*work2(i))
             enddo
           enddo
         else
@@ -706,11 +702,9 @@
             do i=1,im
               kk = max(10,kpbl(i))
               if (k < kk) then
-                tem    = rhcbot - (rhcbot-rhcpbl) * (1.0-prslk(i,k))                &
-                                                 / (1.0-prslk(i,kk))
+                tem    = rhcbot - (rhcbot-rhcpbl) * (1.0-prslk(i,k)) / (1.0-prslk(i,kk))
               else
-                tem    = rhcpbl - (rhcpbl-rhctop) * (prslk(i,kk)-prslk(i,k)) &
-                                                / prslk(i,kk)
+                tem    = rhcpbl - (rhcpbl-rhctop) * (prslk(i,kk)-prslk(i,k)) / prslk(i,kk)
               endif
               tem      = rhcmax * work1(i) + tem * work2(i)
               rhc(i,k) = max(0.0, min(1.0,tem))

@@ -1,3 +1,6 @@
+!>\file namelist_soilveg.f
+
+!>\ingroup Noah_LSM
       module namelist_soilveg
       implicit none
       save

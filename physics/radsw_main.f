@@ -376,7 +376,7 @@
       subroutine rrtmg_sw_init ()
       end subroutine rrtmg_sw_init
 
-!> \defgroup module_radsw_main GFS radsw Main
+!> \defgroup module_radsw_main GFS RRTMG Shortwave Module
 !! This module includes NCEP's modifications of the RRTMG-SW radiation
 !! code from AER.
 !!
@@ -1586,6 +1586,8 @@
 !!\param nlay           vertical layer number
 !!\param ipseed         permutation seed for generating random numbers
 !!                      (isubcsw>0)
+!!\param dz             layer thickness (km)
+!!\param delgth         layer cloud decorrelation length (km)
 !!\param taucw          cloud optical depth, w/o delta scaled
 !!\param ssacw          weighted cloud single scattering albedo
 !!                      (ssa = ssacw / taucw)
@@ -1974,9 +1976,11 @@
 !!\param cldf        layer cloud fraction
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
+!!\param dz          layer thickness (km)
+!!\param de_lgth     layer cloud decorrelation length (km)
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_sw_gen mcica_subcol General Algorithm
-!! @{
+!> @{
 ! ----------------------------------
       subroutine mcica_subcol                                           &
      &    ( cldf, nlay, ipseed, dz, de_lgth,                            &       !  ---  inputs
@@ -2184,7 +2188,7 @@
       return
 ! ..................................
       end subroutine mcica_subcol
-!! @}
+!> @}
 ! ----------------------------------
 
 !>\ingroup module_radsw_main
@@ -2199,13 +2203,13 @@
 !!\param jp              indices of lower reference pressure
 !!\param jt,jt1          indices of lower reference temperatures at
 !!                       levels of jp and jp+1
-!!\param facij           factors mltiply the reference ks,i,j=0/1 for
+!!\param fac00,fac01,fac10,fac11           factors mltiply the reference ks,i,j=0/1 for
 !!                       lower/higher of the 2 appropriate temperature
 !!                       and altitudes.
 !!\param selffac         scale factor for w. v. self-continuum equals
 !!                       (w.v. density)/(atmospheric density at 296k
 !!                       and 1013 mb)
-!!\param seffrac         factor for temperature interpolation of
+!!\param selffrac         factor for temperature interpolation of
 !!                       reference w.v. self-continuum data
 !!\param indself         index of lower ref temp for selffac
 !!\param forfac          scale factor for w. v. foreign-continuum
@@ -4004,7 +4008,7 @@
 !!                        are for h2o, co2, o3, n2o, ch4, and o2,
 !!                        respectively \f$(mol/cm^2)\f$
 !!\param colmol           total column amount (dry air+water vapor)
-!!\param facij            for each layer, these are factors that are
+!!\param fac00,fac01,fac10,fac11      for each layer, these are factors that are
 !!                        needed to compute the interpolation factors
 !!                        that multiply the appropriate reference
 !!                        k-values.  a value of 0/1 for i,j indicates

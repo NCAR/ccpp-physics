@@ -23,7 +23,7 @@
       end subroutine samfshalcnv_finalize
 
 
-!> \defgroup SAMF_shal GFS samfshalcnv Main
+!> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection Scheme Module
 !! @{
 !>  \brief This subroutine contains the entirety of the SAMF shallow convection
 !!  scheme.
@@ -109,21 +109,22 @@
 !
       integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
-      real(kind=kind_phys), intent(in) :: cliq, cp, cvap,
+      real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),
+      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km), garea(im), hpbl(im), dot(ix,km), phil(ix,km)
 !
       integer, intent(inout)  :: kcnv(im)
-      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),
+      ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
+      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
      &   q1(ix,km), t1(ix,km), u1(ix,km), v1(ix,km)
 !
       integer, intent(out) :: kbot(im), ktop(im)
-      real(kind=kind_phys), intent(out) :: rn(im),
+      real(kind=kind_phys), intent(out) :: rn(im),                      &
      &   cnvw(ix,km), cnvc(ix,km), ud_mf(im,km), dt_mf(im,km)
 !
-      real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,
+      real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, pgcon
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -1869,18 +1870,16 @@ c
 
         real(kind=kind_phys), dimension(im), intent(inout) :: rainc,
      &    cnvprcp, cnvprcpb
-        ! DH* The following arrays may not be allocated, depending on certain flags and microphysics schemes.
+        ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
         ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
         ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
         ! as long as these do not get used when not allocated.
         real(kind=kind_phys), dimension(:,:), intent(inout) ::
      &    cnvw_phy_f3d, cnvc_phy_f3d
-        ! *DH
 
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
-        real(kind=kind_phys), dimension(im) :: raincs
         integer :: i, k
 
         ! Initialize CCPP error handling variables
@@ -1888,15 +1887,8 @@ c
         errflg = 0
 
         do i=1,im
-          raincs(i)     = frain * rain1(i)
-          rainc(i) = rainc(i) + raincs(i)
+          rainc(i) = rainc(i) + frain * rain1(i)
         enddo
-        if (lssav) then
-          do i=1,im
-            cnvprcp(i)  = cnvprcp(i)  + raincs(i)
-            cnvprcpb(i) = cnvprcpb(i) + raincs(i)
-          enddo
-        endif
 ! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
         if (shcnvcw .and. num_p3d == 4 .and. npdf3d == 3) then
           do k=1,levs

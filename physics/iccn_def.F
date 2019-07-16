@@ -1,3 +1,8 @@
+!>\file iccn_def.F
+!! This file defines IN and CCN arrays.
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This module defines IN and CCN arrays.
       module iccn_def
       use machine , only : kind_phys
       implicit none

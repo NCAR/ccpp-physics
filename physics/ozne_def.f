@@ -1,3 +1,8 @@
+!>\file ozne_def.f
+!! This file contains the ozone array definition used in ozone physics.
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This module defines arrays in Ozone scheme.
       module ozne_def
       use machine , only : kind_phys
       implicit none

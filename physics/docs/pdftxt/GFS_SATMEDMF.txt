@@ -1,0 +1,35 @@
+/**
+\page GFS_SATMEDMF GFS Scale-aware TKE-based Moist Eddy-Diffusion Mass-Flux (EDMF) PBL and Free Atmospheric Turbulence Scheme
+\section des_satmedmf Description
+
+The current operational \ref GFS_HEDMF uses a hybrid EDMF parameterization for the convective PBL (Han et al. 2016 \cite Han_2016;
+Han et al. 2017 \cite han_et_al_2017), where the EDMF scheme is applied only for the strongly unstable PBL, while the eddy-diffusivity
+counter-gradient(EDCG) scheme is used for the weakly unstable PBL. The new TKE-EDMF is an extended version of \ref GFS_HEDMF  with below enhancement:
+
+-# Eddy diffusivity (K) is now a function of TKE which is prognostically predicted
+
+-# EDMF approach is applied for all the unstable PBL 
+
+-# EDMF approach is also applied to the stratocumulus-top-driven turbulence mixing
+
+-# It includes a moist-adiabatic process when updraft thermal becomes saturated
+
+-# Scale-aware capability
+
+-# It includes interaction between TKE and cumulus convection
+
+The CCPP-compliant subroutine satmedmfvdif_run() computes subgrid vertical turbulence mixing using scale-aware
+TKE-based moist eddy-diffusion mass-flux paramterization (Han et al. 2019 \cite Han_2019)
+- For the convective boundary layer, the scheme adopts EDMF parameterization (Siebesma et al. (2007)\cite Siebesma_2007)
+to take into account nonlocal transport by large eddies(mfpblt.f)
+- A new mass-flux paramterization for stratocumulus-top-induced turbulence mixing has been introduced (mfscu.f; previously,
+it was an eddy diffusion form)
+- For local turbulence mixing, a TKE closure model is used.
+
+\section intra_satmedmf Intraphysics Communication
+\ref arg_table_satmedmfvdif_run
+
+\section gen_pbl_satmedmfvdif  General Algorithm
+\ref gen_satmedmfvdif
+
+*/

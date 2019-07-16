@@ -1,3 +1,10 @@
+!>\file gcycle.F90
+!! This file repopulates specific time-varying surface properties for 
+!! atmospheric forecast runs.
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This subroutine repopulates specific time-varying surface properties for
+!! atmospheric forecast runs.
 # 1 "physics/gcycle.F90"
   SUBROUTINE GCYCLE (nblks, Model, Grid, Sfcprop, Cldprop)
 !

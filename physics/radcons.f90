@@ -3,7 +3,6 @@
 
 
 !> \defgroup radcons GFS RRTMG Constants Module
-!! @{
 !> This module contains some of the most frequently used math and physics
 !! constants for RRTMG.
 
@@ -61,7 +60,6 @@
 !----------------------------
 ! Module variable definitions
 !----------------------------
-! DH* CHECK IF THIS IS NEEDED/TRUE?
 !CCPP: copy from GFS_driver.F90
   real(kind=kind_phys), parameter :: con_24  =   24.0_kind_phys
   real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
@@ -73,4 +71,3 @@
 !........................................!
       end module radcons                !
 !========================================!
-!! @}

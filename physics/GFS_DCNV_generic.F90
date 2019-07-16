@@ -11,6 +11,7 @@
       subroutine GFS_DCNV_generic_pre_finalize()
       end subroutine GFS_DCNV_generic_pre_finalize
 
+#if 0
 !> \brief Interstitial scheme called prior to any deep convective scheme to save state variables for calculating tendencies after the deep convective scheme is executed
 !! \section arg_table_GFS_DCNV_generic_pre_run Argument Table
 !! | local_name      | standard_name                                          | long_name                                                                 | units   | rank | type      |    kind   | intent | optional |
@@ -34,6 +35,7 @@
 !! | errmsg          | ccpp_error_message                                     | error message for error handling in CCPP                                  | none    |    0 | character | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                        | error flag for error handling in CCPP                                     | flag    |    0 | integer   |           | out    | F        |
 !!
+#endif
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, cnvgwd, lgocart, do_ca,     &
                                          isppt_deep, gu0, gv0, gt0, gq0_water_vapor,    &
                                          save_u, save_v, save_t, save_qv, ca_deep,      &
@@ -101,6 +103,7 @@
     subroutine GFS_DCNV_generic_post_finalize ()
     end subroutine GFS_DCNV_generic_post_finalize
 
+#if 0
 !> \section arg_table_GFS_DCNV_generic_post_run Argument Table
 !! | local_name      | standard_name                                                                               | long_name                                                            | units         | rank | type              |    kind   | intent | optional |
 !! |-----------------|---------------------------------------------------------------------------------------------|----------------------------------------------------------------------|---------------|------|-------------------|-----------|--------|----------|
@@ -136,8 +139,6 @@
 !! | ncnvcld3d       | number_of_convective_3d_cloud_fields                                                        | number of convective 3d clouds fields                                | count         |    0 | integer           |           | in     | F        |
 !! | rainc           | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep                       | convective rain at this time step                                    | m             |    1 | real              | kind_phys | inout  | F        |
 !! | cldwrk          | cumulative_cloud_work_function                                                              | cumulative cloud work function (valid only with sas)                 | m2 s-1        |    1 | real              | kind_phys | inout  | F        |
-!! | cnvprcp         | cumulative_lwe_thickness_of_convective_precipitation_amount                                 | cumulative convective precipitation                                  | m             |    1 | real              | kind_phys | inout  | F        |
-!! | cnvprcpb        | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket                       | cumulative convective precipitation in bucket                        | m             |    1 | real              | kind_phys | inout  | F        |
 !! | dt3dt           | cumulative_change_in_temperature_due_to_deep_convection                                     | cumulative change in temperature due to deep conv.                   | K             |    2 | real              | kind_phys | inout  | F        |
 !! | dq3dt           | cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection                   | cumulative change in water vapor specific humidity due to deep conv. | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | du3dt           | cumulative_change_in_x_wind_due_to_deep_convection                                          | cumulative change in x wind due to deep convection                   | m s-1         |    2 | real              | kind_phys | inout  | F        |
@@ -154,7 +155,7 @@
 !! | cnvc            | convective_cloud_cover                                                                      | convective cloud cover                                               | frac          |    2 | real              | kind_phys | inout  | F        |
 !! | cnvw_phy_f3d    | convective_cloud_water_mixing_ratio_in_phy_f3d                                              | convective cloud water mixing ratio in the phy_f3d array             | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | cnvc_phy_f3d    | convective_cloud_cover_in_phy_f3d                                                           | convective cloud cover in the phy_f3d array                          | frac          |    2 | real              | kind_phys | inout  | F        |
-!! | cape            | convective_available_potential_energy_for_coupling                                          | convective available potential energy for coupling DH* CHECK THIS DOESN'T MAKE SENSE!!! *DH | m2 s-2        |    1 | real    | kind_phys | inout   | F        |
+!! | cape            | convective_available_potential_energy_for_coupling                                          | convective available potential energy for coupling                   | m2 s-2        |    1 | real              | kind_phys | inout  | F        |
 !! | tconvtend       | tendency_of_air_temperature_due_to_deep_convection_for_coupling_on_physics_timestep         | tendency of air temperature due to deep convection                   | K             |    2 | real              | kind_phys | inout  | F        |
 !! | qconvtend       | tendency_of_water_vapor_specific_humidity_due_to_deep_convection_for_coupling_on_physics_timestep | tendency of specific humidity due to deep convection           | kg kg-1       |    2 | real              | kind_phys | inout  | F        |
 !! | uconvtend       | tendency_of_x_wind_due_to_deep_convection_for_coupling_on_physics_timestep                  | tendency_of_x_wind_due_to_deep_convection                            | m s-1         |    2 | real              | kind_phys | inout  | F        |
@@ -162,10 +163,11 @@
 !! | errmsg          | ccpp_error_message                                                                          | error message for error handling in CCPP                             | none          |    0 | character         | len=*     | out    | F        |
 !! | errflg          | ccpp_error_flag                                                                             | error flag for error handling in CCPP                                | flag          |    0 | integer           |           | out    | F        |
 !!
+#endif
     subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, ras, cscnv, do_ca,      &
       isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
       gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,  &
-      rainc, cldwrk, cnvprcp, cnvprcpb, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf, dqdti,   &
+      rainc, cldwrk, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf, dqdti,                      &
       cnvqci, upd_mfi, dwn_mfi, det_mfi, cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d,                     &
       cape, tconvtend, qconvtend, uconvtend, vconvtend, errmsg, errflg)
 
@@ -185,19 +187,19 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: clw_ice, clw_liquid
       integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cldwrk, cnvprcp, cnvprcpb
+      real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cldwrk
       ! dt3dt, dq3dt, du3dt, dv3dt upd_mf, dwn_mf, det_mf only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, dq3dt, du3dt, dv3dt
       real(kind=kind_phys), dimension(:,:), intent(inout) :: upd_mf, dwn_mf, det_mf
       ! dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi only allocated if ldiag3d == .true. or lgocart == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti, cnvqci, upd_mfi, dwn_mfi, det_mfi
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: cnvw, cnvc
-      ! DH* The following arrays may not be allocated, depending on certain flags and microphysics schemes.
+      ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated (it is still invalid Fortran code, though).
       real(kind=kind_phys), dimension(:,:), intent(inout) :: cnvw_phy_f3d, cnvc_phy_f3d
-      ! *DH
+
       real(kind=kind_phys), dimension(im), intent(inout) :: cape
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: tconvtend, qconvtend, uconvtend, vconvtend
 
@@ -242,8 +244,6 @@
       if (lssav) then
         do i=1,im
           cldwrk (i)  = cldwrk (i)  + cld1d(i) * dtf
-          cnvprcp(i)  = cnvprcp(i)  + rainc(i)
-          cnvprcpb(i) = cnvprcpb(i) + rainc(i)
         enddo
 
         if (ldiag3d) then

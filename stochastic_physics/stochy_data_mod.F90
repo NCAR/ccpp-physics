@@ -1,6 +1,9 @@
+!>\file stochy_data_mod.F90
+!!This file includes module to set up and initializes stochastic random patterns.
+
+!> This module set up and initializes stochastic random patterns
 module stochy_data_mod
 
-! set up and initialize stochastic random patterns.
 
  use spectral_layout_mod, only: len_trie_ls,len_trio_ls,ls_dim,ls_max_node
  use stochy_resol_def, only : skeblevs,levs,jcap,lonf,latg
@@ -39,10 +42,11 @@ module stochy_data_mod
  type(stochy_internal_state),public :: gis_stochy
  
  contains
+
+!> This subroutine initializes random patterns. A spinup period of spinup_efolds times
+!! the temporal time scale is run for each pattern.
  subroutine init_stochdata(nlevs,delt,input_nml_file,fn_nml,nlunit,iret)
 
-! initialize random patterns.  A spinup period of spinup_efolds times the
-! temporal time scale is run for each pattern.
    integer, intent(in) :: nlunit,nlevs
    character(len=*),  intent(in) :: input_nml_file(:)
    character(len=64), intent(in) :: fn_nml

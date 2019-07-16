@@ -134,11 +134,17 @@
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Sfcprop
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slmsk'    , Sfcprop%slmsk)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakemsk'  , Sfcprop%lakemsk)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%oceanfrac', Sfcprop%oceanfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%landfrac' , Sfcprop%landfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakefrac' , Sfcprop%lakefrac)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfc'     , Sfcprop%tsfc)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfco'    , Sfcprop%tsfco)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfcl'    , Sfcprop%tsfcl)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tisfc'    , Sfcprop%tisfc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%snowd'    , Sfcprop%snowd)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%zorl'     , Sfcprop%zorl)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorlo'    , Sfcprop%zorlo)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorll'    , Sfcprop%zorll)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%fice'     , Sfcprop%fice)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprim'    , Sfcprop%hprim)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprime'   , Sfcprop%hprime)
@@ -168,7 +174,6 @@
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%f10m'     , Sfcprop%f10m)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tprcp'    , Sfcprop%tprcp)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%srflag'   , Sfcprop%srflag)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%sr'       , Sfcprop%sr)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slc'      , Sfcprop%slc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%smc'      , Sfcprop%smc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%stc'      , Sfcprop%stc)
@@ -254,10 +259,10 @@
                      call print_var(mpirank,omprank, blkno, 'Tbd%ccn_nm'          , Tbd%ccn_nm)
                      call print_var(mpirank,omprank, blkno, 'Tbd%aer_nm'          , Tbd%aer_nm)
                      ! Diag
-                     call print_var(mpirank,omprank, blkno, 'Diag%fluxr       ',    Diag%fluxr)
-                     do n=1,size(Diag%fluxr(1,:))
-                         call print_var(mpirank,omprank, blkno, 'Diag%fluxr_n ',    Diag%fluxr(:,n))
-                     end do
+                     !call print_var(mpirank,omprank, blkno, 'Diag%fluxr       ',    Diag%fluxr)
+                     !do n=1,size(Diag%fluxr(1,:))
+                     !    call print_var(mpirank,omprank, blkno, 'Diag%fluxr_n ',    Diag%fluxr(:,n))
+                     !end do
                      call print_var(mpirank,omprank, blkno, 'Diag%srunoff     ',    Diag%srunoff)
                      call print_var(mpirank,omprank, blkno, 'Diag%evbsa       ',    Diag%evbsa)
                      call print_var(mpirank,omprank, blkno, 'Diag%evcwa       ',    Diag%evcwa)
@@ -315,10 +320,16 @@
                      call print_var(mpirank,omprank, blkno, 'Diag%epi         ',    Diag%epi)
                      call print_var(mpirank,omprank, blkno, 'Diag%smcwlt2     ',    Diag%smcwlt2)
                      call print_var(mpirank,omprank, blkno, 'Diag%smcref2     ',    Diag%smcref2)
+                     call print_var(mpirank,omprank, blkno, 'Diag%sr          ',    Diag%sr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomr       ',    Diag%tdomr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomzr      ',    Diag%tdomzr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomip      ',    Diag%tdomip)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdoms       ',    Diag%tdoms)
+                     if (Model%lsm == Model%lsm_ruc) then
+                       call print_var(mpirank,omprank, blkno, 'Diag%wet1        ',  Sfcprop%wetness)
+                     else
+                       call print_var(mpirank,omprank, blkno, 'Diag%wet1        ',  Diag%wet1)
+                     end if
                      call print_var(mpirank,omprank, blkno, 'Diag%skebu_wts   ',    Diag%skebu_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%skebv_wts   ',    Diag%skebv_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%sppt_wts    ',    Diag%sppt_wts)

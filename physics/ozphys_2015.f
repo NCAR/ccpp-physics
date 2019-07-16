@@ -20,10 +20,8 @@
       end subroutine ozphys_2015_finalize
 
 
-!>\defgroup GFS_ozphys_2015 GFS ozphys_2015 Main
-!! @{
-!! \brief The operational GFS currently parameterizes ozone production
-!and
+!>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Scheme Module
+!! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
@@ -54,18 +52,18 @@
 !! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
 !!
 !> \section genal_ozphys_2015 GFS ozphys_2015_run General Algorithm
-!! @{
+!> @{
+!> -  This code assumes that both prsl and po3 are from bottom to top
+!!     as are all other variables.
+!> -  This code is specifically for NRL parameterization and
+!!     climatological T and O3 are in location 5 and 6 of prdout array
+!!\author June 2015 - Shrinivas Moorthi
       subroutine ozphys_2015_run (                                      &
      &                        ix, im, levs, ko3, dt, oz, tin, po3,      &
      &                        prsl, prdout, pl_coeff, delp, ldiag3d,    &
      &                        ozp1,ozp2,ozp3,ozp4,con_g,                &
      &                        me, errmsg, errflg)
 !
-!     this code assumes that both prsl and po3 are from bottom to top
-!     as are all other variables
-!     This code is specifically for NRL parameterization and
-!     climatological T and O3 are in location 5 and 6 of prdout array
-! June 2015 - Shrinivas Moorthi
 !
       use machine , only : kind_phys
       implicit none
@@ -185,7 +183,6 @@
       return
       end subroutine ozphys_2015_run
 
-!! @}
-!! @}
+!> @}
 
       end module ozphys_2015

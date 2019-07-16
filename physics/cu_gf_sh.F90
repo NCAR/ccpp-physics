@@ -1,44 +1,8 @@
-! module cup_gf_sh will call shallow convection as described in grell and
-! freitas (2016). input variables are:
-!    zo               height at model levels
-!    t,tn             temperature without and with forcing at model levels
-!    q,qo             mixing ratio without and with forcing at model levels
-!    po               pressure at model levels (mb)
-!    psur             surface pressure (mb)
-!    z1               surface height
-!    dhdt             forcing for boundary layer equilibrium   
-!    hfx,qfx          in w/m2 (positive, if upward from sfc)
-!    kpbl             level of boundaty layer height
-!    xland            land mask (1. for land)
-!    ichoice          which closure to choose 
-!                     1: old g
-!                     2: zws
-!                     3: dhdt
-!                     0: average
-!    tcrit            parameter for water/ice conversion (258)
-!
-!!!!!!!!!!!! variables that are diagnostic
-!
-!    zuo               normalized mass flux profile
-!    xmb_out           base mass flux
-!    kbcon             convective cloud base
-!    ktop              cloud top
-!    k22               level of updraft originating air
-!    ierr              error flag
-!    ierrc             error description
-!
-!!!!!!!!!!!! variables that are on output
-!    outt               temperature tendency (k/s)
-!    outq               mixing ratio tendency (kg/kg/s)
-!    outqc              cloud water/ice tendency (kg/kg/s)
-!    pre                precip rate (mm/s)
-!    cupclw             incloud mixing ratio of cloudwater/ice (for radiation)
-!                       this needs heavy tuning factors, since cloud fraction is
-!                       not included (kg/kg)
-!    cnvwt              required for gfs physics
-!
-!    itf,ktf,its,ite, kts,kte are dimensions
-!    ztexec,zqexec    excess temperature and moisture for updraft
+!>\file cu_gf_sh.F90
+!! This file contains Grell-Freitas shallow convection scheme.
+
+!>\defgroup cu_gf_sh_group Grell-Freitas Shallow Convection Module
+!> \ingroup cu_gf_group
 module cu_gf_sh
     use machine , only : kind_phys
     !real(kind=kind_phys), parameter:: c1_shal=0.0015! .0005
@@ -52,17 +16,57 @@ module cu_gf_sh
 
 contains
 
+!>\ingroup cu_gf_sh_group
+!> GF shallow convection as described in Grell and
+!! Freitas (2014) \cite grell_and_freitas_2014. input variables are:
+!!\param    us               x wind updated by physics
+!!\param    vs               y wind updated by physics
+!!\param    zo               height at model levels
+!!\param    t,tn             temperature without and with forcing at model levels
+!!\param    q,qo             mixing ratio without and with forcing at model levels
+!!\param    po               pressure at model levels (mb)
+!!\param    psur             surface pressure (mb)
+!!\param    z1               surface height
+!!\param    dhdt             forcing for boundary layer equilibrium
+!!\param    hfx,qfx          in w/m2 (positive, if upward from sfc)
+!!\param    kpbl             level of boundaty layer height
+!!\param    rho              moist air density
+!!\param    xland            land mask (1. for land)
+!!\param    ichoice          which closure to choose
+!!\n                         1: old g
+!!\n                         2: zws
+!!\n                         3: dhdt
+!!\n                         0: average
+!!\param    tcrit            parameter for water/ice conversion (258)
+!!\param    dtime            physics time step
+!!\param    zuo               normalized mass flux profile
+!!\param    xmb_out           base mass flux
+!!\param    kbcon             convective cloud base
+!!\param    ktop              cloud top
+!!\param    k22               level of updraft originating air
+!!\param    ierr              error flag
+!!\param    ierrc             error description
+!!\param    outt               temperature tendency (k/s)
+!!\param    outq               mixing ratio tendency (kg/kg/s)
+!!\param    outqc              cloud water/ice tendency (kg/kg/s)
+!!\param    outu               x wind tendency
+!!\param    outv               y wind tendency
+!!\param    pre                precip rate (mm/s)
+!!\param    cupclw             incloud mixing ratio of cloudwater/ice (for radiation)
+!!                            this needs heavy tuning factors, since cloud fraction is
+!!                             not included (kg/kg)
+!!\param    cnvwt              required for gfs physics
+!!\param    itf,ktf,its,ite, kts,kte are dimensions
+!!\param    ipr               horizontal index of printed column
+!!\param    tropics            =0
+!>\section gen_cu_gf_sh_run GSD cu_gf_sh_run General Algorithm
+!> @{
   subroutine cu_gf_sh_run (                                            &
-! input variables, must be supplied
-                         us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     &
+                         us,vs,zo,t,q,z1,tn,qo,po,psur,dhdt,kpbl,rho,     & ! input variables, must be supplied
                          hfx,qfx,xland,ichoice,tcrit,dtime,         &
-! input variables. ierr should be initialized to zero or larger than zero for
-! turning off shallow convection for grid points
                          zuo,xmb_out,kbcon,ktop,k22,ierr,ierrc,     &
-! output tendencies
-                         outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,          &
-! dimesnional variables
-                         itf,ktf,its,ite, kts,kte,ipr,tropics)
+                         outt,outq,outqc,outu,outv,cnvwt,pre,cupclw,     & ! output tendencies
+                         itf,ktf,its,ite, kts,kte,ipr,tropics)  ! dimesnional variables
 !
 ! this module needs some subroutines from gf_deep
 !
@@ -281,7 +285,7 @@ contains
           !- moisture  excess
           zqexec(i)     = max(flux_tun(i)*qfx(i)/xlv/(rho(i,1)*zws(i)),0.)
          endif
-       !- zws for shallow convection closure (grant 2001)
+       !> - Calculate zws for shallow convection closure (grant 2001)
        !- height of the pbl
        zws(i) = max(0.,flux_tun(i)*0.41*buo_flux*zo(i,kpbl(i))*g/t(i,kpbl(i)))
        zws(i) = 1.2*zws(i)**.3333
@@ -290,11 +294,11 @@ contains
       enddo
 
 !
-!--- max height(m) above ground where updraft air can originate
+!> - Determin max height(m) above ground where updraft air can originate
 !
       zkbmax=3000.
 !
-!--- calculate moist static energy, heights, qes
+!> - Call cup_env() to calculate moist static energy, heights, qes
 !
       call cup_env(z,qes,he,hes,t,q,po,z1,       &
            psur,ierr,tcrit,-1,                   &
@@ -306,7 +310,7 @@ contains
            its,ite, kts,kte)
 
 !
-!--- environmental values on cloud levels
+!> - Call cup_env_clev() to calculate environmental values on cloud levels
 !
       call cup_env_clev(t,qes,q,he,hes,z,po,qes_cup,q_cup,he_cup,  &
            hes_cup,z_cup,p_cup,gamma_cup,t_cup,psur,               &
@@ -347,7 +351,7 @@ contains
 !
 !
 !
-!------- determine level with highest moist static energy content - k22
+!> - Determine level with highest moist static energy content (\p k22)
 !
        do 36 i=its,itf
          if(kpbl(i).gt.3)cap_max(i)=po_cup(i,kpbl(i))
@@ -364,7 +368,8 @@ contains
          endif
  36   continue
 !
-!--- determine the level of convective cloud base  - kbcon
+!> - Call get_cloud_bc() and cup_kbcon() to determine the level of 
+!! convective cloud base (\p kbcon)
 !
       do i=its,itf
        if(ierr(i).eq.0)then
@@ -388,7 +393,8 @@ contains
            0,itf,ktf,                                                      &
            its,ite, kts,kte,                                               &
            z_cup,entr_rate,heo,0)
-!--- get inversion layers for cloud tops
+
+!> - Call cup_minimi() and get_inversion_layers() to get inversion layers for cloud tops
       call cup_minimi(heso_cup,kbcon,kbmax,kstabi,ierr,                    &
            itf,ktf,                                                        &
            its,ite, kts,kte)
@@ -432,7 +438,7 @@ contains
             endif
          endif
       enddo
-! get normalized mass flux profile
+!> - Call rates_up_pdf() to get normalized mass flux profile
       call rates_up_pdf(rand_vmas,ipr,'shallow',ktop,ierr,po_cup,entr_rate_2d,hkbo,heo,heso_cup,zo_cup, &
            xland1,kstabi,k22,kbcon,its,ite,itf,kts,kte,ktf,zuo,kpbl,ktopx,kbcon,pmin_lev)
       do i=its,itf
@@ -470,7 +476,7 @@ contains
         endif
       enddo
 !
-! calculate mass entrainment and detrainment
+!> - Call get_lateral_massflux() to calculate mass entrainment and detrainment
 !
       call get_lateral_massflux(itf,ktf, its,ite, kts,kte                             &
                                 ,ierr,ktop,zo_cup,zuo,cd,entr_rate_2d                 &
@@ -934,4 +940,5 @@ contains
 !             enddo
 
    end subroutine cu_gf_sh_run
+!> @}
 end module cu_gf_sh

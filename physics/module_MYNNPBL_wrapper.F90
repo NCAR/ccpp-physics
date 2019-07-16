@@ -1,6 +1,11 @@
-!> \file module_mynnedmf_wrapper.F90
-!!  Contains all of the code related to running the MYNN eddy-diffusivity mass-flux scheme 
+!> \file module_MYNNPBL_wrapper.F90
+!!  This file contains all of the code related to running the MYNN 
+!! eddy-diffusivity mass-flux scheme. 
 
+!>\ingroup gsd_mynn_edmf
+!> The following references best describe the code within
+!!    Olson et al. (2018, NOAA Technical Memorandum)
+!!    Nakanishi and Niino (2009 ) \cite NAKANISHI_2009
       MODULE mynnedmf_wrapper
 
       contains
@@ -11,13 +16,9 @@
       subroutine mynnedmf_wrapper_finalize ()
       end subroutine mynnedmf_wrapper_finalize
 
-!! The following references best describe the code within
-!!    Olson et al. (2018, NOAA Technical Memorandum) 
-!!    Nakanishi and Niino (2009, Jap. Meteor. Soc.)
-!!
-!> \brief This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
+! \brief This scheme (1) performs pre-mynnedmf work, (2) runs the mynnedmf, and (3) performs post-mynnedmf work
 #if 0
-!! \section arg_table_mynnedmf_wrapper_run Argument Table
+!> \section arg_table_mynnedmf_wrapper_run Argument Table
 !! | local_name                  | standard_name                                                                | long_name                                                                  | units         | rank | type      |    kind   | intent | optional |
 !! |-----------------------------|------------------------------------------------------------------------------|----------------------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | ix                          | horizontal_dimension                                                         | horizontal dimension                                                       | count         |    0 | integer   |           | in     | F        |
@@ -25,7 +26,11 @@
 !! | levs                        | vertical_dimension                                                           | vertical layer dimension                                                   | count         |    0 | integer   |           | in     | F        |
 !! | flag_init                   | flag_for_first_time_step                                                     | flag signaling first time step for time integration loop                   | flag          |    0 | logical   |           | in     | F        |
 !! | flag_restart                | flag_for_restart                                                             | flag for restart (warmstart) or coldstart                                  | flag          |    0 | logical   |           | in     | F        |
+!! | lssav                       | flag_diagnostics                                                             | logical flag for storing diagnostics                                       | flag          |    0 | logical   |           | in     | F        |
+!! | ldiag3d                     | flag_diagnostics_3D                                                          | flag for 3d diagnostic fields                                              | flag          |    0 | logical   |           | in     | F        |
+!! | lsidea                      | flag_idealized_physics                                                       | flag for idealized physics                                                 | flag          |    0 | logical   |           | in     | F        |
 !! | delt                        | time_step_for_physics                                                        | time step for physics                                                      | s             |    0 | real      | kind_phys | in     | F        |
+!! | dtf                         | time_step_for_dynamics                                                       | dynamics timestep                                                          | s             |    0 | real      | kind_phys | in     | F        |
 !! | dx                          | cell_size                                                                    | size of the grid cell                                                      | m             |    1 | real      | kind_phys | in     | F        |
 !! | zorl                        | surface_roughness_length                                                     | surface roughness length in cm                                             | cm            |    1 | real      | kind_phys | in     | F        |
 !! | phii                        | geopotential_at_interface                                                    | geopotential at model layer interfaces                                     | m2 s-2        |    2 | real      | kind_phys | in     | F        |
@@ -94,6 +99,14 @@
 !! | dqdt_ice_num_conc           | tendency_of_ice_number_concentration_due_to_model_physics                    | number conc. of ice tendency due to model physics                          | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
 !! | dqdt_water_aer_num_conc     | tendency_of_water_friendly_aerosol_number_concentration_due_to_model_physics | number conc. of water-friendly aerosols tendency due to model physics      | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
 !! | dqdt_ice_aer_num_conc       | tendency_of_ice_friendly_aerosol_number_concentration_due_to_model_physics   | number conc. of ice-friendly aerosols tendency due to model physics        | kg-1 s-1      |    2 | real      | kind_phys | inout  | F        |
+!! | dt3dt                       | cumulative_change_in_temperature_due_to_PBL                                  | cumulative change in temperature due to PBL                                | K             |    2 | real      | kind_phys | inout  | F        |
+!! | du3dt_PBL                   | cumulative_change_in_x_wind_due_to_PBL                                       | cumulative change in x wind due to PBL                                     | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | du3dt_OGWD                  | cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag              | cumulative change in x wind due to orographic gravity wave drag            | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | dv3dt_PBL                   | cumulative_change_in_y_wind_due_to_PBL                                       | cumulative change in y wind due to PBL                                     | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | dv3dt_OGWD                  | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag              | cumulative change in y wind due to orographic gravity wave drag            | m s-1         |    2 | real      | kind_phys | inout  | F        |
+!! | htrsw                       | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep   | total sky sw heating rate                                                  | K s-1         |    2 | real      | kind_phys | in     | F        |
+!! | htrlw                       | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep    | total sky lw heating rate                                                  | K s-1         |    2 | real      | kind_phys | in     | F        |
+!! | xmu                         | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                 | zenith angle temporal adjustment factor for shortwave                      | none          |    1 | real      | kind_phys | in     | F        |
 !! | grav_settling               | grav_settling                                                                | flag to activate gravitational setting of fog                              | flag          |    0 | integer   |           | in     | F        |
 !! | bl_mynn_tkebudget           | tke_budget                                                                   | flag for activating TKE budget                                             | flag          |    0 | integer   |           | in     | F        |
 !! | bl_mynn_tkeadvect           | tke_advect                                                                   | flag for activating TKE advect                                             | flag          |    0 | logical   |           | in     | F        |
@@ -117,11 +130,11 @@
 !! | errflg                      | ccpp_error_flag                                                              | error flag for error handling in CCPP                                      | flag          |    0 | integer   |           | out    | F        |
 !!
 #endif
-!###===================================================================
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  ix,im,levs,                     &
      &  flag_init,flag_restart,         &
-     &  delt,dx,zorl,                   &
+     &  lssav, ldiag3d, lsidea,         & 
+     &  delt,dtf,dx,zorl,               &
      &  phii,u,v,omega,t3d,             &
      &  qgrs_water_vapor,               &
      &  qgrs_liquid_cloud,              &
@@ -151,6 +164,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_ice_cloud, dqdt_ozone,                        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    &
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    &
+     &  dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, &
+     &  htrsw, htrlw, xmu,                                 &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
@@ -240,13 +255,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
        &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2
 
-  REAL, PARAMETER :: tref=300.0     ! reference temperature (K)
-  REAL, PARAMETER :: TKmin=253.0    ! for total water conversion, Tripoli and Cotton (1981)
+  REAL, PARAMETER :: tref=300.0     !< reference temperature (K)
+  REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
   REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, g_inv=1./g
 
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
-
+  
+  LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
                              lprnt, do_mynnsfclay
@@ -278,7 +294,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
        &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
 
 !MYNN-1D
-      REAL(kind=kind_phys), intent(in) :: delt
+      REAL(kind=kind_phys), intent(in) :: delt, dtf
       INTEGER, intent(in) :: im, ix, levs
       LOGICAL, intent(in) :: flag_init, flag_restart
       INTEGER :: initflag, k, i
@@ -287,6 +303,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &            ITS,ITE,JTS,JTE,KTS,KTE
       INTEGER :: kdvel, num_vert_mix
       INTEGER, PARAMETER :: nchem=1, ndvel=1
+      REAL(kind=kind_phys) :: tem
 
 !MYNN-3D
       real(kind=kind_phys), dimension(im,levs+1), intent(in) :: phii
@@ -315,7 +332,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        RTHRATEN
      real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
     &        Tsq, Qsq, Cov, exch_h, exch_m
-
+     real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt,       &
+    &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD
+    real(kind=kind_phys), dimension(im), intent(in) :: xmu
+    real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
      !LOCAL
       real(kind=kind_phys), dimension(im,levs) ::                        &
      &        qvsh,qc,qi,qnc,qni,ozone,qnwfa,qnifa,                      &
@@ -791,7 +811,28 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              enddo
            enddo
        endif
-
+       
+       if (lssav .and. ldiag3d) then
+         if (lsidea) then
+           dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
+         else
+           do k=1,levs
+             do i=1,im
+               tem  = dtdt(i,k) - (htrlw(i,k)+htrsw(i,k)*xmu(i))
+               dt3dt(i,k) = dt3dt(i,k) + tem*dtf
+             enddo
+           enddo
+         endif
+         do k=1,levs
+           do i=1,im
+             du3dt_PBL(i,k) = du3dt_PBL(i,k) + dudt(i,k) * dtf
+             du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
+             dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + dvdt(i,k) * dtf
+             dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
+           enddo
+         enddo
+       endif
+       
        if (lprnt) then
           print*
           print*,"===Finished with mynn_bl_driver; output:"

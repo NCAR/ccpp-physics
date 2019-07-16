@@ -12,11 +12,11 @@ set(CMAKE_MACOSX_RPATH 1)
 
 if(POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
-    project(ccppphys VERSION 2.0.0)
+    project(ccppphys VERSION 3.0.0)
 else(POLICY CMP0048)
     project(ccppphys)
-    set(PROJECT_VERSION 2.0.0)
-    set(PROJECT_VERSION_MAJOR 2)
+    set(PROJECT_VERSION 3.0.0)
+    set(PROJECT_VERSION_MAJOR 3)
     set(PROJECT_VERSION_MINOR 0)
     set(PROJECT_VERSION_PATCH 0)
 endif(POLICY CMP0048)
@@ -100,28 +100,52 @@ list(APPEND LIBS "ccpp")
 include(./CCPP_SCHEMES.cmake)
 # Set the sources: physics scheme caps
 include(./CCPP_CAPS.cmake)
-# Create empty lists for schemes with special compiler flags
-set(SCHEMES_SFX "")
-
+# Create empty lists for schemes with special compiler optimization flags
+set(SCHEMES_SFX_OPT "")
+# Create empty lists for schemes with special floating point precision flags
+set(SCHEMES_SFX_PREC "")
+# Create a duplicate of the SCHEMES list for handling floating point precision flags
+set(SCHEMES2 ${SCHEMES})
 #------------------------------------------------------------------------------
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   set(CMAKE_Fortran_FLAGS "${CMAKE_Fortran_FLAGS} -ffree-line-length-none")
-  SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -fdefault-real-8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fno-range-check")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-ffree-line-length-none -fdefault-real-8 -ffree-form")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
+
   if (PROJECT STREQUAL "CCPP-FV3")
+    # Set 32-bit floating point precision flags for certain files
+    # that are executed in the dynamics (fast physics part)
     if (DYN32)
-      message (FATAL_ERROR "The current build system does not allow building fast physics with 32-bit precision when the GNU compilers are used")
+      # Reduce floating point precision from 64-bit to 32-bit, if necessary
+      set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
+      string(REPLACE "-fdefault-real-8" ""
+             CMAKE_Fortran_FLAGS_PREC32 "${CMAKE_Fortran_FLAGS_PREC32}")
+      string(REPLACE "-fdefault-double-8" ""
+             CMAKE_Fortran_FLAGS_PREC32 "${CMAKE_Fortran_FLAGS_PREC32}")
+      SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90
+                   APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ")
+      # Add all of the above files to the list of schemes with special floating point precision flags
+      list(APPEND SCHEMES_SFX_PREC ./physics/gfdl_fv_sat_adj.F90)
     endif (DYN32)
+
+    # Remove files with special floating point precision flags from list
+    # of files with standard floating point precision flags flags
+    if (SCHEMES_SFX_PREC)
+      list(REMOVE_ITEM SCHEMES2 ${SCHEMES_SFX_PREC})
+    endif (SCHEMES_SFX_PREC)
+    # Assign standard floating point precision flags to all remaining schemes and caps
+    SET_PROPERTY(SOURCE ${SCHEMES2} ${CAPS}
+                 APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_DEFAULT_PREC} ")
   endif (PROJECT STREQUAL "CCPP-FV3")
+
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Adjust settings for bit-for-bit reproducibility of NEMSfv3gfs
   if (PROJECT STREQUAL "CCPP-FV3")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f
-                                ./physics/rascnvv2.f
                                 ./physics/sflx.f
                                 ./physics/sfc_diff.f
                                 ./physics/sfc_diag.f
@@ -159,13 +183,13 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     SET_SOURCE_FILES_PROPERTIES(./physics/radiation_aerosols.f
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
     # Add all of the above files to the list of schemes with special compiler flags
-    list(APPEND SCHEMES_SFX ./physics/radiation_aerosols.f)
+    list(APPEND SCHEMES_SFX_OPT ./physics/radiation_aerosols.f)
 
     # Force consistent results of math calculations for MG microphysics;
     # in Debug/Bitforbit mode; without this flag, the results of the
     # intrinsic gamma function are different for the non-CCPP and CCPP
-    # version (on Theia with Intel 18). Note this is only required with
-    # dynamic CCPP builds (hybrid, standalone), not with static CCPP builds.
+    # version (on Theia with Intel 18). Note this is only required for
+    # the dynamic CCPP build, not for the static CCPP build.
     if (TRANSITION)
       # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I, -no-prec-div with -prec-div, and
       # -no-prec-sqrt with -prec-sqrt for certain files for bit-for-bit reproducibility
@@ -195,7 +219,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                   ./physics/gcm_shoc.F90
                                   PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT2}")
       # Add all of the above files to the list of schemes with special compiler flags
-      list(APPEND SCHEMES_SFX ./physics/micro_mg2_0.F90
+      list(APPEND SCHEMES_SFX_OPT ./physics/micro_mg2_0.F90
                               ./physics/micro_mg3_0.F90
                               ./physics/aer_cloud.F
                               ./physics/cldmacro.F
@@ -208,35 +232,70 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     endif (TRANSITION)
 
     # Remove files with special compiler flags from list of files with standard compiler flags
-    list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX})
+    list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
     # Assign standard compiler flags to all remaining schemes and caps
     SET_SOURCE_FILES_PROPERTIES(${SCHEMES} ${CAPS}
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT}")
 
-    # This has to come last: append 32-bit dynamics flags to certain files that are executed
-    # in the dynamics (fast physics part); this will overwrite any preceding -real-size 64
+    # Set 32-bit floating point precision flags for certain files
+    # that are executed in the dynamics (fast physics part)
     if (DYN32)
-      SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90 APPEND_STRING PROPERTY COMPILE_FLAGS " -real-size 32 ")
+      # Reduce floating point precision from 64-bit to 32-bit, if necessary
+      set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
+      string(REPLACE "-real-size 64" "-real-size 32"
+             CMAKE_Fortran_FLAGS_PREC32 "${CMAKE_Fortran_FLAGS_PREC32}")
+      SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90
+                   APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ")
+      # Add all of the above files to the list of schemes with special floating point precision flags
+      list(APPEND SCHEMES_SFX_PREC ./physics/gfdl_fv_sat_adj.F90)
     endif (DYN32)
 
+    # Remove files with special floating point precision flags from list
+    # of files with standard floating point precision flags flags
+    if (SCHEMES_SFX_PREC)
+      list(REMOVE_ITEM SCHEMES2 ${SCHEMES_SFX_PREC})
+    endif (SCHEMES_SFX_PREC)
+    # Assign standard floating point precision flags to all remaining schemes and caps
+    SET_PROPERTY(SOURCE ${SCHEMES2} ${CAPS}
+                 APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_DEFAULT_PREC} ")
+
   else (PROJECT STREQUAL "CCPP-FV3")
-    SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
+    SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -ftz")
     SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-extend-source 132 -r8 -free")
     SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
   endif (PROJECT STREQUAL "CCPP-FV3")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-  SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/rascnvv2.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
+  SET_SOURCE_FILES_PROPERTIES(./physics/module_bfmicrophysics.f ./physics/sflx.f ./physics/sfc_diff.f ./physics/sfc_diag.f PROPERTIES COMPILE_FLAGS -r8)
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_model.f90 ./physics/calpreciptype.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/mersenne_twister.f PROPERTIES COMPILE_FLAGS "-r8 -Mnofptrap")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_nst_water_prop.f90 PROPERTIES COMPILE_FLAGS "-r8 -Mfree")
   SET_SOURCE_FILES_PROPERTIES(./physics/aer_cloud.F ./physics/wv_saturation.F ./physics/cldwat2m_micro.F ./physics/surface_perturbation.F90 PROPERTIES COMPILE_FLAGS "-r8")
   SET_SOURCE_FILES_PROPERTIES(./physics/module_mp_thompson_make_number_concentrations.F90 PROPERTIES COMPILE_FLAGS "-r8")
   if (PROJECT STREQUAL "CCPP-FV3")
+    # Set 32-bit floating point precision flags for certain files
+    # that are executed in the dynamics (fast physics part)
     if (DYN32)
-      SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90 APPEND_STRING PROPERTY COMPILE_FLAGS " -r4 ")
+      # Reduce floating point precision from 64-bit to 32-bit, if necessary
+      set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
+      string(REPLACE "-r8" "-r4"
+             CMAKE_Fortran_FLAGS_PREC32 "${CMAKE_Fortran_FLAGS_PREC32}")
+      SET_PROPERTY(SOURCE ./physics/gfdl_fv_sat_adj.F90
+                   APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ")
+      # Add all of the above files to the list of schemes with special floating point precision flags
+      list(APPEND SCHEMES_SFX_PREC ./physics/gfdl_fv_sat_adj.F90)
     endif (DYN32)
+
+    # Remove files with special floating point precision flags from list
+    # of files with standard floating point precision flags flags
+    if (SCHEMES_SFX_PREC)
+      list(REMOVE_ITEM SCHEMES2 ${SCHEMES_SFX_PREC})
+    endif (SCHEMES_SFX_PREC)
+    # Assign standard floating point precision flags to all remaining schemes and caps
+    SET_PROPERTY(SOURCE ${SCHEMES2} ${CAPS}
+                 APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_DEFAULT_PREC} ")
+
   endif (PROJECT STREQUAL "CCPP-FV3")
 else (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   message ("CMAKE_Fortran_COMPILER full path: " ${CMAKE_Fortran_COMPILER})
@@ -253,37 +312,24 @@ endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 # physics schemes, these checks can and should remain enabled. Overwriting
 # the pointer check flags explicitly works for Intel and GNU, but not for PGI.
 if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
-  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-fcheck=no-pointer,no-bounds")
+  set_property(SOURCE ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " -fcheck=no-pointer,no-bounds ")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
-  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-check nopointers,nobounds")
+  set_property(SOURCE ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " -check nopointers,nobounds ")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   if (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
     message (FATAL_ERROR "PGI compiler option chkptr cannot be used for CCPP physics")
   endif (CMAKE_Fortran_FLAGS MATCHES ".*chkptr.*")
-  set_property(SOURCE ${CAPS} PROPERTY COMPILE_FLAGS "-Mnobounds")
+  set_property(SOURCE ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " -Mnobounds ")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 if (PROJECT STREQUAL "CCPP-SCM")
-  SET(W3LIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/w3nco/v2.0.6/src)
-  SET(BACIOLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/bacio/v2.0.1/src)
-  SET(SPLIB_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../external/sp/v2.0.2/src)
-
-  #add "sibling" directories (must specify the build directory too)
-  ADD_SUBDIRECTORY(${W3LIB_SRC} ${CMAKE_BINARY_DIR}/w3nco)
-  ADD_SUBDIRECTORY(${BACIOLIB_SRC} ${CMAKE_BINARY_DIR}/bacio)
-  ADD_SUBDIRECTORY(${SPLIB_SRC} ${CMAKE_BINARY_DIR}/sp)
-
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/w3nco)
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/sp)
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/bacio)
-
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
 endif (PROJECT STREQUAL "CCPP-SCM")
 
 #------------------------------------------------------------------------------
 
 if(STATIC)
-  add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
+  add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
   # Generate list of Fortran modules from defined sources
   foreach(source_f90 ${CAPS})
       string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${source_f90})
@@ -291,17 +337,13 @@ if(STATIC)
       list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/../${module_f90})
   endforeach()
 else(STATIC)
-  add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX} ${CAPS})
+  add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
 endif(STATIC)
 
-if (PROJECT STREQUAL "CCPP-FV3")
-  # Link required NCEPlibs for dynamic builds
-  if (NOT STATIC)
-    target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
-  endif (NOT STATIC)
-elseif (PROJECT STREQUAL "CCPP-SCM")
-  target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} w3 sp bacio)
-endif (PROJECT STREQUAL "CCPP-FV3")
+if (NOT STATIC)
+  target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
+endif (NOT STATIC)
+
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
 

@@ -27,6 +27,9 @@
 !! | ntsw                         | index_for_snow_water                                   | tracer index for snow water                                                         | index         |    0 | integer   |           | in     | F        |
 !! | ntlnc                        | index_for_liquid_cloud_number_concentration            | tracer index for liquid number concentration                                        | index         |    0 | integer   |           | in     | F        |
 !! | ntinc                        | index_for_ice_cloud_number_concentration               | tracer index for ice    number concentration                                        | index         |    0 | integer   |           | in     | F        |
+!! | ntrnc                        | index_for_rain_number_concentration                    | tracer index for rain   number concentration                                        | index         |    0 | integer   |           | in     | F        |
+!! | ntsnc                        | index_for_snow_number_concentration                    | tracer index for snow   number concentration                                        | index         |    0 | integer   |           | in     | F        |
+!! | ntgnc                        | index_for_graupel_number_concentration                 | tracer index for graupel number concentration                                       | index         |    0 | integer   |           | in     | F        |
 !! | ntwa                         | index_for_water_friendly_aerosols                      | tracer index for water friendly aerosol                                             | index         |    0 | integer   |           | in     | F        |
 !! | ntia                         | index_for_ice_friendly_aerosols                        | tracer index for ice friendly aerosol                                               | index         |    0 | integer   |           | in     | F        |
 !! | ntgl                         | index_for_graupel                                      | tracer index for graupel                                                            | index         |    0 | integer   |           | in     | F        |
@@ -38,6 +41,7 @@
 !! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                  | choice of Thompson microphysics scheme                                              | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                      | choice of WSM6 microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                 | choice of Zhao-Carr microphysics scheme                                             | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_mg               | flag_for_morrison_gettelman_microphysics_scheme        | choice of Morrison-Gettelman microphysics scheme                                    | flag          |    0 | integer   |           | in     | F        |
 !! | cplchm                       | flag_for_chemistry_coupling                            | flag controlling cplchm collection (default off)                                    | flag          |    0 | logical   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                               | flag for aerosol physics                                                            | flag          |    0 | logical   |           | in     | F        |
 !! | hybedmf                      | flag_for_hedmf                                         | flag for hybrid edmf pbl scheme (moninedmf)                                         | flag          |    0 | logical   |           | in     | F        |
@@ -50,19 +54,21 @@
 !!
 #endif
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
-        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
+        ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                             &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, cplchm, ltaerosol, hybedmf, do_shoc, satmedmf,            &
-        qgrs, vdftra, errmsg, errflg)
+        imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
+        satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine, only : kind_phys
 
       implicit none
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
-      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
+      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
@@ -94,18 +100,19 @@
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
-          ! DH* Thompson ntrw and ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
-                vdftra(i,k,1) = qgrs(i,k,ntqv)
-                vdftra(i,k,2) = qgrs(i,k,ntcw)
-                vdftra(i,k,3) = qgrs(i,k,ntiw)
-                vdftra(i,k,4) = qgrs(i,k,ntlnc)
-                vdftra(i,k,5) = qgrs(i,k,ntinc)
-                vdftra(i,k,6) = qgrs(i,k,ntoz)
-                vdftra(i,k,7) = qgrs(i,k,ntwa)
-                vdftra(i,k,8) = qgrs(i,k,ntia)
+                vdftra(i,k,1)  = qgrs(i,k,ntqv)
+                vdftra(i,k,2)  = qgrs(i,k,ntcw)
+                vdftra(i,k,3)  = qgrs(i,k,ntiw)
+                vdftra(i,k,4)  = qgrs(i,k,ntrw)
+                vdftra(i,k,5)  = qgrs(i,k,ntsw)
+                vdftra(i,k,6)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,7)  = qgrs(i,k,ntinc)
+                vdftra(i,k,8)  = qgrs(i,k,ntoz)
+                vdftra(i,k,9)  = qgrs(i,k,ntwa)
+                vdftra(i,k,10) = qgrs(i,k,ntia)
               enddo
             enddo
           else
@@ -114,12 +121,48 @@
                 vdftra(i,k,1) = qgrs(i,k,ntqv)
                 vdftra(i,k,2) = qgrs(i,k,ntcw)
                 vdftra(i,k,3) = qgrs(i,k,ntiw)
-                vdftra(i,k,4) = qgrs(i,k,ntinc)
-                vdftra(i,k,5) = qgrs(i,k,ntoz)
+                vdftra(i,k,4) = qgrs(i,k,ntrw)
+                vdftra(i,k,5) = qgrs(i,k,ntsw)
+                vdftra(i,k,6) = qgrs(i,k,ntinc)
+                vdftra(i,k,7) = qgrs(i,k,ntoz)
               enddo
             enddo
           endif
-  !
+  ! MG
+        elseif (imp_physics == imp_physics_mg) then        ! MG3/2
+          if (ntgl > 0) then                               ! MG3
+            do k=1,levs
+              do i=1,im
+                vdftra(i,k,1)  = qgrs(i,k,ntqv)
+                vdftra(i,k,2)  = qgrs(i,k,ntcw)
+                vdftra(i,k,3)  = qgrs(i,k,ntiw)
+                vdftra(i,k,4)  = qgrs(i,k,ntrw)
+                vdftra(i,k,5)  = qgrs(i,k,ntsw)
+                vdftra(i,k,6)  = qgrs(i,k,ntgl)
+                vdftra(i,k,7)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,8)  = qgrs(i,k,ntinc)
+                vdftra(i,k,9)  = qgrs(i,k,ntrnc)
+                vdftra(i,k,10) = qgrs(i,k,ntsnc)
+                vdftra(i,k,11) = qgrs(i,k,ntgnc)
+                vdftra(i,k,12) = qgrs(i,k,ntoz)
+              enddo
+            enddo
+          else                                             ! MG2
+            do k=1,levs
+              do i=1,im
+                vdftra(i,k,1)  = qgrs(i,k,ntqv)
+                vdftra(i,k,2)  = qgrs(i,k,ntcw)
+                vdftra(i,k,3)  = qgrs(i,k,ntiw)
+                vdftra(i,k,4)  = qgrs(i,k,ntrw)
+                vdftra(i,k,5)  = qgrs(i,k,ntsw)
+                vdftra(i,k,6)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,7)  = qgrs(i,k,ntinc)
+                vdftra(i,k,8)  = qgrs(i,k,ntrnc)
+                vdftra(i,k,9)  = qgrs(i,k,ntsnc)
+                vdftra(i,k,10) = qgrs(i,k,ntoz)
+              enddo
+            enddo
+          endif
         elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP
           do k=1,levs
@@ -146,7 +189,7 @@
           endif
         endif
 
-        if (satmedmf) then
+        if (ntke>0) then
           do k=1,levs
             do i=1,im
               vdftra(i,k,ntkev) = qgrs(i,k,ntke)
@@ -186,6 +229,9 @@
 !! | ntsw                         | index_for_snow_water                                                              | tracer index for snow water                                                                 | index         |    0 | integer   |           | in     | F        |
 !! | ntlnc                        | index_for_liquid_cloud_number_concentration                                       | tracer index for liquid number concentration                                                | index         |    0 | integer   |           | in     | F        |
 !! | ntinc                        | index_for_ice_cloud_number_concentration                                          | tracer index for ice    number concentration                                                | index         |    0 | integer   |           | in     | F        |
+!! | ntrnc                        | index_for_rain_number_concentration                                               | tracer index for rain   number concentration                                                | index         |    0 | integer   |           | in     | F        |
+!! | ntsnc                        | index_for_snow_number_concentration                                               | tracer index for snow   number concentration                                                | index         |    0 | integer   |           | in     | F        |
+!! | ntgnc                        | index_for_graupel_number_concentration                                            | tracer index for graupel number concentration                                               | index         |    0 | integer   |           | in     | F        |
 !! | ntwa                         | index_for_water_friendly_aerosols                                                 | tracer index for water friendly aerosol                                                     | index         |    0 | integer   |           | in     | F        |
 !! | ntia                         | index_for_ice_friendly_aerosols                                                   | tracer index for ice friendly aerosol                                                       | index         |    0 | integer   |           | in     | F        |
 !! | ntgl                         | index_for_graupel                                                                 | tracer index for graupel                                                                    | index         |    0 | integer   |           | in     | F        |
@@ -197,6 +243,7 @@
 !! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                                             | choice of Thompson microphysics scheme                                                      | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                                                 | choice of WSM6 microphysics scheme                                                          | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                                            | choice of Zhao-Carr microphysics scheme                                                     | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_mg               | flag_for_morrison_gettelman_microphysics_scheme                                   | choice of Morrison-Gettelman microphysics scheme                                            | flag          |    0 | integer   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                                                          | flag for aerosol physics                                                                    | flag          |    0 | logical   |           | in     | F        |
 !! | cplflx                       | flag_for_flux_coupling                                                            | flag controlling cplflx collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
 !! | cplchm                       | flag_for_chemistry_coupling                                                       | flag controlling cplchm collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
@@ -249,8 +296,8 @@
 !!
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
-        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                       &
-        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                          &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
+        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
@@ -263,9 +310,9 @@
       implicit none
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
-      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
@@ -276,14 +323,13 @@
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: dqdt
 
-      ! DH* The following arrays may not be allocated, depending on certain flags (cplflx, ...).
+      ! The following arrays may not be allocated, depending on certain flags (cplflx, ...).
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
       real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
-      ! *DH
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -298,6 +344,15 @@
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         dqdt = dvdftra
       elseif (nvdiff /= ntrac .and. .not. shinhong .and. .not. do_ysu) then
+
+        if (ntke>0) then
+          do k=1,levs
+            do i=1,im
+              dqdt(i,k,ntke)  = dvdftra(i,k,ntkev)
+            enddo
+          enddo
+        endif
+
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
           do k=1,levs
@@ -310,18 +365,19 @@
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
-          ! DH* - Thompson ntrw, ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
                 dqdt(i,k,ntqv)  = dvdftra(i,k,1)
                 dqdt(i,k,ntcw)  = dvdftra(i,k,2)
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,4)
-                dqdt(i,k,ntinc) = dvdftra(i,k,5)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,6)
-                dqdt(i,k,ntwa)  = dvdftra(i,k,7)
-                dqdt(i,k,ntia)  = dvdftra(i,k,8)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,6)
+                dqdt(i,k,ntinc) = dvdftra(i,k,7)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,8)
+                dqdt(i,k,ntwa)  = dvdftra(i,k,9)
+                dqdt(i,k,ntia)  = dvdftra(i,k,10)
               enddo
             enddo
           else
@@ -330,8 +386,44 @@
                 dqdt(i,k,ntqv)  = dvdftra(i,k,1)
                 dqdt(i,k,ntcw)  = dvdftra(i,k,2)
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntinc) = dvdftra(i,k,4)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,5)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntinc) = dvdftra(i,k,6)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,7)
+              enddo
+            enddo
+          endif
+        elseif (imp_physics == imp_physics_mg) then          ! MG3/2
+          if (ntgl > 0) then                                 ! MG
+            do k=1,levs
+              do i=1,im
+                dqdt(i,k,1)     = dvdftra(i,k,1)
+                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,7)
+                dqdt(i,k,ntinc) = dvdftra(i,k,8)
+                dqdt(i,k,ntrnc) = dvdftra(i,k,9)
+                dqdt(i,k,ntsnc) = dvdftra(i,k,10)
+                dqdt(i,k,ntgnc) = dvdftra(i,k,11)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,12)
+              enddo
+            enddo
+          else                                               ! MG2
+            do k=1,levs
+              do i=1,im
+                dqdt(i,k,1)     = dvdftra(i,k,1)
+                dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+                dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,6)
+                dqdt(i,k,ntinc) = dvdftra(i,k,7)
+                dqdt(i,k,ntrnc) = dvdftra(i,k,8)
+                dqdt(i,k,ntsnc) = dvdftra(i,k,9)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,10)
               enddo
             enddo
           endif
@@ -360,30 +452,47 @@
           endif
         endif
 
-        if (satmedmf) then
-          do k=1,levs
-            do i=1,im
-              dqdt(i,k,ntke)  = dvdftra(i,k,ntkev)
-            enddo
-          enddo
-        endif
-
       endif ! nvdiff == ntrac
 
 !  --- ...  coupling insertion
 
-      if (cplflx) then
-        do i=1,im
-          dusfc_cpl (i) = dusfc_cpl(i) + dusfc1(i)*dtf
-          dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfc1(i)*dtf
-          dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfc1(i)*dtf
-          dqsfc_cpl (i) = dqsfc_cpl(i) + dqsfc1(i)*dtf
-          dusfci_cpl(i) = dusfc1(i)
-          dvsfci_cpl(i) = dvsfc1(i)
-          dtsfci_cpl(i) = dtsfc1(i)
-          dqsfci_cpl(i) = dqsfc1(i)
-        enddo
-      endif
+! ### GJF ### the following section needs to be made CCPP-compliant when cplflx = T
+!      if (Model%cplflx) then
+!        do i=1,im
+!          if (Sfcprop%oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
+!            if (fice(i) == 1.0) then           ! use results from CICE
+!              Coupling%dusfci_cpl(i) = dusfc_cice(i)
+!              Coupling%dvsfci_cpl(i) = dvsfc_cice(i)
+!              Coupling%dtsfci_cpl(i) = dtsfc_cice(i)
+!              Coupling%dqsfci_cpl(i) = dqsfc_cice(i)
+!            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
+!              tem1 = max(Diag%q1(i), 1.e-8)
+!              rho = Statein%prsl(i,1) / (con_rd*Diag%t1(i)*(1.0+con_fvirt*tem1))
+!              if (wind(i) > 0.0) then
+!                tem = - rho * stress_ocn(i) / wind(i)
+!                Coupling%dusfci_cpl(i) = tem * Statein%ugrs(i,1)   ! U-momentum flux
+!                Coupling%dvsfci_cpl(i) = tem * Statein%vgrs(i,1)   ! V-momentum flux
+!              else
+!                Coupling%dusfci_cpl(i) = 0.0
+!                Coupling%dvsfci_cpl(i) = 0.0
+!              endif
+!              Coupling%dtsfci_cpl(i) = con_cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
+!              Coupling%dqsfci_cpl(i) = con_hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+!            else                                                    ! use results from PBL scheme for 100% open ocean
+!              Coupling%dusfci_cpl(i) = dusfc1(i)
+!              Coupling%dvsfci_cpl(i) = dvsfc1(i)
+!              Coupling%dtsfci_cpl(i) = dtsfc1(i)
+!              Coupling%dqsfci_cpl(i) = dqsfc1(i)
+!            endif
+!
+!            Coupling%dusfc_cpl (i) = Coupling%dusfc_cpl(i) + Coupling%dusfci_cpl(i) * dtf
+!            Coupling%dvsfc_cpl (i) = Coupling%dvsfc_cpl(i) + Coupling%dvsfci_cpl(i) * dtf
+!            Coupling%dtsfc_cpl (i) = Coupling%dtsfc_cpl(i) + Coupling%dtsfci_cpl(i) * dtf
+!            Coupling%dqsfc_cpl (i) = Coupling%dqsfc_cpl(i) + Coupling%dqsfci_cpl(i) * dtf
+!!
+!          endif ! Ocean only, NO LAKES
+!        enddo
+!      endif
 !-------------------------------------------------------lssav if loop ----------
       if (lssav) then
         do i=1,im

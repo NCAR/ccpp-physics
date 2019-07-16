@@ -1,0 +1,45 @@
+/**
+\page CPT_MG3 Morrison-Gettelman Cloud Microphysics Scheme 
+\section des_MG3_cloud Description
+The Morrison-Gettelman Version 3  (MG3) microphysics scheme is a six-category double momentum bulk scheme. It forecasts mass 
+and number concentration of five hydrometeors (cloud water, cloud ice, rain, snow and graupel) in addition to mass of water vapor.
+
+# Morrison Gettelman Advancements
+- MG1: Morrison and Gettelman (2008) \cite Morrison_2008 (CESM1, CAM5) 
+  - Morrison et al 2005 scheme
+  - Added sub-grid scale variance
+  - Coupling to activation (aerosols)
+- MG2: Gettelman and Morrison (2015) \cite Gettelman_2015_1 \cite Gettelman_2015_2 (CESM2, CAM6)
+  - Prognostic precipitation (rain and snow)
+  - Sub-stepping and sub-column capable
+- MG3: Gettelman et al. (2019) \cite Gettelman_et_al_2019
+  - Rimed hydrometeors (graupel or hail) are added to stratiform cloud scheme for global models
+  - Global climate impacts are limited to small increased in ice mass
+  - High (14 km) resolution simulations show local production of rimed ice (graupel) can affect regional 
+precipitation amounts and intensity
+
+A schematic of the MG3 scheme is shown in Figure 1. MG3 starts with MG2 \cite Gettelman_2015_1 \cite Gettelman_2015_2 and adds a 
+series of processes (in red). One rimed hydrometeor category is added. Both mass and number are prognosed. Rimed ice has the 
+"character" of hail or graupel by pre-selecting density and fall speed parameters.
+
+\image  html  MG3_MP_diagram.png "Figure 1: A schematic of the MG3 scheme (Courtesy of A. Gettleman )" width=10cm
+
+Some unique attributes of MG3 cloud microphysics include:
+
+-# Consistent treatment of cloud fraction in cloud macrophysics and radiation
+-# Subgrid-scale microphysics
+-# Maximum-overlap and in-cloud precipitation fraction area
+-# Options for subcolumn microphysics
+-# Options for running with fewer species and processes, simulating MG1 and MG2 codes
+-# Completely aerosol awareness with 1) constant aerosol mixing ratio, 2) climatology IN/CCN from CAM5 (default; \c cam5_4_143_NAAI_monclimo2.nc),  3) climatology aerosol from MERRA2 , 4) GOCART, and  5) MAM7
+-# Sub-step semi-implicit sedimentation
+-# Can be used along with the FV in-core saturation adjustment
+
+\section intra_mg3 Intraphysics Communication
+\ref arg_table_m_micro_run
+
+\section gen_mg3 General Algorithm
+\ref detail_m_micro_run
+
+
+*/

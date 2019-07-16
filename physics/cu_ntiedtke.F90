@@ -119,7 +119,11 @@ contains
          integer,                   intent(in)    :: mpiroot
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
-
+         
+         ! initialize ccpp error handling variables
+         errmsg = ''
+         errflg = 0
+         
          ! DH* temporary
          if (mpirank==mpiroot) then
             write(0,*) ' -----------------------------------------------------------------------------------------------------------------------------'
@@ -198,6 +202,10 @@ contains
       real(kind=kind_phys), dimension( ix , km ),     intent(inout) :: pu, pv, pt, pqv
       real(kind=kind_phys), dimension( ix , km ),     intent(in )   :: poz, prsl, pomg, pqvf, ptf
       real(kind=kind_phys), dimension( ix , km+1 ),   intent(in )   :: pzz, prsi
+      ! DH* TODO - check dimensions of clw, ktrac+2 seems to be smaller
+      ! than the actual dimensions (ok as long as only indices 1 and 2
+      ! are accessed here, and as long as these contain what is expected);
+      ! better to expand into the cloud-ice and cloud-water components *DH
       real(kind=kind_phys), dimension( ix , km, ktrac+2 ),    intent(inout ) ::  clw
 
       integer, dimension( lq ),   intent(out)  :: kbot, ktop, kcnv

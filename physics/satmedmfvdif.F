@@ -1,23 +1,7 @@
 !> \file satmedmfvdif.F
 !! This file  contains the CCPP-compliant SATMEDMF scheme which computes
 !! subgrid vertical turbulence mixing using scale-aware TKE-based moist
-!! eddy-diffusion mass-flux (EDMF) parameterization (by Jongil Han).
-!!
-!! Subroutine 'satmedmfvdif_run' computes subgrid vertical turbulence mixing
-!! using scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization
-!! (by Jongil Han).
-!!
-!! - For the convective boundary layer, the scheme adopts
-!! EDMF parameterization (Siebesma et al., 2007) to take
-!! into account nonlocal transport by large eddies (mfpblt.f).
-!!
-!! - A new mass-flux parameterization for stratocumulus-top-induced turbulence
-!! mixing has been introduced (previously, it was eddy diffusion form)
-!! [mfscu.f].
-!!
-!! - For local turbulence mixing, a TKE closure model is used.
-!
-!----------------------------------------------------------------------
+!! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
 
       module satmedmfvdif
       contains
@@ -28,9 +12,10 @@
       subroutine satmedmfvdif_finalize ()
       end subroutine satmedmfvdif_finalize
 
-!> \defgroup SATMEDMF FV3GFS satmedmfvdif_run Main
-!! \brief This subroutine contains all of the logic for the 
-!! scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) scheme.
+!> \defgroup satmedmf GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF) Scheme Module 
+!! @{
+!! \brief This subroutine contains all of the logic for the
+!! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF) scheme.
 !!
 !> \section arg_table_satmedmfvdif_run Argument Table
 !! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
@@ -96,13 +81,25 @@
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
 !!
-      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,
-     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,
-     &     tsea,heat,evap,stress,spd1,kpbl,
-     &     prsi,del,prsl,prslk,phii,phil,delt,
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,
+!!\section gen_satmedmfvdif GFS satmedmfvdif General Algorithm
+!! satmedmfvdif_run() computes subgrid vertical turbulence mixing
+!! using the scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization of
+!! Han and Bretherton (2019) \cite Han_2019 .
+!! -# The local turbulent mixing is represented by an eddy-diffusivity scheme which 
+!! is a function of a prognostic TKE.
+!! -# For the convective boundary layer, nonlocal transport by large eddies 
+!! (mfpblt.f), is represented using a mass flux approach (Siebesma et al.(2007) \cite Siebesma_2007 ).
+!! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
+!! (mfscu.f).
+!! \section detail_satmedmfvidf GFS satmedmfvdif Detailed Algorithm 
+!> @{
+      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
+     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
+     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
+     &     tsea,heat,evap,stress,spd1,kpbl,                             &
+     &     prsi,del,prsl,prslk,phii,phil,delt,                          &
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -115,31 +112,31 @@
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
 !
-      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,
+      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),
+      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
-      real(kind=kind_phys), intent(in) ::
-     &                     u1(ix,km),     v1(ix,km),
-     &                     t1(ix,km),     q1(ix,km,ntrac),
-     &                     swh(ix,km),    hlw(ix,km),
-     &                     xmu(im),       garea(im),
-     &                     psk(ix),       rbsoil(im),
-     &                     zorl(im),      tsea(im),
-     &                     u10m(im),      v10m(im),
-     &                     fm(im),        fh(im),
-     &                     evap(im),      heat(im),
-     &                     stress(im),    spd1(im),
-     &                     prsi(ix,km+1), del(ix,km),
-     &                     prsl(ix,km),   prslk(ix,km),
+      real(kind=kind_phys), intent(in) ::                               &
+     &                     u1(ix,km),     v1(ix,km),                    &
+     &                     t1(ix,km),     q1(ix,km,ntrac),              &
+     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     xmu(im),       garea(im),                    &
+     &                     psk(ix),       rbsoil(im),                   &
+     &                     zorl(im),      tsea(im),                     &
+     &                     u10m(im),      v10m(im),                     &
+     &                     fm(im),        fh(im),                       &
+     &                     evap(im),      heat(im),                     &
+     &                     stress(im),    spd1(im),                     &
+     &                     prsi(ix,km+1), del(ix,km),                   &
+     &                     prsl(ix,km),   prslk(ix,km),                 &
      &                     phii(ix,km+1), phil(ix,km)
-      real(kind=kind_phys), intent(out) ::
-     &                     dusfc(im),     dvsfc(im),
-     &                     dtsfc(im),     dqsfc(im),
-     &                     hpbl(im) 
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dusfc(im),     dvsfc(im),                    &
+     &                     dtsfc(im),     dqsfc(im),                    &
+     &                     hpbl(im)
 !
-      logical, intent(out)  :: dspheat
+      logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -277,6 +274,7 @@
       errmsg = ''
       errflg = 0
 
+!> -# Compute preliminary variables from input arguments
       dt2  = delt
       rdt = 1. / dt2
 !
@@ -287,7 +285,8 @@
       km1 = km - 1
       kmpbl = km / 2
       kmscu = km / 2
-!
+!>  - Compute physical height of the layer centers and interfaces from 
+!! the geopotential height (\p zi and \p zl)
       do k=1,km
         do i=1,im
           zi(i,k) = phii(i,k) * gravi
@@ -308,11 +307,12 @@
           zm(i,k) = zi(i,k+1)
         enddo
       enddo
-! horizontal grid size
+!>  - Compute horizontal grid size (\p gdx)
       do i=1,im
         gdx(i) = sqrt(garea(i))
       enddo
-!
+!>  - Initialize tke value at vertical layer centers and interfaces 
+!! from tracer (\p tke and \p tkeh)
       do k=1,km
         do i=1,im
           tke(i,k) = max(q1(i,k,ntke), tkmin)
@@ -323,7 +323,7 @@
           tkeh(i,k) = 0.5 * (tke(i,k) + tke(i,k+1))
         enddo
       enddo
-!
+!>  - Compute reciprocal of \f$ \Delta z \f$ (rdzt)
       do k = 1,km1
         do i=1,im
           rdzt(i,k) = 1.0 / (zl(i,k+1) - zl(i,k))
@@ -331,12 +331,14 @@
         enddo
       enddo
 !
-! set background diffusivities as a function of
-!  horizontal grid size with xkzm_h & xkzm_m for gdx >= 25km
-!  and 0.01 for gdx=5m, i.e.,
-!  xkzm_hx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
-!  xkzm_mx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
-!
+!>  - Compute reciprocal of pressure (tx1, tx2)
+!>  - Compute background vertical diffusivities for scalars and momentum (xkzo and xkzmo)
+!!   -  set background diffusivities as a function of
+!!  horizontal grid size with xkzm_h & xkzm_m for gdx >= 25km
+!!  and 0.01 for gdx=5m, i.e.,
+!!\n  xkzm_hx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
+!!\n  xkzm_mx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
+
       do i=1,im
         kx1(i) = 1
         tx1(i) = 1.0 / prsi(i,1)
@@ -377,6 +379,7 @@
         enddo
       enddo
 !
+!>  - Some output variables and logical flags are initialized
       do i = 1,im
          z0(i)    = 0.01 * zorl(i)
          dusfc(i) = 0.
@@ -401,6 +404,8 @@
          endif
       enddo
 !
+!>  - Compute \f$\theta\f$(theta), and \f$q_l\f$(qlx), \f$\theta_e\f$(thetae),
+!! \f$\theta_v\f$(thvx),\f$\theta_{l,v}\f$ (thlvx) including ice water 
       do k=1,km
         do i=1,im
           pix(i,k)   = psk(i) / prslk(i,k)
@@ -428,8 +433,8 @@
         enddo
       enddo
 !
-! The background vertical diffusivities in the inversion layers are limited 
-!    to be less than or equal to xkzminv
+!>  - The background vertical diffusivities in the inversion layers are limited 
+!! to be less than or equal to xkzinv
 !
       do k = 1,km1
         do i=1,im
@@ -441,9 +446,8 @@
         enddo
       enddo
 !
-! compute an empirical cloud fraction based on 
-!    Xu & Randall's (1996,JAS) study
-!
+!>  - Compute an empirical cloud fraction based on 
+!! Xu and Randall (1996) \cite xu_and_randall_1996
       do k = 1, km
         do i = 1, im
           plyr(i,k)   = 0.01 * prsl(i,k)   ! pa to mb (hpa)
@@ -470,7 +474,7 @@
         enddo
       enddo
 !
-!  compute buoyancy modified by clouds
+!>  - Compute buoyancy modified by clouds
 !
       do k = 1, km1
         do i = 1, im
@@ -493,6 +497,8 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
+!>  - Initialize diffusion coefficients to 0 and calculate the total 
+!! radiative heating rate (dku, dkt, radx)
       do k=1,km1
         do i=1,im
           dku(i,k)  = 0.
@@ -504,13 +510,28 @@
           radx(i,k) = tem*(swh(i,k)*xmu(i)+hlw(i,k))
         enddo
       enddo
-!
+!>  - Compute stable/unstable PBL flag (pblflg) based on the total
+!! surface energy flux (\e false if the total surface energy flux
+!! is into the surface) 
       do i = 1,im
          sflux(i)  = heat(i) + evap(i)*fv*theta(i,1)
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
       enddo
 !
-!  compute critical bulk richardson number 
+!>  - Compute critical bulk Richardson number (\f$Rb_{cr}\f$) (crb)
+!!   - For the unstable PBL, crb is a constant (0.25)
+!!   - For the stable boundary layer (SBL), \f$Rb_{cr}\f$ varies
+!!     with the surface Rossby number, \f$R_{0}\f$, as given by 
+!!     Vickers and Mahrt (2004) \cite Vickers_2004
+!!\f[
+!!      Rb_{cr}=0.16(10^{-7}R_{0})^{-0.18},  
+!!
+!!      R_{0}=\frac{U_{10}}{f_{0}z_{0}}
+!!\f]
+!!     where \f$U_{10}\f$ is the wind speed at 10m above the ground surface,
+!!     \f$f_0\f$ the Coriolis parameter, and \f$z_{0}\f$ the surface roughness
+!!     length. To avoid too much variation, we restrict \f$Rb_{cr}\f$ to vary
+!!     within the range of 0.15~0.35
 !
       do i = 1,im
         if(pblflg(i)) then
@@ -528,6 +549,7 @@
         endif
       enddo
 !
+!>  - Compute \f$\frac{\Delta t}{\Delta z}\f$ , \f$u_*\f$
       do i=1,im
          dtdz1(i)  = dt2 / (zi(i,2)-zi(i,1))
       enddo
@@ -536,7 +558,8 @@
          ustar(i) = sqrt(stress(i))
       enddo
 !
-!  compute buoyancy (bf) and winshear square
+!>  - Compute buoyancy \f$\frac{\partial \theta_v}{\partial z}\f$ (bf) 
+!! and the wind shear squared (shr2)
 !
       do k = 1, km1
       do i = 1, im
@@ -548,14 +571,19 @@
       enddo
       enddo
 !
-! find pbl height based on bulk richardson number (mrf pbl scheme)
+! Find pbl height based on bulk Richardson number (mrf pbl scheme)
 !   and also for diagnostic purpose
+!
 !
       do i=1,im
          flg(i) = .false.
          rbup(i) = rbsoil(i)
       enddo
-!
+!>  - Given the thermal's properties and the critical Richardson number, 
+!! a loop is executed to find the first level above the surface (kpblx) where 
+!! the modified Richardson number is greater than the critical Richardson
+!! number, using equation 10a from Troen and Mahrt (1996) \cite troen_and_mahrt_1986 
+!! (also equation 8 from Hong and Pan (1996) \cite hong_and_pan_1996):
       do k = 1, kmpbl
       do i = 1, im
         if(.not.flg(i)) then
@@ -570,6 +598,9 @@
         endif
       enddo
       enddo
+!>  - Once the level is found, some linear interpolation is performed to find
+!! the exact height of the boundary layer top (where \f$R_{i} > Rb_{cr}\f$)
+!! and the PBL height (hpbl and kpbl) and the PBL top index are saved.
       do i = 1,im
         if(kpblx(i) > 1) then
           k = kpblx(i)
@@ -591,8 +622,15 @@
         if(kpbl(i) <= 1) pblflg(i)=.false.
       enddo
 !
-!     compute similarity parameters
-!
+!> -# Compute Monin-Obukhov similarity parameters
+!!  - Calculate the Monin-Obukhov nondimensional stability paramter, commonly
+!! referred to as \f$\zeta\f$ using the following equation from Businger et al.(1971) \cite businger_et_al_1971
+!! (eqn 28):
+!!  \f[
+!!  \zeta = Ri_{sfc}\frac{F_m^2}{F_h} = \frac{z}{L}
+!!  \f]
+!!  where \f$F_m\f$ and \f$F_h\f$ are surface Monin-Obukhov stability functions calculated in sfc_diff.f and 
+!! \f$L\f$ is the Obukhov length.
       do i=1,im
          zol(i) = max(rbsoil(i)*fm(i)*fm(i)/fh(i),rimin)
          if(sfcflg(i)) then
@@ -600,7 +638,18 @@
          else
            zol(i) = max(zol(i),zfmin)
          endif
-!
+!>  - Calculate the nondimensional gradients of momentum and temperature (\f$\phi_m\f$ (phim) and \f$\phi_h\f$(phih)) are calculated using
+!! eqns 5 and 6 from Hong and Pan (1996) \cite hong_and_pan_1996 depending on the surface layer stability:
+!!   - For the unstable and neutral conditions:
+!!\f[
+!!     \phi_m=(1-16\frac{0.1h}{L})^{-1/4}
+!!
+!!     \phi_h=(1-16\frac{0.1h}{L})^{-1/2}
+!!\f]
+!!   - For the stable regime
+!!\f[
+!!     \phi_m=\phi_t=(1+5\frac{0.1h}{L})
+!!\f]
          zol1 = zol(i)*sfcfrac*hpbl(i)/zl(i,1)
          if(sfcflg(i)) then
            tem     = 1.0 / (1. - aphi16*zol1)
@@ -612,6 +661,21 @@
          endif
       enddo
 !
+!>  - The \f$z/L\f$ (zol) is used as the stability criterion for the PBL.Currently,
+!! strong unstable (convective) PBL for \f$z/L < -0.02\f$ and weakly and moderately
+!! unstable PBL for \f$0>z/L>-0.02\f$ 
+!>  - Compute the velocity scale \f$w_s\f$ (wscale) (eqn 22 of Han et al. 2019). It
+!! is represented by the value scaled at the top of the surface layer:
+!!\f[
+!!  w_s=(u_*^3+7\alpha\kappa w_*^3)^{1/3}
+!!\f]
+!!  where \f$u_*\f$ (ustar) is the surface friction velocity,\f$\alpha\f$ is the ratio
+!! of the surface layer height to the PBL height (specified as sfcfrac =0.1), 
+!! \f$\kappa =0.4\f$ is the von Karman constant, and \f$w_*\f$ is the convective velocity
+!! scale defined as eqn23 of Han et al.(2019):
+!!\f[
+!!  w_{*}=[(g/T)\overline{(w'\theta_v^{'})}_0h]^{1/3}
+!!\f]
       do i=1,im
         if(pblflg(i)) then
           if(zol(i) < zolcru) then
@@ -626,7 +690,7 @@
         endif
       enddo
 !
-! compute a thermal excess
+!>  - Compute a thermal excess. 
 !
       do i = 1,im
          if(pcnvflg(i)) then
@@ -639,7 +703,9 @@
          endif
       enddo
 !
-!  enhance the pbl height by considering the thermal excess
+!>  - Compute enhance the pbl height by considering the thermal excess.
+!! The PBL height calculation follows the same procedure above, except 
+!! that is uses an updated virtual potential temperature for the thermal.
 !     (overshoot pbl top)
 !
       do i=1,im
@@ -684,7 +750,10 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  look for stratocumulus
-!
+!> -# Determine whether stratocumulus layers exist and compute quantities
+!!  - Starting at the PBL top and going downward, if the level is less than 2.5 km
+!! and \f$q_l\geq q_{lcr}\f$ then set kcld = k (find the cloud top index in the PBL.
+!! If no cloud water above the threshold is hound, \e scuflg is set to F. 
       do i=1,im
          flg(i)  = scuflg(i)
       enddo
@@ -712,7 +781,11 @@
       do i = 1, im
         if(scuflg(i) .and. kcld(i)==km1) scuflg(i)=.false.
       enddo
-!
+!>  - Starting at the PBL top and going downward, if the level is less 
+!! than the cloud top, find the level of the minimum radiative heating
+!! rate wihin the cloud. If the level of the minimum is the lowest model 
+!! level or the minimum radiative heating rate is positive, then set
+!! scuflg to F. 
       do i = 1, im
         flg(i)=scuflg(i)
       enddo
@@ -736,9 +809,10 @@
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute components for mass flux mixing by large thermals
+!> -# Compute components for mass flux mixing by large thermals
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
+!>  - If the PBL is convective, the updraft properties are initialized 
+!! to be the same as the state variables.
       do k = 1, km
         do i = 1, im
           if(pcnvflg(i)) then
@@ -765,12 +839,14 @@
         enddo
       enddo
       enddo
-!
+!>  - Call mfpblt(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
+!! to take into account nonlocal transport by large eddies. 
       call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue)
-!
+!>  - Call mfscu(), which is a new mass-flux parameterization for 
+!! stratocumulus-top-induced turbulence mixing.
       call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,radj,
@@ -778,8 +854,15 @@
      &    tcdo,qcdo,ucdo,vcdo,xlamde)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!   compute prandtl number and exchange coefficient varying with height
-!
+!> -# Compute Prandtl number \f$P_r\f$ (prn) and exchange coefficient varying with height
+!!  - Within PBL,\f$P_r\f$ is given as \f$P_r=\phi_h/\phi_m\f$, where 
+!! \f$\phi_h\f$ and \f$\phi_m\f$ are the surface layer (\f$z\leq0.1h\f$, where \f$h\f$
+!! is the PBL height) non-dimensional gradient functions for heat and momentum, 
+!! respectively. 
+!!   - We assume that \f$P_r=0.67\f$ in the stratocumulus and the unstable 
+!! layers above PBL (prscu).
+!!   - For the stable layers above PBL, \f$P_r\f$ is given as \f$P_r=1+2.1R_i\f$ 
+!! (prnum) (Kennedy and Shapiro (1980)\cite kennedy_and_shapiro_1980 )
       do k = 1, kmpbl
         do i = 1, im
           if(k < kpbl(i)) then
@@ -806,7 +889,7 @@
 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute an asymtotic mixing length
+!> -# Compute an asymtotic mixing length
 !
       do k = 1, km1
         do i = 1, im
@@ -866,7 +949,18 @@
 !
           tem = 0.5 * (zi(i,k+1)-zi(i,k))
           tem1 = min(tem, rlmn)
-!
+!>  - Following Bougeault and Lacarrere(1989), the characteristic length
+!! scale (\f$l_2\f$) (eqn 10 in Han et al.(2019) \cite Han_2019) is given by:
+!!\f[
+!!   l_2=min(l_{up},l_{down})
+!!\f]
+!! and dissipation length scale \f$l_d\f$ is given by:
+!!\f[ 
+!!   l_d=(l_{up}l_{down})^{1/2}
+!!\f]
+!!    where \f$l_{up}\f$ and \f$l_{down}\f$ are the distances that a parcel
+!! having an initial TKE can travel upward and downward before being stopped
+!! by buoyancy effects.
           ptem2 = min(zlup,zldn)
           rlam(i,k) = elmfac * ptem2
           rlam(i,k) = max(rlam(i,k), tem1)
@@ -879,7 +973,8 @@
 !
         enddo
       enddo
-!
+!>  - Compute the surface layer length scale (\f$l_1\f$) following 
+!! Nakanishi (2001) \cite Nakanish_2001 (eqn 9 of Han et al.(2019) \cite Han_2019)
       do k = 1, km1
         do i = 1, im
           tem = vk * zl(i,k)
@@ -907,9 +1002,7 @@
         ele(i,km) = ele(i,km1)
       enddo
 !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute eddy diffusivities
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!> -# Compute eddy diffusivities
 !
       do k = 1, km1
         do i = 1, im
@@ -970,8 +1063,7 @@
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute buoyancy and shear productions of tke 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!> -# Compute buoyancy and shear productions of TKE 
 !
       do k = 1, km1
         do i = 1, im
@@ -1094,7 +1186,7 @@
       enddo
 !
 !----------------------------------------------------------------------
-!     first predict tke due to tke production & dissipation(diss) 
+!> -# First predict tke due to tke production & dissipation(diss) 
 !
       do k = 1,km1
         do i=1,im
@@ -1116,7 +1208,7 @@
       enddo
       enddo
 !
-!     compute updraft & downdraft properties for tke
+!> -# Compute updraft & downdraft properties for TKE
 !
       do k = 1, km
         do i = 1, im
@@ -1154,7 +1246,7 @@
       enddo
 !
 !----------------------------------------------------------------------
-!     compute tridiagonal matrix elements for turbulent kinetic energy
+!> -# Compute tridiagonal matrix elements for turbulent kinetic energy
 !
       do i=1,im
          ad(i,1) = 1.0
@@ -1202,7 +1294,7 @@
         enddo
       enddo
 !
-!     solve tridiagonal problem for tke
+!> -# Call tridit() to solve tridiagonal problem for TKE
 !
       call tridit(im,km,1,al,ad,au,f1,au,f1)
 !
@@ -1216,7 +1308,7 @@
          enddo
       enddo
 !
-!     compute tridiagonal matrix elements for heat and moisture
+!> -# Compute tridiagonal matrix elements for heat and moisture
 !
       do i=1,im
          ad(i,1) = 1.
@@ -1325,7 +1417,7 @@
         enddo
       endif
 !
-!     solve tridiagonal problem for heat and moisture
+!> -# Call tridin() to solve tridiagonal problem for heat and moisture
 !
       call tridin(im,km,ntrac1,al,ad,au,f1,f2,au,f1,f2)
 !
@@ -1354,7 +1446,7 @@
         enddo
       endif
 !
-!     add tke dissipative heating to temperature tendency
+!> -# Add TKE dissipative heating to temperature tendency
 !
       if(dspheat) then
       do k = 1,km1
@@ -1367,7 +1459,7 @@
       enddo
       endif
 !
-!     compute tridiagonal matrix elements for momentum
+!> -# Compute tridiagonal matrix elements for momentum
 !
       do i=1,im
          ad(i,1) = 1.0 + dtdz1(i) * stress(i) / spd1(i)
@@ -1425,7 +1517,7 @@
         enddo
       enddo
 !
-!     solve tridiagonal problem for momentum
+!> -# Call tridi2() to solve tridiagonal problem for momentum
 !
       call tridi2(im,km,al,ad,au,f1,f2,au,f1,f2)
 !
@@ -1443,7 +1535,7 @@
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  pbl height for diagnostic purpose
+!> -# Save PBL height for diagnostic purpose
 !
       do i = 1, im
          hpbl(i) = hpblx(i)
@@ -1453,9 +1545,12 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
       end subroutine satmedmfvdif_run
+!> @}
 !
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------
+!>\ingroup satmedmf
+!! This subroutine solves tridiagonal problem for TKE.
       subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
 !-----------------------------------------------------------------------
 !!
@@ -1513,5 +1608,6 @@
 !-----------------------------------------------------------------------
       return
       end subroutine tridit
+!> @}
 
       end module satmedmfvdif

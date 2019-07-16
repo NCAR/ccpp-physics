@@ -11,8 +11,7 @@
       subroutine rayleigh_damp_init ()
       end subroutine rayleigh_damp_init
 
-!>\defgroup rayleigh_main GFS Rayleigh Damping Main
-!! @{
+!>\defgroup rayleigh_main GFS Rayleigh Damping Module
 !!\brief This is the Rayleigh friction calculation with total energy conservation.
 !!
 !! Role of Rayleigh friction, it attempts to resolve two issues:
@@ -41,6 +40,8 @@
 !! | errmsg         | ccpp_error_message                                   | error message for error handling in CCPP             | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                      | error flag for error handling in CCPP                | flag       |    0 | integer   |           | out    | F        |
 !!
+!>\section gen_ray_damp_run GFS rayleigh_damp_runGeneral Algorithm
+!> @{
       subroutine rayleigh_damp_run (                                    &
      &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,                     &
      &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,errmsg,errflg)
@@ -138,7 +139,7 @@
 
       RETURN
       end subroutine rayleigh_damp_run
-!! @}
+!> @}
 
 
 !! \section arg_table_rayleigh_damp_finalize Argument Table
