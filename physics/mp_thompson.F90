@@ -124,7 +124,7 @@ module mp_thompson
                                ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
                                its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte, &
                                mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot,    &
-                               threads=threads)
+                               threads=threads, errmsg=errmsg, errflg=errflg)
             if (errflg /= 0) return
          else if (is_aerosol_aware) then
             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_init:',                    &
@@ -137,7 +137,7 @@ module mp_thompson
                                ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme, &
                                its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte, &
                                mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot,    &
-                               threads=threads)
+                               threads=threads, errmsg=errmsg, errflg=errflg)
             if (errflg /= 0) return
          end if
 

@@ -159,6 +159,7 @@
       logical, intent(in)  :: do_ca
 
       integer, intent(inout)  :: kcnv(im)
+      ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
      &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),                  &
      &   cnvw(ix,km),  cnvc(ix,km)
