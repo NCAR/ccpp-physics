@@ -144,7 +144,6 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
        ltaerosol      = .true.
        lradar         = .true.
        ttendlim       = -999.
-       make_number_concentrations = .true.
        pdfcld         = .false.
        fhswr          = 3600.
        fhlwr          = 3600.
