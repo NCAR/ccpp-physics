@@ -100,18 +100,19 @@
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
-          ! DH* Thompson ntrw and ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
-                vdftra(i,k,1) = qgrs(i,k,ntqv)
-                vdftra(i,k,2) = qgrs(i,k,ntcw)
-                vdftra(i,k,3) = qgrs(i,k,ntiw)
-                vdftra(i,k,4) = qgrs(i,k,ntlnc)
-                vdftra(i,k,5) = qgrs(i,k,ntinc)
-                vdftra(i,k,6) = qgrs(i,k,ntoz)
-                vdftra(i,k,7) = qgrs(i,k,ntwa)
-                vdftra(i,k,8) = qgrs(i,k,ntia)
+                vdftra(i,k,1)  = qgrs(i,k,ntqv)
+                vdftra(i,k,2)  = qgrs(i,k,ntcw)
+                vdftra(i,k,3)  = qgrs(i,k,ntiw)
+                vdftra(i,k,4)  = qgrs(i,k,ntrw)
+                vdftra(i,k,5)  = qgrs(i,k,ntsw)
+                vdftra(i,k,6)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,7)  = qgrs(i,k,ntinc)
+                vdftra(i,k,8)  = qgrs(i,k,ntoz)
+                vdftra(i,k,9)  = qgrs(i,k,ntwa)
+                vdftra(i,k,10) = qgrs(i,k,ntia)
               enddo
             enddo
           else
@@ -120,8 +121,10 @@
                 vdftra(i,k,1) = qgrs(i,k,ntqv)
                 vdftra(i,k,2) = qgrs(i,k,ntcw)
                 vdftra(i,k,3) = qgrs(i,k,ntiw)
-                vdftra(i,k,4) = qgrs(i,k,ntinc)
-                vdftra(i,k,5) = qgrs(i,k,ntoz)
+                vdftra(i,k,4) = qgrs(i,k,ntrw)
+                vdftra(i,k,5) = qgrs(i,k,ntsw)
+                vdftra(i,k,6) = qgrs(i,k,ntinc)
+                vdftra(i,k,7) = qgrs(i,k,ntoz)
               enddo
             enddo
           endif
@@ -288,6 +291,14 @@
 !! | dv3dt_OGWD                   | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag                   | cumulative change in y wind due to orographic gravity wave drag                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt                        | cumulative_change_in_water_vapor_specific_humidity_due_to_PBL                     | cumulative change in water vapor specific humidity due to PBL                               | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt_ozone                  | cumulative_change_in_ozone_mixing_ratio_due_to_PBL                                | cumulative change in ozone mixing ratio due to PBL                                          | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | con_rd                       | gas_constant_dry_air                                                              | ideal gas constant for dry air                                                              | J kg-1 K-1    |    0 | real      | kind_phys | none   | F        |
+!! | con_rv                       | gas_constant_water_vapor                                                          | ideal gas constant for water vapor                                                          | J kg-1 K-1    |    0 | real      | kind_phys | none   | F        |
+!! | con_fvirt                    | ratio_of_vapor_to_dry_air_gas_constants_minus_one                                 | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                       | none          |    0 | real      | kind_phys | none   | F        |
+!! | t1                           | air_temperature_at_lowest_model_layer_for_diag                                    | layer 1 temperature for diag                                                                | K             |    1 | real      | kind_phys | none   | F        |
+!! | q1                           | water_vapor_specific_humidity_at_lowest_model_layer_for_diag                      | layer 1 specific humidity for diag                                                          | kg kg-1       |    1 | real      | kind_phys | none   | F        |
+!! | dkt                          | atmosphere_heat_diffusivity                                                       | diffusivity for heat                                                                        | m2 s-1        |    2 | reel      | kind_phys | none   | F        |
+!! | prsl                         | air_pressure                                                                      | mean layer pressure                                                                         | Pa            |    2 | real      | kind_phys | none   | F        | 
+!! | hflx                         | kinematic_surface_upward_sensible_heat_flux                                       | kinematic surface upward sensible heat flux                                                 | K m s-1       |    1 | real      | kind_phys | none   | F        |
 !! | errmsg                       | ccpp_error_message                                                                | error message for error handling in CCPP                                                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg                       | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -300,7 +311,7 @@
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, errmsg, errflg)
+        dq3dt_ozone, con_rd, con_cp, con_fvirt, dkt, prsl, t1, q1, hflx, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -310,6 +321,7 @@
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
+      integer, intent(in) :: con_rd, con_cp, con_fvirt
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
@@ -324,15 +336,17 @@
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone, dkt
       real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
-        dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
+        dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, &
+        prsl, t1, q1, hflx
 
+      real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
       integer :: i, k
-      real(kind=kind_phys) :: tem
+      real(kind=kind_phys) :: tem, tem1
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -362,18 +376,19 @@
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
-          ! DH* - Thompson ntrw, ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
                 dqdt(i,k,ntqv)  = dvdftra(i,k,1)
                 dqdt(i,k,ntcw)  = dvdftra(i,k,2)
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,4)
-                dqdt(i,k,ntinc) = dvdftra(i,k,5)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,6)
-                dqdt(i,k,ntwa)  = dvdftra(i,k,7)
-                dqdt(i,k,ntia)  = dvdftra(i,k,8)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,6)
+                dqdt(i,k,ntinc) = dvdftra(i,k,7)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,8)
+                dqdt(i,k,ntwa)  = dvdftra(i,k,9)
+                dqdt(i,k,ntia)  = dvdftra(i,k,10)
               enddo
             enddo
           else
@@ -382,8 +397,10 @@
                 dqdt(i,k,ntqv)  = dvdftra(i,k,1)
                 dqdt(i,k,ntcw)  = dvdftra(i,k,2)
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntinc) = dvdftra(i,k,4)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,5)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntinc) = dvdftra(i,k,6)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,7)
               enddo
             enddo
           endif
@@ -447,12 +464,22 @@
         endif
 
       endif ! nvdiff == ntrac
+!! new adding
+      if (cplchm) then
+        do i = 1, im
+          tem1 = max(q1(i), 1.e-8)
+          tem  = prsl(i,1) / (con_rd*t1(i)*(1.0+con_fvirt*tem1))
+          ushfsfci(i) = -con_cp * tem * hflx(i) ! upward sensible heat flux
+        enddo
+!!        Coupling%dkt     (:,:) = dkt (:,:)
+      endif
+
 
 !  --- ...  coupling insertion
 
 ! ### GJF ### the following section needs to be made CCPP-compliant when cplflx = T
-!      if (Model%cplflx) then
-!        do i=1,im
+      if (Model%cplflx) then
+        do i=1,im
 !          if (Sfcprop%oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
 !            if (fice(i) == 1.0) then           ! use results from CICE
 !              Coupling%dusfci_cpl(i) = dusfc_cice(i)

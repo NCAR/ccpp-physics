@@ -46,6 +46,7 @@
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
 !! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | in     | F        |
+!! | islmsk_cice    | sea_land_ice_mask_cice                                                       | sea/land/ice mask cice (=0/1/2)                                 | flag          |    1 | integer   |           | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                              | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | lprnt          | flag_print                                                                   | switch for printing sample column to stdout                     | flag          |    0 | logical   |           | in     | F        |
@@ -95,7 +96,7 @@
      &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    & !  ---  inputs:
      &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
-     &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
+     &       cm, ch, prsl1, prslki, islimsk, islmsk_cice, ddvel,        &
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  ---  outputs:
@@ -157,6 +158,7 @@
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
+!     islmsk_cice  - integer, sea/land/ice cice mask (=0/1/2)      im   !
 !     ddvel    - real,                                             im   !
 !     flag_iter- logical,                                          im   !
 !                                                                       !
@@ -208,7 +210,7 @@
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, ddvel
 
-      integer, dimension(im), intent(in) :: islimsk
+      integer, dimension(im), intent(in) :: islimsk, islmsk_cice
       real (kind=kind_phys), intent(in)  :: delt
 
       logical, dimension(im), intent(in) :: flag_iter
@@ -238,6 +240,7 @@
       real (kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i, k
+      integer, dimension(im) :: islmsk_LOCAL
 
       logical :: flag(im)
 !
@@ -250,12 +253,24 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+!!
+      do i = 1, im
+                      islmsk_LOCAL(i) = islimsk(i)
+      enddo
+      if (cplflx) then
+          do i=1,im
+            if (flag_cice(i)) then
+               islmsk_LOCAL (i) = islmsk_cice(i)
+            endif
+          enddo
+      endif
 !
 !> - Set flag for sea-ice.
 
       do i = 1, im
-        flag(i) = (islimsk(i) == 2) .and. flag_iter(i)
-        if (flag_iter(i) .and. islimsk(i) < 2) then
+        flag(i) = (islmsk_LOCAL(i) == 2) .and. flag_iter(i)
+        if (flag_iter(i) .and. islmsk_LOCAL(i) < 2) then
           hice(i) = zero
           fice(i) = zero
         endif
