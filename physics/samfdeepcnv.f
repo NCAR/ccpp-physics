@@ -168,10 +168,14 @@
       real(kind=kind_phys), intent(out) :: cldwrk(im),                  &
      &   rn(im),                                                        &
      &   ud_mf(im,km),dd_mf(im,km), dt_mf(im,km)
-
-      real(kind=kind_phys), dimension(im,km), intent(inout) ::          &
+      
+      ! GJF* These variables are conditionally allocated depending on whether the
+      !     Morrison-Gettelman microphysics is used, so they must be declared 
+      !     using assumed shape.
+      real(kind=kind_phys), dimension(:,:), intent(inout) ::          &
      &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn                    &
      &,  cnv_fice, cnv_ndrop, cnv_nice, cf_upi
+      ! *GJF
       integer :: mp_phys, mp_phys_mg
 
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
