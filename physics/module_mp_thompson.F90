@@ -414,7 +414,8 @@ MODULE module_mp_thompson
                           ids, ide, jds, jde, kds, kde,     &
                           ims, ime, jms, jme, kms, kme,     &
                           its, ite, jts, jte, kts, kte,     &
-                          mpicomm, mpirank, mpiroot, threads)
+                          mpicomm, mpirank, mpiroot,        &
+                          threads, errmsg, errflg)
 
       IMPLICIT NONE
 
@@ -428,6 +429,8 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime,jms:jme),         OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
+      CHARACTER(len=*), INTENT(INOUT) :: errmsg
+      INTEGER,          INTENT(INOUT) :: errflg
 
 
       INTEGER:: i, j, k, l, m, n
@@ -881,7 +884,8 @@ MODULE module_mp_thompson
       ! doing it always ensures that the correct data is in the SIONlib
       ! file containing the precomputed tables *DH
       WRITE (*,*) '  calling table_ccnAct routine'
-      call table_ccnAct
+      call table_ccnAct(errmsg,errflg)
+      if (.not. errflg==0) return
 
 !>  - Call table_efrw() and table_efsw() to creat collision efficiency table 
 !! between rain/snow and cloud water
@@ -4613,15 +4617,17 @@ MODULE module_mp_thompson
 !! vertical velocity, temperature, lognormal mean aerosol radius, and
 !! hygroscopicity, kappa.  The data are read from external file and
 !! contain activated fraction of CCN for given conditions.
-      subroutine table_ccnAct
+      subroutine table_ccnAct(errmess,errflag)
 
       implicit none
 
+!..Error handling variables
+      CHARACTER(len=*), INTENT(INOUT) :: errmess
+      INTEGER,          INTENT(INOUT) :: errflag
 
 !..Local variables
       INTEGER:: iunit_mp_th1, i
       LOGICAL:: opened
-      CHARACTER*64 errmess
 
       iunit_mp_th1 = -1
         DO i = 20,99
@@ -4649,19 +4655,11 @@ MODULE module_mp_thompson
       RETURN
  9009 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
-      write(0,*) errmess
-      ! DH* TEMPORARY FIX 20181203
-      call sleep(5)
-      stop
-      ! *DH
+      errflag = 1
       RETURN
  9010 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error reading CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
-      write(0,*) errmess
-      ! DH* TEMPORARY FIX 20181203
-      call sleep(5)
-      stop
-      ! *DH
+      errflag = 1
       RETURN
 
       end subroutine table_ccnAct

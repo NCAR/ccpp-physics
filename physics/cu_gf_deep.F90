@@ -3227,9 +3227,9 @@ endif
         enddo
         do k=kts+1,ktf
           do i=its,itf
-           if(ierr(i).ne.0) exit
-           if(k.lt.kbcon(i)) exit
-           if(k.gt.ktop(i)) exit
+           if(ierr(i).ne.0) cycle
+           if(k.lt.kbcon(i)) cycle
+           if(k.gt.ktop(i)) cycle
            dz=z(i,k)-z(i,k-1)
            da=zu(i,k)*dz*(9.81/(1004.*( &
                   (t_cup(i,k)))))*dby(i,k-1)/ &
@@ -4379,8 +4379,8 @@ endif
         enddo
         do i=its,itf
           do k=kts,kbcon(i)
-            if(ierr(i).ne.0 ) exit
-!           if(k.gt.kbcon(i)) exit
+            if(ierr(i).ne.0 ) cycle
+!           if(k.gt.kbcon(i)) cycle
 
             dz = (z_cup (i,k+1)-z_cup (i,k))*g
             da = dz*(tn(i,k)*(1.+0.608*qo(i,k))-t(i,k)*(1.+0.608*q(i,k)))/dtime

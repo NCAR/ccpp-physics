@@ -100,18 +100,19 @@
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
-          ! DH* Thompson ntrw and ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
-                vdftra(i,k,1) = qgrs(i,k,ntqv)
-                vdftra(i,k,2) = qgrs(i,k,ntcw)
-                vdftra(i,k,3) = qgrs(i,k,ntiw)
-                vdftra(i,k,4) = qgrs(i,k,ntlnc)
-                vdftra(i,k,5) = qgrs(i,k,ntinc)
-                vdftra(i,k,6) = qgrs(i,k,ntoz)
-                vdftra(i,k,7) = qgrs(i,k,ntwa)
-                vdftra(i,k,8) = qgrs(i,k,ntia)
+                vdftra(i,k,1)  = qgrs(i,k,ntqv)
+                vdftra(i,k,2)  = qgrs(i,k,ntcw)
+                vdftra(i,k,3)  = qgrs(i,k,ntiw)
+                vdftra(i,k,4)  = qgrs(i,k,ntrw)
+                vdftra(i,k,5)  = qgrs(i,k,ntsw)
+                vdftra(i,k,6)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,7)  = qgrs(i,k,ntinc)
+                vdftra(i,k,8)  = qgrs(i,k,ntoz)
+                vdftra(i,k,9)  = qgrs(i,k,ntwa)
+                vdftra(i,k,10) = qgrs(i,k,ntia)
               enddo
             enddo
           else
@@ -120,8 +121,10 @@
                 vdftra(i,k,1) = qgrs(i,k,ntqv)
                 vdftra(i,k,2) = qgrs(i,k,ntcw)
                 vdftra(i,k,3) = qgrs(i,k,ntiw)
-                vdftra(i,k,4) = qgrs(i,k,ntinc)
-                vdftra(i,k,5) = qgrs(i,k,ntoz)
+                vdftra(i,k,4) = qgrs(i,k,ntrw)
+                vdftra(i,k,5) = qgrs(i,k,ntsw)
+                vdftra(i,k,6) = qgrs(i,k,ntinc)
+                vdftra(i,k,7) = qgrs(i,k,ntoz)
               enddo
             enddo
           endif
@@ -362,18 +365,19 @@
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
-          ! DH* - Thompson ntrw, ntsw?
           if(ltaerosol) then
             do k=1,levs
               do i=1,im
                 dqdt(i,k,ntqv)  = dvdftra(i,k,1)
                 dqdt(i,k,ntcw)  = dvdftra(i,k,2)
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,4)
-                dqdt(i,k,ntinc) = dvdftra(i,k,5)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,6)
-                dqdt(i,k,ntwa)  = dvdftra(i,k,7)
-                dqdt(i,k,ntia)  = dvdftra(i,k,8)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,6)
+                dqdt(i,k,ntinc) = dvdftra(i,k,7)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,8)
+                dqdt(i,k,ntwa)  = dvdftra(i,k,9)
+                dqdt(i,k,ntia)  = dvdftra(i,k,10)
               enddo
             enddo
           else
@@ -382,8 +386,10 @@
                 dqdt(i,k,ntqv)  = dvdftra(i,k,1)
                 dqdt(i,k,ntcw)  = dvdftra(i,k,2)
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-                dqdt(i,k,ntinc) = dvdftra(i,k,4)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,5)
+                dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+                dqdt(i,k,ntsw)  = dvdftra(i,k,5)
+                dqdt(i,k,ntinc) = dvdftra(i,k,6)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,7)
               enddo
             enddo
           endif
