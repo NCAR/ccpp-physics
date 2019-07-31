@@ -1,56 +1,51 @@
-!>\file module_mp_FER_HIRES_pre.F90
+!>\file module_mp_fer_hires_pre.F90
 !! This file contains a wrap around UPDATE_WATER in NAM/module_MICROPHYSICS.F90
 !! which should be called the first in the physics suite using Ferrier-Aligo MP
 !! scheme.
 
 !> This module contains the CCPP-compliant UPDATE_WATER for Ferrier-Aligo MP.
-     module module_fa_update_water
+     module mp_fer_hires_pre
 
      implicit none
 
-     private
+!     private
 
-     public :: module_fa_update_water_init, module_fa_update_water_run, &
-               module_fa_update_water_finalize
+!     public :: mp_fer_hires_pre_init, mp_fer_hires_pre_run, &
+!               mp_fer_hires_pre_finalize
 
      contains
 
-!>\section arg_table_module_fa_update_water_init Argument Table
-!!
-     subroutine module_fa_update_water_init()
-     end subroutine module_fa_update_water_init
+     subroutine mp_fer_hires_pre_init ()
+     end subroutine mp_fer_hires_pre_init
 
-!>\section arg_table_module_fa_update_water_finalize Argument Table
-!!
-     subroutine module_fa_update_water_finalize()
-     end subroutine module_fa_update_water_finalize
+     subroutine mp_fer_hires_pre_finalize ()
+     end subroutine mp_fer_hires_pre_finalize
 
-!>\defgroup hafs_fa HAFS Ferrier-Aligo MP Scheme Update Water Module
+!> \defgroup hafs_fa HAFS Ferrier-Aligo MP Scheme Update Water Module
 !! This subroutine is to update water array with CWM, F_RAIN, and F_ICE 
 !! for Ferrier-Aligo MP scheme. 
-!>\section arg_table_module_fa_update_water_run Argument Table
+!! \section arg_table_mp_fer_hires_pre_run Argument Table
 !! | local_name     | standard_name                                         | long_name                                                                                  | units   | rank | type      | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------|--------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | cwm            | total_cloud_condensate_mixing_ratio                   | total cloud condensate mixing ratio (except water vapor) in NAM                            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | f_ice          | mass_fraction_of_ice_water_cloud                      | mass fraction of ice water cloud                                                           | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | f_rain         | mass_fraction_of_rain_water_cloud                     | mass fraction of rain water cloud                                                          | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | epsq           | minimum_value_of_specific_humidity                    | floor value for specific humidity                                                          | kg kg-1 |    0 | real      | kind_phys | in     | F        |
-!! | t              | air_temperature                                       | model layer mean temperature                                                               | K       |    2 | real      | kind_phys | inout  | F        |                 
-!! | qc             | cloud_condensed_water_mixing_ratio_updated_by_physics | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics | kg kg-1 |    2 | real      | kind_phys | inout  | F        | 
+!! | t              | air_temperature                                       | model layer mean temperature                                                               | K       |    2 | real      | kind_phys | inout  | F        |
+!! | qc             | cloud_condensed_water_mixing_ratio_updated_by_physics | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | qr             | rain_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | qs             | snow_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics            | kg kg-1 |    2 | real      | kind_phys | inout  | F        | 
-!! | qi             | ice_water_mixing_ratio_updated_by_physics             | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics             | kg kg-1 |    2 | real      | kind_phys | inout  | F        | 
-!! | qg             | graupel_mixing_ratio_updated_by_physics               | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics               | kg kg-1 |    2 | real      | kind_phys | inout  | F        | 
+!! | qs             | snow_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | qi             | ice_water_mixing_ratio_updated_by_physics             | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics             | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | qg             | graupel_mixing_ratio_updated_by_physics               | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics               | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | spec_adv       | flag_for_individual_cloud_species_advected            | flag for individual cloud species advected                                                 | flag    |    0 | logical   |           | in     | F        |
 !! | kdt            | index_of_time_step                                    | current forecast interation                                                                | index   |    0 | integer   |           | in     | F        |
 !! | lm             | vertical_dimension                                    | number of vertical levels                                                                  | count   |    0 | integer   |           | in     | F        |
-!! | ime            | horizontal_dimension                                  | horizontal dimension                                                                       | count   |    0 | integer   |           | in     | F        | 
-!! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP                                                   | none    |    0 | character | len=*     | out    | F        | 
+!! | ime            | horizontal_dimension                                  | horizontal dimension                                                                       | count   |    0 | integer   |           | in     | F        |
+!! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP                                                   | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP                                                      | flag    |    0 | integer   |           | out    | F        |
 !!
-!! \section genal_update_water HAFS Update_Water General Algorithm
-     subroutine module_fa_update_water_run(CWM,F_ICE,F_RAIN,            & ! F_RIMEF  
-                             ,EPSQ                                      & 
+     subroutine mp_fer_hires_pre_run (CWM,F_ICE,F_RAIN,           &
+                             ,EPSQ                                      &
                              ,T,QC,QR,QS,QI,QG                          &
                              ,SPEC_ADV,kdt                              &
                              ,LM,IME,errmsg,errflg )
@@ -159,6 +154,6 @@
             ENDDO
       ENDIF 
 
-      end module_fa_update_water_run
+      end subroutine mp_fer_hires_pre_run
 
-      end module module_fa_update_water
+  end module mp_fer_hires_pre
