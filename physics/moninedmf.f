@@ -8,8 +8,28 @@
 
       contains
 
+!> \section arg_table_hedmf_init Argument Table
+!! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! | moninq_fac     | atmosphere_diffusivity_coefficient_factor                                   | multiplicative constant for atmospheric diffusivities | none          |    0 | real      | kind_phys | in     | F        |
+!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!!
+      subroutine hedmf_init (moninq_fac,errmsg,errflg)
+         use machine, only : kind_phys
+         implicit none
+         real(kind=kind_phys), intent(in ) :: moninq_fac
+         character(len=*),     intent(out) :: errmsg
+         integer,              intent(out) :: errflg
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
-      subroutine hedmf_init ()
+         if (moninq_fac == 0) then
+             errflg = 1
+             write(errmsg,'(*(a))') 'Logic error: moninq_fac == 0',
+     &                              ' is incompatible with hedmf'
+         end if
       end subroutine hedmf_init
 
       subroutine hedmf_finalize ()
