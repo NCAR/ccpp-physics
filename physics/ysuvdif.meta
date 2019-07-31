@@ -29,7 +29,7 @@
   standard_name = x_wind
   long_name = x component of layer wind
   units = m s-1
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -38,7 +38,7 @@
   standard_name = y_wind
   long_name = y component of layer wind
   units = m s-1
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -47,7 +47,7 @@
   standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -56,7 +56,7 @@
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
   units = kg kg-1
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -65,7 +65,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -74,7 +74,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -83,7 +83,7 @@
   standard_name = dimensionless_exner_function_at_model_layers
   long_name = Exner function at layers
   units = none
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -92,7 +92,7 @@
   standard_name = tendency_of_y_wind_due_to_model_physics
   long_name = updated tendency of the y wind
   units = m s-2
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -101,7 +101,7 @@
   standard_name = tendency_of_x_wind_due_to_model_physics
   long_name = updated tendency of the x wind
   units = m s-2
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -110,7 +110,7 @@
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = updated tendency of the temperature
   units = K s-1
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -119,7 +119,7 @@
   standard_name = tendency_of_tracers_due_to_model_physics
   long_name = updated tendency of the tracers due to model physics
   units = kg kg-1 s-1
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout
@@ -128,7 +128,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky shortwave heating rate
   units = K s-1
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -137,7 +137,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky longwave heating rate
   units = K s-1
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -146,7 +146,7 @@
   standard_name = zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes
   long_name = zenith angle temporal adjustment factor for shortwave
   units = none
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -187,7 +187,7 @@
   standard_name = geopotential_at_interface
   long_name = geopotential at model layer interfaces
   units = m2 s-2
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -196,7 +196,7 @@
   standard_name = geopotential
   long_name = geopotential at model layer centers
   units = m2 s-2
-  dimensions = (XX_NotFound_XX,XX_NotFound_XX)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -205,7 +205,7 @@
   standard_name = surface_air_pressure
   long_name = surface pressure
   units = Pa
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -214,7 +214,7 @@
   standard_name = surface_roughness_length
   long_name = surface roughness length in cm
   units = cm
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -223,7 +223,7 @@
   standard_name = surface_wind_stress
   long_name = surface wind stress
   units = m2 s-2
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -232,7 +232,7 @@
   standard_name = atmosphere_boundary_layer_thickness
   long_name = PBL thickness
   units = m
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -241,7 +241,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_momentum
   long_name = Monin-Obukhov similarity function for momentum
   units = none
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -250,7 +250,7 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat
   long_name = Monin-Obukhov similarity function for heat
   units = none
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -259,7 +259,7 @@
   standard_name = sea_land_ice_mask
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = integer
   intent = in
   optional = F
@@ -267,7 +267,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -276,7 +276,7 @@
   standard_name = kinematic_surface_upward_latent_heat_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -285,7 +285,7 @@
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
   units = m s-1
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -294,7 +294,7 @@
   standard_name = bulk_richardson_number_at_lowest_model_level
   long_name = bulk Richardson number at the surface
   units = none
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -366,7 +366,7 @@
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = x momentum flux
   units = Pa
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -375,7 +375,7 @@
   standard_name = instantaneous_surface_y_momentum_flux
   long_name = y momentum flux
   units = Pa
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -384,7 +384,7 @@
   standard_name = instantaneous_surface_upward_sensible_heat_flux
   long_name = surface upward sensible heat flux
   units = W m-2
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -393,7 +393,7 @@
   standard_name = instantaneous_surface_upward_latent_heat_flux
   long_name = surface upward latent heat flux
   units = W m-2
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -411,7 +411,7 @@
   standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
   long_name = PBL top model level index
   units = index
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = integer
   intent = out
   optional = F
@@ -419,7 +419,7 @@
   standard_name = x_wind_at_10m
   long_name = x component of wind at 10 m
   units = m s-1
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -428,7 +428,7 @@
   standard_name = y_wind_at_10m
   long_name = y component of wind at 10 m
   units = m s-1
-  dimensions = (XX_NotFound_XX)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
