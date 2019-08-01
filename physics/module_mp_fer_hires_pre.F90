@@ -44,7 +44,7 @@
 !! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP                                                   | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP                                                      | flag    |    0 | integer   |           | out    | F        |
 !!
-     subroutine mp_fer_hires_pre_run (CWM,F_ICE,F_RAIN,           &
+     subroutine mp_fer_hires_pre_run (CWM,F_ICE,F_RAIN                  &
                              ,EPSQ                                      &
                              ,T,QC,QR,QS,QI,QG                          &
                              ,SPEC_ADV,kdt                              &
@@ -117,40 +117,36 @@
 !-- Update WATER arrays when advecting only total condensate (spec_adv=F)
 !   or at the initial time step
             DO K=1,LM
-!zm             DO J=JMS,JME
               DO I=1,IME
-                IF (CWM(I,J,K)>EPSQ) THEN
-                  LIQW=(1.-F_ice(I,J,K))*CWM(I,J,K)
-                  QC(I,J,K)=(1.-F_rain(I,J,K))*LIQW
-                  QR(I,J,K)=F_rain(I,J,K)*LIQW
-                  QS(I,J,K)=F_ice(I,J,K)*CWM(I,J,K)
+                IF (CWM(I,K)>EPSQ) THEN
+                  LIQW=(1.-F_ice(I,K))*CWM(I,K)
+                  QC(I,K)=(1.-F_rain(I,K))*LIQW
+                  QR(I,K)=F_rain(I,K)*LIQW
+                  QS(I,K)=F_ice(I,K)*CWM(I,K)
                 ELSE
-                  QC(I,J,K)=0.
-                  QR(I,J,K)=0.
-                  QS(I,J,K)=0.
+                  QC(I,K)=0.
+                  QR(I,K)=0.
+                  QS(I,K)=0.
                 ENDIF
               ENDDO
-             ENDDO
             ENDDO
 
       ELSE 
 !-- Update CWM,F_ICE,F_RAIN arrays from separate species advection (spec_adv=T)
             DO K=1,LM
-!zm             DO J=JMS,JME
               DO I=1,IME
-                CWM(I,J,K)=QC(I,J,K)+QR(I,J,K)+QS(I,J,K)
-                IF (QS(I,J,K)>EPSQ) THEN
-                  F_ICE(I,J,K)=QS(I,J,K)/CWM(I,J,K)
+                CWM(I,K)=QC(I,K)+QR(I,K)+QS(I,K)
+                IF (QS(I,K)>EPSQ) THEN
+                  F_ICE(I,K)=QS(I,K)/CWM(I,K)
                 ELSE
-                  F_ICE(I,J,K)=0.0
+                  F_ICE(I,K)=0.0
                 ENDIF
-                IF (QR(I,J,K)>EPSQ) THEN
-                  F_RAIN(I,J,K)=QR(I,J,K)/(QC(I,J,K)+QR(I,J,K))
+                IF (QR(I,K)>EPSQ) THEN
+                  F_RAIN(I,K)=QR(I,K)/(QC(I,K)+QR(I,K))
                 ELSE
-                  F_RAIN(I,J,K)=0.
+                  F_RAIN(I,K)=0.
                 ENDIF
               ENDDO
-             ENDDO
             ENDDO
       ENDIF 
 
