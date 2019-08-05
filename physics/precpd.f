@@ -37,7 +37,7 @@
 !! | prautco        | coefficient_from_cloud_water_to_rain                          | conversion coefficient from cloud water to rain                   | none        |    1 | real      | kind_phys | in     | F        |
 !! | evpco          | coefficient_for_evaporation_of_rainfall                       | coefficient for evaporation of rainfall                           | none        |    0 | real      | kind_phys | in     | F        |
 !! | wminco         | cloud_condensed_water_conversion_threshold                    | conversion coefficient from cloud liquid and ice to precipitation | none        |    1 | real      | kind_phys | in     | F        |
-!! | wk1            | grid_size_related_coefficient_used_in_scale-sensitive_schemes | grid size related coefficient used in scale-sensitive schemes     | none        |    1 | real      | kind_phys | in     | F        |
+!! | wk1            | grid_size_related_coefficient_used_in_scale_sensitive_schemes | grid size related coefficient used in scale-sensitive schemes     | none        |    1 | real      | kind_phys | in     | F        |
 !! | lprnt          | flag_print                                                    | flag for printing diagnostics to output                           | flag        |    0 | logical   |           | in     | F        |
 !! | jpr            | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                          | none        |    0 | character | len=*     | out    | F        |
