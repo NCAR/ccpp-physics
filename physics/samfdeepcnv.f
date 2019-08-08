@@ -172,7 +172,7 @@
       ! GJF* These variables are conditionally allocated depending on whether the
       !     Morrison-Gettelman microphysics is used, so they must be declared 
       !     using assumed shape.
-      real(kind=kind_phys), dimension(:,:), intent(inout) ::          &
+      real(kind=kind_phys), dimension(:,:), intent(inout) ::            &
      &   qlcn, qicn, w_upi, cnv_mfd, cnv_dqldt, clcn                    &
      &,  cnv_fice, cnv_ndrop, cnv_nice, cf_upi
       ! *GJF
