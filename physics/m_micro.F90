@@ -297,10 +297,16 @@ end subroutine m_micro_init
      &                                       lwheat_i,swheat_i
        real (kind=kind_phys), dimension(ix,0:lm),intent(in):: prsi_i,   &
      &                                                        phii
-       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+! GJF* These variables are conditionally allocated depending on whether the
+!     Morrison-Gettelman microphysics is used, so they must be declared 
+!     using assumed shape.
+       real (kind=kind_phys), dimension(:,:),  intent(in)  ::           &
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
-     &       CNV_NICE_i,  w_upi, rhc_i, naai_i, npccn_i
+     &       CNV_NICE_i,  w_upi
+! *GJF
+       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+     &       rhc_i, naai_i, npccn_i
        real (kind=kind_phys), dimension(im,lm,ntrcaer),intent(in) ::    &
      &       aerfld_i
        real (kind=kind_phys),dimension(im),intent(in):: TAUGWX,         &
@@ -320,9 +326,13 @@ end subroutine m_micro_init
        integer, dimension(IM), intent(inout):: KCBL
        real (kind=kind_phys),dimension(ix,lm),intent(inout):: q_io, t_io,   &
      &                                             ncpl_io,ncpi_io,CLLS_io
-       real (kind=kind_phys),dimension(im,lm),intent(inout):: rnw_io,snw_io,&
+! GJF* These variables are conditionally allocated depending on whether the
+!     Morrison-Gettelman microphysics is used, so they must be declared 
+!     using assumed shape.
+       real (kind=kind_phys),dimension(:,:),intent(inout):: rnw_io,snw_io,&
      &                                             ncpr_io, ncps_io,        &
      &                                             qgl_io,  ncgl_io
+! *GJF
 !Moo   real (kind=kind_phys),dimension(im,lm),intent(inout):: CLLS_io
 
 

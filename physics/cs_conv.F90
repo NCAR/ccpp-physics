@@ -423,9 +423,13 @@ module cs_conv
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
    real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
-   real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd,          &
+! GJF* These variables are conditionally allocated depending on whether the
+!     Morrison-Gettelman microphysics is used, so they must be declared 
+!     using assumed shape.
+   real(r8), intent(out), dimension(:,:) :: qlcn, qicn, w_upi,cnv_mfd,                  &
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
+! *GJF
    integer, intent(inout) :: kcnv(im)             ! zero if no deep convection and 1 otherwise
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
