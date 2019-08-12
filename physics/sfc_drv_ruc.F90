@@ -502,10 +502,14 @@ module lsm_ruc
         !- 10may19 - ice points are turned off.
         flag(i) = land(i)
         if (land(i) .and. (vegtype(i)==iswater .or. vegtype(i)==isice)) then
-            write(errmsg,'(a,i0,a,i0)') 'Logic error in sfc_drv_ruc_run: for i=', i, &
-                       ', land(i) is true but vegtype(i) is water or ice: ', vegtype(i)
-            errflg = 1
-            return
+            !write(errmsg,'(a,i0,a,i0)') 'Logic error in sfc_drv_ruc_run: for i=', i, &
+            !           ', land(i) is true but vegtype(i) is water or ice: ', vegtype(i)
+            !errflg = 1
+            !return
+            if(flag_init .and. iter==1) then
+              write(0,'(a,i0,a,i0)') 'Warning: in sfc_drv_ruc_run: for i=', i, &
+                ', land(i) is true but vegtype(i) is water or ice: ', vegtype(i)
+            end if
         end if
       enddo
 
