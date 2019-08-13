@@ -29,7 +29,8 @@ OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = YES
 OPTIMIZE_OUTPUT_VHDL   = NO
-EXTENSION_MAPPING      = .f=FortranFree \
+EXTENSION_MAPPING      = .F=FortranFree \
+                         .f=FortranFree \
                          .F90=FortranFree  \
                          .f90=FortranFree
 MARKDOWN_SUPPORT       = YES
@@ -175,7 +176,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.f90     \
-                        ../radcons.f90
+                        ../radcons.f90      \
+                        ../machine.F
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
