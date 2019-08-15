@@ -19,7 +19,7 @@
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
 !! | km             | soil_vertical_dimension                                                      | vertical loop extent for soil levels, start at 1                | count         |    0 | integer   |           | in     | F        |
-!! | sbc            | steffan_boltzmann_constant                                                   | Steffan-Boltzmann constant                                      | W m-2 K-4     |    0 | real      | kind_phys | in     | F        |
+!! | sbc            | stefan_boltzmann_constant                                                    | Stefan-Boltzmann constant                                       | W m-2 K-4     |    0 | real      | kind_phys | in     | F        |
 !! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                          | J kg-1        |    0 | real      | kind_phys | in     | F        |
 !! | tgice          | freezing_point_temperature_of_seawater                                       | freezing point temperature of seawater                          | K             |    0 | real      | kind_phys | in     | F        |
 !! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                   | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
@@ -45,7 +45,7 @@
 !! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | in     | F        |
+!! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | inout  | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                              | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | lprnt          | flag_print                                                                   | switch for printing sample column to stdout                     | flag          |    0 | logical   |           | in     | F        |
@@ -66,6 +66,11 @@
 !! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice                 | thermal exchange coefficient over ice                           | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux_over_ice                           | kinematic surface upward latent heat flux over ice              | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ice                         | kinematic surface upward sensible heat flux over ice            | K m s-1       |    1 | real      | kind_phys | inout  | F        |
+!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                | flag          |    0 | logical   |           | in     | F        |
+!! | cplchm         | flag_for_chemistry_coupling                                                  | flag controlling cplchm collection (default off)                | flag          |    0 | logical   |           | in     | F        |
+!! | flag_cice      | flag_for_cice                                                                | flag for cice                                                   | flag          |    1 | logical   |           | in     | F        |
+!! | islmsk_cice    | sea_land_ice_mask_cice                                                       | sea/land/ice mask cice (=0/1/2)                                 | flag          |    1 | integer   |           | in     | F        | 
+!! | slmsk          | sea_land_ice_mask_real                                                       | landmask: sea/land/ice=0/1/2                                    | flag          |    1 | real      | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -98,7 +103,8 @@
      &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  ---  outputs:
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
+     &       cplflx, cplchm, flag_cice, islmsk_cice, slmsk,             &
      &       errmsg, errflg
      &     )
 
@@ -200,6 +206,8 @@
 !  ---  inputs:
       integer, intent(in) :: im, km, ipr
       logical, intent(in) :: lprnt
+      logical, intent(in) :: cplflx
+      logical, intent(in) :: cplchm
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd, cimin
@@ -208,10 +216,12 @@
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, ddvel
 
-      integer, dimension(im), intent(in) :: islimsk
+      integer, dimension(im), intent(inout) :: islimsk
+      integer, dimension(im), intent(in) :: islmsk_cice
       real (kind=kind_phys), intent(in)  :: delt
+      real (kind=kind_phys), dimension(im), intent(in)  ::  slmsk
 
-      logical, dimension(im), intent(in) :: flag_iter
+      logical, dimension(im), intent(in) :: flag_iter, flag_cice
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
@@ -238,6 +248,7 @@
       real (kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i, k
+      integer, dimension(im) :: islmsk_LOCAL
 
       logical :: flag(im)
 !
@@ -250,17 +261,42 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      do i = 1, im
+                      islmsk_LOCAL(i) = islimsk(i)
+      enddo
+
+      if (cplflx) then
+          do i=1,im
+            if (flag_cice(i)) then
+               islmsk_LOCAL (i) = islmsk_cice(i)
+            endif
+          enddo
+      endif
+
+      do i = 1, im
+                      islimsk(i)=islmsk_LOCAL(i)
+      enddo
+
+      if (cplflx .or. cplchm) then
+          do i = 1, im
+            if (flag_cice(i)) then
+               islimsk(i) = int(slmsk(i)+0.5)
+            endif
+          enddo
+      endif
+
 !
 !> - Set flag for sea-ice.
 
       do i = 1, im
-        flag(i) = (islimsk(i) == 2) .and. flag_iter(i)
-        if (flag_iter(i) .and. islimsk(i) < 2) then
+        flag(i) = (islmsk_LOCAL(i) == 2) .and. flag_iter(i)
+        if (flag_iter(i) .and. islmsk_LOCAL(i) < 2) then
           hice(i) = zero
           fice(i) = zero
         endif
       enddo
-!
+
       do i = 1, im
         if (flag(i)) then
           if (srflag(i) > zero) then
