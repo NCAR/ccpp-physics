@@ -8,8 +8,28 @@
 
       contains
 
+!> \section arg_table_hedmf_init Argument Table
+!! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
+!! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
+!! | moninq_fac     | atmosphere_diffusivity_coefficient_factor                                   | multiplicative constant for atmospheric diffusivities | none          |    0 | real      | kind_phys | in     | F        |
+!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
+!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!!
+      subroutine hedmf_init (moninq_fac,errmsg,errflg)
+         use machine, only : kind_phys
+         implicit none
+         real(kind=kind_phys), intent(in ) :: moninq_fac
+         character(len=*),     intent(out) :: errmsg
+         integer,              intent(out) :: errflg
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
 
-      subroutine hedmf_init ()
+         if (moninq_fac == 0) then
+             errflg = 1
+             write(errmsg,'(*(a))') 'Logic error: moninq_fac == 0',
+     &                              ' is incompatible with hedmf'
+         end if
       end subroutine hedmf_init
 
       subroutine hedmf_finalize ()
@@ -46,8 +66,8 @@
 !! | zorl           | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
 !! | u10m           | x_wind_at_10m                                                               | x component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | v10m           | y_wind_at_10m                                                               | y component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | fm             | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | in     | F        |
-!! | fh             | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | in     | F        |
+!! | fm             | Monin_Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | in     | F        |
+!! | fh             | Monin_Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | in     | F        |
 !! | tsea           | surface_skin_temperature                                                    | surface skin temperature                              | K             |    1 | real      | kind_phys | in     | F        |
 !! | heat           | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | in     | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |

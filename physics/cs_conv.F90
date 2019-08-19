@@ -25,8 +25,8 @@ module cs_conv_pre
 !! | q               | water_vapor_specific_humidity_updated_by_physics              | water vapor specific humidity updated by physics                                                                        | kg kg-1 |    2 | real      | kind_phys | in     | F        |
 !! | clw1            | ice_water_mixing_ratio_convective_transport_tracer            | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array                | kg kg-1 |    2 | real      | kind_phys | in     | F        |
 !! | clw2            | cloud_condensed_water_mixing_ratio_convective_transport_tracer| moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | work1           | grid_size_related_coefficient_used_in_scale-sensitive_schemes | grid size related coefficient used in scale-sensitive schemes                                                           | none    |    1 | real      | kind_phys | in     | F        |
-!! | work2           | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                                                                          | none    |    1 | real      | kind_phys | in     | F        |
+!! | work1           | grid_size_related_coefficient_used_in_scale_sensitive_schemes | grid size related coefficient used in scale-sensitive schemes                                                           | none    |    1 | real      | kind_phys | in     | F        |
+!! | work2           | grid_size_related_coefficient_used_in_scale_sensitive_schemes_complement | complement to work1                                                                                          | none    |    1 | real      | kind_phys | in     | F        |
 !! | cs_parm1        | updraft_velocity_tunable_parameter_1_CS                       | tunable parameter 1 for Chikira-Sugiyama convection                                                                     | m s-1   |    0 | real      | kind_phys | in     | F        |
 !! | cs_parm2        | updraft_velocity_tunable_parameter_2_CS                       | tunable parameter 2 for Chikira-Sugiyama convection                                                                     | m s-1   |    0 | real      | kind_phys | in     | F        |
 !! | wcbmax          | maximum_updraft_velocity_at_cloud_base                        | maximum updraft velocity at cloud base                                                                                  | m s-1   |    1 | real      | kind_phys | out    | F        |
@@ -423,9 +423,13 @@ module cs_conv
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
    real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
-   real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd,          &
+! GJF* These variables are conditionally allocated depending on whether the
+!     Morrison-Gettelman microphysics is used, so they must be declared 
+!     using assumed shape.
+   real(r8), intent(out), dimension(:,:) :: qlcn, qicn, w_upi,cnv_mfd,                  &
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
+! *GJF
    integer, intent(inout) :: kcnv(im)             ! zero if no deep convection and 1 otherwise
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
