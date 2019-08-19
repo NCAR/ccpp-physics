@@ -302,10 +302,10 @@
 !! | ushfsfci                     | instantaneous_upward_sensible_heat_flux                                           | instantaneous upward sensible heat flux                                                     | W m-2         |    1 | real      | kind_phys | out    | F        |
 !! | oceanfrac                    | sea_area_fraction                                                                 | fraction of horizontal grid area occupied by ocean                                          | frac          |    1 | real      | kind_phys | in     | F        |
 !! | fice                         | sea_ice_concentration                                                             | ice fraction over open water                                                                | frac          |    1 | real      | kind_phys | in     | F        |
-!! | dusfc_cice                   | surface_x_momentum_flux_for_coupling_cice                                         | sfc x momentum flux for cice                                                                | Pa            |    1 | real      | kind_phys | in     | F        | 
-!! | dvsfc_cice                   | surface_y_momentum_flux_for_coupling_cice                                         | sfc y momentum flux for cice                                                                | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | dtsfc_cice                   | surface_upward_sensible_heat_flux_for_coupling_cice                               | sfc sensible heat flux for cice                                                             | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | dqsfc_cice                   | surface_upward_latent_heat_flux_for_coupling_cice                                 | sfc latent heat flux for cice                                                               | W m-2         |    1 | real      | kind_phys | in     | F        |
+!! | dusfc_cice                   | surface_x_momentum_flux_for_coupling_interstitial                                 | sfc x momentum flux for coupling interstitial                                               | Pa            |    1 | real      | kind_phys | in     | F        | 
+!! | dvsfc_cice                   | surface_y_momentum_flux_for_coupling_interstitial                                 | sfc y momentum flux for coupling interstitial                                               | Pa            |    1 | real      | kind_phys | in     | F        |
+!! | dtsfc_cice                   | surface_upward_sensible_heat_flux_for_coupling_interstitial                       | sfc sensible heat flux for coupling interstitial                                            | W m-2         |    1 | real      | kind_phys | in     | F        |
+!! | dqsfc_cice                   | surface_upward_latent_heat_flux_for_coupling_interstitial                         | sfc latent heat flux for coupling interstitial                                              | W m-2         |    1 | real      | kind_phys | in     | F        |
 !! | dry                          | flag_nonzero_land_surface_fraction                                                | flag indicating presence of some land surface area fraction                                 | flag          |    1 | logical   |           | in     | F        |
 !! | icy                          | flag_nonzero_sea_ice_surface_fraction                                             | flag indicating presence of some sea ice surface area fraction                              | flag          |    1 | logical   |           | in     | F        |
 !! | wind                         | wind_speed_at_lowest_model_layer                                                  | wind speed at lowest model level                                                            | m s-1         |    1 | real      | kind_phys | in     | F        |
@@ -494,6 +494,11 @@
           ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
         enddo
 !!        Coupling%dkt     (:,:) = dkt (:,:)
+      endif
+
+      if(cplflx)then
+        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
+        stop 
       endif
 
 !  --- ...  coupling insertion

@@ -66,16 +66,16 @@
 !! | flag_cice      | flag_for_cice                                                                | flag for cice                                                    | flag       |    1 | logical   |           | inout  | F        |
 !! | islmsk_cice    | sea_land_ice_mask_cice                                                       | sea/land/ice mask cice (=0/1/2)                                  | flag       |    1 | integer   |           | in     | F        |
 !! | slimskin_cpl   | sea_land_ice_mask_in                                                         | sea/land/ice mask input (=0/1/2)                                 | flag       |    1 | real      | kind_phys | in     | F        |
-!! | dusfcin_cpl    | surface_x_momentum_flux_for_coupling_in                                      | sfc x momentum flux for coupling in                              | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | dvsfcin_cpl    | surface_y_momentum_flux_for_coupling_in                                      | sfc y momentum flux for coupling in                              | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | dtsfcin_cpl    | surface_upward_sensible_heat_flux_for_coupling_in                            | sfc sensible heat flux input                                     | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | dqsfcin_cpl    | surface_upward_latent_heat_flux_for_coupling_in                              | sfc latent heat flux input for coupling in                       | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | ulwsfcin_cpl   | surface_upwelling_longwave_flux_for_coupling_in                              | surface upwelling LW flux for coupling in                        | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | ulwsfc_cice    | surface_upwelling_longwave_flux_for_cice                                     | surface upwelling longwave flux for cice                         | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | dusfc_cice     | surface_x_momentum_flux_for_coupling_cice                                    | sfc x momentum flux for cice                                     | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc_cice     | surface_y_momentum_flux_for_coupling_cice                                    | sfc y momentum flux for cice                                     | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | dtsfc_cice     | surface_upward_sensible_heat_flux_for_coupling_cice                          | sfc sensible heat flux for cice                                  | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | dqsfc_cice     | surface_upward_latent_heat_flux_for_coupling_cice                            | sfc latent heat flux for cice                                    | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | dusfcin_cpl    | surface_x_momentum_flux_for_coupling                                         | sfc x momentum flux for coupling                                 | Pa         |    1 | real      | kind_phys | in     | F        |
+!! | dvsfcin_cpl    | surface_y_momentum_flux_for_coupling                                         | sfc y momentum flux for coupling                                 | Pa         |    1 | real      | kind_phys | in     | F        |
+!! | dtsfcin_cpl    | surface_upward_sensible_heat_flux_for_coupling                               | sfc sensible heat flux input                                     | W m-2      |    1 | real      | kind_phys | in     | F        |
+!! | dqsfcin_cpl    | surface_upward_latent_heat_flux_for_coupling                                 | sfc latent heat flux input for coupling                          | W m-2      |    1 | real      | kind_phys | in     | F        |
+!! | ulwsfcin_cpl   | surface_upwelling_longwave_flux_for_coupling                                 | surface upwelling LW flux for coupling                           | W m-2      |    1 | real      | kind_phys | in     | F        |
+!! | ulwsfc_cice    | surface_upwelling_longwave_flux_for_coupling_interstitial                    | surface upwelling longwave flux for coupling interstitial        | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | dusfc_cice     | surface_x_momentum_flux_for_coupling_interstitial                            | sfc x momentum flux for coupling interstitial                    | Pa         |    1 | real      | kind_phys | out    | F        |
+!! | dvsfc_cice     | surface_y_momentum_flux_for_coupling_interstitial                            | sfc y momentum flux for coupling interstitial                    | Pa         |    1 | real      | kind_phys | out    | F        |
+!! | dtsfc_cice     | surface_upward_sensible_heat_flux_for_coupling_interstitial                  | sfc sensible heat flux for coupling interstitial                 | W m-2      |    1 | real      | kind_phys | out    | F        |
+!! | dqsfc_cice     | surface_upward_latent_heat_flux_for_coupling_interstitial                    | sfc latent heat flux for coupling interstitial                   | W m-2      |    1 | real      | kind_phys | out    | F        |
 !! | tisfc          | sea_ice_temperature                                                          | sea-ice surface temperature                                      | K          |    1 | real      | kind_phys | in     | F        |
 !! | tsfco          | sea_surface_temperature                                                      | sea surface temperature                                          | K          |    1 | real      | kind_phys | in     | F        |
 !! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                      | frac       |    1 | real      | kind_phys | in     | F        |
@@ -251,6 +251,12 @@
           tsurf(i)   = tsfc(i)
           zlvl(i)    = phil(i,1) * onebg
         end do
+
+      if(cplflx)then
+        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
+        stop
+      endif
+
       if (cplflx) then
         do i=1,im
           islmsk_cice(i) = int(slimskin_cpl(i)+0.5)
