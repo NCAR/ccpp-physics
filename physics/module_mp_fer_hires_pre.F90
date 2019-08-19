@@ -8,10 +8,10 @@
 
      implicit none
 
-!     private
+     private
 
-!     public :: mp_fer_hires_pre_init, mp_fer_hires_pre_run, &
-!               mp_fer_hires_pre_finalize
+     public :: mp_fer_hires_pre_init, mp_fer_hires_pre_run, &
+               mp_fer_hires_pre_finalize
 
      contains
 
@@ -49,21 +49,6 @@
                              ,T,QC,QR,QS,QI,QG                          &
                              ,SPEC_ADV,kdt                              &
                              ,LM,IME,errmsg,errflg )
-!***********************************************************************
-!$$$  SUBPROGRAM DOCUMENTATION BLOCK
-!                .      .    .
-! SUBPROGRAM:    UPDATE_WATER          UPDATE WATER ARRAY
-!   PRGRMMR: FERRIER         ORG: NP22     DATE: 3 AUG 2009
-!
-! ABSTRACT:
-!     UPDATE WATER ARRAY FOR FERRIER MICROPHYSICS
-!
-! PROGRAM HISTORY LOG (with changes to called routines) :
-!   2009-08     FERRIER     - Synchronize WATER array with CWM, F_rain, F_ice arrays
-!
-! ATTRIBUTES:
-!   LANGUAGE: FORTRAN 90
-!-----------------------------------------------------------------------
 
        USE MACHINE , only : kind_phys
        IMPLICIT NONE
@@ -74,7 +59,6 @@
 !-- Argument Variables
 !----------------------
 !
-!      INTEGER,INTENT(IN) :: NTIMESTEP,LM,IME
        INTEGER,INTENT(IN) :: KDT,LM,IME
 !
       LOGICAL,INTENT(IN) :: SPEC_ADV

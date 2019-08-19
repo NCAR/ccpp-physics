@@ -126,40 +126,10 @@ module mp_fer_hires
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
                          ,QC,QR,QI,QS,QG                                &  ,NI,NR  
-!ZM                         ,F_QC,F_QR,F_QI,F_QS,F_QG,F_NI,F_NR         &
-!                         ,has_reqc, has_reqi, has_reqs                 &
                          ,PREC,ACPREC                                   &
                          ,refl_10cm                                     &
                          ,RHGRD                                         &
                          ,errmsg,errflg)
-!                         ,IMS,IME,LM,errmsg,errflg)
-
-!          CALL GSMDRIVE(Model%dtp,Model%NPRECIP               &
-!                       ,Sfcprop%sm(:),Sfcprop%oro(:)                    &
-!                       ,Statein%prsi(:,:),Statein%prsl(:,:)             &
-!                       ,Stateout%gt0(:,:)                               &
-!                       ,Stateout%gq0(:,:,1),Stateout%gq0(:,:,2)         & !rv CW vs. QC
-!                       ,Diag%TRAIN(:,:),Diag%sr(:)                      &
-!                       ,Statein%f_ice(:,:),Statein%f_rain(:,:)          &
-!                       ,Statein%f_rimef(:,:)                            &
-!                       ,Stateout%gq0(:,:,Model%ntcw)                    &
-!                       ,Stateout%gq0(:,:,Model%ntrw)                    &
-!                       ,Stateout%gq0(:,:,Model%ntiw)                    &
-!                       ,Stateout%gq0(:,:,Model%ntsw)                    &
-!                       ,Stateout%gq0(:,:,Model%ntgl)                    &
-!                       ,Stateout%gq0(:,:,Model%ntinc)                   &
-!                       ,Stateout%gq0(:,:,Model%ntrnc)                   &
-!                       ,Model%F_QC,Model%F_QR,Model%F_QI,Model%F_QS     &
-!                       ,Model%F_QG,Model%F_NI,Model%F_NR                &
-!                       ,Model%has_reqc,Model%has_reqi,Model%has_reqs    &
-!                       ,Sfcprop%tprcp(:),Diag%totprcp(:)                &
-!                       ,Diag%AVRAIN,Statein%refl_10cm(:,:)              &
-!                       ,Statein%re_cloud(:,:)                           &
-!                       ,Statein%re_ice(:,:),Statein%re_snow(:,:)        &
-!                       ,Model%MICROPHYSICS,Model%RHGRD,Diag%TP1(:,:)    &
-!                       ,Diag%QP1(:,:),Diag%PSP1(:)                      &
-!                       ,ims,ime,LM)
-
 
 !-----------------------------------------------------------------------
       USE MACHINE,    ONLY: kind_phys
@@ -193,21 +163,10 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qs(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev)
-!      real(kind_phys),   intent(inout) :: ni(1:ncol,1:nlev)
-!      real(kind_phys),   intent(inout) :: nr(1:ncol,1:nlev)
-!      logical,           intent(in   ) :: f_qc
-!      logical,           intent(in   ) :: f_qr
-!      logical,           intent(in   ) :: f_qi
-!      logical,           intent(in   ) :: f_qs
-!      logical,           intent(in   ) :: f_qg
-!      logical,           intent(in   ) :: f_ni
-!      logical,           intent(in   ) :: f_nr
-!      integer,           intent(in   ) :: has_reqc, has_reqi,has_reqs
       real(kind_phys),   intent(inout) :: prec(1:ncol)
       real(kind_phys),   intent(inout) :: acprec(1:ncol)
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
       real(kind_phys),   intent(in   ) :: rhgrd
-!      integer,           intent(in   ) :: IMS,IME,LM      
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !
