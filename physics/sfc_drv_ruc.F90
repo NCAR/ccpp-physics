@@ -236,9 +236,9 @@ module lsm_ruc
 !! | evbs                 | soil_upward_latent_heat_flux                                                 | soil upward latent heat flux                                    | W m-2         |    1 | real      | kind_phys | out    | F        |
 !! | evcw                 | canopy_upward_latent_heat_flux                                               | canopy upward latent heat flux                                  | W m-2         |    1 | real      | kind_phys | out    | F        |
 !! | sbsno                | snow_deposition_sublimation_upward_latent_heat_flux                          | latent heat flux from snow depo/subl                            | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | trans                | transpiration_flux                                                           | total plant transpiration rate                                  | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
-!! | runof                | surface_runoff_flux                                                          | surface runoff flux                                             | g m-2 s-1     |    1 | real      | kind_phys | out    | F        |
-!! | drain                | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | g m-2 s-1     |    1 | real      | kind_phys | out    | F        |
+!! | trans                | transpiration_flux                                                           | total plant transpiration rate                                  | W m-2         |    1 | real      | kind_phys | out    | F        |
+!! | runof                | surface_runoff_flux                                                          | surface runoff flux                                             | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
+!! | drain                | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | kg m-2 s-1    |    1 | real      | kind_phys | out    | F        |
 !! | runoff               | total_runoff                                                                 | total water runoff                                              | kg m-2        |    1 | real      | kind_phys | inout  | F        |
 !! | srunoff              | surface_runoff                                                               | surface water runoff (from lsm)                                 | kg m-2        |    1 | real      | kind_phys | inout  | F        |
 !! | gflux                | upward_heat_flux_in_soil_over_land                                           | soil heat flux over land                                        | W m-2         |    1 | real      | kind_phys | out    | F        |
@@ -1032,12 +1032,12 @@ module lsm_ruc
         sfcdew(i)  = dew(i,j)
         qsurf(i)   = qsfc(i,j)
         sncovr1(i) = sncovr(i,j)
-        stm(i)     = soilm(i,j)
+        stm(i)     = soilm(i,j) * 1000.0 ! unit conversion (from m to kg m-2)
         tsurf(i)   = soilt(i,j)
         tice(i)    = tsurf(i)
-        !  --- ...  units [m/s] = [g m-2 s-1] 
-        runof (i)  = runoff1(i,j)
-        drain (i)  = runoff2(i,j)
+        
+        runof (i)  = runoff1(i,j) * 1000.0 ! unit conversion (from m s-1 to mm s-1 and kg m-2 s-1)
+        drain (i)  = runoff2(i,j) * 1000.0 ! unit conversion (from m s-1 to mm s-1 and kg m-2 s-1)
 
         wetness(i) = wet(i,j)
 
@@ -1048,8 +1048,8 @@ module lsm_ruc
         rhosnf(i) = rhosnfr(i,j)
 
         ! --- ... accumulated total runoff and surface runoff
-        runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 0.001 ! kg m-2
-        srunoff(i) = srunoff(i) + runof(i) * delt * 0.001            ! kg m-2
+        runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt          ! kg m-2
+        srunoff(i) = srunoff(i) + runof(i) * delt                     ! kg m-2
 
         ! --- ... accumulated frozen precipitation (accumulation in lsmruc)
         snowfallac(i) = snfallac(i,j) ! kg m-2
