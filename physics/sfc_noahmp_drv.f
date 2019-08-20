@@ -1,5 +1,28 @@
+!>  \file sfc_noahmp_drv.f
+!!  This file contains the NoahMP land surface scheme driver.
+
+!> This module contains the CCPP-compliant NoahMP land surface scheme driver.
+      module noahmpdrv
+
+      implicit none
+
+      private
+
+      public :: noahmpdrv_init, noahmpdrv_run, noahmpdrv_finalize
+
+      contains
+
+      subroutine noahmpdrv_init
+      end subroutine noahmpdrv_init
+      
+      subroutine noahmpdrv_finalize
+      end subroutine noahmpdrv_finalize
+
+!> \section arg_table_noahmpdrv_run Argument Table
+!! \htmlinclude noahmpdrv_run.html
+!!
 !-----------------------------------
-      subroutine noahmpdrv                                              &
+      subroutine noahmpdrv_run                                          &
 !...................................
 !  ---  inputs:
      &     ( im, km,itime,ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf, &
@@ -890,7 +913,7 @@
 !
       return
 !...................................
-      end subroutine noahmpdrv
+      end subroutine noahmpdrv_run
 !-----------------------------------
 
       subroutine transfer_mp_parameters (vegtype,soiltype,slopetype,    &
@@ -1139,4 +1162,4 @@
 ! ----------------------------------------------------------------------
       end subroutine penman
 
-
+end module noahmpdrv

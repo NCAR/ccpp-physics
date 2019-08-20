@@ -522,7 +522,7 @@
 [canopy]
   standard_name = canopy_water_amount
   long_name = canopy water amount
-  units = mm
+  units = kg m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -891,7 +891,7 @@
 [drain]
   standard_name = subsurface_runoff_flux
   long_name = subsurface runoff flux
-  units = mm s-1
+  units = kg m-2 s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -927,7 +927,7 @@
 [runoff]
   standard_name = surface_runoff_flux
   long_name = surface runoff flux
-  units = mm s-1
+  units = kg m-2 s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
