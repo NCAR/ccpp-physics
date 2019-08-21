@@ -4,9 +4,9 @@
 !
 module mp_fer_hires
      
-      use machine, only : kind_phys, kind_evod
+      use machine, only : kind_phys
 
-      use module_mp_fer_hires, only : fer_hires_init, FER_HIRES, FER_HIRES_ADVECT
+      use module_mp_fer_hires, only : fer_hires_init, FER_HIRES
 
       implicit none
 
@@ -22,31 +22,27 @@ module mp_fer_hires
 !! | local_name            | standard_name                             | long_name                                                 | units    | rank |  type                 |   kind    | intent | optional |
 !! |-----------------------|-------------------------------------------|-----------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
 !! | Model                 | GFS_control_type_instance                 | Fortran DDT containing FV3-GFS model control parameters   | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | mpirank               | mpi_rank                                  | current MPI-rank                                          | index    |    0 | integer               |           | in     | F        |
-!! | mpiroot               | mpi_root                                  | master MPI-rank                                           | index    |    0 | integer               |           | in     | F        |
 !! | imp_physics           | flag_for_microphysics_scheme              | choice of microphysics scheme                             | flag     |    0 | integer               |           | in     | F        |
 !! | imp_physics_fer_hires | flag_for_fer_hires_microphysics_scheme    | choice of Ferrier-Aligo microphysics scheme               | flag     |    0 | integer               |           | in     | F        |
 !! | errmsg                | ccpp_error_message                        | error message for error handling in CCPP                  | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg                | ccpp_error_flag                           | error flag for error handling in CCPP                     | flag     |    0 | integer               |           | out    | F        |
 !!
-     subroutine mp_fer_hires_init(Model, mpirank, mpiroot, imp_physics, &
+     subroutine mp_fer_hires_init(Model, imp_physics,                   &
                                   imp_physics_fer_hires, errmsg, errflg)
 
-     ! USE machine,             ONLY : kind_evod
-     ! USE MODULE_MP_FER_HIRES, ONLY : FERRIER_INIT_HR
+      USE machine,             ONLY : kind_phys
+      USE MODULE_MP_FER_HIRES, ONLY : FERRIER_INIT_HR
       USE GFS_typedefs,        ONLY : GFS_control_type
       implicit none
 
       type(GFS_control_type),         intent(in)    :: Model
-      integer,                        intent(in)    :: mpirank
-      integer,                        intent(in)    :: mpiroot
       integer,                        intent(in)    :: imp_physics
       integer,                        intent(in)    :: imp_physics_fer_hires
       character(len=*),               intent(out)   :: errmsg
       integer,                        intent(out)   :: errflg
 
       ! Local variables
-      real(kind=kind_evod)                          :: DT_MICRO
+      real(kind=kind_phys)                          :: DT_MICRO
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -93,7 +89,7 @@ module mp_fer_hires
 !> \section arg_table_mp_fer_hires_run Argument Table
 !! | local_name  | standard_name                                                             | long_name                                                                                          | units    | rank | type     |   kind    | intent | optional |
 !! |-------------|---------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|----------|------|----------|-----------|--------|----------|
-!! |  ncol       | horizontal_loop_extent                                                    | horizontal loop extent                                                                             | count    |   0  | integer  |           | in     | F        |   
+!! |  ncol       | horizontal_loop_extent                                                    | horizontal loop extent                                                                             | count    |   0  | integer  |           | in     | F        |
 !! |  nlev       | vertical_dimension                                                        | number of vertical levels                                                                          | count    |   0  | integer  |           | in     | F        |
 !! |  dt         | time_step_for_physics                                                     | physics timestep                                                                                   | s        |   0  | real     | kind_phys | in     | F        |
 !! |  slmsk      | sea_land_ice_mask_real                                                    | landmask: sea/land/ice=0/1/2                                                                       | flag     |   1  | real     | kind_phys | in     | F        |
@@ -101,21 +97,21 @@ module mp_fer_hires
 !! |  p_phy      | air_pressure                                                              | mean layer pressure                                                                                | Pa       |   2  | real     | kind_phys | in     | F        |
 !! |  t          | air_temperature_updated_by_physics                                        | temperature updated by physics                                                                     | K        |   2  | real     | kind_phys | inout  | F        |
 !! |  q          | water_vapor_specific_humidity_updated_by_physics                          | water vapor specific humidity updated by physics                                                   | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!> |  cwm        | total_cloud_condensate_mixing_ratio                                       | total cloud condensate mixing ratio (except water vapor) in NAM                                    | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!> |  train      | accumulated_tendency_of_air_temperature_due_to_FA_scheme                  |
-!> |  sr         | fraction_of_surface_precipitation_associated_with_snow 
-!> |  f_ice      | mass_fraction_of_ice_water_cloud                                          | mass fraction of ice water cloud for Ferrier-Aligo MP scheme                                       | frac     |   2  | real     | kind_phys | inout  | F        |
-!> |  f_rain     | mass_fraction_of_rain_water_cloud                                         | mass fraction of rain water cloud for Ferrier-Aligo MP scheme                                      | frac     |   2  | real     | kind_phys | inout  | F        |
-!> |  f_rimef    | FA_scheme_rime_factor                         
+!! |  cwm        | total_cloud_condensate_mixing_ratio_updated_by_physics                    | total cloud condensate mixing ratio (except water vapor) updated by physics                        | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
+!! |  train      | accumulated_tendency_of_air_temperature_due_to_FA_scheme                  | accumulated tendency of air temperature due to FA MP scheme                                        | K        |   2  | real     | kind_phys | inout  | F        |
+!! |  sr         | ratio_of_snowfall_to_rainfall                                             | snow ratio: ratio of snow to total precipitation  (explicit only)                                  | frac     |   1  | real     | kind_phys | out    | F        |
+!! |  f_ice      | mass_fraction_of_ice_water_cloud                                          | mass fraction of ice water cloud                                                                   | frac     |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rain     | mass_fraction_of_rain_water_cloud                                         | mass fraction of rain water cloud                                                                  | frac     |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rimef    | mass_fraction_of_rime_factor                                              | mass fraction of rime factor                                                                       | frac     |   2  | real     | kind_phys | inout  | F        |
 !! |  qc         | cloud_condensed_water_mixing_ratio_updated_by_physics                     | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics         | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1  |   2  | real     | kind_phys | inout  | F        | 
-!! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1  |   2  | real     | kind_phys | inout  | F        | 
+!! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
+!! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
 !! |  qs         | snow_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics                    | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
 !! |  qg         | graupel_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics                       | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
 !! |  prec       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                                                       | m        |   1  | real     | kind_phys | inout  | F        |
 !! |  acprec     | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                                                                    | m        |   1  | real     | kind_phys | inout  | F        |
 !! |  refl_10cm  | radar_reflectivity_10cm                                                   | instantaneous refl_10cm                                                                            | dBZ      |   2  | real     | kind_phys | inout  | F        |
-!> |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none     |   0  | real     | kind_phys | in     | F        |           
+!! |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none     |   0  | real     | kind_phys | in     | F        |
 !! |  errmsg     | ccpp_error_message                                                        | error message for error handling in CCPP                                                           | none     |   0  | character| len=*     | out    | F        |
 !! |  errflg     | ccpp_error_flag                                                           | error flag for error handling in CCPP                                                              | flag     |   0  | integer  |           | out    | F        |
 !!
@@ -125,7 +121,7 @@ module mp_fer_hires
                          ,T,Q,CWM                                       &
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
-                         ,QC,QR,QI,QS,QG                                &  ,NI,NR  
+                         ,QC,QR,QI,QS,QG                                &
                          ,PREC,ACPREC                                   &
                          ,refl_10cm                                     &
                          ,RHGRD                                         &

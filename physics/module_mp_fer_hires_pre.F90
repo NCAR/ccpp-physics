@@ -27,7 +27,7 @@
 !! \section arg_table_mp_fer_hires_pre_run Argument Table
 !! | local_name     | standard_name                                         | long_name                                                                                  | units   | rank | type      | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------|--------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | cwm            | total_cloud_condensate_mixing_ratio                   | total cloud condensate mixing ratio (except water vapor) in NAM                            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | cwm            | total_cloud_condensate_mixing_ratio_updated_by_physics| total cloud condensate mixing ratio (except water vapor) updated by physics                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | f_ice          | mass_fraction_of_ice_water_cloud                      | mass fraction of ice water cloud                                                           | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | f_rain         | mass_fraction_of_rain_water_cloud                     | mass fraction of rain water cloud                                                          | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | epsq           | minimum_value_of_specific_humidity                    | floor value for specific humidity                                                          | kg kg-1 |    0 | real      | kind_phys | in     | F        |
