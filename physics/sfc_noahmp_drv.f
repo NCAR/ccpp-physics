@@ -809,8 +809,8 @@
 
           tsurf(i)   = trad
 
-          stm(i) = 0.1*smsoil(1)+0.3*smsoil(2)+0.6*smsoil(3)+           &
-     &              1.0*smsoil(4)
+          stm(i) = (0.1*smsoil(1)+0.3*smsoil(2)+0.6*smsoil(3)+           &
+     &              1.0*smsoil(4))*1000.0  ! unit conversion from m to kg m-2
 !
           snohf (i) = qsnbot * con_hfus  ! only part of it but is diagnostic
 !         write(*,*) 'snohf',snohf(i)
@@ -1162,4 +1162,4 @@
 ! ----------------------------------------------------------------------
       end subroutine penman
 
-end module noahmpdrv
+      end module noahmpdrv

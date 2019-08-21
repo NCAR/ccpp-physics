@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = lsm_noahmp_run
+  name = noahmpdrv_run
   type = scheme
 [im]
   standard_name = horizontal_dimension
@@ -990,7 +990,7 @@
 [stm]
   standard_name = soil_moisture_content
   long_name = soil moisture
-  units = m
+  units = kg m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
