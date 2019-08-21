@@ -367,7 +367,7 @@
   type = integer
   intent = in
   optional = F
-[xlat]
+[xlatin]
   standard_name = latitude
   long_name = latitude
   units = radians
@@ -376,7 +376,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[xcosz]
+[xcoszin]
   standard_name = instantaneous_cosine_of_zenith_angle
   long_name = cosine of zenith angle at current time
   units = none

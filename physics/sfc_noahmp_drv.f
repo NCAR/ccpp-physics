@@ -25,31 +25,31 @@
       subroutine noahmpdrv_run                                          &
 !...................................
 !  ---  inputs:
-     &     ( im, km,itime,ps, u1, v1, t1, q1, soiltyp, vegtype, sigmaf, &
-     &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
+     &     ( im, km, itime, ps, u1, v1, t1, q1, soiltyp, vegtype,       &
+     &       sigmaf, sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
      &       prsl1, prslki, zf, dry, ddvel, slopetyp,                   &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
-     &       idveg,iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,    &
-     &       iopt_inf,iopt_rad, iopt_alb, iopt_snf,iopt_tbot,iopt_stc,  &
-     &       xlatin,xcoszin, iyrlen, julian,                            &
-     &       rainn_mp,rainc_mp,snow_mp,graupel_mp,ice_mp,               &
+     &       idveg, iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,   &
+     &       iopt_inf, iopt_rad, iopt_alb, iopt_snf, iopt_tbot,         &
+     &       iopt_stc, xlatin, xcoszin, iyrlen, julian,                 &
+     &       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp,           &
 
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
-     &       canopy, trans, tsurf,zorl,                                 &
+     &       canopy, trans, tsurf, zorl,                                &
 
 ! --- Noah MP specific
 
-     &      snowxy, tvxy, tgxy, canicexy,canliqxy, eahxy,tahxy,cmxy,    &
-     &      chxy, fwetxy, sneqvoxy, alboldxy, qsnowxy, wslakexy,        &
-     &      zwtxy, waxy, wtxy, tsnoxy,zsnsoxy,  snicexy,  snliqxy,      &
-     &      lfmassxy, rtmassxy,stmassxy, woodxy, stblcpxy, fastcpxy,    &
-     &      xlaixy,xsaixy,taussxy,smoiseq,smcwtdxy,deeprechxy,rechxy,   &
+     &       snowxy, tvxy, tgxy, canicexy, canliqxy, eahxy, tahxy, cmxy,&
+     &       chxy, fwetxy, sneqvoxy, alboldxy, qsnowxy, wslakexy, zwtxy,&
+     &       waxy, wtxy, tsnoxy, zsnsoxy, snicexy, snliqxy, lfmassxy,   &
+     &       rtmassxy, stmassxy, woodxy, stblcpxy, fastcpxy, xlaixy,    &
+     &       xsaixy, taussxy, smoiseq, smcwtdxy, deeprechxy, rechxy,    &
 
 !  ---  outputs:
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-     &       smcwlt2, smcref2,wet1,t2mmp,q2mp)     
+     &       smcwlt2, smcref2, wet1, t2mmp, q2mp, errmsg, errflg)     
 !
 !
       use machine ,   only : kind_phys
@@ -157,7 +157,11 @@
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &    evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,wet1,  &
      &    t2mmp,q2mp 
-    
+
+! error messages
+      character(len=*), intent(out)    :: errmsg
+      integer,          intent(out)    :: errflg
+
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
      &       q0, qs1, theta1, tv1, wind, weasd_old, snwdph_old,         &
@@ -227,6 +231,10 @@
 !
 !===> ...  begin here
 !
+
+! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 
 !  --- ...  set flag for land points
 
