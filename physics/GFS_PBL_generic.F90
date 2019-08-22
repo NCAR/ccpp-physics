@@ -485,8 +485,7 @@
         endif
 
       endif ! nvdiff == ntrac
-        write(*,*)rd,cp,hvap,fvirt
-!! new adding
+
       if (cplchm) then
         do i = 1, im
           tem1 = max(q1(i), 1.e-8)

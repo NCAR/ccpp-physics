@@ -1,40 +1,10 @@
 !>  \file sfc_cice.f
 !!  This file contains the sfc_sice for coupling to CICE
 
-!> This module comtains the CCPP-compliant GFS sea ice post interstitial codes, which returns
-!! updated ice thickness and concentration to global arrays
-!! where there is no ice, and set temperature to surface skin
-!!temperature.
-      module sfc_cice_pre
-
-      contains
-!! \section arg_table_sfc_cice_post_init  Argument Table
-!!
-      subroutine sfc_cice_pre_init
-      end subroutine sfc_cice_pre_init
-
-      subroutine sfc_cice_pre_finalize
-      end subroutine sfc_cice_pre_finalize
-
-      end module  sfc_cice_pre
-!!
-      module sfc_cice_post
-
-      contains
-!! \section arg_table_sfc_cice_post_init  Argument Table
-!!
-      subroutine sfc_cice_post_init
-      end subroutine sfc_cice_post_init
-
-!! \section arg_table_sfc_cice_post_finalize  Argument Table
-!!
-      subroutine sfc_cice_post_finalize
-      end subroutine sfc_cice_post_finalize
-
-      subroutine sfc_cice_post_run
-      end subroutine sfc_cice_post_run
-
-      end module  sfc_cice_post
+!> This module contains the CCPP-compliant GFS sea ice post
+!! interstitial codes, which returns updated ice thickness and 
+!! concentration to global arrays where there is no ice, and 
+!! set temperature to surface skin temperature.
 
 !> This module contains the CCPP-compliant GFS sea ice scheme.
       module sfc_cice

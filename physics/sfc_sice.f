@@ -248,7 +248,7 @@
       real (kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i, k
-      integer, dimension(im) :: islmsk_LOCAL
+      integer, dimension(im) :: islmsk_local
 
       logical :: flag(im)
 !
@@ -262,24 +262,20 @@
       errmsg = ''
       errflg = 0
 
-      do i = 1, im
-                      islmsk_LOCAL(i) = islimsk(i)
-      enddo
       if(cplflx)then
         write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
         stop
       endif
 
-      if (cplflx) then
-          do i=1,im
-            if (flag_cice(i)) then
-               islmsk_LOCAL (i) = islmsk_cice(i)
+      do i = 1, im
+            islmsk_local(i) = islimsk(i)
+            if (flag_cice(i).and.cplflx) then
+               islmsk_local (i) = islmsk_cice(i)
             endif
-          enddo
-      endif
+      enddo
 
       do i = 1, im
-                      islimsk(i)=islmsk_LOCAL(i)
+                      islimsk(i)=islmsk_local(i)
       enddo
 
       if (cplflx .or. cplchm) then
@@ -294,8 +290,8 @@
 !> - Set flag for sea-ice.
 
       do i = 1, im
-        flag(i) = (islmsk_LOCAL(i) == 2) .and. flag_iter(i)
-        if (flag_iter(i) .and. islmsk_LOCAL(i) < 2) then
+        flag(i) = (islmsk_local(i) == 2) .and. flag_iter(i)
+        if (flag_iter(i) .and. islmsk_local(i) < 2) then
           hice(i) = zero
           fice(i) = zero
         endif
