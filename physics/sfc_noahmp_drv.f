@@ -36,7 +36,7 @@
 
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
-     &       canopy, trans, tsurf, zorl,                                &
+     &       canopy, trans, tsurf, zorl, t2mmp, q2mp,                   &
 
 ! --- Noah MP specific
 
@@ -49,7 +49,7 @@
 !  ---  outputs:
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-     &       smcwlt2, smcref2, wet1, t2mmp, q2mp, errmsg, errflg)     
+     &       smcwlt2, smcref2, wet1, errmsg, errflg)     
 !
 !
       use machine ,   only : kind_phys
@@ -129,7 +129,8 @@
 
 !  ---  in/out:
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-     &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf,zorl
+     &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl,  &
+     &       t2mmp, q2mp
 
       real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
      &       smc, stc, slc
@@ -150,13 +151,12 @@
       integer, dimension(im)                   :: jsnowxy
       real (kind=kind_phys),dimension(im)      :: snodep
       real (kind=kind_phys),dimension(im,-2:4) :: tsnsoxy
-
+      
 !  ---  output:
 
       real (kind=kind_phys), dimension(im), intent(out) :: sncovr1,     &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
-     &    evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,wet1,  &
-     &    t2mmp,q2mp 
+     &    evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,wet1 
 
 ! error messages
       character(len=*), intent(out)    :: errmsg
@@ -669,8 +669,10 @@
         z0wrf  = 0.002
   
         eta    = fgev
-        t2mmp(i) = t2mb 
-        q2mp(i) = q2b 
+        if (dry(i)) then
+          t2mmp(i) = t2mb 
+          q2mp(i) = q2b 
+        endif
 !
 ! Non-glacial case
 !
@@ -711,8 +713,10 @@
 
        eta  = fcev + fgev + fctr     ! the flux w/m2
 
-        t2mmp(i) = t2mv*fveg+t2mb*(1-fveg) 
-        q2mp(i) = q2v*fveg+q2b*(1-fveg) 
+       if (dry(i)) then  
+         t2mmp(i) = t2mv*fveg+t2mb*(1-fveg) 
+         q2mp(i) = q2v*fveg+q2b*(1-fveg)
+       endif 
 
       endif          ! glacial split ends
 

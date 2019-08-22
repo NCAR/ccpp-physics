@@ -555,6 +555,24 @@
   kind = kind_phys
   intent = inout
   optional = F
+[t2mmp]
+  standard_name = temperature_at_2m
+  long_name = 2 meter temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[q2mp]
+  standard_name = specific_humidity_at_2m
+  long_name = 2 meter specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [snowxy]
   standard_name = number_of_snow_layers
   long_name = number of snow layers
@@ -1027,24 +1045,6 @@
   standard_name = normalized_soil_wetness
   long_name = normalized soil wetness
   units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[t2mmp]
-  standard_name = temperature_at_2m
-  long_name = 2 meter temperature
-  units = K
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[q2mp]
-  standard_name = specific_humidity_at_2m
-  long_name = 2 meter specific humidity
-  units = kg kg-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
