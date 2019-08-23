@@ -72,7 +72,7 @@ contains
     integer,              intent (in) :: latr
     real(kind=kind_phys), intent (in) :: ak(:), bk(:)
     real(kind=kind_phys), intent (in) :: dtp
-    real(kind=kind_phys), intent (in) :: cdmvgwd(:), cgwf(2) ! "scaling" controls for "old" GFS-GW schemes
+    real(kind=kind_phys), intent (in) :: cdmvgwd(2), cgwf(2) ! "scaling" controls for "old" GFS-GW schemes
     real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
     real(kind=kind_phys), intent (in) :: con_p0
 
@@ -165,15 +165,15 @@ contains
 !! | lonr             | number_of_equatorial_longitude_points                                          | number of global points in x-dir (i) along the equator       | count     | 0    | integer   |           | in     | F        |
 !! | oro              | orography                                                                      | orography                                                    | m         | 1    | real      | kind_phys | in     | F        |
 !! | oro_uf           | orography_unfiltered                                                           | unfiltered orography                                         | m         | 1    | real      | kind_phys | in     | F        |
-!! | hprime           | standard_deviation_of_subgrid_orography                                        | standard deviation of subgrid orography                      | m         | 1    | real      | kind_phys | out    | F        |
+!! | hprime           | standard_deviation_of_subgrid_orography                                        | standard deviation of subgrid orography                      | m         | 1    | real      | kind_phys | in     | F        |
 !! | nmtvr            | number_of_statistical_measures_of_subgrid_orography                            | number of topographic variables in GWD                       | count     | 0    | integer   |           | in     | F        |
-!! | oc               | convexity_of_subgrid_orography                                                 | convexity of subgrid orography                               | none      | 1    | real      | kind_phys | out    | F        |
-!! | oa4              | asymmetry_of_subgrid_orography                                                 | asymmetry of subgrid orography                               | none      | 2    | real      | kind_phys | out    | F        |
-!! | clx              | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height        | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    | 2 | real | kind_phys | out | F |
-!! | theta            | angle_from_east_of_maximum_subgrid_orographic_variations                       | angle with_respect to east of maximum subgrid orographic variations                      | degrees | 1 | real | kind_phys | out | F |
-!! | sigma            | slope_of_subgrid_orography                                                     | slope of subgrid orography                                   | none      | 1    | real      | kind_phys | out    | F        |
-!! | gamma            | anisotropy_of_subgrid_orography                                                | anisotropy of subgrid orography                              | none      | 1    | real      | kind_phys | out    | F        |
-!! | elvmax           | maximum_subgrid_orography                                                      | maximum of subgrid orography                                 | m         | 1    | real      | kind_phys | out    | F        |
+!! | oc               | convexity_of_subgrid_orography                                                 | convexity of subgrid orography                               | none      | 1    | real      | kind_phys | in     | F        |
+!! | oa4              | asymmetry_of_subgrid_orography                                                 | asymmetry of subgrid orography                               | none      | 2    | real      | kind_phys | in     | F        |
+!! | clx              | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height        | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    | 2 | real | kind_phys | in | F |
+!! | theta            | angle_from_east_of_maximum_subgrid_orographic_variations                       | angle with_respect to east of maximum subgrid orographic variations                      | degrees | 1 | real | kind_phys | in | F |
+!! | sigma            | slope_of_subgrid_orography                                                     | slope of subgrid orography                                   | none      | 1    | real      | kind_phys | in     | F        |
+!! | gamma            | anisotropy_of_subgrid_orography                                                | anisotropy of subgrid orography                              | none      | 1    | real      | kind_phys | in     | F        |
+!! | elvmax           | maximum_subgrid_orography                                                      | maximum of subgrid orography                                 | m         | 1    | real      | kind_phys | in     | F        |
 !! | do_tofd          | turb_oro_form_drag_flag                                                        | flag for turbulent orographic form drag                      | flag      | 0    | logical   |           | in     | F        |
 !! | cdmbgwd          | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag  | multiplication factors for cdmb and gwd                      | none      | 1    | real      | kind_phys | in     | F        |
 !! | xlat             | latitude                                                                       | grid latitude in radians                                     | radians   | 1    | real      | kind_phys | in     | F        |
@@ -198,10 +198,10 @@ contains
 !! | gw_dvdt          | tendency_of_y_wind_due_to_ugwp                                                 | meridional wind tendency due to UGWP                         | m s-2     | 2    | real      | kind_phys | out    | F        |
 !! | gw_dtdt          | tendency_of_air_temperature_due_to_ugwp                                        | air temperature tendency due to UGWP                         | K s-1     | 2    | real      | kind_phys | out    | F        |
 !! | gw_kdis          | eddy_mixing_due_to_ugwp                                                        | eddy mixing due to UGWP                                      | m2 s-1    | 2    | real      | kind_phys | out    | F        |
-!! | tau_tofd         | instantaneous_momentum_flux_due_to_turbulent_orographic_form_drag              | momentum flux or stress due to TOFD                          | Pa        | 2    | real      | kind_phys | out    | F        |
-!! | tau_mtb          | instantaneous_momentum_flux_due_to_mountain_blocking_drag                      | momentum flux or stress due to mountain blocking drag        | Pa        | 2    | real      | kind_phys | out    | F        |
-!! | tau_ogw          | instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag                | momentum flux or stress due to orographic gravity wave drag  | Pa        | 2    | real      | kind_phys | out    | F        |
-!! | tau_ngw          | instantaneous_momentum_flux_due_to_nonstationary_gravity_wave                  | momentum flux or stress due to nonstationary gravity waves   | Pa        | 2    | real      | kind_phys | out    | F        |
+!! | tau_tofd         | instantaneous_momentum_flux_due_to_turbulent_orographic_form_drag              | momentum flux or stress due to TOFD                          | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | tau_mtb          | instantaneous_momentum_flux_due_to_mountain_blocking_drag                      | momentum flux or stress due to mountain blocking drag        | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | tau_ogw          | instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag                | momentum flux or stress due to orographic gravity wave drag  | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | tau_ngw          | instantaneous_momentum_flux_due_to_nonstationary_gravity_wave                  | momentum flux or stress due to nonstationary gravity waves   | Pa        | 1    | real      | kind_phys | out    | F        |
 !! | zmtb             | height_of_mountain_blocking                                                    | height of mountain blocking drag                             | m         | 1    | real      | kind_phys | out    | F        |
 !! | zlwb             | height_of_low_level_wave_breaking                                              | height of low level wave breaking                            | m         | 1    | real      | kind_phys | out    | F        |
 !! | zogw             | height_of_launch_level_of_orographic_gravity_wave                              | height of launch level of orographic gravity wave            | m         | 1    | real      | kind_phys | out    | F        |
