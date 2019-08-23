@@ -4,22 +4,28 @@
 !! Gravity waves (GWs): Mesoscale GWs transport momentum, energy (heat) , and create eddy mixing in the whole atmosphere domain; Breaking and dissipating GWs deposit: (a) momentum; (b) heat (energy); and create (c) turbulent mixing of momentum, heat, and tracers
 !! To properly incorporate GW effects (a-c) unresolved by DYCOREs we need GW physics
 !! "Unified": a) all GW effects due to both dissipation/breaking; b) identical GW solvers for all GW sources; c) ability to replace solvers.
-!! Unified Formalism: 
+!! Unified Formalism:
 !! 1. GW Sources: Stochastic and physics based mechanisms for GW-excitations in the lower atmosphere, calibrated by the high-res analyses/forecasts, and observations (3 types of GW sources: orography, convection, fronts/jets).
-!! 2. GW Propagation: Unified solver for “propagation, dissipation and breaking” excited from all type of GW sources. 
+!! 2. GW Propagation: Unified solver for “propagation, dissipation and breaking” excited from all type of GW sources.
 !! 3. GW Effects: Unified representation of GW impacts on the ‘resolved’ flow for all sources (energy-balanced schemes for momentum, heat and mixing).
 !! https://www.weather.gov/media/sti/nggps/Presentations%202017/02%20NGGPS_VYUDIN_2017_.pdf
 
 module cires_ugwp
 
-    use cires_ugwp_module, only: knob_ugwp_version, cires_ugwp_mod_init, cires_ugwp_mod_finalize!, GWDPS_V0, slat_geos5_tamp, fv3_ugwp_solv2_v0, edmix_ugwp_v0, diff_1d_wtend, diff_1d_ptend
- 
+    use machine, only: kind_phys
+
+    use cires_ugwp_module, only: knob_ugwp_version, cires_ugwp_mod_init, cires_ugwp_mod_finalize
 
     implicit none
+
+    private
+
+    public cires_ugwp_init, cires_ugwp_run, cires_ugwp_finalize
 
     logical :: is_initialized = .False.
 
 contains
+
 ! ------------------------------------------------------------------------
 ! CCPP entry points for CIRES Unified Gravity Wave Physics (UGWP) scheme v0
 ! ------------------------------------------------------------------------
@@ -34,15 +40,16 @@ contains
 !! | logunit          | iounit_log                                                                    | fortran unit number for writing logfile                 | none   | 0    | integer   |           | in     | F        |
 !! | fn_nml2          | namelist_filename                                                             | namelist filename for ugwp                              | none   | 0    | character | len=*     | in     | F        |
 !! | lonr             | number_of_equatorial_longitude_points                                         | number of global points in x-dir (i) along the equator  | count  | 0    | integer   |           | in     | F        |
-!! | latr             | number_of_latitude_points                                                     | number of global points in y-dir (j) along the meridian | count  | 0    | integer   |           | none   | F        |
+!! | latr             | number_of_latitude_points                                                     | number of global points in y-dir (j) along the meridian | count  | 0    | integer   |           | in     | F        |
 !! | levs             | vertical_dimension                                                            | number of vertical levels                               | count  | 0    | integer   |           | in     | F        |
-!! | ak               | a_parameter_of_the_hybrid_coordinate                                          | a parameter for sigma pressure level calculations       | Pa     | 0    | real      | kind_phys | none   | F        |
-!! | bk               | b_parameter_of_the_hybrid_coordinate                                          | b parameter for sigma pressure level calculations       | none   | 0    | real      | kind_phys | none   | F        |
+!! | ak               | a_parameter_of_the_hybrid_coordinate                                          | a parameter for sigma pressure level calculations       | Pa     | 1    | real      | kind_phys | in     | F        |
+!! | bk               | b_parameter_of_the_hybrid_coordinate                                          | b parameter for sigma pressure level calculations       | none   | 1    | real      | kind_phys | in     | F        |
 !! | dtp              | time_step_for_physics                                                         | physics timestep                                        | s      | 0    | real      | kind_phys | in     | F        |
 !! | cdmvgwd          | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag | multiplication factors for cdmb and gwd                 | none   | 1    | real      | kind_phys | in     | F        |
-!! | cgwf             | multiplication_factors_for_convective_gravity_wave_drag                       | multiplication factor for convective GWD                | none   | 1    | real      | kind_phys | in     | F        | 
-!! | pa_rf_in         | pressure_cutoff_for_rayleigh_damping                                          | pressure level from which Rayleigh Damping is applied   | Pa     | 0    | real      | kind_phys | none   | F        |
-!! | tau_rf_in        | time_scale_for_rayleigh_damping                                               | time scale for Rayleigh damping in days                 | d      | 0    | real      | kind_phys | none   | F        |
+!! | cgwf             | multiplication_factors_for_convective_gravity_wave_drag                       | multiplication factor for convective GWD                | none   | 1    | real      | kind_phys | in     | F        |
+!! | pa_rf_in         | pressure_cutoff_for_rayleigh_damping                                          | pressure level from which Rayleigh Damping is applied   | Pa     | 0    | real      | kind_phys | in     | F        |
+!! | tau_rf_in        | time_scale_for_rayleigh_damping                                               | time scale for Rayleigh damping in days                 | d      | 0    | real      | kind_phys | in     | F        |
+!! | con_p0           | standard_atmospheric_pressure                                                 | standard atmospheric pressure                           | Pa     | 0    | real      | kind_phys | in     | F        |
 !! | errmsg           | ccpp_error_message                                                            | error message for error handling in CCPP                | none   | 0    | character | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                               | error flag for error handling in CCPP                   | flag   | 0    | integer   |           | out    | F        |
 !!
@@ -50,34 +57,31 @@ contains
 ! -----------------------------------------------------------------------
 !
     subroutine cires_ugwp_init (me, master, nlunit, logunit, fn_nml2, &
-                lonr, latr, levs, ak, bk, dtp, cdmvgwd, cgwf,  &
-                pa_rf_in, tau_rf_in, errmsg, errflg)
+                lonr, latr, levs, ak, bk, dtp, cdmvgwd, cgwf,         &
+                pa_rf_in, tau_rf_in, con_p0, errmsg, errflg)
 
-    use physcons,      only: con_p0 ! pref in VAY's code
-
-!----  initialization of cires_ugwp 
+!----  initialization of cires_ugwp
     implicit none
-    
-    integer, intent (in) :: me
-    integer, intent (in) :: master
-    integer, intent (in) :: nlunit
-    integer, intent (in) :: logunit
-    integer, intent (in) :: lonr
-    integer, intent (in) :: levs
-    integer, intent (in) :: latr   
-    real,    intent(in), dimension(levs+1):: ak, bk
-    !real(kind=kind_phys),    intent (in) :: ak(levs+1), bk(levs+1)
-    real,    intent (in) :: dtp   
-    real,    intent (in) :: cdmvgwd(2), cgwf(2)             ! "scaling" controls for "old" GFS-GW schemes     
-    real,    intent (in) :: pa_rf_in, tau_rf_in
-      
-    character(len=*), intent (in) :: fn_nml2
-    !character(len=*), parameter   :: fn_nml='input.nml' 
 
+    integer,              intent (in) :: me
+    integer,              intent (in) :: master
+    integer,              intent (in) :: nlunit
+    integer,              intent (in) :: logunit
+    integer,              intent (in) :: lonr
+    integer,              intent (in) :: levs
+    integer,              intent (in) :: latr
+    real(kind=kind_phys), intent (in) :: ak(:), bk(:)
+    real(kind=kind_phys), intent (in) :: dtp
+    real(kind=kind_phys), intent (in) :: cdmvgwd(2), cgwf(2) ! "scaling" controls for "old" GFS-GW schemes
+    real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
+    real(kind=kind_phys), intent (in) :: con_p0
+
+    character(len=*), intent (in) :: fn_nml2
+    !character(len=*), parameter   :: fn_nml='input.nml'
 
     integer :: ios
     logical :: exists
-    real    :: dxsg 
+    real    :: dxsg
     integer :: k
 
     character(len=*), intent(out) :: errmsg
@@ -86,15 +90,12 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
-
 
     if (is_initialized) return
 
-
-    call cires_ugwp_mod_init (me, master, nlunit, logunit, fn_nml2, &
-                              lonr, latr, levs, ak, bk, con_p0, dtp, cdmvgwd, cgwf, &
-                              pa_rf_in, tau_rf_in)
+    call cires_ugwp_mod_init (me, master, nlunit, logunit, fn_nml2,  &
+                              lonr, latr, levs, ak, bk, con_p0, dtp, &
+                              cdmvgwd, cgwf, pa_rf_in, tau_rf_in)
 
     if (.not.knob_ugwp_version==0) then
        write(errmsg,'(*(a))') 'Logic error: CCPP only supports version zero of UGWP'
@@ -104,14 +105,11 @@ contains
 
     is_initialized = .true.
 
-
     end subroutine cires_ugwp_init
 
 
-
-
 ! -----------------------------------------------------------------------
-! finalize of cires_ugwp   (_finalize) 
+! finalize of cires_ugwp   (_finalize)
 ! -----------------------------------------------------------------------
 
 !>@brief The subroutine finalizes the CIRES UGWP
@@ -139,11 +137,8 @@ contains
     call cires_ugwp_mod_finalize()
 
     is_initialized = .false.
-            
-    end subroutine cires_ugwp_finalize  
-    
 
-
+    end subroutine cires_ugwp_finalize
 
 
 ! -----------------------------------------------------------------------
@@ -159,7 +154,7 @@ contains
 !> \section arg_table_cires_ugwp_run Argument Table
 !! | local_name       | standard_name                                                                  | long_name                                                    | units     | rank | type      | kind      | intent | optional |
 !! |------------------|--------------------------------------------------------------------------------|--------------------------------------------------------------|-----------|------|-----------|-----------|--------|----------|
-!! | do_ugwp          | do_ugwp                                                                        | flag to activate CIRES UGWP                                  | flag      | 0    | logical   |           | none   | F        |
+!! | do_ugwp          | do_ugwp                                                                        | flag to activate CIRES UGWP                                  | flag      | 0    | logical   |           | in     | F        |
 !! | me               | mpi_rank                                                                       | MPI rank of current process                                  | index     | 0    | integer   |           | in     | F        |
 !! | master           | mpi_root                                                                       | MPI rank of master process                                   | index     | 0    | integer   |           | in     | F        |
 !! | im               | horizontal_loop_extent                                                         | horizontal                                                   | count     | 0    | integer   |           | in     | F        |
@@ -170,22 +165,22 @@ contains
 !! | lonr             | number_of_equatorial_longitude_points                                          | number of global points in x-dir (i) along the equator       | count     | 0    | integer   |           | in     | F        |
 !! | oro              | orography                                                                      | orography                                                    | m         | 1    | real      | kind_phys | in     | F        |
 !! | oro_uf           | orography_unfiltered                                                           | unfiltered orography                                         | m         | 1    | real      | kind_phys | in     | F        |
-!! | hprime           | standard_deviation_of_subgrid_orography                                        | standard deviation of subgrid orography                      | m         | 1    | real      | kind_phys | out    | F        |
+!! | hprime           | standard_deviation_of_subgrid_orography                                        | standard deviation of subgrid orography                      | m         | 1    | real      | kind_phys | in     | F        |
 !! | nmtvr            | number_of_statistical_measures_of_subgrid_orography                            | number of topographic variables in GWD                       | count     | 0    | integer   |           | in     | F        |
-!! | oc               | convexity_of_subgrid_orography                                                 | convexity of subgrid orography                               | none      | 1    | real      | kind_phys | out    | F        |
-!! | oa4              | asymmetry_of_subgrid_orography                                                 | asymmetry of subgrid orography                               | none      | 2    | real      | kind_phys | out    | F        |
-!! | clx              | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height        | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    | 2 | real | kind_phys | out | F |
-!! | theta            | angle_from_east_of_maximum_subgrid_orographic_variations                       | angle with_respect to east of maximum subgrid orographic variations                      | degrees | 1 | real | kind_phys | out | F |
-!! | sigma            | slope_of_subgrid_orography                                                     | slope of subgrid orography                                   | none      | 1    | real      | kind_phys | out    | F        |
-!! | gamma            | anisotropy_of_subgrid_orography                                                | anisotropy of subgrid orography                              | none      | 1    | real      | kind_phys | out    | F        |
-!! | elvmax           | maximum_subgrid_orography                                                      | maximum of subgrid orography                                 | m         | 1    | real      | kind_phys | out    | F        |
-!! | do_tofd          | turb_oro_form_drag_flag                                                        | flag for turbulent orographic form drag                      | flag      | 0    | logical   |           | none   | F        | 
+!! | oc               | convexity_of_subgrid_orography                                                 | convexity of subgrid orography                               | none      | 1    | real      | kind_phys | in     | F        |
+!! | oa4              | asymmetry_of_subgrid_orography                                                 | asymmetry of subgrid orography                               | none      | 2    | real      | kind_phys | in     | F        |
+!! | clx              | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height        | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    | 2 | real | kind_phys | in | F |
+!! | theta            | angle_from_east_of_maximum_subgrid_orographic_variations                       | angle with_respect to east of maximum subgrid orographic variations                      | degrees | 1 | real | kind_phys | in | F |
+!! | sigma            | slope_of_subgrid_orography                                                     | slope of subgrid orography                                   | none      | 1    | real      | kind_phys | in     | F        |
+!! | gamma            | anisotropy_of_subgrid_orography                                                | anisotropy of subgrid orography                              | none      | 1    | real      | kind_phys | in     | F        |
+!! | elvmax           | maximum_subgrid_orography                                                      | maximum of subgrid orography                                 | m         | 1    | real      | kind_phys | in     | F        |
+!! | do_tofd          | turb_oro_form_drag_flag                                                        | flag for turbulent orographic form drag                      | flag      | 0    | logical   |           | in     | F        |
 !! | cdmbgwd          | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag  | multiplication factors for cdmb and gwd                      | none      | 1    | real      | kind_phys | in     | F        |
-!! | xlat             | latitude                                                                       | grid latitude in radians                                     | radians   | 1    | real      | kind_phys | in     | F        | 
+!! | xlat             | latitude                                                                       | grid latitude in radians                                     | radians   | 1    | real      | kind_phys | in     | F        |
 !! | xlat_d           | latitude_degree                                                                | latitude in degrees                                          | degree    | 1    | real      | kind_phys | in     | F        |
 !! | sinlat           | sine_of_latitude                                                               | sine of the grid latitude                                    | none      | 1    | real      | kind_phys | in     | F        |
-!! | coslat           | cosine_of_latitude                                                             | cosine of the grid latitude                                  | none      | 1    | real      | kind_phys | in     | F        |  
-!! | area             | cell_area                                                                      | area of the grid cell                                        | m2        | 1    | real      | kind_phys | none   | F        |
+!! | coslat           | cosine_of_latitude                                                             | cosine of the grid latitude                                  | none      | 1    | real      | kind_phys | in     | F        |
+!! | area             | cell_area                                                                      | area of the grid cell                                        | m2        | 1    | real      | kind_phys | in     | F        |
 !! | ugrs             | x_wind                                                                         | zonal wind                                                   | m s-1     | 2    | real      | kind_phys | in     | F        |
 !! | vgrs             | y_wind                                                                         | meridional wind                                              | m s-1     | 2    | real      | kind_phys | in     | F        |
 !! | tgrs             | air_temperature                                                                | model layer mean temperature                                 | K         | 2    | real      | kind_phys | in     | F        |
@@ -195,50 +190,52 @@ contains
 !! | prslk            | dimensionless_exner_function_at_model_layers                                   | dimensionless Exner function at model layer centers          | none      | 2    | real      | kind_phys | in     | F        |
 !! | phii             | geopotential_at_interface                                                      | geopotential at model layer interfaces                       | m2 s-2    | 2    | real      | kind_phys | in     | F        |
 !! | phil             | geopotential                                                                   | geopotential at model layer centers                          | m2 s-2    | 2    | real      | kind_phys | in     | F        |
-!! | del              | air_pressure_difference_between_midlayers                                      | air pressure difference between midlayers                    | Pa        | 2    | real      | kind_phys | none   | F        |
+!! | del              | air_pressure_difference_between_midlayers                                      | air pressure difference between midlayers                    | Pa        | 2    | real      | kind_phys | in     | F        |
 !! | kpbl             | vertical_index_at_top_of_atmosphere_boundary_layer                             | vertical index at top atmospheric boundary layer             | index     | 1    | integer   |           | in     | F        |
-!! | dusfcg           | instantaneous_x_stress_due_to_gravity_wave_drag                                | zonal surface stress due to orographic gravity wave drag     | Pa        | 1    | real      | kind_phys | none   | F        |
-!! | dvsfcg           | instantaneous_y_stress_due_to_gravity_wave_drag                                | meridional surface stress due to orographic gravity wave drag| Pa        | 1    | real      | kind_phys | none   | F        |
-!! | gw_dudt          | tendency_of_x_wind_due_to_ugwp                                                 | zonal wind tendency due to UGWP                              | m s-2     | 2    | real      | kind_phys | none   | F        |
-!! | gw_dvdt          | tendency_of_y_wind_due_to_ugwp                                                 | meridional wind tendency due to UGWP                         | m s-2     | 2    | real      | kind_phys | none   | F        |
-!! | gw_dtdt          | tendency_of_air_temperature_due_to_ugwp                                        | air temperature tendency due to UGWP                         | K s-1     | 2    | real      | kind_phys | none   | F        |
-!! | gw_kdis          | eddy_mixing_due_to_ugwp                                                        | eddy mixing due to UGWP                                      | m2 s-1    | 2    | real      | kind_phys | none   | F        |
-!! | tau_tofd         | instantaneous_momentum_flux_due_to_turbulent_orographic_form_drag              | momentum flux or stress due to TOFD                          | Pa        | 2    | real      | kind_phys | none   | F        | 
-!! | tau_mtb          | instantaneous_momentum_flux_due_to_mountain_blocking_drag                      | momentum flux or stress due to mountain blocking drag        | Pa        | 2    | real      | kind_phys | none   | F        | 
-!! | tau_ogw          | instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag                | momentum flux or stress due to orographic gravity wave drag  | Pa        | 2    | real      | kind_phys | none   | F        | 
-!! | tau_ngw          | instantaneous_momentum_flux_due_to_nonstationary_gravity_wave                  | momentum flux or stress due to nonstationary gravity waves   | Pa        | 2    | real      | kind_phys | none   | F        | 
-!! | zmtb             | height_of_mountain_blocking                                                    | height of mountain blocking drag                             | m         | 1    | real      | kind_phys | none   | F        |
-!! | zlwb             | height_of_low_level_wave_breaking                                              | height of low level wave breaking                            | m         | 1    | real      | kind_phys | none   | F        |   
-!! | zogw             | height_of_launch_level_of_orographic_gravity_wave                              | height of launch level of orographic gravity wave            | m         | 1    | real      | kind_phys | none   | F        | 
-!! | dudt_mtb         | instantaneous_change_in_x_wind_due_to_mountain_blocking_drag                   | instantaneous change in x wind due to mountain blocking drag | m s-2     | 2    | real      | kind_phys | none   | F        | 
-!! | dudt_ogw         | instantaneous_change_in_x_wind_due_to_orographic_gravity_wave_drag             | instantaneous change in x wind due to orographic gw drag     | m s-2     | 2    | real      | kind_phys | none   | F        | 
-!! | dudt_tms         | instantaneous_change_in_x_wind_due_to_turbulent_orographic_form_drag           | instantaneous change in x wind due to TOFD                   | m s-2     | 2    | real      | kind_phys | none   | F        | 
-!! | dudt             | tendency_of_x_wind_due_to_model_physics                                        | zonal wind tendency due to model physics                     | m s-2     | 2    | real      | kind_phys | none   | F        |
-!! | dvdt             | tendency_of_y_wind_due_to_model_physics                                        | meridional wind tendency due to model physics                | m s-2     | 2    | real      | kind_phys | none   | F        |
-!! | dtdt             | tendency_of_air_temperature_due_to_model_physics                               | air temperature tendency due to model physics                | K s-1     | 2    | real      | kind_phys | none   | F        |
-!! | rdxzb            | level_of_dividing_streamline                                                   | level of the dividing streamline                             | none      | 1    | real      | kind_phys | none   | F        |
+!! | dusfcg           | instantaneous_x_stress_due_to_gravity_wave_drag                                | zonal surface stress due to orographic gravity wave drag     | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | dvsfcg           | instantaneous_y_stress_due_to_gravity_wave_drag                                | meridional surface stress due to orographic gravity wave drag| Pa        | 1    | real      | kind_phys | out    | F        |
+!! | gw_dudt          | tendency_of_x_wind_due_to_ugwp                                                 | zonal wind tendency due to UGWP                              | m s-2     | 2    | real      | kind_phys | out    | F        |
+!! | gw_dvdt          | tendency_of_y_wind_due_to_ugwp                                                 | meridional wind tendency due to UGWP                         | m s-2     | 2    | real      | kind_phys | out    | F        |
+!! | gw_dtdt          | tendency_of_air_temperature_due_to_ugwp                                        | air temperature tendency due to UGWP                         | K s-1     | 2    | real      | kind_phys | out    | F        |
+!! | gw_kdis          | eddy_mixing_due_to_ugwp                                                        | eddy mixing due to UGWP                                      | m2 s-1    | 2    | real      | kind_phys | out    | F        |
+!! | tau_tofd         | instantaneous_momentum_flux_due_to_turbulent_orographic_form_drag              | momentum flux or stress due to TOFD                          | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | tau_mtb          | instantaneous_momentum_flux_due_to_mountain_blocking_drag                      | momentum flux or stress due to mountain blocking drag        | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | tau_ogw          | instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag                | momentum flux or stress due to orographic gravity wave drag  | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | tau_ngw          | instantaneous_momentum_flux_due_to_nonstationary_gravity_wave                  | momentum flux or stress due to nonstationary gravity waves   | Pa        | 1    | real      | kind_phys | out    | F        |
+!! | zmtb             | height_of_mountain_blocking                                                    | height of mountain blocking drag                             | m         | 1    | real      | kind_phys | out    | F        |
+!! | zlwb             | height_of_low_level_wave_breaking                                              | height of low level wave breaking                            | m         | 1    | real      | kind_phys | out    | F        |
+!! | zogw             | height_of_launch_level_of_orographic_gravity_wave                              | height of launch level of orographic gravity wave            | m         | 1    | real      | kind_phys | out    | F        |
+!! | dudt_mtb         | instantaneous_change_in_x_wind_due_to_mountain_blocking_drag                   | instantaneous change in x wind due to mountain blocking drag | m s-2     | 2    | real      | kind_phys | out    | F        |
+!! | dudt_ogw         | instantaneous_change_in_x_wind_due_to_orographic_gravity_wave_drag             | instantaneous change in x wind due to orographic gw drag     | m s-2     | 2    | real      | kind_phys | out    | F        |
+!! | dudt_tms         | instantaneous_change_in_x_wind_due_to_turbulent_orographic_form_drag           | instantaneous change in x wind due to TOFD                   | m s-2     | 2    | real      | kind_phys | out    | F        |
+!! | dudt             | tendency_of_x_wind_due_to_model_physics                                        | zonal wind tendency due to model physics                     | m s-2     | 2    | real      | kind_phys | inout  | F        |
+!! | dvdt             | tendency_of_y_wind_due_to_model_physics                                        | meridional wind tendency due to model physics                | m s-2     | 2    | real      | kind_phys | inout  | F        |
+!! | dtdt             | tendency_of_air_temperature_due_to_model_physics                               | air temperature tendency due to model physics                | K s-1     | 2    | real      | kind_phys | inout  | F        |
+!! | rdxzb            | level_of_dividing_streamline                                                   | level of the dividing streamline                             | none      | 1    | real      | kind_phys | out    | F        |
+!! | con_g            | gravitational_acceleration                                                     | gravitational acceleration                                   | m s-2     | 0    | real      | kind_phys | in     | F        |
+!! | con_pi           | pi                                                                             | ratio of a circle's circumference to its diameter            | radians   | 0    | real      | kind_phys | in     | F        |
+!! | con_cp           | specific_heat_of_dry_air_at_constant_pressure                                  | specific heat !of dry air at constant pressure               | J kg-1 K-1| 0    | real      | kind_phys | in     | F        |
+!! | con_rd           | gas_constant_dry_air                                                           | ideal gas constant for dry air                               | J kg-1 K-1| 0    | real      | kind_phys | in     | F        |
+!! | con_rv           | gas_constant_water_vapor                                                       | ideal gas constant for water vapor                           | J kg-1 K-1| 0    | real      | kind_phys | in     | F        |
+!! | con_fvirt        | ratio_of_vapor_to_dry_air_gas_constants_minus_one                              | rv/rd - 1 (rv = ideal gas constant for water vapor)          | none      | 0    | real      | kind_phys | in     | F        |
 !! | errmsg           | ccpp_error_message                                                             | error message for error handling in CCPP                     | none      | 0    | character | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                                | error flag for error handling in CCPP                        | flag      | 0    | integer   |           | out    | F        |
 !!
 #endif
 
 ! subroutines original
-     subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr,  &
-         oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,& 
-         do_tofd,  cdmbgwd,  xlat, xlat_d, sinlat, coslat, area,               &
-         ugrs, vgrs, tgrs, qgrs, prsi, prsl, prslk, phii, phil,                &
-         del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,        &
-         tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                & 
-         dudt_mtb,dudt_ogw, dudt_tms, dudt, dvdt, dtdt, rdxzb,                 &
-         errmsg, errflg)
-
-               
-    use machine,       only: kind_phys
-    use physcons,      only: con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt
+     subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
+         oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
+         do_tofd,  cdmbgwd, xlat, xlat_d, sinlat, coslat, area,                        &
+         ugrs, vgrs, tgrs, qgrs, prsi, prsl, prslk, phii, phil,                        &
+         del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
+         tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
+         dudt_mtb,dudt_ogw, dudt_tms, dudt, dvdt, dtdt, rdxzb,                         &
+         con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt, errmsg, errflg)
 
     implicit none
 
-    ! interface variables     
+    ! interface variables
     integer,                 intent(in) :: me, master, im, levs, ntrac, kdt, lonr, nmtvr
     integer,                 intent(in), dimension(im)       :: kpbl
     real(kind=kind_phys),    intent(in), dimension(im)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma, elvmax
@@ -250,7 +247,7 @@ contains
     real(kind=kind_phys),    intent(in) :: dtp, cdmbgwd(2)
     logical,                 intent(in) :: do_ugwp, do_tofd
 
-    real(kind=kind_phys),    intent(out), dimension(im)      :: dusfcg, dvsfcg 
+    real(kind=kind_phys),    intent(out), dimension(im)      :: dusfcg, dvsfcg
     real(kind=kind_phys),    intent(out), dimension(im)      :: zmtb, zlwb, zogw, rdxzb
     real(kind=kind_phys),    intent(out), dimension(im)      :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
     real(kind=kind_phys),    intent(out), dimension(im, levs):: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
@@ -258,9 +255,10 @@ contains
 
     real(kind=kind_phys),    intent(inout), dimension(im, levs):: dudt, dvdt, dtdt
 
+    real(kind=kind_phys),    intent(in) :: con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt
+
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
-
 
     ! local variables
     integer :: i, k
@@ -273,17 +271,16 @@ contains
     ! switches that activate impact of OGWs and NGWs (WL* how to deal with them? *WL)
     real(kind=kind_phys), parameter :: pogw=1., pngw=1., pked=1.
 
-
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
     ! wrap everything in a do_ugwp 'if test' in order not to break the namelist functionality
-    IF (do_ugwp) THEN
+    if (do_ugwp) then
 
         ! topo paras
         ! w/ orographic effects
-        if(nmtvr == 14)then         
+        if(nmtvr == 14)then
             ! calculate sgh30 for TOFD
             sgh30 = abs(oro - oro_uf)
         ! w/o orographic effects
@@ -308,7 +305,7 @@ contains
         call fv3_ugwp_solv2_v0(im, levs, dtp, tgrs, ugrs, vgrs,qgrs(:,:,1), &
              prsl, prsi, phil, xlat_d, sinlat, coslat, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, &
              tau_ngw, me, master, kdt)
-    
+
         if(pogw /= 0.)then
 
             do k=1,levs
@@ -321,16 +318,16 @@ contains
                 ! accumulation of tendencies for CCPP to replicate EMC-physics updates (!! removed in latest code commit to VLAB)
                 dudt(i,k) = dudt(i,k) +gw_dudt(i,k)
                 dvdt(i,k) = dvdt(i,k) +gw_dvdt(i,k)
-                dtdt(i,k) = dtdt(i,k) +gw_dtdt(i,k)  
+                dtdt(i,k) = dtdt(i,k) +gw_dtdt(i,k)
             enddo
             enddo
 
         else
 
             tau_mtb = 0.  ; tau_ogw =0.;     tau_tofd =0.
-            dudt_mtb =0. ; dudt_ogw = 0.;  dudt_tms=0.  
+            dudt_mtb =0. ; dudt_ogw = 0.;  dudt_tms=0.
 
-        endif 
+        endif
 
         return
 
@@ -342,7 +339,7 @@ contains
         ! 3) application of "eddy"-diffusion to "smooth" UGWP-related tendencies
         !------------------------------------------------------------------------------
         ed_dudt(:,:) =0.; ed_dvdt(:,:) = 0. ; ed_dtdt(:,:) = 0.
-    
+
         call edmix_ugwp_v0(im, levs, dtp, tgrs, ugrs, vgrs, qgrs(:,:,1), &
              del, prsl, prsi, phil, prslk, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, &
              ed_dudt, ed_dvdt, ed_dtdt, me, master, kdt)
@@ -352,12 +349,9 @@ contains
 
 
 
-    ENDIF ! do_ugwp
-
+    endif ! do_ugwp
 
     end subroutine cires_ugwp_run
-
-
 
 
 end module cires_ugwp
