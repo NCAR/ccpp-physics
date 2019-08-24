@@ -111,7 +111,9 @@ end module noahmp_glacier_globals
 
 module noahmp_glacier_routines
   use noahmp_glacier_globals
+#ifndef CCPP
   use  module_wrf_utl
+#endif
   implicit none
 
   public  :: noahmp_options_glacier
@@ -158,7 +160,12 @@ contains
                    fsa     ,fsr     ,fira    ,fsh     ,fgev    ,ssoil   , & ! out : 
                    trad    ,edir    ,runsrf  ,runsub  ,sag     ,albedo  , & ! out :
                    qsnbot  ,ponding ,ponding1,ponding2,t2m     ,q2e     , & ! out :
+#ifdef CCPP
+                   emissi,  fpice   ,ch2b    , esnow, errmsg, errflg) 
+#else
                    emissi,  fpice   ,ch2b    , esnow) 
+#endif
+                   
 
 ! --------------------------------------------------------------------------------------------------
 ! initial code: guo-yue niu, oct. 2007
@@ -232,6 +239,11 @@ contains
   real                           , intent(out)   :: ch2b
   real                           , intent(out)   :: esnow
 
+#ifdef CCPP  
+  character(len=*), intent(inout)    :: errmsg
+  integer,          intent(inout)    :: errflg
+#endif
+  
 ! local
   integer                                        :: iz     !do-loop index
   integer, dimension(-nsnow+1:nsoil)             :: imelt  !phase change index [1-melt; 2-freeze]
@@ -529,7 +541,15 @@ contains
 
     fire = lwdn + fira
 
-    if(fire <=0.) call wrf_error_fatal("stop in noah-mp: emitted longwave <0")
+    if(fire <=0.) then
+#ifdef CCPP
+      errflg = 1
+      errmsg = "stop in noah-mp: emitted longwave <0"
+      return 
+#else
+      call wrf_error_fatal("stop in noah-mp: emitted longwave <0")
+#endif
+    end if
 
     ! compute a net emissivity
     emissi = emg
@@ -1252,7 +1272,13 @@ contains
   
     if(zlvl <= zpd) then
        write(*,*) 'critical glacier problem: zlvl <= zpd; model stops', zlvl, zpd
+#ifdef CCPP
+       errflg = 1
+       errmsg = "stop in noah-mp glacier"
+       return 
+#else
        call wrf_error_fatal("stop in noah-mp glacier")
+#endif
     endif
 
     tmpcm = log((zlvl-zpd) / z0m)
@@ -2918,17 +2944,33 @@ contains
      write(*,*) "fsa    =",fsa
      write(*,*) "fsr    =",fsr
      write(message,*) 'errsw =',errsw
+#ifdef CCPP
+     errflg = 1
+     errmsg = trim(message)//NEW_LINE('A')//"radiation budget problem in noahmp glacier"
+     return 
+#else
      call wrf_message(trim(message))
      call wrf_error_fatal("radiation budget problem in noahmp glacier")
+#endif
    end if
 
    erreng = sag-(fira+fsh+fgev+ssoil)
    if(erreng > 0.01) then
       write(message,*) 'erreng =',erreng
+#ifdef CCPP
+      errmsg = trim(message)    
+#else
       call wrf_message(trim(message))
+#endif  
       write(message,'(i6,1x,i6,1x,5f10.4)')iloc,jloc,sag,fira,fsh,fgev,ssoil
-      call wrf_message(trim(message))
-      call wrf_error_fatal("energy budget problem in noahmp glacier")
+#ifdef CCPP
+     errflg = 1
+     errmsg = trim(errmsg)//NEW_LINE('A')//"energy budget problem in noahmp glacier"
+     return 
+#else
+     call wrf_message(trim(message))
+     call wrf_error_fatal("energy budget problem in noahmp glacier")
+#endif
    end if
 
    end_wb = sneqv

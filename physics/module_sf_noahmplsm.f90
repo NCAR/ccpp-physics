@@ -1,5 +1,7 @@
 module module_sf_noahmplsm
+#ifndef CCPP  
   use  module_wrf_utl
+#endif
 
   implicit none
 
@@ -303,7 +305,11 @@ contains
 		   shg     , shc     , shb     , evg     , evb     , ghv     , & ! out :
 		   ghb     , irg     , irc     , irb     , tr      , evc     , & ! out :
 		   chleaf  , chuc    , chv2    , chb2    , fpice   , pahv    , &
-                   pahg    , pahb    , pah     , esnow) 
+#ifdef CCPP
+                   pahg    , pahb    , pah     , esnow, errmsg, errflg)
+#else
+                   pahg    , pahb    , pah     , esnow)
+#endif
 
 ! --------------------------------------------------------------------------------------------------
 ! initial code: guo-yue niu, oct. 2007
@@ -432,6 +438,10 @@ contains
   real              :: q1
   real, intent(out) :: emissi
 !jref:end
+#ifdef CCPP
+  character(len=*), intent(inout)    :: errmsg
+  integer,          intent(inout)    :: errflg
+#endif
 
 ! local
   integer                                        :: iz     !do-loop index
@@ -606,7 +616,13 @@ contains
         if(fveg <= 0.05) fveg = 0.05
      else
         write(*,*) "-------- fatal called in sflx -----------"
+#ifdef CCPP
+        errflg = 1
+        errmsg = "namelist parameter dveg unknown"
+        return 
+#else
         call wrf_error_fatal("namelist parameter dveg unknown") 
+#endif
      endif
      if(parameters%urban_flag .or. vegtyp == parameters%isbarren) fveg = 0.0
      if(elai+esai == 0.0) fveg = 0.0
@@ -1271,36 +1287,89 @@ contains
    write(*,*) "fsa    =",fsa
 !jref:end   
       write(message,*) 'errsw =',errsw
+#ifdef CCPP
+      errflg = 1
+      errmsg = trim(message)//NEW_LINE('A')//"stop in noah-mp"
+      return 
+#else
       call wrf_message(trim(message))
       call wrf_error_fatal("stop in noah-mp")
+#endif
    end if
 
    erreng = sav+sag-(fira+fsh+fcev+fgev+fctr+ssoil) +pah
 !   erreng = fveg*sav+sag-(fira+fsh+fcev+fgev+fctr+ssoil)
    if(abs(erreng) > 0.01) then
       write(message,*) 'erreng =',erreng,' at i,j: ',iloc,jloc
+#ifdef CCPP
+      errmsg = trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "net solar:       ",fsa
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "net longwave:    ",fira
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "total sensible:  ",fsh
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "canopy evap:     ",fcev
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "ground evap:     ",fgev
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "transpiration:   ",fctr
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "total ground:    ",ssoil
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,4f10.4)') "precip advected: ",pah,pahv,pahg,pahb
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "precip: ",prcp
+#ifdef CCPP
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
       call wrf_message(trim(message))
+#endif
       write(message,'(a17,f10.4)') "veg fraction: ",fveg
+#ifdef CCPP
+      errflg = 1
+      errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)//NEW_LINE('A')//"energy budget problem in noahmp lsm"
+      return
+#else
       call wrf_message(trim(message))
       call wrf_error_fatal("energy budget problem in noahmp lsm")
+#endif
+      
    end if
 
    if (ist == 1) then                                       !soil
@@ -1880,7 +1949,14 @@ contains
        write(6,*) 'input of shdfac with lai'
        write(6,*) iloc, jloc, 'shdfac=',fveg,'vai=',vai,'tv=',tv,'tg=',tg
        write(6,*) 'lwdn=',lwdn,'fira=',fira,'snowh=',snowh
-       call wrf_error_fatal("stop in noah-mp")
+#ifdef CCPP
+      errflg = 1
+      errmsg = "stop in noah-mp"
+      return
+#else
+      call wrf_error_fatal("stop in noah-mp")
+#endif
+       
     end if
 
     ! compute a net emissivity
@@ -3396,16 +3472,39 @@ contains
         uc = ur*log((hcan-zpd+z0m)/z0m)/log(zlvl/z0m)   ! mb: add zpd v3.7
         if((hcan-zpd) <= 0.) then
           write(message,*) "critical problem: hcan <= zpd"
+#ifdef CCPP
+          errmsg = trim(message)
+#else
           call wrf_message ( message )
+#endif
           write(message,*) 'i,j point=',iloc, jloc
+#ifdef CCPP
+          errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
           call wrf_message ( message )
+#endif
           write(message,*) 'hcan  =',hcan
+#ifdef CCPP
+          errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
           call wrf_message ( message )
+#endif
           write(message,*) 'zpd   =',zpd
+#ifdef CCPP
+          errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
           call wrf_message ( message )
+#endif
           write (message, *) 'snowh =',snowh
+#ifdef CCPP
+          errflg = 1
+          errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)//NEW_LINE('A')//"critical problem in module_sf_noahmplsm:vegeflux"
+          return
+#else
           call wrf_message ( message )
           call wrf_error_fatal ( "critical problem in module_sf_noahmplsm:vegeflux" )
+#endif
+          
         end if
 
 ! prepare for longwave rad.
@@ -4124,7 +4223,13 @@ contains
   
     if(zlvl <= zpd) then
        write(*,*) 'critical problem: zlvl <= zpd; model stops'
-       call wrf_error_fatal("stop in noah-mp")
+#ifdef CCPP
+       errflg = 1
+       errmsg = "stop in noah-mp"
+       return
+#else
+      call wrf_error_fatal("stop in noah-mp")
+#endif
     endif
 
     tmpcm = log((zlvl-zpd) / z0m)
@@ -4833,10 +4938,18 @@ contains
 
     if (abs(err_est) > 1.) then    ! w/m2
        write(message,*) 'tsnosoi is losing(-)/gaining(+) false energy',err_est,' w/m2'
+#ifdef CCPP
+       errmsg = trim(message)
+#else
        call wrf_message(trim(message))
+#endif
        write(message,'(i6,1x,i6,1x,i3,f18.13,5f20.12)') &
             iloc, jloc, ist,err_est,ssoil,snowh,tg,stc(isnow+1),eflxb
+#ifdef CCPP
+       errmsg = trim(errmsg)//NEW_LINE('A')//trim(message)
+#else
        call wrf_message(trim(message))
+#endif
        !niu      stop
     end if
 
@@ -5397,7 +5510,11 @@ contains
 ! ----------------------------------------------------------------------
        if (kcount == 0) then
           write(message, '("flerchinger used in new version. iterations=", i6)') nlog
+#ifdef CCPP
+          errmsg = trim(message)
+#else
           call wrf_message(trim(message))
+#endif
           fk = ( ( (hfus / (grav * ( - parameters%psisat)))*                    &
                ( (tkelv - tfrz)/ tkelv))** ( -1/ bx))* parameters%smcmax
           if (fk < 0.02) fk = 0.02

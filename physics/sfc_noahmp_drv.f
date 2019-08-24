@@ -628,8 +628,15 @@
      &             fsa     ,fsr     ,fira    ,fsh     ,fgev  ,ssoil   , & ! out : 
      &             trad    ,edir    ,runsrf  ,runsub  ,sag   ,albedo  , & ! out : albedo is surface albedo
      &             qsnbot  ,ponding ,ponding1,ponding2,t2mb  ,q2b     , & ! out :
+#ifdef CCPP
+     &             emissi  ,fpice   ,ch2b    ,esnow, errmsg, errflg )
+#else
      &             emissi  ,fpice   ,ch2b    ,esnow )
+#endif
 
+#ifdef CCPP
+       if (errflg /= 0) return
+#endif
 !
 ! in/out and outs
 !
@@ -710,8 +717,15 @@
      &        shg     , shc     , shb     , evg     , evb     , ghv    ,&! out :
      &        ghb     , irg     , irc     , irb     , tr      , evc    ,& ! out :
      &        chleaf  , chuc    , chv2    , chb2    , fpice   , pahv   ,& ! out
-     &        pahg    , pahb    , pah     , esnow   ) 
+#ifdef CCPP
+     &        pahg    , pahb    , pah     , esnow, errmsg, errflg   )
+#else
+     &        pahg    , pahb    , pah     , esnow   )
+#endif
 
+#ifdef CCPP
+       if (errflg /= 0) return
+#endif
 
        eta  = fcev + fgev + fctr     ! the flux w/m2
 
