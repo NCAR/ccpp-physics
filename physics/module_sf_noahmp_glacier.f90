@@ -294,10 +294,18 @@ contains
                          tbot   ,zbot   ,zsnso  ,dzsnso ,                 & !in
                          tg     ,stc    ,snowh  ,sneqv  ,sneqvo ,sh2o   , & !inout
                          smc    ,snice  ,snliq  ,albold ,cm     ,ch     , & !inout
+#ifdef CCPP
+                         tauss  ,qsfc   ,errmsg ,errflg ,                 & !inout
+#else
                          tauss  ,qsfc   ,                                 & !inout
+#endif
                          imelt  ,snicev ,snliqv ,epore  ,qmelt  ,ponding, & !out
-		         sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
-		         trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi, ch2b )   !out
+                         sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
+                         trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi, ch2b )   !out
+
+#ifdef CCPP
+    if (errflg /= 0) return
+#endif
 
     sice = max(0.0, smc - sh2o)   
     sneqvo  = sneqv
@@ -324,7 +332,15 @@ contains
 
      call error_glacier (iloc   ,jloc   ,swdown ,fsa    ,fsr    ,fira   , &
                          fsh    ,fgev   ,ssoil  ,sag    ,prcp   ,edir   , &
-		         runsrf ,runsub ,sneqv  ,dt     ,beg_wb )
+#ifdef CCPP
+                         runsrf ,runsub ,sneqv  ,dt     ,beg_wb, errmsg, errflg )
+#else
+                         runsrf ,runsub ,sneqv  ,dt     ,beg_wb )
+#endif
+
+#ifdef CCPP
+     if (errflg /= 0) return
+#endif
 
     if(snowh <= 1.e-6 .or. sneqv <= 1.e-3) then
      snowh = 0.0
@@ -399,7 +415,11 @@ contains
                              tbot   ,zbot   ,zsnso  ,dzsnso ,                 & !in
                              tg     ,stc    ,snowh  ,sneqv  ,sneqvo ,sh2o   , & !inout
                              smc    ,snice  ,snliq  ,albold ,cm     ,ch     , & !inout
+#ifdef CCPP
+                             tauss  ,qsfc   ,errmsg, errflg,                  & !inout
+#else
                              tauss  ,qsfc   ,                                 & !inout
+#endif
                              imelt  ,snicev ,snliqv ,epore  ,qmelt  ,ponding, & !out
                              sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
                              trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi, ch2b )   !out
@@ -449,6 +469,11 @@ contains
   real                              , intent(inout) :: ch     !sensible heat exchange coefficient
   real                              , intent(inout) :: tauss  !snow aging factor
   real                              , intent(inout) :: qsfc   !mixing ratio at lowest model layer
+  
+#ifdef CCPP  
+  character(len=*)                  , intent(inout) :: errmsg
+  integer                           , intent(inout) :: errflg
+#endif
 
 ! outputs
   integer, dimension(-nsnow+1:nsoil), intent(out)   :: imelt  !phase change index [1-melt; 2-freeze]
@@ -531,11 +556,15 @@ contains
 
     call glacier_flux (nsoil   ,nsnow   ,emg     ,isnow   ,df      ,dzsnso  ,z0mg    , & !in
                        zlvl    ,zpd     ,qair    ,sfctmp  ,rhoair  ,sfcprs  , & !in
-		       ur      ,gamma   ,rsurf   ,lwdn    ,rhsur   ,smc     , & !in
-		       eair    ,stc     ,sag     ,snowh   ,lathea  ,sh2o    , & !in
-		       cm      ,ch      ,tg      ,qsfc    ,          & !inout
-		       fira    ,fsh     ,fgev    ,ssoil   ,          & !out
-		       t2m     ,q2e     ,ch2b)                         !out 
+                       ur      ,gamma   ,rsurf   ,lwdn    ,rhsur   ,smc     , & !in
+                       eair    ,stc     ,sag     ,snowh   ,lathea  ,sh2o    , & !in
+#ifdef CCPP
+                       cm      ,ch      ,tg      ,qsfc    ,errmsg  ,errflg  , & !inout
+#else
+                       cm      ,ch      ,tg      ,qsfc    ,          & !inout
+#endif
+                       fira    ,fsh     ,fgev    ,ssoil   ,          & !out
+                       t2m     ,q2e     ,ch2b)                         !out 
 
 !energy balance at surface: sag=(irb+shb+evb+ghb)
 
@@ -952,9 +981,13 @@ contains
 ! ==================================================================================================
   subroutine glacier_flux (nsoil   ,nsnow   ,emg     ,isnow   ,df      ,dzsnso  ,z0m     , & !in
                            zlvl    ,zpd     ,qair    ,sfctmp  ,rhoair  ,sfcprs  , & !in
-			   ur      ,gamma   ,rsurf   ,lwdn    ,rhsur   ,smc     , & !in
-			   eair    ,stc     ,sag     ,snowh   ,lathea  ,sh2o    , & !in
+                           ur      ,gamma   ,rsurf   ,lwdn    ,rhsur   ,smc     , & !in
+                           eair    ,stc     ,sag     ,snowh   ,lathea  ,sh2o    , & !in
+#ifdef CCPP
+                           cm      ,ch      ,tgb     ,qsfc    ,errmsg  ,errflg  , & !inout
+#else
                            cm      ,ch      ,tgb     ,qsfc    ,          & !inout
+#endif
                            irb     ,shb     ,evb     ,ghb     ,          & !out
                            t2mb    ,q2b     ,ehb2)                         !out 
 
@@ -1001,7 +1034,12 @@ contains
   real,                         intent(inout) :: ch     !sensible heat exchange coefficient
   real,                         intent(inout) :: tgb    !ground temperature (k)
   real,                         intent(inout) :: qsfc   !mixing ratio at lowest model layer
-
+  
+#ifdef CCPP  
+  character(len=*),             intent(inout) :: errmsg
+  integer,                      intent(inout) :: errflg
+#endif
+  
 ! output
 ! -sab + irb[tg] + shb[tg] + evb[tg] + ghb[tg] = 0
   real,                           intent(out) :: irb    !net longwave rad (w/m2)   [+ to atm]
@@ -1073,9 +1111,16 @@ contains
 
         call sfcdif1_glacier(iter   ,zlvl   ,zpd    ,z0h    ,z0m    , & !in
                      qair   ,sfctmp ,h      ,rhoair ,mpe    ,ur     , & !in
-       &             moz    ,mozsgn ,fm     ,fh     ,fm2    ,fh2    , & !inout
+#ifdef CCPP
+       &             moz ,mozsgn ,fm ,fh ,fm2 ,fh2   ,errmsg, errflg, & !inout
+#else 
+       &             moz ,mozsgn ,fm ,fh ,fm2 ,fh2                  , & !inout
+#endif
        &             fv     ,cm     ,ch     ,ch2)                       !out
 
+#ifdef CCPP
+        if (errflg /= 0) return
+#endif
         ramb = max(1.,1./(cm*ur))
         rahb = max(1.,1./(ch*ur))
         rawb = rahb
@@ -1212,7 +1257,11 @@ contains
 
   subroutine sfcdif1_glacier(iter   ,zlvl   ,zpd    ,z0h    ,z0m    , & !in
                      qair   ,sfctmp ,h      ,rhoair ,mpe    ,ur     , & !in
-       &             moz    ,mozsgn ,fm     ,fh     ,fm2    ,fh2    , & !inout
+#ifdef CCPP
+       &             moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,errmsg ,errflg  , & !inout
+#else
+       &             moz ,mozsgn ,fm ,fh ,fm2 ,fh2                  , & !inout
+#endif
        &             fv     ,cm     ,ch     ,ch2     )                  !out
 ! -------------------------------------------------------------------------------------------------
 ! computing surface drag coefficient cm for momentum and ch for heat
@@ -1239,6 +1288,11 @@ contains
     real,              intent(inout) :: fh     !sen heat stability correction, weighted by prior iters
     real,              intent(inout) :: fm2    !sen heat stability correction, weighted by prior iters
     real,              intent(inout) :: fh2    !sen heat stability correction, weighted by prior iters
+
+#ifdef CCPP  
+    character(len=*),  intent(inout) :: errmsg
+    integer,           intent(inout) :: errflg
+#endif
 
 ! outputs
     real,                intent(out) :: fv     !friction velocity (m/s)
@@ -2906,7 +2960,11 @@ contains
 ! ==================================================================================================
   subroutine error_glacier (iloc   ,jloc   ,swdown ,fsa    ,fsr    ,fira   , &
                             fsh    ,fgev   ,ssoil  ,sag    ,prcp   ,edir   , &
-		            runsrf ,runsub ,sneqv  ,dt     ,beg_wb )
+#ifdef CCPP
+                           runsrf ,runsub ,sneqv  ,dt     ,beg_wb, errmsg, errflg )
+#else 
+                           runsrf ,runsub ,sneqv  ,dt     ,beg_wb )
+#endif
 ! --------------------------------------------------------------------------------------------------
 ! check surface energy balance and water balance
 ! --------------------------------------------------------------------------------------------------
@@ -2931,6 +2989,11 @@ contains
   real                           , intent(in) :: sneqv  !snow water eqv. [mm]
   real                           , intent(in) :: dt     !time step [sec]
   real                           , intent(in) :: beg_wb !water storage at begin of a timesetp [mm]
+
+#ifdef CCPP  
+  character(len=*)               , intent(inout) :: errmsg
+  integer                        , intent(inout) :: errflg
+#endif
 
   real                                        :: end_wb !water storage at end of a timestep [mm]
   real                                        :: errwat !error in water balance [mm/timestep]

@@ -645,7 +645,7 @@ contains
                  elai   ,esai   ,fwet   ,foln   ,         & !in
                  fveg   ,pahv   ,pahg   ,pahb   ,                 & !in
                  qsnow  ,dzsnso ,lat    ,canliq ,canice ,iloc, jloc , & !in
-		 z0wrf  ,                                         &
+                 z0wrf  ,                                         &
                  imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
                  sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
                  tauy   ,fira   ,fsh    ,fcev   ,fgev   ,fctr   , & !out
@@ -654,16 +654,22 @@ contains
                  tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                  sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                  albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , & !inout
+#ifdef CCPP
+                 tauss  ,errmsg ,errflg ,                         & !inout
+#else
                  tauss  ,                                         & !inout
+#endif
 !jref:start
                  qc     ,qsfc   ,psfc   , & !in 
                  t2mv   ,t2mb  ,fsrv   , &
                  fsrg   ,rssun   ,rssha ,bgap   ,wgap, tgv,tgb,&
                  q1     ,q2v    ,q2b    ,q2e    ,chv   ,chb     , & !out
                  emissi ,pah    ,                                 &
-		     shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
+                 shg,shc,shb,evg,evb,ghv,ghb,irg,irc,irb,tr,evc,chleaf,chuc,chv2,chb2 )                                            !out
 !jref:end
-
+#ifdef CCPP
+    if (errflg /= 0) return
+#endif
     sice(:) = max(0.0, smc(:) - sh2o(:))   
     sneqvo  = sneqv
 
@@ -709,7 +715,15 @@ contains
                  etran  ,edir   ,runsrf ,runsub ,dt     ,nsoil  , & !in
                  nsnow  ,ist    ,errwat ,iloc   , jloc  ,fveg   , &
                  sav    ,sag    ,fsrv   ,fsrg   ,zwt    ,pah    , &
+#ifdef CCPP
+                 pahv   ,pahg   ,pahb   ,errmsg, errflg)   !in ( except errwat [out] and errmsg, errflg [inout] )
+#else
                  pahv   ,pahg   ,pahb   )   !in ( except errwat, which is out )
+#endif
+
+#ifdef CCPP
+     if (errflg /= 0) return
+#endif
 
 ! urban - jref
     qfx = etran + ecan + edir
@@ -1209,7 +1223,11 @@ contains
                     etran  ,edir   ,runsrf ,runsub ,dt     ,nsoil  , &
                     nsnow  ,ist    ,errwat, iloc   ,jloc   ,fveg   , &
                     sav    ,sag    ,fsrv   ,fsrg   ,zwt    ,pah    , &
+#ifdef CCPP
+                    pahv   ,pahg   ,pahb   ,errmsg, errflg)
+#else
                     pahv   ,pahg   ,pahb   )
+#endif
 ! --------------------------------------------------------------------------------------------------
 ! check surface energy balance and water balance
 ! --------------------------------------------------------------------------------------------------
@@ -1257,6 +1275,11 @@ contains
   real, intent(in)   :: pahv    !precipitation advected heat - total (w/m2)
   real, intent(in)   :: pahg    !precipitation advected heat - total (w/m2)
   real, intent(in)   :: pahb    !precipitation advected heat - total (w/m2)
+
+#ifdef CCPP
+  character(len=*)               , intent(inout) :: errmsg
+  integer                        , intent(inout) :: errflg
+#endif
 
   integer                                     :: iz     !do-loop index
   real                                        :: end_wb !water storage at end of a timestep [mm]
@@ -1404,7 +1427,11 @@ contains
                      tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                      sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                      albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , &   !inout
+#ifdef CCPP
+                     tauss  ,errmsg ,errflg,                          & !inout
+#else
                      tauss  ,                                         & !inout
+#endif
 !jref:start
                      qc     ,qsfc   ,psfc   , & !in 
                      t2mv   ,t2mb   ,fsrv   , &
@@ -1568,6 +1595,10 @@ contains
   real                              , intent(inout) :: cm     !momentum drag coefficient
   real                              , intent(inout) :: ch     !sensible heat exchange coefficient
   real                              , intent(inout) :: q1
+#ifdef CCPP
+  character(len=*)                  , intent(inout) :: errmsg
+  integer                           , intent(inout) :: errflg
+#endif
 !  real                                              :: q2e
   real,                               intent(out)   :: emissi
   real,                               intent(out)   :: pah    !precipitation advected heat - total (w/m2)
@@ -1869,14 +1900,21 @@ contains
                     foln    ,co2air  ,o2air   ,btran   ,sfcprs  , & !in
                     rhsur   ,iloc    ,jloc    ,q2      ,pahv  ,pahg  , & !in
                     eah     ,tah     ,tv      ,tgv     ,cmv     , & !inout
+#ifdef CCPP
+                    chv     ,dx      ,dz8w    ,errmsg  ,errflg  , & !inout
+#else
                     chv     ,dx      ,dz8w    ,                   & !inout
+#endif
                     tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                     shc     ,evg     ,evc     ,tr      ,ghv     , & !out
                     t2mv    ,psnsun  ,psnsha  ,                   & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
                     q2v     ,chv2, chleaf, chuc)               !inout 
-!jref:end                            
+!jref:end
+#ifdef CCPP
+        if (errflg /= 0) return 
+#endif                           
     end if
 
     tgb = tg
@@ -1888,14 +1926,20 @@ contains
                     dzsnso  ,zlvl    ,zpdg    ,z0mg    ,fsno,          & !in
                     emg     ,stc     ,df      ,rsurf   ,latheag  , & !in
                     gammag   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
+#ifdef CCPP
+                    tgb     ,cmb     ,chb     ,errmsg  ,errflg   , & !inout
+#else
                     tgb     ,cmb     ,chb     ,                   & !inout
+#endif
                     tauxb   ,tauyb   ,irb     ,shb     ,evb     , & !out
                     ghb     ,t2mb    ,dx      ,dz8w    ,vegtyp  , & !out
 !jref:start
                     qc      ,qsfc    ,psfc    , & !in
                     sfcprs  ,q2b,   chb2)                          !in 
-!jref:end                            
-
+!jref:end
+#ifdef CCPP
+    if (errflg /= 0) return
+#endif
 !energy balance at vege canopy: sav          =(irc+shc+evc+tr)     *fveg  at   fveg 
 !energy balance at vege ground: sag*    fveg =(irg+shg+evg+ghv)    *fveg  at   fveg
 !energy balance at bare ground: sag*(1.-fveg)=(irb+shb+evb+ghb)*(1.-fveg) at 1-fveg
@@ -1981,7 +2025,15 @@ contains
                   tbot    ,zsnso   ,ssoil   ,df      ,hcpct   , & !in
                   sag     ,dt      ,snowh   ,dzsnso  , & !in
                   tg      ,iloc    ,jloc    ,                   & !in
+#ifdef CCPP
+                  stc     ,errmsg  ,errflg     )                  !inout
+#else
                   stc     )                                       !inout
+#endif
+
+#ifdef CCPP
+    if (errflg /= 0) return
+#endif
 
 ! adjusting snow surface temperature
      if(opt_stc == 2) then
@@ -2003,9 +2055,15 @@ contains
  call phasechange (parameters,nsnow   ,nsoil   ,isnow   ,dt      ,fact    , & !in
                    dzsnso  ,hcpct   ,ist     ,iloc    ,jloc    , & !in
                    stc     ,snice   ,snliq   ,sneqv   ,snowh   , & !inout
+#ifdef CCPP
+                   smc     ,sh2o    ,errmsg  ,errflg  ,          & !inout
+#else
                    smc     ,sh2o    ,                            & !inout
+#endif
                    qmelt   ,imelt   ,ponding )                     !out
-
+#ifdef CCPP
+    if (errflg /= 0) return
+#endif
 
   end subroutine energy
 
@@ -3209,7 +3267,11 @@ contains
                        foln    ,co2air  ,o2air   ,btran   ,sfcprs  , & !in
                        rhsur   ,iloc    ,jloc    ,q2      ,pahv    ,pahg     , & !in
                        eah     ,tah     ,tv      ,tg      ,cm      , & !inout
-                       ch      ,dx      ,dz8w    ,                   & !
+#ifdef CCPP
+                       ch      ,dx      ,dz8w    ,errmsg  ,errflg  , & !inout
+#else
+                       ch      ,dx      ,dz8w    ,                   & !inout
+#endif
                        tauxv   ,tauyv   ,irg     ,irc     ,shg     , & !out
                        shc     ,evg     ,evc     ,tr      ,gh      , & !out
                        t2mv    ,psnsun  ,psnsha  ,                   & !out
@@ -3302,6 +3364,11 @@ contains
   real,                         intent(inout) :: tg     !ground temperature (k)
   real,                         intent(inout) :: cm     !momentum drag coefficient
   real,                         intent(inout) :: ch     !sensible heat exchange coefficient
+
+#ifdef CCPP
+  character(len=*),             intent(inout) :: errmsg
+  integer,                      intent(inout) :: errflg
+#endif
 
 ! output
 ! -fsa + fira + fsh + (fcev + fctr + fgev) + fcst + ssoil = 0
@@ -3528,8 +3595,15 @@ contains
           call sfcdif1(parameters,iter   ,sfctmp ,rhoair ,h      ,qair   , & !in
                        zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
                        mpe    ,iloc   ,jloc   ,                 & !in
-                       moz    ,mozsgn ,fm     ,fh     ,fm2,fh2, & !inout
+#ifdef CCPP
+                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,errmsg ,errflg ,& !inout
+#else
+                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,           & !inout
+#endif
                        cm     ,ch     ,fv     ,ch2     )          !out
+#ifdef CCPP
+          if (errflg /= 0) return
+#endif
        endif
      
        if(opt_sfc == 2) then
@@ -3755,7 +3829,11 @@ contains
                         dzsnso  ,zlvl    ,zpd     ,z0m     ,fsno    , & !in
                         emg     ,stc     ,df      ,rsurf   ,lathea  , & !in
                         gamma   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
+#ifdef CCPP
+                        tgb     ,cm      ,ch      ,errmsg  ,errflg  , & !inout
+#else
                         tgb     ,cm      ,ch      ,          & !inout
+#endif
                         tauxb   ,tauyb   ,irb     ,shb     ,evb     , & !out
                         ghb     ,t2mb    ,dx      ,dz8w    ,ivgtyp  , & !out
                         qc      ,qsfc    ,psfc    ,                   & !in
@@ -3818,6 +3896,10 @@ contains
   real,                         intent(inout) :: tgb    !ground temperature (k)
   real,                         intent(inout) :: cm     !momentum drag coefficient
   real,                         intent(inout) :: ch     !sensible heat exchange coefficient
+#ifdef CCPP
+  character(len=*),             intent(inout) :: errmsg
+  integer,                      intent(inout) :: errflg
+#endif
 
 ! output
 ! -sab + irb[tg] + shb[tg] + evb[tg] + ghb[tg] = 0
@@ -3937,8 +4019,15 @@ contains
           call sfcdif1(parameters,iter   ,sfctmp ,rhoair ,h      ,qair   , & !in
                        zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
                        mpe    ,iloc   ,jloc   ,                 & !in
-                       moz    ,mozsgn ,fm     ,fh     ,fm2,fh2, & !inout
+#ifdef CCPP
+                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,errmsg ,errflg ,& !inout
+#else
+                       moz ,mozsgn ,fm ,fh ,fm2 ,fh2 ,           & !inout
+#endif
                        cm     ,ch     ,fv     ,ch2     )          !out
+#ifdef CCPP
+          if (errflg /= 0) return
+#endif
         endif
 
         if(opt_sfc == 2) then
@@ -4160,7 +4249,11 @@ contains
   subroutine sfcdif1(parameters,iter   ,sfctmp ,rhoair ,h      ,qair   , & !in
        &             zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
        &             mpe    ,iloc   ,jloc   ,                 & !in
+#ifdef CCPP
+       &             moz    ,mozsgn ,fm     ,fh     ,fm2,fh2,errmsg,errflg, & !inout
+#else
        &             moz    ,mozsgn ,fm     ,fh     ,fm2,fh2, & !inout
+#endif
        &             cm     ,ch     ,fv     ,ch2     )          !out
 ! -------------------------------------------------------------------------------------------------
 ! computing surface drag coefficient cm for momentum and ch for heat
@@ -4191,6 +4284,10 @@ contains
     real,              intent(inout) :: fh     !sen heat stability correction, weighted by prior iters
     real,              intent(inout) :: fm2    !sen heat stability correction, weighted by prior iters
     real,              intent(inout) :: fh2    !sen heat stability correction, weighted by prior iters
+#ifdef CCPP
+    character(len=*),  intent(inout) :: errmsg
+    integer,           intent(inout) :: errflg
+#endif
 
 ! outputs
 
@@ -4834,7 +4931,11 @@ contains
                       tbot    ,zsnso   ,ssoil   ,df      ,hcpct   , & !in
                       sag     ,dt      ,snowh   ,dzsnso  , & !in
                       tg      ,iloc    ,jloc    ,                   & !in
+#ifdef CCPP
+                      stc     ,errmsg  ,errflg)                       !inout
+#else
                       stc     )                                       !inout
+#endif
 ! --------------------------------------------------------------------------------------------------
 ! compute snow (up to 3l) and soil (4l) temperature. note that snow temperatures
 ! during melting season may exceed melting point (tfrz) but later in phasechange
@@ -4867,6 +4968,10 @@ contains
 !input and output
 
     real, dimension(-nsnow+1:nsoil), intent(inout) :: stc
+#ifdef CCPP
+    character(len=*)               , intent(inout) :: errmsg
+    integer                        , intent(inout) :: errflg
+#endif
 
 !local
 
@@ -5182,7 +5287,11 @@ contains
   subroutine phasechange (parameters,nsnow   ,nsoil   ,isnow   ,dt      ,fact    , & !in
                           dzsnso  ,hcpct   ,ist     ,iloc    ,jloc    , & !in
                           stc     ,snice   ,snliq   ,sneqv   ,snowh   , & !inout
+#ifdef CCPP
+                          smc     ,sh2o    ,errmsg  ,errflg  ,          & !inout
+#else
                           smc     ,sh2o    ,                            & !inout
+#endif
                           qmelt   ,imelt   ,ponding )                     !out
 ! ----------------------------------------------------------------------
 ! melting/freezing of snow water and soil water
@@ -5217,6 +5326,10 @@ contains
   real, dimension(       1:nsoil), intent(inout)  :: smc    !total soil water [m3/m3]
   real, dimension(-nsnow+1:0)    , intent(inout)  :: snice  !snow layer ice [mm]
   real, dimension(-nsnow+1:0)    , intent(inout)  :: snliq  !snow layer liquid water [mm]
+#ifdef CCPP
+  character(len=*)               , intent(inout)  :: errmsg
+  integer                        , intent(inout)  :: errflg
+#endif
 
 ! local
 
@@ -5275,7 +5388,12 @@ contains
             end if
          end if
          if (opt_frz == 2) then
+#ifdef CCPP
+               call frh2o (parameters,supercool(j),stc(j),smc(j),sh2o(j),errmsg,errflg)
+               if (errflg /=0) return
+#else
                call frh2o (parameters,supercool(j),stc(j),smc(j),sh2o(j))
+#endif
                supercool(j) = supercool(j)*dzsnso(j)*1000.        !(mm)
          end if
       enddo
@@ -5389,8 +5507,11 @@ contains
   end subroutine phasechange
 
 !== begin frh2o ====================================================================================
-
+#ifdef CCPP
+  subroutine frh2o (parameters,free,tkelv,smc,sh2o,errmsg,errflg)
+#else
   subroutine frh2o (parameters,free,tkelv,smc,sh2o)
+#endif
 
 ! ----------------------------------------------------------------------
 ! subroutine frh2o
@@ -5423,6 +5544,10 @@ contains
   type (noahmp_parameters), intent(in) :: parameters
     real, intent(in)     :: sh2o,smc,tkelv
     real, intent(out)    :: free
+#ifdef CCPP
+    character(len=*), intent(inout)  :: errmsg
+    integer, intent(inout)           :: errflg
+#endif
     real                 :: bx,denom,df,dswl,fk,swl,swlk
     integer              :: nlog,kcount
 !      parameter(ck = 0.0)
