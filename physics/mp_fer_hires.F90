@@ -6,7 +6,7 @@ module mp_fer_hires
      
       use machine, only : kind_phys
 
-      use module_mp_fer_hires, only : fer_hires_init, FER_HIRES
+      use module_mp_fer_hires, only : ferrier_init_hr, FER_HIRES
 
       implicit none
 
@@ -85,7 +85,7 @@ module mp_fer_hires
        ! DT_MICRO=Model%NPRECIP*Model%dtp
         DT_MICRO=Model%dtp
 
-       CALL FERRIER_INIT_HR(DT_MICRO,mpicomm,mpirank,thread)
+       CALL FERRIER_INIT_HR(DT_MICRO,mpicomm,mpirank,threads)
 
        if (errflg /= 0 ) return
        
@@ -211,7 +211,7 @@ module mp_fer_hires
       ! Check initialization state
       if (.not. is_initialized) then
          write(errmsg, fmt='((a))') 'mp_fer_hires_run called before mp_fer_hires_init'
-         errflag = 1
+         errflg = 1
          return
       end if 
 
@@ -243,14 +243,13 @@ module mp_fer_hires
 !-----------------------------------------------------------------------
 !
 !.......................................................................
-!$omp parallel do                                                       &
-!$omp& private(j,i,k,ql,tl)
+!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!$omp& private(i,k,ql,tl)
 !.......................................................................
-      DO J=JMS,JME
       DO I=IMS,IME
 !
-        LOWLYR(I,J)=1
-        XLAND(I,J)=SM(I,J)+1.
+        LOWLYR(I)=1
+        XLAND(I)=SM(I)+1.
 !
 !-----------------------------------------------------------------------
 !***   FILL RAINNC WITH ZERO (NORMALLY CONTAINS THE NONCONVECTIVE
@@ -264,10 +263,10 @@ module mp_fer_hires
 !.. But, the fact is, the total accum variables are local, never saved
 !.. nor written so they go nowhere at the moment.
 !
-        RAINNC (I,J)=0. ! NOT YET USED BY NMM
-        RAINNCv(I,J)=0.
-        SNOWNCv(I,J)=0.
-        graupelncv(i,j) = 0.0
+        RAINNC (I)=0. ! NOT YET USED BY NMM
+        RAINNCv(I)=0.
+        SNOWNCv(I)=0.
+        graupelncv(i) = 0.0
 !
 !-----------------------------------------------------------------------
 !***  FILL THE SINGLE-COLUMN INPUT
@@ -275,18 +274,18 @@ module mp_fer_hires
 !
         DO K=LM,1,-1   ! We are moving down from the top in the flipped arrays
 !
-          TL(K)=T(I,J,K)
-          QL(K)=AMAX1(Q(I,J,K),EPSQ)
+          TL(K)=T(I,K)
+          QL(K)=AMAX1(Q(I,K),EPSQ)
 !
-          RR(I,J,K)=P_PHY(I,K)/(R_D*TL(K)*(P608*QL(K)+1.))
-          PI_PHY(I,J,K)=(P_PHY(I,K)*1.E-5)**CAPPA
-          TH_PHY(I,J,K)=TL(K)/PI_PHY(I,J,K)
-          DZ(I,J,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,J,K)
+          RR(I,K)=P_PHY(I,K)/(R_D*TL(K)*(P608*QL(K)+1.))
+          PI_PHY(I,K)=(P_PHY(I,K)*1.E-5)**CAPPA
+          TH_PHY(I,K)=TL(K)/PI_PHY(I,K)
+          DZ(I,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,K)
 !
         ENDDO    !- DO K=LM,1,-1
 !
       ENDDO    !- DO I=IMS,IME
-      ENDDO    !- DO J=JMS,JME
+!MZ      ENDDO    !- DO J=JMS,JME
 !.......................................................................
 !$omp end parallel do
 !.......................................................................
@@ -297,12 +296,12 @@ module mp_fer_hires
 !*** Update the rime factor array after 3d advection
 !---------------------------------------------------------------------
               DO K=1,LM
-              DO J=JMS,JME
+             !MZ DO J=JMS,JME
               DO I=IMS,IME
-                IF (QG(I,J,K)>EPSQ .AND. QS(I,J,K)>EPSQ) THEN
-                  F_RIMEF(I,J,K)=MIN(50.,MAX(1.,QG(I,J,K)/QS(I,J,K)))
+                IF (QG(I,K)>EPSQ .AND. QS(I,K)>EPSQ) THEN
+                  F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QS(I,K)))
                 ELSE
-                  F_RIMEF(I,J,K)=1.
+                  F_RIMEF(I,K)=1.
                 ENDIF
               ENDDO
               ENDDO
@@ -327,29 +326,29 @@ module mp_fer_hires
 !*** Calculate graupel from snow array and rime factor
 !---------------------------------------------------------------------
               DO K=1,LM
-              DO J=JMS,JME
+              !MZ DO J=JMS,JME
               DO I=IMS,IME
-                QG(I,J,K)=QS(I,J,K)*F_RIMEF(I,J,K)
+                QG(I,K)=QS(I,K)*F_RIMEF(I,K)
               ENDDO
               ENDDO
               ENDDO
 !
 
 !.......................................................................
-!$omp parallel do                                                       &
-!$omp& private(i,j,k,TNEW)
+!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!$omp& private(i,k,TNEW)
 !.......................................................................
       DO K=1,LM
-        DO J=JMS,JME
+       !MZ DO J=JMS,JME
         DO I=IMS,IME
 !
 !-----------------------------------------------------------------------
 !***  UPDATE TEMPERATURE, SPECIFIC HUMIDITY, CLOUD WATER, AND HEATING.
 !-----------------------------------------------------------------------
 !
-          TNEW=TH_PHY(I,J,K)*PI_PHY(I,J,K)
-          TRAIN(I,J,K)=TRAIN(I,J,K)+(TNEW-T(I,J,K))*RDTPHS
-          T(I,J,K)=TNEW
+          TNEW=TH_PHY(I,K)*PI_PHY(I,K)
+          TRAIN(I,K)=TRAIN(I,K)+(TNEW-T(I,K))*RDTPHS
+          T(I,K)=TNEW
         ENDDO
         ENDDO
       ENDDO
@@ -363,11 +362,11 @@ module mp_fer_hires
 !
 !jaa!$omp parallel do                                                       &
 !jaa!$omp& private(i,j,pcpcol)
-      DO J=JMS,JME
+    !MZ  DO J=JMS,JME
       DO I=IMS,IME
-        PCPCOL=RAINNCV(I,J)*1.E-3
-        PREC(I,J)=PREC(I,J)+PCPCOL
-        ACPREC(I,J)=ACPREC(I,J)+PCPCOL
+        PCPCOL=RAINNCV(I)*1.E-3
+        PREC(I)=PREC(I)+PCPCOL
+        ACPREC(I)=ACPREC(I)+PCPCOL
 !
 ! NOTE: RAINNC IS ACCUMULATED INSIDE MICROPHYSICS BUT NMM ZEROES IT OUT ABOVE
 !       SINCE IT IS ONLY A LOCAL ARRAY FOR NOW

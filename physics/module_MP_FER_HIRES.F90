@@ -119,7 +119,7 @@
 !MZ        RD=>R_D, RV=>R_V, T0C=>TIW, EPS=>EP_2, EPS1=>EP_1, CLIQ, CICE,  &
 !MZ        XLV
 !MZ
-!MZ temporary values copied from module_CONSTANTS; need to come from host model
+!MZ temporary values copied from module_CONSTANTS; ideally they come from host model
 !side
      REAL, PARAMETER :: pi=3.141592653589793       ! ludolf number
      REAL, PARAMETER :: cp=1004.6                  ! spec. heat for dry air at constant pressure
