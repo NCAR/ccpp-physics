@@ -559,6 +559,7 @@
 !! | imp_physics_zhao_carr_pdf  | flag_for_zhao_carr_pdf_microphysics_scheme                                                    | choice of Zhao-Carr microphysics scheme with PDF clouds           | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_gfdl           | flag_for_gfdl_microphysics_scheme                                                             | choice of GFDL microphysics scheme                                | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_thompson       | flag_for_thompson_microphysics_scheme                                                         | choice of Thompson microphysics scheme                            | flag          |    0 | integer    |           | in     | F        |
+!! | imp_physics_fer_hires      | flag_for_Ferrier_Aligo_microphysics_scheme                                                    | choice of Ferrier-Aligo microphysics scheme                       | flag          |    0 | integer    |           | in     | F        |
 !! | imp_physics_wsm6           | flag_for_wsm6_microphysics_scheme                                                             | choice of WSM6 microphysics scheme                                | flag          |    0 | integer    |           | in     | F        |
 !! | prsi                       | air_pressure_at_interface                                                                     | air pressure at model layer interfaces                            | Pa            |    2 | real       | kind_phys | in     | F        |
 !! | prsl                       | air_pressure                                                                                  | mean layer pressure                                               | Pa            |    2 | real       | kind_phys | in     | F        |
@@ -582,9 +583,9 @@
 #endif
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,  &
       ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlat, gq0, imp_physics, imp_physics_mg, imp_physics_zhao_carr,&
-      imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, prsi, prsl, prslk, rhcbot,     &
-      rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver,                                                         &
-      clw, rhc, save_qc, save_qi, errmsg, errflg)
+      imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_fer_hires, prsi,   &
+      prsl, prslk, rhcbot,hcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver,clw, rhc, save_qc, save_qi,errmsg,    & 
+      errflg)
 
       use machine, only: kind_phys
 
@@ -593,7 +594,7 @@
       ! interface variables
       integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw,     &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
-        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
+        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires
       integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
       logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol
 
@@ -740,7 +741,7 @@
         else
           save_qi(:,:) = clw(:,:,1)
         endif
-      elseif (imp_physics == imp_physics_wsm6 .or. imp_physics == imp_physics_mg) then
+      elseif (imp_physics == imp_physics_wsm6 .or. imp_physics == imp_physics_mg .or. imp_physics == imp_physics_fer_hires) then
         do k=1,levs
           do i=1,im
             clw(i,k,1) = gq0(i,k,ntiw)                    ! ice
@@ -795,6 +796,7 @@
 !! | imp_physics                | flag_for_microphysics_scheme                                                  | choice of microphysics scheme                                     | flag          |    0 | integer          |           | in     | F        |
 !! | imp_physics_gfdl           | flag_for_gfdl_microphysics_scheme                                             | choice of GFDL microphysics scheme                                | flag          |    0 | integer          |           | in     | F        |
 !! | imp_physics_thompson       | flag_for_thompson_microphysics_scheme                                         | choice of Thompson microphysics scheme                            | flag          |    0 | integer          |           | in     | F        |
+!! | imp_physics_fer_hires      | flag_for_Ferrier_Aligo_microphysics_scheme                                    | choice of Ferrier-Aligo microphysics scheme                       | flag          |    0 | integer          |           | in     | F        |
 !! | imp_physics_zhao_carr      | flag_for_zhao_carr_microphysics_scheme                                        | choice of Zhao-Carr microphysics scheme                           | flag          |    0 | integer          |           | in     | F        |
 !! | imp_physics_zhao_carr_pdf  | flag_for_zhao_carr_pdf_microphysics_scheme                                    | choice of Zhao-Carr microphysics scheme with PDF clouds           | flag          |    0 | integer          |           | in     | F        |
 !! | dtf                        | time_step_for_dynamics                                                        | dynamics timestep                                                 | s             |    0 | real             | kind_phys | in     | F        |
@@ -809,7 +811,7 @@
 !!
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, lgocart, tracers_total, ntrac, ntcw, ntiw, ntclamt,      &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                                    &
+      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_fer_hires, dtf, save_qc, save_qi, con_pi,             &
       gq0, clw, dqdti, errmsg, errflg)
 
       use machine,               only: kind_phys
@@ -820,7 +822,7 @@
 
       integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,imp_physics_fer_hires
 
       logical,                                  intent(in) :: ltaerosol, lgocart
 
@@ -872,7 +874,7 @@
 
 !  for microphysics
         if (imp_physics == imp_physics_zhao_carr_pdf .or. imp_physics == imp_physics_zhao_carr    &
-                               .or. imp_physics == imp_physics_gfdl) then
+                               .or. imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_fer_hires) then
            gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
         elseif (ntiw > 0) then
           do k=1,levs

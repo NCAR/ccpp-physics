@@ -123,6 +123,7 @@ module mp_fer_hires
 !! |  threads    | omp_threads                                                               | number of OpenMP threads available to scheme                                                       | count      |   0  | integer  |           | in     | F        | 
 !! |  refl_10cm  | radar_reflectivity_10cm                                                   | instantaneous refl_10cm                                                                            | dBZ        |   2  | real     | kind_phys | inout  | F        |
 !! |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none       |   0  | real     | kind_phys | in     | F        |
+!! |  dx         | cell_size                                                                 | relative dx for the grid cell                                                                      | m          |   1  | real     | kind_phys | in     | F        |
 !! |  EPSQ       | minimum_value_of_specific_humidity                                        | floor value for specific humidity                                                                  | kg kg-1    |   0  | real     | kind_phys | in     | F        |    
 !! |  R_D        | gas_constant_dry_air                                                      | ideal gas constant for dry air                                                                     | J kg-1 K-1 |   0  | real     | kind_phys | in     | F        |
 !! |  P608       | ratio_of_vapor_to_dry_air_gas_constants_minus_one                         | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                              | none       |   0  | real     | kind_phys | in     | F        | 
@@ -141,7 +142,7 @@ module mp_fer_hires
                          ,PREC,ACPREC                                   &
                          ,threads                                       &
                          ,refl_10cm                                     &
-                         ,RHGRD                                         &
+                         ,RHGRD,dx                                      &
                          ,EPSQ,R_D,P608,CP,G                            &
                          ,errmsg,errflg)
 
@@ -183,6 +184,7 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: acprec(1:ncol)
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
       real(kind_phys),   intent(in   ) :: rhgrd
+      real(kind_phys),   intent(in   ) :: dx
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !
@@ -192,6 +194,7 @@ module mp_fer_hires
 !
       integer            :: I,J,K,N
       integer            :: lowlyr(1:ncol)
+      integer            :: dx1
       real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
       real(kind_phys)    :: sm(1:ncol), xland(1:ncol)
       real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW  
@@ -238,6 +241,12 @@ module mp_fer_hires
       jms = 1
       jme = 1
       lm  = nlev
+
+! Use the dx of the 1st i point to set an integer value of dx to be used for
+! determining where RHgrd
+! should be set to 0.98 in the coarse domain when running HAFS.
+      DX1=NINT(DX(1))
+
 
 
 !ZM: module_SOLVER_GRID_COMP.F90 
@@ -327,7 +336,7 @@ module mp_fer_hires
                   ,threads=threads                                      &
                   ,IMS=IMS,IME=IME,JMS=JMS,JME=JME,LM=LM                &
                   ,D_SS=d_ss,MPRATES=mprates                            &
-                  ,refl_10cm=refl_10cm)
+                  ,refl_10cm=refl_10cm,DX1=DX1)
 
 !---------------------------------------------------------------------
 !*** Calculate graupel from snow array and rime factor

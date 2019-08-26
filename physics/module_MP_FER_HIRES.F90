@@ -213,7 +213,9 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !  * NCW - number concentrations of cloud droplets (m**-3)
 ! ======================================================================
       REAL, PUBLIC,PARAMETER ::                                         &
-     &  T_ICE=-40.                                                      &
+     &  RHgrd_in=1.                                                     &
+     &, P_RHgrd_out=850.E2                                              &
+     & ,T_ICE=-40.                                                      &
      & ,T_ICEK=T0C+T_ICE                                                &
      & ,T_ICE_init=-12.                                                 &
      & ,NSI_max=250.E3                                                  &
@@ -240,11 +242,11 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      &                      threads,                                    &
      &                      ims,ime, jms,jme, lm,     		        &
      &                      d_ss,mprates,                               &
-     &                      refl_10cm )
+     &                      refl_10cm,DX1 )
 !-----------------------------------------------------------------------
       IMPLICIT NONE
 !-----------------------------------------------------------------------
-      INTEGER,INTENT(IN) :: D_SS,IMS,IME,JMS,JME,LM    !ZM ,ITIMESTEP
+      INTEGER,INTENT(IN) :: D_SS,IMS,IME,JMS,JME,LM,DX1    !ZM ,ITIMESTEP
       REAL, INTENT(IN) 	    :: DT,RHgrd
       INTEGER,   INTENT(IN) :: THREADS
       REAL, INTENT(IN),     DIMENSION(ims:ime, jms:jme, lm)::      &
@@ -291,7 +293,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
          pidep1d,piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,     &
          pimlt1d,praut1d,pracw1d,prevp1d,pisub1d,pevap1d,DBZ_col,       & !jul28
          NR_col,NS_col,vsnow1d,vrain11d,vrain21d,vci1d,NSmICE1d,        &
-         INDEXS1d,INDEXR1d,RFlag1d   !jul28  !jun01
+         INDEXS1d,INDEXR1d,RFlag1d,RHC_col   !jul28  !jun01
 !
 !-----------------------------------------------------------------------
 !**********************************************************************
@@ -452,6 +454,17 @@ ENDIF
             QI_col(L)=QI
             QR_col(L)=QRdum
             QW_col(L)=QW
+!GFDL => New.  Added RHC_col to allow for height- and grid-dependent values for
+!GFDL          the relative humidity threshold for condensation ("RHgrd")
+!6/11/2010 mod - Use lower RHgrd_out threshold for < 850 hPa
+!------------------------------------------------------------
+            IF(DX1 .GE. 10 .AND. P_col(L)<P_RHgrd_out) THEN  ! gopal's doing
+based on GFDL
+              RHC_col(L)=RHgrd
+            ELSE
+              RHC_col(L)=RHgrd_in
+            ENDIF
+
           ENDDO
 !
 !#######################################################################
@@ -460,14 +473,14 @@ ENDIF
 !
           I_index=I
           J_index=J
-       CALL EGCP01COLUMN_hr ( ARAIN, ASNOW, DT, RHgrd,                  &
+       CALL EGCP01COLUMN_hr ( ARAIN, ASNOW, DT, RHC_col,                  &
      & I_index, J_index, LSFC,                                          &
      & P_col, QI_col, QR_col, Q_col, QW_col, RimeF_col, T_col,          &
      & THICK_col, WC_col,LM,pcond1d,pidep1d,                            &
      & piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,pimlt1d,       &
      & praut1d,pracw1d,prevp1d,pisub1d,pevap1d, DBZ_col,NR_col,NS_col,  &
      & vsnow1d,vrain11d,vrain21d,vci1d,NSmICE1d,INDEXS1d,INDEXR1d,      & !jul28
-     & RFlag1d)   !jun01
+     & RFlag1d,DX1)   !jun01
 !#######################################################################
 !
 !--- Update storage arrays
@@ -653,14 +666,14 @@ ENDIF
 !###############################################################################
 !###############################################################################
 !
-      SUBROUTINE EGCP01COLUMN_hr ( ARAIN, ASNOW, DTPH, RHgrd,            &
+      SUBROUTINE EGCP01COLUMN_hr ( ARAIN, ASNOW, DTPH, RHC_col,          &
      & I_index, J_index, LSFC,                                           &
      & P_col, QI_col, QR_col, Q_col, QW_col, RimeF_col, T_col,           &
      & THICK_col, WC_col ,LM,pcond1d,pidep1d,                            &
      & piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,pimlt1d,        &
      & praut1d,pracw1d,prevp1d,pisub1d,pevap1d, DBZ_col,NR_col,NS_col,   &
      & vsnow1d,vrain11d,vrain21d,vci1d,NSmICE1d,INDEXS1d,INDEXR1d,       &  !jul28
-     & RFlag1d)   !jun01
+     & RFlag1d,DX1)   !jun01
 !
 !###############################################################################
 !###############################################################################
@@ -702,6 +715,7 @@ ENDIF
 !   T_col      - vertical column of model temperature (deg K)
 !   THICK_col  - vertical column of model mass thickness (density*height increment)
 !   WC_col     - vertical column of model mixing ratio of total condensate (kg/kg)
+!   RHC_col    - vertical column of threshold relative humidity for onset of condensation (ratio)   !GFDL
 !   
 !
 ! OUTPUT ARGUMENT LIST: 
@@ -740,15 +754,15 @@ ENDIF
 !
       IMPLICIT NONE
 !    
-      INTEGER,INTENT(IN) :: LM,I_index, J_index, LSFC
-      REAL,INTENT(IN)    :: DTPH,RHgrd
+      INTEGER,INTENT(IN) :: LM,I_index, J_index, LSFC,DX1
+      REAL,INTENT(IN)    :: DTPH
       REAL,INTENT(INOUT) ::  ARAIN, ASNOW
       REAL,DIMENSION(LM),INTENT(INOUT) ::  P_col, QI_col,QR_col         &
      & ,Q_col ,QW_col, RimeF_col, T_col, THICK_col,WC_col,pcond1d       &
      & ,pidep1d,piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d       &
      & ,pimlt1d,praut1d,pracw1d,prevp1d,pisub1d,pevap1d,DBZ_col,NR_col  &
      & ,NS_col,vsnow1d,vrain11d,vrain21d,vci1d,NSmICE1d,INDEXS1d        &  !jun01
-     & ,INDEXR1d,RFlag1d    !jun01
+     & ,INDEXR1d,RFlag1d,RHC_col    !jun01
 !
 !--------------------------------------------------------------------------------
 !--- The following arrays are integral calculations based on the mean 
@@ -816,6 +830,7 @@ ENDIF
 !-----------------------------------------------------------------------
 !
       REAL :: EMAIRI, N0r, NLICE, NSmICE, NInuclei, Nrain, Nsnow, Nmix
+      REAL :: RHgrd
       LOGICAL :: CLEAR, ICE_logical, DBG_logical, RAIN_logical,         &
                  STRAT, DRZL
       INTEGER :: INDEX_MY,INDEXR,INDEXR1,INDEXR2,INDEXS,IPASS,ITDX,IXRF,&
@@ -923,6 +938,7 @@ big_loop: DO L=1,LSFC
         Q=Q_col(L)          ! Specific humidity of water vapor (kg/kg)
         WV=Q/(1.-Q)         ! Water vapor mixing ratio (kg/kg)
         WC=WC_col(L)        ! Grid-scale mixing ratio of total condensate (water or ice; kg/kg)
+        RHgrd=RHC_col(L)    ! Threshold relative humidity for the onset of condensation
 !
 !-----------------------------------------------------------------------
 !--- Moisture variables below are mixing ratios & not specifc humidities
