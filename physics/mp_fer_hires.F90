@@ -97,34 +97,39 @@ module mp_fer_hires
 
 !> This is the CCPP-compliant FER_HIRES driver module.
 !> \section arg_table_mp_fer_hires_run Argument Table
-!! | local_name  | standard_name                                                             | long_name                                                                                          | units    | rank | type     |   kind    | intent | optional |
-!! |-------------|---------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|----------|------|----------|-----------|--------|----------|
-!! |  ncol       | horizontal_loop_extent                                                    | horizontal loop extent                                                                             | count    |   0  | integer  |           | in     | F        |
-!! |  nlev       | vertical_dimension                                                        | number of vertical levels                                                                          | count    |   0  | integer  |           | in     | F        |
-!! |  dt         | time_step_for_physics                                                     | physics timestep                                                                                   | s        |   0  | real     | kind_phys | in     | F        |
-!! |  slmsk      | sea_land_ice_mask_real                                                    | landmask: sea/land/ice=0/1/2                                                                       | flag     |   1  | real     | kind_phys | in     | F        |
-!! |  prsi       | air_pressure_at_interface                                                 | air pressure at model layer interfaces                                                             | Pa       |   2  | real     | kind_phys | in     | F        |
-!! |  p_phy      | air_pressure                                                              | mean layer pressure                                                                                | Pa       |   2  | real     | kind_phys | in     | F        |
-!! |  t          | air_temperature_updated_by_physics                                        | temperature updated by physics                                                                     | K        |   2  | real     | kind_phys | inout  | F        |
-!! |  q          | water_vapor_specific_humidity_updated_by_physics                          | water vapor specific humidity updated by physics                                                   | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  cwm        | total_cloud_condensate_mixing_ratio_updated_by_physics                    | total cloud condensate mixing ratio (except water vapor) updated by physics                        | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  train      | accumulated_tendency_of_air_temperature_due_to_FA_scheme                  | accumulated tendency of air temperature due to FA MP scheme                                        | K        |   2  | real     | kind_phys | inout  | F        |
-!! |  sr         | ratio_of_snowfall_to_rainfall                                             | snow ratio: ratio of snow to total precipitation  (explicit only)                                  | frac     |   1  | real     | kind_phys | out    | F        |
-!! |  f_ice      | mass_fraction_of_ice_water_cloud                                          | mass fraction of ice water cloud                                                                   | frac     |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rain     | mass_fraction_of_rain_water_cloud                                         | mass fraction of rain water cloud                                                                  | frac     |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rimef    | mass_fraction_of_rime_factor                                              | mass fraction of rime factor                                                                       | frac     |   2  | real     | kind_phys | inout  | F        |
-!! |  qc         | cloud_condensed_water_mixing_ratio_updated_by_physics                     | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics         | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  qs         | snow_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics                    | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  qg         | graupel_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics                       | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
-!! |  prec       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                                                       | m        |   1  | real     | kind_phys | inout  | F        |
-!! |  acprec     | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                                                                    | m        |   1  | real     | kind_phys | inout  | F        |
-!! | threads     | omp_threads                                                               | number of OpenMP threads available to scheme                                                       | count    |    0 | integer  |           | in     | F        | 
-!! |  refl_10cm  | radar_reflectivity_10cm                                                   | instantaneous refl_10cm                                                                            | dBZ      |   2  | real     | kind_phys | inout  | F        |
-!! |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none     |   0  | real     | kind_phys | in     | F        |
-!! |  errmsg     | ccpp_error_message                                                        | error message for error handling in CCPP                                                           | none     |   0  | character| len=*     | out    | F        |
-!! |  errflg     | ccpp_error_flag                                                           | error flag for error handling in CCPP                                                              | flag     |   0  | integer  |           | out    | F        |
+!! | local_name  | standard_name                                                             | long_name                                                                                          | units      | rank | type     |   kind    | intent | optional |
+!! |-------------|---------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|------------|------|----------|-----------|--------|----------|
+!! |  ncol       | horizontal_loop_extent                                                    | horizontal loop extent                                                                             | count      |   0  | integer  |           | in     | F        |
+!! |  nlev       | vertical_dimension                                                        | number of vertical levels                                                                          | count      |   0  | integer  |           | in     | F        |
+!! |  dt         | time_step_for_physics                                                     | physics timestep                                                                                   | s          |   0  | real     | kind_phys | in     | F        |
+!! |  slmsk      | sea_land_ice_mask_real                                                    | landmask: sea/land/ice=0/1/2                                                                       | flag       |   1  | real     | kind_phys | in     | F        |
+!! |  prsi       | air_pressure_at_interface                                                 | air pressure at model layer interfaces                                                             | Pa         |   2  | real     | kind_phys | in     | F        |
+!! |  p_phy      | air_pressure                                                              | mean layer pressure                                                                                | Pa         |   2  | real     | kind_phys | in     | F        |
+!! |  t          | air_temperature_updated_by_physics                                        | temperature updated by physics                                                                     | K          |   2  | real     | kind_phys | inout  | F        |
+!! |  q          | water_vapor_specific_humidity_updated_by_physics                          | water vapor specific humidity updated by physics                                                   | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  cwm        | total_cloud_condensate_mixing_ratio_updated_by_physics                    | total cloud condensate mixing ratio (except water vapor) updated by physics                        | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  train      | accumulated_tendency_of_air_temperature_due_to_FA_scheme                  | accumulated tendency of air temperature due to FA MP scheme                                        | K          |   2  | real     | kind_phys | inout  | F        |
+!! |  sr         | ratio_of_snowfall_to_rainfall                                             | snow ratio: ratio of snow to total precipitation  (explicit only)                                  | frac       |   1  | real     | kind_phys | out    | F        |
+!! |  f_ice      | mass_fraction_of_ice_water_cloud                                          | mass fraction of ice water cloud                                                                   | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rain     | mass_fraction_of_rain_water_cloud                                         | mass fraction of rain water cloud                                                                  | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rimef    | mass_fraction_of_rime_factor                                              | mass fraction of rime factor                                                                       | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  qc         | cloud_condensed_water_mixing_ratio_updated_by_physics                     | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics         | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  qs         | snow_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  qg         | graupel_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics                       | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  prec       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                                                       | m          |   1  | real     | kind_phys | inout  | F        |
+!! |  acprec     | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                                                                    | m          |   1  | real     | kind_phys | inout  | F        |
+!! |  threads    | omp_threads                                                               | number of OpenMP threads available to scheme                                                       | count      |   0  | integer  |           | in     | F        | 
+!! |  refl_10cm  | radar_reflectivity_10cm                                                   | instantaneous refl_10cm                                                                            | dBZ        |   2  | real     | kind_phys | inout  | F        |
+!! |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none       |   0  | real     | kind_phys | in     | F        |
+!! |  EPSQ       | minimum_value_of_specific_humidity                                        | floor value for specific humidity                                                                  | kg kg-1    |   0  | real     | kind_phys | in     | F        |    
+!! |  R_D        | gas_constant_dry_air                                                      | ideal gas constant for dry air                                                                     | J kg-1 K-1 |   0  | real     | kind_phys | in     | F        |
+!! |  P608       | ratio_of_vapor_to_dry_air_gas_constants_minus_one                         | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                              | none       |   0  | real     | kind_phys | in     | F        | 
+!! |  CP         | specific_heat_of_dry_air_at_constant_pressure                             | specific heat of dry air at constant pressure                                                      | J kg-1 K-1 |   0  | real     | kind_phys | in     | F        |
+!! |  G          | gravitational_acceleration                                                | gravitational acceleration                                                                         | m s-2      |   0  | real     | kind_phys | in     | F        | 
+!! |  errmsg     | ccpp_error_message                                                        | error message for error handling in CCPP                                                           | none       |   0  | character| len=*     | out    | F        |
+!! |  errflg     | ccpp_error_flag                                                           | error flag for error handling in CCPP                                                              | flag       |   0  | integer  |           | out    | F        |
 !!
        SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT                       &
                          ,SLMSK                                         &
@@ -137,6 +142,7 @@ module mp_fer_hires
                          ,threads                                       &
                          ,refl_10cm                                     &
                          ,RHGRD                                         &
+                         ,EPSQ,R_D,P608,CP,G                            &
                          ,errmsg,errflg)
 
 !-----------------------------------------------------------------------
@@ -154,11 +160,12 @@ module mp_fer_hires
 
       integer,           intent(in   ) :: ncol
       integer,           intent(in   ) :: nlev
-      integer,           intent(in   ) :: dt
+      real(kind_phys),   intent(in   ) :: dt
       integer,           intent(in   ) :: threads
       real(kind_phys),   intent(in   ) :: slmsk(1:ncol)
       real(kind_phys),   intent(in   ) :: prsi(1:ncol,1:nlev+1)
       real(kind_phys),   intent(in   ) :: p_phy(1:ncol,1:nlev)
+      real(kind_phys),   intent(in   ) :: epsq,r_d,p608,cp,g
       real(kind_phys),   intent(inout) :: t(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: q(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: cwm(1:ncol,1:nlev)
@@ -187,7 +194,7 @@ module mp_fer_hires
       integer            :: lowlyr(1:ncol)
       real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
       real(kind_phys)    :: sm(1:ncol), xland(1:ncol)
-      real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW   !qw
+      real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW  
       real(kind_phys)    :: ql(1:ncol),tl(1:ncol)
       real(kind_phys)    :: rainnc(1:ncol),rainncv(1:ncol)
       real(kind_phys)    :: snownc(1:ncol),snowncv(1:ncol)
@@ -196,6 +203,7 @@ module mp_fer_hires
       real(kind_phys)    :: pi_phy(1:ncol,1:nlev)
       real(kind_phys)    :: rr(1:ncol,1:nlev)
       real(kind_phys)    :: th_phy(1:ncol,1:nlev)
+      real(kind_phys)    :: R_G, CAPPA
 
 ! Dimension
       integer            :: ims, ime, jms, jme, lm
@@ -203,6 +211,8 @@ module mp_fer_hires
 !-----------------------------------------------------------------------
 !***********************************************************************
 !-----------------------------------------------------------------------
+      R_G=1./G
+      CAPPA=R_D/CP
       
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -285,7 +295,6 @@ module mp_fer_hires
         ENDDO    !- DO K=LM,1,-1
 !
       ENDDO    !- DO I=IMS,IME
-!MZ      ENDDO    !- DO J=JMS,JME
 !.......................................................................
 !$omp end parallel do
 !.......................................................................
@@ -296,7 +305,6 @@ module mp_fer_hires
 !*** Update the rime factor array after 3d advection
 !---------------------------------------------------------------------
               DO K=1,LM
-             !MZ DO J=JMS,JME
               DO I=IMS,IME
                 IF (QG(I,K)>EPSQ .AND. QS(I,K)>EPSQ) THEN
                   F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QS(I,K)))
@@ -305,11 +313,10 @@ module mp_fer_hires
                 ENDIF
               ENDDO
               ENDDO
-              ENDDO
 !---------------------------------------------------------------------
 
             CALL FER_HIRES(                                             &
-                   DT=dtphs,RHgrd=RHGRD                  &
+                   DT=dtphs,RHgrd=RHGRD                                 &
                   ,DZ8W=dz,RHO_PHY=rr,P_PHY=p_phy,PI_PHY=pi_phy         &
                   ,TH_PHY=th_phy                                        &
                   ,Q=Q,QC=QC,QS=QS,QR=QR,QT=cwm                         &
@@ -326,10 +333,8 @@ module mp_fer_hires
 !*** Calculate graupel from snow array and rime factor
 !---------------------------------------------------------------------
               DO K=1,LM
-              !MZ DO J=JMS,JME
               DO I=IMS,IME
                 QG(I,K)=QS(I,K)*F_RIMEF(I,K)
-              ENDDO
               ENDDO
               ENDDO
 !
@@ -339,7 +344,6 @@ module mp_fer_hires
 !$omp& private(i,k,TNEW)
 !.......................................................................
       DO K=1,LM
-       !MZ DO J=JMS,JME
         DO I=IMS,IME
 !
 !-----------------------------------------------------------------------
@@ -349,7 +353,6 @@ module mp_fer_hires
           TNEW=TH_PHY(I,K)*PI_PHY(I,K)
           TRAIN(I,K)=TRAIN(I,K)+(TNEW-T(I,K))*RDTPHS
           T(I,K)=TNEW
-        ENDDO
         ENDDO
       ENDDO
 !.......................................................................
@@ -362,7 +365,6 @@ module mp_fer_hires
 !
 !jaa!$omp parallel do                                                       &
 !jaa!$omp& private(i,j,pcpcol)
-    !MZ  DO J=JMS,JME
       DO I=IMS,IME
         PCPCOL=RAINNCV(I)*1.E-3
         PREC(I)=PREC(I)+PCPCOL
@@ -371,7 +373,6 @@ module mp_fer_hires
 ! NOTE: RAINNC IS ACCUMULATED INSIDE MICROPHYSICS BUT NMM ZEROES IT OUT ABOVE
 !       SINCE IT IS ONLY A LOCAL ARRAY FOR NOW
 !
-      ENDDO
       ENDDO
 !
 !-----------------------------------------------------------------------
