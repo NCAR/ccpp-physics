@@ -107,12 +107,33 @@
      MODULE MODULE_MP_FER_HIRES
 !
 !-----------------------------------------------------------------------------
-     USE MPI
-     USE ESMF
-     USE MODULE_KINDS
-     USE MODULE_CONSTANTS,ONLY : PI, CP, EPSQ, GRAV=>G, RHOL=>RHOWATER, &
-        RD=>R_D, RV=>R_V, T0C=>TIW, EPS=>EP_2, EPS1=>EP_1, CLIQ, CICE,  &
-        XLV
+
+#ifdef MPI
+     USE mpi
+#endif
+!MZ     USE ESMF
+!     USE MODULE_KINDS
+      USE machine
+!MZ
+!MZ     USE MODULE_CONSTANTS,ONLY : PI, CP, EPSQ, GRAV=>G, RHOL=>RHOWATER, &
+!MZ        RD=>R_D, RV=>R_V, T0C=>TIW, EPS=>EP_2, EPS1=>EP_1, CLIQ, CICE,  &
+!MZ        XLV
+!MZ
+!MZ temporary values copied from module_CONSTANTS; need to come from host model
+!side
+     REAL, PARAMETER :: pi=3.141592653589793       ! ludolf number
+     REAL, PARAMETER :: cp=1004.6                  ! spec. heat for dry air at constant pressure
+     REAL, PARAMETER :: epsq=1.e-12                ! floor value for specific humidity (kg/kg)
+     REAL, PARAMETER :: grav= 9.8060226            ! gravity
+     REAL, PARAMETER :: RHOL=1000.                 ! density of water (kg/m3)
+     REAL, PARAMETER :: RD=287.04                  ! gas constant for dry air
+     REAL, PARAMETER :: RV=461.6                   ! gas constant for water vapor
+     REAL, PARAMETER :: T0C= 273.15                ! melting point
+     REAL, PARAMETER :: EPS=RD/RV
+     REAL, PARAMETER :: EPS1=RV/RD-1.
+     REAL, PARAMETER :: CLIQ = 4190.               ! MZ: inconsistent value below
+     REAL, PARAMETER :: CICE = 2106.
+     REAL, PARAMETER  :: XLV  = 2.5E6
 !-----------------------------------------------------------------------------
       PUBLIC :: FERRIER_INIT_HR, GPVS_HR,FPVS,FPVS0,NX
 !-----------------------------------------------------------------------------
@@ -216,6 +237,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY,           &
      &                      QC,QR,QS,                                   &
      &                      RAINNC,RAINNCV,                             &
+     &                      threads,                                    &
      &                      ims,ime, jms,jme, lm,     		        &
      &                      d_ss,mprates,                               &
      &                      refl_10cm )
@@ -224,6 +246,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------------------------------------------------------------------
       INTEGER,INTENT(IN) :: D_SS,IMS,IME,JMS,JME,LM    !ZM ,ITIMESTEP
       REAL, INTENT(IN) 	    :: DT,RHgrd
+      INTEGER,   INTENT(IN) :: THREADS
       REAL, INTENT(IN),     DIMENSION(ims:ime, jms:jme, lm)::      &
      &                      dz8w,p_phy,pi_phy,rho_phy
       REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme, lm)::      &
@@ -289,7 +312,8 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       TBPVS0(1:NX)=TBPVS0_STATE(1:NX)
 !
 !.......................................................................
-!$omp parallel do private(j,k,i)
+!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!$OMP PRIVATE(j,k,i,t_phy)
 !.......................................................................
       DO j = jms,jme
       DO k = 1,lm
@@ -304,7 +328,8 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !.......................................................................
 
 !.......................................................................
-!$omp parallel do private(j,k,i)
+!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!$OMP PRIVATE(j,i,k, ACPREC, APREC, PREC,SR, TLATGS_PHY,TRAIN_PHY )
 !.......................................................................
       DO j = jms,jme
        DO i = ims,ime
@@ -328,14 +353,15 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !.......................................................................
 !$omp end parallel do
 !.......................................................................
-!$omp parallel do                                                       &
-!$omp private (j,i,k,lsfc,dpcol,l,p_col,thick_col,t_col,tc,q_col,       &
-!$omp          wc_col,wc,qi,QRdum,qw,fice,frain,rimef_col,qi_col,qr_col,&
-!$omp          qw_col,i_index,j_index,arain,asnow,dum,                  &
-!$omp          pcond1d,pidep1d,                                         &
-!$omp          piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,pimlt1d, &
-!$omp          praut1d,pracw1d,prevp1d,pisub1d,pevap1d,                 &
-!$omp          dbz_col,nr_col,ns_col),SCHEDULE(dynamic)
+
+!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!$OMP PRIVATE(j,i,k,lsfc,dpcol,l,p_col,thick_col,t_col,tc,q_col,       &
+!$OMP         wc_col,wc,qi,QRdum,qw,fice,frain,rimef_col,qi_col,qr_col,&
+!$OMP         qw_col,i_index,j_index,arain,asnow,dum,                  &
+!$OMP         pcond1d,pidep1d,                                         &
+!$OMP         piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,pimlt1d, &
+!$OMP         praut1d,pracw1d,prevp1d,pisub1d,pevap1d,                 &
+!$OMP         dbz_col,nr_col,ns_col)
 !.......................................................................
        DO J=JMS,JME    
         DO I=IMS,IME  
@@ -532,7 +558,8 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 !.......................................................................
-!$omp parallel do private(j,k,i,wc)
+!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!$OMP PRIVATE(j,k,i,wc)
 !.......................................................................
      DO j = jms,jme
         DO k = 1,lm
@@ -2146,10 +2173,11 @@ DSD2:         IF (RQRnew<=RQR_DRmin) THEN
 !
       IMPLICIT NONE
 !
-      INTEGER, PARAMETER :: HIGH_PRES=Selected_Real_Kind(15)
-      REAL (KIND=HIGH_PRES), PARAMETER ::                               &
+!MZ      INTEGER, PARAMETER :: HIGH_PRES=Selected_Real_Kind(15)
+!      REAL (KIND=HIGH_PRES), PARAMETER ::                               &
+      REAL (KIND=kind_phys), PARAMETER ::                               &
      & RHLIMIT=.001, RHLIMIT1=-RHLIMIT
-      REAL (KIND=HIGH_PRES) :: COND, SSAT, WCdum
+      REAL (KIND=kind_phys) :: COND, SSAT, WCdum
 !
       REAL,INTENT(IN) :: QW,PP,WV,TK,RHgrd
       REAL WVdum,Tdum,DWV,WS,ESW
@@ -2367,7 +2395,7 @@ ENDIF
 ! SH 0211/2002
 
 !-----------------------------------------------------------------------
-      SUBROUTINE FERRIER_INIT_hr (GSMDT)
+      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,THREADS)
 !-----------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !---  SUBPROGRAM DOCUMENTATION BLOCK
@@ -2421,16 +2449,19 @@ ENDIF
 !
 !     VARIABLES PASSED IN
       real,INTENT(IN) :: GSMDT
+      INTEGER,   INTENT(IN) :: MYPE 
+      INTEGER,   INTENT(IN) :: MPI_COMM_COMP
+      INTEGER,   INTENT(IN) :: THREADS
 !
 !-----------------------------------------------------------------------
 !     LOCAL VARIABLES
 !-----------------------------------------------------------------------
-      type(ESMF_VM) :: VM
+!MZ      type(ESMF_VM) :: VM
       REAL :: BBFR,DTPH,Thour_print,RDIS,BETA6
       INTEGER :: I,J,L,K
       INTEGER :: etampnew_unit1
       LOGICAL :: opened
-      INTEGER :: IRTN,MYPE,rc,mpi_comm_comp
+      INTEGER :: IRTN,rc !MYPE,mpi_comm_comp
       CHARACTER*80 errmess
 !
 !-----------------------------------------------------------------------
@@ -2443,8 +2474,8 @@ ENDIF
 !
 !--- Read in various lookup tables
 !
-        call ESMF_VMGetCurrent(vm=VM)
-        call ESMF_VMGet(vm=VM,localPet=mype,mpiCommunicator=MPI_COMM_COMP)
+!MZ        call ESMF_VMGetCurrent(vm=VM)
+!MZ        call ESMF_VMGet(vm=VM,localPet=mype,mpiCommunicator=MPI_COMM_COMP)
         IF(MYPE==0)THEN
           etampnew_unit1 = -1
           DO i = 31,99

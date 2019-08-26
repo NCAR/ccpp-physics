@@ -24,11 +24,17 @@ module mp_fer_hires
 !! | Model                 | GFS_control_type_instance                 | Fortran DDT containing FV3-GFS model control parameters   | DDT      |    0 | GFS_control_type      |           | in     | F        |
 !! | imp_physics           | flag_for_microphysics_scheme              | choice of microphysics scheme                             | flag     |    0 | integer               |           | in     | F        |
 !! | imp_physics_fer_hires | flag_for_fer_hires_microphysics_scheme    | choice of Ferrier-Aligo microphysics scheme               | flag     |    0 | integer               |           | in     | F        |
+!! | mpicomm               | mpi_comm                                  | MPI communicator                                          | index    |    0 | integer               |           | in     | F        |
+!! | mpirank               | mpi_rank                                  | current MPI-rank                                          | index    |    0 | integer               |           | in     | F        |
+!! | mpiroot               | mpi_root                                  | master MPI-rank                                           | index    |    0 | integer               |           | in     | F        |
+!! | threads               | omp_threads                               | number of OpenMP threads available to scheme              | count    |    0 | integer               |           | in     | F        | 
 !! | errmsg                | ccpp_error_message                        | error message for error handling in CCPP                  | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg                | ccpp_error_flag                           | error flag for error handling in CCPP                     | flag     |    0 | integer               |           | out    | F        |
 !!
      subroutine mp_fer_hires_init(Model, imp_physics,                   &
-                                  imp_physics_fer_hires, errmsg, errflg)
+                                  imp_physics_fer_hires,                &
+                                  mpicomm, mpirank,mpiroot,             &
+                                  threads, errmsg, errflg)
 
       USE machine,             ONLY : kind_phys
       USE MODULE_MP_FER_HIRES, ONLY : FERRIER_INIT_HR
@@ -38,6 +44,10 @@ module mp_fer_hires
       type(GFS_control_type),         intent(in)    :: Model
       integer,                        intent(in)    :: imp_physics
       integer,                        intent(in)    :: imp_physics_fer_hires
+      integer,                        intent(in)    :: mpicomm
+      integer,                        intent(in)    :: mpirank
+      integer,                        intent(in)    :: mpiroot
+      integer,                        intent(in)    :: threads
       character(len=*),               intent(out)   :: errmsg
       integer,                        intent(out)   :: errflg
 
@@ -75,11 +85,11 @@ module mp_fer_hires
        ! DT_MICRO=Model%NPRECIP*Model%dtp
         DT_MICRO=Model%dtp
 
-       CALL FERRIER_INIT_HR(DT_MICRO)
+       CALL FERRIER_INIT_HR(DT_MICRO,mpicomm,mpirank,thread)
 
        if (errflg /= 0 ) return
        
-       is_initialized = .true
+       is_initialized = .true.
 
  
      end subroutine mp_fer_hires_init
@@ -110,12 +120,13 @@ module mp_fer_hires
 !! |  qg         | graupel_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics                       | kg kg-1  |   2  | real     | kind_phys | inout  | F        |
 !! |  prec       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                                                       | m        |   1  | real     | kind_phys | inout  | F        |
 !! |  acprec     | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                                                                    | m        |   1  | real     | kind_phys | inout  | F        |
+!! | threads     | omp_threads                                                               | number of OpenMP threads available to scheme                                                       | count    |    0 | integer  |           | in     | F        | 
 !! |  refl_10cm  | radar_reflectivity_10cm                                                   | instantaneous refl_10cm                                                                            | dBZ      |   2  | real     | kind_phys | inout  | F        |
 !! |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none     |   0  | real     | kind_phys | in     | F        |
 !! |  errmsg     | ccpp_error_message                                                        | error message for error handling in CCPP                                                           | none     |   0  | character| len=*     | out    | F        |
 !! |  errflg     | ccpp_error_flag                                                           | error flag for error handling in CCPP                                                              | flag     |   0  | integer  |           | out    | F        |
 !!
-       SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT,                      &
+       SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT                       &
                          ,SLMSK                                         &
                          ,PRSI,P_PHY                                    &
                          ,T,Q,CWM                                       &
@@ -123,6 +134,7 @@ module mp_fer_hires
                          ,F_ICE,F_RAIN,F_RIMEF                          &
                          ,QC,QR,QI,QS,QG                                &
                          ,PREC,ACPREC                                   &
+                         ,threads                                       &
                          ,refl_10cm                                     &
                          ,RHGRD                                         &
                          ,errmsg,errflg)
@@ -143,6 +155,7 @@ module mp_fer_hires
       integer,           intent(in   ) :: ncol
       integer,           intent(in   ) :: nlev
       integer,           intent(in   ) :: dt
+      integer,           intent(in   ) :: threads
       real(kind_phys),   intent(in   ) :: slmsk(1:ncol)
       real(kind_phys),   intent(in   ) :: prsi(1:ncol,1:nlev+1)
       real(kind_phys),   intent(in   ) :: p_phy(1:ncol,1:nlev)
@@ -150,7 +163,7 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: q(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: cwm(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: train(1:ncol,1:nlev)
-      real(kind_phys),   intent(out)   :: sr(1:ncol)
+      real(kind_phys),   intent(out  ) :: sr(1:ncol)
       real(kind_phys),   intent(inout) :: f_ice(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: f_rain(1:ncol,1:nlev) 
       real(kind_phys),   intent(inout) :: f_rimef(1:ncol,1:nlev)
@@ -305,6 +318,7 @@ module mp_fer_hires
                   ,F_ICE_PHY=F_ICE,F_RAIN_PHY=F_RAIN                    &
                   ,F_RIMEF_PHY=F_RIMEF                                  &
                   ,RAINNC=rainnc,RAINNCV=rainncv                        &
+                  ,threads=threads                                      &
                   ,IMS=IMS,IME=IME,JMS=JMS,JME=JME,LM=LM                &
                   ,D_SS=d_ss,MPRATES=mprates                            &
                   ,refl_10cm=refl_10cm)
