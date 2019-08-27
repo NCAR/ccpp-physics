@@ -184,7 +184,7 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: acprec(1:ncol)
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
       real(kind_phys),   intent(in   ) :: rhgrd
-      real(kind_phys),   intent(in   ) :: dx
+      real(kind_phys),   intent(in   ) :: dx(1:ncol)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !
@@ -243,8 +243,7 @@ module mp_fer_hires
       lm  = nlev
 
 ! Use the dx of the 1st i point to set an integer value of dx to be used for
-! determining where RHgrd
-! should be set to 0.98 in the coarse domain when running HAFS.
+! determining where RHgrd should be set to 0.98 in the coarse domain when running HAFS.
       DX1=NINT(DX(1))
 
 

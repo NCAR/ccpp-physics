@@ -581,11 +581,16 @@
 !! | errflg                     | ccpp_error_flag                                                                               | error flag for error handling in CCPP                             | flag          |    0 | integer    |           | out    | F        |
 !!
 #endif
-    subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,  &
-      ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlat, gq0, imp_physics, imp_physics_mg, imp_physics_zhao_carr,&
-      imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_fer_hires, prsi,   &
-      prsl, prslk, rhcbot,hcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver,clw, rhc, save_qc, save_qi,errmsg,    & 
-      errflg)
+    subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv,       &
+               satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
+               ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
+               xlat, gq0, imp_physics, imp_physics_mg,                  &
+               imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
+               imp_physics_gfdl, imp_physics_thompson,                  &
+               imp_physics_wsm6, imp_physics_fer_hires, prsi,           &
+               prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,      &
+               work1, work2, kpbl, kinver,clw, rhc, save_qc, save_qi,   &
+               errmsg, errflg)
 
       use machine, only: kind_phys
 

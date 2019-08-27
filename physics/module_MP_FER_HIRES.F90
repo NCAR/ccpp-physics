@@ -458,8 +458,7 @@ ENDIF
 !GFDL          the relative humidity threshold for condensation ("RHgrd")
 !6/11/2010 mod - Use lower RHgrd_out threshold for < 850 hPa
 !------------------------------------------------------------
-            IF(DX1 .GE. 10 .AND. P_col(L)<P_RHgrd_out) THEN  ! gopal's doing
-based on GFDL
+            IF(DX1 .GE. 10 .AND. P_col(L)<P_RHgrd_out) THEN  ! gopal's doing based on GFDL
               RHC_col(L)=RHgrd
             ELSE
               RHC_col(L)=RHgrd_in
