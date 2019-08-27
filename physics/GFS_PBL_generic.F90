@@ -42,6 +42,7 @@
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                      | choice of WSM6 microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                 | choice of Zhao-Carr microphysics scheme                                             | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_mg               | flag_for_morrison_gettelman_microphysics_scheme        | choice of Morrison-Gettelman microphysics scheme                                    | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_fer_hires        | flag_for_fer_hires_microphysics_scheme                 | choice of Ferrier-Aligo microphysics scheme                                         | flag          |    0 | integer   |           | in     | F        |        
 !! | cplchm                       | flag_for_chemistry_coupling                            | flag controlling cplchm collection (default off)                                    | flag          |    0 | logical   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                               | flag for aerosol physics                                                            | flag          |    0 | logical   |           | in     | F        |
 !! | hybedmf                      | flag_for_hedmf                                         | flag for hybrid edmf pbl scheme (moninedmf)                                         | flag          |    0 | logical   |           | in     | F        |
@@ -57,7 +58,8 @@
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                             &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires,                    &
+        cplchm, ltaerosol, hybedmf, do_shoc,                                             &
         satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine, only : kind_phys
@@ -68,7 +70,7 @@
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
@@ -163,8 +165,9 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then
-  ! GFDL MP
+        elseif (imp_physics == imp_physics_gfdl .or.                    &
+                imp_physics == imp_physics_fer_hires) then
+  ! GFDL MP or F-A MP
           do k=1,levs
             do i=1,im
               vdftra(i,k,1) = qgrs(i,k,ntqv)
@@ -244,6 +247,7 @@
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                                                 | choice of WSM6 microphysics scheme                                                          | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                                            | choice of Zhao-Carr microphysics scheme                                                     | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_mg               | flag_for_morrison_gettelman_microphysics_scheme                                   | choice of Morrison-Gettelman microphysics scheme                                            | flag          |    0 | integer   |           | in     | F        |
+!! | imp_physics_fer_hires        | flag_for_fer_hires_microphysics_scheme                                            | choice of Ferrier-Aligo microphysics scheme                                                 | flag          |    0 | integer   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                                                          | flag for aerosol physics                                                                    | flag          |    0 | logical   |           | in     | F        |
 !! | cplflx                       | flag_for_flux_coupling                                                            | flag controlling cplflx collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
 !! | cplchm                       | flag_for_chemistry_coupling                                                       | flag controlling cplchm collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
@@ -298,6 +302,7 @@
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
+        imp_physics_fer_hires,                                                                                                 &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
@@ -311,7 +316,7 @@
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_fer_hires
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
@@ -427,8 +432,9 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then
-  ! GFDL MP
+        elseif (imp_physics == imp_physics_gfdl .or.                    &
+                imp_physics == imp_physics_fer_hires ) then
+  ! GFDL MP or F-A MP
           do k=1,levs
             do i=1,im
               dqdt(i,k,ntqv) = dvdftra(i,k,1)
