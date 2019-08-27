@@ -879,7 +879,7 @@
 
 !  for microphysics
         if (imp_physics == imp_physics_zhao_carr_pdf .or. imp_physics == imp_physics_zhao_carr    &
-                               .or. imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_fer_hires) then
+                               .or. imp_physics == imp_physics_gfdl) then
            gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
         elseif (ntiw > 0) then
           do k=1,levs
