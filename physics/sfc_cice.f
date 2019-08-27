@@ -65,7 +65,6 @@
 
 !!      use physcons, only : hvap => con_hvap,  cp => con_cp,             &
 !!    &                     rvrdm1 => con_fvirt, rd => con_rd
-      contains
 !
 !-----------------------------------
       subroutine sfc_cice_run                                           &
@@ -120,11 +119,6 @@
 
       real (kind=kind_phys), intent(in) :: hvap, cp, rvrdm1, rd
 
-!-  constant parameters:
-      real(kind=kind_phys), parameter :: cpinv = 1.0/cp
-      real(kind=kind_phys), parameter :: hvapi = 1.0/hvap
-      real(kind=kind_phys), parameter :: elocp = hvap/cp
-
 !  ---  inputs:
       integer, intent(in) :: im
       logical, intent(in) :: cplflx
@@ -149,6 +143,8 @@
 
       real (kind=kind_phys) :: tem
 
+      real(kind=kind_phys) :: cpinv, hvapi, elocp
+
       integer :: i
  
       logical :: flag(im)
@@ -156,6 +152,10 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      cpinv = 1.0/cp
+      hvapi = 1.0/hvap
+      elocp = hvap/cp
 !
       if((.not. cplflx).and.(.not.cplchm))then
         return
