@@ -314,6 +314,8 @@
 !! | evap_ocn                     | kinematic_surface_upward_latent_heat_flux_over_ocean                              | kinematic surface upward latent heat flux over ocean                                        | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
 !! | ugrs1                        | x_wind_at_lowest_model_layer                                                      | zonal wind at lowest model layer                                                            | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | vgrs1                        | y_wind_at_lowest_model_layer                                                      | meridional wind at lowest model layer                                                       | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | dkt_cpl                      | instantaneous_atmosphere_heat_diffusivity                                         | instantaneous atmospheric heat diffusivity                                                  | m2 s-1        |    2 | real      | kind_phys | inout  | F        |
+!! | dkt                          | atmosphere_heat_diffusivity                                                       | diffusivity for heat                                                                        | m2 s-1        |    2 | real      | kind_phys | in     | F        |
 !! | errmsg                       | ccpp_error_message                                                                | error message for error handling in CCPP                                                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg                       | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -327,7 +329,7 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, errmsg, errflg)
+        dqsfc_cice, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -362,6 +364,10 @@
 
       logical, dimension(:),intent(in) :: dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
+
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dkt_cpl
+      real(kind=kind_phys), dimension(:,:), intent(in) :: dkt
+
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -491,7 +497,8 @@
           tem  = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
           ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
         enddo
-!!        Coupling%dkt     (:,:) = dkt (:,:)
+        ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
+        dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
       endif
 
       if(cplflx)then
