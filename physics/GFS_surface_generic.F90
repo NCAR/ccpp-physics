@@ -337,7 +337,7 @@
 !! | xcosz          | instantaneous_cosine_of_zenith_angle                                                                                | cosine of zenith angle at current time                                              | none        |    1 | real       | kind_phys | in     | F        |
 !! | evbs           | soil_upward_latent_heat_flux                                                                                        | soil upward latent heat flux                                                        | W m-2       |    1 | real       | kind_phys | in     | F        |
 !! | evcw           | canopy_upward_latent_heat_flux                                                                                      | canopy upward latent heat flux                                                      | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | trans          | transpiration_flux                                                                                                  | total plant transpiration rate                                                      | kg m-2 s-1  |    1 | real       | kind_phys | in     | F        |
+!! | trans          | transpiration_flux                                                                                                  | total plant transpiration rate                                                      | W m-2       |    1 | real       | kind_phys | in     | F        |
 !! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux                                                                 | latent heat flux from snow depo/subl                                                | W m-2       |    1 | real       | kind_phys | in     | F        |
 !! | snowc          | surface_snow_area_fraction                                                                                          | surface snow area fraction                                                          | frac        |    1 | real       | kind_phys | in     | F        |
 !! | snohf          | snow_freezing_rain_upward_latent_heat_flux                                                                          | latent heat flux due to snow and frz rain                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
@@ -387,8 +387,8 @@
 !! | ep             | cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep                                         | cumulative surface upward potential latent heat flux multiplied by timestep         | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
 !! | runoff         | total_runoff                                                                                                        | total water runoff                                                                  | kg m-2      |    1 | real       | kind_phys | inout  | F        |
 !! | srunoff        | surface_runoff                                                                                                      | surface water runoff (from lsm)                                                     | kg m-2      |    1 | real       | kind_phys | inout  | F        |
-!! | runof          | surface_runoff_flux                                                                                                 | surface runoff flux                                                                 | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
-!! | drain          | subsurface_runoff_flux                                                                                              | subsurface runoff flux                                                              | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
+!! | runof          | surface_runoff_flux                                                                                                 | surface runoff flux                                                                 | kg m-2 s-1  |    1 | real       | kind_phys | in     | F        |
+!! | drain          | subsurface_runoff_flux                                                                                              | subsurface runoff flux                                                              | kg m-2 s-1  |    1 | real       | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                                                                  | error message for error handling in CCPP                                            | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
@@ -430,7 +430,7 @@
         real(kind=kind_phys), parameter :: albdf   = 0.06d0
 
         integer :: i
-        real(kind=kind_phys) :: tem, xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
+        real(kind=kind_phys) :: xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -524,10 +524,9 @@
 !  --- ...  total runoff is composed of drainage into water table and
 !           runoff at the surface and is accumulated in unit of meters
         if (lssav) then
-          tem = dtf * 0.001
           do i=1,im
-            runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * tem
-            srunoff(i) = srunoff(i) + runof(i) * tem
+            runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * dtf
+            srunoff(i) = srunoff(i) + runof(i) * dtf
           enddo
         endif
 
