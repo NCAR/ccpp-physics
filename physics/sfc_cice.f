@@ -26,11 +26,11 @@
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_cice_run Arguments
-!! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional | !!
+!! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
 !! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                | flag          |    0 | logical   |           | in     | F
-!! | cplchm         | flag_for_chemistry_coupling                                                    | flag controlling cplchm collection (default off)                | flag          |    0 | logical   |           | in     | F        |
+!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                | flag          |    0 | logical   |           | in     | F        |
+!! | cplchm         | flag_for_chemistry_coupling                                                  | flag controlling cplchm collection (default off)                | flag          |    0 | logical   |           | in     | F        |
 !! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                          | J kg-1        |    0 | real      | kind_phys | in     | F        | 
 !! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                   | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
 !! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)           | none          |    0 | real      | kind_phys | in     | F        |
@@ -40,10 +40,10 @@
 !! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                                  | K             |    1 | real      | kind_phys | in     | F        |
 !! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                            | kg kg-1       |    1 | real      | kind_phys | in     | F        |
 !! | cm             | surface_drag_coefficient_for_momentum_in_air_over_ice                        | surface exchange coeff for momentum over ice                    | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                 | none          |    1 | real      | kind_phys | in     | F        
+!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | in     | F        |
+!! | flag_cice      | flag_for_cice                                                                | flag for cice                                                   | flag          |    1 | logical   |           | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                              | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | dqsfc          | dqsfcin                                                                      | aoi_fld%dqsfcin(item,lan)                                       |               |    1 | real      | kind_phys | none   | F        |
@@ -70,7 +70,7 @@
       subroutine sfc_cice_run                                           &
      &     ( im, cplflx, cplchm, hvap, cp, rvrdm1, rd,                  & ! ---  inputs:
      &       u1, v1, t1, q1, cm, ch, prsl1, prslki,                     &
-     &       islimsk, ddvel, flag_iter, dqsfc, dtsfc,                   &
+     &       flag_cice, ddvel, flag_iter, dqsfc, dtsfc,                 &
      &       qsurf, cmm, chh, evap, hflx,                               & ! ---  outputs:
      &       errmsg, errflg
      &     )
@@ -127,7 +127,7 @@
       real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,       &
      &       t1, q1, cm, ch, prsl1, prslki, ddvel, dqsfc, dtsfc
 
-      integer, dimension(im), intent(in) :: islimsk
+      logical, dimension(im), intent(in) :: flag_cice
 
       logical, intent(in) :: flag_iter(im)
 
@@ -146,27 +146,21 @@
       real(kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i
- 
-      logical :: flag(im)
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+!
+      if ((.not. cplflx) .and. (.not.cplchm)) then
+         return
+      endif
+!
       cpinv = 1.0/cp
       hvapi = 1.0/hvap
       elocp = hvap/cp
 !
-      if((.not. cplflx).and.(.not.cplchm))then
-        return
-      endif
-
       do i = 1, im
-         flag(i) = (islimsk(i) == 4) .and. flag_iter(i)
-      enddo
-!
-      do i = 1, im
-        if (flag(i)) then
+        if (flag_cice(i) .and. flag_iter(i)) then
 
           wind(i)   = sqrt(u1(i)*u1(i) + v1(i)*v1(i))                   &
      &              + max(0.0, min(ddvel(i), 30.0))

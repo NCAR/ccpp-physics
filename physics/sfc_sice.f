@@ -45,7 +45,7 @@
 !! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                 | none          |    1 | real      | kind_phys | in     | F        |
 !! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
 !! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | inout  | F        |
+!! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | in     | F        |
 !! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                              | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
 !! | lprnt          | flag_print                                                                   | switch for printing sample column to stdout                     | flag          |    0 | logical   |           | in     | F        |
@@ -70,7 +70,6 @@
 !! | cplchm         | flag_for_chemistry_coupling                                                  | flag controlling cplchm collection (default off)                | flag          |    0 | logical   |           | in     | F        |
 !! | flag_cice      | flag_for_cice                                                                | flag for cice                                                   | flag          |    1 | logical   |           | in     | F        |
 !! | islmsk_cice    | sea_land_ice_mask_cice                                                       | sea/land/ice mask cice (=0/1/2)                                 | flag          |    1 | integer   |           | in     | F        | 
-!! | slmsk          | sea_land_ice_mask_real                                                       | landmask: sea/land/ice=0/1/2                                    | flag          |    1 | real      | kind_phys | in     | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -104,7 +103,7 @@
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-     &       cplflx, cplchm, flag_cice, islmsk_cice, slmsk,             &
+     &       cplflx, cplchm, flag_cice, islmsk_cice,                    &
      &       errmsg, errflg
      &     )
 
@@ -216,10 +215,9 @@
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, ddvel
 
-      integer, dimension(im), intent(inout) :: islimsk
+      integer, dimension(im), intent(in) :: islimsk
       integer, dimension(im), intent(in) :: islmsk_cice
       real (kind=kind_phys), intent(in)  :: delt
-      real (kind=kind_phys), dimension(im), intent(in)  ::  slmsk
 
       logical, dimension(im), intent(in) :: flag_iter, flag_cice
 
@@ -263,28 +261,19 @@
       errflg = 0
 
       if(cplflx)then
-        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
+        write(*,*)'Fatal error: CCPP not been tested with cplflx=true!'
         stop
       endif
 
-      do i = 1, im
-            islmsk_local(i) = islimsk(i)
-            if (flag_cice(i).and.cplflx) then
-               islmsk_local (i) = islmsk_cice(i)
-            endif
-      enddo
-
-      do i = 1, im
-                      islimsk(i)=islmsk_local(i)
-      enddo
-
-      if (cplflx .or. cplchm) then
-          do i = 1, im
-            if (flag_cice(i)) then
-               islimsk(i) = int(slmsk(i)+0.5)
-            endif
-          enddo
-      endif
+      if (cplflx) then
+         where (flag_cice)
+            islmsk_local = islmsk_cice
+         elsewhere
+            islmsk_local = islimsk
+         endwhere
+      else
+        islmsk_local = islimsk
+      end if
 
 !
 !> - Set flag for sea-ice.
