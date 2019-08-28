@@ -361,8 +361,7 @@
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
 
       logical, dimension(:),intent(in) :: dry, icy
-
-     real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
+      real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -502,7 +501,6 @@
 
 !  --- ...  coupling insertion
 
-! ### GJF ### the following section needs to be made CCPP-compliant when cplflx = T
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
@@ -540,6 +538,7 @@
         enddo
       endif
 
+!-------------------------------------------------------lssav if loop ----------
       if (lssav) then
         do i=1,im
           dusfc_diag (i) = dusfc_diag(i) + dusfc1(i)*dtf
