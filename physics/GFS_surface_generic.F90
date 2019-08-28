@@ -142,9 +142,6 @@
              tisfc, tsfco, fice, hice
         real(kind=kind_phys), dimension(im), intent(out) ::ulwsfc_cice, &
              dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice
-        real(kind=kind_phys), dimension(im) :: tisfc_cice, tsea_cice,   &
-             fice_cice,hice_cice
-
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -262,23 +259,13 @@
           islmsk_cice(i) = int(slimskin_cpl(i)+0.5)
           if(islmsk_cice(i) == 4)then
             flag_cice(i)   = .true.
-          else
-            flag_cice(i) = .false.
           endif
           ulwsfc_cice(i) = ulwsfcin_cpl(i)
           dusfc_cice(i)  = dusfcin_cpl(i)
           dvsfc_cice(i)  = dvsfcin_cpl(i)
           dtsfc_cice(i)  = dtsfcin_cpl(i)
           dqsfc_cice(i)  = dqsfcin_cpl(i)
-          tisfc_cice(i)  = tisfc(i)
-          tsea_cice(i)   = tsfco(i)
-          fice_cice(i)   = fice(i)
-          hice_cice(i)   = hice(i)
-          if(flag_cice(i)) tsfc(i) = fice_cice(i)*tisfc_cice(i) + (1. - fice_cice(i))*tsea_cice(i)
         enddo
-      else
-        ! Avoid uninitialized variables - set to default values
-        flag_cice = .false.
       endif
 
 
