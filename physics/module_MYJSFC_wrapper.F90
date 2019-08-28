@@ -102,6 +102,9 @@
 !! | fh2_lnd        | Monin_Obukhov_similarity_function_for_heat_at_2m_over_land                  | Monin-Obukhov parameter for heat at 2m over land      | none          |    1 | real        | kind_phys | inout  | F        |
 !! | fh2_ice        | Monin_Obukhov_similarity_function_for_heat_at_2m_over_ice                   | Monin-Obukhov parameter for heat at 2m over ice       | none          |    1 | real        | kind_phys | inout  | F        |
 !! | wind           | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real        | kind_phys | out    | F        |
+!! | con_cp                     | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure                                               | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
+!! | con_g                      | gravitational_acceleration                                                  | gravitational acceleration                                                                  | m s-2         |    0 | real       | kind_phys | in     | F        |
+!! | con_rd                     | gas_constant_dry_air                                                        | ideal gas constant for dry air                                                              | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
 !! | me             | mpi_rank                                                                    | current MPI-rank                                      | index         |    0 | integer     |           | in     | F        |
 !! | lprnt          | flag_print                                                                  | control flag for diagnostic print out                 | flag          |    0 | logical     |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character   | len=*     | out    | F        |
@@ -136,16 +139,10 @@
      &  fh_ocn,    fh_lnd,    fh_ice,              &   ! intent(inout)
      &  fm10_ocn,  fm10_lnd,  fm10_ice,            &   ! intent(inout)
      &  fh2_ocn,   fh2_lnd,   fh2_ice,             &   ! intent(inout)
-     &  wind, me, lprnt, errmsg, errflg )             ! intent(inout)
+     &  wind,      con_cp,    con_g,    con_rd,    &
+     &  me, lprnt, errmsg, errflg )             ! intent(inout)
 ! 
       use machine,        only : kind_phys
-      use GFS_typedefs,   only : GFS_tbd_type
-      use physcons,       only : cp   => con_cp,   &
-     &                           g    => con_g,    &
-     &                           r_d  => con_rd,   &
-     &                           r_v  => con_rv,   &
-     &                           cpv  => con_cvap, &
-     &                           rcp  => con_rocp
       use MODULE_SF_JSFC, only: JSFC_INIT,JSFC
 
 !------------------------------------------------------------------- 
@@ -159,7 +156,7 @@
         ,kdbl=8                     ! double precision
 !
 !  ---  constant parameters:
-      real(kind=kind_phys), parameter :: karman  = 0.4
+!      real(kind=kind_phys), parameter :: karman  = 0.4
 
 !-------------------------------------------------------------------
 !-------------------------------------------------------------------
@@ -172,7 +169,7 @@
 !     real    , parameter :: cpv          = 4.*r_v
 !     real    , parameter :: rcp          = r_d/cp
 
-      real, parameter :: g_inv=1/g, cappa=r_d/cp
+!      real, parameter :: g_inv=1/g, cappa=r_d/cp
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -182,6 +179,7 @@
       integer,intent(in) :: kdt, iter, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
       logical,intent(in) :: restart, lprnt
+      real(kind=kind_phys),intent(in) :: con_cp, con_g, con_rd
 
 !MYJ-2D
       logical,dimension(im),intent(in) :: flag_iter
@@ -226,6 +224,7 @@
       logical :: lprnt1, lprnt2
       integer :: ntsd, k, k1, i, n, ide, jde, kde
 
+      real(kind=kind_phys) :: g, r_d, g_inv, cappa
       real(kind=kfpt),dimension(levs)       :: epsq2
       real(kind=kfpt),dimension(im)         ::           &
            sfcz,tsk,xland,mavail,rmol,                   &
@@ -256,6 +255,11 @@
            print*,'ntsd,iter=',ntsd,iter
          end if
       endif
+
+      r_d   = con_rd
+      g     = con_g
+      g_inv = 1./con_g
+      cappa = con_rd/con_cp
 
       if (ntsd==0.and.iter==1)then
         do i=1,im

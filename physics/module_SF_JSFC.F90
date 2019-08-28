@@ -327,15 +327,15 @@
 !
 !***  FIND THE HEIGHT OF THE PBL
 !
-          LPBL=LMH
+          LPBL=LMH/3
           DO K=LMH-1,1,-1
             IF(Q2K(K)<=EPSQ2(K)*FH) THEN
               LPBL=K
-              GO TO 110
+!              GO TO 110
             ENDIF
           ENDDO
 !
-          LPBL=1
+!          LPBL=1
 !
 !-----------------------------------------------------------------------
 !--------------THE HEIGHT OF THE PBL------------------------------------

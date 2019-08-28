@@ -84,6 +84,9 @@
 !! | xkzm_s              | diffusivity_background_sigma_level                              | sigma level threshold for background diffusivity      | none          |    0 | real             | kind_phys | in     | F        |
 !! | gamt                | countergradient_mixing_term_for_temperature                     | countergradient mixing term for temperature           | K             |    1 | real             | kind_phys | inout  | F        |
 !! | gamq                | countergradient_mixing_term_for_water_vapor                     | countergradient mixing term for water vapor           | kg kg-1       |    1 | real             | kind_phys | inout  | F        |
+!! | con_cp                     | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure                                               | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
+!! | con_g                      | gravitational_acceleration                                                  | gravitational acceleration                                                                  | m s-2         |    0 | real       | kind_phys | in     | F        |
+!! | con_rd                     | gas_constant_dry_air                                                        | ideal gas constant for dry air                                                              | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
 !! | me                  | mpi_rank                                                        | current MPI-rank                                      | index         |    0 | integer          |           | in     | F        |
 !! | lprnt               | flag_print                                                      | control flag for diagnostic print out                 | flag          |    0 | logical          |           | in     | F        |
 !! | errmsg              | ccpp_error_message                                              | error message for error handling in CCPP              | none          |    0 | character        | len=*     | out    | F        |
@@ -110,18 +113,11 @@
      &  dudt, dvdt, dtdt, dqdt,                     &
      &  dusfc,dvsfc,dtsfc,dqsfc,                    &     
      &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
+     &  con_cp,con_g,con_rd,                        &
      &  me, lprnt, errmsg, errflg )
 
 ! 
       use machine,      only : kind_phys
-      use GFS_typedefs, only:  GFS_tbd_type
-
-      use physcons, only : cp   => con_cp,          &
-     &                     g    => con_g,           &
-     &                     r_d  => con_rd,          &
-     &                     r_v  => con_rv,          &
-     &                     cpv  => con_cvap,        &
-     &                     rcp  => con_rocp
 
       use MODULE_BL_MYJPBL,      only: MYJPBL_INIT,MYJPBL
 
@@ -141,13 +137,14 @@
 !   real    , parameter :: g            = 9.81
 !   real    , parameter :: r_d          = 287.
 !   real    , parameter :: cp           = 7.*r_d/2.
-!   real    , parameter :: r_v          = 461.6
 !
-      real, parameter :: rd=r_d, rk=cp/rd
-      real, parameter :: elwv=2.501e6, eliv=2.834e6
-      real, parameter :: reliw=eliv/elwv, xkgdx=25000.,xkzinv=0.15
+!      real, parameter :: g = 9.81, r_d=287., cp= 7.*r_d/2. 
+!      real, parameter :: rd=r_d, rk=cp/rd
+!      real, parameter :: elwv=2.501e6, eliv=2.834e6
+!      real, parameter :: reliw=eliv/elwv, 
+      real, parameter :: xkgdx=25000.,xkzinv=0.15
 
-      real, parameter :: g_inv=1/g, cappa=r_d/cp
+!      real, parameter :: g_inv=1./con_g, cappa=con_rd/con_cp
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -157,6 +154,7 @@
       integer,intent(in) :: kdt, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
       logical,intent(in) :: restart,do_myjsfc,lprnt
+      real(kind=kind_phys),intent(in) :: con_cp, con_g, con_rd
       real(kind=kind_phys),intent(in) :: dt_phs, xkzm_m, xkzm_h, xkzm_s
 
 !MYJ-2D
@@ -215,6 +213,7 @@
       real(kind=kfpt),dimension(im,13) :: phy_f2d_myj 
       real(kind=kfpt), dimension(im,levs) :: xcofh  &
      &        ,xkzo,xkzmo
+      real(kind=kind_phys) :: g, r_d, g_inv, cappa 
       real(kind=kind_phys) :: thz0, qz0, a1u, a1t, a1q
       real(kind=kind_phys) :: z0m, aa1u, aa1t, z1uov, z1tox
       real(kind=kind_phys) :: tmax,tmin,t_myj1
@@ -245,6 +244,12 @@
       end if
 
 !prep MYJ-only variables
+ 
+      r_d   = con_rd
+      g     = con_g
+      g_inv = 1./con_g 
+      cappa = con_rd/con_cp 
+
       do i=1,im
          work3(i)=prsik_1(i) / prslk_1(i)
          sice(i)=slmsk(i)*0.5
@@ -381,9 +386,8 @@
                aa1t=ch(i)*wind1(i)*z1tox
                a1t=aa1t/(1.-aa1t)
 !
-! Qingfu tests
-               a1u=0.3
-               a1t=0.25
+!               a1u=0.3
+!               a1t=0.25
 !
                a1q=a1t
             else
