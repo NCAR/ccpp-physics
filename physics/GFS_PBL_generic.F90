@@ -291,6 +291,29 @@
 !! | dv3dt_OGWD                   | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag                   | cumulative change in y wind due to orographic gravity wave drag                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt                        | cumulative_change_in_water_vapor_specific_humidity_due_to_PBL                     | cumulative change in water vapor specific humidity due to PBL                               | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
 !! | dq3dt_ozone                  | cumulative_change_in_ozone_mixing_ratio_due_to_PBL                                | cumulative change in ozone mixing ratio due to PBL                                          | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
+!! | rd                           | gas_constant_dry_air                                                              | ideal gas constant for dry air                                                              | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | cp                           | specific_heat_of_dry_air_at_constant_pressure                                     | specific heat of dry air at constant pressure                                               | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
+!! | fvirt                        | ratio_of_vapor_to_dry_air_gas_constants_minus_one                                 | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                       | none          |    0 | real      | kind_phys | in     | F        |
+!! | hvap                         | latent_heat_of_vaporization_of_water_at_0C                                        | latent heat of evaporation/sublimation                                                      | J kg-1        |    0 | real      | kind_phys | in     | F        |
+!! | t1                           | air_temperature_at_lowest_model_layer_for_diag                                    | layer 1 temperature for diag                                                                | K             |    1 | real      | kind_phys | in     | F        |
+!! | q1                           | water_vapor_specific_humidity_at_lowest_model_layer_for_diag                      | layer 1 specific humidity for diag                                                          | kg kg-1       |    1 | real      | kind_phys | in     | F        |
+!! | prsl                         | air_pressure                                                                      | mean layer pressure                                                                         | Pa            |    2 | real      | kind_phys | in     | F        |
+!! | hflx                         | kinematic_surface_upward_sensible_heat_flux                                       | kinematic surface upward sensible heat flux                                                 | K m s-1       |    1 | real      | kind_phys | in     | F        |
+!! | ushfsfci                     | instantaneous_upward_sensible_heat_flux                                           | instantaneous upward sensible heat flux                                                     | W m-2         |    1 | real      | kind_phys | out    | F        |
+!! | oceanfrac                    | sea_area_fraction                                                                 | fraction of horizontal grid area occupied by ocean                                          | frac          |    1 | real      | kind_phys | in     | F        |
+!! | fice                         | sea_ice_concentration                                                             | ice fraction over open water                                                                | frac          |    1 | real      | kind_phys | in     | F        |
+!! | dusfc_cice                   | surface_x_momentum_flux_for_coupling_interstitial                                 | sfc x momentum flux for coupling interstitial                                               | Pa            |    1 | real      | kind_phys | in     | F        | 
+!! | dvsfc_cice                   | surface_y_momentum_flux_for_coupling_interstitial                                 | sfc y momentum flux for coupling interstitial                                               | Pa            |    1 | real      | kind_phys | in     | F        |
+!! | dtsfc_cice                   | surface_upward_sensible_heat_flux_for_coupling_interstitial                       | sfc sensible heat flux for coupling interstitial                                            | W m-2         |    1 | real      | kind_phys | in     | F        |
+!! | dqsfc_cice                   | surface_upward_latent_heat_flux_for_coupling_interstitial                         | sfc latent heat flux for coupling interstitial                                              | W m-2         |    1 | real      | kind_phys | in     | F        |
+!! | dry                          | flag_nonzero_land_surface_fraction                                                | flag indicating presence of some land surface area fraction                                 | flag          |    1 | logical   |           | in     | F        |
+!! | icy                          | flag_nonzero_sea_ice_surface_fraction                                             | flag indicating presence of some sea ice surface area fraction                              | flag          |    1 | logical   |           | in     | F        |
+!! | wind                         | wind_speed_at_lowest_model_layer                                                  | wind speed at lowest model level                                                            | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | stress_ocn                   | surface_wind_stress_over_ocean                                                    | surface wind stress over ocean                                                              | m2 s-2        |    1 | real      | kind_phys | in     | F        |
+!! | hflx_ocn                     | kinematic_surface_upward_sensible_heat_flux_over_ocean                            | kinematic surface upward sensible heat flux over ocean                                      | K m s-1       |    1 | real      | kind_phys | in     | F        |
+!! | evap_ocn                     | kinematic_surface_upward_latent_heat_flux_over_ocean                              | kinematic surface upward latent heat flux over ocean                                        | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
+!! | ugrs1                        | x_wind_at_lowest_model_layer                                                      | zonal wind at lowest model layer                                                            | m s-1         |    1 | real      | kind_phys | in     | F        |
+!! | vgrs1                        | y_wind_at_lowest_model_layer                                                      | meridional wind at lowest model layer                                                       | m s-1         |    1 | real      | kind_phys | in     | F        |
 !! | errmsg                       | ccpp_error_message                                                                | error message for error handling in CCPP                                                    | none          |    0 | character | len=*     | out    | F        |
 !! | errflg                       | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -303,7 +326,8 @@
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, errmsg, errflg)
+        dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
+        dqsfc_cice, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -317,6 +341,11 @@
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       real(kind=kind_phys), intent(in) :: dtf
+      real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
+      real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac, fice
+      real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
+      real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
+          wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
       real(kind=kind_phys), dimension(im), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
       real(kind=kind_phys), dimension(im, levs), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
@@ -331,11 +360,14 @@
       real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
 
+      logical, dimension(:),intent(in) :: dry, icy
+
+     real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
       integer :: i, k
-      real(kind=kind_phys) :: tem
+      real(kind=kind_phys) :: tem, tem1, rho
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -454,46 +486,60 @@
 
       endif ! nvdiff == ntrac
 
+      if (cplchm) then
+        do i = 1, im
+          tem1 = max(q1(i), 1.e-8)
+          tem  = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
+          ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
+        enddo
+!!        Coupling%dkt     (:,:) = dkt (:,:)
+      endif
+
+      if(cplflx)then
+        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
+        stop 
+      endif
+
 !  --- ...  coupling insertion
 
 ! ### GJF ### the following section needs to be made CCPP-compliant when cplflx = T
-!      if (Model%cplflx) then
-!        do i=1,im
-!          if (Sfcprop%oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
-!            if (fice(i) == 1.0) then           ! use results from CICE
-!              Coupling%dusfci_cpl(i) = dusfc_cice(i)
-!              Coupling%dvsfci_cpl(i) = dvsfc_cice(i)
-!              Coupling%dtsfci_cpl(i) = dtsfc_cice(i)
-!              Coupling%dqsfci_cpl(i) = dqsfc_cice(i)
-!            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
-!              tem1 = max(Diag%q1(i), 1.e-8)
-!              rho = Statein%prsl(i,1) / (con_rd*Diag%t1(i)*(1.0+con_fvirt*tem1))
-!              if (wind(i) > 0.0) then
-!                tem = - rho * stress_ocn(i) / wind(i)
-!                Coupling%dusfci_cpl(i) = tem * Statein%ugrs(i,1)   ! U-momentum flux
-!                Coupling%dvsfci_cpl(i) = tem * Statein%vgrs(i,1)   ! V-momentum flux
-!              else
-!                Coupling%dusfci_cpl(i) = 0.0
-!                Coupling%dvsfci_cpl(i) = 0.0
-!              endif
-!              Coupling%dtsfci_cpl(i) = con_cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
-!              Coupling%dqsfci_cpl(i) = con_hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
-!            else                                                    ! use results from PBL scheme for 100% open ocean
-!              Coupling%dusfci_cpl(i) = dusfc1(i)
-!              Coupling%dvsfci_cpl(i) = dvsfc1(i)
-!              Coupling%dtsfci_cpl(i) = dtsfc1(i)
-!              Coupling%dqsfci_cpl(i) = dqsfc1(i)
-!            endif
+      if (cplflx) then
+        do i=1,im
+          if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
+            if (fice(i) == 1.0) then           ! use results from CICE
+              dusfci_cpl(i) = dusfc_cice(i)
+              dvsfci_cpl(i) = dvsfc_cice(i)
+              dtsfci_cpl(i) = dtsfc_cice(i)
+              dqsfci_cpl(i) = dqsfc_cice(i)
+            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
+              tem1 = max(q1(i), 1.e-8)
+              rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
+              if (wind(i) > 0.0) then
+                tem = - rho * stress_ocn(i) / wind(i)
+                dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
+                dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
+              else
+                dusfci_cpl(i) = 0.0
+                dvsfci_cpl(i) = 0.0
+              endif
+              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+            else                                                    ! use results from PBL scheme for 100% open ocean
+              dusfci_cpl(i) = dusfc1(i)
+              dvsfci_cpl(i) = dvsfc1(i)
+              dtsfci_cpl(i) = dtsfc1(i)
+              dqsfci_cpl(i) = dqsfc1(i)
+            endif
 !
-!            Coupling%dusfc_cpl (i) = Coupling%dusfc_cpl(i) + Coupling%dusfci_cpl(i) * dtf
-!            Coupling%dvsfc_cpl (i) = Coupling%dvsfc_cpl(i) + Coupling%dvsfci_cpl(i) * dtf
-!            Coupling%dtsfc_cpl (i) = Coupling%dtsfc_cpl(i) + Coupling%dtsfci_cpl(i) * dtf
-!            Coupling%dqsfc_cpl (i) = Coupling%dqsfc_cpl(i) + Coupling%dqsfci_cpl(i) * dtf
+            dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
+            dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfci_cpl(i) * dtf
+            dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfci_cpl(i) * dtf
+            dqsfc_cpl (i) = dqsfc_cpl(i) + dqsfci_cpl(i) * dtf
 !!
-!          endif ! Ocean only, NO LAKES
-!        enddo
-!      endif
-!-------------------------------------------------------lssav if loop ----------
+          endif ! Ocean only, NO LAKES
+        enddo
+      endif
+
       if (lssav) then
         do i=1,im
           dusfc_diag (i) = dusfc_diag(i) + dusfc1(i)*dtf
