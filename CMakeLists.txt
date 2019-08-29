@@ -97,9 +97,23 @@ list(APPEND LIBS "ccpp")
 
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
-include(./CCPP_SCHEMES.cmake)
+set(SCHEMES $ENV{CCPP_SCHEMES})
+if(SCHEMES)
+  message(INFO "Got CCPP_SCHEMES from environment variable: ${SCHEMES}")
+else(SCHEMES)
+  include(./CCPP_SCHEMES.cmake)
+  message(INFO "Got SCHEMES from cmakefile include file: ${SCHEMES}")
+endif(SCHEMES)
+
 # Set the sources: physics scheme caps
-include(./CCPP_CAPS.cmake)
+set(CAPS $ENV{CCPP_CAPS})
+if(CAPS)
+  message(INFO "Got CAPS from environment variable: ${CAPS}")
+else(CAPS)
+  include(./CCPP_CAPS.cmake)
+  message(INFO "Got CAPS from cmakefile include file: ${CAPS}")
+endif(CAPS)
+
 # Create empty lists for schemes with special compiler optimization flags
 set(SCHEMES_SFX_OPT "")
 # Create empty lists for schemes with special floating point precision flags
@@ -334,7 +348,7 @@ if(STATIC)
   foreach(source_f90 ${CAPS})
       string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${source_f90})
       string(TOLOWER ${tmp_module_f90} module_f90)
-      list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/../${module_f90})
+      list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
   endforeach()
 else(STATIC)
   add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
