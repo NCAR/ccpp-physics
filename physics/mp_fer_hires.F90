@@ -111,14 +111,13 @@ module mp_fer_hires
 !! |  cwm        | total_cloud_condensate_mixing_ratio_updated_by_physics                    | total cloud condensate mixing ratio (except water vapor) updated by physics                        | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  train      | accumulated_tendency_of_air_temperature_due_to_FA_scheme                  | accumulated tendency of air temperature due to FA MP scheme                                        | K          |   2  | real     | kind_phys | inout  | F        |
 !! |  sr         | ratio_of_snowfall_to_rainfall                                             | snow ratio: ratio of snow to total precipitation  (explicit only)                                  | frac       |   1  | real     | kind_phys | out    | F        |
-!! |  f_ice      | mass_fraction_of_ice_water_cloud                                          | mass fraction of ice water cloud                                                                   | frac       |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rain     | mass_fraction_of_rain_water_cloud                                         | mass fraction of rain water cloud                                                                  | frac       |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rimef    | mass_fraction_of_rime_factor                                              | mass fraction of rime factor                                                                       | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  f_ice      | fraction_of_ice_water_cloud                                               | fraction of ice water cloud                                                                        | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rain     | fraction_of_rain_water_cloud                                              | fraction of rain water cloud                                                                       | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rimef    | rime_factor                                                   |  rime factor                                                                            | frac       |   2  | real     | kind_phys | inout  | F        |
 !! |  qc         | cloud_condensed_water_mixing_ratio_updated_by_physics                     | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics         | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  qs         | snow_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  qg         | graupel_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics                       | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  qg         | mass_weighted_rime_factor                                                 | mass_weighted_rime_factor                                                                          | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  prec       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                                                       | m          |   1  | real     | kind_phys | inout  | F        |
 !! |  acprec     | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                                                                    | m          |   1  | real     | kind_phys | inout  | F        |
 !! |  mpirank    | mpi_rank                                                                  | current MPI-rank                                                                                   | index      |   0  | integer  |           | in     | F        |
@@ -141,7 +140,7 @@ module mp_fer_hires
                          ,T,Q,CWM                                       &
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
-                         ,QC,QR,QI,QS,QG                                &
+                         ,QC,QR,QI,QG                                   &
                          ,PREC,ACPREC                                   &
                          ,mpirank, mpiroot, threads                     &
                          ,refl_10cm                                     &
@@ -183,7 +182,6 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qc(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: qs(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: prec(1:ncol)
       real(kind_phys),   intent(inout) :: acprec(1:ncol)
@@ -319,8 +317,8 @@ module mp_fer_hires
 !---------------------------------------------------------------------
               DO K=1,LM
               DO I=IMS,IME
-                IF (QG(I,K)>EPSQ .AND. QS(I,K)>EPSQ) THEN
-                  F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QS(I,K)))
+                IF (QG(I,K)>EPSQ .AND. QI(I,K)>EPSQ) THEN
+                  F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QI(I,K)))
                 ELSE
                   F_RIMEF(I,K)=1.
                 ENDIF
@@ -332,7 +330,7 @@ module mp_fer_hires
                    DT=dtphs,RHgrd=RHGRD                                 &
                   ,DZ8W=dz,RHO_PHY=rr,P_PHY=p_phy,PI_PHY=pi_phy         &
                   ,TH_PHY=th_phy                                        &
-                  ,Q=Q,QC=QC,QS=QS,QR=QR,QT=cwm                         &
+                  ,Q=Q,QC=QC,QS=QI,QR=QR,QT=cwm                         &
                   ,LOWLYR=LOWLYR,SR=SR                                  &
                   ,F_ICE_PHY=F_ICE,F_RAIN_PHY=F_RAIN                    &
                   ,F_RIMEF_PHY=F_RIMEF                                  &
@@ -347,7 +345,7 @@ module mp_fer_hires
 !---------------------------------------------------------------------
               DO K=1,LM
               DO I=IMS,IME
-                QG(I,K)=QS(I,K)*F_RIMEF(I,K)
+                QG(I,K)=QI(I,K)*F_RIMEF(I,K)
               ENDDO
               ENDDO
 !
