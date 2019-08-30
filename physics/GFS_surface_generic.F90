@@ -21,6 +21,7 @@
 !! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                           | count      |    0 | integer   |           | in     | F        |
 !! | levs           | vertical_dimension                                                           | number of vertical levels                                        | count      |    0 | integer   |           | in     | F        |
+!! | first_time_step | flag_for_first_time_step                                                    | flag for first time step for time integration loop (cold/warmstart) | flag    |    0 | logical   |           | in     | F        |
 !! | vfrac          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                       | frac       |    1 | real      | kind_phys | in     | F        |
 !! | islmsk         | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                     | flag       |    1 | integer   |           | in     | F        |
 !! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                         | index      |    0 | integer   |           | in     | F        |
@@ -80,22 +81,26 @@
 !! | tsfco          | sea_surface_temperature                                                      | sea surface temperature                                          | K          |    1 | real      | kind_phys | in     | F        |
 !! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                      | frac       |    1 | real      | kind_phys | in     | F        |
 !! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                                | m          |    1 | real      | kind_phys | in     | F        |
+!! | weasd          | water_equivalent_accumulated_snow_depth                                      | water equiv of acc snow depth over land and sea ice              | mm         |    1 | real      | kind_phys | in     | F        |
+!! | sncovr         | surface_snow_area_fraction_over_land                                         | surface snow area fraction                                       | frac       |    1 | real      | kind_phys | inout  | F        |
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                         | none       |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
 !!
 #endif
-      subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
+      subroutine GFS_surface_generic_pre_run (im, levs, first_time_step, vfrac, islmsk, isot, ivegsrc,     &
+                          stype, vtype, slope, &
                           prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, &
                           slopetyp, work3, gabsbdlw, tsurf, zlvl, do_sppt, dtdtr,                          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
                           cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
                           dtsfcin_cpl, dqsfcin_cpl, ulwsfcin_cpl, ulwsfc_cice, dusfc_cice, dvsfc_cice,     &
-                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice,                                &
+                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice, weasd, sncovr,                 &
                           errmsg, errflg)
 
         use machine,               only: kind_phys
         use surface_perturbation,  only: cdfnor
+        use namelist_soilveg,      only: salp_data, snupx
 
         implicit none
 
@@ -106,8 +111,8 @@
 
         real(kind=kind_phys), intent(in) :: con_g
         real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1, &
-          semis, adjsfcdlw
-        real(kind=kind_phys), dimension(im), intent(inout) :: tsfc
+          semis, adjsfcdlw, weasd
+        real(kind=kind_phys), dimension(im), intent(inout) :: tsfc, sncovr
         real(kind=kind_phys), dimension(im,levs), intent(in) :: phil
 
         real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, gabsbdlw, tsurf, zlvl
@@ -133,7 +138,7 @@
         real(kind=kind_phys), dimension(im),          intent(out) :: xlai1d
         real(kind=kind_phys), dimension(im),          intent(out) :: vegf1d
 
-        logical, intent(in) :: cplflx
+        logical, intent(in) :: cplflx, first_time_step
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
         logical, dimension(im), intent(inout) :: flag_cice
               integer, dimension(im), intent(out) :: islmsk_cice
@@ -151,14 +156,40 @@
         integer              :: i
         real(kind=kind_phys) :: onebg
         real(kind=kind_phys) :: cdfz
-
+        
+        !--- local variables for sncovr calculation
+        integer :: vegtyp
+        logical :: mand
+        real(kind=kind_phys) :: rsnow, tem
+        
         ! Set constants
         onebg  = 1.0/con_g
 
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
-
+        
+        !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
+        if (first_time_step) then
+          if (nint(sncovr(1)) == -9999) then
+            do i = 1, im
+              sncovr(i) = 0.0
+              if (islmsk(i) > 0) then
+                ! GJF* this is different than the integer conversion below, but copied from FV3GFS_io.f90.
+                ! Can this block be moved to after vegetation_type_classification (integer) has been set? *GJF 
+                vegtyp = vtype(i)
+                if (vegtyp == 0) vegtyp = 7
+                rsnow  = 0.001*weasd(i)/snupx(vegtyp)
+                if (0.001*weasd(i) < snupx(vegtyp)) then
+                  sncovr(i) = 1.0 - (exp(-salp_data*rsnow) - rsnow*exp(-salp_data))
+                else
+                  sncovr(i) = 1.0
+                endif
+              endif
+            enddo
+          endif
+        endif
+        
         ! Set initial quantities for stochastic physics deltas
         if (do_sppt) then
           dtdtr     = 0.0
