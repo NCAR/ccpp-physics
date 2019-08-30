@@ -594,7 +594,7 @@
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water/ice
             enddo
           enddo
-        elseif (Model%ncnd == 2) then                             ! MG
+        elseif (Model%ncnd == 2) then                             ! MG or F-A
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water

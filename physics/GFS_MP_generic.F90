@@ -166,8 +166,8 @@
 !! | dsnow_cpl        | tendency_of_lwe_thickness_of_snow_amount_for_coupling                   | change in show_cpl (coupling_type)                                      | m           |    1 | real       | kind_phys | inout  | F        |
 !! | lsm              | flag_for_land_surface_scheme                                            | flag for land surface model                                             | flag        |    0 | integer    |           | in     | F        |
 !! | lsm_ruc          | flag_for_ruc_land_surface_scheme                                        | flag for RUC land surface model                                         | flag        |    0 | integer    |           | in     | F        |
-!! | raincprv         | lwe_thickness_of_convective_precipitation_amount_from_previous_timestep | convective_precipitation_amount from previous timestep                  | m           |    1 | real       | kind_phys | inout  | F        |
-!! | rainncprv        | lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep        | explicit rainfall from previous timestep                                | m           |    1 | real       | kind_phys | inout  | F        |
+!! | raincprv         | lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep        | explicit rainfall from previous timestep                                | m           |    1 | real       | kind_phys | inout  | F        |
+!! | rainncprv        | lwe_thickness_of_convective_precipitation_amount_from_previous_timestep | convective_precipitation_amount from previous timestep                  | m           |    1 | real       | kind_phys | inout  | F        |
 !! | iceprv           | lwe_thickness_of_ice_amount_from_previous_timestep                      | ice amount from previous timestep                                       | m           |    1 | real       | kind_phys | inout  | F        |
 !! | snowprv          | lwe_thickness_of_snow_amount_from_previous_timestep                     | snow amount from previous timestep                                      | m           |    1 | real       | kind_phys | inout  | F        |
 !! | graupelprv       | lwe_thickness_of_graupel_amount_from_previous_timestep                  | graupel amount from previous timestep                                   | m           |    1 | real       | kind_phys | inout  | F        |
@@ -276,6 +276,10 @@
         graupel = frain*graupel0              ! time-step graupel
         ice     = frain*ice0                  ! time-step ice
         snow    = frain*snow0                 ! time-step snow
+
+      else if (imp_physics == imp_physics_fer_hires) then
+        tprcp   = max (0.,rain) ! time-step convective and explicit precip
+        ice     = frain*rain1*sr                  ! time-step ice
       end if
 
       if (lsm==lsm_ruc) then
@@ -374,7 +378,7 @@
 !! and determine explicit rain/snow by snow/ice/graupel coming out directly from MP
 !! and convective rainfall from the cumulus scheme if the surface temperature is below
 !! \f$0^oC\f$.
-      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson) then
+      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. imp_physics_fer_hires) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
         do i = 1, im
@@ -392,10 +396,17 @@
 !            Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
 !          endif
 ! compute fractional srflag
-          total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
-          if (total_precip > rainmin) then
-            srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
-          endif
+          if(imp_physics == imp_physics_fer_hires) then
+            total_precip = tprcp(i)
+            if (total_precip > rainmin) then
+              srflag(i) = (ice(i)+csnow)/total_precip
+            endif
+          else
+            total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
+            if (total_precip > rainmin) then
+              srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
+            endif
+          end if
         enddo
       elseif( .not. cal_pre) then
         if (imp_physics == imp_physics_mg) then              ! MG microphysics

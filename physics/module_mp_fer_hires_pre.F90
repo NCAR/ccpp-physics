@@ -28,15 +28,13 @@
 !! | local_name     | standard_name                                         | long_name                                                                                  | units   | rank | type      | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------|--------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
 !! | cwm            | total_cloud_condensate_mixing_ratio_updated_by_physics| total cloud condensate mixing ratio (except water vapor) updated by physics                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | f_ice          | fraction_of_ice_water_cloud                      | mass fraction of ice water cloud                                                           | frac    |    2 | real      | kind_phys | inout  | F        |
-!! | f_rain         | fraction_of_rain_water_cloud                     | mass fraction of rain water cloud                                                          | frac    |    2 | real      | kind_phys | inout  | F        |
+!! | f_ice          | fraction_of_ice_water_cloud                           | fraction of ice water cloud                                                                | frac    |    2 | real      | kind_phys | inout  | F        |
+!! | f_rain         | fraction_of_rain_water_cloud                          | fraction of rain water cloud                                                               | frac    |    2 | real      | kind_phys | inout  | F        |
 !! | epsq           | minimum_value_of_specific_humidity                    | floor value for specific humidity                                                          | kg kg-1 |    0 | real      | kind_phys | in     | F        |
 !! | t              | air_temperature                                       | model layer mean temperature                                                               | K       |    2 | real      | kind_phys | inout  | F        |
 !! | qc             | cloud_condensed_water_mixing_ratio_updated_by_physics | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | qr             | rain_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | qs             | snow_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics            | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | qi             | ice_water_mixing_ratio_updated_by_physics             | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics             | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | qg             | graupel_mixing_ratio_updated_by_physics               | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics               | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
+!! | qs             | ice_water_mixing_ratio_updated_by_physics             | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics             | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | spec_adv       | flag_for_individual_cloud_species_advected            | flag for individual cloud species advected                                                 | flag    |    0 | logical   |           | in     | F        |
 !! | kdt            | index_of_time_step                                    | current forecast interation                                                                | index   |    0 | integer   |           | in     | F        |
 !! | lm             | vertical_dimension                                    | number of vertical levels                                                                  | count   |    0 | integer   |           | in     | F        |
@@ -46,7 +44,7 @@
 !!
      subroutine mp_fer_hires_pre_run (CWM,F_ICE,F_RAIN                  &
                              ,EPSQ                                      &
-                             ,T,QC,QR,QS,QI,QG                          &
+                             ,T,QC,QR,QS                                &
                              ,SPEC_ADV,kdt                              &
                              ,LM,IME,errmsg,errflg )
 
@@ -67,7 +65,7 @@
                                                            ,F_ICE       &
                                                            ,F_RAIN      &
                                                            ,T,QC,QR     &
-                                                           ,QS,QI,QG
+                                                           ,QS
 !
 !--------------------
 !--  Local Variables
