@@ -1,4 +1,58 @@
 [ccpp-arg-table]
+  name = noahmpdrv_init
+  type = scheme
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isot]
+  standard_name = soil_type_dataset_choice
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ivegsrc]
+  standard_name = vegetation_type_dataset_choice
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nlunit]
+  standard_name = iounit_namelist
+  long_name = fortran unit number for file opens
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = noahmpdrv_run
   type = scheme
 [im]

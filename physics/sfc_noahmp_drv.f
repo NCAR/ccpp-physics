@@ -12,9 +12,29 @@
 
       contains
 
-      subroutine noahmpdrv_init
-      end subroutine noahmpdrv_init
+!! \section arg_table_noahmpdrv_init Argument Table
+!! \htmlinclude noahmpdrv_init.html
+!!
+      subroutine noahmpdrv_init(me, isot, ivegsrc, nlunit, errmsg,      &
+     &                          errflg)
+        
+        use set_soilveg_mod,  only: set_soilveg
+        
+        implicit none
       
+        integer,              intent(in)  :: me, isot, ivegsrc, nlunit
+        character(len=*),     intent(out) :: errmsg
+        integer,              intent(out) :: errflg
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        !--- initialize soil vegetation
+        call set_soilveg(me, isot, ivegsrc, nlunit)
+      
+      end subroutine noahmpdrv_init
+
       subroutine noahmpdrv_finalize
       end subroutine noahmpdrv_finalize
 
