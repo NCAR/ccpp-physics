@@ -85,8 +85,9 @@ module mp_fer_hires
        ! DT_MICRO=Model%NPRECIP*Model%dtp
         DT_MICRO=Model%dtp
 
-       CALL FERRIER_INIT_HR(DT_MICRO,mpicomm,mpirank,threads)
+       CALL FERRIER_INIT_HR(DT_MICRO,mpicomm,mpirank,mpiroot,threads)
 
+       if (mpirank==mpiroot) write (0,*)'F-A: FERRIER_INIT_HR finished ...'
        if (errflg /= 0 ) return
        
        is_initialized = .true.
@@ -120,6 +121,8 @@ module mp_fer_hires
 !! |  qg         | graupel_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics                       | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  prec       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                                                       | m          |   1  | real     | kind_phys | inout  | F        |
 !! |  acprec     | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                                                                    | m          |   1  | real     | kind_phys | inout  | F        |
+!! |  mpirank    | mpi_rank                                                                  | current MPI-rank                                                                                   | index      |   0  | integer  |           | in     | F        |
+!! |  mpiroot    | mpi_root                                                                  | master MPI-rank                                                                                    | index      |    0 | integer  |           | in     | F        |
 !! |  threads    | omp_threads                                                               | number of OpenMP threads available to scheme                                                       | count      |   0  | integer  |           | in     | F        | 
 !! |  refl_10cm  | radar_reflectivity_10cm                                                   | instantaneous refl_10cm                                                                            | dBZ        |   2  | real     | kind_phys | inout  | F        |
 !! |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none       |   0  | real     | kind_phys | in     | F        |
@@ -140,7 +143,7 @@ module mp_fer_hires
                          ,F_ICE,F_RAIN,F_RIMEF                          &
                          ,QC,QR,QI,QS,QG                                &
                          ,PREC,ACPREC                                   &
-                         ,threads                                       &
+                         ,mpirank, mpiroot, threads                     &
                          ,refl_10cm                                     &
                          ,RHGRD,dx                                      &
                          ,EPSQ,R_D,P608,CP,G                            &
@@ -163,6 +166,8 @@ module mp_fer_hires
       integer,           intent(in   ) :: nlev
       real(kind_phys),   intent(in   ) :: dt
       integer,           intent(in   ) :: threads
+      integer,           intent(in)    :: mpirank
+      integer,           intent(in)    :: mpiroot
       real(kind_phys),   intent(in   ) :: slmsk(1:ncol)
       real(kind_phys),   intent(in   ) :: prsi(1:ncol,1:nlev+1)
       real(kind_phys),   intent(in   ) :: p_phy(1:ncol,1:nlev)
@@ -262,7 +267,7 @@ module mp_fer_hires
 !
 !.......................................................................
 !$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$omp& private(i,k,ql,tl)
+!$OMP private(i,k,ql,xland,tl,rr,pi_phy, th_phy,dz)
 !.......................................................................
       DO I=IMS,IME
 !
@@ -304,7 +309,7 @@ module mp_fer_hires
 !
       ENDDO    !- DO I=IMS,IME
 !.......................................................................
-!$omp end parallel do
+!$OMP end parallel do
 !.......................................................................
 !
 !***  CALL MICROPHYSICS
@@ -322,7 +327,7 @@ module mp_fer_hires
               ENDDO
               ENDDO
 !---------------------------------------------------------------------
-
+            if (mpirank==mpiroot) write (0,*)'F-A: Calling FER_HIRES ...'
             CALL FER_HIRES(                                             &
                    DT=dtphs,RHgrd=RHGRD                                 &
                   ,DZ8W=dz,RHO_PHY=rr,P_PHY=p_phy,PI_PHY=pi_phy         &
@@ -349,7 +354,7 @@ module mp_fer_hires
 
 !.......................................................................
 !$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$omp& private(i,k,TNEW)
+!$OMP private(i,k,TNEW,TRAIN)
 !.......................................................................
       DO K=1,LM
         DO I=IMS,IME
@@ -364,15 +369,15 @@ module mp_fer_hires
         ENDDO
       ENDDO
 !.......................................................................
-!$omp end parallel do
+!$OMP end parallel do
 !.......................................................................
 !
 !-----------------------------------------------------------------------
 !***  UPDATE PRECIPITATION
 !-----------------------------------------------------------------------
 !
-!jaa!$omp parallel do                                                       &
-!jaa!$omp& private(i,j,pcpcol)
+!$OMP parallel do  SCHEDULE(dynamic) num_threads(threads) &
+!$OMP private(i,pcpcol,prec,acprec)
       DO I=IMS,IME
         PCPCOL=RAINNCV(I)*1.E-3
         PREC(I)=PREC(I)+PCPCOL
@@ -382,8 +387,9 @@ module mp_fer_hires
 !       SINCE IT IS ONLY A LOCAL ARRAY FOR NOW
 !
       ENDDO
-!
+!$OMP end parallel do
 !-----------------------------------------------------------------------
+      if (mpirank==mpiroot) write (0,*)'F-A: mp_fer_hires_run finished ...'
 !
        end subroutine mp_fer_hires_run 
 
@@ -394,6 +400,3 @@ module mp_fer_hires
        end subroutine mp_fer_hires_finalize
 
 end module mp_fer_hires
-     
-
-                  

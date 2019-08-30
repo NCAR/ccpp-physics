@@ -24,6 +24,11 @@
 !! | Cldprop           | GFS_cldprop_type_instance                                     | Fortran DDT containing FV3-GFS cloud fields needed by radiation from physics  | DDT      |    0 | GFS_cldprop_type |           | in     | F        |
 !! | Coupling          | GFS_coupling_type_instance                                    | Fortran DDT containing FV3-GFS fields needed for coupling                     | DDT      |    0 | GFS_coupling_type|           | in     | F        |
 !! | Radtend           | GFS_radtend_type_instance                                     | Fortran DDT containing FV3-GFS radiation tendencies                           | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
+!! | f_ice             | mass_fraction_of_ice_water_cloud                              | mass fraction of ice water cloud                                              | frac     |    2 | real             | kind_phys | in     | F        |
+!! | f_rain            | mass_fraction_of_rain_water_cloud                             | mass fraction of rain water cloud                                             | frac     |    2 | real             | kind_phys | in     | F        |
+!! | f_rimef           | mass_fraction_of_rime_factor                                  | mass fraction of rime factor                                                  | frac     |    2 | real             | kind_phys | in     | F        |
+!! | flgmin            | minimum_large_ice_fraction                                    | minimum large ice fraction in F-A mp scheme                                   | frac     |    1 | real             | kind_phys | in     | F        |
+!! | cwm               | total_cloud_condensate_mixing_ratio_updated_by_physics        | total cloud condensate mixing ratio (except water vapor) updated by physics   | kg kg-1  |    2 | real             | kind_phys | in     | F        |
 !! | lm                | number_of_vertical_layers_for_radiation_calculations          | number of vertical layers for radiation calculation                           | count    |    0 | integer          |           | in     | F        |
 !! | im                | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer          |           | in     | F        |
 !! | lmk               | adjusted_vertical_layer_dimension_for_radiation               | number of vertical layers for radiation                                       | count    |    0 | integer          |           | in     | F        |
@@ -81,6 +86,7 @@
       subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   & ! input
           Tbd, Cldprop, Coupling,                                    &
           Radtend,                                                   & ! input/output
+          f_ice, f_rain, f_rimef, flgmin, cwm,                       & ! F-A mp scheme only
           lm, im, lmk, lmp,                                          & ! input
           kd, kt, kb, raddt, delp, dz, plvl, plyr,                   & ! output
           tlvl, tlyr, tsfg, tsfa, qlyr, olyr,                        &
@@ -120,6 +126,7 @@
      &                                     NSPC1
       use module_radiation_clouds,   only: NF_CLDS,                    &  ! cld_init
      &                                     progcld1, progcld3,         &
+     &                                     progcld2,                   &
      &                                     progcld4, progcld5,         &
      &                                     progclduni
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
@@ -141,7 +148,15 @@
 
       integer,              intent(in)  :: im, lm, lmk, lmp
       integer,              intent(out) :: kd, kt, kb
+
+! F-A mp scheme only
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_ice
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_rain
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_rimef
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: cwm
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)),                intent(in)  :: flgmin
       real(kind=kind_phys), intent(out) :: raddt
+
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: delp
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: dz
@@ -772,6 +787,18 @@
                          Sfcprop%slmsk, dz, delp, im, lmk, lmp, deltaq, &
                          Model%sup, Model%kdt, me,                      &
                          clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
+
+!MZ
+!clw here is total cloud condensate
+        elseif (Model%imp_physics == 15) then           ! F-A cloud scheme
+           call progcld2 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,     &
+                          cwm,                                          &    ! ---  inputs:
+                          Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp,  &
+                          f_ice,f_rain,f_rimef,flgmin,                  &    ! F-A scheme specific
+                          im, lmk, lmp, Model%lmfshal, Model%lmfdeep2,  &
+                          clouds,cldsa,mtopa,mbota,de_lgth)                  !  ---  outputs:
+            
+
 
         elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
 

@@ -571,7 +571,7 @@ ENDIF
 !
 !.......................................................................
 !$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$OMP PRIVATE(j,k,i,wc)
+!$OMP PRIVATE(j,k,i, th_phy, wc, qs, qc)
 !.......................................................................
      DO j = jms,jme
         DO k = 1,lm
@@ -2410,7 +2410,7 @@ ENDIF
 ! SH 0211/2002
 
 !-----------------------------------------------------------------------
-      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,THREADS)
+      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,mpiroot,THREADS)
 !-----------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !---  SUBPROGRAM DOCUMENTATION BLOCK
@@ -2465,6 +2465,7 @@ ENDIF
 !     VARIABLES PASSED IN
       real,INTENT(IN) :: GSMDT
       INTEGER,   INTENT(IN) :: MYPE 
+      INTEGER,   INTENT(IN) :: MPIROOT
       INTEGER,   INTENT(IN) :: MPI_COMM_COMP
       INTEGER,   INTENT(IN) :: THREADS
 !
@@ -2484,6 +2485,10 @@ ENDIF
         DTPH=GSMDT     !-- Time step in s
 !
 !--- Create lookup tables for saturation vapor pressure w/r/t water & ice
+
+!MZ
+       if (mype==mpiroot) write(0,*) 'F-A: Create lookup tables for saturation vapor pressure w/r/t water & ice ... '
+       
 !
         CALL GPVS_hr
 !
@@ -2509,6 +2514,8 @@ ENDIF
         ENDIF
 !
         IF(MYPE==0)THEN
+!MZ
+          write(0,*) 'F-A: Reading DETAMPNEW_DATA*LE data... '
           OPEN(UNIT=etampnew_unit1,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
      &        FORM="UNFORMATTED",STATUS="OLD",ERR=9061)
 !
