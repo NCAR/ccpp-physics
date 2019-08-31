@@ -201,7 +201,7 @@ module mp_fer_hires
       real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
       real(kind_phys)    :: sm(1:ncol), xland(1:ncol)
       real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW  
-      real(kind_phys)    :: ql(1:ncol),tl(1:ncol)
+      real(kind_phys)    :: ql(1:nlev),tl(1:nlev)
       real(kind_phys)    :: rainnc(1:ncol),rainncv(1:ncol)
       real(kind_phys)    :: snownc(1:ncol),snowncv(1:ncol)
       real(kind_phys)    :: graupelncv(1:ncol)

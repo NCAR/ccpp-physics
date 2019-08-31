@@ -28,7 +28,7 @@
 !! | f_rain            | fraction_of_rain_water_cloud                                  | fraction of rain water cloud                                                  | frac     |    2 | real             | kind_phys | in     | F        |
 !! | f_rimef           | rime_factor                                                   | rime factor                                                                   | frac     |    2 | real             | kind_phys | in     | F        |
 !! | flgmin            | minimum_large_ice_fraction                                    | minimum large ice fraction in F-A mp scheme                                   | frac     |    1 | real             | kind_phys | in     | F        |
-!! | cwm               | total_cloud_condensate_mixing_ratio_updated_by_physics        | total cloud condensate mixing ratio (except water vapor) updated by physics   | kg kg-1  |    2 | real             | kind_phys | in     | F        |
+!! | cwm               | total_cloud_condensate_mixing_ratio_updated_by_physics        | total cloud condensate mixing ratio (except water vapor) updated by physics   | kg kg-1  |    2 | real             | kind_phys | out    | F        |
 !! | lm                | number_of_vertical_layers_for_radiation_calculations          | number of vertical layers for radiation calculation                           | count    |    0 | integer          |           | in     | F        |
 !! | im                | horizontal_loop_extent                                        | horizontal loop extent                                                        | count    |    0 | integer          |           | in     | F        |
 !! | lmk               | adjusted_vertical_layer_dimension_for_radiation               | number of vertical layers for radiation                                       | count    |    0 | integer          |           | in     | F        |
@@ -153,7 +153,7 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_ice
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_rain
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_rimef
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: cwm
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(out) :: cwm
       real(kind=kind_phys), dimension(size(Grid%xlon,1)),                intent(in)  :: flgmin
       real(kind=kind_phys), intent(out) :: raddt
 
@@ -587,6 +587,7 @@
 !  --- ...  obtain cloud information for radiation calculations
 
 !      if (ntcw > 0) then                            ! prognostic cloud schemes
+       if (Model%imp_physics .ne. 15) then
         ccnd = 0.0_kind_phys
         if (Model%ncnd == 1) then                                 ! Zhao_Carr_Sundqvist
           do k=1,LMK
@@ -627,6 +628,7 @@
             enddo
           enddo
         enddo
+      endif     !not FA 
         if (Model%imp_physics == 11 ) then
           if (.not. Model%lgfdlmprad) then
 
@@ -791,14 +793,23 @@
 !MZ
 !clw here is total cloud condensate
         elseif (Model%imp_physics == 15) then           ! F-A cloud scheme
+
+           cwm(:,:) = cwm(:,:) + tracer1(:,1:LMK,Model%ntcw)   &
+                                + tracer1(:,1:LMK,Model%ntrw)   &
+                                + tracer1(:,1:LMK,Model%ntiw)   
+
+           if(Model%me==0) write(0,*)'F-A: progcld2 max(cwm),min(cwm) =' &
+                            ,maxval(cwm),minval(cwm)
            call progcld2 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,     &
                           cwm,                                          &    ! ---  inputs:
                           Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp,  &
                           f_ice,f_rain,f_rimef,flgmin,                  &    ! F-A scheme specific
                           im, lmk, lmp, Model%lmfshal, Model%lmfdeep2,  &
                           clouds,cldsa,mtopa,mbota,de_lgth)                  !  ---  outputs:
-            
 
+            if(Model%me==0) write(0,*)'F-A: progcld2 max(clouds(:,:,1)),&
+                            min(clouds(:,:,1)) =  '                     &
+                            ,maxval(clouds(:,:,1)),minval(clouds(:,:,1))
 
         elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
 

@@ -100,6 +100,19 @@
               vdftra(i,k,4) = qgrs(i,k,ntoz)
             enddo
           enddo
+
+  ! Ferrier-Aligo
+        elseif (imp_physics == imp_physics_fer_hires) then
+          do k=1,levs
+            do i=1,im
+              vdftra(i,k,1) = qgrs(i,k,ntqv)
+              vdftra(i,k,2) = qgrs(i,k,ntcw)
+              vdftra(i,k,3) = qgrs(i,k,ntiw)
+              vdftra(i,k,4) = qgrs(i,k,ntrw)
+              vdftra(i,k,5) = qgrs(i,k,ntoz)
+            enddo
+          enddo
+        
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
           if(ltaerosol) then
@@ -165,9 +178,8 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl .or.                    &
-                imp_physics == imp_physics_fer_hires) then
-  ! GFDL MP or F-A MP
+        elseif (imp_physics == imp_physics_gfdl ) then
+  ! GFDL MP
           do k=1,levs
             do i=1,im
               vdftra(i,k,1) = qgrs(i,k,ntqv)
@@ -368,6 +380,19 @@
               dqdt(i,k,ntoz)  = dvdftra(i,k,4)
             enddo
           enddo
+
+        elseif (imp_physics == imp_physics_fer_hires) then
+  ! Ferrier-Aligo 
+          do k=1,levs
+            do i=1,im
+              dqdt(i,k,ntqv)  = dvdftra(i,k,1)
+              dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+              dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+              dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+              dqdt(i,k,ntoz)  = dvdftra(i,k,5)
+            enddo
+          enddo
+
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
           if(ltaerosol) then
@@ -432,8 +457,7 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl .or.                    &
-                imp_physics == imp_physics_fer_hires ) then
+        elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP or F-A MP
           do k=1,levs
             do i=1,im
