@@ -119,6 +119,9 @@
         !--- radiation triggers
         Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
         Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+        !--- allow for radiation to be called on every physics time step, if needed
+        if (Model%nsswr == 1)  Model%lsswr = .true.
+        if (Model%nslwr == 1)  Model%lslwr = .true.
 
         !--- set the solar hour based on a combination of phour and time initial hour
         Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
