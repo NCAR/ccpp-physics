@@ -36,13 +36,14 @@
 !! | ntoz                         | index_for_ozone                                        | tracer index for ozone mixing ratio                                                 | index         |    0 | integer   |           | in     | F        |
 !! | ntke                         | index_for_turbulent_kinetic_energy                     | tracer index for turbulent kinetic energy                                           | index         |    0 | integer   |           | in     | F        |
 !! | ntkev                        | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array    | index         |    0 | integer   |           | in     | F        |
+!! | nqrimef                      | index_for_mass_weighted_rime_factor                    | tracer index for mass weighted rime factor                                          | index         |    0 | integer   |           | in     | F        |
 !! | imp_physics                  | flag_for_microphysics_scheme                           | choice of microphysics scheme                                                       | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_gfdl             | flag_for_gfdl_microphysics_scheme                      | choice of GFDL microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                  | choice of Thompson microphysics scheme                                              | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                      | choice of WSM6 microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                 | choice of Zhao-Carr microphysics scheme                                             | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_mg               | flag_for_morrison_gettelman_microphysics_scheme        | choice of Morrison-Gettelman microphysics scheme                                    | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_fer_hires        | flag_for_fer_hires_microphysics_scheme                 | choice of Ferrier-Aligo microphysics scheme                                         | flag          |    0 | integer   |           | in     | F        |        
+!! | imp_physics_fer_hires        | flag_for_fer_hires_microphysics_scheme                 | choice of Ferrier-Aligo microphysics scheme                                         | flag          |    0 | integer   |           | in     | F        |    
 !! | cplchm                       | flag_for_chemistry_coupling                            | flag controlling cplchm collection (default off)                                    | flag          |    0 | logical   |           | in     | F        |
 !! | ltaerosol                    | flag_for_aerosol_physics                               | flag for aerosol physics                                                            | flag          |    0 | logical   |           | in     | F        |
 !! | hybedmf                      | flag_for_hedmf                                         | flag for hybrid edmf pbl scheme (moninedmf)                                         | flag          |    0 | logical   |           | in     | F        |
@@ -56,10 +57,9 @@
 #endif
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
-        ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                             &
+        ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,                                    &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires,                    &
-        cplchm, ltaerosol, hybedmf, do_shoc,                                             &
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, hybedmf, do_shoc,      &
         satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine, only : kind_phys
@@ -68,7 +68,7 @@
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
-      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
@@ -178,7 +178,7 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl ) then
+        elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP
           do k=1,levs
             do i=1,im
@@ -191,6 +191,20 @@
               vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
+
+        elseif (imp_physics == imp_physics_fer_hires) then
+  ! F-A MP
+          do k=1,levs
+            do i=1,im
+              vdftra(i,k,1) = qgrs(i,k,ntqv)
+              vdftra(i,k,2) = qgrs(i,k,ntcw)
+              vdftra(i,k,3) = qgrs(i,k,ntiw)
+              vdftra(i,k,4) = qgrs(i,k,ntrw)
+              vdftra(i,k,5) = qgrs(i,k,nqrimef)
+              vdftra(i,k,6) = qgrs(i,k,ntoz)
+            enddo
+          enddo
+
         elseif (imp_physics == imp_physics_zhao_carr) then
 ! Zhao/Carr/Sundqvist
           if (cplchm) then
@@ -253,6 +267,7 @@
 !! | ntoz                         | index_for_ozone                                                                   | tracer index for ozone mixing ratio                                                         | index         |    0 | integer   |           | in     | F        |
 !! | ntke                         | index_for_turbulent_kinetic_energy                                                | tracer index for turbulent kinetic energy                                                   | index         |    0 | integer   |           | in     | F        |
 !! | ntkev                        | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer                      | index for turbulent kinetic energy in the vertically diffused tracer array                  | index         |    0 | integer   |           | in     | F        |
+!! | nqrimef                      | index_for_mass_weighted_rime_factor                                               | tracer index for mass weighted rime factor                                                  | index         |    0 | integer   |           | in     | F        |
 !! | imp_physics                  | flag_for_microphysics_scheme                                                      | choice of microphysics scheme                                                               | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_gfdl             | flag_for_gfdl_microphysics_scheme                                                 | choice of GFDL microphysics scheme                                                          | flag          |    0 | integer   |           | in     | F        |
 !! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                                             | choice of Thompson microphysics scheme                                                      | flag          |    0 | integer   |           | in     | F        |
@@ -337,9 +352,8 @@
 !!
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
-        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
-        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
-        imp_physics_fer_hires,                                                                                                 &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
+        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,imp_physics_fer_hires,          &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
@@ -353,9 +367,9 @@
       implicit none
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
-      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_fer_hires
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
+      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
@@ -495,7 +509,7 @@
             enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then
-  ! GFDL MP or F-A MP
+  ! GFDL MP
           do k=1,levs
             do i=1,im
               dqdt(i,k,ntqv) = dvdftra(i,k,1)
@@ -505,6 +519,18 @@
               dqdt(i,k,ntsw) = dvdftra(i,k,5)
               dqdt(i,k,ntgl) = dvdftra(i,k,6)
               dqdt(i,k,ntoz) = dvdftra(i,k,7)
+            enddo
+          enddo
+        elseif (imp_physics == imp_physics_fer_hires) then
+  ! F-A MP
+          do k=1,levs
+            do i=1,im
+              dqdt(i,k,ntqv) = dvdftra(i,k,1)
+              dqdt(i,k,ntcw) = dvdftra(i,k,2)
+              dqdt(i,k,ntiw) = dvdftra(i,k,3)
+              dqdt(i,k,ntrw) = dvdftra(i,k,4)
+              dqdt(i,k,nqrimef) = dvdftra(i,k,5)
+              dqdt(i,k,ntoz) = dvdftra(i,k,6)
             enddo
           enddo
         elseif (imp_physics == imp_physics_zhao_carr) then
