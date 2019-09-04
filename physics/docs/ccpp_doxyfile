@@ -1,7 +1,7 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "Common Community Physics Package (CCPP) Scientific Documentation"
-PROJECT_NUMBER         = "Version 3.0"
+PROJECT_NUMBER         = ""
 PROJECT_BRIEF          = " "
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
@@ -255,6 +255,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
+                         *.F \
                          *.F90 \
                          *.f90 \
                          *.nml \
