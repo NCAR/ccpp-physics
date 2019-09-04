@@ -32,26 +32,7 @@ contains
 !>@brief The subroutine initializes the CIRES UGWP
 #if 0
 !> \section arg_table_cires_ugwp_init Argument Table
-!! | local_name       | standard_name                                                                 | long_name                                               | units  | rank | type      | kind      | intent | optional |
-!! |------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|--------|------|-----------|-----------|--------|----------|
-!! | me               | mpi_rank                                                                      | MPI rank of current process                             | index  | 0    | integer   |           | in     | F        |
-!! | master           | mpi_root                                                                      | MPI rank of master process                              | index  | 0    | integer   |           | in     | F        |
-!! | nlunit           | iounit_namelist                                                               | fortran unit number for opening namelist file           | none   | 0    | integer   |           | in     | F        |
-!! | logunit          | iounit_log                                                                    | fortran unit number for writing logfile                 | none   | 0    | integer   |           | in     | F        |
-!! | fn_nml2          | namelist_filename                                                             | namelist filename for ugwp                              | none   | 0    | character | len=*     | in     | F        |
-!! | lonr             | number_of_equatorial_longitude_points                                         | number of global points in x-dir (i) along the equator  | count  | 0    | integer   |           | in     | F        |
-!! | latr             | number_of_latitude_points                                                     | number of global points in y-dir (j) along the meridian | count  | 0    | integer   |           | in     | F        |
-!! | levs             | vertical_dimension                                                            | number of vertical levels                               | count  | 0    | integer   |           | in     | F        |
-!! | ak               | a_parameter_of_the_hybrid_coordinate                                          | a parameter for sigma pressure level calculations       | Pa     | 1    | real      | kind_phys | in     | F        |
-!! | bk               | b_parameter_of_the_hybrid_coordinate                                          | b parameter for sigma pressure level calculations       | none   | 1    | real      | kind_phys | in     | F        |
-!! | dtp              | time_step_for_physics                                                         | physics timestep                                        | s      | 0    | real      | kind_phys | in     | F        |
-!! | cdmvgwd          | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag | multiplication factors for cdmb and gwd                 | none   | 1    | real      | kind_phys | in     | F        |
-!! | cgwf             | multiplication_factors_for_convective_gravity_wave_drag                       | multiplication factor for convective GWD                | none   | 1    | real      | kind_phys | in     | F        |
-!! | pa_rf_in         | pressure_cutoff_for_rayleigh_damping                                          | pressure level from which Rayleigh Damping is applied   | Pa     | 0    | real      | kind_phys | in     | F        |
-!! | tau_rf_in        | time_scale_for_rayleigh_damping                                               | time scale for Rayleigh damping in days                 | d      | 0    | real      | kind_phys | in     | F        |
-!! | con_p0           | standard_atmospheric_pressure                                                 | standard atmospheric pressure                           | Pa     | 0    | real      | kind_phys | in     | F        |
-!! | errmsg           | ccpp_error_message                                                            | error message for error handling in CCPP                | none   | 0    | character | len=*     | out    | F        |
-!! | errflg           | ccpp_error_flag                                                               | error flag for error handling in CCPP                   | flag   | 0    | integer   |           | out    | F        |
+!! \htmlinclude cires_ugwp_init.html
 !!
 #endif
 ! -----------------------------------------------------------------------
@@ -115,10 +96,7 @@ contains
 !>@brief The subroutine finalizes the CIRES UGWP
 #if 0
 !> \section arg_table_cires_ugwp_finalize Argument Table
-!! | local_name       | standard_name                                                                 | long_name                                               | units  | rank | type      | kind      | intent | optional |
-!! |------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|--------|------|-----------|-----------|--------|----------|
-!! | errmsg           | ccpp_error_message                                                            | error message for error handling in CCPP                | none   | 0    | character | len=*     | out    | F        |
-!! | errflg           | ccpp_error_flag                                                               | error flag for error handling in CCPP                   | flag   | 0    | integer   |           | out    | F        |
+!! \htmlinclude cires_ugwp_finalize.html
 !!
 #endif
     subroutine cires_ugwp_finalize(errmsg, errflg)
@@ -152,74 +130,7 @@ contains
 !>@brief The subroutine executes the CIRES UGWP
 #if 0
 !> \section arg_table_cires_ugwp_run Argument Table
-!! | local_name       | standard_name                                                                  | long_name                                                    | units     | rank | type      | kind      | intent | optional |
-!! |------------------|--------------------------------------------------------------------------------|--------------------------------------------------------------|-----------|------|-----------|-----------|--------|----------|
-!! | do_ugwp          | do_ugwp                                                                        | flag to activate CIRES UGWP                                  | flag      | 0    | logical   |           | in     | F        |
-!! | me               | mpi_rank                                                                       | MPI rank of current process                                  | index     | 0    | integer   |           | in     | F        |
-!! | master           | mpi_root                                                                       | MPI rank of master process                                   | index     | 0    | integer   |           | in     | F        |
-!! | im               | horizontal_loop_extent                                                         | horizontal                                                   | count     | 0    | integer   |           | in     | F        |
-!! | levs             | vertical_dimension                                                             | number of vertical levels                                    | count     | 0    | integer   |           | in     | F        |
-!! | ntrac            | number_of_tracers                                                              | number of tracers                                            | count     | 0    | integer   |           | in     | F        |
-!! | dtp              | time_step_for_physics                                                          | physics timestep                                             | s         | 0    | real      | kind_phys | in     | F        |
-!! | kdt              | index_of_time_step                                                             | current forecast iteration                                   | index     | 0    | integer   |           | in     | F        |
-!! | lonr             | number_of_equatorial_longitude_points                                          | number of global points in x-dir (i) along the equator       | count     | 0    | integer   |           | in     | F        |
-!! | oro              | orography                                                                      | orography                                                    | m         | 1    | real      | kind_phys | in     | F        |
-!! | oro_uf           | orography_unfiltered                                                           | unfiltered orography                                         | m         | 1    | real      | kind_phys | in     | F        |
-!! | hprime           | standard_deviation_of_subgrid_orography                                        | standard deviation of subgrid orography                      | m         | 1    | real      | kind_phys | in     | F        |
-!! | nmtvr            | number_of_statistical_measures_of_subgrid_orography                            | number of topographic variables in GWD                       | count     | 0    | integer   |           | in     | F        |
-!! | oc               | convexity_of_subgrid_orography                                                 | convexity of subgrid orography                               | none      | 1    | real      | kind_phys | in     | F        |
-!! | oa4              | asymmetry_of_subgrid_orography                                                 | asymmetry of subgrid orography                               | none      | 2    | real      | kind_phys | in     | F        |
-!! | clx              | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height        | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    | 2 | real | kind_phys | in | F |
-!! | theta            | angle_from_east_of_maximum_subgrid_orographic_variations                       | angle with_respect to east of maximum subgrid orographic variations                      | degrees | 1 | real | kind_phys | in | F |
-!! | sigma            | slope_of_subgrid_orography                                                     | slope of subgrid orography                                   | none      | 1    | real      | kind_phys | in     | F        |
-!! | gamma            | anisotropy_of_subgrid_orography                                                | anisotropy of subgrid orography                              | none      | 1    | real      | kind_phys | in     | F        |
-!! | elvmax           | maximum_subgrid_orography                                                      | maximum of subgrid orography                                 | m         | 1    | real      | kind_phys | in     | F        |
-!! | do_tofd          | turb_oro_form_drag_flag                                                        | flag for turbulent orographic form drag                      | flag      | 0    | logical   |           | in     | F        |
-!! | cdmbgwd          | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag  | multiplication factors for cdmb and gwd                      | none      | 1    | real      | kind_phys | in     | F        |
-!! | xlat             | latitude                                                                       | grid latitude in radians                                     | radians   | 1    | real      | kind_phys | in     | F        |
-!! | xlat_d           | latitude_degree                                                                | latitude in degrees                                          | degree    | 1    | real      | kind_phys | in     | F        |
-!! | sinlat           | sine_of_latitude                                                               | sine of the grid latitude                                    | none      | 1    | real      | kind_phys | in     | F        |
-!! | coslat           | cosine_of_latitude                                                             | cosine of the grid latitude                                  | none      | 1    | real      | kind_phys | in     | F        |
-!! | area             | cell_area                                                                      | area of the grid cell                                        | m2        | 1    | real      | kind_phys | in     | F        |
-!! | ugrs             | x_wind                                                                         | zonal wind                                                   | m s-1     | 2    | real      | kind_phys | in     | F        |
-!! | vgrs             | y_wind                                                                         | meridional wind                                              | m s-1     | 2    | real      | kind_phys | in     | F        |
-!! | tgrs             | air_temperature                                                                | model layer mean temperature                                 | K         | 2    | real      | kind_phys | in     | F        |
-!! | qgrs             | tracer_concentration                                                           | model layer mean tracer concentration                        | kg kg-1   | 3    | real      | kind_phys | in     | F        |
-!! | prsi             | air_pressure_at_interface                                                      | air pressure at model layer interfaces                       | Pa        | 2    | real      | kind_phys | in     | F        |
-!! | prsl             | air_pressure                                                                   | mean layer pressure                                          | Pa        | 2    | real      | kind_phys | in     | F        |
-!! | prslk            | dimensionless_exner_function_at_model_layers                                   | dimensionless Exner function at model layer centers          | none      | 2    | real      | kind_phys | in     | F        |
-!! | phii             | geopotential_at_interface                                                      | geopotential at model layer interfaces                       | m2 s-2    | 2    | real      | kind_phys | in     | F        |
-!! | phil             | geopotential                                                                   | geopotential at model layer centers                          | m2 s-2    | 2    | real      | kind_phys | in     | F        |
-!! | del              | air_pressure_difference_between_midlayers                                      | air pressure difference between midlayers                    | Pa        | 2    | real      | kind_phys | in     | F        |
-!! | kpbl             | vertical_index_at_top_of_atmosphere_boundary_layer                             | vertical index at top atmospheric boundary layer             | index     | 1    | integer   |           | in     | F        |
-!! | dusfcg           | instantaneous_x_stress_due_to_gravity_wave_drag                                | zonal surface stress due to orographic gravity wave drag     | Pa        | 1    | real      | kind_phys | out    | F        |
-!! | dvsfcg           | instantaneous_y_stress_due_to_gravity_wave_drag                                | meridional surface stress due to orographic gravity wave drag| Pa        | 1    | real      | kind_phys | out    | F        |
-!! | gw_dudt          | tendency_of_x_wind_due_to_ugwp                                                 | zonal wind tendency due to UGWP                              | m s-2     | 2    | real      | kind_phys | out    | F        |
-!! | gw_dvdt          | tendency_of_y_wind_due_to_ugwp                                                 | meridional wind tendency due to UGWP                         | m s-2     | 2    | real      | kind_phys | out    | F        |
-!! | gw_dtdt          | tendency_of_air_temperature_due_to_ugwp                                        | air temperature tendency due to UGWP                         | K s-1     | 2    | real      | kind_phys | out    | F        |
-!! | gw_kdis          | eddy_mixing_due_to_ugwp                                                        | eddy mixing due to UGWP                                      | m2 s-1    | 2    | real      | kind_phys | out    | F        |
-!! | tau_tofd         | instantaneous_momentum_flux_due_to_turbulent_orographic_form_drag              | momentum flux or stress due to TOFD                          | Pa        | 1    | real      | kind_phys | out    | F        |
-!! | tau_mtb          | instantaneous_momentum_flux_due_to_mountain_blocking_drag                      | momentum flux or stress due to mountain blocking drag        | Pa        | 1    | real      | kind_phys | out    | F        |
-!! | tau_ogw          | instantaneous_momentum_flux_due_to_orographic_gravity_wave_drag                | momentum flux or stress due to orographic gravity wave drag  | Pa        | 1    | real      | kind_phys | out    | F        |
-!! | tau_ngw          | instantaneous_momentum_flux_due_to_nonstationary_gravity_wave                  | momentum flux or stress due to nonstationary gravity waves   | Pa        | 1    | real      | kind_phys | out    | F        |
-!! | zmtb             | height_of_mountain_blocking                                                    | height of mountain blocking drag                             | m         | 1    | real      | kind_phys | out    | F        |
-!! | zlwb             | height_of_low_level_wave_breaking                                              | height of low level wave breaking                            | m         | 1    | real      | kind_phys | out    | F        |
-!! | zogw             | height_of_launch_level_of_orographic_gravity_wave                              | height of launch level of orographic gravity wave            | m         | 1    | real      | kind_phys | out    | F        |
-!! | dudt_mtb         | instantaneous_change_in_x_wind_due_to_mountain_blocking_drag                   | instantaneous change in x wind due to mountain blocking drag | m s-2     | 2    | real      | kind_phys | out    | F        |
-!! | dudt_ogw         | instantaneous_change_in_x_wind_due_to_orographic_gravity_wave_drag             | instantaneous change in x wind due to orographic gw drag     | m s-2     | 2    | real      | kind_phys | out    | F        |
-!! | dudt_tms         | instantaneous_change_in_x_wind_due_to_turbulent_orographic_form_drag           | instantaneous change in x wind due to TOFD                   | m s-2     | 2    | real      | kind_phys | out    | F        |
-!! | dudt             | tendency_of_x_wind_due_to_model_physics                                        | zonal wind tendency due to model physics                     | m s-2     | 2    | real      | kind_phys | inout  | F        |
-!! | dvdt             | tendency_of_y_wind_due_to_model_physics                                        | meridional wind tendency due to model physics                | m s-2     | 2    | real      | kind_phys | inout  | F        |
-!! | dtdt             | tendency_of_air_temperature_due_to_model_physics                               | air temperature tendency due to model physics                | K s-1     | 2    | real      | kind_phys | inout  | F        |
-!! | rdxzb            | level_of_dividing_streamline                                                   | level of the dividing streamline                             | none      | 1    | real      | kind_phys | out    | F        |
-!! | con_g            | gravitational_acceleration                                                     | gravitational acceleration                                   | m s-2     | 0    | real      | kind_phys | in     | F        |
-!! | con_pi           | pi                                                                             | ratio of a circle's circumference to its diameter            | radians   | 0    | real      | kind_phys | in     | F        |
-!! | con_cp           | specific_heat_of_dry_air_at_constant_pressure                                  | specific heat !of dry air at constant pressure               | J kg-1 K-1| 0    | real      | kind_phys | in     | F        |
-!! | con_rd           | gas_constant_dry_air                                                           | ideal gas constant for dry air                               | J kg-1 K-1| 0    | real      | kind_phys | in     | F        |
-!! | con_rv           | gas_constant_water_vapor                                                       | ideal gas constant for water vapor                           | J kg-1 K-1| 0    | real      | kind_phys | in     | F        |
-!! | con_fvirt        | ratio_of_vapor_to_dry_air_gas_constants_minus_one                              | rv/rd - 1 (rv = ideal gas constant for water vapor)          | none      | 0    | real      | kind_phys | in     | F        |
-!! | errmsg           | ccpp_error_message                                                             | error message for error handling in CCPP                     | none      | 0    | character | len=*     | out    | F        |
-!! | errflg           | ccpp_error_flag                                                                | error flag for error handling in CCPP                        | flag      | 0    | integer   |           | out    | F        |
+!! \htmlinclude cires_ugwp_run.html
 !!
 #endif
 

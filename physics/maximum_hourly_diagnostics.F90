@@ -22,35 +22,7 @@ contains
 
 #if 0
 !> \section arg_table_maximum_hourly_diagnostics_run Argument Table
-!! | local_name           | standard_name                                                      | long_name                                                          | units      | rank | type      | kind      | intent | optional |
-!! |----------------------|--------------------------------------------------------------------|--------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im                   | horizontal_loop_extent                                             | horizontal loop extent                                             | count      |    0 | integer   |           | in     | F        |
-!! | levs                 | vertical_dimension                                                 | number of vertical levels                                          | count      |    0 | integer   |           | in     | F        |
-!! | reset                | flag_reset_maximum_hourly_fields                                   | flag for resetting maximum hourly fields                           | flag       |    0 | logical   |           | in     | F        |
-!! | lradar               | flag_for_radar_reflectivity                                        | flag for radar reflectivity                                        | flag       |    0 | logical   |           | in     | F        |
-!! | imp_physics          | flag_for_microphysics_scheme                                       | choice of microphysics scheme                                      | flag       |    0 | integer   |           | in     | F        |
-!! | imp_physics_gfdl     | flag_for_gfdl_microphysics_scheme                                  | choice of GFDL microphysics scheme                                 | flag       |    0 | integer   |           | in     | F        |
-!! | imp_physics_thompson | flag_for_thompson_microphysics_scheme                              | choice of Thompson microphysics scheme                             | flag       |    0 | integer   |           | in     | F        |
-!! | con_g                | gravitational_acceleration                                         | gravitational acceleration                                         | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | phil                 | geopotential                                                       | geopotential at model layer centers                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | gt0                  | air_temperature_updated_by_physics                                 | temperature updated by physics                                     | K          |    2 | real      | kind_phys | in     | F        |
-!! | refl_10cm            | radar_reflectivity_10cm                                            | instantaneous refl_10cm                                            | dBZ        |    2 | real      | kind_phys | in     | F        |
-!! | refdmax              | maximum_reflectivity_at_1km_agl_over_maximum_hourly_time_interval  | maximum reflectivity at 1km agl over maximum hourly time interval  | dBZ        |    1 | real      | kind_phys | inout  | F        |
-!! | refdmax263k          | maximum_reflectivity_at_minus10c_over_maximum_hourly_time_interval | maximum reflectivity at minus10c over maximum hourly time interval | dBZ        |    1 | real      | kind_phys | inout  | F        |
-!! | u10m                 | x_wind_at_10m                                                      | 10 meter u wind speed                                              | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | v10m                 | y_wind_at_10m                                                      | 10 meter v wind speed                                              | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | u10max               | maximum_u_wind_at_10m_over_maximum_hourly_time_interval            | maximum u wind at 10m over maximum hourly time interval            | m s-1      |    1 | real      | kind_phys | inout  | F        |
-!! | v10max               | maximum_v_wind_at_10m_over_maximum_hourly_time_interval            | maximum v wind at 10m over maximum hourly time interval            | m s-1      |    1 | real      | kind_phys | inout  | F        |
-!! | spd10max             | maximum_wind_at_10m_over_maximum_hourly_time_interval              | maximum wind at 10m over maximum hourly time interval              | m s-1      |    1 | real      | kind_phys | inout  | F        |
-!! | pgr                  | surface_air_pressure                                               | surface pressure                                                   | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | t2m                  | temperature_at_2m                                                  | 2 meter temperature                                                | K          |    1 | real      | kind_phys | in     | F        |
-!! | q2m                  | specific_humidity_at_2m                                            | 2 meter specific humidity                                          | kg kg-1    |    1 | real      | kind_phys | in     | F        |
-!! | t02max               | maximum_temperature_at_2m_over_maximum_hourly_time_interval        | maximum temperature at 2m over maximum hourly time interval        | K          |    1 | real      | kind_phys | inout  | F        |
-!! | t02min               | minimum_temperature_at_2m_over_maximum_hourly_time_interval        | minumum temperature at 2m over maximum hourly time interval        | K          |    1 | real      | kind_phys | inout  | F        |
-!! | rh02max              | maximum_relative_humidity_at_2m_over_maximum_hourly_time_interval  | maximum relative humidity at 2m over maximum hourly time interval  | %          |    1 | real      | kind_phys | inout  | F        |
-!! | rh02min              | minimum_relative_humidity_at_2m_over_maximum_hourly_time_interval  | minumum relative humidity at 2m over maximum hourly time interval  | %          |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg               | ccpp_error_message                                                 | error message for error handling in CCPP                           | none       |    0 | character | len=*     | out    | F        |
-!! | errflg               | ccpp_error_flag                                                    | error flag for error handling in CCPP                              | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude maximum_hourly_diagnostics_run.html
 !!
 #endif
    subroutine maximum_hourly_diagnostics_run(im, levs, reset, lradar, imp_physics,                 &

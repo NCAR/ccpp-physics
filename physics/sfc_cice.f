@@ -26,35 +26,7 @@
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_cice_run Arguments
-!! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                | flag          |    0 | logical   |           | in     | F        |
-!! | cplchm         | flag_for_chemistry_coupling                                                  | flag controlling cplchm collection (default off)                | flag          |    0 | logical   |           | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                          | J kg-1        |    0 | real      | kind_phys | in     | F        | 
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                   | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)           | none          |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                         | ideal gas constant for dry air                                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | u1             | x_wind_at_lowest_model_layer                                                 | u component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | v component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                                  | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                            | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air_over_ice                        | surface exchange coeff for momentum over ice                    | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | flag_cice      | flag_for_cice                                                                | flag for cice                                                   | flag          |    1 | logical   |           | in     | F        |
-!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                              | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
-!! | dqsfc          | dqsfcin                                                                      | aoi_fld%dqsfcin(item,lan)                                       |               |    1 | real      | kind_phys | none   | F        |
-!! | dtsfc          | dtsfcin                                                                      | aoi_fld%dtsfcin(item,lan)                                       |               |    1 | real      | kind_phys | none   | F        |
-!! | qsurf          | surface_specific_humidity_over_ice                                           | surface air saturation specific humidity over ice               | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_ice                         | momentum exchange coefficient over ice                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice                 | thermal exchange coefficient over ice                           | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux_over_ice                           | kinematic surface upward latent heat flux over ice              | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ice                         | kinematic surface upward sensible heat flux over ice            | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude cice_run.html
 !!
 
 !!
