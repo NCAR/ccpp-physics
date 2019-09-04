@@ -66,6 +66,10 @@
 !! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice                 | thermal exchange coefficient over ice                           | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux_over_ice                           | kinematic surface upward latent heat flux over ice              | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ice                         | kinematic surface upward sensible heat flux over ice            | K m s-1       |    1 | real      | kind_phys | inout  | F        |
+!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                | flag          |    0 | logical   |           | in     | F        |
+!! | cplchm         | flag_for_chemistry_coupling                                                  | flag controlling cplchm collection (default off)                | flag          |    0 | logical   |           | in     | F        |
+!! | flag_cice      | flag_for_cice                                                                | flag for cice                                                   | flag          |    1 | logical   |           | in     | F        |
+!! | islmsk_cice    | sea_land_ice_mask_cice                                                       | sea/land/ice mask cice (=0/1/2)                                 | flag          |    1 | integer   |           | in     | F        | 
 !! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
 !!
@@ -98,7 +102,8 @@
      &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  ---  outputs:
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
+     &       cplflx, cplchm, flag_cice, islmsk_cice,                    &
      &       errmsg, errflg
      &     )
 
@@ -200,6 +205,8 @@
 !  ---  inputs:
       integer, intent(in) :: im, km, ipr
       logical, intent(in) :: lprnt
+      logical, intent(in) :: cplflx
+      logical, intent(in) :: cplchm
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd, cimin
@@ -209,9 +216,10 @@
      &       prsl1, prslki, ddvel
 
       integer, dimension(im), intent(in) :: islimsk
+      integer, dimension(im), intent(in) :: islmsk_cice
       real (kind=kind_phys), intent(in)  :: delt
 
-      logical, dimension(im), intent(in) :: flag_iter
+      logical, dimension(im), intent(in) :: flag_iter, flag_cice
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
@@ -238,6 +246,7 @@
       real (kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i, k
+      integer, dimension(im) :: islmsk_local
 
       logical :: flag(im)
 !
@@ -250,17 +259,33 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if(cplflx)then
+        write(*,*)'Fatal error: CCPP not been tested with cplflx=true!'
+        stop
+      endif
+
+      if (cplflx) then
+         where (flag_cice)
+            islmsk_local = islmsk_cice
+         elsewhere
+            islmsk_local = islimsk
+         endwhere
+      else
+        islmsk_local = islimsk
+      end if
+
 !
 !> - Set flag for sea-ice.
 
       do i = 1, im
-        flag(i) = (islimsk(i) == 2) .and. flag_iter(i)
-        if (flag_iter(i) .and. islimsk(i) < 2) then
+        flag(i) = (islmsk_local(i) == 2) .and. flag_iter(i)
+        if (flag_iter(i) .and. islmsk_local(i) < 2) then
           hice(i) = zero
           fice(i) = zero
         endif
       enddo
-!
+
       do i = 1, im
         if (flag(i)) then
           if (srflag(i) > zero) then

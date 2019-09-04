@@ -231,17 +231,17 @@
 !! | stc            | soil_temperature                                                             | soil temperature                                                | K             |    2 | real      | kind_phys | inout  | F        |
 !! | slc            | volume_fraction_of_unfrozen_soil_moisture                                    | volume fraction of unfrozen soil moisture                       | frac          |    2 | real      | kind_phys | inout  | F        |
 !! | canopy         | canopy_water_amount                                                          | canopy moisture content                                         | kg m-2        |    1 | real      | kind_phys | inout  | F        |
-!! | trans          | transpiration_flux                                                           | total plant transpiration rate                                  | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
+!! | trans          | transpiration_flux                                                           | total plant transpiration rate                                  | W m-2         |    1 | real      | kind_phys | inout  | F        |
 !! | tsurf          | surface_skin_temperature_after_iteration_over_land                           | surface skin temperature after iteration over land              | K             |    1 | real      | kind_phys | inout  | F        |
 !! | zorl           | surface_roughness_length_over_land_interstitial                              | surface roughness length over land  (temporary use as interstitial)  | cm       |    1 | real      | kind_phys | inout  | F        |
 !! | sncovr1        | surface_snow_area_fraction_over_land                                         | surface snow area fraction                                      | frac          |    1 | real      | kind_phys | inout  | F        |
 !! | qsurf          | surface_specific_humidity_over_land                                          | surface air saturation specific humidity over land              | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
 !! | gflux          | upward_heat_flux_in_soil_over_land                                           | soil heat flux over land                                        | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | drain          | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | g m-2 s-1     |    1 | real      | kind_phys | inout  | F        |
+!! | drain          | subsurface_runoff_flux                                                       | subsurface runoff flux                                          | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | evap           | kinematic_surface_upward_latent_heat_flux_over_land                          | kinematic surface upward latent heat flux over land             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
 !! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_land                        | kinematic surface upward sensible heat flux over land           | K m s-1       |    1 | real      | kind_phys | inout  | F        |
 !! | ep             | surface_upward_potential_latent_heat_flux_over_land                          | surface upward potential latent heat flux over land             | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | runoff         | surface_runoff_flux                                                          | surface runoff flux                                             | g m-2 s-1     |    1 | real      | kind_phys | inout  | F        |
+!! | runoff         | surface_runoff_flux                                                          | surface runoff flux                                             | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_land                        | momentum exchange coefficient over land                         | m s-1         |    1 | real      | kind_phys | inout  | F        |
 !! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_land                | thermal exchange coefficient over land                          | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
 !! | evbs           | soil_upward_latent_heat_flux                                                 | soil upward latent heat flux                                    | W m-2         |    1 | real      | kind_phys | inout  | F        |
@@ -614,7 +614,7 @@
           trans(i) = ett
           sbsno(i) = esnow
           snowc(i) = sncovr
-          stm(i)   = soilm
+          stm(i)   = soilm * 1000.0 ! unit conversion (from m to kg m-2)
           snohf(i) = flx1 + flx2 + flx3
 
           smcwlt2(i) = smcwlt
@@ -630,7 +630,7 @@
           enddo
           wet1(i) = smsoil(1) / smcmax !Sarah Lu added 09/09/2010 (for GOCART)
 
-!  --- ...  unit conversion (from m s-1 to mm s-1)
+!  --- ...  unit conversion (from m s-1 to mm s-1 and kg m-2 s-1)
           runoff(i)  = runoff1 * 1000.0
           drain (i)  = runoff2 * 1000.0
 
