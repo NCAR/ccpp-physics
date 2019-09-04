@@ -67,15 +67,15 @@
 !> \section arg_table_GFS_SCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
-      subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, lgocart, frain, gt0, gq0_water_vapor, &
-        save_t, save_qv, dqdti, dt3dt, dq3dt, clw, errmsg, errflg)
+      subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, lgocart, cplchm, &
+        frain, gt0, gq0_water_vapor, save_t, save_qv, dqdti, dt3dt, dq3dt, clw, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
       integer, intent(in) :: im, levs, nn
-      logical, intent(in) :: lssav, ldiag3d, lgocart
+      logical, intent(in) :: lssav, ldiag3d, lgocart, cplchm
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_t, save_qv
@@ -98,11 +98,11 @@
 
       if (lssav) then
 !          update dqdt_v to include moisture tendency due to shallow convection
-        if (lgocart) then
+        if (lgocart .and. .not.cplchm) then
           do k=1,levs
             do i=1,im
               tem  = (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
-              dqdti(i,k) = dqdti(i,k)  + tem
+              dqdti(i,k) = dqdti(i,k) + tem
             enddo
           enddo
         endif
@@ -115,6 +115,15 @@
           enddo
         endif
       endif   ! end if_lssav
+!
+      if (cplchm) then
+        do k=1,levs
+          do i=1,im
+            tem  = (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
+            dqdti(i,k) = dqdti(i,k) + tem
+          enddo
+        enddo
+      endif
 !
       do k=1,levs
         do i=1,im

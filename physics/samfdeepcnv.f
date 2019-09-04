@@ -6,6 +6,8 @@
 !! convection scheme.
       module samfdeepcnv
 
+      use samfcnv_aerosols, only : samfdeepcnv_aerosols
+
       contains
 
 !> \brief Brief description of the subroutine
@@ -66,10 +68,10 @@
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
-      subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,                &
+      subroutine samfdeepcnv_run (im,ix,km,itc,ntc,cliq,cp,cvap,        &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
-     &    prslp,psp,phil,qtr,q1,t1,u1,v1,                               &
+     &    prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                         &
      &    do_ca,ca_deep,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,         &
      &    dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                       &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
@@ -82,13 +84,14 @@
 
       implicit none
 !
-      integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
+      integer, intent(in)  :: im, ix, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
+      real(kind=kind_phys), dimension(:), intent(in) :: fscav
       real(kind=kind_phys), intent(in) :: ca_deep(ix)
       logical, intent(in)  :: do_ca
 
@@ -224,6 +227,8 @@ c  physical parameters
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
      &                     ctr(im,km,ntr), ctro(im,km,ntr)
+!  for aerosol transport
+      real(kind=kind_phys) qaero(im,km,ntc)
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km)
       real(kind=kind_phys) wc(im),         scaldfunc(im), sigmagfm(im)
@@ -246,7 +251,7 @@ c  cloud water
      &                     tx1(im),        sumx(im),      cnvwt(im,km)
 !    &,                    rhbar(im)
 !
-      logical totflg, cnvflg(im), asqecflg(im), flg(im)
+      logical do_aerosols, totflg, cnvflg(im), asqecflg(im), flg(im)
 !
 !    asqecflg: flag for the quasi-equilibrium assumption of Arakawa-Schubert
 !
@@ -271,6 +276,11 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
 
       fact1 = (cvap-cliq)/rv
       fact2 = hvap/rv-fact1*t0c
+!
+c-----------------------------------------------------------------------
+!>  ## Determine whether to perform aerosol transport
+      do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
+      if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
 !
 c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
@@ -2393,6 +2403,23 @@ c
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
       enddo
+
+!> - If stochastic physics using cellular automata is .true. then perturb the mass-flux here:
+
+      if(do_ca)then
+        do i=1,im
+         xmb(i) = xmb(i)*(1.0 + ca_deep(i)*5.)
+        enddo
+      endif
+
+!> - Transport aerosols if present
+
+      if (do_aerosols)
+     &  call samfdeepcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
+     &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
+     &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
+     &  qtr, qaero)
+
 c
 c  restore to,qo,uo,vo to t1,q1,u1,v1 in case convection stops
 c
@@ -2675,6 +2702,20 @@ c
         enddo
       enddo
       enddo
+
+!> - Store aerosol concentrations if present
+      if (do_aerosols) then
+        do n = 1, ntc
+          kk = n + itc - 1
+          do k = 1, km
+            do i = 1, im
+              if(cnvflg(i) .and. rn(i) > 0.) then
+                if (k <= kmax(i)) qtr(i,k,kk) = qaero(i,k,n)
+              endif
+            enddo
+          enddo
+        enddo
+       endif
 !
 ! hchuang code change
 !

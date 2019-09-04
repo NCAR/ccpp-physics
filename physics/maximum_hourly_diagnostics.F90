@@ -66,7 +66,9 @@ contains
        errflg = 0
 
 !Calculate hourly max 1-km agl and -10C reflectivity
-       if (lradar .and. (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson)) then
+       if (lradar .and. &
+           (imp_physics == imp_physics_gfdl .or. &
+            imp_physics == imp_physics_thompson)) then
           allocate(refd(im))
           allocate(refd263k(im))
           call max_fields(phil,refl_10cm,con_g,im,levs,refd,gt0,refd263k)

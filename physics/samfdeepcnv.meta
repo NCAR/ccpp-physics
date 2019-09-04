@@ -35,6 +35,22 @@
   type = integer
   intent = in
   optional = F
+[itc]
+  standard_name = number_of_aerosol_tracers_for_convection
+  long_name = number of aerosol tracers transported/scavenged by convection
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntc]
+  standard_name = number_of_chemical_tracers
+  long_name = number of chemical tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cliq]
   standard_name = specific_heat_of_liquid_water_at_constant_pressure
   long_name = specific heat of liquid water at constant pressure
@@ -239,6 +255,15 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[fscav]
+  standard_name = coefficients_for_aerosol_scavenging
+  long_name = array of aerosol scavenging coefficients
+  units = none
+  dimensions = (number_of_chemical_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [do_ca]
   standard_name = flag_for_cellular_automata

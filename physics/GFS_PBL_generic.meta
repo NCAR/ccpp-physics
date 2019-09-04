@@ -161,6 +161,30 @@
   type = integer
   intent = in
   optional = F
+[trans_aero]
+  standard_name = flag_for_aerosol_convective_transport_and_PBL_diffusion
+  long_name = flag for aerosol convective transport and PBL diffusion
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntchs]
+  standard_name = index_for_first_chemical_tracer
+  long_name = tracer index for first chemical tracer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntchm]
+  standard_name = number_of_chemical_tracers
+  long_name = number of chemical tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [imp_physics]
   standard_name = flag_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -445,6 +469,30 @@
   standard_name = index_for_turbulent_kinetic_energy_vertical_diffusion_tracer
   long_name = index for turbulent kinetic energy in the vertically diffused tracer array
   units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[trans_aero]
+  standard_name = flag_for_aerosol_convective_transport_and_PBL_diffusion
+  long_name = flag for aerosol convective transport and PBL diffusion
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ntchs]
+  standard_name = index_for_first_chemical_tracer
+  long_name = tracer index for first chemical tracer
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntchm]
+  standard_name = number_of_chemical_tracers
+  long_name = number of chemical tracers
+  units = count
   dimensions = ()
   type = integer
   intent = in

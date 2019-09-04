@@ -19,7 +19,7 @@
 #endif
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
-        ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                             &
+        ntwa, ntia, ntgl, ntoz, ntke, ntkev, trans_aero, ntchs, ntchm,                   &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
         satmedmf, qgrs, vdftra, errmsg, errflg)
@@ -30,7 +30,8 @@
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
-      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, ntchs, ntchm
+      logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
@@ -42,7 +43,7 @@
       integer, intent(out) :: errflg
 
       !local variables
-      integer :: i, k
+      integer :: i, k, kk, n
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -140,6 +141,17 @@
               vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
+          if (trans_aero) then
+            kk = 7
+            do n=ntchs,ntchm+ntchs-1
+              kk = kk + 1
+              do k=1,levs
+                do i=1,im
+                  vdftra(i,k,kk) = qgrs(i,k,n)
+                enddo
+              enddo
+            enddo
+          endif
         elseif (imp_physics == imp_physics_zhao_carr) then
 ! Zhao/Carr/Sundqvist
           if (cplchm) then
@@ -185,6 +197,7 @@
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
+        trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
@@ -198,8 +211,9 @@
 
       implicit none
 
-      integer, intent(in) :: im, levs, nvdiff, ntrac
+      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
@@ -234,7 +248,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      integer :: i, k
+      integer :: i, k, kk, n
       real(kind=kind_phys) :: tem, tem1, rho
 
       ! Initialize CCPP error handling variables
@@ -327,8 +341,7 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then
-  ! GFDL MP
+        elseif (imp_physics == imp_physics_gfdl) then        ! GFDL MP
           do k=1,levs
             do i=1,im
               dqdt(i,k,ntqv) = dvdftra(i,k,1)
@@ -340,6 +353,17 @@
               dqdt(i,k,ntoz) = dvdftra(i,k,7)
             enddo
           enddo
+          if (trans_aero) then
+            kk = 7
+            do n=ntchs,ntchm+ntchs-1
+              kk = kk + 1
+              do k=1,levs
+                do i=1,im
+                  dqdt(i,k,n) = dvdftra(i,k,kk)
+                enddo
+              enddo
+            enddo
+          endif
         elseif (imp_physics == imp_physics_zhao_carr) then
           if (cplchm) then
             do k=1,levs

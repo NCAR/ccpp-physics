@@ -613,9 +613,9 @@
 !> \section arg_table_GFS_suite_interstitial_4_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_4_run.html
 !!
-    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, lgocart, tracers_total, ntrac, ntcw, ntiw, ntclamt,      &
-      ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                                    &
+    subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, lgocart, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
+      ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
+      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                                        &
       gq0, clw, dqdti, errmsg, errflg)
 
       use machine,               only: kind_phys
@@ -628,7 +628,7 @@
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
         imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
-      logical,                                  intent(in) :: ltaerosol, lgocart
+      logical,                                  intent(in) :: ltaerosol, lgocart, cplchm
 
       real(kind=kind_phys),                     intent(in) :: con_pi, dtf
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc
@@ -678,8 +678,9 @@
       if (ntcw > 0) then
 
 !  for microphysics
-        if (imp_physics == imp_physics_zhao_carr_pdf .or. imp_physics == imp_physics_zhao_carr    &
-                               .or. imp_physics == imp_physics_gfdl) then
+        if (imp_physics == imp_physics_zhao_carr     .or. &
+            imp_physics == imp_physics_zhao_carr_pdf .or. &
+            imp_physics == imp_physics_gfdl) then
            gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
         elseif (ntiw > 0) then
           do k=1,levs
@@ -723,7 +724,7 @@
       endif   ! end if_ntcw
 
 ! dqdt_v : instaneous moisture tendency (kg/kg/sec)
-      if (lgocart) then
+      if (lgocart .or. cplchm) then
         do k=1,levs
           do i=1,im
             dqdti(i,k) = dqdti(i,k) * (1.0 / dtf)

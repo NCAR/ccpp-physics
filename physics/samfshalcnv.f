@@ -5,6 +5,8 @@
 !! shallow convection scheme.
       module samfshalcnv
 
+      use samfcnv_aerosols, only : samfshalcnv_aerosols
+
       contains
 
 !> \brief Brief description of the subroutine
@@ -47,10 +49,10 @@
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
 !!  @{
-      subroutine samfshalcnv_run(im,ix,km,cliq,cp,cvap,                 &
+      subroutine samfshalcnv_run(im,ix,km,itc,ntc,cliq,cp,cvap,         &
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,                                       &
-     &     prslp,psp,phil,qtr,q1,t1,u1,v1,                              &
+     &     prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                        &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
      &     clam,c0s,c1,pgcon,asolfac,errmsg,errflg)
@@ -60,7 +62,7 @@
 
       implicit none
 !
-      integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
+      integer, intent(in)  :: im, ix, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
@@ -68,6 +70,7 @@
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km), garea(im), hpbl(im), dot(ix,km), phil(ix,km)
 !
+      real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
       real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
@@ -175,6 +178,8 @@ c  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
      &                     ctr(im,km,ntr), ctro(im,km,ntr)
+!  for aerosol transport
+      real(kind=kind_phys) qaero(im,km,ntc)
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km)
       real(kind=kind_phys) wc(im),         scaldfunc(im), sigmagfm(im)
@@ -193,7 +198,7 @@ c  cloud water
      &                     zi(im,km),      pwo(im,km),    c0t(im,km),
      &                     sumx(im),       tx1(im),       cnvwt(im,km)
 !
-      logical totflg, cnvflg(im), flg(im)
+      logical do_aerosols, totflg, cnvflg(im), flg(im)
 !
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
@@ -210,6 +215,11 @@ c-----------------------------------------------------------------------
       fact1 = (cvap-cliq)/rv
       fact2 = hvap/rv-fact1*t0c
 
+c-----------------------------------------------------------------------
+!>  ## Determine whether to perform aerosol transport
+      do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
+      if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
+!
 !************************************************************************
 !     convert input Pa terms to Cb terms  -- Moorthi
 !>  ## Compute preliminary quantities needed for the static and feedback control portions of the algorithm.
@@ -1490,6 +1500,17 @@ c
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
       enddo
+!
+!> - Transport aerosols if present
+!
+      if (do_aerosols)
+     &  call samfshalcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
+!    &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
+     &  cnvflg, kb, kmax, kbcon, ktcon, fscav,
+!    &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
+     &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
+     &  qtr, qaero)
+!
 !> ## For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !! - Recalculate saturation specific humidity.
 c
@@ -1728,6 +1749,19 @@ c
       enddo
 !
       endif
+!> - Store aerosol concentrations if present
+      if (do_aerosols) then
+        do n = 1, ntc
+          kk = n + itc - 1
+          do k = 1, km
+            do i = 1, im
+              if(cnvflg(i) .and. rn(i) > 0.) then
+                if (k <= kmax(i)) qtr(i,k,kk) = qaero(i,k,n)
+              endif
+            enddo
+          enddo
+        enddo
+       endif
 !
 ! hchuang code change
 !
