@@ -24,79 +24,7 @@
 !>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Scheme Module
 !> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
-!! | local_name     | standard_name                                                                | long_name                                                   | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer   |           | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                      | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure               | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | hfus           | latent_heat_of_fusion_of_water_at_0C                                         | latent heat of fusion                                       | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | jcal           | joules_per_calorie_constant                                                  | joules per calorie constant                                 | J cal-1       |    0 | real      | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                       | none          |    0 | real      | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                 | none          |    0 | real      | kind_phys | in     | F        |
-!! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)       | none          |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                         | ideal gas constant for dry air                              | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | rhw0           | sea_water_reference_density                                                  | sea water reference density                                 | kg m-3        |    0 | real      | kind_phys | in     | F        |
-!! | sbc            | stefan_boltzmann_constant                                                    | Stefan-Boltzmann constant                                   | W m-2 K-4     |    0 | real      | kind_phys | in     | F        |
-!! | pi             | pi                                                                           | ratio of a circle's circumference to its diameter           | radians       |    0 | real      | kind_phys | in     | F        |
-!! | ps             | surface_air_pressure                                                         | surface pressure                                            | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                              | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                        | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | tref           | sea_surface_reference_temperature                                            | reference/foundation temperature                            | K             |    1 | real      | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air_over_ocean                      | surface exchange coeff for momentum over ocean              | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean             | surface exchange coeff heat & moisture over ocean           | none          |    1 | real      | kind_phys | in     | F        |
-!! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                 | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag |    1 | logical   |           | in     | F        |
-!! | icy            | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction       | flag |    1 | logical   |           | in     | F        |
-!! | xlon           | longitude                                                                    | longitude                                                   | radians       |    1 | real      | kind_phys | in     | F        |
-!! | sinlat         | sine_of_latitude                                                             | sine of latitude                                            | none          |    1 | real      | kind_phys | in     | F        |
-!! | stress         | surface_wind_stress_over_ocean                                               | surface wind stress over ocean                              | m2 s-2        |    1 | real      | kind_phys | in     | F        |
-!! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                 | frac          |    1 | real      | kind_phys | in     | F        |
-!! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky sfc downward lw flux absorbed by the ocean        | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc net sw flx into ocean                         | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | rain           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ocean | total precipitation amount in each time step over ocean | m            |    1 | real      | kind_phys | in     | F        |
-!! | timestep       | time_step_for_dynamics                                                       | timestep interval                                           | s             |    0 | real      | kind_phys | in     | F        |
-!! | kdt            | index_of_time_step                                                           | current time step index                                     | index         |    0 | integer   |           | in     | F        |
-!! | solhr          | forecast_hour                                                                | fcst hour at the end of prev time step                      | h             |    0 | real      | kind_phys | in     | F        |
-!! | xcosz          | instantaneous_cosine_of_zenith_angle                                         | cosine of solar zenith angle                                | none          |    1 | real      | kind_phys | in     | F        |
-!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                          | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                          | flag          |    1 | logical   |           | in     | F        |
-!! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                          | flag          |    1 | logical   |           | in     | F        |
-!! | nstf_name1     | flag_for_nsstm_run                                                           | NSSTM flag: off/uncoupled/coupled=0/1/2                     | flag          |    0 | integer   |           | in     | F        |
-!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                                       | mm            |    0 | integer   |           | in     | F        |
-!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                                       | mm            |    0 | integer   |           | in     | F        |
-!! | lprnt          | flag_print                                                                   | flag for printing diagnostics to output                     | flag          |    0 | logical   |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                          | index         |    0 | integer   |           | in     | F        |
-!! | tskin          | surface_skin_temperature_for_nsst                                            | ocean surface skin temperature                              | K             |    1 | real      | kind_phys | inout  | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration_over_ocean                          | surface skin temperature after iteration over ocean         | K             |    1 | real      | kind_phys | inout  | F        |
-!! | xt             | diurnal_thermocline_layer_heat_content                                       | heat content in diurnal thermocline layer                   | K m           |    1 | real      | kind_phys | inout  | F        |
-!! | xs             | sea_water_salinity                                                           | salinity  content in diurnal thermocline layer              | ppt m         |    1 | real      | kind_phys | inout  | F        |
-!! | xu             | diurnal_thermocline_layer_x_current                                          | u-current content in diurnal thermocline layer              | m2 s-1        |    1 | real      | kind_phys | inout  | F        |
-!! | xv             | diurnal_thermocline_layer_y_current                                          | v-current content in diurnal thermocline layer              | m2 s-1        |    1 | real      | kind_phys | inout  | F        |
-!! | xz             | diurnal_thermocline_layer_thickness                                          | diurnal thermocline layer thickness                         | m             |    1 | real      | kind_phys | inout  | F        |
-!! | zm             | ocean_mixed_layer_thickness                                                  | mixed layer thickness                                       | m             |    1 | real      | kind_phys | inout  | F        |
-!! | xtts           | sensitivity_of_dtl_heat_content_to_surface_temperature                       | d(xt)/d(ts)                                                 | m             |    1 | real      | kind_phys | inout  | F        |
-!! | xzts           | sensitivity_of_dtl_thickness_to_surface_temperature                          | d(xz)/d(ts)                                                 | m K-1         |    1 | real      | kind_phys | inout  | F        |
-!! | dt_cool        | sub_layer_cooling_amount                                                     | sub-layer cooling amount                                    | K             |    1 | real      | kind_phys | inout  | F        |
-!! | z_c            | sub_layer_cooling_thickness                                                  | sub-layer cooling thickness                                 | m             |    1 | real      | kind_phys | inout  | F        |
-!! | c_0            | coefficient_c_0                                                              | coefficient1 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | c_d            | coefficient_c_d                                                              | coefficient2 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | w_0            | coefficient_w_0                                                              | coefficient3 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | w_d            | coefficient_w_d                                                              | coefficient4 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | d_conv         | free_convection_layer_thickness                                              | thickness of free convection layer                          | m             |    1 | real      | kind_phys | inout  | F        |
-!! | ifd            | index_of_dtlm_start                                                          | index to start dtlm run or not                              | index         |    1 | real      | kind_phys | inout  | F        |
-!! | qrain          | sensible_heat_flux_due_to_rainfall                                           | sensible heat flux due to rainfall                          | W             |    1 | real      | kind_phys | inout  | F        |
-!! | qsurf          | surface_specific_humidity_over_ocean                                         | surface air saturation specific humidity over ocean         | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | gflux          | upward_heat_flux_in_soil_over_ocean                                          | soil heat flux over ocean                                   | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_ocean                       | momentum exchange coefficient over ocean                    | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ocean               | thermal exchange coefficient over ocean                     | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux_over_ocean                         | kinematic surface upward latent heat flux over ocean        | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ocean                       | kinematic surface upward sensible heat flux over ocean      | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux_over_ocean                         | surface upward potential latent heat flux over ocean        | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_nst_run.html
 !!
 !! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
@@ -727,39 +655,7 @@ cc
       end subroutine sfc_nst_pre_finalize
 
 !! \section arg_table_sfc_nst_pre_run Argument Table
-!! | local_name     | standard_name                                                     | long_name                                                             | units         | rank | type        |    kind   | intent | optional |
-!! |----------------|-------------------------------------------------------------------|-----------------------------------------------------------------------|---------------|------|-------------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                            | horizontal loop extent                                                | count         |    0 | integer     |           | in     | F        |
-!! | rlapse         | air_temperature_lapse_rate_constant                               | environmental air temperature lapse rate constant                     | K m-1         |    0 | real        | kind_phys | in     | F        |
-!! | icy            | flag_nonzero_sea_ice_surface_fraction                             | flag indicating presence of some sea ice surface area fraction        | flag          |    1 | logical     |           | in     | F        |
-!! | wet            | flag_nonzero_wet_surface_fraction                                 | flag indicating presence of some ocean or lake surface area fraction  | flag          |    1 | logical     |           | in     | F        |
-!! | zorl_ocn       | surface_roughness_length_over_ocean_interstitial                  | surface roughness length over ocean (temporary use as interstitial)   | cm            |    1 | real        | kind_phys | inout  | F        |
-!! | zorl_ice       | surface_roughness_length_over_ice_interstitial                    | surface roughness length over ice   (temporary use as interstitial)   | cm            |    1 | real        | kind_phys | in     | F        |
-!! | cd_ocn         | surface_drag_coefficient_for_momentum_in_air_over_ocean           | surface exchange coeff for momentum over ocean                        | none          |    1 | real        | kind_phys | inout  | F        |
-!! | cd_ice         | surface_drag_coefficient_for_momentum_in_air_over_ice             | surface exchange coeff for momentum over ice                          | none          |    1 | real        | kind_phys | in     | F        |
-!! | cdq_ocn        | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean  | surface exchange coeff heat & moisture over ocean                     | none          |    1 | real        | kind_phys | inout  | F        |
-!! | cdq_ice        | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice    | surface exchange coeff heat & moisture over ice                       | none          |    1 | real        | kind_phys | in     | F        |
-!! | rb_ocn         | bulk_richardson_number_at_lowest_model_level_over_ocean           | bulk Richardson number at the surface over ocean                      | none          |    1 | real        | kind_phys | inout  | F        |
-!! | rb_ice         | bulk_richardson_number_at_lowest_model_level_over_ice             | bulk Richardson number at the surface over ice                        | none          |    1 | real        | kind_phys | in     | F        |
-!! | stress_ocn     | surface_wind_stress_over_ocean                                    | surface wind stress over ocean                                        | m2 s-2        |    1 | real        | kind_phys | inout  | F        |
-!! | stress_ice     | surface_wind_stress_over_ice                                      | surface wind stress over ice                                          | m2 s-2        |    1 | real        | kind_phys | in     | F        |
-!! | ffmm_ocn       | Monin_Obukhov_similarity_function_for_momentum_over_ocean         | Monin-Obukhov similarity function for momentum over ocean             | none          |    1 | real        | kind_phys | inout  | F        |
-!! | ffmm_ice       | Monin_Obukhov_similarity_function_for_momentum_over_ice           | Monin-Obukhov similarity function for momentum over ice               | none          |    1 | real        | kind_phys | in     | F        |
-!! | ffhh_ocn       | Monin_Obukhov_similarity_function_for_heat_over_ocean             | Monin-Obukhov similarity function for heat over ocean                 | none          |    1 | real        | kind_phys | inout  | F        |
-!! | ffhh_ice       | Monin_Obukhov_similarity_function_for_heat_over_ice               | Monin-Obukhov similarity function for heat over ice                   | none          |    1 | real        | kind_phys | in     | F        |
-!! | uustar_ocn     | surface_friction_velocity_over_ocean                              | surface friction velocity over ocean                                  | m s-1         |    1 | real        | kind_phys | inout  | F        |
-!! | uustar_ice     | surface_friction_velocity_over_ice                                | surface friction velocity over ice                                    | m s-1         |    1 | real        | kind_phys | in     | F        |
-!! | fm10_ocn       | Monin_Obukhov_similarity_function_for_momentum_at_10m_over_ocean  | Monin-Obukhov similarity parameter for momentum at 10m over ocean     | none          |    1 | real        | kind_phys | inout  | F        |
-!! | fm10_ice       | Monin_Obukhov_similarity_function_for_momentum_at_10m_over_ice    | Monin-Obukhov similarity parameter for momentum at 10m over ice       | none          |    1 | real        | kind_phys | in     | F        |
-!! | fh2_ocn        | Monin_Obukhov_similarity_function_for_heat_at_2m_over_ocean       | Monin-Obukhov similarity parameter for heat at 2m over ocean          | none          |    1 | real        | kind_phys | inout  | F        |
-!! | fh2_ice        | Monin_Obukhov_similarity_function_for_heat_at_2m_over_ice         | Monin-Obukhov similarity parameter for heat at 2m over ice            | none          |    1 | real        | kind_phys | in     | F        |
-!! | oro            | orography                                                         | orography                                                             | m             |    1 | real        | kind_phys | in     | F        |
-!! | oro_uf         | orography_unfiltered                                              | unfiltered orographyo                                                 | m             |    1 | real        | kind_phys | in     | F        |
-!! | tsfc_ocn       | surface_skin_temperature_over_ocean_interstitial                  | surface skin temperature over ocean (temporary use as interstitial)   | K             |    1 | real        | kind_phys | in     | F        |
-!! | tsurf_ocn      | surface_skin_temperature_after_iteration_over_ocean               | surface skin temperature after iteration over ocean                   | K             |    1 | real        | kind_phys | inout  | F        |
-!! | tseal          | surface_skin_temperature_for_nsst                                 | ocean surface skin temperature                                        | K             |    1 | real        | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                | error message for error handling in CCPP                              | none          |    0 | character   | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                   | error flag for error handling in CCPP                                 | flag          |    0 | integer     |           | out    | F        |
+!! \htmlinclude sfc_nst_pre_run.html
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
@@ -836,28 +732,7 @@ cc
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sfc_nst_post_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                                            | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|----------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                               | count   |    0 | integer   |           | in     | F        |
-!! | rlapse         | air_temperature_lapse_rate_constant                    | environmental air temperature lapse rate constant                    | K m-1   |    0 | real      | kind_phys | in     | F        |
-!! | wet            | flag_nonzero_wet_surface_fraction                      | flag indicating presence of some ocean or lake surface area fraction | flag    |    1 | logical   |           | in     | F        |
-!! | icy            | flag_nonzero_sea_ice_surface_fraction                  | flag indicating presence of some sea ice surface area fraction       | flag    |    1 | logical   |           | in     | F        |
-!! | oro            | orography                                              | orography                                                            | m       |    1 | real      | kind_phys | in     | F        |
-!! | oro_uf         | orography_unfiltered                                   | unfiltered orography                                                 | m       |    1 | real      | kind_phys | in     | F        |
-!! | nstf_name1     | flag_for_nsstm_run                                     | NSSTM flag: off/uncoupled/coupled=0/1/2                              | flag    |    0 | integer   |           | in     | F        |
-!! | nstf_name4     | vertical_temperature_average_range_lower_bound         | zsea1                                                                | mm      |    0 | integer   |           | in     | F        |
-!! | nstf_name5     | vertical_temperature_average_range_upper_bound         | zsea2                                                                | mm      |    0 | integer   |           | in     | F        |
-!! | xt             | diurnal_thermocline_layer_heat_content                 | heat content in diurnal thermocline layer                            | K m     |    1 | real      | kind_phys | in     | F        |
-!! | xz             | diurnal_thermocline_layer_thickness                    | diurnal thermocline layer thickness                                  | m       |    1 | real      | kind_phys | in     | F        |
-!! | dt_cool        | sub_layer_cooling_amount                               | sub-layer cooling amount                                             | K       |    1 | real      | kind_phys | in     | F        |
-!! | z_c            | sub_layer_cooling_thickness                            | sub-layer cooling thickness                                          | m       |    1 | real      | kind_phys | in     | F        |
-!! | tref           | sea_surface_reference_temperature                      | reference/foundation temperature                                     | K       |    1 | real      | kind_phys | in     | F        |
-!! | xlon           | longitude                                              | longitude                                                            | radians |    1 | real      | kind_phys | in     | F        |
-!! | tsurf_ocn      | surface_skin_temperature_after_iteration_over_ocean    | surface skin temperature after iteration over ocean                  | K       |    1 | real      | kind_phys | inout  | F        |
-!! | tsfc_ocn       | surface_skin_temperature_over_ocean_interstitial       | surface skin temperature over ocean (temporary use as interstitial)  | K       |    1 | real      | kind_phys | inout  | F        |
-!! | dtzm           | mean_change_over_depth_in_sea_water_temperature        | mean of dT(z)  (zsea1 to zsea2)                                      | K       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                             | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_nst_post_run.html
 !!
 ! \section NSST_general_post_algorithm General Algorithm
 !

@@ -23,23 +23,7 @@ module mp_thompson
 !> This subroutine is a wrapper around the actual mp_gt_driver().
 #if 0
 !! \section arg_table_mp_thompson_init Argument Table
-!! | local_name           | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
-!! |----------------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | ncol                 | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
-!! | nlev                 | vertical_dimension                                    | number of vertical levels                                | count      |    0 | integer   |           | in     | F        |
-!! | is_aerosol_aware     | flag_for_aerosol_physics                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
-!! | nwfa2d               | tendency_of_water_friendly_aerosols_at_surface        | instantaneous fake water-friendly surface aerosol source | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
-!! | nifa2d               | tendency_of_ice_friendly_aerosols_at_surface          | instantaneous fake ice-friendly surface aerosol source   | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
-!! | nwfa                 | water_friendly_aerosol_number_concentration           | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nifa                 | ice_friendly_aerosol_number_concentration             | number concentration of ice-friendly aerosols            | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | mpicomm              | mpi_comm                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpirank              | mpi_rank                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpiroot              | mpi_root                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
-!! | threads              | omp_threads                                           | number of OpenMP threads available to scheme             | count      |    0 | integer   |           | in     | F        |
-!! | imp_physics          | flag_for_microphysics_scheme                          | choice of microphysics scheme                            | flag       |    0 | integer   |           | in     | F        |
-!! | imp_physics_thompson | flag_for_thompson_microphysics_scheme                 | choice of Thompson microphysics scheme                   | flag       |    0 | integer   |           | in     | F        |
-!! | errmsg               | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg               | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude mp_thompson_init.html
 !!
 #endif
       subroutine mp_thompson_init(ncol, nlev, is_aerosol_aware, &
@@ -148,47 +132,7 @@ module mp_thompson
 
 #if 0
 !> \section arg_table_mp_thompson_run Argument Table
-!! | local_name      | standard_name                                                         | long_name                                                             | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|-----------------------------------------------------------------------|-----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                                | count      |    0 | integer   |           | in     | F        |
-!! | nlev            | vertical_dimension                                                    | number of vertical levels                                             | count      |    0 | integer   |           | in     | F        |
-!! | con_g           | gravitational_acceleration                                            | gravitational acceleration                                            | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | con_rd          | gas_constant_dry_air                                                  | ideal gas constant for dry air                                        | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | spechum         | water_vapor_specific_humidity_updated_by_physics                      | water vapor specific humidity                                         | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qc              | cloud_condensed_water_mixing_ratio_updated_by_physics                 | cloud water mixing ratio wrt dry+vapor (no condensates)               | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qr              | rain_water_mixing_ratio_updated_by_physics                            | rain water mixing ratio wrt dry+vapor (no condensates)                | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qi              | ice_water_mixing_ratio_updated_by_physics                             | ice water mixing ratio wrt dry+vapor (no condensates)                 | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qs              | snow_water_mixing_ratio_updated_by_physics                            | snow water mixing ratio wrt dry+vapor (no condensates)                | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qg              | graupel_mixing_ratio_updated_by_physics                               | graupel mixing ratio wrt dry+vapor (no condensates)                   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | ni              | ice_number_concentration_updated_by_physics                           | ice number concentration                                              | kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | nr              | rain_number_concentration_updated_by_physics                          | rain number concentration                                             | kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | is_aerosol_aware| flag_for_aerosol_physics                                              | flag for aerosol-aware physics                                        | flag       |    0 | logical   |           | in     | F        |
-!! | nc              | cloud_droplet_number_concentration_updated_by_physics                 | cloud droplet number concentration                                    | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nwfa            | water_friendly_aerosol_number_concentration_updated_by_physics        | number concentration of water-friendly aerosols                       | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nifa            | ice_friendly_aerosol_number_concentration_updated_by_physics          | number concentration of ice-friendly aerosols                         | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nwfa2d          | tendency_of_water_friendly_aerosols_at_surface                        | instantaneous fake water-friendly surface aerosol source              | kg-1 s-1   |    1 | real      | kind_phys | in     | T        |
-!! | nifa2d          | tendency_of_ice_friendly_aerosols_at_surface                          | instantaneous fake ice-friendly surface aerosol source                | kg-1 s-1   |    1 | real      | kind_phys | in     | T        |
-!! | tgrs            | air_temperature_updated_by_physics                                    | model layer mean temperature                                          | K          |    2 | real      | kind_phys | inout  | F        |
-!! | prsl            | air_pressure                                                          | mean layer pressure                                                   | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | phii            | geopotential_at_interface                                             | geopotential at model layer interfaces                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | omega           | omega                                                                 | layer mean vertical velocity                                          | Pa s-1     |    2 | real      | kind_phys | in     | F        |
-!! | dtp             | time_step_for_physics                                                 | physics timestep                                                      | s          |    0 | real      | kind_phys | in     | F        |
-!! | prcp            | lwe_thickness_of_explicit_precipitation_amount                        | explicit precipitation (rain, ice, snow, graupel) on physics timestep | m          |    1 | real      | kind_phys | inout  | F        |
-!! | rain            | lwe_thickness_of_explicit_rain_amount                                 | explicit rain fall on physics timestep                                | m          |    1 | real      | kind_phys | inout  | F        |
-!! | graupel         | lwe_thickness_of_graupel_amount                                       | graupel fall on physics timestep                                      | m          |    1 | real      | kind_phys | inout  | F        |
-!! | ice             | lwe_thickness_of_ice_amount                                           | ice fall on physics timestep                                          | m          |    1 | real      | kind_phys | inout  | F        |
-!! | snow            | lwe_thickness_of_snow_amount                                          | snow fall on physics timestep                                         | m          |    1 | real      | kind_phys | inout  | F        |
-!! | sr              | ratio_of_snowfall_to_rainfall                                         | ratio of snowfall to large-scale rainfall                             | frac       |    1 | real      | kind_phys | out    | F        |
-!! | refl_10cm       | radar_reflectivity_10cm                                               | instantaneous refl_10cm                                               | dBZ        |    2 | real      | kind_phys | out    | F        |
-!! | do_radar_ref    | flag_for_radar_reflectivity                                           | flag for radar reflectivity                                           | flag       |    0 | logical   |           | in     | F        |
-!! | re_cloud        | effective_radius_of_stratiform_cloud_liquid_water_particle_in_um      | eff. radius of cloud liquid water particle in micrometer (meter here) | m          |    2 | real      | kind_phys | out    | F        |
-!! | re_ice          | effective_radius_of_stratiform_cloud_ice_particle_in_um               | eff. radius of cloud ice water particle in micrometer (meter here)    | m          |    2 | real      | kind_phys | out    | F        |
-!! | re_snow         | effective_radius_of_stratiform_cloud_snow_particle_in_um              | effective radius of cloud snow particle in micrometer  (meter here)   | m          |    2 | real      | kind_phys | out    | F        |
-!! | mpicomm         | mpi_comm                                                              | MPI communicator                                                      | index      |    0 | integer   |           | in     | F        |
-!! | mpirank         | mpi_rank                                                              | current MPI-rank                                                      | index      |    0 | integer   |           | in     | F        |
-!! | mpiroot         | mpi_root                                                              | master MPI-rank                                                       | index      |    0 | integer   |           | in     | F        |
-!! | errmsg          | ccpp_error_message                                                    | error message for error handling in CCPP                              | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                                 | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude mp_thompson_run.html
 !!
 #endif
 !>\ingroup aathompson
@@ -458,10 +402,7 @@ module mp_thompson
 
 #if 0
 !! \section arg_table_mp_thompson_finalize Argument Table
-!! | local_name      | standard_name                                                 | long_name                                              | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|---------------------------------------------------------------|--------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | errmsg          | ccpp_error_message                                            | error message for error handling in CCPP               | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                               | error flag for error handling in CCPP                  | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude mp_thompson_finalize.html
 !!
 #endif
       subroutine mp_thompson_finalize(errmsg, errflg)

@@ -117,18 +117,7 @@ contains
 
 !>\brief The subroutine 'fv_sat_adj_init' initializes lookup tables for the saturation mixing ratio.
 !! \section arg_table_fv_sat_adj_init Argument Table
-!! | local_name     | standard_name                                                 | long_name                                                                              | units      | rank | type      |   kind    | intent | optional |
-!! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | do_sat_adj     | flag_for_saturation_adjustment_for_microphysics_in_dynamics   | flag for saturation adjustment for microphysics in dynamics                            | none       |    0 | logical   |           | in     | F        |
-!! | kmp            | top_layer_index_for_fast_physics                              | top_layer_inder_for_gfdl_mp                                                            | index      |    0 | integer   |           | in     | F        |
-!! | nwat           | number_of_water_species                                       | number of water species                                                                | count      |    0 | integer   |           | in     | F        |
-!! | ngas           | number_of_gases_for_multi_gases_physics                       | number of gases for multi gases physics                                                | count      |    0 | integer   |           | in     | F        |
-!! | rilist         | gas_constants_for_multi_gases_physics                         | gas constants for multi gases physics                                                  | J kg-1 K-1 |    1 | real      | kind_dyn  | in     | F        |
-!! | cpilist        | specific_heat_capacities_for_multi_gases_physics              | specific heat capacities for multi gases physics                                       | J kg-1 K-1 |    1 | real      | kind_dyn  | in     | F        |
-!! | mpirank        | mpi_rank_for_fast_physics                                     | current MPI-rank for fast physics schemes                                              | index      |    0 | integer   |           | in     | F        |
-!! | mpiroot        | mpi_root_for_fast_physics                                     | master MPI-rank for fast physics schemes                                               | index      |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude fv_sat_adj_init.html
 !!
 subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
                            mpirank, mpiroot, errmsg, errflg)
@@ -194,10 +183,7 @@ end subroutine fv_sat_adj_init
 !\ingroup fast_sat_adj
 !>\brief The subroutine 'fv_sat_adj_finalize' deallocates lookup tables for the saturation mixing ratio.
 !! \section arg_table_fv_sat_adj_finalize Argument Table
-!! | local_name     | standard_name                                                 | long_name                                                                              | units   | rank | type      |   kind    | intent | optional |
-!! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude fv_sat_adj_finalize.html
 !!
 subroutine fv_sat_adj_finalize (errmsg, errflg)
 
@@ -237,52 +223,7 @@ end subroutine fv_sat_adj_finalize
 !! It handles the heat release due to in situ phase changes.
 !!
 !! \section arg_table_fv_sat_adj_run Argument Table
-!! | local_name     | standard_name                                                 | long_name                                                                              | units     | rank | type      |   kind    | intent | optional |
-!! |----------------|---------------------------------------------------------------|----------------------------------------------------------------------------------------|-----------|------|-----------|-----------|--------|----------|
-!! | mdt            | time_step_for_remapping_for_fast_physics                      | remapping time step for fast physics                                                   | s         |    0 | real      | kind_dyn  | in     | F        |
-!! | zvir           | ratio_of_vapor_to_dry_air_gas_constants_minus_one_default_kind| zvir=rv/rd-1.0                                                                         | none      |    0 | real      | kind_dyn  | in     | F        |
-!! | is             | starting_x_direction_index                                    | starting X direction index                                                             | count     |    0 | integer   |           | in     | F        |
-!! | ie             | ending_x_direction_index                                      | ending X direction index                                                               | count     |    0 | integer   |           | in     | F        |
-!! | isd            | starting_x_direction_index_domain                             | starting X direction index for domain                                                  | count     |    0 | integer   |           | in     | F        |
-!! | ied            | ending_x_direction_index_domain                               | ending X direction index for domain                                                    | count     |    0 | integer   |           | in     | F        |
-!! | kmp            | top_layer_index_for_fast_physics                              | top layer index for GFDL mp                                                            | index     |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension_for_fast_physics                           | number of vertical levels                                                              | count     |    0 | integer   |           | in     | F        |
-!! | kmdelz         | vertical_dimension_for_thickness_at_Lagrangian_surface        | vertical dimension for thickness at Lagrangian surface                                 | count     |    0 | integer   |           | in     | F        |
-!! | js             | starting_y_direction_index                                    | starting Y direction index                                                             | count     |    0 | integer   |           | in     | F        |
-!! | je             | ending_y_direction_index                                      | ending Y direction index                                                               | count     |    0 | integer   |           | in     | F        |
-!! | jsd            | starting_y_direction_index_domain                             | starting X direction index for domain                                                  | count     |    0 | integer   |           | in     | F        |
-!! | jed            | ending_y_direction_index_domain                               | ending X direction index for domain                                                    | count     |    0 | integer   |           | in     | F        |
-!! | ng             | number_of_ghost_zones                                         | number of ghost zones defined in fv_mp                                                 | count     |    0 | integer   |           | in     | F        |
-!! | hydrostatic    | flag_for_hydrostatic_solver_for_fast_physics                  | flag for use the hydrostatic or nonhydrostatic solver                                  | flag      |    0 | logical   |           | in     | F        |
-!! | fast_mp_consv  | flag_for_fast_microphysics_energy_conservation                | flag for fast microphysics energy conservation                                         | flag      |    0 | logical   |           | in     | F        |
-!! | te0_2d         | atmosphere_energy_content_in_column                           | atmosphere total energy in columns                                                     | J m-2     |    2 | real      | kind_dyn  | inout  | F        |
-!! | te0            | atmosphere_energy_content_at_Lagrangian_surface               | atmosphere total energy at Lagrangian surface                                          | J m-2     |    3 | real      | kind_dyn  | out    | F        |
-!! | ngas           | number_of_gases_for_multi_gases_physics                       | number of gases for multi gases physics                                                | count     |    0 | integer   |           | in     | F        |
-!! | qvi            | gas_tracers_for_multi_gas_physics_at_Lagrangian_surface       | gas tracers for multi gas physics at Lagrangian surface                                | kg kg-1   |    4 | real      | kind_dyn  | inout  | F        |
-!! | qv             | water_vapor_specific_humidity_at_Lagrangian_surface           | water vapor specific humidity updated by fast physics at Lagrangian surface            | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
-!! | ql             | cloud_liquid_water_specific_humidity_at_Lagrangian_surface    | cloud liquid water specific humidity updated by fast physics at Lagrangian surface     | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
-!! | qi             | cloud_ice_specific_humidity_at_Lagrangian_surface             | cloud ice specific humidity updated by fast physics at Lagrangian surface              | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
-!! | qr             | cloud_rain_specific_humidity_at_Lagrangian_surface            | cloud rain specific humidity updated by fast physics at Lagrangian surface             | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
-!! | qs             | cloud_snow_specific_humidity_at_Lagrangian_surface            | cloud snow specific humidity updated by fast physics at Lagrangian surface             | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
-!! | qg             | cloud_graupel_specific_humidity_at_Lagrangian_surface         | cloud graupel specific humidity updated by fast physics at Lagrangian surface          | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
-!! | hs             | surface_geopotential_at_Lagrangian_surface                    | surface geopotential  at Lagrangian surface                                            | m2 s-2    |    2 | real      | kind_dyn  | in     | F        |
-!! | peln           | log_pressure_at_Lagrangian_surface                            | logarithm of pressure at Lagrangian surface                                            | Pa        |    3 | real      | kind_dyn  | in     | F        |
-!! | delz           | thickness_at_Lagrangian_surface                               | thickness at Lagrangian_surface                                                        | m         |    3 | real      | kind_dyn  | in     | F        |
-!! | delp           | pressure_thickness_at_Lagrangian_surface                      | pressure thickness at Lagrangian surface                                               | Pa        |    3 | real      | kind_dyn  | in     | F        |
-!! | pt             | virtual_temperature_at_Lagrangian_surface                     | virtual temperature at Lagrangian surface                                              | K         |    3 | real      | kind_dyn  | inout  | F        |
-!! | pkz            | finite_volume_mean_edge_pressure_raised_to_the_power_of_kappa | finite-volume mean edge pressure raised to the power of kappa                          | Pa**kappa |    3 | real      | kind_dyn  | inout  | F        |
-!! | q_con          | cloud_condensed_water_specific_humidity_at_Lagrangian_surface | cloud condensed water specific humidity updated by fast physics at Lagrangian surface  | kg kg-1   |    3 | real      | kind_dyn  | inout  | F        |
-!! | akap           | kappa_dry_for_fast_physics                                    | modified kappa for dry air, fast physics                                               | none      |    0 | real      | kind_dyn  | in     | F        |
-!! | cappa          | cappa_moist_gas_constant_at_Lagrangian_surface                | cappa(i,j,k) = rdgas / ( rdgas +  cvm(i)/(1.+r_vir*q(i,j,k,sphum)) )                   | none      |    3 | real      | kind_dyn  | inout  | F        |
-!! | area           | cell_area_for_fast_physics                                    | area of the grid cell for fast physics                                                 | m2        |    2 | real      | kind_grid | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_at_Lagrangian_surface             | air temperature tendency due to fast physics at Lagrangian surface                     | K s-1     |    3 | real      | kind_dyn  | inout  | F        |
-!! | out_dt         | flag_for_tendency_of_air_temperature_at_Lagrangian_surface    | flag for calculating tendency of air temperature due to fast physics                   | flag      |    0 | logical   |           | in     | F        |
-!! | last_step      | flag_for_the_last_step_of_k_split_remapping                   | flag for the last step of k-split remapping                                            | flag      |    0 | logical   |           | in     | F        |
-!! | do_qa          | flag_for_inline_cloud_fraction_calculation                    | flag for the inline cloud fraction calculation                                         | flag      |    0 | logical   |           | in     | F        |
-!! | qa             | cloud_fraction_at_Lagrangian_surface                          | cloud fraction at Lagrangian surface                                                   | none      |    3 | real      | kind_dyn  | out    | F        |
-!! | nthreads       | omp_threads_for_fast_physics                                  | number of OpenMP threads available for fast physics schemes                            | count     |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                               | none      |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                                  | flag      |    0 | integer   |           | out    | F        |
+!! \htmlinclude fv_sat_adj_run.html
 !!
 subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, jsd, jed, &
                  ng, hydrostatic, fast_mp_consv, te0_2d, te0, ngas, qvi, qv, ql, qi, qr,  &

@@ -445,7 +445,7 @@
           enddo
 
           print *
-          pause
+          !pause
         endif
 
         do j=1,im
@@ -488,7 +488,7 @@
               print *, maxval(vi),   minval(vi)   , ' vi  '
               print *, maxval(v1),   minval(v1)   , ' ++++ v1  ' 
               print *, maxval(pint), minval(pint) , ' pint  '
-               pause
+              !pause
              endif
 !
              call ugwp_lsatdis_naz(levs, ksrc, nw, naz, kxw, taub_spect,      &
@@ -510,7 +510,7 @@
                print *, maxval(ui),   minval(ui)   , ' ui  '
                print *, maxval(vi),   minval(vi)   , ' vi  '
                print *, maxval(pint), minval(pint) , ' pint '
-               pause
+               !pause
              endif
 !
 !            ax(j,:)   = ax1
