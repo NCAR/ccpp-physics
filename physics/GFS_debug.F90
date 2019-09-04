@@ -896,3 +896,107 @@
       end subroutine GFS_abort_run
 
     end module GFS_abort
+
+    module GFS_checkland
+
+        private
+ 
+        public GFS_checkland_init, GFS_checkland_run, GFS_checkland_finalize
+
+        contains
+
+        subroutine GFS_checkland_init ()
+        end subroutine GFS_checkland_init
+
+        subroutine GFS_checkland_finalize ()
+        end subroutine GFS_checkland_finalize
+
+!> \section arg_table_GFS_checkland_run Argument Table
+!! \htmlinclude GFS_checkland_run.html
+!!
+        subroutine GFS_checkland_run (me, master, blkno, im, kdt, iter, flag_iter, flag_guess, &
+                flag_init, flag_restart, frac_grid, isot, ivegsrc, stype, vtype, slope,        &
+                soiltyp, vegtype, slopetyp, dry, icy, wet, lake, ocean,                        &
+                oceanfrac, landfrac, lakefrac, slmsk, islmsk, errmsg, errflg )
+
+           use machine, only: kind_phys
+
+           implicit none
+
+           ! Interface variables
+           integer,          intent(in   ) :: me
+           integer,          intent(in   ) :: master
+           integer,          intent(in   ) :: blkno
+           integer,          intent(in   ) :: im
+           integer,          intent(in   ) :: kdt
+           integer,          intent(in   ) :: iter
+           logical,          intent(in   ) :: flag_iter(im)
+           logical,          intent(in   ) :: flag_guess(im)
+           logical,          intent(in   ) :: flag_init
+           logical,          intent(in   ) :: flag_restart
+           logical,          intent(in   ) :: frac_grid
+           integer,          intent(in   ) :: isot
+           integer,          intent(in   ) :: ivegsrc
+           real(kind_phys),  intent(in   ) :: stype(im)
+           real(kind_phys),  intent(in   ) :: vtype(im)
+           real(kind_phys),  intent(in   ) :: slope(im)
+           integer,          intent(in   ) :: soiltyp(im)
+           integer,          intent(in   ) :: vegtype(im)
+           integer,          intent(in   ) :: slopetyp(im)
+           logical,          intent(in   ) :: dry(im)
+           logical,          intent(in   ) :: icy(im)
+           logical,          intent(in   ) :: wet(im)
+           logical,          intent(in   ) :: lake(im)
+           logical,          intent(in   ) :: ocean(im)
+           real(kind_phys),  intent(in   ) :: oceanfrac(im)
+           real(kind_phys),  intent(in   ) :: landfrac(im)
+           real(kind_phys),  intent(in   ) :: lakefrac(im)
+           real(kind_phys),  intent(in   ) :: slmsk(im)
+           integer,          intent(in   ) :: islmsk(im)
+           character(len=*), intent(  out) :: errmsg
+           integer,          intent(  out) :: errflg
+
+           ! Local variables
+           integer :: i
+
+           errflg = 0
+           errmsg = ''
+
+           write(0,'(a,i5)')   'YYY: me           :', me
+           write(0,'(a,i5)')   'YYY: master       :', master
+           write(0,'(a,i5)')   'YYY: blkno        :', blkno
+           write(0,'(a,i5)')   'YYY: im           :', im
+           write(0,'(a,i5)')   'YYY: kdt          :', kdt
+           write(0,'(a,i5)')   'YYY: iter         :', iter
+           write(0,'(a,1x,l)') 'YYY: flag_init    :', flag_init
+           write(0,'(a,1x,l)') 'YYY: flag_restart :', flag_restart
+           write(0,'(a,1x,l)') 'YYY: frac_grid    :', frac_grid
+           write(0,'(a,i5)')   'YYY: isot         :', isot
+           write(0,'(a,i5)')   'YYY: ivegsrc      :', ivegsrc
+
+           do i=1,im
+             !if (vegtype(i)==15) then
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_iter(i)  :', i, blkno, flag_iter(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_guess(i) :', i, blkno, flag_guess(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, stype(i)      :', i, blkno, stype(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, vtype(i)      :', i, blkno, vtype(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slope(i)      :', i, blkno, slope(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, soiltyp(i)    :', i, blkno, soiltyp(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, vegtype(i)    :', i, blkno, vegtype(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, slopetyp(i)   :', i, blkno, slopetyp(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, dry(i)        :', i, blkno, dry(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, icy(i)        :', i, blkno, icy(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, wet(i)        :', i, blkno, wet(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, lake(i)       :', i, blkno, lake(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, ocean(i)      :', i, blkno, ocean(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, oceanfrac(i)  :', i, blkno, oceanfrac(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, landfrac(i)   :', i, blkno, landfrac(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, lakefrac(i)   :', i, blkno, lakefrac(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slmsk(i)      :', i, blkno, slmsk(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, islmsk(i)     :', i, blkno, islmsk(i)
+             !end if
+           end do
+
+        end subroutine GFS_checkland_run
+
+    end module GFS_checkland

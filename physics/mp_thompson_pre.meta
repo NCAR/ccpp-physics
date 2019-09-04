@@ -115,14 +115,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[make_number_concentrations]
-  standard_name = flag_for_initial_number_concentration_calculation
-  long_name = flag for initial number concentration calculation
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [is_aerosol_aware]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol-aware physics

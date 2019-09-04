@@ -21,6 +21,15 @@
 !! \htmlinclude mynnrad_pre_run.html
 !!
 #endif
+!
+!    cloud array description:                                          !
+!          clouds(:,:,1)  -  layer total cloud fraction                !
+!          clouds(:,:,2)  -  layer cloud liq water path                !
+!          clouds(:,:,3)  -  mean effective radius for liquid cloud    !
+!          clouds(:,:,4)  -  layer cloud ice water path                !
+!          clouds(:,:,5)  -  mean effective radius for ice cloud       !
+!
+!###===================================================================
 SUBROUTINE mynnrad_pre_run(                &
      &     ix,im,levs,                     &
      &     qc, qi, T3D,                    &
@@ -68,6 +77,7 @@ SUBROUTINE mynnrad_pre_run(                &
 
               qc_save(i,k) = qc(i,k)
               qi_save(i,k) = qi(i,k)
+              clouds1(i,k)=CLDFRA_BL(i,k)
 
               IF (qc(i,k) < 1.E-6 .AND. qi(i,k) < 1.E-8 .AND. CLDFRA_BL(i,k)>0.001) THEN
                 !Partition the BL clouds into water & ice according to a linear
@@ -75,8 +85,8 @@ SUBROUTINE mynnrad_pre_run(                &
                 !one 3D array for both cloud water & ice.
 !               Wice = 1. - MIN(1., MAX(0., (t(i,k)-254.)/15.))
 !               Wh2o = 1. - Wice
-                clouds1(i,k)=MAX(clouds1(i,k),CLDFRA_BL(i,k))
-                clouds1(i,k)=MAX(0.0,MIN(1.0,clouds1(i,k)))
+                !clouds1(i,k)=MAX(clouds1(i,k),CLDFRA_BL(i,k))
+                !clouds1(i,k)=MAX(0.0,MIN(1.0,clouds1(i,k)))
                 qc(i,k) = QC_BL(i,k)*(MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
                 qi(i,k) = QC_BL(i,k)*(1. - MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
 

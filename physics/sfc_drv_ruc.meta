@@ -94,6 +94,14 @@
   type = integer
   intent = in
   optional = F
+[master]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [kdt]
   standard_name = index_of_time_step
   long_name = current number of time steps
@@ -198,14 +206,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[islmsk]
-  standard_name = sea_land_ice_mask
-  long_name = landmask: sea/land/ice=0/1/2
-  units = flag
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = in
   optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
@@ -786,6 +786,15 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[tskin_ocn]
+  standard_name = surface_skin_temperature_over_ocean_interstitial
+  long_name = surface skin temperature over ocean (temporary use as interstitial)
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [tsurf]
   standard_name = surface_skin_temperature_after_iteration_over_land

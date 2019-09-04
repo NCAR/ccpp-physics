@@ -62,7 +62,7 @@
 !!
       subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &  !intent(in)
      &                    ps,u1,v1,t1,q1,z1,                            &  !intent(in)
-     &                    prsl1,prslki,ddvel,                           &  !intent(in)
+     &                    prsl1,prslki,prsik1,prslk1,ddvel,             &  !intent(in)
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
@@ -84,6 +84,7 @@
      &                    wind                           ,              &  !intent(inout)
      &                    errmsg, errflg)                                  !intent(out)
 !
+! DH* 20190718: prslki can be removed if GSD_SURFACE_FLUXES_BUGFIX is adopted
       use funcphys, only : fpvs
 
       implicit none
@@ -99,8 +100,8 @@
       real(kind=kind_phys), dimension(im), intent(in)    :: u10m,v10m
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
       real(kind=kind_phys), dimension(im), intent(in)    ::             &
-     &                    ps,u1,v1,t1,q1,z1,prsl1,prslki,ddvel,         &
-     &                    sigmaf,shdmax,                                &
+     &                    ps,u1,v1,t1,q1,z1,prsl1,prslki,prsik1,prslk1, &
+     &                    ddvel, sigmaf,shdmax,                         &
      &                    z0pert,ztpert ! mg, sfc-perts
       real(kind=kind_phys), dimension(im), intent(in)    ::             &
      &                    tskin_ocn, tskin_lnd, tskin_ice,              &
@@ -179,10 +180,17 @@
           wind(i) = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))
      &                + max(0.0, min(ddvel(i), 30.0)), 1.0)
           tem1    = 1.0 + rvrdm1 * max(q1(i),1.e-8)
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          thv1    = t1(i) / prslk1(i) * tem1
+          tvs_lnd = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))/prsik1(i) * tem1
+          tvs_ice = 0.5 * (tsurf_ice(i)+tskin_ice(i))/prsik1(i) * tem1
+          tvs_ocn = 0.5 * (tsurf_ocn(i)+tskin_ocn(i))/prsik1(i) * tem1
+#else
           thv1    = t1(i) * prslki(i) * tem1
           tvs_lnd = 0.5 * (tsurf_lnd(i)+tskin_lnd(i)) * tem1
           tvs_ice = 0.5 * (tsurf_ice(i)+tskin_ice(i)) * tem1
           tvs_ocn = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * tem1
+#endif
           qs1     = fpvs(t1(i))
           qs1     = max(1.0e-8, eps * qs1 / (prsl1(i) + epsm1 * qs1))
 
@@ -414,8 +422,13 @@
           dtv     = thv1 - tvs
           adtv    = max(abs(dtv),0.001)
           dtv     = sign(1.,dtv) * adtv
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          rb      = max(-5000.0, grav * dtv * z1
+     &            / (thv1 * wind * wind))
+#else
           rb      = max(-5000.0, (grav+grav) * dtv * z1
      &            / ((thv1 + tvs) * wind * wind))
+#endif
           tem1    = 1.0 / z0max
           tem2    = 1.0 / ztmax
           fm      = log((z0max+z1) * tem1)

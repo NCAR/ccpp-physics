@@ -31,7 +31,8 @@
       subroutine sfc_nst_run                                            &
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &
      &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
-     &       prsl1, prslki, wet, icy, xlon, sinlat, stress,             &
+     &       prsl1, prslki, prsik1, prslk1, wet, icy, xlon, sinlat,     &
+     &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
      &       nstf_name5, lprnt, ipr,                                    &  ! inputs from here and above
@@ -40,6 +41,7 @@
      &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &  ! outputs
      &      )
 
+! DH* 20190718: prslki can be removed if GSD_SURFACE_FLUXES_BUGFIX is adopted
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -49,7 +51,8 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, iwet, iice, xlon, sinlat, stress,           !
+!            prsl1, prslki, prsik1, prslk1, iwet, iice, xlon, sinlat,   !
+!            stress,                                                    !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
@@ -93,6 +96,8 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure (pa)            im   !
 !     prslki   - real,                                             im   !
+!     prsik1   - real,                                             im   !
+!     prslk1   - real,                                             im   !
 !     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
@@ -190,7 +195,8 @@
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
-     &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &
+     &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
+     &       xlon,xcosz,                                                &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, ddvel
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
@@ -296,7 +302,11 @@ cc
           wind(i)   = max( wind(i), 1.0 )
 
           q0(i)     = max(q1(i), 1.0e-8)
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          theta1(i) = t1(i) / prslk1(i) ! potential temperature at the middle of lowest model layer
+#else
           theta1(i) = t1(i) * prslki(i)
+#endif
           tv1(i)    = t1(i) * (1.0 + rvrdm1*q0(i))
           rho_a(i)  = prsl1(i) / (rd*tv1(i))
           qss(i)    = fpvs(tsurf(i))                          ! pa
@@ -317,7 +327,11 @@ cc
 !           at previous time step
           evap(i)    = elocp * rch(i) * (qss(i) - q0(i))
           qsurf(i)   = qss(i)
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          hflx(i)    = rch(i) * (tsurf(i)/prsik1(i) - theta1(i))
+#else
           hflx(i)    = rch(i) * (tsurf(i) - theta1(i))
+#endif
 
 !     if (lprnt .and. i == ipr) print *,' tskin=',tskin(i),' theta1=',
 !    & theta1(i),' hflx=',hflx(i),' t1=',t1(i),'prslki=',prslki(i)
@@ -611,7 +625,11 @@ cc
             qss(i)   = eps*qss(i) / (ps(i) + epsm1*qss(i))
             qsurf(i) = qss(i)
             evap(i)  = elocp*rch(i) * (qss(i) - q0(i))
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+            hflx(i)  = rch(i) * (tskin(i)/prsik1(i) - theta1(i))
+#else
             hflx(i)  = rch(i) * (tskin(i) - theta1(i))
+#endif
           endif
         enddo
       endif                   ! if ( nstf_name1 > 1 ) then

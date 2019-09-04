@@ -43,7 +43,7 @@
      &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    & !  ---  inputs:
      &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
-     &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
+     &       cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, ddvel,     &
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
@@ -51,6 +51,7 @@
      &       errmsg, errflg
      &     )
 
+! DH* 20190718: prslki can be removed if GSD_SURFACE_FLUXES_BUGFIX is adopted
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -60,7 +61,7 @@
 !       inputs:                                                         !
 !          ( im, km, ps, u1, v1, t1, q1, delt,                          !
 !            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   !
-!            cm, ch, prsl1, prslki, islimsk, ddvel,                     !
+!            cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, ddvel,     !
 !            flag_iter,                                                 !
 !       input/outputs:                                                  !
 !            hice, fice, tice, weasd, tskin, tprcp, stc, ep,            !
@@ -105,6 +106,8 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
+!     prsik1   - real,                                             im   !
+!     prslk1   - real,                                             im   !
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
 !     ddvel    - real,                                             im   !
 !     flag_iter- logical,                                          im   !
@@ -157,7 +160,7 @@
 
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
-     &       prsl1, prslki, ddvel
+     &       prsl1, prslki, prsik1, prslk1, ddvel
 
       integer, dimension(im), intent(in) :: islimsk
       integer, dimension(im), intent(in) :: islmsk_cice
@@ -268,7 +271,11 @@
 
           q0        = max(q1(i), 1.0e-8)
 !         tsurf(i)  = tskin(i)
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          theta1(i) = t1(i) / prslk1(i) ! potential temperature in middle of lowest atm. layer
+#else
           theta1(i) = t1(i) * prslki(i)
+#endif
           rho(i)    = prsl1(i) / (rd*t1(i)*(one+rvrdm1*q0))
           qs1       = fpvs(t1(i))
           qs1       = max(eps*qs1 / (prsl1(i) + epsm1*qs1), 1.e-8)
@@ -320,8 +327,13 @@
 
 !> - Calculate net non-solar and upir heat flux @ ice surface \a hfi.
 
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
+     &           + rch(i)*(tice(i)/prsik1(i) - theta1(i))
+#else
           hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
      &           + rch(i)*(tice(i) - theta1(i))
+#endif
 !> - Calculate heat flux derivative at surface \a hfd.
           hfd(i) = 4.0d0*sfcemis(i)*sbc*tice(i)*t12                       &
      &           + (one + elocp*eps*hvap*qs1/(rd*t12)) * rch(i)
@@ -397,8 +409,13 @@
         if (flag(i)) then
 !  --- ...  calculate sensible heat flux (& evap over sea ice)
 
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          hflxi    = rch(i) * (tice(i)/prsik1(i) - theta1(i))
+          hflxw    = rch(i) * (tgice / prsik1(i) - theta1(i))
+#else
           hflxi    = rch(i) * (tice(i) - theta1(i))
           hflxw    = rch(i) * (tgice - theta1(i))
+#endif
           hflx(i)  = fice(i)*hflxi    + ffw(i)*hflxw
           evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
 !

@@ -208,6 +208,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[prsik1]
+  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  long_name = dimensionless Exner function at the ground surface
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prslk1]
+  standard_name = dimensionless_exner_function_at_lowest_model_layer
+  long_name = dimensionless Exner function at the lowest model layer
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction

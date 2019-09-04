@@ -74,7 +74,11 @@
 !       t2m(i)  = t2m(i) * sig2k
         wrk     = 1.0 - fhi
 
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+        t2m(i)  = tskin(i)*wrk + t1(i)*fhi - (grav+grav)/cp
+#else
         t2m(i)  = tskin(i)*wrk + t1(i)*prslki(i)*fhi - (grav+grav)/cp
+#endif
 
         if(evap(i) >= 0.) then !  for evaporation>0, use inferred qsurf to deduce q2m
           q2m(i) = qsurf(i)*wrk + max(qmin,q1(i))*fhi
