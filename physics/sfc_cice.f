@@ -25,8 +25,8 @@
 !!
 !> \brief Brief description of the subroutine
 !!
-!! \section arg_table_cice_run Arguments
-!! \htmlinclude cice_run.html
+!! \section arg_table_sfc_cice_run Arguments
+!! \htmlinclude sfc_cice_run.html
 !!
 
 !!

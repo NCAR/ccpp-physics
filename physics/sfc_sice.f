@@ -6,10 +6,10 @@
 
       contains
 
-      subroutine sfc_sice_init
+      subroutine sfc_sice_init()
       end subroutine sfc_sice_init
 !
-      subroutine sfc_sice_finalize
+      subroutine sfc_sice_finalize()
       end subroutine sfc_sice_finalize
 
 !>\defgroup gfs_sice_main GFS Three-layer Thermodynomics Sea-Ice Scheme Module

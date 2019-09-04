@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = cice_run
+  name = sfc_cice_run
   type = scheme
 [im]
   standard_name = horizontal_loop_extent
