@@ -113,7 +113,7 @@ module mp_fer_hires
 !! |  sr         | ratio_of_snowfall_to_rainfall                                             | snow ratio: ratio of snow to total precipitation  (explicit only)                                  | frac       |   1  | real     | kind_phys | out    | F        |
 !! |  f_ice      | fraction_of_ice_water_cloud                                               | fraction of ice water cloud                                                                        | frac       |   2  | real     | kind_phys | inout  | F        |
 !! |  f_rain     | fraction_of_rain_water_cloud                                              | fraction of rain water cloud                                                                       | frac       |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rimef    | rime_factor                                                   |  rime factor                                                                            | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rimef    | rime_factor                                                               | rime factor                                                                            | frac       |   2  | real     | kind_phys | inout  | F        |
 !! |  qc         | cloud_condensed_water_mixing_ratio_updated_by_physics                     | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics         | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
@@ -219,7 +219,7 @@ module mp_fer_hires
 !-----------------------------------------------------------------------
       R_G=1./G
       CAPPA=R_D/CP
-      
+
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -262,10 +262,9 @@ module mp_fer_hires
 !***         THE WRF PHYSICS DRIVERS HAVE IKJ STORAGE WITH LAYER 1
 !***         AT THE BOTTOM.
 !-----------------------------------------------------------------------
-!
 !.......................................................................
-!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$OMP private(i,k,ql,xland,tl,rr,pi_phy, th_phy,dz)
+!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!MZ$OMP private(i,k,ql,xland,rr,pi_phy, th_phy,dz)
 !.......................................................................
       DO I=IMS,IME
 !
@@ -293,21 +292,23 @@ module mp_fer_hires
 !***  FILL THE SINGLE-COLUMN INPUT
 !-----------------------------------------------------------------------
 !
-        DO K=LM,1,-1   ! We are moving down from the top in the flipped arrays
+!MZ        DO K=LM,1,-1   ! We are moving down from the top in the flipped arrays
+        DO K=1,LM
+         
 !
-          TL(K)=T(I,K)
-          QL(K)=AMAX1(Q(I,K),EPSQ)
+!          TL(K)=T(I,K)
+!          QL(K)=AMAX1(Q(I,K),EPSQ)
 !
-          RR(I,K)=P_PHY(I,K)/(R_D*TL(K)*(P608*QL(K)+1.))
+          RR(I,K)=P_PHY(I,K)/(R_D*T(I,K)*(P608*AMAX1(Q(I,K),EPSQ)+1.))
           PI_PHY(I,K)=(P_PHY(I,K)*1.E-5)**CAPPA
-          TH_PHY(I,K)=TL(K)/PI_PHY(I,K)
+          TH_PHY(I,K)=T(I,K)/PI_PHY(I,K)
           DZ(I,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,K)
 !
         ENDDO    !- DO K=LM,1,-1
 !
       ENDDO    !- DO I=IMS,IME
 !.......................................................................
-!$OMP end parallel do
+!MZ$OMP end parallel do
 !.......................................................................
 !
 !***  CALL MICROPHYSICS
@@ -324,16 +325,39 @@ module mp_fer_hires
                 ENDIF
               ENDDO
               ENDDO
+
+!MZ
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(cwm)  = ',  &
+                                        maxval(cwm),minval(cwm)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(t)  = ',  &
+                                        maxval(t),minval(t)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(q)  = ',  &
+                                        maxval(q),minval(q)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qc)  = ',  &
+                                        maxval(qc),minval(qc)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qi)  = ',  &
+                                        maxval(qi),minval(qi)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qr)  = ',  &
+                                        maxval(qr),minval(qr)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qg)  = ',   &
+                                        maxval(qg),minval(qg)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_rimef)  = ',  &
+                                        maxval(f_rimef),minval(f_rimef)
+      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dx1)  = ',  &
+                                        dx1
+
+
 !---------------------------------------------------------------------
-            if (mpirank==mpiroot) write (0,*)'F-A: Calling FER_HIRES ...'
+        
             CALL FER_HIRES(                                             &
                    DT=dtphs,RHgrd=RHGRD                                 &
                   ,DZ8W=dz,RHO_PHY=rr,P_PHY=p_phy,PI_PHY=pi_phy         &
-                  ,TH_PHY=th_phy                                        &
-                  ,Q=Q,QC=QC,QS=QI,QR=QR,QT=cwm                         &
+                  ,TH_PHY=th_phy,T_PHY=t                                &
+                  ,Q=Q,QT=cwm                                           &
                   ,LOWLYR=LOWLYR,SR=SR                                  &
                   ,F_ICE_PHY=F_ICE,F_RAIN_PHY=F_RAIN                    &
                   ,F_RIMEF_PHY=F_RIMEF                                  &
+                  ,QC=QC,QR=QR,QS=QI                                    &
                   ,RAINNC=rainnc,RAINNCV=rainncv                        &
                   ,threads=threads                                      &
                   ,IMS=IMS,IME=IME,JMS=JMS,JME=JME,LM=LM                &
@@ -343,16 +367,17 @@ module mp_fer_hires
 !---------------------------------------------------------------------
 !*** Calculate graupel from snow array and rime factor
 !---------------------------------------------------------------------
+
               DO K=1,LM
               DO I=IMS,IME
                 QG(I,K)=QI(I,K)*F_RIMEF(I,K)
               ENDDO
               ENDDO
-!
+
 
 !.......................................................................
-!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$OMP private(i,k,TNEW,TRAIN)
+!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!MZ$OMP private(i,k,TNEW,TRAIN)
 !.......................................................................
       DO K=1,LM
         DO I=IMS,IME
@@ -366,16 +391,40 @@ module mp_fer_hires
           T(I,K)=TNEW
         ENDDO
       ENDDO
+
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(cwm)= ', &
+                                            maxval(cwm),minval(cwm)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(t)= ', &
+                                            maxval(t),minval(t)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(q)= ', &
+                                            maxval(q),minval(q)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qc)= ', &
+                                            maxval(qc),minval(qc)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qr)= ', &
+                                            maxval(qr),minval(qr)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qi)= ', &
+                                            maxval(qi),minval(qi)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rimef)= ', &
+                                            maxval(f_rimef),minval(f_rimef)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qg)= ', &
+                                            maxval(qg),minval(qg)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainnc)= ', &
+                                            maxval(rainnc),minval(rainnc)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainncv)= ', &
+                                            maxval(rainncv),minval(rainncv)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(sr)= ', &
+                                            maxval(sr),minval(sr)
+
 !.......................................................................
-!$OMP end parallel do
+!MZ$OMP end parallel do
 !.......................................................................
 !
 !-----------------------------------------------------------------------
 !***  UPDATE PRECIPITATION
 !-----------------------------------------------------------------------
 !
-!$OMP parallel do  SCHEDULE(dynamic) num_threads(threads) &
-!$OMP private(i,pcpcol,prec,acprec)
+!MZ$OMP parallel do  SCHEDULE(dynamic) num_threads(threads) &
+!MZ$OMP private(i,pcpcol,prec,acprec)
       DO I=IMS,IME
         PCPCOL=RAINNCV(I)*1.E-3
         PREC(I)=PREC(I)+PCPCOL
@@ -385,9 +434,9 @@ module mp_fer_hires
 !       SINCE IT IS ONLY A LOCAL ARRAY FOR NOW
 !
       ENDDO
-!$OMP end parallel do
+!MZ$OMP end parallel do
 !-----------------------------------------------------------------------
-      if (mpirank==mpiroot) write (0,*)'F-A: mp_fer_hires_run finished ...'
+!      if (mpirank==mpiroot) write (0,*)'F-A: mp_fer_hires_run finished ...'
 !
        end subroutine mp_fer_hires_run 
 

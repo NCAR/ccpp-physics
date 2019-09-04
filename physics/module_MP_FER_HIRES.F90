@@ -234,7 +234,8 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------------------------------------------------------------------
 !ZM      SUBROUTINE FER_HIRES (itimestep,DT,RHgrd,                         &
       SUBROUTINE FER_HIRES (DT,RHgrd,                         &
-     &                      dz8w,rho_phy,p_phy,pi_phy,th_phy,q,qt,      &
+     &                      dz8w,rho_phy,p_phy,pi_phy,th_phy,t_phy,     &
+     &                      q,qt,                                       &
      &                      LOWLYR,SR,                                  &
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY,           &
      &                      QC,QR,QS,                                   &
@@ -252,7 +253,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       REAL, INTENT(IN),     DIMENSION(ims:ime, jms:jme, lm)::      &
      &                      dz8w,p_phy,pi_phy,rho_phy
       REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme, lm)::      &
-     &                      th_phy,q,qt
+     &                      th_phy,t_phy,q,qt
       REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme, lm ) ::    &
      &                      qc,qr,qs
       REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme,lm) ::    &
@@ -278,7 +279,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       REAL,  DIMENSION( ims:ime, jms:jme,lm ) ::                  &
      &       TLATGS_PHY,TRAIN_PHY
       REAL,  DIMENSION(ims:ime,jms:jme):: APREC,PREC,ACPREC
-      REAL,  DIMENSION(ims:ime, jms:jme, lm):: t_phy
+!MZ      REAL,  DIMENSION(ims:ime, jms:jme, lm):: t_phy
 
       INTEGER :: I,J,K,KK
       REAL :: wc
@@ -314,24 +315,25 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       TBPVS0(1:NX)=TBPVS0_STATE(1:NX)
 !
 !.......................................................................
-!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$OMP PRIVATE(j,k,i,t_phy)
+!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!MZ$OMP PRIVATE(j,k,i,t_phy)
 !.......................................................................
-      DO j = jms,jme
-      DO k = 1,lm
-      DO i = ims,ime
-        t_phy(i,j,k) = th_phy(i,j,k)*pi_phy(i,j,k)
+!MZ: t_phy is a state variable in FV3
+!      DO j = jms,jme
+!      DO k = 1,lm
+!      DO i = ims,ime
+!        t_phy(i,j,k) = th_phy(i,j,k)*pi_phy(i,j,k)
 !     endif
-      ENDDO
-      ENDDO
-      ENDDO
+!      ENDDO
+!      ENDDO
+!      ENDDO
 !.......................................................................
-!$omp end parallel do
+!MZ$omp end parallel do
 !.......................................................................
 
 !.......................................................................
-!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$OMP PRIVATE(j,i,k, ACPREC, APREC, PREC,SR, TLATGS_PHY,TRAIN_PHY )
+!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!MZ$OMP PRIVATE(j,i,k, ACPREC, APREC, PREC,SR, TLATGS_PHY,TRAIN_PHY )
 !.......................................................................
       DO j = jms,jme
        DO i = ims,ime
@@ -353,17 +355,17 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------------------------------------------------------------------
 !
 !.......................................................................
-!$omp end parallel do
+!MZ$omp end parallel do
 !.......................................................................
 
-!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$OMP PRIVATE(j,i,k,lsfc,dpcol,l,p_col,thick_col,t_col,tc,q_col,       &
-!$OMP         wc_col,wc,qi,QRdum,qw,fice,frain,rimef_col,qi_col,qr_col,&
-!$OMP         qw_col,i_index,j_index,arain,asnow,dum,                  &
-!$OMP         pcond1d,pidep1d,                                         &
-!$OMP         piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,pimlt1d, &
-!$OMP         praut1d,pracw1d,prevp1d,pisub1d,pevap1d,                 &
-!$OMP         dbz_col,nr_col,ns_col)
+!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!MZ$OMP PRIVATE(j,i,k,lsfc,dpcol,l,p_col,thick_col,t_col,tc,q_col,       &
+!MZ$OMP         wc_col,wc,qi,QRdum,qw,fice,frain,rimef_col,qi_col,qr_col,&
+!MZ$OMP         qw_col,i_index,j_index,arain,asnow,dum,                  &
+!MZ$OMP         pcond1d,pidep1d,                                         &
+!MZ$OMP         piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,pimlt1d, &
+!MZ$OMP         praut1d,pracw1d,prevp1d,pisub1d,pevap1d,                 &
+!MZ$OMP         dbz_col,nr_col,ns_col)
 !.......................................................................
        DO J=JMS,JME    
         DO I=IMS,IME  
@@ -562,7 +564,7 @@ ENDIF
     enddo                          ! End "I" loop
     enddo                          ! End "J" loop
 !.......................................................................
-!$omp end parallel do
+!MZ$omp end parallel do
 !.......................................................................
 !
 !-----------------------------------------------------------------------
@@ -570,8 +572,8 @@ ENDIF
 !-----------------------------------------------------------------------
 !
 !.......................................................................
-!$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!$OMP PRIVATE(j,k,i, th_phy, wc, qs, qc)
+!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
+!MZ$OMP PRIVATE(j,k,i, th_phy, wc, qs, qc)
 !.......................................................................
      DO j = jms,jme
         DO k = 1,lm
@@ -605,7 +607,7 @@ ENDIF
         ENDDO     !- k
      ENDDO        !- j
 !.......................................................................
-!$omp end parallel do
+!MZ$omp end parallel do
 !.......................................................................
 ! 
 !- Update rain (convert from m to kg/m**2, which is also equivalent to mm depth)
@@ -2487,7 +2489,7 @@ ENDIF
 !--- Create lookup tables for saturation vapor pressure w/r/t water & ice
 
 !MZ
-       if (mype==mpiroot) write(0,*) 'F-A: Create lookup tables for saturation vapor pressure w/r/t water & ice ... '
+!       if (mype==mpiroot) write(0,*) 'F-A: Create lookup tables for saturation vapor pressure w/r/t water & ice ... '
        
 !
         CALL GPVS_hr
@@ -2515,7 +2517,7 @@ ENDIF
 !
         IF(MYPE==0)THEN
 !MZ
-          write(0,*) 'F-A: Reading DETAMPNEW_DATA*LE data... '
+!          write(0,*) 'F-A: Reading DETAMPNEW_DATA*LE data... '
           OPEN(UNIT=etampnew_unit1,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
      &        FORM="UNFORMATTED",STATUS="OLD",ERR=9061)
 !

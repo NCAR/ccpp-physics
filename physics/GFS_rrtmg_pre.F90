@@ -798,8 +798,8 @@
                                 + tracer1(:,1:LMK,Model%ntrw)   &
                                 + tracer1(:,1:LMK,Model%ntiw)   
 
-           if(Model%me==0) write(0,*)'F-A: progcld2 max(cwm),min(cwm) =' &
-                            ,maxval(cwm),minval(cwm)
+           !if(Model%me==0) write(0,*)'F-A: progcld2 max(cwm),min(cwm) =' &
+           !                 ,maxval(cwm),minval(cwm)
            call progcld2 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,     &
                           cwm,                                          &    ! ---  inputs:
                           Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp,  &
@@ -807,9 +807,9 @@
                           im, lmk, lmp, Model%lmfshal, Model%lmfdeep2,  &
                           clouds,cldsa,mtopa,mbota,de_lgth)                  !  ---  outputs:
 
-            if(Model%me==0) write(0,*)'F-A: progcld2 max(clouds(:,:,1)),&
-                            min(clouds(:,:,1)) =  '                     &
-                            ,maxval(clouds(:,:,1)),minval(clouds(:,:,1))
+            !if(Model%me==0) write(0,*)'F-A: progcld2 max(clouds(:,:,1)),&
+            !                min(clouds(:,:,1)) =  '                     &
+            !                ,maxval(clouds(:,:,1)),minval(clouds(:,:,1))
 
         elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
 
