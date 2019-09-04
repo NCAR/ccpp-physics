@@ -637,7 +637,8 @@
 
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
-      real(kind=kind_phys), dimension(im,levs),       intent(inout) :: dqdti
+      ! dqdti may not be allocated
+      real(kind=kind_phys), dimension(:,:),           intent(inout) :: dqdti
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

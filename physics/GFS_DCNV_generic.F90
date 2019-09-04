@@ -84,11 +84,9 @@
     subroutine GFS_DCNV_generic_post_finalize ()
     end subroutine GFS_DCNV_generic_post_finalize
 
-#if 0
 !> \section arg_table_GFS_DCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_DCNV_generic_post_run.html
 !!
-#endif
     subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, lgocart, ras, cscnv, do_ca,      &
       isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
       gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,  &
