@@ -234,11 +234,11 @@
       
       ! Rainfall variables previous time step (update for NoahMP LSM)
       integer, intent(in) :: lsm_noahmp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: rainc_mp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: rainn_mp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: ice_mp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: snow_mp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: graupel_mp
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rainc_mp
+      real(kind=kind_phys), dimension(:),      intent(inout) :: rainn_mp
+      real(kind=kind_phys), dimension(:),      intent(inout) :: ice_mp
+      real(kind=kind_phys), dimension(:),      intent(inout) :: snow_mp
+      real(kind=kind_phys), dimension(:),      intent(inout) :: graupel_mp
       
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg

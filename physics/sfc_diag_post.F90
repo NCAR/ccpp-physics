@@ -15,13 +15,18 @@
 !! | local_name     | standard_name                                                                                                       | long_name                                                                           | units       | rank | type       |    kind   | intent | optional |
 !! |----------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
 !! | im             | horizontal_loop_extent                                                                                              | horizontal loop extent                                                              | count       |    0 | integer    |           | in     | F        |
+!! | lsm            | flag_for_land_surface_scheme                                                                                        | flag for land surface model                                                         | flag        |    0 | integer    |           | in     | F        |
+!! | lsm_noahmp     | flag_for_noahmp_land_surface_scheme                                                                                 | flag for NOAH MP land surface model                                                 | flag        |    0 | integer    |           | in     | F        |
+!! | dry            | flag_nonzero_land_surface_fraction                                                                                  | flag indicating presence of some land surface area fraction                         | flag        |    1 | logical    |           | in     | F        |
 !! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
 !! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
 !! | con_eps        | ratio_of_dry_air_to_water_vapor_gas_constants                                                                       | rd/rv                                                                               | none        |    0 | real       | kind_phys | in     | F        |
 !! | con_epsm1      | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                                                             | (rd/rv) - 1                                                                         | none        |    0 | real       | kind_phys | in     | F        |
 !! | pgr            | surface_air_pressure                                                                                                | surface pressure                                                                    | Pa          |    1 | real       | kind_phys | in     | F        |
-!! | t2m            | temperature_at_2m                                                                                                   | 2 meter temperature                                                                 | K           |    1 | real       | kind_phys | in     | F        |
-!! | q2m            | specific_humidity_at_2m                                                                                             | 2 meter specific humidity                                                           | kg kg-1     |    1 | real       | kind_phys | in     | F        |
+!! | t2mmp          | temperature_at_2m_from_noahmp                                                                                       | 2 meter temperature from NoahMP                                                     | K           |    1 | real       | kind_phys | in     | F        |
+!! | q2mp           | specific_humidity_at_2m_from_noahmp                                                                                 | 2 meter specific humidity from noahmp                                               | kg kg-1     |    1 | real       | kind_phys | in     | F        |
+!! | t2m            | temperature_at_2m                                                                                                   | 2 meter temperature                                                                 | K           |    1 | real       | kind_phys | inout  | F        |
+!! | q2m            | specific_humidity_at_2m                                                                                             | 2 meter specific humidity                                                           | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
 !! | u10m           | x_wind_at_10m                                                                                                       | 10 meter u wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
 !! | v10m           | y_wind_at_10m                                                                                                       | 10 meter v wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
 !! | tmpmin         | minimum_temperature_at_2m                                                                                           | min temperature at 2m height                                                        | K           |    1 | real       | kind_phys | inout  | F        |
@@ -36,19 +41,21 @@
 !! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
 !!
 #endif
-      subroutine sfc_diag_post_run (im, lssav, dtf, con_eps, con_epsm1, pgr,    &
-                         t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,&
+      subroutine sfc_diag_post_run (im, lsm, lsm_noahmp, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
+                         t2mmp, q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,&
                          wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
 
         use machine,               only: kind_phys
 
         implicit none
 
-        integer,                              intent(in) :: im
+        integer,                              intent(in) :: im, lsm, lsm_noahmp
         logical,                              intent(in) :: lssav
         real(kind=kind_phys),                 intent(in) :: dtf, con_eps, con_epsm1
-        real(kind=kind_phys), dimension(im),  intent(in) :: pgr, t2m, q2m, u10m, v10m
-        real(kind=kind_phys), dimension(im),  intent(inout) :: tmpmin, tmpmax, spfhmin, spfhmax
+        logical             , dimension(im),  intent(in) :: dry
+        real(kind=kind_phys), dimension(im),  intent(in) :: pgr, u10m, v10m
+        real(kind=kind_phys), dimension(:) ,  intent(in) :: t2mmp, q2mp
+        real(kind=kind_phys), dimension(im),  intent(inout) :: t2m, q2m, tmpmin, tmpmax, spfhmin, spfhmax
         real(kind=kind_phys), dimension(im),  intent(inout) :: wind10mmax, u10mmax, v10mmax, dpt2m
 
         character(len=*),                     intent(out) :: errmsg
@@ -60,7 +67,16 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
-
+        
+        if (lsm == lsm_noahmp) then
+          do i=1,im
+            if(dry(i)) then
+              t2m(i) = t2mmp(i)
+              q2m(i) = q2mp(i)
+            endif
+          enddo
+        endif
+        
         if (lssav) then
           do i=1,im
             tmpmax(i)  = max(tmpmax(i),t2m(i))

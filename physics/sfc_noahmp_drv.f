@@ -58,7 +58,7 @@
 
 !  ---  in/outs:
      &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
-     &       canopy, trans, tsurf, zorl, t2mmp, q2mp,                   &
+     &       canopy, trans, tsurf, zorl,                                &
 
 ! --- Noah MP specific
 
@@ -71,7 +71,7 @@
 !  ---  outputs:
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
-     &       smcwlt2, smcref2, wet1, errmsg, errflg)     
+     &       smcwlt2, smcref2, wet1, t2mmp, q2mp, errmsg, errflg)     
 !
 !
       use machine ,   only : kind_phys
@@ -143,8 +143,7 @@
 
 !  ---  in/out:
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-     &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl,  &
-     &       t2mmp, q2mp
+     &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl
 
       real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
      &       smc, stc, slc
@@ -170,7 +169,8 @@
 
       real (kind=kind_phys), dimension(im), intent(out) :: sncovr1,     &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
-     &    evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2,wet1 
+     &    evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2, wet1
+      real (kind=kind_phys), dimension(:), intent(out) :: t2mmp, q2mp
 
 ! error messages
       character(len=*), intent(out)    :: errmsg
@@ -698,10 +698,8 @@
         z0wrf  = 0.002
   
         eta    = fgev
-        if (dry(i)) then
-          t2mmp(i) = t2mb 
-          q2mp(i) = q2b 
-        endif
+        t2mmp(i) = t2mb 
+        q2mp(i) = q2b 
 !
 ! Non-glacial case
 !
@@ -749,10 +747,8 @@
 
        eta  = fcev + fgev + fctr     ! the flux w/m2
 
-       if (dry(i)) then  
-         t2mmp(i) = t2mv*fveg+t2mb*(1-fveg) 
-         q2mp(i) = q2v*fveg+q2b*(1-fveg)
-       endif 
+       t2mmp(i) = t2mv*fveg+t2mb*(1-fveg) 
+       q2mp(i) = q2v*fveg+q2b*(1-fveg)
 
       endif          ! glacial split ends
 
