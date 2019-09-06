@@ -165,17 +165,11 @@
 !! | dsnow_cpl        | tendency_of_lwe_thickness_of_snow_amount_for_coupling                   | change in show_cpl (coupling_type)                                      | m           |    1 | real       | kind_phys | inout  | F        |
 !! | lsm              | flag_for_land_surface_scheme                                            | flag for land surface model                                             | flag        |    0 | integer    |           | in     | F        |
 !! | lsm_ruc          | flag_for_ruc_land_surface_scheme                                        | flag for RUC land surface model                                         | flag        |    0 | integer    |           | in     | F        |
-!! | lsm_noahmp       | flag_for_noahmp_land_surface_scheme                                     | flag for NOAH MP land surface model                                     | flag        |    0 | integer    |           | in     | F        |
 !! | raincprv         | lwe_thickness_of_convective_precipitation_amount_from_previous_timestep | convective_precipitation_amount from previous timestep                  | m           |    1 | real       | kind_phys | inout  | F        |
 !! | rainncprv        | lwe_thickness_of_explicit_rainfall_amount_from_previous_timestep        | explicit rainfall from previous timestep                                | m           |    1 | real       | kind_phys | inout  | F        |
 !! | iceprv           | lwe_thickness_of_ice_amount_from_previous_timestep                      | ice amount from previous timestep                                       | m           |    1 | real       | kind_phys | inout  | F        |
 !! | snowprv          | lwe_thickness_of_snow_amount_from_previous_timestep                     | snow amount from previous timestep                                      | m           |    1 | real       | kind_phys | inout  | F        |
 !! | graupelprv       | lwe_thickness_of_graupel_amount_from_previous_timestep                  | graupel amount from previous timestep                                   | m           |    1 | real       | kind_phys | inout  | F        |
-!! | rainc_mp         | convective_precipitation_rate_from_previous_timestep                    | convective precipitation rate from previous timestep                    | mm s-1      |    1 | real       | kind_phys | inout  | F        |
-!! | rainn_mp         | explicit_rainfall_rate_from_previous_timestep                           | explicit rainfall rate previous timestep                                | mm s-1      |    1 | real       | kind_phys | inout  | F        |
-!! | ice_mp           | ice_precipitation_rate_from_previous_timestep                           | ice precipitation rate from previous timestep                           | mm s-1      |    1 | real       | kind_phys | inout  | F        |
-!! | snow_mp          | snow_precipitation_rate_from_previous_timestep                          | snow precipitation rate from previous timestep                          | mm s-1      |    1 | real       | kind_phys | inout  | F        |
-!! | graupel_mp       | graupel_precipitation_rate_from_previous_timestep                       | graupel precipitation rate from previous timestep                       | mm s-1      |    1 | real       | kind_phys | inout  | F        |
 !! | dtp              | time_step_for_physics                                                   | physics timestep                                                        | s           |    0 | real       | kind_phys | in     | F        |
 !! | errmsg           | ccpp_error_message                                                      | error message for error handling in CCPP                                | none        |    0 | character  | len=*     | out    | F        |
 !! | errflg           | ccpp_error_flag                                                         | error flag for error handling in CCPP                                   | flag        |    0 | integer    |           | out    | F        |
@@ -187,8 +181,8 @@
         rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
-        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
-        graupelprv, dtp, rainc_mp, rainn_mp, ice_mp, snow_mp, graupel_mp, errmsg, errflg)
+        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, raincprv, rainncprv, iceprv, snowprv, graupelprv, dtp, &
+        errmsg, errflg)
 !
       use machine, only: kind_phys
 
@@ -231,14 +225,6 @@
       real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
 
       real(kind=kind_phys),                     intent(in)    :: dtp
-      
-      ! Rainfall variables previous time step (update for NoahMP LSM)
-      integer, intent(in) :: lsm_noahmp
-      real(kind=kind_phys), dimension(:),      intent(inout) :: rainc_mp
-      real(kind=kind_phys), dimension(:),      intent(inout) :: rainn_mp
-      real(kind=kind_phys), dimension(:),      intent(inout) :: ice_mp
-      real(kind=kind_phys), dimension(:),      intent(inout) :: snow_mp
-      real(kind=kind_phys), dimension(:),      intent(inout) :: graupel_mp
       
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -300,19 +286,6 @@
             graupelprv(:) = graupel(:)
         end if
       end if
-      
-      !---  get the amount of different precip type for Noah MP
-      !  ---  convert from m/dtp to mm/s
-      if (lsm ==  lsm_noahmp .and. (imp_physics == imp_physics_mg .or. imp_physics == imp_physics_gfdl)) then
-        tem = 1.0 / (dtp*con_p001)
-        do  i=1,im
-          rainn_mp(i)   = tem * (rain(i)-rainc(i))
-          rainc_mp(i)   = tem * rainc(i)
-          snow_mp(i)    = tem * snow(i)
-          graupel_mp(i) = tem * graupel(i)
-          ice_mp(i)     = tem * ice(i)
-        enddo
-      endif
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !
