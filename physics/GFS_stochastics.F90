@@ -16,47 +16,7 @@
 !! This module
 !> @{
 !> \section arg_table_GFS_stochastics_run Argument Table
-!! | local_name     | standard_name                                                             | long_name                                                    | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|---------------------------------------------------------------------------|--------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                    | horizontal loop extent                                       | count   |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                        | number of vertical levels                                    | count   |    0 | integer   |           | in     | F        |
-!! | do_sppt        | flag_for_stochastic_surface_physics_perturbations                         | flag for stochastic surface physics perturbations            | flag    |    0 | logical   |           | in     | F        |
-!! | use_zmtnblck   | flag_for_mountain_blocking                                                | flag for mountain blocking                                   | flag    |    0 | logical   |           | in     | F        |
-!! | do_shum        | flag_for_stochastic_shum_option                                           | flag for stochastic shum option                              | flag    |    0 | logical   |           | in     | F        |
-!! | do_skeb        | flag_for_stochastic_skeb_option                                           | flag for stochastic skeb option                              | flag    |    0 | logical   |           | in     | F        |
-!! | zmtnblck       | level_of_dividing_streamline                                              | level of the dividing streamline                             | none    |    1 | real      | kind_phys | in     | F        |
-!! | sppt_wts       | weights_for_stochastic_sppt_perturbation                                  | weights for stochastic sppt perturbation                     | none    |    2 | real      | kind_phys | inout  | F        |
-!! | skebu_wts      | weights_for_stochastic_skeb_perturbation_of_x_wind                        | weights for stochastic skeb perturbation of x wind           | none    |    2 | real      | kind_phys | in     | F        |
-!! | skebv_wts      | weights_for_stochastic_skeb_perturbation_of_y_wind                        | weights for stochastic skeb perturbation of y wind           | none    |    2 | real      | kind_phys | in     | F        |
-!! | shum_wts       | weights_for_stochastic_shum_perturbation                                  | weights for stochastic shum perturbation                     | none    |    2 | real      | kind_phys | in     | F        |
-!! | sppt_wts_inv   | weights_for_stochastic_sppt_perturbation_flipped                          | weights for stochastic sppt perturbation, flipped            | none    |    2 | real      | kind_phys | inout  | F        |
-!! | skebu_wts_inv  | weights_for_stochastic_skeb_perturbation_of_x_wind_flipped                | weights for stochastic skeb perturbation of x wind, flipped  | none    |    2 | real      | kind_phys | inout  | F        |
-!! | skebv_wts_inv  | weights_for_stochastic_skeb_perturbation_of_y_wind_flipped                | weights for stochastic skeb perturbation of y wind, flipped  | none    |    2 | real      | kind_phys | inout  | F        |
-!! | shum_wts_inv   | weights_for_stochastic_shum_perturbation_flipped                          | weights for stochastic shum perturbation, flipped            | none    |    2 | real      | kind_phys | inout  | F        |
-!! | diss_est       | dissipation_estimate_of_air_temperature_at_model_layers                   | dissipation estimate model layer mean temperature            | K       |    2 | real      | kind_phys | in     | F        |
-!! | ugrs           | x_wind                                                                    | zonal wind                                                   | m s-1   |    2 | real      | kind_phys | in     | F        |
-!! | vgrs           | y_wind                                                                    | meridional wind                                              | m s-1   |    2 | real      | kind_phys | in     | F        |
-!! | tgrs           | air_temperature                                                           | model layer mean temperature                                 | K       |    2 | real      | kind_phys | in     | F        |
-!! | qgrs           | water_vapor_specific_humidity                                             | water vapor specific humidity                                | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | gu0            | x_wind_updated_by_physics                                                 | zonal wind updated by physics                                | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | gv0            | y_wind_updated_by_physics                                                 | meridional wind updated by physics                           | m s-1   |    2 | real      | kind_phys | inout  | F        |
-!! | gt0            | air_temperature_updated_by_physics                                        | temperature updated by physics                               | K       |    2 | real      | kind_phys | inout  | F        |
-!! | gq0            | water_vapor_specific_humidity_updated_by_physics                          | water vapor specific humidity updated by physics             | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dtdtr          | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step | temp. change due to radiative heating per time step          | K       |    2 | real      | kind_phys | in     | F        |
-!! | rain           | lwe_thickness_of_precipitation_amount_on_dynamics_timestep                | total rain at this time step                                 | m       |    1 | real      | kind_phys | in     | F        |
-!! | rainc          | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep     | convective rain at this time step                            | m       |    1 | real      | kind_phys | in     | F        |
-!! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                 | m       |    1 | real      | kind_phys | inout  | F        |
-!! | totprcp        | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                              | m       |    1 | real      | kind_phys | inout  | F        |
-!! | cnvprcp        | cumulative_lwe_thickness_of_convective_precipitation_amount               | cumulative convective precipitation                          | m       |    1 | real      | kind_phys | inout  | F        |
-!! | totprcpb       | accumulated_lwe_thickness_of_precipitation_amount_in_bucket               | accumulated total precipitation in bucket                    | m       |    1 | real      | kind_phys | inout  | F        |
-!! | cnvprcpb       | cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket     | cumulative convective precipitation in bucket                | m       |    1 | real      | kind_phys | inout  | F        |
-!! | cplflx         | flag_for_flux_coupling                                                    | flag controlling cplflx collection (default off)             | flag    |    0 | logical   |           | in     | F        |
-!! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                        | total rain precipitation                                     | m       |    1 | real      | kind_phys | inout  | F        |
-!! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                 | total snow precipitation                                     | m       |    1 | real      | kind_phys | inout  | F        |
-!! | drain_cpl      | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling            | change in rain_cpl (coupling_type)                           | m       |    1 | real      | kind_phys | in     | F        |
-!! | dsnow_cpl      | tendency_of_lwe_thickness_of_snow_amount_for_coupling                     | change in show_cpl (coupling_type)                           | m       |    1 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                     | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                        | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_stochastics_run.html
 !!
 !>\section gfs_stochy_general GFS_stochastics_run General Algorithm
 !! This is the GFS stochastic physics driver.

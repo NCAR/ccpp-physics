@@ -414,7 +414,8 @@ MODULE module_mp_thompson
                           ids, ide, jds, jde, kds, kde,     &
                           ims, ime, jms, jme, kms, kme,     &
                           its, ite, jts, jte, kts, kte,     &
-                          mpicomm, mpirank, mpiroot, threads)
+                          mpicomm, mpirank, mpiroot,        &
+                          threads, errmsg, errflg)
 
       IMPLICIT NONE
 
@@ -428,6 +429,8 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime,jms:jme),         OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
+      CHARACTER(len=*), INTENT(INOUT) :: errmsg
+      INTEGER,          INTENT(INOUT) :: errflg
 
 
       INTEGER:: i, j, k, l, m, n
@@ -870,8 +873,8 @@ MODULE module_mp_thompson
          enddo
       enddo
 
-      if (mpirank==mpiroot) WRITE (*,*)'CREATING MICROPHYSICS LOOKUP TABLES ... '
-      if (mpirank==mpiroot) WRITE (*,'(a, f5.2, a, f5.2, a, f5.2, a, f5.2)') &
+      if (mpirank==mpiroot) write (*,*)'creating microphysics lookup tables ... '
+      if (mpirank==mpiroot) write (*,'(a, f5.2, a, f5.2, a, f5.2, a, f5.2)') &
           ' using: mu_c=',mu_c,' mu_i=',mu_i,' mu_r=',mu_r,' mu_g=',mu_g
 
 !>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
@@ -880,17 +883,18 @@ MODULE module_mp_thompson
       ! This computation is cheap compared to the others below, and
       ! doing it always ensures that the correct data is in the SIONlib
       ! file containing the precomputed tables *DH
-      WRITE (*,*) '  calling table_ccnAct routine'
-      call table_ccnAct
+      if (mpirank==mpiroot) write(0,*) '  calling table_ccnAct routine'
+      call table_ccnAct(errmsg,errflg)
+      if (.not. errflg==0) return
 
 !>  - Call table_efrw() and table_efsw() to creat collision efficiency table 
 !! between rain/snow and cloud water
-      WRITE (*,*)'  creating qc collision eff tables'
+      if (mpirank==mpiroot) write(0,*) '  creating qc collision eff tables'
       call table_Efrw
       call table_Efsw
 
 !>  - Call table_dropevap() to creat rain drop evaporation table
-      WRITE(*,*) '  creating rain evap table'
+      if (mpirank==mpiroot) write(0,*) '  creating rain evap table'
       call table_dropEvap
 
       call cpu_time(etime)
@@ -926,7 +930,7 @@ MODULE module_mp_thompson
 
 !$OMP section
 !>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table
-      WRITE (*,*) '  creating rain collecting graupel table'
+      if (mpirank==mpiroot) write(0,*) '  creating rain collecting graupel table'
       call cpu_time(stime)
       call qr_acr_qg
       call cpu_time(etime)
@@ -934,7 +938,7 @@ MODULE module_mp_thompson
 
 !$OMP section
 !>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table
-      WRITE (*,*) '  creating rain collecting snow table'
+      if (mpirank==mpiroot) write (*,*) '  creating rain collecting snow table'
       call cpu_time(stime)
       call qr_acr_qs
       call cpu_time(etime)
@@ -945,14 +949,14 @@ MODULE module_mp_thompson
 !$OMP end parallel
 
 !>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table
-      WRITE (*,*)  '  creating freezing of water drops table'
+      if (mpirank==mpiroot) write(0,*) '  creating freezing of water drops table'
       call cpu_time(stime)
       call freezeH2O(threads)
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing freezing of water drops table took ",f10.3," seconds.")', etime-stime
 
 !>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
-      WRITE (*,*) '  creating ice converting to snow table'
+      if (mpirank==mpiroot) write(0,*) '  creating ice converting to snow table'
       call cpu_time(stime)
       call qi_aut_qs
       call cpu_time(etime)
@@ -984,7 +988,7 @@ MODULE module_mp_thompson
 
       endif if_not_iiwarm
 
-      WRITE (*,*) ' ... DONE microphysical lookup tables'
+      if (mpirank==mpiroot) write(0,*) ' ... DONE microphysical lookup tables'
 
       endif if_micro_init
 
@@ -1030,7 +1034,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
-      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(OUT):: &
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(OUT):: &
                           re_cloud, re_ice, re_snow
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
@@ -3729,7 +3733,7 @@ MODULE module_mp_thompson
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read qr_acr_qg.dat instead of computing"
+          !write(0,*) "ThompMP: read qr_acr_qg.dat instead of computing"
           OPEN(63,file="qr_acr_qg.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234) tcg_racg
@@ -3905,7 +3909,7 @@ MODULE module_mp_thompson
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read qr_acr_qs.dat instead of computing"
+          !write(0,*) "ThompMP: read qr_acr_qs.dat instead of computing"
           OPEN(63,file="qr_acr_qs.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234)tcs_racs1
@@ -4166,7 +4170,7 @@ MODULE module_mp_thompson
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read freezeH2O.dat instead of computing"
+          !write(0,*) "ThompMP: read freezeH2O.dat instead of computing"
           OPEN(63,file="freezeH2O.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234)tpi_qrfz
@@ -4613,15 +4617,17 @@ MODULE module_mp_thompson
 !! vertical velocity, temperature, lognormal mean aerosol radius, and
 !! hygroscopicity, kappa.  The data are read from external file and
 !! contain activated fraction of CCN for given conditions.
-      subroutine table_ccnAct
+      subroutine table_ccnAct(errmess,errflag)
 
       implicit none
 
+!..Error handling variables
+      CHARACTER(len=*), INTENT(INOUT) :: errmess
+      INTEGER,          INTENT(INOUT) :: errflag
 
 !..Local variables
       INTEGER:: iunit_mp_th1, i
       LOGICAL:: opened
-      CHARACTER*64 errmess
 
       iunit_mp_th1 = -1
         DO i = 20,99
@@ -4649,19 +4655,11 @@ MODULE module_mp_thompson
       RETURN
  9009 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
-      write(0,*) errmess
-      ! DH* TEMPORARY FIX 20181203
-      call sleep(5)
-      stop
-      ! *DH
+      errflag = 1
       RETURN
  9010 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error reading CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
-      write(0,*) errmess
-      ! DH* TEMPORARY FIX 20181203
-      call sleep(5)
-      stop
-      ! *DH
+      errflag = 1
       RETURN
 
       end subroutine table_ccnAct
