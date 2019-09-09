@@ -1,0 +1,121 @@
+[ccpp-arg-table]
+  name = rrtmg_lw_post_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = rrtmg_lw_post_run
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = in
+  optional = F
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = Fortran DDT containing FV3-GFS fields targetted for diagnostic output
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = inout
+  optional = F
+[Coupling]
+  standard_name = GFS_coupling_type_instance
+  long_name = Fortran DDT containing FV3-GFS fields to/from coupling with other components
+  units = DDT
+  dimensions = ()
+  type = GFS_coupling_type
+  intent = inout
+  optional = F
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ltp]
+  standard_name = extra_top_layer
+  long_name = extra top layers
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lm]
+  standard_name = number_of_vertical_layers_for_radiation_calculations
+  long_name = number of vertical layers for radiation calculation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[kd]
+  standard_name = vertical_index_difference_between_inout_and_local
+  long_name = vertical index difference between in/out and local
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[tsfa]
+  standard_name = surface_air_temperature_for_radiation
+  long_name = lowest model layer air temperature for radiation
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[htlwc]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  long_name = total sky heating rate due to longwave radiation
+  units = K s-1
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[htlw0]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
+  long_name = clear sky heating rate due to longwave radiation
+  units = K s-1
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = rrtmg_lw_post_finalize
+  type = scheme

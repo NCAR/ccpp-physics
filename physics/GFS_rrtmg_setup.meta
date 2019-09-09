@@ -1,0 +1,386 @@
+[ccpp-arg-table]
+  name = GFS_rrtmg_setup_init
+  type = scheme
+[si]
+  standard_name = vertical_sigma_coordinate_for_radiation_initialization
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (number_of_vertical_layers_for_radiation_calculations_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[levr]
+  standard_name = number_of_vertical_layers_for_radiation_calculations
+  long_name = number of vertical levels for radiation calculations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ictm]
+  standard_name = flag_for_initial_time_date_control
+  long_name = flag for initial conditions and forcing
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isol]
+  standard_name = flag_for_solar_constant
+  long_name = use prescribed solar constant
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ico2]
+  standard_name = flag_for_using_prescribed_global_mean_co2_value
+  long_name = prescribed global mean value (old opernl)
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iaer]
+  standard_name = flag_for_default_aerosol_effect_in_shortwave_radiation
+  long_name = default aerosol effect in sw only
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ialb]
+  standard_name = flag_for_using_climatology_albedo
+  long_name = flag for using climatology alb, based on sfc type
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iems]
+  standard_name = flag_for_surface_emissivity_control
+  long_name = surface emissivity control flag, use fixed value of 1
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntcw]
+  standard_name = index_for_liquid_cloud_condensate
+  long_name = tracer index for cloud condensate (or liquid water)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[num_p2d]
+  standard_name = array_dimension_of_2d_arrays_for_microphysics
+  long_name = number of 2D arrays needed for microphysics
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[num_p3d]
+  standard_name = array_dimension_of_3d_arrays_for_microphysics
+  long_name = number of 3D arrays needed for microphysics
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[npdf3d]
+  standard_name = number_of_3d_arrays_associated_with_pdf_based_clouds
+  long_name = number of 3d arrays associated with pdf based clouds/mp
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntoz]
+  standard_name = index_for_ozone
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_sw]
+  standard_name = flag_for_max_random_overlap_clouds_for_shortwave_radiation
+  long_name = sw: max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_lw]
+  standard_name = flag_for_max_random_overlap_clouds_for_longwave_radiation
+  long_name = lw: max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isubc_sw]
+  standard_name = flag_for_sw_clouds_without_sub_grid_approximation
+  long_name = flag for sw clouds without sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isubc_lw]
+  standard_name = flag_for_lw_clouds_without_sub_grid_approximation
+  long_name = flag for lw clouds without sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[icliq_sw]
+  standard_name = flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation
+  long_name = sw optical property for liquid clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[crick_proof]
+  standard_name = flag_for_CRICK_proof_cloud_water
+  long_name = flag for CRICK-Proof cloud water
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ccnorm]
+  standard_name = flag_for_cloud_condensate_normalized_by_cloud_cover
+  long_name = flag for cloud condensate normalized by cloud cover
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[imp_physics]
+  standard_name = flag_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[norad_precip]
+  standard_name = flag_for_precipitation_effect_on_radiation
+  long_name = radiation precip flag for Ferrier/Moorthi
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[idate]
+  standard_name = date_and_time_at_model_initialization_reordered
+  long_name = initialization date and time
+  units = none
+  dimensions = (4)
+  type = integer
+  intent = in
+  optional = F
+[iflip]
+  standard_name = flag_for_vertical_index_direction_control
+  long_name = flag for vertical index direction control
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[faerlw]
+  standard_name = aerosol_optical_properties_for_longwave_bands_01_16
+  long_name = optical properties for longwave bands 01-16
+  units = various
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation,number_of_aerosol_output_fields_for_longwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[faersw]
+  standard_name = aerosol_optical_properties_for_shortwave_bands_01_16
+  long_name = aerosol optical properties for shortwave bands 01-16
+  units = various
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation,number_of_aerosol_output_fields_for_shortwave_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[aerodp]
+  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
+  long_name = vertical integrated optical depth for various aerosol species
+  units = none
+  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rrtmg_setup_run
+  type = scheme
+[idate]
+  standard_name = date_and_time_at_model_initialization
+  long_name = initialization date and time
+  units = none
+  dimensions = (8)
+  type = integer
+  intent = in
+  optional = F
+[jdate]
+  standard_name = forecast_date_and_time
+  long_name = current forecast date and time
+  units = none
+  dimensions = (8)
+  type = integer
+  intent = in
+  optional = F
+[deltsw]
+  standard_name = frequency_for_shortwave_radiation
+  long_name = frequency for shortwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[deltim]
+  standard_name = time_step_for_dynamics
+  long_name = dynamics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[slag]
+  standard_name = equation_of_time
+  long_name = equation of time (radian)
+  units = radians
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sdec]
+  standard_name = sine_of_solar_declination_angle
+  long_name = sin of the solar declination angle
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[cdec]
+  standard_name = cosine_of_solar_declination_angle
+  long_name = cos of the solar declination angle
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[solcon]
+  standard_name = solar_constant
+  long_name = solar constant (sun-earth distant adjusted)
+  units = W m-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rrtmg_setup_finalize
+  type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

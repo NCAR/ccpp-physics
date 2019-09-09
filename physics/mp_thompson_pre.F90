@@ -24,43 +24,11 @@ module mp_thompson_pre
 
 #if 0
 !! \section arg_table_mp_thompson_pre_run Argument Table
-!! | local_name      | standard_name                                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|-----------------------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | ncol            | horizontal_loop_extent                                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
-!! | nlev            | vertical_dimension                                                    | number of vertical levels                                | count      |    0 | integer   |           | in     | F        |
-!! | kdt             | index_of_time_step                                                    | current forecast iteration                               | index      |    0 | integer   |           | in     | F        |
-!! | con_g           | gravitational_acceleration                                            | gravitational acceleration                               | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | con_rd          | gas_constant_dry_air                                                  | ideal gas constant for dry air                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | spechum         | water_vapor_specific_humidity_updated_by_physics                      | water vapor specific humidity                            | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qc              | cloud_condensed_water_mixing_ratio_updated_by_physics                 | cloud water mixing ratio wrt dry+vapor (no condensates)  | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qr              | rain_water_mixing_ratio_updated_by_physics                            | rain water mixing ratio wrt dry+vapor (no condensates)   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qi              | ice_water_mixing_ratio_updated_by_physics                             | ice water mixing ratio wrt dry+vapor (no condensates)    | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qs              | snow_water_mixing_ratio_updated_by_physics                            | snow water mixing ratio wrt dry+vapor (no condensates)   | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | qg              | graupel_mixing_ratio_updated_by_physics                               | graupel mixing ratio wrt dry+vapor (no condensates)      | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | ni              | ice_number_concentration_updated_by_physics                           | ice number concentration                                 | kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | nr              | rain_number_concentration_updated_by_physics                          | rain number concentration                                | kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | make_number_concentrations | flag_for_initial_number_concentration_calculation          | flag for initial number concentration calculation        | flag       |    0 | logical   |           | in     | F        |
-!! | is_aerosol_aware| flag_for_aerosol_physics                                              | flag for aerosol-aware physics                           | flag       |    0 | logical   |           | in     | F        |
-!! | nc              | cloud_droplet_number_concentration_updated_by_physics                 | cloud droplet number concentration                       | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nwfa            | water_friendly_aerosol_number_concentration_updated_by_physics        | number concentration of water-friendly aerosols          | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nifa            | ice_friendly_aerosol_number_concentration_updated_by_physics          | number concentration of ice-friendly aerosols            | kg-1       |    2 | real      | kind_phys | inout  | T        |
-!! | nwfa2d          | tendency_of_water_friendly_aerosols_at_surface                        | instantaneous fake water-friendly surface aerosol source | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
-!! | nifa2d          | tendency_of_ice_friendly_aerosols_at_surface                          | instantaneous fake ice-friendly surface aerosol source   | kg-1 s-1   |    1 | real      | kind_phys | inout  | T        |
-!! | tgrs            | air_temperature_updated_by_physics                                    | model layer mean temperature                             | K          |    2 | real      | kind_phys | in     | F        |
-!! | tgrs_save       | air_temperature_save                                                  | air temperature before entering a physics scheme         | K          |    2 | real      | kind_phys | out    | F        |
-!! | prsl            | air_pressure                                                          | mean layer pressure                                      | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | phil            | geopotential                                                          | geopotential at model layer centers                      | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | area            | cell_area                                                             | area of the grid cell                                    | m2         |    1 | real      | kind_phys | in     | F        |
-!! | mpirank         | mpi_rank                                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpiroot         | mpi_root                                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
-!! | blkno           | ccpp_block_number                                                     | for explicit data blocking: block number of this block   | index      |    0 | integer   |           | in     | F        |
-!! | errmsg          | ccpp_error_message                                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude mp_thompson_pre_run.html
 !!
 #endif
       subroutine mp_thompson_pre_run(ncol, nlev, kdt, con_g, con_rd,    &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,       &
-                                  make_number_concentrations,                &
                                   is_aerosol_aware, nc, nwfa, nifa, nwfa2d,  &
                                   nifa2d, tgrs, tgrs_save, prsl, phil, area, &
                                   mpirank, mpiroot, blkno, errmsg, errflg)
@@ -83,7 +51,6 @@ module mp_thompson_pre
          real(kind_phys),           intent(inout) :: qg(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: ni(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
-         logical,                   intent(in   ) :: make_number_concentrations
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
          real(kind_phys), optional, intent(inout) :: nc(1:ncol,1:nlev)
@@ -169,27 +136,17 @@ module mp_thompson_pre
          !  they also need to be switched back to mass/number per kg of air, because
          !  what is returned by the functions is in units of number per cubic meter.
 
-         if (make_number_concentrations) then
-             ! If qi is in boundary conditions but ni is not, calculate ni from qi, rho and tgrs
-             if (maxval(qi)>0.0 .and. maxval(ni)==0.0) then
-                 ni = make_IceNumber(qi*rho, tgrs) * orho
-             end if
-         else
-             ! If qi is in boundary conditions but ni is not, reset qi to zero
-             if (maxval(qi)>0.0 .and. maxval(ni)==0.0) qi = 0.0
+         ! If qi is in boundary conditions but ni is not, calculate ni from qi, rho and tgrs
+         if (maxval(qi)>0.0 .and. maxval(ni)==0.0) then
+             ni = make_IceNumber(qi*rho, tgrs) * orho
          end if
 
          ! If ni is in boundary conditions but qi is not, reset ni to zero
          if (maxval(ni)>0.0 .and. maxval(qi)==0.0) ni = 0.0
 
-         if (make_number_concentrations) then
-             ! If qr is in boundary conditions but nr is not, calculate nr from qr, rho and tgrs
-             if (maxval(qr)>0.0 .and. maxval(nr)==0.0) then
-                 nr = make_RainNumber(qr*rho, tgrs) * orho
-             end if
-         else
-             ! If qr is in boundary conditions but nr is not, reset qr to zero
-             if (maxval(qr)>0.0 .and. maxval(nr)==0.0) qr = 0.0
+         ! If qr is in boundary conditions but nr is not, calculate nr from qr, rho and tgrs
+         if (maxval(qr)>0.0 .and. maxval(nr)==0.0) then
+             nr = make_RainNumber(qr*rho, tgrs) * orho
          end if
 
          ! If nr is in boundary conditions but qr is not, reset nr to zero
@@ -298,14 +255,9 @@ module mp_thompson_pre
             endif
          endif
 
-         if (make_number_concentrations) then
-             ! If qc is in boundary conditions but nc is not, calculate nc from qc, rho and nwfa
-             if (maxval(qc)>0.0 .and. maxval(nc)==0.0) then
-                nc = make_DropletNumber(qc*rho, nwfa) * orho
-             end if
-         else
-             ! If qc is in boundary conditions but nc is not, reset qc to zero
-             if (maxval(qc)>0.0 .and. maxval(nc)==0.0) qc = 0.0
+         ! If qc is in boundary conditions but nc is not, calculate nc from qc, rho and nwfa
+         if (maxval(qc)>0.0 .and. maxval(nc)==0.0) then
+            nc = make_DropletNumber(qc*rho, nwfa) * orho
          end if
 
          ! If nc is in boundary conditions but qc is not, reset nc to zero

@@ -115,7 +115,11 @@
   real(kind=kind_phys),parameter:: con_amn2o  =44.013_kind_phys                    !< molecular wght of n2o (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_thgni  =-38.15_kind_phys                    !< temperature the H.G.Nuc. ice starts
 
+!> minimum ice concentration
   real(kind=kind_phys),parameter:: cimin      =0.15                                !< minimum ice concentration
+
+!> minimum aerosol concentration
+  real(kind=kind_phys),parameter:: qamin = 1.e-16_kind_phys
 
 !> \name Miscellaneous physics related constants (For WSM6; Moorthi - Jul 2014)
 ! integer, parameter :: max_lon=16000, max_lat=8000, min_lon=192, min_lat=94

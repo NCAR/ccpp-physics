@@ -7020,7 +7020,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !> This subroutine computes liquid and forezen soil moisture from the
 !! total soil moisture, and also computes soil moisture availability in
 !! the top soil layer.
-  SUBROUTINE RUCLSMINIT( debug_print,                              &
+  SUBROUTINE RUCLSMINIT( debug_print, landmask,                    &
                      nzs, isltyp, ivgtyp, xice, mavail,            &
                      sh2o, smfr3d, tslb, smois,                    &
                      ims,ime, jms,jme, kms,kme,                    &
@@ -7043,6 +7043,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
             INTENT(IN)    ::                                 TSLB, &
                                                             SMOIS
+
+   REAL, DIMENSION( ims:ime, jms:jme )                           , &
+            INTENT(IN)    ::                             LANDMASK
 
    INTEGER, DIMENSION( ims:ime, jms:jme )                        , &
             INTENT(INOUT)    ::                     ISLTYP,IVGTYP
@@ -7072,6 +7075,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    errflag = 0
    DO j = jts,jtf
      DO i = its,itf
+       ! land-only version
+       IF ( LANDMASK( i,j ) .NE. 1 ) CYCLE
+       !
        IF ( ISLTYP( i,j ) .LT. 0 ) THEN
          errflag = 1
          print *, &
@@ -7086,18 +7092,21 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    ENDIF
 
    DO J=jts,jtf
-       DO I=its,itf
+     DO I=its,itf
+
+       ! land-only version
+       IF ( LANDMASK( i,j ) .NE. 1 ) CYCLE
 
 !--- Computation of volumetric content of ice in soil
 !--- and initialize MAVAIL
-    if(ISLTYP(I,J) > 0) then
-          DQM    = MAXSMC   (ISLTYP(I,J)) -                               &
-                   DRYSMC   (ISLTYP(I,J))
-          REF    = REFSMC   (ISLTYP(I,J))
-          PSIS   = - SATPSI (ISLTYP(I,J))
-          QMIN   = DRYSMC   (ISLTYP(I,J))
-          BCLH   = BB       (ISLTYP(I,J))
-    endif
+       if(ISLTYP(I,J) > 0) then
+             DQM    = MAXSMC   (ISLTYP(I,J)) - &
+                      DRYSMC   (ISLTYP(I,J))
+             REF    = REFSMC   (ISLTYP(I,J))
+             PSIS   = - SATPSI (ISLTYP(I,J))
+             QMIN   = DRYSMC   (ISLTYP(I,J))
+             BCLH   = BB       (ISLTYP(I,J))
+       endif
 
 
 ! in Zobler classification isltyp=0 for water. Statsgo classification
