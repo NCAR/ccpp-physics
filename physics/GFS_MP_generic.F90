@@ -85,8 +85,8 @@
         rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
-        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, raincprv, rainncprv, iceprv, snowprv, graupelprv, dtp, &
-        errmsg, errflg)
+        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, raincprv, rainncprv, iceprv, snowprv, graupelprv,      &
+        dtp, errmsg, errflg)
 !
       use machine, only: kind_phys
 
@@ -129,7 +129,7 @@
       real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
 
       real(kind=kind_phys),                     intent(in)    :: dtp
-      
+
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
