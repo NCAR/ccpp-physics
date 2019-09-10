@@ -12,27 +12,7 @@ contains
       end subroutine GFS_GWD_generic_pre_init
 
 !! \section arg_table_GFS_GWD_generic_pre_run Argument Table
-!! | local_name     | standard_name                                                           | long_name                                                                                | units   | rank | type      | kind      | intent | optional |
-!! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   |    0 | integer   |           | in     | F        |
-!! | levs           | vertical_dimension                                                      | vertical layer dimension                                                                 | count   |    0 | integer   |           | in     | F        |
-!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count   |    0 | integer   |           | in     | F        |
-!! | mntvar         | statistical_measures_of_subgrid_orography                               | array of statistical measures of subgrid orography                                       | various |    2 | real      | kind_phys | in     | F        |
-!! | hprime         | standard_deviation_of_subgrid_orography                                 | standard deviation of subgrid orography                                                  | m       |    1 | real      | kind_phys | out    | F        |
-!! | oc             | convexity_of_subgrid_orography                                          | convexity of subgrid orography                                                           | none    |    1 | real      | kind_phys | out    | F        |
-!! | oa4            | asymmetry_of_subgrid_orography                                          | asymmetry of subgrid orography                                                           | none    |    2 | real      | kind_phys | out    | F        |
-!! | clx            | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    |    2 | real      | kind_phys | out    | F        |
-!! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                | angle with_respect to east of maximum subgrid orographic variations                      | degrees |    1 | real      | kind_phys | out    | F        |
-!! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none    |    1 | real      | kind_phys | out    | F        |
-!! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none    |    1 | real      | kind_phys | out    | F        |
-!! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m       |    1 | real      | kind_phys | out    | F        |
-!! | lssav          | flag_diagnostics                                                        | logical flag for storing diagnostics                                                     | flag    |    0 | logical   |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                                     | flag for 3d diagnostic fields                                                            | flag    |    0 | logical   |           | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                        | updated tendency of the temperature                                                      | K s-1   |    2 | real      | kind_phys | in     | F        |
-!! | dt3dt          | cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag    | cumulative change in temperature due to orographic gravity wave drag                     | K       |    2 | real      | kind_phys | inout  | F        |
-!! | dtf            | time_step_for_dynamics                                                  | dynamics timestep                                                                        | s       |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                      | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                         | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_GWD_generic_pre_run.html
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm

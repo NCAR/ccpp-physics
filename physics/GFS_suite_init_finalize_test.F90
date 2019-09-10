@@ -3,10 +3,7 @@
     contains
 
 !> \section arg_table_GFS_suite_ini_fini_test_init Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_suite_ini_fini_test_init.html
 !!
     subroutine GFS_suite_ini_fini_test_init (errmsg, errflg)
 
@@ -24,10 +21,7 @@
     end subroutine GFS_suite_ini_fini_test_init
 
 !> \section arg_table_GFS_suite_ini_fini_test_finalize Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_suite_ini_fini_test_finalize.html
 !!
     subroutine GFS_suite_ini_fini_test_finalize(errmsg, errflg)
 
@@ -45,10 +39,7 @@
     end subroutine GFS_suite_ini_fini_test_finalize
 
 !> \section arg_table_GFS_suite_ini_fini_test_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_suite_ini_fini_test_run.html
 !!
     subroutine GFS_suite_ini_fini_test_run (errmsg, errflg)
 

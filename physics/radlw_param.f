@@ -99,7 +99,7 @@
       end type proflw_type
 !
 ! Parameter constants for LW band structures
-      integer, parameter :: NBANDS = 16     !< number of total spectral bands       
+      integer, parameter :: NBANDS = 16     !< number of total spectral bands
       integer, parameter :: NGPTLW = 140    !< number of total g-points   
       integer, parameter :: NTBL   = 10000  !< lookup table dimension 
       integer, parameter :: MAXGAS = 7      !< maximum number of absorbing gases
