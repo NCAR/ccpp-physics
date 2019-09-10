@@ -6,6 +6,8 @@
 !! convection scheme.
       module samfdeepcnv
 
+      use samfcnv_aerosols, only : samfdeepcnv_aerosols
+
       contains
 
 !> \brief Brief description of the subroutine
@@ -49,73 +51,7 @@
 !! of the large-scale environment due to the cumulus convection.
 !!
 !! \section arg_table_samfdeepcnv_run Argument Table
-!! | local_name     | standard_name                                                  | long_name                                                                                                | units       | rank | type      |    kind   | intent | optional |
-!! |----------------|----------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                         | horizontal loop extent                                                                                   | count       |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                           | horizontal dimension                                                                                     | count       |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                             | vertical layer dimension                                                                                 | count       |    0 | integer   |           | in     | F        |
-!! | cliq           | specific_heat_of_liquid_water_at_constant_pressure             | specific heat of liquid water at constant pressure                                                       | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                  | specific heat of dry air at constant pressure                                                            | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
-!! | cvap           | specific_heat_of_water_vapor_at_constant_pressure              | specific heat of water vapor at constant pressure                                                        | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                  | rd/rv                                                                                                    | none        |    0 | real      | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one        | (rd/rv) - 1                                                                                              | none        |    0 | real      | kind_phys | in     | F        |
-!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one              | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                                    | none        |    0 | real      | kind_phys | in     | F        |
-!! | grav           | gravitational_acceleration                                     | gravitational acceleration                                                                               | m s-2       |    0 | real      | kind_phys | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                     | latent heat of evaporation/sublimation                                                                   | J kg-1      |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                           | ideal gas constant for dry air                                                                           | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
-!! | rv             | gas_constant_water_vapor                                       | ideal gas constant for water vapor                                                                       | J kg-1 K-1  |    0 | real      | kind_phys | in     | F        |
-!! | t0c            | temperature_at_zero_celsius                                    | temperature at 0 degrees Celsius                                                                         | K           |    0 | real      | kind_phys | in     | F        |
-!! | delt           | time_step_for_physics                                          | physics time step                                                                                        | s           |    0 | real      | kind_phys | in     | F        |
-!! | ntk            | index_for_turbulent_kinetic_energy_convective_transport_tracer | index for turbulent kinetic energy in the convectively transported tracer array                          | index       |    0 | integer   |           | in     | F        |
-!! | ntr            | number_of_tracers_for_samf                                     | number of tracers for scale-aware mass flux schemes                                                      | count       |    0 | integer   |           | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers                      | pres(k) - pres(k+1)                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
-!! | prslp          | air_pressure                                                   | mean layer pressure                                                                                      | Pa          |    2 | real      | kind_phys | in     | F        |
-!! | psp            | surface_air_pressure                                           | surface pressure                                                                                         | Pa          |    1 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                   | layer geopotential                                                                                       | m2 s-2      |    2 | real      | kind_phys | in     | F        |
-!! | qtr            | convective_transportable_tracers                               | array to contain cloud water and other convective trans. tracers                                         | kg kg-1     |    3 | real      | kind_phys | inout  | F        |
-!! | q1             | water_vapor_specific_humidity_updated_by_physics               | updated vapor specific humidity                                                                          | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
-!! | t1             | air_temperature_updated_by_physics                             | updated temperature                                                                                      | K           |    2 | real      | kind_phys | inout  | F        |
-!! | u1             | x_wind_updated_by_physics                                      | updated x-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
-!! | v1             | y_wind_updated_by_physics                                      | updated y-direction wind                                                                                 | m s-1       |    2 | real      | kind_phys | inout  | F        |
-!! | do_ca          | flag_for_cellular_automata                                     | cellular automata main switch                                                                            | flag        |    0 | logical   |           | in     | F        |
-!! | ca_deep        | fraction_of_cellular_automata_for_deep_convection              | fraction of cellular automata for deep convection                                                        | frac        |    1 | real      | kind_phys | in     | F        |
-!! | cldwrk         | cloud_work_function                                            | cloud work function                                                                                      | m2 s-2      |    1 | real      | kind_phys | out    | F        |
-!! | rn             | lwe_thickness_of_deep_convective_precipitation_amount          | deep convective rainfall amount on physics timestep                                                      | m           |    1 | real      | kind_phys | out    | F        |
-!! | kbot           | vertical_index_at_cloud_base                                   | index for cloud base                                                                                     | index       |    1 | integer   |           | out    | F        |
-!! | ktop           | vertical_index_at_cloud_top                                    | index for cloud top                                                                                      | index       |    1 | integer   |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                           | deep convection: 0=no, 1=yes                                                                             | flag        |    1 | integer   |           | inout  | F        |
-!! | islimsk        | sea_land_ice_mask                                              | landmask: sea/land/ice=0/1/2                                                                             | flag        |    1 | integer   |           | in     | F        |
-!! | garea          | cell_area                                                      | grid cell area                                                                                           | m2          |    1 | real      | kind_phys | in     | F        |
-!! | dot            | omega                                                          | layer mean vertical velocity                                                                             | Pa s-1      |    2 | real      | kind_phys | in     | F        |
-!! | ncloud         | number_of_hydrometeors                                         | number of hydrometeors                                                                                   | count       |    0 | integer   |           | in     | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux          | (updraft mass flux) * delt                                                                               | kg m-2      |    2 | real      | kind_phys | out    | F        |
-!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux        | (downdraft mass flux) * delt                                                                             | kg m-2      |    2 | real      | kind_phys | out    | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux      | (detrainment mass flux) * delt                                                                           | kg m-2      |    2 | real      | kind_phys | out    | F        |
-!! | cnvw           | convective_cloud_water_mixing_ratio                            | moist convective cloud water mixing ratio                                                                | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
-!! | cnvc           | convective_cloud_cover                                         | convective cloud cover                                                                                   | frac        |    2 | real      | kind_phys | inout  | F        |
-!! | qlcn           | mass_fraction_of_convective_cloud_liquid_water                 | mass fraction of convective cloud liquid water          | kg kg-1       |    2 | real      | kind_phys | inout   | F        |
-!! | qicn           | mass_fraction_of_convective_cloud_ice                          | mass fraction of convective cloud ice water             | kg kg-1       |    2 | real      | kind_phys | inout   | F        |
-!! | w_upi          | vertical_velocity_for_updraft                                  | vertical velocity for updraft                           | m s-1         |    2 | real      | kind_phys | inout   | F        |
-!! | cf_upi         | convective_cloud_fraction_for_microphysics                     | convective cloud fraction for microphysics              | frac          |    2 | real      | kind_phys | inout   | F        |
-!! | cnv_mfd        | detrained_mass_flux                                            | detrained mass flux                                     | kg m-2 s-1    |    2 | real      | kind_phys | inout   | F        |
-!! | cnv_dqldt      | tendency_of_cloud_water_due_to_convective_microphysics         | tendency of cloud water due to convective microphysics  | kg m-2 s-1    |    2 | real      | kind_phys | inout   | F        |
-!! | clcn           | convective_cloud_volume_fraction                               | convective cloud volume fraction                        | frac          |    2 | real      | kind_phys | inout   | F        |
-!! | cnv_fice       | ice_fraction_in_convective_tower                               | ice fraction in convective tower                        | frac          |    2 | real      | kind_phys | inout   | F        |
-!! | cnv_ndrop      | number_concentration_of_cloud_liquid_water_particles_for_detrainment | droplet number concentration in convective detrainment  | m-3           |    2 | real      | kind_phys | inout   | F        |
-!! | cnv_nice       | number_concentration_of_ice_crystals_for_detrainment           | crystal number concentration in convective detrainment  | m-3           |    2 | real      | kind_phys | inout   | F        |
-!! | mp_phys        | flag_for_microphysics_scheme                                   | choice of microphysics scheme                           | flag          |    0 | integer   |           | in      | F        |
-!! | mp_phys_mg     | flag_for_morrison_gettelman_microphysics_scheme                | choice of Morrison-Gettelman microphysics scheme        | flag          |    0 | integer   |           | in      | F        |
-!! | clam           | entrainment_rate_coefficient_deep_convection                   | entrainment rate coefficient for deep conv.                                                              | none        |    0 | real      | kind_phys | in     | F        |
-!! | c0s            | rain_conversion_parameter_deep_convection                      | convective rain conversion parameter for deep conv.                                                      | m-1         |    0 | real      | kind_phys | in     | F        |
-!! | c1             | detrainment_conversion_parameter_deep_convection               | convective detrainment conversion parameter for deep conv.                                               | m-1         |    0 | real      | kind_phys | in     | F        |
-!! | betal          | downdraft_fraction_reaching_surface_over_land_deep_convection  | downdraft fraction reaching surface over land for deep conv.                                             | frac        |    0 | real      | kind_phys | in     | F        |
-!! | betas          | downdraft_fraction_reaching_surface_over_ocean_deep_convection | downdraft fraction reaching surface over ocean for deep conv.                                            | frac        |    0 | real      | kind_phys | in     | F        |
-!! | evfact         | rain_evaporation_coefficient_deep_convection                   | convective rain evaporation coefficient for deep conv.                                                   | frac        |    0 | real      | kind_phys | in     | F        |
-!! | evfactl        | rain_evaporation_coefficient_over_land_deep_convection         | convective rain evaporation coefficient over land for deep conv.                                         | frac        |    0 | real      | kind_phys | in     | F        |
-!! | pgcon          | momentum_transport_reduction_factor_pgf_deep_convection        | reduction factor in momentum transport due to deep conv. induced pressure gradient force                 | frac        |    0 | real      | kind_phys | in     | F        |
-!! | asolfac        | aerosol_aware_parameter_deep_convection                        | aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for deep conv. | none        |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                             | error message for error handling in CCPP                                                                 | none        |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                | error flag for error handling in CCPP                                                                    | flag        |    0 | integer   |           | out    | F        |
+!! \htmlinclude samfdeepcnv_run.html
 !!
 !!  \section general_samfdeep GFS samfdeepcnv General Algorithm
 !!  -# Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
@@ -132,10 +68,10 @@
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
-      subroutine samfdeepcnv_run (im,ix,km,cliq,cp,cvap,                &
+      subroutine samfdeepcnv_run (im,ix,km,itc,ntc,cliq,cp,cvap,        &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
-     &    prslp,psp,phil,qtr,q1,t1,u1,v1,                               &
+     &    prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                         &
      &    do_ca,ca_deep,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,         &
      &    dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                       &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
@@ -148,13 +84,14 @@
 
       implicit none
 !
-      integer, intent(in)  :: im, ix,  km, ntk, ntr, ncloud
+      integer, intent(in)  :: im, ix, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
+      real(kind=kind_phys), dimension(:), intent(in) :: fscav
       real(kind=kind_phys), intent(in) :: ca_deep(ix)
       logical, intent(in)  :: do_ca
 
@@ -290,6 +227,8 @@ c  physical parameters
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
      &                     uo(im,km),      vo(im,km),     qeso(im,km),
      &                     ctr(im,km,ntr), ctro(im,km,ntr)
+!  for aerosol transport
+      real(kind=kind_phys) qaero(im,km,ntc)
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km)
       real(kind=kind_phys) wc(im),         scaldfunc(im), sigmagfm(im)
@@ -312,7 +251,7 @@ c  cloud water
      &                     tx1(im),        sumx(im),      cnvwt(im,km)
 !    &,                    rhbar(im)
 !
-      logical totflg, cnvflg(im), asqecflg(im), flg(im)
+      logical do_aerosols, totflg, cnvflg(im), asqecflg(im), flg(im)
 !
 !    asqecflg: flag for the quasi-equilibrium assumption of Arakawa-Schubert
 !
@@ -337,6 +276,11 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
 
       fact1 = (cvap-cliq)/rv
       fact2 = hvap/rv-fact1*t0c
+!
+c-----------------------------------------------------------------------
+!>  ## Determine whether to perform aerosol transport
+      do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
+      if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
 !
 c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
@@ -2459,6 +2403,23 @@ c
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
       enddo
+
+!> - If stochastic physics using cellular automata is .true. then perturb the mass-flux here:
+
+      if(do_ca)then
+        do i=1,im
+         xmb(i) = xmb(i)*(1.0 + ca_deep(i)*5.)
+        enddo
+      endif
+
+!> - Transport aerosols if present
+
+      if (do_aerosols)
+     &  call samfdeepcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
+     &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
+     &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
+     &  qtr, qaero)
+
 c
 c  restore to,qo,uo,vo to t1,q1,u1,v1 in case convection stops
 c
@@ -2741,6 +2702,20 @@ c
         enddo
       enddo
       enddo
+
+!> - Store aerosol concentrations if present
+      if (do_aerosols) then
+        do n = 1, ntc
+          kk = n + itc - 1
+          do k = 1, km
+            do i = 1, im
+              if(cnvflg(i) .and. rn(i) > 0.) then
+                if (k <= kmax(i)) qtr(i,k,kk) = qaero(i,k,n)
+              endif
+            enddo
+          enddo
+        enddo
+       endif
 !
 ! hchuang code change
 !

@@ -37,14 +37,7 @@
       contains
 
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Data           | GFS_data_type_instance_all_blocks                      | Fortran DDT containing FV3-GFS data                                     | DDT      |    1 | GFS_data_type         |           | inout  | F        |
-!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
-!! | Interstitial   | GFS_interstitial_type_instance_all_threads             | Fortran DDT containing FV3-GFS interstitial data                        | DDT      |    1 | GFS_interstitial_type |           | inout  | F        |
-!! | nthrds         | omp_threads                                            | number of OpenMP threads available for physics schemes                  | count    |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_phys_time_vary_init.html
 !!
 !>\section gen_GFS_phys_time_vary_init GFS_phys_time_vary_init General Algorithm
 !! @{
@@ -281,10 +274,7 @@
 
 
 !> \section arg_table_GFS_phys_time_vary_finalize Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_phys_time_vary_finalize.html
 !!
       subroutine GFS_phys_time_vary_finalize(errmsg, errflg)
 
@@ -327,14 +317,7 @@
 
 
 !> \section arg_table_GFS_phys_time_vary_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Data           | GFS_data_type_instance_all_blocks                      | Fortran DDT containing FV3-GFS data                                     | DDT      |    1 | GFS_data_type         |           | inout  | F        |
-!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
-!! | nthrds         | omp_threads                                            | number of OpenMP threads available for physics schemes                  | count    |    0 | integer               |           | in     | F        |
-!! | first_time_step | flag_for_first_time_step                              | flag for first time step for time integration loop (cold/warmstart)     | flag     |    0 | logical               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_phys_time_vary_run.html
 !!
 !>\section gen_GFS_phys_time_vary_run GFS_phys_time_vary_run General Algorithm
 !> @{

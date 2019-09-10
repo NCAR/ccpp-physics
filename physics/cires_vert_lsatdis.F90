@@ -230,7 +230,7 @@
         write(6,*) F_nonhyd,    ' F_nonhyd '
         write(6,*) maxval(Bn), minval(BN), ' BN-BV '
         write(6,*) Um(ksrc),    ' Um-ksrc ', cd_ulim2 ,  'cd_ulim2 ', c2f2, ' c2f2 '
-        pause
+        !pause
       endif
 
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -504,7 +504,7 @@
            write(6,*) nw , ' nwaves-linsat '
            write(6,*) maxval(sp_ked), minval(sp_ked), 'ked '
            write(6,*) maxval(sp_tau), minval(sp_tau), 'sp_tau '
-          pause
+          !pause
         endif
           
 !

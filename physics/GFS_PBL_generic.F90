@@ -14,48 +14,12 @@
 !> \brief This scheme sets up the vertically diffused tracer array for any PBL scheme based on the microphysics scheme chosen
 #if 0
 !! \section arg_table_GFS_PBL_generic_pre_run Argument Table
-!! | local_name                   | standard_name                                          | long_name                                                                           | units         | rank | type      |    kind   | intent | optional |
-!! |------------------------------|--------------------------------------------------------|-------------------------------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im                           | horizontal_loop_extent                                 | horizontal loop extent                                                              | count         |    0 | integer   |           | in     | F        |
-!! | levs                         | vertical_dimension                                     | vertical layer dimension                                                            | count         |    0 | integer   |           | in     | F        |
-!! | nvdiff                       | number_of_vertical_diffusion_tracers                   | number of tracers to diffuse vertically                                             | count         |    0 | integer   |           | in     | F        |
-!! | ntrac                        | number_of_tracers                                      | number of tracers                                                                   | count         |    0 | integer   |           | in     | F        |
-!! | ntqv                         | index_for_water_vapor                                  | tracer index for water vapor (specific humidity)                                    | index         |    0 | integer   |           | in     | F        |
-!! | ntcw                         | index_for_liquid_cloud_condensate                      | tracer index for cloud condensate (or liquid water)                                 | index         |    0 | integer   |           | in     | F        |
-!! | ntiw                         | index_for_ice_cloud_condensate                         | tracer index for  ice water                                                         | index         |    0 | integer   |           | in     | F        |
-!! | ntrw                         | index_for_rain_water                                   | tracer index for rain water                                                         | index         |    0 | integer   |           | in     | F        |
-!! | ntsw                         | index_for_snow_water                                   | tracer index for snow water                                                         | index         |    0 | integer   |           | in     | F        |
-!! | ntlnc                        | index_for_liquid_cloud_number_concentration            | tracer index for liquid number concentration                                        | index         |    0 | integer   |           | in     | F        |
-!! | ntinc                        | index_for_ice_cloud_number_concentration               | tracer index for ice    number concentration                                        | index         |    0 | integer   |           | in     | F        |
-!! | ntrnc                        | index_for_rain_number_concentration                    | tracer index for rain   number concentration                                        | index         |    0 | integer   |           | in     | F        |
-!! | ntsnc                        | index_for_snow_number_concentration                    | tracer index for snow   number concentration                                        | index         |    0 | integer   |           | in     | F        |
-!! | ntgnc                        | index_for_graupel_number_concentration                 | tracer index for graupel number concentration                                       | index         |    0 | integer   |           | in     | F        |
-!! | ntwa                         | index_for_water_friendly_aerosols                      | tracer index for water friendly aerosol                                             | index         |    0 | integer   |           | in     | F        |
-!! | ntia                         | index_for_ice_friendly_aerosols                        | tracer index for ice friendly aerosol                                               | index         |    0 | integer   |           | in     | F        |
-!! | ntgl                         | index_for_graupel                                      | tracer index for graupel                                                            | index         |    0 | integer   |           | in     | F        |
-!! | ntoz                         | index_for_ozone                                        | tracer index for ozone mixing ratio                                                 | index         |    0 | integer   |           | in     | F        |
-!! | ntke                         | index_for_turbulent_kinetic_energy                     | tracer index for turbulent kinetic energy                                           | index         |    0 | integer   |           | in     | F        |
-!! | ntkev                        | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array    | index         |    0 | integer   |           | in     | F        |
-!! | imp_physics                  | flag_for_microphysics_scheme                           | choice of microphysics scheme                                                       | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_gfdl             | flag_for_gfdl_microphysics_scheme                      | choice of GFDL microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                  | choice of Thompson microphysics scheme                                              | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                      | choice of WSM6 microphysics scheme                                                  | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                 | choice of Zhao-Carr microphysics scheme                                             | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_mg               | flag_for_morrison_gettelman_microphysics_scheme        | choice of Morrison-Gettelman microphysics scheme                                    | flag          |    0 | integer   |           | in     | F        |
-!! | cplchm                       | flag_for_chemistry_coupling                            | flag controlling cplchm collection (default off)                                    | flag          |    0 | logical   |           | in     | F        |
-!! | ltaerosol                    | flag_for_aerosol_physics                               | flag for aerosol physics                                                            | flag          |    0 | logical   |           | in     | F        |
-!! | hybedmf                      | flag_for_hedmf                                         | flag for hybrid edmf pbl scheme (moninedmf)                                         | flag          |    0 | logical   |           | in     | F        |
-!! | do_shoc                      | flag_for_shoc                                          | flag for SHOC                                                                       | flag          |    0 | logical   |           | in     | F        |
-!! | satmedmf                     | flag_for_scale_aware_TKE_moist_EDMF_PBL                | flag for scale-aware TKE moist EDMF PBL scheme                                      | flag          |    0 | logical   |           | in     | F        |
-!! | qgrs                         | tracer_concentration                                   | model layer mean tracer concentration                                               | kg kg-1       |    3 | real      | kind_phys | in     | F        |
-!! | vdftra                       | vertically_diffused_tracer_concentration               | tracer concentration diffused by PBL scheme                                         | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
-!! | errmsg                       | ccpp_error_message                                     | error message for error handling in CCPP                                            | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                       | ccpp_error_flag                                        | error flag for error handling in CCPP                                               | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_PBL_generic_pre_run.html
 !!
 #endif
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
-        ntwa, ntia, ntgl, ntoz, ntke, ntkev,                                             &
+        ntwa, ntia, ntgl, ntoz, ntke, ntkev, trans_aero, ntchs, ntchm,                   &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
         satmedmf, qgrs, vdftra, errmsg, errflg)
@@ -66,7 +30,8 @@
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
-      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, ntchs, ntchm
+      logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
@@ -78,7 +43,7 @@
       integer, intent(out) :: errflg
 
       !local variables
-      integer :: i, k
+      integer :: i, k, kk, n
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -176,6 +141,17 @@
               vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
+          if (trans_aero) then
+            kk = 7
+            do n=ntchs,ntchm+ntchs-1
+              kk = kk + 1
+              do k=1,levs
+                do i=1,im
+                  vdftra(i,k,kk) = qgrs(i,k,n)
+                enddo
+              enddo
+            enddo
+          endif
         elseif (imp_physics == imp_physics_zhao_carr) then
 ! Zhao/Carr/Sundqvist
           if (cplchm) then
@@ -216,112 +192,12 @@
 
 #if 0
 !> \section arg_table_GFS_PBL_generic_post_run Argument Table
-!! | local_name                   | standard_name                                                                     | long_name                                                                                   | units         | rank | type      |    kind   | intent | optional |
-!! |------------------------------|-----------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im                           | horizontal_loop_extent                                                            | horizontal loop extent                                                                      | count         |    0 | integer   |           | in     | F        |
-!! | levs                         | vertical_dimension                                                                | vertical layer dimension                                                                    | count         |    0 | integer   |           | in     | F        |
-!! | nvdiff                       | number_of_vertical_diffusion_tracers                                              | number of tracers to diffuse vertically                                                     | count         |    0 | integer   |           | in     | F        |
-!! | ntrac                        | number_of_tracers                                                                 | number of tracers                                                                           | count         |    0 | integer   |           | in     | F        |
-!! | ntqv                         | index_for_water_vapor                                                             | tracer index for water vapor (specific humidity)                                            | index         |    0 | integer   |           | in     | F        |
-!! | ntcw                         | index_for_liquid_cloud_condensate                                                 | tracer index for cloud condensate (or liquid water)                                         | index         |    0 | integer   |           | in     | F        |
-!! | ntiw                         | index_for_ice_cloud_condensate                                                    | tracer index for  ice water                                                                 | index         |    0 | integer   |           | in     | F        |
-!! | ntrw                         | index_for_rain_water                                                              | tracer index for rain water                                                                 | index         |    0 | integer   |           | in     | F        |
-!! | ntsw                         | index_for_snow_water                                                              | tracer index for snow water                                                                 | index         |    0 | integer   |           | in     | F        |
-!! | ntlnc                        | index_for_liquid_cloud_number_concentration                                       | tracer index for liquid number concentration                                                | index         |    0 | integer   |           | in     | F        |
-!! | ntinc                        | index_for_ice_cloud_number_concentration                                          | tracer index for ice    number concentration                                                | index         |    0 | integer   |           | in     | F        |
-!! | ntrnc                        | index_for_rain_number_concentration                                               | tracer index for rain   number concentration                                                | index         |    0 | integer   |           | in     | F        |
-!! | ntsnc                        | index_for_snow_number_concentration                                               | tracer index for snow   number concentration                                                | index         |    0 | integer   |           | in     | F        |
-!! | ntgnc                        | index_for_graupel_number_concentration                                            | tracer index for graupel number concentration                                               | index         |    0 | integer   |           | in     | F        |
-!! | ntwa                         | index_for_water_friendly_aerosols                                                 | tracer index for water friendly aerosol                                                     | index         |    0 | integer   |           | in     | F        |
-!! | ntia                         | index_for_ice_friendly_aerosols                                                   | tracer index for ice friendly aerosol                                                       | index         |    0 | integer   |           | in     | F        |
-!! | ntgl                         | index_for_graupel                                                                 | tracer index for graupel                                                                    | index         |    0 | integer   |           | in     | F        |
-!! | ntoz                         | index_for_ozone                                                                   | tracer index for ozone mixing ratio                                                         | index         |    0 | integer   |           | in     | F        |
-!! | ntke                         | index_for_turbulent_kinetic_energy                                                | tracer index for turbulent kinetic energy                                                   | index         |    0 | integer   |           | in     | F        |
-!! | ntkev                        | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer                      | index for turbulent kinetic energy in the vertically diffused tracer array                  | index         |    0 | integer   |           | in     | F        |
-!! | imp_physics                  | flag_for_microphysics_scheme                                                      | choice of microphysics scheme                                                               | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_gfdl             | flag_for_gfdl_microphysics_scheme                                                 | choice of GFDL microphysics scheme                                                          | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_thompson         | flag_for_thompson_microphysics_scheme                                             | choice of Thompson microphysics scheme                                                      | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_wsm6             | flag_for_wsm6_microphysics_scheme                                                 | choice of WSM6 microphysics scheme                                                          | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_zhao_carr        | flag_for_zhao_carr_microphysics_scheme                                            | choice of Zhao-Carr microphysics scheme                                                     | flag          |    0 | integer   |           | in     | F        |
-!! | imp_physics_mg               | flag_for_morrison_gettelman_microphysics_scheme                                   | choice of Morrison-Gettelman microphysics scheme                                            | flag          |    0 | integer   |           | in     | F        |
-!! | ltaerosol                    | flag_for_aerosol_physics                                                          | flag for aerosol physics                                                                    | flag          |    0 | logical   |           | in     | F        |
-!! | cplflx                       | flag_for_flux_coupling                                                            | flag controlling cplflx collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
-!! | cplchm                       | flag_for_chemistry_coupling                                                       | flag controlling cplchm collection (default off)                                            | flag          |    0 | logical   |           | in     | F        |
-!! | lssav                        | flag_diagnostics                                                                  | logical flag for storing diagnostics                                                        | flag          |    0 | logical   |           | in     | F        |
-!! | ldiag3d                      | flag_diagnostics_3D                                                               | flag for 3d diagnostic fields                                                               | flag          |    0 | logical   |           | in     | F        |
-!! | lsidea                       | flag_idealized_physics                                                            | flag for idealized physics                                                                  | flag          |    0 | logical   |           | in     | F        |
-!! | hybedmf                      | flag_for_hedmf                                                                    | flag for hybrid edmf pbl scheme (moninedmf)                                                 | flag          |    0 | logical   |           | in     | F        |
-!! | do_shoc                      | flag_for_shoc                                                                     | flag for SHOC                                                                               | flag          |    0 | logical   |           | in     | F        |
-!! | satmedmf                     | flag_for_scale_aware_TKE_moist_EDMF_PBL                                           | flag for scale-aware TKE moist EDMF PBL scheme                                              | flag          |    0 | logical   |           | in     | F        |
-!! | shinhong                     | flag_for_scale_aware_Shinhong_PBL                                                 | flag for scale-aware Shinhong PBL scheme                                                    | flag          |    0 | logical   |           | in     | F        |
-!! | do_ysu                       | flag_for_ysu                                                                      | flag for YSU PBL scheme                                                                     | flag          |    0 | logical   |           | in     | F        |
-!! | dvdftra                      | tendency_of_vertically_diffused_tracer_concentration                              | updated tendency of the tracers due to vertical diffusion in PBL scheme                     | kg kg-1 s-1   |    3 | real      | kind_phys | in     | F        |
-!! | dusfc1                       | instantaneous_surface_x_momentum_flux                                             | surface momentum flux in the x-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | dvsfc1                       | instantaneous_surface_y_momentum_flux                                             | surface momentum flux in the y-direction valid for current call                             | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | dtsfc1                       | instantaneous_surface_upward_sensible_heat_flux                                   | surface upward sensible heat flux valid for current call                                    | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | dqsfc1                       | instantaneous_surface_upward_latent_heat_flux                                     | surface upward latent heat flux valid for current call                                      | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | dtf                          | time_step_for_dynamics                                                            | dynamics timestep                                                                           | s             |    0 | real      | kind_phys | in     | F        |
-!! | dudt                         | tendency_of_x_wind_due_to_model_physics                                           | updated tendency of the x wind                                                              | m s-2         |    2 | real      | kind_phys | in     | F        |
-!! | dvdt                         | tendency_of_y_wind_due_to_model_physics                                           | updated tendency of the y wind                                                              | m s-2         |    2 | real      | kind_phys | in     | F        |
-!! | dtdt                         | tendency_of_air_temperature_due_to_model_physics                                  | updated tendency of the temperature                                                         | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | htrsw                        | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep        | total sky sw heating rate                                                                   | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | htrlw                        | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep         | total sky lw heating rate                                                                   | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | xmu                          | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                      | zenith angle temporal adjustment factor for shortwave                                       | none          |    1 | real      | kind_phys | in     | F        |
-!! | dqdt                         | tendency_of_tracers_due_to_model_physics                                          | updated tendency of the tracers due to model physics                                        | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
-!! | dusfc_cpl                    | cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep            | cumulative sfc u momentum flux multiplied by timestep                                       | Pa s          |    1 | real      | kind_phys | inout  | F        |
-!! | dvsfc_cpl                    | cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep            | cumulative sfc v momentum flux multiplied by timestep                                       | Pa s          |    1 | real      | kind_phys | inout  | F        |
-!! | dtsfc_cpl                    | cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep  | cumulative sfc sensible heat flux multiplied by timestep                                    | W m-2 s       |    1 | real      | kind_phys | inout  | F        |
-!! | dqsfc_cpl                    | cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep    | cumulative sfc latent heat flux multiplied by timestep                                      | W m-2 s       |    1 | real      | kind_phys | inout  | F        |
-!! | dusfci_cpl                   | instantaneous_surface_x_momentum_flux_for_coupling                                | instantaneous sfc u momentum flux                                                           | Pa            |    1 | real      | kind_phys | inout  | F        |
-!! | dvsfci_cpl                   | instantaneous_surface_y_momentum_flux_for_coupling                                | instantaneous sfc v momentum flux                                                           | Pa            |    1 | real      | kind_phys | inout  | F        |
-!! | dtsfci_cpl                   | instantaneous_surface_upward_sensible_heat_flux_for_coupling                      | instantaneous sfc sensible heat flux                                                        | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | dqsfci_cpl                   | instantaneous_surface_upward_latent_heat_flux_for_coupling                        | instantaneous sfc latent heat flux                                                          | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | dusfc_diag                   | cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep                | cumulative sfc x momentum flux multiplied by timestep                                       | Pa s          |    1 | real      | kind_phys | inout  | F        |
-!! | dvsfc_diag                   | cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep                | cumulative sfc y momentum flux multiplied by timestep                                       | Pa s          |    1 | real      | kind_phys | inout  | F        |
-!! | dtsfc_diag                   | cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep      | cumulative sfc sensible heat flux multiplied by timestep                                    | W m-2 s       |    1 | real      | kind_phys | inout  | F        |
-!! | dqsfc_diag                   | cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep        | cumulative sfc latent heat flux multiplied by timestep                                      | W m-2 s       |    1 | real      | kind_phys | inout  | F        |
-!! | dusfci_diag                  | instantaneous_surface_x_momentum_flux_for_diag                                    | instantaneous sfc x momentum flux multiplied by timestep                                    | Pa            |    1 | real      | kind_phys | inout  | F        |
-!! | dvsfci_diag                  | instantaneous_surface_y_momentum_flux_for_diag                                    | instantaneous sfc y momentum flux multiplied by timestep                                    | Pa            |    1 | real      | kind_phys | inout  | F        |
-!! | dtsfci_diag                  | instantaneous_surface_upward_sensible_heat_flux_for_diag                          | instantaneous sfc sensible heat flux multiplied by timestep                                 | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | dqsfci_diag                  | instantaneous_surface_upward_latent_heat_flux_for_diag                            | instantaneous sfc latent heat flux multiplied by timestep                                   | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | dt3dt                        | cumulative_change_in_temperature_due_to_PBL                                       | cumulative change in temperature due to PBL                                                 | K             |    2 | real      | kind_phys | inout  | F        |
-!! | du3dt_PBL                    | cumulative_change_in_x_wind_due_to_PBL                                            | cumulative change in x wind due to PBL                                                      | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | du3dt_OGWD                   | cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag                   | cumulative change in x wind due to orographic gravity wave drag                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | dv3dt_PBL                    | cumulative_change_in_y_wind_due_to_PBL                                            | cumulative change in y wind due to PBL                                                      | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | dv3dt_OGWD                   | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag                   | cumulative change in y wind due to orographic gravity wave drag                             | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | dq3dt                        | cumulative_change_in_water_vapor_specific_humidity_due_to_PBL                     | cumulative change in water vapor specific humidity due to PBL                               | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | dq3dt_ozone                  | cumulative_change_in_ozone_mixing_ratio_due_to_PBL                                | cumulative change in ozone mixing ratio due to PBL                                          | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | rd                           | gas_constant_dry_air                                                              | ideal gas constant for dry air                                                              | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | cp                           | specific_heat_of_dry_air_at_constant_pressure                                     | specific heat of dry air at constant pressure                                               | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | fvirt                        | ratio_of_vapor_to_dry_air_gas_constants_minus_one                                 | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                       | none          |    0 | real      | kind_phys | in     | F        |
-!! | hvap                         | latent_heat_of_vaporization_of_water_at_0C                                        | latent heat of evaporation/sublimation                                                      | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | t1                           | air_temperature_at_lowest_model_layer_for_diag                                    | layer 1 temperature for diag                                                                | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1                           | water_vapor_specific_humidity_at_lowest_model_layer_for_diag                      | layer 1 specific humidity for diag                                                          | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | prsl                         | air_pressure                                                                      | mean layer pressure                                                                         | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | hflx                         | kinematic_surface_upward_sensible_heat_flux                                       | kinematic surface upward sensible heat flux                                                 | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | ushfsfci                     | instantaneous_surface_upward_sensible_heat_flux_for_chemistry_coupling            | instantaneous upward sensible heat flux for chemistry coupling                              | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | oceanfrac                    | sea_area_fraction                                                                 | fraction of horizontal grid area occupied by ocean                                          | frac          |    1 | real      | kind_phys | in     | F        |
-!! | fice                         | sea_ice_concentration                                                             | ice fraction over open water                                                                | frac          |    1 | real      | kind_phys | in     | F        |
-!! | dusfc_cice                   | surface_x_momentum_flux_for_coupling_interstitial                                 | sfc x momentum flux for coupling interstitial                                               | Pa            |    1 | real      | kind_phys | in     | F        | 
-!! | dvsfc_cice                   | surface_y_momentum_flux_for_coupling_interstitial                                 | sfc y momentum flux for coupling interstitial                                               | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | dtsfc_cice                   | surface_upward_sensible_heat_flux_for_coupling_interstitial                       | sfc sensible heat flux for coupling interstitial                                            | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | dqsfc_cice                   | surface_upward_latent_heat_flux_for_coupling_interstitial                         | sfc latent heat flux for coupling interstitial                                              | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | dry                          | flag_nonzero_land_surface_fraction                                                | flag indicating presence of some land surface area fraction                                 | flag          |    1 | logical   |           | in     | F        |
-!! | icy                          | flag_nonzero_sea_ice_surface_fraction                                             | flag indicating presence of some sea ice surface area fraction                              | flag          |    1 | logical   |           | in     | F        |
-!! | wind                         | wind_speed_at_lowest_model_layer                                                  | wind speed at lowest model level                                                            | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | stress_ocn                   | surface_wind_stress_over_ocean                                                    | surface wind stress over ocean                                                              | m2 s-2        |    1 | real      | kind_phys | in     | F        |
-!! | hflx_ocn                     | kinematic_surface_upward_sensible_heat_flux_over_ocean                            | kinematic surface upward sensible heat flux over ocean                                      | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | evap_ocn                     | kinematic_surface_upward_latent_heat_flux_over_ocean                              | kinematic surface upward latent heat flux over ocean                                        | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | ugrs1                        | x_wind_at_lowest_model_layer                                                      | zonal wind at lowest model layer                                                            | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | vgrs1                        | y_wind_at_lowest_model_layer                                                      | meridional wind at lowest model layer                                                       | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | dkt_cpl                      | instantaneous_atmosphere_heat_diffusivity                                         | instantaneous atmospheric heat diffusivity                                                  | m2 s-1        |    2 | real      | kind_phys | inout  | F        |
-!! | dkt                          | atmosphere_heat_diffusivity                                                       | diffusivity for heat                                                                        | m2 s-1        |    2 | real      | kind_phys | in     | F        |
-!! | errmsg                       | ccpp_error_message                                                                | error message for error handling in CCPP                                                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                       | ccpp_error_flag                                                                   | error flag for error handling in CCPP                                                       | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_PBL_generic_post_run.html
 !!
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
+        trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
@@ -335,8 +211,9 @@
 
       implicit none
 
-      integer, intent(in) :: im, levs, nvdiff, ntrac
+      integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
@@ -371,7 +248,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      integer :: i, k
+      integer :: i, k, kk, n
       real(kind=kind_phys) :: tem, tem1, rho
 
       ! Initialize CCPP error handling variables
@@ -464,8 +341,7 @@
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then
-  ! GFDL MP
+        elseif (imp_physics == imp_physics_gfdl) then        ! GFDL MP
           do k=1,levs
             do i=1,im
               dqdt(i,k,ntqv) = dvdftra(i,k,1)
@@ -477,6 +353,17 @@
               dqdt(i,k,ntoz) = dvdftra(i,k,7)
             enddo
           enddo
+          if (trans_aero) then
+            kk = 7
+            do n=ntchs,ntchm+ntchs-1
+              kk = kk + 1
+              do k=1,levs
+                do i=1,im
+                  dqdt(i,k,n) = dvdftra(i,k,kk)
+                enddo
+              enddo
+            enddo
+          endif
         elseif (imp_physics == imp_physics_zhao_carr) then
           if (cplchm) then
             do k=1,levs

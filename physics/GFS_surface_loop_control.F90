@@ -17,14 +17,7 @@
 !!
 #if 0
 !! \section arg_table_GFS_surface_loop_control_part1_run Arguments
-!! | local_name     | standard_name                                          | long_name                                  | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|--------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                     | count      |    0 | integer   |           | in     | F        |
-!! | iter           | ccpp_loop_counter                                      | loop counter for subcycling loops in CCPP  | index      |    0 | integer   |           | in     | F        |
-!! | wind           | wind_speed_at_lowest_model_layer                       | wind speed at lowest model level           | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | flag_guess     | flag_for_guess_run                                     | flag for guess run                         | flag       |    1 | logical   |           | inout  | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP   | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP      | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_surface_loop_control_part1_run.html
 !!
 #endif
 !!  \section general General Algorithm
@@ -80,19 +73,7 @@
 !!
 #if 0
 !! \section arg_table_GFS_surface_loop_control_part2_run Arguments
-!! | local_name     | standard_name                                          | long_name                                                            | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|----------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                                               | count      |    0 | integer   |           | in     | F        |
-!! | iter           | ccpp_loop_counter                                      | loop counter for subcycling loops in CCPP                            | index      |    0 | integer   |           | in     | F        |
-!! | wind           | wind_speed_at_lowest_model_layer                       | wind speed at lowest model level                                     | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | flag_guess     | flag_for_guess_run                                     | flag for guess run                                                   | flag       |    1 | logical   |           | inout  | F        |
-!! | flag_iter      | flag_for_iteration                                     | flag for iteration                                                   | flag       |    1 | logical   |           | inout  | F        |
-!! | dry            | flag_nonzero_land_surface_fraction                     | flag indicating presence of some land surface area fraction          | flag       |    1 | logical   |           | in     | F        |
-!! | wet            | flag_nonzero_wet_surface_fraction                      | flag indicating presence of some ocean or lake surface area fraction | flag       |    1 | logical   |           | in     | F        |
-!! | icy            | flag_nonzero_sea_ice_surface_fraction                  | flag indicating presence of some sea ice surface area fraction       | flag       |    1 | logical   |           | in     | F        |
-!! | nstf_name1     | flag_for_nsstm_run                                     | NSSTM flag: off/uncoupled/coupled=0/1/2                              | flag       |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                             | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_surface_loop_control_part2_run.html
 !!
 #endif
 !!  \section general General Algorithm
