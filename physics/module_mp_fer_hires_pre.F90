@@ -21,7 +21,8 @@
      subroutine mp_fer_hires_pre_finalize ()
      end subroutine mp_fer_hires_pre_finalize
 
-!> \defgroup hafs_fa HAFS Ferrier-Aligo MP Scheme Update Water Module
+!> \defgroup hafs_fa_update HAFS Ferrier-Aligo MP Scheme Update Water Module
+!! \ingroup hafs_famp
 !! This subroutine is to update water array with CWM, F_RAIN, and F_ICE 
 !! for Ferrier-Aligo MP scheme. 
 !! \section arg_table_mp_fer_hires_pre_run Argument Table
