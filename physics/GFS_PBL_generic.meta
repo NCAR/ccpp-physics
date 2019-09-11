@@ -161,6 +161,14 @@
   type = integer
   intent = in
   optional = F
+[nqrimef]
+  standard_name = index_for_mass_weighted_rime_factor
+  long_name = tracer index for mass weighted rime factor
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [trans_aero]
   standard_name = flag_for_aerosol_convective_transport_and_PBL_diffusion
   long_name = flag for aerosol convective transport and PBL diffusion
@@ -228,6 +236,14 @@
 [imp_physics_mg]
   standard_name = flag_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
   type = integer

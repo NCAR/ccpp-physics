@@ -1553,6 +1553,41 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme 
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cwm]
+  standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
+  long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[f_ice]
+  standard_name = fraction_of_ice_water_cloud
+  long_name = fraction of ice water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[f_rain]
+  standard_name = fraction_of_rain_water_cloud
+  long_name = fraction of rain water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [dtf]
   standard_name = time_step_for_dynamics
   long_name = dynamics timestep
@@ -1584,6 +1619,15 @@
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
   units = radians
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[epsq]
+  standard_name = minimum_value_of_specific_humidity
+  long_name = floor value for specific humidity
+  units = kg kg-1
   dimensions = ()
   type = real
   kind = kind_phys
