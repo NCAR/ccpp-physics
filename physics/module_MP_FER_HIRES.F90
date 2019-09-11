@@ -1,6 +1,6 @@
-!
-!-- "Modified" fer_hires microphysics - 11 July 2016 version
-!
+!>\file module_MP_FER_HIRES.F90
+!! "Modified" fer_hires microphysics - 11 July 2016 version
+!!
 ! (1) Ice nucleation: Fletcher (1962) replaces Meyers et al. (1992)
 ! (2) Cloud ice is a simple function of the number concentration from (1), and it
 !     is no longer a fractional function of the large ice.  Thus, the FLARGE &
@@ -232,7 +232,9 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------------------------------------------------------------------
 !&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 !-----------------------------------------------------------------------
-!ZM      SUBROUTINE FER_HIRES (itimestep,DT,RHgrd,                         &
+
+!>\ingroup hafs_famp
+!! This is the driver scheme of Ferrier-Aligo microphysics scheme.
       SUBROUTINE FER_HIRES (DT,RHgrd,                         &
      &                      dz8w,rho_phy,p_phy,pi_phy,th_phy,t_phy,     &
      &                      q,qt,                                       &
@@ -667,6 +669,31 @@ ENDIF
 !###############################################################################
 !###############################################################################
 !
+!>\ingroup hafs_famp 
+!! This is the grid-scale microphysical processes of Ferrier-Aligo microphysics
+!! scheme (i.e., condensation and precipitation).
+!!\param arain     accumulated rainfall at the surface (kg) 
+!!\param asnow     accumulated snowfall at the surface (kg)
+!!\param dtph      physics time step (s)
+!!\param rhc_col   vertical column of threshold relative humidity for onset of 
+!!                 condensation (ratio)
+!!\param i_index   i index
+!!\param j_index   j index
+!!\param lsfc      Eta level of level above surface, ground
+!!\param p_col     vertical column of model pressure (Pa)
+!!\param qi_col    vertical column of model ice mixing ratio (kg/kg)
+!!\param qr_col    vertical column of model rain ratio (kg/kg)
+!!\param q_col     vertical column of model water vapor specific humidity (kg/kg)
+!!\param qw_col
+!!\param rimef_col
+!!\param t_col
+!!\param thick_col
+!!\param wc_col
+!!\param lm
+!!\param pcond1d
+!!\param pidep1d
+!!\param piacw1d
+!!\param piacwi1d
       SUBROUTINE EGCP01COLUMN_hr ( ARAIN, ASNOW, DTPH, RHC_col,          &
      & I_index, J_index, LSFC,                                           &
      & P_col, QI_col, QR_col, Q_col, QW_col, RimeF_col, T_col,           &

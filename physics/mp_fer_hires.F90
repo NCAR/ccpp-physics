@@ -95,7 +95,7 @@ module mp_fer_hires
  
      end subroutine mp_fer_hires_init
 
-
+!>\defgroup hafs_famp HAFS Ferrier-Aligo Cloud Microphysics Scheme
 !> This is the CCPP-compliant FER_HIRES driver module.
 !> \section arg_table_mp_fer_hires_run Argument Table
 !! | local_name  | standard_name                                                             | long_name                                                                                          | units      | rank | type     |   kind    | intent | optional |
