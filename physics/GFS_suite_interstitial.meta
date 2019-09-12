@@ -9,6 +9,14 @@
   type = GFS_interstitial_type
   intent = inout
   optional = F
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1193,6 +1201,14 @@
 [imp_physics_wsm6]
   standard_name = flag_for_wsm6_microphysics_scheme
   long_name = choice of WSM6 microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
   type = integer

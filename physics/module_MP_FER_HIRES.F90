@@ -378,13 +378,18 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !
 !--- Initialize column data (1D arrays)
 !
-        L=1
+
+
+!MZ        L=1      ! MZ: 1 is top in Eta Model
+           L=LM
 !-- qt = CWM, total condensate
         IF (qt(I,J,L) .LE. EPSQ) qt(I,J,L)=EPSQ
           F_ice_phy(I,J,L)=1.
           F_rain_phy(I,J,L)=0.
           F_RimeF_phy(I,J,L)=1.
-          DO L=1,LSFC
+!MZ: in Eta model, integrate from top to bottom 
+!MZ          DO L=1,LSFC
+          do L=LM,1,-1
 !
 !--- Pressure (Pa) = (Psfc-Ptop)*(ETA/ETA_sfc)+Ptop
 !
@@ -488,7 +493,8 @@ ENDIF
 !
 !--- Update storage arrays
 !
-          DO L=1,LSFC
+!MZ          DO L=1,LSFC
+          do L=LM,1,-1
             TRAIN_phy(I,J,L)=(T_col(L)-T_phy(I,J,L))/DT
             TLATGS_phy(I,J,L)=T_col(L)-T_phy(I,J,L)
             T_phy(I,J,L)=T_col(L)
@@ -578,7 +584,8 @@ ENDIF
 !MZ$OMP PRIVATE(j,k,i, th_phy, wc, qs, qc)
 !.......................................................................
      DO j = jms,jme
-        DO k = 1,lm
+        !MZ DO k = 1,lm
+        do k = lm, 1, -1
 	DO i = ims,ime
            th_phy(i,j,k) = t_phy(i,j,k)/pi_phy(i,j,k)
            WC=qt(I,J,K)
@@ -904,7 +911,9 @@ ENDIF
 !------------ Loop from top (L=1) to surface (L=LSFC) ------------------
 !-----------------------------------------------------------------------
 !
-big_loop: DO L=1,LSFC
+!MZ FV3
+!big_loop: DO L=1,LSFC
+big_loop: DO L=LM,1,-1
         pcond1d(L)=0.
         pidep1d(L)=0.
         piacw1d(L)=0.

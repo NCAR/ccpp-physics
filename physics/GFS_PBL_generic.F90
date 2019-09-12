@@ -223,9 +223,10 @@
 !!
 #endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
-        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
+        imp_physics_fer_hires,                                                                                                 &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &

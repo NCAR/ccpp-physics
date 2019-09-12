@@ -181,8 +181,8 @@
         snow    = frain*snow0                 ! time-step snow
 
       else if (imp_physics == imp_physics_fer_hires) then
-        tprcp   = max (0.,rain) ! time-step convective and explicit precip
-        ice     = frain*rain1*sr                  ! time-step ice
+        tprcp   = max (0.,rain)               ! time-step convective and explicit precip
+        ice     = frain*rain1*sr              ! time-step ice
       end if
 
       if (lsm==lsm_ruc) then
