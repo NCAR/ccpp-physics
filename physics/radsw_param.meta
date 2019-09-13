@@ -1,0 +1,36 @@
+[ccpp-arg-table]
+  name = topfsw_type
+  type = ddt
+
+########################################################################
+[ccpp-arg-table]
+  name = sfcfsw_type
+  type = ddt
+
+########################################################################
+[ccpp-arg-table]
+  name = cmpfsw_type
+  type = ddt
+
+########################################################################
+[ccpp-arg-table]
+  name = module_radsw_parameters
+  type = module
+[topfsw_type]
+  standard_name = topfsw_type
+  long_name = definition of type topfsw_type
+  units = DDT
+  dimensions = ()
+  type = topfsw_type
+[sfcfsw_type]
+  standard_name = sfcfsw_type
+  long_name = definition of type sfcfsw_type
+  units = DDT
+  dimensions = ()
+  type = sfcfsw_type
+[cmpfsw_type]
+  standard_name = cmpfsw_type
+  long_name = definition of type cmpfsw_type
+  units = DDT
+  dimensions = ()
+  type = cmpfsw_type

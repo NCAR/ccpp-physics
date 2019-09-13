@@ -1,0 +1,56 @@
+[ccpp-arg-table]
+  name = cu_ntiedtke_post_run
+  type = scheme
+[t]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[q]
+  standard_name = water_vapor_specific_humidity_updated_by_physics
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prevst]
+  standard_name = temperature_from_previous_timestep
+  long_name = temperature from previous time step
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[prevsq]
+  standard_name = moisture_from_previous_timestep
+  long_name = moisture from previous time step
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

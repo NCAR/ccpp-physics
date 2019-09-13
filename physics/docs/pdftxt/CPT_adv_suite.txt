@@ -82,7 +82,7 @@ The advanced csawmg physics suite uses the parameterizations in the following or
       <scheme>GFS_PBL_generic_pre</scheme>
       <scheme>hedmf</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
-      <scheme>gwdps_pre</scheme>
+      <scheme>GFS_GWD_generic_pre</scheme>
       <scheme>gwdps</scheme>
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
