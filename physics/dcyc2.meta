@@ -12,8 +12,8 @@
   name = dcyc2t3_run
   type = scheme
 [solhr]
-  standard_name = forecast_hour
-  long_name = forecast time in 24-hour form
+  standard_name = forecast_hour_of_the_day
+  long_name = time in hours after 00z at the current timestep
   units = h
   dimensions = ()
   type = real
