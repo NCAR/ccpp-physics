@@ -915,7 +915,7 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL,1:ITBL),PRIVATE,SAVE:: &
 !--------1---------2---------3---------4---------5---------6---------7--
       CUBRY=UBRY*1.5  !*2.
 !--------------FIND THE HEIGHT OF THE PBL-------------------------------
-      LPBL=LMH/3
+      LPBL=LMH
 !      LPBL=LMH-1
       DO K=LMH-1,1,-1
 !        EPSL(K)=1.
@@ -928,11 +928,11 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL,1:ITBL),PRIVATE,SAVE:: &
       DO K=LMH-1,1,-1
         if(q2(k)-epsq2(k)+epsq2(lm).le.epsq2(lm)*fh) then
           LPBL=K
-!QL          GO TO 110
+          GO TO 110
         ENDIF
       ENDDO
 !
-!QL      LPBL=1
+      LPBL=1
 !
 !--------------THE HEIGHT OF THE PBL------------------------------------
 !
@@ -2117,12 +2117,10 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL):: &
       P(1)= RTDXC*(6.*(DYDXR-DYDXL)-DXL*Y2(1))                          
       Q(1)=-RTDXC*DXR                                                   
 !                                                                       
-!QL      IF(NOLD.EQ.3) GO TO 700                                           
-      IF(NOLD.NE.3) THEN
+      IF(NOLD.EQ.3) GO TO 700                                           
 !-----------------------------------------------------------------------
-!      K=3                                                               
+      K=3                                                               
 !                                                                       
-      DO K=3,NOLD-1
  100  DXL=DXR                                                           
       DYDXL=DYDXR                                                       
       DXR=XOLD(K+1)-XOLD(K)                                             
@@ -2133,97 +2131,49 @@ REAL(KIND=KFPT),DIMENSION(1:JTBL):: &
       P(K-1)= DEN*(6.*(DYDXR-DYDXL)-DXL*P(K-2))                         
       Q(K-1)=-DEN*DXR                                                   
 !                                                                       
-!      K=K+1                                                             
-!QL      IF(K.LT.NOLD) GO TO 100      
-      END DO
-      END IF                                     
+      K=K+1                                                             
+      IF(K.LT.NOLD) GO TO 100                                           
 !-----------------------------------------------------------------------
-!QL 700  K=NOLDM1                                                          
-!      K=NOLDM1
-!     
-      DO K=NOLDM1, 2, -1                                                                  
+ 700  K=NOLDM1                                                          
+!                                                                       
  200  Y2(K)=P(K-1)+Q(K-1)*Y2(K+1)                                       
 !                                                                       
-!      K=K-1                                                             
-!QL      IF(K.GT.1) GO TO 200                                              
-      END DO
+      K=K-1                                                             
+      IF(K.GT.1) GO TO 200                                              
 !-----------------------------------------------------------------------
-!      K1=1                                                              
+      K1=1                                                              
 !                                                                       
-      DO K1=1,NNEW
  300  XK=XNEW(K1)                                                       
 !                                                                       
-      YNEW(K1)=YOLD(NOLD)                                               
       DO 400 K2=2,NOLD                                                  
-      IF(XOLD(K2).LE.XK) CYCLE
+      IF(XOLD(K2).LE.XK) GO TO 400                                      
       KOLD=K2-1                                                         
-!QL      GO TO 450                                                         
-      IF(K1.EQ.1)THEN    ! 450
-      K=KOLD
-!
-      Y2K=Y2(K)
-      Y2KP1=Y2(K+1)
-      DX=XOLD(K+1)-XOLD(K)
-      RDX=1./DX
-!
-      AK=.1666667*RDX*(Y2KP1-Y2K)
-      BK=.5*Y2K
-      CK=RDX*(YOLD(K+1)-YOLD(K))-.1666667*DX*(Y2KP1+Y2K+Y2K)
-      X=XK-XOLD(K)
-      XSQ=X*X
-      YNEW(K1)=AK*XSQ*X+BK*XSQ+CK*X+YOLD(K)
-!
-      EXIT
-      END IF
-
-      IF(K.EQ.KOLD)THEN     ! 550
-      X=XK-XOLD(K)
-      XSQ=X*X
-      YNEW(K1)=AK*XSQ*X+BK*XSQ+CK*X+YOLD(K)
-      EXIT
-      END IF
-
-      K=KOLD
-!
-      Y2K=Y2(K)
-      Y2KP1=Y2(K+1)
-      DX=XOLD(K+1)-XOLD(K)
-      RDX=1./DX
-!
-      AK=.1666667*RDX*(Y2KP1-Y2K)
-      BK=.5*Y2K
-      CK=RDX*(YOLD(K+1)-YOLD(K))-.1666667*DX*(Y2KP1+Y2K+Y2K)
-      X=XK-XOLD(K)
-      XSQ=X*X
-      YNEW(K1)=AK*XSQ*X+BK*XSQ+CK*X+YOLD(K)
-!
-      EXIT
-
+      GO TO 450                                                         
  400  CONTINUE                                                          
-!      GO TO 600                                                         
+      YNEW(K1)=YOLD(NOLD)                                               
+      GO TO 600                                                         
 !                                                                       
-! 450  IF(K1.EQ.1)   GO TO 500                                           
-!      IF(K.EQ.KOLD) GO TO 550                                           
+ 450  IF(K1.EQ.1)   GO TO 500                                           
+      IF(K.EQ.KOLD) GO TO 550                                           
 !                                                                       
-! 500  K=KOLD                                                            
+ 500  K=KOLD                                                            
 !                                                                       
-!      Y2K=Y2(K)                                                         
-!      Y2KP1=Y2(K+1)                                                     
-!      DX=XOLD(K+1)-XOLD(K)                                              
-!      RDX=1./DX                                                         
+      Y2K=Y2(K)                                                         
+      Y2KP1=Y2(K+1)                                                     
+      DX=XOLD(K+1)-XOLD(K)                                              
+      RDX=1./DX                                                         
 !                                                                       
-!      AK=.1666667*RDX*(Y2KP1-Y2K)                                       
-!      BK=.5*Y2K                                                         
-!      CK=RDX*(YOLD(K+1)-YOLD(K))-.1666667*DX*(Y2KP1+Y2K+Y2K)            
+      AK=.1666667*RDX*(Y2KP1-Y2K)                                       
+      BK=.5*Y2K                                                         
+      CK=RDX*(YOLD(K+1)-YOLD(K))-.1666667*DX*(Y2KP1+Y2K+Y2K)            
 !                                                                       
-! 550  X=XK-XOLD(K)                                                      
-!      XSQ=X*X                                                           
+ 550  X=XK-XOLD(K)                                                      
+      XSQ=X*X                                                           
 !                                                                       
-!      YNEW(K1)=AK*XSQ*X+BK*XSQ+CK*X+YOLD(K)                             
+      YNEW(K1)=AK*XSQ*X+BK*XSQ+CK*X+YOLD(K)                             
 !                                                                       
-! 600  K1=K1+1                                                           
-!      IF(K1.LE.NNEW) GO TO 300                                          
-      END DO
+ 600  K1=K1+1                                                           
+      IF(K1.LE.NNEW) GO TO 300                                          
 !-----------------------------------------------------------------------
                         ENDSUBROUTINE SPLINE 
 !-----------------------------------------------------------------------
