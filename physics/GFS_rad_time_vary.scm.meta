@@ -1,0 +1,54 @@
+[ccpp-arg-table]
+  name = GFS_rad_time_vary_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rad_time_vary_run
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = inout
+  optional = F
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = Fortran DDT containing FV3-GFS prognostic state data in from dycore
+  units = DDT
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+  optional = F
+[Tbd]
+  standard_name = GFS_tbd_type_instance
+  long_name = Fortran DDT containing FV3-GFS data not yet assigned to a defined container
+  units = DDT
+  dimensions = ()
+  type = GFS_tbd_type
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rad_time_vary_finalize
+  type = scheme

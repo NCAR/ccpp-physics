@@ -18,17 +18,7 @@ module cu_gf_driver_post
    end subroutine cu_gf_driver_post_finalize
 
 !> \section arg_table_cu_gf_driver_post_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                        | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|--------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                           | count   |    0 | integer   |           | in     | F        |
-!! | t              | air_temperature_updated_by_physics                     | temperature updated by physics                   | K       |    2 | real      | kind_phys | in     | F        |
-!! | q              | water_vapor_specific_humidity_updated_by_physics       | water vapor specific humidity updated by physics | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | prevst         | temperature_from_previous_timestep                     | temperature from previous time step              | K       |    2 | real      | kind_phys | out    | F        |
-!! | prevsq         | moisture_from_previous_timestep                        | moisture from previous time step                 | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | cactiv         | conv_activity_counter                                  | convective activity memory                       | none    |    1 | integer   |           | in     | F        |
-!! | conv_act       | gf_memory_counter                                      | Memory counter for GF                            | none    |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP         | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP            | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude cu_gf_driver_post_run.html
 !!
    subroutine cu_gf_driver_post_run (im, t, q, prevst, prevsq, cactiv, conv_act, errmsg, errflg)
 

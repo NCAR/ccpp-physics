@@ -62,6 +62,10 @@
       module module_radsw_parameters     !
 !........................................!
 
+!! \section arg_table_module_radsw_parameters
+!! \htmlinclude module_radsw_parameters.html
+!!
+
       use physparam,                only : kind_phys
 
       implicit   none
@@ -69,37 +73,46 @@
       public
 !
 !> derived type for SW fluxes at TOA
-      type :: topfsw_type     
+!! \section arg_table_topfsw_type
+!! \htmlinclude topfsw_type.html
+!!
+      type topfsw_type
         real (kind=kind_phys) :: upfxc      !< total-sky upward flux
         real (kind=kind_phys) :: dnfxc      !< total-sky downward flux
         real (kind=kind_phys) :: upfx0      !< clear-sky upward flux
-      end type
+      end type topfsw_type
 !
 !> derived type for SW fluxes at surface
-      type :: sfcfsw_type      
+!! \section arg_table_sfcfsw_type
+!! \htmlinclude sfcfsw_type.html
+!!
+      type sfcfsw_type
         real (kind=kind_phys) :: upfxc      !< total-sky upward flux
         real (kind=kind_phys) :: dnfxc      !< total-sky downward flux
         real (kind=kind_phys) :: upfx0      !< clear-sky upward flux
         real (kind=kind_phys) :: dnfx0      !< clear-sky downward flux
-      end type
+      end type sfcfsw_type
 !
 !> derived type for SW fluxes' column profiles (at layer interfaces)
-      type :: profsw_type
+      type profsw_type
         real (kind=kind_phys) :: upfxc      !< total-sky upward flux
         real (kind=kind_phys) :: dnfxc      !< total-sky downward flux
         real (kind=kind_phys) :: upfx0      !< clear-sky upward flux
         real (kind=kind_phys) :: dnfx0      !< clear-sky downward flux
-      end type
+      end type profsw_type
 !
 !> derived type for special components of surface SW fluxes
-      type :: cmpfsw_type
+!! \section arg_table_cmpfsw_type
+!! \htmlinclude cmpfsw_type.html
+!!
+      type cmpfsw_type
         real (kind=kind_phys) :: uvbfc      !< total-sky downward flux cover UV-B spectrum
         real (kind=kind_phys) :: uvbf0      !< clear-sky downward flux cover UV-B spectrum
         real (kind=kind_phys) :: nirbm      !< total-sky downward flux for near-IR direct beam
         real (kind=kind_phys) :: nirdf      !< total-sky downward flux for near-IR diffused part
         real (kind=kind_phys) :: visbm      !< total-sky downward flux for UV+Visible direct
         real (kind=kind_phys) :: visdf      !< total-sky downward flux for UV+Visible diffused
-      end type
+      end type cmpfsw_type
 !
 ! Parameter constants for SW band structures
 
@@ -142,8 +155,8 @@
      &            NS23, NS24, NS25, NS26, NS27, NS28, NS29  /
 
 !> reverse checking of band index for each g-point
-      integer, dimension(NGPTSW)      :: NGB
-      data NGB(:) / 16,16,16,16,16,16,                                  & ! band 16
+      integer, dimension(NGPTSW), parameter :: NGB =                    &
+     &           (/ 16,16,16,16,16,16,                                  & ! band 16
      &              17,17,17,17,17,17,17,17,17,17,17,17,                & ! band 17
      &              18,18,18,18,18,18,18,18,                            & ! band 18
      &              19,19,19,19,19,19,19,19,                            & ! band 19
@@ -156,16 +169,15 @@
      &              26,26,26,26,26,26,                                  & ! band 26
      &              27,27,27,27,27,27,27,27,                            & ! band 27
      &              28,28,28,28,28,28,                                  & ! band 28
-     &              29,29,29,29,29,29,29,29,29,29,29,29 /                 ! band 29
+     &              29,29,29,29,29,29,29,29,29,29,29,29 /)                ! band 29
 
 !> \name Starting/ending wavenumber for each of the SW bands
-      real (kind=kind_phys), dimension(NBANDS):: wvnum1, wvnum2
-      data wvnum1(:)    /                                               &
-     &         2600.0, 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0,  &
-     &         8050.0,12850.0,16000.0,22650.0,29000.0,38000.0,  820.0 /
-      data wvnum2(:)    /                                               &
-     &         3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0, 8050.0,  &
-     &        12850.0,16000.0,22650.0,29000.0,38000.0,50000.0, 2600.0 /
+      real (kind=kind_phys), dimension(NBANDS), parameter :: wvnum1 =   &
+     &      (/ 2600.0, 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0,  &
+     &         8050.0,12850.0,16000.0,22650.0,29000.0,38000.0,  820.0 /)
+      real (kind=kind_phys), dimension(NBANDS), parameter :: wvnum2 =   &
+     &      (/ 3250.0, 4000.0, 4650.0, 5150.0, 6150.0, 7700.0, 8050.0,  &
+     &        12850.0,16000.0,22650.0,29000.0,38000.0,50000.0, 2600.0 /)
 
 !
 !........................................!

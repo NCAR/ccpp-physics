@@ -2,11 +2,7 @@
 
 #if 0
 !! \section arg_table_machine
-!! | local_name                        | standard_name             | long_name                                             | units   | rank | type      |   kind   | intent | optional |
-!! |-----------------------------------|-------------------------- |-------------------------------------------------------|---------|------|-----------|----------|--------|----------|
-!! | kind_dyn                          | kind_dyn                  | definition of kind_dyn                                | none    |    0 | integer   |          | none   | F        |
-!! | kind_grid                         | kind_grid                 | definition of kind_grid                               | none    |    0 | integer   |          | none   | F        |
-!! | kind_phys                         | kind_phys                 | definition of kind_phys                               | none    |    0 | integer   |          | none   | F        |
+!! \htmlinclude machine.html
 !!
 #endif
 
