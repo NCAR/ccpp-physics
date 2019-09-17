@@ -522,7 +522,7 @@
 !  --- ...  obtain cloud information for radiation calculations
 
 !      if (ntcw > 0) then                            ! prognostic cloud schemes
-       if (Model%imp_physics .ne. 15) then
+!MZ       if (Model%imp_physics .ne. 15) then
         ccnd = 0.0_kind_phys
         if (Model%ncnd == 1) then                                 ! Zhao_Carr_Sundqvist
           do k=1,LMK
@@ -563,7 +563,7 @@
             enddo
           enddo
         enddo
-      endif     !not FA 
+!MZ      endif     !not FA 
         if (Model%imp_physics == 11 ) then
           if (.not. Model%lgfdlmprad) then
 
@@ -725,26 +725,32 @@
                          Model%sup, Model%kdt, me,                      &
                          clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
 
-!MZ
-!clw here is total cloud condensate
-        elseif (Model%imp_physics == 15) then           ! F-A cloud scheme
+!        elseif (Model%imp_physics == 15) then           ! F-A cloud scheme
 
-           cwm(:,:) = cwm(:,:) + tracer1(:,1:LMK,Model%ntcw)   &
-                                + tracer1(:,1:LMK,Model%ntrw)   &
-                                + tracer1(:,1:LMK,Model%ntiw)   
 
-           !if(Model%me==0) write(0,*)'F-A: progcld2 max(cwm),min(cwm) =' &
-           !                 ,maxval(cwm),minval(cwm)
-           call progcld2 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,     &
-                          cwm,                                          &    ! ---  inputs:
-                          Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp,  &
-                          f_ice,f_rain,f_rimef,flgmin,                  &    ! F-A scheme specific
-                          im, lmk, lmp, Model%lmfshal, Model%lmfdeep2,  &
-                          clouds,cldsa,mtopa,mbota,de_lgth)                  !  ---  outputs:
+!          if(Model%me==0) then
+!             write(0,*)'F-A: progclduni max(cldcov), min(cldcov) =' &
+!                            ,maxval(cldcov),minval(cldcov)
+!             write(0,*)'F-A: progclduni max(ccnd_c), min(ccnd_c) =' &
+!                            ,maxval(ccnd(:,:,1)),minval(ccnd(:,:,1))
+!             write(0,*)'F-A: progclduni max(ccnd_i), min(ccnd_i) =' &
+!                            ,maxval(ccnd(:,:,2)),minval(ccnd(:,:,2))
+!             write(0,*)'F-A: progclduni max(ccnd_r), min(ccnd_r) =' &
+!                            ,maxval(ccnd(:,:,3)),minval(ccnd(:,:,3))
+!             write(0,*)'F-A: progclduni max(ccnd_s), min(ccnd_s) =' &
+!                            ,maxval(ccnd(:,:,4)),minval(ccnd(:,:,4))
+!             write(0,*)'F-A:-----------------------------------'
+!           endif
 
-            !if(Model%me==0) write(0,*)'F-A: progcld2 max(clouds(:,:,1)),&
-            !                min(clouds(:,:,1)) =  '                     &
-            !                ,maxval(clouds(:,:,1)),minval(clouds(:,:,1))
+!           call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl, &    !  ---  inputs
+!                            Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp, &
+!                            IM, LMK, LMP, cldcov, &
+!                            effrl, effri, effrr, effrs, Model%effr_in, &
+!                            clouds, cldsa, mtopa, mbota, de_lgth) !  ---  outputs
+
+!          if(Model%me==0) write(0,*)'F-A: progclduni max(clouds(:,:,1)),&
+!                            min(clouds(:,:,1)) =  '                     &
+!                            ,maxval(clouds(:,:,1)),minval(clouds(:,:,1))
 
         elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
 
@@ -770,13 +776,29 @@
 !                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then		       ! Thompson / WSM6 cloud micrphysics scheme
-
+!        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then		       ! Thompson / WSM6 cloud micrphysics scheme
+!MZ
+        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6 .or.  &
+               Model%imp_physics == 15) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.
             Tbd%phy_f3d(:,:,Model%nseffr) = 250.
           endif
+
+          if(Model%me==0) then
+             write(0,*)'F-A: progcld5 max(cldcov), min(cldcov) =' &
+                            ,maxval(cldcov),minval(cldcov)
+             write(0,*)'F-A: progcld5 max(ccnd_c), min(ccnd_c) =' &
+                            ,maxval(ccnd(:,:,1)),minval(ccnd(:,:,1))
+             write(0,*)'F-A: progcld5 max(ccnd_i), min(ccnd_i) =' &
+                            ,maxval(ccnd(:,:,2)),minval(ccnd(:,:,2))
+             write(0,*)'F-A: progcld5 max(ccnd_r), min(ccnd_r) =' &
+                            ,maxval(ccnd(:,:,3)),minval(ccnd(:,:,3))
+             write(0,*)'F-A: progcld5 max(ccnd_s), min(ccnd_s) =' &
+                            ,maxval(ccnd(:,:,4)),minval(ccnd(:,:,4))
+             write(0,*)'F-A:-----------------------------------'
+           endif
 
           call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
                          Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
@@ -787,6 +809,22 @@
                          cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
                          Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
                          clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs
+
+          if(Model%me==0) then
+             write(0,*)'F-A: progcld5 max(cldsa1), min(cldsa1) =' &
+                            ,maxval(cldsa(:,1)),minval(cldsa(:,1))
+             write(0,*)'F-A: progcld5 max(cldsa2), min(cldsa2) =' &
+                            ,maxval(cldsa(:,2)),minval(cldsa(:,2))
+             write(0,*)'F-A: progcld5 max(cldsa3), min(cldsa3) =' &
+                            ,maxval(cldsa(:,3)),minval(cldsa(:,3))
+             write(0,*)'F-A: progcld5 max(cldsa4), min(cldsa4) =' &
+                            ,maxval(cldsa(:,4)),minval(cldsa(:,4))
+             write(0,*)'F-A: progcld5 max(cldsa5), min(cldsa5) =' &
+                            ,maxval(cldsa(:,5)),minval(cldsa(:,5))
+
+
+             write(0,*)'F-A:-----------------------------------'
+           endif
 
         endif                            ! end if_imp_physics
 

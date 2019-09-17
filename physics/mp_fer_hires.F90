@@ -118,8 +118,7 @@ module mp_fer_hires
 !! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qg         | mass_weighted_rime_factor                                                 | mass_weighted_rime_factor                                                                          | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  prec       | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep    | total precipitation amount in each time step                                                       | m          |   1  | real     | kind_phys | inout  | F        |
-!! |  acprec     | accumulated_lwe_thickness_of_precipitation_amount                         | accumulated total precipitation                                                                    | m          |   1  | real     | kind_phys | inout  | F        |
+!! |  prec       | lwe_thickness_of_explicit_precipitation_amount                            | explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep                         | m          |   1  | real     | kind_phys | inout  | F        |
 !! |  mpirank    | mpi_rank                                                                  | current MPI-rank                                                                                   | index      |   0  | integer  |           | in     | F        |
 !! |  mpiroot    | mpi_root                                                                  | master MPI-rank                                                                                    | index      |    0 | integer  |           | in     | F        |
 !! |  threads    | omp_threads                                                               | number of OpenMP threads available to scheme                                                       | count      |   0  | integer  |           | in     | F        | 
@@ -141,7 +140,7 @@ module mp_fer_hires
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
                          ,QC,QR,QI,QG                                   &
-                         ,PREC,ACPREC                                   &
+                         ,PREC                                          &!,ACPREC  -MZ:not used 
                          ,mpirank, mpiroot, threads                     &
                          ,refl_10cm                                     &
                          ,RHGRD,dx                                      &
@@ -184,7 +183,7 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: prec(1:ncol)
-      real(kind_phys),   intent(inout) :: acprec(1:ncol)
+!      real(kind_phys)                  :: acprec(1:ncol)   !MZ: change to local
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
       real(kind_phys),   intent(in   ) :: rhgrd
       real(kind_phys),   intent(in   ) :: dx(1:ncol)
@@ -292,8 +291,7 @@ module mp_fer_hires
 !***  FILL THE SINGLE-COLUMN INPUT
 !-----------------------------------------------------------------------
 !
-!MZ        DO K=LM,1,-1   ! We are moving down from the top in the flipped arrays
-        DO K=1,LM
+        DO K=LM,1,-1   ! We are moving down from the top in the flipped arrays
          
 !
 !          TL(K)=T(I,K)
@@ -302,11 +300,16 @@ module mp_fer_hires
           RR(I,K)=P_PHY(I,K)/(R_D*T(I,K)*(P608*AMAX1(Q(I,K),EPSQ)+1.))
           PI_PHY(I,K)=(P_PHY(I,K)*1.E-5)**CAPPA
           TH_PHY(I,K)=T(I,K)/PI_PHY(I,K)
-          DZ(I,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,K)
+!MZ
+!          DZ(I,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,K)
+          DZ(I,K)=(PRSI(I,K)-PRSI(I,K+1))*R_G/RR(I,K)
 !
         ENDDO    !- DO K=LM,1,-1
 !
       ENDDO    !- DO I=IMS,IME
+!     if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dz)  = ',  &
+!                                        maxval(dz),minval(dz)
+
 !.......................................................................
 !MZ$OMP end parallel do
 !.......................................................................
@@ -343,8 +346,9 @@ module mp_fer_hires
                                         maxval(qg),minval(qg)
       if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_rimef)  = ',  &
                                         maxval(f_rimef),minval(f_rimef)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dx1)  = ',  &
-                                        dx1
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dx1)  = ',  &
+      !                                  dx1
+      if (mpirank==mpiroot) write (0,*)'---------------------------------'
 
 
 !---------------------------------------------------------------------
@@ -406,6 +410,10 @@ module mp_fer_hires
                                             maxval(qi),minval(qi)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rimef)= ', &
                                             maxval(f_rimef),minval(f_rimef)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_ice)= ', &
+                                            maxval(f_ice),minval(f_ice)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rain)= ', &
+                                            maxval(f_rain),minval(f_rain)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qg)= ', &
                                             maxval(qg),minval(qg)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainnc)= ', &
@@ -426,9 +434,9 @@ module mp_fer_hires
 !MZ$OMP parallel do  SCHEDULE(dynamic) num_threads(threads) &
 !MZ$OMP private(i,pcpcol,prec,acprec)
       DO I=IMS,IME
-        PCPCOL=RAINNCV(I)*1.E-3
+        PCPCOL=RAINNCV(I)*1.E-3        !MZ:unit:m
         PREC(I)=PREC(I)+PCPCOL
-        ACPREC(I)=ACPREC(I)+PCPCOL
+!MZ        ACPREC(I)=ACPREC(I)+PCPCOL     !MZ: not used 
 !
 ! NOTE: RAINNC IS ACCUMULATED INSIDE MICROPHYSICS BUT NMM ZEROES IT OUT ABOVE
 !       SINCE IT IS ONLY A LOCAL ARRAY FOR NOW
