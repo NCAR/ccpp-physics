@@ -38,7 +38,8 @@
        integer,parameter:: &
          klog=4 &                   ! logical variables
         ,kint=4 &                   ! integer variables
-        ,kfpt=4 &                   ! floating point variables
+        !,kfpt=4 &                   ! floating point variables
+        ,kfpt=8 &                   ! floating point variables
         ,kdbl=8                     ! double precision
 !
       PRIVATE
@@ -92,7 +93,7 @@
 !-----------------------------------------------------------------------
       INTEGER, PARAMETER :: KZTM=10001,KZTM2=KZTM-2
 !
-      REAL(kind=kfpt),PRIVATE,SAVE ::      & 
+      REAL(kind=kfpt),PRIVATE,SAVE ::      &
          DZETA1,DZETA2,FH01,FH02,ZTMAX1,ZTMAX2,ZTMIN1,ZTMIN2
 !
       REAL(kind=kfpt),DIMENSION(KZTM),PRIVATE,SAVE ::    &
@@ -362,7 +363,7 @@
           ULOW=UK(LMH)
           VLOW=VK(LMH)
           ZSL=(ZHK(LMH)-ZHK(LMH+1))*0.5
-!          if(me.eq.0)print*,'ZSL,ZHK(LMH),ZHK(LMH+1,LMH=',ZSL,ZHK(LMH),ZHK(LMH+1),LMH 
+!          if(me.eq.0)print*,'ZSL,ZHK(LMH),ZHK(LMH+1,LMH=',ZSL,ZHK(LMH),ZHK(LMH+1),LMH
           APESFC=(PSFC*1.E-5)**CAPPA
        if(NTSD==0) then
           TZ0=TSK(I,J)

@@ -1,5 +1,5 @@
 !> \file module_myjsfc_wrapper.F90
-!!  Contains all of the code related to running the MYJ surface layer scheme 
+!!  Contains all of the code related to running the MYJ surface layer scheme
 
       MODULE myjsfc_wrapper
 
@@ -13,11 +13,9 @@
 
 !!
 !> \brief This scheme (1) performs pre-myjsfc work, (20 runs the myj sfc layer scheme, and (3) performs post-myjsfc work
-#if 0
 !! \section arg_table_myjsfc_wrapper_run Argument Table
 !! \htmlinclude myjsfc_wrapper_run.html
 !!
-#endif
 !###===================================================================
  SUBROUTINE myjsfc_wrapper_run(                    &
      &  restart,                                   &
@@ -48,18 +46,19 @@
      &  fh2_ocn,   fh2_lnd,   fh2_ice,             &   ! intent(inout)
      &  wind,      con_cp,    con_g,    con_rd,    &
      &  me, lprnt, errmsg, errflg )             ! intent(inout)
-! 
+!
       use machine,        only : kind_phys
       use MODULE_SF_JSFC, only: JSFC_INIT,JSFC
 
-!------------------------------------------------------------------- 
+!-------------------------------------------------------------------
       implicit none
-!------------------------------------------------------------------- 
+!-------------------------------------------------------------------
 
       integer,parameter:: &
          klog=4 &                   ! logical variables
         ,kint=4 &                   ! integer variables
-        ,kfpt=4 &                   ! floating point variables
+        !,kfpt=4 &                   ! floating point variables
+        ,kfpt=8 &                   ! floating point variables
         ,kdbl=8                     ! double precision
 !
 !  ---  constant parameters:
@@ -82,7 +81,7 @@
       integer, intent(out) :: errflg
 
 !MYJ-1D
-      integer,intent(in) :: im, ix, levs 
+      integer,intent(in) :: im, ix, levs
       integer,intent(in) :: kdt, iter, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
       logical,intent(in) :: restart, lprnt
@@ -143,9 +142,9 @@
      &     cw, dz_myj, pmid, q2, exner
       real(kind=kfpt), dimension(im,levs+1) :: pint
       real(kind=kfpt),dimension(im)         ::           &
-     &     cm1,ch1,stress1,ffm1,ffh1,wind1,ffm10,ffh2                    
+     &     cm1,ch1,stress1,ffm1,ffh1,wind1,ffm10,ffh2
 !      real(kind=kind_phys), dimension(im,levs,ntrac) :: &
-!     &     qgrs_myj  
+!     &     qgrs_myj
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -230,7 +229,7 @@
             dz_myj(i,k) = (phii(i,k1+1)-phii(i,k1)) * g_inv
          enddo
       enddo
-         
+
       if (lprnt1) then
          if(me==0.and.ntsd.lt.2)then
             k=63
@@ -302,7 +301,7 @@
      &                 ,1,im,1,1,1,levs                      &
      &                 ,1,im,1,1,1,levs)
       end if
-               
+
       call JSFC(flag_iter,iter,me                            &
      &         ,ntsd,epsq2,sfcz,dz_myj                       &
      &         ,pmid,pint,th_myj,t_myj,q_myj,cw              &
