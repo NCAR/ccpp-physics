@@ -1,5 +1,5 @@
 !> \file module_myjpbl_wrapper.F90
-!!  Contains all of the code related to running the MYJ PBL scheme 
+!!  Contains all of the code related to running the MYJ PBL scheme
 
       MODULE myjpbl_wrapper
 
@@ -36,26 +36,27 @@
      &  garea, ustar, cm, ch, wind,                 &
      &  snowd, zorl, evap, hflx,                    &
      &  dudt, dvdt, dtdt, dqdt,                     &
-     &  dusfc,dvsfc,dtsfc,dqsfc,                    &     
+     &  dusfc,dvsfc,dtsfc,dqsfc,                    &
      &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
      &  con_cp,con_g,con_rd,                        &
      &  me, lprnt, errmsg, errflg )
 
-! 
+!
       use machine,      only : kind_phys
 
       use MODULE_BL_MYJPBL,      only: MYJPBL_INIT,MYJPBL
 
-!------------------------------------------------------------------- 
+!-------------------------------------------------------------------
       implicit none
 
       integer,parameter:: &
         klog=4 &                   ! logical variables
        ,kint=4 &                   ! integer variables
-       ,kfpt=4 &                   ! floating point variables
+       !,kfpt=4 &                   ! floating point variables
+       ,kfpt=8 &                   ! floating point variables
        ,kdbl=8                     ! double precision
 
-!------------------------------------------------------------------- 
+!-------------------------------------------------------------------
 !  ---  constant parameters:
 !For reference
 !   real    , parameter :: karman       = 0.4
@@ -63,10 +64,10 @@
 !   real    , parameter :: r_d          = 287.
 !   real    , parameter :: cp           = 7.*r_d/2.
 !
-!      real, parameter :: g = 9.81, r_d=287., cp= 7.*r_d/2. 
+!      real, parameter :: g = 9.81, r_d=287., cp= 7.*r_d/2.
 !      real, parameter :: rd=r_d, rk=cp/rd
 !      real, parameter :: elwv=2.501e6, eliv=2.834e6
-!      real, parameter :: reliw=eliv/elwv, 
+!      real, parameter :: reliw=eliv/elwv,
       real, parameter :: xkgdx=25000.,xkzinv=0.15
 
 !      real, parameter :: g_inv=1./con_g, cappa=con_rd/con_cp
@@ -104,8 +105,12 @@
               phii, prsi
       real(kind=kind_phys),dimension(im,levs),intent(in) ::    &
      &        ugrs, vgrs, tgrs, prsl
+!      real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
+!             dudt, dvdt, dtdt, dkt
       real(kind=kind_phys),dimension(im,levs),intent(inout) :: &
-             dudt, dvdt, dtdt, dkt
+             dudt, dvdt, dtdt
+      real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
+             dkt
 
 !MYJ-4D
       real(kind=kind_phys),dimension(im,levs,ntrac),intent(inout) ::  &
@@ -135,10 +140,10 @@
       real(kind=kfpt),dimension(im) ::                     &
               dusfc1,dvsfc1,dtsfc1,dqsfc1
       real(kind=kfpt),dimension(im) :: thlm,qlm
-      real(kind=kfpt),dimension(im,13) :: phy_f2d_myj 
+      real(kind=kfpt),dimension(im,13) :: phy_f2d_myj
       real(kind=kfpt), dimension(im,levs) :: xcofh  &
      &        ,xkzo,xkzmo
-      real(kind=kind_phys) :: g, r_d, g_inv, cappa 
+      real(kind=kind_phys) :: g, r_d, g_inv, cappa
       real(kind=kind_phys) :: thz0, qz0, a1u, a1t, a1q
       real(kind=kind_phys) :: z0m, aa1u, aa1t, z1uov, z1tox
       real(kind=kind_phys) :: tmax,tmin,t_myj1
@@ -148,6 +153,7 @@
      &        ,rho,qfc1,gdx,xkzm_hx,xkzm_mx,tx1, tx2
 !      real(kind=kind_phys), dimension(im,levs,ntrac) ::    &
 !     &        qgrs_myj
+      real(kind=kind_phys),dimension(im,levs) :: dkt2
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -169,11 +175,11 @@
       end if
 
 !prep MYJ-only variables
- 
+
       r_d   = con_rd
       g     = con_g
-      g_inv = 1./con_g 
-      cappa = con_rd/con_cp 
+      g_inv = 1./con_g
+      cappa = con_rd/con_cp
 
       do i=1,im
          work3(i)=prsik_1(i) / prslk_1(i)
@@ -285,20 +291,20 @@
 !          if (xkzo(i,k) .gt. 0.01) then
 !             epsl(k)=1.0
 !          end if
-      end do 
+      end do
       epsq2(levs)=epsq2(levs-1)
 
       do k = 1, levs
          k1 = levs-k+1
          do i = 1, im
-            del(i,k) = prsi(i,k1) - prsi (i,k1+1) 
+            del(i,k) = prsi(i,k1) - prsi (i,k1+1)
             dz_myj(i,k) = (phii(i,k1+1)-phii(i,k1)) * g_inv
          enddo
       enddo
 
       do i = 1, im
          wind1(i)=max(wind(i),1.0)
-      end do 
+      end do
 
       if(.not.do_myjsfc)then
          do i=1,im
@@ -433,7 +439,7 @@
                 tmax=t_myj(i,k1)
                 i_max=i
                 k_max=k
-             end if 
+             end if
              if(tmin.gt.t_myj(i,k1))then
                tmin=t_myj(i,k1)
                i_min=i
@@ -450,7 +456,7 @@
 !          end if
 
       end if
-          
+
       ct=0.
       ide=im
       lm=levs
@@ -541,14 +547,14 @@
 !         do k=1,13
 !            Tbd%phy_f2d_myj(i,k)=phy_f2d_myj(i,k)
 !         end do
-      end do 
+      end do
 
-      dkt=0.
+      dkt2=0.
       do k=1,levs
          k1=levs-k+1
          do i=1,im
-!            dkt(i,k)=max(xcofh(i,k1),xkzo(i,k))
-           dkt(i,k)=xcofh(i,k1)
+!            dkt2(i,k)=max(xcofh(i,k1),xkzo(i,k))
+           dkt2(i,k)=xcofh(i,k1)
          end do
       end do
       if(ntke.gt.0)then
@@ -617,7 +623,7 @@
                   (phy_f2d_myj(i,k),k=1,13)
              print*,'tsk(i),ustar1,z0,pblh_myj,kpbl_myj=',    &
                      tsk(i),ustar1(i),z0(i),pblh_myj(i),kpbl_myj(i)
-             print*,'mixht=',mixht(i) 
+             print*,'mixht=',mixht(i)
              do k=1,levs
                 print*,'u,v,t=',k,u_myj(i,k),v_myj(i,k),   &
                    t_myj(i,k)
@@ -634,7 +640,7 @@
                    q2(i,k)
              end do
              do k=1,levs
-                print*,'xcofh,el_myj,dkt=',k,xcofh(i,k),el_myj(i,k),dkt(i,k)
+                print*,'xcofh,el_myj,dkt2=',k,xcofh(i,k),el_myj(i,k),dkt2(i,k)
              end do
          end if
 
@@ -777,6 +783,8 @@
 !          print*
 !       endif
 
+      ! External dkt has dimensions (1:im,1:levs-1)
+      dkt(1:im,1:levs-1) = dkt2(1:im,1:levs-1)
 
   END SUBROUTINE myjpbl_wrapper_run
 
