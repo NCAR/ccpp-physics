@@ -2,8 +2,8 @@
 !! This file is the entity of NOAA/ESRL/GSD RUC LSM Model(WRF version 4.0).
 
 !>\ingroup lsm_ruc_group
-!!\brief This is the entity of RUC LSM model of physics subroutines.
-!! It is a soil/veg/snowpack and ice/snowpack/land-surface model to update soil
+!! This module contains the entity of the RUC LSM model, which is a  
+!! soil/veg/snowpack and ice/snowpack/land-surface model to update soil
 !! moisture, soil temperature, skin temperature, snowpack water content, snowdepth,
 !! and all terms of the surface energy balance and surface water balance.
 MODULE module_sf_ruclsm
@@ -57,107 +57,6 @@ CONTAINS
 !>\ingroup lsm_ruc_group
 !> The RUN LSM model is described in Smirnova et al.(1997) 
 !! \cite Smirnova_1997 and Smirnova et al.(2000) \cite Smirnova_2000 
-!>\param dt            time step(second)
-!>\param ktau          number of time step
-!>\param nsl           number of soil layers
-!>\param graupelncv.
-!>\param snowncv
-!>\param rainncv       one time step grid scale precipitation (mm/step)
-!>\param raincv        one time step convective precipitation (mm/step)
-!>\param zs            depth of soil levels (\f$m\f$)
-!>\param rainbl        accumulated rain in mm between the PBL calls
-!>\param snow          snow water equivalent (\f$mm\f$)
-!>\param snowh
-!>\param snowc         flag indicating snow coverage (1 for snow cover)
-!>\param frzfrac       fraction of frozen precipitation
-!>\param frpcpn
-!>\param rhosnf
-!>\param precipfr      time step frozen precipitation (\f$mm\f$)
-!>\param z3d           height(\f$m\f$)
-!>\param p8w           3D pressure (\f$Pa\f$)
-!>\param t3d           temperature (\f$K\f$)
-!>\param qv3d          3D water vapor mixing ratio (\f$Kg Kg^{-1}\f$)
-!>\param qc3d          3D cloud water mixing ratio (\f$Kg Kg^{-1}\f$)
-!>\param rho3d         3D air density (\f$Kg m^{-3}\f$)
-!>\param glw           downward longwave flux at ground surface (\f$Wm^{-2}\f$)
-!>\param gsw           absorbed shortwave flux at ground surface (\f$Wm^{-2}\f$)
-!>\param emiss         surface emissivity (between 0 and 1)
-!>\param chklowq       is either 0 or 1 (so far set equal to 1).used only in MYJPBL
-!>\param chs
-!>\param flqc          surface exchange coefficient for moisture(\f$Kg m^{-2} s^{-1}\f$)
-!>\param flhc          surface exchange coefficient for heat(\f$Wm^{-2}s^{-1}K^{-1}\f$)
-!>\param mavail
-!>\param canwat        canopy moisture content (\f$mm\f$)
-!>\param vegfra        vegetation fraction (between 0 and 100)
-!>\param alb           surface albedo (between 0 and 1)
-!>\param znt           roughness length (\f$m\f$)
-!>\param z0
-!>\param snoalb        maximum snow albedo (between 0 and 1)
-!>\param albbck        snow-free albedo (between 0 and 1)
-!>\param landusef
-!>\param nlcat
-!>\param soilctop
-!>\param nscat
-!>\param qsfc
-!>\param qsg
-!>\param qvg
-!>\param qcg
-!>\param dew
-!>\param soilt1
-!>\param tsnav
-!>\param tbot           soil temperature at lower boundary (\f$K\f$)
-!>\param ivgtyp         USGS vegetation type (24 classes)
-!>\param isltyp         STASGO soil type (16 classes)
-!>\param xland          land mask (1 for land, 2 for water)
-!>\param iswater
-!>\param isice
-!>\param xice
-!>\param xice_threshold
-!>\param cp             heat capacity at constant pressure for dry air (\f$J Kg^{-1} K^{-1}\f$)
-!>\param rv
-!>\param rd
-!>\param g0             acceleration due to gravity (\f$m s^{-2}\f$)
-!>\param pi
-!>\param lv             latent heat of melting (\f$J Kg^{-1}\f$)
-!>\param stbolt         Stefan-Boltzmann constant (\f$W m^{-2} K^{-4}\f$)
-!>\param soilmois       soil moisture content (volumetric fraction)
-!>\param sh2o
-!>\param smavail
-!>\param smmax
-!>\param tso            soil temperature (\f$K\f$)
-!>\param soilt          surface temperature (\f$K\f$)
-!>\param hfx            upward heat flux at the surface (\f$W m^{-2}\f$)
-!>\param qfx            upward moisture flux at the surface (\f$Kg m^{-2} s^{-1}\f$)
-!>\param lh             upward latent heat flux (\f$W m^{-2}\f$)
-!>\param infiltr
-!>\param runoff1
-!>\param runoff2
-!>\param acrunoff       run-total surface runoff (\f$mm\f$)
-!>\param sfcexc
-!>\param sfcevp
-!>\param grdflx         soil heat flux (\f$W m^{-2}\f$; negative, if downward from surface)
-!>\param snowfallac     run-total snowfall accumulation (\f$m\f$)
-!>\param acsnow         run-total SWE of snowfall (\f$mm\f$)
-!>\param snom
-!>\param smfr3d
-!>\param keepfr3dflag
-!>\param myj
-!>\param shdmin
-!>\param shdmax
-!>\param rdlai2d
-!>\param ims            start index for i in memory
-!>\param ime            end index for i in memory
-!>\param jms            start index for j in memory
-!>\param jme            end index for j in memory
-!>\param kms            start index for k in memory
-!>\param kme            end index for k in memory
-!>\param its
-!>\param ite
-!>\param jts
-!>\param jte
-!>\param kts
-!>\param kte
-!!
 !>\section gen_lsmruc GSD RUC LSM General Algorithm
 !! @{
     SUBROUTINE LSMRUC(                                           &
@@ -7121,7 +7020,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !> This subroutine computes liquid and forezen soil moisture from the
 !! total soil moisture, and also computes soil moisture availability in
 !! the top soil layer.
-  SUBROUTINE RUCLSMINIT( debug_print,                              &
+  SUBROUTINE RUCLSMINIT( debug_print, landmask,                    &
                      nzs, isltyp, ivgtyp, xice, mavail,            &
                      sh2o, smfr3d, tslb, smois,                    &
                      ims,ime, jms,jme, kms,kme,                    &
@@ -7144,6 +7043,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    REAL, DIMENSION( ims:ime, 1:nzs, jms:jme )                    , &
             INTENT(IN)    ::                                 TSLB, &
                                                             SMOIS
+
+   REAL, DIMENSION( ims:ime, jms:jme )                           , &
+            INTENT(IN)    ::                             LANDMASK
 
    INTEGER, DIMENSION( ims:ime, jms:jme )                        , &
             INTENT(INOUT)    ::                     ISLTYP,IVGTYP
@@ -7173,6 +7075,9 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    errflag = 0
    DO j = jts,jtf
      DO i = its,itf
+       ! land-only version
+       IF ( LANDMASK( i,j ) .NE. 1 ) CYCLE
+       !
        IF ( ISLTYP( i,j ) .LT. 0 ) THEN
          errflag = 1
          print *, &
@@ -7187,18 +7092,21 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    ENDIF
 
    DO J=jts,jtf
-       DO I=its,itf
+     DO I=its,itf
+
+       ! land-only version
+       IF ( LANDMASK( i,j ) .NE. 1 ) CYCLE
 
 !--- Computation of volumetric content of ice in soil
 !--- and initialize MAVAIL
-    if(ISLTYP(I,J) > 0) then
-          DQM    = MAXSMC   (ISLTYP(I,J)) -                               &
-                   DRYSMC   (ISLTYP(I,J))
-          REF    = REFSMC   (ISLTYP(I,J))
-          PSIS   = - SATPSI (ISLTYP(I,J))
-          QMIN   = DRYSMC   (ISLTYP(I,J))
-          BCLH   = BB       (ISLTYP(I,J))
-    endif
+       if(ISLTYP(I,J) > 0) then
+             DQM    = MAXSMC   (ISLTYP(I,J)) - &
+                      DRYSMC   (ISLTYP(I,J))
+             REF    = REFSMC   (ISLTYP(I,J))
+             PSIS   = - SATPSI (ISLTYP(I,J))
+             QMIN   = DRYSMC   (ISLTYP(I,J))
+             BCLH   = BB       (ISLTYP(I,J))
+       endif
 
 
 ! in Zobler classification isltyp=0 for water. Statsgo classification
@@ -7678,8 +7586,8 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
 !+---+-----------------------------------------------------------------+
 !>\ingroup lsm_ruc_group
-!> THIS FUNCTION CALCULATES THE LIQUID SATURATION VAPOR MIXING RATIO AS
-!! A FUNCTION OF TEMPERATURE AND PRESSURE (from Thompson scheme)
+!> This function calculates the liquid saturation vapor mixing ratio as 
+!! a function of temperature and pressure (from Thompson scheme).
       REAL FUNCTION RSLF(P,T)
 
       IMPLICIT NONE

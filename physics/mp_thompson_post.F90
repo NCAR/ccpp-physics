@@ -18,23 +18,15 @@ contains
 
 #if 0
 !! \section arg_table_mp_thompson_post_init Argument Table
-!! | local_name      | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | ncol            | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
-!! | area            | cell_area                                             | area of the grid cell                                    | m2         |    1 | real      | kind_phys | in     | F        |
-!! | ttendlim        | limit_for_temperature_tendency_for_microphysics       | temperature tendency limiter per physics time step       | K s-1      |    0 | real      | kind_phys | in     | F        |
-!! | errmsg          | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude mp_thompson_post_init.html
 !!
 #endif
-   subroutine mp_thompson_post_init(ncol, area, ttendlim, errmsg, errflg)
+   subroutine mp_thompson_post_init(ncol, ttendlim, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
       integer,         intent(in) :: ncol
-      ! DH* TODO: remove area and dx (also from metadata table)
-      real(kind_phys), dimension(1:ncol), intent(in) :: area
       real(kind_phys), intent(in) :: ttendlim
 
       ! CCPP error handling
@@ -42,7 +34,6 @@ contains
       integer,          intent(  out) :: errflg
 
       ! Local variables
-      !real(kind_phys), dimension(1:ncol) :: dx
       integer :: i
 
       ! Initialize the CCPP error handling variables
@@ -60,26 +51,7 @@ contains
 
       allocate(mp_tend_lim(1:ncol))
 
-      !! Cell size in m as square root of cell area
-      !dx = sqrt(area)
-
       do i=1,ncol
-         ! The column-dependent values that were set here previously
-         ! are replaced with a single value set in the namelist
-         ! input.nml.This value is independent of the grid spacing
-         ! (as opposed to setting it here on a per-column basis).
-         ! However, given that the timestep is the same for all grid
-         ! columns and determined by the smallest grid spacing in
-         ! the domain, it makes sense to use a single value.
-         !
-         ! The values previously used in RAP/HRRR were
-         !    mp_tend_lim(i) = 0.07    ! [K/s], 3-km HRRR value
-         ! and
-         !   mp_tend_lim(i) = 0.002   ! [K/s], 13-km RAP value
-         !
-         ! Our testing with FV3 has shown thus far that 0.002 is
-         ! too small for a 13km (C768) resolution and that 0.01
-         ! works better. This is work in progress ...
          mp_tend_lim(i) = ttendlim
       end do
 
@@ -91,19 +63,7 @@ contains
 
 #if 0
 !! \section arg_table_mp_thompson_post_run Argument Table
-!! | local_name      | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | ncol            | horizontal_loop_extent                                | horizontal loop extent                                   | count      |    0 | integer   |           | in     | F        |
-!! | nlev            | vertical_dimension                                    | number of vertical levels                                | count      |    0 | integer   |           | in     | F        |
-!! | tgrs_save       | air_temperature_save                                  | air temperature before entering a physics scheme         | K          |    2 | real      | kind_phys | in     | F        |
-!! | tgrs            | air_temperature_updated_by_physics                    | model layer mean temperature                             | K          |    2 | real      | kind_phys | inout  | F        |
-!! | prslk           | dimensionless_exner_function_at_model_layers          | dimensionless Exner function at model layer centers      | none       |    2 | real      | kind_phys | in     | F        |
-!! | dtp             | time_step_for_physics                                 | physics timestep                                         | s          |    0 | real      | kind_phys | in     | F        |
-!! | mpicomm         | mpi_comm                                              | MPI communicator                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpirank         | mpi_rank                                              | current MPI-rank                                         | index      |    0 | integer   |           | in     | F        |
-!! | mpiroot         | mpi_root                                              | master MPI-rank                                          | index      |    0 | integer   |           | in     | F        |
-!! | errmsg          | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude mp_thompson_post_run.html
 !!
 #endif
    subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, &
@@ -172,10 +132,7 @@ contains
 
 #if 0
 !! \section arg_table_mp_thompson_post_finalize Argument Table
-!! | local_name      | standard_name                                         | long_name                                                | units      | rank | type      |    kind   | intent | optional |
-!! |-----------------|-------------------------------------------------------|----------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | errmsg          | ccpp_error_message                                    | error message for error handling in CCPP                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                       | error flag for error handling in CCPP                    | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude mp_thompson_post_finalize.html
 !!
 #endif
    subroutine mp_thompson_post_finalize(errmsg, errflg)

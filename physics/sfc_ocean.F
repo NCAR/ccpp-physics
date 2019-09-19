@@ -17,45 +17,14 @@
 
 #if 0
 !! \section arg_table_sfc_ocean_run Argument Table
-!! | local_name     | standard_name                                                                | long_name                                                            | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|----------------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                               | count         |    0 | integer   |           | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                         | ideal gas constant for dry air                                       | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                                | none          |    0 | real      | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                          | none          |    0 | real      | kind_phys | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                               | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                | none          |    0 | real      | kind_phys | in     | F        |
-!! | ps             | surface_air_pressure                                                         | surface pressure                                                     | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                                    | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind                                    | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                                       | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                                 | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | tskin          | surface_skin_temperature_over_ocean_interstitial                             | surface skin temperature over ocean (temporary use as interstitial)  | K             |    1 | real      | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air_over_ocean                      | surface exchange coeff for momentum over ocean                       | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean             | surface exchange coeff heat & moisture over ocean                    | none          |    1 | real      | kind_phys | in     | F        |
-!! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                          | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer          | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag          |    1 | logical   |           | in     | F        |
-!! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                         | frac          |    1 | real      | kind_phys | in     | F        |
-!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                                   | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                                   | flag          |    1 | logical   |           | in     | F        |
-!! | qsurf          | surface_specific_humidity_over_ocean                                         | surface air saturation specific humidity over ocean                  | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_ocean                       | momentum exchange coefficient over ocean                             | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ocean               | thermal exchange coefficient over ocean                              | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | gflux          | upward_heat_flux_in_soil_over_ocean                                          | soil heat flux over ocean                                            | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux_over_ocean                         | kinematic surface upward latent heat flux over ocean                 | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ocean                       | kinematic surface upward sensible heat flux over ocean               | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux_over_ocean                         | surface upward potential latent heat flux over ocean                 | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                             | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                                | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_ocean_run.html
 !!
 #endif
       subroutine sfc_ocean_run                                          &
 !...................................
 !  ---  inputs:
      &     ( im, cp, rd, eps, epsm1, hvap, rvrdm1, ps, u1, v1, t1, q1,  &
-     &       tskin, cm, ch, prsl1, prslki, wet, fice, ddvel,            &
+     &       tskin, cm, ch, prsl1, prslki, wet, ddvel,                  &
      &       flag_iter,                                                 &
 !  ---  outputs:
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &
@@ -70,7 +39,7 @@
 !    call sfc_ocean                                                     !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tskin, cm, ch,                     !
-!            prsl1, prslki, wet, fice, ddvel, flag_iter,                !
+!            prsl1, prslki, wet, ddvel, flag_iter,                      !
 !       outputs:                                                        !
 !            qsurf, cmm, chh, gflux, evap, hflx, ep )                   !
 !                                                                       !
@@ -102,7 +71,6 @@
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
 !     wet      - logical, =T if any ocean/lak, =F otherwise        im   !
-!     fice     - real, ice fraction                                im   !
 !     ddvel    - real, wind enhancement due to convection (m/s)    im   !
 !     flag_iter- logical,                                          im   !
 !                                                                       !
@@ -128,7 +96,7 @@
      &      rvrdm1
 
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
-     &      t1, q1, tskin, cm, ch, prsl1, prslki, ddvel, fice
+     &      t1, q1, tskin, cm, ch, prsl1, prslki, ddvel
 
       logical, dimension(im), intent(in) :: flag_iter, wet
 
@@ -159,7 +127,7 @@
 !
 !  --- ...  flag for open water
       do i = 1, im
-        flag(i) = (wet(i) .and. fice(i)<1. .and. flag_iter(i))
+        flag(i) = (wet(i) .and. flag_iter(i))
 
 !  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,

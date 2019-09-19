@@ -17,17 +17,7 @@
 !!  This interstitial code restores the original resolved-scale clouds (qc and qi).
 #if 0
 !! \section arg_table_mynnrad_post_run Argument Table
-!! | local_name          | standard_name                                                               | long_name                                                                  | units   | rank | type      |    kind   | intent | optional |
-!! |---------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | ix                  | horizontal_dimension                                                        | horizontal dimension                                                       | count   |    0 | integer   |           | in     | F        |
-!! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                                     | count   |    0 | integer   |           | in     | F        |
-!! | levs                | vertical_dimension                                                          | vertical layer dimension                                                   | count   |    0 | integer   |           | in     | F        |
-!! | qc                  | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | qi                  | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | qc_save             | cloud_condensed_water_mixing_ratio_save    | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | qi_save             | ice_water_mixing_ratio_save                | moist (dry+vapor, no condensates) mixing ratio of ice water before entering a physics scheme                | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP                                   | none    |    0 | character | len=*     | out    | F        |
-!! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude mynnrad_post_run.html
 !!
 #endif
 SUBROUTINE mynnrad_post_run(               &

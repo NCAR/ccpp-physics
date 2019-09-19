@@ -611,7 +611,7 @@
 
 !  --- ...  setting up calculation parameters used by subr coszmn
 
-      nswr  = nint(deltsw / deltim)         ! number of mdl t-step per sw call
+      nswr  = max(1, nint(deltsw/deltim))   ! number of mdl t-step per sw call
       dtswh = deltsw / f3600                ! time length in hours
 
 !     if ( deltsw >= f3600 ) then           ! for longer sw call interval
@@ -624,7 +624,7 @@
 
 !     anginc = pid12 * dtswh / float(nstp-1)          ! solar angle inc during each calc step
 
-      nstp = nswr
+      nstp = max(6, nswr)
       anginc = pid12 * dtswh / float(nstp)
 
       if ( me == 0 ) then
@@ -870,7 +870,7 @@
       real (kind=kind_phys), intent(out) :: coszen(:), coszdg(:)
 
 !  ---  locals:
-      real (kind=kind_phys) :: coszn, cns, ss, cc, solang, rstp
+      real (kind=kind_phys) :: coszn, cns, solang, rstp
 
       integer :: istsun(IM), i, it, j, lat
 
@@ -886,12 +886,9 @@
 
       do it = 1, nstp
         cns = solang + (float(it)-0.5)*anginc + sollag
-
         do i = 1, IM
-          ss  = sinlat(i) * sindec
-          cc  = coslat(i) * cosdec
-
-          coszn = ss + cc * cos(cns + xlon(i))
+          coszn     = sindec * sinlat(i) + cosdec * coslat(i)           &
+     &                                   * cos(cns+xlon(i))
           coszen(i) = coszen(i) + max(0.0, coszn)
           if (coszn > czlimt) istsun(i) = istsun(i) + 1
         enddo

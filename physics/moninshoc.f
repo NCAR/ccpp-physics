@@ -22,65 +22,7 @@
 !                                  for tke as in Deardorff (1980) - added tridi1
 !
 !> \section arg_table_moninshoc_run Argument Table
-!! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | ntrac          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer   |           | in     | F        |
-!! | ntcw           | index_for_liquid_cloud_condensate                                           | cloud condensate index in tracer array                | index         |    0 | integer   |           | in     | F        |
-!! | ncnd           | number_of_tracers_for_cloud_condensate                                      | number of tracers for cloud condensate                | count         |    0 | integer   |           | in     | F        |
-!! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | du             | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | tau            | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | rtg            | tendency_of_vertically_diffused_tracer_concentration                        | updated tendency of the tracers due to vertical diffusion in PBL scheme | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
-!! | u1             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | q1             | vertically_diffused_tracer_concentration                                    | tracer concentration diffused by PBL scheme           | kg kg-1       |    3 | real      | kind_phys | in     | F        |
-!! | tkh            | atmosphere_heat_diffusivity_from_shoc                                       | diffusivity for heat from the SHOC scheme             | m2 s-1        |    2 | real      | kind_phys | in     | F        |
-!! | prnum          | prandtl_number                                                              | turbulent Prandtl number                              | none          |    2 | real      | kind_phys | inout  | F        |
-!! | ntke           | index_for_turbulent_kinetic_energy                                          | tracer index for turbulent kinetic energy             | index         |    0 | integer   |           | in     | F        |
-!! | psk            | dimensionless_exner_function_at_lowest_model_interface                      | dimensionless Exner function at the surface interface | none          |    1 | real      | kind_phys | in     | F        |
-!! | rbsoil         | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | zorl           | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
-!! | u10m           | x_wind_at_10m                                                               | x component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v10m           | y_wind_at_10m                                                               | y component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | fm             | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | in     | F        |
-!! | fh             | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | in     | F        |
-!! | tsea           | surface_skin_temperature                                                    | surface skin temperature                              | K             |    1 | real      | kind_phys | in     | F        |
-!! | heat           | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | stress         | surface_wind_stress                                                         | surface wind stress                                   | m2 s-2        |    1 | real      | kind_phys | in     | F        |
-!! | spd1           | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer                          | PBL top model level index                             | index         |    1 | integer   |           | out    | F        |
-!! | prsi           | air_pressure_at_interface                                                   | air pressure at model layer interfaces                | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers                                   | pres(k) - pres(k+1)                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
-!! | phii           | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                | geopotential at model layer centers                   | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | delt           | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
-!! | dusfc          | instantaneous_surface_x_momentum_flux                                       | x momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc          | instantaneous_surface_y_momentum_flux                                       | y momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dtsfc          | instantaneous_surface_upward_sensible_heat_flux                             | surface upward sensible heat flux                     | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | dqsfc          | instantaneous_surface_upward_latent_heat_flux                               | surface upward latent heat flux                       | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | dkt            | atmosphere_heat_diffusivity                                                 | diffusivity for heat                                  | m2 s-1        |    2 | real      | kind_phys | out    | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | out    | F        |
-!! | kinver         | index_of_highest_temperature_inversion                                      | index of highest temperature inversion                | index         |    1 | integer   |           | in     | F        |
-!! | xkzm_m         | atmosphere_momentum_diffusivity_background                                  | background value of momentum diffusivity              | m2 s-1        |    0 | real      | kind_phys | in     | F        |
-!! | xkzm_h         | atmosphere_heat_diffusivity_background                                      | background value of heat diffusivity                  | m2 s-1        |    0 | real      | kind_phys | in     | F        |
-!! | xkzm_s         | diffusivity_background_sigma_level                                          | sigma level threshold for background diffusivity      | none          |    0 | real      | kind_phys | in     | F        |
-!! | lprnt          | flag_print                                                                  | flag for printing diagnostics to output               | flag          |    0 | logical   |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                          | horizontal index of printed column                    | index         |    0 | integer   |           | in     | F        |
-!! | me             | mpi_rank                                                                    | current MPI-rank                                      | index         |    0 | integer   |           | in     | F        |
-!! | grav           | gravitational_acceleration                                                  | gravitational acceleration                            | m s-2         |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                        | ideal gas constant for dry air                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure         | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | (rv/rd) - 1 (rv = ideal gas constant for water vapor) | none          |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude moninshoc_run.html
 !!
       subroutine moninshoc_run (ix,im,km,ntrac,ntcw,ncnd,dv,du,tau,rtg,
      &                     u1,v1,t1,q1,tkh,prnum,ntke,
@@ -88,7 +30,8 @@
      &                     tsea,heat,evap,stress,spd1,kpbl,
      &                     prsi,del,prsl,prslk,phii,phil,delt,
      &                     dusfc,dvsfc,dtsfc,dqsfc,dkt,hpbl,
-     &                     kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,me,
+     &                     kinver,xkzm_m,xkzm_h,xkzm_s,xkzminv,
+     &                     lprnt,ipr,me,
      &                     grav, rd, cp, hvap, fv,
      &                     errmsg,errflg)
 !
@@ -105,7 +48,7 @@
       integer, dimension(im),                   intent(in) ::  kinver
 
       real(kind=kind_phys),                     intent(in) :: delt,
-     &  xkzm_m, xkzm_h, xkzm_s
+     &  xkzm_m, xkzm_h, xkzm_s, xkzminv
       real(kind=kind_phys),                     intent(in) :: grav,
      &  rd, cp, hvap, fv
       real(kind=kind_phys), dimension(im),      intent(in) :: psk,
@@ -208,7 +151,8 @@
         do i=1,im
           xkzo(i,k)  = 0.0
           xkzmo(i,k) = 0.0
-          if (k < kinver(i)) then
+!         if (k < kinver(i)) then
+          if (k <= kinver(i)) then
 !    vertical background diffusivity for heat and momentum
             tem1       = 1.0 - prsi(i,k+1) * tx1(i)
             tem1       = min(1.0, exp(-tem1 * tem1 * 10.0))
@@ -224,16 +168,16 @@
 !
 !  diffusivity in the inversion layer is set to be xkzminv (m^2/s)
 !
-!     do k = 1,kmpbl
-!       do i=1,im
-!         if(zi(i,k+1) > 250.) then
-!           tem1 = (t1(i,k+1)-t1(i,k)) * rdzt(i,k)
-!           if(tem1 > 1.e-5) then
-!              xkzo(i,k)  = min(xkzo(i,k),xkzminv)
-!           endif
-!         endif
-!       enddo
-!     enddo
+      do k = 1,kmpbl
+        do i=1,im
+          if(zi(i,k+1) > 250.) then
+            tem1 = (t1(i,k+1)-t1(i,k)) * rdzt(i,k)
+            if(tem1 > 1.e-5) then
+               xkzo(i,k)  = min(xkzo(i,k),xkzminv)
+            endif
+          endif
+        enddo
+      enddo
 !
 !
       do i = 1,im
@@ -499,8 +443,6 @@
             ttend      = (a1(i,k)-t1(i,k))   * rdt
             qtend      = (a2(i,k)-q1(i,k,1)) * rdt
             tau(i,k)   = tau(i,k)   + ttend
-!     if(lprnt .and. i==ipr .and. k<11) write(0,*)' tau=',tau(ipr,k)
-!    &,' ttend=',ttend,' a1=',a1(ipr,k),' t1=',t1(ipr,k)
             rtg(i,k,1) = rtg(i,k,1) + qtend
             dtsfc(i)   = dtsfc(i)   + cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)   + conq*del(i,k)*qtend

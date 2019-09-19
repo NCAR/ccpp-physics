@@ -26,14 +26,7 @@
       contains
 
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Grid           | GFS_grid_type_instance                                 | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT      |    0 | GFS_grid_type         |           | inout  | F        |
-!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | Interstitial   | GFS_interstitial_type_instance                         | Fortran DDT containing FV3-GFS interstitial data                        | DDT      |    0 | GFS_interstitial_type |           | inout  | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT      |    0 | GFS_tbd_type          |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_phys_time_vary_init.html
 !!
       subroutine GFS_phys_time_vary_init (Grid, Model, Interstitial, Tbd, errmsg, errflg)
 
@@ -184,10 +177,7 @@
       end subroutine GFS_phys_time_vary_init
 
 !> \section arg_table_GFS_phys_time_vary_finalize Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_phys_time_vary_finalize.html
 !!
       subroutine GFS_phys_time_vary_finalize(errmsg, errflg)
         implicit none
@@ -224,20 +214,11 @@
         if (allocated(ci_pres) ) deallocate(ci_pres)
 
         is_initialized = .false.
+
       end subroutine GFS_phys_time_vary_finalize
 
 !> \section arg_table_GFS_phys_time_vary_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units         | rank | type                          |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|---------------|------|-------------------------------|-----------|--------|----------|
-!! | Grid           | GFS_grid_type_instance                                 | Fortran DDT containing FV3-GFS grid and interpolation related data      | DDT           |    0 | GFS_grid_type                 |           | in     | F        |
-!! | Statein        | GFS_statein_type_instance                              | instance of derived type GFS_statein_type                               | DDT           |    0 | GFS_statein_type              |           | in     | F        |
-!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT           |    0 | GFS_control_type              |           | inout  | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | Fortran DDT containing FV3-GFS miscellaneous data                       | DDT           |    0 | GFS_tbd_type                  |           | inout  | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                              | Fortran DDT containing FV3-GFS surface fields                           | DDT           |    0 | GFS_sfcprop_type              |           | inout  | F        |
-!! | Cldprop        | GFS_cldprop_type_instance                              | Fortran DDT containing FV3-GFS cloud fields                             | DDT           |    0 | GFS_cldprop_type              |           | inout  | F        |
-!! | Diag           | GFS_diag_type_instance                                 | Fortran DDT containing FV3-GFS fields targeted for diagnostic output    | DDT           |    0 | GFS_diag_type                 |           | inout  | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none          |    0 | character                     | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag          |    0 | integer                       |           | out    | F        |
+!! \htmlinclude GFS_phys_time_vary_run.html
 !!
       subroutine GFS_phys_time_vary_run (Grid, Statein, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
 
@@ -264,7 +245,8 @@
         real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
         real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
 
-        integer :: i, j, k, iseed, iskip, ix, nb
+        integer :: i, j, k, iseed, iskip, ix, nb, kdt_rad
+        real(kind=kind_phys) :: sec_zero
         real(kind=kind_phys) :: wrk(1)
         real(kind=kind_phys) :: rannie(Model%cny)
         real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
@@ -362,10 +344,23 @@
         !endif
 
         !--- determine if diagnostics buckets need to be cleared
-        if (mod(Model%kdt,Model%nszero) == 1) then
-          call Diag%rad_zero  (Model)
-          call Diag%phys_zero (Model)
+        sec_zero = nint(Model%fhzero*con_hr)
+        if (sec_zero >= nint(max(Model%fhswr,Model%fhlwr))) then
+          if (mod(Model%kdt,Model%nszero) == 1) then
+              call Diag%rad_zero  (Model)
+              call Diag%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+          endif
+        else
+          if (mod(Model%kdt,Model%nszero) == 1) then
+              call Diag%phys_zero (Model)
+        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+          endif
+          kdt_rad = nint(min(Model%fhswr,Model%fhlwr)/Model%dtp)
+          if (mod(Model%kdt, kdt_rad) == 1) then
+              call Diag%rad_zero  (Model)
+        !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
+          endif
         endif
 
       end subroutine GFS_phys_time_vary_run

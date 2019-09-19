@@ -57,6 +57,7 @@
 !!\param[in] snoalb       real, max albedo over deep snow (fraction)
 !!\param[in] bexpp        real, perturbation of soil type "b" parameter (perturbation)
 !!\param[in] xlaip        real, perturbation of leave area index (perturbation)
+!!\param[in] lheatstrg    logical, flag for canopy heat storage parameterization 
 !!\param[in,out] tbot     real, bottom soil temp (\f$K\f$) (local yearly-mean sfc air temp)
 !!\param[in,out] cmc      real, canopy moisture content (\f$m\f$)
 !!\param[in,out] t1       real, ground/canopy/snowpack eff skin temp (\f$K\f$)
@@ -345,10 +346,9 @@
 !
 !  --- parameters for heat storage parametrization
 !
-      real (kind=kind_phys) ::  cpx, cpx1, cpfac, xx1, xx2, xx3
-      real (kind=kind_phys), parameter :: z0min=0.2
-      real (kind=kind_phys), parameter :: z0max=1.0
-
+      real (kind=kind_phys)            :: cpx, cpx1, cpfac, xx1, xx2
+      real (kind=kind_phys), parameter :: z0min=0.2_kind_phys,          &
+     &                                    z0max=1.0_kind_phys
 !
 !===> ...  begin here
 !
@@ -440,7 +440,7 @@
 
 !  --- ...  bexp sfc-perts, mgehne
 !> - Calculate perturbated soil type "b" parameter.
-!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of LAI
+!! Following Gehne et al. (2019) \cite Gehne_2019 , a perturbation of LAI
 !! "leaf area index" (xlaip) and a perturbation of the empirical exponent parameter
 !! b in the soil hydraulic conductivity calculation (bexpp) are added to account for
 !! the uncertainties of LAI and b associated with different vegetation types and soil 
@@ -802,19 +802,18 @@
 !
 !  ---  enhance cp as a function of z0 to mimic heat storage
 !
-      cpx = cp
-      cpx1 = cp1
-      cpfac = 1.
-      if(lheatstrg) then
-      if((ivegsrc == 1 .and. vegtyp /= 13)
-     &       .or. ivegsrc == 2) then
-        xx1 = (z0 - z0min) / (z0max - z0min)
-        xx2 = min(max(xx1, 0.), 1.)
-        xx3 = 1. + xx2
-        cpx = cp * xx3
-        cpx1 = cp1 * xx3
-        cpfac = cp / cpx
-      endif
+      cpx   = cp
+      cpx1  = cp1
+      cpfac = 1.0
+      if (lheatstrg) then
+        if ((ivegsrc == 1 .and. vegtyp /= 13)
+     &                    .or.  ivegsrc == 2) then
+          xx1   = (z0 - z0min) / (z0max - z0min)
+          xx2   = 1.0 + min(max(xx1, 0.0), 1.0)
+          cpx   = cp  * xx2
+          cpx1  = cp1 * xx2
+          cpfac = cp / cpx
+        endif
       endif
 
 !> - Call penman() to calculate potential evaporation (\a etp),
@@ -2724,7 +2723,7 @@
 
 !  --- ...  before call shflx in this snowpack case, set zz1 and yy arguments to
 !           special values that ensure that ground heat flux calculated in shflx
-!           matches that already computer for below the snowpack, thus the sfc
+!           matches that already computed for below the snowpack, thus the sfc
 !           heat flux to be computed in shflx will effectively be the flux at the
 !           snow top surface.  t11 is a dummy arguement so we will not use the
 !           skin temp value as revised by shflx.
