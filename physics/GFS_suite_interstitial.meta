@@ -1604,6 +1604,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[f_rimef]
+  standard_name = rime_factor
+  long_name = rime factor
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [dtf]
   standard_name = time_step_for_dynamics
   long_name = dynamics timestep
@@ -1675,6 +1684,22 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in 
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

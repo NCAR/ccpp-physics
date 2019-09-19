@@ -240,7 +240,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      &                      q,qt,                                       &
      &                      LOWLYR,SR,                                  &
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY,           &
-     &                      QC,QR,QS,                                   &
+     &                      QC,QR,QS,                                   & 
      &                      RAINNC,RAINNCV,                             &
      &                      threads,                                    &
      &                      ims,ime, jms,jme, lm,     		        &
@@ -611,7 +611,6 @@ ENDIF
                QC(I,J,K)=QC(I,J,K)-QR(I,J,K)
              ENDIF
            ENDIF
-!
           ENDDO   !- i
         ENDDO     !- k
      ENDDO        !- j
@@ -2216,6 +2215,7 @@ DSD2:         IF (RQRnew<=RQR_DRmin) THEN
 !--------- Produces accurate calculation of cloud condensation ---------
 !#######################################################################
 !
+!>\ingroup hafs_famp
       REAL FUNCTION CONDENSE (PP,QW,TK,WV,RHgrd,I,J,L)
 !
 !---------------------------------------------------------------------------------
@@ -2288,6 +2288,7 @@ ENDIF
 !---------------- Calculate ice deposition at T<T_ICE ------------------
 !#######################################################################
 !
+!>\ingroup hafs_famp
       REAL FUNCTION DEPOSIT (PP,Tdum,WVdum,RHgrd,I,J,L)   !-- Debug 20120111
 !
 !--- Also uses the Asai (1965) algorithm, but uses a different target
@@ -2448,6 +2449,7 @@ ENDIF
 ! SH 0211/2002
 
 !-----------------------------------------------------------------------
+!>\ingroup hafs_famp
       SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,mpiroot,THREADS)
 !-----------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -2741,6 +2743,7 @@ ENDIF
 !-----------------------------------------------------------------------
       END SUBROUTINE FERRIER_INIT_hr
 !
+!>\ingroup hafs_famp
       SUBROUTINE MY_GROWTH_RATES_NMM_hr (DTPH)
 !
 !--- Below are tabulated values for the predicted mass of ice crystals
@@ -2786,6 +2789,7 @@ ENDIF
 !---------  Old GFS saturation vapor pressure lookup tables  -----------
 !-----------------------------------------------------------------------
 !
+!>\ingroup hafs_famp
       SUBROUTINE GPVS_hr
 !     ******************************************************************
 !$$$  SUBPROGRAM DOCUMENTATION BLOCK

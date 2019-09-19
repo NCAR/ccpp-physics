@@ -27,7 +27,7 @@ module mp_fer_hires
 !! | mpicomm               | mpi_comm                                  | MPI communicator                                          | index    |    0 | integer               |           | in     | F        |
 !! | mpirank               | mpi_rank                                  | current MPI-rank                                          | index    |    0 | integer               |           | in     | F        |
 !! | mpiroot               | mpi_root                                  | master MPI-rank                                           | index    |    0 | integer               |           | in     | F        |
-!! | threads               | omp_threads                               | number of OpenMP threads available to scheme              | count    |    0 | integer               |           | in     | F        | 
+!! | threads               | omp_threads                               | number of OpenMP threads available to scheme              | count    |    0 | integer               |           | in     | F        |
 !! | errmsg                | ccpp_error_message                        | error message for error handling in CCPP                  | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg                | ccpp_error_flag                           | error flag for error handling in CCPP                     | flag     |    0 | integer               |           | out    | F        |
 !!
@@ -103,6 +103,7 @@ module mp_fer_hires
 !! |  ncol       | horizontal_loop_extent                                                    | horizontal loop extent                                                                             | count      |   0  | integer  |           | in     | F        |
 !! |  nlev       | vertical_dimension                                                        | number of vertical levels                                                                          | count      |   0  | integer  |           | in     | F        |
 !! |  dt         | time_step_for_physics                                                     | physics timestep                                                                                   | s          |   0  | real     | kind_phys | in     | F        |
+!! |  spec_adv   | flag_for_individual_cloud_species_advected                                | flag for individual cloud species_advected                                                         | flag       |   0  | logical  |           | in     | F        | 
 !! |  slmsk      | sea_land_ice_mask_real                                                    | landmask: sea/land/ice=0/1/2                                                                       | flag       |   1  | real     | kind_phys | in     | F        |
 !! |  prsi       | air_pressure_at_interface                                                 | air pressure at model layer interfaces                                                             | Pa         |   2  | real     | kind_phys | in     | F        |
 !! |  p_phy      | air_pressure                                                              | mean layer pressure                                                                                | Pa         |   2  | real     | kind_phys | in     | F        |
@@ -113,11 +114,11 @@ module mp_fer_hires
 !! |  sr         | ratio_of_snowfall_to_rainfall                                             | snow ratio: ratio of snow to total precipitation  (explicit only)                                  | frac       |   1  | real     | kind_phys | out    | F        |
 !! |  f_ice      | fraction_of_ice_water_cloud                                               | fraction of ice water cloud                                                                        | frac       |   2  | real     | kind_phys | inout  | F        |
 !! |  f_rain     | fraction_of_rain_water_cloud                                              | fraction of rain water cloud                                                                       | frac       |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rimef    | rime_factor                                                               | rime factor                                                                            | frac       |   2  | real     | kind_phys | inout  | F        |
+!! |  f_rimef    | rime_factor                                                               | rime factor                                                                                        | frac       |   2  | real     | kind_phys | inout  | F        |
 !! |  qc         | cloud_condensed_water_mixing_ratio_updated_by_physics                     | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics         | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  qg         | mass_weighted_rime_factor                                                 | mass_weighted_rime_factor                                                                          | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
+!! |  qg         | mass_weighted_rime_factor_updated_by_physics                              | mass weighted rime factor updated by physics                                                       | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
 !! |  prec       | lwe_thickness_of_explicit_precipitation_amount                            | explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep                         | m          |   1  | real     | kind_phys | inout  | F        |
 !! |  mpirank    | mpi_rank                                                                  | current MPI-rank                                                                                   | index      |   0  | integer  |           | in     | F        |
 !! |  mpiroot    | mpi_root                                                                  | master MPI-rank                                                                                    | index      |    0 | integer  |           | in     | F        |
@@ -133,7 +134,7 @@ module mp_fer_hires
 !! |  errmsg     | ccpp_error_message                                                        | error message for error handling in CCPP                                                           | none       |   0  | character| len=*     | out    | F        |
 !! |  errflg     | ccpp_error_flag                                                           | error flag for error handling in CCPP                                                              | flag       |   0  | integer  |           | out    | F        |
 !!
-       SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT                       &
+       SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT ,SPEC_ADV             &
                          ,SLMSK                                         &
                          ,PRSI,P_PHY                                    &
                          ,T,Q,CWM                                       &
@@ -164,8 +165,9 @@ module mp_fer_hires
       integer,           intent(in   ) :: nlev
       real(kind_phys),   intent(in   ) :: dt
       integer,           intent(in   ) :: threads
-      integer,           intent(in)    :: mpirank
-      integer,           intent(in)    :: mpiroot
+      logical,           intent(in   ) :: spec_adv
+      integer,           intent(in   ) :: mpirank
+      integer,           intent(in   ) :: mpiroot
       real(kind_phys),   intent(in   ) :: slmsk(1:ncol)
       real(kind_phys),   intent(in   ) :: prsi(1:ncol,1:nlev+1)
       real(kind_phys),   intent(in   ) :: p_phy(1:ncol,1:nlev)
@@ -369,14 +371,17 @@ module mp_fer_hires
                   ,refl_10cm=refl_10cm,DX1=DX1)
 
 !---------------------------------------------------------------------
-!*** Calculate graupel from snow array and rime factor
+!*** Calculate graupel from total ice array and rime factor
 !---------------------------------------------------------------------
 
+!MZ            
+            IF (SPEC_ADV) then
               DO K=1,LM
               DO I=IMS,IME
                 QG(I,K)=QI(I,K)*F_RIMEF(I,K)
               ENDDO
               ENDDO
+            ENDIF
 
 
 !.......................................................................
@@ -408,14 +413,14 @@ module mp_fer_hires
                                             maxval(qr),minval(qr)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qi)= ', &
                                             maxval(qi),minval(qi)
+            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qg)= ', &
+                                            maxval(qg),minval(qg)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rimef)= ', &
                                             maxval(f_rimef),minval(f_rimef)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_ice)= ', &
                                             maxval(f_ice),minval(f_ice)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rain)= ', &
                                             maxval(f_rain),minval(f_rain)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qg)= ', &
-                                            maxval(qg),minval(qg)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainnc)= ', &
                                             maxval(rainnc),minval(rainnc)
             if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainncv)= ', &
