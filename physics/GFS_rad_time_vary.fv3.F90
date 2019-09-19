@@ -10,22 +10,15 @@
 
       contains
 
-!>\defgroup GFS_rad_time_vary GFS RRTMG Update 
-!!\ingroup RRTMG
-!! @{
 !! \section arg_table_GFS_rad_time_vary_init Argument Table
 !!
       subroutine GFS_rad_time_vary_init
       end subroutine GFS_rad_time_vary_init
 
+!>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
+!> @{
 !> \section arg_table_GFS_rad_time_vary_run Argument Table
-!! | local_name        | standard_name                                          | long_name                                                                     | units    | rank |  type                 |   kind    | intent | optional |
-!! |-------------------|--------------------------------------------------------|-------------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model             | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                       | DDT      |    0 | GFS_control_type      |           | inout  | F        |
-!! | Data              | GFS_data_type_instance_all_blocks                      | Fortran DDT containing FV3-GFS data                                           | DDT      |    1 | GFS_data_type         |           | inout  | F        |
-!! | nthrds            | omp_threads                                            | number of OpenMP threads available for physics schemes                        | count    |    0 | integer               |           | in     | F        |
-!! | errmsg            | ccpp_error_message                                     | error message for error handling in CCPP                                      | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg            | ccpp_error_flag                                        | error flag for error handling in CCPP                                         | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_rad_time_vary_run.html
 !!
       subroutine GFS_rad_time_vary_run (Model, Data, nthrds, errmsg, errflg)
 
@@ -105,10 +98,10 @@
          endif
 
       end subroutine GFS_rad_time_vary_run
+!> @}
  
 !> \section arg_table_GFS_rad_time_vary_finalize Argument Table
 !!
       subroutine GFS_rad_time_vary_finalize()
       end subroutine GFS_rad_time_vary_finalize
-!! @}
    end module GFS_rad_time_vary

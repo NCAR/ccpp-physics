@@ -1,5 +1,6 @@
 !>\file cu_gf_driver.F90
-!! This file is Grell-Freitas cumulus scheme driver.
+!! This file is scale-aware Grell-Freitas cumulus scheme driver.
+
 
 module cu_gf_driver
 
@@ -20,12 +21,7 @@ contains
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_cu_gf_driver_init Argument Table
-!! | local_name           | standard_name      | long_name                                | units | rank | type      |    kind   | intent | optional |
-!! |----------------------|--------------------|------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | mpirank              | mpi_rank           | current MPI-rank                         | index |    0 | integer   |           | in     | F        |
-!! | mpiroot              | mpi_root           | master MPI-rank                          | index |    0 | integer   |           | in     | F        |
-!! | errmsg               | ccpp_error_message | error message for error handling in CCPP | none  |    0 | character | len=*     | out    | F        |
-!! | errflg               | ccpp_error_flag    | error flag for error handling in CCPP    | flag  |    0 | integer   |           | out    | F        |
+!! \htmlinclude cu_gf_driver_init.html
 !!
       subroutine cu_gf_driver_init(mpirank, mpiroot, errmsg, errflg)
 
@@ -62,58 +58,22 @@ contains
 ! t = current temp (t2di + physics up to now)
 !===================
 
-!> \defgroup cu_gf_group GSD Scale-Aware Grell-Freitas Convection Scheme Module
-!>\defgroup cu_gf_driver GSD Grell-Freitas Convection Scheme Driver
+!> \defgroup cu_gf_group Grell-Freitas Convection Scheme Module
+!! This is the Grell-Freitas scale and aerosol aware scheme.
+!>\defgroup cu_gf_driver  Grell-Freitas Convection Scheme Driver Module
 !> \ingroup cu_gf_group
+!! This is the Grell-Freitas convection scheme driver module.
 !! \section arg_table_cu_gf_driver_run Argument Table
-!! | local_name     | standard_name                                             | long_name                                           | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------|-----------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | tottracer      | number_of_total_tracers                                   | number of total tracers                             | count         |    0 | integer   |           | in     | F        |
-!! | ntrac          | number_of_vertical_diffusion_tracers                      | number of tracers to diffuse vertically             | count         |    0 | integer   |           | in     | F        |
-!! | garea          | cell_area                                                 | grid cell area                                      | m2            |    1 | real      | kind_phys | in     | F        |
-!! | im             | horizontal_loop_extent                                    | horizontal loop extent                              | count         |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                      | horizontal dimension                                | count         |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                        | vertical layer dimension                            | count         |    0 | integer   |           | in     | F        |
-!! | dt             | time_step_for_physics                                     | physics time step                                   | s             |    0 | real      | kind_phys | in     | F        |
-!! | cactiv         | conv_activity_counter                                     | convective activity memory                          | none          |    1 | integer   |           | inout  | F        |
-!! | forcet         | temperature_tendency_due_to_dynamics                      | temperature tendency due to dynamics only           | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | forceqv_spechum| moisture_tendency_due_to_dynamics                         | moisture tendency due to dynamics only              | kg kg-1 s-1   |    2 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                              | layer geopotential                                  | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | raincv         | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep | m             |    1 | real      | kind_phys | out    | F        |
-!! | qv_spechum     | water_vapor_specific_humidity_updated_by_physics          | water vapor specific humidity updated by physics    | kg kg-1       |    2 | real      | kind_phys | inout  | F        |
-!! | t              | air_temperature_updated_by_physics                        | updated temperature                                 | K             |    2 | real      | kind_phys | inout  | F        |
-!! | cld1d          | cloud_work_function                                       | cloud work function                                 | m2 s-2        |    1 | real      | kind_phys | out    | F        |
-!! | us             | x_wind_updated_by_physics                                 | updated x-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | vs             | y_wind_updated_by_physics                                 | updated y-direction wind                            | m s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | t2di           | air_temperature                                           | mid-layer temperature                               | K             |    2 | real      | kind_phys | in     | F        |
-!! | w              | omega                                                     | layer mean vertical velocity                        | Pa s-1        |    2 | real      | kind_phys | in     | F        |
-!! | qv2di_spechum  | water_vapor_specific_humidity                             | water vapor specific humidity                       | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | p2di           | air_pressure                                              | mean layer pressure                                 | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | psuri          | surface_air_pressure                                      | surface pressure                                    | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | hbot           | vertical_index_at_cloud_base                              | index for cloud base                                | index         |    1 | integer   |           | out    | F        |
-!! | htop           | vertical_index_at_cloud_top                               | index for cloud top                                 | index         |    1 | integer   |           | out    | F        |
-!! | kcnv           | flag_deep_convection                                      | deep convection: 0=no, 1=yes                        | flag          |    1 | integer   |           | out    | F        |
-!! | xland          | sea_land_ice_mask                                         | landmask: sea/land/ice=0/1/2                        | flag          |    1 | integer   |           | in     | F        |
-!! | hfx2           | kinematic_surface_upward_sensible_heat_flux               | kinematic surface upward sensible heat flux         | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | qfx2           | kinematic_surface_upward_latent_heat_flux                 | kinematic surface upward latent heat flux           | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | clw            | convective_transportable_tracers                          | cloud water and other convective trans. tracers     | kg kg-1       |    3 | real      | kind_phys | inout  | F        |
-!! | pbl            | atmosphere_boundary_layer_thickness                       | PBL thickness                                       | m             |    1 | real      | kind_phys | in     | F        |
-!! | ud_mf          | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                          | kg m-2        |    2 | real      | kind_phys | out    | F        |
-!! | dd_mf          | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                        | kg m-2        |    2 | real      | kind_phys | out    | F        |
-!! | dt_mf          | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                      | kg m-2        |    2 | real      | kind_phys | out    | F        |
-!! | cnvw_moist     | convective_cloud_water_mixing_ratio                       | moist convective cloud water mixing ratio           | kg kg-1       |    2 | real      | kind_phys | out    | F        |
-!! | cnvc           | convective_cloud_cover                                    | convective cloud cover                              | frac          |    2 | real      | kind_phys | out    | F        |
-!! | imfshalcnv     | flag_for_mass_flux_shallow_convection_scheme              | flag for mass-flux shallow convection scheme        | flag          |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                        | error message for error handling in CCPP            | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                           | error flag for error handling in CCPP               | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude cu_gf_driver_run.html
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
-      subroutine cu_gf_driver_run(tottracer,ntrac,garea,im,ix,km,dt,cactiv, &
-               forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,       &
-               us,vs,t2di,w,qv2di_spechum,p2di,psuri,                       &
-               hbot,htop,kcnv,xland,hfx2,qfx2,clw,                          &
-               pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,errmsg,errflg)
+      subroutine cu_gf_driver_run(garea,im,ix,km,dt,cactiv,           &
+               forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d, &
+               us,vs,t2di,w,qv2di_spechum,p2di,psuri,                 &
+               hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,              &
+               pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,      &
+               errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -134,7 +94,7 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
-   integer, intent(in   ) :: im,ix,km,ntrac,tottracer
+   integer, intent(in   ) :: im,ix,km
 
    real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: t,us,vs
@@ -142,7 +102,7 @@ contains
    real(kind=kind_phys),  dimension( ix,4 ) :: rand_clos
    real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
    real(kind=kind_phys),  dimension( ix , km ),     intent(out ) :: cnvw_moist,cnvc
-   real(kind=kind_phys),  dimension( ix , km,tottracer+2 ), intent(inout ) :: clw
+   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: cliw, clcw
 
 !hj change from ix to im
    integer, dimension (im), intent(inout) :: hbot,htop,kcnv
@@ -257,17 +217,20 @@ contains
      rand_mom(:)    = 0.
      rand_vmas(:)   = 0.
      rand_clos(:,:) = 0.
+!
      its=1
      ite=im
+     itf=ite
      jts=1
      jte=1
+     jtf=jte
      kts=1
      kte=km
      ktf=kte-1
 ! 
      tropics(:)=0
 !
-!> - tuning constants for radiation coupling
+!> - Set tuning constants for radiation coupling
 !
    tun_rad_shall(:)=.02
    tun_rad_mid(:)=.15
@@ -304,9 +267,6 @@ contains
    iend=ite
    tcrit=258.
 
-   itf=ite
-   ktf=kte-1
-   jtf=jte
    ztm=0.
    ztq=0.
    hfm=0.
@@ -315,7 +275,7 @@ contains
    dd_mf =0.
    dt_mf =0.
    tau_ecmwf(:)=0.
-!                                                                      
+!
        j=1
        ht(:)=phil(:,1)/g
        do i=its,ite
@@ -556,6 +516,7 @@ contains
           do i=its,itf
            if(xmbs(i).gt.0.)cutens(i)=1.
           enddo
+!> - Call neg_check() for GF shallow convection
           call neg_check('shallow',ipn,dt,qcheck,outqs,outts,outus,outvs,   &
                                  outqcs,prets,its,ite,kts,kte,itf,ktf,ktops)
        endif
@@ -637,6 +598,7 @@ contains
               qcheck(i,k)=qv(i,k) +outqs(i,k)*dt
             enddo
             enddo
+!> - Call neg_check() for middle GF convection
       call neg_check('mid',ipn,dt,qcheck,outqm,outtm,outum,outvm,   &
                      outqcm,pretm,its,ite,kts,kte,itf,ktf,ktopm)
     endif
@@ -718,6 +680,7 @@ contains
               qcheck(i,k)=qv(i,k) +(outqs(i,k)+outqm(i,k))*dt
             enddo
             enddo
+!> - Call neg_check() for deep GF convection
       call neg_check('deep',ipn,dt,qcheck,outq,outt,outu,outv,   &
                       outqc,pret,its,ite,kts,kte,itf,ktf,ktop)
 !
@@ -812,9 +775,9 @@ contains
                dsubclwm=0.
                dsubclws=0.
                dp=100.*(p2d(i,k)-p2d(i,k+1))
-               if (clw(i,k,2) .gt. -999.0 .and. clw(i,k+1,2) .gt. -999.0 )then
-                  clwtot = clw(i,k,1) + clw(i,k,2)
-                  clwtot1= clw(i,k+1,1) + clw(i,k+1,2)
+               if (clcw(i,k) .gt. -999.0 .and. clcw(i,k+1) .gt. -999.0 )then
+                  clwtot = cliw(i,k) + clcw(i,k)
+                  clwtot1= cliw(i,k+1) + clcw(i,k+1)
                   dsubclw=((-edt(i)*zd(i,k+1)+zu(i,k+1))*clwtot1   &
                        -(-edt(i)*zd(i,k)  +zu(i,k))  *clwtot  )*g/dp
                   dsubclwm=((-edtm(i)*zdm(i,k+1)+zum(i,k+1))*clwtot1   &
@@ -829,11 +792,11 @@ contains
 !                       +dsubclw*xmb(i)+dsubclws*xmbs(i)+dsubclwm*xmbm(i) &
                       )
                tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
-               if (clw(i,k,2) .gt. -999.0) then
-                clw(i,k,1) = max(0.,clw(i,k,1) + tem * tem1)            ! ice
-                clw(i,k,2) = max(0.,clw(i,k,2) + tem *(1.0-tem1))       ! water
+               if (clcw(i,k) .gt. -999.0) then
+                cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
+                clcw(i,k) = max(0.,clcw(i,k) + tem *(1.0-tem1))       ! water
               else
-                clw(i,k,1) = max(0.,clw(i,k,1) + tem)
+                cliw(i,k) = max(0.,cliw(i,k) + tem)
               endif
 
             enddo

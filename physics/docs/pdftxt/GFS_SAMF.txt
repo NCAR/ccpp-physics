@@ -1,0 +1,9 @@
+/**
+\page GFS_SAMF GFS Scale-Aware Simplified Arakawa-Schubert (sa-SAS) Convection Scheme
+
+\section des_samf Description
+
+\section intra_samf  Intraphysics Communication
+
+
+*/

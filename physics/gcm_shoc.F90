@@ -21,66 +21,7 @@ end subroutine shoc_finalize
 
 #if 0
 !> \section arg_table_shoc_run Argument Table
-!! | local_name                 | standard_name                                                               | long_name                                                                                   | units         | rank | type       |    kind   | intent | optional |
-!! |----------------------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|---------------|------|------------|-----------|--------|----------|
-!! | ix                         | horizontal_dimension                                                        | horizontal dimension                                                                        | count         |    0 | integer    |           | in     | F        |
-!! | nx                         | horizontal_loop_extent                                                      | horizontal loop extent                                                                      | count         |    0 | integer    |           | in     | F        |
-!! | nzm                        | vertical_dimension                                                          | vertical layer dimension                                                                    | count         |    0 | integer    |           | in     | F        |
-!! | do_shoc                    | flag_for_shoc                                                               | flag for SHOC                                                                               | flag          |    0 | logical    |           | in     | F        |
-!! | shocaftcnv                 | flag_for_shoc_after_convection                                              | flag to execute SHOC after convection                                                       | flag          |    0 | logical    |           | in     | F        |
-!! | mg3_as_mg2                 | flag_mg3_as_mg2                                                             | flag for controlling prep for Morrison-Gettelman microphysics                               | flag          |    0 | logical    |           | in     | F        |
-!! | imp_physics                | flag_for_microphysics_scheme                                                | choice of microphysics scheme                                                               | flag          |    0 | integer    |           | in     | F        |
-!! | imp_physics_gfdl           | flag_for_gfdl_microphysics_scheme                                           | choice of GFDL microphysics scheme                                                          | flag          |    0 | integer    |           | in     | F        |
-!! | imp_physics_zhao_carr      | flag_for_zhao_carr_microphysics_scheme                                      | choice of Zhao-Carr microphysics scheme                                                     | flag          |    0 | integer    |           | in     | F        |
-!! | imp_physics_zhao_carr_pdf  | flag_for_zhao_carr_pdf_microphysics_scheme                                  | choice of Zhao-Carr microphysics scheme with PDF clouds                                     | flag          |    0 | integer    |           | in     | F        |
-!! | imp_physics_mg             | flag_for_morrison_gettelman_microphysics_scheme                             | choice of Morrison-Gettelman rmicrophysics scheme                                           | flag          |    0 | integer    |           | in     | F        |
-!! | fprcp                      | number_of_frozen_precipitation_species                                      | number of frozen precipitation species                                                      | count         |    0 | integer    |           | in     | F        |
-!! | tcr                        | cloud_phase_transition_threshold_temperature                                | threshold temperature below which cloud starts to freeze                                    | K             |    0 | real       | kind_phys | in     | F        |
-!! | tcrf                       | cloud_phase_transition_denominator                                          | denominator in cloud phase transition = 1/(tcr-tf)                                          | K-1           |    0 | real       | kind_phys | in     | F        |
-!! | con_cp                     | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure                                               | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
-!! | con_g                      | gravitational_acceleration                                                  | gravitational acceleration                                                                  | m s-2         |    0 | real       | kind_phys | in     | F        |
-!! | con_hvap                   | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                                                      | J kg-1        |    0 | real       | kind_phys | in     | F        |
-!! | con_hfus                   | latent_heat_of_fusion_of_water_at_0C                                        | latent heat of fusion                                                                       | J kg-1        |    0 | real       | kind_phys | in     | F        |
-!! | con_rv                     | gas_constant_water_vapor                                                    | ideal gas constant for water vapor                                                          | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
-!! | con_rd                     | gas_constant_dry_air                                                        | ideal gas constant for dry air                                                              | J kg-1 K-1    |    0 | real       | kind_phys | in     | F        |
-!! | con_pi                     | pi                                                                          | ratio of a circle's circumference to its diameter                                           | radians       |    0 | real       | kind_phys | in     | F        |
-!! | con_fvirt                  | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                       | none          |    0 | real       | kind_phys | in     | F        |
-!! | gq0_cloud_ice              | ice_water_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics              | kg kg-1       |    2 | real       | kind_phys | in     | F        |
-!! | gq0_rain                   | rain_water_mixing_ratio_updated_by_physics                                  | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics             | kg kg-1       |    2 | real       | kind_phys | in     | F        |
-!! | gq0_snow                   | snow_water_mixing_ratio_updated_by_physics                                  | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics             | kg kg-1       |    2 | real       | kind_phys | in     | F        |
-!! | gq0_graupel                | graupel_mixing_ratio_updated_by_physics                                     | moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics                | kg kg-1       |    2 | real       | kind_phys | in     | F        |
-!! | dtp                        | time_step_for_physics                                                       | time step for physics                                                                       | s             |    0 | real       | kind_phys | in     | F        |
-!! | me                         | mpi_rank                                                                    | current MPI-rank                                                                            | index         |    0 | integer    |           | in     | F        |
-!! | prsl                       | air_pressure                                                                | mean layer pressure                                                                         | Pa            |    2 | real       | kind_phys | in     | F        |
-!! | phii                       | geopotential_at_interface                                                   | geopotential at model layer interfaces                                                      | m2 s-2        |    2 | real       | kind_phys | in     | F        |
-!! | phil                       | geopotential                                                                | geopotential at model layer centers                                                         | m2 s-2        |    2 | real       | kind_phys | in     | F        |
-!! | u                          | x_wind_updated_by_physics                                                   | zonal wind updated by physics                                                               | m s-1         |    2 | real       | kind_phys | in     | F        |
-!! | v                          | y_wind_updated_by_physics                                                   | meridional wind updated by physics                                                          | m s-1         |    2 | real       | kind_phys | in     | F        |
-!! | omega                      | omega                                                                       | layer mean vertical velocity                                                                | Pa s-1        |    2 | real       | kind_phys | in     | F        |
-!! | rhc                        | critical_relative_humidity                                                  | critical relative humidity                                                                  | frac          |    2 | real       | kind_phys | in     | F        |
-!! | supice                     | ice_supersaturation_threshold                                               | ice supersaturation parameter for PDF clouds                                                | none          |    0 | real       | kind_phys | in     | F        |
-!! | pcrit                      | shoc_tke_dissipatation_pressure_threshold                                   | pressure below which extra TKE diss. is applied in SHOC                                     | Pa            |    0 | real       | kind_phys | in     | F        |
-!! | cefac                      | shoc_tke_dissipation_tunable_parameter                                      | mult. tuning parameter for TKE diss. in SHOC                                                | none          |    0 | real       | kind_phys | in     | F        |
-!! | cesfac                     | shoc_tke_dissipation_tunable_parameter_near_surface                         | mult. tuning parameter for TKE diss. at surface in SHOC                                     | none          |    0 | real       | kind_phys | in     | F        |
-!! | tkef1                      | shoc_implicit_TKE_integration_uncentering_term                              | uncentering term for TKE integration in SHOC                                                | none          |    0 | real       | kind_phys | in     | F        |
-!! | dis_opt                    | shoc_flag_for_optional_surface_TKE_dissipation                              | flag for alt. TKE diss. near surface in SHOC (>0 = ON)                                      | none          |    0 | real       | kind_phys | in     | F        |
-!! | hflx                       | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux                                                 | K m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | evap                       | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux                                                   | kg kg-1 m s-1 |    1 | real       | kind_phys | in     | F        |
-!! | prnum                      | prandtl_number                                                              | turbulent Prandtl number                                                                    | none          |    2 | real       | kind_phys | in     | F        |
-!! | skip_macro                 | flag_skip_macro                                                             | flag to skip cloud macrophysics in Morrison scheme                                          | flag          |    0 | logical    |           | inout  | F        |
-!! | clw_ice                    | ice_water_mixing_ratio_convective_transport_tracer             | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array                | kg kg-1 | 2 | real | kind_phys | inout  | F        |
-!! | clw_liquid                 | cloud_condensed_water_mixing_ratio_convective_transport_tracer | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array | kg kg-1 | 2 | real | kind_phys | inout  | F        |
-!! | gq0_cloud_liquid           | cloud_condensed_water_mixing_ratio_updated_by_physics                       | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics  | kg kg-1       |    2 | real       | kind_phys | inout  | F        |
-!! | ncpl                       | cloud_droplet_number_concentration_updated_by_physics                       | number concentration of cloud droplets updated by physics                                   | kg-1          |    2 | real       | kind_phys | inout  | F        |
-!! | ncpi                       | ice_number_concentration_updated_by_physics                                 | number concentration of ice updated by physics                                              | kg-1          |    2 | real       | kind_phys | inout  | F        |
-!! | gt0                        | air_temperature_updated_by_physics                                          | temperature updated by physics                                                              | K             |    2 | real       | kind_phys | inout  | F        |
-!! | gq0_water_vapor            | water_vapor_specific_humidity_updated_by_physics                            | water vapor specific humidity updated by physics                                            | kg kg-1       |    2 | real       | kind_phys | inout  | F        |
-!! | cld_sgs                    | subgrid_scale_cloud_fraction_from_shoc                                      | subgrid-scale cloud fraction from the SHOC scheme                                           | frac          |    2 | real       | kind_phys | inout  | F        |
-!! | tke                        | turbulent_kinetic_energy_convective_transport_tracer                        | turbulent kinetic energy in the convectively transported tracer array                       | m2 s-2        |    2 | real       | kind_phys | inout  | F        |
-!! | tkh                        | atmosphere_heat_diffusivity_from_shoc                                       | diffusivity for heat from the SHOC scheme                                                   | m2 s-1        |    2 | real       | kind_phys | inout  | F        |
-!! | wthv_sec                   | kinematic_buoyancy_flux_from_shoc                                           | upward kinematic buoyancy flux from the SHOC scheme                                         | K m s-1       |    2 | real       | kind_phys | inout  | F        |
-!! | errmsg                     | ccpp_error_message                                                          | error message for error handling in CCPP                                                    | none          |    0 | character  | len=*     | out    | F        |
-!! | errflg                     | ccpp_error_flag                                                             | error flag for error handling in CCPP                                                       | flag          |    0 | integer    |           | out    | F        |
+!! \htmlinclude shoc_run.html
 !!
 #endif
 subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, imp_physics_gfdl, imp_physics_zhao_carr,    &
@@ -110,7 +51,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
-   real(kind=kind_phys), parameter :: epsq    = 1.e-20
+   real(kind=kind_phys), parameter :: epsq = 1.d-20
 
    integer :: i, k
 
@@ -125,7 +66,6 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
 
     if (shocaftcnv) then
       if (imp_physics == imp_physics_mg) then
-       skip_macro = do_shoc
        if (abs(fprcp) == 1 .or. mg3_as_mg2) then
          do k=1,nzm
            do i=1,nx
@@ -147,11 +87,10 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
       endif
     else
       if (imp_physics == imp_physics_mg) then
-       skip_macro = do_shoc
        do k=1,nzm
          do i=1,nx
-           ! DH* THESE ARE NOT IN THE ORIGINAL CODE (AND THEY WERE NEVER) ::: clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
-           ! DH* THESE ARE NOT IN THE ORIGINAL CODE (AND THEY WERE NEVER) ::: clw_liquid(i,k) = gq0_cloud_liquid(i,k)              ! water
+           !clw_ice(i,k) = gq0_cloud_ice(i,k)                    ! ice
+           !clw_liquid(i,k) = gq0_cloud_liquid(i,k)              ! water
            !GF - since gq0(ntlnc/ntinc) are passed in directly, no need to copy
            !ncpl(i,k)  = Stateout%gq0(i,k,ntlnc)
            !ncpi(i,k)  = Stateout%gq0(i,k,ntinc)
@@ -172,7 +111,7 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
              !qrn(i,k)    = gq0_rain(i,k)
              qsnw(i,k)    = gq0_snow(i,k) + gq0_graupel(i,k)
              qgl(i,k)     = 0.0
-             clw_ice(i,k) = clw_ice(i,k) + gq0_graupel(i,k)
+             !clw_ice(i,k) = clw_ice(i,k) + gq0_graupel(i,k)
            enddo
          enddo
        endif
@@ -221,18 +160,18 @@ subroutine shoc_run (ix, nx, nzm, do_shoc, shocaftcnv, mg3_as_mg2, imp_physics, 
               cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec, .false., 1, ncpl, ncpi, &
               con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt)
 
-    if (.not.shocaftcnv) then
-      if (imp_physics == imp_physics_mg .and. fprcp > 1) then
-        do k=1,nzm
-          do i=1,nx
-            clw_ice(i,k) = clw_ice(i,k) - gq0_graupel(i,k)
-          enddo
-        enddo
-      endif
-    endif ! .not. shocaftcnv
+    !if (.not.shocaftcnv) then
+    !  if (imp_physics == imp_physics_mg .and. fprcp > 1) then
+    !    do k=1,nzm
+    !      do i=1,nx
+    !        clw_ice(i,k) = clw_ice(i,k) - gq0_graupel(i,k)
+    !      enddo
+    !    enddo
+    !  endif
+    !endif ! .not. shocaftcnv
 
     !GF since gq0(ntlnc/ntinc) are passed in directly, no need to copy back
-    !  if (ntlnc > 0 .and. ntinc > 0 .and. ncld >= 2) then
+    !  if (imp_physics == Model%imp_physics_mg) then
     !    do k=1,nzm
     !      do i=1,nx
     !        Stateout%gq0(i,k,ntlnc) = ncpl(i,k)

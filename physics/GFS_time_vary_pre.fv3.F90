@@ -16,10 +16,7 @@
       contains
 
 !> \section arg_table_GFS_time_vary_pre_init Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_time_vary_pre_init.html
 !!
       subroutine GFS_time_vary_pre_init (errmsg, errflg)
 
@@ -43,10 +40,7 @@
 
 
 !> \section arg_table_GFS_time_vary_pre_finalize Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_time_vary_pre_finalize.html
 !!
       subroutine GFS_time_vary_pre_finalize(errmsg, errflg)
 
@@ -69,11 +63,7 @@
 
 
 !> \section arg_table_GFS_time_vary_pre_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |----------------|--------------------------------------------------------|-------------------------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | Fortran DDT containing FV3-GFS model control parameters                 | DDT      |    0 | GFS_control_type      |           | inout  | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                                   | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_time_vary_pre_run.html
 !!
       subroutine GFS_time_vary_pre_run (Model, errmsg, errflg)
 
@@ -119,6 +109,9 @@
         !--- radiation triggers
         Model%lsswr  = (mod(Model%kdt, Model%nsswr) == 1)
         Model%lslwr  = (mod(Model%kdt, Model%nslwr) == 1)
+        !--- allow for radiation to be called on every physics time step, if needed
+        if (Model%nsswr == 1)  Model%lsswr = .true.
+        if (Model%nslwr == 1)  Model%lslwr = .true.
 
         !--- set the solar hour based on a combination of phour and time initial hour
         Model%solhr  = mod(Model%phour+Model%idate(1),con_24)

@@ -12,86 +12,24 @@
       subroutine satmedmfvdif_finalize ()
       end subroutine satmedmfvdif_finalize
 
-!> \defgroup satmedmf GFS satmedmfvdif Main
+!> \defgroup satmedmf GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF) Scheme Module 
 !! @{
 !! \brief This subroutine contains all of the logic for the
 !! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF) scheme.
 !!
 !> \section arg_table_satmedmfvdif_run Argument Table
-!! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | ntrac          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer   |           | in     | F        |
-!! | ntcw           | index_for_liquid_cloud_condensate                                           | tracer index for cloud condensate (or liquid water)   | index         |    0 | integer   |           | in     | F        |
-!! | ntiw           | index_for_ice_cloud_condensate_vertical_diffusion_tracer             | tracer index for ice water in the vertically diffused tracer array | index         |    0 | integer   |           | in     | F        |
-!! | ntke           | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array | index   |    0 | integer   |           | in     | F        |
-!! | grav           | gravitational_acceleration                                                  | gravitational acceleration                            | m s-2         |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                        | ideal gas constant for dry air                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure         | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | rv             | gas_constant_water_vapor                                                    | ideal gas constant for water vapor                    | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | hfus           | latent_heat_of_fusion_of_water_at_0C                                        | latent heat of fusion                                 | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | (rv/rd) - 1 (rv = ideal gas constant for water vapor) | none          |    0 | real      | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                               | rd/rv                                                 | none          |    0 | real      | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                     | (rd/rv) - 1                                           | none          |    0 | real      | kind_phys | in     | F        |
-!! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | du             | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | tdt            | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | rtg            | tendency_of_vertically_diffused_tracer_concentration                        | updated tendency of the tracers due to vertical diffusion in PBL scheme | kg kg-1 s-1 | 3 | real | kind_phys | inout | F |
-!! | u1             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | q1             | vertically_diffused_tracer_concentration                                    | tracer concentration diffused by PBL scheme           | kg kg-1       |    3 | real      | kind_phys | in     | F        |
-!! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step | total sky shortwave heating rate                      | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                | zenith angle temporal adjustment factor for shortwave | none          |    1 | real      | kind_phys | in     | F        |
-!! | garea          | cell_area                                                                   | area of the grid cell                                 | m2            |    1 | real      | kind_phys | in     | F        |
-!! | psk            | dimensionless_exner_function_at_lowest_model_interface                      | dimensionless Exner function at the surface interface | none          |    1 | real      | kind_phys | in     | F        |
-!! | rbsoil         | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | zorl           | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
-!! | u10m           | x_wind_at_10m                                                               | x component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v10m           | y_wind_at_10m                                                               | y component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | fm             | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | in     | F        |
-!! | fh             | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | in     | F        |
-!! | tsea           | surface_skin_temperature                                                    | surface skin temperature                              | K             |    1 | real      | kind_phys | in     | F        |
-!! | heat           | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | stress         | surface_wind_stress                                                         | surface wind stress                                   | m2 s-2        |    1 | real      | kind_phys | in     | F        |
-!! | spd1           | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer                          | PBL top model level index                             | index         |    1 | integer   |           | out    | F        |
-!! | prsi           | air_pressure_at_interface                                                   | air pressure at model layer interfaces                | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers                                   | pres(k) - pres(k+1)                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
-!! | phii           | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                | geopotential at model layer centers                   | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | delt           | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
-!! | dspheat        | flag_TKE_dissipation_heating                                                | flag for using TKE dissipation heating                | flag          |    0 | logical   |           | in     | F        |
-!! | dusfc          | instantaneous_surface_x_momentum_flux                                       | x momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc          | instantaneous_surface_y_momentum_flux                                       | y momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dtsfc          | instantaneous_surface_upward_sensible_heat_flux                             | surface upward sensible heat flux                     | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | dqsfc          | instantaneous_surface_upward_latent_heat_flux                               | surface upward latent heat flux                       | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | out    | F        |
-!! | kinver         | index_of_highest_temperature_inversion                                      | index of highest temperature inversion                | index         |    1 | integer   |           | in     | F        |
-!! | xkzm_m         | atmosphere_momentum_diffusivity_background                                  | background value of momentum diffusivity              | m2 s-1        |    0 | real      | kind_phys | in     | F        |
-!! | xkzm_h         | atmosphere_heat_diffusivity_background                                      | background value of heat diffusivity                  | m2 s-1        |    0 | real      | kind_phys | in     | F        |
-!! | xkzm_s         | diffusivity_background_sigma_level                                          | sigma level threshold for background diffusivity      | none          |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude satmedmfvdif_run.html
 !!
 !!\section gen_satmedmfvdif GFS satmedmfvdif General Algorithm
 !! satmedmfvdif_run() computes subgrid vertical turbulence mixing
-!! using scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization
-!! (Han and Bretherton (2019)).
-!! -# For the convective boundary layer, the scheme adopts
-!! EDMF parameterization (Siebesma et al., 2007) to take
-!! into account nonlocal transport by large eddies (mfpblt.f).
-!! -# A new mass-flux parameterization for stratocumulus-top-induced turbulence
-!! mixing has been introduced (previously, it was eddy diffusion form)
-!! [mfscu.f].
-!! -# For local turbulence mixing, a TKE closure model is used.
+!! using the scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization of
+!! Han and Bretherton (2019) \cite Han_2019 .
+!! -# The local turbulent mixing is represented by an eddy-diffusivity scheme which 
+!! is a function of a prognostic TKE.
+!! -# For the convective boundary layer, nonlocal transport by large eddies 
+!! (mfpblt.f), is represented using a mass flux approach (Siebesma et al.(2007) \cite Siebesma_2007 ).
+!! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
+!! (mfscu.f).
 !! \section detail_satmedmfvidf GFS satmedmfvdif Detailed Algorithm 
 !> @{
       subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
@@ -287,7 +225,7 @@
       kmpbl = km / 2
       kmscu = km / 2
 !>  - Compute physical height of the layer centers and interfaces from 
-!! the geopotential height (zi and zl)
+!! the geopotential height (\p zi and \p zl)
       do k=1,km
         do i=1,im
           zi(i,k) = phii(i,k) * gravi
@@ -308,12 +246,12 @@
           zm(i,k) = zi(i,k+1)
         enddo
       enddo
-!>  - Compute horizontal grid size (gdx)
+!>  - Compute horizontal grid size (\p gdx)
       do i=1,im
         gdx(i) = sqrt(garea(i))
       enddo
 !>  - Initialize tke value at vertical layer centers and interfaces 
-!! from tracer (tke and tkeh)
+!! from tracer (\p tke and \p tkeh)
       do k=1,km
         do i=1,im
           tke(i,k) = max(q1(i,k,ntke), tkmin)
@@ -449,7 +387,6 @@
 !
 !>  - Compute an empirical cloud fraction based on 
 !! Xu and Randall (1996) \cite xu_and_randall_1996
-!! (see \ref cld_fra).
       do k = 1, km
         do i = 1, im
           plyr(i,k)   = 0.01 * prsl(i,k)   ! pa to mb (hpa)
@@ -520,7 +457,7 @@
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
       enddo
 !
-!>  - Compute critical bulk richardson number (\f$Rb_{cr}\f$) (crb)
+!>  - Compute critical bulk Richardson number (\f$Rb_{cr}\f$) (crb)
 !!   - For the unstable PBL, crb is a constant (0.25)
 !!   - For the stable boundary layer (SBL), \f$Rb_{cr}\f$ varies
 !!     with the surface Rossby number, \f$R_{0}\f$, as given by 
@@ -573,7 +510,7 @@
       enddo
       enddo
 !
-! Find pbl height based on bulk richardson number (mrf pbl scheme)
+! Find pbl height based on bulk Richardson number (mrf pbl scheme)
 !   and also for diagnostic purpose
 !
 !
@@ -584,7 +521,7 @@
 !>  - Given the thermal's properties and the critical Richardson number, 
 !! a loop is executed to find the first level above the surface (kpblx) where 
 !! the modified Richardson number is greater than the critical Richardson
-!! number, using equation 10a from Toen and Mahrt (1996) \cite troen_and_mahrt_1986 
+!! number, using equation 10a from Troen and Mahrt (1996) \cite troen_and_mahrt_1986 
 !! (also equation 8 from Hong and Pan (1996) \cite hong_and_pan_1996):
       do k = 1, kmpbl
       do i = 1, im
