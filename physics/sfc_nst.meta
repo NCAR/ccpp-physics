@@ -323,8 +323,8 @@
   intent = in
   optional = F
 [solhr]
-  standard_name = forecast_hour
-  long_name = fcst hour at the end of prev time step
+  standard_name = forecast_hour_of_the_day
+  long_name = time in hours after 00z at the current timestep
   units = h
   dimensions = ()
   type = real
