@@ -5,3 +5,4 @@ physics/*.xml
 *.cmake
 *.mk
 *.html
+physics/rte-rrtmgp
