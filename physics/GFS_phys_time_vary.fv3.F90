@@ -22,9 +22,11 @@
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
-      
+
+#if 0
       !--- variables needed for calculating 'sncovr'
       use namelist_soilveg, only: salp_data, snupx
+#endif
 
       implicit none
 
@@ -326,7 +328,7 @@
         use mersenne_twister,      only: random_setseed, random_number
         use machine,               only: kind_phys
         use GFS_typedefs,          only: GFS_control_type, GFS_data_type
-        
+
         implicit none
 
         ! Interface variables
@@ -496,7 +498,8 @@
             enddo
           endif
         endif
-        
+
+#if 0
         !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
         if (first_time_step) then
           if (nint(Data(1)%Sfcprop%sncovr(1)) == -9999) then
@@ -519,6 +522,7 @@
             enddo
           endif
         endif
+#endif
 
       end subroutine GFS_phys_time_vary_run
 !> @}
