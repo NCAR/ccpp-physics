@@ -15,6 +15,11 @@
      use iccn_def,   only : ciplin, ccnin, ci_pres
      use iccninterp, only : read_cidata, setindxci, ciinterpol
 
+#if 0
+      !--- variables needed for calculating 'sncovr'
+      use namelist_soilveg, only: salp_data, snupx
+#endif
+
       implicit none
 
       private
@@ -220,7 +225,7 @@
 !> \section arg_table_GFS_phys_time_vary_run Argument Table
 !! \htmlinclude GFS_phys_time_vary_run.html
 !!
-      subroutine GFS_phys_time_vary_run (Grid, Statein, Model, Tbd, Sfcprop, Cldprop, Diag, errmsg, errflg)
+      subroutine GFS_phys_time_vary_run (Grid, Statein, Model, Tbd, Sfcprop, Cldprop, Diag, first_time_step, errmsg, errflg)
 
         use mersenne_twister,      only: random_setseed, random_number
         use machine,               only: kind_phys
@@ -238,6 +243,7 @@
         type(GFS_sfcprop_type),           intent(inout) :: Sfcprop
         type(GFS_cldprop_type),           intent(inout) :: Cldprop
         type(GFS_diag_type),              intent(inout) :: Diag
+        logical,                          intent(in)    :: first_time_step
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -245,8 +251,8 @@
         real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
         real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
 
-        integer :: i, j, k, iseed, iskip, ix, nb, kdt_rad
-        real(kind=kind_phys) :: sec_zero
+        integer :: i, j, k, iseed, iskip, ix, nb, kdt_rad, vegtyp
+        real(kind=kind_phys) :: sec_zero, rsnow
         real(kind=kind_phys) :: wrk(1)
         real(kind=kind_phys) :: rannie(Model%cny)
         real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
@@ -362,6 +368,29 @@
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
         endif
+        
+#if 0
+        !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
+        if (first_time_step) then
+          if (nint(Sfcprop%sncovr(1)) == -9999) then
+            !--- compute sncovr from existing variables
+            !--- code taken directly from read_fix.f
+              do ix = 1, Model%blksz(nb)
+                Sfcprop%sncovr(ix) = 0.0
+                if (Sfcprop%slmsk(ix) > 0.001) then
+                  vegtyp = Sfcprop%vtype(ix)
+                  if (vegtyp == 0) vegtyp = 7
+                  rsnow  = 0.001*Sfcprop%weasd(ix)/snupx(vegtyp)
+                  if (0.001*Sfcprop%weasd(ix) < snupx(vegtyp)) then
+                    Sfcprop%sncovr(ix) = 1.0 - (exp(-salp_data*rsnow) - rsnow*exp(-salp_data))
+                  else
+                    Sfcprop%sncovr(ix) = 1.0
+                  endif
+                endif
+              enddo
+          endif
+        endif
+#endif
 
       end subroutine GFS_phys_time_vary_run
 
