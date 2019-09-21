@@ -304,7 +304,7 @@
             if (total_precip > rainmin) then
               srflag(i) = (ice(i)+csnow)/total_precip
             endif
-          else
+          else if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson ) then
             total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
             if (total_precip > rainmin) then
               srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
