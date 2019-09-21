@@ -3,6 +3,9 @@
 
       MODULE myjpbl_wrapper
 
+      USE machine, only: kfpt => kind_phys, &
+                         kind_phys
+
       contains
 
       subroutine myjpbl_wrapper_init ()
@@ -13,11 +16,9 @@
 
 !!
 !> \brief This scheme (1) performs pre-myjpbl work, (2) runs the myjpbl, and (3) performs post-myjpbl work
-#if 0
 !! \section arg_table_myjpbl_wrapper_run Argument Table
 !! \htmlinclude myjpbl_wrapper_run.html
 !!
-#endif
 !###===================================================================
   SUBROUTINE myjpbl_wrapper_run(                    &
      &  restart,do_myjsfc,                           &
@@ -42,19 +43,18 @@
      &  me, lprnt, errmsg, errflg )
 
 !
-      use machine,      only : kind_phys
 
       use MODULE_BL_MYJPBL,      only: MYJPBL_INIT,MYJPBL
 
 !-------------------------------------------------------------------
       implicit none
 
-      integer,parameter:: &
-        klog=4 &                   ! logical variables
-       ,kint=4 &                   ! integer variables
-       !,kfpt=4 &                   ! floating point variables
-       ,kfpt=8 &                   ! floating point variables
-       ,kdbl=8                     ! double precision
+!      integer,parameter:: &
+!        klog=4 &                   ! logical variables
+!       ,kint=4 &                   ! integer variables
+!       !,kfpt=4 &                   ! floating point variables
+!       ,kfpt=8 &                   ! floating point variables
+!       ,kdbl=8                     ! double precision
 
 !-------------------------------------------------------------------
 !  ---  constant parameters:
@@ -121,7 +121,7 @@
       integer :: i_min, i_max, k_min, k_max
 
       logical :: lprnt1,lprnt2
-      integer (kind=kint) :: ict, ide, lm, me1
+      integer :: ict, ide, lm, me1
       real(kind=kfpt) :: dt_myj, tem, tem1, tem2, ptem
       integer,dimension(im) :: kpbl_myj
       real(kind=kfpt),dimension(1:levs-1):: epsl
