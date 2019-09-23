@@ -26,27 +26,8 @@ contains
   subroutine GFS_rrtmgp_post_init ()
   end subroutine GFS_rrtmgp_post_init
 
-!> \section arg_table_GFS_rrtmgp_post_run Argument Table
-!! | local_name     | standard_name                                                 | long_name                                                                    | units    | rank |  type             |   kind    | intent | optional |
-!! |----------------|---------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|-------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                                     | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type  |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                                        | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type     |           | in     | F        |
-!! | Diag           | GFS_diag_type_instance                                        | Fortran DDT containing FV3-GFS diagnotics data                               | DDT      |    0 | GFS_diag_type     |           | inout  | F        |
-!! | Radtend        | GFS_radtend_type_instance                                     | Fortran DDT containing FV3-GFS radiation tendencies                          | DDT      |    0 | GFS_radtend_type  |           | inout  | F        |
-!! | Statein        | GFS_statein_type_instance                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore          | DDT      |    0 | GFS_statein_type  |           | in     | F        |
-!! | Coupling       | GFS_coupling_type_instance                                    | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type |           | inout  | F        |
-!! | scmpsw         | components_of_surface_downward_shortwave_fluxes               | derived type for special components of surface downward shortwave fluxes     | W m-2    |    1 | cmpfsw_type       |           | inout  | T        |
-!! | ncol           | horizontal_loop_extent                                        | horizontal loop extent                                                       | count    |    0 | integer           |           | in     | F        |
-!! | raddt          | time_step_for_radiation                                       | radiation time step                                                          | s        |    0 | real              | kind_phys | in     | F        |
-!! | aerodp         | atmosphere_optical_thickness_due_to_ambient_aerosol_particles | vertical integrated optical depth for various aerosol species                | none     |    2 | real              | kind_phys | in     | F        |
-!! | cldsa          | cloud_area_fraction_for_radiation                             | fraction of clouds for low, middle, high, total and BL                       | frac     |    2 | real              | kind_phys | in     | F        |
-!! | mtopa          | model_layer_number_at_cloud_top                               | vertical indices for low, middle and high cloud tops                         | index    |    2 | integer           |           | in     | F        |
-!! | mbota          | model_layer_number_at_cloud_base                              | vertical indices for low, middle and high cloud bases                        | index    |    2 | integer           |           | in     | F        |
-!! | cloud_fraction | total_cloud_fraction                                          | layer total cloud fraction                                                   | frac     |    2 | real              | kind_phys | in     | F        |
-!! | cldtaulw       | cloud_optical_depth_layers_at_10mu_band                       | approx 10mu band layer cloud optical depth                                   | none     |    2 | real              | kind_phys | in     | F        |
-!! | cldtausw       | cloud_optical_depth_layers_at_0.55mu_band                     | approx .55mu band layer cloud optical depth                                  | none     |    2 | real              | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                                     | none     |    0 | character         | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                                        | flag     |    0 | integer           |           | out    | F        |
+!> \section arg_table_GFS_rrtmgp_post
+!! \htmlinclude GFS_rrtmgp_post.html
 !!
   subroutine GFS_rrtmgp_post_run (Model, Grid, Diag, Radtend, Statein, Coupling, scmpsw, &
        ncol, raddt, aerodp, cldsa, mtopa, mbota, cloud_fraction, cldtaulw, cldtausw,     &

@@ -24,27 +24,8 @@ contains
 
   ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
 #ifndef __PGI
-!> \section arg_table_GFS_rrtmgp_lw_post_run Argument Table
-!! | local_name        | standard_name                                                                                  | long_name                                                                    | units    | rank |  type                |   kind    | intent | optional |
-!! |-------------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|----------------------|-----------|--------|----------|
-!! | Model             | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type     |           | in     | F        |
-!! | Grid              | GFS_grid_type_instance                                                                         | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type        |           | in     | F        |
-!! | Radtend           | GFS_radtend_type_instance                                                                      | Fortran DDT containing FV3-GFS radiation tendencies                          | DDT      |    0 | GFS_radtend_type     |           | inout  | F        |
-!! | Coupling          | GFS_coupling_type_instance                                                                     | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type    |           | inout  | F        |
-!! | im                | horizontal_loop_extent                                                                         | horizontal loop extent                                                       | count    |    0 | integer              |           | in     | F        |
-!! | tsfa              | surface_air_temperature_for_radiation                                                          | lowest model layer air temperature for radiation                             | K        |    1 | real                 | kind_phys | in     | F        |
-!! | p_lev             | air_pressure_at_interface_for_RRTMGP_in_hPa                                                    | air pressure level                                                           | hPa      |    2 | real                 | kind_phys | in     | F        |
-!! | fluxlwUP_allsky   | lw_flux_profile_upward_allsky                                                                  | RRTMGP upward longwave all-sky flux profile                                  | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | fluxlwDOWN_allsky | lw_flux_profile_downward_allsky                                                                | RRTMGP downward longwave all-sky flux profile                                | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | fluxlwUP_clrsky   | lw_flux_profile_upward_clrsky                                                                  | RRTMGP upward longwave clr-sky flux profile                                  | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | fluxlwDOWN_clrsky | lw_flux_profile_downward_clrsky                                                                | RRTMGP downward longwave clr-sky flux profile                                | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | hlwc              | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                     | longwave total sky heating rate                                              | K s-1    |    2 | real                 | kind_phys | out    | F        |
-!! | topflx_lw         | lw_fluxes_top_atmosphere                                                                       | longwave total sky fluxes at the top of the atm                              | W m-2    |    1 | topflw_type          |           | inout  | F        |
-!! | sfcflx_lw         | lw_fluxes_sfc                                                                                  | longwave total sky fluxes at the Earth surface                               | W m-2    |    1 | sfcflw_type          |           | inout  | F        |
-!! | flxprf_lw         | lw_fluxes                                                                                      | lw fluxes total sky / csk and up / down at levels                            | W m-2    |    2 | proflw_type          |           | inout  | T        |
-!! | hlw0              | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step  | longwave clear sky heating rate                                              | K s-1    |    2 | real                 | kind_phys | inout  | T        |
-!! | errmsg            | ccpp_error_message                                                                             | error message for error handling in CCPP                                     | none     |    0 | character            | len=*     | out    | F        |
-!! | errflg            | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                        | flag     |    0 | integer              |           | out    | F        |
+!> \section arg_table_GFS_rrtmgp_lw_post
+!! \htmlinclude GFS_rrtmgp_lw_post.html
 !!
 #endif
   subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend,  &

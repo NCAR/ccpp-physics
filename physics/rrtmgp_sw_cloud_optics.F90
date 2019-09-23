@@ -14,16 +14,8 @@ module rrtmgp_sw_cloud_optics
 
 contains
 
-!! \section arg_table_rrtmgp_sw_cloud_optics_init Argument Table
-!! | local_name     | standard_name                    | long_name                                                          | units | rank | type             | kind  | intent | optional |
-!! |----------------|----------------------------------|--------------------------------------------------------------------|-------|------|------------------|-------|--------|----------|
-!! | Model          | GFS_control_type_instance        | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type |       | in     | F        |
-!! | mpirank        | mpi_rank                         | current MPI rank                                                   | index |    0 | integer          |       | in     | F        |
-!! | mpiroot        | mpi_root                         | master MPI rank                                                    | index |    0 | integer          |       | in     | F        |
-!! | mpicomm        | mpi_comm                         | MPI communicator                                                   | index |    0 | integer          |       | in     | F        |
-!! | errmsg         | ccpp_error_message               | error message for error handling in CCPP                           | none  |    0 | character        | len=* | out    | F        |
-!! | errflg         | ccpp_error_flag                  | error flag for error handling in CCPP                              | flag  |    0 | integer          |       | out    | F        |
-!! | sw_cloud_props | coefficients_for_sw_cloud_optics | DDT containing spectral information for RRTMGP SW radiation scheme | DDT   |    0 | ty_cloud_optics  |       | out    | F        |
+!! \section arg_table_rrtmgp_sw_cloud_optics
+!! \html_include rrtmgp_lw_cloud_optics.html
 !!
   ! #########################################################################################
   ! SUBROUTINE sw_cloud_optics_init
@@ -313,32 +305,8 @@ contains
     endif
   end subroutine rrtmgp_sw_cloud_optics_init
 
-!! \section arg_table_rrtmgp_sw_cloud_optics_run Argument Table
-!! | local_name            | standard_name                                        | long_name                                                                    | units   | rank | type                  |    kind   | intent | optional |
-!! |-----------------------|------------------------------------------------------|------------------------------------------------------------------------------|---------|------|-----------------------|-----------|--------|----------|
-!! | Model                 | GFS_control_type_instance                            | Fortran DDT containing FV3-GFS model control parameters                      | DDT     |    0 | GFS_control_type      |           | in     | F        |
-!! | ncol                  | horizontal_loop_extent                               | horizontal dimension                                                         | count   |    0 | integer               |           | in     | F        |
-!! | cld_frac              | total_cloud_fraction                                 | layer total cloud fraction                                                   | frac    |    2 | real                  | kind_phys | in     | F        |
-!! | cld_lwp               | cloud_liquid_water_path                              | layer cloud liquid water path                                                | g m-2   |    2 | real                  | kind_phys | in     | F        |
-!! | cld_reliq             | mean_effective_radius_for_liquid_cloud               | mean effective radius for liquid cloud                                       | micron  |    2 | real                  | kind_phys | in     | F        |
-!! | cld_iwp               | cloud_ice_water_path                                 | layer cloud ice water path                                                   | g m-2   |    2 | real                  | kind_phys | in     | F        |
-!! | cld_reice             | mean_effective_radius_for_ice_cloud                  | mean effective radius for ice cloud                                          | micron  |    2 | real                  | kind_phys | in     | F        |
-!! | cld_swp               | cloud_snow_water_path                                | layer cloud snow water path                                                  | g m-2   |    2 | real                  | kind_phys | in     | F        |
-!! | cld_resnow            | mean_effective_radius_for_snow_flake                 | mean effective radius for snow cloud                                         | micron  |    2 | real                  | kind_phys | in     | F        |
-!! | cld_rwp               | cloud_rain_water_path                                | layer cloud rain water path                                                  | g m-2   |    2 | real                  | kind_phys | in     | F        |
-!! | cld_rerain            | mean_effective_radius_for_rain_drop                  | mean effective radius for rain cloud                                         | micron  |    2 | real                  | kind_phys | in     | F        |
-!! | icseed_sw             | seed_random_numbers_sw                               | seed for random number generation for shortwave radiation                    | none    |    1 | integer               |           | in     | F        |
-!! | aerosols              | aerosol_optical_properties_for_shortwave_bands_01-16 | aerosol optical properties for shortwave bands 01-16                         | various |    4 | real                  | kind_phys | in     | F        |
-!! | sw_cloud_props        | coefficients_for_sw_cloud_optics                     | DDT containing spectral information for cloudy RRTMGP SW radiation scheme    | DDT     |    0 | ty_cloud_optics       |           | in     | F        |
-!! | sw_gas_props          | coefficients_for_sw_gas_optics                       | DDT containing spectral information for RRTMGP SW radiation scheme           | DDT     |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | ipsdsw0               | initial_permutation_seed_sw                          | initial seed for McICA SW                                                    | none    |    0 | integer               |           | in     | F        |
-!! | nday                  | daytime_points_dimension                             | daytime points dimension                                                     | count   |    0 | integer               |           | in     | F        |
-!! | idxday                | daytime_points                                       | daytime points                                                               | index   |    1 | integer               |           | in     | F        |
-!! | optical_props_clouds  | shortwave_optical_properties_for_cloudy_atmosphere   | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_2str |           | out    | F        |
-!! | optical_props_aerosol | shortwave_optical_properties_for_aerosols            | Fortran DDT containing RRTMGP optical properties                             | DDT     |    0 | ty_optical_props_2str |           | out    | F        |
-!! | cldtausw              | cloud_optical_depth_layers_at_0.55mu_band            | approx .55mu band layer cloud optical depth                                  | none    |    2 | real                  | kind_phys | out    | F        |
-!! | errmsg                | ccpp_error_message                                   | error message for error handling in CCPP                                     | none    |    0 | character             | len=*     | out    | F        |
-!! | errflg                | ccpp_error_flag                                      | error flag for error handling in CCPP                                        | flag    |    0 | integer               |           | out    | F        |
+!! \section arg_table_rrtmgp_sw_cloud_optics
+!! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
   ! #########################################################################################
   ! SUBROTUINE rrtmgp_sw_cloud_optics_run()

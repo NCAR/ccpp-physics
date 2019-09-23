@@ -1,0 +1,36 @@
+[ccpp-arg-table]
+  name = GFS_rrtmgp_gas_optics_init
+  type = scheme
+[Model]
+  standard_name = GFS_control_type
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Radtend]
+  standard_name = GFS_radtend_type
+  long_name = Fortran DDT containing FV3-GFS radiation tendencies
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

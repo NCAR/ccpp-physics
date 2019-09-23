@@ -24,32 +24,9 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_rte_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_rte_run Argument Table
-!! | local_name            | standard_name                                                                                 | long_name                                                           | units | rank | type                  |    kind   | intent | optional |
-!! |-----------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
-!! | Model                 | GFS_control_type_instance                                                                     | Fortran DDT containing FV3-GFS model control parameters             | DDT   |    0 | GFS_control_type      |           | in     | F        |
-!! | Radtend               | GFS_radtend_type_instance                                                                     | Fortran DDT containing FV3-GFS radiation tendencies                 | DDT   |    0 | GFS_radtend_type      |           | in     | F        |
-!! | Statein               | GFS_statein_type_instance                                                                     | Fortran DDT containing FV3-GFS prognostic state data in from dycore | DDT   |    0 | GFS_statein_type      |           | in     | F        |
-!! | ncol                  | horizontal_loop_extent                                                                        | horizontal dimension                                                | count |    0 | integer               |           | in     | F        |
-!! | p_lay                 | air_pressure_at_layer_for_RRTMGP_in_hPa                                                       | air pressure layer                                                  | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | p_lev                 | air_pressure_at_interface_for_RRTMGP_in_hPa                                                   | air pressure level                                                  | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | t_lay                 | air_temperature_at_layer_for_RRTMGP                                                           | air temperature layer                                               | K     |    2 | real                  | kind_phys | in     | F        |
-!! | skt                   | surface_ground_temperature_for_radiation                                                      | surface ground temperature for radiation                            | K     |    1 | real                  | kind_phys | in     | F        |
-!! | lw_gas_props          | coefficients_for_lw_gas_optics                                                                | DDT containing spectral information for RRTMGP LW radiation scheme  | DDT   |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | optical_props_clrsky  | longwave_optical_properties_for_clear_sky                                                     | Fortran DDT containing RRTMGP optical properties                    | DDT   |    0 | ty_optical_props_1scl |           | inout  | F        |
-!! | optical_props_cloud   | longwave_optical_properties_for_cloudy_atmosphere                                             | Fortran DDT containing RRTMGP optical properties                    | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
-!! | optical_props_aerosol | longwave_optical_properties_for_aerosols                                                      | Fortran DDT containing RRTMGP optical properties                    | DDT   |    0 | ty_optical_props_1scl |           | in     | F        |
-!! | sources               | longwave_source_function                                                                      | Fortran DDT containing RRTMGP source functions                      | DDT   |    0 | ty_source_func_lw     |           | in     | F        |
-!! | lslwr                 | flag_to_calc_lw                                                                               | flag to calculate LW irradiances                                    | flag  |    0 | logical               |           | in     | F        |
-!! | hlw0                  | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                                     | K s-1 |    2 | real                  | kind_phys | in     | T        |
-!! | hlwb                  | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                          | K s-1 |    3 | real                  | kind_phys | in     | T        |
-!! | fluxUP_allsky         | lw_flux_profile_upward_allsky                                                                 | RRTMGP upward longwave all-sky flux profile                         | W m-2 |    2 | real                  | kind_phys | out    | F        |
-!! | fluxDOWN_allsky       | lw_flux_profile_downward_allsky                                                               | RRTMGP downward longwave all-sky flux profile                       | W m-2 |    2 | real                  | kind_phys | out    | F        |
-!! | fluxUP_clrsky         | lw_flux_profile_upward_clrsky                                                                 | RRTMGP upward longwave clr-sky flux profile                         | W m-2 |    2 | real                  | kind_phys | out    | F        |
-!! | fluxDOWN_clrsky       | lw_flux_profile_downward_clrsky                                                               | RRTMGP downward longwave clr-sky flux profile                       | W m-2 |    2 | real                  | kind_phys | out    | F        |
-!! | errmsg                | ccpp_error_message                                                                            | error message for error handling in CCPP                            | none  |    0 | character             | len=*     | out    | F        |
-!! | errflg                | ccpp_error_flag                                                                               | error flag for error handling in CCPP                               | flag  |    0 | integer               |           | out    | F        |
-!!
+!! \section arg_table_rrtmgp_lw_rte
+!! \htmlinclude rrtmgp_lw_rte.html
+!
   subroutine rrtmgp_lw_rte_run(Model, Statein, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, &
        skt, sources, optical_props_clrsky, optical_props_cloud, optical_props_aerosol, lslwr,&
        fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, hlw0, hlwb, errmsg, errflg)

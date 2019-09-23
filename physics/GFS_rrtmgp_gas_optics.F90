@@ -3,14 +3,10 @@ module GFS_rrtmgp_gas_optics
   use GFS_typedefs, only: GFS_control_type,GFS_radtend_type
 contains
   
-!! \section arg_table_GFS_rrtmgp_gas_optics_init Argument Table
-!! | local_name   | standard_name                     | long_name                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |--------------|-----------------------------------|---------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model        | GFS_control_type_instance         | Fortran DDT containing FV3-GFS model control parameters | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | Radtend      | GFS_radtend_type_instance         | Fortran DDT containing FV3-GFS radiation tendencies     | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
-!! | errmsg       | ccpp_error_message                | error message for error handling in CCPP                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg       | ccpp_error_flag                   | error flag for error handling in CCPP                   | flag     |    0 | integer               |           | out    | F        |
+!! \section arg_table_GFS_rrtmgp_gas_optics
+!! \htmlinclude GFS_rrtmgp_gas_optics.html
 !!
+
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_gas_optics_init()
   ! #########################################################################################
