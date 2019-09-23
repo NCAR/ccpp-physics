@@ -9,6 +9,30 @@
   type = integer
   intent = in
   optional = F
+[lsm]
+  standard_name = flag_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsm_noahmp]
+  standard_name = flag_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
 [lssav]
   standard_name = flag_diagnostics
   long_name = logical flag for storing diagnostics
@@ -53,6 +77,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[t2mmp]
+  standard_name = temperature_at_2m_from_noahmp
+  long_name = 2 meter temperature from noahmp
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[q2mp]
+  standard_name = specific_humidity_at_2m_from_noahmp
+  long_name = 2 meter specific humidity from noahmp
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [t2m]
   standard_name = temperature_at_2m
   long_name = 2 meter temperature
@@ -60,7 +102,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [q2m]
   standard_name = specific_humidity_at_2m
@@ -69,7 +111,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [u10m]
   standard_name = x_wind_at_10m
