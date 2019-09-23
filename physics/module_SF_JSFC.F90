@@ -15,6 +15,9 @@
 !
 !-----------------------------------------------------------------------
 !
+
+      USE machine, only: kfpt => kind_phys
+
       IMPLICIT NONE
 !
 !-----------------------------------------------------------------------
@@ -35,12 +38,12 @@
 !       real   (kind=kdbl),parameter :: r8_in=x'fff7ffffffffffff'
 !       integer(kind=kint),parameter :: i4_in=-999  ! -huge(1)
 !
-       integer,parameter:: &
-         klog=4 &                   ! logical variables
-        ,kint=4 &                   ! integer variables
-        !,kfpt=4 &                   ! floating point variables
-        ,kfpt=8 &                   ! floating point variables
-        ,kdbl=8                     ! double precision
+      ! integer,parameter:: &
+      !   klog=4 &                   ! logical variables
+      !  ,kint=4 &                   ! integer variables
+      !  !,kfpt=4 &                   ! floating point variables
+      !  ,kfpt=8 &                   ! floating point variables
+      !  ,kdbl=8                     ! double precision
 !
       PRIVATE
 !

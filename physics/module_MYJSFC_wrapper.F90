@@ -3,6 +3,9 @@
 
       MODULE myjsfc_wrapper
 
+      USE machine, only: kfpt => kind_phys, &
+                         kind_phys
+
       contains
 
       subroutine myjsfc_wrapper_init ()
@@ -47,19 +50,19 @@
      &  wind,      con_cp,    con_g,    con_rd,    &
      &  me, lprnt, errmsg, errflg )             ! intent(inout)
 !
-      use machine,        only : kind_phys
+
       use MODULE_SF_JSFC, only: JSFC_INIT,JSFC
 
 !-------------------------------------------------------------------
       implicit none
 !-------------------------------------------------------------------
 
-      integer,parameter:: &
-         klog=4 &                   ! logical variables
-        ,kint=4 &                   ! integer variables
-        !,kfpt=4 &                   ! floating point variables
-        ,kfpt=8 &                   ! floating point variables
-        ,kdbl=8                     ! double precision
+!      integer,parameter:: &
+!         klog=4 &                   ! logical variables
+!        ,kint=4 &                   ! integer variables
+!        !,kfpt=4 &                   ! floating point variables
+!        ,kfpt=8 &                   ! floating point variables
+!        ,kdbl=8                     ! double precision
 !
 !  ---  constant parameters:
 !      real(kind=kind_phys), parameter :: karman  = 0.4

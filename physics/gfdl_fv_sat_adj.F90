@@ -296,10 +296,6 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
 
     ! Local variables
     real(kind=kind_dyn), dimension(is:ie,js:je) :: dpln
-#ifdef TRANSITION
-    ! For bit-for-bit reproducibility
-    real(kind=kind_dyn), volatile :: volatile_var
-#endif
     integer :: kdelz
     integer :: k, j, i
 
@@ -317,9 +313,6 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
 !$OMP                 ql,qv,te0,fast_mp_consv,     &
 !$OMP                 hydrostatic,ng,zvir,pkz,     &
 !$OMP                 akap,te0_2d,ngas,qvi)        &
-#ifdef TRANSITION
-!$OMP          private(volatile_var)               &
-#endif
 !$OMP          private(k,j,i,kdelz,dpln)
 #endif
 
@@ -351,27 +344,12 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
           do j=js,je
              do i=is,ie
 #ifdef MOIST_CAPPA
-#ifdef TRANSITION
-               volatile_var = log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k))
-               pkz(i,j,k) = exp(cappa(i,j,k)*volatile_var)
-#else
                pkz(i,j,k) = exp(cappa(i,j,k)*log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)))
-#endif
-#else
-#ifdef TRANSITION
-#ifdef MULTI_GASES
-               volatile_var = log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k))
-               pkz(i,j,k) = exp(akap*(virqd(q(i,j,k,1:num_gas))/vicpqd(q(i,j,k,1:num_gas))*volatile_var)
-#else
-               volatile_var = log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k))
-               pkz(i,j,k) = exp(akap*volatile_var)
-#endif
 #else
 #ifdef MULTI_GASES
                pkz(i,j,k) = exp(akap*(virqd(q(i,j,k,1:num_gas))/vicpqd(q(i,j,k,1:num_gas))*log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)))
 #else
                pkz(i,j,k) = exp(akap*log(rrg*delp(i,j,k)/delz(i,j,k)*pt(i,j,k)))
-#endif
 #endif
 #endif
              enddo

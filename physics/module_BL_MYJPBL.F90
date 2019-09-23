@@ -15,6 +15,10 @@
 !                                 ,G,P608,PI,PQ0,R_D,R_V,RHOWATER        &
 !                                 ,STBOLT,CAPPA
 
+      USE machine, only: kfpt => kind_phys,    &
+                         kint => kind_INTEGER, &
+                         klog => kind_LOGICAL
+
 !-----------------------------------------------------------------------
 !
       IMPLICIT NONE
@@ -36,12 +40,12 @@
 !       real   (kind=kdbl),parameter :: r8_in=x'fff7ffffffffffff'
 !       integer(kind=kint),parameter :: i4_in=-999  ! -huge(1)
 
-       integer,parameter:: &
-         klog=4 &                   ! logical variables
-        ,kint=4 &                   ! integer variables
-        !,kfpt=4 &                   ! floating point variables
-        ,kfpt=8 &                   ! floating point variables
-        ,kdbl=8                     ! double precision
+      ! integer,parameter:: &
+      !   klog=4 &                   ! logical variables
+      !  ,kint=4 &                   ! integer variables
+      !  !,kfpt=4 &                   ! floating point variables
+      !  ,kfpt=8 &                   ! floating point variables
+      !  ,kdbl=8                     ! double precision
 
       REAL(kind=kfpt),PARAMETER :: A2=17.2693882,A3=273.15,A4=35.86,CP=1004.6      &
                        ,ELIV=2.850e6,ELWV=2.501e6,R_V=461.6             &
