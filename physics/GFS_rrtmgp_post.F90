@@ -19,14 +19,10 @@ module GFS_rrtmgp_post
   implicit none
 contains
 
-!>\defgroup GFS_rrtmgp_post GFS RRTMGP Scheme Post
-!! @{
-!> \section arg_table_GFS_rrtmgp_post_init Argument Table
-!!
   subroutine GFS_rrtmgp_post_init ()
   end subroutine GFS_rrtmgp_post_init
 
-!> \section arg_table_GFS_rrtmgp_post
+!> \section arg_table_GFS_rrtmgp_post_run
 !! \htmlinclude GFS_rrtmgp_post.html
 !!
   subroutine GFS_rrtmgp_post_run (Model, Grid, Diag, Radtend, Statein, Coupling, scmpsw, &

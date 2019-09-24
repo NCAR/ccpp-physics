@@ -24,9 +24,9 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_rte_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_rte
+!! \section arg_table_rrtmgp_lw_rte_run
 !! \htmlinclude rrtmgp_lw_rte.html
-!
+!!
   subroutine rrtmgp_lw_rte_run(Model, Statein, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, &
        skt, sources, optical_props_clrsky, optical_props_cloud, optical_props_aerosol, lslwr,&
        fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, hlw0, hlwb, errmsg, errflg)

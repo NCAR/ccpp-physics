@@ -23,12 +23,9 @@ contains
   subroutine GFS_rrtmgp_sw_post_init()
   end subroutine GFS_rrtmgp_sw_post_init
 
-  ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
-#ifndef __PGI
-!> \section arg_table_GFS_rrtmgp_sw_post
+!> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post.html
 !!
-#endif
   subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling,       & 
        scmpsw, im, p_lev, sw_gas_props,  nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky,         &
        fluxswUP_clrsky, fluxswDOWN_clrsky, hswc, topflx_sw, sfcflx_sw, flxprf_sw, hsw0,   &

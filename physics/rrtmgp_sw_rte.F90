@@ -26,7 +26,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_rte_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_rte
+!! \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(Model, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay, p_lev, gas_concentrations, &

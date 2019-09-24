@@ -14,8 +14,8 @@ module rrtmgp_sw_cloud_optics
 
 contains
 
-!! \section arg_table_rrtmgp_sw_cloud_optics
-!! \html_include rrtmgp_lw_cloud_optics.html
+!! \section arg_table_rrtmgp_sw_cloud_optics_init
+!! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   ! #########################################################################################
   ! SUBROUTINE sw_cloud_optics_init
@@ -305,7 +305,7 @@ contains
     endif
   end subroutine rrtmgp_sw_cloud_optics_init
 
-!! \section arg_table_rrtmgp_sw_cloud_optics
+!! \section arg_table_rrtmgp_sw_cloud_optics_run
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
   ! #########################################################################################

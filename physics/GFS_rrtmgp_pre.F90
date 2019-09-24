@@ -66,7 +66,7 @@ contains
   subroutine GFS_rrtmgp_pre_init ()
   end subroutine GFS_rrtmgp_pre_init
 
-!> \section arg_table_GFS_rrtmgp_pre
+!> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre.html
 !!
   ! Attention - the output arguments lm, im, lmk, lmp must not be set

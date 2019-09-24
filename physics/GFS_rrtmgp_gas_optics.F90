@@ -1,9 +1,13 @@
+!> \file GFS_rrtmgp_gas_optics.f90
+!! This file contains
 module GFS_rrtmgp_gas_optics
   use machine,      only: kind_phys
   use GFS_typedefs, only: GFS_control_type,GFS_radtend_type
+
+  public GFS_rrtmgp_gas_optics_init,GFS_rrtmgp_gas_optics_run,GFS_rrtmgp_gas_optics_finalize
 contains
   
-!! \section arg_table_GFS_rrtmgp_gas_optics
+!! \section arg_table_GFS_rrtmgp_gas_optics_init
 !! \htmlinclude GFS_rrtmgp_gas_optics.html
 !!
 

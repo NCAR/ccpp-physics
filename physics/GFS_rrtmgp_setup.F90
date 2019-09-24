@@ -37,9 +37,7 @@ module GFS_rrtmgp_setup
 
    contains
 
-!> \defgroup GFS_rrtmgp_setup GFS RRTMGP Scheme Setup
-!! @{
-!! \section arg_table_GFS_rrtmgp_setup
+!! \section arg_table_GFS_rrtmgp_setup_init
 !! \htmlinclude GFS_rrtmgp_setup.html
 !!
    subroutine GFS_rrtmgp_setup_init (                                    &
@@ -316,7 +314,7 @@ module GFS_rrtmgp_setup
 
    end subroutine GFS_rrtmgp_setup_init
 
-!> \section arg_table_GFS_rrtmgp_setup
+!> \section arg_table_GFS_rrtmgp_setup_run
 !! \htmlinclude GFS_rrtmgp_setup.html
 !!
    subroutine GFS_rrtmgp_setup_run (                &
@@ -355,7 +353,7 @@ module GFS_rrtmgp_setup
 
    end subroutine GFS_rrtmgp_setup_run
 
-!> \section arg_table_GFS_rrtmgp_setup
+!> \section arg_table_GFS_rrtmgp_setup_finalize
 !! \htmlinclude GFS_rrtmgp_setup.html
 !!
    subroutine GFS_rrtmgp_setup_finalize (errmsg, errflg)

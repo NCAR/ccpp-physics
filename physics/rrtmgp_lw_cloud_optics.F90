@@ -1,3 +1,5 @@
+!>\file rrtmgp_lw_cloud_optics.F90
+!! This file contains
 module rrtmgp_lw_cloud_optics
   use machine,                  only: kind_phys
   use GFS_typedefs,             only: GFS_control_type
@@ -15,7 +17,7 @@ module rrtmgp_lw_cloud_optics
   public rrtmgp_lw_cloud_optics_init, rrtmgp_lw_cloud_optics_run, rrtmgp_lw_cloud_optics_finalize
 contains
 
-!! \section arg_table_rrtmgp_lw_cloud_optics
+!! \section arg_table_rrtmgp_lw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   ! #########################################################################################
@@ -304,16 +306,16 @@ contains
   end subroutine rrtmgp_lw_cloud_optics_init
 
 
-!! \section arg_table_rrtmgp_lw_cloud_optics
-!! \html_include rrtmgp_lw_cloud_optics.html
+!! \section arg_table_rrtmgp_lw_cloud_optics_run
+!! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_run()
   ! #########################################################################################
-  subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, icseed_lw,cld_frac,       &
-       cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
-       aerosols, lw_cloud_props, lw_gas_props, ipsdlw0,                             &
-       optical_props_clouds, optical_props_aerosol, cldtaulw, errmsg, errflg)
+  subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, ipsdlw0, icseed_lw, cld_frac, cld_lwp, &
+       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,             &
+       lw_cloud_props, lw_gas_props,  aerosols,                                             &
+       cldtaulw, optical_props_clouds, optical_props_aerosol, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -342,10 +344,10 @@ contains
          lw_gas_props
     real(kind_phys), intent(in),dimension(ncol, model%levs, lw_gas_props%get_nband(),3) :: &
          aerosols            !
-    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
-         cldtaulw            ! approx 10.mu band layer cloud optical depth  
 
     ! Outputs
+    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
+         cldtaulw            ! approx 10.mu band layer cloud optical depth  
     type(ty_optical_props_1scl),intent(out) :: &
          optical_props_clouds, & !
          optical_props_aerosol   !

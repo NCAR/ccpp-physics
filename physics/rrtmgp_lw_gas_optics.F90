@@ -18,7 +18,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_gas_optics_init
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_gas_optics
+!! \section arg_table_rrtmgp_lw_gas_optics_init
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(Model, Radtend, mpicomm, mpirank, mpiroot, lw_gas_props,      &
@@ -412,7 +412,7 @@ contains
   !        If calling rte/mo_rte_sw.F90:rte_sw() directly, place calls to compute source 
   !        function and gas_optics() here.
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_gas_optics
+!! \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
   subroutine rrtmgp_lw_gas_optics_run(Model, Radtend, lw_gas_props, ncol, p_lay, p_lev, t_lay, t_lev, skt, &

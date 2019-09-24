@@ -34,3 +34,13 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rrtmgp_gas_optics_run
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rrtmgp_gas_optics_finalize
+  type = scheme

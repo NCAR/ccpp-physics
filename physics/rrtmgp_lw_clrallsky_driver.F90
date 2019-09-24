@@ -24,7 +24,7 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_clrallsky_driver_run
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_clrallsky_drive
+!! \section arg_table_rrtmgp_lw_clrallsky_driver_run
 !! \htmlinclude rrtmgp_lw_clrallsky_driver.html
 !!
   subroutine rrtmgp_lw_clrallsky_driver_run(Model, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, skt, &
