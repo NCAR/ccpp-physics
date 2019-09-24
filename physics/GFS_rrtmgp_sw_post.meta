@@ -2,40 +2,40 @@
   name = GFS_rrtmgp_sw_post_run
   type = scheme
 [Model]
-  standard_name = GFS_control_type
-  long_name = Fortran DDT containing FV3-GFS model control parameters
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
   units = DDT
   dimensions = ()
   type = GFS_control_type
   intent = in
   optional = F
 [Grid]
-  standard_name = GFS_grid_type
-  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
+  standard_name = GFS_grid_type_instance
+  long_name = instance of derived type GFS_grid_type
   units = DDT
   dimensions = ()
   type = GFS_grid_type
   intent = in
   optional = F
 [Diag]
-  standard_name = GFS_diag_type
-  long_name = Fortran DDT containing FV3-GFS diagnotics data
+  standard_name = GFS_diag_type_instance
+  long_name = instance of derived type GFS_diag_type
   units = DDT
   dimensions = ()
   type = GFS_diag_type
   intent = inout
   optional = F
 [Radtend]
-  standard_name = GFS_radtend_type
-  long_name = Fortran DDT containing FV3-GFS radiation tendencies
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
   units = DDT
   dimensions = ()
   type = GFS_radtend_type
   intent = inout
   optional = F
 [Coupling]
-  standard_name = GFS_coupling_type
-  long_name = Fortran DDT containing FV3-GFS fields to/from coupling with other components
+  standard_name = GFS_coupling_type_instance
+  long_name = instance of derived type GFS_coupling_type
   units = DDT
   dimensions = ()
   type = GFS_coupling_type
