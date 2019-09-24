@@ -29,10 +29,10 @@ contains
 !! \section arg_table_rrtmgp_sw_clrallsky_driver_run
 !! \htmlinclude rrtmgp_sw_clrallsky_driver.html
 !!
-  subroutine rrtmgp_sw_clrallsky_driver_run(Model, Radtend, ncol, sw_gas_props, p_lay, t_lay, p_lev, gas_concentrations, &
-       optical_props_clds, optical_props_aerosol, &
-       lsswr, nday, idxday, hsw0, hswb, scmpsw, &
-       fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, errmsg, errflg)
+  subroutine rrtmgp_sw_clrallsky_driver_run(Model, Radtend, ncol, sw_gas_props, p_lay, t_lay,&
+       p_lev, gas_concentrations,sw_optical_props_clouds, sw_optical_props_aerosol, lsswr,   &
+       nday, idxday, hsw0, hswb, scmpsw, &
+       fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type),   intent(in)    :: Model
@@ -50,8 +50,8 @@ contains
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props                ! DDT containing SW spectral information
     type(ty_optical_props_2str),intent(in) :: &
-         optical_props_clds, & ! RRTMGP DDT: longwave cloud radiative properties 
-         optical_props_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
+         sw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
+         sw_optical_props_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
 
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
@@ -62,10 +62,10 @@ contains
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
-         fluxUP_allsky,   & ! All-sky flux                    (W/m2)
-         fluxDOWN_allsky, & ! All-sky flux                    (W/m2)
-         fluxUP_clrsky,   & ! Clear-sky flux                  (W/m2)
-         fluxDOWN_clrsky    ! All-sky flux                    (W/m2)
+         fluxswUP_allsky,   & ! All-sky flux                    (W/m2)
+         fluxswDOWN_allsky, & ! All-sky flux                    (W/m2)
+         fluxswUP_clrsky,   & ! Clear-sky flux                  (W/m2)
+         fluxswDOWN_clrsky    ! All-sky flux                    (W/m2)
 
     ! Inputs (optional) (NOTE. We only need the optional arguments to know what fluxes to output, HR's are computed later)
     real(kind_phys), dimension(ncol,Model%levs), optional, intent(inout) :: &
@@ -94,8 +94,8 @@ contains
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false.
     integer :: iGas
     type(ty_optical_props_2str)  :: &
-         optical_props_clds_daylit, & ! RRTMGP DDT: longwave cloud radiative properties 
-         optical_props_aerosol_daylit ! RRTMGP DDT: longwave aerosol radiative properties
+         sw_optical_props_clouds_daylit, & ! RRTMGP DDT: longwave cloud radiative properties 
+         sw_optical_props_aerosol_daylit ! RRTMGP DDT: longwave aerosol radiative properties
     type(ty_gas_concs) :: &
          gas_concentrations_daylit    ! RRTMGP DDT: trace gas concentrations   (vmr)
 
@@ -112,24 +112,24 @@ contains
     if ( l_scmpsw ) then
        scmpsw = cmpfsw_type (0., 0., 0., 0., 0., 0.)
     endif
-    fluxUP_allsky(:,:)   = 0._kind_phys
-    fluxDOWN_allsky(:,:) = 0._kind_phys
-    fluxUP_clrsky(:,:)   = 0._kind_phys
-    fluxDOWN_clrsky(:,:) = 0._kind_phys
+    fluxswUP_allsky(:,:)   = 0._kind_phys
+    fluxswDOWN_allsky(:,:) = 0._kind_phys
+    fluxswUP_clrsky(:,:)   = 0._kind_phys
+    fluxswDOWN_clrsky(:,:) = 0._kind_phys
 
     if (nDay .gt. 0) then
 
        ! Subset the cloud and aerosol radiative properties over daylit points.
        ! Cloud optics [nDay,Model%levs,nBands]
-       call check_error_msg('rrtmgp_sw_clrallsky_driver_run',optical_props_clds_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
-       optical_props_clds_daylit%tau    = optical_props_clds%tau(idxday,:,:)
-       optical_props_clds_daylit%ssa    = optical_props_clds%ssa(idxday,:,:)
-       optical_props_clds_daylit%g      = optical_props_clds%g(idxday,:,:)
+       call check_error_msg('rrtmgp_sw_clrallsky_driver_run',sw_optical_props_clouds_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
+       sw_optical_props_clouds_daylit%tau    = sw_optical_props_clouds%tau(idxday,:,:)
+       sw_optical_props_clouds_daylit%ssa    = sw_optical_props_clouds%ssa(idxday,:,:)
+       sw_optical_props_clouds_daylit%g      = sw_optical_props_clouds%g(idxday,:,:)
        ! Aerosol optics [nDay,Model%levs,nBands]
-       call check_error_msg('rrtmgp_sw_clrallsky_driver_run',optical_props_aerosol_daylit%alloc_2str(nday, Model%levs, sw_gas_props%get_band_lims_wavenumber()))
-       optical_props_aerosol_daylit%tau = optical_props_aerosol%tau(idxday,:,:)
-       optical_props_aerosol_daylit%ssa = optical_props_aerosol%ssa(idxday,:,:)
-       optical_props_aerosol_daylit%g   = optical_props_aerosol%g(idxday,:,:)
+       call check_error_msg('rrtmgp_sw_clrallsky_driver_run',sw_optical_props_aerosol_daylit%alloc_2str(nday, Model%levs, sw_gas_props%get_band_lims_wavenumber()))
+       sw_optical_props_aerosol_daylit%tau = sw_optical_props_aerosol%tau(idxday,:,:)
+       sw_optical_props_aerosol_daylit%ssa = sw_optical_props_aerosol%ssa(idxday,:,:)
+       sw_optical_props_aerosol_daylit%g   = sw_optical_props_aerosol%g(idxday,:,:)
       
        ! Similarly, subset the gas concentrations.
        do iGas=1,Model%nGases
@@ -158,14 +158,14 @@ contains
             Radtend%coszen(idxday),                   & ! IN  - Cosine of solar zenith angle
             Radtend%sfc_alb_nir_dir(:,idxday),        & ! IN  - Shortwave surface albedo (direct)
             Radtend%sfc_alb_nir_dif(:,idxday),        & ! IN  - Shortwave surface albedo (diffuse)
-            optical_props_clds_daylit,                & ! IN  - DDT containing cloud optical information 
+            sw_optical_props_clouds_daylit,           & ! IN  - DDT containing cloud optical information 
             flux_allsky,                              & ! OUT - Fluxes, all-sky, 3D (nCol,Model%levs,nBand) 
             flux_clrsky,                              & ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
-            aer_props = optical_props_aerosol_daylit))  ! IN(optional) - DDT containing aerosol optical information
-       fluxUP_allsky(idxday,:)   = flux_allsky%flux_up
-       fluxDOWN_allsky(idxday,:) = flux_allsky%flux_dn 
-       fluxUP_clrsky(idxday,:)   = flux_clrsky%flux_up
-       fluxDOWN_clrsky(idxday,:) = flux_clrsky%flux_dn
+            aer_props = sw_optical_props_aerosol_daylit))  ! IN(optional) - DDT containing aerosol optical information
+       fluxswUP_allsky(idxday,:)   = flux_allsky%flux_up
+       fluxswDOWN_allsky(idxday,:) = flux_allsky%flux_dn 
+       fluxswUP_clrsky(idxday,:)   = flux_clrsky%flux_up
+       fluxswDOWN_clrsky(idxday,:) = flux_clrsky%flux_dn
     endif
   end subroutine rrtmgp_sw_clrallsky_driver_run
   

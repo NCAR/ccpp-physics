@@ -83,7 +83,7 @@
   intent = in
   optional = F
 [fluxswUP_allsky]
-  standard_name = sw_flux_profile_upward_allsky
+  standard_name = RRTMGP_sw_flux_profile_upward_allsky
   long_name = RRTMGP upward shortwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -92,7 +92,7 @@
   intent = in
   optional = F
 [fluxswDOWN_allsky]
-  standard_name = sw_flux_profile_downward_allsky
+  standard_name = RRTMGP_sw_flux_profile_downward_allsky
   long_name = RRTMGP downward shortwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -101,7 +101,7 @@
   intent = in
   optional = F
 [fluxswUP_clrsky]
-  standard_name = sw_flux_profile_upward_clrsky
+  standard_name = RRTMGP_sw_flux_profile_upward_clrsky
   long_name = RRTMGP upward shortwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -110,7 +110,7 @@
   intent = in
   optional = F
 [fluxswDOWN_clrsky]
-  standard_name = sw_flux_profile_downward_clrsky
+  standard_name = RRTMGP_sw_flux_profile_downward_clrsky
   long_name = RRTMGP downward shortwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -127,14 +127,14 @@
   intent = in
   optional = F
 [hswc]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
-  long_name = shortwave total sky heating rate
+  standard_name = RRTMGP_sw_heating_rate_all_sky
+  long_name = RRTMGP shortwave all sky heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
   optional = F
+  intent = out
 [topflx_sw]
   standard_name = sw_fluxes_top_atmosphere
   long_name = shortwave total sky fluxes at the top of the atm
@@ -152,16 +152,16 @@
   intent = inout
   optional = F
 [flxprf_sw]
-  standard_name = sw_fluxes
+  standard_name = RRTMGP_sw_fluxes
   long_name = sw fluxes total sky / csk and up / down at levels
   units = W m-2
-  dimensions = (horizontal_dimension,adjusted_vertical_level_dimension_for_radiation)
+  dimensions = (horizontal_dimension,adjusted_vertical_level_dimension_plus_one)
   type = profsw_type
   intent = inout
   optional = T
 [hsw0]
-  standard_name = sw_heating_rate_clear_sky
-  long_name = shortwave clear sky heating rate
+  standard_name = RRTMGP_sw_heating_rate_clear_sky
+  long_name = RRTMGP shortwave clear sky heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

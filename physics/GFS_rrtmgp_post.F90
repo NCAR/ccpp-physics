@@ -26,7 +26,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_post.html
 !!
   subroutine GFS_rrtmgp_post_run (Model, Grid, Diag, Radtend, Statein, Coupling, scmpsw, &
-       ncol, raddt, aerodp, cldsa, mtopa, mbota, cloud_fraction, cldtaulw, cldtausw,     &
+       ncol, raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, cldtausw,     &
        errmsg, errflg)
 
     ! Inputs
@@ -54,7 +54,7 @@ contains
          mbota,          & ! vertical indices for low, middle and high cloud tops 
          mtopa             ! vertical indices for low, middle and high cloud bases
     real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
-         cloud_fraction, & ! Total cloud fraction in each layer
+         cld_frac, & ! Total cloud fraction in each layer
          cldtausw,       & ! approx .55mu band layer cloud optical depth  
          cldtaulw          ! approx 10.mu band layer cloud optical depth  
     ! Inputs (optional)
@@ -186,7 +186,7 @@ contains
        !       if (.not. Model%uni_cld) then
        if (Model%lgocart .or. Model%ldiag3d) then
           do k = 1, Model%levs
-             Coupling%cldcovi(1:ncol,k) = cloud_fraction(1:ncol,k)
+             Coupling%cldcovi(1:ncol,k) = cld_frac(1:ncol,k)
           enddo
        endif
     endif                                ! end_if_lssav

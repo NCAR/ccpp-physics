@@ -27,9 +27,10 @@ contains
 !! \section arg_table_rrtmgp_lw_clrallsky_driver_run
 !! \htmlinclude rrtmgp_lw_clrallsky_driver.html
 !!
-  subroutine rrtmgp_lw_clrallsky_driver_run(Model, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, skt, &
-       gas_concentrations, optical_propsLW_clds, optical_propsLW_aerosol,&
-       lslwr, fluxUP_allsky, fluxDOWN_allsky, fluxUP_clrsky, fluxDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
+  subroutine rrtmgp_lw_clrallsky_driver_run(Model, Radtend, ncol, lw_gas_props, p_lay, t_lay,&
+       p_lev, skt, gas_concentrations, lw_optical_props_clouds, lw_optical_props_aerosol,    &
+       lslwr, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlw0,  &
+       hlwb, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type),   intent(in) :: &
@@ -48,8 +49,8 @@ contains
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props                ! DDT containing LW spectral information
     type(ty_optical_props_1scl),intent(in) :: &
-         optical_propsLW_clds, & ! RRTMGP DDT: longwave cloud radiative properties 
-         optical_propsLW_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
+         lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
+         lw_optical_props_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
     logical, intent(in) :: &
@@ -59,10 +60,10 @@ contains
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
     real(kind_phys), dimension(ncol,model%levs), intent(out) :: &
-         fluxUP_allsky,   & ! All-sky flux                    (W/m2)
-         fluxDOWN_allsky, & ! All-sky flux                    (W/m2)
-         fluxUP_clrsky,   & ! Clear-sky flux                  (W/m2)
-         fluxDOWN_clrsky    ! All-sky flux                    (W/m2)
+         fluxlwUP_allsky,   & ! All-sky flux                    (W/m2)
+         fluxlwDOWN_allsky, & ! All-sky flux                    (W/m2)
+         fluxlwUP_clrsky,   & ! Clear-sky flux                  (W/m2)
+         fluxlwDOWN_clrsky    ! All-sky flux                    (W/m2)
 
     ! Outputs (optional)
     real(kind_phys), dimension(ncol,model%levs,lw_gas_props%get_nband()), optional, intent(inout) :: &
@@ -109,14 +110,14 @@ contains
          p_lev,                              & ! IN  - pressure at layer centers (Pa)
          skt,                                & ! IN  - skin temperature (K)
          Radtend%sfc_emiss_byband,           & ! IN  - surface emissivity in each LW band
-         optical_propsLW_clds,               & ! IN  - DDT containing cloud optical information 
+         lw_optical_props_clouds,            & ! IN  - DDT containing cloud optical information 
          flux_allsky,                        & ! OUT - Fluxes, all-sky, 3D (nCol,model%levs,nBand) 
          flux_clrsky,                        & ! OUT - Fluxes, clear-sky, 3D (nCol,model%levs,nBand) 
-         aer_props = optical_propsLW_aerosol)) ! IN(optional) - DDT containing aerosol optical information
-    fluxUP_allsky   = flux_allsky%flux_up
-    fluxDOWN_allsky = flux_allsky%flux_dn 
-    fluxUP_clrsky   = flux_clrsky%flux_up
-    fluxDOWN_clrsky = flux_clrsky%flux_dn
+         aer_props = lw_optical_props_aerosol)) ! IN(optional) - DDT containing aerosol optical information
+    fluxlwUP_allsky   = flux_allsky%flux_up
+    fluxlwDOWN_allsky = flux_allsky%flux_dn 
+    fluxlwUP_clrsky   = flux_clrsky%flux_up
+    fluxlwDOWN_clrsky = flux_clrsky%flux_dn
 
   end subroutine rrtmgp_lw_clrallsky_driver_run
   

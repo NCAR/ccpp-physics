@@ -46,7 +46,7 @@ module GFS_rrtmgp_setup
           icliq_sw, crick_proof, ccnorm,                                &
           imp_physics,                                                  &
           norad_precip, idate, iflip,                                   &
-          im, faerlw, faersw, aerodp,                                   & ! for consistency checks
+          im, aerosolslw, aerosolssw, aerodp,                                   & ! for consistency checks
           me, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -185,8 +185,8 @@ module GFS_rrtmgp_setup
       integer, intent(in) :: iflip
       ! For consistency checks
       integer, intent(in)         :: im
-      real(kind_phys), intent(in) :: faerlw(:,:,:,:)
-      real(kind_phys), intent(in) :: faersw(:,:,:,:)
+      real(kind_phys), intent(in) :: aerosolslw(:,:,:,:)
+      real(kind_phys), intent(in) :: aerosolssw(:,:,:,:)
       real(kind_phys), intent(in) :: aerodp(:,:)
       ! End for consistency checks
       integer, intent(in)           :: me
@@ -194,8 +194,8 @@ module GFS_rrtmgp_setup
       integer,          intent(out) :: errflg
 
       ! For consistency checks
-      real(kind_phys), dimension(im,levr,NBDLW,NF_AELW) :: faerlw_check
-      real(kind_phys), dimension(im,levr,NBDSW,NF_AESW) :: faersw_check
+      real(kind_phys), dimension(im,levr,NBDLW,NF_AELW) :: aerosolslw_check
+      real(kind_phys), dimension(im,levr,NBDSW,NF_AESW) :: aerosolssw_check
       real(kind_phys), dimension(im,NSPC1)              :: aerodp_check
       ! End for consistency checks
 
@@ -208,21 +208,21 @@ module GFS_rrtmgp_setup
       ! Consistency checks for dimensions of arrays, this is required
       ! to detect differences in FV3's parameters that are used to
       ! dimension certain arrays and the values in ccpp-physics
-      if (size(faerlw(1,:,:,:)).ne.size(faerlw_check(1,:,:,:))) then
+      if (size(aerosolslw(1,:,:,:)).ne.size(aerosolslw_check(1,:,:,:))) then
          write(errmsg,"(3a,4i4,a,4i4)") &
-               "Runtime error: dimension mismatch for faerlw,",        &
+               "Runtime error: dimension mismatch for aerosolslw,",        &
                " check definitions of Model%levs, nbdlw, nf_aelw:",     &
-               " expected shape ", shape(faerlw_check(:,:,:,:)),       &
-               " but got ", shape(faerlw(:,:,:,:))
+               " expected shape ", shape(aerosolslw_check(:,:,:,:)),       &
+               " but got ", shape(aerosolslw(:,:,:,:))
          errflg = 1
          return
       end if
-      if (size(faersw(1,:,:,:)).ne.size(faersw_check(1,:,:,:))) then
+      if (size(aerosolssw(1,:,:,:)).ne.size(aerosolssw_check(1,:,:,:))) then
          write(errmsg,"(3a,4i4,a,4i4)") &
-               "Runtime error: dimension mismatch for faersw,",        &
+               "Runtime error: dimension mismatch for aerosolssw,",        &
                " check definitions of Model%levs, nbdsw, nf_aesw:",     &
-               " expected shape ", shape(faersw_check(:,:,:,:)),       &
-               " but got ", shape(faersw(:,:,:,:))
+               " expected shape ", shape(aerosolssw_check(:,:,:,:)),       &
+               " but got ", shape(aerosolssw(:,:,:,:))
          errflg = 1
          return
       end if

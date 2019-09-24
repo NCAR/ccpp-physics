@@ -314,8 +314,8 @@ contains
   ! #########################################################################################
   subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, ipsdlw0, icseed_lw, cld_frac, cld_lwp, &
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,             &
-       lw_cloud_props, lw_gas_props,  aerosols,                                             &
-       cldtaulw, optical_props_clouds, optical_props_aerosol, errmsg, errflg)
+       lw_cloud_props, lw_gas_props,  aerosolslw,                                           &
+       cldtaulw, lw_optical_props_clouds, lw_optical_props_aerosol, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -343,14 +343,14 @@ contains
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props
     real(kind_phys), intent(in),dimension(ncol, model%levs, lw_gas_props%get_nband(),3) :: &
-         aerosols            !
+         aerosolslw            !
 
     ! Outputs
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
          cldtaulw            ! approx 10.mu band layer cloud optical depth  
     type(ty_optical_props_1scl),intent(out) :: &
-         optical_props_clouds, & !
-         optical_props_aerosol   !
+         lw_optical_props_clouds, & !
+         lw_optical_props_aerosol   !
     integer, intent(out) :: &
          errflg                  !
     character(len=*), intent(out) :: &
@@ -360,7 +360,7 @@ contains
     integer :: iCol
     integer,dimension(ncol) :: ipseed_lw
     logical,dimension(ncol,model%levs) :: liqmask, icemask
-    type(ty_optical_props_1scl) :: optical_props_cloudsByBand
+    type(ty_optical_props_1scl) :: lw_optical_props_cloudsByBand
     type(random_stat) :: rng_stat
     real(kind_phys), dimension(lw_gas_props%get_ngpt(),model%levs,ncol) :: rng3D
     real(kind_phys), dimension(lw_gas_props%get_ngpt()*model%levs) :: rng1D
@@ -397,19 +397,19 @@ contains
     ! Allocate space for RRTMGP DDTs containing cloud and aerosol radiative properties
     ! #######################################################################################
     ! Cloud optics [nCol,model%levs,nBands]
-    call check_error_msg('rrtmgp_lw_cloud_optics_run',optical_props_cloudsByBand%alloc_1scl(&
+    call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_1scl(&
          ncol, model%levs, lw_gas_props%get_band_lims_wavenumber()))
     ! Aerosol optics [nCol,model%levs,nBands]
-    call check_error_msg('rrtmgp_lw_cloud_optics_run',optical_props_aerosol%alloc_1scl(     &
+    call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_aerosol%alloc_1scl(     &
          ncol, model%levs, lw_gas_props%get_band_lims_wavenumber()))
     ! Cloud optics [nCol,model%levs,nGpts]
-    call check_error_msg('rrtmgp_lw_cloud_optics_run',optical_props_clouds%alloc_1scl(      &
+    call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_clouds%alloc_1scl(      &
          ncol, model%levs, lw_gas_props))
 
     ! #######################################################################################
     ! Copy aerosol optical information to RRTMGP DDT
     ! #######################################################################################
-    optical_props_aerosol%tau = aerosols(:,:,:,1) * (1. - aerosols(:,:,:,2))
+    lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
 
     ! #######################################################################################
     ! Compute cloud-optics for RTE.
@@ -427,7 +427,7 @@ contains
             cld_iwp,                    & ! IN  - Cloud ice water path
             cld_reliq,                  & ! IN  - Cloud liquid effective radius
             cld_reice,                  & ! IN  - Cloud ice effective radius
-            optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
+            lw_optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
                                           !       in each band
     else
        ! ii) RRTMG cloud-optics.
@@ -435,7 +435,7 @@ contains
           call rrtmg_lw_cloud_optics(ncol, model%levs, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow,    &
                cld_frac, tau_cld)
-          optical_props_cloudsByBand%tau = tau_cld
+          lw_optical_props_cloudsByBand%tau = tau_cld
        endif
     endif
 
@@ -458,10 +458,10 @@ contains
     end select
     
     ! Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_lw_cloud_optics_run',draw_samples(cldfracMCICA,optical_props_cloudsByBand,optical_props_clouds))
+    call check_error_msg('rrtmgp_lw_cloud_optics_run',draw_samples(cldfracMCICA,lw_optical_props_cloudsByBand,lw_optical_props_clouds))
     
     ! GFS_RRTMGP_POST_RUN() requires the LW optical depth ~10microns
-    cldtaulw = optical_props_cloudsByBand%tau(:,:,7)
+    cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)
 
   end subroutine rrtmgp_lw_cloud_optics_run
   

@@ -60,7 +60,7 @@
   intent = in
   optional = F
 [fluxlwUP_allsky]
-  standard_name = lw_flux_profile_upward_allsky
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -69,7 +69,7 @@
   intent = in
   optional = F
 [fluxlwDOWN_allsky]
-  standard_name = lw_flux_profile_downward_allsky
+  standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -78,7 +78,7 @@
   intent = in
   optional = F
 [fluxlwUP_clrsky]
-  standard_name = lw_flux_profile_upward_clrsky
+  standard_name = RRTMGP_lw_flux_profile_upward_clrsky
   long_name = RRTMGP upward longwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -87,7 +87,7 @@
   intent = in
   optional = F
 [fluxlwDOWN_clrsky]
-  standard_name = lw_flux_profile_downward_clrsky
+  standard_name = RRTMGP_lw_flux_profile_downward_clrsky
   long_name = RRTMGP downward longwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -96,10 +96,10 @@
   intent = in
   optional = F
 [hlwc]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
-  long_name = longwave total sky heating rate
+  standard_name = RRTMGP_lw_heating_rate_all_sky
+  long_name = RRTMGP longwave all sky heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -121,18 +121,18 @@
   intent = inout
   optional = F
 [flxprf_lw]
-  standard_name = lw_fluxes
+  standard_name = RRTMGP_lw_fluxes
   long_name = lw fluxes total sky / csk and up / down at levels
   units = W m-2
-  dimensions = (horizontal_dimension,adjusted_vertical_level_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
   type = proflw_type
   intent = inout
   optional = T
 [hlw0]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
-  long_name = longwave clear sky heating rate
+  standard_name = RRTMGP_lw_heating_rate_clear_sky
+  long_name = RRTMGP longwave clear sky heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout

@@ -69,7 +69,7 @@
   type = ty_gas_optics_rrtmgp
   intent = in
   optional = F
-[optical_propsLW_clds]
+[lw_optical_props_clouds]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
@@ -77,7 +77,7 @@
   type = ty_optical_props_1scl
   intent = in
   optional = F
-[optical_propsLW_aerosol]
+[lw_optical_props_aerosol]
   standard_name = longwave_optical_properties_for_aerosols
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
@@ -102,25 +102,26 @@
   intent = in
   optional = F
 [hlw0]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
-  long_name = longwave clear sky heating rate
+  standard_name = RRTMGP_lw_heating_rate_clear_sky
+  long_name = RRTMGP longwave clear sky heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = in
   optional = T
+  intent = in
 [hlwb]
-  standard_name = lw_heating_rate_spectral
-  long_name = longwave total sky heating rate (spectral)
+  standard_name = RRTMGP_lw_heating_rate_spectral
+  long_name = RRTMGP longwave total sky heating rate (spectral)
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_lw_spectral_points_rrtmgp)
   type = real
   kind = kind_phys
-  intent = in
   optional = T
-[fluxUP_allsky]
-  standard_name = lw_flux_profile_upward_allsky
+  kind = kind_phys
+  intent = in
+[fluxlwUP_allsky]
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -128,8 +129,8 @@
   kind = kind_phys
   intent = out
   optional = F
-[fluxDOWN_allsky]
-  standard_name = lw_flux_profile_downward_allsky
+[fluxlwDOWN_allsky]
+  standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -137,8 +138,8 @@
   kind = kind_phys
   intent = out
   optional = F
-[fluxUP_clrsky]
-  standard_name = lw_flux_profile_upward_clrsky
+[fluxlwUP_clrsky]
+  standard_name = RRTMGP_lw_flux_profile_upward_clrsky
   long_name = RRTMGP upward longwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
@@ -146,8 +147,8 @@
   kind = kind_phys
   intent = out
   optional = F
-[fluxDOWN_clrsky]
-  standard_name = lw_flux_profile_downward_clrsky
+[fluxlwDOWN_clrsky]
+  standard_name = RRTMGP_lw_flux_profile_downward_clrsky
   long_name = RRTMGP downward longwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)

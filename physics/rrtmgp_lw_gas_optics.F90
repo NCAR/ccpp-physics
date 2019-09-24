@@ -415,8 +415,9 @@ contains
 !! \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
-  subroutine rrtmgp_lw_gas_optics_run(Model, Radtend, lw_gas_props, ncol, p_lay, p_lev, t_lay, t_lev, skt, &
-       gas_concentrations, lslwr, optical_props_clrsky, sources_LW, toa_src, errmsg, errflg)
+  subroutine rrtmgp_lw_gas_optics_run(Model, Radtend, lw_gas_props, ncol, p_lay, p_lev, t_lay,&
+       t_lev, skt, gas_concentrations, lslwr, lw_optical_props_clrsky, sources,   &
+       errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -447,11 +448,9 @@ contains
     integer,          intent(out) :: &
          errflg                  ! Error code
     type(ty_optical_props_1scl),intent(out) :: &
-         optical_props_clrsky    !
+         lw_optical_props_clrsky    !
     type(ty_source_func_lw),intent(out) :: &
-         sources_LW
-    real(kind_phys),dimension(ncol,lw_gas_props%get_ngpt()),intent(out)  :: &
-         toa_src
+         sources
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -460,9 +459,9 @@ contains
     if (.not. Model%lslwr) return
 
     ! Allocate space
-    call check_error_msg('rrtmgp_lw_gas_optics_run',optical_props_clrsky%alloc_1scl(ncol, model%levs, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_gas_optics_run',sources_LW%init(lw_gas_props))
-    call check_error_msg('rrtmgp_lw_gas_optics_run',sources_LW%alloc(ncol, Model%levs))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',lw_optical_props_clrsky%alloc_1scl(ncol, model%levs, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',sources%init(lw_gas_props))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',sources%alloc(ncol, Model%levs))
 
     ! Compute boundary-condition (Only do for low-ceiling models)
     !call check_error_msg('rrtmgp_lw_gas_optics_run',compute_bc(&
@@ -471,19 +470,19 @@ contains
     !     p_lev,              & ! IN  -
     !     t_lay,              & ! IN  -
     !     gas_concentrations, & ! IN  -
-    !     toa_src))             ! OUT -    
+    !     Radtend%toa_src_lw))             ! OUT -    
 
     ! Gas-optics (djs asks pincus: I think it makes sense to have a generic gas_optics interface in 
     ! ty_gas_optics_rrtmgp, just as in ty_gas_optics.
     call check_error_msg('rrtmgp_lw_gas_optics_run',lw_gas_props%gas_optics_int(&
-         p_lay,                & ! IN  -
-         p_lev,                & ! IN  -
-         t_lay,                & ! IN  -
-         skt,                  & ! IN  -
-         gas_concentrations,   & ! IN  -
-         optical_props_clrsky, & ! OUT -
-         sources_LW,           & ! OUT -
-         tlev=t_lev))            ! IN  -
+         p_lay,                   & ! IN  -
+         p_lev,                   & ! IN  -
+         t_lay,                   & ! IN  -
+         skt,                     & ! IN  -
+         gas_concentrations,      & ! IN  -
+         lw_optical_props_clrsky, & ! OUT -
+         sources,                 & ! OUT -
+         tlev=t_lev))               ! IN  -
 
   end subroutine rrtmgp_lw_gas_optics_run
 

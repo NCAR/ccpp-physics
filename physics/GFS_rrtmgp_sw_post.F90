@@ -36,7 +36,7 @@ contains
          Model             ! Fortran DDT containing FV3-GFS model control parameters
     type(GFS_grid_type), intent(in) :: &
          Grid              ! Fortran DDT containing FV3-GFS grid and interpolation related data 
-  type(GFS_coupling_type), intent(inout) :: &
+    type(GFS_coupling_type), intent(inout) :: &
          Coupling          ! Fortran DDT containing FV3-GFS fields to/from coupling with other components 
     type(GFS_radtend_type), intent(inout) :: &
          Radtend           ! Fortran DDT containing FV3-GFS radiation tendencies 

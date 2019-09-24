@@ -74,8 +74,8 @@ contains
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
        ncol, lw_gas_props, sw_gas_props,                                                & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, alb1d, cld_frac, cld_lwp,         & ! OUT
-       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, faerlw, & ! OUT
-       faersw, cldsa, mtopa, mbota, de_lgth, aerodp, nday, idxday, gas_concentrations, errmsg, errflg)
+       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, aerosolslw, & ! OUT
+       aerosolssw, cldsa, mtopa, mbota, de_lgth, aerodp, nday, idxday, gas_concentrations, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -133,9 +133,9 @@ contains
          cld_rwp,           & ! Cloud rain water path
          cld_rerain           ! Cloud rain effective radius
     real(kind_phys), dimension(ncol,Model%levs,sw_gas_props%get_nband(),NF_AESW), intent(out) ::&
-         faersw               ! Aerosol radiative properties in each SW band.
+         aerosolssw               ! Aerosol radiative properties in each SW band.
     real(kind_phys), dimension(ncol,Model%levs,lw_gas_props%get_nband(),NF_AELW), intent(out) ::&
-         faerlw               ! Aerosol radiative properties in each LW band.
+         aerosolslw               ! Aerosol radiative properties in each LW band.
     integer,dimension(ncol,3),intent(out) :: &
          mbota,             & ! Vertical indices for cloud tops
          mtopa                ! Vertical indices for cloud bases
@@ -157,7 +157,7 @@ contains
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac) :: tracer
     real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS) :: clouds
-    real(kind_phys), dimension(ncol, Model%levs, sw_gas_props%get_nband(), NF_AESW)::faersw2
+    real(kind_phys), dimension(ncol, Model%levs, sw_gas_props%get_nband(), NF_AESW)::aerosolssw2
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -283,18 +283,18 @@ contains
     ! #######################################################################################
     call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
          Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
-         Model%lsswr, Model%lslwr, faersw2, faerlw, aerodp)
+         Model%lsswr, Model%lslwr, aerosolssw2, aerosolslw, aerodp)
     
     ! Store aerosol optical properties
     ! SW. 
     ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
     ! band ordering was [nIR -> UV -> IR(band)]
-    faersw(1:NCOL,1:Model%levs,1,1)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),1)
-    faersw(1:NCOL,1:Model%levs,1,2)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),2)
-    faersw(1:NCOL,1:Model%levs,1,3)                      = faersw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),3)
-    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),1) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,1)
-    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),2) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,2)
-    faersw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),3) = faersw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,3)
+    aerosolssw(1:NCOL,1:Model%levs,1,1)                      = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),1)
+    aerosolssw(1:NCOL,1:Model%levs,1,2)                      = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),2)
+    aerosolssw(1:NCOL,1:Model%levs,1,3)                      = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),3)
+    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),1) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,1)
+    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),2) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,2)
+    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),3) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,3)
 
     ! Setup surface ground temperature and ground/air skin temperature if required.
     tsfg(1:NCOL) = Sfcprop%tsfc(1:NCOL)

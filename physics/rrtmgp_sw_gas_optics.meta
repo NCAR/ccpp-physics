@@ -180,20 +180,11 @@
   type = integer
   intent = out
   optional = F
-[optical_props_clrsky]
+[sw_optical_props_clrsky]
   standard_name = shortwave_optical_properties_for_clear_sky
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = out
-  optional = F
-[toa_src]
-  standard_name = incident_solar_irradiance_at_top_of_atmosphere_by_spectral_point
-  long_name = top of atmosphere incident solar flux in each spectral point
-  units = 
-  dimensions = (horizontal_dimension,number_of_sw_spectral_points_rrtmgp)
-  type = real
-  kind = kind_phys
   intent = out
   optional = F
