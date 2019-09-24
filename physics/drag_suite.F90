@@ -196,6 +196,7 @@
 !! | imx            | number_of_equatorial_longitude_points                                         | number of longitude points along the equator                                                             | count      |    0 | integer   |           | in     | F        |
 !! | cdmbgwd        | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag | multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag | none       |    1 | real      | kind_phys | in     | F        |
 !! | me             | mpi_rank                                                                      | rank of the current MPI task                                                                             | index      |    0 | integer   |           | in     | F        |
+!! | master         | mpi_root                                                                      | master MPI-rank                                                                                          | index      |    0 | integer   |           | in     | F        |
 !! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       |    0 | logical   |           | in     | F        |
 !! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      |    0 | integer   |           | in     | F        |
 !! | rdxzb          | level_of_dividing_streamline                                                  | level of the dividing streamline                                                                         | none       |    1 | real      | kind_phys | out    | F        |
@@ -384,8 +385,8 @@
      &           dusfc_ls,dvsfc_ls,dusfc_bl,dvsfc_bl,                   &
      &           dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                   &
      &           slmsk,br1,hpbl,                                        &
-     &           g, cp, rd, rv, fv, pi, imx, cdmbgwd,                   &
-     &           me, lprnt, ipr, rdxzb, dx, gwd_opt, errmsg, errflg     )
+     &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, me, master,       &
+     &           lprnt, ipr, rdxzb, dx, gwd_opt, errmsg, errflg     )
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -474,15 +475,17 @@
    implicit none
 
    ! Interface variables
-   integer, intent(in) :: im, ix, km, imx, kdt, ipr, me, gwd_opt
+   integer, intent(in) :: im, ix, km, imx, kdt, ipr, me, master
+   inteter, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(im)
-   real(kind=kind_phys):: deltim, G, CP, RD, RV, cdmbgwd(2)
+   real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(2)
 
    integer             ::  kpblmax
    integer, parameter  ::  ims=1, kms=1, its=1, kts=1
-   real                ::  fv, pi, rcl, cdmb
-   real, parameter     ::  g_inv = 1./9.81 !1./g
+   real, intent(in)    ::  fv, pi
+   real                ::  rcl, cdmb
+   real                ::  g_inv = 1./G
 
    real(kind=kind_phys), intent(out) ::                          &
      &                   dudt(im,km),dvdt(im,km),                &
@@ -644,11 +647,16 @@
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
+
+   ! Calculate inverse of gravitational acceleration
+   g_inv = 1./G
+
+
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
 
-print*,"Running drag suite"
+if (me==master) print *,"Running drag suite"
 !--------------------------------------------------------------------
 ! SCALE-ADPTIVE PARAMETER FROM GFS GWD SCHEME
 !--------------------------------------------------------------------
@@ -722,7 +730,7 @@ else
                                 (dxmax_ls-dxmin_ls)) + 1. )
    end if
 end if
-print*,"in Drag Suite, dx(1:2):",dx(1),dx(2)
+if (me==master) print *,"in Drag Suite, dx(1:2):",dx(1),dx(2)
 if ( dx(1) .ge. dxmax_ss ) then
    ss_taper = 1.
 else
@@ -732,7 +740,7 @@ else
       ss_taper = dxmax_ss * (1. - dxmin_ss/dx(1))/(dxmax_ss-dxmin_ss)
    end if
 end if
-print*,"in Drag Suite, ss_taper:",ss_taper
+if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
 
 !--- calculate length of grid for flow-blocking drag
 !
@@ -1070,7 +1078,7 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
   zq=0.
 !
   IF ( (gwd_opt_ss .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
-    print*,"in Drag Suite: Running small-scale gravity wave drag"
+    if (me==master) print *,"in Drag Suite: Running small-scale gravity wave drag"
 !
 ! declaring potential temperature
 !
@@ -1192,7 +1200,7 @@ ENDIF  ! end if gwd_opt_ss == 1
 ! Topographic Form Drag from Beljaars et al. (2004, QJRMS, equ. 16):
 !================================================================
 IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
-    print*,"in Drag Suite: Running form drag"
+    if (me==master) print *,"in Drag Suite: Running form drag"
 
    utendform=0.
    vtendform=0.
@@ -1259,7 +1267,7 @@ ENDIF  ! end if gwd_opt_fd == 1
 !=======================================================
 ! More for the large-scale gwd component
 IF ( (gwd_opt_ls .EQ. 1).and.(ls_taper.GT.1.E-02) ) THEN
-    print*,"in Drag Suite: Running large-scale gravity wave drag"
+    if (me==master) print *,"in Drag Suite: Running large-scale gravity wave drag"
 !
 !   now compute vertical structure of the stress.
    do k = kts,kpblmax
@@ -1327,7 +1335,7 @@ ENDIF !END LARGE-SCALE TAU CALCULATION
 !COMPUTE BLOCKING COMPONENT                                     
 !===============================================================
 IF ( (gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
-   print*,"in Drag Suite: Running blocking drag"
+   if (me==master) print *,"in Drag Suite: Running blocking drag"
 
    do i = its,im
       if(.not.ldrag(i)) then
@@ -1425,8 +1433,8 @@ IF ( (gwd_opt_ls .EQ. 1 .OR. gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) T
             ! Initial kinetic energy (at t0-dt)
             eng0 = 0.5*( (rcs*u1(i,k))**2. + (rcs*v1(i,k))**2. )
             ! Kinetic energy after wave-breaking/flow-blocking
-            eng1 = 0.5*( (rcs*(u1(i,k)+(dtaux2d_ls(i,k)+dtaux2d_bl(i,k))*deltim))**2 + &
-                         (rcs*(v1(i,k)+(dtauy2d_ls(i,k)+dtauy2d_bl(i,k))*deltim))**2 )
+            eng1 = 0.5*( (rcs*(u1(i,k)+(dtaux+dtauxb)*deltim))**2 + &
+                         (rcs*(v1(i,k)+(dtauy+dtauyb)*deltim))**2 )
             ! Modify theta tendency
             dtdt(i,k) = dtdt(i,k) + max((eng0-eng1),0.0)/cp/deltim/prslk(i,k)
          end if
