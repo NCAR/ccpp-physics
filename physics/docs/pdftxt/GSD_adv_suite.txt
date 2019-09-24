@@ -95,7 +95,7 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
       <scheme>sfc_diag_post</scheme>
       <scheme>GFS_surface_generic_post</scheme>
       <scheme>mynnedmf_wrapper</scheme>
-      <scheme>gwdps_pre</scheme>
+      <scheme>GFS_GWD_generic_pre</scheme>
       <scheme>gwdps</scheme>
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>

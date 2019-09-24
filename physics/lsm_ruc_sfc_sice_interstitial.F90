@@ -18,16 +18,7 @@ contains
 
 #if 0
 !> \section arg_table_lsm_ruc_sfc_sice_pre_run Argument Table
-!! | local_name           | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
-!! |----------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im                   | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | lsoil_ruc            | soil_vertical_dimension_for_land_surface_model                               | number of soil layers internal to land surface model            | count         |    0 | integer   |           | in     | F        |
-!! | lsoil                | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
-!! | land                 | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction     | flag          |    1 | logical   |           | in     | F        |
-!! | stc                  | soil_temperature                                                             | soil temperature                                                | K             |    2 | real      | kind_phys | inout  | F        |
-!! | tslb                 | soil_temperature_for_land_surface_model                                      | soil temperature for land surface model                         | K             |    2 | real      | kind_phys | in     | F        |
-!! | errmsg               | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg               | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude lsm_ruc_sfc_sice_pre_run.html
 !!
 #endif
    subroutine lsm_ruc_sfc_sice_pre_run(im, lsoil_ruc, lsoil, land, stc, tslb, errmsg, errflg)
@@ -84,16 +75,7 @@ contains
 
 #if 0
 !> \section arg_table_lsm_ruc_sfc_sice_post_run Argument Table
-!! | local_name           | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
-!! |----------------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im                   | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | lsoil_ruc            | soil_vertical_dimension_for_land_surface_model                               | number of soil layers internal to land surface model            | count         |    0 | integer   |           | in     | F        |
-!! | lsoil                | soil_vertical_dimension                                                      | soil vertical layer dimension                                   | count         |    0 | integer   |           | in     | F        |
-!! | land                 | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction     | flag          |    1 | logical   |           | in     | F        |
-!! | stc                  | soil_temperature                                                             | soil temperature                                                | K             |    2 | real      | kind_phys | in     | F        |
-!! | tslb                 | soil_temperature_for_land_surface_model                                      | soil temperature for land surface model                         | K             |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg               | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg               | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude lsm_ruc_sfc_sice_post_run.html
 !!
 #endif
    subroutine lsm_ruc_sfc_sice_post_run(im, lsoil_ruc, lsoil, land, stc, tslb, errmsg, errflg)

@@ -61,33 +61,45 @@
       module module_radlw_parameters     !
 !........................................!
 
+!! \section arg_table_module_radlw_parameters
+!! \htmlinclude module_radlw_parameters.html
+!!
+
       use physparam,               only : kind_phys
 
       implicit none
 !
       public
 !
-      type :: topflw_type                   !< define type construct for radiation fluxes at toa
+!> derived type for LW fluxes at top of atmosphere
+!! \section arg_table_topflw_type
+!! \htmlinclude topflw_type.html
+!!
+      type topflw_type                      !< define type construct for radiation fluxes at toa
         real (kind=kind_phys) :: upfxc      !< total sky upward flux at toa
         real (kind=kind_phys) :: upfx0      !< clear sky upward flux at toa
-      end type
+      end type topflw_type
 !
-      type :: sfcflw_type                   !< define type construct for radiation fluxes at surface
+!> derived type for LW fluxes at surface
+!! \section arg_table_sfcflw_type
+!! \htmlinclude sfcflw_type.html
+!!
+      type sfcflw_type                      !< define type construct for radiation fluxes at surface
         real (kind=kind_phys) :: upfxc      !< total sky upward flux at sfc
         real (kind=kind_phys) :: upfx0      !< clear sky upward flux at sfc
         real (kind=kind_phys) :: dnfxc      !< total sky downward flux at sfc
         real (kind=kind_phys) :: dnfx0      !< clear sky downward flux at sfc
-      end type
+      end type sfcflw_type
 !
-      type :: proflw_type                   !< define type construct for optional radiation flux profiles
+      type proflw_type                      !< define type construct for optional radiation flux profiles
         real (kind=kind_phys) :: upfxc      !< level up flux for total sky
         real (kind=kind_phys) :: dnfxc      !< level down flux for total sky
         real (kind=kind_phys) :: upfx0      !< level up for clear sky
         real (kind=kind_phys) :: dnfx0      !< level down flux for clear sky
-      end type
+      end type proflw_type
 !
 ! Parameter constants for LW band structures
-      integer, parameter :: NBANDS = 16     !< number of total spectral bands       
+      integer, parameter :: NBANDS = 16     !< number of total spectral bands
       integer, parameter :: NGPTLW = 140    !< number of total g-points   
       integer, parameter :: NTBL   = 10000  !< lookup table dimension 
       integer, parameter :: MAXGAS = 7      !< maximum number of absorbing gases

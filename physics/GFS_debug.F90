@@ -41,23 +41,7 @@
       end subroutine GFS_diagtoscreen_finalize
 
 !> \section arg_table_GFS_diagtoscreen_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type in FV3        | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | Statein        | GFS_statein_type_instance                              | instance of derived type GFS_statein_type in FV3        | DDT           |    0 | GFS_statein_type      |           | in     | F        |
-!! | Stateout       | GFS_stateout_type_instance                             | instance of derived type GFS_stateout_type              | DDT           |    0 | GFS_stateout_type     |           | in     | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                              | instance of type GFS_sfcprop_type in FV3                | DDT           |    0 | GFS_sfcprop_type      |           | in     | F        |
-!! | Coupling       | GFS_coupling_type_instance                             | instance of type GFS_coupling_type in FV3               | DDT           |    0 | GFS_coupling_type     |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                                 | instance of type GFS_grid_type in FV3                   | DDT           |    0 | GFS_grid_type         |           | in     | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | instance of type GFS_tbd_type in FV3                    | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | Cldprop        | GFS_cldprop_type_instance                              | instance of type GFS_cldprop_type in FV3                | DDT           |    0 | GFS_cldprop_type      |           | in     | F        |
-!! | Radtend        | GFS_radtend_type_instance                              | instance of type GFS_radtend_type in FV3                | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
-!! | Diag           | GFS_diag_type_instance                                 | instance of type GFS_diag_type in FV3                   | DDT           |    0 | GFS_diag_type         |           | in     | F        |
-!! | Interstitial   | GFS_interstitial_type_instance                         | instance of type GFS_interstitial_type in FV3           | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
-!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_diagtoscreen_run.html
 !!
       subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,     &
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
@@ -772,23 +756,7 @@
       end subroutine GFS_interstitialtoscreen_finalize
 
 !> \section arg_table_GFS_interstitialtoscreen_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | Statein        | GFS_statein_type_instance                              | instance of derived type GFS_statein_type               | DDT           |    0 | GFS_statein_type      |           | in     | F        |
-!! | Stateout       | GFS_stateout_type_instance                             | instance of derived type GFS_stateout_type              | DDT           |    0 | GFS_stateout_type     |           | in     | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                              | instance of derived type GFS_sfcprop_type               | DDT           |    0 | GFS_sfcprop_type      |           | in     | F        |
-!! | Coupling       | GFS_coupling_type_instance                             | instance of derived type GFS_coupling_type              | DDT           |    0 | GFS_coupling_type     |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                                 | instance of derived type GFS_grid_type                  | DDT           |    0 | GFS_grid_type         |           | in     | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | instance of derived type GFS_tbd_type                   | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | Cldprop        | GFS_cldprop_type_instance                              | instance of derived type GFS_cldprop_type               | DDT           |    0 | GFS_cldprop_type      |           | in     | F        |
-!! | Radtend        | GFS_radtend_type_instance                              | instance of derived type GFS_radtend_type               | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
-!! | Diag           | GFS_diag_type_instance                                 | instance of derived type GFS_diag_type                  | DDT           |    0 | GFS_diag_type         |           | in     | F        |
-!! | Interstitial   | GFS_interstitial_type_instance                         | instance of derived type GFS_interstitial_type          | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
-!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_interstitialtoscreen_run.html
 !!
       subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
@@ -900,12 +868,7 @@
       end subroutine GFS_abort_finalize
 
 !> \section arg_table_GFS_abort_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_abort_run.html
 !!
       subroutine GFS_abort_run (Model, blkno, errmsg, errflg)
 
@@ -949,39 +912,7 @@
         end subroutine GFS_checkland_finalize
 
 !> \section arg_table_GFS_checkland_run Argument Table
-!! | local_name   | standard_name                         | long_name                                                | units | rank | type      |    kind   | intent | optional |
-!! |--------------|---------------------------------------|----------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | me           | mpi_rank                              | current MPI-rank                                         | index |    0 | integer   |           | in     | F        |
-!! | master       | mpi_root                              | master MPI-rank                                          | index |    0 | integer   |           | in     | F        |
-!! | blkno        | ccpp_block_number                     | number of block for explicit data blocking in CCPP       | index |    0 | integer   |           | in     | F        |
-!! | im           | horizontal_loop_extent                | horizontal loop extent                                   | count |    0 | integer   |           | in     | F        |
-!! | kdt          | index_of_time_step                    | current number of time steps                             | index |    0 | integer   |           | in     | F        |
-!! | iter         | ccpp_loop_counter                     | loop counter for subcycling loops in CCPP                | index |    0 | integer   |           | in     | F        |
-!! | flag_iter    | flag_for_iteration                    | flag for iteration                                       | flag  |    1 | logical   |           | in     | F        |
-!! | flag_guess   | flag_for_guess_run                    | flag for guess run                                       | flag  |    1 | logical   |           | in     | F        |
-!! | flag_init    | flag_for_first_time_step              | flag signaling first time step for time integration loop | flag  |    0 | logical   |           | in     | F        |
-!! | flag_restart | flag_for_restart                      | flag for restart (warmstart) or coldstart                | flag  |    0 | logical   |           | in     | F        |
-!! | frac_grid    | flag_for_fractional_grid              | flag for fractional grid                                 | flag  |    0 | logical   |           | in     | F        |
-!! | isot         | soil_type_dataset_choice              | soil type dataset choice                                 | index |    0 | integer   |           | in     | F        |
-!! | ivegsrc      | vegetation_type_dataset_choice        | land use dataset choice                                  | index |    0 | integer   |           | in     | F        |
-!! | stype        | soil_type_classification_real         | soil type for lsm                                        | index |    1 | real      | kind_phys | in     | F        |
-!! | vtype        | vegetation_type_classification_real   | vegetation type for lsm                                  | index |    1 | real      | kind_phys | in     | F        |
-!! | slope        | surface_slope_classification_real     | sfc slope type for lsm                                   | index |    1 | real      | kind_phys | in     | F        |
-!! | soiltyp      | soil_type_classification              | soil type at each grid cell                              | index |    1 | integer   |           | in     | F        |
-!! | vegtype      | vegetation_type_classification        | vegetation type at each grid cell                        | index |    1 | integer   |           | in     | F        |
-!! | slopetyp     | surface_slope_classification          | surface slope type at each grid cell                     | index |    1 | integer   |           | in     | F        |
-!! | dry          | flag_nonzero_land_surface_fraction    | flag indicating some land surface area fraction          | flag  |    1 | logical   |           | in     | F        |
-!! | icy          | flag_nonzero_sea_ice_surface_fraction | flag indicating some sea ice surface area fraction       | flag  |    1 | logical   |           | in     | F        |
-!! | wet          | flag_nonzero_wet_surface_fraction     | flag indicating some ocean or lake surface area fraction | flag  |    1 | logical   |           | in     | F        |
-!! | lake         | flag_nonzero_lake_surface_fraction    | flag indicating some lake surface area fraction          | flag  |    1 | logical   |           | in     | F        |
-!! | ocean        | flag_nonzero_ocean_surface_fraction   | flag indicating some ocean surface area fraction         | flag  |    1 | logical   |           | in     | F        |
-!! | oceanfrac    | sea_area_fraction                     | fraction of horizontal grid area occupied by ocean       | frac  |    1 | real      | kind_phys | in     | F        |
-!! | landfrac     | land_area_fraction                    | fraction of horizontal grid area occupied by land        | frac  |    1 | real      | kind_phys | in     | F        |
-!! | lakefrac     | lake_area_fraction                    | fraction of horizontal grid area occupied by lake        | frac  |    1 | real      | kind_phys | in     | F        |
-!! | slmsk        | sea_land_ice_mask_real                | landmask: sea/land/ice=0/1/2                             | flag  |    1 | real      | kind_phys | in     | F        |
-!! | islmsk       | sea_land_ice_mask                     | sea/land/ice mask (=0/1/2)                               | flag  |    1 | integer   |           | in     | F        |
-!! | errmsg       | ccpp_error_message                    | error message for error handling in CCPP                 | none  |    0 | character | len=*     | out    | F        |
-!! | errflg       | ccpp_error_flag                       | error flag for error handling in CCPP                    | flag  |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_checkland_run.html
 !!
         subroutine GFS_checkland_run (me, master, blkno, im, kdt, iter, flag_iter, flag_guess, &
                 flag_init, flag_restart, frac_grid, isot, ivegsrc, stype, vtype, slope,        &

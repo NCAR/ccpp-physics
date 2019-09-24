@@ -22,57 +22,7 @@
 !! scale-aware Shinhong scheme.
 !!
 !> \section arg_table_shinhongvdif_run Argument Table
-!! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | ux             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | vx             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | tx             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | qx             | tracer_concentration                                                        | model layer mean tracer concentration                 | kg kg-1       |    3 | real      | kind_phys | in     | F        |
-!! | p2d            | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | p2di           | air_pressure_at_interface                                                   | air pressure at model layer interfaces                | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | pi2d           | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
-!! | vtnp           | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | utnp           | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | ttnp           | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | qtnp           | tendency_of_tracers_due_to_model_physics                                    | updated tendency of the tracers due to model physics  | kg kg-1 s-1   |    3 | real      | kind_phys | inout  | F        |
-!! | ntrac          | number_of_tracers                                                           | number of tracers                                     | count         |    0 | integer   |           | in     | F        |
-!! | ndiff          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer   |           | in     | F        |
-!! | ntcw           | index_for_liquid_cloud_condensate                                           | tracer index for cloud condensate (or liquid water)   | index         |    0 | integer   |           | in     | F        |
-!! | ntiw           | index_for_ice_cloud_condensate                                              | tracer index for ice water                            | index         |    0 | integer   |           | in     | F        |
-!! | phii           | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                | geopotential at model layer centers                   | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | psfcpa         | surface_air_pressure                                                        | surface pressure                                      | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | zorl           | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
-!! | stress         | surface_wind_stress                                                         | surface wind stress                                   | m2 s-2        |    1 | real      | kind_phys | in     | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | out    | F        |
-!! | psim           | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | in     | F        |
-!! | psih           | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | in     | F        |
-!! | landmask       | sea_land_ice_mask                                                           | landmask: sea/land/ice=0/1/2                          | flag          |    1 | integer   |           | in     | F        |
-!! | heat           | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | wspd           | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | br             | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | g              | gravitational_acceleration                                                  | gravitational acceleration                            | m s-2         |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                        | ideal gas constant for dry air                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure         | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | rv             | gas_constant_water_vapor                                                    | ideal gas constant for water vapor                    | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | ep1            | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | rv/rd - 1 (rv = ideal gas constant for water vapor)   | none          |    0 | real      | kind_phys | in     | F        |
-!! | ep2            | ratio_of_dry_air_to_water_vapor_gas_constants                               | rd/rv                                                 | none          |    0 | real      | kind_phys | in     | F        |
-!! | xlv            | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | dusfc          | instantaneous_surface_x_momentum_flux                                       | x momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc          | instantaneous_surface_y_momentum_flux                                       | y momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dtsfc          | instantaneous_surface_upward_sensible_heat_flux                             | surface upward sensible heat flux                     | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | dqsfc          | instantaneous_surface_upward_latent_heat_flux                               | surface upward latent heat flux                       | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | dt             | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
-!! | kpbl1d         | vertical_index_at_top_of_atmosphere_boundary_layer                          | PBL top model level index                             | index         |    1 | integer   |           | out    | F        |
-!! | u10            | x_wind_at_10m                                                               | x component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v10            | y_wind_at_10m                                                               | y component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | dx             | cell_size                                                                   | size of the grid cell                                 | m             |    1 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude shinhongvdif_run.html
 !!
 !-------------------------------------------------------------------------------
    subroutine shinhongvdif_run(ix,im,km,ux,vx,tx,qx,p2d,p2di,pi2d,             &
