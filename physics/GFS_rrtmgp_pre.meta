@@ -2,56 +2,56 @@
   name = GFS_rrtmgp_pre_run
   type = scheme
 [Model]
-  standard_name = GFS_control_type
-  long_name = Fortran DDT containing FV3-GFS model control parameters
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
   units = DDT
   dimensions = ()
   type = GFS_control_type
   intent = in
   optional = F
 [Grid]
-  standard_name = GFS_grid_type
-  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
+  standard_name = GFS_grid_type_instance
+  long_name = instance of derived type GFS_grid_type
   units = DDT
   dimensions = ()
   type = GFS_grid_type
   intent = in
   optional = F
 [Sfcprop]
-  standard_name = GFS_sfcprop_type
-  long_name = Fortran DDT containing FV3-GFS surface fields
+  standard_name = GFS_sfcprop_type_instance
+  long_name = instance of derived type GFS_sfcprop_type
   units = DDT
   dimensions = ()
   type = GFS_sfcprop_type
   intent = in
   optional = F
 [Statein]
-  standard_name = GFS_statein_type
-  long_name = Fortran DDT containing FV3-GFS prognostic state data in from dycore
+  standard_name = GFS_statein_type_instance
+  long_name = instance of derived type GFS_statein_type
   units = DDT
   dimensions = ()
   type = GFS_statein_type
   intent = in
   optional = F
 [Tbd]
-  standard_name = GFS_tbd_type
-  long_name = Fortran DDT containing FV3-GFS data not yet assigned to a defined container
+  standard_name = GFS_tbd_type_instance
+  long_name = instance of derived type GFS_tbd_type
   units = DDT
   dimensions = ()
   type = GFS_tbd_type
   intent = in
   optional = F
 [Coupling]
-  standard_name = GFS_coupling_type
-  long_name = Fortran DDT containing FV3-GFS fields needed for coupling
+  standard_name = GFS_coupling_type_instance
+  long_name = instance of derived type GFS_coupling_type
   units = DDT
   dimensions = ()
   type = GFS_coupling_type
   intent = in
   optional = F
 [Radtend]
-  standard_name = GFS_radtend_type
-  long_name = Fortran DDT containing FV3-GFS radiation tendencies
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
   units = DDT
   dimensions = ()
   type = GFS_radtend_type

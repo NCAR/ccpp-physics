@@ -2,16 +2,16 @@
   name = rrtmgp_sw_clrallsky_driver_run
   type = scheme
 [Model]
-  standard_name = GFS_control_type
-  long_name = Fortran DDT containing FV3-GFS model control parameters
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
   units = DDT
   dimensions = ()
   type = GFS_control_type
   intent = in
   optional = F
 [Radtend]
-  standard_name = GFS_radtend_type
-  long_name = Fortran DDT containing FV3-GFS radiation tendencies
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
   units = DDT
   dimensions = ()
   type = GFS_radtend_type

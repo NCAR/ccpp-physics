@@ -2,8 +2,8 @@
   name = rrtmgp_lw_cloud_optics_init
   type = scheme
 [Model]
-  standard_name = GFS_control_type
-  long_name = Fortran DDT containing FV3-GFS model control parameters
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
   units = DDT
   dimensions = ()
   type = GFS_control_type
@@ -64,8 +64,8 @@
   name = rrtmgp_lw_cloud_optics_run
   type = scheme
 [Model]
-  standard_name = GFS_control_type
-  long_name = Fortran DDT containing FV3-GFS model control parameters
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
   units = DDT
   dimensions = ()
   type = GFS_control_type
