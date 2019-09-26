@@ -114,10 +114,10 @@
   intent = in
   optional = F
 [cld_frac]
-  standard_name = RRTMGP_total_cloud_fraction
+  standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -126,7 +126,7 @@
   standard_name = RRTMGP_cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -135,7 +135,7 @@
   standard_name = RRTMGP_cloud_optical_depth_layers_at_0_55mu_band
   long_name = approx .55mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in

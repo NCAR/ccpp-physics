@@ -178,41 +178,6 @@
   type = integer
   intent = in
   optional = F
-[im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[aerosolssw]
-  standard_name = RRTMGP_aerosol_optical_properties_for_shortwave_bands_01_16
-  long_name = aerosol optical properties for shortwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one, number_of_sw_bands_rrtmgp, number_of_aerosol_output_fields_for_shortwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[aerosolslw]
-  standard_name = RRTMGP_aerosol_optical_properties_for_longwave_bands_01_16
-  long_name = aerosol optical properties for longwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one, number_of_lw_bands_rrtmgp,number_of_aerosol_output_fields_for_longwave_radiation)
-  type = real
-  kind = kind_phys
-  optional = F
-  intent = in
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank

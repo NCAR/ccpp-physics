@@ -145,82 +145,82 @@
   intent = out
   optional = F
 [cld_frac]
-  standard_name = RRTMGP_total_cloud_fraction
+  standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_lwp]
-  standard_name = RRTMGP_cloud_liquid_water_path
+  standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_reliq]
-  standard_name = RRTMGP_mean_effective_radius_for_liquid_cloud
+  standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_iwp]
-  standard_name = RRTMGP_cloud_ice_water_path
+  standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_reice]
-  standard_name = RRTMGP_mean_effective_radius_for_ice_cloud
+  standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_swp]
-  standard_name = RRTMGP_cloud_snow_water_path
+  standard_name = cloud_snow_water_path
   long_name = layer cloud snow water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_resnow]
-  standard_name = RRTMGP_mean_effective_radius_for_snow_flake
+  standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_rwp]
-  standard_name = RRTMGP_cloud_rain_water_path
+  standard_name = cloud_rain_water_path
   long_name = layer cloud rain water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [cld_rerain]
-  standard_name = RRTMGP_mean_effective_radius_for_rain_drop
+  standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -229,7 +229,7 @@
   standard_name = RRTMGP_aerosol_optical_properties_for_longwave_bands_01_16
   long_name = aerosol optical properties for longwave bands 01-16
   units = various
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one, number_of_lw_bands_rrtmgp,number_of_aerosol_output_fields_for_longwave_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension, number_of_lw_bands_rrtmgp,number_of_aerosol_output_fields_for_longwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -238,7 +238,7 @@
   standard_name = RRTMGP_aerosol_optical_properties_for_shortwave_bands_01_16
   long_name = aerosol optical properties for shortwave bands 01-16
   units = various
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one, number_of_sw_bands_rrtmgp, number_of_aerosol_output_fields_for_shortwave_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension, number_of_sw_bands_rrtmgp, number_of_aerosol_output_fields_for_shortwave_radiation)
   type = real
   intent = out
   kind = kind_phys

@@ -3,7 +3,6 @@
 module GFS_rrtmgp_setup
 
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg,&
-!  &             iaermdl, laswflg, lalwflg, lavoflg, icldflg,         &
    &             iaermdl,                            icldflg,         &
    &             iovrsw , iovrlw , lcrick , lcnorm , lnoprec,         &
    &             ialbflg, iemsflg, isubcsw, isubclw, ivflip , ipsd0,  &
@@ -21,7 +20,7 @@ module GFS_rrtmgp_setup
 
    !  ---  version tag and last revision date
    character(40), parameter ::                                       &
-        &   VTAGRAD='NCEP-Radiation_driver    v5.2  Jan 2013 '
+        &   VTAGRAD='NCEP-RRTMGP_driver       v1.0  Sep 2019 '
    !    &   VTAGRAD='NCEP-Radiation_driver    v5.1  Nov 2012 '
    !    &   VTAGRAD='NCEP-Radiation_driver    v5.0  Aug 2012 '
 
@@ -36,7 +35,8 @@ module GFS_rrtmgp_setup
    logical :: loz1st = .true.
 
    contains
-
+!> \defgroup GFS_rrtmgp_setup GFS RRTMGP Scheme Setup
+!! @{
 !! \section arg_table_GFS_rrtmgp_setup_init
 !! \htmlinclude GFS_rrtmgp_setup.html
 !!
@@ -46,7 +46,6 @@ module GFS_rrtmgp_setup
           icliq_sw, crick_proof, ccnorm,                                &
           imp_physics,                                                  &
           norad_precip, idate, iflip,                                   &
-          im, aerosolslw, aerosolssw, aerodp,                                   & ! for consistency checks
           me, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -183,71 +182,38 @@ module GFS_rrtmgp_setup
       logical, intent(in) :: norad_precip
       integer, intent(in) :: idate(4)
       integer, intent(in) :: iflip
-      ! For consistency checks
-      integer, intent(in)         :: im
-      real(kind_phys), intent(in) :: aerosolslw(:,:,:,:)
-      real(kind_phys), intent(in) :: aerosolssw(:,:,:,:)
-      real(kind_phys), intent(in) :: aerodp(:,:)
-      ! End for consistency checks
       integer, intent(in)           :: me
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      ! For consistency checks
-      real(kind_phys), dimension(im,levr,NBDLW,NF_AELW) :: aerosolslw_check
-      real(kind_phys), dimension(im,levr,NBDSW,NF_AESW) :: aerosolssw_check
-      real(kind_phys), dimension(im,NSPC1)              :: aerodp_check
-      ! End for consistency checks
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
-
       if (is_initialized) return
 
-      ! Consistency checks for dimensions of arrays, this is required
-      ! to detect differences in FV3's parameters that are used to
-      ! dimension certain arrays and the values in ccpp-physics
-      if (size(aerosolslw(1,:,:,:)).ne.size(aerosolslw_check(1,:,:,:))) then
-         write(errmsg,"(3a,4i4,a,4i4)") &
-               "Runtime error: dimension mismatch for aerosolslw,",        &
-               " check definitions of Model%levs, nbdlw, nf_aelw:",     &
-               " expected shape ", shape(aerosolslw_check(:,:,:,:)),       &
-               " but got ", shape(aerosolslw(:,:,:,:))
-         errflg = 1
-         return
-      end if
-      if (size(aerosolssw(1,:,:,:)).ne.size(aerosolssw_check(1,:,:,:))) then
-         write(errmsg,"(3a,4i4,a,4i4)") &
-               "Runtime error: dimension mismatch for aerosolssw,",        &
-               " check definitions of Model%levs, nbdsw, nf_aesw:",     &
-               " expected shape ", shape(aerosolssw_check(:,:,:,:)),       &
-               " but got ", shape(aerosolssw(:,:,:,:))
-         errflg = 1
-         return
-      end if
-      if (size(aerodp(1,:)).ne.size(aerodp_check(1,:))) then
-         write(errmsg,"(3a,2i4,a,2i4)") &
-               "Runtime error: dimension mismatch for aerodp,",        &
-               " check definitions of nspc1:",                         &
-               " expected shape ", shape(aerodp_check(:,:)),           &
-               " but got ", shape(aerodp(:,:))
-         errflg = 1
-         return
-      end if
-      
-      ! End of consistency checks
 
-      isolar = isol                     ! solar constant control flag
-
-      ictmflg= ictm                     ! data ic time/date control flag
-      ico2flg= ico2                     ! co2 data source control flag
-      ioznflg= ntoz                     ! ozone data source control flag
+      ! Set radiation parameters
+      isolar  = isol                     ! solar constant control flag
+      ictmflg = ictm                     ! data ic time/date control flag
+      ico2flg = ico2                     ! co2 data source control flag
+      ioznflg = ntoz                     ! ozone data source control flag
+      iswcliq = icliq_sw                 ! optical property for liquid clouds for sw
+      iovrsw  = iovr_sw                  ! cloud overlapping control flag for sw
+      iovrlw  = iovr_lw                  ! cloud overlapping control flag for lw
+      lcrick  = crick_proof              ! control flag for eliminating CRICK 
+      lcnorm  = ccnorm                   ! control flag for in-cld condensate 
+      lnoprec = norad_precip             ! precip effect on radiation flag (ferrier microphysics)
+      isubcsw = isubc_sw                 ! sub-column cloud approx flag in sw radiation
+      isubclw = isubc_lw                 ! sub-column cloud approx flag in lw radiation
+      ialbflg = ialb                     ! surface albedo control flag
+      iemsflg = iems                     ! surface emissivity control flag
+      ivflip  = iflip                    ! vertical index direction control flag
 
       if ( ictm==0 .or. ictm==-2 ) then
-        iaerflg = mod(iaer, 100)        ! no volcanic aerosols for clim hindcast
+         iaerflg = mod(iaer, 100)        ! no volcanic aerosols for clim hindcast
       else
-        iaerflg = mod(iaer, 1000)   
+         iaerflg = mod(iaer, 1000)   
       endif
       iaermdl = iaer/1000               ! control flag for aerosol scheme selection
       if ( iaermdl < 0 .or.  (iaermdl>2 .and. iaermdl/=5) ) then
@@ -255,64 +221,41 @@ module GFS_rrtmgp_setup
          stop 7777
       endif
 
-!     if ( ntcw > 0 ) then
-        icldflg = 1                     ! prognostic cloud optical prop scheme
-!     else
-!       icldflg = 0                     ! no support for diag cloud opt prop scheme
-!     endif
+      !if ( ntcw > 0 ) then
+      icldflg = 1                     ! prognostic cloud optical prop scheme
+      !else
+      !   icldflg = 0                     ! no support for diag cloud opt prop scheme
+      !endif
 
-      iswcliq = icliq_sw                ! optical property for liquid clouds for sw
-
-      iovrsw = iovr_sw                  ! cloud overlapping control flag for sw
-      iovrlw = iovr_lw                  ! cloud overlapping control flag for lw
-
-      lcrick  = crick_proof             ! control flag for eliminating CRICK 
-      lcnorm  = ccnorm                  ! control flag for in-cld condensate 
-      lnoprec = norad_precip            ! precip effect on radiation flag (ferrier microphysics)
-      isubcsw = isubc_sw                ! sub-column cloud approx flag in sw radiation
-      isubclw = isubc_lw                ! sub-column cloud approx flag in lw radiation
-
-      ialbflg= ialb                     ! surface albedo control flag
-      iemsflg= iems                     ! surface emissivity control flag
-
-      ivflip = iflip                    ! vertical index direction control flag
-
-!  ---  assign initial permutation seed for mcica cloud-radiation
+      ! Set initial permutation seed for mcica cloud-radiation
       if ( isubc_sw>0 .or. isubc_lw>0 ) then
-!       ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4) + ipsd0
-        ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4)
+         ipsd0 = 17*idate(1)+43*idate(2)+37*idate(3)+23*idate(4)
       endif
 
       if ( me == 0 ) then
-        print *,'  In rad_initialize (GFS_rrtmgp_setup_init), before calling radinit'
-        print *,' si =',si
-        print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
-     &          ' iaer=',iaer,' ialb=',ialb,' iems=',iems,' ntcw=',ntcw
-        print *,' np3d=',num_p3d,' ntoz=',ntoz,' iovr_sw=',iovr_sw,     &
-     &          ' iovr_lw=',iovr_lw,' isubc_sw=',isubc_sw,              &
-     &          ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
-     &          ' iflip=',iflip,'  me=',me
-        print *,' crick_proof=',crick_proof,                            &
-     &          ' ccnorm=',ccnorm,' norad_precip=',norad_precip
+         print *,'  In rad_initialize (GFS_rrtmgp_setup_init), before calling radinit'
+         print *,' si =',si
+         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
+                 ' iaer=',iaer,' ialb=',ialb,' iems=',iems,' ntcw=',ntcw
+         print *,' np3d=',num_p3d,' ntoz=',ntoz,' iovr_sw=',iovr_sw,     &
+                 ' iovr_lw=',iovr_lw,' isubc_sw=',isubc_sw,              &
+                 ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
+                 ' iflip=',iflip,'  me=',me
+         print *,' crick_proof=',crick_proof,                            &
+                 ' ccnorm=',ccnorm,' norad_precip=',norad_precip
       endif
 
-      call radinit                                                      &
-!  ---  inputs:
-     &     ( si, levr, imp_physics,  me )
-!  ---  outputs:
-!          ( none )
+      call radinit( si, levr, imp_physics,  me )
 
       if ( me == 0 ) then
-        print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
-     &          ' IC-idate =',idate
-        print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
+         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
+                 ' IC-idate =',idate
+         print *,' return from rad_initialize (GFS_rrtmgp_setup_init) - after calling radinit'
       endif
-!
+
       is_initialized = .true.
-!
       return
-
-   end subroutine GFS_rrtmgp_setup_init
+    end subroutine GFS_rrtmgp_setup_init
 
 !> \section arg_table_GFS_rrtmgp_setup_run
 !! \htmlinclude GFS_rrtmgp_setup.html
@@ -497,8 +440,6 @@ module GFS_rrtmgp_setup
       use module_radiation_gases,     only : gas_init
       use module_radiation_surface,   only : sfc_init
       use module_radiation_clouds,    only : cld_init
-      ! DH* these should be called by rrtmgp_lw_init and rrtmgp_sw_init!
-      use rrtmg_sw,                   only : rswinit
 
       implicit none
 
@@ -585,39 +526,16 @@ module GFS_rrtmgp_setup
         endif
       endif
 
-!> -# Initialization
-!! - astronomy initialization routine:
-!! call module_radiation_astronomy::sol_init()
-!! - aerosols initialization routine:
-!! call module_radiation_aerosols::aer_init()
-!! - CO2 and other gases intialization routine:
-!! call module_radiation_gases::gas_init()
-!! - surface intialization routine:
-!! call module_radiation_surface::sfc_init()
-!! - cloud initialization routine:
-!! call module_radiation_clouds::cld_init()
-!! - LW radiation initialization routine:
-!! call module_radlw_main::rlwinit()
-!! - SW radiation initialization routine:
-!! call module_radsw_main::rswinit()
-!     Initialization
+      ! Initialization
 
-      call sol_init ( me )          !  --- ...  astronomy initialization routine
-
-      call aer_init ( NLAY, me )    !  --- ...  aerosols initialization routine
-
-      call gas_init ( me )          !  --- ...  co2 and other gases initialization routine
-
-      call sfc_init ( me )          !  --- ...  surface initialization routine
-
+      call sol_init ( me )                       !  --- ...  astronomy initialization routine
+      call aer_init ( NLAY, me )                 !  --- ...  aerosols initialization routine
+      call gas_init ( me )                       !  --- ...  co2 and other gases initialization routine
+      call sfc_init ( me )                       !  --- ...  surface initialization routine
       call cld_init ( si, NLAY, imp_physics, me) !  --- ...  cloud initialization routine
 
-      !call rlwinit ( me )           !  --- ...  lw radiation initialization routine
-
-      call rswinit ( me )           !  --- ...  sw radiation initialization routine
-!
       return
-!...................................
+      !...................................
       end subroutine radinit
       !-----------------------------------
 

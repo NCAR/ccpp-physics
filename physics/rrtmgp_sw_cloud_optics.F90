@@ -456,7 +456,7 @@ contains
        call random_number(rng1D,rng_stat)
        rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),model%levs])
     enddo
-    
+   
     ! Call McICA
     select case ( iovrsw )
        ! Maximumn-random 

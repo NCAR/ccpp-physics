@@ -317,6 +317,7 @@ contains
     cld_rerain = clouds(:,:,7)  
     cld_swp    = clouds(:,:,8)  
     cld_resnow = clouds(:,:,9)  
+    print*,clouds(:,:,5) 
 
     ! #######################################################################################
     ! mg, sfc-perts

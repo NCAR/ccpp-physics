@@ -35,7 +35,6 @@ contains
     errmsg = ''
     errflg = 0
 
-
     ! Which gases are active? Provided via physics namelist.
     if (len(Model%active_gases) .gt. 0) then
 
