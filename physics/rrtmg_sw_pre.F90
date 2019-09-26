@@ -66,13 +66,13 @@
 !>  - Call module_radiation_surface::setalb() to setup surface albedo.
 !!  for SW radiation.
 
-        call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                     Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                     tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                     Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                     Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                     Sfcprop%tisfc, IM,                           &
-                     alb1d, Model%pertalb,                        &    !  mg, sfc-perts
+        call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,   &  !  ---  inputs:
+                     Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,   &
+                     tsfg, tsfa, Sfcprop%hprime(:,1), Sfcprop%alvsf, &
+                     Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf,    &
+                     Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,     &
+                     Sfcprop%tisfc, IM,                              &
+                     alb1d, Model%pertalb,                           &  !  mg, sfc-perts
                      sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
