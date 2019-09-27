@@ -83,9 +83,27 @@
   kind = kind_phys
   intent = in
   optional = F
-[tsea]
-  standard_name = surface_skin_temperature
-  long_name = surface skin temperature
+[tsfc_lnd]
+  standard_name = surface_skin_temperature_over_land_interstitial
+  long_name = surface skin temperature over land  (temporary use as interstitial)
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc_ocn]
+  standard_name = surface_skin_temperature_over_ocean_interstitial
+  long_name = surface skin temperature over ocean (temporary use as interstitial)
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc_ice]
+  standard_name = surface_skin_temperature_over_ice_interstitial
+  long_name = surface skin temperature over ice   (temporary use as interstitial)
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -110,9 +128,27 @@
   kind = kind_phys
   intent = in
   optional = F
-[sfcemis]
-  standard_name = surface_longwave_emissivity
-  long_name = surface emissivity
+[sfcemis_lnd]
+  standard_name = surface_longwave_emissivity_over_land_interstitial
+  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfcemis_ice]
+  standard_name = surface_longwave_emissivity_over_ice_interstitial
+  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfcemis_ocn]
+  standard_name = surface_longwave_emissivity_over_ocean_interstitial
+  long_name = surface lw emissivity in fraction over ocean (temporary use as interstitial)
   units = frac
   dimensions = (horizontal_dimension)
   type = real
@@ -296,6 +332,30 @@
   kind = kind_phys
   intent = in
   optional = F
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[wet]
+  standard_name = flag_nonzero_wet_surface_fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
 [dtdt]
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = total radiative heating rate at current time
@@ -341,9 +401,27 @@
   kind = kind_phys
   intent = out
   optional = F
-[adjsfculw]
-  standard_name = surface_upwelling_longwave_flux
-  long_name = surface upwelling longwave flux at current time
+[adjsfculw_lnd]
+  standard_name = surface_upwelling_longwave_flux_over_land_interstitial
+  long_name = surface upwelling longwave flux at current time over land (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[adjsfculw_ice]
+  standard_name = surface_upwelling_longwave_flux_over_ice_interstitial
+  long_name = surface upwelling longwave flux at current time over ice (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[adjsfculw_ocn]
+  standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
+  long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real

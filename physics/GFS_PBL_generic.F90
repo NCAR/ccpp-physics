@@ -112,6 +112,7 @@
                 vdftra(i,k,12) = qgrs(i,k,ntoz)
               enddo
             enddo
+            kk = 12
           else                                             ! MG2
             do k=1,levs
               do i=1,im
@@ -125,6 +126,17 @@
                 vdftra(i,k,8)  = qgrs(i,k,ntrnc)
                 vdftra(i,k,9)  = qgrs(i,k,ntsnc)
                 vdftra(i,k,10) = qgrs(i,k,ntoz)
+              enddo
+            enddo
+            kk = 10
+          endif
+          if (trans_aero) then
+            do n=ntchs,ntchm+ntchs-1
+              kk = kk + 1
+              do k=1,levs
+                do i=1,im
+                  vdftra(i,k,kk) = qgrs(i,k,n)
+                enddo
               enddo
             enddo
           endif
@@ -205,7 +217,7 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
+        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -239,7 +251,7 @@
       real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
 
-      logical, dimension(:),intent(in) :: dry, icy
+      logical, dimension(:),intent(in) :: wet, dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
 
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dkt_cpl
@@ -325,6 +337,7 @@
                 dqdt(i,k,ntoz)  = dvdftra(i,k,12)
               enddo
             enddo
+            kk = 12
           else                                               ! MG2
             do k=1,levs
               do i=1,im
@@ -338,6 +351,17 @@
                 dqdt(i,k,ntrnc) = dvdftra(i,k,8)
                 dqdt(i,k,ntsnc) = dvdftra(i,k,9)
                 dqdt(i,k,ntoz)  = dvdftra(i,k,10)
+              enddo
+            enddo
+            kk = 10
+          endif
+          if (trans_aero) then
+            do n=ntchs,ntchm+ntchs-1
+              kk = kk + 1
+              do k=1,levs
+                do i=1,im
+                  dqdt(i,k,n) = dvdftra(i,k,kk)
+                enddo
               enddo
             enddo
           endif
@@ -398,29 +422,32 @@
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
-            if (fice(i) == 1.0) then           ! use results from CICE
-              dusfci_cpl(i) = dusfc_cice(i)
-              dvsfci_cpl(i) = dvsfc_cice(i)
-              dtsfci_cpl(i) = dtsfc_cice(i)
-              dqsfci_cpl(i) = dqsfc_cice(i)
-            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
-              tem1 = max(q1(i), 1.e-8)
-              rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
-              if (wind(i) > 0.0) then
-                tem = - rho * stress_ocn(i) / wind(i)
-                dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
-                dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
-              else
-                dusfci_cpl(i) = 0.0
-                dvsfci_cpl(i) = 0.0
+!            if (fice(i) == ceanfrac(i)) then ! use results from CICE
+!              dusfci_cpl(i) = dusfc_cice(i)
+!              dvsfci_cpl(i) = dvsfc_cice(i)
+!              dtsfci_cpl(i) = dtsfc_cice(i)
+!              dqsfci_cpl(i) = dqsfc_cice(i)
+!            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
+            if (wet(i)) then                   ! use stress_ocean from sfc_diff for opw component at mixed point
+              if (icy(i) .or. dry(i)) then
+                tem1 = max(q1(i), 1.e-8)
+                rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
+                if (wind(i) > 0.0) then
+                  tem = - rho * stress_ocn(i) / wind(i)
+                  dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
+                  dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
+                else
+                  dusfci_cpl(i) = 0.0
+                  dvsfci_cpl(i) = 0.0
+                endif
+                dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
+                dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+              else                                                    ! use results from PBL scheme for 100% open ocean
+                dusfci_cpl(i) = dusfc1(i)
+                dvsfci_cpl(i) = dvsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)
+                dqsfci_cpl(i) = dqsfc1(i)
               endif
-              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
-              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
-            else                                                    ! use results from PBL scheme for 100% open ocean
-              dusfci_cpl(i) = dusfc1(i)
-              dvsfci_cpl(i) = dvsfc1(i)
-              dtsfci_cpl(i) = dtsfc1(i)
-              dqsfci_cpl(i) = dqsfc1(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
@@ -468,27 +495,6 @@
               dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
             enddo
           enddo
-  ! update dqdt_v to include moisture tendency due to vertical diffusion
-  !         if (lgocart) then
-  !           do k=1,levs
-  !             do i=1,im
-  !               dqdt_v(i,k)  = dqdt(i,k,1) * dtf
-  !             enddo
-  !           enddo
-  !         endif
-!          do k=1,levs
-!            do i=1,im
-!              tem  = dqdt(i,k,ntqv) * dtf
-!              dq3dt(i,k) = dq3dt(i,k) + tem
-!            enddo
-!          enddo
-!          if (ntoz > 0) then
-!            do k=1,levs
-!              do i=1,im
-!                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + dqdt(i,k,ntoz) * dtf
-!              enddo
-!            enddo
-!          endif
         endif
 
       endif   ! end if_lssav

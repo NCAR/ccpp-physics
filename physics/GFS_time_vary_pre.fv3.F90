@@ -80,6 +80,9 @@
         real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
         real(kind=kind_phys) :: rinc(5)
 
+        integer              :: fjd, iyear, imon, iday, ihr, imin, jd0, jd1
+        integer              :: iw3jdn
+
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
@@ -115,6 +118,47 @@
 
         !--- set the solar hour based on a combination of phour and time initial hour
         Model%solhr  = mod(Model%phour+Model%idate(1),con_24)
+
+        if (Model%lsm == Model%lsm_noahmp) then
+!
+! Julian day calculation (fcst day of the year)
+! we need imn to init lai and sai and yearln and julian to
+! pass to noah mp sflx, idate is init, jdat is fcst;idate = jdat when kdt=1
+! jdat is changing
+!
+          Model%imn = Model%idate(2)
+
+          iyear = Model%jdat(1)
+          imon  = Model%jdat(2)
+          iday  = Model%jdat(3)
+          ihr   = Model%jdat(5)
+          imin  = Model%jdat(6)
+
+          jd1   = iw3jdn(iyear,imon,iday)
+          jd0   = iw3jdn(iyear,1,1)
+          fjd   = float(ihr)/24.0 + float(imin)/1440.0
+
+          Model%julian = float(jd1-jd0) + fjd
+
+!
+! Year length
+!
+! what if the integration goes from one year to another?
+! iyr or jyr ? from 365 to 366 or from 366 to 365
+!
+! is this against model's noleap yr assumption?
+
+          if (mod(iyear,400) == 0) then
+            Model%yearlen = 366
+          elseif (mod(iyear,100) == 0) then
+            Model%yearlen = 365
+          elseif (mod(iyear,4) == 0) then
+            Model%yearlen = 366
+          else
+            Model%yearlen = 365
+          endif
+        endif !  if (Model%lsm == Model%lsm_noahmp)
+!
 
         if ((Model%debug) .and. (Model%me == Model%master)) then
           print *,'   sec ', Model%sec
