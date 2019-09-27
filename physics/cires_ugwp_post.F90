@@ -20,12 +20,12 @@ contains
 
 
      subroutine cires_ugwp_post_run (ldiag_ugwp, dtf, im, levs,     &
-         gw_dudt, tau_tofd, tau_mtb, tau_ogw, tau_ngw,              &
-         zmtb, zlwb, zogw, dudt_mtb, dudt_ogw, dudt_tms,            &
+         gw_dtdt, gw_dudt, gw_dvdt, tau_tofd, tau_mtb, tau_ogw,     &
+         tau_ngw, zmtb, zlwb, zogw, dudt_mtb, dudt_ogw, dudt_tms,   &
          tot_zmtb, tot_zlwb, tot_zogw,                              &
          tot_tofd, tot_mtb, tot_ogw, tot_ngw,                       &
-         du3dt_mtb,du3dt_ogw, du3dt_tms, du3dt_ngw,                 &
-         cnvgwd, errmsg, errflg)
+         du3dt_mtb,du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw,      &
+         dtdt, dudt, dvdt, errmsg, errflg)
 
         use machine,                only: kind_phys
 
@@ -35,25 +35,21 @@ contains
         integer,              intent(in) :: im, levs
         real(kind=kind_phys), intent(in) :: dtf
         logical,              intent(in) :: ldiag_ugwp      !< flag for CIRES UGWP Diagnostics
-        logical,              intent(inout) :: cnvgwd       !< flag to turn on/off convective gwd
 
         real(kind=kind_phys), intent(in),    dimension(im)       :: zmtb, zlwb, zogw
         real(kind=kind_phys), intent(in),    dimension(im)       :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
         real(kind=kind_phys), intent(inout), dimension(im)       :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
         real(kind=kind_phys), intent(inout), dimension(im)       :: tot_zmtb, tot_zlwb, tot_zogw
-        real(kind=kind_phys), intent(in),    dimension(im, levs) :: gw_dudt, dudt_mtb, dudt_ogw, dudt_tms 
-        real(kind=kind_phys), intent(inout), dimension(im, levs) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw
+        real(kind=kind_phys), intent(in),    dimension(im, levs) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb, dudt_ogw, dudt_tms 
+        real(kind=kind_phys), intent(inout), dimension(im, levs) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
+        real(kind=kind_phys), intent(inout), dimension(im, levs) :: dtdt, dudt, dvdt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
 
-
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
-
-        if (.not. (ldiag_ugwp)) return
-
 
         if (ldiag_ugwp) then
             tot_zmtb =  tot_zmtb + dtf *zmtb
@@ -68,11 +64,13 @@ contains
             du3dt_mtb = du3dt_mtb + dtf *dudt_mtb
             du3dt_tms = du3dt_tms + dtf *dudt_tms
             du3dt_ogw = du3dt_ogw + dtf *dudt_ogw
-            du3dt_ngw = du3dt_ngw + dtf *gw_dudt 
-         endif          
+            du3dt_ngw = du3dt_ngw + dtf *gw_dudt
+            dv3dt_ngw = dv3dt_ngw + dtf *gw_dvdt
+         endif
 
-
-         cnvgwd = .false.
+         dtdt = dtdt + gw_dtdt
+         dudt = dudt + gw_dudt
+         dvdt = dvdt + gw_dvdt
 
       end subroutine cires_ugwp_post_run
 

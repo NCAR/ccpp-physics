@@ -39,9 +39,27 @@
   type = integer
   intent = in
   optional = F
+[gw_dtdt]
+  standard_name = tendency_of_air_temperature_due_to_ugwp
+  long_name = air temperature tendency due to UGWP
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [gw_dudt]
   standard_name = tendency_of_x_wind_due_to_ugwp
   long_name = zonal wind tendency due to UGWP
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gw_dvdt]
+  standard_name = tendency_of_y_wind_due_to_ugwp
+  long_name = meridional wind tendency due to UGWP
   units = m s-2
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -138,14 +156,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[cnvgwd]
-  standard_name = flag_convective_gravity_wave_drag
-  long_name = flag for conv gravity wave drag
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = inout
-  optional = F
 [tot_zmtb]
   standard_name = time_integral_of_height_of_mountain_blocking
   long_name = time integral of height of mountain blocking drag
@@ -239,6 +249,42 @@
 [du3dt_ngw]
   standard_name = time_integral_of_change_in_x_wind_due_to_nonstationary_gravity_wave
   long_name = time integral of change in x wind due to NGW
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt_ngw]
+  standard_name = time_integral_of_change_in_y_wind_due_to_nonstationary_gravity_wave
+  long_name = time integral of change in y wind due to NGW
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtdt]
+  standard_name = tendency_of_air_temperature_due_to_model_physics
+  long_name = air temperature tendency due to model physics
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dudt]
+  standard_name = tendency_of_x_wind_due_to_model_physics
+  long_name = zonal wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvdt]
+  standard_name = tendency_of_y_wind_due_to_model_physics
+  long_name = meridional wind tendency due to model physics
   units = m s-2
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

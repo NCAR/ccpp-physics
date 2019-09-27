@@ -166,13 +166,6 @@
           enddo
         endif
 
-!       if (.not. Model%uni_cld) then
-        if (Model%lgocart .or. Model%ldiag3d) then
-          do k = 1, LM
-            k1 = k + kd
-            Coupling%cldcovi(1:im,k) = clouds1(1:im,k1)
-          enddo
-        endif
       endif                                ! end_if_lssav
 !
       end subroutine GFS_rrtmg_post_run

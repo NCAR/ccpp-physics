@@ -93,11 +93,11 @@
   kind = kind_phys
   intent = in
   optional = F
-[cdmvgwd]
+[cdmbgwd]
   standard_name = multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplication factors for cdmb and gwd
   units = none
-  dimensions = (2)
+  dimensions = (4)
   type = real
   kind = kind_phys
   intent = in
@@ -136,6 +136,14 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[do_ugwp]
+  standard_name = do_ugwp
+  long_name = flag to activate CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [errmsg]
@@ -361,11 +369,19 @@
   type = logical
   intent = in
   optional = F
+[ldiag_ugwp]
+  standard_name = diag_ugwp_flag
+  long_name = flag for CIRES UGWP Diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [cdmbgwd]
   standard_name = multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag
   long_name = multiplication factors for cdmb and gwd
   units = none
-  dimensions = (2)
+  dimensions = (4)
   type = real
   kind = kind_phys
   intent = in
@@ -657,6 +673,33 @@
   kind = kind_phys
   intent = out
   optional = F
+[du3dt_mtb]
+  standard_name = time_integral_of_change_in_x_wind_due_to_mountain_blocking_drag
+  long_name = time integral of change in x wind due to mountain blocking drag
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt_ogw]
+  standard_name = time_integral_of_change_in_x_wind_due_to_orographic_gravity_wave_drag
+  long_name = time integral of change in x wind due to orographic gw drag
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt_tms]
+  standard_name = time_integral_of_change_in_x_wind_due_to_turbulent_orographic_form_drag
+  long_name = time integral of change in x wind due to TOFD
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [dudt]
   standard_name = tendency_of_x_wind_due_to_model_physics
   long_name = zonal wind tendency due to model physics
@@ -745,6 +788,57 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[rain]
+  standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
+  long_name = total rain at this time step
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ntke]
+  standard_name = index_for_turbulent_kinetic_energy
+  long_name = tracer index for turbulent kinetic energy
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[q_tke]
+  standard_name = turbulent_kinetic_energy
+  long_name = turbulent kinetic energy
+  units = J
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dqdt_tke] 
+  standard_name = tendency_of_turbulent_kinetic_energy_due_to_model_physics
+  long_name = turbulent kinetic energy tendency due to model physics
+  units = J s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lprnt]
+  standard_name = flag_print
+  long_name = control flag for diagnostic print out
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ipr]
+  standard_name = horizontal_index_of_printed_column
+  long_name = horizontal index of printed column
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [errmsg]
