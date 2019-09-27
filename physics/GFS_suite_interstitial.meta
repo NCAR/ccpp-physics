@@ -1361,6 +1361,14 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_4_run
   type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
