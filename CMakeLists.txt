@@ -166,7 +166,6 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ./physics/module_MYNNSFC_wrapper.F90
                                 ./physics/module_MYNNrad_pre.F90
                                 ./physics/module_MYNNrad_post.F90
-                                ./physics/drag_suite.F90
                                 ./physics/module_mp_thompson_make_number_concentrations.F90
                                 ./physics/module_SF_JSFC.F90
                                 ./physics/module_BL_MYJPBL.F90

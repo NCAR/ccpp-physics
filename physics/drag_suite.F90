@@ -13,22 +13,8 @@
       subroutine drag_suite_pre_init()
       end subroutine drag_suite_pre_init
 
-!! \section arg_table_drag_suite_pre_run Argument Table
-!! | local_name     | standard_name                                                           | long_name                                                                                | units   | rank | type      | kind      | intent | optional |
-!! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   |    0 | integer   |           | in     | F        |
-!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count   |    0 | integer   |           | in     | F        |
-!! | mntvar         | statistical_measures_of_subgrid_orography                               | array of statistical measures of subgrid orography                                       | various |    2 | real      | kind_phys | in     | F        |
-!! | hprime         | standard_deviation_of_subgrid_orography                                 | standard deviation of subgrid orography                                                  | m       |    1 | real      | kind_phys | out    | F        |
-!! | oc             | convexity_of_subgrid_orography                                          | convexity of subgrid orography                                                           | none    |    1 | real      | kind_phys | out    | F        |
-!! | oa4            | asymmetry_of_subgrid_orography                                          | asymmetry of subgrid orography                                                           | none    |    2 | real      | kind_phys | out    | F        |
-!! | clx            | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    |    2 | real      | kind_phys | out    | F        |
-!! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                | angle with_respect to east of maximum subgrid orographic variations                      | degrees |    1 | real      | kind_phys | out    | F        |
-!! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none    |    1 | real      | kind_phys | out    | F        |
-!! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none    |    1 | real      | kind_phys | out    | F        |
-!! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                                      | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                         | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
+!> \section arg_table_drag_suite_pre_run Argument Table
+!! \htmlinclude drag_suite_pre_run.html
 !!
 !!  \section general General Algorithm
 !!  \section detailed Detailed Algorithm
@@ -136,74 +122,8 @@
 !! subgrid scale orography including convective breaking, shear
 !! breaking and the presence of critical levels.
 !!
-!! \section arg_table_drag_suite_run Argument Table
-!! | local_name     | standard_name                                                                 | long_name                                                                                                | units      | rank | type      | kind      | intent | optional |
-!! |----------------|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                        | horizontal loop extent                                                                                   | count      |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                                          | horizontal dimension                                                                                     | count      |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                            | number of vertical layers                                                                                | count      |    0 | integer   |           | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                                       | meridional wind tendency due to model physics                                                            | m s-2      |    2 | real      | kind_phys | inout  | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                                       | zonal wind tendency due to model physics                                                                 | m s-2      |    2 | real      | kind_phys | inout  | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                              | air temperature tendency due to model physics                                                            | K s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | u1             | x_wind                                                                        | zonal wind                                                                                               | m s-1      |    2 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind                                                                        | meridional wind                                                                                          | m s-1      |    2 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature                                                               | mid-layer temperature                                                                                    | K          |    2 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity                                                 | mid-layer specific humidity of water vapor                                                               | kg kg-1    |    2 | real      | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer                            | vertical index at top atmospheric boundary layer                                                         | index      |    1 | integer   |           | in     | F        |
-!! | prsi           | air_pressure_at_interface                                                     | interface pressure                                                                                       | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers                                     | difference between mid-layer pressures                                                                   | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                                  | mid-layer pressure                                                                                       | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function_at_model_layers                                  | mid-layer Exner function                                                                                 | none       |    2 | real      | kind_phys | in     | F        |
-!! | phii           | geopotential_at_interface                                                     | interface geopotential                                                                                   | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                  | mid-layer geopotential                                                                                   | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | deltim         | time_step_for_physics                                                         | physics time step                                                                                        | s          |    0 | real      | kind_phys | in     | F        |
-!! | kdt            | index_of_time_step                                                            | current time step index                                                                                  | index      |    0 | integer   |           | in     | F        |
-!! | var            | standard_deviation_of_subgrid_orography                                       | standard deviation of subgrid orography                                                                  | m          |    1 | real      | kind_phys | in     | F        |
-!! | oc1            | convexity_of_subgrid_orography                                                | convexity of subgrid orography                                                                           | none       |    1 | real      | kind_phys | in     | F        |
-!! | oa4            | asymmetry_of_subgrid_orography                                                | asymmetry of subgrid orography                                                                           | none       |    2 | real      | kind_phys | in     | F        |
-!! | ol4            | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height       | horizontal fraction of grid box covered by subgrid orography higher than critical height                 | frac       |    2 | real      | kind_phys | in     | F        |
-!! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                      | angle with respect to east of maximum subgrid orographic variations                                      | degrees    |    1 | real      | kind_phys | in     | F        |
-!! | sigma          | slope_of_subgrid_orography                                                    | slope of subgrid orography                                                                               | none       |    1 | real      | kind_phys | in     | F        |
-!! | gamma          | anisotropy_of_subgrid_orography                                               | anisotropy of subgrid orography                                                                          | none       |    1 | real      | kind_phys | in     | F        |
-!! | elvmax         | maximum_subgrid_orography                                                     | maximum of subgrid orography                                                                             | m          |    1 | real      | kind_phys | inout  | F        |
-!! | dtaux2d_ls     | x_momentum_tendency_from_large_scale_gwd                                      | x momentum tendency from large scale gwd                                                                 | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dtauy2d_ls     | y_momentum_tendency_from_large_scale_gwd                                      | y momentum tendency from large scale gwd                                                                 | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dtaux2d_bl     | x_momentum_tendency_from_blocking_drag                                        | x momentum tendency from blocking drag                                                                   | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dtauy2d_bl     | y_momentum_tendency_from_blocking_drag                                        | y momentum tendency from blocking drag                                                                   | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dtaux2d_ss     | x_momentum_tendency_from_small_scale_gwd                                      | x momentum tendency from small scale gwd                                                                 | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dtauy2d_ss     | y_momentum_tendency_from_small_scale_gwd                                      | y momentum tendency from small scale gwd                                                                 | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dtaux2d_fd     | x_momentum_tendency_from_form_drag                                            | x momentum tendency from form drag                                                                       | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dtauy2d_fd     | y_momentum_tendency_from_form_drag                                            | y momentum tendency from form drag                                                                       | m s-2      |    2 | real      | kind_phys | out    | F        |
-!! | dusfc          | instantaneous_x_stress_due_to_gravity_wave_drag                               | zonal surface stress due to orographic gravity wave drag                                                 | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc          | instantaneous_y_stress_due_to_gravity_wave_drag                               | meridional surface stress due to orographic gravity wave drag                                            | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | dusfc_ls       | integrated_x_momentum_flux_from_large_scale_gwd                               | integrated x momentum flux from large scale gwd                                                          | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc_ls       | integrated_y_momentum_flux_from_large_scale_gwd                               | integrated y momentum flux from large scale gwd                                                          | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | dusfc_bl       | integrated_x_momentum_flux_from_blocking_drag                                 | integrated x momentum flux from blocking drag                                                            | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc_bl       | integrated_y_momentum_flux_from_blocking_drag                                 | integrated y momentum flux from blocking drag                                                            | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | dusfc_ss       | integrated_x_momentum_flux_from_small_scale_gwd                               | integrated x momentum flux from small scale gwd                                                          | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc_ss       | integrated_y_momentum_flux_from_small_scale_gwd                               | integrated y momentum flux from small scale gwd                                                          | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | dusfc_fd       | integrated_x_momentum_flux_from_form_drag                                     | integrated x momentum flux from form drag                                                                | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc_fd       | integrated_y_momentum_flux_from_form_drag                                     | integrated y momentum flux from form drag                                                                | Pa s       |    1 | real      | kind_phys | out    | F        |
-!! | slmsk          | sea_land_ice_mask_real                                                        | landmask: sea/land/ice=0/1/2                                                                             | flag       |    1 | real      | kind_phys | in     | F        |
-!! | br1            | bulk_richardson_number_at_lowest_model_level                                  | bulk Richardson number at the surface                                                                    | none       |    1 | real      | kind_phys | in     | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                                           | PBL thickness                                                                                            | m          |    1 | real      | kind_phys | in     | F        |
-!! | g              | gravitational_acceleration                                                    | gravitational acceleration                                                                               | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                 | specific heat of dry air at constant pressure                                                            | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                          | ideal gas constant for dry air                                                                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | rv             | gas_constant_water_vapor                                                      | ideal gas constant for water vapor                                                                       | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one                             | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                                    | none       |    0 | real      | kind_phys | in     | F        |
-!! | pi             | pi                                                                            | ratio of a circle's circumference to its diameter                                                        | radians    |    0 | real      | kind_phys | in     | F        |
-!! | imx            | number_of_equatorial_longitude_points                                         | number of longitude points along the equator                                                             | count      |    0 | integer   |           | in     | F        |
-!! | cdmbgwd        | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag | multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag | none       |    1 | real      | kind_phys | in     | F        |
-!! | me             | mpi_rank                                                                      | rank of the current MPI task                                                                             | index      |    0 | integer   |           | in     | F        |
-!! | master         | mpi_root                                                                      | master MPI-rank                                                                                          | index      |    0 | integer   |           | in     | F        |
-!! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       |    0 | logical   |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      |    0 | integer   |           | in     | F        |
-!! | rdxzb          | level_of_dividing_streamline                                                  | level of the dividing streamline                                                                         | none       |    1 | real      | kind_phys | out    | F        |
-!! | dx             | cell_size                                                                     | size of the grid cell                                                                                    | m          |    1 | real      | kind_phys | in     | F        |
-!! | gwd_opt        | gwd_opt                                                                       | flag to choose gwd scheme                                                                                | flag       |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                                            | error message for error handling in CCPP                                                                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                               | error flag for error handling in CCPP                                                                    | flag       |    0 | integer   |           | out    | F        |
+!> \section arg_table_drag_suite_run Argument Table
+!! \htmlinclude drag_suite_run.html
 !!
 !> \section gen_drag_suite GFS Orographic GWD Scheme General Algorithm
 !! -# Calculate subgrid mountain blocking
@@ -476,16 +396,16 @@
 
    ! Interface variables
    integer, intent(in) :: im, ix, km, imx, kdt, ipr, me, master
-   inteter, intent(in) :: gwd_opt
+   integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(im)
    real(kind=kind_phys), intent(in) :: deltim, G, CP, RD, RV, cdmbgwd(2)
 
-   integer             ::  kpblmax
-   integer, parameter  ::  ims=1, kms=1, its=1, kts=1
-   real, intent(in)    ::  fv, pi
-   real                ::  rcl, cdmb
-   real                ::  g_inv = 1./G
+   integer              ::  kpblmax
+   integer, parameter   ::  ims=1, kms=1, its=1, kts=1
+   real(kind=kind_phys), intent(in) ::  fv, pi
+   real(kind=kind_phys) ::  rcl, cdmb
+   real(kind=kind_phys) ::  g_inv = 1./G
 
    real(kind=kind_phys), intent(out) ::                          &
      &                   dudt(im,km),dvdt(im,km),                &
@@ -501,26 +421,26 @@
      &                                   oa4(im,4),ol4(im,4),    &
      &                                   dx(im)
    !real(kind=kind_phys), intent(in) ::   varss(im),oc1ss(im),   &
-   real                             ::   varss(im),oc1ss(im),    &
+   real(kind=kind_phys)             ::   varss(im),oc1ss(im),    &
      &                              oa4ss(im,4),ol4ss(im,4)
    real(kind=kind_phys), intent(in) :: THETA(im),SIGMA(im),      &
      &                                 GAMMA(im),ELVMAX(im)
 
 ! added for small-scale orographic wave drag
-   real, dimension(im,km)           :: utendwave,vtendwave,thx,thvx
+   real(kind=kind_phys), dimension(im,km) :: utendwave,vtendwave,thx,thvx
    real(kind=kind_phys), intent(in) ::     br1(im),              &
      &                                     hpbl(im),             &
      &                                     slmsk(im)
-   real, dimension(im)              ::     govrth,xland
-   real, dimension(im,km)           ::     dz2
-   real                             ::     tauwavex0,tauwavey0,  &
+   real(kind=kind_phys), dimension(im)    :: govrth,xland
+   real(kind=kind_phys), dimension(im,km) :: dz2
+   real(kind=kind_phys)                   :: tauwavex0,tauwavey0,  &
      &                                     XNBV,density,tvcon,hpbl2
    integer                          ::     kpbl2,kvar
-   real, dimension(im,km+1)         ::     zq      ! = PHII/g
-   real, dimension(im,km)           ::     zl      ! = PHIL/g
+   real(kind=kind_phys), dimension(im,km+1)         ::     zq      ! = PHII/g
+   real(kind=kind_phys), dimension(im,km)           ::     zl      ! = PHIL/g
 
 !SPP
-   real, dimension(im)              :: rstoch
+   real(kind=kind_phys), dimension(im)              :: rstoch
 
 !Output:
    real(kind=kind_phys), intent(out) ::                          &
@@ -538,7 +458,7 @@
      &         dtaux2d_fd(:,:),dtauy2d_fd(:,:)
 
 !Misc arrays
-   real, dimension(im,km)     :: dtaux2d, dtauy2d
+   real(kind=kind_phys), dimension(im,km)     :: dtaux2d, dtauy2d
 
 !-------------------------------------------------------------------------
 ! Flags to regulate the activation of specific components of drag suite:
@@ -553,40 +473,40 @@
 
 ! Parameters for bounding the scale-adaptive variability:
 ! Small-scale GWD + turbulent form drag
-   real, parameter      :: dxmin_ss = 1000.,                     &
+   real(kind=kind_phys), parameter      :: dxmin_ss = 1000.,                     &
      &                     dxmax_ss = 12000.  ! min,max range of tapering (m)
 ! Large-scale GWD + blocking
-   real, parameter      :: dxmin_ls = 3000.,                     &
+   real(kind=kind_phys), parameter      :: dxmin_ls = 3000.,                     &
      &                     dxmax_ls = 13000.  ! min,max range of tapering (m)
-   real                 :: ss_taper, ls_taper ! small- and large-scale tapering factors (-)
+   real(kind=kind_phys)                 :: ss_taper, ls_taper ! small- and large-scale tapering factors (-)
 !
 ! Variables for limiting topographic standard deviation (var)
-   real, parameter      :: varmax_ss = 50.,                      &
+   real(kind=kind_phys), parameter      :: varmax_ss = 50.,                      &
                            varmax_fd = 150.,                     &
                            beta_ss = 0.1,                        &
                            beta_fd = 0.2
-   real                 :: var_temp
+   real(kind=kind_phys)                 :: var_temp
 
 ! added Beljaars orographic form drag
-   real, dimension(im,km) :: utendform,vtendform
-   real                 :: a1,a2,wsp
-   real                 :: H_efold
+   real(kind=kind_phys), dimension(im,km) :: utendform,vtendform
+   real(kind=kind_phys)                 :: a1,a2,wsp
+   real(kind=kind_phys)                 :: H_efold
 
 ! critical richardson number for wave breaking : ! larger drag with larger value
-   real,parameter       ::  ric     = 0.25
-   real,parameter       ::  dw2min  = 1.
-   real,parameter       ::  rimin   = -100.
-   real,parameter       ::  bnv2min = 1.0e-5
-   real,parameter       ::  efmin   = 0.0
-   real,parameter       ::  efmax   = 10.0
-   real,parameter       ::  xl      = 4.0e4
-   real,parameter       ::  critac  = 1.0e-5
-   real,parameter       ::  gmax    = 1.
-   real,parameter       ::  veleps  = 1.0
-   real,parameter       ::  factop  = 0.5
-   real,parameter       ::  frc     = 1.0
-   real,parameter       ::  ce      = 0.8
-   real,parameter       ::  cg      = 0.5
+   real(kind=kind_phys), parameter       ::  ric     = 0.25
+   real(kind=kind_phys), parameter       ::  dw2min  = 1.
+   real(kind=kind_phys), parameter       ::  rimin   = -100.
+   real(kind=kind_phys), parameter       ::  bnv2min = 1.0e-5
+   real(kind=kind_phys), parameter       ::  efmin   = 0.0
+   real(kind=kind_phys), parameter       ::  efmax   = 10.0
+   real(kind=kind_phys), parameter       ::  xl      = 4.0e4
+   real(kind=kind_phys), parameter       ::  critac  = 1.0e-5
+   real(kind=kind_phys), parameter       ::  gmax    = 1.
+   real(kind=kind_phys), parameter       ::  veleps  = 1.0
+   real(kind=kind_phys), parameter       ::  factop  = 0.5
+   real(kind=kind_phys), parameter       ::  frc     = 1.0
+   real(kind=kind_phys), parameter       ::  ce      = 0.8
+   real(kind=kind_phys), parameter       ::  cg      = 0.5
    integer,parameter    ::  kpblmin = 2
 
 !
@@ -595,7 +515,7 @@
    integer              ::  i,j,k,lcap,lcapp1,nwd,idir,           &
                             klcap,kp1,ikount,kk
 !
-   real                 ::  rcs,rclcs,csg,fdir,cleff,cleff_ss,cs, &
+   real(kind=kind_phys) ::  rcs,rclcs,csg,fdir,cleff,cleff_ss,cs, &
                             rcsks,wdir,ti,rdz,temp,tem2,dw2,shr2, &
                             bvf2,rdelks,wtkbj,tem,gfobnv,hd,fro,  &
                             rim,temc,tem1,efact,temv,dtaux,dtauy, &
@@ -604,7 +524,7 @@
    logical              ::  ldrag(im),icrilv(im),                 &
                             flag(im),kloop1(im)
 !
-   real                 ::  taub(im),taup(im,km+1),               &
+   real(kind=kind_phys) ::  taub(im),taup(im,km+1),               &
                             xn(im),yn(im),                        &
                             ubar(im),vbar(im),                    &
                             fr(im),ulow(im),                      &
@@ -624,25 +544,26 @@
    integer              ::  kbl(im),klowtop(im)
    logical :: iope
    integer,parameter    ::  mdir=8
-   integer              ::  nwdir(mdir)
-   data nwdir/6,7,5,8,2,3,1,4/
+   !integer              ::  nwdir(mdir)
+   !data nwdir/6,7,5,8,2,3,1,4/
+   integer, parameter :: nwdir = (/6,7,5,8,2,3,1,4/)
 !
 !  variables for flow-blocking drag
 !
-   real,parameter       :: frmax  = 10.
-   real,parameter       :: olmin  = 1.0e-5
-   real,parameter       :: odmin  = 0.1
-   real,parameter       :: odmax  = 10.
-   real,parameter       :: erad   = 6371.315e+3
+   real(kind=kind_phys),parameter       :: frmax  = 10.
+   real(kind=kind_phys),parameter       :: olmin  = 1.0e-5
+   real(kind=kind_phys),parameter       :: odmin  = 0.1
+   real(kind=kind_phys),parameter       :: odmax  = 10.
+   real(kind=kind_phys),parameter       :: erad   = 6371.315e+3
    integer              :: komax(im)
    integer              :: kblk
-   real                 :: cd
-   real                 :: zblk,tautem
-   real                 :: pe,ke
-   real                 :: delx,dely,dxy4(4),dxy4p(4)
-   real                 :: dxy(im),dxyp(im)
-   real                 :: ol4p(4),olp(im),od(im)
-   real                 :: taufb(im,km+1)
+   real(kind=kind_phys)                 :: cd
+   real(kind=kind_phys)                 :: zblk,tautem
+   real(kind=kind_phys)                 :: pe,ke
+   real(kind=kind_phys)                 :: delx,dely,dxy4(4),dxy4p(4)
+   real(kind=kind_phys)                 :: dxy(im),dxyp(im)
+   real(kind=kind_phys)                 :: ol4p(4),olp(im),od(im)
+   real(kind=kind_phys)                 :: taufb(im,km+1)
 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -1498,29 +1419,13 @@ endif
 
       contains
 
-!! \section arg_table_drag_suite_post_init Argument Table
+!> \section arg_table_drag_suite_post_init Argument Table
 !!
       subroutine drag_suite_post_init()
       end subroutine drag_suite_post_init
 
-!! \section arg_table_drag_suite_post_run Argument Table
-!! | local_name     | standard_name                                                                                 | long_name                                                                 | units | rank | type      | kind      | intent | optional |
-!! |----------------|-----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | lssav          | flag_diagnostics                                                                              | flag for calculating diagnostic fields                                    | flag  |    0 | logical   |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                                                           | flag for calculating 3-D diagnostic fields                                | flag  |    0 | logical   |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                                                        | dynamics time step                                                        | s     |    0 | real      | kind_phys | in     | F        |
-!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag                                               | zonal surface stress due to orographic gravity wave drag                  | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag                                               | meridional surface stress due to orographic gravity wave drag             | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                                                       | zonal wind tendency due to model physics                                  | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                                                       | meridional wind tendency due to model physics                             | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                                              | air temperature tendency due to model physics                             | K s-1 |    2 | real      | kind_phys | in     | F        |
-!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag                                            | integral over time of zonal stress due to gravity wave drag               | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag                                            | integral over time of meridional stress due to gravity wave drag          | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | du3dt          | cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag                               | cumulative change in zonal wind due to orographic gravity wave drag       | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dv3dt          | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag                               | cumulative change in meridional wind due to orographic gravity wave drag  | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dt3dt          | cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag                          | cumulative change in temperature due to orographic gravity wave drag      | K     |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                                            | error message for error handling in CCPP                                  | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                                               | error flag for error handling in CCPP                                     | flag  |    0 | integer   |           | out    | F        |
+!> \section arg_table_drag_suite_post_run Argument Table
+!! \htmlinclude drag_suite_post_run.html
 !!
       subroutine drag_suite_post_run(                                        &
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
