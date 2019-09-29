@@ -405,7 +405,7 @@
    integer, parameter   ::  ims=1, kms=1, its=1, kts=1
    real(kind=kind_phys), intent(in) ::  fv, pi
    real(kind=kind_phys) ::  rcl, cdmb
-   real(kind=kind_phys) ::  g_inv = 1./G
+   real(kind=kind_phys) ::  g_inv
 
    real(kind=kind_phys), intent(out) ::                          &
      &                   dudt(im,km),dvdt(im,km),                &
@@ -546,7 +546,7 @@
    integer,parameter    ::  mdir=8
    !integer              ::  nwdir(mdir)
    !data nwdir/6,7,5,8,2,3,1,4/
-   integer, parameter :: nwdir = (/6,7,5,8,2,3,1,4/)
+   integer, parameter :: nwdir(8) = (/6,7,5,8,2,3,1,4/)
 !
 !  variables for flow-blocking drag
 !
@@ -568,10 +568,8 @@
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
-
    ! Calculate inverse of gravitational acceleration
    g_inv = 1./G
-
 
    ! Initialize CCPP error handling variables
    errmsg = ''
