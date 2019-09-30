@@ -101,10 +101,10 @@
 
       IF (.NOT.SPEC_ADV .OR. CLD_INIT) THEN
 !-- Update WATER arrays when advecting only total condensate (spec_adv=F)
-!   or at the initial time step
+!-- and F_*   or at the initial time step
             DO K=1,LM
               DO I=1,IME
-                CWM(I,K)=QC(I,K)+QR(I,K)+QI(I,K)
+                !!CWM(I,K)=QC(I,K)+QR(I,K)+QI(I,K)
                 IF (CWM(I,K)>EPSQ) THEN
                   LIQW=(1.-F_ice(I,K))*CWM(I,K)
                   QC(I,K)=(1.-F_rain(I,K))*LIQW

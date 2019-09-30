@@ -522,7 +522,6 @@
 !  --- ...  obtain cloud information for radiation calculations
 
 !      if (ntcw > 0) then                            ! prognostic cloud schemes
-!MZ       if (Model%imp_physics .ne. 15) then
         ccnd = 0.0_kind_phys
         if (Model%ncnd == 1) then                                 ! Zhao_Carr_Sundqvist
           do k=1,LMK
@@ -563,7 +562,6 @@
             enddo
           enddo
         enddo
-!MZ      endif     !not FA 
         if (Model%imp_physics == 11 ) then
           if (.not. Model%lgfdlmprad) then
 
