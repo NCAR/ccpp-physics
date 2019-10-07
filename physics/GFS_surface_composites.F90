@@ -351,7 +351,11 @@ contains
           if (.not. flag_cice(i)) then
             if (islmsk(i) == 2) then                           ! return updated lake ice thickness & concentration to global array
               ! DH* NOT NEEDED? Sfcprop%hice(i)  = zice(i)
-              cice(i)  = cice(i) * (1.0-landfrac(i))           ! fice is fraction of lake area that is frozen
+! DH* is this correct? can we update cice in place or do we need separate variables as for IPD?
+!!             Sfcprop%fice(i)  = fice(i) * Sfcprop%lakefrac(i) ! fice is fraction of lake area that is frozen
+!              Sfcprop%fice(i)  = fice(i) * (one-Sfcprop%landfrac(i)) ! fice is fraction of wet area that is frozen
+              cice(i)  = cice(i) * (1.0-landfrac(i))           ! cice is fraction of wet area that is frozen
+! *DH
               tisfc(i) = tice(i)
             else                                               ! this would be over open ocean or land (no ice fraction)
               hice(i)  = zero
