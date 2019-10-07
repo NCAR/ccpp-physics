@@ -897,7 +897,7 @@ module lsm_ruc
         sfcdew(i)  = dew(i,j)
         qsurf(i)   = qsfc(i,j)
         sncovr1(i) = sncovr(i,j)
-        stm(i)     = soilm(i,j) * 1000.0 ! unit conversion (from m to kg m-2)
+        stm(i)     = soilm(i,j) 
         tsurf(i)   = soilt(i,j)
         tice(i)    = tsurf(i)
         
