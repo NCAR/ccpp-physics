@@ -112,7 +112,6 @@
                 vdftra(i,k,12) = qgrs(i,k,ntoz)
               enddo
             enddo
-            kk = 12
           else                                             ! MG2
             do k=1,levs
               do i=1,im
@@ -126,17 +125,6 @@
                 vdftra(i,k,8)  = qgrs(i,k,ntrnc)
                 vdftra(i,k,9)  = qgrs(i,k,ntsnc)
                 vdftra(i,k,10) = qgrs(i,k,ntoz)
-              enddo
-            enddo
-            kk = 10
-          endif
-          if (trans_aero) then
-            do n=ntchs,ntchm+ntchs-1
-              kk = kk + 1
-              do k=1,levs
-                do i=1,im
-                  vdftra(i,k,kk) = qgrs(i,k,n)
-                enddo
               enddo
             enddo
           endif
@@ -153,30 +141,36 @@
               vdftra(i,k,7) = qgrs(i,k,ntoz)
             enddo
           enddo
-          if (trans_aero) then
-            kk = 7
-            do n=ntchs,ntchm+ntchs-1
-              kk = kk + 1
-              do k=1,levs
-                do i=1,im
-                  vdftra(i,k,kk) = qgrs(i,k,n)
-                enddo
-              enddo
-            enddo
-          endif
         elseif (imp_physics == imp_physics_zhao_carr) then
 ! Zhao/Carr/Sundqvist
-          if (cplchm) then
+          do k=1,levs
+            do i=1,im
+              vdftra(i,k,1) = qgrs(i,k,ntqv)
+              vdftra(i,k,2) = qgrs(i,k,ntcw)
+              vdftra(i,k,3) = qgrs(i,k,ntoz)
+            enddo
+          enddo
+        endif
+!
+        if (trans_aero) then
+          call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
+                                        imp_physics_thompson, ltaerosol,        &
+                                        imp_physics_mg, ntgl, imp_physics_gfdl, &
+                                        imp_physics_zhao_carr, kk,              &
+                                        errmsg, errflg)
+          if (.not.errflg==1) return
+          !
+          k1 = kk
+          do n=ntchs,ntchm+ntchs-1
+            k1 = k1 + 1
             do k=1,levs
               do i=1,im
-                vdftra(i,k,1) = qgrs(i,k,ntqv)
-                vdftra(i,k,2) = qgrs(i,k,ntcw)
-                vdftra(i,k,3) = qgrs(i,k,ntoz)
+                vdftra(i,k,k1) = qgrs(i,k,n)
               enddo
             enddo
-          endif
+          enddo
         endif
-
+!
         if (ntke>0) then
           do k=1,levs
             do i=1,im
@@ -184,7 +178,7 @@
             enddo
           enddo
         endif
-
+!
       endif
 
     end subroutine GFS_PBL_generic_pre_run
@@ -270,7 +264,7 @@
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         dqdt = dvdftra
       elseif (nvdiff /= ntrac .and. .not. shinhong .and. .not. do_ysu) then
-
+!
         if (ntke>0) then
           do k=1,levs
             do i=1,im
@@ -278,7 +272,27 @@
             enddo
           enddo
         endif
-
+!
+        if (trans_aero) then
+          ! Set kk if chemistry-aerosol tracers are diffused
+          call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
+                                        imp_physics_thompson, ltaerosol,        &
+                                        imp_physics_mg, ntgl, imp_physics_gfdl, &
+                                        imp_physics_zhao_carr, kk,              &
+                                        errmsg, errflg)
+          if (.not.errflg==1) return
+          !
+          k1 = kk
+          do n=ntchs,ntchm+ntchs-1
+            k1 = k1 + 1
+            do k=1,levs
+              do i=1,im
+                dqdt(i,k,n) = dvdftra(i,k,k1)
+              enddo
+            enddo
+          enddo
+        endif
+!
         if (imp_physics == imp_physics_wsm6) then
   ! WSM6
           do k=1,levs
@@ -337,7 +351,6 @@
                 dqdt(i,k,ntoz)  = dvdftra(i,k,12)
               enddo
             enddo
-            kk = 12
           else                                               ! MG2
             do k=1,levs
               do i=1,im
@@ -353,17 +366,6 @@
                 dqdt(i,k,ntoz)  = dvdftra(i,k,10)
               enddo
             enddo
-            kk = 10
-          endif
-          if (trans_aero) then
-            do n=ntchs,ntchm+ntchs-1
-              kk = kk + 1
-              do k=1,levs
-                do i=1,im
-                  dqdt(i,k,n) = dvdftra(i,k,kk)
-                enddo
-              enddo
-            enddo
           endif
         elseif (imp_physics == imp_physics_gfdl) then        ! GFDL MP
           do k=1,levs
@@ -377,27 +379,14 @@
               dqdt(i,k,ntoz) = dvdftra(i,k,7)
             enddo
           enddo
-          if (trans_aero) then
-            kk = 7
-            do n=ntchs,ntchm+ntchs-1
-              kk = kk + 1
-              do k=1,levs
-                do i=1,im
-                  dqdt(i,k,n) = dvdftra(i,k,kk)
-                enddo
-              enddo
-            enddo
-          endif
         elseif (imp_physics == imp_physics_zhao_carr) then
-          if (cplchm) then
-            do k=1,levs
-              do i=1,im
-                dqdt(i,k,1)    = dvdftra(i,k,1)
-                dqdt(i,k,ntcw) = dvdftra(i,k,2)
-                dqdt(i,k,ntoz) = dvdftra(i,k,3)
-              enddo
+          do k=1,levs
+            do i=1,im
+              dqdt(i,k,1)    = dvdftra(i,k,1)
+              dqdt(i,k,ntcw) = dvdftra(i,k,2)
+              dqdt(i,k,ntoz) = dvdftra(i,k,3)
             enddo
-          endif
+          enddo
         endif
 
       endif ! nvdiff == ntrac
@@ -500,5 +489,58 @@
       endif   ! end if_lssav
 
       end subroutine GFS_PBL_generic_post_run
+
+
+      subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
+                                          imp_physics_thompson, ltaerosol,        &
+                                          imp_physics_mg, ntgl, imp_physics_gfdl, &
+                                          imp_physics_zhao_carr, kk,              &
+                                          errmsg, errflg)
+      implicit none
+      !
+      integer, intent(in )          :: imp_physics, imp_physics_wsm6,          &
+                                       imp_physics_thompson,                   &
+                                       imp_physics_mg, ntgl, imp_physics_gfdl, &
+                                       imp_physics_zhao_carr
+      logical, intent(in )          :: ltaerosol
+      integer, intent(out)          :: kk
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out)          :: errflg
+
+      errflg = 0
+
+! Set Interstitial%kk = last index in diffused tracer array before chemistry-aerosol tracers
+      if (imp_physics == imp_physics_wsm6) then
+! WSM6
+        kk = 4
+      elseif (imp_physics == imp_physics_thompson) then
+! Thompson
+        if(ltaerosol) then
+          kk = 10
+        else
+          kk = 7
+        endif
+! MG
+      elseif (imp_physics == imp_physics_mg) then
+        if (ntgl > 0) then
+          kk = 12
+        else
+          kk = 10
+        endif
+      elseif (imp_physics == imp_physics_gfdl) then
+! GFDL MP
+        kk = 7
+      elseif (imp_physics == imp_physics_zhao_carr) then
+! Zhao/Carr/Sundqvist
+        kk = 3
+      else
+        write(errmsg,'(*(a))') 'Logic error: unknown microphysics option in set_aerosol_tracer_index'
+        kk = -999
+        errflg = 1
+        return
+      endif
+
+      end subroutine set_aerosol_tracer_index
+
 
       end module GFS_PBL_generic_post
