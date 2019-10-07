@@ -1,4 +1,42 @@
 [ccpp-arg-table]
+  name = GFS_rrtmgp_pre_init
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = GFS_rrtmgp_pre_run
   type = scheme
 [Model]
@@ -144,6 +182,33 @@
   kind = kind_phys
   intent = out
   optional = F
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[relhum]
+  standard_name = relative_humidity
+  long_name = layer relative humidity
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[tracer]
+  standard_name = chemical_tracers
+  long_name = chemical tracers
+  units = g g-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -225,23 +290,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[aerosolslw]
-  standard_name = RRTMGP_aerosol_optical_properties_for_longwave_bands_01_16
-  long_name = aerosol optical properties for longwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,vertical_dimension, number_of_lw_bands_rrtmgp,number_of_aerosol_output_fields_for_longwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[aerosolssw]
-  standard_name = RRTMGP_aerosol_optical_properties_for_shortwave_bands_01_16
-  long_name = aerosol optical properties for shortwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,vertical_dimension, number_of_sw_bands_rrtmgp, number_of_aerosol_output_fields_for_shortwave_radiation)
-  type = real
-  intent = out
-  kind = kind_phys
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
@@ -276,46 +324,12 @@
   kind = kind_phys
   intent = out
   optional = F
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[alb1d]
-  standard_name = surface_albedo_perturbation
-  long_name = surface albedo perturbation
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = out
-  optional = F
-[nday]
-  standard_name = daytime_points_dimension
-  long_name = daytime points dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
-[idxday]
-  standard_name = daytime_points
-  long_name = daytime points
-  units = index
-  dimensions = (horizontal_dimension)
-  type = integer
   intent = out
   optional = F
 [errmsg]

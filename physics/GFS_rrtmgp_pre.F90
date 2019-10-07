@@ -50,7 +50,7 @@ module GFS_rrtmgp_pre
   ! RRTMGP types
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs
-  use rrtmgp_aux,            only: check_error_msg
+  use rrtmgp_aux,            only: check_error_msg, rrtmgp_minP, rrtmgp_minT
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -62,20 +62,66 @@ module GFS_rrtmgp_pre
   public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize
   
 contains
+  
+!! \section arg_table_GFS_rrtmgp_pre_init
+!! \htmlinclude GFS_rrtmgp_pre_init.html
+!!
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_pre_init()
+  ! #########################################################################################
+  subroutine GFS_rrtmgp_pre_init(Model, Radtend, errmsg, errflg)
+    ! Inputs
+    type(GFS_control_type), intent(in) :: &
+         Model      ! DDT containing model control parameters
+   type(GFS_radtend_type), intent(inout) :: &
+        Radtend     ! Fortran DDT containing FV3-GFS radiation tendencies 
+    ! Outputs
+    character(len=*), intent(out) :: &
+         errmsg     ! Error message
+    integer, intent(out) :: &  
+         errflg     ! Error flag
 
-  subroutine GFS_rrtmgp_pre_init ()
+    ! Local variables
+    character(len=1) :: tempstr
+    integer :: ij, count
+    integer,dimension(Model%ngases,2) :: gasIndices
+
+    ! Initialize
+    errmsg = ''
+    errflg = 0
+
+    ! Which gases are active? Provided via physics namelist.
+    if (len(Model%active_gases) .gt. 0) then
+
+       ! Pull out gas names from list...
+       ! First grab indices in character array corresponding to start:end of gas name.
+       gasIndices(1,1)=1
+       count=1
+       do ij=1,len(Model%active_gases)
+          tempstr=trim(Model%active_gases(ij:ij))
+          if (tempstr .eq. '_') then
+             gasIndices(count,2)=ij-1
+             gasIndices(count+1,1)=ij+1
+             count=count+1
+          endif
+       enddo
+       gasIndices(Model%ngases,2)=len(trim(Model%active_gases))
+       ! Now extract the gas names
+       do ij=1,Model%ngases
+          Radtend%active_gases(ij,1) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
+       enddo
+    endif
   end subroutine GFS_rrtmgp_pre_init
 
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre.html
 !!
-  ! Attention - the output arguments lm, im, lmk, lmp must not be set
-  ! in the CCPP version - they are defined in the interstitial_create routine
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
        ncol, lw_gas_props, sw_gas_props,                                                & ! IN
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, alb1d, cld_frac, cld_lwp,         & ! OUT
-       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, aerosolslw, & ! OUT
-       aerosolssw, cldsa, mtopa, mbota, de_lgth, aerodp, nday, idxday, gas_concentrations, errmsg, errflg)
+       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, cld_frac, cld_lwp,                & ! OUT
+       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,         & ! OUT
+       tv_lay, relhum, tracer, cldsa, mtopa, mbota, de_lgth,  gas_concentrations,       & ! OUT
+       errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -110,12 +156,6 @@ contains
     real(kind_phys), dimension(ncol), intent(out) :: &
          tsfg,              & ! Ground temperature
          tsfa                 ! Skin temperature
-    integer, intent(out)   :: &
-         nday                 ! Number of daylit points
-    integer, dimension(ncol), intent(out) :: &
-         idxday               ! Indices for daylit points
-    real(kind_phys), dimension(ncol), intent(out) :: &
-         alb1d                ! Surface albedo pertubation
     type(ty_gas_concs),intent(out) :: &
          gas_concentrations   ! RRTMGP DDT containing gas volumne mixing ratios
     character(len=*), intent(out) :: &
@@ -132,10 +172,11 @@ contains
          cld_resnow,        & ! Cloud snow effective radius
          cld_rwp,           & ! Cloud rain water path
          cld_rerain           ! Cloud rain effective radius
-    real(kind_phys), dimension(ncol,Model%levs,sw_gas_props%get_nband(),NF_AESW), intent(out) ::&
-         aerosolssw               ! Aerosol radiative properties in each SW band.
-    real(kind_phys), dimension(ncol,Model%levs,lw_gas_props%get_nband(),NF_AELW), intent(out) ::&
-         aerosolslw               ! Aerosol radiative properties in each LW band.
+    real(kind_phys), dimension(ncol,Model%levs),intent(out) :: &
+         tv_lay,            & !
+         relhum 
+    real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(out) :: &
+         tracer
     integer,dimension(ncol,3),intent(out) :: &
          mbota,             & ! Vertical indices for cloud tops
          mtopa                ! Vertical indices for cloud bases
@@ -143,8 +184,6 @@ contains
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
     real(kind_phys), dimension(ncol), intent(out)  :: &
          de_lgth              !
-    real(kind_phys), dimension(ncol,NSPC1), intent(out) :: &
-         aerodp               ! Vertical integrated optical depth for various aerosol species  
 
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
@@ -152,12 +191,9 @@ contains
     real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
-    real(kind_phys), dimension(ncol, Model%levs) :: relhum, qs_lay, q_lay, deltaZ, tv_lay,&
-         deltaP, o3_lay
-    real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac) :: tracer
+    real(kind_phys), dimension(ncol, Model%levs) :: qs_lay, q_lay, deltaZ, deltaP, o3_lay
     real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS) :: clouds
-    real(kind_phys), dimension(ncol, Model%levs, sw_gas_props%get_nband(), NF_AESW)::aerosolssw2
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -201,10 +237,10 @@ contains
     enddo
 
     ! Guard against case when model uppermost model layer higher than rrtmgp allows.
-    where(p_lev(1:nCol,iTOA+1) .lt. sw_gas_props%get_press_min())
+    where(p_lev(1:nCol,iTOA+1) .lt. rrtmgp_minP)
        ! Set to RRTMGP min(pressure/temperature)
-       p_lev(1:nCol,iTOA+1) = spread(sw_gas_props%get_press_min(),dim=1,ncopies=ncol)
-       t_lev(1:nCol,iTOA+1) = spread(sw_gas_props%get_temp_min(),dim=1,ncopies=ncol)
+       p_lev(1:nCol,iTOA+1) = spread(rrtmgp_minP, dim=1,ncopies=ncol)
+       t_lev(1:nCol,iTOA+1) = spread(rrtmgp_minT, dim=1,ncopies=ncol)
        ! Recompute layer pressure/temperature.
        p_lay(1:NCOL,iTOA) = 0.5_kind_phys*(p_lev(1:NCOL,iTOA) +  p_lev(1:NCOL,iTOA+1))
        t_lay(1:NCOL,iTOA) = 0.5_kind_phys*(t_lev(1:NCOL,iTOA) +  t_lev(1:NCOL,iTOA+1))
@@ -255,8 +291,8 @@ contains
     ! Compute volume mixing-ratios for ozone (mmr) and specific-humidity.
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
-    !
-    !call gas_concentrations%reset()
+    
+    ! Populate RRTMGP DDT w/ gas-concentrations
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('o2',  gas_vmr(:,:,4)))
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('co2', gas_vmr(:,:,1)))
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('ch4', gas_vmr(:,:,3)))
@@ -265,38 +301,13 @@ contains
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('o3',  vmr_o3))
 
     ! #######################################################################################
-    ! Radiation time step (output) (Is this really needed?)
+    ! Radiation time step (output) (Is this really needed?) (Used by some diangostics)
     ! #######################################################################################
     raddt = min(Model%fhswr, Model%fhlwr)
 
     ! #######################################################################################
-    ! Compute cosine of zenith angle (only when SW is called)
-    ! #######################################################################################
-    if (Model%lsswr) then
-       call coszmn (Grid%xlon, Grid%sinlat, Grid%coslat, Model%solhr, NCOL, Model%me, &
-            Radtend%coszen, Radtend%coszdg)
-    endif
-
-    ! #######################################################################################
-    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile for both 
-    ! LW and SW radiation.
-    ! #######################################################################################
-    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
-         Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
-         Model%lsswr, Model%lslwr, aerosolssw2, aerosolslw, aerodp)
-    
-    ! Store aerosol optical properties
-    ! SW. 
-    ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
-    ! band ordering was [nIR -> UV -> IR(band)]
-    aerosolssw(1:NCOL,1:Model%levs,1,1)                      = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),1)
-    aerosolssw(1:NCOL,1:Model%levs,1,2)                      = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),2)
-    aerosolssw(1:NCOL,1:Model%levs,1,3)                      = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),3)
-    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),1) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,1)
-    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),2) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,2)
-    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),3) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,3)
-
     ! Setup surface ground temperature and ground/air skin temperature if required.
+    ! #######################################################################################
     tsfg(1:NCOL) = Sfcprop%tsfc(1:NCOL)
     tsfa(1:NCOL) = Sfcprop%tsfc(1:NCOL)
 
@@ -316,73 +327,7 @@ contains
     cld_rwp    = clouds(:,:,6)  
     cld_rerain = clouds(:,:,7)  
     cld_swp    = clouds(:,:,8)  
-    cld_resnow = clouds(:,:,9)  
-    print*,clouds(:,:,5) 
-
-    ! #######################################################################################
-    ! mg, sfc-perts
-    !  ---  scale random patterns for surface perturbations with perturbation size
-    !  ---  turn vegetation fraction pattern into percentile pattern
-    ! #######################################################################################
-    alb1d(:) = 0.
-    if (Model%do_sfcperts) then
-       if (Model%pertalb(1) > 0.) then
-          do i=1,ncol
-             call cdfnor(Coupling%sfc_wts(i,5),alb1d(i))
-          enddo
-       endif
-    endif    
-
-    ! #######################################################################################
-    ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
-    ! #######################################################################################
-    if (Model%lslwr) then
-       call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,     &
-            Sfcprop%zorl, tsfg, tsfa, Sfcprop%hprim, NCOL,  Radtend%semis)
-       do iBand=1,lw_gas_props%get_nband()
-          Radtend%sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
-       enddo
-    endif
-
-    ! #######################################################################################
-    ! For SW, gather daylit points, compute surface albedo in each band,
-    ! #######################################################################################
-    if (Model%lsswr) then
-       ! Check for daytime points for SW radiation.
-       nday = 0
-       idxday = 0
-       do i = 1, NCOL
-          if (Radtend%coszen(i) >= 0.0001) then
-             nday = nday + 1
-             idxday(nday) = i
-          endif
-       enddo
-       
-       ! Call module_radiation_surface::setalb() to setup surface albedo.
-       call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                    Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                    tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                    Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                    Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                    Sfcprop%tisfc, NCOL,                         &
-                    alb1d, Model%pertalb,                        &    !  mg, sfc-perts
-                    sfcalb)                                           !  ---  outputs
-       
-       ! Approximate mean surface albedo from vis- and nir-  diffuse values.
-       Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
-    else
-       nday   = 0
-       idxday = 0
-       sfcalb = 0.0
-    endif
-      
-    ! Spread across all SW bands
-    do iBand=1,sw_gas_props%get_nband()
-       Radtend%sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
-       Radtend%sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
-       Radtend%sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
-       Radtend%sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
-    enddo
+    cld_resnow = clouds(:,:,9)    
 
   end subroutine GFS_rrtmgp_pre_run
   

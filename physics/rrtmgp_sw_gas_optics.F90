@@ -1,12 +1,13 @@
 module rrtmgp_sw_gas_optics
-  use machine,               only: kind_phys
-  use GFS_typedefs,          only: GFS_control_type, GFS_radtend_type
-  use mo_rte_kind,           only: wl
-  use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
-  use mo_gas_concentrations, only: ty_gas_concs
-  use rrtmgp_aux,            only: check_error_msg
-  use mo_optical_props,      only: ty_optical_props_2str
-  use mo_compute_bc,         only: compute_bc
+  use machine,                only: kind_phys
+  use GFS_typedefs,           only: GFS_control_type, GFS_radtend_type
+  use module_radiation_gases, only: NF_VGAS
+  use mo_rte_kind,            only: wl
+  use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
+  use mo_gas_concentrations,  only: ty_gas_concs
+  use rrtmgp_aux,             only: check_error_msg, rrtmgp_minP, rrtmgp_minT
+  use mo_optical_props,       only: ty_optical_props_2str
+  use mo_compute_bc,          only: compute_bc
   use netcdf
 
 contains
@@ -399,6 +400,11 @@ contains
 
     ! Set initial permutation seed for McICA, initially set to number of G-points
     ipsdsw0 = sw_gas_props%get_ngpt()
+
+    ! Store minimum pressure/temperature allowed by RRTMGP
+    rrtmgp_minP = sw_gas_props%get_press_min()
+    rrtmgp_minT = sw_gas_props%get_temp_min()
+
   end subroutine rrtmgp_sw_gas_optics_init
 
   ! #########################################################################################

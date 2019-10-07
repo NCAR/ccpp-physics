@@ -1,6 +1,14 @@
 [ccpp-arg-table]
   name = GFS_rrtmgp_setup_init
   type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
 [si]
   standard_name = vertical_sigma_coordinate_for_radiation_initialization
   long_name = vertical sigma coordinate for radiation initialization

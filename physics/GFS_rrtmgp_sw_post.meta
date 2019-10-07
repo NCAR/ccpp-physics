@@ -41,6 +41,14 @@
   type = GFS_coupling_type
   intent = inout
   optional = F
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = instance of derived type GFS_statein_type
+  units = DDT
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+  optional = F
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
@@ -114,6 +122,67 @@
   long_name = RRTMGP downward shortwave clr-sky flux profile
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[raddt]
+  standard_name = time_step_for_radiation
+  long_name = radiation time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[aerodp]
+  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
+  long_name = vertical integrated optical depth for various aerosol species
+  units = none
+  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cldsa]
+  standard_name = cloud_area_fraction_for_radiation
+  long_name = fraction of clouds for low, middle, high, total and BL
+  units = frac
+  dimensions = (horizontal_dimension,5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[mtopa]
+  standard_name = model_layer_number_at_cloud_top
+  long_name = vertical indices for low, middle and high cloud tops
+  units = index
+  dimensions = (horizontal_dimension,3)
+  type = integer
+  intent = in
+  optional = F
+[mbota]
+  standard_name = model_layer_number_at_cloud_base
+  long_name = vertical indices for low, middle and high cloud bases
+  units = index
+  dimensions = (horizontal_dimension,3)
+  type = integer
+  intent = in
+  optional = F
+[cld_frac]
+  standard_name = total_cloud_fraction
+  long_name = layer total cloud fraction
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cldtausw]
+  standard_name = RRTMGP_cloud_optical_depth_layers_at_0_55mu_band
+  long_name = approx .55mu band layer cloud optical depth
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in

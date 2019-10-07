@@ -1,5 +1,11 @@
 module rrtmgp_aux
+  use machine, only: &
+       kind_phys                   ! Working type
   implicit none
+
+  real(kind_phys) :: &
+       rrtmgp_minP, & ! Minimum pressure allowed in RRTMGP
+       rrtmgp_minT    ! Minimum temperature allowed in RRTMGP
 contains
   !
   subroutine rrtmgp_aux_init()

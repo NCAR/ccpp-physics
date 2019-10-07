@@ -5,7 +5,9 @@ module GFS_rrtmgp_lw_post
   use GFS_typedefs,               only: GFS_coupling_type,  &
                                         GFS_control_type,   &
                                         GFS_grid_type,      &
-                                        GFS_radtend_type
+                                        GFS_radtend_type,   &
+                                        GFS_statein_type,   &
+                                        GFS_diag_type
   use module_radiation_aerosols, only: NSPC1
   use module_radlw_parameters,   only: topflw_type, sfcflw_type, proflw_type
   ! RRTMGP DDT's
@@ -25,10 +27,10 @@ contains
 !> \section arg_table_GFS_rrtmgp_lw_post_run
 !! \htmlinclude GFS_rrtmgp_lw_post.html
 !!
-  subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend,  &
-              Coupling, im, p_lev,          &
-              tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, &
-              hlwc, topflx_lw, sfcflx_lw, flxprf_lw, hlw0, errmsg, errflg)
+  subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend, Coupling, Diag,  Statein, im,   &
+       p_lev, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky,&
+       raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw,  hlwc, topflx_lw,           &
+       sfcflx_lw, flxprf_lw, hlw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -39,6 +41,10 @@ contains
          Coupling          ! Fortran DDT containing FV3-GFS fields to/from coupling with other components 
     type(GFS_radtend_type), intent(inout) :: &
          Radtend           ! Fortran DDT containing FV3-GFS radiation tendencies 
+    type(GFS_diag_type), intent(inout) :: &
+         Diag              ! Fortran DDT containing FV3-GFS diagnotics data  
+    type(GFS_statein_type), intent(in) :: &
+         Statein           ! Fortran DDT containing FV3-GFS prognostic state data in from dycore  
     integer, intent(in) :: &
          im                ! Horizontal loop extent 
     real(kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  &
@@ -50,6 +56,18 @@ contains
          fluxlwDOWN_allsky, & ! LW All-sky flux                    (W/m2)
          fluxlwUP_clrsky,   & ! LW Clear-sky flux                  (W/m2)
          fluxlwDOWN_clrsky    ! LW All-sky flux                    (W/m2)
+    real(kind_phys), intent(in) :: &
+         raddt             ! Radiation time step
+    real(kind_phys), dimension(im,NSPC1), intent(in) :: &
+         aerodp            ! Vertical integrated optical depth for various aerosol species  
+    real(kind_phys), dimension(im,5), intent(in) :: &
+         cldsa             ! Fraction of clouds for low, middle, high, total and BL 
+    integer,         dimension(im,3), intent(in) ::&
+         mbota,          & ! vertical indices for low, middle and high cloud tops 
+         mtopa             ! vertical indices for low, middle and high cloud bases
+    real(kind_phys), dimension(im,Model%levs), intent(in) :: &
+         cld_frac, & ! Total cloud fraction in each layer
+         cldtaulw          ! approx 10.mu band layer cloud optical depth  
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
@@ -80,10 +98,11 @@ contains
                           ! dnfx0 - clear sky dnward flux            (W/m2)
 
     ! Local variables
-    integer :: k, iSFC, iTOA
+    integer :: i, j, k, iSFC, iTOA, itop, ibtc
     logical :: l_clrskylw_hr, l_fluxeslw2d, top_at_1
+    real(kind_phys) :: tem0d, tem1, tem2
 
-   ! Initialize CCPP error handling variables
+    ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
@@ -162,6 +181,61 @@ contains
        ! Radiation fluxes for other physics processes
        Coupling%sfcdlw(:) = Radtend%sfcflw(:)%dnfxc
     endif 
+
+    ! #######################################################################################
+    ! Save LW diagnostics
+    ! - For time averaged output quantities (including total-sky and clear-sky SW and LW 
+    !   fluxes at TOA and surface; conventional 3-domain cloud amount, cloud top and base 
+    !   pressure, and cloud top temperature; aerosols AOD, etc.), store computed results in
+    !   corresponding slots of array fluxr with appropriate time weights.
+    ! - Collect the fluxr data for wrtsfc
+    ! #######################################################################################
+    if (Model%lssav) then
+       if (Model%lslwr) then
+          do i=1,im
+             ! LW all-sky fluxes
+             Diag%fluxr(i,1 ) = Diag%fluxr(i,1 ) + Model%fhlwr *    Diag%topflw(i)%upfxc   ! total sky top lw up
+             Diag%fluxr(i,19) = Diag%fluxr(i,19) + Model%fhlwr * Radtend%sfcflw(i)%dnfxc   ! total sky sfc lw dn
+             Diag%fluxr(i,20) = Diag%fluxr(i,20) + Model%fhlwr * Radtend%sfcflw(i)%upfxc   ! total sky sfc lw up
+             ! LW clear-sky fluxes
+             Diag%fluxr(i,28) = Diag%fluxr(i,28) + Model%fhlwr *    Diag%topflw(i)%upfx0   ! clear sky top lw up
+             Diag%fluxr(i,30) = Diag%fluxr(i,30) + Model%fhlwr * Radtend%sfcflw(i)%dnfx0   ! clear sky sfc lw dn
+             Diag%fluxr(i,33) = Diag%fluxr(i,33) + Model%fhlwr * Radtend%sfcflw(i)%upfx0   ! clear sky sfc lw up
+          enddo
+          
+          do i=1,im
+             Diag%fluxr(i,17) = Diag%fluxr(i,17) + raddt * cldsa(i,4)
+             Diag%fluxr(i,18) = Diag%fluxr(i,18) + raddt * cldsa(i,5)
+          enddo
+          
+          ! Save cld frac,toplyr,botlyr and top temp, note that the order of h,m,l cloud is reversed for 
+          ! the fluxr output. save interface pressure (pa) of top/bot
+          do j = 1, 3
+             do i = 1, IM
+                tem0d = raddt * cldsa(i,j)
+                itop  = mtopa(i,j)
+                ibtc  = mbota(i,j)
+                Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
+                Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop)
+                Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc)
+                Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
+                
+                ! Add optical depth and emissivity output
+                tem2 = 0.
+                do k=ibtc,itop
+                   tem2 = tem2 + cldtaulw(i,k)      ! approx 10. mu channel
+                enddo
+                Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
+             enddo
+          enddo
+       endif
+       
+       if (Model%lgocart .or. Model%ldiag3d) then
+          do k = 1, Model%levs
+             Coupling%cldcovi(1:im,k) = cld_frac(1:im,k)
+          enddo
+       endif
+    endif
 
   end subroutine GFS_rrtmgp_lw_post_run
 
