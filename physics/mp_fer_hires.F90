@@ -15,15 +15,30 @@ module mp_fer_hires
       private
 
       logical :: is_initialized = .False.
+      
+      ! * T_ICE - temperature (C) threshold at which all remaining liquid water
+      !           is glaciated to ice
+      ! * T_ICE_init - maximum temperature (C) at which ice nucleation occurs
+      REAL, PUBLIC, PARAMETER :: T_ICE=-40.,                             &
+                                 T0C=273.15,                             &
+                                 T_ICEK=T0C+T_ICE
 
    contains
 
+!> This subroutine initialize constants & lookup tables for Ferrier-Aligao MP
+!! scheme.
 !> \section arg_table_mp_fer_hires_init Argument Table
 !! | local_name            | standard_name                             | long_name                                                 | units    | rank |  type                 |   kind    | intent | optional |
 !! |-----------------------|-------------------------------------------|-----------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
+!! | ncol                  | horizontal_loop_extent                    | horizontal loop extent                                    | count    |    0 | integer               |           | in     | F        |
+!! | nlev                  | vertical_dimension                        | number of vertical levels                                 | count    |    0 | integer               |           | in     | F        |
 !! | Model                 | GFS_control_type_instance                 | Fortran DDT containing FV3-GFS model control parameters   | DDT      |    0 | GFS_control_type      |           | in     | F        |
 !! | imp_physics           | flag_for_microphysics_scheme              | choice of microphysics scheme                             | flag     |    0 | integer               |           | in     | F        |
 !! | imp_physics_fer_hires | flag_for_fer_hires_microphysics_scheme    | choice of Ferrier-Aligo microphysics scheme               | flag     |    0 | integer               |           | in     | F        |
+!! | restart               | flag_for_restart                          | flag for restart (warmstart) or coldstart                 | flag     |    0 | logical               |           | in     | F        |
+!! | f_ice                 | fraction_of_ice_water_cloud               | fraction of ice water cloud                               | frac     |    2 | real                  | kind_phys | out    | T        | 
+!! | f_rain                | fraction_of_rain_water_cloud              | fraction of rain water cloud                              | frac     |    2 | real                  | kind_phys | out    | T        | 
+!! | f_rimef               | rime_factor                               | rime factor                                               | frac     |    2 | real                  | kind_phys | out    | T        |
 !! | mpicomm               | mpi_comm                                  | MPI communicator                                          | index    |    0 | integer               |           | in     | F        |
 !! | mpirank               | mpi_rank                                  | current MPI-rank                                          | index    |    0 | integer               |           | in     | F        |
 !! | mpiroot               | mpi_root                                  | master MPI-rank                                           | index    |    0 | integer               |           | in     | F        |
@@ -31,8 +46,10 @@ module mp_fer_hires
 !! | errmsg                | ccpp_error_message                        | error message for error handling in CCPP                  | none     |    0 | character             | len=*     | out    | F        |
 !! | errflg                | ccpp_error_flag                           | error flag for error handling in CCPP                     | flag     |    0 | integer               |           | out    | F        |
 !!
-     subroutine mp_fer_hires_init(Model, imp_physics,                   &
+     subroutine mp_fer_hires_init(NCOL, NLEV, Model, imp_physics,       &
                                   imp_physics_fer_hires,                &
+                                  restart,                              &
+                                  f_ice,f_rain,f_rimef,                 &
                                   mpicomm, mpirank,mpiroot,             &
                                   threads, errmsg, errflg)
 
@@ -42,16 +59,24 @@ module mp_fer_hires
       implicit none
 
       type(GFS_control_type),         intent(in)    :: Model
+      integer,                        intent(in)    :: ncol
+      integer,                        intent(in)    :: nlev
       integer,                        intent(in)    :: imp_physics
       integer,                        intent(in)    :: imp_physics_fer_hires
       integer,                        intent(in)    :: mpicomm
       integer,                        intent(in)    :: mpirank
       integer,                        intent(in)    :: mpiroot
       integer,                        intent(in)    :: threads
+      logical,                        intent(in)    :: restart
       character(len=*),               intent(out)   :: errmsg
       integer,                        intent(out)   :: errflg
+      real(kind_phys),                intent(out), optional  :: f_ice(1:ncol,1:nlev)
+      real(kind_phys),                intent(out), optional  :: f_rain(1:ncol,1:nlev)
+      real(kind_phys),                intent(out), optional  :: f_rimef(1:ncol,1:nlev)
+
 
       ! Local variables
+      integer                                       :: ims, ime, lm,i,k
       real(kind=kind_phys)                          :: DT_MICRO
 
       ! Initialize the CCPP error handling variables
@@ -60,12 +85,19 @@ module mp_fer_hires
      
       if (is_initialized) return
 
+      ! Set internal dimensions
+      ims = 1
+      ime = ncol
+      lm  = nlev
 
        ! MZ* temporary 
        if (mpirank==mpiroot) then
-         write(0,*) ' ---------------------------------------------------------------------------------------------------------------------'
-         write(0,*) ' --- WARNING --- the CCPP Ferrier-Aligo MP scheme is currently under development, use at your own risk --- WARNING ---'
-         write(0,*) ' ---------------------------------------------------------------------------------------------------------------------'
+         write(0,*) ' -----------------------------------------------'
+         write(0,*) ' ---            !!! WARNING !!!              ---'
+         write(0,*) ' --- the CCPP Ferrier-Aligo MP scheme is     ---'
+         write(0,*) ' --- currently under development, use at     ---'
+         write(0,*) ' --- your own risk .                         ---'
+         write(0,*) ' -----------------------------------------------'
        end if
        ! MZ* temporary
 
@@ -75,14 +107,20 @@ module mp_fer_hires
           return
        end if
           
-       !MZ: FERRIER_INIT_HR in NAM_typedefs.F90
-       !Model%F_QC=.TRUE.
-       !Model%F_QR=.TRUE.
-       !Model%F_QS=.TRUE.
-       !Model%F_QG=.TRUE.
-       !MZ NPRECIP- number of dynamics timesteps between calls to 
-       !convection and microphysics
-       ! DT_MICRO=Model%NPRECIP*Model%dtp
+     !MZ: fer_hires_init() in HWRF
+      IF(.NOT.RESTART .AND.  present(F_ICE)) THEN  !HWRF
+        write(errmsg,'(*(a))') " WARNING: F_ICE,F_RAIN AND F_RIMEF IS REINITIALIZED "
+        DO K = 1,lm
+        DO I= ims,ime
+          F_ICE(i,k)=0.
+          F_RAIN(i,k)=0.
+          F_RIMEF(i,k)=1.
+        ENDDO
+        ENDDO
+      ENDIF
+      !MZ: fer_hires_init() in HWRF
+
+        
         DT_MICRO=Model%dtp
 
        CALL FERRIER_INIT_HR(DT_MICRO,mpicomm,mpirank,mpiroot,threads)
@@ -183,7 +221,7 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qc(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev)
+      real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev) ! QRIMEF
       real(kind_phys),   intent(inout) :: prec(1:ncol)
 !      real(kind_phys)                  :: acprec(1:ncol)   !MZ: change to local
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
@@ -199,7 +237,7 @@ module mp_fer_hires
       integer            :: I,J,K,N
       integer            :: lowlyr(1:ncol)
       integer            :: dx1
-      real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
+      !real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
       real(kind_phys)    :: sm(1:ncol), xland(1:ncol)
       real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW  
       real(kind_phys)    :: ql(1:nlev),tl(1:nlev)
@@ -304,11 +342,7 @@ module mp_fer_hires
           TH_PHY(I,K)=T(I,K)/PI_PHY(I,K)
 !MZ
 !          DZ(I,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,K)
-          DZ(I,K)=(PRSI(I,K)-PRSI(I,K+1))*R_G/RR(I,K)
-!
-        ENDDO    !- DO K=LM,1,-1
-!
-      ENDDO    !- DO I=IMS,IME
+          DZ(I,K)=(PRSI(I,K)-PRSI(I,K+1))*R_G/RR(I,K) !  ENDDO    !- DO K=LM,1,-1 !  ENDDO    !- DO I=IMS,IME
 !     if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dz)  = ',  &
 !                                        maxval(dz),minval(dz)
 
@@ -317,40 +351,66 @@ module mp_fer_hires
 !.......................................................................
 !
 !***  CALL MICROPHYSICS
-!
+
+!MZ* in HWRF
+!-- 6/11/2010: Update cwm, F_ice, F_rain and F_rimef arrays
+         cwm(I,K)=QC(I,K)+QR(I,K)+QI(I,K)
+         IF (QI(I,K) <= EPSQ) THEN
+            F_ICE(I,K)=0.
+            F_RIMEF(I,K)=1.
+            IF (T(I,K) < T_ICEK) F_ICE(I,K)=1.
+         ELSE
+            F_ICE(I,K)=MAX( 0., MIN(1., QI(I,K)/cwm(I,K) ) )
+            F_RIMEF(I,K)=QG(I,K)/QI(I,K)
+         ENDIF
+         IF (QR(I,K) <= EPSQ) THEN
+            F_RAIN(I,K)=0.
+         ELSE
+            F_RAIN(I,K)=QR(I,K)/(QR(I,K)+QC(I,K))
+         ENDIF
+
+        end do
+      enddo
+
 !---------------------------------------------------------------------
 !*** Update the rime factor array after 3d advection
 !---------------------------------------------------------------------
-              DO K=1,LM
-              DO I=IMS,IME
-                IF (QG(I,K)>EPSQ .AND. QI(I,K)>EPSQ) THEN
-                  F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QI(I,K)))
-                ELSE
-                  F_RIMEF(I,K)=1.
-                ENDIF
-              ENDDO
-              ENDDO
+!MZ* in namphysics
+!              DO K=1,LM
+!              DO I=IMS,IME
+!                IF (QG(I,K)>EPSQ .AND. QI(I,K)>EPSQ) THEN
+!                  F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QI(I,K)))
+!                ELSE
+!                  F_RIMEF(I,K)=1.
+!                ENDIF
+!              ENDDO
+!              ENDDO
 
 !MZ
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(cwm)  = ',  &
-                                        maxval(cwm),minval(cwm)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(t)  = ',  &
-                                        maxval(t),minval(t)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(q)  = ',  &
-                                        maxval(q),minval(q)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qc)  = ',  &
-                                        maxval(qc),minval(qc)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qi)  = ',  &
-                                        maxval(qi),minval(qi)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qr)  = ',  &
-                                        maxval(qr),minval(qr)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qg)  = ',   &
-                                        maxval(qg),minval(qg)
-      if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_rimef)  = ',  &
-                                        maxval(f_rimef),minval(f_rimef)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dx1)  = ',  &
-      !                                  dx1
-      if (mpirank==mpiroot) write (0,*)'---------------------------------'
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: t_icek  = ', t_icek
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(cwm)  = ',  &
+      !                                  maxval(cwm),minval(cwm)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(t)  = ',  &
+      !!                                  maxval(t),minval(t)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(q)  = ',  &
+      !                                  maxval(q),minval(q)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qc)  = ',  &
+      !                                  maxval(qc),minval(qc)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qi)  = ',  &
+      !                                  maxval(qi),minval(qi)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qr)  = ',  &
+      !                                  maxval(qr),minval(qr)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qg)  = ',   &
+      !                                  maxval(qg),minval(qg)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_rain)  = ',  &
+      !                                  maxval(f_rain),minval(f_rain)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_ice)  = ',  &
+      !                                  maxval(f_ice),minval(f_ice)
+      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_rimef)  = ',  &
+     !                                   maxval(f_rimef),minval(f_rimef)
+!      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dx1)  = ',  &
+!      !                                  dx1
+!      if (mpirank==mpiroot) write (0,*)'---------------------------------'
 
 
 !---------------------------------------------------------------------
@@ -367,21 +427,8 @@ module mp_fer_hires
                   ,RAINNC=rainnc,RAINNCV=rainncv                        &
                   ,threads=threads                                      &
                   ,IMS=IMS,IME=IME,JMS=JMS,JME=JME,LM=LM                &
-                  ,D_SS=d_ss,MPRATES=mprates                            &
+                  ,D_SS=d_ss                                            &
                   ,refl_10cm=refl_10cm,DX1=DX1)
-
-!---------------------------------------------------------------------
-!*** Calculate graupel from total ice array and rime factor
-!---------------------------------------------------------------------
-
-!MZ            
-            IF (SPEC_ADV) then
-              DO K=1,LM
-              DO I=IMS,IME
-                QG(I,K)=QI(I,K)*F_RIMEF(I,K)
-              ENDDO
-              ENDDO
-            ENDIF
 
 
 !.......................................................................
@@ -390,6 +437,16 @@ module mp_fer_hires
 !.......................................................................
       DO K=1,LM
         DO I=IMS,IME
+
+!---------------------------------------------------------------------
+!*** Calculate graupel from total ice array and rime factor
+!---------------------------------------------------------------------
+
+!MZ            
+            IF (SPEC_ADV) then
+                QG(I,K)=QI(I,K)*F_RIMEF(I,K)
+            ENDIF
+
 !
 !-----------------------------------------------------------------------
 !***  UPDATE TEMPERATURE, SPECIFIC HUMIDITY, CLOUD WATER, AND HEATING.
@@ -401,32 +458,32 @@ module mp_fer_hires
         ENDDO
       ENDDO
 
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(cwm)= ', &
-                                            maxval(cwm),minval(cwm)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(t)= ', &
-                                            maxval(t),minval(t)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(q)= ', &
-                                            maxval(q),minval(q)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qc)= ', &
-                                            maxval(qc),minval(qc)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qr)= ', &
-                                            maxval(qr),minval(qr)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qi)= ', &
-                                            maxval(qi),minval(qi)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qg)= ', &
-                                            maxval(qg),minval(qg)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rimef)= ', &
-                                            maxval(f_rimef),minval(f_rimef)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_ice)= ', &
-                                            maxval(f_ice),minval(f_ice)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rain)= ', &
-                                            maxval(f_rain),minval(f_rain)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainnc)= ', &
-                                            maxval(rainnc),minval(rainnc)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainncv)= ', &
-                                            maxval(rainncv),minval(rainncv)
-            if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(sr)= ', &
-                                            maxval(sr),minval(sr)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(cwm)= ', &
+            !                                maxval(cwm),minval(cwm)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(t)= ', &
+            !                                maxval(t),minval(t)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(q)= ', &
+            !                                maxval(q),minval(q)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qc)= ', &
+            !                                maxval(qc),minval(qc)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qr)= ', &
+            !                                maxval(qr),minval(qr)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qi)= ', &
+            !                                maxval(qi),minval(qi)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qg)= ', &
+            !                                maxval(qg),minval(qg)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rimef)= ', &
+            !                                maxval(f_rimef),minval(f_rimef)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_ice)= ', &
+            !                                maxval(f_ice),minval(f_ice)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rain)= ', &
+            !                                maxval(f_rain),minval(f_rain)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainnc)= ', &
+            !                                maxval(rainnc),minval(rainnc)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainncv)= ', &
+            !                                maxval(rainncv),minval(rainncv)
+            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(sr)= ', &
+            !                                maxval(sr),minval(sr)
 
 !.......................................................................
 !MZ$OMP end parallel do
@@ -449,7 +506,6 @@ module mp_fer_hires
       ENDDO
 !MZ$OMP end parallel do
 !-----------------------------------------------------------------------
-!      if (mpirank==mpiroot) write (0,*)'F-A: mp_fer_hires_run finished ...'
 !
        end subroutine mp_fer_hires_run 
 

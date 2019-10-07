@@ -784,19 +784,19 @@
             Tbd%phy_f3d(:,:,Model%nseffr) = 250.
           endif
 
-          if(Model%me==0) then
-             write(0,*)'F-A: progcld5 max(cldcov), min(cldcov) =' &
-                            ,maxval(cldcov),minval(cldcov)
-             write(0,*)'F-A: progcld5 max(ccnd_c), min(ccnd_c) =' &
-                            ,maxval(ccnd(:,:,1)),minval(ccnd(:,:,1))
-             write(0,*)'F-A: progcld5 max(ccnd_i), min(ccnd_i) =' &
-                            ,maxval(ccnd(:,:,2)),minval(ccnd(:,:,2))
-             write(0,*)'F-A: progcld5 max(ccnd_r), min(ccnd_r) =' &
-                            ,maxval(ccnd(:,:,3)),minval(ccnd(:,:,3))
-             write(0,*)'F-A: progcld5 max(ccnd_s), min(ccnd_s) =' &
-                            ,maxval(ccnd(:,:,4)),minval(ccnd(:,:,4))
-             write(0,*)'F-A:-----------------------------------'
-           endif
+!          if(Model%me==0) then
+!             write(0,*)'F-A: progcld5 max(cldcov), min(cldcov) =' &
+!                            ,maxval(cldcov),minval(cldcov)
+!             write(0,*)'F-A: progcld5 max(ccnd_c), min(ccnd_c) =' &
+!                            ,maxval(ccnd(:,:,1)),minval(ccnd(:,:,1))
+!             write(0,*)'F-A: progcld5 max(ccnd_i), min(ccnd_i) =' &
+!                            ,maxval(ccnd(:,:,2)),minval(ccnd(:,:,2))
+!             write(0,*)'F-A: progcld5 max(ccnd_r), min(ccnd_r) =' &
+!                            ,maxval(ccnd(:,:,3)),minval(ccnd(:,:,3))
+!             write(0,*)'F-A: progcld5 max(ccnd_s), min(ccnd_s) =' &
+!                            ,maxval(ccnd(:,:,4)),minval(ccnd(:,:,4))
+!             write(0,*)'F-A:-----------------------------------'
+!           endif
 
           call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
                          Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
@@ -808,21 +808,19 @@
                          Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
                          clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs
 
-          if(Model%me==0) then
-             write(0,*)'F-A: progcld5 max(cldsa1), min(cldsa1) =' &
-                            ,maxval(cldsa(:,1)),minval(cldsa(:,1))
-             write(0,*)'F-A: progcld5 max(cldsa2), min(cldsa2) =' &
-                            ,maxval(cldsa(:,2)),minval(cldsa(:,2))
-             write(0,*)'F-A: progcld5 max(cldsa3), min(cldsa3) =' &
-                            ,maxval(cldsa(:,3)),minval(cldsa(:,3))
-             write(0,*)'F-A: progcld5 max(cldsa4), min(cldsa4) =' &
-                            ,maxval(cldsa(:,4)),minval(cldsa(:,4))
-             write(0,*)'F-A: progcld5 max(cldsa5), min(cldsa5) =' &
-                            ,maxval(cldsa(:,5)),minval(cldsa(:,5))
-
-
-             write(0,*)'F-A:-----------------------------------'
-           endif
+!          if(Model%me==0) then
+!             write(0,*)'F-A: progcld5 max(cldsa1), min(cldsa1) =' &
+!                            ,maxval(cldsa(:,1)),minval(cldsa(:,1))
+!             write(0,*)'F-A: progcld5 max(cldsa2), min(cldsa2) =' &
+!                            ,maxval(cldsa(:,2)),minval(cldsa(:,2))
+!             write(0,*)'F-A: progcld5 max(cldsa3), min(cldsa3) =' &
+!                            ,maxval(cldsa(:,3)),minval(cldsa(:,3))
+!             write(0,*)'F-A: progcld5 max(cldsa4), min(cldsa4) =' &
+!                            ,maxval(cldsa(:,4)),minval(cldsa(:,4))
+!             write(0,*)'F-A: progcld5 max(cldsa5), min(cldsa5) =' &
+!                            ,maxval(cldsa(:,5)),minval(cldsa(:,5))
+!             write(0,*)'F-A:-----------------------------------'
+!           endif
 
         endif                            ! end if_imp_physics
 

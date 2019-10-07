@@ -140,6 +140,7 @@
       REAL,PRIVATE,SAVE ::  ABFR, CBFR, CIACW, CIACR, C_N0r0, C_NR, Crain, &  !jul28
      &  CRACW, ARAUT, BRAUT, ESW0, RFmx1, ARcw, RH_NgC, RH_NgT,            &  !jul31 !mar08
      &  RR_DRmin, RR_DR1, RR_DR2, RR_DR3, RR_DR4, RR_DR5, RR_DRmax,        &  !may17
+     &  BETA6,                                                             &
      &  RQhail, AVhail, BVhail, QAUT0   !may17
 !
       INTEGER,PRIVATE,PARAMETER :: INDEXRstrmax=500      !mar03, stratiform maximum
@@ -222,7 +223,10 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      & ,NLImin=1.0E3                                                    &
      & ,N0r0=8.E6                                                       &
      & ,N0rmin=1.E4                                                     &
-     & ,NCW=300.E6           !- 100.e6 (maritime), 500.e6 (continental)
+!! based on Aligo's email,NCW is changed to 250E6
+     & ,NCW=250.E6  
+     !HWRF & ,NCW=300.E6           !- 100.e6 (maritime), 500.e6 (continental)
+
 !--- Other public variables passed to other routines:
       REAL, PUBLIC,DIMENSION(MDImin:MDImax) :: MASSI
 !
@@ -235,7 +239,11 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 
 !>\ingroup hafs_famp
 !! This is the driver scheme of Ferrier-Aligo microphysics scheme.
-      SUBROUTINE FER_HIRES (DT,RHgrd,                         &
+!! NOTE: The only differences between FER_HIRES and FER_HIRES_ADVECT
+!! is that the QT, and F_* are all local variables in the advected 
+!! version, and QRIMEF is only in the advected version. The innards
+!! are all the same.
+      SUBROUTINE FER_HIRES (DT,RHgrd,                                   &
      &                      dz8w,rho_phy,p_phy,pi_phy,th_phy,t_phy,     &
      &                      q,qt,                                       &
      &                      LOWLYR,SR,                                  &
@@ -243,8 +251,8 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      &                      QC,QR,QS,                                   & 
      &                      RAINNC,RAINNCV,                             &
      &                      threads,                                    &
-     &                      ims,ime, jms,jme, lm,     		        &
-     &                      d_ss,mprates,                               &
+     &                      ims,ime, jms,jme, lm,                       &
+     &                      d_ss,                                       &
      &                      refl_10cm,DX1 )
 !-----------------------------------------------------------------------
       IMPLICIT NONE
@@ -264,8 +272,8 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      &                      refl_10cm               !jul28
       REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme)           ::     &
      &                                                   RAINNC,RAINNCV
-      REAL,               DIMENSION(ims:ime, jms:jme,lm,d_ss) ::  &
-     &                     mprates 
+!MZ      REAL,               DIMENSION(ims:ime, jms:jme,lm,d_ss) ::  &
+!MZ     &                     mprates 
       REAL, INTENT(OUT),    DIMENSION(ims:ime,jms:jme):: SR
 !
       INTEGER, DIMENSION( ims:ime, jms:jme ),INTENT(INOUT) :: LOWLYR
@@ -281,7 +289,6 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       REAL,  DIMENSION( ims:ime, jms:jme,lm ) ::                  &
      &       TLATGS_PHY,TRAIN_PHY
       REAL,  DIMENSION(ims:ime,jms:jme):: APREC,PREC,ACPREC
-!MZ      REAL,  DIMENSION(ims:ime, jms:jme, lm):: t_phy
 
       INTEGER :: I,J,K,KK
       REAL :: wc
@@ -302,24 +309,60 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !**********************************************************************
 !-----------------------------------------------------------------------
 !
-      MY_GROWTH_NMM(MY_T1:MY_T2)=MP_RESTART_STATE(MY_T1:MY_T2)
+! MZ: NAMPHYSICS
+!      MY_GROWTH_NMM(MY_T1:MY_T2)=MP_RESTART_STATE(MY_T1:MY_T2)
 !
-      C1XPVS0=MP_RESTART_STATE(MY_T2+1)
-      C2XPVS0=MP_RESTART_STATE(MY_T2+2)
-      C1XPVS =MP_RESTART_STATE(MY_T2+3)
-      C2XPVS =MP_RESTART_STATE(MY_T2+4)
-      CIACW  =MP_RESTART_STATE(MY_T2+5)
-      CIACR  =MP_RESTART_STATE(MY_T2+6)
-      CRACW  =MP_RESTART_STATE(MY_T2+7)
-      BRAUT  =MP_RESTART_STATE(MY_T2+8)
+!      C1XPVS0=MP_RESTART_STATE(MY_T2+1)
+!      C2XPVS0=MP_RESTART_STATE(MY_T2+2)
+!      C1XPVS =MP_RESTART_STATE(MY_T2+3)
+!      C2XPVS =MP_RESTART_STATE(MY_T2+4)
+!      CIACW  =MP_RESTART_STATE(MY_T2+5)
+!      CIACR  =MP_RESTART_STATE(MY_T2+6)
+!      CRACW  =MP_RESTART_STATE(MY_T2+7)
+!      BRAUT  =MP_RESTART_STATE(MY_T2+8)
 !
-      TBPVS(1:NX) =TBPVS_STATE(1:NX)
-      TBPVS0(1:NX)=TBPVS0_STATE(1:NX)
+!      TBPVS(1:NX) =TBPVS_STATE(1:NX)
+!      TBPVS0(1:NX)=TBPVS0_STATE(1:NX)
+! 
+
+! MZ: HWRF practice start 
+!----------
+!2015-03-30, recalculate some constants which may depend on phy time step
+          CALL MY_GROWTH_RATES_NMM_hr  (DT)
+
+!--- CIACW is used in calculating riming rates
+!      The assumed effective collection efficiency of cloud water rimed onto
+!      ice is =0.5 below:
 !
-!.......................................................................
-!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!MZ$OMP PRIVATE(j,k,i,t_phy)
-!.......................................................................
+        CIACW=DT*0.25*PI*0.5*(1.E5)**C1
+!
+!--- CIACR is used in calculating freezing of rain colliding with large ice
+!      The assumed collection efficiency is 1.0
+!
+        CIACR=PI*DT
+!
+!--- CRACW is used in calculating collection of cloud water by rain (an
+!      assumed collection efficiency of 1.0)
+!
+        CRACW=DT*0.25*PI*1.0
+!
+!-- See comments in subroutine etanewhr_init starting with variable RDIS=
+!
+        BRAUT=DT*1.1E10*BETA6/NCW
+
+       !write(*,*)'dt=',dt
+       !write(*,*)'pi=',pi
+       !write(*,*)'c1=',c1
+       !write(*,*)'ciacw=',ciacw 
+       !write(*,*)'ciacr=',ciacr 
+       !write(*,*)'cracw=',cracw 
+       !write(*,*)'araut=',araut
+       !write(*,*)'braut=',braut
+!! END OF adding, 2015-03-30
+!-----------
+! MZ: HWRF practice end
+!
+
 !MZ: t_phy is a state variable in FV3
 !      DO j = jms,jme
 !      DO k = 1,lm
@@ -329,14 +372,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !      ENDDO
 !      ENDDO
 !      ENDDO
-!.......................................................................
-!MZ$omp end parallel do
-!.......................................................................
 
-!.......................................................................
-!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!MZ$OMP PRIVATE(j,i,k, ACPREC, APREC, PREC,SR, TLATGS_PHY,TRAIN_PHY )
-!.......................................................................
       DO j = jms,jme
        DO i = ims,ime
          ACPREC(i,j)=0.
@@ -351,24 +387,11 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
        ENDDO
        ENDDO
       ENDDO
-!
+
 !-----------------------------------------------------------------------
 !-- Start of original driver for EGCP01COLUMN_hr
 !-----------------------------------------------------------------------
 !
-!.......................................................................
-!MZ$omp end parallel do
-!.......................................................................
-
-!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!MZ$OMP PRIVATE(j,i,k,lsfc,dpcol,l,p_col,thick_col,t_col,tc,q_col,       &
-!MZ$OMP         wc_col,wc,qi,QRdum,qw,fice,frain,rimef_col,qi_col,qr_col,&
-!MZ$OMP         qw_col,i_index,j_index,arain,asnow,dum,                  &
-!MZ$OMP         pcond1d,pidep1d,                                         &
-!MZ$OMP         piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,pimlt1d, &
-!MZ$OMP         praut1d,pracw1d,prevp1d,pisub1d,pevap1d,                 &
-!MZ$OMP         dbz_col,nr_col,ns_col)
-!.......................................................................
        DO J=JMS,JME    
         DO I=IMS,IME  
           LSFC=LM-LOWLYR(I,J)+1                      ! "L" of surface
@@ -504,34 +527,37 @@ ENDIF
 !---d_ss is the total number of source/sink terms in the 4D mprates array
 !---if d_ss=1, only 1 source/sink term is used
 !
-       IF(D_SS.EQ.1)THEN
-           mprates(I,J,L,1)=0.
-       ELSE
-           mprates(I,J,L,1)=mprates(I,J,L,1)+pcond1d(L)
-           mprates(I,J,L,2)=mprates(I,J,L,2)+pidep1d(L)
-           mprates(I,J,L,3)=mprates(I,J,L,3)+piacw1d(L)
-           mprates(I,J,L,4)=mprates(I,J,L,4)+piacwi1d(L)
-           mprates(I,J,L,5)=mprates(I,J,L,5)+piacwr1d(L)
-           mprates(I,J,L,6)=mprates(I,J,L,6)+piacr1d(L)
-           mprates(I,J,L,7)=mprates(I,J,L,7)+picnd1d(L)
-           mprates(I,J,L,8)=mprates(I,J,L,8)+pievp1d(L)
-           mprates(I,J,L,9)=mprates(I,J,L,9)+pimlt1d(L)
-           mprates(I,J,L,10)=mprates(I,J,L,10)+praut1d(L)
-           mprates(I,J,L,11)=mprates(I,J,L,11)+pracw1d(L)
-           mprates(I,J,L,12)=mprates(I,J,L,12)+prevp1d(L)
-           mprates(I,J,L,13)=mprates(I,J,L,13)+pisub1d(L)
-           mprates(I,J,L,14)=mprates(I,J,L,14)+pevap1d(L)
-           mprates(I,J,L,15)=vsnow1d(L)
-           mprates(I,J,L,16)=vrain11d(L)
-           mprates(I,J,L,17)=vrain21d(L)
-           mprates(I,J,L,18)=vci1d(L)
-           mprates(I,J,L,19)=NSmICE1d(L)
-           mprates(I,J,L,20)=NS_col(L)   !- # conc snow   !jul28
-           mprates(I,J,L,21)=NR_col(L)   !- # conc rain   !jul28
-           mprates(I,J,L,22)=INDEXS1d(L)
-           mprates(I,J,L,23)=INDEXR1d(L)
-           mprates(I,J,L,24)=RFlag1d(L)
-        ENDIF
+
+! MZ*
+!HWRF       IF(D_SS.EQ.1)THEN
+!HWRF           mprates(I,J,L,1)=0.
+!HWRF       ELSE
+!HWRF           mprates(I,J,L,1)=mprates(I,J,L,1)+pcond1d(L)
+!HWRF           mprates(I,J,L,2)=mprates(I,J,L,2)+pidep1d(L)
+!HWRF           mprates(I,J,L,3)=mprates(I,J,L,3)+piacw1d(L)
+!HWRF           mprates(I,J,L,4)=mprates(I,J,L,4)+piacwi1d(L)
+!HWRF           mprates(I,J,L,5)=mprates(I,J,L,5)+piacwr1d(L)
+!HWRF           mprates(I,J,L,6)=mprates(I,J,L,6)+piacr1d(L)
+!HWRF           mprates(I,J,L,7)=mprates(I,J,L,7)+picnd1d(L)
+!HWRF           mprates(I,J,L,8)=mprates(I,J,L,8)+pievp1d(L)
+!HWRF           mprates(I,J,L,9)=mprates(I,J,L,9)+pimlt1d(L)
+!HWRF           mprates(I,J,L,10)=mprates(I,J,L,10)+praut1d(L)
+!HWRF           mprates(I,J,L,11)=mprates(I,J,L,11)+pracw1d(L)
+!HWRF           mprates(I,J,L,12)=mprates(I,J,L,12)+prevp1d(L)
+!HWRF           mprates(I,J,L,13)=mprates(I,J,L,13)+pisub1d(L)
+!HWRF           mprates(I,J,L,14)=mprates(I,J,L,14)+pevap1d(L)
+!HWRF           mprates(I,J,L,15)=vsnow1d(L)
+!HWRF           mprates(I,J,L,16)=vrain11d(L)
+!HWRF           mprates(I,J,L,17)=vrain21d(L)
+!HWRF           mprates(I,J,L,18)=vci1d(L)
+!HWRF           mprates(I,J,L,19)=NSmICE1d(L)
+!HWRF           mprates(I,J,L,20)=NS_col(L)   !- # conc snow   !jul28
+!HWRF           mprates(I,J,L,21)=NR_col(L)   !- # conc rain   !jul28
+!HWRF           mprates(I,J,L,22)=INDEXS1d(L)
+!HWRF           mprates(I,J,L,23)=INDEXR1d(L)
+!HWRF           mprates(I,J,L,24)=RFlag1d(L)
+!HWRF        ENDIF
+! MZ*
 !
 !--- REAL*4 array storage
 !
@@ -571,18 +597,11 @@ ENDIF
 !
     enddo                          ! End "I" loop
     enddo                          ! End "J" loop
-!.......................................................................
-!MZ$omp end parallel do
-!.......................................................................
 !
 !-----------------------------------------------------------------------
 !-- End of original driver for EGCP01COLUMN_hr
 !-----------------------------------------------------------------------
 !
-!.......................................................................
-!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!MZ$OMP PRIVATE(j,k,i, th_phy, wc, qs, qc)
-!.......................................................................
      DO j = jms,jme
         !MZ DO k = 1,lm
         do k = lm, 1, -1
@@ -614,9 +633,6 @@ ENDIF
           ENDDO   !- i
         ENDDO     !- k
      ENDDO        !- j
-!.......................................................................
-!MZ$omp end parallel do
-!.......................................................................
 ! 
 !- Update rain (convert from m to kg/m**2, which is also equivalent to mm depth)
 ! 
@@ -2526,16 +2542,12 @@ ENDIF
 !
 !--- Create lookup tables for saturation vapor pressure w/r/t water & ice
 
-!MZ
-!       if (mype==mpiroot) write(0,*) 'F-A: Create lookup tables for saturation vapor pressure w/r/t water & ice ... '
        
 !
         CALL GPVS_hr
 !
 !--- Read in various lookup tables
 !
-!MZ        call ESMF_VMGetCurrent(vm=VM)
-!MZ        call ESMF_VMGet(vm=VM,localPet=mype,mpiCommunicator=MPI_COMM_COMP)
         IF(MYPE==0)THEN
           etampnew_unit1 = -1
           DO i = 31,99
@@ -2554,8 +2566,6 @@ ENDIF
         ENDIF
 !
         IF(MYPE==0)THEN
-!MZ
-!          write(0,*) 'F-A: Reading DETAMPNEW_DATA*LE data... '
           OPEN(UNIT=etampnew_unit1,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
      &        FORM="UNFORMATTED",STATUS="OLD",ERR=9061)
 !
@@ -2590,7 +2600,9 @@ ENDIF
 !--- Calculates coefficients for growth rates of ice nucleated in water
 !    saturated conditions, scaled by physics time step (lookup table)
 !
+
         CALL MY_GROWTH_RATES_NMM_hr (DTPH)
+!
 !
 !--- Constants associated with Biggs (1953) freezing of rain, as parameterized
 !    following Lin et al. (JCAM, 1983) & Reisner et al. (1998, QJRMS).
@@ -2720,17 +2732,18 @@ ENDIF
 !
         Thour_print=-DTPH/3600.
 !
-        MP_RESTART_STATE(MY_T1:MY_T2)=MY_GROWTH_NMM(MY_T1:MY_T2)
-        MP_RESTART_STATE(MY_T2+1)=C1XPVS0
-        MP_RESTART_STATE(MY_T2+2)=C2XPVS0
-        MP_RESTART_STATE(MY_T2+3)=C1XPVS
-        MP_RESTART_STATE(MY_T2+4)=C2XPVS
-        MP_RESTART_STATE(MY_T2+5)=CIACW
-        MP_RESTART_STATE(MY_T2+6)=CIACR
-        MP_RESTART_STATE(MY_T2+7)=CRACW
-        MP_RESTART_STATE(MY_T2+8)=BRAUT
-        TBPVS_STATE(1:NX) =TBPVS(1:NX)
-        TBPVS0_STATE(1:NX)=TBPVS0(1:NX)
+! MZ: NAMPHYSICS only
+!        MP_RESTART_STATE(MY_T1:MY_T2)=MY_GROWTH_NMM(MY_T1:MY_T2)
+!        MP_RESTART_STATE(MY_T2+1)=C1XPVS0
+!        MP_RESTART_STATE(MY_T2+2)=C2XPVS0
+!        MP_RESTART_STATE(MY_T2+3)=C1XPVS
+!        MP_RESTART_STATE(MY_T2+4)=C2XPVS
+!        MP_RESTART_STATE(MY_T2+5)=CIACW
+!        MP_RESTART_STATE(MY_T2+6)=CIACR
+!        MP_RESTART_STATE(MY_T2+7)=CRACW
+!        MP_RESTART_STATE(MY_T2+8)=BRAUT
+!        TBPVS_STATE(1:NX) =TBPVS(1:NX)
+!        TBPVS0_STATE(1:NX)=TBPVS0(1:NX)
 
       RETURN
 !

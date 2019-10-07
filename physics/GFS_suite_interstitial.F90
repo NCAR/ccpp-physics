@@ -722,37 +722,38 @@
             endif
           endif
 
-!MZ
-          if (imp_physics == imp_physics_fer_hires) then
+!MZ* : move to module_MP_FER_HIRES.F90
+!
+!          if (imp_physics == imp_physics_fer_hires) then
 !MZ: Update CWM,F_ICE,F_RAIN arrays from separate species advection
 !(spec_adv=T.or.F)
-            DO K=1,levs
-               DO I=1,IM
-                  CWM(I,K)= max(0.0,gq0(i,k,ntcw))+max(0.0,gq0(i,k,ntiw)) &
-                           +max(0.0,gq0(i,k,ntrw))
-                  IF (gq0(I,K,ntiw)>EPSQ) THEN
-                     F_ICE(I,K)=MAX(0.0,MIN(1.,gq0(I,K,ntiw)/CWM(I,K)))
-                  ELSE
-                     F_ICE(I,K)=0.0
-                  ENDIF
-                  IF (gq0(I,K,ntrw)>EPSQ) THEN
-                     F_RAIN(I,K)=gq0(I,K,ntrw)/(gq0(I,K,ntcw)+gq0(I,K,ntrw))
-                  ELSE
-                     F_RAIN(I,K)=0.
-                  ENDIF
-               ENDDO
-            ENDDO
-            if(mpirank == mpiroot) then
-               write (0,*)'interstitial_4: cwm =',   &
-                                                 maxval(cwm),minval(cwm)
-               write (0,*)'interstitial_4: f_ice =',  &
-                                                 maxval(f_ice),minval(f_ice)
-               write (0,*)'interstitial_4: f_rain =', &
-                                                 maxval(f_rain),minval(f_rain)
-             end if
-
-          endif
-
+!            DO K=1,levs
+!               DO I=1,IM
+!                  CWM(I,K)= max(0.0,gq0(i,k,ntcw))+max(0.0,gq0(i,k,ntiw)) &
+!                           +max(0.0,gq0(i,k,ntrw))
+!                  IF (gq0(I,K,ntiw)>EPSQ) THEN
+!                     F_ICE(I,K)=MAX(0.0,MIN(1.,gq0(I,K,ntiw)/CWM(I,K)))
+!                  ELSE
+!                     F_ICE(I,K)=0.0
+!                  ENDIF
+!                  IF (gq0(I,K,ntrw)>EPSQ) THEN
+!                     F_RAIN(I,K)=gq0(I,K,ntrw)/(gq0(I,K,ntcw)+gq0(I,K,ntrw))
+!                  ELSE
+!                     F_RAIN(I,K)=0.
+!                  ENDIF
+!               ENDDO
+!            ENDDO
+!            if(mpirank == mpiroot) then
+!               write (0,*)'interstitial_4: cwm =',   &
+!                                                 maxval(cwm),minval(cwm)
+!               write (0,*)'interstitial_4: f_ice =',  &
+!                                                 maxval(f_ice),minval(f_ice)
+!               write (0,*)'interstitial_4: f_rain =', &
+!                                                 maxval(f_rain),minval(f_rain)
+!             end if
+!
+!          endif
+!
 !MZ
         else
           do k=1,levs
