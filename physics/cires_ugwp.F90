@@ -75,10 +75,7 @@ contains
 
     if (is_initialized) return
 
-    write(0,*) "DH DEBUG cires_ugwp_init: do_ugwp, (cdmbgwd(3) > 0.0) ?", do_ugwp, " ", (cdmbgwd(3) > 0.0)
-
     if (do_ugwp .or. cdmbgwd(3) > 0.0) then
-      write(0,*) "DH DEBUG cires_ugwp_init: cires_ugwp_mod_init"
       call cires_ugwp_mod_init (me, master, nlunit, logunit, fn_nml2,  &
                                 lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
@@ -93,8 +90,6 @@ contains
       errflg = 1
       return
     end if
-
-    write(0,*) "DH DEBUG cires_ugwp_init: set is_initialized = .true."
 
     is_initialized = .true.
 
@@ -213,14 +208,6 @@ contains
     errmsg = ''
     errflg = 0
 
-    ! DH*
-    write(0,*) "DH DEBUG cires_ugwp_run: do_ugwp, nmtvr:", do_ugwp, " ", nmtvr
-    ! *DH
-
-    ! DH*
-    write(0,*) "DH DEBUG cires_ugwp_run: cdmbgwd=", cdmbgwd
-    ! *DH
-
     ! 1) ORO stationary GWs
     !    ------------------
     ! wrap everything in a do_ugwp 'if test' in order not to break the namelist functionality
@@ -238,9 +225,6 @@ contains
 
      zlwb(:)   = 0.
 
-     ! DH*
-     write(0,*) "DH DEBUG cires_ugwp_run: calling GWDPS_V0, cdmbgwd:", cdmbgwd
-     ! *DH
      call GWDPS_V0(im, levs, lonr, do_tofd, Pdvdt, Pdudt, Pdtdt, Pkdis,          &
           ugrs, vgrs, tgrs, qgrs(:,:,1), kpbl, prsi,del,prsl, prslk, phii, phil, &
           dtp, kdt, sgh30, hprime, oc, oa4, clx, theta, sigma, gamma, elvmax,    &
@@ -260,9 +244,6 @@ contains
       enddo
 
       if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
-        ! DH*
-        write(0,*) "DH DEBUG cires_ugwp_run: calling gwdps_run, cdmbgwd:", cdmbgwd
-        ! *DH
         call gwdps_run(im, im, levs, Pdvdt, Pdudt, Pdtdt,              &
                    ugrs, vgrs, tgrs, qgrs,                             &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
@@ -271,9 +252,6 @@ contains
                    con_g,  con_cp, con_rd, con_rv, lonr,               &
                    nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb,              &
                    errmsg, errflg)
-        ! DH*
-        write(0,*) "DH DEBUG cires_ugwp_run: after calling gwdps_run, errflg=", errflg
-        ! *DH
         if (errflg/=0) return
       endif
 
@@ -284,15 +262,7 @@ contains
 
     endif ! do_ugwp
 
-    ! DH*
-    write(0,*) "DH DEBUG cires_ugwp_run: after do_ugwp"
-    ! *DH
-
     if (cdmbgwd(3) > 0.0) then
-
-      ! DH*
-      write(0,*) "DH DEBUG cires_ugwp_run: calling slat_geos5_tamp"
-      ! *DH
 
       ! 2) non-stationary GW-scheme with GMAO/MERRA GW-forcing
       call slat_geos5_tamp(im, tamp_mpa, xlat_d, tau_ngw)
@@ -332,11 +302,6 @@ contains
         enddo
       endif
 
-      ! DH*
-      write(0,*) "DH DEBUG cires_ugwp_run: tau_ngw=", sum(tau_ngw)
-      write(0,*) "DH DEBUG cires_ugwp_run: calling fv3_ugwp_solv2_v0"
-      ! *DH
-
       call fv3_ugwp_solv2_v0(im, levs, dtp, tgrs, ugrs, vgrs,qgrs(:,:,1), &
            prsl, prsi, phil, xlat_d, sinlat, coslat, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, &
            tau_ngw, me, master, kdt)
@@ -366,10 +331,6 @@ contains
       enddo
 
     endif
-
-    ! DH*
-    write(0,*) "DH DEBUG cires_ugwp_run: before final pogw assignment"
-    ! *DH
 
     if (pogw == 0.0) then
       tau_mtb  = 0. ; tau_ogw  = 0. ; tau_tofd = 0.

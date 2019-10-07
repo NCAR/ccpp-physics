@@ -294,9 +294,6 @@
 !
 !   ********************************************************************
       USE MACHINE , ONLY : kind_phys
-      ! DH*
-      use GFS_diagtoscreen
-      ! *DH
       implicit none
 !
       ! Interface variables
@@ -415,48 +412,6 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      call print_var(-999, -999, -999, "IM      :", IM     )
-      call print_var(-999, -999, -999, "IX      :", IX     )
-      call print_var(-999, -999, -999, "KM      :", KM     )
-      call print_var(-999, -999, -999, "A       :", A      )
-      call print_var(-999, -999, -999, "B       :", B      )
-      call print_var(-999, -999, -999, "C       :", C      )
-      call print_var(-999, -999, -999, "U1      :", U1     )
-      call print_var(-999, -999, -999, "V1      :", V1     )
-      call print_var(-999, -999, -999, "T1      :", T1     )
-      call print_var(-999, -999, -999, "Q1      :", Q1     )
-      call print_var(-999, -999, -999, "KPBL    :", KPBL   )
-      call print_var(-999, -999, -999, "PRSI    :", PRSI   )
-      call print_var(-999, -999, -999, "DEL     :", DEL    )
-      call print_var(-999, -999, -999, "PRSL    :", PRSL   )
-      call print_var(-999, -999, -999, "PRSLK   :", PRSLK  )
-      call print_var(-999, -999, -999, "PHII    :", PHII   )
-      call print_var(-999, -999, -999, "PHIL    :", PHIL   )
-      call print_var(-999, -999, -999, "DELTIM  :", DELTIM )
-      call print_var(-999, -999, -999, "KDT     :", KDT    )
-      call print_var(-999, -999, -999, "HPRIME  :", HPRIME )
-      call print_var(-999, -999, -999, "OC      :", OC     )
-      call print_var(-999, -999, -999, "OA4     :", OA4    )
-      call print_var(-999, -999, -999, "CLX4    :", CLX4   )
-      call print_var(-999, -999, -999, "THETA   :", THETA  )
-      call print_var(-999, -999, -999, "SIGMA   :", SIGMA  )
-      call print_var(-999, -999, -999, "GAMMA   :", GAMMA  )
-      call print_var(-999, -999, -999, "ELVMAX  :", ELVMAX )
-      call print_var(-999, -999, -999, "DUSFC   :", DUSFC  )
-      call print_var(-999, -999, -999, "DVSFC   :", DVSFC  )
-      call print_var(-999, -999, -999, "G       :", G      )
-      call print_var(-999, -999, -999, "CP      :", CP     )
-      call print_var(-999, -999, -999, "RD      :", RD     )
-      call print_var(-999, -999, -999, "RV      :", RV     )
-      call print_var(-999, -999, -999, "IMX     :", IMX    )
-      call print_var(-999, -999, -999, "nmtvr   :", nmtvr  )
-      !call print_var(-999, -999, -999, "cdmbgwd :", cdmbgwd)
-      call print_var(-999, -999, -999, "me      :", me     )
-      call print_var(-999, -999, -999, "lprnt   :", lprnt  )
-      call print_var(-999, -999, -999, "ipr     :", ipr    )
-      call print_var(-999, -999, -999, "rdxzb   :", rdxzb  )
-
 !
 !     parameter (cdmb = 1.0)     ! non-dim sub grid mtn drag Amp (*j*)
 ! non-dim sub grid mtn drag Amp (*j*)
@@ -1354,48 +1309,6 @@
 !
 !      print *,' in gwdps_lm.f 18  =',A(ipt(1),idxzb(1))
 !    &,                          B(ipt(1),idxzb(1)),me
-
-      call print_var(-777, -777, -777, "IM      :", IM     )
-      call print_var(-777, -777, -777, "IX      :", IX     )
-      call print_var(-777, -777, -777, "KM      :", KM     )
-      call print_var(-777, -777, -777, "A       :", A      )
-      call print_var(-777, -777, -777, "B       :", B      )
-      call print_var(-777, -777, -777, "C       :", C      )
-      call print_var(-777, -777, -777, "U1      :", U1     )
-      call print_var(-777, -777, -777, "V1      :", V1     )
-      call print_var(-777, -777, -777, "T1      :", T1     )
-      call print_var(-777, -777, -777, "Q1      :", Q1     )
-      call print_var(-777, -777, -777, "KPBL    :", KPBL   )
-      call print_var(-777, -777, -777, "PRSI    :", PRSI   )
-      call print_var(-777, -777, -777, "DEL     :", DEL    )
-      call print_var(-777, -777, -777, "PRSL    :", PRSL   )
-      call print_var(-777, -777, -777, "PRSLK   :", PRSLK  )
-      call print_var(-777, -777, -777, "PHII    :", PHII   )
-      call print_var(-777, -777, -777, "PHIL    :", PHIL   )
-      call print_var(-777, -777, -777, "DELTIM  :", DELTIM )
-      call print_var(-777, -777, -777, "KDT     :", KDT    )
-      call print_var(-777, -777, -777, "HPRIME  :", HPRIME )
-      call print_var(-777, -777, -777, "OC      :", OC     )
-      call print_var(-777, -777, -777, "OA4     :", OA4    )
-      call print_var(-777, -777, -777, "CLX4    :", CLX4   )
-      call print_var(-777, -777, -777, "THETA   :", THETA  )
-      call print_var(-777, -777, -777, "SIGMA   :", SIGMA  )
-      call print_var(-777, -777, -777, "GAMMA   :", GAMMA  )
-      call print_var(-777, -777, -777, "ELVMAX  :", ELVMAX )
-      call print_var(-777, -777, -777, "DUSFC   :", DUSFC  )
-      call print_var(-777, -777, -777, "DVSFC   :", DVSFC  )
-      call print_var(-777, -777, -777, "G       :", G      )
-      call print_var(-777, -777, -777, "CP      :", CP     )
-      call print_var(-777, -777, -777, "RD      :", RD     )
-      call print_var(-777, -777, -777, "RV      :", RV     )
-      call print_var(-777, -777, -777, "IMX     :", IMX    )
-      call print_var(-777, -777, -777, "nmtvr   :", nmtvr  )
-      !call print_var(-777, -777, -777, "cdmbgwd :", cdmbgwd)
-      call print_var(-777, -777, -777, "me      :", me     )
-      call print_var(-777, -777, -777, "lprnt   :", lprnt  )
-      call print_var(-777, -777, -777, "ipr     :", ipr    )
-      call print_var(-777, -777, -777, "rdxzb   :", rdxzb  )
-
       RETURN
       end subroutine gwdps_run
 !> @}

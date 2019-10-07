@@ -41,7 +41,7 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
-        
+
         if (lsm == lsm_noahmp) then
           do i=1,im
             if(dry(i)) then
@@ -50,7 +50,7 @@
             endif
           enddo
         endif
-        
+
         if (lssav) then
           do i=1,im
             tmpmax(i)  = max(tmpmax(i),t2m(i))
