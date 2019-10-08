@@ -6,7 +6,8 @@ module GFS_rrtmgp_sw_post
                                         GFS_control_type,   &
                                         GFS_grid_type,      &
                                         GFS_radtend_type,   &
-                                        GFS_diag_type
+                                        GFS_diag_type,      &
+                                        GFS_statein_type
   use module_radiation_aerosols, only: NSPC1
   use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, profsw_type, cmpfsw_type
   ! RRTMGP DDT's
@@ -23,51 +24,27 @@ contains
   subroutine GFS_rrtmgp_sw_post_init()
   end subroutine GFS_rrtmgp_sw_post_init
 
-  ! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
-#ifndef __PGI
-!> \section arg_table_GFS_rrtmgp_sw_post_run Argument Table
-!! | local_name        | standard_name                                                                                  | long_name                                                                    | units    | rank |  type                |   kind    | intent | optional |
-!! |-------------------|------------------------------------------------------------------------------------------------|------------------------------------------------------------------------------|----------|------|----------------------|-----------|--------|----------|
-!! | Model             | GFS_control_type_instance                                                                      | Fortran DDT containing FV3-GFS model control parameters                      | DDT      |    0 | GFS_control_type     |           | in     | F        |
-!! | Grid              | GFS_grid_type_instance                                                                         | Fortran DDT containing FV3-GFS grid and interpolation related data           | DDT      |    0 | GFS_grid_type        |           | in     | F        |
-!! | Diag              | GFS_diag_type_instance                                                                         | Fortran DDT containing FV3-GFS diagnotics data                               | DDT      |    0 | GFS_diag_type        |           | inout  | F        |
-!! | Radtend           | GFS_radtend_type_instance                                                                      | Fortran DDT containing FV3-GFS radiation tendencies                          | DDT      |    0 | GFS_radtend_type     |           | inout  | F        |
-!! | Coupling          | GFS_coupling_type_instance                                                                     | Fortran DDT containing FV3-GFS fields to/from coupling with other components | DDT      |    0 | GFS_coupling_type    |           | inout  | F        |
-!! | scmpsw            | components_of_surface_downward_shortwave_fluxes                                                | derived type for special components of surface downward shortwave fluxes     | W m-2    |    1 | cmpfsw_type          |           | inout  | T        |
-!! | im                | horizontal_loop_extent                                                                         | horizontal loop extent                                                       | count    |    0 | integer              |           | in     | F        |
-!! | p_lev             | air_pressure_at_interface_for_RRTMGP_in_hPa                                                    | air pressure level                                                           | hPa      |    2 | real                 | kind_phys | in     | F        |
-!! | nday              | daytime_points_dimension                                                                       | daytime points dimension                                                     | count    |    0 | integer              |           | in     | F        |
-!! | idxday            | daytime_points                                                                                 | daytime points                                                               | index    |    1 | integer              |           | in     | F        |
-!! | fluxswUP_allsky   | sw_flux_profile_upward_allsky                                                                  | RRTMGP upward shortwave all-sky flux profile                                 | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | fluxswDOWN_allsky | sw_flux_profile_downward_allsky                                                                | RRTMGP downward shortwave all-sky flux profile                               | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | fluxswUP_clrsky   | sw_flux_profile_upward_clrsky                                                                  | RRTMGP upward shortwave clr-sky flux profile                                 | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | fluxswDOWN_clrsky | sw_flux_profile_downward_clrsky                                                                | RRTMGP downward shortwave clr-sky flux profile                               | W m-2    |    2 | real                 | kind_phys | in     | F        |
-!! | sw_gas_props      | coefficients_for_sw_gas_optics                                                                 | DDT containing spectral information for RRTMGP SW radiation scheme           | DDT      |    0 | ty_gas_optics_rrtmgp |           | in     | F        |
-!! | hswc              | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step                    | shortwave total sky heating rate                                             | K s-1    |    2 | real                 | kind_phys | out    | F        |
-!! | topflx_sw         | sw_fluxes_top_atmosphere                                                                       | shortwave total sky fluxes at the top of the atm                             | W m-2    |    1 | topfsw_type          |           | inout  | F        |
-!! | sfcflx_sw         | sw_fluxes_sfc                                                                                  | shortwave total sky fluxes at the Earth surface                              | W m-2    |    1 | sfcfsw_type          |           | inout  | F        |
-!! | flxprf_sw         | sw_fluxes                                                                                      | sw fluxes total sky / csk and up / down at levels                            | W m-2    |    2 | profsw_type          |           | inout  | T        |
-!! | hsw0              | tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step | shortwave clear sky heating rate                                             | K s-1    |    2 | real                 | kind_phys | inout  | T        |
-!! | errmsg            | ccpp_error_message                                                                             | error message for error handling in CCPP                                     | none     |    0 | character            | len=*     | out    | F        |
-!! | errflg            | ccpp_error_flag                                                                                | error flag for error handling in CCPP                                        | flag     |    0 | integer              |           | out    | F        |
+!> \section arg_table_GFS_rrtmgp_sw_post_run
+!! \htmlinclude GFS_rrtmgp_sw_post.html
 !!
-#endif
-  subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling,       & 
-       scmpsw, im, p_lev, sw_gas_props,  nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky,         &
-       fluxswUP_clrsky, fluxswDOWN_clrsky, hswc, topflx_sw, sfcflx_sw, flxprf_sw, hsw0,   &
-       errmsg, errflg)
+  subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling, Statein,      &
+       scmpsw, im, p_lev, sw_gas_props, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky,&
+       fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota, mtopa, cld_frac, &
+       cldtausw, hswc, topflx_sw, sfcflx_sw, flxprf_sw, hsw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model             ! Fortran DDT containing FV3-GFS model control parameters
     type(GFS_grid_type), intent(in) :: &
          Grid              ! Fortran DDT containing FV3-GFS grid and interpolation related data 
-  type(GFS_coupling_type), intent(inout) :: &
+    type(GFS_coupling_type), intent(inout) :: &
          Coupling          ! Fortran DDT containing FV3-GFS fields to/from coupling with other components 
     type(GFS_radtend_type), intent(inout) :: &
          Radtend           ! Fortran DDT containing FV3-GFS radiation tendencies 
     type(GFS_diag_type), intent(inout) :: &
          Diag              ! Fortran DDT containing FV3-GFS diagnotics data  
+    type(GFS_statein_type), intent(in) :: &
+         Statein           ! Fortran DDT containing FV3-GFS prognostic state data in from dycore  
     integer, intent(in) :: &
          im,             & ! Horizontal loop extent 
          nDay              ! Number of daylit columns
@@ -82,6 +59,18 @@ contains
          fluxswDOWN_allsky, & ! SW All-sky flux                    (W/m2)
          fluxswUP_clrsky,   & ! SW Clear-sky flux                  (W/m2)
          fluxswDOWN_clrsky    ! SW All-sky flux                    (W/m2)
+    real(kind_phys), intent(in) :: &
+         raddt             ! Radiation time step
+    real(kind_phys), dimension(im,NSPC1), intent(in) :: &
+         aerodp            ! Vertical integrated optical depth for various aerosol species  
+    real(kind_phys), dimension(im,5), intent(in) :: &
+         cldsa             ! Fraction of clouds for low, middle, high, total and BL 
+    integer,         dimension(im,3), intent(in) ::&
+         mbota,          & ! vertical indices for low, middle and high cloud tops 
+         mtopa             ! vertical indices for low, middle and high cloud bases
+    real(kind_phys), dimension(im,Model%levs), intent(in) :: &
+         cld_frac,       & ! Total cloud fraction in each layer
+         cldtausw          ! approx .55mu band layer cloud optical depth  
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
@@ -119,7 +108,8 @@ contains
                           ! visbm - downward uv+vis direct beam flux (W/m2)
                           ! visdf - downward uv+vis diffused flux    (W/m2)
     ! Local variables
-    integer :: i, k, iSFC, iTOA
+    integer :: i, j, k, iSFC, iTOA, itop, ibtc
+    real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys), dimension(nDay, Model%levs) :: thetaTendClrSky, thetaTendAllSky
     logical :: l_clrskysw_hr, l_fluxessw2d, top_at_1, l_sfcFluxessw1D
 
@@ -255,6 +245,81 @@ contains
           Coupling%sfcdsw(i) = Radtend%sfcfsw(i)%dnfxc
        enddo  
     endif                                ! end_if_lsswr
+
+    ! #######################################################################################
+    ! Save SW diagnostics
+    ! - For time averaged output quantities (including total-sky and clear-sky SW and LW 
+    !   fluxes at TOA and surface; conventional 3-domain cloud amount, cloud top and base 
+    !   pressure, and cloud top temperature; aerosols AOD, etc.), store computed results in
+    !   corresponding slots of array fluxr with appropriate time weights.
+    ! - Collect the fluxr data for wrtsfc
+    ! #######################################################################################
+    if (Model%lssav) then
+       if (Model%lsswr) then
+          do i=1,im
+             Diag%fluxr(i,34) = Diag%fluxr(i,34) + Model%fhswr*aerodp(i,1)  ! total aod at 550nm
+             Diag%fluxr(i,35) = Diag%fluxr(i,35) + Model%fhswr*aerodp(i,2)  ! DU aod at 550nm
+             Diag%fluxr(i,36) = Diag%fluxr(i,36) + Model%fhswr*aerodp(i,3)  ! BC aod at 550nm
+             Diag%fluxr(i,37) = Diag%fluxr(i,37) + Model%fhswr*aerodp(i,4)  ! OC aod at 550nm
+             Diag%fluxr(i,38) = Diag%fluxr(i,38) + Model%fhswr*aerodp(i,5)  ! SU aod at 550nm
+             Diag%fluxr(i,39) = Diag%fluxr(i,39) + Model%fhswr*aerodp(i,6)  ! SS aod at 550nm
+             if (Radtend%coszen(i) > 0.) then
+                ! SW all-sky fluxes
+                tem0d = Model%fhswr * Radtend%coszdg(i) / Radtend%coszen(i)
+                Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
+                Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  ! total sky sfc sw up
+                Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
+                ! SW uv-b fluxes
+                Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
+                Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
+                ! SW TOA incoming fluxes
+                Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn
+                ! SW SFC flux components
+                Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
+                Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
+                Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
+                Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
+                ! SW clear-sky fluxes
+                Diag%fluxr(i,29) = Diag%fluxr(i,29) + Diag%topfsw(i)%upfx0 * tem0d     ! clear sky top sw up
+                Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d  ! clear sky sfc sw up
+                Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d  ! clear sky sfc sw dn
+             endif
+          enddo
+
+          ! Save total and boundary-layer clouds
+          do i=1,im
+             Diag%fluxr(i,17) = Diag%fluxr(i,17) + raddt * cldsa(i,4)
+             Diag%fluxr(i,18) = Diag%fluxr(i,18) + raddt * cldsa(i,5)
+          enddo
+
+          ! Save cld frac,toplyr,botlyr and top temp, note that the order of h,m,l cloud 
+          ! is reversed for the fluxr output. save interface pressure (pa) of top/bot
+          do j = 1, 3
+             do i = 1, im
+                tem0d = raddt * cldsa(i,j)
+                itop  = mtopa(i,j)
+                ibtc  = mbota(i,j)
+                Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
+                Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop)
+                Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc)
+                Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
+                
+                ! Add optical depth and emissivity output
+                tem1 = 0.
+                do k=ibtc,itop
+                   tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
+                enddo
+                Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
+             enddo
+          enddo
+       endif
+
+       if (Model%lgocart .or. Model%ldiag3d) then
+          do k = 1, Model%levs
+             Coupling%cldcovi(1:im,k) = cld_frac(1:im,k)
+          enddo
+       endif
+    endif
 
  
   end subroutine GFS_rrtmgp_sw_post_run

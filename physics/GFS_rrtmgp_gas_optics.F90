@@ -1,16 +1,16 @@
+!> \file GFS_rrtmgp_gas_optics.f90
+!! This file contains
 module GFS_rrtmgp_gas_optics
   use machine,      only: kind_phys
   use GFS_typedefs, only: GFS_control_type,GFS_radtend_type
+
+  public GFS_rrtmgp_gas_optics_init,GFS_rrtmgp_gas_optics_run,GFS_rrtmgp_gas_optics_finalize
 contains
   
-!! \section arg_table_GFS_rrtmgp_gas_optics_init Argument Table
-!! | local_name   | standard_name                     | long_name                                               | units    | rank |  type                 |   kind    | intent | optional |
-!! |--------------|-----------------------------------|---------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | Model        | GFS_control_type_instance         | Fortran DDT containing FV3-GFS model control parameters | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | Radtend      | GFS_radtend_type_instance         | Fortran DDT containing FV3-GFS radiation tendencies     | DDT      |    0 | GFS_radtend_type      |           | inout  | F        |
-!! | errmsg       | ccpp_error_message                | error message for error handling in CCPP                | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg       | ccpp_error_flag                   | error flag for error handling in CCPP                   | flag     |    0 | integer               |           | out    | F        |
+!! \section arg_table_GFS_rrtmgp_gas_optics_init
+!! \htmlinclude GFS_rrtmgp_gas_optics.html
 !!
+
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_gas_optics_init()
   ! #########################################################################################
@@ -34,7 +34,6 @@ contains
     ! Initialize
     errmsg = ''
     errflg = 0
-
 
     ! Which gases are active? Provided via physics namelist.
     if (len(Model%active_gases) .gt. 0) then
@@ -60,6 +59,8 @@ contains
   end subroutine GFS_rrtmgp_gas_optics_init
   !
   subroutine GFS_rrtmgp_gas_optics_run()
+
+
   end subroutine GFS_rrtmgp_gas_optics_run
   !
   subroutine GFS_rrtmgp_gas_optics_finalize()

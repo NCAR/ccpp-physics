@@ -1,0 +1,31 @@
+[ccpp-arg-table]
+  name = topflw_type
+  type = ddt
+
+########################################################################
+[ccpp-arg-table]
+  name = sfcflw_type
+  type = ddt
+
+########################################################################
+[ccpp-arg-table]
+  name = module_radlw_parameters
+  type = module
+[topflw_type]
+  standard_name = topflw_type
+  long_name = definition of type topflw_type
+  units = DDT
+  dimensions = ()
+  type = topflw_type
+[sfcflw_type]
+  standard_name = sfcflw_type
+  long_name = definition of type sfcflw_type
+  units = DDT
+  dimensions = ()
+  type = sfcflw_type
+[proflw_type]
+  standard_name = proflw_type
+  long_name = definition of type proflw_type
+  units = DDT
+  dimensions = ()
+  type = proflw_type

@@ -7,7 +7,7 @@ module rrtmgp_lw_gas_optics
   use mo_source_functions,   only: ty_source_func_lw
   use mo_optical_props,      only: ty_optical_props_1scl
   use mo_compute_bc,         only: compute_bc
-  use rrtmgp_aux,            only: check_error_msg
+  use rrtmgp_aux,            only: check_error_msg, rrtmgp_minP, rrtmgp_minT
   use netcdf
 
   ! Parameters
@@ -18,18 +18,8 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_gas_optics_init
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_gas_optics_init Argument Table
-!! | local_name   | standard_name                                | long_name                                                          | units | rank | type                 | kind  | intent | optional |
-!! |--------------|----------------------------------------------|--------------------------------------------------------------------|-------|------|----------------------|-------|--------|----------|
-!! | Model        | GFS_control_type_instance                    | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type     |       | in     | F        |
-!! | Radtend      | GFS_radtend_type_instance                    | Fortran DDT containing FV3-GFS radiation tendencies                | DDT   |    0 | GFS_radtend_type     |       | in     | F        |
-!! | mpirank      | mpi_rank                                     | current MPI rank                                                   | index |    0 | integer              |       | in     | F        |
-!! | mpiroot      | mpi_root                                     | master MPI rank                                                    | index |    0 | integer              |       | in     | F        |
-!! | mpicomm      | mpi_comm                                     | MPI communicator                                                   | index |    0 | integer              |       | in     | F        |
-!! | errmsg       | ccpp_error_message                           | error message for error handling in CCPP                           | none  |    0 | character            | len=* | out    | F        |
-!! | errflg       | ccpp_error_flag                              | error flag for error handling in CCPP                              | flag  |    0 | integer              |       | out    | F        |
-!! | ipsdlw0      | initial_permutation_seed_lw                  | initial seed for McICA LW                                          | none  |    0 | integer              |       | out    | F        |
-!! | lw_gas_props | coefficients_for_lw_gas_optics               | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp |       | out    | F        |
+!! \section arg_table_rrtmgp_lw_gas_optics_init
+!! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(Model, Radtend, mpicomm, mpirank, mpiroot, lw_gas_props,      &
        ipsdlw0, errmsg, errflg)
@@ -412,6 +402,11 @@ contains
 
     ! Set initial permutation seed for McICA, initially set to number of G-points
     ipsdlw0 = lw_gas_props%get_ngpt()
+
+    ! Store minimum pressure/temperature allowed by RRTMGP
+    rrtmgp_minP = lw_gas_props%get_press_min()
+    rrtmgp_minT = lw_gas_props%get_temp_min()
+
   end subroutine rrtmgp_lw_gas_optics_init
 
   ! #########################################################################################
@@ -422,28 +417,12 @@ contains
   !        If calling rte/mo_rte_sw.F90:rte_sw() directly, place calls to compute source 
   !        function and gas_optics() here.
   ! #########################################################################################
-!! \section arg_table_rrtmgp_lw_gas_optics_run Argument Table
-!! | local_name           | standard_name                                                          | long_name                                                          | units | rank | type                  | kind      | intent | optional |
-!! |----------------------|------------------------------------------------------------------------|--------------------------------------------------------------------|-------|------|-----------------------|-----------|--------|----------|
-!! | Model                | GFS_control_type_instance                                              | Fortran DDT containing FV3-GFS model control parameters            | DDT   |    0 | GFS_control_type      |           | in     | F        |
-!! | Radtend              | GFS_radtend_type_instance                                              | Fortran DDT containing FV3-GFS radiation tendencies                | DDT   |    0 | GFS_radtend_type      |           | in     | F        |
-!! | lw_gas_props         | coefficients_for_lw_gas_optics                                         | DDT containing spectral information for RRTMGP LW radiation scheme | DDT   |    0 | ty_gas_optics_rrtmgp  |           | in     | F        |
-!! | ncol                 | horizontal_loop_extent                                                 | horizontal dimension                                               | count |    0 | integer               |           | in     | F        |
-!! | p_lay                | air_pressure_at_layer_for_RRTMGP_in_hPa                                | air pressure layer                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | p_lev                | air_pressure_at_interface_for_RRTMGP_in_hPa                            | air pressure level                                                 | hPa   |    2 | real                  | kind_phys | in     | F        |
-!! | t_lay                | air_temperature_at_layer_for_RRTMGP                                    | air temperature layer                                              | K     |    2 | real                  | kind_phys | in     | F        |
-!! | t_lev                | air_temperature_at_interface_for_RRTMGP                                | air temperature level                                              | K     |    2 | real                  | kind_phys | in     | F        |
-!! | skt                  | surface_ground_temperature_for_radiation                               | surface ground temperature for radiation                           | K     |    1 | real                  | kind_phys | in     | F        |
-!! | gas_concentrations   | Gas_concentrations_for_RRTMGP_suite                                    | DDT containing gas concentrations for RRTMGP radiation scheme      | DDT   |    0 | ty_gas_concs          |           | in     | F        |
-!! | lslwr                | flag_to_calc_lw                                                        | flag to calculate LW irradiances                                   | flag  |    0 | logical               |           | in     | F        |
-!! | errmsg               | ccpp_error_message                                                     | error message for error handling in CCPP                           | none  |    0 | character             | len=*     | out    | F        |
-!! | errflg               | ccpp_error_flag                                                        | error flag for error handling in CCPP                              | flag  |    0 | integer               |           | out    | F        |
-!! | optical_props_clrsky | longwave_optical_properties_for_clear_sky                              | Fortran DDT containing RRTMGP optical properties                   | DDT   |    0 | ty_optical_props_1scl |           | out    | F        |
-!! | sources_LW           | longwave_source_function                                               | Fortran DDT containing RRTMGP source functions                     | DDT   |    0 | ty_source_func_lw     |           | out    | F        |
-!! | toa_src              | incident_terrestrial_irradiance_at_top_of_atmosphere_by_spectral_point | top of atmosphere incident terrestrial flux in each spectral point |       |    2 | real                  | kind_phys | out    | F        |
+!! \section arg_table_rrtmgp_lw_gas_optics_run
+!! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
-  subroutine rrtmgp_lw_gas_optics_run(Model, Radtend, lw_gas_props, ncol, p_lay, p_lev, t_lay, t_lev, skt, &
-       gas_concentrations, lslwr, optical_props_clrsky, sources_LW, toa_src, errmsg, errflg)
+  subroutine rrtmgp_lw_gas_optics_run(Model, Radtend, lw_gas_props, ncol, p_lay, p_lev, t_lay,&
+       t_lev, skt, gas_concentrations, lslwr, lw_optical_props_clrsky, sources,   &
+       errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -474,11 +453,9 @@ contains
     integer,          intent(out) :: &
          errflg                  ! Error code
     type(ty_optical_props_1scl),intent(out) :: &
-         optical_props_clrsky    !
+         lw_optical_props_clrsky    !
     type(ty_source_func_lw),intent(out) :: &
-         sources_LW
-    real(kind_phys),dimension(ncol,lw_gas_props%get_ngpt()),intent(out)  :: &
-         toa_src
+         sources
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -487,9 +464,9 @@ contains
     if (.not. Model%lslwr) return
 
     ! Allocate space
-    call check_error_msg('rrtmgp_lw_gas_optics_run',optical_props_clrsky%alloc_1scl(ncol, model%levs, lw_gas_props))
-    call check_error_msg('rrtmgp_lw_gas_optics_run',sources_LW%init(lw_gas_props))
-    call check_error_msg('rrtmgp_lw_gas_optics_run',sources_LW%alloc(ncol, Model%levs))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',lw_optical_props_clrsky%alloc_1scl(ncol, model%levs, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',sources%init(lw_gas_props))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',sources%alloc(ncol, Model%levs))
 
     ! Compute boundary-condition (Only do for low-ceiling models)
     !call check_error_msg('rrtmgp_lw_gas_optics_run',compute_bc(&
@@ -498,19 +475,19 @@ contains
     !     p_lev,              & ! IN  -
     !     t_lay,              & ! IN  -
     !     gas_concentrations, & ! IN  -
-    !     toa_src))             ! OUT -    
+    !     Radtend%toa_src_lw))             ! OUT -    
 
     ! Gas-optics (djs asks pincus: I think it makes sense to have a generic gas_optics interface in 
     ! ty_gas_optics_rrtmgp, just as in ty_gas_optics.
     call check_error_msg('rrtmgp_lw_gas_optics_run',lw_gas_props%gas_optics_int(&
-         p_lay,                & ! IN  -
-         p_lev,                & ! IN  -
-         t_lay,                & ! IN  -
-         skt,                  & ! IN  -
-         gas_concentrations,   & ! IN  -
-         optical_props_clrsky, & ! OUT -
-         sources_LW,           & ! OUT -
-         tlev=t_lev))            ! IN  -
+         p_lay,                   & ! IN  -
+         p_lev,                   & ! IN  -
+         t_lay,                   & ! IN  -
+         skt,                     & ! IN  -
+         gas_concentrations,      & ! IN  -
+         lw_optical_props_clrsky, & ! OUT -
+         sources,                 & ! OUT -
+         tlev=t_lev))               ! IN  -
 
   end subroutine rrtmgp_lw_gas_optics_run
 

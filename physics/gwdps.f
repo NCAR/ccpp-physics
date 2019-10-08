@@ -2,145 +2,6 @@
 !! This file is the  parameterization of orographic gravity wave
 !! drag and mountain blocking.
 
-!> This module contains the CCPP-compliant orographic gravity wave 
-!! drag pre interstitial codes.
-      module gwdps_pre
-
-      contains
-
-!> \section arg_table_gwdps_pre_init Argument Table
-!!
-      subroutine gwdps_pre_init()
-      end subroutine gwdps_pre_init
-
-!! \section arg_table_gwdps_pre_run Argument Table
-!! | local_name     | standard_name                                                           | long_name                                                                                | units   | rank | type      | kind      | intent | optional |
-!! |----------------|-------------------------------------------------------------------------|------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                  | horizontal dimension                                                                     | count   |    0 | integer   |           | in     | F        |
-!! | levs           | vertical_dimension                                                      | vertical layer dimension                                                                 | count   |    0 | integer   |           | in     | F        |
-!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                     | number of statistical measures of subgrid orography                                      | count   |    0 | integer   |           | in     | F        |
-!! | mntvar         | statistical_measures_of_subgrid_orography                               | array of statistical measures of subgrid orography                                       | various |    2 | real      | kind_phys | in     | F        |
-!! | hprime         | standard_deviation_of_subgrid_orography                                 | standard deviation of subgrid orography                                                  | m       |    1 | real      | kind_phys | out    | F        |
-!! | oc             | convexity_of_subgrid_orography                                          | convexity of subgrid orography                                                           | none    |    1 | real      | kind_phys | out    | F        |
-!! | oa4            | asymmetry_of_subgrid_orography                                          | asymmetry of subgrid orography                                                           | none    |    2 | real      | kind_phys | out    | F        |
-!! | clx            | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height | horizontal fraction of grid box covered by subgrid orography higher than critical height | frac    |    2 | real      | kind_phys | out    | F        |
-!! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                | angle with_respect to east of maximum subgrid orographic variations                      | degrees |    1 | real      | kind_phys | out    | F        |
-!! | sigma          | slope_of_subgrid_orography                                              | slope of subgrid orography                                                               | none    |    1 | real      | kind_phys | out    | F        |
-!! | gamma          | anisotropy_of_subgrid_orography                                         | anisotropy of subgrid orography                                                          | none    |    1 | real      | kind_phys | out    | F        |
-!! | elvmax         | maximum_subgrid_orography                                               | maximum of subgrid orography                                                             | m       |    1 | real      | kind_phys | out    | F        |
-!! | lssav          | flag_diagnostics                                                        | logical flag for storing diagnostics                                                     | flag    |    0 | logical   |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                                     | flag for 3d diagnostic fields                                                            | flag    |    0 | logical   |           | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                        | updated tendency of the temperature                                                      | K s-1   |    2 | real      | kind_phys | in     | F        |
-!! | dt3dt          | cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag    | cumulative change in temperature due to orographic gravity wave drag                     | K       |    2 | real      | kind_phys | inout  | F        |
-!! | dtf            | time_step_for_dynamics                                                  | dynamics timestep                                                                        | s       |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                      | error message for error handling in CCPP                                                 | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                         | error flag for error handling in CCPP                                                    | flag    |    0 | integer   |           | out    | F        |
-!!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
-      subroutine gwdps_pre_run(                                         &
-     &           im, levs, nmtvr, mntvar,                               &
-     &           hprime, oc, oa4, clx, theta,                           &
-     &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
-     &           dtdt, dt3dt, dtf, errmsg, errflg)
-
-      use machine, only : kind_phys
-      implicit none
-
-      integer, intent(in) :: im, levs, nmtvr
-      real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
-
-      real(kind=kind_phys), intent(out) ::                              &
-     &  hprime(im), oc(im), oa4(im,4), clx(im,4),                       &
-     &  theta(im), sigma(im), gamma(im), elvmax(im)                     &
-
-      logical, intent(in) :: lssav, ldiag3d
-      real(kind=kind_phys), intent(in) :: dtdt(im,levs)
-      ! dt3dt only allocated only if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout) :: dt3dt(:,:)
-      real(kind=kind_phys), intent(in) :: dtf
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      integer :: i, k
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      if (nmtvr == 14) then  ! current operational - as of 2014
-        hprime(:) = mntvar(:,1)
-        oc(:)     = mntvar(:,2)
-        oa4(:,1)  = mntvar(:,3)
-        oa4(:,2)  = mntvar(:,4)
-        oa4(:,3)  = mntvar(:,5)
-        oa4(:,4)  = mntvar(:,6)
-        clx(:,1)  = mntvar(:,7)
-        clx(:,2)  = mntvar(:,8)
-        clx(:,3)  = mntvar(:,9)
-        clx(:,4)  = mntvar(:,10)
-        theta(:)  = mntvar(:,11)
-        gamma(:)  = mntvar(:,12)
-        sigma(:)  = mntvar(:,13)
-        elvmax(:) = mntvar(:,14)
-      elseif (nmtvr == 10) then
-        hprime(:) = mntvar(:,1)
-        oc(:)     = mntvar(:,2)
-        oa4(:,1)  = mntvar(:,3)
-        oa4(:,2)  = mntvar(:,4)
-        oa4(:,3)  = mntvar(:,5)
-        oa4(:,4)  = mntvar(:,6)
-        clx(:,1)  = mntvar(:,7)
-        clx(:,2)  = mntvar(:,8)
-        clx(:,3)  = mntvar(:,9)
-        clx(:,4)  = mntvar(:,10)
-      elseif (nmtvr == 6) then
-        hprime(:) = mntvar(:,1)
-        oc(:)     = mntvar(:,2)
-        oa4(:,1)  = mntvar(:,3)
-        oa4(:,2)  = mntvar(:,4)
-        oa4(:,3)  = mntvar(:,5)
-        oa4(:,4)  = mntvar(:,6)
-        clx(:,1)  = 0.0
-        clx(:,2)  = 0.0
-        clx(:,3)  = 0.0
-        clx(:,4)  = 0.0
-      else
-        hprime = 0
-        oc = 0
-        oa4 = 0
-        clx = 0
-        theta = 0
-        gamma = 0
-        sigma = 0
-        elvmax = 0
-      endif   ! end if_nmtvr
-
-      if (lssav) then
-        if (ldiag3d) then
-          do k=1,levs
-            do i=1,im
-              dt3dt(i,k) = dt3dt(i,k) - dtdt(i,k)*dtf
-            enddo
-          enddo
-        endif
-      endif
-
-      end subroutine gwdps_pre_run
-!> @}
-
-! \ingroup GFS_ogwd
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_gwdps_pre_finalize Argument Table
-!!
-      subroutine gwdps_pre_finalize()
-      end subroutine gwdps_pre_finalize
-
-      end module gwdps_pre
-
 !> This module contains the CCPP-compliant orographic gravity wave dray scheme.
       module gwdps
 
@@ -161,50 +22,7 @@
 !! breaking and the presence of critical levels.
 !!
 !! \section arg_table_gwdps_run Argument Table
-!! | local_name     | standard_name                                                                 | long_name                                                                                                | units      | rank | type      | kind      | intent | optional |
-!! |----------------|-------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                        | horizontal loop extent                                                                                   | count      |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                                          | horizontal dimension                                                                                     | count      |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                            | number of vertical layers                                                                                | count      |    0 | integer   |           | in     | F        |
-!! | A              | tendency_of_y_wind_due_to_model_physics                                       | meridional wind tendency due to model physics                                                            | m s-2      |    2 | real      | kind_phys | inout  | F        |
-!! | B              | tendency_of_x_wind_due_to_model_physics                                       | zonal wind tendency due to model physics                                                                 | m s-2      |    2 | real      | kind_phys | inout  | F        |
-!! | C              | tendency_of_air_temperature_due_to_model_physics                              | air temperature tendency due to model physics                                                            | K s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | u1             | x_wind                                                                        | zonal wind                                                                                               | m s-1      |    2 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind                                                                        | meridional wind                                                                                          | m s-1      |    2 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature                                                               | mid-layer temperature                                                                                    | K          |    2 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity                                                 | mid-layer specific humidity of water vapor                                                               | kg kg-1    |    2 | real      | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer                            | vertical index at top atmospheric boundary layer                                                         | index      |    1 | integer   |           | in     | F        |
-!! | prsi           | air_pressure_at_interface                                                     | interface pressure                                                                                       | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers                                     | difference between mid-layer pressures                                                                   | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                                  | mid-layer pressure                                                                                       | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function_at_model_layers                                  | mid-layer Exner function                                                                                 | none       |    2 | real      | kind_phys | in     | F        |
-!! | phii           | geopotential_at_interface                                                     | interface geopotential                                                                                   | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                  | mid-layer geopotential                                                                                   | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | deltim         | time_step_for_physics                                                         | physics time step                                                                                        | s          |    0 | real      | kind_phys | in     | F        |
-!! | kdt            | index_of_time_step                                                            | current time step index                                                                                  | index      |    0 | integer   |           | in     | F        |
-!! | hprime         | standard_deviation_of_subgrid_orography                                       | standard deviation of subgrid orography                                                                  | m          |    1 | real      | kind_phys | in     | F        |
-!! | oc             | convexity_of_subgrid_orography                                                | convexity of subgrid orography                                                                           | none       |    1 | real      | kind_phys | in     | F        |
-!! | oa4            | asymmetry_of_subgrid_orography                                                | asymmetry of subgrid orography                                                                           | none       |    2 | real      | kind_phys | in     | F        |
-!! | clx4           | fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height       | horizontal fraction of grid box covered by subgrid orography higher than critical height                 | frac       |    2 | real      | kind_phys | in     | F        |
-!! | theta          | angle_from_east_of_maximum_subgrid_orographic_variations                      | angle with respect to east of maximum subgrid orographic variations                                      | degrees    |    1 | real      | kind_phys | in     | F        |
-!! | sigma          | slope_of_subgrid_orography                                                    | slope of subgrid orography                                                                               | none       |    1 | real      | kind_phys | in     | F        |
-!! | gamma          | anisotropy_of_subgrid_orography                                               | anisotropy of subgrid orography                                                                          | none       |    1 | real      | kind_phys | in     | F        |
-!! | elvmax         | maximum_subgrid_orography                                                     | maximum of subgrid orography                                                                             | m          |    1 | real      | kind_phys | inout  | F        |
-!! | dusfc          | instantaneous_x_stress_due_to_gravity_wave_drag                               | zonal surface stress due to orographic gravity wave drag                                                 | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc          | instantaneous_y_stress_due_to_gravity_wave_drag                               | meridional surface stress due to orographic gravity wave drag                                            | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | g              | gravitational_acceleration                                                    | gravitational acceleration                                                                               | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                 | specific heat of dry air at constant pressure                                                            | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                          | ideal gas constant for dry air                                                                           | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | rv             | gas_constant_water_vapor                                                      | ideal gas constant for water vapor                                                                       | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | imx            | number_of_equatorial_longitude_points                                         | number of longitude points along the equator                                                             | count      |    0 | integer   |           | in     | F        |
-!! | nmtvr          | number_of_statistical_measures_of_subgrid_orography                           | number of statistical measures of subgrid orography                                                      | count      |    0 | integer   |           | in     | F        |
-!! | cdmbgwd        | multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag | multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag | none       |    1 | real      | kind_phys | in     | F        |
-!! | me             | mpi_rank                                                                      | rank of the current MPI task                                                                             | index      |    0 | integer   |           | in     | F        |
-!! | lprnt          | flag_print                                                                    | flag for debugging printouts                                                                             | flag       |    0 | logical   |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                            | horizontal index of column used in debugging printouts                                                   | index      |    0 | integer   |           | in     | F        |
-!! | rdxzb          | level_of_dividing_streamline                                                  | level of the dividing streamline                                                                         | none       |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                                            | error message for error handling in CCPP                                                                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                               | error flag for error handling in CCPP                                                                    | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude gwdps_run.html
 !!
 !> \section gen_gwdps GFS Orographic GWD Scheme General Algorithm
 !! -# Calculate subgrid mountain blocking
@@ -1505,23 +1323,7 @@
       end subroutine gwdps_post_init
 
 !! \section arg_table_gwdps_post_run Argument Table
-!! | local_name     | standard_name                                                        | long_name                                                                | units | rank | type      | kind      | intent | optional |
-!! |----------------|----------------------------------------------------------------------|--------------------------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | lssav          | flag_diagnostics                                                     | flag for calculating diagnostic fields                                   | flag  |    0 | logical   |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                                  | flag for calculating 3-D diagnostic fields                               | flag  |    0 | logical   |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                               | dynamics time step                                                       | s     |    0 | real      | kind_phys | in     | F        |
-!! | dusfcg         | instantaneous_x_stress_due_to_gravity_wave_drag                      | zonal surface stress due to orographic gravity wave drag                 | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dvsfcg         | instantaneous_y_stress_due_to_gravity_wave_drag                      | meridional surface stress due to orographic gravity wave drag            | Pa    |    1 | real      | kind_phys | in     | F        |
-!! | dudt           | tendency_of_x_wind_due_to_model_physics                              | zonal wind tendency due to model physics                                 | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dvdt           | tendency_of_y_wind_due_to_model_physics                              | meridional wind tendency due to model physics                            | m s-2 |    2 | real      | kind_phys | in     | F        |
-!! | dtdt           | tendency_of_air_temperature_due_to_model_physics                     | air temperature tendency due to model physics                            | K s-1 |    2 | real      | kind_phys | in     | F        |
-!! | dugwd          | time_integral_of_x_stress_due_to_gravity_wave_drag                   | integral over time of zonal stress due to gravity wave drag              | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | dvgwd          | time_integral_of_y_stress_due_to_gravity_wave_drag                   | integral over time of meridional stress due to gravity wave drag         | Pa s  |    1 | real      | kind_phys | inout  | F        |
-!! | du3dt          | cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag      | cumulative change in zonal wind due to orographic gravity wave drag      | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dv3dt          | cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag      | cumulative change in meridional wind due to orographic gravity wave drag | m s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | dt3dt          | cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag | cumulative change in temperature due to orographic gravity wave drag     | K     |    2 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                   | error message for error handling in CCPP                                 | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                      | error flag for error handling in CCPP                                    | flag  |    0 | integer   |           | out    | F        |
+!! \htmlinclude gwdps_post_run.html
 !!
       subroutine gwdps_post_run(                                        &
      &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
