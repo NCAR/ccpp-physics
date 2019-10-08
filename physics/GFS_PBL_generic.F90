@@ -43,7 +43,7 @@
       integer, intent(out) :: errflg
 
       !local variables
-      integer :: i, k, kk, n
+      integer :: i, k, kk, k1, n
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -254,7 +254,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      integer :: i, k, kk, n
+      integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
       ! Initialize CCPP error handling variables
