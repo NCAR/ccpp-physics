@@ -143,7 +143,7 @@ module lsm_ruc
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, zf, ddvel, shdmin, shdmax, alvwf, alnwf,            &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
-     &       smc, stc, slc, lsm_ruc, lsm, land,                         &
+     &       smc, stc, slc, lsm_ruc, lsm, land, islimsk,                &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       smcwlt2, smcref2, wspd, do_mynnsfclay,                     &
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,& !  constants
@@ -184,6 +184,7 @@ module lsm_ruc
                                             con_hvap, con_fvirt
 
       logical, dimension(im), intent(in) :: flag_iter, flag_guess, land
+      integer, dimension(im), intent(in) :: islimsk ! sea/land/ice mask (=0/1/2)
       logical,                intent(in) :: do_mynnsfclay
 
 !  ---  in/out:
@@ -384,7 +385,7 @@ module lsm_ruc
         !> - Set flag for land and ice points.
         !- 10may19 - ice points are turned off.
         flag(i) = land(i)
-        if (land(i) .and. (vegtype(i)==iswater .or. vegtype(i)==isice)) then
+        if (land(i) .and. (vegtype(i)==iswater .or. (vegtype(i)==isice.and.islimsk(i)==2))) then
             !write(errmsg,'(a,i0,a,i0)') 'Logic error in sfc_drv_ruc_run: for i=', i, &
             !           ', land(i) is true but vegtype(i) is water or ice: ', vegtype(i)
             !errflg = 1
@@ -897,7 +898,7 @@ module lsm_ruc
         sfcdew(i)  = dew(i,j)
         qsurf(i)   = qsfc(i,j)
         sncovr1(i) = sncovr(i,j)
-        stm(i)     = soilm(i,j) * 1000.0 ! unit conversion (from m to kg m-2)
+        stm(i)     = soilm(i,j)
         tsurf(i)   = soilt(i,j)
         tice(i)    = tsurf(i)
         
