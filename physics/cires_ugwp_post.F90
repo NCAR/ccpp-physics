@@ -25,7 +25,8 @@ contains
          tot_zmtb, tot_zlwb, tot_zogw,                              &
          tot_tofd, tot_mtb, tot_ogw, tot_ngw,                       &
          du3dt_mtb,du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw,      &
-         dtdt, dudt, dvdt, errmsg, errflg)
+         dtdt, dudt, dvdt, lssav, ldiag3d, dusfcg, dvsfcg, dugwd,   &
+         dvgwd, du3dt, dv3dt, dt3dt, errmsg, errflg)
 
         use machine,                only: kind_phys
 
@@ -44,6 +45,12 @@ contains
         real(kind=kind_phys), intent(inout), dimension(im, levs) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
         real(kind=kind_phys), intent(inout), dimension(im, levs) :: dtdt, dudt, dvdt
 
+        ! For if (lssav) block, originally in gwdps_post_run
+        logical, intent(in) :: lssav, ldiag3d
+        real(kind=kind_phys), intent(in),    dimension(im)       :: dusfcg, dvsfcg
+        real(kind=kind_phys), intent(inout), dimension(im)       :: dugwd, dvgwd
+        real(kind=kind_phys), intent(inout), dimension(im, levs) :: du3dt, dv3dt, dt3dt
+
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
 
@@ -52,25 +59,37 @@ contains
         errflg = 0
 
         if (ldiag_ugwp) then
-            tot_zmtb =  tot_zmtb + dtf *zmtb
-            tot_zlwb =  tot_zlwb + dtf *zlwb
-            tot_zogw =  tot_zogw + dtf *zogw
+          tot_zmtb =  tot_zmtb + dtf *zmtb
+          tot_zlwb =  tot_zlwb + dtf *zlwb
+          tot_zogw =  tot_zogw + dtf *zogw
     
-            tot_tofd  = tot_tofd + dtf *tau_tofd
-            tot_mtb   = tot_mtb +  dtf *tau_mtb
-            tot_ogw   = tot_ogw +  dtf *tau_ogw
-            tot_ngw   = tot_ngw +  dtf *tau_ngw
+          tot_tofd  = tot_tofd + dtf *tau_tofd
+          tot_mtb   = tot_mtb +  dtf *tau_mtb
+          tot_ogw   = tot_ogw +  dtf *tau_ogw
+          tot_ngw   = tot_ngw +  dtf *tau_ngw
     
-            du3dt_mtb = du3dt_mtb + dtf *dudt_mtb
-            du3dt_tms = du3dt_tms + dtf *dudt_tms
-            du3dt_ogw = du3dt_ogw + dtf *dudt_ogw
-            du3dt_ngw = du3dt_ngw + dtf *gw_dudt
-            dv3dt_ngw = dv3dt_ngw + dtf *gw_dvdt
-         endif
+          du3dt_mtb = du3dt_mtb + dtf *dudt_mtb
+          du3dt_tms = du3dt_tms + dtf *dudt_tms
+          du3dt_ogw = du3dt_ogw + dtf *dudt_ogw
+          du3dt_ngw = du3dt_ngw + dtf *gw_dudt
+          dv3dt_ngw = dv3dt_ngw + dtf *gw_dvdt
+        endif
 
-         dtdt = dtdt + gw_dtdt
-         dudt = dudt + gw_dudt
-         dvdt = dvdt + gw_dvdt
+        dtdt = dtdt + gw_dtdt
+        dudt = dudt + gw_dudt
+        dvdt = dvdt + gw_dvdt
+
+        ! Originally in gwdps_post_run
+        if (lssav) then
+          dugwd(:) = dugwd(:) + dusfcg(:)*dtf
+          dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
+
+          if (ldiag3d) then
+            du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
+            dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
+            dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf
+          endif
+        endif
 
       end subroutine cires_ugwp_post_run
 
