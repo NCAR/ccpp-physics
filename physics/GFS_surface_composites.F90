@@ -22,20 +22,17 @@ contains
    subroutine GFS_surface_composites_pre_finalize()
    end subroutine GFS_surface_composites_pre_finalize
 
-#if 0
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-#endif
    subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, landfrac, lakefrac, oceanfrac,  &
                                  frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorl_ocn, &
                                  zorl_lnd, zorl_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn,  &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_ocn,        &
                                  weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_ocn, tsfc_lnd,        &
                                  tsfc_ice, tisfc, tice, tsurf, tsurf_ocn, tsurf_lnd, tsurf_ice, gflx_ice,       &
-                                 tgice, islmsk, semis_rad, semis_ocn, semis_lnd, semis_ice, adjsfcdlw,          &
-                                 gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_ocn, min_lakeice, min_seaice,             &
-                                 errmsg, errflg)
+                                 tgice, islmsk, semis_rad, semis_ocn, semis_lnd, semis_ice,                     &
+                                 min_lakeice, min_seaice, errmsg, errflg)
 
       implicit none
 
@@ -57,9 +54,8 @@ contains
       real(kind=kind_phys), dimension(im), intent(  out) :: tice
       real(kind=kind_phys),                intent(in   ) :: tgice
       integer,              dimension(im), intent(in   ) :: islmsk
-      real(kind=kind_phys), dimension(im), intent(in   ) :: semis_rad, adjsfcdlw
+      real(kind=kind_phys), dimension(im), intent(in   ) :: semis_rad
       real(kind=kind_phys), dimension(im), intent(inout) :: semis_ocn, semis_lnd, semis_ice
-      real(kind=kind_phys), dimension(im), intent(inout) :: gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_ocn
       real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
 
       ! CCPP error handling
@@ -180,7 +176,60 @@ contains
         end if
       enddo
 
-      !  ---  convert lw fluxes for land/ocean/sea-ice models
+     ! Assign sea ice temperature to interstitial variable
+      do i = 1, im
+        tice(i) = tisfc(i)
+      end do
+
+   end subroutine GFS_surface_composites_pre_run
+
+end module GFS_surface_composites_pre
+
+
+module GFS_surface_composites_inter
+
+   use machine, only: kind_phys
+
+   implicit none
+
+   private
+
+   public GFS_surface_composites_inter_init, GFS_surface_composites_inter_finalize, GFS_surface_composites_inter_run
+
+contains
+
+   subroutine GFS_surface_composites_inter_init ()
+   end subroutine GFS_surface_composites_inter_init
+
+   subroutine GFS_surface_composites_inter_finalize()
+   end subroutine GFS_surface_composites_inter_finalize
+
+!> \section arg_table_GFS_surface_composites_inter_run Argument Table
+!! \htmlinclude GFS_surface_composites_inter_run.html
+!!
+   subroutine GFS_surface_composites_inter_run (im, dry, icy, wet, semis_ocn, semis_lnd, semis_ice, adjsfcdlw, &
+                                                gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_ocn, errmsg, errflg)
+
+      implicit none
+
+      ! Interface variables
+      integer,                             intent(in   ) :: im
+      logical,              dimension(im), intent(in   ) :: dry, icy, wet
+      real(kind=kind_phys), dimension(im), intent(in   ) :: semis_ocn, semis_lnd, semis_ice, adjsfcdlw
+      real(kind=kind_phys), dimension(im), intent(inout) :: gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_ocn
+
+      ! CCPP error handling
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Local variables
+      integer :: i
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      !  ---  convert lw fluxes for land/ocean/sea-ice models - requires dcyc2t3 to set adjsfcdlw
       !  note: for sw: adjsfcdsw and adjsfcnsw are zenith angle adjusted downward/net fluxes.
       !        for lw: adjsfcdlw is (sfc temp adjusted) downward fluxe with no emiss effect.
       !                adjsfculw is (sfc temp adjusted) upward fluxe including emiss effect.
@@ -203,14 +252,9 @@ contains
         if (wet(i)) gabsbdlw_ocn(i) = semis_ocn(i) * adjsfcdlw(i)
       enddo
 
-     ! Assign sea ice temperature to interstitial variable
-      do i = 1, im
-        tice(i) = tisfc(i)
-      end do
+   end subroutine GFS_surface_composites_inter_run
 
-   end subroutine GFS_surface_composites_pre_run
-
-end module GFS_surface_composites_pre
+end module GFS_surface_composites_inter
 
 
 module GFS_surface_composites_post
