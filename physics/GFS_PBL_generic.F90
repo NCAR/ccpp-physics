@@ -1,6 +1,70 @@
 !> \file GFS_PBL_generic.F90
 !!  Contains code related to PBL schemes to be used within the GFS physics suite.
 
+      module GFS_PBL_generic_common
+
+      implicit none
+
+      private
+
+      public :: set_aerosol_tracer_index
+
+      contains
+
+      subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
+                                          imp_physics_thompson, ltaerosol,        &
+                                          imp_physics_mg, ntgl, imp_physics_gfdl, &
+                                          imp_physics_zhao_carr, kk,              &
+                                          errmsg, errflg)
+      implicit none
+      !
+      integer, intent(in )          :: imp_physics, imp_physics_wsm6,          &
+                                       imp_physics_thompson,                   &
+                                       imp_physics_mg, ntgl, imp_physics_gfdl, &
+                                       imp_physics_zhao_carr
+      logical, intent(in )          :: ltaerosol
+      integer, intent(out)          :: kk
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out)          :: errflg
+
+      errflg = 0
+
+! Set Interstitial%kk = last index in diffused tracer array before chemistry-aerosol tracers
+      if (imp_physics == imp_physics_wsm6) then
+! WSM6
+        kk = 4
+      elseif (imp_physics == imp_physics_thompson) then
+! Thompson
+        if(ltaerosol) then
+          kk = 10
+        else
+          kk = 7
+        endif
+! MG
+      elseif (imp_physics == imp_physics_mg) then
+        if (ntgl > 0) then
+          kk = 12
+        else
+          kk = 10
+        endif
+      elseif (imp_physics == imp_physics_gfdl) then
+! GFDL MP
+        kk = 7
+      elseif (imp_physics == imp_physics_zhao_carr) then
+! Zhao/Carr/Sundqvist
+        kk = 3
+      else
+        write(errmsg,'(*(a))') 'Logic error: unknown microphysics option in set_aerosol_tracer_index'
+        kk = -999
+        errflg = 1
+        return
+      endif
+
+      end subroutine set_aerosol_tracer_index
+
+      end module GFS_PBL_generic_common
+
+
       module GFS_PBL_generic_pre
 
       contains
@@ -12,11 +76,9 @@
       end subroutine GFS_PBL_generic_pre_finalize
 
 !> \brief This scheme sets up the vertically diffused tracer array for any PBL scheme based on the microphysics scheme chosen
-#if 0
 !! \section arg_table_GFS_PBL_generic_pre_run Argument Table
 !! \htmlinclude GFS_PBL_generic_pre_run.html
 !!
-#endif
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, trans_aero, ntchs, ntchm,                   &
@@ -24,7 +86,8 @@
         imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
         satmedmf, qgrs, vdftra, errmsg, errflg)
 
-      use machine, only : kind_phys
+      use machine,                only : kind_phys
+      use GFS_PBL_generic_common, only : set_aerosol_tracer_index
 
       implicit none
 
@@ -185,6 +248,7 @@
 
     end module GFS_PBL_generic_pre
 
+
     module GFS_PBL_generic_post
 
     contains
@@ -195,12 +259,9 @@
     subroutine GFS_PBL_generic_post_finalize ()
     end subroutine GFS_PBL_generic_post_finalize
 
-
-#if 0
 !> \section arg_table_GFS_PBL_generic_post_run Argument Table
 !! \htmlinclude GFS_PBL_generic_post_run.html
 !!
-#endif
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
         trans_aero, ntchs, ntchm,                                                                                              &
@@ -213,7 +274,8 @@
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
         dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
 
-      use machine,               only: kind_phys
+      use machine,                only : kind_phys
+      use GFS_PBL_generic_common, only : set_aerosol_tracer_index
 
       implicit none
 
@@ -489,58 +551,5 @@
       endif   ! end if_lssav
 
       end subroutine GFS_PBL_generic_post_run
-
-
-      subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
-                                          imp_physics_thompson, ltaerosol,        &
-                                          imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                          imp_physics_zhao_carr, kk,              &
-                                          errmsg, errflg)
-      implicit none
-      !
-      integer, intent(in )          :: imp_physics, imp_physics_wsm6,          &
-                                       imp_physics_thompson,                   &
-                                       imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                       imp_physics_zhao_carr
-      logical, intent(in )          :: ltaerosol
-      integer, intent(out)          :: kk
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out)          :: errflg
-
-      errflg = 0
-
-! Set Interstitial%kk = last index in diffused tracer array before chemistry-aerosol tracers
-      if (imp_physics == imp_physics_wsm6) then
-! WSM6
-        kk = 4
-      elseif (imp_physics == imp_physics_thompson) then
-! Thompson
-        if(ltaerosol) then
-          kk = 10
-        else
-          kk = 7
-        endif
-! MG
-      elseif (imp_physics == imp_physics_mg) then
-        if (ntgl > 0) then
-          kk = 12
-        else
-          kk = 10
-        endif
-      elseif (imp_physics == imp_physics_gfdl) then
-! GFDL MP
-        kk = 7
-      elseif (imp_physics == imp_physics_zhao_carr) then
-! Zhao/Carr/Sundqvist
-        kk = 3
-      else
-        write(errmsg,'(*(a))') 'Logic error: unknown microphysics option in set_aerosol_tracer_index'
-        kk = -999
-        errflg = 1
-        return
-      endif
-
-      end subroutine set_aerosol_tracer_index
-
 
       end module GFS_PBL_generic_post
