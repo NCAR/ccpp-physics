@@ -31,20 +31,25 @@
 !! \section arg_table_mp_FA_update_moist_run Argument Table
 !! | local_name     | standard_name                                         | long_name                                                                                  | units   | rank | type      | kind      | intent | optional |
 !! |----------------|-------------------------------------------------------|--------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | cwm            | total_cloud_condensate_mixing_ratio_updated_by_physics| total cloud condensate mixing ratio (except water vapor) updated by physics                | kg kg-1 |    2 | real      | kind_phys | in     | F        |
+!! | cwm            | total_cloud_condensate_mixing_ratio_updated_by_physics| total cloud condensate mixing ratio (except water vapor) updated by physics                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
 !! | f_ice          | fraction_of_ice_water_cloud                           | fraction of ice water cloud                                                                | frac    |    2 | real      | kind_phys | in     | F        |
 !! | f_rain         | fraction_of_rain_water_cloud                          | fraction of rain water cloud                                                               | frac    |    2 | real      | kind_phys | in     | F        |
 !! | qc             | cloud_condensed_water_mixing_ratio_updated_by_physics | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | qr             | rain_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics            | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | qi             | ice_water_mixing_ratio_updated_by_physics             | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics             | kg kg-1 |    2 | real      | kind_phys | out    | F        |
 !! | qs             | snow_water_mixing_ratio_updated_by_physics            | moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics            | kg kg-1 |    2 | real      | kind_phys | out    | F        |
+!! | spec_adv       | flag_for_individual_cloud_species_advected            | flag for individual cloud species advected                                                 | flag    |    0 | logical   |           | in     | F        |
+!! | mpirank        | mpi_rank                                              | current MPI-rank                                                                           | index   |    0 | integer   |           | in     | F        |
+!! | mpiroot        | mpi_root                                              | master MPI-rank                                                                            | index   |    0 | integer   |           | in     | F        |
 !! | lm             | vertical_dimension                                    | number of vertical levels                                                                  | count   |    0 | integer   |           | in     | F        |
 !! | ime            | horizontal_dimension                                  | horizontal dimension                                                                       | count   |    0 | integer   |           | in     | F        |
 !! | errmsg         | ccpp_error_message                                    | error message for error handling in CCPP                                                   | none    |    0 | character | len=*     | out    | F        |
 !! | errflg         | ccpp_error_flag                                       | error flag for error handling in CCPP                                                      | flag    |    0 | integer   |           | out    | F        |
 !!
-     subroutine mp_FA_update_moist_run (CWM,F_ICE,F_RAIN,               &
-                                        ,QC,QR,QI,QS,                   &
+     subroutine mp_FA_update_moist_run (CWM,F_ICE,F_RAIN               &
+                                        ,QC,QR,QI,QS                   &
+                                        ,spec_adv                      &
+                                        ,mpirank,mpiroot               &
                                         ,LM,IME,errmsg,errflg )
 
        USE MACHINE , only : kind_phys
@@ -56,11 +61,16 @@
 !
        INTEGER,INTENT(IN) :: LM,IME
 !
-      REAL(kind=kind_phys),DIMENSION(1:IME,1:LM),INTENT(IN) :: CWM,     &
+      integer,                        intent(in)    :: mpirank
+      integer,                        intent(in)    :: mpiroot
+
+      LOGICAL,INTENT(IN) :: SPEC_ADV
+      REAL(kind=kind_phys),DIMENSION(1:IME,1:LM),INTENT(INOUT) :: CWM
+      REAL(kind=kind_phys),DIMENSION(1:IME,1:LM),INTENT(IN) ::      &
                                                                F_ICE,   &
                                                                F_RAIN 
       REAL(kind=kind_phys),DIMENSION(1:IME,1:LM),INTENT(OUT) :: QC,QR,  &
-                                                           ,QI,QS    ! qs is total ice in F-A
+                                                                QI,QS    ! qs e in F-A
 !
 !--------------------
 !--  Local Variables
@@ -80,6 +90,15 @@
 
 !MZ
         IF (SPEC_ADV) then
+
+          !if(mpirank == mpiroot) then
+          !  write(0,*) 'F-A update_moist:---------------'
+          !  write(0,*) 'max/min(cwm) = ',maxval(cwm),minval(cwm)
+          !  write(0,*) 'max/min(qc) = ',maxval(qc),minval(qc)
+          !  write(0,*) 'max/min(qr) = ',maxval(qr),minval(qr)
+          !  write(0,*) 'max/min(qi) = ',maxval(qi),minval(qi)
+          !  write(0,*) 'max/min(qs) = ',maxval(qs),minval(qs)
+          !endif
           DO K=1,LM
             DO I=1,IME
              !MZ: need to check
@@ -98,6 +117,7 @@
                 QI(I,K) =0.
                 QR(I,K) =0.
                 QC(I,K) =0.
+                QS(I,K) =0.
                 IF(F_ICE(I,K)>=1.) THEN
                    QI(I,K) = CWM(i,k)
                 ELSEIF(F_ICE(I,K)<=0.) THEN
@@ -116,8 +136,8 @@
                       QC(I,K)=QC(I,K)-QR(I,K)
                    ENDIF
                 ENDIF
-                qi(i,k) = 0.
-                qs(i,k) = qi(i,k)    !MZ: qs contains total ice in HWRF
+                !qi(i,k) = 0.
+                !qs(i,k) = qi(i,k)    !MZ: qs contains total ice in HWRF
               ENDDO
             ENDDO
         ENDIF
