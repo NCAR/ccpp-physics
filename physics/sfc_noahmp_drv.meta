@@ -150,22 +150,22 @@
   intent= in
   optional = F
 [sfcemis]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
+  standard_name = surface_longwave_emissivity_over_land_interstitial
+  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
   units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent= in
+  intent = in
   optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground
-  long_name = total sky surface downward longwave flux absorbed by the ground
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
+  long_name = total sky surface downward longwave flux absorbed by the ground over land
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent= in
+  intent = in
   optional = F
 [dswsfc]
   standard_name = surface_downwelling_shortwave_flux
