@@ -3,7 +3,7 @@
     module GFS_diagtoscreen
 
       private
- 
+
       public GFS_diagtoscreen_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
 
       public print_my_stuff, chksum_int, chksum_real
@@ -130,7 +130,7 @@
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%zorlo'    , Sfcprop%zorlo)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%zorll'    , Sfcprop%zorll)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%fice'     , Sfcprop%fice)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%hprim'    , Sfcprop%hprim)
+!                    call print_var(mpirank,omprank, blkno, 'Sfcprop%hprim'    , Sfcprop%hprim)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprime'   , Sfcprop%hprime)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%sncovr'   , Sfcprop%sncovr)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%snoalb'   , Sfcprop%snoalb)
@@ -617,7 +617,7 @@
           integer, intent(in) :: mpirank, omprank, blkno
           character(len=*), intent(in) :: name
           real(kind_phys), intent(in) :: var(:,:)
-          
+
           integer :: k, i
 
 #ifdef PRINT_SUM
@@ -744,7 +744,7 @@
     module GFS_interstitialtoscreen
 
       private
- 
+
       public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
 
       contains
@@ -856,7 +856,7 @@
     module GFS_abort
 
       private
- 
+
       public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
 
       contains
@@ -900,7 +900,7 @@
     module GFS_checkland
 
         private
- 
+
         public GFS_checkland_init, GFS_checkland_run, GFS_checkland_finalize
 
         contains
