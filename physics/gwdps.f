@@ -303,7 +303,7 @@
       ! changes the results on Theia/Intel - skip for bit-for-bit results *DH
 !      real(kind=kind_phys), intent(in) ::                               &
 !     &                     deltim, G, CP, RD, RV, cdmbgwd(2)
-      real(kind=kind_phys) deltim, G, CP, RD, RV, cdmbgwd(2)
+      real(kind=kind_phys) deltim, G, CP, RD, RV, cdmbgwd(4)
       ! *DH
       real(kind=kind_phys), intent(inout) ::                            &
      &                     A(IX,KM), B(IX,KM), C(IX,KM)
@@ -382,7 +382,8 @@
       real(kind=kind_phys) TAUB(IM),  XN(IM),     YN(IM),    UBAR(IM)   &
      &,                    VBAR(IM),  ULOW(IM),   OA(IM),    CLX(IM)    &
      &,                    ROLL(IM),  ULOI(IM)                          &
-     &,                    DTFAC(IM), XLINV(IM),  DELKS(IM), DELKS1(IM)
+     &,                    DTFAC(IM), XLINV(IM),  DELKS(IM)
+!    &,                    DTFAC(IM), XLINV(IM),  DELKS(IM), DELKS1(IM)
 !
       real(kind=kind_phys) BNV2(IM,KM),  TAUP(IM,KM+1), ri_n(IM,KM)     &
      &,                    TAUD(IM,KM),  RO(IM,KM),     VTK(IM,KM)      &
@@ -392,7 +393,8 @@
 !     real(kind=kind_phys) VELKO(KM-1)
       integer   kref(IM), kint(im), iwk(im), ipt(im)
 ! for lm mtn blocking
-      integer   kreflm(IM), iwklm(im)
+      integer   iwklm(im)
+!      integer   kreflm(IM), iwklm(im)
       integer   idxzb(im), ktrial, klevm1
 !
       real(kind=kind_phys) gor,    gocp,  fv,    gr2,  bnv,  fr         &
@@ -470,7 +472,7 @@
         do i=1,npt
           iwklm(i)  = 2
           IDXZB(i)  = 0 
-          kreflm(i) = 0
+!         kreflm(i) = 0
         enddo
 !       if (lprnt) 
 !    &  print *,' in gwdps_lm.f npt,IM,IX,IY,km,me=',npt,IM,IX,IY,km,me
@@ -552,14 +554,14 @@
 !
         DO I = 1, npt
           J   = ipt(i)
-          DELKS(I)  = 1.0 / (PRSI(J,1) - PRSI(J,iwklm(i)))
-          DELKS1(I) = 1.0 / (PRSL(J,1) - PRSL(J,iwklm(i)))
-          UBAR (I)  = 0.0
-          VBAR (I)  = 0.0
-          ROLL (I)  = 0.0
-          PE   (I)  = 0.0
-          EK   (I)  = 0.0
-          BNV2bar(I) = (PRSL(J,1)-PRSL(J,2)) * DELKS1(I) * BNV2LM(I,1)
+          DELKS(I)   = 1.0 / (PRSI(J,1) - PRSI(J,iwklm(i)))
+!         DELKS1(I)  = 1.0 / (PRSI(J,1) - PRSL(J,iwklm(i)))
+          UBAR (I)   = 0.0
+          VBAR (I)   = 0.0
+          ROLL (I)   = 0.0
+          PE   (I)   = 0.0
+          EK   (I)   = 0.0
+          BNV2bar(I) = (PRSI(J,1)-PRSL(J,1)) * DELKS(I) * BNV2LM(I,1)
         ENDDO
 
 ! --- find the dividing stream line height
@@ -567,13 +569,13 @@
 ! --- iwklm(i) is the k-index of mtn elvmax elevation
 !> - Find the dividing streamline height starting from the level above
 !! the maximum mountain height and processing downward.
-        DO Ktrial = KMLL, 1, -1
-          DO I = 1, npt
-             IF ( Ktrial < iwklm(I) .and. kreflm(I) == 0 ) then
-                kreflm(I) = Ktrial
-             ENDIF
-          ENDDO
-        ENDDO
+!       DO Ktrial = KMLL, 1, -1
+!         DO I = 1, npt
+!            IF ( Ktrial < iwklm(I) .and. kreflm(I) == 0 ) then
+!               kreflm(I) = Ktrial
+!            ENDIF
+!         ENDDO
+!       ENDDO
 !     print *,' in gwdps_lm.f 4 npt=',npt,kreflm(npt),me
 !
 ! --- in the layer kreflm(I) to 1 find PE (which needs N, ELVMAX)
@@ -582,13 +584,17 @@
 ! --- is the vert ave of quantities from the surface to mtn top.
 !   
         DO I = 1, npt
-          DO K = 1, Kreflm(I)
+          DO K = 1, iwklm(i)-1
             J          = ipt(i)
             RDELKS     = DEL(J,K) * DELKS(I)
             UBAR(I)    = UBAR(I)  + RDELKS * U1(J,K) ! trial Mean U below
             VBAR(I)    = VBAR(I)  + RDELKS * V1(J,K) ! trial Mean V below
             ROLL(I)    = ROLL(I)  + RDELKS * RO(I,K) ! trial Mean RO below
-            RDELKS     = (PRSL(J,K)-PRSL(J,K+1)) * DELKS1(I)
+            if (k < iwklm(I)-1) then
+              RDELKS   = (PRSL(J,K)-PRSL(J,K+1)) * DELKS(I)
+            else
+              RDELKS   = (PRSL(J,K)-PRSI(J,K+1)) * DELKS(I)
+            endif
             BNV2bar(I) = BNV2bar(I) + BNV2lm(I,K) * RDELKS
 ! --- these vert ave are for diags, testing and GWD to follow (*j*).
           ENDDO
@@ -862,14 +868,14 @@
         J         = ipt(i)
         kref(I)   = MAX(IWK(I), KPBL(J)+1 ) ! reference level
         DELKS(I)  = 1.0 / (PRSI(J,1) - PRSI(J,kref(I)))
-        DELKS1(I) = 1.0 / (PRSL(J,1) - PRSL(J,kref(I)))
+!       DELKS1(I) = 1.0 / (PRSI(J,1) - PRSL(J,kref(I)))
         UBAR (I)  = 0.0
         VBAR (I)  = 0.0
         ROLL (I)  = 0.0
         KBPS      = MAX(KBPS, kref(I))
         KMPS      = MIN(KMPS, kref(I))
 !
-        BNV2bar(I) = (PRSL(J,1)-PRSL(J,2)) * DELKS1(I) * BNV2(I,1)
+        BNV2bar(I) = (PRSI(J,1)-PRSL(J,1)) * DELKS(I) * BNV2(I,1)
       ENDDO
 !      print *,' in gwdps_lm.f GWD:15  =',KBPS,KMPS
       KBPSP1 = KBPS + 1
@@ -883,7 +889,11 @@
             VBAR(I)    = VBAR(I)  + RDELKS * V1(J,K)   ! Mean V below kref
 !
             ROLL(I)    = ROLL(I)  + RDELKS * RO(I,K)   ! Mean RO below kref
-            RDELKS     = (PRSL(J,K)-PRSL(J,K+1)) * DELKS1(I)
+            if (k < kref(i)-1) then
+              RDELKS     = (PRSL(J,K)-PRSL(J,K+1)) * DELKS(I)
+            else
+              RDELKS     = (PRSL(J,K)-PRSI(J,K+1)) * DELKS(I)
+            endif
             BNV2bar(I) = BNV2bar(I) + BNV2(I,K) * RDELKS
           ENDIF
         ENDDO

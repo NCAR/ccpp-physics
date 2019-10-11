@@ -43,7 +43,7 @@
 !! emissivity for LW radiation.
         call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,        &        !  ---  inputs
                      Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
-                     tsfg, tsfa, Sfcprop%hprim, IM,               &
+                     tsfg, tsfa, Sfcprop%hprime(:,1), IM,         &
                       Radtend%semis)                              !  ---  outputs
       endif
 

@@ -61,24 +61,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[u1]
-  standard_name = x_wind_at_lowest_model_layer
-  long_name = u component of surface layer wind
-  units = m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[v1]
-  standard_name = y_wind_at_lowest_model_layer
-  long_name = v component of surface layer wind
-  units = m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [t1]
   standard_name = air_temperature_at_lowest_model_layer
   long_name = surface layer mean temperature
@@ -124,10 +106,10 @@
   kind = kind_phys
   intent = in
   optional = F
-[prslki]
-  standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
-  long_name = Exner function ratio bt midlayer and interface at 1st layer
-  units = ratio
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -139,15 +121,6 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
-  intent = in
-  optional = F
-[ddvel]
-  standard_name = surface_wind_enhancement_due_to_convection
-  long_name = wind enhancement due to convection
-  units = m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [flag_iter]
@@ -171,6 +144,24 @@
   standard_name = surface_upward_sensible_heat_flux_for_coupling_interstitial
   long_name = sfc sensible heat flux for coupling interstitial
   units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dusfc]
+  standard_name = surface_x_momentum_flux_for_coupling_interstitial
+  long_name = sfc x momentum flux for coupling interstitial
+  units = Pa 
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dvsfc]
+  standard_name = surface_y_momentum_flux_for_coupling_interstitial
+  long_name = sfc y momentum flux for coupling interstitial
+  units = Pa 
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -216,6 +207,15 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_ice
   long_name = kinematic surface upward sensible heat flux over ice
   units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[stress]
+  standard_name = surface_wind_stress_over_ice
+  long_name = surface wind stress over ice
+  units = m2 s-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

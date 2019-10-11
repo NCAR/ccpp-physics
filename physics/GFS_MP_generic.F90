@@ -303,6 +303,7 @@
       elseif( .not. cal_pre) then
         if (imp_physics == imp_physics_mg) then              ! MG microphysics
           do i=1,im
+            tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
             if (rain(i)*tem > rainmin) then
               srflag(i) = max(zero, min(one, (rain(i)-rainc(i))*sr(i)/rain(i)))
             else
@@ -311,7 +312,7 @@
           enddo
         else
           do i = 1, im
-            tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp
+            tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
             srflag(i) = 0.0                    ! clu: default srflag as 'rain' (i.e. 0)
             if (t850(i) <= 273.16) then
               srflag(i) = 1.0                  ! clu: set srflag to 'snow' (i.e. 1)
