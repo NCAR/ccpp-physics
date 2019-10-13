@@ -37,19 +37,19 @@ contains
         real(kind=kind_phys), intent(in) :: dtf
         logical,              intent(in) :: ldiag_ugwp      !< flag for CIRES UGWP Diagnostics
 
-        real(kind=kind_phys), intent(in),    dimension(im)       :: zmtb, zlwb, zogw
-        real(kind=kind_phys), intent(in),    dimension(im)       :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
-        real(kind=kind_phys), intent(inout), dimension(im)       :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
-        real(kind=kind_phys), intent(inout), dimension(im)       :: tot_zmtb, tot_zlwb, tot_zogw
-        real(kind=kind_phys), intent(in),    dimension(im, levs) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb, dudt_ogw, dudt_tms 
-        real(kind=kind_phys), intent(inout), dimension(im, levs) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
-        real(kind=kind_phys), intent(inout), dimension(im, levs) :: dtdt, dudt, dvdt
+        real(kind=kind_phys), intent(in),    dimension(:)   :: zmtb, zlwb, zogw
+        real(kind=kind_phys), intent(in),    dimension(:)   :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
+        real(kind=kind_phys), intent(inout), dimension(:)   :: tot_mtb, tot_ogw, tot_tofd, tot_ngw
+        real(kind=kind_phys), intent(inout), dimension(:)   :: tot_zmtb, tot_zlwb, tot_zogw
+        real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb, dudt_ogw, dudt_tms
+        real(kind=kind_phys), intent(inout), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
+        real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
 
         ! For if (lssav) block, originally in gwdps_post_run
         logical, intent(in) :: lssav, ldiag3d
-        real(kind=kind_phys), intent(in),    dimension(im)       :: dusfcg, dvsfcg
-        real(kind=kind_phys), intent(inout), dimension(im)       :: dugwd, dvgwd
-        real(kind=kind_phys), intent(inout), dimension(im, levs) :: du3dt, dv3dt, dt3dt
+        real(kind=kind_phys), intent(in),    dimension(:)   :: dusfcg, dvsfcg
+        real(kind=kind_phys), intent(inout), dimension(:)   :: dugwd, dvgwd
+        real(kind=kind_phys), intent(inout), dimension(:,:) :: du3dt, dv3dt, dt3dt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
