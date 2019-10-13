@@ -1361,12 +1361,12 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_4_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = Fortran DDT containing FV3-GFS model control parameters
-  units = DDT
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
   dimensions = ()
-  type = GFS_control_type
+  type = integer
   intent = in
   optional = F
 [im]
