@@ -299,12 +299,8 @@
       ! Interface variables
       integer, intent(in) :: im, ix, km, imx, kdt, ipr, me
       integer, intent(in) :: KPBL(IM) ! Index for the PBL top layer!
-      ! DH* adding intent(in) information for the following variables
-      ! changes the results on Theia/Intel - skip for bit-for-bit results *DH
-!      real(kind=kind_phys), intent(in) ::                               &
-!     &                     deltim, G, CP, RD, RV, cdmbgwd(2)
-      real(kind=kind_phys) deltim, G, CP, RD, RV, cdmbgwd(4)
-      ! *DH
+      real(kind=kind_phys), intent(in) ::                               &
+     &                     deltim, G, CP, RD, RV, cdmbgwd(4)
       real(kind=kind_phys), intent(inout) ::                            &
      &                     A(IX,KM), B(IX,KM), C(IX,KM)
       real(kind=kind_phys), intent(in) ::                               &
