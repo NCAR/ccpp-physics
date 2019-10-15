@@ -3,9 +3,16 @@
 
       module GFS_surface_generic_pre
 
+      use machine, only: kind_phys
+
+      implicit none
+
       private
 
       public GFS_surface_generic_pre_init, GFS_surface_generic_pre_finalize, GFS_surface_generic_pre_run
+
+      real(kind=kind_phys), parameter :: one = 1.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0d0
 
       contains
 
@@ -15,22 +22,19 @@
       subroutine GFS_surface_generic_pre_finalize()
       end subroutine GFS_surface_generic_pre_finalize
 
-#if 0
 !> \section arg_table_GFS_surface_generic_pre_run Argument Table
 !! \htmlinclude GFS_surface_generic_pre_run.html
 !!
-#endif
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
-                          prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, &
-                          slopetyp, work3, gabsbdlw, tsurf, zlvl, do_sppt, dtdtr,                          &
+                          prsik_1, prslk_1, tsfc, phil, con_g,                                             &
+                          sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
                           cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
                           dtsfcin_cpl, dqsfcin_cpl, ulwsfcin_cpl, ulwsfc_cice, dusfc_cice, dvsfc_cice,     &
-                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice,                                &
-                          errmsg, errflg)
+                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice, dry, icy, wet,                 &
+                          wind, u1, v1, cnvwind, errmsg, errflg)
 
-        use machine,               only: kind_phys
         use surface_perturbation,  only: cdfnor
 
         implicit none
@@ -39,14 +43,15 @@
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
         integer, dimension(im), intent(inout) :: soiltyp, vegtype, slopetyp
+        logical, dimension(im), intent(in) :: dry, icy, wet
 
         real(kind=kind_phys), intent(in) :: con_g
-        real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1, &
-          semis, adjsfcdlw
+        real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1
+
         real(kind=kind_phys), dimension(im), intent(inout) :: tsfc
         real(kind=kind_phys), dimension(im,levs), intent(in) :: phil
 
-        real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, gabsbdlw, tsurf, zlvl
+        real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, tsurf, zlvl
 
         ! Stochastic physics / surface perturbations
         logical, intent(in) :: do_sppt
@@ -78,6 +83,11 @@
              tisfc, tsfco, fice, hice
         real(kind=kind_phys), dimension(im), intent(out) ::ulwsfc_cice, &
              dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice
+
+        real(kind=kind_phys), dimension(im), intent(out) :: wind
+        real(kind=kind_phys), dimension(im), intent(in ) :: u1, v1
+        ! surface wind enhancement due to convection
+        real(kind=kind_phys), dimension(im), intent(in ) :: cnvwind
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -156,33 +166,22 @@
             soiltyp(i)  = int( stype(i)+0.5 )
             vegtype(i)  = int( vtype(i)+0.5 )
             slopetyp(i) = int( slope(i)+0.5 )    !! clu: slope -> slopetyp
+            if (soiltyp(i)  < 1) soiltyp(i)  = 14
+            if (vegtype(i)  < 1) vegtype(i)  = 17
+            if (slopetyp(i) < 1) slopetyp(i) = 1
           endif
 
           work3(i)   = prsik_1(i) / prslk_1(i)
         end do
 
-        !  ---  convert lw fluxes for land/ocean/sea-ice models
-        !  note: for sw: adjsfcdsw and adjsfcnsw are zenith angle adjusted downward/net fluxes.
-        !        for lw: adjsfcdlw is (sfc temp adjusted) downward fluxe with no emiss effect.
-        !                adjsfculw is (sfc temp adjusted) upward fluxe including emiss effect.
-        !        one needs to be aware that that the absorbed downward lw flux (used by land/ocean
-        !        models as downward flux) is not the same as adjsfcdlw but a value reduced by
-        !        the factor of emissivity.  however, the net effects are the same when seeing
-        !        it either above the surface interface or below.
-        !
-        !   - flux above the interface used by atmosphere model:
-        !        down: adjsfcdlw;    up: adjsfculw = sfcemis*sigma*T**4 + (1-sfcemis)*adjsfcdlw
-        !        net = up - down = sfcemis * (sigma*T**4 - adjsfcdlw)
-        !   - flux below the interface used by lnd/oc/ice models:
-        !        down: sfcemis*adjsfcdlw;  up: sfcemis*sigma*T**4
-        !        net = up - down = sfcemis * (sigma*T**4 - adjsfcdlw)
-
-        !  --- ...  define the downward lw flux absorbed by ground
-        gabsbdlw(:) = semis(:) * adjsfcdlw(:)
-
         do i=1,im
-          tsurf(i)   = tsfc(i)
-          zlvl(i)    = phil(i,1) * onebg
+          !tsurf(i) = tsfc(i)
+          zlvl(i)  = phil(i,1) * onebg
+          wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
+                         + max(zero, min(cnvwind(i), 30.0)), one)
+          !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
+          !                         Statein%vgrs(i,1)*Statein%vgrs(i,1))  &
+          !              + max(zero, min(Tbd%phy_f2d(i,Model%num_p2d), 30.0)), one)
         end do
 
       if(cplflx)then
@@ -195,15 +194,14 @@
           islmsk_cice(i) = int(slimskin_cpl(i)+0.5)
           if(islmsk_cice(i) == 4)then
             flag_cice(i)   = .true.
+            ulwsfc_cice(i) = ulwsfcin_cpl(i)
+            dusfc_cice(i)  = dusfcin_cpl(i)
+            dvsfc_cice(i)  = dvsfcin_cpl(i)
+            dtsfc_cice(i)  = dtsfcin_cpl(i)
+            dqsfc_cice(i)  = dqsfcin_cpl(i)
           endif
-          ulwsfc_cice(i) = ulwsfcin_cpl(i)
-          dusfc_cice(i)  = dusfcin_cpl(i)
-          dvsfc_cice(i)  = dvsfcin_cpl(i)
-          dtsfc_cice(i)  = dtsfcin_cpl(i)
-          dqsfc_cice(i)  = dqsfcin_cpl(i)
         enddo
       endif
-
 
       end subroutine GFS_surface_generic_pre_run
 
@@ -212,9 +210,16 @@
 
       module GFS_surface_generic_post
 
+      use machine, only: kind_phys
+
+      implicit none
+
       private
 
       public GFS_surface_generic_post_init, GFS_surface_generic_post_finalize, GFS_surface_generic_post_run
+
+      real(kind=kind_phys), parameter :: one = 1.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0d0
 
       contains
 
@@ -223,21 +228,18 @@
 
       subroutine GFS_surface_generic_post_finalize()
       end subroutine GFS_surface_generic_post_finalize
-#if 0
+
 !> \section arg_table_GFS_surface_generic_post_run Argument Table
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
-#endif
       subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, icy, wet, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,&
-        adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-        t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
+        adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_ocn, adjnirbmu, adjnirdfu,           &
+        adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_ocn, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,              &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
         runoff, srunoff, runof, drain, errmsg, errflg)
-
-        use machine,               only: kind_phys
 
         implicit none
 
@@ -247,8 +249,8 @@
         real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(im),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw, &
-          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                   &
-          t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
+          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_ocn, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
+          t2m, q2m, u10m, v10m, tsfc, tsfc_ocn, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
 
         real(kind=kind_phys), dimension(im),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
           dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, &
@@ -301,20 +303,25 @@
             dnirdf_cpl  (i) = dnirdf_cpl(i) + adjnirdfd(i)*dtf
             dvisbm_cpl  (i) = dvisbm_cpl(i) + adjvisbmd(i)*dtf
             dvisdf_cpl  (i) = dvisdf_cpl(i) + adjvisdfd(i)*dtf
-            nlwsfci_cpl (i) = adjsfcdlw(i) - adjsfculw(i)
+            nlwsfci_cpl (i) = adjsfcdlw(i)  - adjsfculw(i)
+            if (wet(i)) then
+              nlwsfci_cpl(i) = adjsfcdlw(i) - adjsfculw_ocn(i)
+            endif
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-            tsfci_cpl   (i) = tsfc(i)
+!            tsfci_cpl   (i) = tsfc(i)
+            tsfci_cpl   (i) = tsfc_ocn(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
 
-  !  ---  estimate mean albedo for ocean point without ice cover and apply
-  !       them to net SW heat fluxes
+!  ---  estimate mean albedo for ocean point without ice cover and apply
+!       them to net SW heat fluxes
 
           do i=1,im
-            if (wet(i) .or. icy(i)) then ! not 100% land
-  !  ---  compute open water albedo
+!           if (Sfcprop%landfrac(i) < one) then ! Not 100% land
+            if (wet(i)) then                    ! some open water 
+!  ---  compute open water albedo
               xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
               ocalnirdf_cpl = 0.06
               ocalnirbm_cpl = max(albdf, 0.026/(xcosz_loc**1.7+0.065)  &
@@ -323,10 +330,10 @@
               ocalvisdf_cpl = 0.06
               ocalvisbm_cpl = ocalnirbm_cpl
 
-              nnirbmi_cpl(i) = adjnirbmd(i)-adjnirbmd(i)*ocalnirbm_cpl
-              nnirdfi_cpl(i) = adjnirdfd(i)-adjnirdfd(i)*ocalnirdf_cpl
-              nvisbmi_cpl(i) = adjvisbmd(i)-adjvisbmd(i)*ocalvisbm_cpl
-              nvisdfi_cpl(i) = adjvisdfd(i)-adjvisdfd(i)*ocalvisdf_cpl
+              nnirbmi_cpl(i) = adjnirbmd(i) * (one-ocalnirbm_cpl)
+              nnirdfi_cpl(i) = adjnirdfd(i) * (one-ocalnirdf_cpl)
+              nvisbmi_cpl(i) = adjvisbmd(i) * (one-ocalvisbm_cpl)
+              nvisdfi_cpl(i) = adjvisdfd(i) * (one-ocalvisdf_cpl)
             else
               nnirbmi_cpl(i) = adjnirbmd(i) - adjnirbmu(i)
               nnirdfi_cpl(i) = adjnirdfd(i) - adjnirdfu(i)

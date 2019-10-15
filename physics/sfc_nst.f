@@ -29,19 +29,21 @@
 !! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
+!  ---  inputs:
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &
      &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
-     &       prsl1, prslki, prsik1, prslk1, wet, icy, xlon, sinlat,     &
+     &       prsl1, prslki, prsik1, prslk1, wet, xlon, sinlat,          &
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
-     &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
-     &       nstf_name5, lprnt, ipr,                                    &  ! inputs from here and above
+     &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
+     &       nstf_name5, lprnt, ipr,                                    &
+!  ---  input/output:
      &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
-     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &  ! in/outs from here and above
-     &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &  ! outputs
+     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
+!  ---  outputs:
+     &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &
      &      )
-
-! DH* 20190718: prslki can be removed if GSD_SURFACE_FLUXES_BUGFIX is adopted
+!
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -51,10 +53,9 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, prsik1, prslk1, iwet, iice, xlon, sinlat,   !
-!            stress,                                                    !
+!            prsl1, prslki, wet, xlon, sinlat, stress,                  !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
-!            ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      !
+!            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
 !       input/outputs:                                                  !
 !            tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, !
@@ -106,17 +107,12 @@
 !     sfcemis  - real, sfc lw emissivity (fraction)                im   !
 !     dlwflx   - real, total sky sfc downward lw flux (w/m**2)     im   !
 !     sfcnsw   - real, total sky sfc netsw flx into ocean (w/m**2) im   !
-! DH*
-! The actual unit of rain passed in is m ! see below line 438, qrain(i) = ...
-! where 1000*rain in the nominator converts m to kg m^2; there is still a
-! time unit 's' missing. Need to double-check what is going on.
-! *DH
 !     rain     - real, rainfall rate     (kg/m**2/s)               im   !
 !     timestep - real, timestep interval (second)                  1    !
 !     kdt      - integer, time step counter                        1    !
 !     solhr    - real, fcst hour at the end of prev time step      1    !
 !     xcosz    - real, consine of solar zenith angle               1    !
-!     ddvel    - real, wind enhancement due to convection (m/s)    im   !
+!     wind     - real, wind speed (m/s)                            im   !
 !     flag_iter- logical, execution or not                         im   !
 !                when iter = 1, flag_iter = .true. for all grids   im   !
 !                when iter = 2, flag_iter = .true. when wind < 2   im   !
@@ -197,12 +193,12 @@
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
      &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
      &       xlon,xcosz,                                                &
-     &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, ddvel
+     &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet, &
-     &       icy
+      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet
+!    &,      icy
       logical,                intent(in) :: lprnt
 
 !  ---  input/outputs:
@@ -224,7 +220,7 @@
       integer :: k,i
 !
       real (kind=kind_phys), dimension(im) ::  q0, qss, rch,
-     &                     rho_a, theta1, tv1, wind, wndmag
+     &                     rho_a, theta1, tv1, wndmag
 
       real(kind=kind_phys) elocp,tem,cpinv,hvapi
 !
@@ -265,13 +261,15 @@ cc
 ! flag for open water and where the iteration is on
 !
       do i = 1, im
-         flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
+!       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
+        flag(i) = wet(i) .and. flag_iter(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
-        if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
+!       if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
+        if(wet(i) .and. flag_guess(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -298,8 +296,6 @@ cc
 
           nswsfc(i) = sfcnsw(i) ! net solar radiation at the air-sea surface (positive downward)
           wndmag(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
-          wind(i)   = wndmag(i) + max( 0.0, min( ddvel(i), 30.0 ) )
-          wind(i)   = max( wind(i), 1.0 )
 
           q0(i)     = max(q1(i), 1.0e-8)
 #ifdef GSD_SURFACE_FLUXES_BUGFIX
@@ -588,8 +584,9 @@ cc
 
 ! restore nst-related prognostic fields for guess run
       do i=1, im
-        if(wet(i) .and. .not.icy(i)) then
-          if(flag_guess(i)) then    ! when it is guess of
+!       if (wet(i) .and. .not.icy(i)) then
+        if (wet(i)) then
+          if (flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
             xu(i)      = xu_old(i)
@@ -609,9 +606,9 @@ cc
 !
             if ( nstf_name1 > 1 ) then
               tskin(i) = tsurf(i)
-            endif               ! if nstf_name1 > 1
-          endif                 ! if flag_guess(i)
-        endif                   ! if wet(i) .and. .not.icy(i)
+            endif               ! if nstf_name1 > 1 then
+          endif                 ! if flag_guess(i) then
+        endif                   ! if wet(i) .and. .not.icy(i) then
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
@@ -678,11 +675,8 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, rlapse, icy, wet, zorl_ocn, zorl_ice, cd_ocn, cd_ice,
-     &     cdq_ocn, cdq_ice, rb_ocn, rb_ice, stress_ocn, stress_ice,
-     &     ffmm_ocn, ffmm_ice, ffhh_ocn, ffhh_ice, uustar_ocn,
-     &     uustar_ice, fm10_ocn, fm10_ice, fh2_ocn, fh2_ice, oro,
-     &     oro_uf, tsfc_ocn, tsurf_ocn, tseal, errmsg, errflg)
+     &    (im, wet, tsfc_ocn, tsurf_ocn, tseal, xt, xz, dt_cool,
+     &     z_c, tref, cplflx, errmsg, errflg)
 
       use machine , only : kind_phys
 
@@ -690,16 +684,14 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im
-      logical, dimension(im), intent(in) :: icy, wet
-      real (kind=kind_phys), intent(in) :: rlapse
-      real (kind=kind_phys), dimension(im), intent(in) :: zorl_ice,
-     &    cd_ice, cdq_ice, rb_ice, stress_ice, ffmm_ice, ffhh_ice,
-     &    uustar_ice, fm10_ice, fh2_ice, oro, oro_uf, tsfc_ocn
+      logical, dimension(im), intent(in) :: wet
+      real (kind=kind_phys), dimension(im), intent(in) ::
+     &      tsfc_ocn, xt, xz, dt_cool, z_c
+      logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_ocn,
-     &    zorl_ocn, cd_ocn, cdq_ocn, rb_ocn, stress_ocn, ffmm_ocn,
-     &    ffhh_ocn, uustar_ocn, fm10_ocn, fh2_ocn, tseal
+      real (kind=kind_phys), dimension(im), intent(inout) ::
+     &    tsurf_ocn, tseal, tref
 
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
@@ -707,19 +699,47 @@ cc
 
 !  ---  locals
       integer :: i
-      real(kind=kind_phys) :: tem
+      real(kind=kind_phys), parameter :: zero = 0.0d0,
+     &                                   one  = 1.0d0,
+     &                                   half = 0.5d0,
+     &                                   omz1 = 10.0d0
+      real(kind=kind_phys) :: tem1, tem2, dt_warm
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
       do i=1,im
-        if (wet(i) .and. .not. icy(i)) then
-          tem      = (oro(i)-oro_uf(i)) * rlapse
-          tseal(i) = tsfc_ocn(i)  + tem
-          tsurf_ocn(i) = tsurf_ocn(i) + tem
+        if (wet(i)) then
+!          tem         = (oro(i)-oro_uf(i)) * rlapse
+          ! DH* 20190927 simplyfing this code because tem is zero
+          !tem          = zero
+          !tseal(i)     = tsfc_ocn(i)  + tem
+          tseal(i)     = tsfc_ocn(i)
+          !tsurf_ocn(i) = tsurf_ocn(i) + tem
+          ! *DH
         endif
       enddo
+
+      if (cplflx) then
+        tem1 = half / omz1
+        do i=1,im
+          if (wet(i)) then
+            tem2 = one / xz(i)
+            dt_warm = (xt(i)+xt(i)) * tem2
+            if ( xz(i) > omz1) then
+              tref(i) = tseal(i) - (one-half*omz1*tem2) * dt_warm       &
+     &                  + z_c(i)*dt_cool(i)*tem1
+            else
+              tref(i) = tseal(i) - (xz(i)*dt_warm                       &
+     &                  -  z_c(i)*dt_cool(i))*tem1
+            endif
+            tseal(i) = tref(i) + dt_warm - dt_cool(i)
+!                  - (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
+            tsurf_ocn(i) = tseal(i)
+          endif
+        enddo
+      endif
 
       return
       end subroutine sfc_nst_pre_run
@@ -799,11 +819,11 @@ cc
 !    &     ' dt_cool=',dt_cool(ipr),' dt_warm=',2.0*xt(ipr)/xz(ipr),
 !    &     ' kdt=',kdt
 
-      do i = 1, im
-        if (wet(i) .and. .not. icy(i)) then
-          tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
-        endif
-      enddo
+!      do i = 1, im
+!        if (wet(i) .and. .not. icy(i)) then
+!          tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
+!        endif
+!      enddo
 
 !  --- ...  run nsst model  ... ---
 
@@ -812,12 +832,15 @@ cc
         zsea1 = 0.001*real(nstf_name4)
         zsea2 = 0.001*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool,                              &
-     &                    z_c, wet, icy, zsea1, zsea2,                  &
+     &                    z_c, wet, zsea1, zsea2,                       &
      &                    im, 1, dtzm)
         do i = 1, im
-          if ( wet(i)  .and. .not. icy(i) ) then
-            tsfc_ocn(i) = max(271.2,tref(i) + dtzm(i)) -                &
-     &                    (oro(i)-oro_uf(i))*rlapse
+!          if (wet(i) .and. .not.icy(i)) then
+!          if (wet(i) .and. (Model%frac_grid .or. .not. icy(i))) then
+          if (wet(i)) then
+            tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i))
+!           tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i)) -  &
+!                           (oro(i)-oro_uf(i))*rlapse
           endif
         enddo
       endif

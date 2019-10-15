@@ -286,6 +286,7 @@ contains
                    qc      , soldn   , lwdn    ,                               & ! in : forcing
 	           prcpconv, prcpnonc, prcpshcv, prcpsnow, prcpgrpl, prcphail, & ! in : forcing
                    tbot    , co2air  , o2air   , foln    , ficeold , zlvl    , & ! in : forcing
+                   lheatstrg                                                 , & ! in : canopy heat storage
                    albold  , sneqvo  ,                                         & ! in/out : 
                    stc     , sh2o    , smc     , tah     , eah     , fwet    , & ! in/out : 
                    canliq  , canice  , tv      , tg      , qsfc    , qsnow   , & ! in/out : 
@@ -293,9 +294,9 @@ contains
                    zwt     , wa      , wt      , wslake  , lfmass  , rtmass  , & ! in/out : 
                    stmass  , wood    , stblcp  , fastcp  , lai     , sai     , & ! in/out : 
                    cm      , ch      , tauss   ,                               & ! in/out : 
-                   smcwtd  ,deeprech , rech    ,                               & ! in/out :
+                   smcwtd  ,deeprech , rech    , cpfac                       , & ! in/out :
 		   z0wrf   , &
-                   fsa     , fsr     , fira    , fsh     , ssoil   , fcev    , & ! out : 
+                   fsa     , fsr     , fira    , fshx    , ssoil   , fcev    , & ! out : 
                    fgev    , fctr    , ecan    , etran   , edir    , trad    , & ! out :
                    tgb     , tgv     , t2mv    , t2mb    , q2v     , q2b     , & ! out :
                    runsrf  , runsub  , apar    , psn     , sav     , sag     , & ! out :
@@ -336,6 +337,7 @@ contains
   real                           , intent(in)    :: lwdn   !downward longwave radiation (w/m2)
   real                           , intent(in)    :: sfcprs !pressure (pa)
   real                           , intent(inout) :: zlvl   !reference height (m)
+  logical                        , intent(in)    :: lheatstrg ! flag for canopy heat storage parameterization       
   real                           , intent(in)    :: cosz   !cosine solar zenith angle [0-1]
   real                           , intent(in)    :: tbot   !bottom condition for soil temp. [k]
   real                           , intent(in)    :: foln   !foliage nitrogen (%) [1-saturated]
@@ -394,13 +396,14 @@ contains
   real,                            intent(inout) :: smcwtd !soil water content between bottom of the soil and water table [m3/m3]
   real,                            intent(inout) :: deeprech !recharge to or from the water table when deep [m]
   real,                            intent(inout) :: rech !recharge to or from the water table when shallow [m] (diagnostic)
+  real,                            intent(inout) :: cpfac  ! heat capacity enhancement factor due to heat storage
 
 ! output
   real                           , intent(out)   :: z0wrf  !combined z0 sent to coupled model
   real                           , intent(out)   :: fsa    !total absorbed solar radiation (w/m2)
   real                           , intent(out)   :: fsr    !total reflected solar radiation (w/m2)
   real                           , intent(out)   :: fira   !total net lw rad (w/m2)  [+ to atm]
-  real                           , intent(out)   :: fsh    !total sensible heat (w/m2) [+ to atm]
+  real                           , intent(out)   :: fshx   !total sensible heat (w/m2) [+ to atm]
   real                           , intent(out)   :: fcev   !canopy evap heat (w/m2) [+ to atm]
   real                           , intent(out)   :: fgev   !ground evap heat (w/m2) [+ to atm]
   real                           , intent(out)   :: fctr   !transpiration heat (w/m2) [+ to atm]
@@ -450,6 +453,7 @@ contains
   real                                           :: taux   !wind stress: e-w (n/m2)
   real                                           :: tauy   !wind stress: n-s (n/m2)
   real                                           :: rhoair !density air (kg/m3)
+  real                                           :: fsh    !total sensible heat (w/m2) [+ to atm]
 !  real, dimension(       1:    5)                :: vocflx !voc fluxes [ug c m-2 h-1]
   real, dimension(-nsnow+1:nsoil)                :: dzsnso !snow/soil layer thickness [m]
   real                                           :: thair  !potential temperature (k)
@@ -640,6 +644,7 @@ contains
     call energy (parameters,ice    ,vegtyp ,ist    ,nsnow  ,nsoil  , & !in
                  isnow  ,dt     ,rhoair ,sfcprs ,qair   , & !in
                  sfctmp ,thair  ,lwdn   ,uu     ,vv     ,zlvl   , & !in
+                 lheatstrg                                      , & !in
                  co2air ,o2air  ,solad  ,solai  ,cosz   ,igs    , & !in
                  eair   ,tbot   ,zsnso  ,zsoil  , & !in
                  elai   ,esai   ,fwet   ,foln   ,         & !in
@@ -648,16 +653,16 @@ contains
                  z0wrf  ,                                         &
                  imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
                  sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
-                 tauy   ,fira   ,fsh    ,fcev   ,fgev   ,fctr   , & !out
+                 tauy   ,fira   ,fsh    ,fshx   ,fcev   ,fgev   ,fctr   , & !out
                  trad   ,psn    ,apar   ,ssoil  ,btrani ,btran  , & !out
                  ponding,ts     ,latheav , latheag , frozen_canopy,frozen_ground,                         & !out
                  tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                  sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                  albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , & !inout
 #ifdef CCPP
-                 tauss  ,errmsg ,errflg ,                         & !inout
+                 tauss  ,cpfac  ,errmsg ,errflg ,                 & !inout
 #else
-                 tauss  ,                                         & !inout
+                 tauss  ,cpfac  ,                                 & !inout
 #endif
 !jref:start
                  qc     ,qsfc   ,psfc   , & !in 
@@ -709,7 +714,7 @@ contains
 
 ! water and energy balance check
 
-     call error (parameters,swdown ,fsa    ,fsr    ,fira   ,fsh    ,fcev   , & !in
+     call error (parameters,swdown ,fsa    ,fsr    ,fira   ,fsh   ,fcev   , & !in
                  fgev   ,fctr   ,ssoil  ,beg_wb ,canliq ,canice , & !in
                  sneqv  ,wa     ,smc    ,dzsnso ,prcp   ,ecan   , & !in
                  etran  ,edir   ,runsrf ,runsub ,dt     ,nsoil  , & !in
@@ -1413,6 +1418,7 @@ contains
   subroutine energy (parameters,ice    ,vegtyp ,ist    ,nsnow  ,nsoil  , & !in
                      isnow  ,dt     ,rhoair ,sfcprs ,qair   , & !in
                      sfctmp ,thair  ,lwdn   ,uu     ,vv     ,zref   , & !in
+                     lheatstrg      ,  & !in
                      co2air ,o2air  ,solad  ,solai  ,cosz   ,igs    , & !in
                      eair   ,tbot   ,zsnso  ,zsoil  , & !in
                      elai   ,esai   ,fwet   ,foln   ,         & !in
@@ -1421,16 +1427,16 @@ contains
 		     z0wrf  ,                                         &
                      imelt  ,snicev ,snliqv ,epore  ,t2m    ,fsno   , & !out
                      sav    ,sag    ,qmelt  ,fsa    ,fsr    ,taux   , & !out
-                     tauy   ,fira   ,fsh    ,fcev   ,fgev   ,fctr   , & !out
+                     tauy   ,fira   ,fsh    ,fshx   ,fcev   ,fgev   ,fctr   , & !out
                      trad   ,psn    ,apar   ,ssoil  ,btrani ,btran  , & !out
                      ponding,ts     ,latheav , latheag , frozen_canopy,frozen_ground,                       & !out
                      tv     ,tg     ,stc    ,snowh  ,eah    ,tah    , & !inout
                      sneqvo ,sneqv  ,sh2o   ,smc    ,snice  ,snliq  , & !inout
                      albold ,cm     ,ch     ,dx     ,dz8w   ,q2     , &   !inout
 #ifdef CCPP
-                     tauss  ,errmsg ,errflg,                          & !inout
+                     tauss  ,cpfac  ,errmsg ,errflg,                  & !inout
 #else
-                     tauss  ,                                         & !inout
+                     tauss  ,cpfac  ,                                 & !inout
 #endif
 !jref:start
                      qc     ,qsfc   ,psfc   , & !in 
@@ -1512,6 +1518,7 @@ contains
   real                              , intent(in)    :: igs    !growing season index (0=off, 1=on)
 
   real                              , intent(in)    :: zref   !reference height (m)
+  logical                           , intent(in)    :: lheatstrg ! flag for canopy heat storage parameterization       
   real                              , intent(in)    :: tbot   !bottom condition for soil temp. (k) 
   real   , dimension(-nsnow+1:nsoil), intent(in)    :: zsnso  !layer-bottom depth from snow surf [m]
   real   , dimension(       1:nsoil), intent(in)    :: zsoil  !layer-bottom depth from soil surf [m]
@@ -1546,6 +1553,7 @@ contains
   real                              , intent(out)   :: tauy   !wind stress: n-s (n/m2)
   real                              , intent(out)   :: fira   !total net lw. rad (w/m2)   [+ to atm]
   real                              , intent(out)   :: fsh    !total sensible heat (w/m2) [+ to atm]
+  real                              , intent(out)   :: fshx   !total sensible heat (w/m2) [+ to atm]
   real                              , intent(out)   :: fcev   !canopy evaporation (w/m2)  [+ to atm]
   real                              , intent(out)   :: fgev   !ground evaporation (w/m2)  [+ to atm]
   real                              , intent(out)   :: fctr   !transpiration (w/m2)       [+ to atm]
@@ -1592,6 +1600,7 @@ contains
   real                              , intent(inout) :: tah    !canopy air temperature (k)
   real                              , intent(inout) :: albold !snow albedo at last time step(class type)
   real                              , intent(inout) :: tauss  !non-dimensional snow age
+  real                              , intent(inout) :: cpfac  !heat capacity enhancement factor due to heat storage
   real                              , intent(inout) :: cm     !momentum drag coefficient
   real                              , intent(inout) :: ch     !sensible heat exchange coefficient
   real                              , intent(inout) :: q1
@@ -1693,6 +1702,11 @@ contains
   real, parameter                   :: mpe    = 1.e-6
   real, parameter                   :: psiwlt = -150.  !metric potential for wilting point (m)
   real, parameter                   :: z0     = 0.01   ! bare-soil roughness length (m) (i.e., under the canopy)
+!
+! parameters for heat storage parametrization
+!
+  real, parameter :: z0min = 0.2 !minimum roughness length for heat storage
+  real, parameter :: z0max = 1.0 !maximum roughness length for heat storage
 
 ! ---------------------------------------------------------------------------------------------------
 ! initialize fluxes from veg. fraction
@@ -1758,6 +1772,13 @@ contains
         z0m  = z0mg
         zpd  = zpdg
      end if
+!
+!  compute heat capacity enhancement factor as a function of z0m to mimic heat storage
+!
+     if (lheatstrg .and. (.not. parameters%urban_flag) ) then
+         cpfac = (z0m - z0min) / (z0max - z0min)
+         cpfac = 1. + min(max(cpfac, 0.0), 1.0)
+     endif
 
      zlvl = max(zpd,parameters%hvt) + zref
      if(zpdg >= zlvl) zlvl = zpdg + zref
@@ -1862,7 +1883,7 @@ contains
         latheav = hsub
 	frozen_canopy = .true.
      end if
-     gammav = cpair*sfcprs/(0.622*latheav)
+     gammav = cpair*cpfac*sfcprs/(0.622*latheav)
 
      if (tg .gt. tfrz) then
         latheag = hvap
@@ -1871,14 +1892,14 @@ contains
         latheag = hsub
 	frozen_ground = .true.
      end if
-     gammag = cpair*sfcprs/(0.622*latheag)
+     gammag = cpair*cpfac*sfcprs/(0.622*latheag)
 
 !     if (sfctmp .gt. tfrz) then
 !        lathea = hvap
 !     else
 !        lathea = hsub
 !     end if
-!     gamma = cpair*sfcprs/(0.622*lathea)
+!     gamma = cpair*cpfac*sfcprs/(0.622*lathea)
 
 ! surface temperatures of the ground and canopy and energy fluxes
 
@@ -1891,9 +1912,9 @@ contains
     call vege_flux (parameters,nsnow   ,nsoil   ,isnow   ,vegtyp  ,veg     , & !in
                     dt      ,sav     ,sag     ,lwdn    ,ur      , & !in
                     uu      ,vv      ,sfctmp  ,thair   ,qair    , & !in
-                    eair    ,rhoair  ,snowh   ,vai     ,gammav   ,gammag   , & !in
+                    eair    ,rhoair  ,snowh   ,vai     ,gammav  ,gammag    , & !in
                     fwet    ,laisun  ,laisha  ,cwp     ,dzsnso  , & !in
-                    zlvl    ,zpd     ,z0m     ,fveg    , & !in
+                    zlvl    ,cpfac   ,zpd     ,z0m     ,fveg    , & !in
                     z0mg    ,emv     ,emg     ,canliq  ,fsno, & !in
                     canice  ,stc     ,df      ,rssun   ,rssha   , & !in
                     rsurf   ,latheav ,latheag ,parsun  ,parsha  ,igs     , & !in
@@ -1923,7 +1944,7 @@ contains
     call bare_flux (parameters,nsnow   ,nsoil   ,isnow   ,dt      ,sag     , & !in
                     lwdn    ,ur      ,uu      ,vv      ,sfctmp  , & !in
                     thair   ,qair    ,eair    ,rhoair  ,snowh   , & !in
-                    dzsnso  ,zlvl    ,zpdg    ,z0mg    ,fsno,          & !in
+                    dzsnso  ,zlvl    ,zpdg    ,z0mg    ,fsno,             & !in
                     emg     ,stc     ,df      ,rsurf   ,latheag  , & !in
                     gammag   ,rhsur   ,iloc    ,jloc    ,q2      ,pahb  , & !in
 #ifdef CCPP
@@ -1949,6 +1970,7 @@ contains
         tauy  = fveg * tauyv     + (1.0 - fveg) * tauyb
         fira  = fveg * irg       + (1.0 - fveg) * irb       + irc
         fsh   = fveg * shg       + (1.0 - fveg) * shb       + shc
+        fshx  = fveg * shg/cpfac + (1.0 - fveg) * shb + shc/cpfac
         fgev  = fveg * evg       + (1.0 - fveg) * evb
         ssoil = fveg * ghv       + (1.0 - fveg) * ghb
         fcev  = evc
@@ -1967,6 +1989,7 @@ contains
         tauy  = tauyb
         fira  = irb
         fsh   = shb
+        fshx  = shb
         fgev  = evb
         ssoil = ghb
         tg    = tgb
@@ -3260,7 +3283,8 @@ contains
                        uu      ,vv      ,sfctmp  ,thair   ,qair    , & !in
                        eair    ,rhoair  ,snowh   ,vai     ,gammav   ,gammag,  & !in
                        fwet    ,laisun  ,laisha  ,cwp     ,dzsnso  , & !in
-                       zlvl    ,zpd     ,z0m     ,fveg    , & !in
+                       zlvl    ,cpfac            , & !in
+                       zpd     ,z0m     ,fveg    , & !in
                        z0mg    ,emv     ,emg     ,canliq  ,fsno,          & !in
                        canice  ,stc     ,df      ,rssun   ,rssha   , & !in
                        rsurf   ,latheav ,latheag  ,parsun  ,parsha  ,igs     , & !in
@@ -3320,6 +3344,8 @@ contains
   real,                            intent(in) :: laisun !sunlit leaf area index, one-sided (m2/m2)
   real,                            intent(in) :: laisha !shaded leaf area index, one-sided (m2/m2)
   real,                            intent(in) :: zlvl   !reference height (m)
+  real,                            intent(in) :: cpfac  !heat capacity enhancement factor due to heat storage
+
   real,                            intent(in) :: zpd    !zero plane displacement (m)
   real,                            intent(in) :: z0m    !roughness length, momentum (m)
   real,                            intent(in) :: z0mg   !roughness length, momentum, ground (m)
@@ -3449,6 +3475,7 @@ contains
   real :: kh           !turbulent transfer coefficient, sensible heat, (m2/s)
   real :: h            !temporary sensible heat flux (w/m2)
   real :: hg           !temporary sensible heat flux (w/m2)
+
   real :: moz          !monin-obukhov stability parameter
   real :: mozg         !monin-obukhov stability parameter
   real :: mozold       !monin-obukhov stability parameter from prior iteration
@@ -3578,6 +3605,7 @@ contains
 
         air = -emv*(1.+(1.-emv)*(1.-emg))*lwdn - emv*emg*sb*tg**4  
         cir = (2.-emv*(1.-emg))*emv*sb
+
 ! ---------------------------------------------------------------------------------------------
       loop1: do iter = 1, niterc    !  begin stability iteration
 
@@ -3674,7 +3702,7 @@ contains
         cond = cah + cvh + cgh
         ata  = (sfctmp*cah + tg*cgh) / cond
         bta  = cvh/cond
-        csh  = (1.-bta)*rhoair*cpair*cvh
+        csh  = (1.-bta)*rhoair*cpair*cpfac*cvh
 
 ! prepare for latent heat flux above veg.
 
@@ -3685,8 +3713,8 @@ contains
         cond = caw + cew + ctw + cgw
         aea  = (eair*caw + estg*cgw) / cond
         bea  = (cew+ctw)/cond
-        cev  = (1.-bea)*cew*rhoair*cpair/gammav   ! barlage: change to vegetation v3.6
-        ctr  = (1.-bea)*ctw*rhoair*cpair/gammav
+        cev  = (1.-bea)*cew*rhoair*cpair*cpfac/gammav   ! barlage: change to vegetation v3.6
+        ctr  = (1.-bea)*ctw*rhoair*cpair*cpfac/gammav
 
 ! evaluate surface fluxes with current temperature and solve for dts
 
@@ -3694,9 +3722,9 @@ contains
         eah = aea + bea*estv             ! canopy air e
 
         irc = fveg*(air + cir*tv**4)
-        shc = fveg*rhoair*cpair*cvh * (  tv-tah)
-        evc = fveg*rhoair*cpair*cew * (estv-eah) / gammav ! barlage: change to v in v3.6
-        tr  = fveg*rhoair*cpair*ctw * (estv-eah) / gammav
+        shc = fveg*rhoair*cpair*cpfac*cvh * (  tv-tah)
+        evc = fveg*rhoair*cpair*cpfac*cew * (estv-eah) / gammav ! barlage: change to v in v3.6
+        tr  = fveg*rhoair*cpair*cpfac*ctw * (estv-eah) / gammav
 	if (tv > tfrz) then
           evc = min(canliq*latheav/dt,evc)    ! barlage: add if block for canice in v3.6
 	else
@@ -3736,8 +3764,8 @@ contains
 
         air = - emg*(1.-emv)*lwdn - emg*emv*sb*tv**4
         cir = emg*sb
-        csh = rhoair*cpair/rahg
-        cev = rhoair*cpair / (gammag*(rawg+rsurf))  ! barlage: change to ground v3.6
+        csh = rhoair*cpair*cpfac/rahg
+        cev = rhoair*cpair*cpfac / (gammag*(rawg+rsurf))  ! barlage: change to ground v3.6
         cgh = 2.*df(isnow+1)/dzsnso(isnow+1)
 !        write(*,*)'inside tg=',tg,'stc(1)=',stc(1)
 
@@ -3792,10 +3820,10 @@ contains
 
 ! consistent vegetation air temperature and vapor pressure since tg is not consistent with the tah/eah
 ! calculation.
-!     tah = sfctmp + (shg+shc)/(rhoair*cpair*cah) 
-!     tah = sfctmp + (shg*fveg+shc)/(rhoair*cpair*cah) ! ground flux need fveg
-!     eah = eair + (evc+fveg*(tr+evg))/(rhoair*caw*cpair/gammag )
-!     qfx = (qsfc-qair)*rhoair*caw !*cpair/gammag
+!     tah = sfctmp + (shg+shc)/(rhoair*cpair*cpfac*cah) 
+!     tah = sfctmp + (shg*fveg+shc)/(rhoair*cpair*cpfac*cah) ! ground flux need fveg
+!     eah = eair + (evc+fveg*(tr+evg))/(rhoair*caw*cpair*cpfac/gammag )
+!     qfx = (qsfc-qair)*rhoair*cpfac*caw !*cpair/gammag
 
 ! 2m temperature over vegetation ( corrected for low cq2v values )
    if (opt_sfc == 1 .or. opt_sfc == 2) then
@@ -3808,7 +3836,7 @@ contains
 !         q2v  = (eah*0.622/(sfcprs - 0.378*eah))
          q2v  = qsfc
       else
-         t2mv = tah - (shg+shc/fveg)/(rhoair*cpair) * 1./cah2
+         t2mv = tah - (shg+shc/fveg)/(rhoair*cpair*cpfac) * 1./cah2
 !         q2v = (eah*0.622/(sfcprs - 0.378*eah))- qfx/(rhoair*fv)* 1./vkc * log((2.+z0h)/z0h)
          q2v = qsfc - ((evc+tr)/fveg+evg)/(latheav*rhoair) * 1./cq2v
       endif
