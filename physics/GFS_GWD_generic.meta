@@ -39,15 +39,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[hprime]
-  standard_name = standard_deviation_of_subgrid_orography
-  long_name = standard deviation of subgrid orography
-  units = m
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [oc]
   standard_name = convexity_of_subgrid_orography
   long_name = convexity of subgrid orography

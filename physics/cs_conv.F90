@@ -181,9 +181,9 @@ module cs_conv
 !                                 spblcrit=0.03, & !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.035,& !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.025,& !< minimum cloudbase height in p/ps
-                                  cincrit= 150.0
-!                                 cincrit= 120.0
-!                                 cincrit= 100.0
+                                  cincrit= -150.0
+!                                 cincrit= -120.0
+!                                 cincrit= -100.0
 
 !DD precz0 and  preczh control partitioning of water between detrainment
 !DD   and precipitation. Decrease for more precip
@@ -326,7 +326,7 @@ module cs_conv
 ! added for cs_convr
    real(r8), intent(inout) :: u(IM,KMAX)          ! zonal wind at mid-layer (m/s)
    real(r8), intent(inout) :: v(IM,KMAX)          ! meridional wind at mid-layer (m/s)
-   
+
    real(r8), intent(in)    :: DELTA               ! physics time step
    real(r8), intent(in)    :: DELTI               ! dynamics time step (model time increment in seconds)
    logical,  intent(in)    :: do_aw, do_awdd, flx_form
@@ -1089,19 +1089,19 @@ module cs_conv
            ELSE
               BUOY = (GDS(I,1)-GDS(I,K)) / (CP*GDT(I,K))
            END IF
-           IF (BUOY > zero .AND. JBUOY(I) /=  0) THEN
+           IF (BUOY > zero .AND. JBUOY(I) >=  -1) THEN
               CAPE(I) = CAPE(I) + BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
               JBUOY(I) = 2
            ELSEIF (BUOY < zero .AND. JBUOY(I) /= 2) THEN
               CIN(I) = CIN(I) - BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
-              JBUOY(I) = 1
+              JBUOY(I) = -1
            ENDIF
          endif
        ENDDO
      ENDDO
      DO I=ISTS,IENS
        IF (JBUOY(I) /= 2) CIN(I) = -999.D0
-       if (cin(i) > cincrit) kb(i) = -1
+       if (cin(i) < cincrit) kb(i) = -1
      ENDDO
 
 !DDsigma some initialization  before summing over cloud type

@@ -1,6 +1,9 @@
 !> \file gfdl_cloud_microphys.F90
-!! This file contains the column GFDL cloud microphysics ( Chen and Lin (2013)
-!! \cite chen_and_lin_2013 ).
+!! This file contains the full GFDL cloud microphysics (Chen and Lin (2013)
+!! \cite chen_and_lin_2013 and Zhou et al. 2019 \cite zhou2019toward).
+!! The module is paired with 'gfdl_fv_sat_adj', which performs the "fast"
+!! processes
+!>author Shian-Jiann Lin, Linjiong Zhou
 !***********************************************************************
 !*                   GNU Lesser General Public License
 !*
@@ -285,6 +288,18 @@ module gfdl_cloud_microphys_mod
 
    real :: log_10, tice0, t_wfr
 
+    integer :: reiflag = 1
+    ! 1: Heymsfield and Mcfarquhar, 1996
+    ! 2: Wyser, 1998
+     
+    logical :: tintqs = .false. !< use temperature in the saturation mixing in PDF 
+
+    real :: rewmin = 5.0, rewmax = 10.0
+    real :: reimin = 10.0, reimax = 150.0
+    real :: rermin = 10.0, rermax = 10000.0
+    real :: resmin = 150.0, resmax = 10000.0
+    real :: regmin = 300.0, regmax = 10000.0
+    
    ! -----------------------------------------------------------------------
    ! namelist
    ! -----------------------------------------------------------------------
@@ -299,7 +314,9 @@ module gfdl_cloud_microphys_mod
        tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
        z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
        rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f, mp_print
+       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
+       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
+       resmin, resmax, regmin, regmax, tintqs
 
    public                                                                    &
        mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
@@ -311,7 +328,9 @@ module gfdl_cloud_microphys_mod
        tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
        z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
        rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f, mp_print
+       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
+       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
+       resmin, resmax, regmin, regmax, tintqs 
 
 contains
 
@@ -3301,7 +3320,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
             else
                 tc (k) = tk (k) - tice
                 vti (k) = (3. + log10 (qi (k) * den (k))) * (tc (k) * (aa * tc (k) + bb) + cc) + dd * tc (k) + ee
-                vti (k) = vi0 * exp (log_10 * vti (k))
+                vti (k) = vi0 * exp (log_10 * vti (k)) * 0.8 
                 vti (k) = min (vi_max, max (vf_min, vti (k)))
             endif
         enddo
@@ -4683,127 +4702,141 @@ end subroutine interpolate_z
 !> \ingroup mod_gfdl_cloud_mp
 !! The subroutine 'cloud_diagnosis' diagnoses the radius of cloud
 !! species.
-subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
+!>author Linjiong Zhoum, Shian-Jiann Lin
+! =======================================================================
+subroutine cloud_diagnosis (is, ie, ks, ke, den, delp, lsm, qmw, qmi, qmr, qms, qmg, t, &
         rew, rei, rer, res, reg)
-!       qcw, qci, qcr, qcs, qcg, rew, rei, rer, res, reg)
 
     implicit none
 
-    integer, intent (in) :: is, ie, js, je
+    integer, intent (in) :: is, ie, ks, ke
+    integer, intent (in), dimension (is:ie) :: lsm ! land sea mask, 0: ocean, 1: land, 2: sea ice
 
-    real, intent (in), dimension (is:ie, js:je) :: den, t
-    real, intent (in), dimension (is:ie, js:je) :: qw, qi, qr, qs, qg       ! units: kg / kg
+    real, intent (in), dimension (is:ie, ks:ke) :: den, delp, t
+    real, intent (in), dimension (is:ie, ks:ke) :: qmw, qmi, qmr, qms, qmg !< units: kg / kg
 
-!   real, intent (out), dimension (is:ie, js:je) :: qcw, qci, qcr, qcs, qcg ! units: kg / m^3
-    real, dimension (is:ie, js:je) :: qcw, qci, qcr, qcs, qcg               ! units: kg / m^3
-    real, intent (out), dimension (is:ie, js:je) :: rew, rei, rer, res, reg ! units: micron
+    real, intent (out), dimension (is:ie, ks:ke) :: rew, rei, rer, res, reg !< units: micron
 
-    integer :: i, j
+    real, dimension (is:ie, ks:ke) :: qcw, qci, qcr, qcs, qcg !< units: g / m^2
+    
+    integer :: i, k
 
     real :: lambdar, lambdas, lambdag
+    real :: dpg, rei_fac, mask, ccn, bw
+    real, parameter :: rho_0 = 50.e-3
 
     real :: rhow = 1.0e3, rhor = 1.0e3, rhos = 1.0e2, rhog = 4.0e2
     real :: n0r = 8.0e6, n0s = 3.0e6, n0g = 4.0e6
     real :: alphar = 0.8, alphas = 0.25, alphag = 0.5
     real :: gammar = 17.837789, gammas = 8.2850630, gammag = 11.631769
-!   real :: qmin = 1.0e-5, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 5.0e-6, ccn = 1.0e8, beta = 1.22
-    real :: qmin = 9.0e-6, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 1.0e-6, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 1.0e-8, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 1.0e-12, ccn = 1.0e8, beta = 1.22
+    real :: qmin = 1.0e-12, beta = 1.22
 
-    ! real :: rewmin = 1.0, rewmax = 25.0
-    ! real :: reimin = 10.0, reimax = 300.0
-    ! real :: rermin = 25.0, rermax = 225.0
-    ! real :: resmin = 300, resmax = 1000.0
-    ! real :: regmin = 1000.0, regmax = 1.0e5
-    real :: rewmin = 5.0, rewmax = 10.0
-    real :: reimin = 10.0, reimax = 150.0
-!   real :: rermin = 0.0, rermax = 10000.0
-!   real :: resmin = 0.0, resmax = 10000.0
-!   real :: regmin = 0.0, regmax = 10000.0
-    real :: rermin = 50.0, rermax = 10000.0
-    real :: resmin = 100.0, resmax = 10000.0
-    real :: regmin = 300.0, regmax = 10000.0
-
-    do j = js, je
+    do k = ks, ke
         do i = is, ie
+            
+            dpg = abs (delp (i, k)) / grav
+            mask = min (max (real(lsm (i)), 0.0), 2.0)
 
             ! -----------------------------------------------------------------------
-            ! cloud water (martin et al., 1994)
+            ! cloud water (Martin et al., 1994)
             ! -----------------------------------------------------------------------
 
-            if (qw (i, j) .gt. qmin) then
-                qcw (i, j) = den (i, j) * qw (i, j)
-                rew (i, j) = exp (1.0 / 3.0 * log ((3 * qcw (i, j)) / (4 * pi * rhow * ccn))) * 1.0e6
-                rew (i, j) = max (rewmin, min (rewmax, rew (i, j)))
+            ccn = 0.80 * (- 1.15e-3 * (ccn_o ** 2) + 0.963 * ccn_o + 5.30) * abs (mask - 1.0) + &
+                0.67 * (- 2.10e-4 * (ccn_l ** 2) + 0.568 * ccn_l - 27.9) * (1.0 - abs (mask - 1.0))
+
+            if (qmw (i, k) .gt. qmin) then
+                qcw (i, k) = dpg * qmw (i, k) * 1.0e3
+                rew (i, k) = exp (1.0 / 3.0 * log ((3.0 * den (i, k) * qmw (i, k)) / (4.0 * pi * rhow * ccn))) * 1.0e4
+                rew (i, k) = max (rewmin, min (rewmax, rew (i, k)))
             else
-                qcw (i, j) = 0.0
-                rew (i, j) = rewmin
+                qcw (i, k) = 0.0
+                rew (i, k) = rewmin
             endif
+            
+            if (reiflag .eq. 1) then
 
             ! -----------------------------------------------------------------------
-            ! cloud ice (heymsfield and mcfarquhar, 1996)
+                ! cloud ice (Heymsfield and Mcfarquhar, 1996)
             ! -----------------------------------------------------------------------
 
-            if (qi (i, j) .gt. qmin) then
-                qci (i, j) = den (i, j) * qi (i, j)
-                if (t (i, j) - tice .lt. - 50) then
-                    rei (i, j) = beta / 9.917 * exp ((1 - 0.891) * log (1.0e3 * qci (i, j))) * 1.0e3
-                elseif (t (i, j) - tice .lt. - 40) then
-                    rei (i, j) = beta / 9.337 * exp ((1 - 0.920) * log (1.0e3 * qci (i, j))) * 1.0e3
-                elseif (t (i, j) - tice .lt. - 30) then
-                    rei (i, j) = beta / 9.208 * exp ((1 - 0.945) * log (1.0e3 * qci (i, j))) * 1.0e3
+                if (qmi (i, k) .gt. qmin) then
+                    qci (i, k) = dpg * qmi (i, k) * 1.0e3
+                    rei_fac = log (1.0e3 * qmi (i, k) * den (i, k))
+                    if (t (i, k) - tice .lt. - 50) then
+                        rei (i, k) = beta / 9.917 * exp (0.109 * rei_fac) * 1.0e3
+                    elseif (t (i, k) - tice .lt. - 40) then
+                        rei (i, k) = beta / 9.337 * exp (0.080 * rei_fac) * 1.0e3
+                    elseif (t (i, k) - tice .lt. - 30) then
+                        rei (i, k) = beta / 9.208 * exp (0.055 * rei_fac) * 1.0e3
                 else
-                    rei (i, j) = beta / 9.387 * exp ((1 - 0.969) * log (1.0e3 * qci (i, j))) * 1.0e3
+                        rei (i, k) = beta / 9.387 * exp (0.031 * rei_fac) * 1.0e3
                 endif
-                rei (i, j) = max (reimin, min (reimax, rei (i, j)))
+                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
             else
-                qci (i, j) = 0.0
-                rei (i, j) = reimin
+                    qci (i, k) = 0.0
+                    rei (i, k) = reimin
+            endif
+
+            endif
+            
+            if (reiflag .eq. 2) then
+
+            ! -----------------------------------------------------------------------
+                ! cloud ice (Wyser, 1998)
+            ! -----------------------------------------------------------------------
+
+                if (qmi (i, k) .gt. qmin) then
+                    qci (i, k) = dpg * qmi (i, k) * 1.0e3
+                    bw = - 2. + 1.e-3 * log10 (den (i, k) * qmi (i, k) / rho_0) * max (0.0, tice - t (i, k)) ** 1.5
+                    rei (i, k) = 377.4 + bw * (203.3 + bw * (37.91 + 2.3696 * bw))
+                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+            else
+                    qci (i, k) = 0.0
+                    rei (i, k) = reimin
+                endif
+
             endif
 
             ! -----------------------------------------------------------------------
-            ! rain (lin et al., 1983)
+            ! rain (Lin et al., 1983)
             ! -----------------------------------------------------------------------
 
-            if (qr (i, j) .gt. qmin) then
-                qcr (i, j) = den (i, j) * qr (i, j)
-                lambdar = exp (0.25 * log (pi * rhor * n0r / qcr (i, j)))
-                rer (i, j) = 0.5 * exp (log (gammar / 6) / alphar) / lambdar * 1.0e6
-                rer (i, j) = max (rermin, min (rermax, rer (i, j)))
+            if (qmr (i, k) .gt. qmin) then
+                qcr (i, k) = dpg * qmr (i, k) * 1.0e3
+                lambdar = exp (0.25 * log (pi * rhor * n0r / qmr (i, k) / den (i, k)))
+                rer (i, k) = 0.5 * exp (log (gammar / 6) / alphar) / lambdar * 1.0e6
+                rer (i, k) = max (rermin, min (rermax, rer (i, k)))
             else
-                qcr (i, j) = 0.0
-                rer (i, j) = rermin
+                qcr (i, k) = 0.0
+                rer (i, k) = rermin
             endif
 
             ! -----------------------------------------------------------------------
-            ! snow (lin et al., 1983)
+            ! snow (Lin et al., 1983)
             ! -----------------------------------------------------------------------
 
-            if (qs (i, j) .gt. qmin) then
-                qcs (i, j) = den (i, j) * qs (i, j)
-                lambdas = exp (0.25 * log (pi * rhos * n0s / qcs (i, j)))
-                res (i, j) = 0.5 * exp (log (gammas / 6) / alphas) / lambdas * 1.0e6
-                res (i, j) = max (resmin, min (resmax, res (i, j)))
+            if (qms (i, k) .gt. qmin) then
+                qcs (i, k) = dpg * qms (i, k) * 1.0e3
+                lambdas = exp (0.25 * log (pi * rhos * n0s / qms (i, k) / den (i, k)))
+                res (i, k) = 0.5 * exp (log (gammas / 6) / alphas) / lambdas * 1.0e6
+                res (i, k) = max (resmin, min (resmax, res (i, k)))
             else
-                qcs (i, j) = 0.0
-                res (i, j) = resmin
+                qcs (i, k) = 0.0
+                res (i, k) = resmin
             endif
-
+            
             ! -----------------------------------------------------------------------
-            ! graupel (lin et al., 1983)
+            ! graupel (Lin et al., 1983)
             ! -----------------------------------------------------------------------
-
-            if (qg (i, j) .gt. qmin) then
-                qcg (i, j) = den (i, j) * qg (i, j)
-                lambdag = exp (0.25 * log (pi * rhog * n0g / qcg (i, j)))
-                reg (i, j) = 0.5 * exp (log (gammag / 6) / alphag) / lambdag * 1.0e6
-                reg (i, j) = max (regmin, min (regmax, reg (i, j)))
+            
+            if (qmg (i, k) .gt. qmin) then
+                qcg (i, k) = dpg * qmg (i, k) * 1.0e3
+                lambdag = exp (0.25 * log (pi * rhog * n0g / qmg (i, k) / den (i, k)))
+                reg (i, k) = 0.5 * exp (log (gammag / 6) / alphag) / lambdag * 1.0e6
+                reg (i, k) = max (regmin, min (regmax, reg (i, k)))
             else
-                qcg (i, j) = 0.0
-                reg (i, j) = regmin
+                qcg (i, k) = 0.0
+                reg (i, k) = regmin
             endif
 
         enddo
