@@ -49,7 +49,7 @@ module GFS_rrtmgp_setup
      ! Inputs
      type(GFS_control_type), intent(in) :: &
           Model      ! DDT containing model control parameters
-     real(kind_phys), dimension(levr+1, intent(in) :: &
+     real(kind_phys), dimension(levr+1), intent(in) :: &
           si
      integer, intent(in) :: levr, ictm, isol, ico2, iaer, ialb, iems,   & 
           ntcw, num_p3d, ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,    &
