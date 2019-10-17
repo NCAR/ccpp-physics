@@ -270,7 +270,7 @@
         enddo
       enddo
 
-      ! Conversion factor mm per physics timestep to m per day
+      ! Conversion factor mm per day to m per physics timestep 
       tem = dtp * con_p001 / con_day
 
 !> - For GFDL and Thompson MP scheme, determine convective snow by surface temperature;
@@ -280,6 +280,8 @@
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
+       
+      if (lsm/=lsm_ruc) then
         do i = 1, im
           !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
           srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
@@ -300,6 +302,14 @@
             srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
           endif
         enddo
+      else
+      ! only for RUC LSM
+        do i=1,im
+          srflag(i) = sr(i)
+        if(sr(i) > 0.) print *,'RUC LSM uses SR from MP - srflag(i)',i,srflag(i)
+        enddo
+      endif ! lsm==lsm_ruc
+
       elseif( .not. cal_pre) then
         if (imp_physics == imp_physics_mg) then              ! MG microphysics
           do i=1,im

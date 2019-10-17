@@ -562,11 +562,15 @@ module lsm_ruc
         !rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
         !graupelncv(i,j) = rhoh2o * graupel(i)
         !snowncv(i,j)    = rhoh2o * snow(i)
-        prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! tprcp in [m] - convective plus explicit
-        raincv(i,j)     = rhoh2o * rainc(i)                    ! total time-step convective precip
-        rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
+        prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! [mm] - convective plus explicit
+        raincv(i,j)     = rhoh2o * rainc(i)                    ! [mm] - total time-step convective precip
+        rainncv(i,j)    = rhoh2o * rainnc(i)                   ! [mm] - total time-step explicit precip 
         graupelncv(i,j) = rhoh2o * graupel(i)
         snowncv(i,j)    = rhoh2o * snow(i)
+    if(ffrozp(i,j) > 0.) then
+    print *,'prcp(i,j),raincv(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)',i,j, &
+        prcp(i,j),raincv(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)
+    endif
         ! ice not used
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
@@ -694,7 +698,7 @@ module lsm_ruc
         znt(i,j) = zorl(i)/100.
 
         if(debug_print) then
-          !if(me==0 .and. i==ipr) then
+          if(me==0 .and. i==ipr) then
             write (0,*)'before RUC smsoil = ',smsoil(i,:,j), i,j
             write (0,*)'stsoil = ',stsoil(i,:,j), i,j
             write (0,*)'soilt = ',soilt(i,j), i,j
@@ -788,7 +792,7 @@ module lsm_ruc
             write (0,*)'shdmin1d(i,j) =',i,j,shdmin1d(i,j)
             write (0,*)'shdmax1d(i,j) =',i,j,shdmax1d(i,j)
             write (0,*)'rdlai2d =',rdlai2d
-          !endif
+          endif
         endif
 
 !> - Call RUC LSM lsmruc(). 
@@ -828,6 +832,7 @@ module lsm_ruc
      &          its,ite, jts,jte, kts,kte                                    )
 
         if(debug_print) then
+          !if(me==0 .and. i==ipr) then
           write (0,*)'after sneqv(i,j) =',i,j,sneqv(i,j)
           write (0,*)'after snowh(i,j) =',i,j,snowh(i,j)
           write (0,*)'after sncovr(i,j) =',i,j,sncovr(i,j)
