@@ -228,13 +228,7 @@ contains
                 Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
              enddo
           enddo
-       endif
-       
-       if (Model%lgocart .or. Model%ldiag3d) then
-          do k = 1, Model%levs
-             Coupling%cldcovi(1:im,k) = cld_frac(1:im,k)
-          enddo
-       endif
+       endif       
     endif
 
   end subroutine GFS_rrtmgp_lw_post_run

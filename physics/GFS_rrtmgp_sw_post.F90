@@ -313,12 +313,6 @@ contains
              enddo
           enddo
        endif
-
-       if (Model%lgocart .or. Model%ldiag3d) then
-          do k = 1, Model%levs
-             Coupling%cldcovi(1:im,k) = cld_frac(1:im,k)
-          enddo
-       endif
     endif
 
  
