@@ -145,7 +145,7 @@ contains
     
     ! Call module_radiation_surface::setalb() to setup surface albedo.
     call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%snoalb, Sfcprop%zorl, &
-         Radtend%coszen, Sfcprop%tsfc, Sfcprop%tsfc, Sfcprop%hprim, Sfcprop%alvsf,           &
+         Radtend%coszen, Sfcprop%tsfc, Sfcprop%tsfc, Sfcprop%hprime(:,1), Sfcprop%alvsf,           &
          Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf,          &
          Sfcprop%fice, Sfcprop%tisfc, NCOL, alb1d, Model%pertalb, sfcalb)
        

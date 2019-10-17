@@ -94,7 +94,7 @@ contains
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
     call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,    &
-         Sfcprop%zorl, Sfcprop%tsfc,Sfcprop%tsfc, Sfcprop%hprim, NCOL,   &
+         Sfcprop%zorl, Sfcprop%tsfc,Sfcprop%tsfc, Sfcprop%hprime(:,1), NCOL,   &
          Radtend%semis)
     do iBand=1,lw_gas_props%get_nband()
        Radtend%sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
