@@ -164,15 +164,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[frain]
-  standard_name = dynamics_to_physics_timestep_ratio
-  long_name = ratio of dynamics timestep to physics timestep
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [islmsk]
   standard_name = sea_land_ice_mask
   long_name = landmask: sea/land/ice=0/1/2
@@ -363,6 +354,14 @@
   type = logical
   intent = in
   optional = F
+[frac_grid]
+  standard_name = flag_for_fractional_grid
+  long_name = flag for fractional grid
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [imfshalcnv]
   standard_name = flag_for_mass_flux_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme
@@ -402,6 +401,15 @@
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
   units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cice]
+  standard_name = sea_ice_concentration
+  long_name = ice fraction over open water
+  units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -578,6 +586,33 @@
   kind = kind_phys
   intent = inout
   optional = F
+[adjsfculw_lnd]
+  standard_name = surface_upwelling_longwave_flux_over_land_interstitial
+  long_name = surface upwelling longwave flux at current time over land (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfculw_ice]
+  standard_name = surface_upwelling_longwave_flux_over_ice_interstitial
+  long_name = surface upwelling longwave flux at current time over ice (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfculw_ocn]
+  standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
+  long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [dlwsfc]
   standard_name = cumulative_surface_downwelling_longwave_flux_multiplied_by_timestep
   long_name = cumulative surface downwelling LW flux multiplied by timestep
@@ -684,6 +719,48 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
+  optional = F
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[wet]
+  standard_name = flag_nonzero_wet_surface_fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[frland]
+  standard_name = land_area_fraction_for_microphysics
+  long_name = land area fraction used in microphysics schemes
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[huge]
+  standard_name = netcdf_float_fillvalue
+  long_name = definition of NetCDF float FillValue
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -1396,14 +1473,6 @@
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lgocart]
-  standard_name = flag_gocart
-  long_name = flag for 3d diagnostic fields for gocart 1
   units = flag
   dimensions = ()
   type = logical

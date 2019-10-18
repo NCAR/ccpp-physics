@@ -41,17 +41,16 @@
 !>  @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    & !  ---  inputs:
-     &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
+     &       t0c, rd, ps, t1, q1, delt,                                 &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
-     &       cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, ddvel,     &
-     &       flag_iter, lprnt, ipr,                                     &
+     &       cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      &
+     &       flag_iter, lprnt, ipr, cimin,                              &
      &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
      &       cplflx, cplchm, flag_cice, islmsk_cice,                    &
      &       errmsg, errflg
      &     )
 
-! DH* 20190718: prslki can be removed if GSD_SURFACE_FLUXES_BUGFIX is adopted
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -59,9 +58,9 @@
 !                                                                       !
 !    call sfc_sice                                                      !
 !       inputs:                                                         !
-!          ( im, km, ps, u1, v1, t1, q1, delt,                          !
+!          ( im, km, ps, t1, q1, delt,                                  !
 !            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   !
-!            cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, ddvel,     !
+!            cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      !
 !            flag_iter,                                                 !
 !       input/outputs:                                                  !
 !            hice, fice, tice, weasd, tskin, tprcp, stc, ep,            !
@@ -93,7 +92,6 @@
 !  inputs:                                                       size   !
 !     im, km   - integer, horiz dimension and num of soil layers   1    !
 !     ps       - real, surface pressure                            im   !
-!     u1, v1   - real, u/v component of surface layer wind         im   !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     delt     - real, time interval (second)                      1    !
@@ -109,7 +107,7 @@
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
-!     ddvel    - real,                                             im   !
+!     wind     - real,                                             im   !
 !     flag_iter- logical,                                          im   !
 !                                                                       !
 !  input/outputs:                                                       !
@@ -134,7 +132,7 @@
 !                                                                       !
 ! ===================================================================== !
 !
-      use machine, only: kind_phys
+      use machine, only : kind_phys
       use funcphys, only : fpvs
 !
       implicit none
@@ -156,15 +154,15 @@
       logical, intent(in) :: cplchm
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
-     &       epsm1, grav, rvrdm1, t0c, rd, cimin
+     &       epsm1, grav, rvrdm1, t0c, rd
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
+      real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
-     &       prsl1, prslki, prsik1, prslk1, ddvel
+     &       prsl1, prslki, prsik1, prslk1, wind
 
       integer, dimension(im), intent(in) :: islimsk
       integer, dimension(im), intent(in) :: islmsk_cice
-      real (kind=kind_phys), intent(in)  :: delt
+      real (kind=kind_phys), intent(in)  :: delt, cimin
 
       logical, dimension(im), intent(in) :: flag_iter, flag_cice
 
@@ -189,7 +187,7 @@
      &       snowd, theta1
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kmi)
-     &,                        hflxi, hflxw, q0, qs1, wind, qssi, qssw
+     &,                        hflxi, hflxw, q0, qs1, qssi, qssw
       real (kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i, k
@@ -266,9 +264,6 @@
 !         dlwflx has been given a negative sign for downward longwave
 !         sfcnsw is the net shortwave flux (direction: dn-up)
 
-          wind      = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))               &
-     &              + max(zero, min(ddvel(i), 30.0d0)), one)
-
           q0        = max(q1(i), 1.0e-8)
 !         tsurf(i)  = tskin(i)
 #ifdef GSD_SURFACE_FLUXES_BUGFIX
@@ -307,8 +302,8 @@
 
 !  --- ...  rcp = rho cp ch v
 
-          cmm(i) = cm(i)  * wind
-          chh(i) = rho(i) * ch(i) * wind
+          cmm(i) = cm(i)  * wind(i)
+          chh(i) = rho(i) * ch(i) * wind(i)
           rch(i) = chh(i) * cp
 
 !> - Calculate sensible and latent heat flux over open water & sea ice.

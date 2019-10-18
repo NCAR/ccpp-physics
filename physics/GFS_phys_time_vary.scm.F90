@@ -368,7 +368,7 @@
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
         endif
-        
+
 #if 0
         !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
         if (first_time_step) then

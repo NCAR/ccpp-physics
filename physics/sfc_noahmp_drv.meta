@@ -150,22 +150,22 @@
   intent= in
   optional = F
 [sfcemis]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
+  standard_name = surface_longwave_emissivity_over_land_interstitial
+  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
   units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent= in
+  intent = in
   optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground
-  long_name = total sky surface downward longwave flux absorbed by the ground
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
+  long_name = total sky surface downward longwave flux absorbed by the ground over land
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent= in
+  intent = in
   optional = F
 [dswsfc]
   standard_name = surface_downwelling_shortwave_flux
@@ -256,9 +256,9 @@
   type = logical
   intent = in
   optional = F
-[ddvel]
-  standard_name = surface_wind_enhancement_due_to_convection
-  long_name = surface wind enhancement due to convection
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
   units = m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -322,6 +322,14 @@
   long_name = flag for guess run
   units = flag
   dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[lheatstrg]
+  standard_name = flag_for_canopy_heat_storage
+  long_name = flag for canopy heat storage parameterization
+  units = flag
+  dimensions = ()
   type = logical
   intent = in
   optional = F

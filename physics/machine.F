@@ -1,10 +1,8 @@
       module machine
 
-#if 0
 !! \section arg_table_machine
 !! \htmlinclude machine.html
 !!
-#endif
 
       implicit none
       
