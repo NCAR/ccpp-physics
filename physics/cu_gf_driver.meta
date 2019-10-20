@@ -44,9 +44,9 @@
 [ccpp-arg-table]
   name = cu_gf_driver_run
   type = scheme
-[tottracer]
-  standard_name = number_of_total_tracers
-  long_name = number of total tracers
+[ntracer]
+  standard_name = number_of_tracers
+  long_name = number of tracers
   units = count
   dimensions = ()
   type = integer

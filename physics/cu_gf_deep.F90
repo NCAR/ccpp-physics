@@ -2251,7 +2251,7 @@ contains
 
    do i=its,itf
      evap_bcb    (i,:)= 0.0
-     evap_bcb    (i,:)= 0.0
+     net_prec_bcb(i,:)= 0.0
      tot_evap_bcb(i)  = 0.0
      if(ierr(i) /= 0) cycle
 
@@ -2283,9 +2283,8 @@ contains
       !--units here: kg[water]/kg[air}/sec * kg[air]/m3 * m = kg[water]/m2/sec
        evap_bcb(i,k)= evap_bcb(i,k)*dp/g
 
-       if((net_prec_bcb(i,k+1) - evap_bcb(i,k)).lt.0.)then
-         cycle
-       endif
+       if((net_prec_bcb(i,k+1) - evap_bcb(i,k)).lt.0.) cycle
+       if((pre(i) - evap_bcb(i,k)).lt.0.) cycle
        net_prec_bcb(i,k)= net_prec_bcb(i,k+1) - evap_bcb(i,k)
 
        tot_evap_bcb(i) = tot_evap_bcb(i)+evap_bcb(i,k)
@@ -3020,9 +3019,8 @@ contains
                      xff_ens3(12)=0.
                      xff_ens3(13)= 0.
                      xff_ens3(16)= 0.
-!                     closure_n(i)=12.
-! hli 05/01/2018                     closure_n(i)=12.
-!                     xff_dicycle = 0.
+!                    closure_n(i)=12.
+!                    xff_dicycle = 0.
                 endif  !xff0
              endif ! ichoice
 

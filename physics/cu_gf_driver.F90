@@ -69,7 +69,7 @@ contains
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
-      subroutine cu_gf_driver_run(tottracer,garea,im,ix,km,dt,cactiv,           &
+      subroutine cu_gf_driver_run(ntracer,garea,im,ix,km,dt,cactiv,             &
                forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,           &
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
@@ -96,7 +96,7 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
-   integer, intent(in   ) :: im,ix,km,tottracer
+   integer, intent(in   ) :: im,ix,km,ntracer
 
    real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: t,us,vs
@@ -129,7 +129,7 @@ contains
 !  additional variables for number concentrations
    real(kind=kind_phys), intent(in) :: nwfa(1:im,1:km)
    real(kind=kind_phys), intent(in) :: con_rd
-   real(kind=kind_phys), dimension(im,km,tottracer), intent(inout) :: gq0
+   real(kind=kind_phys), dimension(im,km,ntracer), intent(inout) :: gq0
    integer, intent(in) :: imp_physics,imp_physics_thompson,ntlnc,ntinc
 
    integer, intent(in   ) :: imfshalcnv
@@ -733,6 +733,7 @@ contains
                hbot(i)=max(kbconm(i),kbcon(i)) !jmin(i)
             endif
 
+            dtime_max=dt
             do k=kts,kstop
                cnvc(i,k) = 0.04 * log(1. + 675. * zu(i,k) * xmb(i)) +   &
                            0.04 * log(1. + 675. * zum(i,k) * xmbm(i)) + &
@@ -815,7 +816,7 @@ contains
              do k=1,kstop
                tem  = dt*(outqcs(i,k)*cutens(i)+outqc(i,k)*cuten(i)    &
                       +outqcm(i,k)*cutenm(i)                           &
-                      +clw_ten1(k))
+                      +max(0.,clw_ten1(k)))
                tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
                if (clcw(i,k) .gt. -999.0) then
                 cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
