@@ -106,12 +106,10 @@ module  cires_ugwp_module
 ! init  of cires_ugwp   (_init)  called from GFS_driver.F90
 !
 ! -----------------------------------------------------------------------
-   subroutine cires_ugwp_mod_init (me, master, nlunit, logunit, fn_nml2, &
+   subroutine cires_ugwp_mod_init (me, master, nlunit, logunit, fn_nml, &
               lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
               pa_rf_in, tau_rf_in)
-!
-!  input_nml_file ='input.nml'=fn_nml
-!
+
     use  ugwp_oro_init,     only :  init_oro_gws
     use  ugwp_conv_init,    only :  init_conv_gws
     use  ugwp_fjet_init,    only :  init_fjet_gws
@@ -132,10 +130,8 @@ module  cires_ugwp_module
     real,    intent (in) :: cdmvgwd(2), cgwf(2)             ! "scaling" controls for "old" GFS-GW schemes
     real,    intent (in) :: pa_rf_in, tau_rf_in
  
-    character(len=64), intent (in) :: fn_nml2
-    character(len=64), parameter   :: fn_nml='input.nml'
+    character(len=64), intent (in) :: fn_nml
 
-!    character,  intent (in) :: input_nml_file
 !    integer, parameter :: logunit =  6
     integer :: ios
     logical :: exists
