@@ -96,10 +96,10 @@
   intent = in
   optional = F
 [rannum]
-  standard_name = random_numbers
-  long_name = random numbers time step
-  units = count
-  dimensions = ()
+  standard_name = random_number_array
+  long_name = random number array (0-1)
+  units = none
+  dimensions = (horizontal_dimension,array_dimension_of_random_number)
   type = real
   kind = kind_phys
   intent = in
@@ -178,7 +178,7 @@
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
-  units = count
+  units = Pa
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -187,7 +187,7 @@
 [prsik]
   standard_name = interface_exner_function
   long_name = layer interface exner function
-  units = count
+  units = ratio
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -196,7 +196,7 @@
 [prslk]
   standard_name = layer_exner_function
   long_name = mean layer exner function
-  units = Pa
+  units = ratio
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -290,7 +290,7 @@
 [facmb]
   standard_name = pressure_conversion_factor
   long_name = conversion factor from input pressure to hPa
-  units = none
+  units = ratio
   dimensions = ()
   type = real
   kind = kind_phys
@@ -325,7 +325,7 @@
 [nrcm]
   standard_name = number_of_random_numbers
   long_name = number of random numbers
-  units = none
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -333,7 +333,7 @@
 [rhc]
   standard_name = critical_relative_humidity
   long_name = critical relative humidity
-  units = none
+  units = frac
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -341,7 +341,7 @@
   optional = F
 [ud_mf]
   standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
-  long_name = (updraft mass flux) * delt
+  long_name = (updraft mass flux) * dt
   units = kg m-2
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -350,7 +350,7 @@
   optional = F
 [dd_mf]
   standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
-  long_name = (downdraft mass flux) * delt
+  long_name = (downdraft mass flux) * dt
   units = kg m-2
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -359,7 +359,7 @@
   optional = F
 [det_mf]
   standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
-  long_name = (detrainment mass flux) * delt
+  long_name = (detrainment mass flux) * dt
   units = kg m-2
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -369,7 +369,6 @@
 [c00]
   standard_name = rain_auto_conversion_coefficient
   long_name = rain auto conversion coefficient
-  long_name = convective rain conversion parameter for deep conv.
   units = m-1
   dimensions = (horizontal_dimension)
   type = real
@@ -396,7 +395,7 @@
   optional = F
 [qi0]
   standard_name = ice_water_threshold_in_autoconversion
-  long_name = iice water threshold in autoconversion
+  long_name = ice water threshold in autoconversion
   units = kg kg-1
   dimensions = (horizontal_dimension)
   type = real
@@ -429,9 +428,9 @@
   intent = in
   optional = F
 [kdt]
-  standard_name = htime_step
-  long_name = current time step
-  units = count
+  standard_name = index_of_time_step
+  long_name = current time step index
+  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -552,17 +551,17 @@
   optional = F
 [trcmin]
   standard_name = floor_value_for_tracers
-  long_name = minimum tracet value
-  units = kgkg-1
+  long_name = minimum tracer value
+  units = kg kg-1
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [ntk]
-  standard_name = index_of_location_turbulent_kinetic_energy
-  long_name = index of turbulent kinetic energy location
-  units = flag
+  standard_name = index_for_turbulent_kinetic_energy_convective_transport_tracer
+  long_name = index for turbulent kinetic energy in the convectively transported tracer array
+  units = index
   dimensions = ()
   type = integer
   intent = in

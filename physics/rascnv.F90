@@ -2,8 +2,6 @@
 !!  This file contains the entire Relaxed Arakawa-Schubert convection
 !!  parameteriztion
 
-!> This module contains the CCPP-compliant scale-aware mass-flux deep
-!! convection scheme.
       module rascnv
 
       USE machine , ONLY : kind_phys
@@ -13,6 +11,7 @@
       implicit none
       public :: rascnv_init, rascnv_run, rascnv_finalize
       private
+      logical :: is_initialized = .False.
 !
       integer,               parameter :: nrcmax=32 ! Maximum # of random clouds per 1200s
 
@@ -140,39 +139,38 @@
 ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-      if (first) then
+      if (is_initialized) return
 !                           set critical workfunction arrays
-        ACTOP = ACTP*FACM
-        DO L=1,15
-          A(L) = A(L)*FACM
-        ENDDO
-        DO L=2,15
-          TEM   = one / (PH(L) - PH(L-1))
-          AC(L) = (PH(L)*A(L-1) - PH(L-1)*A(L)) * TEM
-          AD(L) = (A(L) - A(L-1)) * TEM
-        ENDDO
-        AC(1)  = ACTOP
-        AC(16) = A(15)
-        AD(1)  = zero
-        AD(16) = zero
+      ACTOP = ACTP*FACM
+      DO L=1,15
+        A(L) = A(L)*FACM
+      ENDDO
+      DO L=2,15
+        TEM   = one / (PH(L) - PH(L-1))
+        AC(L) = (PH(L)*A(L-1) - PH(L-1)*A(L)) * TEM
+        AD(L) = (A(L) - A(L-1)) * TEM
+      ENDDO
+      AC(1)  = ACTOP
+      AC(16) = A(15)
+      AD(1)  = zero
+      AD(16) = zero
 !
-        CALL SETQRP
-        CALL SETVTP
+      CALL SETQRP
+      CALL SETVTP
 !
-        do i=1,7
-          tlbpl(i) = (tlac(i)-tlac(i+1)) / (plac(i)-plac(i+1))
-        enddo
-        do i=1,5
-          drdp(i)  = (REFR(i+1)-REFR(i)) / (REFP(i+1)-REFP(i))
-        enddo
+      do i=1,7
+        tlbpl(i) = (tlac(i)-tlac(i+1)) / (plac(i)-plac(i+1))
+      enddo
+      do i=1,5
+        drdp(i)  = (REFR(i+1)-REFR(i)) / (REFP(i+1)-REFP(i))
+      enddo
 !
-!       VTP = 36.34*SQRT(1.2)* (0.001)**0.1364
+!     VTP = 36.34*SQRT(1.2)* (0.001)**0.1364
 !
-        if (me == 0) write(0,*) ' NO DOWNDRAFT FOR CLOUD TYPES'         &
+      if (me == 0) write(0,*) ' NO DOWNDRAFT FOR CLOUD TYPES'           &
      &,                ' DETRAINING AT NORMALIZED PRESSURE ABOVE ',DPD
 !
-        first = .false.
-      endif
+      is_initialized = .true.
 
 !
       end subroutine rascnv_init
@@ -192,79 +190,79 @@
       errflg = 0
 
       end subroutine rascnv_finalize
-!
-!
-! ===================================================================== !
-!  rascnv_run:                                                          !
-!                                                                       !
-!  program history log:                                                 !
-!    Oct  2019  -- shrinivas moorthi                                    !
-!                                                                       !
-!                                                                       !
-!  ====================  defination of variables  ====================
-!  !
-!                                                                       !
-!  inputs:                                                       size
-!  !
-!     im       - integer, horiz dimension and num of used pts      1    !
-!     ix       - integer, maximum horiz dimension                  1    !
-!     k        - integer, vertical dimension                       1    !
-!     dt       - real, time step in seconds                        1    !
-!     dtf      - real, dynamics time step in seconds               1    !
-!     rannum   - real, array holding random numbers between 0 an 1 (ix,nrcm)  !
-!     tin      - real, input temperature (K)
-!     qin      - real, input specific humidity (kg/kg)
-!     uin      - real, input zonal wind component
-!     vin      - real, input meridional wind component
-!     ccin     - real, input condensates+tracers 
-!     fscav    - real 
-!     prsi     - real, layer interface pressure
-!     prsl     - real, layer mid pressure
-!     prsik    - real, layer interface Exner function
-!     prslk    - real, layer mid Exner function
-!     phil     - real, layer mid geopotential height
-!     phii     - real, layer interface geopotential height
-!     kpbl     - integer pbl top index
-!     cdrag    - real, drag coefficient
-!     rainc    - real, convectinve rain (m/sec)
-!     kbot     - integer, cloud bottom index
-!     ktop     - integer, cloud top index
-!     knv      - integer, 0 - no convvection; 1 - convection
-!     ddvel    - downdraft induced surface wind
-!     flipv    - logical, true if input data from bottom to top
-!     facmb    - real, factor bewteen input pressure and hPa
-!     me       - integer, current pe number
-!     garea    - real, grid area
-!     ccwfac   - real, grid area
-!     nrcm     - integer, number of random numbers at each grid point
-!     rhc      - real, critical relative humidity
-!     ud_mf    - real, updraft mass flux
-!     dd_mf    - real, downdraft mass flux
-!     det_mf   - real, detrained mass flux
-!     c00      - real, auto convection coefficient for rain
-!     qw0      - real, min cloud water before autoconversion
-!     c00i     - real, auto convection coefficient for snow
-!     qi0      - real, min cloud ice before autoconversion
-!     dlqfac   - real,fraction of condensated detrained in layers
-!     lprnt    - logical, true for debug print
-!     ipr      - integer, horizontal grid point to print when lprnt=true
-!     kdt      - integer, current teime step
-!     revap    - logial,  when true reevaporate falling rain/snow
-!     qlcn     - real
-!     qicn     - real
-!     w_upi    - real
-!     cf_upi   - real
-!     cnv_mfd  - real
-!     cnv_dqldt- real
-!     clcn     - real
-!     cnv_fice - real
-!     cnv_ndrop- real
-!     cnv_nice - real
-!     mp_phys  - integer, microphysics option
-!     mp_phys_mg - integer, flag for MG microphysics option
-!     trcmin   - real, floor value for tracers
-!     ntk      - integer, index representing TKE in the tracer array
-!
+!!
+!!
+!!===================================================================== !
+!! rascnv_run:                                                          !
+!!                                                                      !
+!! program history log:                                                 !
+!!   Oct  2019  -- shrinivas moorthi                                    !
+!!                                                                      !
+!!                                                                      !
+!! ====================  defination of variables  ====================
+!! !
+!!                                                                      !
+!! inputs:                                                       size
+!! !
+!!    im       - integer, horiz dimension and num of used pts      1    !
+!!    ix       - integer, maximum horiz dimension                  1    !
+!!    k        - integer, vertical dimension                       1    !
+!!    dt       - real, time step in seconds                        1    !
+!!    dtf      - real, dynamics time step in seconds               1    !
+!!    rannum   - real, array holding random numbers between 0 an 1 (ix,nrcm)  !
+!!    tin      - real, input temperature (K)
+!!    qin      - real, input specific humidity (kg/kg)
+!!    uin      - real, input zonal wind component
+!!    vin      - real, input meridional wind component
+!!    ccin     - real, input condensates+tracers 
+!!    fscav    - real 
+!!    prsi     - real, layer interface pressure
+!!    prsl     - real, layer mid pressure
+!!    prsik    - real, layer interface Exner function
+!!    prslk    - real, layer mid Exner function
+!!    phil     - real, layer mid geopotential height
+!!    phii     - real, layer interface geopotential height
+!!    kpbl     - integer pbl top index
+!!    cdrag    - real, drag coefficient
+!!    rainc    - real, convectinve rain (m/sec)
+!!    kbot     - integer, cloud bottom index
+!!    ktop     - integer, cloud top index
+!!    knv      - integer, 0 - no convvection; 1 - convection
+!!    ddvel    - downdraft induced surface wind
+!!    flipv    - logical, true if input data from bottom to top
+!!    facmb    - real, factor bewteen input pressure and hPa
+!!    me       - integer, current pe number
+!!    garea    - real, grid area
+!!    ccwfac   - real, grid area
+!!    nrcm     - integer, number of random numbers at each grid point
+!!    rhc      - real, critical relative humidity
+!!    ud_mf    - real, updraft mass flux
+!!    dd_mf    - real, downdraft mass flux
+!!    det_mf   - real, detrained mass flux
+!!    c00      - real, auto convection coefficient for rain
+!!    qw0      - real, min cloud water before autoconversion
+!!    c00i     - real, auto convection coefficient for snow
+!!    qi0      - real, min cloud ice before autoconversion
+!!    dlqfac   - real,fraction of condensated detrained in layers
+!!    lprnt    - logical, true for debug print
+!!    ipr      - integer, horizontal grid point to print when lprnt=true
+!!    kdt      - integer, current teime step
+!!    revap    - logial,  when true reevaporate falling rain/snow
+!!    qlcn     - real
+!!    qicn     - real
+!!    w_upi    - real
+!!    cf_upi   - real
+!!    cnv_mfd  - real
+!!    cnv_dqldt- real
+!!    clcn     - real
+!!    cnv_fice - real
+!!    cnv_ndrop- real
+!!    cnv_nice - real
+!!    mp_phys  - integer, microphysics option
+!!    mp_phys_mg - integer, flag for MG microphysics option
+!!    trcmin   - real, floor value for tracers
+!!    ntk      - integer, index representing TKE in the tracer array
+!!
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 !! \section arg_table_rascnv_run Argument Table
