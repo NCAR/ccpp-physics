@@ -816,7 +816,8 @@ contains
              do k=1,kstop
                tem  = dt*(outqcs(i,k)*cutens(i)+outqc(i,k)*cuten(i)    &
                       +outqcm(i,k)*cutenm(i)                           &
-                      +max(0.,clw_ten1(k)))
+                      +clw_ten1(k)                                     &
+                         )
                tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
                if (clcw(i,k) .gt. -999.0) then
                 cliw(i,k) = max(0.,cliw(i,k) + tem * tem1)            ! ice
