@@ -672,7 +672,7 @@
 
       integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,imp_physics_fer_hires
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
       logical,                                  intent(in) :: ltaerosol, cplchm
 
@@ -685,8 +685,8 @@
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
       ! dqdti may not be allocated
       real(kind=kind_phys), dimension(:,:),           intent(inout) :: dqdti
-      integer,                        intent(in)    :: mpirank
-      integer,                        intent(in)    :: mpiroot
+      !integer,                        intent(in)    :: mpirank
+      !integer,                        intent(in)    :: mpiroot
 
 
       character(len=*), intent(out) :: errmsg

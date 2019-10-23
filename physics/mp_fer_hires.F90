@@ -28,23 +28,7 @@ module mp_fer_hires
 !> This subroutine initialize constants & lookup tables for Ferrier-Aligao MP
 !! scheme.
 !> \section arg_table_mp_fer_hires_init Argument Table
-!! | local_name            | standard_name                             | long_name                                                 | units    | rank |  type                 |   kind    | intent | optional |
-!! |-----------------------|-------------------------------------------|-----------------------------------------------------------|----------|------|-----------------------|-----------|--------|----------|
-!! | ncol                  | horizontal_loop_extent                    | horizontal loop extent                                    | count    |    0 | integer               |           | in     | F        |
-!! | nlev                  | vertical_dimension                        | number of vertical levels                                 | count    |    0 | integer               |           | in     | F        |
-!! | Model                 | GFS_control_type_instance                 | Fortran DDT containing FV3-GFS model control parameters   | DDT      |    0 | GFS_control_type      |           | in     | F        |
-!! | imp_physics           | flag_for_microphysics_scheme              | choice of microphysics scheme                             | flag     |    0 | integer               |           | in     | F        |
-!! | imp_physics_fer_hires | flag_for_fer_hires_microphysics_scheme    | choice of Ferrier-Aligo microphysics scheme               | flag     |    0 | integer               |           | in     | F        |
-!! | restart               | flag_for_restart                          | flag for restart (warmstart) or coldstart                 | flag     |    0 | logical               |           | in     | F        |
-!! | f_ice                 | fraction_of_ice_water_cloud               | fraction of ice water cloud                               | frac     |    2 | real                  | kind_phys | out    | T        | 
-!! | f_rain                | fraction_of_rain_water_cloud              | fraction of rain water cloud                              | frac     |    2 | real                  | kind_phys | out    | T        | 
-!! | f_rimef               | rime_factor                               | rime factor                                               | frac     |    2 | real                  | kind_phys | out    | T        |
-!! | mpicomm               | mpi_comm                                  | MPI communicator                                          | index    |    0 | integer               |           | in     | F        |
-!! | mpirank               | mpi_rank                                  | current MPI-rank                                          | index    |    0 | integer               |           | in     | F        |
-!! | mpiroot               | mpi_root                                  | master MPI-rank                                           | index    |    0 | integer               |           | in     | F        |
-!! | threads               | omp_threads                               | number of OpenMP threads available to scheme              | count    |    0 | integer               |           | in     | F        |
-!! | errmsg                | ccpp_error_message                        | error message for error handling in CCPP                  | none     |    0 | character             | len=*     | out    | F        |
-!! | errflg                | ccpp_error_flag                           | error flag for error handling in CCPP                     | flag     |    0 | integer               |           | out    | F        |
+!! \htmlinclude mp_fer_hires_init.html
 !!
      subroutine mp_fer_hires_init(NCOL, NLEV, Model, imp_physics,       &
                                   imp_physics_fer_hires,                &
@@ -136,41 +120,7 @@ module mp_fer_hires
 !>\defgroup hafs_famp HAFS Ferrier-Aligo Cloud Microphysics Scheme
 !> This is the CCPP-compliant FER_HIRES driver module.
 !> \section arg_table_mp_fer_hires_run Argument Table
-!! | local_name  | standard_name                                                             | long_name                                                                                          | units      | rank | type     |   kind    | intent | optional |
-!! |-------------|---------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|------------|------|----------|-----------|--------|----------|
-!! |  ncol       | horizontal_loop_extent                                                    | horizontal loop extent                                                                             | count      |   0  | integer  |           | in     | F        |
-!! |  nlev       | vertical_dimension                                                        | number of vertical levels                                                                          | count      |   0  | integer  |           | in     | F        |
-!! |  dt         | time_step_for_physics                                                     | physics timestep                                                                                   | s          |   0  | real     | kind_phys | in     | F        |
-!! |  spec_adv   | flag_for_individual_cloud_species_advected                                | flag for individual cloud species_advected                                                         | flag       |   0  | logical  |           | in     | F        | 
-!! |  slmsk      | sea_land_ice_mask_real                                                    | landmask: sea/land/ice=0/1/2                                                                       | flag       |   1  | real     | kind_phys | in     | F        |
-!! |  prsi       | air_pressure_at_interface                                                 | air pressure at model layer interfaces                                                             | Pa         |   2  | real     | kind_phys | in     | F        |
-!! |  p_phy      | air_pressure                                                              | mean layer pressure                                                                                | Pa         |   2  | real     | kind_phys | in     | F        |
-!! |  t          | air_temperature_updated_by_physics                                        | temperature updated by physics                                                                     | K          |   2  | real     | kind_phys | inout  | F        |
-!! |  q          | water_vapor_specific_humidity_updated_by_physics                          | water vapor specific humidity updated by physics                                                   | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  cwm        | total_cloud_condensate_mixing_ratio_updated_by_physics                    | total cloud condensate mixing ratio (except water vapor) updated by physics                        | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  train      | accumulated_tendency_of_air_temperature_due_to_FA_scheme                  | accumulated tendency of air temperature due to FA MP scheme                                        | K          |   2  | real     | kind_phys | inout  | F        |
-!! |  sr         | ratio_of_snowfall_to_rainfall                                             | snow ratio: ratio of snow to total precipitation  (explicit only)                                  | frac       |   1  | real     | kind_phys | out    | F        |
-!! |  f_ice      | fraction_of_ice_water_cloud                                               | fraction of ice water cloud                                                                        | frac       |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rain     | fraction_of_rain_water_cloud                                              | fraction of rain water cloud                                                                       | frac       |   2  | real     | kind_phys | inout  | F        |
-!! |  f_rimef    | rime_factor                                                               | rime factor                                                                                        | frac       |   2  | real     | kind_phys | inout  | F        |
-!! |  qc         | cloud_condensed_water_mixing_ratio_updated_by_physics                     | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics         | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  qr         | rain_water_mixing_ratio_updated_by_physics                                | moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics                    | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  qi         | ice_water_mixing_ratio_updated_by_physics                                 | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics                     | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  qg         | mass_weighted_rime_factor_updated_by_physics                              | mass weighted rime factor updated by physics                                                       | kg kg-1    |   2  | real     | kind_phys | inout  | F        |
-!! |  prec       | lwe_thickness_of_explicit_precipitation_amount                            | explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep                         | m          |   1  | real     | kind_phys | inout  | F        |
-!! |  mpirank    | mpi_rank                                                                  | current MPI-rank                                                                                   | index      |   0  | integer  |           | in     | F        |
-!! |  mpiroot    | mpi_root                                                                  | master MPI-rank                                                                                    | index      |    0 | integer  |           | in     | F        |
-!! |  threads    | omp_threads                                                               | number of OpenMP threads available to scheme                                                       | count      |   0  | integer  |           | in     | F        | 
-!! |  refl_10cm  | radar_reflectivity_10cm                                                   | instantaneous refl_10cm                                                                            | dBZ        |   2  | real     | kind_phys | inout  | F        |
-!! |  rhgrd      | fa_threshold_relative_humidity_for_onset_of_condensation                  | relative humidity threshold parameter for condensation for FA scheme                               | none       |   0  | real     | kind_phys | in     | F        |
-!! |  dx         | cell_size                                                                 | relative dx for the grid cell                                                                      | m          |   1  | real     | kind_phys | in     | F        |
-!! |  EPSQ       | minimum_value_of_specific_humidity                                        | floor value for specific humidity                                                                  | kg kg-1    |   0  | real     | kind_phys | in     | F        |    
-!! |  R_D        | gas_constant_dry_air                                                      | ideal gas constant for dry air                                                                     | J kg-1 K-1 |   0  | real     | kind_phys | in     | F        |
-!! |  P608       | ratio_of_vapor_to_dry_air_gas_constants_minus_one                         | (rv/rd) - 1 (rv = ideal gas constant for water vapor)                                              | none       |   0  | real     | kind_phys | in     | F        | 
-!! |  CP         | specific_heat_of_dry_air_at_constant_pressure                             | specific heat of dry air at constant pressure                                                      | J kg-1 K-1 |   0  | real     | kind_phys | in     | F        |
-!! |  G          | gravitational_acceleration                                                | gravitational acceleration                                                                         | m s-2      |   0  | real     | kind_phys | in     | F        | 
-!! |  errmsg     | ccpp_error_message                                                        | error message for error handling in CCPP                                                           | none       |   0  | character| len=*     | out    | F        |
-!! |  errflg     | ccpp_error_flag                                                           | error flag for error handling in CCPP                                                              | flag       |   0  | integer  |           | out    | F        |
+!! \htmlinclude mp_fer_hires_run.html
 !!
        SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT ,SPEC_ADV             &
                          ,SLMSK                                         &
@@ -457,33 +407,6 @@ module mp_fer_hires
           T(I,K)=TNEW
         ENDDO
       ENDDO
-
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(cwm)= ', &
-            !                                maxval(cwm),minval(cwm)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(t)= ', &
-            !                                maxval(t),minval(t)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(q)= ', &
-            !                                maxval(q),minval(q)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qc)= ', &
-            !                                maxval(qc),minval(qc)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qr)= ', &
-            !                                maxval(qr),minval(qr)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qi)= ', &
-            !                                maxval(qi),minval(qi)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(qg)= ', &
-            !                                maxval(qg),minval(qg)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rimef)= ', &
-            !                                maxval(f_rimef),minval(f_rimef)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_ice)= ', &
-            !                                maxval(f_ice),minval(f_ice)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(f_rain)= ', &
-            !                                maxval(f_rain),minval(f_rain)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainnc)= ', &
-            !                                maxval(rainnc),minval(rainnc)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(rainncv)= ', &
-            !                                maxval(rainncv),minval(rainncv)
-            !if (mpirank==mpiroot) write(0,*)'af fer_hires: max/min(sr)= ', &
-            !                                maxval(sr),minval(sr)
 
 !.......................................................................
 !MZ$OMP end parallel do
