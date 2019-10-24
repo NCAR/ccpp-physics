@@ -37,8 +37,8 @@ contains
 !!
 ! -----------------------------------------------------------------------
 !
-    subroutine cires_ugwp_init (me, master, nlunit, logunit, fn_nml2, &
-                lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,         &
+    subroutine cires_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
+                fn_nml2, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,       &
                 pa_rf_in, tau_rf_in, con_p0, do_ugwp, errmsg, errflg)
 
 !----  initialization of cires_ugwp
@@ -47,6 +47,7 @@ contains
     integer,              intent (in) :: me
     integer,              intent (in) :: master
     integer,              intent (in) :: nlunit
+    character(len=*),     intent (in) :: input_nml_file(:)
     integer,              intent (in) :: logunit
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
@@ -76,8 +77,8 @@ contains
     if (is_initialized) return
 
     if (do_ugwp .or. cdmbgwd(3) > 0.0) then
-      call cires_ugwp_mod_init (me, master, nlunit, logunit, fn_nml2,  &
-                                lonr, latr, levs, ak, bk, con_p0, dtp, &
+      call cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
+                                fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
     else
       write(errmsg,'(*(a))') "Logic error: cires_ugwp_init called but do_ugwp is false and cdmbgwd(3) <= 0"
