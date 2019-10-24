@@ -560,17 +560,15 @@ module lsm_ruc
         !prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
         !raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
         !rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
-        !graupelncv(i,j) = rhoh2o * graupel(i)
-        !snowncv(i,j)    = rhoh2o * snow(i)
         prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! [mm] - convective plus explicit
         raincv(i,j)     = rhoh2o * rainc(i)                    ! [mm] - total time-step convective precip
         rainncv(i,j)    = rhoh2o * rainnc(i)                   ! [mm] - total time-step explicit precip 
         graupelncv(i,j) = rhoh2o * graupel(i)
         snowncv(i,j)    = rhoh2o * snow(i)
-    if(ffrozp(i,j) > 0.) then
-    print *,'prcp(i,j),raincv(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)',i,j, &
-        prcp(i,j),raincv(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)
-    endif
+    !if(prcp(i,j) > 0. .and. i==21) then
+    !print *,'prcp(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)',i,j, &
+    !    prcp(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)
+    !endif
         ! ice not used
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
