@@ -128,7 +128,8 @@ module mp_fer_hires
                          ,T,Q,CWM                                       &
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
-                         ,QC,QR,QI,QG                                   &
+                         ,QC,QR,QI,QG                                   & ! wet mixing ratio
+                         !,qc_m,qi_m,qr_m                               & 
                          ,PREC                                          &!,ACPREC  -MZ:not used 
                          ,mpirank, mpiroot, threads                     &
                          ,refl_10cm                                     &
@@ -172,6 +173,10 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev) ! QRIMEF
+    !  real(kind_phys),   intent(  out) :: qc_m(1:ncol,1:nlev)
+    !  real(kind_phys),   intent(  out) :: qr_m(1:ncol,1:nlev)
+    !  real(kind_phys),   intent(  out) :: qi_m(1:ncol,1:nlev)
+
       real(kind_phys),   intent(inout) :: prec(1:ncol)
 !      real(kind_phys)                  :: acprec(1:ncol)   !MZ: change to local
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
@@ -292,13 +297,8 @@ module mp_fer_hires
           TH_PHY(I,K)=T(I,K)/PI_PHY(I,K)
 !MZ
 !          DZ(I,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,K)
-          DZ(I,K)=(PRSI(I,K)-PRSI(I,K+1))*R_G/RR(I,K) !  ENDDO    !- DO K=LM,1,-1 !  ENDDO    !- DO I=IMS,IME
-!     if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dz)  = ',  &
-!                                        maxval(dz),minval(dz)
+          DZ(I,K)=(PRSI(I,K)-PRSI(I,K+1))*R_G/RR(I,K)
 
-!.......................................................................
-!MZ$OMP end parallel do
-!.......................................................................
 !
 !***  CALL MICROPHYSICS
 
@@ -336,32 +336,6 @@ module mp_fer_hires
 !              ENDDO
 !              ENDDO
 
-!MZ
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: t_icek  = ', t_icek
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(cwm)  = ',  &
-      !                                  maxval(cwm),minval(cwm)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(t)  = ',  &
-      !!                                  maxval(t),minval(t)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(q)  = ',  &
-      !                                  maxval(q),minval(q)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qc)  = ',  &
-      !                                  maxval(qc),minval(qc)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qi)  = ',  &
-      !                                  maxval(qi),minval(qi)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qr)  = ',  &
-      !                                  maxval(qr),minval(qr)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(qg)  = ',   &
-      !                                  maxval(qg),minval(qg)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_rain)  = ',  &
-      !                                  maxval(f_rain),minval(f_rain)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_ice)  = ',  &
-      !                                  maxval(f_ice),minval(f_ice)
-      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(f_rimef)  = ',  &
-     !                                   maxval(f_rimef),minval(f_rimef)
-!      !if (mpirank==mpiroot) write (0,*)'bf fer_hires: max/min(dx1)  = ',  &
-!      !                                  dx1
-!      if (mpirank==mpiroot) write (0,*)'---------------------------------'
-
 
 !---------------------------------------------------------------------
         
@@ -385,6 +359,21 @@ module mp_fer_hires
 !MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
 !MZ$OMP private(i,k,TNEW,TRAIN)
 !.......................................................................
+
+!MZ*
+!Aligo Oct-23-2019 
+! - Convert dry qc,qr,qi back to wet mixing ratio
+!    DO K = 1, LM
+!     DO I= IMS, IME
+!       qc_m(i,k) = qc(i,k)/(1.0_kind_phys+q(i,k))
+!       qi_m(i,k) = qi(i,k)/(1.0_kind_phys+q(i,k))
+!       qr_m(i,k) = qr(i,k)/(1.0_kind_phys+q(i,k))
+!     ENDDO
+!    ENDDO
+    
+
+
+!-----------------------------------------------------------
       DO K=1,LM
         DO I=IMS,IME
 
@@ -411,6 +400,7 @@ module mp_fer_hires
 !.......................................................................
 !MZ$OMP end parallel do
 !.......................................................................
+
 !
 !-----------------------------------------------------------------------
 !***  UPDATE PRECIPITATION

@@ -274,18 +274,18 @@
   kind = kind_phys
   intent = inout
   optional = F
-[qr]
-  standard_name = rain_water_mixing_ratio_updated_by_physics
-  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics
+[qi]
+  standard_name = ice_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[qi]
-  standard_name = ice_water_mixing_ratio_updated_by_physics
-  long_name = moist (dry+vapor, no condensate) mixing ratio of ice water updated by physics
+[qr]
+  standard_name = rain_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

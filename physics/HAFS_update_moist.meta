@@ -126,8 +126,8 @@
   intent = out
   optional = F
 [qg_r]
-  standard_name = cloud_graupel_mixing_ratio
-  long_name = the ratio of the mass of graupel to mass of dry air
+  standard_name = mass_weighted_rime_factor_updated_by_physics
+  long_name = mass weighted rime factor updated by physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

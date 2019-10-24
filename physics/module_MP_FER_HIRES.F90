@@ -265,6 +265,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme, lm)::      &
      &                      th_phy,t_phy,q,qt
       REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme, lm ) ::    &
+!Aligo Oct 23,2019: dry mixing ratio for cloud species
      &                      qc,qr,qs
       REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme,lm) ::    &
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY
