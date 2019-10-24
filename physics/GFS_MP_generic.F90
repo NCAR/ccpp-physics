@@ -270,7 +270,7 @@
         enddo
       enddo
 
-      ! Conversion factor mm per day to m per physics timestep 
+      ! Conversion factor from mm per day to m per physics timestep 
       tem = dtp * con_p001 / con_day
 
 !> - For GFDL and Thompson MP scheme, determine convective snow by surface temperature;
@@ -306,7 +306,7 @@
       ! only for RUC LSM
         do i=1,im
           srflag(i) = sr(i)
-        if(sr(i) > 0.) print *,'RUC LSM uses SR from MP - srflag(i)',i,srflag(i)
+        !if(sr(i) > 0.) print *,'RUC LSM uses SR from MP - srflag(i)',i,srflag(i)
         enddo
       endif ! lsm==lsm_ruc
 
