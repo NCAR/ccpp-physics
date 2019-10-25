@@ -325,20 +325,37 @@ contains
     call MPI_BCAST(kminor_start_lower,     size(kminor_start_lower),     MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(key_species,            size(key_species),            MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(band2gpt,               size(band2gpt),               MPI_INTEGER, mpiroot, mpicomm, ierr)
-    call MPI_BCAST(band_lims,              size(band_lims),              kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(press_ref,              size(press_ref),              kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(temp_ref,               size(temp_ref),               kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(kminor_lower,           size(kminor_lower),           kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(kminor_upper,           size(kminor_upper),           kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(scaling_gas_lower,      size(scaling_gas_lower),      kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(scaling_gas_upper,      size(scaling_gas_upper),      kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(vmr_ref,                size(vmr_ref),                kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(kmajor,                 size(kmajor),                 kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(temp_ref_p,             1,                            kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(temp_ref_t,             1,                            kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(press_ref_trop,         1,                            kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(totplnk,                size(totplnk),                kind_phys,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(planck_frac,            size(planck_frac),            kind_phys,   mpiroot, mpicomm, ierr)
+#ifndef SINGLE_PREC
+    call MPI_BCAST(band_lims,              size(band_lims),              MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(press_ref,              size(press_ref),              MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(temp_ref,               size(temp_ref),               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(kminor_lower,           size(kminor_lower),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(kminor_upper,           size(kminor_upper),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(scaling_gas_lower,      size(scaling_gas_lower),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(scaling_gas_upper,      size(scaling_gas_upper),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(vmr_ref,                size(vmr_ref),                MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(kmajor,                 size(kmajor),                 MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(temp_ref_p,             1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(temp_ref_t,             1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(press_ref_trop,         1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(totplnk,                size(totplnk),                MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(planck_frac,            size(planck_frac),            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+#else
+    call MPI_BCAST(band_lims,              size(band_lims),              MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(press_ref,              size(press_ref),              MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(temp_ref,               size(temp_ref),               MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(kminor_lower,           size(kminor_lower),           MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(kminor_upper,           size(kminor_upper),           MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(scaling_gas_lower,      size(scaling_gas_lower),      MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(scaling_gas_upper,      size(scaling_gas_upper),      MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(vmr_ref,                size(vmr_ref),                MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(kmajor,                 size(kmajor),                 MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(temp_ref_p,             1,                            MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(temp_ref_t,             1,                            MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(press_ref_trop,         1,                            MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(totplnk,                size(totplnk),                MPI_REAL,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(planck_frac,            size(planck_frac),            MPI_REAL,   mpiroot, mpicomm, ierr)
+#endif
     ! Character arrays
     do ij=1,nabsorbers
        call MPI_BCAST(gas_names(ij),         32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
@@ -355,37 +372,41 @@ contains
     enddo
     ! Logical arrays (First convert to integer-array, then broadcast)
     !
-    allocate(temp_log_array1(nminor_absorber_intervals_lower))
-    where(minor_scales_with_density_lower)
-       temp_log_array1 = 1
-    elsewhere
-       temp_log_array1 = 0
-    end where
-    call MPI_BCAST(temp_log_array1, size(temp_log_array1), MPI_INTEGER,  mpiroot, mpicomm, ierr)
+    call MPI_BCAST(minor_scales_with_density_lower, nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    !allocate(temp_log_array1(nminor_absorber_intervals_lower))
+    !where(minor_scales_with_density_lower)
+    !   temp_log_array1 = 1
+    !elsewhere
+    !   temp_log_array1 = 0
+    !end where
+    !call MPI_BCAST(temp_log_array1, size(temp_log_array1), MPI_INTEGER,  mpiroot, mpicomm, ierr)
     !
-    allocate(temp_log_array2(nminor_absorber_intervals_lower))
-    where(scale_by_complement_lower)
-       temp_log_array2 = 1
-    elsewhere
-       temp_log_array2 = 0
-    end where
-    call MPI_BCAST(temp_log_array2, size(temp_log_array2), MPI_INTEGER,  mpiroot, mpicomm, ierr)
+    !allocate(temp_log_array2(nminor_absorber_intervals_lower))
+    !where(scale_by_complement_lower)
+    !   temp_log_array2 = 1
+    !elsewhere
+    !   temp_log_array2 = 0
+    !end where
+    !call MPI_BCAST(temp_log_array2, size(temp_log_array2), MPI_INTEGER,  mpiroot, mpicomm, ierr)
     !
-    allocate(temp_log_array3(nminor_absorber_intervals_upper))
-    where(minor_scales_with_density_upper)
-       temp_log_array3 = 1
-    elsewhere
-       temp_log_array3 = 0
-    end where
-    call MPI_BCAST(temp_log_array3, size(temp_log_array3), MPI_INTEGER,  mpiroot, mpicomm, ierr)
+    !allocate(temp_log_array3(nminor_absorber_intervals_upper))
+    !where(minor_scales_with_density_upper)
+    !   temp_log_array3 = 1
+    !elsewhere
+    !   temp_log_array3 = 0
+    !end where
+    !call MPI_BCAST(temp_log_array3, size(temp_log_array3), MPI_INTEGER,  mpiroot, mpicomm, ierr)
     !
-    allocate(temp_log_array4(nminor_absorber_intervals_upper))
-    where(scale_by_complement_upper)
-       temp_log_array4 = 1
-    elsewhere
-       temp_log_array4 = 0
-    end where
-    call MPI_BCAST(temp_log_array4, size(temp_log_array4), MPI_INTEGER,  mpiroot, mpicomm, ierr)
+    !allocate(temp_log_array4(nminor_absorber_intervals_upper))
+    !where(scale_by_complement_upper)
+    !   temp_log_array4 = 1
+    !elsewhere
+    !   temp_log_array4 = 0
+    !end where
+    !call MPI_BCAST(temp_log_array4, size(temp_log_array4), MPI_INTEGER,  mpiroot, mpicomm, ierr)
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
