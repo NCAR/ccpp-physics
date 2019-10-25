@@ -134,6 +134,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                          pdftxt/GFSphys_namelist.txt    \
 ###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
+                          pdftxt/NoahMP.txt \
 ### in-core MP
                         ../gfdl_fv_sat_adj.F90    \
 ### time_vary
@@ -172,6 +173,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../sflx.f    \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
+                        ../sfc_noahmp_drv.f \
+                        ../module_sf_noahmplsm.f90 \
+                        ../module_sf_noahmp_glacier.f90 \
+                        ../noahmp_tables.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL

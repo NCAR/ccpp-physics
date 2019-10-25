@@ -1,3 +1,7 @@
+!>  \file module_sf_noahmplsm.f90
+!!  This file contains the NoahMP land surface model.
+
+!>\ingroup NoahMP_LSM
 module module_sf_noahmplsm
 #ifndef CCPP  
   use  module_wrf_utl
@@ -277,6 +281,7 @@ contains
 !
 !== begin noahmp_sflx ==============================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine noahmp_sflx (parameters, &
                    iloc    , jloc    , lat     , yearlen , julian  , cosz    , & ! in : time/space-related
                    dt      , dx      , dz8w    , nsoil   , zsoil   , nsnow   , & ! in : model configuration 
@@ -753,6 +758,7 @@ contains
 
 !== begin atm ======================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine atm (parameters,sfcprs  ,sfctmp   ,q2      ,                             &
                   prcpconv,prcpnonc ,prcpshcv,prcpsnow,prcpgrpl,prcphail , &
                   soldn   ,cosz     ,thair   ,qair    ,                    & 
@@ -899,6 +905,7 @@ contains
 
 !== begin phenology ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine phenology (parameters,vegtyp , snowh  , tv     , lat   , yearlen , julian , & !in
                         lai    , sai    , troot  , elai    , esai   , igs)
 
@@ -993,6 +1000,7 @@ contains
 
 !== begin precip_heat ==============================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine precip_heat (parameters,iloc   ,jloc   ,vegtyp ,dt     ,uu     ,vv     , & !in
                           elai   ,esai   ,fveg   ,ist    ,                 & !in
                           bdfall ,rain   ,snow   ,fp     ,                 & !in
@@ -1222,6 +1230,7 @@ contains
 
 !== begin error ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine error (parameters,swdown ,fsa    ,fsr    ,fira   ,fsh    ,fcev   , &
                     fgev   ,fctr   ,ssoil  ,beg_wb ,canliq ,canice , &
                     sneqv  ,wa     ,smc    ,dzsnso ,prcp   ,ecan   , &
@@ -1415,6 +1424,7 @@ contains
 
 !== begin energy ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine energy (parameters,ice    ,vegtyp ,ist    ,nsnow  ,nsoil  , & !in
                      isnow  ,dt     ,rhoair ,sfcprs ,qair   , & !in
                      sfctmp ,thair  ,lwdn   ,uu     ,vv     ,zref   , & !in
@@ -2092,6 +2102,7 @@ contains
 
 !== begin thermoprop ===============================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine thermoprop (parameters,nsoil   ,nsnow   ,isnow   ,ist     ,dzsnso  , & !in
                          dt      ,snowh   ,snice   ,snliq   , & !in
                          smc     ,sh2o    ,tg      ,stc     ,ur      , & !in
@@ -2203,6 +2214,7 @@ contains
 
 !== begin csnow ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine csnow (parameters,isnow   ,nsnow   ,nsoil   ,snice   ,snliq   ,dzsnso  , & !in
                     tksno   ,cvsno   ,snicev  ,snliqv  ,epore   )   !out
 ! --------------------------------------------------------------------------------------------------
@@ -2262,6 +2274,7 @@ contains
 
 !== begin tdfcnd ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine tdfcnd (parameters, df, smc, sh2o)
 ! --------------------------------------------------------------------------------------------------
 ! calculate thermal diffusivity and conductivity of the soil.
@@ -2371,6 +2384,7 @@ contains
 
 !== begin radiation ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine radiation (parameters,vegtyp  ,ist     ,ice     ,nsoil   , & !in
                         sneqvo  ,sneqv   ,dt      ,cosz    ,snowh   , & !in
                         tg      ,tv      ,fsno    ,qsnow   ,fwet    , & !in
@@ -2495,6 +2509,7 @@ contains
 
 !== begin albedo ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine albedo (parameters,vegtyp ,ist    ,ice    ,nsoil  , & !in
                      dt     ,cosz   ,fage   ,elai   ,esai   , & !in
                      tg     ,tv     ,snowh  ,fsno   ,fwet   , & !in
@@ -2677,6 +2692,7 @@ contains
 
 !== begin surrad ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine surrad (parameters,mpe     ,fsun    ,fsha    ,elai    ,vai     , & !in
                      laisun  ,laisha  ,solad   ,solai   ,fabd    , & !in
                      fabi    ,ftdd    ,ftid    ,ftii    ,albgrd  , & !in
@@ -2802,6 +2818,7 @@ contains
 
 !== begin snow_age =================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine snow_age (parameters,dt,tg,sneqvo,sneqv,tauss,fage)
 ! ----------------------------------------------------------------------
   implicit none
@@ -2856,6 +2873,7 @@ contains
 
 !== begin snowalb_bats =============================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine snowalb_bats (parameters,nband,fsno,cosz,fage,albsnd,albsni)
 ! --------------------------------------------------------------------------------------------------
   implicit none
@@ -2911,6 +2929,7 @@ contains
 
 !== begin snowalb_class ============================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine snowalb_class (parameters,nband,qsnow,dt,alb,albold,albsnd,albsni,iloc,jloc)
 ! ----------------------------------------------------------------------
   implicit none
@@ -2964,6 +2983,7 @@ contains
 
 !== begin groundalb ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine groundalb (parameters,nsoil   ,nband   ,ice     ,ist     , & !in
                         fsno    ,smc     ,albsnd  ,albsni  ,cosz    , & !in
                         tg      ,iloc    ,jloc    ,                   & !in
@@ -3028,6 +3048,7 @@ contains
 
 !== begin twostream ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine twostream (parameters,ib     ,ic      ,vegtyp  ,cosz    ,vai    , & !in
                         fwet   ,t       ,albgrd  ,albgri  ,rho    , & !in
                         tau    ,fveg    ,ist     ,iloc    ,jloc   , & !in
@@ -3278,6 +3299,7 @@ contains
 
 !== begin vege_flux ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine vege_flux(parameters,nsnow   ,nsoil   ,isnow   ,vegtyp  ,veg     , & !in
                        dt      ,sav     ,sag     ,lwdn    ,ur      , & !in
                        uu      ,vv      ,sfctmp  ,thair   ,qair    , & !in
@@ -3851,6 +3873,7 @@ contains
 
 !== begin bare_flux ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine bare_flux (parameters,nsnow   ,nsoil   ,isnow   ,dt      ,sag     , & !in
                         lwdn    ,ur      ,uu      ,vv      ,sfctmp  , & !in
                         thair   ,qair    ,eair    ,rhoair  ,snowh   , & !in
@@ -4174,6 +4197,7 @@ contains
 
 !== begin ragrb ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine ragrb(parameters,iter   ,vai    ,rhoair ,hg     ,tah    , & !in
                    zpd    ,z0mg   ,z0hg   ,hcan   ,uc     , & !in
                    z0h    ,fv     ,cwp    ,vegtyp ,mpe    , & !in
@@ -4274,6 +4298,7 @@ contains
 
 !== begin sfcdif1 ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine sfcdif1(parameters,iter   ,sfctmp ,rhoair ,h      ,qair   , & !in
        &             zlvl   ,zpd    ,z0m    ,z0h    ,ur     , & !in
        &             mpe    ,iloc   ,jloc   ,                 & !in
@@ -4452,6 +4477,7 @@ contains
 
 !== begin sfcdif2 ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine sfcdif2(parameters,iter   ,z0     ,thz0   ,thlm   ,sfcspd , & !in
                      zlm    ,iloc   ,jloc   ,         & !in
                      akms   ,akhs   ,rlmo   ,wstar2 ,         & !in
@@ -4654,6 +4680,7 @@ contains
 
 !== begin esat =====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine esat(t, esw, esi, desw, desi)
 !---------------------------------------------------------------------------------------------------
 ! use polynomials to calculate saturation vapor pressure and derivative with
@@ -4707,6 +4734,7 @@ contains
 
 !== begin stomata ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine stomata (parameters,vegtyp  ,mpe     ,apar    ,foln    ,iloc    , jloc, & !in
                       tv      ,ei      ,ea      ,sfctmp  ,sfcprs  , & !in
                       o2      ,co2     ,igs     ,btran   ,rb      , & !in
@@ -4840,6 +4868,7 @@ contains
 
 !== begin canres ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine canres (parameters,par   ,sfctmp,rcsoil ,eah   ,sfcprs , & !in
                      rc    ,psn   ,iloc   ,jloc  )           !out
 
@@ -4924,6 +4953,7 @@ contains
 
 !== begin calhum ===================================================================================
 
+!>\ingroup NoahMP_LSM
         subroutine calhum(parameters,sfctmp, sfcprs, q2sat, dqsdt2)
 
         implicit none
@@ -4955,6 +4985,7 @@ contains
 
 !== begin tsnosoi ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine tsnosoi (parameters,ice     ,nsoil   ,nsnow   ,isnow   ,ist     , & !in
                       tbot    ,zsnso   ,ssoil   ,df      ,hcpct   , & !in
                       sag     ,dt      ,snowh   ,dzsnso  , & !in
@@ -5090,6 +5121,7 @@ contains
 
 !== begin hrt ======================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine hrt (parameters,nsnow     ,nsoil     ,isnow     ,zsnso     , &
                   stc       ,tbot      ,zbot      ,dt        , &
                   df        ,hcpct     ,ssoil     ,phi       , &
@@ -5192,6 +5224,7 @@ contains
 
 !== begin hstep ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine hstep (parameters,nsnow     ,nsoil     ,isnow     ,dt        ,  &
                     ai        ,bi        ,ci        ,rhsts     ,  &
                     stc       )  
@@ -5251,6 +5284,7 @@ contains
 
 !== begin rosr12 ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine rosr12 (p,a,b,c,d,delta,ntop,nsoil,nsnow)
 ! ----------------------------------------------------------------------
 ! subroutine rosr12
@@ -5312,6 +5346,7 @@ contains
 
 !== begin phasechange ==============================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine phasechange (parameters,nsnow   ,nsoil   ,isnow   ,dt      ,fact    , & !in
                           dzsnso  ,hcpct   ,ist     ,iloc    ,jloc    , & !in
                           stc     ,snice   ,snliq   ,sneqv   ,snowh   , & !inout
@@ -5535,10 +5570,13 @@ contains
   end subroutine phasechange
 
 !== begin frh2o ====================================================================================
+
+!>\ingroup NoahMP_LSM
+  subroutine frh2o (parameters,free,tkelv,smc,sh2o,&
 #ifdef CCPP
-  subroutine frh2o (parameters,free,tkelv,smc,sh2o,errmsg,errflg)
+     errmsg,errflg)
 #else
-  subroutine frh2o (parameters,free,tkelv,smc,sh2o)
+     )
 #endif
 
 ! ----------------------------------------------------------------------
@@ -5686,6 +5724,7 @@ contains
 
 !== begin water ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine water (parameters,vegtyp ,nsnow  ,nsoil  ,imelt  ,dt     ,uu     , & !in
                     vv     ,fcev   ,fctr   ,qprecc ,qprecl ,elai   , & !in
                     esai   ,sfctmp ,qvap   ,qdew   ,zsoil  ,btrani , & !in
@@ -5917,6 +5956,7 @@ contains
 
 !== begin canwater =================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine canwater (parameters,vegtyp ,dt     , & !in
                        fcev   ,fctr   ,elai   , & !in
                        esai   ,tg     ,fveg   ,iloc   , jloc , & !in
@@ -6049,6 +6089,7 @@ contains
 
 !== begin snowwater ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine snowwater (parameters,nsnow  ,nsoil  ,imelt  ,dt     ,zsoil  , & !in
                         sfctmp ,snowhin,qsnow  ,qsnfro ,qsnsub , & !in
                         qrain  ,ficeold,iloc   ,jloc   ,         & !in
@@ -6182,6 +6223,7 @@ contains
 
 !== begin snowfall =================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine snowfall (parameters,nsoil  ,nsnow  ,dt     ,qsnow  ,snowhin , & !in
                        sfctmp ,iloc   ,jloc   ,                  & !in
                        isnow  ,snowh  ,dzsnso ,stc    ,snice   , & !inout
@@ -6252,6 +6294,7 @@ contains
 
 !== begin combine ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine combine (parameters,nsnow  ,nsoil  ,iloc   ,jloc   ,         & !in
                       isnow  ,sh2o   ,stc    ,snice  ,snliq  , & !inout
                       dzsnso ,sice   ,snowh  ,sneqv  ,         & !inout
@@ -6438,6 +6481,7 @@ contains
 
 !== begin divide ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine divide (parameters,nsnow  ,nsoil  ,                         & !in
                      isnow  ,stc    ,snice  ,snliq  ,dzsnso  )  !inout
 ! ----------------------------------------------------------------------
@@ -6566,6 +6610,7 @@ contains
 
 !== begin combo ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine combo(parameters,dz,  wliq,  wice, t, dz2, wliq2, wice2, t2)
 ! ----------------------------------------------------------------------
     implicit none
@@ -6620,6 +6665,7 @@ contains
 
 !== begin compact ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine compact (parameters,nsnow  ,nsoil  ,dt     ,stc    ,snice  , & !in
                       snliq  ,zsoil  ,imelt  ,ficeold,iloc   , jloc , & !in
                       isnow  ,dzsnso ,zsnso )                    !inout
@@ -6725,6 +6771,7 @@ contains
 
 !== begin snowh2o ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine snowh2o (parameters,nsnow  ,nsoil  ,dt     ,qsnfro ,qsnsub , & !in 
                       qrain  ,iloc   ,jloc   ,                 & !in
                       isnow  ,dzsnso ,snowh  ,sneqv  ,snice  , & !inout
@@ -6878,6 +6925,7 @@ contains
 
 !== begin soilwater ================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine soilwater (parameters,nsoil  ,nsnow  ,dt     ,zsoil  ,dzsnso , & !in
                         qinsur ,qseva  ,etrani ,sice   ,iloc   , jloc, & !in
                         sh2o   ,smc    ,zwt    ,vegtyp ,& !inout
@@ -7138,6 +7186,7 @@ contains
 
 !== begin zwteq ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine zwteq (parameters,nsoil  ,nsnow  ,zsoil  ,dzsnso ,sh2o   ,zwt)
 ! ----------------------------------------------------------------------
 ! calculate equilibrium water table depth (niu et al., 2005)
@@ -7194,6 +7243,7 @@ contains
 
 !== begin infil ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine infil (parameters,nsoil  ,dt     ,zsoil  ,sh2o   ,sice   , & !in
                     sicemax,qinsur ,                         & !in
                     pddum  ,runsrf )                           !out
@@ -7294,6 +7344,7 @@ contains
 
 !== begin srt ======================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine srt (parameters,nsoil  ,zsoil  ,dt     ,pddum  ,etrani , & !in
                   qseva  ,sh2o   ,smc    ,zwt    ,fcr    , & !in
                   sicemax,fcrmax ,iloc   ,jloc   ,smcwtd ,         & !in
@@ -7427,6 +7478,7 @@ contains
 
 !== begin sstep ====================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine sstep (parameters,nsoil  ,nsnow  ,dt     ,zsoil  ,dzsnso , & !in
                     sice   ,iloc   ,jloc   ,zwt            ,                 & !in
                     sh2o   ,smc    ,ai     ,bi     ,ci     , & !inout
@@ -7538,6 +7590,7 @@ contains
 
 !== begin wdfcnd1 ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine wdfcnd1 (parameters,wdf,wcnd,smc,fcr)
 ! ----------------------------------------------------------------------
 ! calculate soil water diffusivity and soil hydraulic conductivity.
@@ -7576,6 +7629,7 @@ contains
 
 !== begin wdfcnd2 ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine wdfcnd2 (parameters,wdf,wcnd,smc,sice)
 ! ----------------------------------------------------------------------
 ! calculate soil water diffusivity and soil hydraulic conductivity.
@@ -7617,6 +7671,7 @@ contains
 
 !== begin groundwater ==============================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine groundwater(parameters,nsnow  ,nsoil  ,dt     ,sice   ,zsoil  , & !in
                          stc    ,wcnd   ,fcrmax ,iloc   ,jloc   , & !in
                          sh2o   ,zwt    ,wa     ,wt     ,         & !inout
@@ -7804,6 +7859,7 @@ contains
 
 !== begin shallowwatertable ========================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine shallowwatertable (parameters,nsnow  ,nsoil  ,zsoil, dt    , & !in
                          dzsnso ,smceq ,iloc   ,jloc         , & !in
                          smc    ,wtd   ,smcwtd ,rech, qdrain  )  !inout
@@ -7943,6 +7999,7 @@ end  subroutine shallowwatertable
 
 !== begin carbon ===================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine carbon (parameters,nsnow  ,nsoil  ,vegtyp ,dt     ,zsoil  , & !in
                      dzsnso ,stc    ,smc    ,tv     ,tg     ,psn    , & !in
                      foln   ,btran  ,apar   ,fveg   ,igs    , & !in
@@ -8056,6 +8113,7 @@ end  subroutine shallowwatertable
 
 !== begin co2flux ==================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine co2flux (parameters,nsnow  ,nsoil  ,vegtyp ,igs    ,dt     , & !in
                       dzsnso ,stc    ,psn    ,troot  ,tv     , & !in
                       wroot  ,wstres ,foln   ,lapm   ,         & !in
@@ -8424,6 +8482,7 @@ end  subroutine shallowwatertable
 
 !== begin noahmp_options ===========================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine noahmp_options(idveg     ,iopt_crs  ,iopt_btr  ,iopt_run  ,iopt_sfc  ,iopt_frz , & 
                              iopt_inf  ,iopt_rad  ,iopt_alb  ,iopt_snf  ,iopt_tbot, iopt_stc )
 
