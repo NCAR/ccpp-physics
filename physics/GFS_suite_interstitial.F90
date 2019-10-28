@@ -422,7 +422,7 @@
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,  &
       ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlat, gq0, imp_physics, imp_physics_mg, imp_physics_zhao_carr,&
       imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, prsi, prsl, prslk, rhcbot,     &
-      rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver,                                                         &
+      rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver, ras,                                                    &
       clw, rhc, save_qc, save_qi, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -434,7 +434,7 @@
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
-      logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol
+      logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
       real(kind=kind_phys),                             intent(in) :: rhcbot, rhcmax, rhcpbl, rhctop
       real(kind=kind_phys), dimension(im),              intent(in) :: work1, work2
@@ -493,7 +493,7 @@
       ! endif
       !*GF
 
-      if (cscnv .or. satmedmf .or. trans_trac ) then
+      if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
         tracers = 2
         do n=2,ntrac
           if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &

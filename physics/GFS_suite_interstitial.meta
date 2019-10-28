@@ -1303,6 +1303,14 @@
   type = integer
   intent = in
   optional = F
+[ras]
+  standard_name = flag_for_ras_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [clw]
   standard_name = convective_transportable_tracers
   long_name = array to contain cloud water and other convective trans. tracers
