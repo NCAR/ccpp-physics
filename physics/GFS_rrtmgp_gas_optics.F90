@@ -53,7 +53,7 @@ contains
        gasIndices(Model%ngases,2)=len(trim(Model%active_gases))
        ! Now extract the gas names
        do ij=1,Model%ngases
-          Radtend%active_gases(ij,1) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
+          Radtend%active_gases(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
        enddo
     endif
   end subroutine GFS_rrtmgp_gas_optics_init

@@ -133,8 +133,8 @@ contains
       
        ! Similarly, subset the gas concentrations.
        do iGas=1,Model%nGases
-          call check_error_msg('rrtmgp_sw_clrallsky_driver_run',gas_concentrations%get_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp))
-          call check_error_msg('rrtmgp_sw_clrallsky_driver_run',gas_concentrations_daylit%set_vmr(trim(Radtend%active_gases(iGas,1)),vmrTemp(idxday,:)))
+          call check_error_msg('rrtmgp_sw_clrallsky_driver_run',gas_concentrations%get_vmr(trim(Model%active_gases_array(iGas)),vmrTemp))
+          call check_error_msg('rrtmgp_sw_clrallsky_driver_run',gas_concentrations_daylit%set_vmr(trim(Model%active_gases_array(iGas)),vmrTemp(idxday,:)))
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes

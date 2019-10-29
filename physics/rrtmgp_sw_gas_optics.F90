@@ -408,7 +408,7 @@ contains
 
     ! Initialize gas concentrations and gas optics class with data
     do iGas=1,Model%nGases
-       call check_error_msg('sw_gas_optics_init',gas_concentrations%set_vmr(Radtend%active_gases(iGas,1), 0._kind_phys))
+       call check_error_msg('sw_gas_optics_init',gas_concentrations%set_vmr(Model%active_gases_array(iGas), 0._kind_phys))
     enddo
     call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations, gas_names_sw,   &
          key_species_sw, band2gpt_sw, band_lims_sw, press_ref_sw, press_ref_trop_sw, temp_ref_sw,   &
