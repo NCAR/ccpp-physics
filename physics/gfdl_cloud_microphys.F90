@@ -113,7 +113,7 @@ contains
 !! \htmlinclude gfdl_cloud_microphys_run.html
 !!
    subroutine gfdl_cloud_microphys_run(                                       &
-      levs, im, con_g, con_fvirt, con_rd, frland, garea,                      &
+      levs, im, con_g, con_fvirt, con_rd, frland, garea, islmsk,              &
       gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,     &
       gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
       rain0, ice0, snow0, graupel0, prcp0, sr,                                &
@@ -136,6 +136,7 @@ contains
       integer,              intent(in   ) :: levs, im
       real(kind=kind_phys), intent(in   ) :: con_g, con_fvirt, con_rd
       real(kind=kind_phys), intent(in   ), dimension(1:im)          :: frland, garea
+      integer,              intent(in   ), dimension(1:im)          :: islmsk
       real(kind=kind_phys), intent(inout), dimension(1:im,1:levs)   :: gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, &
                                                                        gq0_ntsw, gq0_ntgl, gq0_ntclamt
       real(kind=kind_phys), intent(inout), dimension(1:im,1:levs)   :: gt0, gu0, gv0
@@ -170,9 +171,6 @@ contains
       real(kind=kind_phys), dimension(:,:), allocatable :: den
       real(kind=kind_phys) :: onebg
       real(kind=kind_phys) :: tem
-#ifdef TRANSITION
-      real(kind=kind_phys), volatile :: volatile_var1, volatile_var2
-#endif
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -260,18 +258,10 @@ contains
       ! calculate fraction of frozen precipitation using unscaled
       ! values of rain0, ice0, snow0, graupel0 (for bit-for-bit)
       do i=1,im
-#ifdef TRANSITION
-        volatile_var1 = rain0(i)+snow0(i)+ice0(i)+graupel0(i)
-        volatile_var2 = snow0(i)+ice0(i)+graupel0(i)
-        prcp0(i) = volatile_var1 * tem
-        if ( volatile_var1 * tem > rainmin ) then
-          sr(i) = volatile_var2 / volatile_var1
-#else
         prcp0(i) = (rain0(i)+snow0(i)+ice0(i)+graupel0(i)) * tem
         if ( prcp0(i) > rainmin ) then
           sr(i) = (snow0(i) + ice0(i)  + graupel0(i)) &
                       / (rain0(i) + snow0(i) + ice0(i) + graupel0(i))
-#endif
         else
           sr(i) = 0.0
         endif
@@ -309,9 +299,11 @@ contains
             enddo
          enddo
          call cloud_diagnosis (1, im, 1, levs, den(1:im,1:levs), &
+            del(1:im,1:levs),      islmsk(1:im),                 &
             gq0_ntcw(1:im,1:levs), gq0_ntiw(1:im,1:levs),        &
-            gq0_ntrw(1:im,1:levs), gq0_ntsw(1:im,1:levs),        &
-            gq0_ntgl(1:im,1:levs), gt0(1:im,1:levs),             &
+            gq0_ntrw(1:im,1:levs),                               &
+            gq0_ntsw(1:im,1:levs) + gq0_ntgl(1:im,1:levs),       &
+            gq0_ntgl(1:im,1:levs)*0.0, gt0(1:im,1:levs),         &
             rew(1:im,1:levs), rei(1:im,1:levs), rer(1:im,1:levs),&
             res(1:im,1:levs), reg(1:im,1:levs))
          deallocate(den)

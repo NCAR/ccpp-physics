@@ -25,17 +25,9 @@
   type = logical
   intent = in
   optional = F
-[cnvgwd]
-  standard_name = flag_convective_gravity_wave_drag
-  long_name = flag for conv gravity wave drag
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lgocart]
-  standard_name = flag_gocart
-  long_name = flag for 3d diagnostic fields for gocart 1
+[do_cnvgwd]
+  standard_name = flag_for_convective_gravity_wave_drag
+  long_name = flag for convective gravity wave drag (gwd)
   units = flag
   dimensions = ()
   type = logical
@@ -187,14 +179,6 @@
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lgocart]
-  standard_name = flag_gocart
-  long_name = flag for 3d diagnostic fields for gocart 1
   units = flag
   dimensions = ()
   type = logical
@@ -494,51 +478,6 @@
   standard_name = cumulative_atmosphere_detrainment_convective_mass_flux
   long_name = cumulative detrainment mass flux
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dqdti]
-  standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
-  long_name = instantaneous moisture tendency due to convection
-  units = kg kg-1 s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[cnvqci]
-  standard_name = instantaneous_deep_convective_cloud_condensate_mixing_ratio_on_dynamics_time_step
-  long_name = instantaneous total convective condensate mixing ratio
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[upd_mfi]
-  standard_name = instantaneous_atmosphere_updraft_convective_mass_flux_on_dynamics_timestep
-  long_name = (updraft mass flux) * delt
-  units = kg m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dwn_mfi]
-  standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux_on_dynamics_timestep
-  long_name = (downdraft mass flux) * delt
-  units = kg m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[det_mfi]
-  standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux_on_dynamics_timestep
-  long_name = (detrainment mass flux) * delt
-  units = kg m-2
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys

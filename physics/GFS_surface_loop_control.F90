@@ -111,7 +111,8 @@
         flag_guess(i) = .false.
 
         if (iter == 1 .and. wind(i) < 2.0) then
-          if (dry(i) .or. (wet(i) .and. .not.icy(i) .and. nstf_name1 > 0)) then
+          !if (dry(i) .or. (wet(i) .and. .not.icy(i) .and. nstf_name1 > 0)) then
+          if (dry(i) .or. (wet(i) .and. nstf_name1 > 0)) then
             flag_iter(i) = .true.
           endif
         endif
