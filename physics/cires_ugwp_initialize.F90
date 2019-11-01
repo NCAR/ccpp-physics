@@ -37,28 +37,22 @@
     
     module ugwp_common
 !
+     use machine,  only: kind_phys
+     use physcons, only : pi => con_pi, grav => con_g, rd => con_rd,   &
+                          rv => con_rv, cpd => con_cp, fv => con_fvirt,&
+                          arad => con_rerth
      implicit none
 
-      real, parameter ::  grav =9.80665, cpd = 1004.6, grcp = grav/cpd
-      real, parameter ::  rd = 287.05 , rv =461.5
-      real, parameter ::  rgrav = 1.0/grav
+      real(kind=kind_phys), parameter ::  grcp = grav/cpd, rgrav = 1.0d0/grav, &
+                          rdi  = 1.0d0/rd,                                     &
+                          gor  = grav/rd,  gr2   = grav*gor, gocp = grav/cpd,    &
+                          rcpd = 1./cpd,   rcpd2 = 0.5*rcpd,                   &
+                          pi2  = pi + pi,  omega1 = pi2/86400.0,               &
+                          omega2 = omega1+omega1,                              &
+                          rad_to_deg=180.0/pi, deg_to_rad=pi/180.0,            &
+                          dw2min=1.0, bnv2min=1.e-6, velmin=sqrt(dw2min)
 
-      real, parameter ::  fv   = rv/rd - 1.0
-      real, parameter ::  rdi  = 1.0 / rd
-      real, parameter ::  gor  = grav/rd
-      real, parameter ::  gr2  = grav*gor
-      real, parameter ::  gocp = grav/cpd
-      real, parameter ::  pi = 4.*atan(1.0), pi2 = 2.*pi
-!
-      real, parameter ::  rad_to_deg=180.0/pi, deg_to_rad=pi/180.0
 
-      real, parameter ::  arad = 6370.e3
-      real, parameter ::  rcpd2 = 0.5/cpd,  rcpd = 1./cpd
-      real, parameter ::  dw2min=1.0
-      real, parameter ::  bnv2min=1.e-6
-      real, parameter ::  velmin=sqrt(dw2min)
-      real, parameter ::  omega1 = pi2/86400.
-      real, parameter ::  omega2 = 2.*omega1
      end module ugwp_common
 !
 !
@@ -181,7 +175,7 @@
       real, parameter :: frmax=10., frc =1.0, frmin =0.01
 !
 
-       real, parameter :: ce=0.8, ceofrc=ce/frc, cg=0.5
+       real, parameter :: ce=0.8,   ceofrc=ce/frc, cg=0.5
        real, parameter :: gmax=1.0, veleps=1.0, factop=0.5
 !
        real, parameter :: rlolev=50000.0
@@ -212,27 +206,27 @@
       data nwdir/6,7,5,8,2,3,1,4/
       save nwdir
 
-     real,    parameter   ::   odmin  = 0.1, odmax = 10.0
+     real,    parameter   ::   odmin = 0.1, odmax = 10.0
 !------------------------------------------------------------------------------
 !    small-scale orography parameters  for TOFD of Beljaars et al., 2004, QJRMS
 !------------------------------------------------------------------------------
 
-     integer, parameter  ::   n_tofd=2                  ! depth of SSO for TOFD compared with Zpbl
-     real, parameter     ::  const_tofd =  0.0759       ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
-     real, parameter     ::     ze_tofd =1500.0         ! BJ's z-decay in meters
-     real, parameter     ::  a12_tofd =0.0002662*0.005363   ! BJ's k-spect const for sigf2 * a1*a2*exp(-[z/zdec]**1.5]
-     real, parameter     ::      ztop_tofd =10.*ze_tofd     ! no TOFD > this height too higher 15 km
+     integer, parameter  :: n_tofd = 2                      ! depth of SSO for TOFD compared with Zpbl
+     real, parameter     :: const_tofd = 0.0759             ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
+     real, parameter     :: ze_tofd    = 1500.0             ! BJ's z-decay in meters
+     real, parameter     :: a12_tofd   = 0.0002662*0.005363 ! BJ's k-spect const for sigf2 * a1*a2*exp(-[z/zdec]**1.5]
+     real, parameter     :: ztop_tofd  = 10.*ze_tofd        ! no TOFD > this height too higher 15 km
 !------------------------------------------------------------------------------
 !
       real, parameter :: fcrit_sm  = 0.7, fcrit_sm2  = fcrit_sm * fcrit_sm
       real, parameter :: fcrit_gfs = 0.7
       real, parameter :: fcrit_mtb = 0.7
 
-      real,  parameter :: lzmax  = 18.e3                      ! 18 km
-      real,  parameter :: mkzmin = 6.28/lzmax
+      real,  parameter :: lzmax   = 18.e3                      ! 18 km
+      real,  parameter :: mkzmin  = 6.28/lzmax
       real,  parameter :: mkz2min = mkzmin*mkzmin
-      real,  parameter :: zbr_pi  = 3./2.*4.*atan(1.0)        ! 3pi/2
-      real,  parameter :: zbr_ifs = 2.*atan(1.0)              ! pi/2
+      real,  parameter :: zbr_pi  = (3.0/2.0)*pi
+      real,  parameter :: zbr_ifs = 0.5*pi
 
       contains
 !
@@ -521,6 +515,7 @@
 !
   module ugwp_wmsdis_init
  
+    use ugwp_common, only :   pi, pi2
     implicit none
 
       real,     parameter   :: maxdudt = 250.e-5
@@ -554,7 +549,7 @@
       real ,     parameter  :: zcimin = ucrit2
       real ,     parameter  :: zcimax = 125.0
       real ,     parameter  :: zgam   =   0.25
-      real ,     parameter  :: zms_l  = 2000.0
+      real ,     parameter  :: zms_l  = 2000.0, zms = pi2 / zms_l, zmsi = 1.0 / zms
 
       integer               :: ilaunch
       real                  :: gw_eff
@@ -563,7 +558,7 @@
       integer  :: nwav, nazd, nst
       real     :: eff
  
-      real                :: zaz_fct , zms
+      real                :: zaz_fct
       real, allocatable   :: zci(:), zci4(:), zci3(:),zci2(:), zdci(:)
       real, allocatable   :: zcosang(:), zsinang(:)
       contains
@@ -573,7 +568,6 @@
 !        call initsolv_wmsdis(me, master, knob_ugwp_wvspec(2), knob_ugwp_azdir(2), &
 !         knob_ugwp_stoch(2), knob_ugwp_effac(2), do_physb_gwsrcs, kxw)
 !
-     use ugwp_common, only :   pi, pi2
      implicit none
 !
 !input -control for solvers:
@@ -626,7 +620,7 @@
 !      set up azimuth directions and some trig factors
 !
 !
-       zang=pi2/float(nazd)
+       zang = pi2 / float(nazd)
 
 ! get normalization factor to ensure that the same amount of momentum
 ! flux is directed (n,s,e,w) no mater how many azimuths are selected.
@@ -638,8 +632,8 @@
          zsinang(iazi) = sin(zang1)
          znorm         = znorm + abs(zcosang(iazi))
        enddo
-       zaz_fct = 1.0
-       zaz_fct = 2.0 / znorm            ! correction factot for azimuthal sums
+!      zaz_fct = 1.0
+       zaz_fct = 2.0 / znorm            ! correction factor for azimuthal sums
 
 !       define coordinate transform for "Ch"   ....x = 1/c stretching transform
 !       ----------------------------------------------- 
@@ -660,7 +654,7 @@
 !                                   if(lgacalc) zgam=(zxmax-zxmin)/log(zxmax/zxmin)
 !                                   zx1=zxran/(exp(zxran/zgam)-1.0_jprb)
 !                                   zx2=zxmin-zx1
-        zms = 2.*pi/zms_l
+!       zms = pi2 / zms_l
         do inc=1, nwav
           ztx = real(inc-1)*zdx+zxmin
           zx  = zx1*exp((ztx-zxmin)/zgam)+zx2                            !eq. 29 of scinocca 2003

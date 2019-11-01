@@ -270,7 +270,7 @@
         enddo
       enddo
 
-      ! Conversion factor mm per physics timestep to m per day
+      ! Conversion factor from mm per day to m per physics timestep 
       tem = dtp * con_p001 / con_day
 
 !> - For GFDL and Thompson MP scheme, determine convective snow by surface temperature;
@@ -280,29 +280,38 @@
       if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
-        do i = 1, im
-          !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
-          srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
-          if (tsfc(i) >= 273.15) then
-            crain = rainc(i)
-            csnow = 0.0
-          else
-            crain = 0.0
-            csnow = rainc(i)
-          endif
-!          if (snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow > rain0(i,1)+crain) then
-!          if (snow0(i)+ice0(i)+graupel0(i)+csnow > 0.0) then
-!            Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
-!          endif
+       
+        if (lsm/=lsm_ruc) then
+          do i = 1, im
+            !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
+            srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
+            if (tsfc(i) >= 273.15) then
+              crain = rainc(i)
+              csnow = 0.0
+            else
+              crain = 0.0
+              csnow = rainc(i)
+            endif
+!            if (snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow > rain0(i,1)+crain) then
+!            if (snow0(i)+ice0(i)+graupel0(i)+csnow > 0.0) then
+!              Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
+!            endif
 ! compute fractional srflag
-          total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
-          if (total_precip > rainmin) then
-            srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
-          endif
-        enddo
+            total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
+            if (total_precip > rainmin) then
+              srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
+            endif
+          enddo
+        else
+          ! only for RUC LSM
+          do i=1,im
+            srflag(i) = sr(i)
+          enddo
+        endif ! lsm==lsm_ruc
       elseif( .not. cal_pre) then
         if (imp_physics == imp_physics_mg) then              ! MG microphysics
           do i=1,im
+            tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
             if (rain(i)*tem > rainmin) then
               srflag(i) = max(zero, min(one, (rain(i)-rainc(i))*sr(i)/rain(i)))
             else
@@ -311,7 +320,7 @@
           enddo
         else
           do i = 1, im
-            tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp
+            tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
             srflag(i) = 0.0                    ! clu: default srflag as 'rain' (i.e. 0)
             if (t850(i) <= 273.16) then
               srflag(i) = 1.0                  ! clu: set srflag to 'snow' (i.e. 1)

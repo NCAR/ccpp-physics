@@ -54,24 +54,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[u1]
-  standard_name = x_wind_at_lowest_model_layer
-  long_name = x component of 1st model layer wind
-  units = m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[v1]
-  standard_name = y_wind_at_lowest_model_layer
-  long_name = y component of 1st model layer wind
-  units = m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [t1]
   standard_name = air_temperature_at_lowest_model_layer
   long_name = 1st model layer air temperature
@@ -94,6 +76,15 @@
   standard_name = height_above_ground_at_lowest_model_layer
   long_name = height above ground at 1st model layer
   units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -130,15 +121,6 @@
   standard_name = dimensionless_exner_function_at_lowest_model_layer
   long_name = dimensionless Exner function at the lowest model layer
   units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[ddvel]
-  standard_name = surface_wind_enhancement_due_to_convection
-  long_name = surface wind enhancement due to convection
-  units = m s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -608,15 +590,6 @@
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ice
   long_name = Monin-Obukhov similarity parameter for heat at 2m over ice
   units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[wind]
-  standard_name = wind_speed_at_lowest_model_layer
-  long_name = wind speed at lowest model level
-  units = m s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

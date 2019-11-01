@@ -116,7 +116,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [cimin]
   standard_name = minimum_sea_ice_concentration
@@ -442,6 +442,194 @@
   kind = kind_phys
   intent = inout
   optional = F
+[tgice]
+  standard_name = freezing_point_temperature_of_seawater
+  long_name = freezing point temperature of seawater
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[islmsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[semis_rad]
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[semis_ocn]
+  standard_name = surface_longwave_emissivity_over_ocean_interstitial
+  long_name = surface lw emissivity in fraction over ocean (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[semis_lnd]
+  standard_name = surface_longwave_emissivity_over_land_interstitial
+  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[semis_ice]
+  standard_name = surface_longwave_emissivity_over_ice_interstitial
+  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[min_lakeice]
+  standard_name = lake_ice_minimum
+  long_name = minimum lake ice value
+  units = ???
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = ???
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_surface_composites_inter_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[wet]
+  standard_name = flag_nonzero_wet_surface_fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[semis_ocn]
+  standard_name = surface_longwave_emissivity_over_ocean_interstitial
+  long_name = surface lw emissivity in fraction over ocean (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[semis_lnd]
+  standard_name = surface_longwave_emissivity_over_land_interstitial
+  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[semis_ice]
+  standard_name = surface_longwave_emissivity_over_ice_interstitial
+  long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfcdlw]
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gabsbdlw_lnd]
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
+  long_name = total sky surface downward longwave flux absorbed by the ground over land
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[gabsbdlw_ice]
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_ice
+  long_name = total sky surface downward longwave flux absorbed by the ground over ice
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[gabsbdlw_ocn]
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_ocean
+  long_name = total sky surface downward longwave flux absorbed by the ground over ocean
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -531,6 +719,24 @@
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lakefrac]
+  standard_name = lake_area_fraction
+  long_name = fraction of horizontal grid area occupied by lake
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
   units = frac
   dimensions = (horizontal_dimension)
   type = real
