@@ -71,7 +71,7 @@ contains
   ! #########################################################################################
   subroutine GFS_rrtmgp_pre_init(Model, Radtend, errmsg, errflg)
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
+    type(GFS_control_type), intent(inout) :: &
          Model      ! DDT containing model control parameters
    type(GFS_radtend_type), intent(inout) :: &
         Radtend     ! Fortran DDT containing FV3-GFS radiation tendencies 
@@ -108,7 +108,7 @@ contains
        gasIndices(Model%ngases,2)=len(trim(Model%active_gases))
        ! Now extract the gas names
        do ij=1,Model%ngases
-          Radtend%active_gases(ij,1) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
+          Model%active_gases_array(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
        enddo
     endif
   end subroutine GFS_rrtmgp_pre_init

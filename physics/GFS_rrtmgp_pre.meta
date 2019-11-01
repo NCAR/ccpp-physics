@@ -7,7 +7,7 @@
   units = DDT
   dimensions = ()
   type = GFS_control_type
-  intent = in
+  intent = inout
   optional = F
 [Radtend]
   standard_name = GFS_radtend_type_instance
