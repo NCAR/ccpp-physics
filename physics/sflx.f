@@ -337,7 +337,8 @@
      &       psisat, quartz, rch, refkdt, rr, rgl, rsmax, sndens,       &
      &       sncond, sbeta, sn_new, slope, snup, salp, soilwm, soilww,  &
      &       t1v, t24, t2v, th2v, topt, tsnow, zbot, z0
-
+      
+      real (kind=kind_phys) ::  shdfac0
       real (kind=kind_phys), dimension(nsold) :: rtdis, zsoil
 
       logical :: frzgra, snowng
@@ -368,6 +369,7 @@
 !           vegetation fraction (shdfac) = 0.
 
 !> - Set ice = -1 and green vegetation fraction (shdfac) = 0 for glacial-ice land.
+      shdfac0 = shdfac
       ice = icein
 
       if(ivegsrc == 2) then
@@ -420,12 +422,18 @@
 !only igbp type has urban
 !urban
          if(vegtyp == 13)then
-              shdfac=0.05
-              rsmin=400.0
-              smcmax = 0.45
-              smcref = 0.42
-              smcwlt = 0.40
-              smcdry = 0.40
+!             shdfac=0.05
+!             rsmin=400.0
+!             smcmax = 0.45
+!             smcref = 0.42
+!             smcwlt = 0.40
+!             smcdry = 0.40
+              rsmin=400.0*(1-shdfac0)+40.0*shdfac0   ! gvf
+              shdfac=shdfac0                         ! gvf
+              smcmax = 0.45*(1-shdfac0)+smcmax*shdfac0
+              smcref = 0.42*(1-shdfac0)+smcref*shdfac0
+              smcwlt = 0.40*(1-shdfac0)+smcwlt*shdfac0
+              smcdry = 0.40*(1-shdfac0)+smcdry*shdfac0
          endif
         endif
 
@@ -662,18 +670,21 @@
 !  ---  outputs:
      &       df1                                                        &
      &     )
-!>   - For IGBP/urban, \f$df1=3.24\f$.
-        if(ivegsrc == 1) then
+!       if(ivegsrc == 1) then
 !only igbp type has urban
 !urban
-            if ( vegtyp == 13 ) df1=3.24
-        endif
+!           if ( vegtyp == 13 ) df1=3.24
+!       endif
 
 !>   - Add subsurface heat flux reduction effect from the
 !!  overlying green canopy, adapted from section 2.1.2 of
 !!  \cite peters-lidard_et_al_1997.
-
-        df1 = df1 * exp( sbeta*shdfac )
+!wz only urban for igbp type
+        if(ivegsrc == 1 .and. vegtyp == 13) then
+          df1 = 3.24*(1.-shdfac) + shdfac*df1*exp(sbeta*shdfac)
+        else
+          df1 = df1 * exp( sbeta*shdfac )
+        endif
 
       endif   ! end if_ice_block
 
@@ -1499,18 +1510,22 @@
 !  ---  outputs:
      &       df1                                                        &
      &     )
-       if(ivegsrc == 1) then
+!      if(ivegsrc == 1) then
 !urban
-         if ( vegtyp == 13 ) df1=3.24
-       endif
+!        if ( vegtyp == 13 ) df1=3.24
+!      endif
 
 !  --- ... vegetation greenness fraction reduction in subsurface heat
 !          flux via reduction factor, which is convenient to apply here
 !          to thermal diffusivity that is later used in hrt to compute
 !          sub sfc heat flux (see additional comments on veg effect
 !          sub-sfc heat flx in routine sflx)
-
-      df1 = df1 * exp( sbeta*shdfac )
+!wz only urban for igbp type
+        if(ivegsrc == 1 .and. vegtyp == 13) then
+          df1 = 3.24*(1.-shdfac) + shdfac*df1*exp(sbeta*shdfac)
+        else
+          df1 = df1 * exp( sbeta*shdfac )
+        endif
 
 !  --- ...  compute intermediate terms passed to routine hrt (via routine
 !           shflx below) for use in computing subsurface heat flux in hrt
@@ -2595,8 +2610,8 @@
       if (t12 <= tfreez) then
 
         t1 = t12
-!       ssoil = df1 * (t1 - stc(1)) / dtot
-        ssoil = (t1 - stc (1)) * max(7.0, df1/dtot)
+        ssoil = df1 * (t1 - stc(1)) / dtot
+!wz     ssoil = (t1 - stc (1)) * max(7.0, df1/dtot)
         sneqv = max(0.0, sneqv-esnow2)
         flx3 = 0.0
         ex = 0.0
@@ -2729,7 +2744,7 @@
 !           skin temp value as revised by shflx.
 
       zz1 = 1.0
-      yy = stc(1) - 0.5*ssoil*zsoil(1)*zz1 / df1
+      yy  = stc(1) - 0.5*ssoil*zsoil(1)*zz1 / df1
       t11 = t1
 
 !  --- ...  shflx will calc/update the soil temps.  note:  the sub-sfc heat flux
@@ -3371,6 +3386,7 @@
 !  ---  inputs:
      &     ( nsoil, stc, smc, smcmax, zsoil, yy, zz1, tbot,             &
      &       zbot, psisat, dt, bexp, df1, quartz, csoil,vegtyp,         &
+     &       shdfac,                                                    &
 !  ---  input/outputs:
      &       sh2o,                                                      &
 !  ---  outputs:
@@ -4037,6 +4053,7 @@
 !  ---  inputs:
      &     ( nsoil, stc, smc, smcmax, zsoil, yy, zz1, tbot,             &
      &       zbot, psisat, dt, bexp, df1, quartz, csoil, vegtyp,        &
+     &       shdfac,                                                    &
 !  ---  input/outputs:
      &       sh2o,                                                      &
 !  ---  outputs:
@@ -4090,7 +4107,7 @@
 
       real (kind=kind_phys),  intent(in) :: stc(nsoil), smc(nsoil),     &
      &       smcmax, zsoil(nsoil), yy, zz1, tbot, zbot, psisat, dt,     &
-     &       bexp, df1, quartz, csoil
+     &       bexp, df1, quartz, csoil, shdfac
 
 !  ---  input/outputs:
       real (kind=kind_phys),  intent(inout) :: sh2o(nsoil)
@@ -4116,7 +4133,8 @@
        if (ivegsrc == 1)then
 !urban
         if( vegtyp == 13 ) then
-            csoil_loc=3.0e6
+!           csoil_loc=3.0e6
+            csoil_loc=3.0e6*(1.-shdfac)+csoil*shdfac  ! gvf
         endif
        endif
 
@@ -4206,7 +4224,7 @@
         call snksrc                                                     &
 !  ---  inputs:
      &     ( nsoil, 1, tavg, smc(1), smcmax, psisat, bexp, dt,          &
-     &       qtot, zsoil,                                               &
+     &       qtot, zsoil, shdfac,                                       &
 !  ---  input/outputs:
      &       sh2o(1),                                                   &
 !  ---  outputs:
@@ -4248,9 +4266,13 @@
      &       df1n                                                       &
      &     )
 !urban
-      if (ivegsrc == 1)then
-       if ( vegtyp == 13 ) df1n = 3.24
-      endif
+!     if (ivegsrc == 1)then
+!      if ( vegtyp == 13 ) df1n = 3.24
+!     endif
+!wz only urban for igbp type
+        if(ivegsrc == 1 .and. vegtyp == 13) then
+          df1n = 3.24*(1.-shdfac) + shdfac*df1n
+        endif
 
 !  --- ...  calc the vertical soil temp gradient thru this layer
 
@@ -4288,9 +4310,13 @@
      &       df1n                                                       &
      &     )
 !urban
-      if (ivegsrc == 1)then
-       if ( vegtyp == 13 ) df1n = 3.24
-      endif
+!     if (ivegsrc == 1)then
+!      if ( vegtyp == 13 ) df1n = 3.24
+!     endif
+!wz only urban for igbp type
+        if(ivegsrc == 1 .and. vegtyp == 13) then
+          df1n = 3.24*(1.-shdfac) + shdfac*df1n
+        endif
 
 !  --- ...  calc the vertical soil temp gradient thru bottom layer.
 
@@ -4344,7 +4370,7 @@
           call snksrc                                                   &
 !  ---  inputs:
      &     ( nsoil, k, tavg, smc(k), smcmax, psisat, bexp, dt,          &
-     &       qtot, zsoil,                                               &
+     &       qtot, zsoil, shdfac,                                       &
 !  ---  input/outputs:
      &       sh2o(k),                                                   &
 !  ---  outputs:
@@ -4759,7 +4785,7 @@
       subroutine snksrc                                                 &
 !  ---  inputs:
      &     ( nsoil, k, tavg, smc, smcmax, psisat, bexp, dt,             &
-     &       qtot, zsoil,                                               &
+     &       qtot, zsoil, shdfac,                                       &
 !  ---  input/outputs:
      &       sh2o,                                                      &
 !  ---  outputs:
@@ -4804,7 +4830,7 @@
       integer, intent(in) :: nsoil, k
 
       real (kind=kind_phys), intent(in) :: tavg, smc, smcmax, psisat,   &
-     &       bexp, dt, qtot, zsoil(nsoil)
+     &       bexp, dt, qtot, zsoil(nsoil), shdfac
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: sh2o
@@ -4819,9 +4845,13 @@
 !     real (kind=kind_phys) :: frh2o
 
 !urban
-       if (ivegsrc == 1)then
-            if ( vegtyp == 13 ) df1=3.24
-       endif
+!      if (ivegsrc == 1)then
+!           if ( vegtyp == 13 ) df1=3.24
+!      endif
+!wz only urban for igbp type
+        if(ivegsrc == 1 .and. vegtyp == 13) then
+          df1 = 3.24*(1.-shdfac) + shdfac*df1
+        endif
 !
 !===> ...  begin here
 !
