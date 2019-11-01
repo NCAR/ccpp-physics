@@ -6,73 +6,16 @@
 
       contains
 
-      subroutine sfc_sice_init
+      subroutine sfc_sice_init()
       end subroutine sfc_sice_init
 !
-      subroutine sfc_sice_finalize
+      subroutine sfc_sice_finalize()
       end subroutine sfc_sice_finalize
 
 !>\defgroup gfs_sice_main GFS Three-layer Thermodynomics Sea-Ice Scheme Module
 !!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
 !! \section arg_table_sfc_sice_run Argument Table
-!! | local_name     | standard_name                                                                | long_name                                                       | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|-----------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                          | count         |    0 | integer   |           | in     | F        |
-!! | km             | soil_vertical_dimension                                                      | vertical loop extent for soil levels, start at 1                | count         |    0 | integer   |           | in     | F        |
-!! | sbc            | stefan_boltzmann_constant                                                    | Stefan-Boltzmann constant                                       | W m-2 K-4     |    0 | real      | kind_phys | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                   | latent heat of evaporation/sublimation                          | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | tgice          | freezing_point_temperature_of_seawater                                       | freezing point temperature of seawater                          | K             |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                                | specific heat of dry air at constant pressure                   | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                           | none          |    0 | real      | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                     | none          |    0 | real      | kind_phys | in     | F        |
-!! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)           | none          |    0 | real      | kind_phys | in     | F        |
-!! | grav           | gravitational_acceleration                                                   | gravitational acceleration                                      | m s-2         |    0 | real      | kind_phys | in     | F        |
-!! | t0c            | temperature_at_zero_celsius                                                  | temperature at 0 degrees Celsius                                | K             |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                         | ideal gas constant for dry air                                  | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | cimin          | minimum_sea_ice_concentration                                                | minimum sea ice concentration                                   | frac          |    0 | real      | kind_phys | in     | F        |
-!! | ps             | surface_air_pressure                                                         | surface pressure                                                | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | u1             | x_wind_at_lowest_model_layer                                                 | u component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | v component of surface layer wind                               | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                                  | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                            | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | delt           | time_step_for_dynamics                                                       | time step                                                       | s             |    0 | real      | kind_phys | in     | F        |
-!! | sfcemis        | surface_longwave_emissivity                                                  | sfc lw emissivity                                               | frac          |    1 | real      | kind_phys | in     | F        |
-!! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc netsw flx into ground                             | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | sfcdsw         | surface_downwelling_shortwave_flux                                           | total sky sfc downward sw flux                                  | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | srflag         | flag_for_precipitation_type                                                  | snow/rain flag for precipitation                                | flag          |    1 | real      | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air_over_ice                        | surface exchange coeff for momentum over ice                    | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                     | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer     | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                                            | sea/land/ice mask (=0/1/2)                                      | flag          |    1 | integer   |           | inout  | F        |
-!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                              | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                              | flag          |    1 | logical   |           | in     | F        |
-!! | lprnt          | flag_print                                                                   | switch for printing sample column to stdout                     | flag          |    0 | logical   |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                              | index         |    0 | integer   |           | in     | F        |
-!! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                               | m             |    1 | real      | kind_phys | inout  | F        |
-!! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                     | frac          |    1 | real      | kind_phys | inout  | F        |
-!! | tice           | sea_ice_temperature_interstitial                                             | sea-ice surface temperature use as interstitial                 | K             |    1 | real      | kind_phys | inout  | F        |
-!! | weasd          | water_equivalent_accumulated_snow_depth_over_ice                             | water equiv of acc snow depth over ice                          | mm            |    1 | real      | kind_phys | inout  | F        |
-!! | tskin          | surface_skin_temperature_over_ice_interstitial                               | surface skin temperature over ice   (temporary use as interstitial)  | K        |    1 | real      | kind_phys | inout  | F        |
-!! | tprcp          | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ice | total precipitation amount in each time step over ice        | m             |    1 | real      | kind_phys | inout  | F        |
-!! | stc            | soil_temperature                                                             | soil temp                                                       | K             |    2 | real      | kind_phys | inout  | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux_over_ice                           | surface upward potential latent heat flux over ice              | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | snwdph         | surface_snow_thickness_water_equivalent_over_ice                             | water equivalent snow depth over ice                            | mm            |    1 | real      | kind_phys | inout  | F        |
-!! | qsurf          | surface_specific_humidity_over_ice                                           | surface air saturation specific humidity over ice               | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | snowmt         | surface_snow_melt                                                            | snow melt during timestep                                       | m             |    1 | real      | kind_phys | inout  | F        |
-!! | gflux          | upward_heat_flux_in_soil_over_ice                                            | soil heat flux over ice                                         | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air_over_ice                         | momentum exchange coefficient over ice                          | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ice                 | thermal exchange coefficient over ice                           | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux_over_ice                           | kinematic surface upward latent heat flux over ice              | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux_over_ice                         | kinematic surface upward sensible heat flux over ice            | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                | flag          |    0 | logical   |           | in     | F        |
-!! | cplchm         | flag_for_chemistry_coupling                                                  | flag controlling cplchm collection (default off)                | flag          |    0 | logical   |           | in     | F        |
-!! | flag_cice      | flag_for_cice                                                                | flag for cice                                                   | flag          |    1 | logical   |           | in     | F        |
-!! | islmsk_cice    | sea_land_ice_mask_cice                                                       | sea/land/ice mask cice (=0/1/2)                                 | flag          |    1 | integer   |           | in     | F        | 
-!! | slmsk          | sea_land_ice_mask_real                                                       | landmask: sea/land/ice=0/1/2                                    | flag          |    1 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                        | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                           | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_sice_run.html
 !!
 !>  \section general_sice_run GFS Sea Ice Driver General Algorithm
 !!The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness
@@ -98,13 +41,13 @@
 !>  @{
       subroutine sfc_sice_run                                           &
      &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    & !  ---  inputs:
-     &       t0c, rd, cimin, ps, u1, v1, t1, q1, delt,                  &
+     &       t0c, rd, ps, t1, q1, delt,                                 &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
-     &       cm, ch, prsl1, prslki, islimsk, ddvel,                     &
-     &       flag_iter, lprnt, ipr,                                     &
+     &       cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      &
+     &       flag_iter, lprnt, ipr, cimin,                              &
      &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-     &       cplflx, cplchm, flag_cice, islmsk_cice, slmsk,             &
+     &       cplflx, cplchm, flag_cice, islmsk_cice,                    &
      &       errmsg, errflg
      &     )
 
@@ -115,9 +58,9 @@
 !                                                                       !
 !    call sfc_sice                                                      !
 !       inputs:                                                         !
-!          ( im, km, ps, u1, v1, t1, q1, delt,                          !
+!          ( im, km, ps, t1, q1, delt,                                  !
 !            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   !
-!            cm, ch, prsl1, prslki, islimsk, ddvel,                     !
+!            cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      !
 !            flag_iter,                                                 !
 !       input/outputs:                                                  !
 !            hice, fice, tice, weasd, tskin, tprcp, stc, ep,            !
@@ -149,7 +92,6 @@
 !  inputs:                                                       size   !
 !     im, km   - integer, horiz dimension and num of soil layers   1    !
 !     ps       - real, surface pressure                            im   !
-!     u1, v1   - real, u/v component of surface layer wind         im   !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     delt     - real, time interval (second)                      1    !
@@ -162,8 +104,10 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
+!     prsik1   - real,                                             im   !
+!     prslk1   - real,                                             im   !
 !     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
-!     ddvel    - real,                                             im   !
+!     wind     - real,                                             im   !
 !     flag_iter- logical,                                          im   !
 !                                                                       !
 !  input/outputs:                                                       !
@@ -188,7 +132,7 @@
 !                                                                       !
 ! ===================================================================== !
 !
-      use machine, only: kind_phys
+      use machine, only : kind_phys
       use funcphys, only : fpvs
 !
       implicit none
@@ -210,16 +154,15 @@
       logical, intent(in) :: cplchm
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
-     &       epsm1, grav, rvrdm1, t0c, rd, cimin
+     &       epsm1, grav, rvrdm1, t0c, rd
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
+      real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
-     &       prsl1, prslki, ddvel
+     &       prsl1, prslki, prsik1, prslk1, wind
 
-      integer, dimension(im), intent(inout) :: islimsk
+      integer, dimension(im), intent(in) :: islimsk
       integer, dimension(im), intent(in) :: islmsk_cice
-      real (kind=kind_phys), intent(in)  :: delt
-      real (kind=kind_phys), dimension(im), intent(in)  ::  slmsk
+      real (kind=kind_phys), intent(in)  :: delt, cimin
 
       logical, dimension(im), intent(in) :: flag_iter, flag_cice
 
@@ -244,7 +187,7 @@
      &       snowd, theta1
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kmi)
-     &,                        hflxi, hflxw, q0, qs1, wind, qssi, qssw
+     &,                        hflxi, hflxw, q0, qs1, qssi, qssw
       real (kind=kind_phys) :: cpinv, hvapi, elocp
 
       integer :: i, k
@@ -263,28 +206,19 @@
       errflg = 0
 
       if(cplflx)then
-        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
+        write(*,*)'Fatal error: CCPP not been tested with cplflx=true!'
         stop
       endif
 
-      do i = 1, im
-            islmsk_local(i) = islimsk(i)
-            if (flag_cice(i).and.cplflx) then
-               islmsk_local (i) = islmsk_cice(i)
-            endif
-      enddo
-
-      do i = 1, im
-                      islimsk(i)=islmsk_local(i)
-      enddo
-
-      if (cplflx .or. cplchm) then
-          do i = 1, im
-            if (flag_cice(i)) then
-               islimsk(i) = int(slmsk(i)+0.5)
-            endif
-          enddo
-      endif
+      if (cplflx) then
+         where (flag_cice)
+            islmsk_local = islmsk_cice
+         elsewhere
+            islmsk_local = islimsk
+         endwhere
+      else
+        islmsk_local = islimsk
+      end if
 
 !
 !> - Set flag for sea-ice.
@@ -330,12 +264,13 @@
 !         dlwflx has been given a negative sign for downward longwave
 !         sfcnsw is the net shortwave flux (direction: dn-up)
 
-          wind      = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))               &
-     &              + max(zero, min(ddvel(i), 30.0d0)), one)
-
           q0        = max(q1(i), 1.0e-8)
 !         tsurf(i)  = tskin(i)
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          theta1(i) = t1(i) / prslk1(i) ! potential temperature in middle of lowest atm. layer
+#else
           theta1(i) = t1(i) * prslki(i)
+#endif
           rho(i)    = prsl1(i) / (rd*t1(i)*(one+rvrdm1*q0))
           qs1       = fpvs(t1(i))
           qs1       = max(eps*qs1 / (prsl1(i) + epsm1*qs1), 1.e-8)
@@ -367,8 +302,8 @@
 
 !  --- ...  rcp = rho cp ch v
 
-          cmm(i) = cm(i)  * wind
-          chh(i) = rho(i) * ch(i) * wind
+          cmm(i) = cm(i)  * wind(i)
+          chh(i) = rho(i) * ch(i) * wind(i)
           rch(i) = chh(i) * cp
 
 !> - Calculate sensible and latent heat flux over open water & sea ice.
@@ -387,8 +322,13 @@
 
 !> - Calculate net non-solar and upir heat flux @ ice surface \a hfi.
 
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
+     &           + rch(i)*(tice(i)/prsik1(i) - theta1(i))
+#else
           hfi(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapi(i)           &
      &           + rch(i)*(tice(i) - theta1(i))
+#endif
 !> - Calculate heat flux derivative at surface \a hfd.
           hfd(i) = 4.0d0*sfcemis(i)*sbc*tice(i)*t12                       &
      &           + (one + elocp*eps*hvap*qs1/(rd*t12)) * rch(i)
@@ -464,8 +404,13 @@
         if (flag(i)) then
 !  --- ...  calculate sensible heat flux (& evap over sea ice)
 
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          hflxi    = rch(i) * (tice(i)/prsik1(i) - theta1(i))
+          hflxw    = rch(i) * (tgice / prsik1(i) - theta1(i))
+#else
           hflxi    = rch(i) * (tice(i) - theta1(i))
           hflxw    = rch(i) * (tgice - theta1(i))
+#endif
           hflx(i)  = fice(i)*hflxi    + ffw(i)*hflxw
           evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
 !

@@ -1,0 +1,583 @@
+[ccpp-arg-table]
+  name = GFS_DCNV_generic_pre_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_cnvgwd]
+  standard_name = flag_for_convective_gravity_wave_drag
+  long_name = flag for convective gravity wave drag (gwd)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[isppt_deep]
+  standard_name = flag_for_combination_of_sppt_with_isppt_deep
+  long_name = switch for combination with isppt_deep.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = zonal wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = meridional wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_water_vapor]
+  standard_name = water_vapor_specific_humidity_updated_by_physics
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[save_t]
+  standard_name = air_temperature_save
+  long_name = air temperature before entering a physics scheme
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[save_qv]
+  standard_name = water_vapor_specific_humidity_save
+  long_name = water vapor specific humidity before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ca_deep]
+  standard_name = fraction_of_cellular_automata_for_deep_convection
+  long_name = fraction of cellular automata for deep convection
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_DCNV_generic_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ras]
+  standard_name = flag_for_ras_deep_convection
+  long_name = flag for ras convection scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[cscnv]
+  standard_name = flag_for_Chikira_Sugiyama_deep_convection
+  long_name = flag for Chikira-Sugiyama convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[isppt_deep]
+  standard_name = flag_for_combination_of_sppt_with_isppt_deep
+  long_name = switch for combination with isppt_deep.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[frain]
+  standard_name = dynamics_to_physics_timestep_ratio
+  long_name = ratio of dynamics timestep to physics timestep
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rain1]
+  standard_name = lwe_thickness_of_deep_convective_precipitation_amount
+  long_name = deep convective rainfall amount on physics timestep
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dtf]
+  standard_name = time_step_for_dynamics
+  long_name = dynamics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cld1d]
+  standard_name = cloud_work_function
+  long_name = cloud work function
+  units = m2 s-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_t]
+  standard_name = air_temperature_save
+  long_name = air temperature before entering a physics scheme
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_qv]
+  standard_name = water_vapor_specific_humidity_save
+  long_name = water vapor specific humidity before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = zonal wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = meridional wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_water_vapor]
+  standard_name = water_vapor_specific_humidity_updated_by_physics
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ud_mf]
+  standard_name = instantaneous_atmosphere_updraft_convective_mass_flux
+  long_name = (updraft mass flux) * delt
+  units = kg m-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dd_mf]
+  standard_name = instantaneous_atmosphere_downdraft_convective_mass_flux
+  long_name = (downdraft mass flux) * delt
+  units = kg m-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dt_mf]
+  standard_name = instantaneous_atmosphere_detrainment_convective_mass_flux
+  long_name = (detrainment mass flux) * delt
+  units = kg m-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[clw_ice]
+  standard_name = ice_water_mixing_ratio_convective_transport_tracer
+  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[clw_liquid]
+  standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
+  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[npdf3d]
+  standard_name = number_of_3d_arrays_associated_with_pdf_based_clouds
+  long_name = number of 3d arrays associated with pdf based clouds/mp
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[num_p3d]
+  standard_name = array_dimension_of_3d_arrays_for_microphysics
+  long_name = number of 3D arrays needed for microphysics
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ncnvcld3d]
+  standard_name = number_of_convective_3d_cloud_fields
+  long_name = number of convective 3d clouds fields
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[rainc]
+  standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
+  long_name = convective rain at this time step
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cldwrk]
+  standard_name = cumulative_cloud_work_function
+  long_name = cumulative cloud work function (valid only with sas)
+  units = m2 s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dt3dt]
+  standard_name = cumulative_change_in_temperature_due_to_deep_convection
+  long_name = cumulative change in temperature due to deep conv.
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dq3dt]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection
+  long_name = cumulative change in water vapor specific humidity due to deep conv.
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt]
+  standard_name = cumulative_change_in_x_wind_due_to_deep_convection
+  long_name = cumulative change in x wind due to deep convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt]
+  standard_name = cumulative_change_in_y_wind_due_to_deep_convection
+  long_name = cumulative change in y wind due to deep convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[upd_mf]
+  standard_name = cumulative_atmosphere_updraft_convective_mass_flux
+  long_name = cumulative updraft mass flux
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dwn_mf]
+  standard_name = cumulative_atmosphere_downdraft_convective_mass_flux
+  long_name = cumulative downdraft mass flux
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[det_mf]
+  standard_name = cumulative_atmosphere_detrainment_convective_mass_flux
+  long_name = cumulative detrainment mass flux
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cnvw]
+  standard_name = convective_cloud_water_mixing_ratio
+  long_name = moist convective cloud water mixing ratio
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cnvc]
+  standard_name = convective_cloud_cover
+  long_name = convective cloud cover
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cnvw_phy_f3d]
+  standard_name = convective_cloud_water_mixing_ratio_in_phy_f3d
+  long_name = convective cloud water mixing ratio in the phy_f3d array
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cnvc_phy_f3d]
+  standard_name = convective_cloud_cover_in_phy_f3d
+  long_name = convective cloud cover in the phy_f3d array
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cape]
+  standard_name = convective_available_potential_energy_for_coupling
+  long_name = convective available potential energy for coupling
+  units = m2 s-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tconvtend]
+  standard_name = tendency_of_air_temperature_due_to_deep_convection_for_coupling_on_physics_timestep
+  long_name = tendency of air temperature due to deep convection
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qconvtend]
+  standard_name = tendency_of_water_vapor_specific_humidity_due_to_deep_convection_for_coupling_on_physics_timestep
+  long_name = tendency of specific humidity due to deep convection
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[uconvtend]
+  standard_name = tendency_of_x_wind_due_to_deep_convection_for_coupling_on_physics_timestep
+  long_name = tendency_of_x_wind_due_to_deep_convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[vconvtend]
+  standard_name = tendency_of_y_wind_due_to_deep_convection_for_coupling_on_physics_timestep
+  long_name = tendency_of_y_wind_due_to_deep_convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

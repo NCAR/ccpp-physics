@@ -3,9 +3,16 @@
 
       module GFS_surface_generic_pre
 
+      use machine, only: kind_phys
+
+      implicit none
+
       private
 
       public GFS_surface_generic_pre_init, GFS_surface_generic_pre_finalize, GFS_surface_generic_pre_run
+
+      real(kind=kind_phys), parameter :: one = 1.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0d0
 
       contains
 
@@ -15,86 +22,19 @@
       subroutine GFS_surface_generic_pre_finalize()
       end subroutine GFS_surface_generic_pre_finalize
 
-#if 0
 !> \section arg_table_GFS_surface_generic_pre_run Argument Table
-!! | local_name     | standard_name                                                                | long_name                                                        | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                           | count      |    0 | integer   |           | in     | F        |
-!! | levs           | vertical_dimension                                                           | number of vertical levels                                        | count      |    0 | integer   |           | in     | F        |
-!! | vfrac          | vegetation_area_fraction                                                     | areal fractional cover of green vegetation                       | frac       |    1 | real      | kind_phys | in     | F        |
-!! | islmsk         | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                     | flag       |    1 | integer   |           | in     | F        |
-!! | isot           | soil_type_dataset_choice                                                     | soil type dataset choice                                         | index      |    0 | integer   |           | in     | F        |
-!! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                          | index      |    0 | integer   |           | in     | F        |
-!! | stype          | soil_type_classification_real                                                | soil type for lsm                                                | index      |    1 | real      | kind_phys | in     | F        |
-!! | vtype          | vegetation_type_classification_real                                          | vegetation type for lsm                                          | index      |    1 | real      | kind_phys | in     | F        |
-!! | slope          | surface_slope_classification_real                                            | sfc slope type for lsm                                           | index      |    1 | real      | kind_phys | in     | F        |
-!! | prsik_1        | dimensionless_exner_function_at_lowest_model_interface                       | dimensionless Exner function at lowest model interface           | none       |    1 | real      | kind_phys | in     | F        |
-!! | prslk_1        | dimensionless_exner_function_at_lowest_model_layer                           | dimensionless Exner function at lowest model layer               | none       |    1 | real      | kind_phys | in     | F        |
-!! | semis          | surface_longwave_emissivity                                                  | surface lw emissivity in fraction                                | frac       |    1 | real      | kind_phys | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux                                            | surface downwelling longwave flux at current time                | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                                                     | surface skin temperature                                         | K          |    1 | real      | kind_phys | inout  | F        |
-!! | phil           | geopotential                                                                 | geopotential at model layer centers                              | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | con_g          | gravitational_acceleration                                                   | gravitational acceleration                                       | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom | frac       |    1 | real      | kind_phys | inout  | F        |
-!! | soiltyp        | soil_type_classification                                                     | soil type at each grid cell                                      | index      |    1 | integer   |           | inout  | F        |
-!! | vegtype        | vegetation_type_classification                                               | vegetation type at each grid cell                                | index      |    1 | integer   |           | inout  | F        |
-!! | slopetyp       | surface_slope_classification                                                 | surface slope type at each grid cell                             | index      |    1 | integer   |           | inout  | F        |
-!! | work3          | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer      | ratio      |    1 | real      | kind_phys | inout  | F        |
-!! | gabsbdlw       | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky surface downward longwave flux absorbed by the ground  | W m-2      |    1 | real      | kind_phys | inout  | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration                                     | surface skin temperature after iteration                         | K          |    1 | real      | kind_phys | inout  | F        |
-!! | zlvl           | height_above_ground_at_lowest_model_layer                                    | layer 1 height above ground (not MSL)                            | m          |    1 | real      | kind_phys | inout  | F        |
-!! | do_sppt        | flag_for_stochastic_surface_physics_perturbations                            | flag for stochastic surface physics perturbations                | flag       |    0 | logical   |           | in     | F        |
-!! | dtdtr          | tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step    | temp. change due to radiative heating per time step              | K          |    2 | real      | kind_phys | out    | F        |
-!! | drain_cpl      | tendency_of_lwe_thickness_of_precipitation_amount_for_coupling               | change in rain_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
-!! | dsnow_cpl      | tendency_of_lwe_thickness_of_snow_amount_for_coupling                        | change in show_cpl (coupling_type)                               | m          |    1 | real      | kind_phys | out    | F        |
-!! | rain_cpl       | lwe_thickness_of_precipitation_amount_for_coupling                           | total rain precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
-!! | snow_cpl       | lwe_thickness_of_snow_amount_for_coupling                                    | total snow precipitation                                         | m          |    1 | real      | kind_phys | in     | F        |
-!! | do_sfcperts    | flag_for_stochastic_surface_perturbations                                    | flag for stochastic surface perturbations option                 | flag       |    0 | logical   |           | in     | F        |
-!! | nsfcpert       | number_of_surface_perturbations                                              | number of surface perturbations                                  | count      |    0 | integer   |           | in     | F        |
-!! | sfc_wts        | weights_for_stochastic_surface_physics_perturbation                          | weights for stochastic surface physics perturbation              | none       |    2 | real      | kind_phys | in     | F        |
-!! | pertz0         | magnitude_of_perturbation_of_momentum_roughness_length                       | magnitude of perturbation of momentum roughness length           | frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertzt         | magnitude_of_perturbation_of_heat_to_momentum_roughness_length_ratio         | magnitude of perturbation of heat to momentum roughness length r.| frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertshc        | magnitude_of_perturbation_of_soil_type_b_parameter                           | magnitude of perturbation of soil type b parameter               | frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertlai        | magnitude_of_perturbation_of_leaf_area_index                                 | magnitude of perturbation of leaf area index                     | frac       |    1 | real      | kind_phys | in     | F        |
-!! | pertvegf       | magnitude_of_perturbation_of_vegetation_fraction                             | magnitude of perturbation of vegetation fraction                 | frac       |    1 | real      | kind_phys | in     | F        |
-!! | z01d           | perturbation_of_momentum_roughness_length                                    | perturbation of momentum roughness length                        | frac       |    1 | real      | kind_phys | out    | F        |
-!! | zt1d           | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio          | frac       |    1 | real      | kind_phys | out    | F        |
-!! | bexp1d         | perturbation_of_soil_type_b_parameter                                        | perturbation of soil type "b" parameter                          | frac       |    1 | real      | kind_phys | out    | F        |
-!! | xlai1d         | perturbation_of_leaf_area_index                                              | perturbation of leaf area index                                  | frac       |    1 | real      | kind_phys | out    | F        |
-!! | vegf1d         | perturbation_of_vegetation_fraction                                          | perturbation of vegetation fraction                              | frac       |    1 | real      | kind_phys | out    | F        |
-!! | cplflx         | flag_for_flux_coupling                                                       | flag controlling cplflx collection (default off)                 | flag       |    0 | logical   |           | in     | F        |
-!! | flag_cice      | flag_for_cice                                                                | flag for cice                                                    | flag       |    1 | logical   |           | inout  | F        |
-!! | islmsk_cice    | sea_land_ice_mask_cice                                                       | sea/land/ice mask cice (=0/1/2)                                  | flag       |    1 | integer   |           | in     | F        |
-!! | slimskin_cpl   | sea_land_ice_mask_in                                                         | sea/land/ice mask input (=0/1/2)                                 | flag       |    1 | real      | kind_phys | in     | F        |
-!! | dusfcin_cpl    | surface_x_momentum_flux_for_coupling                                         | sfc x momentum flux for coupling                                 | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | dvsfcin_cpl    | surface_y_momentum_flux_for_coupling                                         | sfc y momentum flux for coupling                                 | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | dtsfcin_cpl    | surface_upward_sensible_heat_flux_for_coupling                               | sfc sensible heat flux input                                     | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | dqsfcin_cpl    | surface_upward_latent_heat_flux_for_coupling                                 | sfc latent heat flux input for coupling                          | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | ulwsfcin_cpl   | surface_upwelling_longwave_flux_for_coupling                                 | surface upwelling LW flux for coupling                           | W m-2      |    1 | real      | kind_phys | in     | F        |
-!! | ulwsfc_cice    | surface_upwelling_longwave_flux_for_coupling_interstitial                    | surface upwelling longwave flux for coupling interstitial        | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | dusfc_cice     | surface_x_momentum_flux_for_coupling_interstitial                            | sfc x momentum flux for coupling interstitial                    | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc_cice     | surface_y_momentum_flux_for_coupling_interstitial                            | sfc y momentum flux for coupling interstitial                    | Pa         |    1 | real      | kind_phys | out    | F        |
-!! | dtsfc_cice     | surface_upward_sensible_heat_flux_for_coupling_interstitial                  | sfc sensible heat flux for coupling interstitial                 | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | dqsfc_cice     | surface_upward_latent_heat_flux_for_coupling_interstitial                    | sfc latent heat flux for coupling interstitial                   | W m-2      |    1 | real      | kind_phys | out    | F        |
-!! | tisfc          | sea_ice_temperature                                                          | sea-ice surface temperature                                      | K          |    1 | real      | kind_phys | in     | F        |
-!! | tsfco          | sea_surface_temperature                                                      | sea surface temperature                                          | K          |    1 | real      | kind_phys | in     | F        |
-!! | fice           | sea_ice_concentration                                                        | sea-ice concentration [0,1]                                      | frac       |    1 | real      | kind_phys | in     | F        |
-!! | hice           | sea_ice_thickness                                                            | sea-ice thickness                                                | m          |    1 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                         | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_surface_generic_pre_run.html
 !!
-#endif
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
-                          prsik_1, prslk_1, semis, adjsfcdlw, tsfc, phil, con_g, sigmaf, soiltyp, vegtype, &
-                          slopetyp, work3, gabsbdlw, tsurf, zlvl, do_sppt, dtdtr,                          &
+                          prsik_1, prslk_1, tsfc, phil, con_g,                                             &
+                          sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
                           cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
                           dtsfcin_cpl, dqsfcin_cpl, ulwsfcin_cpl, ulwsfc_cice, dusfc_cice, dvsfc_cice,     &
-                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice,                                &
-                          errmsg, errflg)
+                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice, dry, icy, wet,                 &
+                          wind, u1, v1, cnvwind, errmsg, errflg)
 
-        use machine,               only: kind_phys
         use surface_perturbation,  only: cdfnor
 
         implicit none
@@ -103,14 +43,15 @@
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
         integer, dimension(im), intent(inout) :: soiltyp, vegtype, slopetyp
+        logical, dimension(im), intent(in) :: dry, icy, wet
 
         real(kind=kind_phys), intent(in) :: con_g
-        real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1, &
-          semis, adjsfcdlw
+        real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1
+
         real(kind=kind_phys), dimension(im), intent(inout) :: tsfc
         real(kind=kind_phys), dimension(im,levs), intent(in) :: phil
 
-        real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, gabsbdlw, tsurf, zlvl
+        real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, tsurf, zlvl
 
         ! Stochastic physics / surface perturbations
         logical, intent(in) :: do_sppt
@@ -142,9 +83,11 @@
              tisfc, tsfco, fice, hice
         real(kind=kind_phys), dimension(im), intent(out) ::ulwsfc_cice, &
              dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice
-        real(kind=kind_phys), dimension(im) :: tisfc_cice, tsea_cice,   &
-             fice_cice,hice_cice
 
+        real(kind=kind_phys), dimension(im), intent(out) :: wind
+        real(kind=kind_phys), dimension(im), intent(in ) :: u1, v1
+        ! surface wind enhancement due to convection
+        real(kind=kind_phys), dimension(im), intent(in ) :: cnvwind
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -223,33 +166,22 @@
             soiltyp(i)  = int( stype(i)+0.5 )
             vegtype(i)  = int( vtype(i)+0.5 )
             slopetyp(i) = int( slope(i)+0.5 )    !! clu: slope -> slopetyp
+            if (soiltyp(i)  < 1) soiltyp(i)  = 14
+            if (vegtype(i)  < 1) vegtype(i)  = 17
+            if (slopetyp(i) < 1) slopetyp(i) = 1
           endif
 
           work3(i)   = prsik_1(i) / prslk_1(i)
         end do
 
-        !  ---  convert lw fluxes for land/ocean/sea-ice models
-        !  note: for sw: adjsfcdsw and adjsfcnsw are zenith angle adjusted downward/net fluxes.
-        !        for lw: adjsfcdlw is (sfc temp adjusted) downward fluxe with no emiss effect.
-        !                adjsfculw is (sfc temp adjusted) upward fluxe including emiss effect.
-        !        one needs to be aware that that the absorbed downward lw flux (used by land/ocean
-        !        models as downward flux) is not the same as adjsfcdlw but a value reduced by
-        !        the factor of emissivity.  however, the net effects are the same when seeing
-        !        it either above the surface interface or below.
-        !
-        !   - flux above the interface used by atmosphere model:
-        !        down: adjsfcdlw;    up: adjsfculw = sfcemis*sigma*T**4 + (1-sfcemis)*adjsfcdlw
-        !        net = up - down = sfcemis * (sigma*T**4 - adjsfcdlw)
-        !   - flux below the interface used by lnd/oc/ice models:
-        !        down: sfcemis*adjsfcdlw;  up: sfcemis*sigma*T**4
-        !        net = up - down = sfcemis * (sigma*T**4 - adjsfcdlw)
-
-        !  --- ...  define the downward lw flux absorbed by ground
-        gabsbdlw(:) = semis(:) * adjsfcdlw(:)
-
         do i=1,im
-          tsurf(i)   = tsfc(i)
-          zlvl(i)    = phil(i,1) * onebg
+          !tsurf(i) = tsfc(i)
+          zlvl(i)  = phil(i,1) * onebg
+          wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
+                         + max(zero, min(cnvwind(i), 30.0)), one)
+          !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
+          !                         Statein%vgrs(i,1)*Statein%vgrs(i,1))  &
+          !              + max(zero, min(Tbd%phy_f2d(i,Model%num_p2d), 30.0)), one)
         end do
 
       if(cplflx)then
@@ -262,25 +194,14 @@
           islmsk_cice(i) = int(slimskin_cpl(i)+0.5)
           if(islmsk_cice(i) == 4)then
             flag_cice(i)   = .true.
-          else
-            flag_cice(i) = .false.
+            ulwsfc_cice(i) = ulwsfcin_cpl(i)
+            dusfc_cice(i)  = dusfcin_cpl(i)
+            dvsfc_cice(i)  = dvsfcin_cpl(i)
+            dtsfc_cice(i)  = dtsfcin_cpl(i)
+            dqsfc_cice(i)  = dqsfcin_cpl(i)
           endif
-          ulwsfc_cice(i) = ulwsfcin_cpl(i)
-          dusfc_cice(i)  = dusfcin_cpl(i)
-          dvsfc_cice(i)  = dvsfcin_cpl(i)
-          dtsfc_cice(i)  = dtsfcin_cpl(i)
-          dqsfc_cice(i)  = dqsfcin_cpl(i)
-          tisfc_cice(i)  = tisfc(i)
-          tsea_cice(i)   = tsfco(i)
-          fice_cice(i)   = fice(i)
-          hice_cice(i)   = hice(i)
-          if(flag_cice(i)) tsfc(i) = fice_cice(i)*tisfc_cice(i) + (1. - fice_cice(i))*tsea_cice(i)
         enddo
-      else
-        ! Avoid uninitialized variables - set to default values
-        flag_cice = .false.
       endif
-
 
       end subroutine GFS_surface_generic_pre_run
 
@@ -289,9 +210,16 @@
 
       module GFS_surface_generic_post
 
+      use machine, only: kind_phys
+
+      implicit none
+
       private
 
       public GFS_surface_generic_post_init, GFS_surface_generic_post_finalize, GFS_surface_generic_post_run
+
+      real(kind=kind_phys), parameter :: one = 1.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0d0
 
       contains
 
@@ -300,109 +228,18 @@
 
       subroutine GFS_surface_generic_post_finalize()
       end subroutine GFS_surface_generic_post_finalize
-#if 0
+
 !> \section arg_table_GFS_surface_generic_post_run Argument Table
-!! | local_name     | standard_name                                                                                                       | long_name                                                                           | units       | rank | type       |    kind   | intent | optional |
-!! |----------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                                                              | horizontal loop extent                                                              | count       |    0 | integer    |           | in     | F        |
-!! | cplflx         | flag_for_flux_coupling                                                                                              | flag controlling cplflx collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
-!! | cplwav         | flag_for_wave_coupling                                                                                              | flag controlling cplwav collection (default off)                                    | flag        |    0 | logical    |           | in     | F        |
-!! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
-!! | icy            | flag_nonzero_sea_ice_surface_fraction                                                                               | flag indicating presence of some sea ice surface area fraction                      | flag        |    1 | logical    |           | in     | F        |
-!! | wet            | flag_nonzero_wet_surface_fraction                                                                                   | flag indicating presence of some ocean or lake surface area fraction                | flag        |    1 | logical    |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
-!! | ep1d           | surface_upward_potential_latent_heat_flux                                                                           | surface upward potential latent heat flux                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | gflx           | upward_heat_flux_in_soil                                                                                            | upward soil heat flux                                                               | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | tgrs_1         | air_temperature_at_lowest_model_layer                                                                               | mean temperature at lowest model layer                                              | K           |    1 | real       | kind_phys | in     | F        |
-!! | qgrs_1         | water_vapor_specific_humidity_at_lowest_model_layer                                                                 | specific humidity at lowest model layer                                             | kg kg-1     |    1 | real       | kind_phys | in     | F        |
-!! | ugrs_1         | x_wind_at_lowest_model_layer                                                                                        | zonal wind at lowest model layer                                                    | m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | vgrs_1         | y_wind_at_lowest_model_layer                                                                                        | meridional wind at lowest model layer                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | adjsfcdlw      | surface_downwelling_longwave_flux                                                                                   | surface downwelling longwave flux at current time                                   | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjsfcdsw      | surface_downwelling_shortwave_flux                                                                                  | surface downwelling shortwave flux at current time                                  | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjnirbmd      | surface_downwelling_direct_near_infrared_shortwave_flux                                                             | surface downwelling beam near-infrared shortwave flux at current time               | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjnirdfd      | surface_downwelling_diffuse_near_infrared_shortwave_flux                                                            | surface downwelling diffuse near-infrared shortwave flux at current time            | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjvisbmd      | surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux                                                   | surface downwelling beam ultraviolet plus visible shortwave flux at current time    | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjvisdfd      | surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux                                                  | surface downwelling diffuse ultraviolet plus visible shortwave flux at current time | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjsfculw      | surface_upwelling_longwave_flux                                                                                     | surface upwelling longwave flux at current time                                     | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjnirbmu      | surface_upwelling_direct_near_infrared_shortwave_flux                                                               | surface upwelling beam near-infrared shortwave flux at current time                 | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjnirdfu      | surface_upwelling_diffuse_near_infrared_shortwave_flux                                                              | surface upwelling diffuse near-infrared shortwave flux at current time              | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjvisbmu      | surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux                                                     | surface upwelling beam ultraviolet plus visible shortwave flux at current time      | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | adjvisdfu      | surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux                                                    | surface upwelling diffuse ultraviolet plus visible shortwave flux at current time   | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | t2m            | temperature_at_2m                                                                                                   | 2 meter temperature                                                                 | K           |    1 | real       | kind_phys | in     | F        |
-!! | q2m            | specific_humidity_at_2m                                                                                             | 2 meter specific humidity                                                           | kg kg-1     |    1 | real       | kind_phys | in     | F        |
-!! | u10m           | x_wind_at_10m                                                                                                       | 10 meter u wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | v10m           | y_wind_at_10m                                                                                                       | 10 meter v wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                                                                                            | surface skin temperature                                                            | K           |    1 | real       | kind_phys | in     | F        |
-!! | pgr            | surface_air_pressure                                                                                                | surface pressure                                                                    | Pa          |    1 | real       | kind_phys | in     | F        |
-!! | xcosz          | instantaneous_cosine_of_zenith_angle                                                                                | cosine of zenith angle at current time                                              | none        |    1 | real       | kind_phys | in     | F        |
-!! | evbs           | soil_upward_latent_heat_flux                                                                                        | soil upward latent heat flux                                                        | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | evcw           | canopy_upward_latent_heat_flux                                                                                      | canopy upward latent heat flux                                                      | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | trans          | transpiration_flux                                                                                                  | total plant transpiration rate                                                      | kg m-2 s-1  |    1 | real       | kind_phys | in     | F        |
-!! | sbsno          | snow_deposition_sublimation_upward_latent_heat_flux                                                                 | latent heat flux from snow depo/subl                                                | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | snowc          | surface_snow_area_fraction                                                                                          | surface snow area fraction                                                          | frac        |    1 | real       | kind_phys | in     | F        |
-!! | snohf          | snow_freezing_rain_upward_latent_heat_flux                                                                          | latent heat flux due to snow and frz rain                                           | W m-2       |    1 | real       | kind_phys | in     | F        |
-!! | epi            | instantaneous_surface_potential_evaporation                                                                         | instantaneous sfc potential evaporation                                             | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | gfluxi         | instantaneous_surface_ground_heat_flux                                                                              | instantaneous sfc ground heat flux                                                  | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | t1             | air_temperature_at_lowest_model_layer_for_diag                                                                      | layer 1 temperature for diag                                                        | K           |    1 | real       | kind_phys | inout  | F        |
-!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer_for_diag                                                        | layer 1 specific humidity for diag                                                  | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
-!! | u1             | x_wind_at_lowest_model_layer_for_diag                                                                               | layer 1 x wind for diag                                                             | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | v1             | y_wind_at_lowest_model_layer_for_diag                                                                               | layer 1 y wind for diag                                                             | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | dlwsfci_cpl    | instantaneous_surface_downwelling_longwave_flux_for_coupling                                                        | instantaneous sfc downward lw flux                                                  | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | dswsfci_cpl    | instantaneous_surface_downwelling_shortwave_flux_for_coupling                                                       | instantaneous sfc downward sw flux                                                  | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | dlwsfc_cpl     | cumulative_surface_downwelling_longwave_flux_for_coupling_multiplied_by_timestep                                    | cumulative sfc downward lw flux mulitplied by timestep                              | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | dswsfc_cpl     | cumulative_surface_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep                                   | cumulative sfc downward sw flux multiplied by timestep                              | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | dnirbmi_cpl    | instantaneous_surface_downwelling_direct_near_infrared_shortwave_flux_for_coupling                                  | instantaneous sfc nir beam downward sw flux                                         | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | dnirdfi_cpl    | instantaneous_surface_downwelling_diffuse_near_infrared_shortwave_flux_for_coupling                                 | instantaneous sfc nir diff downward sw flux                                         | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | dvisbmi_cpl    | instantaneous_surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_for_coupling                        | instantaneous sfc uv+vis beam downward sw flux                                      | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | dvisdfi_cpl    | instantaneous_surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling                       | instantaneous sfc uv+vis diff downward sw flux                                      | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | dnirbm_cpl     | cumulative_surface_downwelling_direct_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep              | cumulative sfc nir beam downward sw flux multiplied by timestep                     | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | dnirdf_cpl     | cumulative_surface_downwelling_diffuse_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep             | cumulative sfc nir diff downward sw flux multiplied by timestep                     | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | dvisbm_cpl     | cumulative_surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep    | cumulative sfc uv+vis beam dnwd sw flux multiplied by timestep                      | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | dvisdf_cpl     | cumulative_surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep   | cumulative sfc uv+vis diff dnwd sw flux multiplied by timestep                      | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | nlwsfci_cpl    | instantaneous_surface_net_downward_longwave_flux_for_coupling                                                       | instantaneous net sfc downward lw flux                                              | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | nlwsfc_cpl     | cumulative_surface_net_downward_longwave_flux_for_coupling_multiplied_by_timestep                                   | cumulative net downward lw flux multiplied by timestep                              | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | t2mi_cpl       | instantaneous_temperature_at_2m_for_coupling                                                                        | instantaneous T2m                                                                   | K           |    1 | real       | kind_phys | inout  | F        |
-!! | q2mi_cpl       | instantaneous_specific_humidity_at_2m_for_coupling                                                                  | instantaneous Q2m                                                                   | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
-!! | u10mi_cpl      | instantaneous_x_wind_at_10m_for_coupling                                                                            | instantaneous U10m                                                                  | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | v10mi_cpl      | instantaneous_y_wind_at_10m_for_coupling                                                                            | instantaneous V10m                                                                  | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | tsfci_cpl      | instantaneous_surface_skin_temperature_for_coupling                                                                 | instantaneous sfc temperature                                                       | K           |    1 | real       | kind_phys | inout  | F        |
-!! | psurfi_cpl     | instantaneous_surface_air_pressure_for_coupling                                                                     | instantaneous sfc pressure                                                          | Pa          |    1 | real       | kind_phys | inout  | F        |
-!! | nnirbmi_cpl    | instantaneous_surface_net_downward_direct_near_infrared_shortwave_flux_for_coupling                                 | instantaneous net nir beam sfc downward sw flux                                     | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | nnirdfi_cpl    | instantaneous_surface_net_downward_diffuse_near_infrared_shortwave_flux_for_coupling                                | instantaneous net nir diff sfc downward sw flux                                     | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | nvisbmi_cpl    | instantaneous_surface_net_downward_direct_ultraviolet_and_visible_shortwave_flux_for_coupling                       | instantaneous net uv+vis beam downward sw flux                                      | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | nvisdfi_cpl    | instantaneous_surface_net_downward_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling                      | instantaneous net uv+vis diff downward sw flux                                      | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | nswsfci_cpl    | instantaneous_surface_net_downward_shortwave_flux_for_coupling                                                      | instantaneous net sfc downward sw flux                                              | W m-2       |    1 | real       | kind_phys | inout  | F        |
-!! | nswsfc_cpl     | cumulative_surface_net_downward_shortwave_flux_for_coupling_multiplied_by_timestep                                  | cumulative net downward sw flux multiplied by timestep                              | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | nnirbm_cpl     | cumulative_surface_net_downward_direct_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep             | cumulative net nir beam downward sw flux multiplied by timestep                     | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | nnirdf_cpl     | cumulative_surface_net_downward_diffuse_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep            | cumulative net nir diff downward sw flux multiplied by timestep                     | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | nvisbm_cpl     | cumulative_surface_net_downward_direct_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep   | cumulative net uv+vis beam downward sw rad flux multiplied by timestep              | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | nvisdf_cpl     | cumulative_surface_net_downward_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep  | cumulative net uv+vis diff downward sw rad flux multiplied by timestep              | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | gflux          | cumulative_surface_ground_heat_flux_multiplied_by_timestep                                                          | cumulative groud conductive heat flux multiplied by timestep                        | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | evbsa          | cumulative_soil_upward_latent_heat_flux_multiplied_by_timestep                                                      | cumulative soil upward latent heat flux multiplied by timestep                      | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | evcwa          | cumulative_canopy_upward_latent_heat_flu_multiplied_by_timestep                                                     | cumulative canopy upward latent heat flux multiplied by timestep                    | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | transa         | cumulative_transpiration_flux_multiplied_by_timestep                                                                | cumulative total plant transpiration rate multiplied by timestep                    | kg m-2      |    1 | real       | kind_phys | inout  | F        |
-!! | sbsnoa         | cumulative_snow_deposition_sublimation_upward_latent_heat_flux_multiplied_by_timestep                               | cumulative latent heat flux from snow depo/subl multiplied by timestep              | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | snowca         | cumulative_surface_snow_area_fraction_multiplied_by_timestep                                                        | cumulative surface snow area fraction multiplied by timestep                        | s           |    1 | real       | kind_phys | inout  | F        |
-!! | snohfa         | cumulative_snow_freezing_rain_upward_latent_heat_flux_multiplied_by_timestep                                        | cumulative latent heat flux due to snow and frz rain multiplied by timestep         | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | ep             | cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep                                         | cumulative surface upward potential latent heat flux multiplied by timestep         | W m-2 s     |    1 | real       | kind_phys | inout  | F        |
-!! | runoff         | total_runoff                                                                                                        | total water runoff                                                                  | kg m-2      |    1 | real       | kind_phys | inout  | F        |
-!! | srunoff        | surface_runoff                                                                                                      | surface water runoff (from lsm)                                                     | kg m-2      |    1 | real       | kind_phys | inout  | F        |
-!! | runof          | surface_runoff_flux                                                                                                 | surface runoff flux                                                                 | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
-!! | drain          | subsurface_runoff_flux                                                                                              | subsurface runoff flux                                                              | g m-2 s-1   |    1 | real       | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                                                                  | error message for error handling in CCPP                                            | none        |    0 | character  | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
+!! \htmlinclude GFS_surface_generic_post_run.html
 !!
-#endif
       subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, icy, wet, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,&
-        adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-        t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,                                             &
+        adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_ocn, adjnirbmu, adjnirdfu,           &
+        adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_ocn, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,              &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
         runoff, srunoff, runof, drain, errmsg, errflg)
-
-        use machine,               only: kind_phys
 
         implicit none
 
@@ -412,8 +249,8 @@
         real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(im),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw, &
-          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                   &
-          t2m, q2m, u10m, v10m, tsfc, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
+          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_ocn, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
+          t2m, q2m, u10m, v10m, tsfc, tsfc_ocn, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
 
         real(kind=kind_phys), dimension(im),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
           dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, &
@@ -430,7 +267,7 @@
         real(kind=kind_phys), parameter :: albdf   = 0.06d0
 
         integer :: i
-        real(kind=kind_phys) :: tem, xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
+        real(kind=kind_phys) :: xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -466,20 +303,25 @@
             dnirdf_cpl  (i) = dnirdf_cpl(i) + adjnirdfd(i)*dtf
             dvisbm_cpl  (i) = dvisbm_cpl(i) + adjvisbmd(i)*dtf
             dvisdf_cpl  (i) = dvisdf_cpl(i) + adjvisdfd(i)*dtf
-            nlwsfci_cpl (i) = adjsfcdlw(i) - adjsfculw(i)
+            nlwsfci_cpl (i) = adjsfcdlw(i)  - adjsfculw(i)
+            if (wet(i)) then
+              nlwsfci_cpl(i) = adjsfcdlw(i) - adjsfculw_ocn(i)
+            endif
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-            tsfci_cpl   (i) = tsfc(i)
+!            tsfci_cpl   (i) = tsfc(i)
+            tsfci_cpl   (i) = tsfc_ocn(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
 
-  !  ---  estimate mean albedo for ocean point without ice cover and apply
-  !       them to net SW heat fluxes
+!  ---  estimate mean albedo for ocean point without ice cover and apply
+!       them to net SW heat fluxes
 
           do i=1,im
-            if (wet(i) .or. icy(i)) then ! not 100% land
-  !  ---  compute open water albedo
+!           if (Sfcprop%landfrac(i) < one) then ! Not 100% land
+            if (wet(i)) then                    ! some open water 
+!  ---  compute open water albedo
               xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
               ocalnirdf_cpl = 0.06
               ocalnirbm_cpl = max(albdf, 0.026/(xcosz_loc**1.7+0.065)  &
@@ -488,10 +330,10 @@
               ocalvisdf_cpl = 0.06
               ocalvisbm_cpl = ocalnirbm_cpl
 
-              nnirbmi_cpl(i) = adjnirbmd(i)-adjnirbmd(i)*ocalnirbm_cpl
-              nnirdfi_cpl(i) = adjnirdfd(i)-adjnirdfd(i)*ocalnirdf_cpl
-              nvisbmi_cpl(i) = adjvisbmd(i)-adjvisbmd(i)*ocalvisbm_cpl
-              nvisdfi_cpl(i) = adjvisdfd(i)-adjvisdfd(i)*ocalvisdf_cpl
+              nnirbmi_cpl(i) = adjnirbmd(i) * (one-ocalnirbm_cpl)
+              nnirdfi_cpl(i) = adjnirdfd(i) * (one-ocalnirdf_cpl)
+              nvisbmi_cpl(i) = adjvisbmd(i) * (one-ocalvisbm_cpl)
+              nvisdfi_cpl(i) = adjvisdfd(i) * (one-ocalvisdf_cpl)
             else
               nnirbmi_cpl(i) = adjnirbmd(i) - adjnirbmu(i)
               nnirdfi_cpl(i) = adjnirdfd(i) - adjnirdfu(i)
@@ -524,10 +366,9 @@
 !  --- ...  total runoff is composed of drainage into water table and
 !           runoff at the surface and is accumulated in unit of meters
         if (lssav) then
-          tem = dtf * 0.001
           do i=1,im
-            runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * tem
-            srunoff(i) = srunoff(i) + runof(i) * tem
+            runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * dtf
+            srunoff(i) = srunoff(i) + runof(i) * dtf
           enddo
         endif
 

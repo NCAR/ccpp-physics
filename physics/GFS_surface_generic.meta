@@ -1,0 +1,1387 @@
+[ccpp-arg-table]
+  name = GFS_surface_generic_pre_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[vfrac]
+  standard_name = vegetation_area_fraction
+  long_name = areal fractional cover of green vegetation
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[islmsk]
+  standard_name = sea_land_ice_mask
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[isot]
+  standard_name = soil_type_dataset_choice
+  long_name = soil type dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ivegsrc]
+  standard_name = vegetation_type_dataset_choice
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[stype]
+  standard_name = soil_type_classification_real
+  long_name = soil type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vtype]
+  standard_name = vegetation_type_classification_real
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[slope]
+  standard_name = surface_slope_classification_real
+  long_name = sfc slope type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsik_1]
+  standard_name = dimensionless_exner_function_at_lowest_model_interface
+  long_name = dimensionless Exner function at lowest model interface
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prslk_1]
+  standard_name = dimensionless_exner_function_at_lowest_model_layer
+  long_name = dimensionless Exner function at lowest model layer
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc]
+  standard_name = surface_skin_temperature
+  long_name = surface skin temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[phil]
+  standard_name = geopotential
+  long_name = geopotential at model layer centers
+  units = m2 s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sigmaf]
+  standard_name = bounded_vegetation_area_fraction
+  long_name = areal fractional cover of green vegetation bounded on the bottom
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[soiltyp]
+  standard_name = soil_type_classification
+  long_name = soil type at each grid cell
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[vegtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type at each grid cell
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[slopetyp]
+  standard_name = surface_slope_classification
+  long_name = surface slope type at each grid cell
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = inout
+  optional = F
+[work3]
+  standard_name = ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer
+  long_name = Exner function ratio bt midlayer and interface at 1st layer
+  units = ratio
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tsurf]
+  standard_name = surface_skin_temperature_after_iteration
+  long_name = surface skin temperature after iteration
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zlvl]
+  standard_name = height_above_ground_at_lowest_model_layer
+  long_name = layer 1 height above ground (not MSL)
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[do_sppt]
+  standard_name = flag_for_stochastic_surface_physics_perturbations
+  long_name = flag for stochastic surface physics perturbations
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[dtdtr]
+  standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
+  long_name = temp. change due to radiative heating per time step
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[drain_cpl]
+  standard_name = tendency_of_lwe_thickness_of_precipitation_amount_for_coupling
+  long_name = change in rain_cpl (coupling_type)
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dsnow_cpl]
+  standard_name = tendency_of_lwe_thickness_of_snow_amount_for_coupling
+  long_name = change in show_cpl (coupling_type)
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[rain_cpl]
+  standard_name = lwe_thickness_of_precipitation_amount_for_coupling
+  long_name = total rain precipitation
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snow_cpl]
+  standard_name = lwe_thickness_of_snow_amount_for_coupling
+  long_name = total snow precipitation
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[do_sfcperts]
+  standard_name = flag_for_stochastic_surface_perturbations
+  long_name = flag for stochastic surface perturbations option
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[nsfcpert]
+  standard_name = number_of_surface_perturbations
+  long_name = number of surface perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[sfc_wts]
+  standard_name = weights_for_stochastic_surface_physics_perturbation
+  long_name = weights for stochastic surface physics perturbation
+  units = none
+  dimensions = (horizontal_dimension,number_of_surface_perturbations)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pertz0]
+  standard_name = magnitude_of_perturbation_of_momentum_roughness_length
+  long_name = magnitude of perturbation of momentum roughness length
+  units = frac
+  dimensions = (5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pertzt]
+  standard_name = magnitude_of_perturbation_of_heat_to_momentum_roughness_length_ratio
+  long_name = magnitude of perturbation of heat to momentum roughness length r.
+  units = frac
+  dimensions = (5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pertshc]
+  standard_name = magnitude_of_perturbation_of_soil_type_b_parameter
+  long_name = magnitude of perturbation of soil type b parameter
+  units = frac
+  dimensions = (5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pertlai]
+  standard_name = magnitude_of_perturbation_of_leaf_area_index
+  long_name = magnitude of perturbation of leaf area index
+  units = frac
+  dimensions = (5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pertvegf]
+  standard_name = magnitude_of_perturbation_of_vegetation_fraction
+  long_name = magnitude of perturbation of vegetation fraction
+  units = frac
+  dimensions = (5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[z01d]
+  standard_name = perturbation_of_momentum_roughness_length
+  long_name = perturbation of momentum roughness length
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[zt1d]
+  standard_name = perturbation_of_heat_to_momentum_roughness_length_ratio
+  long_name = perturbation of heat to momentum roughness length ratio
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[bexp1d]
+  standard_name = perturbation_of_soil_type_b_parameter
+  long_name = perturbation of soil type "b" parameter
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[xlai1d]
+  standard_name = perturbation_of_leaf_area_index
+  long_name = perturbation of leaf area index
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[vegf1d]
+  standard_name = perturbation_of_vegetation_fraction
+  long_name = perturbation of vegetation fraction
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[cplflx]
+  standard_name = flag_for_flux_coupling
+  long_name = flag controlling cplflx collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[flag_cice]
+  standard_name = flag_for_cice
+  long_name = flag for cice
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = inout
+  optional = F
+[islmsk_cice]
+  standard_name = sea_land_ice_mask_cice
+  long_name = sea/land/ice mask cice (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[slimskin_cpl]
+  standard_name = sea_land_ice_mask_in
+  long_name = sea/land/ice mask input (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dusfcin_cpl]
+  standard_name = surface_x_momentum_flux_for_coupling
+  long_name = sfc x momentum flux for coupling
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dvsfcin_cpl]
+  standard_name = surface_y_momentum_flux_for_coupling
+  long_name = sfc y momentum flux for coupling
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dtsfcin_cpl]
+  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  long_name = sfc sensible heat flux input
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dqsfcin_cpl]
+  standard_name = surface_upward_latent_heat_flux_for_coupling
+  long_name = sfc latent heat flux input for coupling
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ulwsfcin_cpl]
+  standard_name = surface_upwelling_longwave_flux_for_coupling
+  long_name = surface upwelling LW flux for coupling
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ulwsfc_cice]
+  standard_name = surface_upwelling_longwave_flux_for_coupling_interstitial
+  long_name = surface upwelling longwave flux for coupling interstitial
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfc_cice]
+  standard_name = surface_x_momentum_flux_for_coupling_interstitial
+  long_name = sfc x momentum flux for coupling interstitial
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_cice]
+  standard_name = surface_y_momentum_flux_for_coupling_interstitial
+  long_name = sfc y momentum flux for coupling interstitial
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtsfc_cice]
+  standard_name = surface_upward_sensible_heat_flux_for_coupling_interstitial
+  long_name = sfc sensible heat flux for coupling interstitial
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dqsfc_cice]
+  standard_name = surface_upward_latent_heat_flux_for_coupling_interstitial
+  long_name = sfc latent heat flux for coupling interstitial
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[tisfc]
+  standard_name = sea_ice_temperature
+  long_name = sea-ice surface temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfco]
+  standard_name = sea_surface_temperature
+  long_name = sea surface temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fice]
+  standard_name = sea_ice_concentration
+  long_name = sea-ice concentration [0,1]
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hice]
+  standard_name = sea_ice_thickness
+  long_name = sea-ice thickness
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[wet]
+  standard_name = flag_nonzero_wet_surface_fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[u1]
+  standard_name = x_wind_at_lowest_model_layer
+  long_name = zonal wind at lowest model layer
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[v1]
+  standard_name = y_wind_at_lowest_model_layer
+  long_name = meridional wind at lowest model layer
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cnvwind]
+  standard_name = surface_wind_enhancement_due_to_convection
+  long_name = surface wind enhancement due to convection
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_surface_generic_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cplflx]
+  standard_name = flag_for_flux_coupling
+  long_name = flag controlling cplflx collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[cplwav]
+  standard_name = flag_for_wave_coupling
+  long_name = flag controlling cplwav collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[wet]
+  standard_name = flag_nonzero_wet_surface_fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[dtf]
+  standard_name = time_step_for_dynamics
+  long_name = dynamics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ep1d]
+  standard_name = surface_upward_potential_latent_heat_flux
+  long_name = surface upward potential latent heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gflx]
+  standard_name = upward_heat_flux_in_soil
+  long_name = upward soil heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tgrs_1]
+  standard_name = air_temperature_at_lowest_model_layer
+  long_name = mean temperature at lowest model layer
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qgrs_1]
+  standard_name = water_vapor_specific_humidity_at_lowest_model_layer
+  long_name = specific humidity at lowest model layer
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ugrs_1]
+  standard_name = x_wind_at_lowest_model_layer
+  long_name = zonal wind at lowest model layer
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vgrs_1]
+  standard_name = y_wind_at_lowest_model_layer
+  long_name = meridional wind at lowest model layer
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfcdlw]
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfcdsw]
+  standard_name = surface_downwelling_shortwave_flux
+  long_name = surface downwelling shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjnirbmd]
+  standard_name = surface_downwelling_direct_near_infrared_shortwave_flux
+  long_name = surface downwelling beam near-infrared shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjnirdfd]
+  standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux
+  long_name = surface downwelling diffuse near-infrared shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjvisbmd]
+  standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux
+  long_name = surface downwelling beam ultraviolet plus visible shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjvisdfd]
+  standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux
+  long_name = surface downwelling diffuse ultraviolet plus visible shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfculw]
+  standard_name = surface_upwelling_longwave_flux
+  long_name = surface upwelling longwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfculw_ocn]
+  standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
+  long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjnirbmu]
+  standard_name = surface_upwelling_direct_near_infrared_shortwave_flux
+  long_name = surface upwelling beam near-infrared shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjnirdfu]
+  standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux
+  long_name = surface upwelling diffuse near-infrared shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjvisbmu]
+  standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux
+  long_name = surface upwelling beam ultraviolet plus visible shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjvisdfu]
+  standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux
+  long_name = surface upwelling diffuse ultraviolet plus visible shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[t2m]
+  standard_name = temperature_at_2m
+  long_name = 2 meter temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[q2m]
+  standard_name = specific_humidity_at_2m
+  long_name = 2 meter specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[u10m]
+  standard_name = x_wind_at_10m
+  long_name = 10 meter u wind speed
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[v10m]
+  standard_name = y_wind_at_10m
+  long_name = 10 meter v wind speed
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc]
+  standard_name = surface_skin_temperature
+  long_name = surface skin temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc_ocn]
+  standard_name = surface_skin_temperature_over_ocean_interstitial
+  long_name = surface skin temperature over ocean (temporary use as interstitial)
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pgr]
+  standard_name = surface_air_pressure
+  long_name = surface pressure
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[xcosz]
+  standard_name = instantaneous_cosine_of_zenith_angle
+  long_name = cosine of zenith angle at current time
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[evbs]
+  standard_name = soil_upward_latent_heat_flux
+  long_name = soil upward latent heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[evcw]
+  standard_name = canopy_upward_latent_heat_flux
+  long_name = canopy upward latent heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[trans]
+  standard_name = transpiration_flux
+  long_name = total plant transpiration rate
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sbsno]
+  standard_name = snow_deposition_sublimation_upward_latent_heat_flux
+  long_name = latent heat flux from snow depo/subl
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snowc]
+  standard_name = surface_snow_area_fraction
+  long_name = surface snow area fraction
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snohf]
+  standard_name = snow_freezing_rain_upward_latent_heat_flux
+  long_name = latent heat flux due to snow and frz rain
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[epi]
+  standard_name = instantaneous_surface_potential_evaporation
+  long_name = instantaneous sfc potential evaporation
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[gfluxi]
+  standard_name = instantaneous_surface_ground_heat_flux
+  long_name = instantaneous sfc ground heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[t1]
+  standard_name = air_temperature_at_lowest_model_layer_for_diag
+  long_name = layer 1 temperature for diag
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[q1]
+  standard_name = water_vapor_specific_humidity_at_lowest_model_layer_for_diag
+  long_name = layer 1 specific humidity for diag
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[u1]
+  standard_name = x_wind_at_lowest_model_layer_for_diag
+  long_name = layer 1 x wind for diag
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[v1]
+  standard_name = y_wind_at_lowest_model_layer_for_diag
+  long_name = layer 1 y wind for diag
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dlwsfci_cpl]
+  standard_name = instantaneous_surface_downwelling_longwave_flux_for_coupling
+  long_name = instantaneous sfc downward lw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dswsfci_cpl]
+  standard_name = instantaneous_surface_downwelling_shortwave_flux_for_coupling
+  long_name = instantaneous sfc downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dlwsfc_cpl]
+  standard_name = cumulative_surface_downwelling_longwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc downward lw flux mulitplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dswsfc_cpl]
+  standard_name = cumulative_surface_downwelling_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc downward sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dnirbmi_cpl]
+  standard_name = instantaneous_surface_downwelling_direct_near_infrared_shortwave_flux_for_coupling
+  long_name = instantaneous sfc nir beam downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dnirdfi_cpl]
+  standard_name = instantaneous_surface_downwelling_diffuse_near_infrared_shortwave_flux_for_coupling
+  long_name = instantaneous sfc nir diff downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvisbmi_cpl]
+  standard_name = instantaneous_surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_for_coupling
+  long_name = instantaneous sfc uv+vis beam downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvisdfi_cpl]
+  standard_name = instantaneous_surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling
+  long_name = instantaneous sfc uv+vis diff downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dnirbm_cpl]
+  standard_name = cumulative_surface_downwelling_direct_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc nir beam downward sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dnirdf_cpl]
+  standard_name = cumulative_surface_downwelling_diffuse_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc nir diff downward sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvisbm_cpl]
+  standard_name = cumulative_surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc uv+vis beam dnwd sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvisdf_cpl]
+  standard_name = cumulative_surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc uv+vis diff dnwd sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nlwsfci_cpl]
+  standard_name = instantaneous_surface_net_downward_longwave_flux_for_coupling
+  long_name = instantaneous net sfc downward lw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nlwsfc_cpl]
+  standard_name = cumulative_surface_net_downward_longwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative net downward lw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[t2mi_cpl]
+  standard_name = instantaneous_temperature_at_2m_for_coupling
+  long_name = instantaneous T2m
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[q2mi_cpl]
+  standard_name = instantaneous_specific_humidity_at_2m_for_coupling
+  long_name = instantaneous Q2m
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[u10mi_cpl]
+  standard_name = instantaneous_x_wind_at_10m_for_coupling
+  long_name = instantaneous U10m
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[v10mi_cpl]
+  standard_name = instantaneous_y_wind_at_10m_for_coupling
+  long_name = instantaneous V10m
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tsfci_cpl]
+  standard_name = instantaneous_surface_skin_temperature_for_coupling
+  long_name = instantaneous sfc temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[psurfi_cpl]
+  standard_name = instantaneous_surface_air_pressure_for_coupling
+  long_name = instantaneous sfc pressure
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nnirbmi_cpl]
+  standard_name = instantaneous_surface_net_downward_direct_near_infrared_shortwave_flux_for_coupling
+  long_name = instantaneous net nir beam sfc downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nnirdfi_cpl]
+  standard_name = instantaneous_surface_net_downward_diffuse_near_infrared_shortwave_flux_for_coupling
+  long_name = instantaneous net nir diff sfc downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nvisbmi_cpl]
+  standard_name = instantaneous_surface_net_downward_direct_ultraviolet_and_visible_shortwave_flux_for_coupling
+  long_name = instantaneous net uv+vis beam downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nvisdfi_cpl]
+  standard_name = instantaneous_surface_net_downward_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling
+  long_name = instantaneous net uv+vis diff downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nswsfci_cpl]
+  standard_name = instantaneous_surface_net_downward_shortwave_flux_for_coupling
+  long_name = instantaneous net sfc downward sw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nswsfc_cpl]
+  standard_name = cumulative_surface_net_downward_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative net downward sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nnirbm_cpl]
+  standard_name = cumulative_surface_net_downward_direct_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative net nir beam downward sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nnirdf_cpl]
+  standard_name = cumulative_surface_net_downward_diffuse_near_infrared_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative net nir diff downward sw flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nvisbm_cpl]
+  standard_name = cumulative_surface_net_downward_direct_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative net uv+vis beam downward sw rad flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nvisdf_cpl]
+  standard_name = cumulative_surface_net_downward_diffuse_ultraviolet_and_visible_shortwave_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative net uv+vis diff downward sw rad flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[gflux]
+  standard_name = cumulative_surface_ground_heat_flux_multiplied_by_timestep
+  long_name = cumulative groud conductive heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[evbsa]
+  standard_name = cumulative_soil_upward_latent_heat_flux_multiplied_by_timestep
+  long_name = cumulative soil upward latent heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[evcwa]
+  standard_name = cumulative_canopy_upward_latent_heat_flu_multiplied_by_timestep
+  long_name = cumulative canopy upward latent heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[transa]
+  standard_name = cumulative_transpiration_flux_multiplied_by_timestep
+  long_name = cumulative total plant transpiration rate multiplied by timestep
+  units = kg m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sbsnoa]
+  standard_name = cumulative_snow_deposition_sublimation_upward_latent_heat_flux_multiplied_by_timestep
+  long_name = cumulative latent heat flux from snow depo/subl multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snowca]
+  standard_name = cumulative_surface_snow_area_fraction_multiplied_by_timestep
+  long_name = cumulative surface snow area fraction multiplied by timestep
+  units = s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snohfa]
+  standard_name = cumulative_snow_freezing_rain_upward_latent_heat_flux_multiplied_by_timestep
+  long_name = cumulative latent heat flux due to snow and frz rain multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ep]
+  standard_name = cumulative_surface_upward_potential_latent_heat_flux_multiplied_by_timestep
+  long_name = cumulative surface upward potential latent heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[runoff]
+  standard_name = total_runoff
+  long_name = total water runoff
+  units = kg m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[srunoff]
+  standard_name = surface_runoff
+  long_name = surface water runoff (from lsm)
+  units = kg m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[runof]
+  standard_name = surface_runoff_flux
+  long_name = surface runoff flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[drain]
+  standard_name = subsurface_runoff_flux
+  long_name = subsurface runoff flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

@@ -1,0 +1,538 @@
+[ccpp-arg-table]
+  name = m_micro_pre_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = m_micro_pre_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[do_shoc]
+  standard_name = flag_for_shoc
+  long_name = flag for SHOC
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[skip_macro]
+  standard_name = flag_skip_macro
+  long_name = flag to skip cloud macrophysics in Morrison scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
+  optional = F
+[fprcp]
+  standard_name = number_of_frozen_precipitation_species
+  long_name = number of frozen precipitation species
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mg3_as_mg2]
+  standard_name = flag_mg3_as_mg2
+  long_name = flag for controlling prep for Morrison-Gettelman microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[gq0_ice]
+  standard_name = ice_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_water]
+  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_rain]
+  standard_name = rain_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_snow]
+  standard_name = snow_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_graupel]
+  standard_name = graupel_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_rain_nc]
+  standard_name = rain_number_concentration_updated_by_physics
+  long_name = number concentration of rain updated by physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_snow_nc]
+  standard_name = snow_number_concentration_updated_by_physics
+  long_name = number concentration of snow updated by physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_graupel_nc]
+  standard_name = graupel_number_concentration_updated_by_physics
+  long_name = number concentration of graupel updated by physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cld_shoc]
+  standard_name = subgrid_scale_cloud_fraction_from_shoc
+  long_name = subgrid-scale cloud fraction from the SHOC scheme
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cnvc]
+  standard_name = convective_cloud_cover
+  long_name = convective cloud cover
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cnvw]
+  standard_name = convective_cloud_water_mixing_ratio
+  long_name = moist convective cloud water mixing ratio
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tcr]
+  standard_name = cloud_phase_transition_threshold_temperature
+  long_name = threshold temperature below which cloud starts to freeze
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tcrf]
+  standard_name = cloud_phase_transition_denominator
+  long_name = denominator in cloud phase transition = 1/(tcr-tf)
+  units = K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qrn]
+  standard_name = local_rain_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water local to physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qsnw]
+  standard_name = local_snow_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of snow water local to physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qgl]
+  standard_name = local_graupel_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of graupel local to physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ncpr]
+  standard_name = local_rain_number_concentration
+  long_name = number concentration of rain local to physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ncps]
+  standard_name = local_snow_number_concentration
+  long_name = number concentration of snow local to physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ncgl]
+  standard_name = local_graupel_number_concentration
+  long_name = number concentration of graupel local to physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cld_frc_MG]
+  standard_name = cloud_fraction_for_MG
+  long_name = cloud fraction used by Morrison-Gettelman MP
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qlcn]
+  standard_name = mass_fraction_of_convective_cloud_liquid_water
+  long_name = mass fraction of convective cloud liquid water
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qicn]
+  standard_name = mass_fraction_of_convective_cloud_ice
+  long_name = mass fraction of convective cloud ice water
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cf_upi]
+  standard_name = convective_cloud_fraction_for_microphysics
+  long_name = convective cloud fraction for microphysics
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[clw_water]
+  standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
+  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[clw_ice]
+  standard_name = ice_water_mixing_ratio_convective_transport_tracer
+  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[clcn]
+  standard_name = convective_cloud_volume_fraction
+  long_name = convective cloud volume fraction
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = m_micro_pre_finalize
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = m_micro_post_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = m_micro_post_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[fprcp]
+  standard_name = number_of_frozen_precipitation_species
+  long_name = number of frozen precipitation species
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mg3_as_mg2]
+  standard_name = flag_mg3_as_mg2
+  long_name = flag for controlling prep for Morrison-Gettelman microphysics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ncpr]
+  standard_name = local_rain_number_concentration
+  long_name = number concentration of rain local to physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ncps]
+  standard_name = local_snow_number_concentration
+  long_name = number concentration of snow local to physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ncgl]
+  standard_name = local_graupel_number_concentration
+  long_name = number concentration of graupel local to physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qrn]
+  standard_name = local_rain_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water local to physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qsnw]
+  standard_name = local_snow_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of snow water local to physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qgl]
+  standard_name = local_graupel_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of graupel local to physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[gq0_ice]
+  standard_name = ice_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gq0_rain]
+  standard_name = rain_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[gq0_snow]
+  standard_name = snow_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of snow water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[gq0_graupel]
+  standard_name = graupel_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of graupel updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[gq0_rain_nc]
+  standard_name = rain_number_concentration_updated_by_physics
+  long_name = number concentration of rain updated by physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[gq0_snow_nc]
+  standard_name = snow_number_concentration_updated_by_physics
+  long_name = number concentration of snow updated by physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[gq0_graupel_nc]
+  standard_name = graupel_number_concentration_updated_by_physics
+  long_name = number concentration of graupel updated by physics
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ice]
+  standard_name = lwe_thickness_of_ice_amount_on_dynamics_timestep
+  long_name = ice fall at this time step
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[snow]
+  standard_name = lwe_thickness_of_snow_amount_on_dynamics_timestep
+  long_name = snow fall at this time step
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[graupel]
+  standard_name = lwe_thickness_of_graupel_amount_on_dynamics_timestep
+  long_name = graupel fall at this time step
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtp]
+  standard_name = time_step_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = m_micro_post_finalize
+  type = scheme

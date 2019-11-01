@@ -1,10 +1,8 @@
       module machine
 
-#if 0
 !! \section arg_table_machine
 !! \htmlinclude machine.html
 !!
-#endif
 
       implicit none
       
@@ -20,6 +18,7 @@
      &,                     kind_phys = 8     ,kind_taum=8              &
      &,                     kind_grid = 8                               &
      &,                     kind_REAL = 8                               &! used in cmp_comm
+     &,                     kind_LOGICAL = 4                            &
      &,                     kind_INTEGER = 4                             ! -,,-
 
 #else
@@ -34,6 +33,7 @@
      &,                     kind_phys = 4     ,kind_taum=4              &
      &,                     kind_grid = 4                               &
      &,                     kind_REAL = 4                               &! used in cmp_comm
+     &,                     kind_LOGICAL = 4                            &
      &,                     kind_INTEGER = 4                             ! -,,-
 
 #endif

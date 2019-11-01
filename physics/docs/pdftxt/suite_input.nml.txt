@@ -23,7 +23,6 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>h2o_phys        <td>gfs_control_type          <td>flag for stratosphere h2o scheme                <td>.false. 
 <tr><td>ldiag3d         <td>gfs_control_type          <td>flag for 3D diagnostic fields                   <td>.false. 
 <tr><td>lssav           <td>gfs_control_type          <td>logical flag for storing diagnostics            <td>.false.
-<tr><td>lgocart         <td>gfs_control_type          <td>logical flag for 3D diagnostic fields for gocart 1    <td>.false.
 <tr><td>cplflx          <td>gfs_control_type          <td>logical flag for cplflx collection              <td>.false.
 <tr><td>cplwav          <td>gfs_control_type          <td>logical flag for cplwav collection              <td>.false.
 <tr><td>cplchm          <td>gfs_control_type          <td>logical flag for chemistry collection           <td>.false.
@@ -279,7 +278,6 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>iccn            <td>gfs_control_type          <td>flag for using IN and CCN forcing in MG2/3 microphysics      <td>.false.
 <tr><td>rhcmax          <td>gfs_control_type          <td>maximum critical relative humidity                           <td>0.9999999 
 <tr><td colspan="4"  align= center>\b Parameters \b Specific \b to \b GSD_v0 \b Suite 
-<tr><td>make_number_concentrations    <td>gfs_control_type   <td>flag to calculate initial number concentrations from mass concentrations if not in ICs/BCs    <td>.false.
 <tr><td>ltaerosol       <td>gfs_control_type          <td>logical flag for using aerosol climotology in Thompson MP scheme          <td>.false.
 <tr><td>lradar          <td>gfs_control_type          <td>logical flag for computing radar reflectivity in Thompson MP scheme       <td>.false.
 <tr><td>ttendlim        <td>gfs_control_type          <td>temperature tendency limiter per time step in K/s, set to < 0 to deactivate   <td>-999.0
