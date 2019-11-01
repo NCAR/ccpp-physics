@@ -453,7 +453,7 @@
       enddo
       DO IPT=1,IM
 
-        tem1    = (log(area(i)) - dxmin) * dxinv
+        tem1    = (log(area(ipt)) - dxmin) * dxinv
         tem2    = one - tem1
         ccwfac  = ccwf(1)*tem1 + ccwf(2)*tem2
         dlq_fac = dlqf(1)*tem1 + dlqf(2)*tem2
