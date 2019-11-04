@@ -22,7 +22,7 @@
       subroutine gwdc_pre_run (                                         &
      &  im, cgwf, dx, work1, work2, dlength, cldf,                      &
      &  levs, kbot, ktop, dtp, gt0, gt0_init, del, cumabs,              &
-     &  errmsg, errflg )
+     &  do_cnvgwd, errmsg, errflg )
 
       use machine, only : kind_phys
       implicit none
@@ -38,6 +38,7 @@
       real(kind=kind_phys), intent(out) ::                              &
      &  dlength(:), cldf(:), cumabs(:)
 
+      logical,          intent(in)  :: do_cnvgwd
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -48,6 +49,14 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      ! DH*
+      if (.not. do_cnvgwd) then
+          write(0,*) "ERROR: , GWDC_PRE CALLED BUT DO_CNVGWD FALSE"
+          call sleep(5)
+          stop
+      end if
+      ! *DH
 
       do i = 1, im
         tem1       = dx(i)

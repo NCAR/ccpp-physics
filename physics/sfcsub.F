@@ -6146,17 +6146,24 @@
 !
       ijmax  = imax*jmax
       rslmsk = 0.
+! TG3 MODS BEGIN
+      if(kpds5 == kpdtsf .and. imax == 138 .and. jmax == 116
+     &   .and. kpds4 == 128) then
+!        print*,'turn off setrmsk for tg3'
+         lmask = .false.
+
+      elseif(kpds5 == kpdtsf) then
+! TG3 MODS END
 !
 !  surface temperature
 !
-      if(kpds5.eq.kpdtsf) then
-!       lmask=.false.
+        lmask = .false.
         call ga2la(slmask,igaul,jgaul,rslmsk,imax,jmax,wlon,rnlat
      &,            rlnout, rltout, gaus, blno, blto)
 !    &,            dlon, dlat, gaus, blno, blto)
-        crit=0.5
+        crit = 0.5
         call rof01(rslmsk,ijmax,'ge',crit)
-        lmask=.true.
+        lmask = .true.
 !
 !  bucket soil wetness
 !
@@ -6164,16 +6171,16 @@
         call ga2la(slmask,igaul,jgaul,rslmsk,imax,jmax,wlon,rnlat
      &,            rlnout, rltout, gaus, blno, blto)
 !    &,            dlon, dlat, gaus, blno, blto)
-        crit=0.5
+        crit = 0.5
         call rof01(rslmsk,ijmax,'ge',crit)
-        lmask=.true.
+        lmask = .true.
 !       write(6,*) 'wet rslmsk'
 !       znnt=1.
 !       call nntprt(rslmsk,ijmax,znnt)
 !
 !  snow depth
 !
-      elseif(kpds5.eq.kpdsnd) then
+      elseif(kpds5 == kpdsnd) then
         if(kpds4 == 192) then  ! use the bitmap
           rslmsk = 0.
           do j = 1, jmax
@@ -7043,51 +7050,51 @@ cjfe
 !
 !     get tsf climatology for the begining of the forecast
 !
-        if (fh .gt. 0.0) then
+        if (fh > 0.0) then
 !cbosu
           if (me == 0) print*,'bosu fh gt 0'
 
-          iy4=iy
-          if(iy.lt.101) iy4=1900+iy4
-          fha=0
-          ida=0
-          jda=0
-!         fha(2)=nint(fh)
-          ida(1)=iy
-          ida(2)=im
-          ida(3)=id
-          ida(5)=ih
+          iy4 = iy
+          if (iy < 101) iy4 = 1900 + iy4
+          fha = 0
+          ida = 0
+          jda = 0
+!         fha(2) = nint(fh)
+          ida(1) = iy
+          ida(2) = im
+          ida(3) = id
+          ida(5) = ih
           call w3kind(w3kindreal,w3kindint)
           if(w3kindreal == 4) then
-            fha4=fha
+            fha4 = fha
             call w3movdat(fha4,ida,jda)
           else
             call w3movdat(fha,ida,jda)
           endif
-          jy=jda(1)
-          jm=jda(2)
-          jd=jda(3)
-          jh=jda(5)
-          if (me .eq. 0) write(6,*) ' forecast jy,jm,jd,jh',
-     &                   jy,jm,jd,jh
+          jy = jda(1)
+          jm = jda(2)
+          jd = jda(3)
+          jh = jda(5)
+          if (me == 0) write(6,*) ' forecast jy,jm,jd,jh',
+     &                              jy,jm,jd,jh
           jdow = 0
           jdoy = 0
           jday = 0
           call w3doxdat(jda,jdow,jdoy,jday)
-          rjday=jdoy+jda(5)/24.
-          if(rjday.lt.dayhf(1)) rjday=rjday+365.
+          rjday = jdoy + jda(5) / 24.
+          if(rjday < dayhf(1)) rjday = rjday + 365.
 !
-          if (me .eq. 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
+          if (me == 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
 !
 !         for monthly mean climatology
 !
           monend = 12
           do mm=1,monend
-            mmm=mm
-            mmp=mm+1
-            if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
-               mon1=mmm
-               mon2=mmp
+            mmm = mm
+            mmp = mm + 1
+            if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
+               mon1 = mmm
+               mon2 = mmp
                go to 10
             endif
           enddo
@@ -7095,17 +7102,18 @@ cjfe
           call abort
    10     continue
           wei1m = (dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
-          wei2m = (rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
-          if(mon2.eq.13) mon2=1
-          if (me .eq. 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
-     &                   rjday,mon1,mon2,wei1m,wei2m
+          wei2m = 1.0 - wei1m
+!         wei2m = (rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
+          if (mon2 == 13) mon2 = 1
+          if (me == 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
+     &                          rjday,mon1,mon2,wei1m,wei2m
 !
 !       read monthly mean climatology of tsf
 !
           kpd7 = -1
           do nn=1,2
             mon = mon1
-            if (nn .eq. 2) mon = mon2
+            if (nn == 2) mon = mon2
             call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
      &                 tsf(1,nn),len,iret
      &,                imsk, jmsk, slmskh, gaus,blno, blto
@@ -7122,8 +7130,8 @@ cjfe
 !
 !  compute current jy,jm,jd,jh of forecast and the day of the year
 !
-      iy4=iy
-      if(iy.lt.101) iy4=1900+iy4
+      iy4 = iy
+      if (iy < 101) iy4=1900+iy4
       fha    = 0
       ida    = 0
       jda    = 0
@@ -7133,8 +7141,8 @@ cjfe
       ida(3) = id
       ida(5) = ih
       call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        fha4=fha
+      if(w3kindreal == 4) then
+        fha4 = fha
         call w3movdat(fha4,ida,jda)
       else
         call w3movdat(fha,ida,jda)
@@ -7149,44 +7157,45 @@ cjfe
       jdoy   = 0
       jday   = 0
       call w3doxdat(jda,jdow,jdoy,jday)
-      rjday  = jdoy+jda(5)/24.
-      if(rjday.lt.dayhf(1)) rjday=rjday+365.
+      rjday = jdoy + jda(5) / 24.
+      if(rjday < dayhf(1)) rjday = rjday + 365.
 
-      if (me .eq. 0) write(6,*) ' forecast jy,jm,jd,jh,rjday=',
-     &               jy,jm,jd,jh,rjday
+      if (me == 0) write(6,*) ' forecast jy,jm,jd,jh,rjday=',
+     &                          jy,jm,jd,jh,rjday
 !
-      if (me .eq. 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
+      if (me == 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
 !
 !     for monthly mean climatology
 !
       monend = 12
       do mm=1,monend
-         mmm=mm
-         mmp=mm+1
-         if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
-            mon1=mmm
-            mon2=mmp
+         mmm = mm
+         mmp = mm + 1
+         if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
+            mon1 = mmm
+            mon2 = mmp
             go to 20
          endif
       enddo
       print *,'wrong rjday',rjday
       call abort
    20 continue
-      wei1m=(dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
-      wei2m=(rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
-      if(mon2.eq.13) mon2=1
-      if (me .eq. 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
-     &               rjday,mon1,mon2,wei1m,wei2m
+      wei1m = (dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
+      wei2m = 1.0 - wei1m
+!     wei2m = (rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
+      if (mon2 == 13) mon2 = 1
+      if (me == 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
+     &                      rjday,mon1,mon2,wei1m,wei2m
 !
 !     for seasonal mean climatology
 !
       monend = 4
       is     = im/3 + 1
-      if (is.eq.5) is = 1
+      if (is == 5) is = 1
       do mm=1,monend
         mmm = mm*3 - 2
         mmp = (mm+1)*3 - 2
-        if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
+        if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
           sea1 = mmm
           sea2 = mmp
           go to 30
@@ -7196,20 +7205,21 @@ cjfe
       call abort
    30 continue
       wei1s = (dayhf(sea2)-rjday)/(dayhf(sea2)-dayhf(sea1))
-      wei2s = (rjday-dayhf(sea1))/(dayhf(sea2)-dayhf(sea1))
-      if(sea2.eq.13) sea2=1
-      if (me .eq. 0) print *,'rjday,sea1,sea2,wei1s,wei2s=',
-     &               rjday,sea1,sea2,wei1s,wei2s
+      wei2s = 1.0 - wei1s
+!     wei2s = (rjday-dayhf(sea1))/(dayhf(sea2)-dayhf(sea1))
+      if (sea2 == 13) sea2 = 1
+      if (me == 0) print *,'rjday,sea1,sea2,wei1s,wei2s=',
+     &                      rjday,sea1,sea2,wei1s,wei2s
 !
 !     for summer and winter values (maximum and minimum).
 !
       monend = 2
       is     = im/6 + 1
-      if (is.eq.3) is = 1
+      if (is == 3) is = 1
       do mm=1,monend
         mmm = mm*6 - 5
         mmp = (mm+1)*6 - 5
-        if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
+        if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
           hyr1 = mmm
           hyr2 = mmp
           go to 31
@@ -7219,10 +7229,11 @@ cjfe
       call abort
    31 continue
       wei1y = (dayhf(hyr2)-rjday)/(dayhf(hyr2)-dayhf(hyr1))
-      wei2y = (rjday-dayhf(hyr1))/(dayhf(hyr2)-dayhf(hyr1))
-      if(hyr2.eq.13) hyr2=1
-      if (me .eq. 0) print *,'rjday,hyr1,hyr2,wei1y,wei2y=',
-     &               rjday,hyr1,hyr2,wei1y,wei2y
+      wei2y = 1.0 - wei1y
+!     wei2y = (rjday-dayhf(hyr1))/(dayhf(hyr2)-dayhf(hyr1))
+      if (hyr2 == 13) hyr2 = 1
+      if (me == 0) print *,'rjday,hyr1,hyr2,wei1y,wei2y=',
+     &                      rjday,hyr1,hyr2,wei1y,wei2y
 !
 !  start reading in climatology and interpolate to the date
 !
@@ -7622,7 +7633,7 @@ cjfe
 !
       mon1s = mon1 ; mon2s = mon2 ; sea1s = sea1 ; sea2s = sea2
 !
-      if (me .eq. 0) print *,' mon1s=',mon1s,' mon2s=',mon2s
+      if (me == 0) print *,' mon1s=',mon1s,' mon2s=',mon2s
      &,' sea1s=',sea1s,' sea2s=',sea2s
 !
         k1  = 1 ; k2 = 2
@@ -7680,11 +7691,11 @@ cjfe
 !     seasonal mean climatology
 !
          isx   = sea2/3 + 1
-         if (isx .eq. 5) isx = 1
-         if(isx.eq.1) kpd9 = 12
-         if(isx.eq.2) kpd9 = 3
-         if(isx.eq.3) kpd9 = 6
-         if(isx.eq.4) kpd9 = 9
+         if (isx == 5) isx  = 1
+         if (isx == 1) kpd9 = 12
+         if (isx == 2) kpd9 = 3
+         if (isx == 3) kpd9 = 6
+         if (isx == 4) kpd9 = 9
 !
 !  albedo
 !  there are four albedo fields in this version:
@@ -7720,7 +7731,7 @@ cjfe
             if (me == 0) print*,'bosu 2nd time in clima for month ',
      &                   mon, k1,k2
             if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
-              kpd7=-1
+              kpd7 = -1
               do k = 1, 4
                 call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
      &                      alb(1,k,nn),len,iret
@@ -7737,7 +7748,7 @@ cjfe
 !
 !  tsf at the current time t
 !
-          kpd7=-1
+          kpd7 = -1
           call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
      &               tsf(1,nn),len,iret
      &,              imsk, jmsk, slmskh, gaus,blno, blto
@@ -7745,13 +7756,13 @@ cjfe
 !
 !  soil wetness
 !
-          if(fnwetc(1:8).ne.'        ') then
+          if (fnwetc(1:8).ne.'        ') then
             kpd7=-1
             call fixrdc(lugb,fnwetc,kpdwet,kpd7,mon,slmask,
      &                  wet(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
-          elseif(fnsmcc(1:8).ne.'        ') then
+          elseif (fnsmcc(1:8).ne.'        ') then
             if (index(fnsmcc,'global_soilmcpc.1x1.grb') /= 0) then ! the old climo data
               kpd7=-1
               call fixrdc(lugb,fnsmcc,kpdsmc,kpd7,mon,slmask,
@@ -7793,13 +7804,13 @@ cjfe
 !
 !  sea ice
 !
-          kpd7=-1
-          if(fnacnc(1:8).ne.'        ') then
+          kpd7 = -1
+          if (fnacnc(1:8).ne.'        ') then
             call fixrdc(lugb,fnacnc,kpdacn,kpd7,mon,slmask,
      &                  acn(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
-          elseif(fnaisc(1:8).ne.'        ') then
+          elseif (fnaisc(1:8).ne.'        ') then
             call fixrdc(lugb,fnaisc,kpdais,kpd7,mon,slmask,
      &                  ais(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
@@ -7819,7 +7830,7 @@ cjfe
 !
 !  snow cover
 !
-          if(fnscvc(1:8).ne.'        ') then
+          if (fnscvc(1:8).ne.'        ') then
             kpd7=-1
             call fixrdc(lugb,fnscvc,kpdscv,kpd7,mon,slmask,
      &                  scv(1,nn),len,iret
@@ -7830,7 +7841,7 @@ cjfe
 !
 !  surface roughness
 !
-      if(fnzorc(1:3) == 'sib') then
+      if (fnzorc(1:3) == 'sib') then
         if (me == 0) then
           write(6,*) 'roughness length to be set from sib veg type'
         endif
@@ -7848,7 +7859,7 @@ cjfe
 !
 !  vegetation cover
 !
-          if(fnvegc(1:8).ne.'        ') then
+          if (fnvegc(1:8) .ne. '        ') then
             if ( index(fnvegc, "tileX.nc") == 0) then ! grib file
               kpd7=-1
               call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
@@ -7870,35 +7881,35 @@ cjfe
 ! when chosen, set the z0 based on the vegetation type.
 ! for this option to work, namelist variable fnvetc must be
 ! set to point at the proper vegetation type file.
-      if(fnzorc(1:3) == 'sib') then
-        if(fnvetc(1:4) == '   ') then
+      if (fnzorc(1:3) == 'sib') then
+        if (fnvetc(1:4) == '   ') then
           if (me==0) write(6,*) "must choose sib veg type climo file"
           call abort
         endif
         zorclm = 0.0
         do i=1,len
-          ivtyp=nint(vet(i))
+          ivtyp = nint(vet(i))
           if (ivtyp >= 1 .and. ivtyp <= 13) then
             zorclm(i) = z0_sib(ivtyp)
           endif
         enddo
       elseif(fnzorc(1:4) == 'igbp') then
-        if(fnvetc(1:4) == '   ') then
-          if (me==0) write(6,*) "must choose igbp veg type climo file"
+        if (fnvetc(1:4) == '   ') then
+          if (me == 0) write(6,*) "must choose igbp veg type climo file"
           call abort
         endif
         zorclm = 0.0
         do i=1,len
-          ivtyp=nint(vet(i))
+          ivtyp = nint(vet(i))
           if (ivtyp >= 1 .and. ivtyp <= 20) then
             z0_season(1) = z0_igbp_min(ivtyp)
             z0_season(7) = z0_igbp_max(ivtyp)
-            if(outlat(i) < 0.0)then
+            if (outlat(i) < 0.0) then
               zorclm(i) = wei1y * z0_season(hyr2) + 
-     &                    wei2y *z0_season(hyr1)
+     &                    wei2y * z0_season(hyr1)
              else
               zorclm(i) = wei1y * z0_season(hyr1) + 
-     &                    wei2y *z0_season(hyr2)
+     &                    wei2y * z0_season(hyr2)
            endif
           endif
         enddo

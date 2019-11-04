@@ -20,49 +20,45 @@
 !    geometric factors to compute deriv-es etc ...
 !    coriolis coslat tan etc...
 !
-     earth_r = 6370.e3
-     ra1     = 1.0 / earth_r
-     ra2     = ra1*ra1
+      earth_r = 6370.e3
+      ra1     = 1.0 / earth_r
+      ra2     = ra1*ra1
 !
-     rlat   = lat*deg_to_rad
-     rlon   = lon*deg_to_rad
-     tanlat = atan(rlat)
-     cosv   =  cos(rlat)     
-     dy     = rlat(2)-rlat(1)
-     dx     = rlon(2)-rlon(1)
+      rlat   = lat*deg_to_rad
+      rlon   = lon*deg_to_rad
+      tanlat = atan(rlat)
+      cosv   =  cos(rlat)     
+      dy     = rlat(2)-rlat(1)
+      dx     = rlon(2)-rlon(1)
 !
-
-     do j=1, ny-1
-       rlatc(j) = 0.5 * (rlat(j)+rlat(j+1))
-     enddo
- 
-     
+      do j=1, ny-1
+        rlatc(j) = 0.5 * (rlat(j)+rlat(j+1))
+      enddo
 !
-
-     do j=2, ny-1
-       brcos(j) = 1.0 / cos(rlat(j))*ra1
-     enddo       
+      do j=2, ny-1
+        brcos(j) = 1.0 / cos(rlat(j))*ra1
+      enddo       
        
-       brcos(1)  = brcos(2)
-       brcos(ny) = brcos(ny-1)
-       brcos2    = brcos*brcos
+      brcos(1)  = brcos(2)
+      brcos(ny) = brcos(ny-1)
+      brcos2    = brcos*brcos
 !
-       dlam1 = brcos  / (dx+dx)
-       dlam2 = brcos2 / (dx*dx)
+      dlam1 = brcos  / (dx+dx)
+      dlam2 = brcos2 / (dx*dx)
   
-       dlat = ra1 / (dy+dy)
+      dlat = ra1 / (dy+dy)
   
-        divJp = dlat*cosv
-        divJM = dlat*cosv
+      divJp = dlat*cosv
+      divJM = dlat*cosv
 !
-        do  j=2, ny-1 
-          divJp(j) = dlat*cosv(j+1)/cosv(j) 
-          divJM(j) = dlat*cosv(j-1)/cosv(j) 
-        enddo
-        divJp(1)  = divjp(2)   !*divjp(1)/divjp(2)
-        divJp(ny) = divjp(1)
-        divJM(1)  = divjM(2)   !*divjM(1)/divjM(2)
-        divJM(ny) = divjM(1)
+      do  j=2, ny-1 
+        divJp(j) = dlat*cosv(j+1)/cosv(j) 
+        divJM(j) = dlat*cosv(j-1)/cosv(j) 
+      enddo
+      divJp(1)  = divjp(2)   !*divjp(1)/divjp(2)
+      divJp(ny) = divjp(1)
+      divJM(1)  = divjM(2)   !*divjM(1)/divjM(2)
+      divJM(ny) = divjM(1)
 !
       return
       end SUBROUTINE  subs_diag_geo
@@ -456,7 +452,7 @@
         enddo
 !	  
         if (dmax >= tlim_okw) then
-          nf_src = nf_src +1
+          nf_src = nf_src + 1
           if_src(i) = 1          
           taub(i) = tau_min*float(kex)          !* precip(i)/precip_max*coslat(i)
         endif 
@@ -473,36 +469,29 @@
 !=================
       implicit none
       integer :: im     
-      real  :: xlatdeg(im),  tau_amp         
-      real  :: tau_gw(im)
-      real  :: latdeg
-!      real, parameter  :: tau_amp = 100.e-3
-      real             :: trop_gw,  flat_gw 
+      real    :: tau_amp, xlatdeg(im), tau_gw(im)
+      real    :: latdeg, flat_gw, tem
       integer :: i
       
 !
 ! if-lat
 !
-      trop_gw = 0.75
       do i=1, im
-      latdeg = xlatdeg(i)    
-      if (-15.3 < latdeg .and. latdeg < 15.3) then
-          flat_gw = trop_gw*exp(-( (abs(latdeg)-3.)/8.0)**2)
-          if (flat_gw < 1.2 .and. abs(latdeg) <= 3.) flat_gw = trop_gw
-      else if (latdeg > -31. .and. latdeg <= -15.3) then
-          flat_gw =  0.10
-      else if (latdeg <  31. .and. latdeg >=  15.3) then
+        latdeg = abs(xlatdeg(i))    
+        if (latdeg < 15.3) then
+          tem = (latdeg-3.0) / 8.0
+          flat_gw = 0.75 * exp(-tem * tem)
+          if (flat_gw < 1.2 .and. latdeg <= 3.0) flat_gw = 0.75
+        elseif (latdeg <  31.0 .and. latdeg >=  15.3) then
            flat_gw =  0.10
-      else if (latdeg > -60. .and. latdeg <= -31.) then
-        flat_gw =  0.50*exp(-((abs(latdeg)-60.)/23.)**2)
-      else if (latdeg <  60. .and. latdeg >=  31.) then
-        flat_gw =  0.50*exp(-((abs(latdeg)-60.)/23.)**2)
-      else if (latdeg <= -60.) then
-         flat_gw =  0.50*exp(-((abs(latdeg)-60.)/70.)**2)
-      else if (latdeg >=  60.) then
-         flat_gw =  0.50*exp(-((abs(latdeg)-60.)/70.)**2)
-      end if
-      tau_gw(i) = tau_amp*flat_gw 
+        elseif (latdeg <  60.0 .and. latdeg >=  31.0) then
+          tem = (latdeg-60.0) / 23.0
+          flat_gw =  0.50 * exp(- tem * tem)
+        elseif (latdeg >=  60.0) then
+          tem = (latdeg-60.0) / 70.0
+          flat_gw =  0.50 * exp(- tem * tem)
+        endif
+        tau_gw(i) = tau_amp*flat_gw 
       enddo
 !      
       end subroutine slat_geos5_tamp
