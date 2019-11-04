@@ -385,24 +385,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[u1]
-  standard_name = x_wind_at_lowest_model_layer
-  long_name = zonal wind at lowest model layer
-  units = m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[v1]
-  standard_name = y_wind_at_lowest_model_layer
-  long_name = meridional wind at lowest model layer
-  units = m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [prsl1]
   standard_name = air_pressure_at_lowest_model_layer
   long_name = mean pressure at lowest model layer
@@ -412,9 +394,9 @@
   kind = kind_phys
   intent = in
   optional = F
-[ddvel]
-  standard_name = surface_wind_enhancement_due_to_convection
-  long_name = surface wind enhancement due to convection
+[wind]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
   units = m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -476,18 +458,9 @@
   intent = in
   optional = F
 [sfcemis]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
+  standard_name = surface_longwave_emissivity_over_land_interstitial
+  long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
   units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[wspd]
-  standard_name = wind_speed_at_lowest_model_layer
-  long_name = wind speed at lowest model level
-  units = m s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
