@@ -2,7 +2,7 @@
 ! ###########################################################################################
 module rrtmgp_sw_clrallsky_driver
   use machine,                 only: kind_phys
-  use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type
+  use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type, GFS_interstitial_type
   use mo_rte_kind,             only: wl
   use mo_gas_optics_rrtmgp,    only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,         only: ty_cloud_optics
@@ -29,13 +29,14 @@ contains
 !! \section arg_table_rrtmgp_sw_clrallsky_driver_run
 !! \htmlinclude rrtmgp_sw_clrallsky_driver.html
 !!
-  subroutine rrtmgp_sw_clrallsky_driver_run(Model, Radtend, ncol, sw_gas_props, p_lay, t_lay,&
+  subroutine rrtmgp_sw_clrallsky_driver_run(Model, Interstitial, Radtend, ncol, sw_gas_props, p_lay, t_lay,&
        p_lev, gas_concentrations,sw_optical_props_clouds, sw_optical_props_aerosol, lsswr,   &
        nday, idxday, hsw0, hswb, scmpsw, &
        fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type),   intent(in)    :: Model
+    type(GFS_interstitial_type), intent(in) :: Interstitial
     type(GFS_radtend_type),   intent(in)    :: Radtend
     integer, intent(in) :: &
          ncol,                 & ! Number of horizontal gridpoints
@@ -156,8 +157,8 @@ contains
             t_lay(idxday,1:Model%levs),               & ! IN  - temperature at layer interfaes (K)
             p_lev(idxday,1:Model%levs+1),             & ! IN  - pressure at layer centers (Pa)
             Radtend%coszen(idxday),                   & ! IN  - Cosine of solar zenith angle
-            Radtend%sfc_alb_nir_dir(:,idxday),        & ! IN  - Shortwave surface albedo (direct)
-            Radtend%sfc_alb_nir_dif(:,idxday),        & ! IN  - Shortwave surface albedo (diffuse)
+            Interstitial%sfc_alb_nir_dir(:,idxday),   & ! IN  - Shortwave surface albedo (direct)
+            Interstitial%sfc_alb_nir_dif(:,idxday),   & ! IN  - Shortwave surface albedo (diffuse)
             sw_optical_props_clouds_daylit,           & ! IN  - DDT containing cloud optical information 
             flux_allsky,                              & ! OUT - Fluxes, all-sky, 3D (nCol,Model%levs,nBand) 
             flux_clrsky,                              & ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 

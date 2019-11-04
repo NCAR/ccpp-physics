@@ -1,6 +1,6 @@
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
-  use GFS_typedefs,           only: GFS_control_type, GFS_radtend_type
+  use GFS_typedefs,           only: GFS_control_type, GFS_interstitial_type
   use module_radiation_gases, only: NF_VGAS
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
@@ -18,7 +18,7 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_init
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_init(Model, Radtend, mpicomm, mpirank, mpiroot, sw_gas_props, &
+  subroutine rrtmgp_sw_gas_optics_init(Model,  mpicomm, mpirank, mpiroot, sw_gas_props, &
        ipsdsw0, errmsg, errflg)
     use netcdf
 #ifdef MPI
@@ -28,8 +28,6 @@ contains
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model      ! DDT containing model control parameters
-    type(GFS_radtend_type), intent(in) :: &
-         Radtend
     integer,intent(in) :: &
          mpicomm, & ! MPI communicator
          mpirank, & ! Current MPI rank
@@ -373,37 +371,6 @@ contains
     call MPI_BCAST(scale_by_complement_lower_sw,       nminor_absorber_intervals_lower_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
     call MPI_BCAST(minor_scales_with_density_upper_sw, nminor_absorber_intervals_upper_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
     call MPI_BCAST(scale_by_complement_upper_sw,       nminor_absorber_intervals_upper_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
-    !allocate(temp_log_array1(nminor_absorber_intervals_lower_sw))
-    !where(minor_scales_with_density_lower_sw)
-    !   temp_log_array1 = 1
-    !elsewhere
-    !   temp_log_array1 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array1, size(temp_log_array1), MPI_INTEGER,  mpiroot, mpicomm, ierr)
-    !
-    !allocate(temp_log_array2(nminor_absorber_intervals_lower_sw))
-    !where(scale_by_complement_lower_sw)
-    !   temp_log_array2 = 1
-    !elsewhere
-    !   temp_log_array2 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array2, size(temp_log_array2), MPI_INTEGER,  mpiroot, mpicomm, ierr)
-    !
-    !allocate(temp_log_array3(nminor_absorber_intervals_upper_sw))
-    !where(minor_scales_with_density_upper_sw)
-    !   temp_log_array3 = 1
-    !elsewhere
-    !   temp_log_array3 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array3, size(temp_log_array3), MPI_INTEGER,  mpiroot, mpicomm, ierr)
-    !!
-    !allocate(temp_log_array4(nminor_absorber_intervals_upper_sw))
-    !where(scale_by_complement_upper_sw)
-    !   temp_log_array4 = 1
-    !elsewhere
-    !   temp_log_array4 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array4, size(temp_log_array4), MPI_INTEGER,  mpiroot, mpicomm, ierr)
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
@@ -440,14 +407,14 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_run
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_run(Model, Radtend, sw_gas_props, ncol, p_lay, p_lev, t_lay, t_lev, &
+  subroutine rrtmgp_sw_gas_optics_run(Model, Interstitial, sw_gas_props, ncol, p_lay, p_lev, t_lay, t_lev, &
        gas_concentrations, lsswr, sw_optical_props_clrsky, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                   ! DDT containing model control parameters
-    type(GFS_radtend_type),   intent(in) :: &
-         Radtend
+    type(GFS_Interstitial_type),intent(inout) :: &
+         Interstitial
 
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props            ! DDT containing spectral information for RRTMGP SW radiation scheme
@@ -489,7 +456,7 @@ contains
          t_lay,                   & !
          gas_concentrations,      & !
          sw_optical_props_clrsky, & !
-         Radtend%toa_src_sw))                  !
+         Interstitial%toa_src_sw))                  !
 
     ! Compute boundary-condition (only for low ceiling models, set in GFS_typedefs.F90)
     !call check_error_msg('rrtmgp_sw_gas_optics_run',compute_bc(&
@@ -498,7 +465,7 @@ contains
     !     p_lev,              & ! IN  -
     !     t_lay,              & ! IN  -
     !     gas_concentrations, & ! IN  -
-    !     Radtend%toa_src_sw  & ! OUT - 
+    !     Interstitial%toa_src_sw  & ! OUT - 
     !     mu0 = Radtend%coszen))
 
   end subroutine rrtmgp_sw_gas_optics_run

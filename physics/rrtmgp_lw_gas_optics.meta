@@ -9,14 +9,6 @@
   type = GFS_control_type
   intent = in
   optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = instance of derived type GFS_radtend_type
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = in
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -85,14 +77,6 @@
   units = DDT
   dimensions = ()
   type = GFS_control_type
-  intent = in
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = instance of derived type GFS_radtend_type
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
   intent = in
   optional = F
 [lw_gas_props]

@@ -2,7 +2,7 @@
 ! ###########################################################################################
 module rrtmgp_sw_rte
   use machine,                 only: kind_phys
-  use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type, GFS_statein_type
+  use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type, GFS_statein_type, GFS_interstitial_type
   use mo_rte_kind,             only: wl
   use mo_gas_optics_rrtmgp,    only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,         only: ty_cloud_optics
@@ -29,7 +29,7 @@ contains
 !! \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
-  subroutine rrtmgp_sw_rte_run(Model, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay,   &
+  subroutine rrtmgp_sw_rte_run(Model, Interstitial, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay,   &
        p_lev, gas_concentrations, sw_optical_props_clrsky, sw_optical_props_clouds,         &
        sw_optical_props_aerosol, lsswr, nday, idxday, hsw0, hswb, scmpsw,                   &
        fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
@@ -37,6 +37,8 @@ contains
     ! Inputs
     type(GFS_control_type),   intent(in)    :: &
          Model
+    type(GFS_interstitial_type), intent(in) :: &
+         Interstitial
     type(GFS_radtend_type),   intent(in)    :: &
          Radtend
     type(GFS_statein_type), intent(in) :: &
@@ -178,9 +180,9 @@ contains
                sw_optical_props_clrsky_daylit,     & ! IN  - optical-properties
                top_at_1,                           & ! IN  - veritcal ordering flag
                Radtend%coszen(idxday),             & ! IN  - Cosine of solar zenith angle
-               Radtend%toa_src_sw(idxday,:),       & ! IN  - incident solar flux at TOA
-               Radtend%sfc_alb_nir_dir(:,idxday),  & ! IN  - Shortwave surface albedo (direct)
-               Radtend%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
+               Interstitial%toa_src_sw(idxday,:),       & ! IN  - incident solar flux at TOA
+               Interstitial%sfc_alb_nir_dir(:,idxday),  & ! IN  - Shortwave surface albedo (direct)
+               Interstitial%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
                flux_clrsky))                         ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
           ! Store fluxes
           fluxswUP_clrsky(idxday,:)   = flux_clrsky%flux_up
@@ -193,14 +195,17 @@ contains
             sw_optical_props_clrsky_daylit,     & ! IN  - optical-properties
             top_at_1,                           & ! IN  - veritcal ordering flag
             Radtend%coszen(idxday),             & ! IN  - Cosine of solar zenith angle
-            Radtend%toa_src_sw(idxday,:),       & ! IN  - incident solar flux at TOA
-            Radtend%sfc_alb_nir_dir(:,idxday),  & ! IN  - Shortwave surface albedo (direct)
-            Radtend%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
+            Interstitial%toa_src_sw(idxday,:),       & ! IN  - incident solar flux at TOA
+            Interstitial%sfc_alb_nir_dir(:,idxday),  & ! IN  - Shortwave surface albedo (direct)
+            Interstitial%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
             flux_allsky))                         ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
        ! Store fluxes
        fluxswUP_allsky(idxday,:)   = flux_allsky%flux_up
        fluxswDOWN_allsky(idxday,:) = flux_allsky%flux_dn
-       scmpsw(idxday)%nirbm      = flux_allsky%flux_dn_dir(:,iSFC)
+       if ( l_scmpsw ) then
+          scmpsw(idxday)%nirbm = flux_allsky%flux_dn_dir(idxday,iSFC) !Interstitial%sfc_alb_nir_dir(iSFC,idxday)
+          scmpsw(idxday)%nirdf = flux_allsky%flux_dn(idxday,iSFC)  - flux_allsky%flux_dn_dir(idxday,iSFC) !Interstitial%sfc_alb_nir_dif(iSFC,idxday)
+       endif
     endif
   end subroutine rrtmgp_sw_rte_run
   

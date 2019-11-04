@@ -2,7 +2,7 @@
 ! ###########################################################################################
 module rrtmgp_lw_rte
   use machine,                only: kind_phys
-  use GFS_typedefs,           only: GFS_control_type, GFS_radtend_type, GFS_statein_type
+  use GFS_typedefs,           only: GFS_control_type, GFS_interstitial_type, GFS_statein_type
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,        only: ty_cloud_optics
@@ -27,15 +27,15 @@ contains
 !! \section arg_table_rrtmgp_lw_rte_run
 !! \htmlinclude rrtmgp_lw_rte.html
 !!
-  subroutine rrtmgp_lw_rte_run(Model, Statein, Radtend, ncol, lw_gas_props, p_lay, t_lay, p_lev, &
+  subroutine rrtmgp_lw_rte_run(Model, Statein, Interstitial, ncol, lw_gas_props, p_lay, t_lay, p_lev, &
        skt, sources, lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_aerosol, lslwr,&
        fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                   ! Fortran DDT containing FV3-GFS model control parameters 
-    type(GFS_radtend_type), intent(in) :: &
-         Radtend                 ! Fortran DDT containing FV3-GFS radiation tendencies 
+    type(GFS_Interstitial_type), intent(in) :: &
+         Interstitial                 ! Fortran DDT containing FV3-GFS radiation tendencies 
     type(GFS_statein_type), intent(in) :: &
          Statein                 ! Fortran DDT containing FV3-GFS prognostic state data in from dycore 
     integer, intent(in) :: &
@@ -117,7 +117,7 @@ contains
             lw_optical_props_clrsky,            & ! IN  - optical-properties
             top_at_1,                           & ! IN  - veritcal ordering flag
             sources,                            & ! IN  - source function
-            Radtend%sfc_emiss_byband,           & ! IN  - surface emissivity in each LW band
+            Interstitial%sfc_emiss_byband,      & ! IN  - surface emissivity in each LW band
             flux_clrsky))
        ! Store fluxes
        fluxlwUP_clrsky   = flux_clrsky%flux_up
@@ -131,7 +131,7 @@ contains
          lw_optical_props_clrsky,            & ! IN  - optical-properties
          top_at_1,                           & ! IN  - veritcal ordering flag
          sources,                            & ! IN  - source function
-         Radtend%sfc_emiss_byband,           & ! IN  - surface emissivity in each LW band
+         Interstitial%sfc_emiss_byband,      & ! IN  - surface emissivity in each LW band
          flux_allsky))
     ! Store fluxes
     fluxlwUP_allsky   = flux_allsky%flux_up

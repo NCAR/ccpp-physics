@@ -172,31 +172,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[hlwc]
-  standard_name = RRTMGP_lw_heating_rate_all_sky
-  long_name = RRTMGP longwave all sky heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[topflx_lw]
-  standard_name = lw_fluxes_top_atmosphere
-  long_name = longwave total sky fluxes at the top of the atm
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = topflw_type
-  intent = inout
-  optional = F
-[sfcflx_lw]
-  standard_name = lw_fluxes_sfc
-  long_name = longwave total sky fluxes at the Earth surface
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = sfcflw_type
-  intent = inout
-  optional = F
 [flxprf_lw]
   standard_name = RRTMGP_lw_fluxes
   long_name = lw fluxes total sky / csk and up / down at levels
