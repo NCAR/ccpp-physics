@@ -1,6 +1,6 @@
 module rrtmgp_lw_gas_optics
   use machine,               only: kind_phys
-  use GFS_typedefs,          only: GFS_control_type, GFS_radtend_type
+  use GFS_typedefs,          only: GFS_control_type
   use mo_rte_kind,           only: wl
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs  
@@ -21,7 +21,7 @@ contains
 !! \section arg_table_rrtmgp_lw_gas_optics_init
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
-  subroutine rrtmgp_lw_gas_optics_init(Model, Radtend, mpicomm, mpirank, mpiroot, lw_gas_props,      &
+  subroutine rrtmgp_lw_gas_optics_init(Model, mpicomm, mpirank, mpiroot, lw_gas_props,      &
        ipsdlw0, errmsg, errflg)
     use netcdf
     
@@ -32,8 +32,6 @@ contains
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model        ! DDT containing model control parameters
-    type(GFS_radtend_type), intent(in) :: &
-         Radtend      ! DDT containing FV3-GFS radiation tendencies
     integer,intent(in) :: &
          mpicomm,   & ! MPI communicator
          mpirank,   & ! Current MPI rank
@@ -376,37 +374,6 @@ contains
     call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
     call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
     call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
-    !allocate(temp_log_array1(nminor_absorber_intervals_lower))
-    !where(minor_scales_with_density_lower)
-    !   temp_log_array1 = 1
-    !elsewhere
-    !   temp_log_array1 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array1, size(temp_log_array1), MPI_INTEGER,  mpiroot, mpicomm, ierr)
-    !
-    !allocate(temp_log_array2(nminor_absorber_intervals_lower))
-    !where(scale_by_complement_lower)
-    !   temp_log_array2 = 1
-    !elsewhere
-    !   temp_log_array2 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array2, size(temp_log_array2), MPI_INTEGER,  mpiroot, mpicomm, ierr)
-    !
-    !allocate(temp_log_array3(nminor_absorber_intervals_upper))
-    !where(minor_scales_with_density_upper)
-    !   temp_log_array3 = 1
-    !elsewhere
-    !   temp_log_array3 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array3, size(temp_log_array3), MPI_INTEGER,  mpiroot, mpicomm, ierr)
-    !
-    !allocate(temp_log_array4(nminor_absorber_intervals_upper))
-    !where(scale_by_complement_upper)
-    !   temp_log_array4 = 1
-    !elsewhere
-    !   temp_log_array4 = 0
-    !end where
-    !call MPI_BCAST(temp_log_array4, size(temp_log_array4), MPI_INTEGER,  mpiroot, mpicomm, ierr)
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
@@ -441,15 +408,13 @@ contains
 !! \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
-  subroutine rrtmgp_lw_gas_optics_run(Model, Radtend, lw_gas_props, ncol, p_lay, p_lev, t_lay,&
+  subroutine rrtmgp_lw_gas_optics_run(Model, lw_gas_props, ncol, p_lay, p_lev, t_lay,&
        t_lev, skt, gas_concentrations, lslwr, lw_optical_props_clrsky, sources,   &
        errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                   ! DDT containing model control parameters
-    type(GFS_radtend_type),   intent(in) :: &
-         Radtend
 
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props            ! DDT containing spectral information for RRTMGP LW radiation scheme
@@ -496,7 +461,7 @@ contains
     !     p_lev,              & ! IN  -
     !     t_lay,              & ! IN  -
     !     gas_concentrations, & ! IN  -
-    !     Radtend%toa_src_lw))             ! OUT -    
+    !     Interstitial%toa_src_lw))             ! OUT -    
 
     ! Gas-optics (djs asks pincus: I think it makes sense to have a generic gas_optics interface in 
     ! ty_gas_optics_rrtmgp, just as in ty_gas_optics.

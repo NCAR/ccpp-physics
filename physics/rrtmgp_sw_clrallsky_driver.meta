@@ -9,6 +9,14 @@
   type = GFS_control_type
   intent = in
   optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance
+  long_name = derived type GFS_interstitial_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_interstitial_type
+  intent = in
+  optional = F
 [Radtend]
   standard_name = GFS_radtend_type_instance
   long_name = instance of derived type GFS_radtend_type

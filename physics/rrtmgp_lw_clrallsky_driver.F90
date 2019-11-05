@@ -2,7 +2,7 @@
 ! ###########################################################################################
 module rrtmgp_lw_clrallsky_driver
   use machine,                only: kind_phys
-  use GFS_typedefs,           only: GFS_control_type, GFS_radtend_type
+  use GFS_typedefs,           only: GFS_control_type, GFS_Interstitial_type
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,        only: ty_cloud_optics
@@ -27,7 +27,7 @@ contains
 !! \section arg_table_rrtmgp_lw_clrallsky_driver_run
 !! \htmlinclude rrtmgp_lw_clrallsky_driver.html
 !!
-  subroutine rrtmgp_lw_clrallsky_driver_run(Model, Radtend, ncol, lw_gas_props, p_lay, t_lay,&
+  subroutine rrtmgp_lw_clrallsky_driver_run(Model, Interstitial, ncol, lw_gas_props, p_lay, t_lay,&
        p_lev, skt, gas_concentrations, lw_optical_props_clouds, lw_optical_props_aerosol,    &
        lslwr, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlw0,  &
        hlwb, errmsg, errflg)
@@ -35,8 +35,8 @@ contains
     ! Inputs
     type(GFS_control_type),   intent(in) :: &
          Model
-    type(GFS_radtend_type), intent(in) :: &
-         Radtend                 ! Fortran DDT containing FV3-GFS radiation tendencies 
+    type(GFS_Interstitial_type), intent(in) :: &
+         Interstitial                 ! Fortran DDT containing FV3-GFS radiation tendencies 
     integer, intent(in) :: &
          ncol                    ! Number of horizontal gridpoints
     real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
@@ -109,7 +109,7 @@ contains
          t_lay,                              & ! IN  - temperature at layer interfaes (K)
          p_lev,                              & ! IN  - pressure at layer centers (Pa)
          skt,                                & ! IN  - skin temperature (K)
-         Radtend%sfc_emiss_byband,           & ! IN  - surface emissivity in each LW band
+         Interstitial%sfc_emiss_byband,      & ! IN  - surface emissivity in each LW band
          lw_optical_props_clouds,            & ! IN  - DDT containing cloud optical information 
          flux_allsky,                        & ! OUT - Fluxes, all-sky, 3D (nCol,model%levs,nBand) 
          flux_clrsky,                        & ! OUT - Fluxes, clear-sky, 3D (nCol,model%levs,nBand) 

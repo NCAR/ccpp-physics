@@ -9,6 +9,14 @@
   type = GFS_control_type
   intent = in
   optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance
+  long_name = derived type GFS_interstitial_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_interstitial_type
+  intent = in
+  optional = F
 [Grid]
   standard_name = GFS_grid_type_instance
   long_name = instance of derived type GFS_grid_type
@@ -194,31 +202,6 @@
   dimensions = ()
   type = ty_gas_optics_rrtmgp
   intent = in
-  optional = F
-[hswc]
-  standard_name = RRTMGP_sw_heating_rate_all_sky
-  long_name = RRTMGP shortwave all sky heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  optional = F
-  intent = out
-[topflx_sw]
-  standard_name = sw_fluxes_top_atmosphere
-  long_name = shortwave total sky fluxes at the top of the atm
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = topfsw_type
-  intent = inout
-  optional = F
-[sfcflx_sw]
-  standard_name = sw_fluxes_sfc
-  long_name = shortwave total sky fluxes at the Earth surface
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = sfcfsw_type
-  intent = inout
   optional = F
 [flxprf_sw]
   standard_name = RRTMGP_sw_fluxes

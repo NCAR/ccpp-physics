@@ -9,6 +9,7 @@ module GFS_rrtmgp_lw_pre
        GFS_sfcprop_type,         & ! Surface fields
        GFS_grid_type,            & ! Grid and interpolation related data
        GFS_statein_type,         & !
+       GFS_Interstitial_type,    & !
        GFS_radtend_type            ! Radiation tendencies needed in physics
   use module_radiation_surface,  only: &
        setemis                     ! Routine to compute surface-emissivity
@@ -31,7 +32,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_lw_pre.html
 !!
   subroutine GFS_rrtmgp_lw_pre_run (Model, Grid,  Sfcprop, Statein, ncol,  p_lay, p_lev, &
-       tv_lay, relhum, tracer, lw_gas_props, Radtend, aerosolslw, aerodp, errmsg, errflg)
+       tv_lay, relhum, tracer, lw_gas_props, Radtend, Interstitial, aerosolslw, aerodp, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -58,6 +59,8 @@ contains
     ! Outputs
     type(GFS_radtend_type), intent(inout) :: &
          Radtend              ! Fortran DDT containing FV3-GFS radiation tendencies 
+    type(GFS_interstitial_type), intent(inout) :: &
+         Interstitial
     real(kind_phys), dimension(ncol,Model%levs,lw_gas_props%get_nband(),NF_AELW), intent(out) ::&
          aerosolslw               ! Aerosol radiative properties in each SW band.
     real(kind_phys), dimension(ncol,NSPC1), intent(inout) :: &
@@ -97,7 +100,7 @@ contains
          Sfcprop%zorl, Sfcprop%tsfc,Sfcprop%tsfc, Sfcprop%hprime(:,1), NCOL,   &
          Radtend%semis)
     do iBand=1,lw_gas_props%get_nband()
-       Radtend%sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
+       Interstitial%sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
     enddo
 
     ! #######################################################################################
@@ -105,7 +108,7 @@ contains
     ! #######################################################################################
     call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
          Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, ncol, Model%levs, Model%levs+1,      &
-         .false., Model%lslwr, aerosolssw2, aerosolslw, aerodp)
+         .true., Model%lslwr, aerosolssw2, aerosolslw, aerodp)
     
 
   end subroutine GFS_rrtmgp_lw_pre_run

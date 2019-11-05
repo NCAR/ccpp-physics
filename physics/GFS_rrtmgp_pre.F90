@@ -232,15 +232,16 @@ contains
        do iLay=iSFC+1,iTOA
           t_lev(iCol,iLay) = (t_lay(iCol,iLay)+t_lay(iCol,iLay-1))/2._kind_phys
        enddo
-       t_lev(iCol,iTOA+1) = t_lev(iCol,iTOA) + (p_lev(iCol,iTOA+1)-p_lev(iCOL,iTOA))*&
-            (t_lev(iCol,iTOA)-t_lay(iCOL,iTOA))/(p_lev(iCol,iTOA)-p_lay(iCOL,iTOA))
+       t_lev(iCol,iTOA+1) = t_lay(iCol,iTOA)
+       !t_lev(iCol,iTOA+1) = t_lev(iCol,iTOA) + (p_lev(iCol,iTOA+1)-p_lev(iCOL,iTOA))*&
+       !     (t_lev(iCol,iTOA)-t_lay(iCOL,iTOA))/(p_lev(iCol,iTOA)-p_lay(iCOL,iTOA))
     enddo
 
     ! Guard against case when model uppermost model layer higher than rrtmgp allows.
     where(p_lev(1:nCol,iTOA+1) .lt. rrtmgp_minP)
        ! Set to RRTMGP min(pressure/temperature)
        p_lev(1:nCol,iTOA+1) = spread(rrtmgp_minP, dim=1,ncopies=ncol)
-       t_lev(1:nCol,iTOA+1) = spread(rrtmgp_minT, dim=1,ncopies=ncol)
+!       t_lev(1:nCol,iTOA+1) = spread(rrtmgp_minT, dim=1,ncopies=ncol)
        ! Recompute layer pressure/temperature.
        p_lay(1:NCOL,iTOA) = 0.5_kind_phys*(p_lev(1:NCOL,iTOA) +  p_lev(1:NCOL,iTOA+1))
        t_lay(1:NCOL,iTOA) = 0.5_kind_phys*(t_lev(1:NCOL,iTOA) +  t_lev(1:NCOL,iTOA+1))

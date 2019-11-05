@@ -10,7 +10,8 @@ module GFS_rrtmgp_sw_pre
        GFS_grid_type,            & ! Grid and interpolation related data
        GFS_coupling_type,        & !
        GFS_statein_type,         & !
-       GFS_radtend_type            ! Radiation tendencies needed in physics
+       GFS_radtend_type,         & ! Radiation tendencies needed in physics
+       GFS_interstitial_type
   use module_radiation_astronomy,only: &
        coszmn                      ! Function to compute cos(SZA)
   use module_radiation_surface,  only: &
@@ -37,13 +38,15 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run (Model, Grid,   Sfcprop, Statein, ncol, p_lay, &
+  subroutine GFS_rrtmgp_sw_pre_run (Model, Interstitial, Grid,   Sfcprop, Statein, ncol, p_lay, &
        p_lev, tv_lay, relhum, tracer, sw_gas_props, nday, idxday, alb1d, RadTend, &
        Coupling, aerosolssw, aerodp, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                ! Fortran DDT containing FV3-GFS model control parameters
+    type(GFS_Interstitial_type),intent(inout) :: &
+         Interstitial
     type(GFS_grid_type), intent(in) :: &
          Grid                 ! Fortran DDT containing FV3-GFS grid and interpolation related data 
     type(GFS_sfcprop_type), intent(in) :: &
@@ -154,10 +157,10 @@ contains
   
     ! Spread across all SW bands
     do iBand=1,sw_gas_props%get_nband()
-       Radtend%sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
-       Radtend%sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
-       Radtend%sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
-       Radtend%sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
+       Interstitial%sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
+       Interstitial%sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
+       Interstitial%sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
+       Interstitial%sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
     enddo 
 
     ! #######################################################################################
@@ -165,7 +168,7 @@ contains
     ! #######################################################################################
     call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
          Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
-         Model%lsswr, .false., aerosolssw2, aerosolslw, aerodp)
+         Model%lsswr, .true., aerosolssw2, aerosolslw, aerodp)
     
     ! Store aerosol optical properties
     ! SW. 

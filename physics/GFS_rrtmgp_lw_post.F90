@@ -29,8 +29,8 @@ contains
 !!
   subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend, Coupling, Diag,  Statein, im,   &
        p_lev, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky,&
-       raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw,  hlwc, topflx_lw,           &
-       sfcflx_lw, flxprf_lw, hlw0, errmsg, errflg)
+       raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw,                             &
+       flxprf_lw, hlw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -68,24 +68,26 @@ contains
     real(kind_phys), dimension(im,Model%levs), intent(in) :: &
          cld_frac, & ! Total cloud fraction in each layer
          cldtaulw          ! approx 10.mu band layer cloud optical depth  
+    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs)  :: &
+         hlwc             ! Longwave all-sky heating-rate          (K/sec)  
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
          errmsg
     integer, intent(out) :: &
          errflg
-    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs),intent(out) :: &
-         hlwc             ! Longwave all-sky heating-rate          (K/sec)
-    type(topflw_type), dimension(size(Grid%xlon,1)), intent(inout) :: &
-         topflx_lw        ! radiation fluxes at top, components:
-                          ! upfxc - total sky upward flux at top   (w/m2)
-                          ! upfx0 - clear sky upward flux at top   (w/m2)
-    type(sfcflw_type), dimension(size(Grid%xlon,1)), intent(inout) :: &
-         sfcflx_lw        ! radiation fluxes at sfc, components:
-                          ! upfxc - total sky upward flux at sfc   (w/m2)  
-                          ! upfx0 - clear sky upward flux at sfc   (w/m2)
-                          ! dnfxc - total sky downward flux at sfc (w/m2)
-                          ! dnfx0 - clear sky downward flux at sfc (w/m2)
+!    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs),intent(out) :: &
+!         hlwc             ! Longwave all-sky heating-rate          (K/sec)
+!    type(topflw_type), dimension(size(Grid%xlon,1)), intent(inout) :: &
+!         topflx_lw        ! radiation fluxes at top, components:
+!                          ! upfxc - total sky upward flux at top   (w/m2)
+!                          ! upfx0 - clear sky upward flux at top   (w/m2)
+!    type(sfcflw_type), dimension(size(Grid%xlon,1)), intent(inout) :: &
+!         sfcflx_lw        ! radiation fluxes at sfc, components:
+!                          ! upfxc - total sky upward flux at sfc   (w/m2)  
+!                          ! upfx0 - clear sky upward flux at sfc   (w/m2)
+!                          ! dnfxc - total sky downward flux at sfc (w/m2)
+!                          ! dnfx0 - clear sky downward flux at sfc (w/m2)
  
     ! Outputs (optional)
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs), optional, intent(inout) :: &
@@ -145,12 +147,12 @@ contains
        
        ! Copy fluxes from RRTGMP types into model radiation types.
        ! Mandatory outputs
-       topflx_lw%upfxc = fluxlwUP_allsky(:,iTOA)
-       topflx_lw%upfx0 = fluxlwUP_clrsky(:,iTOA)
-       sfcflx_lw%upfxc = fluxlwUP_allsky(:,iSFC)
-       sfcflx_lw%upfx0 = fluxlwUP_clrsky(:,iSFC)
-       sfcflx_lw%dnfxc = fluxlwDOWN_allsky(:,iSFC)
-       sfcflx_lw%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
+       Diag%topflw(:)%upfxc    = fluxlwUP_allsky(:,iTOA)
+       Diag%topflw(:)%upfx0    = fluxlwUP_clrsky(:,iTOA)
+       Radtend%sfcflw(:)%upfxc = fluxlwUP_allsky(:,iSFC)
+       Radtend%sfcflw(:)%upfx0 = fluxlwUP_clrsky(:,iSFC)
+       Radtend%sfcflw(:)%dnfxc = fluxlwDOWN_allsky(:,iSFC)
+       Radtend%sfcflw(:)%dnfx0 = fluxlwDOWN_clrsky(:,iSFC)
        
        ! Optional outputs
        if(l_fluxeslw2d) then
@@ -194,13 +196,13 @@ contains
        if (Model%lslwr) then
           do i=1,im
              ! LW all-sky fluxes
-             Diag%fluxr(i,1 ) = Diag%fluxr(i,1 ) + Model%fhlwr *    Diag%topflw(i)%upfxc   ! total sky top lw up
-             Diag%fluxr(i,19) = Diag%fluxr(i,19) + Model%fhlwr * Radtend%sfcflw(i)%dnfxc   ! total sky sfc lw dn
-             Diag%fluxr(i,20) = Diag%fluxr(i,20) + Model%fhlwr * Radtend%sfcflw(i)%upfxc   ! total sky sfc lw up
+             Diag%fluxr(i,1 ) = Diag%fluxr(i,1 ) + Model%fhlwr * fluxlwUP_allsky(  i,iTOA)   ! total sky top lw up
+             Diag%fluxr(i,19) = Diag%fluxr(i,19) + Model%fhlwr * fluxlwDOWN_allsky(i,iSFC)   ! total sky sfc lw dn
+             Diag%fluxr(i,20) = Diag%fluxr(i,20) + Model%fhlwr * fluxlwUP_allsky(  i,iSFC)   ! total sky sfc lw up
              ! LW clear-sky fluxes
-             Diag%fluxr(i,28) = Diag%fluxr(i,28) + Model%fhlwr *    Diag%topflw(i)%upfx0   ! clear sky top lw up
-             Diag%fluxr(i,30) = Diag%fluxr(i,30) + Model%fhlwr * Radtend%sfcflw(i)%dnfx0   ! clear sky sfc lw dn
-             Diag%fluxr(i,33) = Diag%fluxr(i,33) + Model%fhlwr * Radtend%sfcflw(i)%upfx0   ! clear sky sfc lw up
+             Diag%fluxr(i,28) = Diag%fluxr(i,28) + Model%fhlwr * fluxlwUP_clrsky(  i,iTOA)   ! clear sky top lw up
+             Diag%fluxr(i,30) = Diag%fluxr(i,30) + Model%fhlwr * fluxlwDOWN_clrsky(i,iSFC)   ! clear sky sfc lw dn
+             Diag%fluxr(i,33) = Diag%fluxr(i,33) + Model%fhlwr * fluxlwUP_clrsky(  i,iSFC)   ! clear sky sfc lw up
           enddo
           
           do i=1,im
