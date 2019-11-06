@@ -459,10 +459,10 @@
 !! \htmlinclude GFS_suite_interstitial_3_run.html
 !!
 #endif
-    subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,  &
-      ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlat, gq0, imp_physics, imp_physics_mg, imp_physics_zhao_carr,&
-      imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, prsi, prsl, prslk, rhcbot,     &
-      rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver, ras,                                                    &
+    subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,      &
+      ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlon, xlat, gq0, imp_physics, imp_physics_mg,                     &
+      imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, prsi, prsl, &
+      prslk, rhcbot, rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver, ras, lprnt, ipt, kdt, me,                     &
       clw, rhc, save_qc, save_qi, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -472,7 +472,7 @@
       ! interface variables
       integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw,     &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
-        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
+        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, kdt, me
       integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
       logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
@@ -480,13 +480,15 @@
       real(kind=kind_phys), dimension(im),              intent(in) :: work1, work2
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: prsl, prslk
       real(kind=kind_phys), dimension(im, levs+1),      intent(in) :: prsi
-      real(kind=kind_phys), dimension(im),              intent(in) :: xlat
+      real(kind=kind_phys), dimension(im),              intent(in) :: xlon, xlat
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
       real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
       real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
+      logical,                                        intent(inout) :: lprnt
+      integer,                                        intent(inout) :: ipt
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -500,12 +502,28 @@
       !                   turnrhcrit = 0.900, turnrhcrit_upper = 0.150
       ! in the following inverse of slope_mg and slope_upmg are specified
       real(kind=kind_phys),parameter :: slope_mg   = 50.0_kind_phys,   &
-                                        slope_upmg = 25.0_kind_phys
+                                        slope_upmg = 25.0_kind_phys,   &
+                                        rad2dg     = 180.0/3.14159265359
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
+      do i=1,im
+        lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-29.55) < 0.201  &
+                           .and. abs(xlat(i)*rad2dg+59.62) < 0.201
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-169.453) < 0.501  &
+!                          .and. abs(xlat(i)*rad2dg-72.96) < 0.501
+!       if (kdt == 1) &
+!         write(2000+me,*)' i=',i,' xlon=',xlon(i)*rad2dg,          &
+!                       ' xlat=',xlat(i)*rad2dg,' me=',me
+        if (lprnt) then
+          ipt = i
+          write(0,*)' ipt=',ipt,'xlon=',xlon(i)*rad2dg,' xlat=',xlat(i)*rad2dg,' me=',me
+          exit
+        endif
+      enddo
+!
       !GF* The following section (initializing convective variables) is already executed in GFS_typedefs%interstitial_phys_reset
       ! do k=1,levs
       !   do i=1,im

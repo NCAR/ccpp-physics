@@ -1201,6 +1201,15 @@
   type = integer
   intent = in
   optional = F
+[xlon]
+  standard_name = longitude
+  long_name = longitude
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [xlat]
   standard_name = latitude
   long_name = latitude
@@ -1386,6 +1395,38 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[lprnt]
+  standard_name = flag_print
+  long_name = control flag for diagnostic print out
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ipt]
+  standard_name = horizontal_index_of_printed_column
+  long_name = horizontal index of printed column
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [clw]
