@@ -490,10 +490,6 @@
         dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
       endif
 
-      if(cplflx)then
-        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
-        stop 
-      endif
 
 !  --- ...  coupling insertion
 
