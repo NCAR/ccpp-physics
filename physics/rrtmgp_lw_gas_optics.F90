@@ -7,7 +7,7 @@ module rrtmgp_lw_gas_optics
   use mo_source_functions,   only: ty_source_func_lw
   use mo_optical_props,      only: ty_optical_props_1scl
   use mo_compute_bc,         only: compute_bc
-  use rrtmgp_aux,            only: check_error_msg, rrtmgp_minP, rrtmgp_minT
+  use rrtmgp_aux,            only: check_error_msg
   use netcdf
 
   ! Parameters
@@ -390,10 +390,6 @@ contains
 
     ! Set initial permutation seed for McICA, initially set to number of G-points
     ipsdlw0 = lw_gas_props%get_ngpt()
-
-    ! Store minimum pressure/temperature allowed by RRTMGP
-    rrtmgp_minP = lw_gas_props%get_press_min()
-    rrtmgp_minT = lw_gas_props%get_temp_min()
 
   end subroutine rrtmgp_lw_gas_optics_init
 

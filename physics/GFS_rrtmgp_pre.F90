@@ -50,7 +50,7 @@ module GFS_rrtmgp_pre
   ! RRTMGP types
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs
-  use rrtmgp_aux,            only: check_error_msg, rrtmgp_minP, rrtmgp_minT
+  use rrtmgp_aux,            only: check_error_msg!, rrtmgp_minP, rrtmgp_minT
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -117,7 +117,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_pre.html
 !!
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
-       ncol, lw_gas_props, sw_gas_props,                                                & ! IN
+       ncol,                                                                            & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, cld_frac, cld_lwp,                & ! OUT
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,         & ! OUT
        tv_lay, relhum, tracer, cldsa, mtopa, mbota, de_lgth,  gas_concentrations,       & ! OUT
@@ -140,9 +140,6 @@ contains
          Tbd                  ! Fortran DDT containing FV3-GFS data not yet assigned to a defined container
     integer, intent(in)    :: &
          ncol                 ! Number of horizontal grid points
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props,      & ! RRTMGP DDT containing spectral information for LW calculation
-         sw_gas_props         ! RRTMGP DDT containing spectral information for SW calculation
 
     ! Outputs
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
@@ -233,19 +230,7 @@ contains
           t_lev(iCol,iLay) = (t_lay(iCol,iLay)+t_lay(iCol,iLay-1))/2._kind_phys
        enddo
        t_lev(iCol,iTOA+1) = t_lay(iCol,iTOA)
-       !t_lev(iCol,iTOA+1) = t_lev(iCol,iTOA) + (p_lev(iCol,iTOA+1)-p_lev(iCOL,iTOA))*&
-       !     (t_lev(iCol,iTOA)-t_lay(iCOL,iTOA))/(p_lev(iCol,iTOA)-p_lay(iCOL,iTOA))
     enddo
-
-    ! Guard against case when model uppermost model layer higher than rrtmgp allows.
-    where(p_lev(1:nCol,iTOA+1) .lt. rrtmgp_minP)
-       ! Set to RRTMGP min(pressure/temperature)
-       p_lev(1:nCol,iTOA+1) = spread(rrtmgp_minP, dim=1,ncopies=ncol)
-!       t_lev(1:nCol,iTOA+1) = spread(rrtmgp_minT, dim=1,ncopies=ncol)
-       ! Recompute layer pressure/temperature.
-       p_lay(1:NCOL,iTOA) = 0.5_kind_phys*(p_lev(1:NCOL,iTOA) +  p_lev(1:NCOL,iTOA+1))
-       t_lay(1:NCOL,iTOA) = 0.5_kind_phys*(t_lev(1:NCOL,iTOA) +  t_lev(1:NCOL,iTOA+1))
-    end where
 
     ! Compute layer pressure thicknes
     deltaP = p_lev(:,iSFC:iTOA)-p_lev(:,iSFC+1:iTOA+1)

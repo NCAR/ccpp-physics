@@ -5,7 +5,7 @@ module rrtmgp_sw_gas_optics
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations,  only: ty_gas_concs
-  use rrtmgp_aux,             only: check_error_msg, rrtmgp_minP, rrtmgp_minT
+  use rrtmgp_aux,             only: check_error_msg
   use mo_optical_props,       only: ty_optical_props_2str
   use mo_compute_bc,          only: compute_bc
   use netcdf
@@ -106,7 +106,7 @@ contains
 
     ! Local variables
     integer :: status,ncid_sw,dimid,varID,iGas
-    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4, temp_log_array1, temp_log_array2, temp_log_array3, temp_log_array4
+    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4
     character(len=264) :: sw_gas_props_file
 
     ! Initialize
@@ -390,10 +390,6 @@ contains
     ! Set initial permutation seed for McICA, initially set to number of G-points
     ipsdsw0 = sw_gas_props%get_ngpt()
 
-    ! Store minimum pressure/temperature allowed by RRTMGP
-    rrtmgp_minP = sw_gas_props%get_press_min()
-    rrtmgp_minT = sw_gas_props%get_temp_min()
-
   end subroutine rrtmgp_sw_gas_optics_init
 
   ! #########################################################################################
@@ -408,14 +404,13 @@ contains
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
   subroutine rrtmgp_sw_gas_optics_run(Model, Interstitial, sw_gas_props, ncol, p_lay, p_lev, t_lay, t_lev, &
-       gas_concentrations, lsswr, sw_optical_props_clrsky, errmsg, errflg)
+       gas_concentrations, lsswr, solcon, sw_optical_props_clrsky, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                   ! DDT containing model control parameters
     type(GFS_Interstitial_type),intent(inout) :: &
          Interstitial
-
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props            ! DDT containing spectral information for RRTMGP SW radiation scheme
     integer,intent(in) :: &
@@ -430,7 +425,8 @@ contains
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
     logical, intent(in) :: &
          lsswr                   ! Flag to calculate SW irradiances
-
+    real(kind_phys), intent(in) :: &
+         solcon                  ! Solar constant
     ! Output
     character(len=*), intent(out) :: &
          errmsg                  ! Error message
@@ -450,13 +446,16 @@ contains
 
     ! Gas-optics (djs asks pincus: I think it makes sense to have a generic gas_optics interface in 
     ! ty_gas_optics_rrtmgp, just as in ty_gas_optics.
-    call check_error_msg('rrtmgp_sw_gas_optics_run',sw_gas_props%gas_optics_ext(&
+    call check_error_msg('rrtmgp_sw_gas_optics_run',sw_gas_props%gas_optics(&
          p_lay,                   & !
          p_lev,                   & ! 
          t_lay,                   & !
          gas_concentrations,      & !
          sw_optical_props_clrsky, & !
          Interstitial%toa_src_sw))                  !
+
+    ! Scale incident flux
+    Interstitial%toa_src_sw = Interstitial%toa_src_sw*solcon/sum(Interstitial%toa_src_sw)
 
     ! Compute boundary-condition (only for low ceiling models, set in GFS_typedefs.F90)
     !call check_error_msg('rrtmgp_sw_gas_optics_run',compute_bc(&
