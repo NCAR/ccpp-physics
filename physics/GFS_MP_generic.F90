@@ -281,7 +281,7 @@
 !! and determine explicit rain/snow by snow/ice/graupel coming out directly from MP
 !! and convective rainfall from the cumulus scheme if the surface temperature is below
 !! \f$0^oC\f$.
-      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson .or. imp_physics_fer_hires) then
+      if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson ) then
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
        
@@ -301,17 +301,17 @@
 !              Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
 !            endif
 ! compute fractional srflag
-          if(imp_physics == imp_physics_fer_hires) then
-            total_precip = tprcp(i)
-            if (total_precip > rainmin) then
-              srflag(i) = (ice(i)+csnow)/total_precip
-            endif
-          else
+          !if(imp_physics == imp_physics_fer_hires) then
+          !  total_precip = tprcp(i)
+          !  if (total_precip > rainmin) then
+          !    srflag(i) = (ice(i)+csnow)/total_precip
+          !  endif
+          !else
             total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
             if (total_precip > rainmin) then
               srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip
             endif
-          endif
+          !endif
           enddo
         else
           ! only for RUC LSM
