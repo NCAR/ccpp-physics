@@ -509,14 +509,17 @@
       errmsg = ''
       errflg = 0
 
+      lprnt = .false.
       do i=1,im
-        lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-29.55) < 0.201  &
-                           .and. abs(xlat(i)*rad2dg+59.62) < 0.201
+        lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.29) < 0.301     &
+                           .and. abs(xlat(i)*rad2dg-18.75) < 0.301
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.29) < 0.201     &
+!                          .and. abs(xlat(i)*rad2dg-17.45) < 0.201
 !       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-169.453) < 0.501  &
 !                          .and. abs(xlat(i)*rad2dg-72.96) < 0.501
-!       if (kdt == 1) &
-!         write(2000+me,*)' i=',i,' xlon=',xlon(i)*rad2dg,          &
-!                       ' xlat=',xlat(i)*rad2dg,' me=',me
+        if (kdt == 1) &
+          write(2000+me,*)' i=',i,' xlon=',xlon(i)*rad2dg,          &
+                        ' xlat=',xlat(i)*rad2dg,' me=',me
         if (lprnt) then
           ipt = i
           write(0,*)' ipt=',ipt,'xlon=',xlon(i)*rad2dg,' xlat=',xlat(i)*rad2dg,' me=',me

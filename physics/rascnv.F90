@@ -17,7 +17,7 @@
       private
       logical :: is_initialized = .False.
 !
-      integer,               parameter :: nrcmax=32 ! Maximum # of random clouds per 1200s
+!     integer,               parameter :: nrcmax=32 ! Maximum # of random clouds per 1200s
 
       integer,               parameter :: idnmax=999
       real (kind=kind_phys), parameter :: delt_c=1800.0/3600.0          &
@@ -363,6 +363,7 @@
       real(kind=kind_phys) CFAC, TEM,  sgc, ccwfac, tem1, tem2, rain    &
      &,                    wfnc,tla,pl,qiid,qlid, c0, c0i, dlq_fac, sumq&
      &,                    rainp
+      integer                          :: nrcmax    ! Maximum # of random clouds per 1200s
 !
       Integer              KCR,  KFX, NCMX, NC,  KTEM, I,   L, lm1      &
      &,                    ntrc, ia,  ll,   km1, kp1,  ipt, lv, KBL, n  &
@@ -385,15 +386,20 @@
       endif
       trcmin = -99999.0
       if (ntk-2 > 0) trcmin(ntk-2) = 1.0d-4
+      nrcmax = nrcm
 
 !> - Initialize CCPP error handling variables
 
       errmsg = ''
       errflg = 0
 
+!     if (me == 0) write(0,*)' in ras ntr=',ntr,' kdt=',kdt,' ntk=',ntk
+!     if (me == 0) write(0,*)' in ras tke=',ccin(1,:,ntk),' kdt=',kdt   &
+!    &,                      '  ntk=',ntk
 !     if (me == 0) write(0,*)' rann=',rannum(1,:),' kdt=',kdt
-!     if (lprnt) write(0,*)' in RAS fscav=',fscav_, ' mp_phys=',mp_phys &
-!    &,                    ' fscav=',fscav,' ntr=',ntr
+      if (lprnt) write(0,*)' in RAS fscav=',fscav_, ' mp_phys=',mp_phys &
+     &,                    ' fscav=',fscav,' ntr=',ntr                  &
+     &,                    ' rannum=',rannum(1,:)
 !
       km1 = k - 1
       kp1 = k + 1
@@ -519,8 +525,8 @@
         KTEM    = MIN(K,KFMAX)
         KFX     = KTEM - KCR
 
-!     if(lprnt)write(0,*)' enter RASCNV k=',k,' ktem=',ktem 
-!    &,               ' krmax=',krmax,' kfmax=',kfmax
+!     if(lprnt)write(0,*)' enter RASCNV k=',k,' ktem=',ktem             &
+!    &,               ' krmax=',krmax,' kfmax=',kfmax                   &
 !    &,               ' kcr=',kcr, ' cdrag=',cdrag(ipr)
  
         IF (KFX > 0) THEN
@@ -545,12 +551,12 @@
 !
 !     ia = 1
 !
-!     write(0,*)' in rascnv: k=',k,'lat=',lat,' lprnt=',lprnt
-!     if (lprnt) then
+!     if (me == 0) write(0,*)' in rascnv: k=',k,' lprnt=',lprnt
+      if (lprnt) then
 !        if (me == 0) then
-!        write(0,*)' tin',(tin(ia,l),l=k,1,-1)
-!        write(0,*)' qin',(qin(ia,l),l=k,1,-1)
-!     endif
+         write(0,*)' tin',(tin(ia,l),l=k,1,-1)
+         write(0,*)' qin',(qin(ia,l),l=k,1,-1)
+      endif
 !
 !
         lprint = lprnt .and. ipt == ipr
@@ -673,9 +679,9 @@
 !
         endif      ! end of if (flipv) then
 !
-!     if (lprnt .and. ipt == ipr) write(0,*)' phi_h=',phi_h(:)
-!     if(lprint) write(0,*)' PRS=',PRS
-!     if(lprint) write(0,*)' PRSM=',PRSM
+      if (lprnt .and. ipt == ipr) write(0,*)' phi_h=',phi_h(:)
+      if(lprint) write(0,*)' PRS=',PRS
+      if(lprint) write(0,*)' PRSM=',PRSM
 !     if (lprint) then
 !        write(0,*)' qns=',qns(ia),' qoi=',qn0(ia,k),'qin=',qin(ia,1)
 !        if (me == 0) then
@@ -912,7 +918,7 @@
           qiid = qii(ib)         ! cloud top level ice before convection
           qlid = qli(ib)         ! cloud top level water before convection
 !
-!     if(lprint) write(0,*)' uvitke=',uvi(ib:k,ntk-2), ' ib=',ib
+!     if(lprint) write(0,*)' uvitke=',uvi(ib:k,ntk-2), ' ib=',ib        &
 !    &,' trcmin=',trcmin(ntk-2)
 !         if (lprnt) then
 !           qoi_l(ib:k) = qoi(ib:k)
@@ -938,7 +944,7 @@
 !     if (lprint) then
 !       write(0,*) ' rain=',rain,' ipt=',ipt
 !       write(0,*) ' after calling CLOUD TYPE IB= ', IB                 &
-!    &,' rain=',rain,' prskd=',prs(ib),' qli=',qli(ib),' qii=',qii(ib)
+!    &,' rain=',rain,' prskd=',prs(ib),' qli=',qli(ib),' qii=',qii(ib)  &
 !    &,' rainp=',rainp
 !       write(0,*) ' phi_h=',phi_h(K-5:KP1)
 !       write(0,*) ' TOI=',(TOI(L),L=1,K),' me=',me,' ib=',ib
@@ -1380,15 +1386,15 @@
         qcd(L) = zero
       enddo
 !
-!     if (lprnt) then
-!       write(0,*) ' IN CLOUD for KD=',kd
-!       write(0,*) ' prs=',prs(Kd:KP1)
-!       write(0,*) ' phil=',phil(KD:K)
+      if (lprnt) then
+        write(0,*) ' IN CLOUD for KD=',kd
+        write(0,*) ' prs=',prs(Kd:KP1)
+        write(0,*) ' phil=',phil(KD:K)
 !!      write(0,*) ' phih=',phih(kd:KP1),' kdt=',kdt
-!       write(0,*) ' phih=',phih(KD:KP1)
-!       write(0,*) ' toi=',toi
-!       write(0,*) ' qoi=',qoi
-!     endif
+        write(0,*) ' phih=',phih(KD:KP1)
+        write(0,*) ' toi=',toi
+        write(0,*) ' qoi=',qoi
+      endif
 !
       CLDFRD   = zero
       DOF      = zero
@@ -1769,8 +1775,10 @@
 !
 !       if (ntk > 0 .and. do_aw) then
         if (ntk > 0) then
-          wcbase = min(2.0, max(wcbase, sqrt(twoo3*rbl(ntk))))
-!         wcbase = min(1.0, max(wcbase, sqrt(twoo3*rbl(ntk))))
+          if (rbl(ntk) > 0.0) then
+            wcbase = min(2.0, max(wcbase, sqrt(twoo3*rbl(ntk))))
+!           wcbase = min(1.0, max(wcbase, sqrt(twoo3*rbl(ntk))))
+          endif
         endif
 
 !       if (lprnt) write(0,*)' wcbase=',wcbase,' rbl=',
