@@ -549,7 +549,7 @@
           ENDDO
         ENDIF
 !
-!     ia = 1
+      ia = ipr
 !
 !     if (me == 0) write(0,*)' in rascnv: k=',k,' lprnt=',lprnt
       if (lprnt) then

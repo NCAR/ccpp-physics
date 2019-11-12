@@ -511,8 +511,8 @@
 
       lprnt = .false.
       do i=1,im
-        lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.29) < 0.301     &
-                           .and. abs(xlat(i)*rad2dg-18.75) < 0.301
+        lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.18) < 0.101     &
+                           .and. abs(xlat(i)*rad2dg-19.01) < 0.101
 !       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.29) < 0.201     &
 !                          .and. abs(xlat(i)*rad2dg-17.45) < 0.201
 !       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-169.453) < 0.501  &
