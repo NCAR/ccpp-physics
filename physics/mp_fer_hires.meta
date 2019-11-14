@@ -17,12 +17,13 @@
   type = integer
   intent = in
   optional = F
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = Fortran DDT containing FV3-GFS model control parameters
-  units = DDT
+[dtp]
+  standard_name = time_step_for_physics
+  long_name = physics timestep
+  units = s
   dimensions = ()
-  type = GFS_control_type
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [imp_physics]

@@ -300,13 +300,6 @@
 !            if (snow0(i)+ice0(i)+graupel0(i)+csnow > 0.0) then
 !              Sfcprop%srflag(i) = 1.                   ! clu: set srflag to 'snow' (i.e. 1)
 !            endif
-! compute fractional srflag
-          !if(imp_physics == imp_physics_fer_hires) then
-          !  total_precip = tprcp(i)
-          !  if (total_precip > rainmin) then
-          !    srflag(i) = (ice(i)+csnow)/total_precip
-          !  endif
-          !else
             total_precip = snow0(i)+ice0(i)+graupel0(i)+rain0(i)+rainc(i)
             if (total_precip > rainmin) then
               srflag(i) = (snow0(i)+ice0(i)+graupel0(i)+csnow)/total_precip

@@ -2529,7 +2529,6 @@ ENDIF
 !-----------------------------------------------------------------------
 !     LOCAL VARIABLES
 !-----------------------------------------------------------------------
-!MZ      type(ESMF_VM) :: VM
       REAL :: BBFR,DTPH,Thour_print,RDIS,BETA6
       INTEGER :: I,J,L,K
       INTEGER :: etampnew_unit1

@@ -30,7 +30,7 @@ module mp_fer_hires
 !> \section arg_table_mp_fer_hires_init Argument Table
 !! \htmlinclude mp_fer_hires_init.html
 !!
-     subroutine mp_fer_hires_init(NCOL, NLEV, Model, imp_physics,       &
+     subroutine mp_fer_hires_init(ncol, nlev, dtp, imp_physics,         &
                                   imp_physics_fer_hires,                &
                                   restart,                              &
                                   f_ice,f_rain,f_rimef,                 &
@@ -39,12 +39,11 @@ module mp_fer_hires
 
       USE machine,             ONLY : kind_phys
       USE MODULE_MP_FER_HIRES, ONLY : FERRIER_INIT_HR
-      USE GFS_typedefs,        ONLY : GFS_control_type
       implicit none
 
-      type(GFS_control_type),         intent(in)    :: Model
       integer,                        intent(in)    :: ncol
       integer,                        intent(in)    :: nlev
+      real(kind_phys),                intent(in)    :: dtp
       integer,                        intent(in)    :: imp_physics
       integer,                        intent(in)    :: imp_physics_fer_hires
       integer,                        intent(in)    :: mpicomm
@@ -61,7 +60,7 @@ module mp_fer_hires
 
       ! Local variables
       integer                                       :: ims, ime, lm,i,k
-      real(kind=kind_phys)                          :: DT_MICRO
+      !real(kind=kind_phys)                          :: DT_MICRO
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -104,10 +103,7 @@ module mp_fer_hires
       ENDIF
       !MZ: fer_hires_init() in HWRF
 
-        
-        DT_MICRO=Model%dtp
-
-       CALL FERRIER_INIT_HR(DT_MICRO,mpicomm,mpirank,mpiroot,threads)
+       CALL FERRIER_INIT_HR(dtp,mpicomm,mpirank,mpiroot,threads)
 
        if (mpirank==mpiroot) write (0,*)'F-A: FERRIER_INIT_HR finished ...'
        if (errflg /= 0 ) return
@@ -193,7 +189,6 @@ module mp_fer_hires
       integer            :: lowlyr(1:ncol)
       integer            :: dx1
       !real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
-      real(kind_phys)    :: sm(1:ncol), xland(1:ncol)
       real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW  
       real(kind_phys)    :: ql(1:nlev),tl(1:nlev)
       real(kind_phys)    :: rainnc(1:ncol),rainncv(1:ncol)
@@ -243,14 +238,6 @@ module mp_fer_hires
 ! determining where RHgrd should be set to 0.98 in the coarse domain when running HAFS.
       DX1=NINT(DX(1))
 
-
-
-!ZM: module_SOLVER_GRID_COMP.F90 
-      DO  I = IMS, IME
-          !Sfcprop%sm(i)=1.; if(Sfcprop%slmsk(i) > 0.5 ) Sfcprop%sm(i)=0.
-          sm(i) = 1.; if(slmsk(i) > 0.5) sm(i)=0.
-      ENDDO
-
 !-----------------------------------------------------------------------
 !***  NOTE:  THE NMMB HAS IJK STORAGE WITH LAYER 1 AT THE TOP.
 !***         THE WRF PHYSICS DRIVERS HAVE IKJ STORAGE WITH LAYER 1
@@ -263,7 +250,6 @@ module mp_fer_hires
       DO I=IMS,IME
 !
         LOWLYR(I)=1
-        XLAND(I)=SM(I)+1.
 !
 !-----------------------------------------------------------------------
 !***   FILL RAINNC WITH ZERO (NORMALLY CONTAINS THE NONCONVECTIVE

@@ -135,7 +135,8 @@
               vdftra(i,k,2) = qgrs(i,k,ntcw)
               vdftra(i,k,3) = qgrs(i,k,ntiw)
               vdftra(i,k,4) = qgrs(i,k,ntrw)
-              vdftra(i,k,5) = qgrs(i,k,ntoz)
+              vdftra(i,k,5) = qgrs(i,k,nqrimef)
+              vdftra(i,k,6) = qgrs(i,k,ntoz)
             enddo
           enddo
         
@@ -388,7 +389,8 @@
               dqdt(i,k,ntcw)  = dvdftra(i,k,2)
               dqdt(i,k,ntiw)  = dvdftra(i,k,3)
               dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-              dqdt(i,k,ntoz)  = dvdftra(i,k,5)
+              dqdt(i,k,nqrimef) = dvdftra(i,k,5)
+              dqdt(i,k,ntoz)  = dvdftra(i,k,6)
             enddo
           enddo
 
