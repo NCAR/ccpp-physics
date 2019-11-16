@@ -1187,7 +1187,458 @@
 !! @}
 !-----------------------------------
 
+!---------------------------------------------------------------
+
+!MZ* HAFS aerosol readin
+       subroutine aerosol_in(aerodm,pina,alevsiz,no_months,             &
+                             no_src_types,XLAT,XLONG,                   &
+                             ids, ide, jds, jde, kds, kde,              &
+                             ims, ime, jms, jme, kms, kme,              &
+                             its, ite, jts, jte, kts, kte)
 !
-!........................................!
+! Adaped from oznini in CAM 
+! It should be replaced by monthly climatology that varies latitudinally  and vertically
+!
+       IMPLICIT NONE
+
+       INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde,   &
+                                           ims,ime, jms,jme, kms,kme,   &
+                                           its,ite, jts,jte, kts,kte
+
+       INTEGER,      INTENT(IN   )    ::   alevsiz, no_months,          &
+                                           no_src_types
+
+       REAL,  DIMENSION( ims:ime, jms:jme ), INTENT(IN   )  ::     XLAT,&
+                                                                  XLONG
+
+       REAL,  DIMENSION( ims:ime, alevsiz, jms:jme, no_months, no_src_types ),      &
+          INTENT(OUT   ) ::                         aerodm
+
+       REAL,  DIMENSION(alevsiz), INTENT(OUT )  ::      pina
+
+
+! Local
+!  Data from Ryan Torn, computed from EC 6 types of aerosol data:
+!    organic carbon, sea salt, dust, black carbon, sulfalte 
+!    and stratospheric aerosol (volcanic ashes)
+!  The data dimensions are 46 x 72 x 12 (pressure levels), and in unit of AOD per Pa
+
+       INTEGER, PARAMETER :: latsiz = 46
+       INTEGER, PARAMETER :: lonsiz = 72
+       INTEGER :: i, j, k, itf, jtf, ktf, m, pin_unit,                  &
+                  lat_unit, lon_unit, od_unit, ks, il, jl
+       INTEGER :: ilon1, ilon2, jlat1, jlat2
+       REAL    :: interp_pt, interp_pt_lat, interp_pt_lon, wlat1, wlat2,&
+                  wlon1, wlon2
+       CHARACTER*256 :: message
+
+       REAL,  DIMENSION( lonsiz, alevsiz, latsiz, no_months, no_src_types ) ::   &
+                                                            aerodin
+
+       REAL,  DIMENSION(latsiz)   ::             lat_od, aertmp1
+       REAL,  DIMENSION(lonsiz)   ::             lon_od, aertmp2
+
+       jtf=min0(jte,jde-1)
+       ktf=min0(kte,kde-1)
+       itf=min0(ite,ide-1)
+
+!-- read in aerosol optical depth pressure data
+
+     WRITE(message,*)'no_months = ',no_months
+     CALL wrf_debug(1,message)
+
+! pressure in mb
+      pin_unit = 27
+        OPEN(pin_unit, FILE='aerosol_plev.formatted',FORM='FORMATTED',STATUS='OLD')
+        do k = 1,alevsiz
+        READ (pin_unit,*) pina(k)
+        end do
+      close(27)
+
+!     do k=1,alevsiz
+!       pina(k) = pina(k)*100.
+!     end do
+
+!-- read in aerosol optical depth lat data
+
+      lat_unit = 28
+        OPEN(lat_unit, FILE='aerosol_lat.formatted',FORM='FORMATTED',STATUS='OLD')
+        do j = 1,latsiz
+        READ (lat_unit,*) lat_od(j)
+        end do
+      close(28)
+
+!-- read in aerosol optical depth lon data
+
+      lon_unit = 29
+        OPEN(lon_unit, FILE='aerosol_lon.formatted',FORM='FORMATTED',STATUS='OLD')
+        do j = 1,lonsiz
+        READ (lon_unit,*) lon_od(j)
+        end do
+      close(29)
+
+
+!-- read in ozone data
+      od_unit = 30
+         OPEN(od_unit, FILE='aerosol.formatted',FORM='FORMATTED',STATUS='OLD')
+         do ks=1,no_src_types
+         do m=1,no_months
+         do j=1,latsiz  ! latsiz=46
+         do k=1,alevsiz ! alevsiz=12
+         do i=1,lonsiz  ! lonsiz=72
+            READ (od_unit,*) aerodin(i,k,j,m,ks)
+         enddo
+         enddo
+         enddo
+         enddo
+         enddo
+      close(30)
+
+!-- latitudinally interpolate ozone data (and extend longitudinally)
+!-- using function lin_interpol2(x, f, y) result(g)
+! Purpose:
+!   interpolates f(x) to point y
+!   assuming f(x) = f(x0) + a * (x - x0)
+!   where a = ( f(x1) - f(x0) ) / (x1 - x0)
+!   x0 <= x <= x1
+!   assumes x is monotonically increasing
+!    real, intent(in), dimension(:) :: x  ! grid points
+!    real, intent(in), dimension(:) :: f  ! grid function values
+!    real, intent(in) :: y                ! interpolation point
+!    real :: g                            ! interpolated function value
+!---------------------------------------------------------------------------
+
+      do j=jts,jtf
+      do i=its,itf
+        interp_pt_lat=XLAT(i,j)
+        interp_pt_lon=XLONG(i,j)
+        call interp_vec(lat_od,interp_pt_lat,.true.,jlat1,jlat2,wlat1,wlat2)
+        call interp_vec(lon_od,interp_pt_lon,.true.,ilon1,ilon2,wlon1,wlon2)
+
+        do ks = 1,no_src_types
+        do m  = 1,no_months
+        do k  = 1,alevsiz
+          aerodm(i,k,j,m,ks) = wlon1 * (wlat1 * aerodin(ilon1,k,jlat1,m,ks)  + &
+                                        wlat2 * aerodin(ilon1,k,jlat2,m,ks)) + &
+                               wlon2 * (wlat1 * aerodin(ilon2,k,jlat1,m,ks)  + &
+                                        wlat2 * aerodin(ilon2,k,jlat2,m,ks))
+        end do
+        end do
+        end do
+
+      end do
+      end do
+
+
+!     do j=jts,jtf
+!     do i=its,itf
+!        onefld(i,j) = aerodm(i,12,j,1,1)
+!     enddo
+!     enddo
+
+       END SUBROUTINE aerosol_in
+
+
+!!MZ* original from WRF/phys/module_physics_init.F
+      subroutine interp_vec(locvec,locwant,periodic,loc1,loc2,wght1,wght2)
+
+         implicit none
+
+         real, intent(in), dimension(:) :: locvec
+         real, intent(in)               :: locwant
+         logical, intent(in)            :: periodic
+         integer, intent(out)           :: loc1, loc2
+         real, intent(out)              :: wght1, wght2
+
+         integer :: vsize, n
+         real    :: locv1, locv2
+
+         vsize = size(locvec)
+
+         loc1 = -1
+         loc2 = -1
+
+         do n = 1, vsize-1
+           if ( locvec(n) <= locwant .and. locvec(n+1) > locwant ) then
+              loc1  = n
+              loc2  = n+1
+              locv1 = locvec(n)
+              locv2 = locvec(n+1)
+              exit
+           end if
+         end do
+
+
+!
+      if ( loc1 < 0 .and. loc2 < 0 ) then
+       if ( periodic ) then
+          if ( locwant < locvec(1) ) then
+            loc1  = vsize
+            loc2  = 1
+            locv1 = locvec(vsize)-360.0
+            locv2 = locvec(1)
+          else
+            loc1  = vsize
+            loc2  = 1
+            locv1 = locvec(vsize)
+            locv2 = locvec(1)+360.0
+          end if
+       else
+          if ( locwant < locvec(1) ) then
+            loc1  = 1
+            loc2  = 1
+            locv1 = locvec(1)
+            locv2 = locvec(1)
+          else
+            loc1  = vsize
+            loc2  = vsize
+            locv1 = locvec(vsize)
+            locv2 = locvec(vsize)
+          end if
+       end if
+      end if
+
+
+      wght2 = (locwant-locv1) / (locv2-locv1)
+      wght1 = 1.0 - wght2
+
+      return
+      end subroutine interp_vec
+
+!MZ* originally in WRF/phys/module_ra_cam_support.F, used for HAFS RRTMG
+      subroutine oznini(ozmixm,pin,levsiz,num_months,XLAT,              &
+                         ids, ide, jds, jde, kds, kde,                  &
+                         ims, ime, jms, jme, kms, kme,                  &
+                         its, ite, jts, jte, kts, kte)
+!
+! This subroutine assumes uniform distribution of ozone concentration.
+! It should be replaced by monthly climatology that varies latitudinally
+! and vertically
+!
+
+!MZ* #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
+!  use mpi
+!  use module_dm, only: local_communicator
+!MZ*#endif
+       IMPLICIT NONE
+
+       INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde,   &
+                                           ims,ime, jms,jme, kms,kme,   &
+                                           its,ite, jts,jte, kts,kte
+
+       INTEGER,      INTENT(IN   )    ::   levsiz, num_months
+
+       REAL,  DIMENSION( ims:ime, jms:jme ), INTENT(IN   )  ::     XLAT
+
+       REAL,  DIMENSION( ims:ime, levsiz, jms:jme, num_months ),        &
+              INTENT(OUT   ) ::                                  OZMIXM
+
+       REAL,  DIMENSION(levsiz), INTENT(OUT )  ::                   PIN
+
+! Local
+       INTEGER, PARAMETER :: latsiz = 64
+       INTEGER, PARAMETER :: lonsiz = 1
+       INTEGER :: i, j, k, itf, jtf, ktf, m, pin_unit, lat_unit, oz_unit, ierr
+       REAL    :: interp_pt
+       CHARACTER*255 :: message
+       real, pointer :: ozmixin(:,:,:,:), lat_ozone(:), plev(:)
+!   REAL, DIMENSION( lonsiz, levsiz, latsiz, num_months )    ::   &
+!                                                            OZMIXIN
+
+!MZ*   logical, external :: wrf_dm_on_monitor
+
+      jtf=min0(jte,jde-1)
+      ktf=min0(kte,kde-1)
+      itf=min0(ite,ide-1)
+
+      if_have_ozone: if(.not.have_ozone) then
+       call wrf_debug(1,'Do not have ozone.  Must read it in.')
+       ! Allocate and set local aliases:
+       levsiz_ozone_save=levsiz
+       allocate(plev_ozone_save(levsiz),lat_ozone_save(latsiz))
+       allocate(ozmixin_save(lonsiz, levsiz, latsiz, num_months))
+       plev=>plev_ozone_save
+       lat_ozone=>lat_ozone_save
+       ozmixin=>ozmixin_save
+#if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
+       if_master: if(wrf_dm_on_monitor()) then
+       call wrf_debug(1,'Master rank reads ozone.')
+#endif
+
+!-- read in ozone pressure data
+
+     WRITE(message,*)'num_months = ',num_months
+     CALL wrf_debug(50,message)
+
+      pin_unit = 27
+        OPEN(pin_unit, FILE='ozone_plev.formatted',FORM='FORMATTED',STATUS='OLD')
+        do k = 1,levsiz
+        READ (pin_unit,*)plev(k)
+        end do
+      close(27)
+
+      do k=1,levsiz
+         plev(k) = plev(k)*100.
+      end do
+      pin=plev ! copy to grid array
+
+!-- read in ozone lat data
+
+      lat_unit = 28
+        OPEN(lat_unit, FILE='ozone_lat.formatted',FORM='FORMATTED',STATUS='OLD')
+        do j = 1,latsiz
+        READ (lat_unit,*)lat_ozone(j)
+        end do
+      close(28)
+
+
+!-- read in ozone data
+
+      oz_unit = 29
+      OPEN(oz_unit,FILE='ozone.formatted',FORM='FORMATTED',STATUS='OLD')
+
+      do m=2,num_months
+      do j=1,latsiz ! latsiz=64
+      do k=1,levsiz ! levsiz=59
+      do i=1,lonsiz ! lonsiz=1
+        READ (oz_unit,*)ozmixin(i,k,j,m)
+      enddo
+      enddo
+      enddo
+      enddo
+      close(29)
+#if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
+      endif if_master
+      call wrf_debug(1,"Broadcast ozone to other ranks.")
+# if ( RWORDSIZE == DWORDSIZE )
+      call MPI_Bcast(ozmixin,size(ozmixin),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
+      call MPI_Bcast(pin,size(pin),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
+      plev=pin
+      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
+# else
+      call MPI_Bcast(ozmixin,size(ozmixin),MPI_REAL,0,local_communicator,ierr)
+      call MPI_Bcast(pin,size(pin),MPI_REAL,0,local_communicator,ierr)
+      plev=pin
+      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_REAL,0,local_communicator,ierr)
+# endif
+#endif
+     else ! already read in ozone data
+      ! Make sure, first:
+      if(levsiz/=levsiz_ozone_save) then
+3081     format('Logic error in caller: levsiz=',I0,' but prior call    &
+                 used ',I0,'.')
+         write(message,3081) levsiz,levsiz_ozone_save
+         call wrf_error_fatal(message)
+      endif
+
+      if(.not.(associated(plev_ozone_save) .and. &
+               associated(lat_ozone_save) .and. &
+               associated(ozmixin_save))) then
+          call wrf_error_fatal('Ozone save arrays are not allocated.')
+      endif
+      ! Recover the pointers to allocated data:
+      plev=>plev_ozone_save
+      lat_ozone=>lat_ozone_save
+      ozmixin=>ozmixin_save
+      endif if_have_ozone
+
+!-- latitudinally interpolate ozone data (and extend longitudinally)
+!-- using function lin_interpol2(x, f, y) result(g)
+! Purpose:
+!   interpolates f(x) to point y
+!   assuming f(x) = f(x0) + a * (x - x0)
+!   where a = ( f(x1) - f(x0) ) / (x1 - x0)
+!   x0 <= x <= x1
+!   assumes x is monotonically increasing
+!    real, intent(in), dimension(:) :: x  ! grid points
+!    real, intent(in), dimension(:) :: f  ! grid function values
+!    real, intent(in) :: y                ! interpolation point
+!    real :: g                            ! interpolated function value
+!---------------------------------------------------------------------------
+
+
+      do m=2,num_months
+      do j=jts,jtf
+      do k=1,levsiz
+      do i=its,itf
+         interp_pt=XLAT(i,j)
+         ozmixm(i,k,j,m)=lin_interpol2(lat_ozone(:),ozmixin(1,k,:,m),interp_pt)
+      enddo
+      enddo
+      enddo
+      enddo
+
+! Old code for fixed ozone
+
+!     pin(1)=70.
+!     DO k=2,levsiz
+!     pin(k)=pin(k-1)+16.
+!     ENDDO
+
+!     DO k=1,levsiz
+!         pin(k) = pin(k)*100.
+!     end do
+
+!     DO m=1,num_months
+!     DO j=jts,jtf
+!     DO i=its,itf
+!     DO k=1,2
+!      ozmixm(i,k,j,m)=1.e-6
+!     ENDDO
+!     DO k=3,levsiz
+!      ozmixm(i,k,j,m)=1.e-7
+!     ENDDO
+!     ENDDO
+!     ENDDO
+!     ENDDO
+
+      END SUBROUTINE oznini
+
+
+       function lin_interpol2(x, f, y) result(g)
+
+        ! Purpose:
+        !   interpolates f(x) to point y
+        !   assuming f(x) = f(x0) + a * (x - x0)
+        !   where a = ( f(x1) - f(x0) ) / (x1 - x0)
+        !   x0 <= x <= x1
+        !   assumes x is monotonically increasing
+
+        ! Author: D. Fillmore ::  J. Done changed from r8 to r4
+
+        implicit none
+
+        real, intent(in), dimension(:) :: x  ! grid points
+        real, intent(in), dimension(:) :: f  ! grid function values
+        real, intent(in) :: y                ! interpolation point
+        real :: g                            ! interpolated function value
+
+        integer :: k  ! interpolation point index
+        integer :: n  ! length of x
+        real    :: a
+
+        n = size(x)
+
+        ! find k such that x(k) < y =< x(k+1)
+        ! set k = 1 if y <= x(1)  and  k = n-1 if y > x(n)
+
+        if (y <= x(1)) then
+           k = 1
+        else if (y >= x(n)) then
+           k = n - 1
+        else
+           k = 1
+           do while (y > x(k+1) .and. k < n)
+             k = k + 1
+           end do
+        end if
+
+        ! interpolate
+        a = (  f(k+1) - f(k) ) / ( x(k+1) - x(k) )
+        g = f(k) + a * (y - x(k))
+
+        end function lin_interpol2
+
+
       end module module_radiation_gases  !
 !========================================!
