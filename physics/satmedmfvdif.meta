@@ -1,4 +1,42 @@
 [ccpp-arg-table]
+  name = satmedmfvdif_init
+  type = scheme
+[isatmedmf]
+  standard_name = choice_of_scale_aware_TKE_moist_EDMF_PBL
+  long_name = choice of scale-aware TKE moist EDMF PBL scheme
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isatmedmf_vdif]
+  standard_name = choice_of_original_scale_aware_TKE_moist_EDMF_PBL
+  long_name = choice of original scale-aware TKE moist EDMF PBL scheme
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+#####################################################################
+[ccpp-arg-table]
   name = satmedmfvdif_run
   type = scheme
 [ix]
