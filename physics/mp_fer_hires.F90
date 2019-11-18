@@ -244,9 +244,6 @@ module mp_fer_hires
 !***         AT THE BOTTOM.
 !-----------------------------------------------------------------------
 !.......................................................................
-!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!MZ$OMP private(i,k,ql,xland,rr,pi_phy, th_phy,dz)
-!.......................................................................
       DO I=IMS,IME
 !
         LOWLYR(I)=1
@@ -281,8 +278,6 @@ module mp_fer_hires
           RR(I,K)=P_PHY(I,K)/(R_D*T(I,K)*(P608*AMAX1(Q(I,K),EPSQ)+1.))
           PI_PHY(I,K)=(P_PHY(I,K)*1.E-5)**CAPPA
           TH_PHY(I,K)=T(I,K)/PI_PHY(I,K)
-!MZ
-!          DZ(I,K)=(PRSI(I,K+1)-PRSI(I,K))*R_G/RR(I,K)
           DZ(I,K)=(PRSI(I,K)-PRSI(I,K+1))*R_G/RR(I,K)
 
 !
@@ -342,9 +337,6 @@ module mp_fer_hires
 
 
 !.......................................................................
-!MZ$OMP PARALLEL DO SCHEDULE(dynamic) num_threads(threads) &
-!MZ$OMP private(i,k,TNEW,TRAIN)
-!.......................................................................
 
 !MZ*
 !Aligo Oct-23-2019 
@@ -384,16 +376,12 @@ module mp_fer_hires
       ENDDO
 
 !.......................................................................
-!MZ$OMP end parallel do
-!.......................................................................
 
 !
 !-----------------------------------------------------------------------
 !***  UPDATE PRECIPITATION
 !-----------------------------------------------------------------------
 !
-!MZ$OMP parallel do  SCHEDULE(dynamic) num_threads(threads) &
-!MZ$OMP private(i,pcpcol,prec,acprec)
       DO I=IMS,IME
         PCPCOL=RAINNCV(I)*1.E-3        !MZ:unit:m
         PREC(I)=PREC(I)+PCPCOL
@@ -403,7 +391,6 @@ module mp_fer_hires
 !       SINCE IT IS ONLY A LOCAL ARRAY FOR NOW
 !
       ENDDO
-!MZ$OMP end parallel do
 !-----------------------------------------------------------------------
 !
        end subroutine mp_fer_hires_run 

@@ -111,8 +111,6 @@
 #ifdef MPI
      USE mpi
 #endif
-!MZ     USE ESMF
-!     USE MODULE_KINDS
       USE machine
 !MZ
 !MZ     USE MODULE_CONSTANTS,ONLY : PI, CP, EPSQ, GRAV=>G, RHOL=>RHOWATER, &
@@ -273,8 +271,6 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      &                      refl_10cm               !jul28
       REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme)           ::     &
      &                                                   RAINNC,RAINNCV
-!MZ      REAL,               DIMENSION(ims:ime, jms:jme,lm,d_ss) ::  &
-!MZ     &                     mprates 
       REAL, INTENT(OUT),    DIMENSION(ims:ime,jms:jme):: SR
 !
       INTEGER, DIMENSION( ims:ime, jms:jme ),INTENT(INOUT) :: LOWLYR
@@ -310,21 +306,6 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !**********************************************************************
 !-----------------------------------------------------------------------
 !
-! MZ: NAMPHYSICS
-!      MY_GROWTH_NMM(MY_T1:MY_T2)=MP_RESTART_STATE(MY_T1:MY_T2)
-!
-!      C1XPVS0=MP_RESTART_STATE(MY_T2+1)
-!      C2XPVS0=MP_RESTART_STATE(MY_T2+2)
-!      C1XPVS =MP_RESTART_STATE(MY_T2+3)
-!      C2XPVS =MP_RESTART_STATE(MY_T2+4)
-!      CIACW  =MP_RESTART_STATE(MY_T2+5)
-!      CIACR  =MP_RESTART_STATE(MY_T2+6)
-!      CRACW  =MP_RESTART_STATE(MY_T2+7)
-!      BRAUT  =MP_RESTART_STATE(MY_T2+8)
-!
-!      TBPVS(1:NX) =TBPVS_STATE(1:NX)
-!      TBPVS0(1:NX)=TBPVS0_STATE(1:NX)
-! 
 
 ! MZ: HWRF practice start 
 !----------
@@ -402,17 +383,12 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !
 !--- Initialize column data (1D arrays)
 !
-
-
-!MZ        L=1      ! MZ: 1 is top in Eta Model
            L=LM
 !-- qt = CWM, total condensate
         IF (qt(I,J,L) .LE. EPSQ) qt(I,J,L)=EPSQ
           F_ice_phy(I,J,L)=1.
           F_rain_phy(I,J,L)=0.
           F_RimeF_phy(I,J,L)=1.
-!MZ: in Eta model, integrate from top to bottom 
-!MZ          DO L=1,LSFC
           do L=LM,1,-1
 !
 !--- Pressure (Pa) = (Psfc-Ptop)*(ETA/ETA_sfc)+Ptop
@@ -517,7 +493,6 @@ ENDIF
 !
 !--- Update storage arrays
 !
-!MZ          DO L=1,LSFC
           do L=LM,1,-1
             TRAIN_phy(I,J,L)=(T_col(L)-T_phy(I,J,L))/DT
             TLATGS_phy(I,J,L)=T_col(L)-T_phy(I,J,L)
@@ -529,37 +504,6 @@ ENDIF
 !---if d_ss=1, only 1 source/sink term is used
 !
 
-! MZ*
-!HWRF       IF(D_SS.EQ.1)THEN
-!HWRF           mprates(I,J,L,1)=0.
-!HWRF       ELSE
-!HWRF           mprates(I,J,L,1)=mprates(I,J,L,1)+pcond1d(L)
-!HWRF           mprates(I,J,L,2)=mprates(I,J,L,2)+pidep1d(L)
-!HWRF           mprates(I,J,L,3)=mprates(I,J,L,3)+piacw1d(L)
-!HWRF           mprates(I,J,L,4)=mprates(I,J,L,4)+piacwi1d(L)
-!HWRF           mprates(I,J,L,5)=mprates(I,J,L,5)+piacwr1d(L)
-!HWRF           mprates(I,J,L,6)=mprates(I,J,L,6)+piacr1d(L)
-!HWRF           mprates(I,J,L,7)=mprates(I,J,L,7)+picnd1d(L)
-!HWRF           mprates(I,J,L,8)=mprates(I,J,L,8)+pievp1d(L)
-!HWRF           mprates(I,J,L,9)=mprates(I,J,L,9)+pimlt1d(L)
-!HWRF           mprates(I,J,L,10)=mprates(I,J,L,10)+praut1d(L)
-!HWRF           mprates(I,J,L,11)=mprates(I,J,L,11)+pracw1d(L)
-!HWRF           mprates(I,J,L,12)=mprates(I,J,L,12)+prevp1d(L)
-!HWRF           mprates(I,J,L,13)=mprates(I,J,L,13)+pisub1d(L)
-!HWRF           mprates(I,J,L,14)=mprates(I,J,L,14)+pevap1d(L)
-!HWRF           mprates(I,J,L,15)=vsnow1d(L)
-!HWRF           mprates(I,J,L,16)=vrain11d(L)
-!HWRF           mprates(I,J,L,17)=vrain21d(L)
-!HWRF           mprates(I,J,L,18)=vci1d(L)
-!HWRF           mprates(I,J,L,19)=NSmICE1d(L)
-!HWRF           mprates(I,J,L,20)=NS_col(L)   !- # conc snow   !jul28
-!HWRF           mprates(I,J,L,21)=NR_col(L)   !- # conc rain   !jul28
-!HWRF           mprates(I,J,L,22)=INDEXS1d(L)
-!HWRF           mprates(I,J,L,23)=INDEXR1d(L)
-!HWRF           mprates(I,J,L,24)=RFlag1d(L)
-!HWRF        ENDIF
-! MZ*
-!
 !--- REAL*4 array storage
 !
             IF (QI_col(L) .LE. EPSQ) THEN
@@ -604,7 +548,6 @@ ENDIF
 !-----------------------------------------------------------------------
 !
      DO j = jms,jme
-        !MZ DO k = 1,lm
         do k = lm, 1, -1
 	DO i = ims,ime
            th_phy(i,j,k) = t_phy(i,j,k)/pi_phy(i,j,k)
@@ -927,8 +870,6 @@ ENDIF
 !------------ Loop from top (L=1) to surface (L=LSFC) ------------------
 !-----------------------------------------------------------------------
 !
-!MZ FV3
-!big_loop: DO L=1,LSFC
 big_loop: DO L=LM,1,-1
         pcond1d(L)=0.
         pidep1d(L)=0.
@@ -2243,8 +2184,6 @@ DSD2:         IF (RQRnew<=RQR_DRmin) THEN
 !
       IMPLICIT NONE
 !
-!MZ      INTEGER, PARAMETER :: HIGH_PRES=Selected_Real_Kind(15)
-!      REAL (KIND=HIGH_PRES), PARAMETER ::                               &
       REAL (KIND=kind_phys), PARAMETER ::                               &
      & RHLIMIT=.001, RHLIMIT1=-RHLIMIT
       REAL (KIND=kind_phys) :: COND, SSAT, WCdum
@@ -2732,18 +2671,6 @@ ENDIF
 !
         Thour_print=-DTPH/3600.
 !
-! MZ: NAMPHYSICS only
-!        MP_RESTART_STATE(MY_T1:MY_T2)=MY_GROWTH_NMM(MY_T1:MY_T2)
-!        MP_RESTART_STATE(MY_T2+1)=C1XPVS0
-!        MP_RESTART_STATE(MY_T2+2)=C2XPVS0
-!        MP_RESTART_STATE(MY_T2+3)=C1XPVS
-!        MP_RESTART_STATE(MY_T2+4)=C2XPVS
-!        MP_RESTART_STATE(MY_T2+5)=CIACW
-!        MP_RESTART_STATE(MY_T2+6)=CIACR
-!        MP_RESTART_STATE(MY_T2+7)=CRACW
-!        MP_RESTART_STATE(MY_T2+8)=BRAUT
-!        TBPVS_STATE(1:NX) =TBPVS(1:NX)
-!        TBPVS0_STATE(1:NX)=TBPVS0(1:NX)
 
       RETURN
 !
