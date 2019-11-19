@@ -275,9 +275,9 @@
   intent = inout
   optional = F
 [cldwrk]
-  standard_name = cumulative_cloud_work_function
-  long_name = cumulative cloud work function (valid only with sas)
-  units = m2 s-1
+  standard_name = cloud_work_function
+  long_name = cloud work function
+  units = m2 s-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
