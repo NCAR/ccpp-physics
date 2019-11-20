@@ -205,10 +205,6 @@
       errmsg = ''
       errflg = 0
 
-      if(cplflx)then
-        write(*,*)'Fatal error: CCPP not been tested with cplflx=true!'
-        stop
-      endif
 
       if (cplflx) then
          where (flag_cice)

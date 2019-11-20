@@ -1,60 +1,69 @@
 [ccpp-arg-table]
-  name = samfshalcnv_init
+  name = shalcnv_init
+  type = scheme
+[do_shoc]
+  standard_name = flag_for_shoc
+  long_name = flag for SHOC
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[shal_cnv]
+  standard_name = flag_for_shallow_convection
+  long_name = flag for calling shallow convection
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[imfshalcnv]
+  standard_name = flag_for_mass_flux_shallow_convection_scheme
+  long_name = flag for mass-flux shallow convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfshalcnv_sas]
+  standard_name = flag_for_sas_shallow_convection_scheme
+  long_name = flag for SAS shallow convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = shalcnv_finalize
   type = scheme
 
 ########################################################################
 [ccpp-arg-table]
-  name = samfshalcnv_finalize
+  name = shalcnv_run
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = samfshalcnv_run
-  type = scheme
-[im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[km]
-  standard_name = vertical_dimension
-  long_name = vertical layer dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[itc]
-  standard_name = number_of_aerosol_tracers_for_convection
-  long_name = number of aerosol tracers transported/scavenged by convection
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ntc]
-  standard_name = number_of_chemical_tracers
-  long_name = number of chemical tracers
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[cliq]
-  standard_name = specific_heat_of_liquid_water_at_constant_pressure
-  long_name = specific heat of liquid water at constant pressure
-  units = J kg-1 K-1
+[grav]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
   dimensions = ()
   type = real
   kind = kind_phys
@@ -69,9 +78,63 @@
   kind = kind_phys
   intent = in
   optional = F
+[hvap]
+  standard_name = latent_heat_of_vaporization_of_water_at_0C
+  long_name = latent heat of evaporation/sublimation
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rv]
+  standard_name = gas_constant_water_vapor
+  long_name = ideal gas constant for water vapor
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fv]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degrees Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [cvap]
   standard_name = specific_heat_of_water_vapor_at_constant_pressure
   long_name = specific heat of water vapor at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cliq]
+  standard_name = specific_heat_of_liquid_water_at_constant_pressure
+  long_name = specific heat of liquid water at constant pressure
   units = J kg-1 K-1
   dimensions = ()
   type = real
@@ -96,88 +159,50 @@
   kind = kind_phys
   intent = in
   optional = F
-[fv]
-  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
-  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
-  units = none
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
   dimensions = ()
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
-[grav]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
+[ix]
+  standard_name = horizontal_dimension
+  long_name = horizontal_dimension
+  units = count
   dimensions = ()
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
-[hvap]
-  standard_name = latent_heat_of_vaporization_of_water_at_0C
-  long_name = latent heat of evaporation/sublimation
-  units = J kg-1
+[km]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
   dimensions = ()
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
-[rd]
-  standard_name = gas_constant_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
+[jcap]
+  standard_name = number_of_spectral_wave_trancation_for_sas
+  long_name = number of spectral wave trancation used only by sascnv and shalcnv
+  units = count
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[rv]
-  standard_name = gas_constant_water_vapor
-  long_name = ideal gas constant for water vapor
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[t0c]
-  standard_name = temperature_at_zero_celsius
-  long_name = temperature at 0 degrees Celsius
-  units = K
-  dimensions = ()
-  type = real
-  kind = kind_phys
+  type = integer
   intent = in
   optional = F
 [delt]
   standard_name = time_step_for_physics
-  long_name = physics time step
+  long_name = physics timestep
   units = s
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[ntk]
-  standard_name = index_for_turbulent_kinetic_energy_convective_transport_tracer
-  long_name = index for turbulent kinetic energy in the convectively transported tracer array
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ntr]
-  standard_name = number_of_tracers_for_samf
-  long_name = number of tracers for scale-aware mass flux schemes
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [delp]
   standard_name = air_pressure_difference_between_midlayers
-  long_name = pres(k) - pres(k+1)
+  long_name = air pressure difference between midlayers
   units = Pa
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -204,25 +229,34 @@
   optional = F
 [phil]
   standard_name = geopotential
-  long_name = layer geopotential
+  long_name = geopotential at model layer centers
   units = m2 s-2
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[qtr]
-  standard_name = convective_transportable_tracers
-  long_name = array to contain cloud water and other convective trans. tracers
+[qlc]
+  standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
+  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers_for_convective_transport)
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qli]
+  standard_name = ice_water_mixing_ratio_convective_transport_tracer
+  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [q1]
   standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = updated vapor specific humidity
+  long_name = water vapor specific humidity updated by physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -231,7 +265,7 @@
   optional = F
 [t1]
   standard_name = air_temperature_updated_by_physics
-  long_name = updated temperature
+  long_name = temperature updated by physics
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -240,7 +274,7 @@
   optional = F
 [u1]
   standard_name = x_wind_updated_by_physics
-  long_name = updated x-direction wind
+  long_name = zonal wind updated by physics
   units = m s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -249,21 +283,12 @@
   optional = F
 [v1]
   standard_name = y_wind_updated_by_physics
-  long_name = updated y-direction wind
+  long_name = meridional wind updated by physics
   units = m s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[fscav]
-  standard_name = coefficients_for_aerosol_scavenging
-  long_name = array of aerosol scavenging coefficients
-  units = none
-  dimensions = (number_of_chemical_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [rn]
   standard_name = lwe_thickness_of_shallow_convective_precipitation_amount
@@ -276,19 +301,19 @@
   optional = F
 [kbot]
   standard_name = vertical_index_at_cloud_base
-  long_name = index at cloud base
+  long_name = index for cloud base
   units = index
   dimensions = (horizontal_dimension)
   type = integer
-  intent = out
+  intent = inout
   optional = F
 [ktop]
   standard_name = vertical_index_at_cloud_top
-  long_name = index at cloud top
+  long_name = index for cloud top
   units = index
   dimensions = (horizontal_dimension)
   type = integer
-  intent = out
+  intent = inout
   optional = F
 [kcnv]
   standard_name = flag_deep_convection
@@ -304,15 +329,6 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = integer
-  intent = in
-  optional = F
-[garea]
-  standard_name = cell_area
-  long_name = grid cell area
-  units = m2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [dot]
@@ -334,8 +350,26 @@
   optional = F
 [hpbl]
   standard_name = atmosphere_boundary_layer_thickness
-  long_name = PBL top height
+  long_name = pbl height
   units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[heat]
+  standard_name = kinematic_surface_upward_sensible_heat_flux
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[evap]
+  standard_name = kinematic_surface_upward_latent_heat_flux
+  long_name = kinematic surface upward latent heat flux
+  units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -366,7 +400,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cnvc]
   standard_name = convective_cloud_cover
@@ -375,20 +409,20 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [clam]
   standard_name = entrainment_rate_coefficient_shallow_convection
-  long_name = entrainment rate coefficient for shal conv.
+  long_name = entrainment rate coefficient for shallow convection
   units = none
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[c0s]
+[c0]
   standard_name = rain_conversion_parameter_shallow_convection
-  long_name = convective rain conversion parameter for shal conv.
+  long_name = convective rain conversion parameter for shallow convection
   units = m-1
   dimensions = ()
   type = real
@@ -397,7 +431,7 @@
   optional = F
 [c1]
   standard_name = detrainment_conversion_parameter_shallow_convection
-  long_name = convective detrainment conversion parameter for shal conv.
+  long_name = convective detrainment conversion parameter for shallow convection
   units = m-1
   dimensions = ()
   type = real
@@ -406,17 +440,8 @@
   optional = F
 [pgcon]
   standard_name = momentum_transport_reduction_factor_pgf_shallow_convection
-  long_name = reduction factor in momentum transport due to shal conv. induced pressure gradient force
+  long_name = reduction factor in momentum transport due to shallow convection induced pressure gradient force
   units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[asolfac]
-  standard_name = aerosol_aware_parameter_shallow_convection
-  long_name = aerosol-aware parameter inversely proportional to CCN number concentraion from Lim (2011) for shal conv.
-  units = none
   dimensions = ()
   type = real
   kind = kind_phys
