@@ -1,6 +1,6 @@
 !> \file satmedmfvdifq.F
-!! This file  contains the CCPP-compliant SATMEDMF scheme (HAFS version) which computes
-!! subgrid vertical turbulence mixing using scale-aware TKE-based moist
+!! This file contains the CCPP-compliant SATMEDMF scheme (updated version) which
+!! computes subgrid vertical turbulence mixing using scale-aware TKE-based moist
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
 
       module satmedmfvdifq
@@ -33,10 +33,10 @@
       subroutine satmedmfvdifq_finalize ()
       end subroutine satmedmfvdifq_finalize
 
-!> \defgroup satmedmfq GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF, HAFS version) Scheme Module
+!> \defgroup satmedmfq GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF, updated version) Scheme Module
 !! @{
 !! \brief This subroutine contains all of the logic for the
-!! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF, HAFS version) scheme.
+!! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF, updated version) scheme.
 !!
 !> \section arg_table_satmedmfvdifq_run Argument Table
 !! \htmlinclude satmedmfvdifq_run.html

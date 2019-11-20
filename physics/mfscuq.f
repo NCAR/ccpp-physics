@@ -1,6 +1,6 @@
 !>\file mfscuq.f
 !! This file contains the mass flux and downdraft parcel preperties
-!! parameterization for stratocumulus-top-driven turbulence (HAFS version).
+!! parameterization for stratocumulus-top-driven turbulence (updated version).
 
 !>\ingroup satmedmfq
 !! This subroutine computes mass flux and downdraft parcel properties

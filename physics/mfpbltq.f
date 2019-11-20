@@ -1,7 +1,7 @@
 !>\file mfpbltq.f
 !! This file contains the subroutine that calculates mass flux and
 !! updraft parcel properties for thermals driven by surface heating 
-!! for use in the TKE-EDMF PBL scheme (HAFS version).
+!! for use in the TKE-EDMF PBL scheme (updated version).
 
 !>\ingroup satmedmfq
 !! This subroutine computes mass flux and updraft parcel properties for
