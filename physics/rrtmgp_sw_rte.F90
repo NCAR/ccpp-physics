@@ -175,6 +175,7 @@ contains
        ! Compute clear-sky fluxes (if requested)
        ! Clear-sky fluxes are gas+aerosol
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol_daylit%increment(sw_optical_props_clrsky_daylit))
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky_daylit%delta_scale())
        if (l_ClrSky_HR) then
           call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
                sw_optical_props_clrsky_daylit,     & ! IN  - optical-properties
@@ -190,6 +191,7 @@ contains
        endif
 
        ! Compute all-sky fluxes
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%delta_scale())
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%increment(sw_optical_props_clrsky_daylit))
        call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
             sw_optical_props_clrsky_daylit,     & ! IN  - optical-properties
