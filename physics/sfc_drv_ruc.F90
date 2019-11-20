@@ -139,11 +139,11 @@ module lsm_ruc
 ! DH* TODO - make order of arguments the same as in the metadata table
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, kdt, im, nlev, lsoil_ruc, lsoil, zs,     &
-     &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf,              &
+     &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,       &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, zf, ddvel, shdmin, shdmax, alvwf, alnwf,            &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
-     &       smc, stc, slc, lsm_ruc, lsm, land, islimsk,                &
+     &       smc, stc, slc, lsm_ruc, lsm, land, islimsk, rdlai,         &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       smcwlt2, smcref2, wspd, do_mynnsfclay,                     &
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,& !  constants
@@ -178,6 +178,8 @@ module lsm_ruc
      &       ch, prsl1, ddvel, shdmin, shdmax,                          &
      &       snoalb, alvwf, alnwf, zf, qc, q1, wspd
 
+      real (kind=kind_phys), dimension(:), intent(in) :: laixy
+
       real (kind=kind_phys),  intent(in) :: delt
       real (kind=kind_phys),  intent(in) :: con_cp, con_rv, con_g,      &
                                             con_pi, con_rd,             &
@@ -186,6 +188,8 @@ module lsm_ruc
       logical, dimension(im), intent(in) :: flag_iter, flag_guess, land
       integer, dimension(im), intent(in) :: islimsk ! sea/land/ice mask (=0/1/2)
       logical,                intent(in) :: do_mynnsfclay
+
+      logical,                intent(in) :: rdlai
 
 !  ---  in/out:
       integer, dimension(im), intent(inout) :: soiltyp, vegtype
@@ -316,6 +320,8 @@ module lsm_ruc
                                lsm_ruc, lsm,                             & ! in
                                zs, sh2o, smfrkeep, tslb, smois, wetness, & ! out
                                me, master, errmsg, errflg)
+
+        xlai = 0.
 
       endif ! flag_init=.true.,iter=1
 !-- end of initialization
@@ -516,10 +522,10 @@ module lsm_ruc
           ffrozp(i,j) = real(nint(srflag(i)),kind_phys)
         endif
 
-        !tgs - for now set rdlai2d to .false., WRF has LAI maps, and RUC LSM
-        !      uses rdlai2d = .true.
-        rdlai2d = .false.
-        !if( .not. rdlai2d) xlai = lai_data(vtype)
+        !tgs - rdlai is .false. when the LAI data is not available in the
+        !    - INPUT/sfc_data.nc
+
+        rdlai2d = rdlai
 
         conflx2(i,1,j)  = zf(i) * 2. ! factor 2. is needed to get the height of
                                      ! atm. forcing inside RUC LSM (inherited
@@ -610,6 +616,8 @@ module lsm_ruc
         snoalb1d(i,j) = snoalb(i)
         albbck(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
         alb(i,j)      = sfalb(i)
+
+        if(rdlai2d) xlai(i,j) = laixy(i)
 
         tbot(i,j) = tg3(i)
 
@@ -806,8 +814,7 @@ module lsm_ruc
      &          chs(i,j), flqc(i,j), flhc(i,j),                              &
 !  ---  input/outputs:
      &          wet(i,j), cmc(i,j), shdfac(i,j), alb(i,j), znt(i,j),         &
-     &          z0(i,j), snoalb1d(i,j), albbck(i,j),                         &
-!     &          z0, snoalb1d, alb, xlai,                                     &
+     &          z0(i,j), snoalb1d(i,j), albbck(i,j), xlai(i,j),              &
      &          landusef(i,:,j), nlcat,                                      &
 !  --- mosaic_lu and mosaic_soil are moved to the namelist
 !     &          mosaic_lu, mosaic_soil,                                      &

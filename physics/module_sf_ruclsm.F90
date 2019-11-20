@@ -67,7 +67,7 @@ CONTAINS
                    Z3D,P8W,T3D,QV3D,QC3D,RHO3D,                  &
                    GLW,GSW,EMISS,CHKLOWQ, CHS,                   &
                    FLQC,FLHC,MAVAIL,CANWAT,VEGFRA,ALB,ZNT,       &
-                   Z0,SNOALB,ALBBCK,                             & !Z0,SNOALB,ALBBCK,LAI, &
+                   Z0,SNOALB,ALBBCK,LAI,                         & 
                    landusef, nlcat,                              & ! mosaic_lu, mosaic_soil, &
                    soilctop, nscat,                              &
                    QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
@@ -218,6 +218,7 @@ CONTAINS
                                                          CANWAT, & ! new
                                                          SNOALB, &
                                                             ALB, &
+                                                            LAI, &
                                                           EMISS, &
                                                          MAVAIL, & 
                                                          SFCEXC, &
@@ -269,7 +270,6 @@ CONTAINS
                                                              PC, &
                                                       SFCRUNOFF, &
                                                        UDRUNOFF, &
-                                                            LAI, &
                                                          EMISSL, &
                                                            ZNTL, &
                                                         LMAVAIL, &
