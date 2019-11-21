@@ -1235,7 +1235,7 @@
   optional = F
 [SWVISDIR] 
   standard_name = direct_visible_component_of_shortwave_radiation
-  long_name =
+  long_name = :wq!
   units = 
   dimensions = (horizontal_dimension)
   type = real

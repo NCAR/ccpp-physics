@@ -1639,6 +1639,265 @@
 
         end function lin_interpol2
 
+!MZ: The following four subroutines are adapted from WRF radiation
+!driver:
+! - ozn_time_int()
+! - ozn_p_int()
+! - aer_time_init()
+! - aer_p_int ()
+
+
+        SUBROUTINE ozn_time_int(julday,julian,ozmixm,ozmixt,levsiz,     &
+                                num_months,                             &
+                                ids , ide , jds , jde , kds , kde ,     &
+                                ims , ime , jms , jme , kms , kme ,     &
+                                its , ite , jts , jte , kts , kte )
+
+! adapted from oznint from CAM module
+!  input: ozmixm - read from physics_init
+! output: ozmixt - time interpolated
+
+
+         IMPLICIT NONE
+
+         INTEGER,    INTENT(IN) ::           ids,ide, jds,jde, kds,kde, &
+                                             ims,ime, jms,jme, kms,kme, &
+                                             its,ite, jts,jte, kts,kte
+
+         INTEGER,      INTENT(IN   )    ::   levsiz, num_months
+
+         REAL,  DIMENSION( ims:ime, levsiz, jms:jme, num_months ),      &
+                       INTENT(IN   )    ::           ozmixm
+
+         INTEGER, INTENT(IN )      ::        JULDAY
+         REAL,    INTENT(IN )      ::        JULIAN
+
+         REAL,  DIMENSION( ims:ime, levsiz, jms:jme ),      &
+                     INTENT(OUT  ) ::           ozmixt
+
+         !Local
+         REAL      :: intJULIAN
+         integer   :: np1,np,nm,m,k,i,j
+         integer   :: IJUL
+         integer, dimension(12) ::  date_oz
+         data date_oz/16, 45, 75, 105, 136, 166, 197, 228, 258, 289, 319, 350/
+         real, parameter :: daysperyear = 365.  ! number of days in a year
+         real      :: cdayozp, cdayozm
+         real      :: fact1, fact2, deltat
+         logical   :: finddate
+         logical   :: ozncyc
+         CHARACTER(LEN=256) :: msgstr
+
+         ozncyc = .true.
+         ! JULIAN starts from 0.0 at 0Z on 1 Jan.
+         intJULIAN = JULIAN + 1.0       ! offset by one day
+         ! jan 1st 00z is julian=1.0 here
+         IJUL=INT(intJULIAN)
+!  Note that following will drift.
+!    Need to use actual month/day info to compute julian.
+         intJULIAN=intJULIAN-FLOAT(IJUL)
+         IJUL=MOD(IJUL,365)
+         IF(IJUL.EQ.0)IJUL=365
+         intJULIAN=intJULIAN+IJUL
+         np1=1
+         finddate=.false.
+
+
+         do m=1,12
+            if(date_oz(m).gt.intjulian.and..not.finddate) then
+              np1=m
+              finddate=.true.
+            endif
+         enddo
+         cdayozp=date_oz(np1)
+
+         if(np1.gt.1) then
+            cdayozm=date_oz(np1-1)
+            np=np1
+            nm=np-1
+         else
+            cdayozm=date_oz(12)
+            np=np1
+            nm=12
+         endif
+
+!  call getfactors(ozncyc,np1, cdayozm, cdayozp,intjulian, &
+!                   fact1, fact2)
+!
+! Determine time interpolation factors.  Account for December-January
+! interpolation if dataset is being cycled yearly.
+!
+        if (ozncyc .and. np1 == 1) then            ! Dec-Jan interpolation
+           deltat = cdayozp + daysperyear - cdayozm
+           if (intjulian > cdayozp) then           ! We are in December
+              fact1 = (cdayozp + daysperyear - intjulian)/deltat
+              fact2 = (intjulian - cdayozm)/deltat
+            else                                   ! We are in January
+              fact1 = (cdayozp - intjulian)/deltat
+              fact2 = (intjulian + daysperyear - cdayozm)/deltat
+            end if
+        else
+            deltat = cdayozp - cdayozm
+            fact1 = (cdayozp - intjulian)/deltat
+            fact2 = (intjulian - cdayozm)/deltat
+        end if
+!
+! Time interpolation.
+!
+        do j=jts,jte
+        do k=1,levsiz
+        do i=its,ite
+            ozmixt(i,k,j) = ozmixm(i,k,j,nm)*fact1 + ozmixm(i,k,j,np)*fact2
+        end do
+        end do
+        end do
+
+        END SUBROUTINE ozn_time_int
+
+        SUBROUTINE ozn_p_int(p ,pin, levsiz, ozmixt, o3vmr,             &
+                              ids , ide , jds , jde , kds , kde ,       &
+                              ims , ime , jms , jme , kms , kme ,       &
+                              its , ite , jts , jte , kts , kte )
+
+!-----------------------------------------------------------------------
+!
+! Purpose: Interpolate ozone from current time-interpolated values to
+! model levels
+!
+! Method: Use pressure values to determine interpolation levels
+!
+! Author: Bruce Briegleb
+! WW: Adapted for general use
+!
+!--------------------------------------------------------------------------
+        implicit none
+!--------------------------------------------------------------------------
+!
+! Arguments
+!
+        INTEGER,    INTENT(IN) ::           ids,ide, jds,jde, kds,kde,  &
+                                            ims,ime, jms,jme, kms,kme,  &
+                                            its,ite, jts,jte, kts,kte
+
+        integer, intent(in) :: levsiz              ! number of ozone layers
+
+        real, intent(in) :: p(ims:ime,kms:kme,jms:jme)   ! level pressures (mks, bottom-up)
+        real, intent(in) :: pin(levsiz)        ! ozone data level pressures (mks, top-down)
+        real, intent(in) :: ozmixt(ims:ime,levsiz,jms:jme) ! ozone mixing ratio
+
+        real, intent(out) :: o3vmr(ims:ime,kms:kme,jms:jme) ! ozone volume mixing ratio
+!
+! local storage
+!
+        real    pmid(its:ite,kts:kte)
+        integer i,j                 ! longitude index
+        integer k, kk, kkstart, kout! level indices
+        integer kupper(its:ite)     ! Level indices for interpolation
+        integer kount               ! Counter
+        integer ncol, pver
+
+        real    dpu                 ! upper level pressure difference
+        real    dpl                 ! lower level pressure difference
+
+        ncol = ite - its + 1
+        pver = kte - kts + 1
+
+
+        do j=jts,jte
+!
+! Initialize index array
+!
+       !  do i=1, ncol
+          do i=its, ite
+             kupper(i) = 1
+          end do
+!
+! Reverse the pressure array, and pin is in Pa, the same as model pmid
+!
+          do k = kts,kte
+             kk = kte - k + kts
+             do i = its,ite
+                pmid(i,kk) = p(i,k,j)
+             enddo
+          enddo
+
+      do k=1,pver
+
+      kout = pver - k + 1
+!     kout = k
+!
+! Top level we need to start looking is the top level for the previous k
+! for all longitude points
+!
+      kkstart = levsiz
+!     do i=1,ncol
+      do i=its,ite
+         kkstart = min0(kkstart,kupper(i))
+      end do
+      kount = 0
+!
+! Store level indices for interpolation
+!
+      do kk=kkstart,levsiz-1
+!        do i=1,ncol
+         do i=its,ite
+            if (pin(kk).lt.pmid(i,k) .and. pmid(i,k).le.pin(kk+1)) then
+               kupper(i) = kk
+               kount = kount + 1
+            end if
+         end do
+!
+! If all indices for this level have been found, do the interpolation
+! and
+! go to the next level
+!
+         if (kount.eq.ncol) then
+!           do i=1,ncol
+            do i=its,ite
+               dpu = pmid(i,k) - pin(kupper(i))
+               dpl = pin(kupper(i)+1) - pmid(i,k)
+               o3vmr(i,kout,j) = (ozmixt(i,kupper(i),j)*dpl + &
+                             ozmixt(i,kupper(i)+1,j)*dpu)/(dpl + dpu)
+            end do
+            goto 35
+         end if
+      end do
+!
+! If we've fallen through the kk=1,levsiz-1 loop, we cannot interpolate
+! and
+! must extrapolate from the bottom or top ozone data level for at least
+! some
+! of the longitude points.
+!
+!     do i=1,ncol
+      do i=its,ite
+         if (pmid(i,k) .lt. pin(1)) then
+            o3vmr(i,kout,j) = ozmixt(i,1,j)*pmid(i,k)/pin(1)
+         else if (pmid(i,k) .gt. pin(levsiz)) then
+            o3vmr(i,kout,j) = ozmixt(i,levsiz,j)
+         else
+            dpu = pmid(i,k) - pin(kupper(i))
+            dpl = pin(kupper(i)+1) - pmid(i,k)
+            o3vmr(i,kout,j) = (ozmixt(i,kupper(i),j)*dpl + &
+                          ozmixt(i,kupper(i)+1,j)*dpu)/(dpl + dpu)
+         end if
+      end do
+
+      if (kount.gt.ncol) then
+        !mz call wrf_error_fatal ('OZN_P_INT: Bad ozone data: non-monotonicity suspected')
+        write(0,*) "OZN_P_INT: Bad ozone data: non-monotonicity         &
+                    suspected"
+        return
+      end if
+35    continue
+
+      end do
+      end do
+
+      return
+      END SUBROUTINE ozn_p_int
+
+
 
       end module module_radiation_gases  !
 !========================================!

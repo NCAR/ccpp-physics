@@ -1036,7 +1036,192 @@
 !! @}
 !-----------------------------------
 
+!MZ* ZENITH() and CAL_MON_DAY() is adapted from HWRF:MODULE_RA_GFDLETA
+
+
+!----------------------------------------------------------------------
+
+      SUBROUTINE ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,GLON,GLAT,CZEN,     &
+                        MYIS,MYIE,MYJS,MYJE,                           & IDS,IDE, JDS,JDE, KDS,KDE,                     &
+                        IMS,IME, JMS,JME, KMS,KME,                     &
+                        ITS,ITE, JTS,JTE, KTS,KTE                      )
+!----------------------------------------------------------------------
+      IMPLICIT NONE
+!----------------------------------------------------------------------
+      INTEGER, INTENT(IN)        :: IDS,IDE, JDS,JDE, KDS,KDE ,        &
+                                    IMS,IME, JMS,JME, KMS,KME ,        &
+                                    ITS,ITE, JTS,JTE, KTS,KTE
+      INTEGER, INTENT(IN)        :: MYJS,MYJE,MYIS,MYIE
+
+      REAL,    INTENT(IN)        :: TIMES
+      REAL,    INTENT(OUT)       :: HOUR,DAYI
+      INTEGER, INTENT(IN)        :: IHRST
+
+      INTEGER, INTENT(IN), DIMENSION(3) :: IDAT
+      REAL,    INTENT(IN), DIMENSION(IMS:IME,JMS:JME) :: GLAT,GLON
+      REAL,    INTENT(OUT), DIMENSION(IMS:IME,JMS:JME) :: CZEN
+
+      REAL,    PARAMETER :: GSTC1=24110.54841,GSTC2=8640184.812866,    &
+                            GSTC3=9.3104E-2,GSTC4=-6.2E-6,             &
+                            PI=3.1415926,PI2=2.*PI,PIH=0.5*PI,         &
+!#$                         DEG2RD=1.745329E-2,OBLIQ=23.440*DEG2RD,    &
+                            DEG2RD=3.1415926/180.,OBLIQ=23.440*DEG2RD, &
+                            ZEROJD=2451545.0
+
+      REAL    :: DAY,YFCTR,ADDDAY,STARTYR,DATJUL,DIFJD,SLONM,   &
+                 ANOM,SLON,DEC,RA,DATJ0,TU,STIM0,SIDTIM,HRANG
+      REAL    :: HRLCL,SINALT
+      INTEGER :: KMNTH,KNT,IDIFYR,J,I
+      LOGICAL :: LEAP
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+      INTEGER :: MONTH (12)
+!-----------------------------------------------------------------------
+      DATA MONTH/31,28,31,30,31,30,31,31,30,31,30,31/
+!***********************************************************************
+!     SAVE MONTH
+      DAY=0.
+      LEAP=.FALSE.
+      IF(MOD(IDAT(3),4).EQ.0)THEN
+        MONTH(2)=29
+        LEAP=.TRUE.
+      ENDIF
+      IF(IDAT(1).GT.1)THEN
+        KMNTH=IDAT(1)-1
+        DO 10 KNT=1,KMNTH
+        DAY=DAY+REAL(MONTH(KNT))
+   10   CONTINUE
+      ENDIF
+!***
+!***  CALCULATE EXACT NUMBER OF DAYS FROM BEGINNING OF YEAR TO
+!***  FORECAST TIME OF INTEREST 
+!***
+      DAY=DAY+REAL(IDAT(2)-1)+(REAL(IHRST)+TIMES/3600.)/24.
+      DAYI=REAL(INT(DAY)+1)
+      HOUR=(DAY-DAYI+1.)*24.
+      YFCTR=2000.-IDAT(3)
+!-----------------------------------------------------------------------
+!***
+!***  FIND CELESTIAL LONGITUDE OF THE SUN THEN THE SOLAR DECLINATION AND
+!***  RIGHT ASCENSION.
+!***
+!-----------------------------------------------------------------------
+      IDIFYR=IDAT(3)-2000
+
+!***
+!***  FIND JULIAN DATE OF START OF THE RELEVANT YEAR
+!***  ADDING IN LEAP DAYS AS NEEDED
+!***
+      IF(IDIFYR.LT.0)THEN
+        ADDDAY=REAL(IDIFYR/4)
+      ELSE
+        ADDDAY=REAL((IDIFYR+3)/4)
+      ENDIF
+      STARTYR=ZEROJD+IDIFYR*365.+ADDDAY-0.5
+!***
+!***  THE JULIAN DATE OF THE TIME IN QUESTION
+!***
+      DATJUL=STARTYR+DAY
 !
+!***  DIFFERENCE OF ACTUAL JULIAN DATE FROM JULIAN DATE
+!***  AT 00H 1 January 2000
+!
+      DIFJD=DATJUL-ZEROJD
+!
+!***  MEAN GEOMETRIC LONGITUDE OF THE SUN
+!
+      SLONM=(280.460+0.9856474*DIFJD)*DEG2RD+YFCTR*PI2
+!
+!***  THE MEAN ANOMOLY
+!
+      ANOM=(357.528+0.9856003*DIFJD)*DEG2RD
+!
+!***  APPARENT GEOMETRIC LONGITUDE OF THE SUN
+!
+      SLON=SLONM+(1.915*SIN(ANOM)+0.020*SIN(2.*ANOM))*DEG2RD
+      IF(SLON.GT.PI2)SLON=SLON-PI2
+!
+!***  DECLINATION AND RIGHT ASCENSION
+! 
+      DEC=ASIN(SIN(SLON)*SIN(OBLIQ))
+      RA=ACOS(COS(SLON)/COS(DEC))
+      IF(SLON.GT.PI)RA=PI2-RA
+!***
+!***  FIND THE GREENWICH SIDEREAL TIME THEN THE LOCAL SOLAR
+!***  HOUR ANGLE.
+!***
+      DATJ0=STARTYR+DAYI-1.
+      TU=(DATJ0-2451545.)/36525.
+      STIM0=GSTC1+TU*(GSTC2+GSTC3*TU+GSTC4*TU*TU)
+      SIDTIM=STIM0/3600.+YFCTR*24.+1.00273791*HOUR
+      SIDTIM=SIDTIM*15.*DEG2RD
+      IF(SIDTIM.LT.0.)SIDTIM=SIDTIM+PI2
+      IF(SIDTIM.GT.PI2)SIDTIM=SIDTIM-PI2
+      HRANG=SIDTIM-RA
+!
+      DO 100 J=MYJS,MYJE
+      DO 100 I=MYIS,MYIE
+!     HRLCL=HRANG-GLON(I,J)
+      HRLCL=HRANG+GLON(I,J)+PI2
+!***
+!***  THE ZENITH ANGLE IS THE COMPLEMENT OF THE ALTITUDE THUS THE
+!***  COSINE OF THE ZENITH ANGLE EQUALS THE SINE OF THE ALTITUDE.
+!***
+      SINALT=SIN(DEC)*SIN(GLAT(I,J))+COS(DEC)*COS(HRLCL)* &
+       COS(GLAT(I,J))
+      IF(SINALT.LT.0.)SINALT=0.
+      CZEN(I,J)=SINALT
+  100 CONTINUE
+!***
+!***  IF THE FORECAST IS IN A DIFFERENT YEAR THAN THE START TIME,
+!***  RESET DAYI TO THE PROPER DAY OF THE NEW YEAR (IT MUST NOT BE
+!***  RESET BEFORE THE SOLAR ZENITH ANGLE IS COMPUTED).
+!***
+      IF(DAYI.GT.365.)THEN
+        IF(.NOT.LEAP)THEN
+          DAYI=DAYI-365.
+        ELSEIF(LEAP.AND.DAYI.GT.366.)THEN
+          DAYI=DAYI-366.
+        ENDIF
+      ENDIF
+!
+      END SUBROUTINE ZENITH
+
+!---------------------------------------------------------------------
+      SUBROUTINE CAL_MON_DAY(JULDAY,julyr,Jmonth,Jday)
+!---------------------------------------------------------------------
+      IMPLICIT NONE
+!-----------------------------------------------------------------------
+      INTEGER, INTENT(IN) :: JULDAY,julyr
+      INTEGER, INTENT(OUT) :: Jmonth,Jday
+      LOGICAL :: LEAP,NOT_FIND_DATE
+      INTEGER :: MONTH (12),itmpday,itmpmon,i
+!-----------------------------------------------------------------------
+      DATA MONTH/31,28,31,30,31,30,31,31,30,31,30,31/
+!***********************************************************************
+      NOT_FIND_DATE = .true.
+
+      itmpday = JULDAY
+      itmpmon = 1
+      LEAP=.FALSE.
+      IF(MOD(julyr,4).EQ.0)THEN
+         MONTH(2)=29
+         LEAP=.TRUE.
+      ENDIF
+
+      i = 1
+      DO WHILE (NOT_FIND_DATE)
+         IF(itmpday.GT.MONTH(i))THEN
+            itmpday=itmpday-MONTH(i)
+         ELSE
+            Jday=itmpday
+            Jmonth=i
+            NOT_FIND_DATE = .false.
+         ENDIF
+         i = i+1
+      END DO
+
+      END SUBROUTINE CAL_MON_DAY
 !...........................................!
       end module module_radiation_astronomy !
 !===========================================!

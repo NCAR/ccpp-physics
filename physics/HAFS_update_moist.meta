@@ -1,0 +1,185 @@
+[ccpp-arg-table]
+  name = HAFS_update_moist_run
+  type = scheme
+[cwm]
+  standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
+  long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qv]
+  standard_name = water_vapor_specific_humidity_updated_by_physics
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[f_ice]
+  standard_name = fraction_of_ice_water_cloud
+  long_name = fraction of ice water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F 
+[f_rain]
+  standard_name = fraction_of_rain_water_cloud
+  long_name = fraction of rain water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qc]
+  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qi]
+  standard_name = ice_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensate) mixing ratio of ice water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qr]
+  standard_name = rain_water_mixing_ratio_updated_by_physics
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[imp_physics]
+  standard_name = flag_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[qv_r]
+  standard_name = humidity_mixing_ratio
+  long_name = the ratio of the mass of water vapor to the mass of dry air
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[qc_r]
+  standard_name = cloud_liquid_water_mixing_ratio
+  long_name = the ratio of the mass of liquid water to the mass of dry air
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[qr_r]
+  standard_name = cloud_rain_water_mixing_ratio
+  long_name = the ratio of the mass rain water to the mass of dry air
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out 
+  optional = F
+[qi_r]
+  standard_name = cloud_ice_mixing_ratio
+  long_name = the ratio of the mass of ice to mass of dry air
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[qs_r]
+  standard_name = cloud_snow_mixing_ratio
+  long_name = the ratio of the mass of snow to mass of dry air
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[qg_r]
+  standard_name = mass_weighted_rime_factor_updated_by_physics
+  long_name = mass weighted rime factor updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[spec_adv]
+  standard_name = flag_for_individual_cloud_species_advected
+  long_name = flag for individual cloud species advected
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lm]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ime]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+########################################################################
+[ccpp-arg-table]
+  name = HAFS_update_moist_finalize
+  type = scheme
+########################################################################
+[ccpp-arg-table]
+  name = HAFS_update_moist_init
+  type = scheme
