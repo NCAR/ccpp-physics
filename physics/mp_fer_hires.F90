@@ -169,9 +169,6 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev) ! QRIMEF
-    !  real(kind_phys),   intent(  out) :: qc_m(1:ncol,1:nlev)
-    !  real(kind_phys),   intent(  out) :: qr_m(1:ncol,1:nlev)
-    !  real(kind_phys),   intent(  out) :: qi_m(1:ncol,1:nlev)
 
       real(kind_phys),   intent(inout) :: prec(1:ncol)
 !      real(kind_phys)                  :: acprec(1:ncol)   !MZ: change to local
