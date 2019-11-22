@@ -685,8 +685,6 @@
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
       ! dqdti may not be allocated
       real(kind=kind_phys), dimension(:,:),           intent(inout) :: dqdti
-      !integer,                        intent(in)    :: mpirank
-      !integer,                        intent(in)    :: mpiroot
 
 
       character(len=*), intent(out) :: errmsg
