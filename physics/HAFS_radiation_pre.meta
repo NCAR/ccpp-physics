@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = HAFS_update_moist_run
+  name = HAFS_radiation_pre_run
   type = scheme
 [cwm]
   standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
@@ -64,22 +64,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[imp_physics]
-  standard_name = flag_for_microphysics_scheme
-  long_name = choice of microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_fer_hires]
-  standard_name = flag_for_fer_hires_microphysics_scheme
-  long_name = choice of Ferrier-Aligo microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [qv_r]
   standard_name = humidity_mixing_ratio
   long_name = the ratio of the mass of water vapor to the mass of dry air
@@ -126,21 +110,13 @@
   intent = out
   optional = F
 [qg_r]
-  standard_name = mass_weighted_rime_factor_updated_by_physics
-  long_name = mass weighted rime factor updated by physics
+  standard_name = cloud_graupel_mixing_ratio
+  long_name = the ratio of the mass of gaupel to mass of dry air 
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
-  optional = F
-[spec_adv]
-  standard_name = flag_for_individual_cloud_species_advected
-  long_name = flag for individual cloud species advected
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
   optional = F
 [lm]
   standard_name = vertical_dimension
@@ -175,11 +151,3 @@
   type = integer
   intent = out
   optional = F
-########################################################################
-[ccpp-arg-table]
-  name = HAFS_update_moist_finalize
-  type = scheme
-########################################################################
-[ccpp-arg-table]
-  name = HAFS_update_moist_init
-  type = scheme

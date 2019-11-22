@@ -9899,8 +9899,9 @@
 !------------------------------------------------------------------
 MODULE module_ra_rrtmg_sw
 
-use module_model_constants, only : cp
-USE module_wrf_error
+!mz use module_model_constants, only : cp
+     use physcons, only:con_cp
+!mz USE module_wrf_error
 #if (HWRF == 1)
 USE module_state_description, ONLY : FER_MP_HIRES, FER_MP_HIRES_ADVECT, ETAMP_HWRF 
 #else

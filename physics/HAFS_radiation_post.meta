@@ -1,0 +1,20 @@
+[ccpp-arg-table]
+  name = HAFS_radiation_pre_run
+  type = scheme
+
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = in
+  optional = F
+[nlev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+

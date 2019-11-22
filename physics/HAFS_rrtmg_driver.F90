@@ -708,10 +708,7 @@ CONTAINS
         ENDDO
         ENDDO
 
-
-
-
-             write(0,*) 'CALL rrtmg_sw'
+             if(mpirank==mpiroot)write(0,*) 'CALL HAFS_rrtmg_sw'
              CALL RRTMG_SWRAD(                                         &
                      RTHRATENSW=RTHRATENSW,                            &
                      HRSWPD=HRSWPD,                                    & ! J. Henderson AER
