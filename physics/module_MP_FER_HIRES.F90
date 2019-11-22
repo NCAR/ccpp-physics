@@ -255,20 +255,19 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------------------------------------------------------------------
       IMPLICIT NONE
 !-----------------------------------------------------------------------
-      INTEGER,INTENT(IN) :: D_SS,IMS,IME,JMS,JME,LM,DX1    !ZM ,ITIMESTEP
+      INTEGER,INTENT(IN) :: D_SS,IMS,IME,JMS,JME,LM,DX1    
       REAL, INTENT(IN) 	    :: DT,RHgrd
       INTEGER,   INTENT(IN) :: THREADS
-      REAL, INTENT(IN),     DIMENSION(ims:ime, jms:jme, lm)::      &
+      REAL, INTENT(IN),     DIMENSION(ims:ime, jms:jme, lm)::           &
      &                      dz8w,p_phy,pi_phy,rho_phy
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme, lm)::      &
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme, lm)::           &
      &                      th_phy,t_phy,q,qt
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme, lm ) ::    &
-!Aligo Oct 23,2019: dry mixing ratio for cloud species
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme, lm ) ::          &
      &                      qc,qr,qs
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme,lm) ::    &
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme,lm) ::           &
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY
-      REAL, INTENT(OUT),    DIMENSION(ims:ime, jms:jme,lm) ::      & !jul28
-     &                      refl_10cm               !jul28
+      REAL, INTENT(OUT),    DIMENSION(ims:ime, jms:jme,lm) ::           & 
+     &                      refl_10cm               
       REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme)           ::     &
      &                                                   RAINNC,RAINNCV
       REAL, INTENT(OUT),    DIMENSION(ims:ime,jms:jme):: SR
@@ -295,12 +294,12 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       INTEGER :: LSFC,I_index,J_index,L
       INTEGER,DIMENSION(ims:ime,jms:jme) :: LMH
       REAL :: TC,QI,QRdum,QW,Fice,Frain,DUM,ASNOW,ARAIN
-      REAL,DIMENSION(lm) :: P_col,Q_col,T_col,WC_col,              &
+      REAL,DIMENSION(lm) :: P_col,Q_col,T_col,WC_col,                   &
          RimeF_col,QI_col,QR_col,QW_col, THICK_col,DPCOL,pcond1d,       &
          pidep1d,piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,     &
-         pimlt1d,praut1d,pracw1d,prevp1d,pisub1d,pevap1d,DBZ_col,       & !jul28
+         pimlt1d,praut1d,pracw1d,prevp1d,pisub1d,pevap1d,DBZ_col,       & 
          NR_col,NS_col,vsnow1d,vrain11d,vrain21d,vci1d,NSmICE1d,        &
-         INDEXS1d,INDEXR1d,RFlag1d,RHC_col   !jul28  !jun01
+         INDEXS1d,INDEXR1d,RFlag1d,RHC_col   
 !
 !-----------------------------------------------------------------------
 !**********************************************************************
@@ -344,16 +343,6 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------
 ! MZ: HWRF practice end
 !
-
-!MZ: t_phy is a state variable in FV3
-!      DO j = jms,jme
-!      DO k = 1,lm
-!      DO i = ims,ime
-!        t_phy(i,j,k) = th_phy(i,j,k)*pi_phy(i,j,k)
-!     endif
-!      ENDDO
-!      ENDDO
-!      ENDDO
 
       DO j = jms,jme
        DO i = ims,ime

@@ -222,8 +222,8 @@
   intent = inout
   optional = F
 [train]
-  standard_name = accumulated_tendency_of_air_temperature_due_to_FA_scheme
-  long_name = accumulated tendency of air temperature due to FA MP scheme
+  standard_name = accumulated_change_of_air_temperature_due_to_FA_scheme
+  long_name = accumulated change of air temperature due to FA MP scheme
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
