@@ -748,8 +748,7 @@
 !                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6 .or.  &
-               Model%imp_physics == 15) then
+        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.
@@ -765,6 +764,15 @@
                          cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
                          Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
                          clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs
+
+        elseif(Model%imp_physics == 15) then
+          call progcld2 (plyr,plvl,tlyr,qlyr,qstl,rhly,tvly,tracer1,&  !  --- inputs
+                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+                         im, lmk, lmp,                              &
+                         Model%lmfshal,Model%lmfdeep2,              &
+                         clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs
+!  ---  output
 
         endif                            ! end if_imp_physics
 
