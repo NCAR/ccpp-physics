@@ -273,7 +273,7 @@ module mp_fer_hires
             IF (T(I,K) < T_ICEK) F_ICE(I,K)=1.
          ELSE
             F_ICE(I,K)=MAX( 0., MIN(1., QI(I,K)/cwm(I,K) ) )
-            F_RIMEF(I,K)=QG(I,K)/QI(I,K)
+            F_RIMEF(I,K)=QG(I,K) !/QI(I,K) Chunxi Nov 25,2019
          ENDIF
          IF (QR(I,K) <= EPSQ) THEN
             F_RAIN(I,K)=0.
