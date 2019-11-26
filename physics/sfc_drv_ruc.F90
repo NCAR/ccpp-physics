@@ -829,7 +829,6 @@ module lsm_ruc
      &          its,ite, jts,jte, kts,kte                                    )
 
         if(debug_print) then
-          !if(me==0 .and. i==ipr) then
           write (0,*)'after sneqv(i,j) =',i,j,sneqv(i,j)
           write (0,*)'after snowh(i,j) =',i,j,snowh(i,j)
           write (0,*)'after sncovr(i,j) =',i,j,sncovr(i,j)
