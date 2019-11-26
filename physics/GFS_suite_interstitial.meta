@@ -1454,6 +1454,14 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_4_run
   type = scheme
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
