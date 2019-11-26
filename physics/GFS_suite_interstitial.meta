@@ -1454,14 +1454,6 @@
 [ccpp-arg-table]
   name = GFS_suite_interstitial_4_run
   type = scheme
-[imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
-  long_name = flag for mass-flux deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -1708,6 +1700,22 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfdeepcnv_gf]
+  standard_name = flag_for_gf_deep_convection_scheme
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
