@@ -596,6 +596,7 @@ if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
      olss(i)       = 0.0
      ulow (i)      = 0.0
      dtfac(i)      = 1.0
+     rstoch(i)     = 0.0
      ldrag(i)      = .false.
      icrilv(i)     = .false.
      flag(i)       = .true.
