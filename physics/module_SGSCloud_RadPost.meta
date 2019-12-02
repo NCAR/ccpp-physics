@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = mynnrad_post_run
+  name = sgscloud_radpost_run
   type = scheme
 [ix]
   standard_name = horizontal_dimension
@@ -23,6 +23,22 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[flag_init]
+  standard_name = flag_for_first_time_step
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [qc]

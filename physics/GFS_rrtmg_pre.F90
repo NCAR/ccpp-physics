@@ -751,6 +751,7 @@
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, Model%uni_cld,               &
                          Model%lmfshal,Model%lmfdeep2,              &
+                         Coupling%qci_conv,                         &
                          cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
                          Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
                          clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs

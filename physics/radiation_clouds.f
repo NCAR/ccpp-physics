@@ -243,7 +243,7 @@
       integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
-     &                 cld_init, progcld5, progcld4o
+     &                 cld_init, progcld5, progcld4o, gethml
 
 
 ! =================
@@ -2340,7 +2340,8 @@
      &       xlat,xlon,slmsk,dz,delp,                                   & 
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &            
      &       IX, NLAY, NLP1,                                            &
-     &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &    
+     &       uni_cld, lmfshal, lmfdeep2, qci_conv, cldcov,              &    
+!    &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &    
      &       re_cloud,re_ice,re_snow,                                   & 
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
      &      )
@@ -2435,6 +2436,7 @@
      &       re_cloud, re_ice, re_snow 
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: clw
+      real (kind=kind_phys), dimension(:,:), intent(in) :: qci_conv   
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
@@ -2511,7 +2513,9 @@
 
         do k = 1, NLAY
           do i = 1, IX
-            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
+            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)  &
+     &                                +  qci_conv(i,k)
+!           clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
           enddo
         enddo
 !> - Find top pressure for each cloud domain for given latitude.

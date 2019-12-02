@@ -1,27 +1,28 @@
-!> \file module_MYNNrad_post.F90
+!> \file module_SGSCloud_RadPost.F90
 !!  Contains the post (interstitial) work after the call to the radiation schemes:
 !!    1) Restores the original qc & qi
 
-      MODULE mynnrad_post
+      MODULE sgscloud_radpost
 
       contains
 
-      subroutine mynnrad_post_init ()
-      end subroutine mynnrad_post_init
+      subroutine sgscloud_radpost_init ()
+      end subroutine sgscloud_radpost_init
 
-      subroutine mynnrad_post_finalize ()
-      end subroutine mynnrad_post_finalize
+      subroutine sgscloud_radpost_finalize ()
+      end subroutine sgscloud_radpost_finalize
 
-!>\defgroup gsd_mynnrad_post GSD mynnrad_post_run Module
+!>\defgroup sgscloud_radpost GSD sgscloud_radpost_run Module
 !>\ingroup gsd_mynn_edmf
 !!  This interstitial code restores the original resolved-scale clouds (qc and qi).
 #if 0
-!! \section arg_table_mynnrad_post_run Argument Table
-!! \htmlinclude mynnrad_post_run.html
+!! \section arg_table_sgscloud_radpost_run Argument Table
+!! \htmlinclude sgscloud_radpost_run.html
 !!
 #endif
-SUBROUTINE mynnrad_post_run(               &
+SUBROUTINE sgscloud_radpost_run(           &
      &     ix,im,levs,                     &
+     &     flag_init,flag_restart,         &
      &     qc,qi,                          &
      &     qc_save, qi_save,               &
      &     errmsg, errflg                  )
@@ -34,6 +35,7 @@ SUBROUTINE mynnrad_post_run(               &
 !------------------------------------------------------------------- 
 
       integer, intent(in)  :: ix, im, levs
+      logical,          intent(in)  :: flag_init, flag_restart
       real(kind=kind_phys), dimension(im,levs), intent(out) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(in)  :: qc_save, qi_save
       character(len=*), intent(out) :: errmsg
@@ -48,6 +50,11 @@ SUBROUTINE mynnrad_post_run(               &
       !write(0,*)"=============================================="
       !write(0,*)"in mynn rad post"
 
+      if (flag_init .and. (.not. flag_restart)) then
+        !write (0,*) 'Skip MYNNrad_post flag_init = ', flag_init
+        return
+      endif
+
      ! Add subgrid cloud information:
         do k = 1, levs
            do i = 1, im
@@ -61,8 +68,8 @@ SUBROUTINE mynnrad_post_run(               &
        ! print*,"===Finished restoring the resolved-scale clouds"
        ! print*,"qc_save:",qc_save(1,1)," qc:",qc(1,1)
 
-  END SUBROUTINE mynnrad_post_run
+  END SUBROUTINE sgscloud_radpost_run
 
 !###=================================================================
 
-END MODULE mynnrad_post
+END MODULE sgscloud_radpost
