@@ -5,7 +5,7 @@ MODULE HAFS_rrtmg_driver
 CONTAINS
 
    SUBROUTINE radiation_driver (ACFRCV ,ACFRST ,ALBEDO                  &
-              ,CFRACH ,CFRACL ,CFRACM    ,CZMEAN ,DT                    &
+              ,CZMEAN ,DT                                               &
               ,DZ8W   ,EMISS  ,GLW     ,GMT    ,GSW                     & 
               ,ITIMESTEP,JULDAY, JULIAN,JULYR                           &
               ,NCFRCV ,NCFRST ,NPHS  O3RAD  ,                           &
@@ -78,7 +78,7 @@ CONTAINS
               ,TAUAERlw15, TAUAERlw16  &
               ,progn                                            &
 #endif
-              ,ht,dx,dy                 &
+              ,dx,dy                 &
               ,SWUPFLX,SWUPFLXC,SWDNFLX,SWDNFLXC                          & ! Optional
               ,LWUPFLX,LWUPFLXC,LWDNFLX,LWDNFLXC                          & ! Optional
               ,ALSWVISDIR, ALSWVISDIF, ALSWNIRDIR, ALSWNIRDIF             & !fds ssib alb comp (06/2010)
@@ -360,9 +360,9 @@ CONTAINS
 
    INTEGER,INTENT(IN)                                       :: NPHS
    REAL, DIMENSION( ims:ime, jms:jme ),INTENT(OUT)          ::    &
-                                                      CFRACH,     & 
-                                                      CFRACL,     &
-                                                      CFRACM,     & 
+!mz                                                      CFRACH,     & 
+!mz                                                      CFRACL,     &
+!mz                                                      CFRACM,     & 
                                                       CZMEAN        
    REAL, DIMENSION( ims:ime, jms:jme ),                           &
          INTENT(INOUT)  ::                                        &
@@ -420,7 +420,7 @@ CONTAINS
 
 
      REAL, OPTIONAL, INTENT(IN) :: dx,dy
-     REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(IN)  :: ht
+!mz     REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(IN)  :: ht
 
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL ,       &
          INTENT(INOUT)  ::                       o3rad

@@ -37,7 +37,8 @@
       INTEGER,                   INTENT(IN   )    :: levsiz, n_ozmixm
       INTEGER,                   INTENT(IN   )    :: NCOL, NLAY, KDT
       INTEGER,                   INTENT(IN   )    :: alevsiz, no_src_types
-      INTEGER,                   INTENT(INOUT):: has_reqc, has_reqi, has_reqs
+      INTEGER,                   INTENT(INOUT)    :: has_reqc, has_reqi,&
+                                                     has_reqs
       INTEGER,                   INTENT(IN   )    :: mpirank
       INTEGER,                   INTENT(IN   )    :: mpiroot
       REAL(KIND_PHYS),  DIMENSION(1:ncol) , INTENT(IN) ::  XLAT, XLONG
@@ -111,16 +112,53 @@
       kme = levr
       kte = levr
 
+
+! Initialze ALBEDO in phy_init
+      ALBLND =0.2
+      
+      DO j=jts,jtf
+      DO i=its,itf
+         IF(XLAND(i,j) .LT. 1.5)THEN    !mz:land
+            IF(mminlu_loc .EQ. '    ') ALBBCK(i,j)=ALBLND
+            !EMBCK(i,j)=0.85
+            ALBEDO(i,j)=ALBBCK(i,j)
+            !EMISS(i,j)=EMBCK(i,j)
+            !THC(i,j)=THINLD
+            !ZNT(i,j)=ZZLND
+!#if  ! ( NMM_CORE == 1 )
+            !Z0(i,j)=ZZLND
+!#endif
+            !MAVAIL(i,j)=XMAVA
+         ELSE
+            IF(mminlu_loc .EQ. '    ') ALBBCK(i,j)=0.08
+            ALBEDO(i,j)=ALBBCK(i,j)
+            !EMBCK(i,j)=0.98
+            !EMISS(i,j)=EMBCK(i,j)
+            !THC(i,j)=THINLD
+            !ZNT(i,j)=ZZWTR
+!#if  ! ( NMM_CORE == 1 )
+            !Z0(i,j)=ZZWTR
+!#endif
+            !MAVAIL(i,j)=1.0
+         ENDIF
+
+      ENDDO
+      ENDDO
+
+
+
+
+
+
 !---------------------------------------------------------------------
 
 !-- calculate radiation time step
 
-      STEPRA = nint(RADT*60./DT)
-      STEPRA = max(STEPRA,1)
+!      STEPRA = nint(RADT*60./DT)
+!      STEPRA = max(STEPRA,1)
 
 !-- initialization
-
-
+!MZ: rad_reset 
       IF(KDT .LE. 1) THEN
       DO j=jts,jte
       DO k=kts,kte
@@ -182,32 +220,30 @@
       SUBROUTINE HAFS_radiation_run (NTSD,DT,JULDAY,JULYR,XTIME,JULIAN  &
      &                    ,IHRST,NPHS,GLAT,GLON                         &
      &                    ,NRADS,NRADL, DX                              &
-     &                    ,DETA1,DETA2,AETA1,AETA2,ETA1,ETA2,PDTOP,PT   &
-     &                    ,PD,RES,PINT,T,Q                              &
+     &                    ,p8w,prsl,tsfc                                & !p8w-prsi; psfc-prsl1
+     &                    ,T,Q                                          &
      &                    ,QV,QC,QI,QR,QS,QG                            & !MOIST: dry mixing ratio
-     &                    ,THS,ALBEDO,EPSR                              &
+     &                    ,ALBEDO,EPSR                                  &
      &                    ,F_ICE,F_RAIN                                 &
      &                    ,SM,HBM2,CLDFRA,RESTRT                        &
-     &                    ,RLWTT,RSWTT,RLWIN,RSWIN,RSWINC,RSWOUT        &
+     &                    ,RLWTT,RSWTT,RLWIN,RSWIN,RSWINC,RSWOUT,GSW,   &
      &                    ,RLWTOA,RSWTOA,CZMEAN                         &
-     &                    ,CFRACL,CFRACM,CFRACH,SIGT4                   &
+!mz     &                    ,SIGT4                                        &
      &                    ,ACFRST,NCFRST,ACFRCV,NCFRCV                  &
      &                    ,CUPPT,VEGFRC,SNOW,HTOP,HBOT                  &
-     &                    ,Z,SICE,NUM_AEROSOLC,NUM_OZMIXM,OZMIXM,PIN    &
+     &                    ,SICE, NUM_OZMIXM,OZMIXM,PIN                  & !z
      &                    ,LEVSIZ                                       &
      &                    ,RTHRATEN                                     &
      &                    ,re_cloud,re_ice,re_snow                      &
      &                    ,has_reqc,has_reqi,has_reqs                   &
-!mz grid ; new added
-     &                    ,swddir, swddni,swddif, swddirc,swddnic      &
-     &                    ,gx,bx,gg,bb,swdown_ref, swddir_ref          &
+     &                    ,swddir, swddni,swddif, swddirc,swddnic       &
+     &                    ,gx,bx,gg,bb,swdown_ref, swddir_ref           &
      &                    ,coszen_ref, coszen,hrang                     &
      &                    ,xlat,xlong                                   &
      &                    ,paerlev, ALEVSIZ,no_src_types,               &   !NML
      &                    ,CAM_ABS_FREQ_S,swint_opt,icloud,cldovrlp     &
      &                    ,RA_CALL_OFFSET, o3input,aer_opt,o3rad        &
      &                    ,sf_surface_physics                           &
-!mz  &
      &                    ,hrswpd,hrlwpd                                &
      &                    ,SWUPT,SWUPTC,SWDNT,SWDNTC                    &
      &                    ,SWUPB,SWUPBC,SWDNB,SWDNBC                    &
@@ -227,7 +263,7 @@
 
       INTEGER,         INTENT(IN) :: IHRST,JULDAY,JULYR                 &
      &                              ,NPHS,NRADL,NRADS,NTSD              &
-     &                              ,NUM_AEROSOLC,NUM_OZMIXM,LEVSIZ
+     &                              ,NUM_OZMIXM,LEVSIZ
 
       INTEGER,         INTENT(IN) :: NCOL, NLAY
       REAL(KIND_PHYS), INTENT(IN) :: DX
@@ -248,19 +284,19 @@
       INTEGER,         DIMENSION(1:NCOL),   INTENT(INOUT) :: NCFRCV,    &
                                                              NCFRST
 
-      REAL(KIND_PHYS), INTENT(IN) :: DT,PDTOP,PT,XTIME,JULIAN
+      REAL(KIND_PHYS), INTENT(IN) :: DT,XTIME,JULIAN
 
-      REAL(KIND_PHYS), DIMENSION(1:NLAY-1), INTENT(   IN) :: AETA1,     &
-                                                       AETA2,DETA1,DETA2
-
-      REAL(KIND_PHYS), DIMENSION(1:NLAY),      INTENT(IN) :: ETA1,ETA2
       REAL(KIND_PHYS), DIMENSION(1:ncol),      INTENT(IN)    :: ALBEDO  &
      &                                             ,EPSR,GLAT,GLON      &
      &                                             ,HBM2                &
-     &                                             ,PD,RES,SICE,SM      &
-     &                                             ,SNOW,THS,VEGFRC
+     &                                             ,SICE,SM      &
+     &                                             ,SNOW,VEGFRC
       REAL(KIND_PHYS),DIMENSION(1:ncol),       INTENT(INOUT) :: CUPPT
-      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(IN)    :: Q,T,Z
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(IN)    :: Q,T,Z,  &
+                                                                prsl
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay+1),INTENT(IN)  :: p8w 
+      REAL(KIND_PHYS),DIMENSION(1:ncol),       INTENT(IN)  :: tsfc
+
       REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(IN)    :: F_ICE   &
      &                                                         ,F_RAIN
       REAL(KIND_PHYS),DIMENSION(1:NCOL),       INTENT(INOUT) :: SWDDIR  &
@@ -282,13 +318,14 @@
      &                                                ,HBOT,HTOP        &
      &                                                ,RLWIN,RLWTOA     &
      &                                                ,RSWIN,RSWOUT     &
+     &                                                ,GSW              &
      &                                                ,RSWINC,RSWTOA
-      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) :: PINT    &
+      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::         & ! PINT    &
      &                                                        ,RLWTT    &
      &                                                        ,RSWTT
-      REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) :: CFRACH,CFRACL  &
-     &                                                ,CFRACM,CZMEAN    &
-     &                                                ,SIGT4
+      REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) ::                &
+     &                                                        CZMEAN    &
+!     &                                                        ,SIGT4
       REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) :: CLDFRA
       REAL(kind_phys), DIMENSION(1:ncol), INTENT(INOUT) ::              &
                             ACSWUPT,ACSWUPTC,ACSWDNT,ACSWDNTC,          &
@@ -314,49 +351,43 @@
 
       !..Output daily longwave and shortwave heating rates: 
       REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(OUT):: hrlwpd,hrswpd
-      integer,                   intent(in)    :: mpirank
-      integer,                   intent(in)    :: mpiroot
-      character(len=*),          intent(  out) :: errmsg
-      integer,                   intent(  out) :: errflg
-
-
       LOGICAL,INTENT(IN) :: RESTRT
-
-!
 !-----------------------------------------------------------------------
 !***  LOCAL VARIABLES
 !-----------------------------------------------------------------------
-      INTEGER :: I,IENDX,II,ISTAT,J,JDAY,JMONTH,K,KMNTH,N,NRAD
+      INTEGER :: I,IENDX,II,ISTAT,J,JDAY,JMONTH,K,KMNTH,N,NRAD,         &
+                 NUM_AEROSOLC
       INTEGER,DIMENSION(3) :: IDAT
       INTEGER,DIMENSION(12) :: MONTH=(/31,28,31,30,31,30,31,31          &
      &                                ,30,31,30,31/)
 !
-      REAL(kind_phys) :: CAPA,DAYI,DPL,FICE,FRAIN,GMT,HOUR,PLYR,PSFC    &
+      REAL(kind_phys) :: CAPA,DAYI,FICE,FRAIN,GMT,HOUR,PLYR,            &
      &       ,QI,QR,QW,RADT,TIMES,WC,TDUM
 !
       REAL(kind_phys),DIMENSION(1:nlay-1) :: QL,TL
 !
       REAL(kind_phys),DIMENSION(1:ncol) :: CUPPTR,CZEN,HBOTR,HTOPR      &
      &                                  ,SWCF, LWCF                     &
-     &                                  ,PDSL,REXNSFC,SWNETDN           &
+     &                                   ,REXNSFC,SWNETDN           &
      &                                  ,TOT,TOTLWDN,TOTSWDN,TOTSWDNC   &
-     &                                  ,TSFC,XLAND, HT
+     &                                  ,XLAND
       REAL(kind_phys),DIMENSION(1:ncol,1:nlay) :: CLFR,DZ               &
-     &                                          ,P8W,P_PHY,PI_PHY       &
+     &                                          ,P_PHY,PI_PHY       &
      &                                          ,RR,T8W                 &
      &                                          ,THRATENLW,THRATENSW    &
-     &                                          ,TH_PHY,T_PHY,Z_PHY
+     &                                          ,TH_PHY,T_PHY
 !
-!      REAL(kind_phys),DIMENSION(:,:,:,:),ALLOCATABLE :: MOIST_TRANS
-!
-!      LOGICAL :: WARM_RAIN
-!      LOGICAL :: IS_CAMMGMP_USED=.FALSE.
 
       REAL(kind_phys) :: DXKM, DYKM
 
       INTEGER            :: IDS,IDE,JDS,JDE,KDS,KDE                     &
      &                     ,IMS,IME,JMS,JME,KMS,KME                     &
      &                     ,ITS,ITE,JTS,JTE,KTS,KTE
+
+      integer,                   intent(in)    :: mpirank
+      integer,                   intent(in)    :: mpiroot
+      character(len=*),          intent(  out) :: errmsg
+      integer,                   intent(  out) :: errflg
 
 
       ! Initialize the CCPP error handling variables
@@ -398,6 +429,35 @@
       kde    =    nlay
       kme    =    nlay
       kte    =    nlay
+
+!----------------------------------------------------------------------
+!***  RADIATION
+!----------------------------------------------------------------------
+!
+!***  When allocating CAM radiation 4d arrays (ozmixm, aerosolc), 
+!***  the following two scalars are not needed.
+!
+      NUM_AEROSOLC=1
+!
+!MZ      IF(grid%ntsd<=0)THEN
+!MZ        NTSD_rad=grid%ntsd
+!MZ      ELSE
+!
+!***  Call radiation just BEFORE the top of the hour
+!***  so that updated fields are written to history files.
+!
+      IF (NTSD > 0) then
+        NTSD_rad=ntsd+1
+      ENDIF
+
+      IF(MOD(NTSD_rad,GRID%NRADS)==0.OR.                               &
+     &   MOD(NTSD_rad,GRID%NRADL)==0)THEN
+
+
+
+       
+
+     
 !
 !-----------------------------------------------------------------------
 !***** NOTE: THIS IS HARDWIRED FOR CALLS TO LONGWAVE AND SHORTWAVE
@@ -422,16 +482,23 @@
       DO J=MYJS2,MYJE2
       DO I=MYIS1,MYIE1
 !
-        PDSL(I,J)=PD(I,J)*RES(I,J)
-        P8W(I,KTE+1,J)=PT
+!mz        PDSL(I,J)=PD(I,J)*RES(I,J)
+!mz        P8W(I,KTE+1,J)=PT
         XLAND(I,J)=SM(I,J)+1.
-        PSFC=PD(I,J)+PDTOP+PT
-        REXNSFC(I,J)=(PSFC*1.E-5)**CAPA
-        TSFC(I,J)=THS(I,J)*REXNSFC(I,J)
+!mz        PSFC=PD(I,J)+PDTOP+PT
+!mz        REXNSFC(I,J)=(PSFC*1.E-5)**CAPA
+!mz        TSFC(I,J)=THS(I,J)*REXNSFC(I,J)
         T8W(I,KTS,J)=TSFC(I,J)
-        P8W(I,KTS,J)=ETA1(KTS)*PDTOP+ETA2(KTS)*PDSL(I,J)+PT
-        Z_PHY(I,KTS,J)=Z(I,J,KTS)
-        HT(I,J)=Z(I,J,KTS)
+!MZ:eta1-interface sigma value in pressure domain 
+!   eta2-interface sigma value in sigma domain
+!  pdtop-mass at i,j in pressure domain, Pa
+!  pdsl- sigma-domain pressure at sigma=1
+!MZ        P8W(I,KTS,J)=ETA1(KTS)*PDTOP+ETA2(KTS)*PDSL(I,J)+PT
+!prsi: air pressure at interface in Pa
+!        P8W(I,KTS,J)=prsi(i,kts)
+     
+!        Z_PHY(I,KTS,J)=Z(I,J,KTS)
+!        HT(I,J)=Z(I,J,KTS)
       ENDDO
       ENDDO
 !
@@ -442,15 +509,16 @@
       DO J=MYJS2,MYJE2
       DO I=MYIS1,MYIE1
         DO K=KTS,KTE
-          DPL=DETA1(K)*PDTOP+DETA2(K)*PDSL(I,J)
+          !mz DPL=DETA1(K)*PDTOP+DETA2(K)*PDSL(I,J)
           QL(K)=MAX(Q(I,J,K),EPSQ)
-          PLYR=AETA1(K)*PDTOP+AETA2(K)*PDSL(I,J)+PT
+          !mz PLYR=AETA1(K)*PDTOP+AETA2(K)*PDSL(I,J)+PT
+          PLYR = PRSL(I,J,K)
           TL(K)=T(I,J,K)
 !
           RR(I,K,J)=PLYR/(R_D*TL(K)*(1.+P608*QL(K)))
           T_PHY(I,K,J)=TL(K)
           TH_PHY(I,K,J)=TL(K)*(1.E5/PLYR)**CAPA
-          P8W(I,K+1,J)=ETA1(K+1)*PDTOP+ETA2(K+1)*PDSL(I,J)+PT
+          !mz P8W(I,K+1,J)=ETA1(K+1)*PDTOP+ETA2(K+1)*PDSL(I,J)+PT
           P_PHY(I,K,J)=PLYR
           PI_PHY(I,K,J)=(PLYR*1.E-5)**CAPA
           DZ(I,K,J)=TL(K)*(P608*QL(K)+1.)*R_D                           &
@@ -485,11 +553,11 @@
 !
       DO J=JMS,JME
         DO I=IMS,IME
-          CFRACH(I,J)=0.
-          CFRACL(I,J)=0.
-          CFRACM(I,J)=0.
+!          CFRACH(I,J)=0.
+!          CFRACL(I,J)=0.
+!          CFRACM(I,J)=0.
           CZMEAN(I,J)=0.
-          SIGT4(I,J)=0.
+!          SIGT4(I,J)=0.
           TOTSWDN(I,J)=0.   ! TOTAL (clear+cloudy sky) shortwave down at the surface
           TOTSWDNC(I,J)=0.  ! CLEAR SKY shortwave down at the surface
           SWNETDN(I,J)=0.   ! Net (down - up) total (clear+cloudy sky) shortwave at the surface
@@ -520,7 +588,7 @@
      &                  IDS=IDS,IDE=IDE,JDS=JDS,JDE=JDE,KDS=KDS,KDE=KDE &
      &                 ,IMS=IMS,IME=IME,JMS=JMS,JME=JME,KMS=KMS,KME=KME &
      &                 ,KTS=KTS,KTE=KTE,                                &
-     &                 ,ITIMESTEP=NTSD,DT=DT                            &
+     &                 ,ITIMESTEP=NTSD_rad,DT=DT                        &
      &                 ,DX=DXKM,DY=DYKM                                 &
      &                 ,swint_opt=swint_opt                             &
      &                 ,SWDDIR=swddir,SWDDNI=swddni,SWDDIF=swddif       &
@@ -528,7 +596,7 @@
      &                 ,Gx=Gx,Bx=Bx,gg=gg,bb=bb                         &
      &                 ,swdown_ref=swdown_ref,swddir_ref=swddir_ref     &
      &                 ,coszen_ref=coszen_ref,coszen=coszen             &
-     &                 ,hrang=hrang,ht=ht                               &
+     &                 ,hrang=hrang                                     &
      &                 ,RTHRATENLW=THRATENLW,RTHRATENSW=THRATENSW       &
      &                 ,RTHRATEN=RTHRATEN                               &
      &                 ,HRSWPD=HRSWPD, HRLWPD=HRLWPD                    &
@@ -594,8 +662,7 @@
      &                 ,has_reqi=has_reqi                               &
      &                 ,has_reqs=has_reqs                               &
      &                 ,RSWTOA=RSWTOA,RLWTOA=RLWTOA                     &
-     &                 ,CZMEAN=CZMEAN,CFRACL=CFRACL                     &
-     &                 ,CFRACM=CFRACM,CFRACH=CFRACH                     &
+     &                 ,CZMEAN=CZMEAN                                   &
      &                 ,ACFRST=ACFRST,NCFRST=NCFRST                     &
      &                 ,ACFRCV=ACFRCV,NCFRCV=NCFRCV                     &
      &                 ,F_ICE_PHY=F_ICE,F_RAIN_PHY=F_RAIN               &
@@ -626,7 +693,7 @@
 !-----------------------------------------------------------------------
 !
 !-----------------------------------------------------------------------
-      nrads_block: IF(MOD(NTSD,NRADS)==0)THEN
+      nrads_block: IF(MOD(NTSD_rad,NRADS)==0)THEN
 !-----------------------------------------------------------------------
 !***  COMPUTE CZMEAN FOR NON-GFDL SHORTWAVE
 !-----------------------------------------------------------------------
@@ -643,7 +710,7 @@
           IDAT(3)=JULYR
 !
           DO II=0,NRADS,NPHS
-            TIMES=NTSD*DT+II*DT
+            TIMES=NTSD_rad*DT+II*DT
             CALL ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,GLON,GLAT,CZEN       &
      &                 ,MYIS,MYIE,MYJS,MYJE                             &
      &                 ,IDS,IDE,JDS,JDE,KDS,KDE                         &
@@ -729,7 +796,7 @@
 !***  LONGWAVE
 !-----------------------------------------------------------------------
 !
-      nradl_block: IF(MOD(NTSD,NRADL)==0)THEN
+      nradl_block: IF(MOD(NTSD_rad,NRADL)==0)THEN
 !
 !$omp parallel do                                                       &
 !$omp& private(i,iendx,j)
@@ -740,7 +807,7 @@
 !
             IF(HBM2(I,J)>0.5)THEN
               TDUM=T(I,J,KTS)
-              SIGT4(I,J)=STBOLT*TDUM*TDUM*TDUM*TDUM
+!              SIGT4(I,J)=STBOLT*TDUM*TDUM*TDUM*TDUM
               RLWIN(I,J)=TOTLWDN(I,J)
             ENDIF
 !
@@ -807,14 +874,24 @@
         IF(HBM2(I,J)<0.5)THEN
           ACFRST(I,J)=0.
           ACFRCV(I,J)=0.
-          CFRACL(I,J)=0.
-          CFRACM(I,J)=0.
-          CFRACH(I,J)=0.
+!          CFRACL(I,J)=0.
+!          CFRACM(I,J)=0.
+!          CFRACH(I,J)=0.
           RSWTOA(I,J)=0.
           RLWTOA(I,J)=0.
         ENDIF
       ENDDO
       ENDDO
+
+!
+      DO J=jts,min(jde-1,jte)
+      DO I=its,min(ide-1,ite)
+          gsw(I,J)=rswin(I,J)-rswout(I,J)
+      ENDDO
+      ENDDO
+     
+      ENDIF    !radiation loop
+
 !
 !-----------------------------------------------------------------------
 !

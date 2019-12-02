@@ -11,8 +11,8 @@
   intent = in
   optional = F
 [qv]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = water vapor specific humidity updated by physics
+  standard_name = water_vapor_specific_humidity
+  long_name = water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -38,8 +38,8 @@
   intent = in
   optional = F
 [qc]
-  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics
+  standard_name = cloud_condensed_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -47,8 +47,8 @@
   intent = in
   optional = F
 [qi]
-  standard_name = ice_water_mixing_ratio_updated_by_physics
-  long_name = moist (dry+vapor, no condensate) mixing ratio of ice water updated by physics
+  standard_name = ice_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensate) mixing ratio of ice water
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -56,8 +56,8 @@
   intent = in
   optional = F
 [qr]
-  standard_name = rain_water_mixing_ratio_updated_by_physics
-  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water updated by physics
+  standard_name = rain_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -84,7 +84,7 @@
   optional = F
 [qr_r]
   standard_name = cloud_rain_water_mixing_ratio
-  long_name = the ratio of the mass rain water to the mass of dry air
+  long_name = the ratio of the mass of rain water to the mass of dry air
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -111,7 +111,7 @@
   optional = F
 [qg_r]
   standard_name = cloud_graupel_mixing_ratio
-  long_name = the ratio of the mass of gaupel to mass of dry air 
+  long_name = the ratio of the mass of graupel to the mass of dry air 
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

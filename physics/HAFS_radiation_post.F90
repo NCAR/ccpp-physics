@@ -22,10 +22,10 @@
 !> \section arg_table_HAFS_radiation_post_run Argument Table
 !! \htmlinclude HAFS_radiation_post_run.html
 !!
-      subroutine HAFS_radiation_post_run (ncol, nlay, rswin, rswout,    &
+      subroutine HAFS_radiation_post_run (ncol, nlay,                   &
                             ntsd, dt,  julday, julyr, xtime, ihrst,     &
-                            glat, glon, czmean, rswtt, rlwtt, hbm2,     &
-                            t, gsw, czen, errmsg, errflg)
+                            glat, glon, czmean, rswtt, rlwtt,           &
+                            t, czen, errmsg, errflg)
       
       USE MACHINE , only : kind_phys
 
@@ -33,11 +33,11 @@
 
       !-- interface variables
       INTEGER,               INTENT(IN) :: IHRST,JULDAY,JULYR,NTSD
+      !MZ* dt-time step for physics?
       REAL(KIND_PHYS),       INTENT(IN) :: DT,XTIME
       REAL(KIND_PHYS),DIMENSION(1:NCOL),INTENT(IN) :: CZMEAN,GLAT,GLON  &
-     &                                             ,HBM2
 
-      REAL(KIND_PHYS),DIMENSION(1:NCOL,1:NLAY),INTENT(IN) :: RLWTT       &
+      REAL(KIND_PHYS),DIMENSION(1:NCOL,1:NLAY),INTENT(IN) :: RLWTT      &
      &                                                     ,RSWTT
 
       REAL(KIND_PHYS),DIMENSION(1:NCOL,1:NLAY),INTENT(INOUT) :: T
@@ -78,15 +78,6 @@
          kme = nlay
          kte = nlay
 
- 
-
-        DO J=jts,jte
-        DO I=its,ite
-          gsw(I,J)=rswin(I,J)-rswout(I,J)
-        ENDDO
-        ENDDO
-
-
 !----------------------------------------------------------------------
 !***  APPLY TEMPERATURE TENDENCY DUE TO RADIATION
 !----------------------------------------------------------------------
@@ -95,7 +86,7 @@
       CALL RDTEMP(ntsd,DT,JULDAY,JULYR                                  &
      &           ,XTIME,IHRST,glat,glon                                 &
      &           ,czen,czmean,t                                         &
-     &           ,rswtt,rlwtt,hbm2                                      &
+     &           ,rswtt,rlwtt                                           &
      &           ,IDS,IDF,JDS,JDF,KDS,KDE                               &
      &           ,IMS,IME,JMS,JME,KMS,KME                               &
      &           ,ITS,ITE,JTS,JTE,KTS,KTE)

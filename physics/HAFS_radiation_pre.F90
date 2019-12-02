@@ -19,7 +19,7 @@
      subroutine HAFS_radiation_pre_finalize ()
      end subroutine HAFS_radiation_pre_finalize
 
-!> \defgroup hafs_update_moist HAFS Update Moist Module
+!> \defgroup hafs_etamp_to_moist HAFS Update Moist Module
 !! This subroutine is to update water array with CWM, F_RAIN, and F_ICE. 
 !! \section arg_table_HAFS_radiation_pre_run Argument Table
 !! \htmlinclude HAFS_radiation_pre_run.html

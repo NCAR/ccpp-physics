@@ -2,8 +2,8 @@
 !NCEP_MESO:MODEL_LAYER: PHYSICS
 !
 !***********************************************************************
-      SUBROUTINE RDTEMP(NTSD,DT,JULDAY,JULYR,XTIME,IHRST,GLAT,GLON      &
-     &                 ,CZEN,CZMEAN,T,RSWTT,RLWTT,HBM2                  &
+      SUBROUTINE RDTEMP(NTSD,DT,JULDAY,JULYR,IHRST,GLAT,GLON      &
+     &                 ,CZEN,CZMEAN,T,RSWTT,RLWTT                       &
      &                 ,IDS,IDE,JDS,JDE,KDS,KDE                         &
      &                 ,IMS,IME,JMS,JME,KMS,KME                         &
      &                 ,ITS,ITE,JTS,JTE,KTS,KTE)
@@ -47,10 +47,9 @@
 !
       INTEGER,INTENT(IN) :: IHRST,JULDAY,JULYR,NTSD
 !
-      REAL,INTENT(IN) :: DT,XTIME
+      REAL,INTENT(IN) :: DT
 !
-      REAL,DIMENSION(IMS:IME,JMS:JME),INTENT(IN) :: CZMEAN,GLAT,GLON    &
-     &                                             ,HBM2
+      REAL,DIMENSION(IMS:IME,JMS:JME),INTENT(IN) :: CZMEAN,GLAT,GLON    
 !
       REAL,DIMENSION(IMS:IME,JMS:JME,KMS:KME),INTENT(IN) :: RLWTT       &
      &                                                     ,RSWTT
@@ -64,6 +63,8 @@
 !-----------------------------------------------------------------------
 !
       INTEGER :: I,J,JDAY,JMONTH,K
+      !MZ: Height boundary mask
+      REAL,DIMENSION(IMS:IME,JMS:JME) :: HBM2
 !
       INTEGER,DIMENSION(3) :: IDAT
 !
@@ -86,8 +87,8 @@
 !
 !***  GET CURRENT VALUE OF COS(ZENITH ANGLE)
 !
-!      TIMES=NTSD*DT
-      TIMES=XTIME*60.
+      TIMES=NTSD*DT
+!MZ      TIMES=XTIME*60.
 !
       DO J=MYJS,MYJE
       DO I=MYIS,MYIE
@@ -130,6 +131,8 @@
       DO K=KTS,KTE
         DO J=MYJS,MYJE
         DO I=MYIS,MYIE
+!MZ* see module_initialize_real.F
+          HBM2(I,J) =1.
           TTNDKL=RSWTT(I,J,K)*FACTR(I,J)+RLWTT(I,J,K)
           T(I,J,K)=T(I,J,K)+TTNDKL*DT*HBM2(I,J)
         ENDDO
