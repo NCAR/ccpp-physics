@@ -2489,7 +2489,9 @@ ENDIF
             write(0,*)'FERRIER_INIT_hr: Can not find unused fortran '  &
                      ,'unit to read in lookup tables'
             write(0,*)' ABORTING!'
+#ifdef MPI
             call MPI_ABORT(MPI_COMM_COMP, rc, IRTN)
+#endif
           ENDIF
         ENDIF
 !
@@ -2512,6 +2514,7 @@ ENDIF
           CLOSE (etampnew_unit1)
         ENDIF
 !
+#ifdef MPI
         CALL MPI_BCAST(VENTR1,SIZE(VENTR1),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(VENTR2,SIZE(VENTR2),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(ACCRR,SIZE(ACCRR)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
@@ -2524,6 +2527,7 @@ ENDIF
         CALL MPI_BCAST(MASSI,SIZE(MASSI)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(VSNOWI,SIZE(VSNOWI),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(VEL_RF,SIZE(VEL_RF),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
+#endif
 !
 !--- Calculates coefficients for growth rates of ice nucleated in water
 !    saturated conditions, scaled by physics time step (lookup table)
