@@ -1,28 +1,28 @@
-!>\file HAFS_radiation_post.F90
-!! This file applies temperature tendency due to HAFS radiation.
-      module HAFS_radiation_post
+!>\file HWRF_radiation_post.F90
+!! This file applies temperature tendency due to HWRF radiation.
+      module HWRF_radiation_post
 
       implicit none
      
       private
       
-      public :: HAFS_radiation_post_init, HAFS_radiation_post_run,      &
-                HAFS_radiation_post_finalize
+      public :: HWRF_radiation_post_init, HWRF_radiation_post_run,      &
+                HWRF_radiation_post_finalize
 
 
       contains
 
-      subroutine HAFS_radiation_post_init ()
-      end subroutine HAFS_radiation_pre_init
+      subroutine HWRF_radiation_post_init ()
+      end subroutine HWRF_radiation_pre_init
 
-      subroutine HAFS_radiation_post_finalize ()
-      end subroutine HAFS_radiation_post_finalize
+      subroutine HWRF_radiation_post_finalize ()
+      end subroutine HWRF_radiation_post_finalize
 
 
-!> \section arg_table_HAFS_radiation_post_run Argument Table
-!! \htmlinclude HAFS_radiation_post_run.html
+!> \section arg_table_HWRF_radiation_post_run Argument Table
+!! \htmlinclude HWRF_radiation_post_run.html
 !!
-      subroutine HAFS_radiation_post_run (ncol, nlay,                   &
+      subroutine HWRF_radiation_post_run (ncol, nlay,                   &
                             ntsd, dt,  julday, julyr, xtime, ihrst,     &
                             glat, glon, czmean, rswtt, rlwtt,           &
                             t, czen, errmsg, errflg)
@@ -92,6 +92,6 @@
      &           ,ITS,ITE,JTS,JTE,KTS,KTE)
 !
 
-      end subroutine HAFS_radiation_post_run
-      end module HAFS_radiation_post
+      end subroutine HWRF_radiation_post_run
+      end module HWRF_radiation_post
 

@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = HAFS_radiation_init
+  name = HWRF_radiation_init
   type = scheme
 [ncol]
   standard_name = horizontal_loop_extent
@@ -205,12 +205,12 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = HAFS_radiation_finalize
+  name = HWRF_radiation_finalize
   type = scheme
 
 ########################################################################
 [ccpp-arg-table]
-  name = HAFS_radiation_run
+  name = HWRF_radiation_run
   type = scheme
 [NTSD]
   standard_name = index_of_time_step
@@ -272,9 +272,9 @@
   intent = in
   optional = F
 [NPHS]      !nml 2,6,6
-  standard_name = 
-  long_name =
-  units =
+  standard_name = number_of_physics_timesteps_between_calls_to_HWRF_turbulence_and_microphysics 
+  long_name = number of physics timesteps between calls to HWRF turbulence and microphysics
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -422,45 +422,45 @@
   intent = inout
   optional = F
 [ALBEDO]
-  standard_name =
-  long_name =
-  units =
+  standard_name = surface_albedo
+  long_name = surface albedo
+  units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [EPSR]
-  standard_name =
-  long_name =
-  units =
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
+  units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [F_ICE]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  standard_name = fraction_of_ice_water_cloud
+  long_name = fraction of ice water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [F_RAIN]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  standard_name = fraction_of_rain_water_cloud
+  long_name = fraction of rain water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [SM]
-  standard_name =
-  long_name =
-  units =
+  standard_name = sea_mask
+  long_name = sea mask; =1 for sea, =0 for land
+  units = flag
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -479,7 +479,7 @@
   standard_name =
   long_name =
   units =
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout

@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = HAFS_radiation_pre_run
+  name = HWRF_radiation_pre_run
   type = scheme
 [ncol]
   standard_name = horizontal_loop_extent

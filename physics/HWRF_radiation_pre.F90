@@ -1,30 +1,30 @@
-!>\file HAFS_radiation_pre.F90
+!>\file HWRF_radiation_pre.F90
 !! This file contains CCPP-compliant ETAMP_TO_MOIST() in HWRF.  
 !!
 !> This module contains the CCPP-compliant ETAMP_TO_MOIST in HWRF .
-     module HAFS_radiation_pre
+     module HWRF_radiation_pre
 
      implicit none
 
      private
 
-     public :: HAFS_radiation_pre_init, HAFS_radiation_pre_run,           &
-               HAFS_radiation_pre_finalize
+     public :: HWRF_radiation_pre_init, HWRF_radiation_pre_run,           &
+               HWRF_radiation_pre_finalize
 
      contains
 
-     subroutine HAFS_radiation_pre_init ()
-     end subroutine HAFS_radiation_pre_init
+     subroutine HWRF_radiation_pre_init ()
+     end subroutine HWRF_radiation_pre_init
 
-     subroutine HAFS_radiation_pre_finalize ()
-     end subroutine HAFS_radiation_pre_finalize
+     subroutine HWRF_radiation_pre_finalize ()
+     end subroutine HWRF_radiation_pre_finalize
 
-!> \defgroup hafs_etamp_to_moist HAFS Update Moist Module
+!> \defgroup hwrf_etamp_to_moist HWRF Update Moist Module
 !! This subroutine is to update water array with CWM, F_RAIN, and F_ICE. 
-!! \section arg_table_HAFS_radiation_pre_run Argument Table
-!! \htmlinclude HAFS_radiation_pre_run.html
+!! \section arg_table_HWRF_radiation_pre_run Argument Table
+!! \htmlinclude HWRF_radiation_pre_run.html
 !!
-     subroutine HAFS_radiation_pre_run (CWM,QV, F_ICE,F_RAIN            &
+     subroutine HWRF_radiation_pre_run (CWM,QV, F_ICE,F_RAIN            &
                                         ,qc,qi,qr                       &
                                         ,qv_r, qc_r,qr_r,qi_r           & 
                                         ,qs_r, qg_r                     &      
@@ -110,6 +110,6 @@
               ENDDO
             ENDDO
 
-      end subroutine HAFS_radiation_pre_run
+      end subroutine HWRF_radiation_pre_run
 
-  end module HAFS_radiation_pre
+  end module HWRF_radiation_pre

@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = HAFS_radiation_pre_run
+  name = HWRF_radiation_pre_run
   type = scheme
 [cwm]
   standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics

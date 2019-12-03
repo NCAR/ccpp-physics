@@ -1,6 +1,6 @@
-!>\file HAFS_rrtmg_driver.F
+!>\file HWRF_rrtmg_driver.F
 
-MODULE HAFS_rrtmg_driver
+MODULE HWRF_rrtmg_driver
  
 CONTAINS
 
@@ -619,7 +619,7 @@ CONTAINS
               ENDDO
 !mz           ENDIF
 
-           write(0,*)"in HAFS rad driver: call cldfra3 to use gthompson cloud fraction scheme"
+           write(0,*)"in HWRF rad driver: call cldfra3 to use gthompson cloud fraction scheme"
            CALL cal_cldfra3(CLDFRA, qv, qc, qi, qs,                     &
      &                 p,t,rho, XLAND, gridkm,                          &
      &                 ids,ide, jds,jde, kds,kde,                       &
@@ -708,7 +708,7 @@ CONTAINS
         ENDDO
         ENDDO
 
-             if(mpirank==mpiroot)write(0,*) 'CALL HAFS_rrtmg_sw'
+             if(mpirank==mpiroot)write(0,*) 'CALL HWRF_rrtmg_sw'
              CALL RRTMG_SWRAD(                                         &
                      RTHRATENSW=RTHRATENSW,                            &
                      HRSWPD=HRSWPD,                                    & ! J. Henderson AER
@@ -2178,4 +2178,4 @@ SUBROUTINE aer_p_int(p ,pin, levsiz, aerodt, aerod, no_src, pf, totaod,   &
    return
 END SUBROUTINE aer_p_int
 
-END MODULE HAFS_rrtmg_driver
+END MODULE HWRF_rrtmg_driver

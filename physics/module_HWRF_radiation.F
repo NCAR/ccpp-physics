@@ -1,23 +1,24 @@
-!>\file module_HAFS_radiation.F
+!>\file module_HWRF_radiation.F
 !! This is the HWRF RRTMG driver wrapper module.
 
-      MODULE HAFS_radiation
+      MODULE HWRF_radiation
 !
       use machine, only : kind_phys
 !-----------------------------------------------------------------------
       USE MODULE_MODEL_CONSTANTS
       USE module_radiation_astronomy ,ONLY : CAL_MON_DAY,ZENITH
-      USE HAFS_rrtmg_driver
+      USE HWRF_rrtmg_driver
 !-----------------------------------------------------------------------
 !
-      public : HAFS_radiation_init, HAFS_radiation_run, HAFS_radiation_finalize
+      public : HWRF_radiation_init, HWRF_radiation_run,                 &
+               HWRF_radiation_finalize
 
       CONTAINS
      
-!! \section arg_table_HAFS_radiation_init Argument Table
-!! \htmlinclude HAFS_radiation_init.html
+!! \section arg_table_HWRF_radiation_init Argument Table
+!! \htmlinclude HWRF_radiation_init.html
 !!
-      SUBROUTINE HAFS_radiation_init(ncol, nlev, KDT,                   &
+      SUBROUTINE HWRF_radiation_init(ncol, nlev, KDT,                   &
                       RTHRATEN,RTHRATENLW,                              &
                       RTHRATENSW,CLDFRA,                                &
                       levsiz,XLAT,XLONG,n_ozmixm,                       &
@@ -78,7 +79,7 @@
       if (mpirank==mpiroot) then
         write(0,*) '---------------------------------------------------'
         write(0,*) '-                   WARNING                       -'
-        write(0,*) '-  the CCPP HAFS RRTMG LW/SW scheme is currently  -'
+        write(0,*) '-  the CCPP HWRF RRTMG LW/SW scheme is currently  -'
         write(0,*) '-  under development, use at your own risk        -'
         write(0,*) '-                   WARNING                       -'
         write(0,*) '---------------------------------------------------'
@@ -208,16 +209,16 @@
 
       acswalloc = .true.
 
-      END SUBROUTINE HAFS_radiation_init
+      END SUBROUTINE HWRF_radiation_init
 
-      SUBROUTINE HAFS_radiation_finalize()
-      END SUBROUTINE HAFS_radiation_finalize
+      SUBROUTINE HWRF_radiation_finalize()
+      END SUBROUTINE HWRF_radiation_finalize
 !
 
-!> \section arg_table_HAFS_radiation_run Argument Table
-!! \htmlinclude HAFS_radiation_run.html
+!> \section arg_table_HWRF_radiation_run Argument Table
+!! \htmlinclude HWRF_radiation_run.html
 !!
-      SUBROUTINE HAFS_radiation_run (NTSD,DT,JULDAY,JULYR,XTIME,JULIAN  &
+      SUBROUTINE HWRF_radiation_run (NTSD,DT,JULDAY,JULYR,XTIME,JULIAN  &
      &                    ,IHRST,NPHS,GLAT,GLON                         &
      &                    ,NRADS,NRADL, DX                              &
      &                    ,p8w,prsl,tsfc                                & !p8w-prsi; psfc-prsl1
@@ -396,8 +397,8 @@
 
       ! Check initialization state
       if (.not.acswalloc .or. .not. aclwalloc) then
-          write(errmsg, fmt='((a))') 'HAFS_radiation_run called before  &
-                                     HAFS_radiation_init'
+          write(errmsg, fmt='((a))') 'HWRF_radiation_run called before  &
+                                      HWRF_radiation_init'
           errflg = 1
           return
       end if
@@ -895,4 +896,4 @@
 !
 !-----------------------------------------------------------------------
 !
-      END SUBROUTINE HAFS_radiation_run
+      END SUBROUTINE HWRF_radiation_run
