@@ -71,27 +71,14 @@ contains
          errflg               ! Error flag
 
     ! Local
-    integer :: iSFC, iTOA
-    logical :: top_at_1
     real(kind_phys), dimension(ncol, Model%levs, Model%rrtmgp_nBandsSW, NF_AESW) :: &
          aerosolssw2
+
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
     
     if (.not. Model%lslwr) return
-
-    ! #######################################################################################
-    ! What is vertical ordering?
-    ! #######################################################################################
-    top_at_1 = (Statein%prsi(1,1) .lt.  Statein%prsi(1, Model%levs))
-    if (top_at_1) then 
-       iSFC = Model%levs
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = Model%levs
-    endif
 
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
@@ -106,7 +93,7 @@ contains
     ! #######################################################################################
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     ! #######################################################################################
-    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
+    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,:), tv_lay, relhum,                      &
          Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, ncol, Model%levs, Model%levs+1,      &
          .true., Model%lslwr, aerosolssw2, aerosolslw, aerodp)
     

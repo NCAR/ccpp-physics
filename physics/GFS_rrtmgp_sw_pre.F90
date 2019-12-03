@@ -87,31 +87,18 @@ contains
          errflg               ! Error flag
 
     ! Local variables
-    integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
+    integer :: i, j, iCol, iBand, iLay
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
     real(kind_phys), dimension(ncol, Model%levs, sw_gas_props%get_nband(), NF_AESW) :: &
          aerosolssw2
     real(kind_phys), dimension(ncol, Model%levs, Model%rrtmgp_nBandsLW, NF_AELW) :: &
          aerosolslw
-    logical :: top_at_1
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
     
     if (.not. Model%lsswr) return
-
-    ! #######################################################################################
-    ! What is vertical ordering?
-    ! #######################################################################################
-    top_at_1 = (Statein%prsi(1,1) .lt.  Statein%prsi(1, Model%levs))
-    if (top_at_1) then 
-       iSFC = Model%levs
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = Model%levs
-    endif
     
     ! #######################################################################################
     ! Compute cosine of zenith angle (only when SW is called)
@@ -166,20 +153,20 @@ contains
     ! #######################################################################################
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     ! #######################################################################################
-    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,iSFC:iTOA), tv_lay, relhum,              &
+    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,:), tv_lay, relhum,                      &
          Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
          Model%lsswr, .true., aerosolssw2, aerosolslw, aerodp)
-    
+
     ! Store aerosol optical properties
     ! SW. 
     ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
     ! band ordering was [nIR -> UV -> IR(band)]
-    aerosolssw(1:NCOL,1:Model%levs,1,1)                          = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),1)
-    aerosolssw(1:NCOL,1:Model%levs,1,2)                          = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),2)
-    aerosolssw(1:NCOL,1:Model%levs,1,3)                          = aerosolssw2(1:NCOL,1:Model%levs,sw_gas_props%get_nband(),3)
-    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),1) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,1)
-    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),2) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,2)
-    aerosolssw(1:NCOL,1:Model%levs,2:sw_gas_props%get_nband(),3) = aerosolssw2(1:NCOL,1:Model%levs,1:sw_gas_props%get_nband()-1,3)
+    aerosolssw(1:NCOL,:,1,1)                          = aerosolssw2(1:NCOL,:,sw_gas_props%get_nband(),1)
+    aerosolssw(1:NCOL,:,1,2)                          = aerosolssw2(1:NCOL,:,sw_gas_props%get_nband(),2)
+    aerosolssw(1:NCOL,:,1,3)                          = aerosolssw2(1:NCOL,:,sw_gas_props%get_nband(),3)
+    aerosolssw(1:NCOL,:,2:sw_gas_props%get_nband(),1) = aerosolssw2(1:NCOL,:,1:sw_gas_props%get_nband()-1,1)
+    aerosolssw(1:NCOL,:,2:sw_gas_props%get_nband(),2) = aerosolssw2(1:NCOL,:,1:sw_gas_props%get_nband()-1,2)
+    aerosolssw(1:NCOL,:,2:sw_gas_props%get_nband(),3) = aerosolssw2(1:NCOL,:,1:sw_gas_props%get_nband()-1,3)
 
   end subroutine GFS_rrtmgp_sw_pre_run
   

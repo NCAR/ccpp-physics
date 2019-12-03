@@ -93,10 +93,10 @@ contains
     type(ty_fluxes_byband) :: &
          flux_allsky, & ! All-sky flux                      (W/m2)
          flux_clrsky    ! Clear-sky flux                    (W/m2)
-    real(kind_phys), dimension(nday,Model%levs+1),target :: &
-         fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
     real(kind_phys), dimension(nday,Model%levs+1,sw_gas_props%get_nband()),target :: &
-         fluxSWBB_up_allsky, fluxSWBB_dn_allsky
+         fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
+!    real(kind_phys), dimension(nday,Model%levs+1,sw_gas_props%get_nband()),target :: &
+!         fluxSWBB_up_allsky, fluxSWBB_dn_allsky
     real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false., top_at_1
     integer :: iGas,iSFC,iTOA
@@ -114,7 +114,7 @@ contains
     if (.not. lsswr) return
 
     ! Vertical ordering?
-    top_at_1 = (Statein%prsi(1,1) .lt.  Statein%prsi(1, Model%levs))
+    top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levs))
     if (top_at_1) then 
        iSFC = Model%levs+1
        iTOA = 1
@@ -161,16 +161,16 @@ contains
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
-       flux_allsky%flux_up     => fluxSW_up_allsky
-       flux_allsky%flux_dn     => fluxSW_dn_allsky
-       flux_allsky%flux_dn_dir => fluxSW_dn_dir_allsky
-       flux_clrsky%flux_up     => fluxSW_up_clrsky
-       flux_clrsky%flux_dn     => fluxSW_dn_clrsky
+       flux_allsky%bnd_flux_up     => fluxSW_up_allsky
+       flux_allsky%bnd_flux_dn     => fluxSW_dn_allsky
+       flux_allsky%bnd_flux_dn_dir => fluxSW_dn_dir_allsky
+       flux_clrsky%bnd_flux_up     => fluxSW_up_clrsky
+       flux_clrsky%bnd_flux_dn     => fluxSW_dn_clrsky
        ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
-       if (l_AllSky_HR_byband) then
-          flux_allsky%bnd_flux_up => fluxSWBB_up_allsky
-          flux_allsky%bnd_flux_dn => fluxSWBB_dn_allsky
-       endif
+       !if (l_AllSky_HR_byband) then
+       !   flux_allsky%bnd_flux_up => fluxSWBB_up_allsky
+       !   flux_allsky%bnd_flux_dn => fluxSWBB_dn_allsky
+       !endif
 
        ! Compute clear-sky fluxes (if requested)
        ! Clear-sky fluxes are gas+aerosol
@@ -186,8 +186,8 @@ contains
                Interstitial%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
                flux_clrsky))                         ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
           ! Store fluxes
-          fluxswUP_clrsky(idxday,:)   = flux_clrsky%flux_up
-          fluxswDOWN_clrsky(idxday,:) = flux_clrsky%flux_dn
+          fluxswUP_clrsky(idxday,:)   = sum(flux_clrsky%bnd_flux_up,dim=3)
+          fluxswDOWN_clrsky(idxday,:) = sum(flux_clrsky%bnd_flux_dn,dim=3)
        endif
 
        ! Compute all-sky fluxes
@@ -202,11 +202,11 @@ contains
             Interstitial%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
             flux_allsky))                         ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
        ! Store fluxes
-       fluxswUP_allsky(idxday,:)   = flux_allsky%flux_up
-       fluxswDOWN_allsky(idxday,:) = flux_allsky%flux_dn
+       fluxswUP_allsky(idxday,:)   = sum(flux_allsky%bnd_flux_up,dim=3)
+       fluxswDOWN_allsky(idxday,:) = sum(flux_allsky%bnd_flux_dn,dim=3)
        if ( l_scmpsw ) then
-          scmpsw(idxday)%nirbm = flux_allsky%flux_dn_dir(idxday,iSFC) !Interstitial%sfc_alb_nir_dir(iSFC,idxday)
-          scmpsw(idxday)%nirdf = flux_allsky%flux_dn(idxday,iSFC)  - flux_allsky%flux_dn_dir(idxday,iSFC) !Interstitial%sfc_alb_nir_dif(iSFC,idxday)
+          scmpsw(idxday)%nirbm = sum(flux_allsky%bnd_flux_dn_dir(idxday,iSFC,:),dim=2)
+          scmpsw(idxday)%nirdf = sum(flux_allsky%bnd_flux_dn(idxday,iSFC,:),dim=2)  - sum(flux_allsky%bnd_flux_dn_dir(idxday,iSFC,:),dim=2)
        endif
     endif
   end subroutine rrtmgp_sw_rte_run

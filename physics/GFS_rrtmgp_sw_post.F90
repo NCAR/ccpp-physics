@@ -144,17 +144,17 @@ contains
     ! #######################################################################################
     ! Initialize
     hswc = 0
-    Diag%topfsw = topfsw_type ( 0., 0., 0. )
-   ! sfcflx_sw = sfcfsw_type ( 0., 0., 0., 0. )
+    Diag%topfsw    = topfsw_type ( 0., 0., 0. )
+    Radtend%sfcfsw = sfcfsw_type ( 0., 0., 0., 0. )
     if (l_clrskysw_hr) then
        hsw0(:,:) = 0.
     endif
     if (l_fluxessw2D) then
        flxprf_sw = profsw_type ( 0., 0., 0., 0. )
     endif
-    !if (l_sfcfluxessw1D) then
-    !   scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
-    !endif
+    if (l_sfcfluxessw1D) then
+       scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
+    endif
 
     if (Model%lsswr .and. nDay .gt. 0) then
        ! Clear-sky heating-rate (optional)
@@ -162,7 +162,7 @@ contains
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
                fluxswUP_clrsky(idxday,:),                &
                fluxswDOWN_clrsky(idxday,:),                &
-               p_lev(idxday,1:Model%levs+1),     &
+               p_lev(idxday,:),     &
                thetaTendClrSky))
           hsw0(idxday,:)=thetaTendClrSky
        endif
@@ -170,12 +170,15 @@ contains
        call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(    &
             fluxswUP_allsky(idxday,:),                   &
             fluxswDOWN_allsky(idxday,:),                   &
-            p_lev(idxday,1:Model%levs+1),        &
+            p_lev(idxday,:),        &
             thetaTendAllSky))
        hswc(idxday,:) = thetaTendAllSky
        
        ! Copy fluxes from RRTGMP types into model radiation types.
        ! Mandatory outputs
+       write(*,"(a11,2i8)") "iTOA/iSFC: ",iTOA,iSFC
+       write(*,*) "fluxswDOWN_allsky: ",fluxswDOWN_allsky(idxday,:)
+       write(*,*) "fluxswDOWN_clrsky: ",fluxswDOWN_clrsky(idxday,:)
        Diag%topfsw(idxday)%upfxc    = fluxswUP_allsky(idxday,iTOA)
        Diag%topfsw(idxday)%upfx0    = fluxswUP_clrsky(idxday,iTOA)
        Diag%topfsw(idxday)%dnfxc    = fluxswDOWN_allsky(idxday,iTOA)
@@ -202,7 +205,7 @@ contains
           do k = 1, Model%levs
              Radtend%htrsw(1:im,k) = hswc(1:im,k)
           enddo
-          ! Clear-sk heating rate
+          ! Clear-sky heating rate
           if (Model%swhtr) then
              do k = 1, Model%levs
                 Radtend%swhc(1:im,k) = hsw0(1:im,k)
@@ -272,23 +275,34 @@ contains
              if (Radtend%coszen(i) > 0.) then
                 ! SW all-sky fluxes
                 tem0d = Model%fhswr * Radtend%coszdg(i) / Radtend%coszen(i)
-                Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  + fluxswUP_allsky(  idxday(i),iTOA) * tem0d  ! total sky top sw up
-                Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + fluxswUP_allsky(  idxday(i),iSFC) * tem0d  ! total sky sfc sw up
-                Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + fluxswDOWN_allsky(idxday(i),iSFC) * tem0d  ! total sky sfc sw dn
+                !write(*,"(a23,3f10.6)") 'In GFS_rrtmgp_sw_post: ',Diag%topfsw(i)%dnfxc, tem0d,Diag%fluxr(i,23)
+                !write(*,"(a23,f20.15)") 'In GFS_rrtmgp_sw_post: ',Model%fhswr 
+                !Diagfluxr(i,2 ) = Diag%fluxr(i,2)  + fluxswUP_allsky(  i,iTOA) * tem0d  ! total sky top sw up
+                !Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + fluxswUP_allsky(  i,iSFC) * tem0d  ! total sky sfc sw up
+                !Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + fluxswDOWN_allsky(i,iSFC) * tem0d  ! total sky sfc sw dn
+                Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
+                Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  
+                Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
                 ! SW uv-b fluxes
                 Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
                 Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
                 ! SW TOA incoming fluxes
-                Diag%fluxr(i,23) = Diag%fluxr(i,23) + fluxswDOWN_allsky(idxday(i),iTOA) * tem0d     ! top sw dn
+                !temiag%fluxr(i,23) = Diag%fluxr(i,23) + fluxswDOWN_allsky(i,iTOA) * tem0d     ! top sw dn
+                Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn 
+                write(*,"(a23,3f10.6)") 'In GFS_rrtmgp_sw_post: ',Diag%topfsw(i)%dnfxc, tem0d,Diag%fluxr(i,23)
                 ! SW SFC flux components
                 Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
                 Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
                 Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
                 Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
                 ! SW clear-sky fluxes
-                Diag%fluxr(i,29) = Diag%fluxr(i,29) + fluxswUP_clrsky(  idxday(i),iTOA) * tem0d     ! clear sky top sw up
-                Diag%fluxr(i,31) = Diag%fluxr(i,31) + fluxswUP_clrsky(  idxday(i),iSFC) * tem0d  ! clear sky sfc sw up
-                Diag%fluxr(i,32) = Diag%fluxr(i,32) + fluxswDOWN_clrsky(idxday(i),iSFC) * tem0d  ! clear sky sfc sw dn
+                !Diag%fluxr(i,29) = Diag%fluxr(i,29) + fluxswUP_clrsky(  i,iTOA) * tem0d     ! clear sky top sw up
+                !Diag%fluxr(i,31) = Diag%fluxr(i,31) + fluxswUP_clrsky(  i,iSFC) * tem0d  ! clear sky sfc sw up
+                !Diag%fluxr(i,32) = Diag%fluxr(i,32) + fluxswDOWN_clrsky(i,iSFC) * tem0d  ! clear sky sfc sw dn
+                Diag%fluxr(i,29) = Diag%fluxr(i,29) + Diag%topfsw(i)%upfx0 * tem0d
+                Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d 
+                Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d
+
              endif
           enddo
 

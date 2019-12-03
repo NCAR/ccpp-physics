@@ -213,38 +213,43 @@ contains
     ! #######################################################################################
     ! Compute some fields needed by RRTMGP
     ! #######################################################################################
-
+    
+    ! Water-vapor mixing-ratio
+    q_lay(1:ncol,:)  = max( 1.e-6, Statein%qgrs(:,:,1))
+    
     ! Pressure at layer-interface
-    p_lev(1:NCOL,iSFC:iTOA+1) = Statein%prsi(1:NCOL,1:Model%levs+1)
-    !
+    p_lev(1:NCOL,:) = Statein%prsi(1:NCOL,:)
+
     ! Pressure at layer-center
-    p_lay(1:NCOL,iSFC:iTOA)   = Statein%prsl(1:NCOL,1:Model%levs)
-    !
+    p_lay(1:NCOL,:)   = Statein%prsl(1:NCOL,:)
+
     ! Temperature at layer-center
-    t_lay(1:NCOL,iSFC:iTOA) = Statein%tgrs(1:NCOL,1:Model%levs)
+    t_lay(1:NCOL,:) = Statein%tgrs(1:NCOL,:)
+
     !
     ! Temperature at layer-interfaces
-    t_lev(1:NCOL,iSFC) = Sfcprop%tsfc(1:NCOL)
-    do iCol=1,NCOL
-       do iLay=iSFC+1,iTOA
-          t_lev(iCol,iLay) = (t_lay(iCol,iLay)+t_lay(iCol,iLay-1))/2._kind_phys
-       enddo
-       t_lev(iCol,iTOA+1) = t_lay(iCol,iTOA)
-    enddo
-
+    if (top_at_1) then
+       t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
+       t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
+       t_lev(1:NCOL,iSFC+1) = Sfcprop%tsfc(1:NCOL)
+    else
+       t_lev(1:NCOL,1)      = Sfcprop%tsfc(1:NCOL)
+       t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
+       t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
+    endif
+    
     ! Compute layer pressure thicknes
-    deltaP = p_lev(:,iSFC:iTOA)-p_lev(:,iSFC+1:iTOA+1)
+    deltaP = abs(p_lev(:,2:model%levs+1)-p_lev(:,1:model%levs))
 
     ! Compute a bunch of thermodynamic fields needed by the macrophysics schemes. Relative humidity, 
     ! saturation mixing-ratio, vapor mixing-ratio, virtual temperature, layer thickness,...
     do iCol=1,NCOL
-       do iLay=iSFC,iTOA
-          es                = min( Statein%prsl(iCol,iLay),  fpvs( Statein%tgrs(iCol,iLay) ) )  ! fpvs and prsl in pa
-          qs                = max( QMIN, eps * es / (Statein%prsl(iCol,iLay) + epsm1*es) )
-          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(QMIN, Statein%qgrs(iCol,iLay,1))/qs ) )
+       do iLay=1,Model%levs
+          es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
+          qs                = max( QMIN, eps * es / (p_lay(iCol,iLay) + epsm1*es) )
+          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(QMIN, q_lay(iCol,iLay))/qs ) )
           qs_lay(iCol,iLay) = qs
-          q_lay(iCol,iLay)  = max( 1.e-6, Statein%qgrs(iCol,iLay,1) )
-          tv_lay(iCol,iLay) = Statein%tgrs(iCol,iLay) * (1._kind_phys + fvirt*q_lay(iCol,iLay)) 
+          tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + fvirt*q_lay(iCol,iLay)) 
           deltaZ(iCol,iLay) = (rog*0.001) * (log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
        enddo
     enddo
@@ -254,18 +259,18 @@ contains
     ! #######################################################################################
     ! First recast remaining all tracers (except sphum) forcing them all to be positive
     do j = 2, model%NTRAC
-       tracer(1:NCOL,1:Model%levs,j) = max(0.0, Statein%qgrs(1:NCOL,1:Model%levs,j))
+       tracer(1:NCOL,:,j) = max(0.0, Statein%qgrs(1:NCOL,:,j))
     enddo
 
     if (Model%ntoz > 0) then 
-       do iLay=iSFC,iTOA
+       do iLay=1,Model%levs
           do iCol=1,NCOL
              o3_lay(iCol,iLay) = max( QMIN, tracer(iCol,iLay,Model%ntoz) )
           enddo
        enddo
     ! OR Use climatological ozone data
     else                               
-       call getozn (Statein%prslk(1:NCOL,iSFC:iTOA), Grid%xlat, NCOL, Model%levs, o3_lay) 
+       call getozn (Statein%prslk(1:NCOL,:), Grid%xlat, NCOL, Model%levs, o3_lay)
     endif
 
     ! #######################################################################################

@@ -79,10 +79,10 @@ contains
     ! Local variables
     type(ty_fluxes_byband) :: &
          flux_allsky, flux_clrsky
-    real(kind_phys), dimension(ncol,model%levs+1),target :: &
-         fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
     real(kind_phys), dimension(ncol,model%levs+1,lw_gas_props%get_nband()),target :: &
-         fluxLWBB_up_allsky, fluxLWBB_dn_allsky
+         fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
+!    real(kind_phys), dimension(ncol,model%levs+1,lw_gas_props%get_nband()),target :: &
+!         fluxLWBB_up_allsky, fluxLWBB_dn_allsky
     logical :: &
          l_ClrSky_HR, l_AllSky_HR_byband, top_at_1
 
@@ -92,22 +92,22 @@ contains
     if (.not. lslwr) return
 
     ! Vertical ordering?
-    top_at_1 = (Statein%prsi(1,1) .lt.  Statein%prsi(1, Model%levs))
+    top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levs))
 
     ! Are any optional outputs requested? Need to know now to compute correct fluxes.
     l_ClrSky_HR        = present(hlw0)
     l_AllSky_HR_byband = present(hlwb)
 
     ! Initialize RRTMGP DDT containing 2D(3D) fluxes
-    flux_allsky%flux_up => fluxLW_up_allsky
-    flux_allsky%flux_dn => fluxLW_dn_allsky
-    flux_clrsky%flux_up => fluxLW_up_clrsky
-    flux_clrsky%flux_dn => fluxLW_dn_clrsky
+    flux_allsky%bnd_flux_up => fluxLW_up_allsky
+    flux_allsky%bnd_flux_dn => fluxLW_dn_allsky
+    flux_clrsky%bnd_flux_up => fluxLW_up_clrsky
+    flux_clrsky%bnd_flux_dn => fluxLW_dn_clrsky
     ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
-    if (l_AllSky_HR_byband) then
-       flux_allsky%bnd_flux_up => fluxLWBB_up_allsky
-       flux_allsky%bnd_flux_dn => fluxLWBB_dn_allsky
-    endif
+    !if (l_AllSky_HR_byband) then
+    !   flux_allsky%bnd_flux_up => fluxLWBB_up_allsky
+    !   flux_allsky%bnd_flux_dn => fluxLWBB_dn_allsky
+    !endif
 
     ! Compute clear-sky fluxes (if requested)
     ! Clear-sky fluxes are gas+aerosol
@@ -120,8 +120,8 @@ contains
             Interstitial%sfc_emiss_byband,      & ! IN  - surface emissivity in each LW band
             flux_clrsky))
        ! Store fluxes
-       fluxlwUP_clrsky   = flux_clrsky%flux_up
-       fluxlwDOWN_clrsky = flux_clrsky%flux_dn
+       fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
+       fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
     endif
 
     ! All-sky fluxes
@@ -134,8 +134,8 @@ contains
          Interstitial%sfc_emiss_byband,      & ! IN  - surface emissivity in each LW band
          flux_allsky))
     ! Store fluxes
-    fluxlwUP_allsky   = flux_allsky%flux_up
-    fluxlwDOWN_allsky = flux_allsky%flux_dn 
+    fluxlwUP_allsky   = sum(flux_allsky%bnd_flux_up,dim=3)
+    fluxlwDOWN_allsky = sum(flux_allsky%bnd_flux_dn,dim=3) 
 
   end subroutine rrtmgp_lw_rte_run
   
