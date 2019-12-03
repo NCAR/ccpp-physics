@@ -20,6 +20,7 @@
       subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   & ! input
           Tbd, Cldprop, Coupling,                                    &
           Radtend,                                                   & ! input/output
+          f_ice, f_rain, f_rimef, flgmin, cwm,                       & ! F-A mp scheme only
           lm, im, lmk, lmp,                                          & ! input
           kd, kt, kb, raddt, delp, dz, plvl, plyr,                   & ! output
           tlvl, tlyr, tsfg, tsfa, qlyr, olyr,                        &
@@ -59,6 +60,7 @@
      &                                     NSPC1
       use module_radiation_clouds,   only: NF_CLDS,                    &  ! cld_init
      &                                     progcld1, progcld3,         &
+     &                                     progcld2,                   &
      &                                     progcld4, progcld5,         &
      &                                     progclduni
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
@@ -80,7 +82,15 @@
 
       integer,              intent(in)  :: im, lm, lmk, lmp
       integer,              intent(out) :: kd, kt, kb
+
+! F-A mp scheme only
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_ice
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_rain
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: f_rimef
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(out) :: cwm
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)),                intent(in)  :: flgmin
       real(kind=kind_phys), intent(out) :: raddt
+
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: delp
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP),   intent(out) :: dz
@@ -520,7 +530,7 @@
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water/ice
             enddo
           enddo
-        elseif (Model%ncnd == 2) then                             ! MG
+        elseif (Model%ncnd == 2) then                             ! MG or F-A
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
@@ -749,6 +759,7 @@
                          Model%sup, Model%kdt, me,                      &
                          clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
 
+
         elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
 
           if (.not.Model%lgfdlmprad) then
@@ -773,8 +784,8 @@
 !                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then		       ! Thompson / WSM6 cloud micrphysics scheme
-
+        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6 .or.  &
+               Model%imp_physics == 15) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.
@@ -795,7 +806,6 @@
 
 !      endif                                ! end_if_ntcw
 
-! CCPP
        do k = 1, LMK
          do i = 1, IM
             clouds1(i,k)  = clouds(i,k,1)

@@ -234,6 +234,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cal_pre]
   standard_name = flag_for_precipitation_type_algorithm
   long_name = flag controls precip type algorithm

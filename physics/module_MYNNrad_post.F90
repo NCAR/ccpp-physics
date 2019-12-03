@@ -22,6 +22,7 @@
 #endif
 SUBROUTINE mynnrad_post_run(               &
      &     ix,im,levs,                     &
+     &     flag_init,flag_restart,         &
      &     qc,qi,                          &
      &     qc_save, qi_save,               &
      &     errmsg, errflg                  )
@@ -34,6 +35,7 @@ SUBROUTINE mynnrad_post_run(               &
 !------------------------------------------------------------------- 
 
       integer, intent(in)  :: ix, im, levs
+      logical,          intent(in)  :: flag_init, flag_restart
       real(kind=kind_phys), dimension(im,levs), intent(out) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(in)  :: qc_save, qi_save
       character(len=*), intent(out) :: errmsg
@@ -47,6 +49,11 @@ SUBROUTINE mynnrad_post_run(               &
 
       !write(0,*)"=============================================="
       !write(0,*)"in mynn rad post"
+
+      if (flag_init .and. (.not. flag_restart)) then
+        !write (0,*) 'Skip MYNNrad_post flag_init = ', flag_init
+        return
+      endif
 
      ! Add subgrid cloud information:
         do k = 1, levs
