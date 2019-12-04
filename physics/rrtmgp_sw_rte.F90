@@ -68,7 +68,7 @@ contains
     ! Outputs
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
-    real(kind_phys), dimension(ncol,Model%levs+1), intent(out) :: &
+    real(kind_phys), dimension(ncol,Model%levs+1), intent(inout) :: &
          fluxswUP_allsky,   & ! All-sky flux                    (W/m2)
          fluxswDOWN_allsky, & ! All-sky flux                    (W/m2)
          fluxswUP_clrsky,   & ! Clear-sky flux                  (W/m2)

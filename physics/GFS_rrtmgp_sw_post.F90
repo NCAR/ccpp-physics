@@ -143,18 +143,18 @@ contains
     ! Compute SW heating-rates
     ! #######################################################################################
     ! Initialize
-    hswc = 0
-    Diag%topfsw    = topfsw_type ( 0., 0., 0. )
-    Radtend%sfcfsw = sfcfsw_type ( 0., 0., 0., 0. )
-    if (l_clrskysw_hr) then
-       hsw0(:,:) = 0.
-    endif
-    if (l_fluxessw2D) then
-       flxprf_sw = profsw_type ( 0., 0., 0., 0. )
-    endif
-    if (l_sfcfluxessw1D) then
-       scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
-    endif
+!    hswc = 0
+!    Diag%topfsw    = topfsw_type ( 0., 0., 0. )
+!    Radtend%sfcfsw = sfcfsw_type ( 0., 0., 0., 0. )
+!    if (l_clrskysw_hr) then
+!       hsw0(:,:) = 0.
+!    endif
+!    if (l_fluxessw2D) then
+!       flxprf_sw = profsw_type ( 0., 0., 0., 0. )
+!    endif
+!    if (l_sfcfluxessw1D) then
+!       scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
+!    endif
 
     if (Model%lsswr .and. nDay .gt. 0) then
        ! Clear-sky heating-rate (optional)
@@ -173,29 +173,35 @@ contains
             p_lev(idxday,:),        &
             thetaTendAllSky))
        hswc(idxday,:) = thetaTendAllSky
-       
+
        ! Copy fluxes from RRTGMP types into model radiation types.
        ! Mandatory outputs
        write(*,"(a11,2i8)") "iTOA/iSFC: ",iTOA,iSFC
        write(*,*) "fluxswDOWN_allsky: ",fluxswDOWN_allsky(idxday,:)
-       write(*,*) "fluxswDOWN_clrsky: ",fluxswDOWN_clrsky(idxday,:)
-       Diag%topfsw(idxday)%upfxc    = fluxswUP_allsky(idxday,iTOA)
-       Diag%topfsw(idxday)%upfx0    = fluxswUP_clrsky(idxday,iTOA)
-       Diag%topfsw(idxday)%dnfxc    = fluxswDOWN_allsky(idxday,iTOA)
-       Radtend%sfcfsw(idxday)%upfxc = fluxswUP_allsky(idxday,iSFC)
-       Radtend%sfcfsw(idxday)%upfx0 = fluxswUP_clrsky(idxday,iSFC)
-       Radtend%sfcfsw(idxday)%dnfxc = fluxswDOWN_allsky(idxday,iSFC)
-       Radtend%sfcfsw(idxday)%dnfx0 = fluxswDOWN_clrsky(idxday,iSFC)
-
+       write(*,*) "fluxswDOWN_clrsky: ",fluxswDOWN_clrsky(:,:)
+       Diag%topfsw(:)%upfxc    = fluxswUP_allsky(:,iTOA)
+       Diag%topfsw(:)%upfx0    = fluxswUP_clrsky(:,iTOA)
+       Diag%topfsw(:)%dnfxc    = fluxswDOWN_allsky(:,iTOA)
+       Radtend%sfcfsw(:)%upfxc = fluxswUP_allsky(:,iSFC)
+       Radtend%sfcfsw(:)%upfx0 = fluxswUP_clrsky(:,iSFC)
+       Radtend%sfcfsw(:)%dnfxc = fluxswDOWN_allsky(:,iSFC)
+       Radtend%sfcfsw(:)%dnfx0 = fluxswDOWN_clrsky(:,iSFC)
+       !Diag%topfsw(idxday)%upfxc    = fluxswUP_allsky(idxday,iTOA)
+       !Diag%topfsw(idxday)%upfx0    = fluxswUP_clrsky(idxday,iTOA)
+       !Diag%topfsw(idxday)%dnfxc    = fluxswDOWN_allsky(idxday,iTOA)
+       !Radtend%sfcfsw(idxday)%upfxc = fluxswUP_allsky(idxday,iSFC)
+       !Radtend%sfcfsw(idxday)%upfx0 = fluxswUP_clrsky(idxday,iSFC)
+       !Radtend%sfcfsw(idxday)%dnfxc = fluxswDOWN_allsky(idxday,iSFC)
+       !Radtend%sfcfsw(idxday)%dnfx0 = fluxswDOWN_clrsky(idxday,iSFC)
+    
        ! Optional output
        if(l_fluxessw2D) then
-          flxprf_sw(idxday,:)%upfxc = fluxswUP_allsky(idxday,:)
-          flxprf_sw(idxday,:)%dnfxc = fluxswDOWN_allsky(idxday,:)
-          flxprf_sw(idxday,:)%upfx0 = fluxswUP_clrsky(idxday,:)
-          flxprf_sw(idxday,:)%dnfx0 = fluxswDOWN_clrsky(idxday,:)
+          flxprf_sw(:,:)%upfxc = fluxswUP_allsky(:,:)
+          flxprf_sw(:,:)%dnfxc = fluxswDOWN_allsky(:,:)
+          flxprf_sw(:,:)%upfx0 = fluxswUP_clrsky(:,:)
+          flxprf_sw(:,:)%dnfx0 = fluxswDOWN_clrsky(:,:)
        endif
     endif
-
     ! #######################################################################################
     ! Save SW outputs
     ! #######################################################################################
