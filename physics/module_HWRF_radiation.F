@@ -220,27 +220,19 @@
 !!
       SUBROUTINE HWRF_radiation_run (NTSD,DT,JULDAY,JULYR,XTIME,JULIAN  &
      &                    ,IHRST,NPHS,GLAT,GLON                         &
-     &                    ,NRADS,NRADL, DX                              &
-     &                    ,p8w,prsl,tsfc                                & !p8w-prsi; psfc-prsl1
-     &                    ,T,Q                                          &
+     &                    ,NRADS,NRADL, DX ,p8w,prsl,tsfc,T,Q           &
      &                    ,QV,QC,QI,QR,QS,QG                            & !MOIST: dry mixing ratio
      &                    ,ALBEDO,EPSR                                  &
-     &                    ,F_ICE,F_RAIN                                 &
-     &                    ,SM,HBM2,CLDFRA,RESTRT                        &
+     &                    ,F_ICE,F_RAIN,SM,CLDFRA                       &
      &                    ,RLWTT,RSWTT,RLWIN,RSWIN,RSWINC,RSWOUT,GSW,   &
      &                    ,RLWTOA,RSWTOA,CZMEAN                         &
-!mz     &                    ,SIGT4                                        &
-     &                    ,ACFRST,NCFRST,ACFRCV,NCFRCV                  &
-     &                    ,CUPPT,VEGFRC,SNOW,HTOP,HBOT                  &
-     &                    ,SICE, NUM_OZMIXM,OZMIXM,PIN                  & !z
-     &                    ,LEVSIZ                                       &
-     &                    ,RTHRATEN                                     &
+     &                    ,SNOW,SICE, NUM_OZMIXM,OZMIXM,PIN,LEVSIZ      &
+     &                    ,RTHRATEN,RTHRATENLW,RTHRATENSW               &
      &                    ,re_cloud,re_ice,re_snow                      &
      &                    ,has_reqc,has_reqi,has_reqs                   &
      &                    ,swddir, swddni,swddif, swddirc,swddnic       &
      &                    ,gx,bx,gg,bb,swdown_ref, swddir_ref           &
-     &                    ,coszen_ref, coszen,hrang                     &
-     &                    ,xlat,xlong                                   &
+     &                    ,coszen_ref, coszen,hrang,xlat,xlong          &
      &                    ,paerlev, ALEVSIZ,no_src_types,               &   !NML
      &                    ,CAM_ABS_FREQ_S,swint_opt,icloud,cldovrlp     &
      &                    ,RA_CALL_OFFSET, o3input,aer_opt,o3rad        &
@@ -282,17 +274,18 @@
       LOGICAL,         INTENT(IN) :: warm_rain
       INTEGER,    OPTIONAL, INTENT(IN   )    ::  sf_surface_physics
 !
-      INTEGER,         DIMENSION(1:NCOL),   INTENT(INOUT) :: NCFRCV,    &
-                                                             NCFRST
+!      INTEGER,         DIMENSION(1:NCOL),   INTENT(INOUT) :: NCFRCV,    &
+!                                                             NCFRST
 
       REAL(KIND_PHYS), INTENT(IN) :: DT,XTIME,JULIAN
 
       REAL(KIND_PHYS), DIMENSION(1:ncol),      INTENT(IN)    :: ALBEDO  &
      &                                             ,EPSR,GLAT,GLON      &
-     &                                             ,HBM2                &
+!MZ     &                                             ,HBM2                &
      &                                             ,SICE,SM      &
-     &                                             ,SNOW,VEGFRC
-      REAL(KIND_PHYS),DIMENSION(1:ncol),       INTENT(INOUT) :: CUPPT
+     &                                             ,SNOW
+!MZ ,VEGFRC
+!MZ      REAL(KIND_PHYS),DIMENSION(1:ncol),       INTENT(INOUT) :: CUPPT
       REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(IN)    :: Q,T,Z,  &
                                                                 prsl
       REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay+1),INTENT(IN)  :: p8w 
@@ -308,20 +301,22 @@
       REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) :: COSZEN
       REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) :: HRANG
       REAL(KIND_PHYS),DIMENSION(1:ncol) , INTENT(IN) ::  XLAT, XLONG
-      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) :: RTHRATEN
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::RTHRATEN &
+                                                            ,RTHRATENSW &
+                                                            ,RTHRATENLW
       REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::    QV   &
                                                                   ,QC   &
                                                                   ,QI   &
                                                                   ,QR   &
                                                                   ,QS   &
                                                                   ,QG
-      REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) :: ACFRCV,ACFRST  &
-     &                                                ,HBOT,HTOP        &
+      REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) ::                &!ACFRCV,ACFRST  &
+!     &                                                ,HBOT,HTOP        &
      &                                                ,RLWIN,RLWTOA     &
      &                                                ,RSWIN,RSWOUT     &
      &                                                ,GSW              &
      &                                                ,RSWINC,RSWTOA
-      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::         & ! PINT    &
+      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::         &
      &                                                        ,RLWTT    &
      &                                                        ,RSWTT
       REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) ::                &
@@ -352,7 +347,7 @@
 
       !..Output daily longwave and shortwave heating rates: 
       REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(OUT):: hrlwpd,hrswpd
-      LOGICAL,INTENT(IN) :: RESTRT
+!mz      LOGICAL,INTENT(IN) :: RESTRT
 !-----------------------------------------------------------------------
 !***  LOCAL VARIABLES
 !-----------------------------------------------------------------------
@@ -367,7 +362,7 @@
 !
       REAL(kind_phys),DIMENSION(1:nlay-1) :: QL,TL
 !
-      REAL(kind_phys),DIMENSION(1:ncol) :: CUPPTR,CZEN,HBOTR,HTOPR      &
+      REAL(kind_phys),DIMENSION(1:ncol) :: CZEN   !mz,HBOTR,HTOPR      &
      &                                  ,SWCF, LWCF                     &
      &                                   ,REXNSFC,SWNETDN           &
      &                                  ,TOT,TOTLWDN,TOTSWDN,TOTSWDNC   &
@@ -563,18 +558,13 @@
           TOTSWDNC(I,J)=0.  ! CLEAR SKY shortwave down at the surface
           SWNETDN(I,J)=0.   ! Net (down - up) total (clear+cloudy sky) shortwave at the surface
           TOTLWDN(I,J)=0.   ! Total longwave down at the surface
-          CUPPTR(I,J)=CUPPT(I,J)   ! Temporary array set to zero in radiation
-          HTOPR(I,J) =0.
-          HBOTR(I,J) = REAL(KTE+1)
+!mz          CUPPTR(I,J)=CUPPT(I,J)   ! Temporary array set to zero in radiation
+!mz          HTOPR(I,J) =0.
+!mz          HBOTR(I,J) = REAL(KTE+1)
 !          HBOTR(I,J) =0.
           SWCF(I,J) =0.
           LWCF(I,J) =0.
 !
-!-- NOTE:  HBOTR, HTOPR are passed into radiation and set equal to HBOT, HTOP.  HBOT, HTOP are
-!          reset to clear sky values to be used by the ARW.  At the bottom of this subroutine,
-!          HBOT, HTOP are re-defined again to values stored in HBOTR, HTOPR.  HBOT, HTOP are
-!          reset to clear sky values after the call to radiation and after the top of the hour
-!          in subroutine CUCNVC below.
 !
         ENDDO
       ENDDO
@@ -609,9 +599,7 @@
      &                 ,ALEVSIZ=ALEVSIZ,no_src_types=no_src_types       &
      &                 ,LEVSIZ=LEVSIZ,N_OZMIXM=NUM_OZMIXM               &
      &                 ,OZMIXM=OZMIXM,PIN=PIN                           &
-     &                 ,HTOP=HTOP,HBOT=HBOT,CUPPT=CUPPTR                &
-     &                 ,HTOPR=HTOPR,HBOTR=HBOTR                         &
-     &                 ,VEGFRA=VEGFRC,SNOW=SNOW                         &
+     &                 ,SNOW=SNOW                                       &
      &                 ,RHO=RR,P8W=P8W,P=P_PHY,PI=PI_PHY                &
      &                 ,DZ8W=DZ,T=T_PHY,T8W=T8W,GMT=GMT                 &
      &                 ,JULDAY=JULDAY,JULYR=JULYR,NPHS=NPHS             &
@@ -664,8 +652,10 @@
      &                 ,has_reqs=has_reqs                               &
      &                 ,RSWTOA=RSWTOA,RLWTOA=RLWTOA                     &
      &                 ,CZMEAN=CZMEAN                                   &
-     &                 ,ACFRST=ACFRST,NCFRST=NCFRST                     &
-     &                 ,ACFRCV=ACFRCV,NCFRCV=NCFRCV                     &
+!     &                 ,ACFRST=ACFRST
+!     &                 ,NCFRST=NCFRST                     &
+!     &                 ,ACFRCV=ACFRCV
+!     &                 ,NCFRCV=NCFRCV                     &
      &                 ,F_ICE_PHY=F_ICE,F_RAIN_PHY=F_RAIN               &
      &                 ,LWCF=LWCF,SWCF=SWCF                             &
      &                 ,O3INPUT=O3INPUT,AER_OPT=AER_OPT,O3RAD=o3rad     &
@@ -748,7 +738,7 @@
           DO J=MYJS2,MYJE2
           DO I=MYIS1,MYIE1
 !
-            IF(HBM2(I,J)>0.5)THEN
+!MZ            IF(HBM2(I,J)>0.5)THEN
               TOTSWDN(I,J)=SWNETDN(I,J)/(1.-ALBEDO(I,J))
 !
 !--- No value currently available for clear-sky solar fluxes from
@@ -756,7 +746,7 @@
 !    For the time being, set to the total downward solar fluxes.
 !
               TOTSWDNC(I,J)=TOTSWDN(I,J)
-            ENDIF
+!MZ            ENDIF
 !
           ENDDO
           ENDDO
@@ -806,11 +796,12 @@
           IF(MOD(J,2)==0.AND.ITE==IDE)IENDX=IENDX-1
           DO I=MYIS1,IENDX
 !
-            IF(HBM2(I,J)>0.5)THEN
+!MZ: hbm2=1. in global FV3
+!            IF(HBM2(I,J)>0.5)THEN
               TDUM=T(I,J,KTS)
 !              SIGT4(I,J)=STBOLT*TDUM*TDUM*TDUM*TDUM
               RLWIN(I,J)=TOTLWDN(I,J)
-            ENDIF
+!            ENDIF
 !
           ENDDO
         ENDDO
@@ -823,9 +814,9 @@
 !
           DO K=KTS,KTE
           DO I=MYIS1,IENDX
-            IF(HBM2(I,J)>0.5)THEN
+!MZ            IF(HBM2(I,J)>0.5)THEN
                 RLWTT(I,J,K)=THRATENLW(I,K,J)*PI_PHY(I,K,J)
-            ENDIF
+!MZ            ENDIF
           ENDDO
           ENDDO
 !
@@ -861,8 +852,8 @@
         IF(MOD(J,2)==0.AND.ITE==IDE)IENDX=IENDX-1
         DO I=MYIS1,IENDX
           HBOT(I,J)=HBOTR(I,J)
-          HTOP(I,J)=HTOPR(I,J)
-          CUPPT(I,J)=CUPPTR(I,J)
+!          HTOP(I,J)=HTOPR(I,J)
+!          CUPPT(I,J)=CUPPTR(I,J)
         ENDDO
       ENDDO
 !
@@ -870,19 +861,20 @@
 !***  ZERO OUT BOUNDARY ROWS.
 !-----------------------------------------------------------------------
 !
-      DO J=JTS,JTE
-      DO I=ITS,ITE
-        IF(HBM2(I,J)<0.5)THEN
-          ACFRST(I,J)=0.
-          ACFRCV(I,J)=0.
-!          CFRACL(I,J)=0.
-!          CFRACM(I,J)=0.
-!          CFRACH(I,J)=0.
-          RSWTOA(I,J)=0.
-          RLWTOA(I,J)=0.
-        ENDIF
-      ENDDO
-      ENDDO
+!MZ
+!      DO J=JTS,JTE
+!      DO I=ITS,ITE
+!        IF(HBM2(I,J)<0.5)THEN
+!          ACFRST(I,J)=0.
+!          ACFRCV(I,J)=0.
+!!          CFRACL(I,J)=0.
+!!          CFRACM(I,J)=0.
+!!          CFRACH(I,J)=0.
+!          RSWTOA(I,J)=0.
+!          RLWTOA(I,J)=0.
+!        ENDIF
+!      ENDDO
+!      ENDDO
 
 !
       DO J=jts,min(jde-1,jte)

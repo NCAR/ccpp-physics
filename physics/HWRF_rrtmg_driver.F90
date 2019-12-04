@@ -4,11 +4,11 @@ MODULE HWRF_rrtmg_driver
  
 CONTAINS
 
-   SUBROUTINE radiation_driver (ACFRCV ,ACFRST ,ALBEDO                  &
+   SUBROUTINE radiation_driver (ALBEDO                                  &
               ,CZMEAN ,DT                                               &
               ,DZ8W   ,EMISS  ,GLW     ,GMT    ,GSW                     & 
               ,ITIMESTEP,JULDAY, JULIAN,JULYR                           &
-              ,NCFRCV ,NCFRST ,NPHS  O3RAD  ,                           &
+              ,NPHS  O3RAD  ,                           &
               ,P8W  ,P ,PI  ,        RADT                               & 
               ,RHO    ,RLWTOA  ,RSWTOA ,RTHRATEN                        &
               ,RTHRATENLW    ,RTHRATENSW   ,HRSWPD, HRLWPD              &
@@ -367,13 +367,13 @@ CONTAINS
    REAL, DIMENSION( ims:ime, jms:jme ),                           &
          INTENT(INOUT)  ::                                        &
                                                       RLWTOA,     & 
-                                                      RSWTOA,     &
-                                                      ACFRST,     & 
-                                                      ACFRCV       
+                                                      RSWTOA,     
+!mz                                                      ACFRST,     & 
+!mz                                                      ACFRCV       
 
-   INTEGER,DIMENSION( ims:ime, jms:jme ),INTENT(INOUT)        ::  &
-                                                          NCFRST, & 
-                                                          NCFRCV   
+!mz   INTEGER,DIMENSION( ims:ime, jms:jme ),INTENT(INOUT)        ::  &
+!mz                                                          NCFRST, & 
+!mz                                                          NCFRCV   
 
 
 !

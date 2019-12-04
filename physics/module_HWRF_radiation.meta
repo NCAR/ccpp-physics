@@ -466,37 +466,20 @@
   kind = kind_phys
   intent = in
   optional = F
-[HBM2]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [CLDFRA]
-  standard_name =
-  long_name =
-  units =
+  standard_name = total_cloud_fraction
+  long_name = layer total cloud fraction
+  units = frac
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[RESTRT]
-  standard_name =
-  long_name =
-  units =
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [RLWTT]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating
   long_name = tendency of air temperature due to longwave heating
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -505,7 +488,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating
   long_name = tendency of air temperature due to shortwave heating
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -573,124 +556,28 @@
   kind = kind_phys
   intent = inout
   optional = F
-[SIGT4]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[ACFRST]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[NCFRST]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = inout
-  optional = F
-[ACFRCV]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[NCFRCV]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = inout
-  optional = F
-[CUPPT]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[VEGFRC]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [SNOW]
-  standard_name =
-  long_name =
-  units =
+  standard_name = water_equivalent_accumulated_snow_depth
+  long_name = water equiv of acc snow depth over land and sea ice
+  units = mm
   dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[HTOP]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[HBOT]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[Z]
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [SICE]
-  standard_name =
-  long_name =
-  units =
+  standard_name = sea_ice_mask
+  long_name = sea ice mask; =1 for sea ice, =0 for no sea ice
+  units = flag
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[NUM_AEROSOLC]
-  standard_name =
-  long_name =
-  units =
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [NUM_OZMINXM]
-  standard_name =
-  long_name =
-  units =
+  standard_name = number_of_CAM_ozone_data_months
+  long_name = number of CAM ozone data months
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -721,13 +608,29 @@
   type = integer
   intent = in
   optional = F
-[GRID]
-
 [RTHRATEN]
   standard_name = tendency_of_potential_temperature_due_to_radiative_heating_per_sec
   long_name =  total sky radiative heating rate per sec
   units = K s-1
-  dimensions = (horizontal_dimension, adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension, vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[RTHRATENLW]
+  standard_name = tendency_of_potential_temperature_due_to_longwave_heating_per_sec
+  long_name = total sky longwave radiative heating rate per sec
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[RTHRATENSW]
+  standard_name = tendency_of_potential_temperature_due_to_shortwave_heating_per_sec
+  long_name = total sky shortwave radiative heating rate per sec
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -736,7 +639,7 @@
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
   long_name = eff. radius of cloud liquid water particle in meter
   units = m
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -745,7 +648,7 @@
   standard_name = effective_radius_of_stratiform_cloud_ice_particle
   long_name = eff. radius of cloud ice water particle in meter
   units = m
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -754,7 +657,7 @@
   standard_name = effective_radius_of_stratiform_cloud_snow_particle
   long_name = effective radius of cloud snow particle in meter
   units = m
-  dimensions = (horizontal_dimension, adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -787,7 +690,7 @@
   standard_name = daily shortwave heating rates
   long_name
   units 
-  dimension =  (horizontal_dimension, adjusted_vertical_layer_dimension_for_radiation)
+  dimension =  (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -796,7 +699,7 @@
   standard_name = daily longwave heating rates
   long_name
   units
-  dimension =  (horizontal_dimension, adjusted_vertical_layer_dimension_for_radiation)
+  dimension =  (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -1091,8 +994,8 @@
   optional = F
 [SWVISDIR] 
   standard_name = direct_visible_component_of_shortwave_radiation
-  long_name = :wq!
-  units = 
+  long_name = direct visible component of SW radiation
+  units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -1100,29 +1003,61 @@
   optional = F
 [SWVISDIF]
   standard_name = diffuse_visible_component_of_shortwave_radiation
-  long_name =
-  units =
+  long_name = diffuse visible component of SW radiation
+  units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [SWNIRDIR] 
-  standard_name
-  long_name = direct_near_infrared_component_of
-  units =
+  standard_name = direct_near_infrared_component_of_shortwave_radiation
+  long_name = direct NIR component of SW radiation
+  units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [SWNIRDIF]               
-  standard_name
-  long_name =
-  units =
+  standard_name = diffuse_near_infrared_component_of_shortwave_radiation
+  long_name = diffuse NIR component of SW radiation
+  units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
-
+[MPIROOT]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[MPIRANK]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
