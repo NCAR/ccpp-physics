@@ -3,7 +3,6 @@
       module GFS_rrtmg_pre
 
       public GFS_rrtmg_pre_run
-
       contains
 
 !> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
@@ -155,6 +154,8 @@
                           rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
                           cldcov, deltaq, cnvc, cnvw,                      &
                           effrl, effri, effrr, effrs
+      real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value, tem1, tem2, tem3
+      real (kind=kind_phys), parameter :: xrc3 = 100.
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP+1) :: tem2db
 !     real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP+1) :: hz
@@ -273,7 +274,7 @@
           tracer1(:,k1,j) = max(0.0, Statein%qgrs(:,k2,j))
         enddo
       enddo
-!
+
       if (ivflip == 0) then                                ! input data from toa to sfc
         do i = 1, IM
           plvl(i,1+kd) = 0.01 * Statein%prsi(i,1)          ! pa to mb (hpa)
@@ -591,6 +592,7 @@
           enddo
         endif
 !
+
         if (Model%uni_cld) then
           if (Model%effr_in) then
             do k=1,lm
@@ -694,6 +696,40 @@
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
+        if (Model%imp_physics == 10) then
+          ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK) + ccnd(1:IM,1:LMK,2)
+        endif
+
+        if (Model%uni_cld) then
+          if (Model%effr_in) then
+            do k=1,lm
+              k1 = k + kd
+              do i=1,im
+                 cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                 effrl(i,k1)  = Tbd%phy_f3d(i,k,2)
+                 effri(i,k1)  = Tbd%phy_f3d(i,k,3)
+                 effrr(i,k1)  = Tbd%phy_f3d(i,k,4)
+                 effrs(i,k1)  = Tbd%phy_f3d(i,k,5)
+              enddo
+            enddo
+          else
+            do k=1,lm
+              k1 = k + kd
+              do i=1,im
+                 cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                 if (tracer1(i,k,ntcw) .gt. 0 .or. tracer1(i,k,ntiw) .gt. 0) then
+                    cldcov(i,k1) = 0.1
+                 else
+                    cldcov(i,k1) = 0.0
+                 endif
+              enddo
+            enddo
+          endif
+        elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
+          cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,Model%ntclamt)
+        else                                                           ! neither of the other two cases
+          cldcov = 0.0
+        endif
 
         if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
@@ -783,6 +819,7 @@
             clouds9(i,k)  = clouds(i,k,9)
          enddo
        enddo
+
 
 ! mg, sfc-perts
 !  ---  scale random patterns for surface perturbations with

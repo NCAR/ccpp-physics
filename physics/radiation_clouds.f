@@ -2485,10 +2485,10 @@
           cip   (i,k) = 0.0
           crp   (i,k) = 0.0
           csp   (i,k) = 0.0
-          rew   (i,k) = re_cloud(i,k)
-          rei   (i,k) = re_ice(i,k) 
+          rew   (i,k) = reliq_def ! default liq radius to 10 micron
+          rei   (i,k) = reice_def            ! default ice radius to 50 micron
           rer   (i,k) = rrain_def            ! default rain radius to 1000 micron
-          res   (i,k) = re_snow(i,K) 
+          res   (i,k) = rsnow_def
 !         tem2d (i,k) = min( 1.0, max( 0.0, (con_ttp-tlyr(i,k))*0.05 ) )
           clwf(i,k)   = 0.0
         enddo
