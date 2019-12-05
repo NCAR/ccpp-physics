@@ -103,7 +103,7 @@ module mp_fer_hires
       ENDIF
       !MZ: fer_hires_init() in HWRF
 
-       CALL FERRIER_INIT_HR(dtp,mpicomm,mpirank,mpiroot,threads)
+       CALL FERRIER_INIT_HR(dtp,mpicomm,mpirank,mpiroot,threads,errmsg,errflg)
 
        if (mpirank==mpiroot) write (0,*)'F-A: FERRIER_INIT_HR finished ...'
        if (errflg /= 0 ) return
