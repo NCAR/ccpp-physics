@@ -409,7 +409,7 @@
 !!
     subroutine GFS_suite_stateout_update_run (im, levs, ntrac, dtp,  &
                      tgrs, ugrs, vgrs, qgrs, dudt, dvdt, dtdt, dqdt, &
-                     gt0, gu0, gv0, gq0, errmsg, errflg)
+                     gt0, gu0, gv0, gq0,gq0_rf, ntiw, nqrimef, epsq, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -419,18 +419,20 @@
       integer,              intent(in) :: im
       integer,              intent(in) :: levs
       integer,              intent(in) :: ntrac
-      real(kind=kind_phys), intent(in) :: dtp
+      integer, optional,    intent(in) :: ntiw, nqrimef
+      real(kind=kind_phys), intent(in) :: dtp, epsq
 
       real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: qgrs
       real(kind=kind_phys), dimension(im,levs),       intent(in)  :: dudt, dvdt, dtdt
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: dqdt
-      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0
+      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0, gq0_rf
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(out) :: gq0
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
+      integer                       :: i, k
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -439,6 +441,20 @@
       gu0(:,:)   = ugrs(:,:)   + dudt(:,:)   * dtp
       gv0(:,:)   = vgrs(:,:)   + dvdt(:,:)   * dtp
       gq0(:,:,:) = qgrs(:,:,:) + dqdt(:,:,:) * dtp
+      
+      if(present(ntiw) .and. present(nqrimef))then
+       do k=1,levs
+         do i=1,im
+           if(gq0(i,k,ntiw) > epsq) then
+             !mz gq0(i,k,nqrimef) = gq0(i,k,nqrimef)/gq0(i,k,ntiw)
+             gq0_rf(i,k) = gq0(i,k,nqrimef)/gq0(i,k,ntiw)
+           else
+             !mz gq0(i,k,nqrimef) = 1.
+             gq0_rf(i,k) = 1.
+           end if
+         end do
+       end do
+      end if
 
     end subroutine GFS_suite_stateout_update_run
 

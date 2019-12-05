@@ -1043,6 +1043,40 @@
   kind = kind_phys
   intent = out
   optional = F
+[gq0_rf]
+  standard_name = mass_weighted_rime_factor_updated_by_physics
+  long_name = mass weighted rime factor updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ntiw]
+  standard_name = index_for_ice_cloud_condensate
+  long_name = tracer index for  ice water
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = T
+[nqrimef]
+  standard_name = index_for_mass_weighted_rime_factor
+  long_name = tracer index for mass weighted rime factor
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = T
+[epsq]
+  standard_name = minimum_value_of_specific_humidity
+  long_name = floor value for specific humidity
+  units = kg kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

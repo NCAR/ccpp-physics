@@ -169,6 +169,9 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev) ! QRIMEF
+    !  real(kind_phys),   intent(  out) :: qc_m(1:ncol,1:nlev)
+    !  real(kind_phys),   intent(  out) :: qr_m(1:ncol,1:nlev)
+    !  real(kind_phys),   intent(  out) :: qi_m(1:ncol,1:nlev)
 
       real(kind_phys),   intent(inout) :: prec(1:ncol)
 !      real(kind_phys)                  :: acprec(1:ncol)   !MZ: change to local
@@ -260,20 +263,14 @@ module mp_fer_hires
 
 !MZ* in HWRF
 !-- 6/11/2010: Update cwm, F_ice, F_rain and F_rimef arrays
-         cwm(I,K) = QC(I,K)+QR(I,K)+QI(I,K)
-!aligo
-         cwm(i,k) = cwm(i,k)/(1.0_kind_phys-q(i,k))
-         qr(i,k)  = qr(i,k)/(1.0_kind_phys-q(i,k))
-         qi(i,k)  = qi(i,k)/(1.0_kind_phys-q(i,k))
-         qc(i,k)  = qc(i,k)/(1.0_kind_phys-q(i,k))
-!aligo
+         cwm(I,K)=QC(I,K)+QR(I,K)+QI(I,K)
          IF (QI(I,K) <= EPSQ) THEN
             F_ICE(I,K)=0.
             F_RIMEF(I,K)=1.
             IF (T(I,K) < T_ICEK) F_ICE(I,K)=1.
          ELSE
             F_ICE(I,K)=MAX( 0., MIN(1., QI(I,K)/cwm(I,K) ) )
-            F_RIMEF(I,K)=QG(I,K) !/QI(I,K) Chunxi Nov 25,2019
+            F_RIMEF(I,K)=QG(I,K)!/QI(I,K)
          ENDIF
          IF (QR(I,K) <= EPSQ) THEN
             F_RAIN(I,K)=0.
@@ -283,23 +280,15 @@ module mp_fer_hires
 
         ENDDO
 
-      enddo
+      ENDDO
 
 !---------------------------------------------------------------------
-!*** Update the rime factor array after 3d advection
-!---------------------------------------------------------------------
-!MZ* in namphysics
-!              DO K=1,LM
-!              DO I=IMS,IME
-!                IF (QG(I,K)>EPSQ .AND. QI(I,K)>EPSQ) THEN
-!                  F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QI(I,K)))
-!                ELSE
-!                  F_RIMEF(I,K)=1.
-!                ENDIF
-!              ENDDO
-!              ENDDO
-
-
+!aligo
+         cwm(i,k) = cwm(i,k)/(1.0_kind_phys-q(i,k))
+         qr(i,k) = qr(i,k)/(1.0_kind_phys-q(i,k))
+         qi(i,k) = qi(i,k)/(1.0_kind_phys-q(i,k))
+         qc(i,k) = qc(i,k)/(1.0_kind_phys-q(i,k))
+!aligo
 !---------------------------------------------------------------------
         
             CALL FER_HIRES(                                             &
@@ -319,18 +308,16 @@ module mp_fer_hires
 
 !.......................................................................
 
-!Aligo Oct-23-2019 
+!MZ*
+!Aligo Oct-23-2019
 ! - Convert dry qc,qr,qi back to wet mixing ratio
     DO K = 1, LM
      DO I= IMS, IME
-        cwm(i,k) = cwm(i,k)/(1.0_kind_phys+q(i,k))
         qc(i,k) = qc(i,k)/(1.0_kind_phys+q(i,k))
         qi(i,k) = qi(i,k)/(1.0_kind_phys+q(i,k))
         qr(i,k) = qr(i,k)/(1.0_kind_phys+q(i,k))
      ENDDO
-    ENDDO
-    
-
+    ENDDO 
 
 !-----------------------------------------------------------
       DO K=1,LM
