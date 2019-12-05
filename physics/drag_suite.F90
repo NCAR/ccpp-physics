@@ -332,11 +332,11 @@
      &                                     hpbl(im),             &
      &                                     slmsk(im)
    real(kind=kind_phys), dimension(im)    :: govrth,xland
-   real(kind=kind_phys), dimension(im,km) :: dz2
+   !real(kind=kind_phys), dimension(im,km) :: dz2
    real(kind=kind_phys)                   :: tauwavex0,tauwavey0,  &
      &                                     XNBV,density,tvcon,hpbl2
    integer                          ::     kpbl2,kvar
-   real(kind=kind_phys), dimension(im,km+1)         ::     zq      ! = PHII/g
+   !real(kind=kind_phys), dimension(im,km+1)         ::     zq      ! = PHII/g
    real(kind=kind_phys), dimension(im,km)           ::     zl      ! = PHIL/g
 
 !SPP
@@ -413,10 +413,10 @@
 !  local variables
 !
    integer              ::  i,j,k,lcap,lcapp1,nwd,idir,           &
-                            klcap,kp1,ikount,kk
+                            klcap,kp1
 !
-   real(kind=kind_phys) ::  rcs,rclcs,csg,fdir,cleff,cleff_ss,cs, &
-                            rcsks,wdir,ti,rdz,temp,tem2,dw2,shr2, &
+   real(kind=kind_phys) ::  rcs,csg,fdir,cleff,cleff_ss,cs,       &
+                            rcsks,wdir,ti,rdz,tem2,dw2,shr2,      &
                             bvf2,rdelks,wtkbj,tem,gfobnv,hd,fro,  &
                             rim,temc,tem1,efact,temv,dtaux,dtauy, &
                             dtauxb,dtauyb,eng0,eng1
@@ -442,7 +442,6 @@
                             coefm(im),coefm_ss(im)
 !
    integer              ::  kbl(im),klowtop(im)
-   logical :: iope
    integer,parameter    ::  mdir=8
    !integer              ::  nwdir(mdir)
    !data nwdir/6,7,5,8,2,3,1,4/
@@ -596,6 +595,7 @@ if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
      olss(i)       = 0.0
      ulow (i)      = 0.0
      dtfac(i)      = 1.0
+     rstoch(i)     = 0.0
      ldrag(i)      = .false.
      icrilv(i)     = .false.
      flag(i)       = .true.
@@ -657,6 +657,17 @@ if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
        vtj(i,k)  = t1(i,k)  * (1.+fv*q1(i,k))
        vtk(i,k)  = vtj(i,k) / prslk(i,k)
        ro(i,k)   = 1./rd * prsl(i,k) / vtj(i,k) ! density kg/m**3
+     enddo
+   enddo
+!
+!  calculate mid-layer height (zl), interface height (zq), and layer depth (dz2).
+!
+   !zq=0.
+   do k = kts,km
+     do i = its,im
+       !zq(i,k+1) = PHII(i,k+1)*g_inv
+       !dz2(i,k)  = (PHII(i,k+1)-PHII(i,k))*g_inv
+       zl(i,k)   = PHIL(i,k)*g_inv
      enddo
    enddo
 !
@@ -894,7 +905,6 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
   density=1.2
   utendwave=0.
   vtendwave=0.
-  zq=0.
 !
   IF ( (gwd_opt_ss .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
     if (me==master) print *,"in Drag Suite: Running small-scale gravity wave drag"
@@ -911,14 +921,6 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
       do i = its,im
         tvcon = (1.+fv*q1(i,k))
         thvx(i,k) = thx(i,k)*tvcon
-      enddo
-    enddo
-    ! Calculate mid-layer height (zl), interface height (zq), and layer depth (dz2).
-    do k = kts,km
-      do i = its,im
-        zq(i,k+1) = PHII(i,k+1)*g_inv
-        dz2(i,k)  = (PHII(i,k+1)-PHII(i,k))*g_inv
-        zl(i,k)   = PHIL(i,k)*g_inv
       enddo
     enddo
 
@@ -1026,19 +1028,6 @@ IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
 
    utendform=0.
    vtendform=0.
-   zq=0.
-
-   IF ( (gwd_opt_ss .NE. 1).and.(ss_taper.GT.1.E-02) ) THEN
-     ! Defining mid-layer height (zl), interface height (zq), and layer depth (dz2). 
-     ! This is already done above if the small-scale GWD is activated.
-     do k = kts,km
-       do i = its,im
-         zq(i,k+1) = PHII(i,k+1)*g_inv
-         dz2(i,k)  = (PHII(i,k+1)-PHII(i,k))*g_inv
-         zl(i,k)   = PHIL(i,k)*g_inv
-       enddo
-     enddo
-   ENDIF
 
    DO i=its,im
       IF ((xland(i)-1.5) .le. 0.) then

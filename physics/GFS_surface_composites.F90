@@ -123,7 +123,7 @@ contains
             if (cice(i) < one) then
               wet(i) = .true.
   !           tsfco(i) = tgice
-              tsfco(i) = max(tisfc(i), tgice)
+              if (.not. cplflx) tsfco(i) = max(tisfc(i), tgice)
   !           tsfco(i) = max((tsfc(i) - cice(i)*tisfc(i)) &
   !                                     / (one - cice(i)), tgice)
             endif
