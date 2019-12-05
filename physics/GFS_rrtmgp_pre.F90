@@ -1,5 +1,3 @@
-!> \file GFS_rrtmgp_pre.f90
-!! This file contains
 module GFS_rrtmgp_pre
   use physparam
   use machine, only: &
@@ -63,18 +61,18 @@ module GFS_rrtmgp_pre
   
 contains
   
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_pre_init
+  ! #########################################################################################
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-  ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_pre_init()
-  ! #########################################################################################
   subroutine GFS_rrtmgp_pre_init(Model, Radtend, errmsg, errflg)
     ! Inputs
     type(GFS_control_type), intent(inout) :: &
-         Model      ! DDT containing model control parameters
-   type(GFS_radtend_type), intent(inout) :: &
-        Radtend     ! Fortran DDT containing FV3-GFS radiation tendencies 
+         Model      ! DDT: FV3-GFS model control parameters
+    type(GFS_radtend_type), intent(inout) :: &
+         Radtend     ! DDT: FV3-GFS radiation tendencies 
     ! Outputs
     character(len=*), intent(out) :: &
          errmsg     ! Error message
@@ -113,6 +111,9 @@ contains
     endif
   end subroutine GFS_rrtmgp_pre_init
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_pre_run
+  ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre.html
 !!
@@ -125,19 +126,19 @@ contains
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
-         Model                ! Fortran DDT containing FV3-GFS model control parameters
+         Model                ! DDT: FV3-GFS model control parameters
     type(GFS_grid_type), intent(in) :: &
-         Grid                 ! Fortran DDT containing FV3-GFS grid and interpolation related data 
+         Grid                 ! DDT: FV3-GFS grid and interpolation related data 
     type(GFS_statein_type), intent(in) :: &
-         Statein              ! Fortran DDT containing FV3-GFS prognostic state data in from dycore    
+         Statein              ! DDT: FV3-GFS prognostic state data in from dycore    
     type(GFS_coupling_type), intent(in) :: &
-         Coupling             ! Fortran DDT containing FV3-GFS fields to/from coupling with other components 
+         Coupling             ! DDT: FV3-GFS fields to/from coupling with other components 
     type(GFS_radtend_type), intent(inout) :: &
-         Radtend              ! Fortran DDT containing FV3-GFS radiation tendencies 
+         Radtend              ! DDT: FV3-GFS radiation tendencies 
     type(GFS_sfcprop_type), intent(in) :: &
-         Sfcprop              ! Fortran DDT containing FV3-GFS surface fields
+         Sfcprop              ! DDT: FV3-GFS surface fields
     type(GFS_tbd_type), intent(in) :: &
-         Tbd                  ! Fortran DDT containing FV3-GFS data not yet assigned to a defined container
+         Tbd                  ! DDT: FV3-GFS data not yet assigned to a defined container
     integer, intent(in)    :: &
          ncol                 ! Number of horizontal grid points
 
@@ -154,7 +155,7 @@ contains
          tsfg,              & ! Ground temperature
          tsfa                 ! Skin temperature
     type(ty_gas_concs),intent(out) :: &
-         gas_concentrations   ! RRTMGP DDT containing gas volumne mixing ratios
+         gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
@@ -170,17 +171,17 @@ contains
          cld_rwp,           & ! Cloud rain water path
          cld_rerain           ! Cloud rain effective radius
     real(kind_phys), dimension(ncol,Model%levs),intent(out) :: &
-         tv_lay,            & !
-         relhum 
+         tv_lay,            & ! Virtual temperatue at model-layers 
+         relhum               ! Relative-humidity at model-layers 
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(out) :: &
-         tracer
+         tracer               ! Array containing trace gases
     integer,dimension(ncol,3),intent(out) :: &
          mbota,             & ! Vertical indices for cloud tops
          mtopa                ! Vertical indices for cloud bases
     real(kind_phys), dimension(ncol,5), intent(out) :: &
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
     real(kind_phys), dimension(ncol), intent(out)  :: &
-         de_lgth              !
+         de_lgth              ! Decorrelation length
 
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
@@ -215,7 +216,7 @@ contains
     ! #######################################################################################
     
     ! Water-vapor mixing-ratio
-    q_lay(1:ncol,:)  = max( 1.e-6, Statein%qgrs(:,:,1))
+    q_lay(1:ncol,:)  = max( 1.e-6, Statein%qgrs(1:NCOL,:,1))
     
     ! Pressure at layer-interface
     p_lev(1:NCOL,:) = Statein%prsi(1:NCOL,:)
@@ -305,9 +306,8 @@ contains
     ! #######################################################################################
     ! Cloud microphysics
     ! #######################################################################################
-    call cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,    &
-         p_lev, tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, &
-         clouds, cldsa, mbota, mtopa, de_lgth)
+    call cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,  p_lev,  &
+         tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, clouds, cldsa, mbota, mtopa, de_lgth)
 
     ! Copy output cloud fields
     cld_frac   = clouds(:,:,1)
@@ -322,28 +322,29 @@ contains
 
   end subroutine GFS_rrtmgp_pre_run
   
-!> \section arg_table_GFS_rrtmgp_pre_finalize Argument Table
-!!
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_pre_finalize
+  ! #########################################################################################
   subroutine GFS_rrtmgp_pre_finalize ()
   end subroutine GFS_rrtmgp_pre_finalize
 
-  ! #######################################################################################
+  ! #########################################################################################
   ! Subroutine cloud_microphysics()
-  ! #######################################################################################
-  subroutine cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,    &
-       p_lev, tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, &
-       clouds, cldsa, mbota, mtopa, de_lgth)
+  ! #########################################################################################
+  subroutine cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay, p_lev,&
+       tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, clouds, cldsa, mbota, mtopa, de_lgth)
+
     ! Inputs
     type(GFS_control_type), intent(in) :: &
-         Model                ! Fortran DDT containing FV3-GFS model control parameters
+         Model                ! DDT: FV3-GFS model control parameters
     type(GFS_tbd_type), intent(in) :: &
-         Tbd                  ! Fortran DDT containing FV3-GFS data not yet assigned to a defined container
+         Tbd                  ! DDT: FV3-GFS data not yet assigned to a defined container
     type(GFS_grid_type), intent(in) :: &
-         Grid                 ! Fortran DDT containing FV3-GFS grid and interpolation related data 
+         Grid                 ! DDT: FV3-GFS grid and interpolation related data 
     type(GFS_sfcprop_type), intent(in) :: &
-         Sfcprop              ! Fortran DDT containing FV3-GFS surface fields
+         Sfcprop              ! DDT: FV3-GFS surface fields
     integer, intent(in) :: &
-         ncol ! Number of horizontal gridpoints
+         ncol                 ! Number of horizontal gridpoints
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(in) :: &
          tracer               !
     real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
@@ -359,16 +360,22 @@ contains
          p_lev                !
 
     ! Outputs
-    real(kind_phys), dimension(ncol, Model%levs, NF_CLDS),intent(out) :: clouds
-    integer,dimension(ncol,3), intent(out) :: mbota, mtopa
-    real(kind_phys), dimension(ncol), intent(out)  :: de_lgth
-    real(kind_phys), dimension(ncol, 5), intent(out) :: cldsa
+    real(kind_phys), dimension(ncol, Model%levs, NF_CLDS),intent(out) :: &
+         clouds               !
+    integer,dimension(ncol,3), intent(out) :: &
+         mbota,             & ! 
+         mtopa                !
+    real(kind_phys), dimension(ncol), intent(out)  ::&
+         de_lgth              !
+    real(kind_phys), dimension(ncol, 5), intent(out) :: &
+         cldsa                !
 
     ! Local variables
     real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
     integer :: i,k
     real(kind_phys), parameter :: xrc3 = 100.
-    real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, effr_i, effr_r, effr_s, cldcov
+    real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, &
+         effr_i, effr_r, effr_s, cldcov
 
     ! #######################################################################################
     !  Obtain cloud information for radiation calculations
@@ -665,6 +672,6 @@ contains
             mbota,                    & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
             de_lgth)                    ! OUT - clouds decorrelation length (km)
     endif ! end if_imp_physics
-     
   end subroutine cloud_microphysics
+  !
 end module GFS_rrtmgp_pre

@@ -1,5 +1,3 @@
-!> \file GFS_rrtmgp_sw_pre.f90
-!! This file contains
 module GFS_rrtmgp_sw_pre
   use physparam
   use machine, only: &
@@ -32,27 +30,33 @@ module GFS_rrtmgp_sw_pre
   
 contains
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_sw_pre_init
+  ! #########################################################################################
   subroutine GFS_rrtmgp_sw_pre_init ()
   end subroutine GFS_rrtmgp_sw_pre_init
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_sw_pre_run
+  ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run (Model, Interstitial, Grid,   Sfcprop, Statein, ncol, p_lay, &
-       p_lev, tv_lay, relhum, tracer, sw_gas_props, nday, idxday, alb1d, RadTend, &
+  subroutine GFS_rrtmgp_sw_pre_run(Model, Interstitial, Grid, Sfcprop, Statein, ncol, p_lay,&
+       p_lev, tv_lay, relhum, tracer, sw_gas_props, nday, idxday, alb1d, RadTend,           &
        Coupling, aerosolssw, aerodp, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
-         Model                ! Fortran DDT containing FV3-GFS model control parameters
+         Model                ! DDT: FV3-GFS model control parameters
     type(GFS_Interstitial_type),intent(inout) :: &
          Interstitial
     type(GFS_grid_type), intent(in) :: &
-         Grid                 ! Fortran DDT containing FV3-GFS grid and interpolation related data 
+         Grid                 ! DDT: FV3-GFS grid and interpolation related data 
     type(GFS_sfcprop_type), intent(in) :: &
-         Sfcprop              ! Fortran DDT containing FV3-GFS surface fields
+         Sfcprop              ! DDT: FV3-GFS surface fields
     type(GFS_statein_type), intent(in) :: &
-         Statein              ! Fortran DDT containing FV3-GFS prognostic state data in from dycore    
+         Statein              ! DDT: FV3-GFS prognostic state data in from dycore    
     integer, intent(in)    :: &
          ncol                 ! Number of horizontal grid points
     real(kind_phys), dimension(ncol,Model%levs),intent(in) :: &
@@ -62,9 +66,9 @@ contains
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(in) :: &
          tracer
     real(kind_phys), dimension(ncol,Model%levs+1),intent(in) :: &
-         p_lev                ! Interface (level) pressure
+         p_lev                ! Pressure @ layer interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props         ! RRTMGP DDT containing spectral information for SW calculation
+         sw_gas_props         ! RRTMGP DDT: spectral information for SW calculation
 
     ! Outputs
     integer, intent(out)   :: &
@@ -74,11 +78,11 @@ contains
     real(kind_phys), dimension(ncol), intent(out) :: &
          alb1d                ! Surface albedo pertubation
     type(GFS_radtend_type), intent(inout) :: &
-         Radtend              ! Fortran DDT containing FV3-GFS radiation tendencies 
+         Radtend              ! DDT: FV3-GFS radiation tendencies 
     type(GFS_coupling_type), intent(inout) :: &
-         Coupling
+         Coupling             ! DDT: FV3-GFS coupling arrays
     real(kind_phys), dimension(ncol,Model%levs,sw_gas_props%get_nband(),NF_AESW), intent(out) ::&
-         aerosolssw               ! Aerosol radiative properties in each SW band.
+         aerosolssw           ! Aerosol radiative properties in each SW band.
     real(kind_phys), dimension(ncol,NSPC1), intent(inout) :: &
          aerodp               ! Vertical integrated optical depth for various aerosol species  
     character(len=*), intent(out) :: &
@@ -135,7 +139,7 @@ contains
     
     ! Call module_radiation_surface::setalb() to setup surface albedo.
     call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%snoalb, Sfcprop%zorl, &
-         Radtend%coszen, Sfcprop%tsfc, Sfcprop%tsfc, Sfcprop%hprime(:,1), Sfcprop%alvsf,           &
+         Radtend%coszen, Sfcprop%tsfc, Sfcprop%tsfc, Sfcprop%hprime(:,1), Sfcprop%alvsf,     &
          Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf,          &
          Sfcprop%fice, Sfcprop%tisfc, NCOL, alb1d, Model%pertalb, sfcalb)
        
@@ -153,9 +157,9 @@ contains
     ! #######################################################################################
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
     ! #######################################################################################
-    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,:), tv_lay, relhum,                      &
-         Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1,      &
-         Model%lsswr, .true., aerosolssw2, aerosolslw, aerodp)
+    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,:), tv_lay, relhum, Sfcprop%slmsk, tracer, &
+         Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1, Model%lsswr, .true.,           &
+         aerosolssw2, aerosolslw, aerodp)
 
     ! Store aerosol optical properties
     ! SW. 
@@ -170,8 +174,9 @@ contains
 
   end subroutine GFS_rrtmgp_sw_pre_run
   
-!> \section arg_table_GFS_rrtmgp_sw_pre_finalize Argument Table
-!!
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_sw_pre_finalize
+  ! #########################################################################################
   subroutine GFS_rrtmgp_sw_pre_finalize ()
   end subroutine GFS_rrtmgp_sw_pre_finalize
 

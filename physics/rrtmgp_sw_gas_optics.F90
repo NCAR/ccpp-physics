@@ -403,11 +403,11 @@ contains
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
-         Model                   ! DDT containing model control parameters
+         Model                   ! DDT: FV3-GFS  model control parameters
     type(GFS_Interstitial_type),intent(inout) :: &
-         Interstitial
+         Interstitial            ! DDT: FV3-GFS Interstitial arrays
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props            ! DDT containing spectral information for RRTMGP SW radiation scheme
+         sw_gas_props            ! RRTMGP DDT: spectral information for RRTMGP SW radiation scheme
     integer,intent(in) :: &
          ncol                    ! Number of horizontal points
     real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
@@ -429,7 +429,7 @@ contains
     integer,          intent(out) :: &
          errflg                  ! Error code
     type(ty_optical_props_2str),intent(out) :: &
-         sw_optical_props_clrsky    !
+         sw_optical_props_clrsky ! RRTMGP DDT: clear-sky shortwave optical properties, spectral (tau,ssa,g) 
 
     ! Local variables
     integer :: ij

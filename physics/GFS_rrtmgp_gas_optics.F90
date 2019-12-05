@@ -1,5 +1,3 @@
-!> \file GFS_rrtmgp_gas_optics.f90
-!! This file contains
 module GFS_rrtmgp_gas_optics
   use machine,      only: kind_phys
   use GFS_typedefs, only: GFS_control_type,GFS_radtend_type
@@ -7,13 +5,12 @@ module GFS_rrtmgp_gas_optics
   public GFS_rrtmgp_gas_optics_init,GFS_rrtmgp_gas_optics_run,GFS_rrtmgp_gas_optics_finalize
 contains
   
-!! \section arg_table_GFS_rrtmgp_gas_optics_init
-!! \htmlinclude GFS_rrtmgp_gas_optics.html
-!!
-
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_gas_optics_init()
   ! #########################################################################################
+!! \section arg_table_GFS_rrtmgp_gas_optics_init
+!! \htmlinclude GFS_rrtmgp_gas_optics.html
+!!
   subroutine GFS_rrtmgp_gas_optics_init(Model, Radtend, errmsg, errflg)
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -57,13 +54,17 @@ contains
        enddo
     endif
   end subroutine GFS_rrtmgp_gas_optics_init
-  !
+
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_gas_optics_run
+  ! #########################################################################################
   subroutine GFS_rrtmgp_gas_optics_run()
-
-
   end subroutine GFS_rrtmgp_gas_optics_run
-  !
+
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_gas_optics_finalize
+  ! #########################################################################################
   subroutine GFS_rrtmgp_gas_optics_finalize()
   end subroutine GFS_rrtmgp_gas_optics_finalize
-  !
+ 
 end module GFS_rrtmgp_gas_optics

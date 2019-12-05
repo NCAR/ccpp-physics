@@ -1,5 +1,3 @@
-!> \file GFS_rrtmgp_lw_pre.f90
-!! This file contains
 module GFS_rrtmgp_lw_pre
   use physparam
   use machine, only: &
@@ -25,24 +23,31 @@ module GFS_rrtmgp_lw_pre
   
 contains
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_lw_pre_init
+  ! #########################################################################################
   subroutine GFS_rrtmgp_lw_pre_init ()
   end subroutine GFS_rrtmgp_lw_pre_init
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_lw_pre_run
+  ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_lw_pre_run
 !! \htmlinclude GFS_rrtmgp_lw_pre.html
 !!
-  subroutine GFS_rrtmgp_lw_pre_run (Model, Grid,  Sfcprop, Statein, ncol,  p_lay, p_lev, &
-       tv_lay, relhum, tracer, lw_gas_props, Radtend, Interstitial, aerosolslw, aerodp, errmsg, errflg)
+  subroutine GFS_rrtmgp_lw_pre_run (Model, Grid,  Sfcprop, Statein, ncol,  p_lay, p_lev,    &
+       tv_lay, relhum, tracer, lw_gas_props, Radtend, Interstitial, aerosolslw, aerodp,     &
+       errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
-         Model                ! Fortran DDT containing FV3-GFS model control parameters
+         Model                ! DDT: FV3-GFS model control parameters
     type(GFS_grid_type), intent(in) :: &
-         Grid                 ! Fortran DDT containing FV3-GFS grid and interpolation related data 
+         Grid                 ! DDT: FV3-GFS grid and interpolation related data 
     type(GFS_sfcprop_type), intent(in) :: &
-         Sfcprop              ! Fortran DDT containing FV3-GFS surface fields
+         Sfcprop              ! DDT: FV3-GFS surface fields
     type(GFS_statein_type), intent(in) :: &
-         Statein              ! Fortran DDT containing FV3-GFS prognostic state data in from dycore 
+         Statein              ! DDT: FV3-GFS prognostic state data in from dycore 
     integer, intent(in)    :: &
          ncol                 ! Number of horizontal grid points
     real(kind_phys), dimension(ncol,Model%levs),intent(in) :: &
@@ -50,19 +55,19 @@ contains
          tv_lay,            & ! Layer virtual-temperature
          relhum               ! Layer relative-humidity
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(in) :: &
-         tracer
+         tracer               ! trace gas concentrations
     real(kind_phys), dimension(ncol,Model%levs+1),intent(in) :: &
          p_lev                ! Interface (level) pressure
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props         ! RRTMGP DDT containing spectral information for LW calculation
+         lw_gas_props         ! RRTMGP DDT: spectral information for LW calculation
 
     ! Outputs
     type(GFS_radtend_type), intent(inout) :: &
-         Radtend              ! Fortran DDT containing FV3-GFS radiation tendencies 
+         Radtend              ! DDT: FV3-GFS radiation tendencies 
     type(GFS_interstitial_type), intent(inout) :: &
-         Interstitial
+         Interstitial         ! DDT: FV3-GFS Interstitial arrays
     real(kind_phys), dimension(ncol,Model%levs,lw_gas_props%get_nband(),NF_AELW), intent(out) ::&
-         aerosolslw               ! Aerosol radiative properties in each SW band.
+         aerosolslw           ! Aerosol radiative properties in each SW band.
     real(kind_phys), dimension(ncol,NSPC1), intent(inout) :: &
          aerodp               ! Vertical integrated optical depth for various aerosol species  
     character(len=*), intent(out) :: &
@@ -83,9 +88,10 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,    &
-         Sfcprop%zorl, Sfcprop%tsfc,Sfcprop%tsfc, Sfcprop%hprime(:,1), NCOL,   &
-         Radtend%semis)
+    call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,       &
+         Sfcprop%zorl, Sfcprop%tsfc,Sfcprop%tsfc, Sfcprop%hprime(:,1), NCOL, Radtend%semis)
+
+    ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()
        Interstitial%sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
     enddo
@@ -100,8 +106,9 @@ contains
 
   end subroutine GFS_rrtmgp_lw_pre_run
   
-!> \section arg_table_GFS_rrtmgp_lw_pre_finalize Argument Table
-!!
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_lw_pre_finalize
+  ! #########################################################################################
   subroutine GFS_rrtmgp_lw_pre_finalize ()
   end subroutine GFS_rrtmgp_lw_pre_finalize
 

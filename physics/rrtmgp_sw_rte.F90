@@ -1,5 +1,3 @@
-! ###########################################################################################
-! ###########################################################################################
 module rrtmgp_sw_rte
   use machine,                 only: kind_phys
   use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type, GFS_statein_type, GFS_interstitial_type
@@ -29,74 +27,72 @@ contains
 !! \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
-  subroutine rrtmgp_sw_rte_run(Model, Interstitial, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay,   &
-       p_lev, gas_concentrations, sw_optical_props_clrsky, sw_optical_props_clouds,         &
-       sw_optical_props_aerosol, lsswr, nday, idxday, hsw0, hswb, scmpsw,                   &
-       fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
+  subroutine rrtmgp_sw_rte_run(Model, Interstitial, Radtend, Statein, ncol, sw_gas_props,   &
+       p_lay, t_lay, p_lev, gas_concentrations, sw_optical_props_clrsky,                    &
+       sw_optical_props_clouds, sw_optical_props_aerosol, lsswr, nday, idxday, hsw0, hswb,  &
+       scmpsw, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky,      &
+       errmsg, errflg)
 
     ! Inputs
-    type(GFS_control_type),   intent(in)    :: &
+    type(GFS_control_type), intent(in)    :: &
          Model
     type(GFS_interstitial_type), intent(in) :: &
          Interstitial
     type(GFS_radtend_type),   intent(in)    :: &
          Radtend
     type(GFS_statein_type), intent(in) :: &
-         Statein                 ! Fortran DDT containing FV3-GFS prognostic state data in from dycore 
+         Statein                    ! DDT: FV3-GFS prognostic state data in from dycore 
     integer, intent(in) :: &
-         ncol,                 & ! Number of horizontal gridpoints
-         nday                    ! Number of daytime points
+         ncol,                    & ! Number of horizontal gridpoints
+         nday                       ! Number of daytime points
     integer, intent(in), dimension(nday) :: &
-         idxday                  ! Index array for daytime points
+         idxday                     ! Index array for daytime points
     real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
-         p_lay,                & ! Pressure @ model layer-centers         (hPa)
-         t_lay                   ! Temperature                            (K)
+         p_lay,                   & ! Pressure @ model layer-centers (Pa)
+         t_lay                      ! Temperature (K)
     real(kind_phys), dimension(ncol,Model%levs+1), intent(in) :: &
-         p_lev                   ! Pressure @ model layer-interfaces      (hPa)
+         p_lev                      ! Pressure @ model layer-interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props                ! DDT containing SW spectral information
+         sw_gas_props               ! RRTMGP DDT: SW spectral information
     type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_clrsky, & ! RRTMGP DDT: longwave clear-sky radiative properties 
          sw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
-         sw_optical_props_aerosol ! RRTMGP DDT: longwave aerosol radiative properties
-
+         sw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
     type(ty_gas_concs),intent(in) :: &
-         gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
+         gas_concentrations         ! RRTMGP DDT: trace gas concentrations   (vmr)
     logical, intent(in) :: &
-         lsswr                   ! Flag to calculate SW irradiances
+         lsswr                      ! Flag to calculate SW irradiances
 
     ! Outputs
     character(len=*), intent(out) :: errmsg
     integer, intent(out) :: errflg
     real(kind_phys), dimension(ncol,Model%levs+1), intent(inout) :: &
-         fluxswUP_allsky,   & ! All-sky flux                    (W/m2)
-         fluxswDOWN_allsky, & ! All-sky flux                    (W/m2)
-         fluxswUP_clrsky,   & ! Clear-sky flux                  (W/m2)
-         fluxswDOWN_clrsky    ! All-sky flux                    (W/m2)
+         fluxswUP_allsky,         & ! RRTMGP upward all-sky flux profiles (W/m2)
+         fluxswDOWN_allsky,       & ! RRTMGP downward all-sky flux profiles (W/m2)
+         fluxswUP_clrsky,         & ! RRTMGP upward clear-sky flux profiles (W/m2)
+         fluxswDOWN_clrsky          ! RRTMGP downward clear-sky flux profiles (W/m2)
 
     ! Inputs (optional) (NOTE. We only need the optional arguments to know what fluxes to output, HR's are computed later)
     real(kind_phys), dimension(ncol,Model%levs), optional, intent(inout) :: &
-         hsw0             ! Clear-sky heating rate            (K/sec)
+         hsw0                       ! Clear-sky heating rate (K/sec)
     real(kind_phys), dimension(ncol,Model%levs,sw_gas_props%get_nband()), intent(inout), optional :: &
-         hswb             ! All-sky heating rate, by band     (K/sec)
+         hswb                       ! All-sky heating rate, by band (K/sec)
     ! Outputs (optional)
     type(cmpfsw_type), dimension(ncol), intent(inout),optional :: &
-         scmpsw           ! 2D surface fluxes, components:
-                          ! uvbfc - total sky downward uv-b flux at  (W/m2)
-                          ! uvbf0 - clear sky downward uv-b flux at  (W/m2)
-                          ! nirbm - downward nir direct beam flux    (W/m2)
-                          ! nirdf - downward nir diffused flux       (W/m2)
-                          ! visbm - downward uv+vis direct beam flux (W/m2)
-                          ! visdf - downward uv+vis diffused flux    (W/m2)
+         scmpsw                     ! 2D surface fluxes, components:
+                                    ! uvbfc - total sky downward uv-b flux (W/m2)
+                                    ! uvbf0 - clear sky downward uv-b flux (W/m2)
+                                    ! nirbm - downward nir direct beam flux (W/m2)
+                                    ! nirdf - downward nir diffused flux (W/m2)
+                                    ! visbm - downward uv+vis direct beam flux (W/m2)
+                                    ! visdf - downward uv+vis diffused flux (W/m2)
 
     ! Local variables
     type(ty_fluxes_byband) :: &
-         flux_allsky, & ! All-sky flux                      (W/m2)
-         flux_clrsky    ! Clear-sky flux                    (W/m2)
+         flux_allsky, & ! All-sky flux (W/m2)
+         flux_clrsky    ! Clear-sky flux (W/m2)
     real(kind_phys), dimension(nday,Model%levs+1,sw_gas_props%get_nband()),target :: &
          fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
-!    real(kind_phys), dimension(nday,Model%levs+1,sw_gas_props%get_nband()),target :: &
-!         fluxSWBB_up_allsky, fluxSWBB_dn_allsky
     real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false., top_at_1
     integer :: iGas,iSFC,iTOA
@@ -166,41 +162,39 @@ contains
        flux_allsky%bnd_flux_dn_dir => fluxSW_dn_dir_allsky
        flux_clrsky%bnd_flux_up     => fluxSW_up_clrsky
        flux_clrsky%bnd_flux_dn     => fluxSW_dn_clrsky
-       ! Only calculate fluxes by-band, only when heating-rate profiles by band are requested.
-       !if (l_AllSky_HR_byband) then
-       !   flux_allsky%bnd_flux_up => fluxSWBB_up_allsky
-       !   flux_allsky%bnd_flux_dn => fluxSWBB_dn_allsky
-       !endif
 
        ! Compute clear-sky fluxes (if requested)
-       ! Clear-sky fluxes are gas+aerosol
+       ! Clear-sky fluxes (gas+aerosol)
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol_daylit%increment(sw_optical_props_clrsky_daylit))
+       ! Delta-scale optical properties
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky_daylit%delta_scale())
        if (l_ClrSky_HR) then
           call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
-               sw_optical_props_clrsky_daylit,     & ! IN  - optical-properties
-               top_at_1,                           & ! IN  - veritcal ordering flag
-               Radtend%coszen(idxday),             & ! IN  - Cosine of solar zenith angle
-               Interstitial%toa_src_sw(idxday,:),       & ! IN  - incident solar flux at TOA
-               Interstitial%sfc_alb_nir_dir(:,idxday),  & ! IN  - Shortwave surface albedo (direct)
-               Interstitial%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
-               flux_clrsky))                         ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
+               sw_optical_props_clrsky_daylit,         & ! IN  - optical-properties
+               top_at_1,                               & ! IN  - veritcal ordering flag
+               Radtend%coszen(idxday),                 & ! IN  - Cosine of solar zenith angle
+               Interstitial%toa_src_sw(idxday,:),      & ! IN  - incident solar flux at TOA
+               Interstitial%sfc_alb_nir_dir(:,idxday), & ! IN  - Shortwave surface albedo (direct)
+               Interstitial%sfc_alb_nir_dif(:,idxday), & ! IN  - Shortwave surface albedo (diffuse)
+               flux_clrsky))                             ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
           ! Store fluxes
           fluxswUP_clrsky(idxday,:)   = sum(flux_clrsky%bnd_flux_up,dim=3)
           fluxswDOWN_clrsky(idxday,:) = sum(flux_clrsky%bnd_flux_dn,dim=3)
        endif
 
        ! Compute all-sky fluxes
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%delta_scale())
+       ! All-sky fluxes (clear-sky + clouds)
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%increment(sw_optical_props_clrsky_daylit))
+       ! Delta-scale optical properties
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%delta_scale())
        call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
-            sw_optical_props_clrsky_daylit,     & ! IN  - optical-properties
-            top_at_1,                           & ! IN  - veritcal ordering flag
-            Radtend%coszen(idxday),             & ! IN  - Cosine of solar zenith angle
-            Interstitial%toa_src_sw(idxday,:),       & ! IN  - incident solar flux at TOA
-            Interstitial%sfc_alb_nir_dir(:,idxday),  & ! IN  - Shortwave surface albedo (direct)
-            Interstitial%sfc_alb_nir_dif(:,idxday),  & ! IN  - Shortwave surface albedo (diffuse)
-            flux_allsky))                         ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
+            sw_optical_props_clrsky_daylit,         & ! IN  - optical-properties
+            top_at_1,                               & ! IN  - veritcal ordering flag
+            Radtend%coszen(idxday),                 & ! IN  - Cosine of solar zenith angle
+            Interstitial%toa_src_sw(idxday,:),      & ! IN  - incident solar flux at TOA
+            Interstitial%sfc_alb_nir_dir(:,idxday), & ! IN  - Shortwave surface albedo (direct)
+            Interstitial%sfc_alb_nir_dif(:,idxday), & ! IN  - Shortwave surface albedo (diffuse)
+            flux_allsky))                             ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
        ! Store fluxes
        fluxswUP_allsky(idxday,:)   = sum(flux_allsky%bnd_flux_up,dim=3)
        fluxswDOWN_allsky(idxday,:) = sum(flux_allsky%bnd_flux_dn,dim=3)
