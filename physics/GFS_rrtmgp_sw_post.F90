@@ -22,79 +22,73 @@ module GFS_rrtmgp_sw_post
 
 contains
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_sw_post_init
+  ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_init()
   end subroutine GFS_rrtmgp_sw_post_init
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_sw_post_run
+  ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post.html
 !!
-  subroutine GFS_rrtmgp_sw_post_run (Model, Interstitial, Grid, Diag, Radtend, Coupling, Statein,      &
-       scmpsw, im, p_lev, sw_gas_props, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky,&
-       fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota, mtopa, cld_frac, &
-       cldtausw, flxprf_sw, hsw0, errmsg, errflg)
+  subroutine GFS_rrtmgp_sw_post_run (Model, Interstitial, Grid, Diag, Radtend, Coupling,    &
+       Statein, scmpsw, im, p_lev, sw_gas_props, nday, idxday, fluxswUP_allsky,             &
+       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota,  &
+       mtopa, cld_frac, cldtausw, flxprf_sw, hsw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
-         Model             ! Fortran DDT containing FV3-GFS model control parameters
+         Model                ! Fortran DDT: FV3-GFS model control parameters
     type(GFS_Interstitial_type), intent(in) :: &
-         Interstitial
+         Interstitial         ! Fortran DDT: FV3-GFS interstitial arrays
     type(GFS_grid_type), intent(in) :: &
-         Grid              ! Fortran DDT containing FV3-GFS grid and interpolation related data 
+         Grid                 ! Fortran DDT: FV3-GFS grid and interpolation related data 
     type(GFS_coupling_type), intent(inout) :: &
-         Coupling          ! Fortran DDT containing FV3-GFS fields to/from coupling with other components 
+         Coupling             ! Fortran DDT: FV3-GFS fields to/from coupling with other components 
     type(GFS_radtend_type), intent(inout) :: &
-         Radtend           ! Fortran DDT containing FV3-GFS radiation tendencies 
+         Radtend              ! Fortran DDT: FV3-GFS radiation tendencies 
     type(GFS_diag_type), intent(inout) :: &
-         Diag              ! Fortran DDT containing FV3-GFS diagnotics data  
+         Diag                 ! Fortran DDT: FV3-GFS diagnotics data  
     type(GFS_statein_type), intent(in) :: &
-         Statein           ! Fortran DDT containing FV3-GFS prognostic state data in from dycore  
+         Statein              ! Fortran DDT: FV3-GFS prognostic state data in from dycore  
     integer, intent(in) :: &
-         im,             & ! Horizontal loop extent 
-         nDay              ! Number of daylit columns
+         im,                & ! Horizontal loop extent 
+         nDay                 ! Number of daylit columns
     integer, intent(in), dimension(nday) :: &
-         idxday            ! Index array for daytime points
+         idxday               ! Index array for daytime points
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props          ! DDT containing SW spectral information
+         sw_gas_props         ! DDT containing SW spectral information
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
-         p_lev             ! Pressure @ model layer-interfaces    (hPa)
+         p_lev                ! Pressure @ model layer-interfaces    (hPa)
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs+1), intent(in) :: &
          fluxswUP_allsky,   & ! SW All-sky flux                    (W/m2)
          fluxswDOWN_allsky, & ! SW All-sky flux                    (W/m2)
          fluxswUP_clrsky,   & ! SW Clear-sky flux                  (W/m2)
          fluxswDOWN_clrsky    ! SW All-sky flux                    (W/m2)
     real(kind_phys), intent(in) :: &
-         raddt             ! Radiation time step
+         raddt                ! Radiation time step
     real(kind_phys), dimension(im,NSPC1), intent(in) :: &
-         aerodp            ! Vertical integrated optical depth for various aerosol species  
+         aerodp               ! Vertical integrated optical depth for various aerosol species  
     real(kind_phys), dimension(im,5), intent(in) :: &
-         cldsa             ! Fraction of clouds for low, middle, high, total and BL 
+         cldsa                ! Fraction of clouds for low, middle, high, total and BL 
     integer,         dimension(im,3), intent(in) ::&
-         mbota,          & ! vertical indices for low, middle and high cloud tops 
-         mtopa             ! vertical indices for low, middle and high cloud bases
+         mbota,             & ! vertical indices for low, middle and high cloud tops 
+         mtopa                ! vertical indices for low, middle and high cloud bases
     real(kind_phys), dimension(im,Model%levs), intent(in) :: &
-         cld_frac,       & ! Total cloud fraction in each layer
-         cldtausw          ! approx .55mu band layer cloud optical depth  
+         cld_frac,          & ! Total cloud fraction in each layer
+         cldtausw             ! approx .55mu band layer cloud optical depth  
     real(kind_phys),dimension(size(Grid%xlon,1), Model%levs) :: & 
-         hswc
+         hswc                 ! All-sky heating rates (K/s)
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
          errmsg
     integer, intent(out) :: &
          errflg
-!    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs),intent(out) :: &
-!         hswc             ! Shortwave all-sky heating-rate         (K/sec)
-!    type(topfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: &
-!         topflx_sw        ! radiation fluxes at top, components:
-!                          ! upfxc - total sky upward flux at top   (w/m2)
-!                          ! upfx0 - clear sky upward flux at top   (w/m2)
-!    type(sfcfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: &
-!         sfcflx_sw        ! radiation fluxes at sfc, components:
-!                          ! upfxc - total sky upward flux at sfc   (w/m2)  
-!                          ! upfx0 - clear sky upward flux at sfc   (w/m2)
-!                          ! dnfxc - total sky downward flux at sfc (w/m2)
-!                          ! dnfx0 - clear sky downward flux at sfc (w/m2)
-    
+
     ! Outputs (optional)
     real(kind_phys), dimension(size(Grid%xlon,1), Model%levs), optional, intent(inout) :: &
          hsw0             ! Shortwave clear-sky heating-rate         (K/sec)
@@ -143,18 +137,18 @@ contains
     ! Compute SW heating-rates
     ! #######################################################################################
     ! Initialize
-!    hswc = 0
-!    Diag%topfsw    = topfsw_type ( 0., 0., 0. )
-!    Radtend%sfcfsw = sfcfsw_type ( 0., 0., 0., 0. )
-!    if (l_clrskysw_hr) then
-!       hsw0(:,:) = 0.
-!    endif
-!    if (l_fluxessw2D) then
-!       flxprf_sw = profsw_type ( 0., 0., 0., 0. )
-!    endif
-!    if (l_sfcfluxessw1D) then
-!       scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
-!    endif
+    hswc = 0
+    Diag%topfsw    = topfsw_type ( 0., 0., 0. )
+    Radtend%sfcfsw = sfcfsw_type ( 0., 0., 0., 0. )
+    if (l_clrskysw_hr) then
+       hsw0(:,:) = 0.
+    endif
+    if (l_fluxessw2D) then
+       flxprf_sw = profsw_type ( 0., 0., 0., 0. )
+    endif
+    if (l_sfcfluxessw1D) then
+       scmpsw = cmpfsw_type (0.,0.,0.,0.,0.,0.)
+    endif
 
     if (Model%lsswr .and. nDay .gt. 0) then
        ! Clear-sky heating-rate (optional)
@@ -176,9 +170,6 @@ contains
 
        ! Copy fluxes from RRTGMP types into model radiation types.
        ! Mandatory outputs
-       write(*,"(a11,2i8)") "iTOA/iSFC: ",iTOA,iSFC
-       write(*,*) "fluxswDOWN_allsky: ",fluxswDOWN_allsky(idxday,:)
-       write(*,*) "fluxswDOWN_clrsky: ",fluxswDOWN_clrsky(:,:)
        Diag%topfsw(:)%upfxc    = fluxswUP_allsky(:,iTOA)
        Diag%topfsw(:)%upfx0    = fluxswUP_clrsky(:,iTOA)
        Diag%topfsw(:)%dnfxc    = fluxswDOWN_allsky(:,iTOA)
@@ -186,14 +177,7 @@ contains
        Radtend%sfcfsw(:)%upfx0 = fluxswUP_clrsky(:,iSFC)
        Radtend%sfcfsw(:)%dnfxc = fluxswDOWN_allsky(:,iSFC)
        Radtend%sfcfsw(:)%dnfx0 = fluxswDOWN_clrsky(:,iSFC)
-       !Diag%topfsw(idxday)%upfxc    = fluxswUP_allsky(idxday,iTOA)
-       !Diag%topfsw(idxday)%upfx0    = fluxswUP_clrsky(idxday,iTOA)
-       !Diag%topfsw(idxday)%dnfxc    = fluxswDOWN_allsky(idxday,iTOA)
-       !Radtend%sfcfsw(idxday)%upfxc = fluxswUP_allsky(idxday,iSFC)
-       !Radtend%sfcfsw(idxday)%upfx0 = fluxswUP_clrsky(idxday,iSFC)
-       !Radtend%sfcfsw(idxday)%dnfxc = fluxswDOWN_allsky(idxday,iSFC)
-       !Radtend%sfcfsw(idxday)%dnfx0 = fluxswDOWN_clrsky(idxday,iSFC)
-    
+
        ! Optional output
        if(l_fluxessw2D) then
           flxprf_sw(:,:)%upfxc = fluxswUP_allsky(:,:)
@@ -281,11 +265,6 @@ contains
              if (Radtend%coszen(i) > 0.) then
                 ! SW all-sky fluxes
                 tem0d = Model%fhswr * Radtend%coszdg(i) / Radtend%coszen(i)
-                !write(*,"(a23,3f10.6)") 'In GFS_rrtmgp_sw_post: ',Diag%topfsw(i)%dnfxc, tem0d,Diag%fluxr(i,23)
-                !write(*,"(a23,f20.15)") 'In GFS_rrtmgp_sw_post: ',Model%fhswr 
-                !Diagfluxr(i,2 ) = Diag%fluxr(i,2)  + fluxswUP_allsky(  i,iTOA) * tem0d  ! total sky top sw up
-                !Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + fluxswUP_allsky(  i,iSFC) * tem0d  ! total sky sfc sw up
-                !Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + fluxswDOWN_allsky(i,iSFC) * tem0d  ! total sky sfc sw dn
                 Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  +    Diag%topfsw(i)%upfxc * tem0d  ! total sky top sw up
                 Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + Radtend%sfcfsw(i)%upfxc * tem0d  
                 Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + Radtend%sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
@@ -293,18 +272,13 @@ contains
                 Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
                 Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
                 ! SW TOA incoming fluxes
-                !temiag%fluxr(i,23) = Diag%fluxr(i,23) + fluxswDOWN_allsky(i,iTOA) * tem0d     ! top sw dn
                 Diag%fluxr(i,23) = Diag%fluxr(i,23) + Diag%topfsw(i)%dnfxc * tem0d     ! top sw dn 
-                write(*,"(a23,3f10.6)") 'In GFS_rrtmgp_sw_post: ',Diag%topfsw(i)%dnfxc, tem0d,Diag%fluxr(i,23)
                 ! SW SFC flux components
                 Diag%fluxr(i,24) = Diag%fluxr(i,24) + scmpsw(i)%visbm * tem0d          ! uv/vis beam sw dn
                 Diag%fluxr(i,25) = Diag%fluxr(i,25) + scmpsw(i)%visdf * tem0d          ! uv/vis diff sw dn
                 Diag%fluxr(i,26) = Diag%fluxr(i,26) + scmpsw(i)%nirbm * tem0d          ! nir beam sw dn
                 Diag%fluxr(i,27) = Diag%fluxr(i,27) + scmpsw(i)%nirdf * tem0d          ! nir diff sw dn
                 ! SW clear-sky fluxes
-                !Diag%fluxr(i,29) = Diag%fluxr(i,29) + fluxswUP_clrsky(  i,iTOA) * tem0d     ! clear sky top sw up
-                !Diag%fluxr(i,31) = Diag%fluxr(i,31) + fluxswUP_clrsky(  i,iSFC) * tem0d  ! clear sky sfc sw up
-                !Diag%fluxr(i,32) = Diag%fluxr(i,32) + fluxswDOWN_clrsky(i,iSFC) * tem0d  ! clear sky sfc sw dn
                 Diag%fluxr(i,29) = Diag%fluxr(i,29) + Diag%topfsw(i)%upfx0 * tem0d
                 Diag%fluxr(i,31) = Diag%fluxr(i,31) + Radtend%sfcfsw(i)%upfx0 * tem0d 
                 Diag%fluxr(i,32) = Diag%fluxr(i,32) + Radtend%sfcfsw(i)%dnfx0 * tem0d
@@ -344,6 +318,9 @@ contains
  
   end subroutine GFS_rrtmgp_sw_post_run
 
+  ! #########################################################################################
+  ! SUBROUTINE GFS_rrtmgp_sw_post_finalize
+  ! #########################################################################################
   subroutine GFS_rrtmgp_sw_post_finalize ()
   end subroutine GFS_rrtmgp_sw_post_finalize
 

@@ -394,17 +394,12 @@ contains
 
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_sw_gas_optics_run
-  ! *NOTE* The computation of the optical properties for a gaseous (+aerosols) atmosphere are
-  !        handled internally by the rte-rrtmgp/extensions/mo_rrtmgp_clr_all_sky.F90:rte_sw() 
-  !        driver. 
-  !        If calling rte/mo_rte_sw.F90:rte_sw() directly, place calls to compute source 
-  !        function and gas_optics() here.
   ! #########################################################################################
 !! \section arg_table_rrtmgp_sw_gas_optics_run
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_run(Model, Interstitial, sw_gas_props, ncol, p_lay, p_lev, t_lay, t_lev, &
-       gas_concentrations, lsswr, solcon, sw_optical_props_clrsky, errmsg, errflg)
+  subroutine rrtmgp_sw_gas_optics_run(Model, Interstitial, sw_gas_props, ncol, p_lay, p_lev, &
+       t_lay, t_lev, gas_concentrations, lsswr, solcon, sw_optical_props_clrsky, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -427,6 +422,7 @@ contains
          lsswr                   ! Flag to calculate SW irradiances
     real(kind_phys), intent(in) :: &
          solcon                  ! Solar constant
+
     ! Output
     character(len=*), intent(out) :: &
          errmsg                  ! Error message
@@ -434,6 +430,9 @@ contains
          errflg                  ! Error code
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_clrsky    !
+
+    ! Local variables
+    integer :: ij
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -444,28 +443,20 @@ contains
     ! Allocate space
     call check_error_msg('rrtmgp_sw_gas_optics_run',sw_optical_props_clrsky%alloc_2str(ncol, model%levs, sw_gas_props))
 
-    ! Gas-optics (djs asks pincus: I think it makes sense to have a generic gas_optics interface in 
-    ! ty_gas_optics_rrtmgp, just as in ty_gas_optics.
+    ! Gas-optics
     call check_error_msg('rrtmgp_sw_gas_optics_run',sw_gas_props%gas_optics(&
-         p_lay,                   & !
-         p_lev,                   & ! 
-         t_lay,                   & !
-         gas_concentrations,      & !
-         sw_optical_props_clrsky, & !
-         Interstitial%toa_src_sw))                  !
+         p_lay,                   & ! IN  - Pressure @ layer-centers (Pa)
+         p_lev,                   & ! IN  - Pressure @ layer-interfaces (Pa)
+         t_lay,                   & ! IN  - Temperature @ layer-centers (K)
+         gas_concentrations,      & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
+         sw_optical_props_clrsky, & ! OUT - RRTMGP DDT: Shortwave optical properties, by
+                                    !                    spectral point (tau,ssa,g)
+         Interstitial%toa_src_sw))  ! OUT - TOA incident shortwave radiation (spectral)
 
     ! Scale incident flux
-    Interstitial%toa_src_sw = Interstitial%toa_src_sw*solcon/sum(Interstitial%toa_src_sw)
-
-    ! Compute boundary-condition (only for low ceiling models, set in GFS_typedefs.F90)
-    !call check_error_msg('rrtmgp_sw_gas_optics_run',compute_bc(&
-    !     sw_gas_props,       & ! IN  -
-    !     p_lay,              & ! IN  -
-    !     p_lev,              & ! IN  -
-    !     t_lay,              & ! IN  -
-    !     gas_concentrations, & ! IN  -
-    !     Interstitial%toa_src_sw  & ! OUT - 
-    !     mu0 = Radtend%coszen))
+    do ij=1,ncol
+       Interstitial%toa_src_sw(ij,:) = Interstitial%toa_src_sw(ij,:)*solcon/sum(Interstitial%toa_src_sw(ij,:))
+    enddo
 
   end subroutine rrtmgp_sw_gas_optics_run
 

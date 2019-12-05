@@ -343,10 +343,10 @@ contains
   ! #########################################################################################
   ! SUBROTUINE rrtmgp_sw_cloud_optics_run()
   ! #########################################################################################
-  subroutine rrtmgp_sw_cloud_optics_run(Model, ncol, icseed_sw, cld_frac, cld_lwp, cld_reliq,&
-       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, aerosolssw,             &
-       sw_cloud_props, sw_gas_props, ipsdsw0, nday, idxday,                                  & ! IN
-       sw_optical_props_clouds, sw_optical_props_aerosol, cldtausw, errmsg, errflg)            ! OUT
+  subroutine rrtmgp_sw_cloud_optics_run(Model, ncol, icseed_sw, cld_frac, cld_lwp,          &
+       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, aerosolssw, &
+       sw_cloud_props, sw_gas_props, ipsdsw0, nday, idxday, sw_optical_props_clouds,        &
+       sw_optical_props_aerosol, cldtausw, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -373,20 +373,22 @@ contains
          cld_rwp,          & ! Cloud rain water path
          cld_rerain          ! Cloud rain effective radius
     type(ty_cloud_optics),intent(in) :: &
-         sw_cloud_props       ! 
+         sw_cloud_props      ! RRTMGP DDT: 
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props
+         sw_gas_props        ! RRTMGP DDT: K-distribution data
     real(kind_phys), intent(in),dimension(ncol, model%levs, sw_gas_props%get_nband(),3) :: &
-         aerosolssw            !
+         aerosolssw          ! Shortwave aerosol optical properties, by band (tau,ssa,g)
 
     ! Outputs
+    character(len=*), intent(out) :: &
+         errmsg                     ! Error message
+    integer,          intent(out) :: &
+         errflg                     ! Error code
     type(ty_optical_props_2str),intent(out) :: &
-         sw_optical_props_clouds, &
-         sw_optical_props_aerosol
+         sw_optical_props_clouds, & ! RRTMGP DDT: Shortwave optical properties (cloudy atmosphere)
+         sw_optical_props_aerosol   ! RRTMGP DDT: Shortwave optical properties (aerosols)
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
-         cldtausw            ! approx 10.mu band layer cloud optical depth  
-    integer, intent(out) :: errflg
-    character(len=*), intent(out) :: errmsg
+         cldtausw                   ! approx 10.mu band layer cloud optical depth  
 
     ! Local variables
     integer :: iCol
@@ -451,18 +453,18 @@ contains
     if (Model%rrtmgp_cld_optics .gt. 0) then
        ! RRTMGP cloud-optics.
        call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_cloud_props%cloud_optics(&
-            ncol,                       & ! IN  - Number of daylit gridpoints
-            model%levs,                 & ! IN  - Number of vertical layers
-            sw_cloud_props%get_nband(), & ! IN  - Number of SW bands
-            Model%rrtmgp_nrghice,       & ! IN  - Number of ice-roughness categories
-            liqmask,                    & ! IN  - Liquid-cloud mask
-            icemask,                    & ! IN  - Ice-cloud mask
-            cld_lwp,                    & ! IN  - Cloud liquid water path
-            cld_iwp,                    & ! IN  - Cloud ice water path
-            cld_reliq,                  & ! IN  - Cloud liquid effective radius
-            cld_reice,                  & ! IN  - Cloud ice effective radius
-            sw_optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
-                                          !       in each band
+            ncol,                         & ! IN  - Number of daylit gridpoints
+            model%levs,                   & ! IN  - Number of vertical layers
+            sw_cloud_props%get_nband(),   & ! IN  - Number of SW bands
+            Model%rrtmgp_nrghice,         & ! IN  - Number of ice-roughness categories
+            liqmask,                      & ! IN  - Liquid-cloud mask
+            icemask,                      & ! IN  - Ice-cloud mask
+            cld_lwp,                      & ! IN  - Cloud liquid water path
+            cld_iwp,                      & ! IN  - Cloud ice water path
+            cld_reliq,                    & ! IN  - Cloud liquid effective radius
+            cld_reice,                    & ! IN  - Cloud ice effective radius
+            sw_optical_props_cloudsByBand)) ! OUT - RRTMGP DDT: Shortwave optical properties, 
+                                            !       in each band (tau,ssa,g)
     else
        ! RRTMG cloud-optics
        if (any(cld_frac .gt. 0)) then
@@ -503,7 +505,11 @@ contains
     cldtausw = sw_optical_props_cloudsByBand%tau(:,:,11)    
 
   end subroutine rrtmgp_sw_cloud_optics_run
-  
+
+  ! #########################################################################################
+  ! SUBROTUINE rrtmgp_sw_cloud_optics_finalize()
+  ! #########################################################################################  
   subroutine rrtmgp_sw_cloud_optics_finalize()
   end subroutine rrtmgp_sw_cloud_optics_finalize 
+
 end module rrtmgp_sw_cloud_optics
