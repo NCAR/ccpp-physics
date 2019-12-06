@@ -250,6 +250,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_mp_thompson.F90 \
                         ../module_mp_radar.F90 \
                         ../mp_thompson_post.F90  \
+### HAFS
+                        ../module_MP_FER_HIRES.F90 \
+                        ../mp_fer_hires.F90   \
+                        ../module_mp_fer_hires_pre.F90 \
 ### utils
                         ../funcphys.f90     \
                         ../physparam.f      \

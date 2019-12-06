@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = satmedmfvdif_init
+  name = satmedmfvdifq_init
   type = scheme
 [isatmedmf]
   standard_name = choice_of_scale_aware_TKE_moist_EDMF_PBL
@@ -9,9 +9,9 @@
   type = integer
   intent = in
   optional = F
-[isatmedmf_vdif]
-  standard_name = choice_of_original_scale_aware_TKE_moist_EDMF_PBL
-  long_name = choice of original scale-aware TKE moist EDMF PBL scheme
+[isatmedmf_vdifq]
+  standard_name = choice_of_updated_scale_aware_TKE_moist_EDMF_PBL
+  long_name = choice of updated scale-aware TKE moist EDMF PBL scheme
   units = none
   dimensions = ()
   type = integer
@@ -37,7 +37,7 @@
 
 #####################################################################
 [ccpp-arg-table]
-  name = satmedmfvdif_run
+  name = satmedmfvdifq_run
   type = scheme
 [ix]
   standard_name = horizontal_dimension
@@ -545,6 +545,33 @@
 [xkzm_s]
   standard_name = diffusivity_background_sigma_level
   long_name = sigma level threshold for background diffusivity
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dspfac]
+  standard_name = tke_dissipative_heating_factor
+  long_name = tke dissipative heating factor
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[bl_upfr]
+  standard_name = updraft_fraction_in_boundary_layer_mass_flux_scheme
+  long_name = updraft fraction in boundary layer mass flux scheme
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[bl_dnfr]
+  standard_name = downdraft_fraction_in_boundary_layer_mass_flux_scheme
+  long_name = downdraft fraction in boundary layer mass flux scheme
   units = none
   dimensions = ()
   type = real

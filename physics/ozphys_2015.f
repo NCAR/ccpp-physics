@@ -8,8 +8,25 @@
       contains
 
 !> \section arg_table_ozphys_2015_init Argument Table
+!! \htmlinclude ozphys_2015_init.html
 !!
-      subroutine ozphys_2015_init()
+      subroutine ozphys_2015_init(oz_phys_2015, errmsg, errflg)
+
+      implicit none
+      logical,          intent(in)  :: oz_phys_2015
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not.oz_phys_2015) then
+        write (errmsg,'(*(a))') 'Logic error: oz_phys_2015 == .false.'
+        errflg = 1
+        return
+      endif
+
       end subroutine ozphys_2015_init
 
 ! \brief Brief description of the subroutine

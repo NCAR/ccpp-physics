@@ -32,6 +32,7 @@
 !###===================================================================
 SUBROUTINE mynnrad_pre_run(                &
      &     ix,im,levs,                     &
+     &     flag_init,flag_restart,         &
      &     qc, qi, T3D,                    &
      &     qc_save, qi_save,               &
      &     qc_bl,cldfra_bl,                &
@@ -50,6 +51,7 @@ SUBROUTINE mynnrad_pre_run(                &
       ! Interface variables
       real (kind=kind_phys), parameter :: gfac=1.0e5/con_g
       integer, intent(in)  :: ix, im, levs
+      logical,          intent(in)  :: flag_init, flag_restart
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: T3D,delp
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: &
@@ -71,13 +73,17 @@ SUBROUTINE mynnrad_pre_run(                &
       !write(0,*)"=============================================="
       !write(0,*)"in mynn rad pre"
 
+      if (flag_init .and. (.not. flag_restart)) then
+       !write (0,*) 'Skip MYNNrad_pre flag_init = ', flag_init
+        return
+      endif
      ! Add subgrid cloud information:
         do k = 1, levs
            do i = 1, im
 
               qc_save(i,k) = qc(i,k)
               qi_save(i,k) = qi(i,k)
-              clouds1(i,k)=CLDFRA_BL(i,k)
+              clouds1(i,k) = CLDFRA_BL(i,k)
 
               IF (qc(i,k) < 1.E-6 .AND. qi(i,k) < 1.E-8 .AND. CLDFRA_BL(i,k)>0.001) THEN
                 !Partition the BL clouds into water & ice according to a linear

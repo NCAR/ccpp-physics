@@ -81,9 +81,9 @@
 !!
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
-        ntwa, ntia, ntgl, ntoz, ntke, ntkev, trans_aero, ntchs, ntchm,                   &
+        ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,                   &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, hybedmf, do_shoc,      &
         satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine,                only : kind_phys
@@ -93,10 +93,10 @@
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
-      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, ntchs, ntchm
+      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
@@ -126,6 +126,20 @@
               vdftra(i,k,4) = qgrs(i,k,ntoz)
             enddo
           enddo
+
+  ! Ferrier-Aligo
+        elseif (imp_physics == imp_physics_fer_hires) then
+          do k=1,levs
+            do i=1,im
+              vdftra(i,k,1) = qgrs(i,k,ntqv)
+              vdftra(i,k,2) = qgrs(i,k,ntcw)
+              vdftra(i,k,3) = qgrs(i,k,ntiw)
+              vdftra(i,k,4) = qgrs(i,k,ntrw)
+              vdftra(i,k,5) = qgrs(i,k,nqrimef)
+              vdftra(i,k,6) = qgrs(i,k,ntoz)
+            enddo
+          enddo
+        
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
           if(ltaerosol) then
@@ -263,9 +277,10 @@
 !! \htmlinclude GFS_PBL_generic_post_run.html
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
-        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
+        imp_physics_fer_hires,                                                                                                 &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
@@ -280,10 +295,10 @@
       implicit none
 
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
-      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
@@ -365,6 +380,20 @@
               dqdt(i,k,ntoz)  = dvdftra(i,k,4)
             enddo
           enddo
+
+        elseif (imp_physics == imp_physics_fer_hires) then
+  ! Ferrier-Aligo 
+          do k=1,levs
+            do i=1,im
+              dqdt(i,k,ntqv)  = dvdftra(i,k,1)
+              dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+              dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+              dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+              dqdt(i,k,nqrimef) = dvdftra(i,k,5)
+              dqdt(i,k,ntoz)  = dvdftra(i,k,6)
+            enddo
+          enddo
+
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
           if(ltaerosol) then
@@ -463,10 +492,6 @@
         dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
       endif
 
-      if(cplflx)then
-        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
-        stop 
-      endif
 
 !  --- ...  coupling insertion
 

@@ -79,6 +79,11 @@ module module_mp_thompson_make_number_concentrations
          161.503, 168.262, 175.248, 182.473, 189.952, 197.699,          &
          205.728, 214.055, 222.694, 231.661, 240.971, 250.639 /)
 
+      if (Q_ice == 0) then
+         make_IceNumber = 0
+         return
+      end if
+
 !+---+-----------------------------------------------------------------+ 
 !..From the model 3D temperature field, subtract 179K for which
 !.. index value of retab as a start.  Value of corr is for
@@ -133,6 +138,11 @@ module module_mp_thompson_make_number_concentrations
       real:: q_nwfa, x1, xDc
       integer:: nu_c
 
+      if (Q_cloud == 0) then
+         make_DropletNumber = 0
+         return
+      end if
+
 !+---+
 
       q_nwfa = MAX(99.E6, MIN(qnwfa,5.E10))
@@ -160,6 +170,11 @@ module module_mp_thompson_make_number_concentrations
       !real, parameter:: PI = 3.1415926536
       real, parameter:: am_r = PI*1000./6.
 
+      if (Q_rain == 0) then
+         make_RainNumber = 0
+         return
+      end if
+
       !+---+-----------------------------------------------------------------+ 
       !.. Not thrilled with it, but set Y-intercept parameter to Marshal-Palmer value
       !.. that basically assumes melting snow becomes typical rain. However, for
@@ -172,7 +187,7 @@ module module_mp_thompson_make_number_concentrations
       N0 = 8.E6
 
       if (temp .le. 271.15) then
-         N0 = 8.E8      
+         N0 = 8.E8
       elseif (temp .gt. 271.15 .and. temp.lt.273.15) then
          N0 = 8. * 10**(279.15-temp)
       endif

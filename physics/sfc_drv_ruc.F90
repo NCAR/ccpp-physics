@@ -69,7 +69,6 @@ module lsm_ruc
 !     im       - integer, horiz dimention and num of used pts      1    !
 !     km       - integer, vertical soil layer dimension            9    !
 !     ps       - real, surface pressure (pa)                       im   !
-!     u1, v1   - real, u/v component of surface layer wind         im   !
 !     t1       - real, surface layer mean temperature (k)          im   !
 !     q1       - real, surface layer mean specific humidity        im   !
 !     soiltyp  - integer, soil type (integer index)                im   !
@@ -86,6 +85,7 @@ module lsm_ruc
 !     prsl1    - real, sfc layer 1 mean pressure (pa)              im   !
 !     prslki   - real, dimensionless exner function at layer 1     im   !
 !     zf       - real, height of bottom layer (m)                  im   !
+!     wind       real, surface layer wind speed (m/s)              im   !
 !     slopetyp - integer, class of sfc slope (integer index)       im   !
 !     shdmin   - real, min fractional coverage of green veg        im   !
 !     shdmax   - real, max fractnl cover of green veg (not used)   im   !
@@ -139,13 +139,13 @@ module lsm_ruc
 ! DH* TODO - make order of arguments the same as in the metadata table
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, kdt, im, nlev, lsoil_ruc, lsoil, zs,     &
-     &       u1, v1, t1, q1, qc, soiltyp, vegtype, sigmaf,              &
+     &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
-     &       prsl1, zf, ddvel, shdmin, shdmax, alvwf, alnwf,            &
+     &       prsl1, zf, wind, shdmin, shdmax, alvwf, alnwf,             &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
-     &       smc, stc, slc, lsm_ruc, lsm, land, islimsk,                &
+     &       smc, stc, slc, lsm_ruc, lsm, land, islimsk, rdlai,         &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
-     &       smcwlt2, smcref2, wspd, do_mynnsfclay,                     &
+     &       smcwlt2, smcref2, do_mynnsfclay,                           &
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,& !  constants
      &       weasd, snwdph, tskin, tskin_ocn,                           & !  in/outs
      &       rainnc, rainc, ice, snow, graupel,                         & ! in
@@ -173,10 +173,12 @@ module lsm_ruc
 
       real (kind=kind_phys), dimension(im,lsoil), intent(inout) :: smc,stc,slc
 
-      real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,&
+      real (kind=kind_phys), dimension(im), intent(in) ::               &
      &       t1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,        &
-     &       ch, prsl1, ddvel, shdmin, shdmax,                          &
-     &       snoalb, alvwf, alnwf, zf, qc, q1, wspd
+     &       ch, prsl1, wind, shdmin, shdmax,                           &
+     &       snoalb, alvwf, alnwf, zf, qc, q1
+
+      real (kind=kind_phys), dimension(:), intent(in) :: laixy
 
       real (kind=kind_phys),  intent(in) :: delt
       real (kind=kind_phys),  intent(in) :: con_cp, con_rv, con_g,      &
@@ -186,6 +188,8 @@ module lsm_ruc
       logical, dimension(im), intent(in) :: flag_iter, flag_guess, land
       integer, dimension(im), intent(in) :: islimsk ! sea/land/ice mask (=0/1/2)
       logical,                intent(in) :: do_mynnsfclay
+
+      logical,                intent(in) :: rdlai
 
 !  ---  in/out:
       integer, dimension(im), intent(inout) :: soiltyp, vegtype
@@ -216,7 +220,7 @@ module lsm_ruc
 
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rch, rho,                 &
-     &       q0, qs1, wind, weasd_old, snwdph_old,                      &
+     &       q0, qs1, weasd_old, snwdph_old,                            &
      &       tprcp_old, srflag_old, tskin_old, canopy_old,              &
      &       tsnow_old, snowfallac_old, acsnow_old, sfalb_old,          &
      &       sfcqv_old, sfcqc_old, wetness_old, zorl_old, sncovr1_old
@@ -316,6 +320,8 @@ module lsm_ruc
                                lsm_ruc, lsm,                             & ! in
                                zs, sh2o, smfrkeep, tslb, smois, wetness, & ! out
                                me, master, errmsg, errflg)
+
+        xlai = 0.
 
       endif ! flag_init=.true.,iter=1
 !-- end of initialization
@@ -472,15 +478,7 @@ module lsm_ruc
 
       do i  = 1, im
         if (flag_iter(i) .and. flag(i)) then
-          !if (do_mynnsfclay) then
-          ! WARNING - used of wspd computed in MYNN sfc leads to massive cooling.
-          !  wind(i) = wspd(i)
-          !else
-            wind(i) = max(sqrt( u1(i)*u1(i) + v1(i)*v1(i) )               &
-                    + max(0.0, min(ddvel(i), 30.0)), 1.0)
-          !endif
           q0(i)   = max(q1(i)/(1.-q1(i)), 1.e-8)   !* q1=specific humidity at level 1 (kg/kg)
-
           rho(i) = prsl1(i) / (con_rd*t1(i)*(1.0+con_fvirt*q0(i)))
           qs1(i) = rslf(prsl1(i),t1(i))  !* qs1=sat. mixing ratio at level 1 (kg/kg)
           q0 (i) = min(qs1(i), q0(i))
@@ -516,10 +514,10 @@ module lsm_ruc
           ffrozp(i,j) = real(nint(srflag(i)),kind_phys)
         endif
 
-        !tgs - for now set rdlai2d to .false., WRF has LAI maps, and RUC LSM
-        !      uses rdlai2d = .true.
-        rdlai2d = .false.
-        !if( .not. rdlai2d) xlai = lai_data(vtype)
+        !tgs - rdlai is .false. when the LAI data is not available in the
+        !    - INPUT/sfc_data.nc
+
+        rdlai2d = rdlai
 
         conflx2(i,1,j)  = zf(i) * 2. ! factor 2. is needed to get the height of
                                      ! atm. forcing inside RUC LSM (inherited
@@ -560,13 +558,15 @@ module lsm_ruc
         !prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
         !raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
         !rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
-        !graupelncv(i,j) = rhoh2o * graupel(i)
-        !snowncv(i,j)    = rhoh2o * snow(i)
-        prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! tprcp in [m] - convective plus explicit
-        raincv(i,j)     = rhoh2o * rainc(i)                    ! total time-step convective precip
-        rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
+        prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! [mm] - convective plus explicit
+        raincv(i,j)     = rhoh2o * rainc(i)                    ! [mm] - total time-step convective precip
+        rainncv(i,j)    = rhoh2o * rainnc(i)                   ! [mm] - total time-step explicit precip 
         graupelncv(i,j) = rhoh2o * graupel(i)
         snowncv(i,j)    = rhoh2o * snow(i)
+    !if(prcp(i,j) > 0. .and. i==21) then
+    !print *,'prcp(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)',i,j, &
+    !    prcp(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)
+    !endif
         ! ice not used
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
@@ -608,6 +608,8 @@ module lsm_ruc
         snoalb1d(i,j) = snoalb(i)
         albbck(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
         alb(i,j)      = sfalb(i)
+
+        if(rdlai2d) xlai(i,j) = laixy(i)
 
         tbot(i,j) = tg3(i)
 
@@ -694,7 +696,7 @@ module lsm_ruc
         znt(i,j) = zorl(i)/100.
 
         if(debug_print) then
-          !if(me==0 .and. i==ipr) then
+          if(me==0 .and. i==ipr) then
             write (0,*)'before RUC smsoil = ',smsoil(i,:,j), i,j
             write (0,*)'stsoil = ',stsoil(i,:,j), i,j
             write (0,*)'soilt = ',soilt(i,j), i,j
@@ -788,7 +790,7 @@ module lsm_ruc
             write (0,*)'shdmin1d(i,j) =',i,j,shdmin1d(i,j)
             write (0,*)'shdmax1d(i,j) =',i,j,shdmax1d(i,j)
             write (0,*)'rdlai2d =',rdlai2d
-          !endif
+          endif
         endif
 
 !> - Call RUC LSM lsmruc(). 
@@ -804,8 +806,7 @@ module lsm_ruc
      &          chs(i,j), flqc(i,j), flhc(i,j),                              &
 !  ---  input/outputs:
      &          wet(i,j), cmc(i,j), shdfac(i,j), alb(i,j), znt(i,j),         &
-     &          z0(i,j), snoalb1d(i,j), albbck(i,j),                         &
-!     &          z0, snoalb1d, alb, xlai,                                     &
+     &          z0(i,j), snoalb1d(i,j), albbck(i,j), xlai(i,j),              &
      &          landusef(i,:,j), nlcat,                                      &
 !  --- mosaic_lu and mosaic_soil are moved to the namelist
 !     &          mosaic_lu, mosaic_soil,                                      &
