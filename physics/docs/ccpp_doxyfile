@@ -120,6 +120,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMF.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_GWDC.txt     \
+                          pdftxt/UGWPv0.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
 ###                          pdftxt/GFS_SURFACE_PERT.txt    \
@@ -204,6 +205,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Shallow Convection
                         ../samfshalcnv.f \
                         ../cnvc90.f \
+### Unified Gravity Wave
+                        ../cires_ugwp.F90 \
+                        ../ugwp_driver_v0.F \
+                        ../cires_ugwp_triggers.F90 \
 ### Microphysics
 ###                        ../gscond.f \
 ###                        ../precpd.f \
