@@ -2,7 +2,10 @@
 \page NoahMP GFS NoahMP Land Surface Model
 \section des_noahmp  Description
 
-This implementation of the NoahMP Land Surface Model (LSM) is a Fortran 90 port of version 1.6 with additions by NOAA EMC staff to work with the UFS Atmosphere model. Authoritative documentation of the NoahMP scheme can be accessed at the following link:
+This implementation of the NoahMP Land Surface Model (LSM) is adapted from the version implemented in WRF v3.7 with additions by NOAA EMC staff to work with the UFS Atmosphere model. Authoritative documentation of the NoahMP scheme can be accessed at the following links:
+
+[University of Texas at Austin NoahMP Documentation](http://www.jsg.utexas.edu/noah-mp "University of Texas at Austin NoahMP Documentation")
+
 [NCAR Research Application Laboratory NoahMP Documentation](https://ral.ucar.edu/solutions/products/noah-multiparameterization-land-surface-model-noah-mp-lsm "NCAR RAL NoahMP Documentation")
 
 A primary reference for the NoahMP LSM is Niu et al. (2011) \cite niu_et_al_2011.
