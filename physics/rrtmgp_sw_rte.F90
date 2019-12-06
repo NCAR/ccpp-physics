@@ -45,7 +45,7 @@ contains
     integer, intent(in) :: &
          ncol,                    & ! Number of horizontal gridpoints
          nday                       ! Number of daytime points
-    integer, intent(in), dimension(nday) :: &
+    integer, intent(in), dimension(ncol) :: &
          idxday                     ! Index array for daytime points
     real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
          p_lay,                   & ! Pressure @ model layer-centers (Pa)
@@ -54,7 +54,7 @@ contains
          p_lev                      ! Pressure @ model layer-interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props               ! RRTMGP DDT: SW spectral information
-    type(ty_optical_props_2str),intent(in) :: &
+    type(ty_optical_props_2str),intent(inout) :: &
          sw_optical_props_clrsky, & ! RRTMGP DDT: longwave clear-sky radiative properties 
          sw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
          sw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
@@ -108,52 +108,38 @@ contains
     errflg  = 0
 
     if (.not. lsswr) return
-
-    ! Vertical ordering?
-    top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levs))
-    if (top_at_1) then 
-       iSFC = Model%levs+1
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = Model%levs+1
-    endif
-
-    ! Are any optional outputs requested? Need to know now to compute correct fluxes.
-    l_ClrSky_HR        = present(hsw0)
-    l_AllSky_HR_byband = present(hswb)
-    l_scmpsw           = present(scmpsw)
-    if ( l_scmpsw ) then
-       scmpsw = cmpfsw_type (0., 0., 0., 0., 0., 0.)
-    endif
-    fluxswUP_allsky(:,:)   = 0._kind_phys
-    fluxswDOWN_allsky(:,:) = 0._kind_phys
-    fluxswUP_clrsky(:,:)   = 0._kind_phys
-    fluxswDOWN_clrsky(:,:) = 0._kind_phys
-
     if (nDay .gt. 0) then
 
-       ! Subset the cloud and aerosol radiative properties over daylit points.
-       ! Cloud optics [nDay,Model%levs,nGpts]
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
-       sw_optical_props_clouds_daylit%tau    = sw_optical_props_clouds%tau(idxday,:,:)
-       sw_optical_props_clouds_daylit%ssa    = sw_optical_props_clouds%ssa(idxday,:,:)
-       sw_optical_props_clouds_daylit%g      = sw_optical_props_clouds%g(idxday,:,:)
-       ! Aerosol optics [nDay,Model%levs,nBands]
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol_daylit%alloc_2str(nday, Model%levs, sw_gas_props%get_band_lims_wavenumber()))
-       sw_optical_props_aerosol_daylit%tau = sw_optical_props_aerosol%tau(idxday,:,:)
-       sw_optical_props_aerosol_daylit%ssa = sw_optical_props_aerosol%ssa(idxday,:,:)
-       sw_optical_props_aerosol_daylit%g   = sw_optical_props_aerosol%g(idxday,:,:)
-       ! Clear-sky optics [nDay,Model%levs,nGpts]
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky_daylit%alloc_2str(nday, Model%levs, sw_gas_props))
-       sw_optical_props_clrsky_daylit%tau = sw_optical_props_clrsky%tau(idxday,:,:)
-       sw_optical_props_clrsky_daylit%ssa = sw_optical_props_clrsky%ssa(idxday,:,:)
-       sw_optical_props_clrsky_daylit%g   = sw_optical_props_clrsky%g(idxday,:,:)
-      
-       ! Similarly, subset the gas concentrations.
+       ! Vertical ordering?
+       top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levs))
+       if (top_at_1) then 
+          iSFC = Model%levs+1
+          iTOA = 1
+       else
+          iSFC = 1
+          iTOA = Model%levs+1
+       endif
+       
+       ! Are any optional outputs requested? Need to know now to compute correct fluxes.
+       l_ClrSky_HR        = present(hsw0)
+       l_AllSky_HR_byband = present(hswb)
+       l_scmpsw           = present(scmpsw)
+       if ( l_scmpsw ) then
+          scmpsw = cmpfsw_type (0., 0., 0., 0., 0., 0.)
+       endif
+
+       ! Initialize fluxes
+       fluxswUP_allsky(:,:)   = 0._kind_phys
+       fluxswDOWN_allsky(:,:) = 0._kind_phys
+       fluxswUP_clrsky(:,:)   = 0._kind_phys
+       fluxswDOWN_clrsky(:,:) = 0._kind_phys
+       
+       ! Subset the gas concentrations, only need daylit points.
        do iGas=1,Model%nGases
-          call check_error_msg('rrtmgp_sw_rte_run',gas_concentrations%get_vmr(trim(Model%active_gases_array(iGas)),vmrTemp))
-          call check_error_msg('rrtmgp_sw_rte_run',gas_concentrations_daylit%set_vmr(trim(Model%active_gases_array(iGas)),vmrTemp(idxday,:)))
+          call check_error_msg('rrtmgp_sw_rte_run',&
+               gas_concentrations%get_vmr(trim(Model%active_gases_array(iGas)),vmrTemp))
+          call check_error_msg('rrtmgp_sw_rte_run',&
+               gas_concentrations_daylit%set_vmr(trim(Model%active_gases_array(iGas)),vmrTemp(idxday(1:nday),:)))
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
@@ -165,42 +151,43 @@ contains
 
        ! Compute clear-sky fluxes (if requested)
        ! Clear-sky fluxes (gas+aerosol)
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol_daylit%increment(sw_optical_props_clrsky_daylit))
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol%increment(sw_optical_props_clrsky))
        ! Delta-scale optical properties
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky_daylit%delta_scale())
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky%delta_scale())
        if (l_ClrSky_HR) then
-          call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
-               sw_optical_props_clrsky_daylit,         & ! IN  - optical-properties
-               top_at_1,                               & ! IN  - veritcal ordering flag
-               Radtend%coszen(idxday),                 & ! IN  - Cosine of solar zenith angle
-               Interstitial%toa_src_sw(idxday,:),      & ! IN  - incident solar flux at TOA
-               Interstitial%sfc_alb_nir_dir(:,idxday), & ! IN  - Shortwave surface albedo (direct)
-               Interstitial%sfc_alb_nir_dif(:,idxday), & ! IN  - Shortwave surface albedo (diffuse)
-               flux_clrsky))                             ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
+          call check_error_msg('rrtmgp_sw_rte_run',rte_sw(     &
+               sw_optical_props_clrsky,                        & ! IN  - optical-properties
+               top_at_1,                                       & ! IN  - veritcal ordering flag
+               Radtend%coszen(idxday(1:nday)),                 & ! IN  - Cosine of solar zenith angle
+               Interstitial%toa_src_sw(idxday(1:nday),:),      & ! IN  - incident solar flux at TOA
+               Interstitial%sfc_alb_nir_dir(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (direct)
+               Interstitial%sfc_alb_nir_dif(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (diffuse)
+               flux_clrsky))                                     ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
           ! Store fluxes
-          fluxswUP_clrsky(idxday,:)   = sum(flux_clrsky%bnd_flux_up,dim=3)
-          fluxswDOWN_clrsky(idxday,:) = sum(flux_clrsky%bnd_flux_dn,dim=3)
+          fluxswUP_clrsky(idxday(1:nday),:)   = sum(flux_clrsky%bnd_flux_up,dim=3)
+          fluxswDOWN_clrsky(idxday(1:nday),:) = sum(flux_clrsky%bnd_flux_dn,dim=3)
        endif
 
        ! Compute all-sky fluxes
        ! All-sky fluxes (clear-sky + clouds)
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%increment(sw_optical_props_clrsky_daylit))
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds%increment(sw_optical_props_clrsky))
        ! Delta-scale optical properties
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds_daylit%delta_scale())
-       call check_error_msg('rrtmgp_sw_rte_run',rte_sw(               &
-            sw_optical_props_clrsky_daylit,         & ! IN  - optical-properties
-            top_at_1,                               & ! IN  - veritcal ordering flag
-            Radtend%coszen(idxday),                 & ! IN  - Cosine of solar zenith angle
-            Interstitial%toa_src_sw(idxday,:),      & ! IN  - incident solar flux at TOA
-            Interstitial%sfc_alb_nir_dir(:,idxday), & ! IN  - Shortwave surface albedo (direct)
-            Interstitial%sfc_alb_nir_dif(:,idxday), & ! IN  - Shortwave surface albedo (diffuse)
-            flux_allsky))                             ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds%delta_scale())
+       call check_error_msg('rrtmgp_sw_rte_run',rte_sw(     &
+            sw_optical_props_clrsky,                        & ! IN  - optical-properties
+            top_at_1,                                       & ! IN  - veritcal ordering flag
+            Radtend%coszen(idxday(1:nday)),                 & ! IN  - Cosine of solar zenith angle
+            Interstitial%toa_src_sw(idxday(1:nday),:),      & ! IN  - incident solar flux at TOA
+            Interstitial%sfc_alb_nir_dir(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (direct)
+            Interstitial%sfc_alb_nir_dif(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (diffuse)
+            flux_allsky))                                     ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
        ! Store fluxes
-       fluxswUP_allsky(idxday,:)   = sum(flux_allsky%bnd_flux_up,dim=3)
-       fluxswDOWN_allsky(idxday,:) = sum(flux_allsky%bnd_flux_dn,dim=3)
+       fluxswUP_allsky(idxday(1:nday),:)   = sum(flux_allsky%bnd_flux_up,dim=3)
+       fluxswDOWN_allsky(idxday(1:nday),:) = sum(flux_allsky%bnd_flux_dn,dim=3)
        if ( l_scmpsw ) then
-          scmpsw(idxday)%nirbm = sum(flux_allsky%bnd_flux_dn_dir(idxday,iSFC,:),dim=2)
-          scmpsw(idxday)%nirdf = sum(flux_allsky%bnd_flux_dn(idxday,iSFC,:),dim=2)  - sum(flux_allsky%bnd_flux_dn_dir(idxday,iSFC,:),dim=2)
+          scmpsw(idxday(1:nday))%nirbm = sum(flux_allsky%bnd_flux_dn_dir(idxday(1:nday),iSFC,:),dim=2)
+          scmpsw(idxday(1:nday))%nirdf = sum(flux_allsky%bnd_flux_dn(idxday(1:nday),iSFC,:),dim=2)  - &
+               sum(flux_allsky%bnd_flux_dn_dir(idxday(1:nday),iSFC,:),dim=2)
        endif
     endif
   end subroutine rrtmgp_sw_rte_run

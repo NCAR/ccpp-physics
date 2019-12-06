@@ -14,12 +14,12 @@ module rrtmgp_sw_cloud_optics
 
 contains
 
-!! \section arg_table_rrtmgp_sw_cloud_optics_init
-!! \htmlinclude rrtmgp_lw_cloud_optics.html
-!!
   ! #########################################################################################
   ! SUBROUTINE sw_cloud_optics_init
   ! #########################################################################################
+!! \section arg_table_rrtmgp_sw_cloud_optics_init
+!! \htmlinclude rrtmgp_lw_cloud_optics.html
+!!
   subroutine rrtmgp_sw_cloud_optics_init(Model,mpicomm, mpirank, mpiroot, sw_cloud_props,   &
         errmsg, errflg)
     use netcdf
@@ -337,12 +337,12 @@ contains
     endif
   end subroutine rrtmgp_sw_cloud_optics_init
 
-!! \section arg_table_rrtmgp_sw_cloud_optics_run
-!! \htmlinclude rrtmgp_sw_cloud_optics.html
-!!
   ! #########################################################################################
   ! SUBROTUINE rrtmgp_sw_cloud_optics_run()
   ! #########################################################################################
+!! \section arg_table_rrtmgp_sw_cloud_optics_run
+!! \htmlinclude rrtmgp_sw_cloud_optics.html
+!!
   subroutine rrtmgp_sw_cloud_optics_run(Model, ncol, icseed_sw, cld_frac, cld_lwp,          &
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, aerosolssw, &
        sw_cloud_props, sw_gas_props, ipsdsw0, nday, idxday, sw_optical_props_clouds,        &
@@ -355,7 +355,7 @@ contains
          ncol,             & ! Number of horizontal gridpoints
          nday,             & ! Number of daylit points.
          ipsdsw0             ! Initial permutation seed for McICA
-    integer,intent(in),dimension(nday) :: &
+    integer,intent(in),dimension(ncol) :: &
          idxday              ! Indices for daylit points.
     integer,intent(in),dimension(ncol) :: &
          icseed_sw           ! auxiliary special cloud related array when module 
@@ -393,7 +393,7 @@ contains
     ! Local variables
     integer :: iCol
     integer,dimension(ncol) :: ipseed_sw
-    logical,dimension(ncol,model%levs) :: liqmask, icemask
+    logical,dimension(nday,model%levs) :: liqmask, icemask
     type(ty_optical_props_2str) :: sw_optical_props_cloudsByBand
     type(random_stat) :: rng_stat
     real(kind_phys), dimension(sw_gas_props%get_ngpt(),model%levs,ncol) :: rng3D
@@ -407,102 +407,108 @@ contains
     errflg = 0
 
     if (.not. Model%lsswr) return
-
-    ! #######################################################################################
-    ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
-    ! #######################################################################################
-    if(isubcsw == 1) then      ! advance prescribed permutation seed
-       do iCol = 1, ncol
-          ipseed_sw(iCol) = ipsdsw0 + iCol
-       enddo
-    elseif (isubcsw == 2) then ! use input array of permutaion seeds
-       do iCol = 1, ncol
-          ipseed_sw(iCol) = icseed_sw(iCol)
-       enddo
-    endif
-    
-    ! #######################################################################################
-    ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
-    ! #######################################################################################
-    liqmask = (cld_frac .gt. 0 .and. cld_lwp .gt. 0)
-    icemask = (cld_frac .gt. 0 .and. cld_iwp .gt. 0)
-
-    ! #######################################################################################
-    ! Allocate space for RRTMGP DDTs containing cloud and aerosol radiative properties
-    ! #######################################################################################
-    ! Cloud optics [ncol,model%levs,nBands]
-    call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_cloudsByBand%alloc_2str(&
-         ncol, model%levs, sw_gas_props%get_band_lims_wavenumber()))
-    ! Aerosol optics [ncol,model%levs,nBands]
-    call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_aerosol%alloc_2str(     &
-         ncol, model%levs, sw_gas_props%get_band_lims_wavenumber()))
-    ! Cloud optics [ncol,model%levs,nGpt]
-    call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_clouds%alloc_2str(      &
-         ncol, model%levs, sw_gas_props))
-
-    ! #######################################################################################
-    ! Copy aerosol optical information to RRTMGP DDT
-    ! #######################################################################################
-    sw_optical_props_aerosol%tau = aerosolssw(:,:,:,1)
-    sw_optical_props_aerosol%ssa = aerosolssw(:,:,:,2)
-    sw_optical_props_aerosol%g   = aerosolssw(:,:,:,3)
-
-    ! #######################################################################################
-    ! Compute cloud-optics for RTE.
-    ! #######################################################################################
-    if (Model%rrtmgp_cld_optics .gt. 0) then
-       ! RRTMGP cloud-optics.
-       call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_cloud_props%cloud_optics(&
-            ncol,                         & ! IN  - Number of daylit gridpoints
-            model%levs,                   & ! IN  - Number of vertical layers
-            sw_cloud_props%get_nband(),   & ! IN  - Number of SW bands
-            Model%rrtmgp_nrghice,         & ! IN  - Number of ice-roughness categories
-            liqmask,                      & ! IN  - Liquid-cloud mask
-            icemask,                      & ! IN  - Ice-cloud mask
-            cld_lwp,                      & ! IN  - Cloud liquid water path
-            cld_iwp,                      & ! IN  - Cloud ice water path
-            cld_reliq,                    & ! IN  - Cloud liquid effective radius
-            cld_reice,                    & ! IN  - Cloud ice effective radius
-            sw_optical_props_cloudsByBand)) ! OUT - RRTMGP DDT: Shortwave optical properties, 
-                                            !       in each band (tau,ssa,g)
-    else
-       ! RRTMG cloud-optics
-       if (any(cld_frac .gt. 0)) then
-          sw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
-          sw_optical_props_cloudsByBand%ssa(:,:,:) = 0._kind_phys
-          sw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys
-          call rrtmg_sw_cloud_optics(nday, model%levs, sw_gas_props%get_nband(), cld_lwp(idxday,:), &
-               cld_reliq(idxday,:), cld_iwp(idxday,:), cld_reice(idxday,:), cld_rwp(idxday,:),   &
-               cld_rerain(idxday,:), cld_swp(idxday,:), cld_resnow(idxday,:), cld_frac(idxday,:),&
-               tau_cld, ssa_cld, asy_cld)
-          sw_optical_props_cloudsByBand%tau(idxday,:,:) = tau_cld
-          sw_optical_props_cloudsByBand%ssa(idxday,:,:) = ssa_cld
-          sw_optical_props_cloudsByBand%g(idxday,:,:)   = asy_cld
+    if (nDay .gt. 0) then
+       
+       ! #######################################################################################
+       ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
+       ! #######################################################################################
+       liqmask = (cld_frac(idxday(1:nday),:) .gt. 0 .and. cld_lwp(idxday(1:nday),:) .gt. 0)
+       icemask = (cld_frac(idxday(1:nday),:) .gt. 0 .and. cld_iwp(idxday(1:nday),:) .gt. 0)
+       
+       ! #######################################################################################
+       ! Allocate space for RRTMGP DDTs containing cloud and aerosol radiative properties
+       ! #######################################################################################
+       ! Cloud optics [nday,model%levs,nBands]
+       call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_cloudsByBand%alloc_2str(&
+            nday, model%levs, sw_gas_props%get_band_lims_wavenumber()))
+       ! Aerosol optics [nday,model%levs,nBands]
+       call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_aerosol%alloc_2str(     &
+            nday, model%levs, sw_gas_props%get_band_lims_wavenumber()))
+       ! Cloud optics [nday,model%levs,nGpt]
+       call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_clouds%alloc_2str(      &
+            nday, model%levs, sw_gas_props))
+       
+       ! #######################################################################################
+       ! Copy aerosol optical information to RRTMGP DDT
+       ! #######################################################################################
+       sw_optical_props_aerosol%tau = aerosolssw(idxday(1:nday),:,:,1)
+       sw_optical_props_aerosol%ssa = aerosolssw(idxday(1:nday),:,:,2)
+       sw_optical_props_aerosol%g   = aerosolssw(idxday(1:nday),:,:,3)
+       
+       ! #######################################################################################
+       ! Compute cloud-optics for RTE.
+       ! #######################################################################################
+       if (Model%rrtmgp_cld_optics .gt. 0) then
+          ! RRTMGP cloud-optics.
+          call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_cloud_props%cloud_optics(&
+               nday,                         & ! IN  - Number of daylit gridpoints
+               model%levs,                   & ! IN  - Number of vertical layers
+               sw_cloud_props%get_nband(),   & ! IN  - Number of SW bands
+               Model%rrtmgp_nrghice,         & ! IN  - Number of ice-roughness categories
+               liqmask,                      & ! IN  - Liquid-cloud mask
+               icemask,                      & ! IN  - Ice-cloud mask
+               cld_lwp(idxday(1:nday),:),    & ! IN  - Cloud liquid water path
+               cld_iwp(idxday(1:nday),:),    & ! IN  - Cloud ice water path
+               cld_reliq(idxday(1:nday),:),  & ! IN  - Cloud liquid effective radius
+               cld_reice(idxday(1:nday),:),  & ! IN  - Cloud ice effective radius
+               sw_optical_props_cloudsByBand)) ! OUT - RRTMGP DDT: Shortwave optical properties, 
+          !       in each band (tau,ssa,g)
+       else
+          ! RRTMG cloud-optics
+          if (any(cld_frac .gt. 0)) then
+             sw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
+             sw_optical_props_cloudsByBand%ssa(:,:,:) = 0._kind_phys
+             sw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys
+             call rrtmg_sw_cloud_optics(nday, model%levs, sw_gas_props%get_nband(), &
+                  cld_lwp(idxday(1:nday),:), cld_reliq(idxday(1:nday),:),           &
+                  cld_iwp(idxday(1:nday),:), cld_reice(idxday(1:nday),:),           &
+                  cld_rwp(idxday(1:nday),:), cld_rerain(idxday(1:nday),:),          &
+                  cld_swp(idxday(1:nday),:), cld_resnow(idxday(1:nday),:),          &
+                  cld_frac(idxday(1:nday),:), tau_cld, ssa_cld, asy_cld)
+             sw_optical_props_cloudsByBand%tau(:,:,:) = tau_cld
+             sw_optical_props_cloudsByBand%ssa(:,:,:) = ssa_cld
+             sw_optical_props_cloudsByBand%g(:,:,:)   = asy_cld
+          endif
        endif
-    endif
-    ! #######################################################################################
-    ! Call McICA to generate subcolumns.
-    ! #######################################################################################
-    ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-    ! and layers. ([nGpts,model%levs,nColumn]-> [nGpts*model%levs]*nColumn)
-    do iCol=1,ncol
-       call random_setseed(ipseed_sw(icol),rng_stat)
-       call random_number(rng1D,rng_stat)
-       rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),model%levs])
-    enddo
-   
-    ! Call McICA
-    select case ( iovrsw )
-       ! Maximumn-random 
-    case(1)
-       call check_error_msg('rrtmgp_sw_cloud_optics_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
-    end select
-    
-    ! Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_sw_cloud_optics_run',draw_samples(cldfracMCICA,sw_optical_props_cloudsByBand,sw_optical_props_clouds))
 
-    ! GFS_RRTMGP_POST_RUN() requires the SW optical depth ~0.55microns
-    cldtausw = sw_optical_props_cloudsByBand%tau(:,:,11)    
+       ! #######################################################################################
+       ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
+       ! #######################################################################################
+       if(isubcsw == 1) then      ! advance prescribed permutation seed
+          do iCol = 1, ncol
+             ipseed_sw(iCol) = ipsdsw0 + iCol
+          enddo
+       elseif (isubcsw == 2) then ! use input array of permutaion seeds
+          do iCol = 1, ncol
+             ipseed_sw(iCol) = icseed_sw(iCol)
+          enddo
+       endif
+
+       ! #######################################################################################
+       ! Call McICA to generate subcolumns.
+       ! #######################################################################################
+       ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
+       ! and layers. ([nGpts,model%levs,nColumn]-> [nGpts*model%levs]*nColumn)
+       do iCol=1,ncol
+          call random_setseed(ipseed_sw(icol),rng_stat)
+          call random_number(rng1D,rng_stat)
+          rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),model%levs])
+       enddo
+       
+       ! Call McICA
+       select case ( iovrsw )
+          ! Maximumn-random 
+       case(1)
+          call check_error_msg('rrtmgp_sw_cloud_optics_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
+       end select
+       
+       ! Map band optical depth to each g-point using McICA
+       call check_error_msg('rrtmgp_sw_cloud_optics_run',draw_samples(&
+            cldfracMCICA(idxday(1:nDay),:,:),sw_optical_props_cloudsByBand,sw_optical_props_clouds))
+       
+       ! GFS_RRTMGP_POST_RUN() requires the SW optical depth ~0.55microns
+       cldtausw(idxday(1:nDay),:) = sw_optical_props_cloudsByBand%tau(:,:,11)    
+    endif
 
   end subroutine rrtmgp_sw_cloud_optics_run
 

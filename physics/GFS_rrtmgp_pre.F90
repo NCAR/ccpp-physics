@@ -216,7 +216,8 @@ contains
     ! #######################################################################################
     
     ! Water-vapor mixing-ratio
-    q_lay(1:ncol,:)  = max( 1.e-6, Statein%qgrs(1:NCOL,:,1))
+    q_lay(1:ncol,:)  = Statein%qgrs(1:NCOL,:,1)
+    where(q_lay .lt. 1.e-6) q_lay = 1.e-6
     
     ! Pressure at layer-interface
     p_lev(1:NCOL,:) = Statein%prsi(1:NCOL,:)
@@ -227,7 +228,6 @@ contains
     ! Temperature at layer-center
     t_lay(1:NCOL,:) = Statein%tgrs(1:NCOL,:)
 
-    !
     ! Temperature at layer-interfaces
     if (top_at_1) then
        t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
@@ -260,7 +260,8 @@ contains
     ! #######################################################################################
     ! First recast remaining all tracers (except sphum) forcing them all to be positive
     do j = 2, model%NTRAC
-       tracer(1:NCOL,:,j) = max(0.0, Statein%qgrs(1:NCOL,:,j))
+       tracer(1:NCOL,:,j) = Statein%qgrs(1:NCOL,:,j)
+       where(tracer(:,:,j) .lt. 0.0) tracer(:,:,j) = 0._kind_phys
     enddo
 
     if (Model%ntoz > 0) then 

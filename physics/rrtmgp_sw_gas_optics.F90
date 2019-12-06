@@ -398,8 +398,9 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_run
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_run(Model, Interstitial, sw_gas_props, ncol, p_lay, p_lev, &
-       t_lay, t_lev, gas_concentrations, lsswr, solcon, sw_optical_props_clrsky, errmsg, errflg)
+  subroutine rrtmgp_sw_gas_optics_run(Model, Interstitial, sw_gas_props, ncol, nday, idxday,&
+       p_lay, p_lev, t_lay, t_lev, gas_concentrations, lsswr, solcon,                       &
+       sw_optical_props_clrsky, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -409,7 +410,10 @@ contains
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props            ! RRTMGP DDT: spectral information for RRTMGP SW radiation scheme
     integer,intent(in) :: &
+         nday,                 & ! Number of daylit points.
          ncol                    ! Number of horizontal points
+    integer,intent(in),dimension(ncol) :: &
+         idxday                  ! Indices for daylit points.
     real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
          p_lay,                & ! Pressure @ model layer-centers         (hPa)
          t_lay                   ! Temperature                            (K)
@@ -432,7 +436,11 @@ contains
          sw_optical_props_clrsky ! RRTMGP DDT: clear-sky shortwave optical properties, spectral (tau,ssa,g) 
 
     ! Local variables
-    integer :: ij
+    integer :: ij,iGas
+    real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
+    real(kind_phys), dimension(nday,sw_gas_props%get_ngpt()) :: toa_src_sw_temp
+    type(ty_gas_concs) :: &
+         gas_concentrations_daylit    ! RRTMGP DDT: trace gas concentrations   (vmr)
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -440,23 +448,35 @@ contains
 
     if (.not. Model%lsswr) return
 
-    ! Allocate space
-    call check_error_msg('rrtmgp_sw_gas_optics_run',sw_optical_props_clrsky%alloc_2str(ncol, model%levs, sw_gas_props))
+    if (nDay .gt. 0) then
+       ! Allocate space
+       call check_error_msg('rrtmgp_sw_gas_optics_run',sw_optical_props_clrsky%alloc_2str(nday, model%levs, sw_gas_props))
 
-    ! Gas-optics
-    call check_error_msg('rrtmgp_sw_gas_optics_run',sw_gas_props%gas_optics(&
-         p_lay,                   & ! IN  - Pressure @ layer-centers (Pa)
-         p_lev,                   & ! IN  - Pressure @ layer-interfaces (Pa)
-         t_lay,                   & ! IN  - Temperature @ layer-centers (K)
-         gas_concentrations,      & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
-         sw_optical_props_clrsky, & ! OUT - RRTMGP DDT: Shortwave optical properties, by
-                                    !                    spectral point (tau,ssa,g)
-         Interstitial%toa_src_sw))  ! OUT - TOA incident shortwave radiation (spectral)
+       ! Subset the gas concentrations, only need daylit points.
+       do iGas=1,Model%nGases
+          call check_error_msg('rrtmgp_sw_rte_run',&
+               gas_concentrations%get_vmr(trim(Model%active_gases_array(iGas)),vmrTemp))
+          call check_error_msg('rrtmgp_sw_rte_run',&
+               gas_concentrations_daylit%set_vmr(trim(Model%active_gases_array(iGas)),vmrTemp(idxday(1:nday),:)))
+       enddo
 
-    ! Scale incident flux
-    do ij=1,ncol
-       Interstitial%toa_src_sw(ij,:) = Interstitial%toa_src_sw(ij,:)*solcon/sum(Interstitial%toa_src_sw(ij,:))
-    enddo
+       ! Gas-optics
+       call check_error_msg('rrtmgp_sw_gas_optics_run',sw_gas_props%gas_optics(&
+            p_lay(idxday(1:nday),:),   & ! IN  - Pressure @ layer-centers (Pa)
+            p_lev(idxday(1:nday),:),   & ! IN  - Pressure @ layer-interfaces (Pa)
+            t_lay(idxday(1:nday),:),   & ! IN  - Temperature @ layer-centers (K)
+            gas_concentrations_daylit, & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
+            sw_optical_props_clrsky,   & ! OUT - RRTMGP DDT: Shortwave optical properties, by
+                                         !                   spectral point (tau,ssa,g)
+            toa_src_sw_temp))            ! OUT - TOA incident shortwave radiation (spectral)
+       Interstitial%toa_src_sw(idxday(1:nday),:) = toa_src_sw_temp
+       ! Scale incident flux
+       do ij=1,nday
+          Interstitial%toa_src_sw(idxday(ij),:) = Interstitial%toa_src_sw(idxday(ij),:)*solcon/ &
+                                                  sum(Interstitial%toa_src_sw(idxday(ij),:))
+       enddo
+    endif
+
 
   end subroutine rrtmgp_sw_gas_optics_run
 

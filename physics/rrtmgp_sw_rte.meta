@@ -82,7 +82,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_2str
-  intent = in
+  intent = inout
   optional = F
 [sw_optical_props_clouds]
   standard_name = shortwave_optical_properties_for_cloudy_atmosphere

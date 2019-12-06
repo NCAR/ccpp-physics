@@ -111,10 +111,9 @@ contains
          Radtend%coszen, Radtend%coszdg)
 
     ! #######################################################################################
-    ! For SW, gather daylit points, compute surface albedo in each band,
+    ! For SW gather daylit points
     ! #######################################################################################
-    ! Check for daytime points for SW radiation.
-    nday = 0
+    nday   = 0
     idxday = 0
     do i = 1, NCOL
        if (Radtend%coszen(i) >= 0.0001) then
@@ -137,7 +136,9 @@ contains
        endif
     endif  
     
+    ! #######################################################################################
     ! Call module_radiation_surface::setalb() to setup surface albedo.
+    ! #######################################################################################
     call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%snoalb, Sfcprop%zorl, &
          Radtend%coszen, Sfcprop%tsfc, Sfcprop%tsfc, Sfcprop%hprime(:,1), Sfcprop%alvsf,     &
          Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf,          &
