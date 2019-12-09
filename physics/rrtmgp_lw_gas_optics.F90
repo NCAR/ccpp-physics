@@ -370,21 +370,12 @@ contains
     call MPI_BCAST(planck_frac,            size(planck_frac),            MPI_REAL,   mpiroot, mpicomm, ierr)
 #endif
     ! Character arrays
-    do ij=1,nabsorbers
-       call MPI_BCAST(gas_names(ij),         32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
-    enddo
-    do ij=1,nminorabsorbers
-       call MPI_BCAST(gas_minor(ij),         32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(identifier_minor(ij),  32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
-    enddo
-    do ij=1,nminor_absorber_intervals_lower
-       call MPI_BCAST(minor_gases_lower(ij), 32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
-    enddo
-    do ij=1,nminor_absorber_intervals_upper
-       call MPI_BCAST(minor_gases_upper(ij), 32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
-    enddo
-    ! Logical arrays (First convert to integer-array, then broadcast)
-    !
+    call MPI_BCAST(gas_names,         size(gas_names),                   MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(gas_minor,         size(gas_minor),                   MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(identifier_minor,  size(identifier_minor),            MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(minor_gases_lower, size(minor_gases_lower),           MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(minor_gases_upper, size(minor_gases_upper),           MPI_CHAR,   mpiroot, mpicomm, ierr)
+    ! Logical arrays
     call MPI_BCAST(minor_scales_with_density_lower, nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
     call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
     call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
