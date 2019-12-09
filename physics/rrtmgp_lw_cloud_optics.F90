@@ -136,6 +136,11 @@ contains
        endif
     endif
 
+    ! Sync processes before broadcasting
+#ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+#endif
+
     ! Broadcast dimensions to all processors
 #ifdef MPI
     if (Model%rrtmgp_cld_optics .eq. 1 .or. Model%rrtmgp_cld_optics .eq. 2) then
@@ -180,6 +185,7 @@ contains
     if (mpirank .eq. mpiroot) then
        ! 
        if (Model%rrtmgp_cld_optics .eq. 1) then
+          write (*,*) 'Reading RRTMGP longwave cloud data (LUT) ... '
           !
           if(nf90_open(trim(lw_cloud_props_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
              status = nf90_inq_varid(ncid_lw_clds,'radliq_lwr',varID)
@@ -213,6 +219,7 @@ contains
        endif
        !
        if (Model%rrtmgp_cld_optics .eq. 2) then
+          write (*,*) 'Reading RRTMGP longwave cloud data (PADE) ... '
           !
           if(nf90_open(trim(lw_cloud_props_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
              status = nf90_inq_varid(ncid_lw_clds,'radliq_lwr',varID)
@@ -258,9 +265,15 @@ contains
        endif
     endif
 
+    ! Sync processes before broadcasting
+#ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+#endif
+
     ! Broadcast arrays to all processors
 #ifdef MPI
     if (Model%rrtmgp_cld_optics .eq. 1) then
+       write (*,*) 'Broadcasting RRTMGP longwave cloud data (LUT) ... '
 #ifndef SINGLE_PREC
        call MPI_BCAST(radliq_lwr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(radliq_upr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
@@ -292,6 +305,7 @@ contains
 #endif
     endif
     if (Model%rrtmgp_cld_optics .eq. 2) then
+       write (*,*) 'Broadcasting RRTMGP longwave cloud data (PADE) ... '
 #ifndef SINGLE_PREC
        call MPI_BCAST(pade_extliq,          size(pade_extliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(pade_ssaliq,          size(pade_ssaliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)

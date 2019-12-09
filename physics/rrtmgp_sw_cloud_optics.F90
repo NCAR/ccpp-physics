@@ -133,6 +133,11 @@ contains
        endif
     endif
 
+    ! Sync processes before broadcasting
+#ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+#endif
+
     ! Broadcast dimensions to all processors
 #ifdef MPI
     if (Model%rrtmgp_cld_optics .eq. 1 .or. Model%rrtmgp_cld_optics .eq. 2) then
@@ -177,6 +182,7 @@ contains
     if (mpirank .eq. mpiroot) then
        ! 
        if (Model%rrtmgp_cld_optics .eq. 1) then
+          write (*,*) 'Reading RRTMGP shortwave cloud data (LUT) ... '
           !
           if(nf90_open(trim(sw_cloud_props_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
              status = nf90_inq_varid(ncid_sw_clds,'radliq_lwr',varID)
@@ -210,6 +216,7 @@ contains
        endif
        !
        if (Model%rrtmgp_cld_optics .eq. 2) then
+          write (*,*) 'Reading RRTMGP shortwave cloud data (PADE) ... '
           !
           if(nf90_open(trim(sw_cloud_props_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
              status = nf90_inq_varid(ncid_sw_clds,'radliq_lwr',varID)
@@ -255,9 +262,15 @@ contains
        endif
     endif
 
+    ! Sync processes before broadcasting
+#ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+#endif
+
     ! Broadcast arrays to all processors
 #ifdef MPI
     if (Model%rrtmgp_cld_optics .eq. 1) then
+       write (*,*) 'Broadcasting RRTMGP shortwave cloud data (LUT) ... '
 #ifndef SINGLE_PREC
        call MPI_BCAST(radliq_lwr_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(radliq_upr_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
@@ -289,6 +302,7 @@ contains
 #endif 
     endif
     if (Model%rrtmgp_cld_optics .eq. 2) then
+       write (*,*) 'Broadcasting RRTMGP shortwave cloud data (PADE) ... '
 #ifndef SINGLE_PREC
        call MPI_BCAST(pade_extliq_sw,          size(pade_extliq_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(pade_ssaliq_sw,          size(pade_ssaliq_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)

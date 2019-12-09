@@ -161,6 +161,11 @@ contains
           status = nf90_close(ncid_lw)
        endif
     endif
+
+    ! Sync processes before broadcasting
+#ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+#endif
     
     ! Broadcast dimensions to all processors
 #ifdef MPI
@@ -215,6 +220,7 @@ contains
     allocate(planck_frac(ngpts_lw, nmixingfracs, npress+1, ntemps))
 
     if (mpirank .eq. mpiroot) then
+       write (*,*) 'Reading RRTMGP longwave k-distribution data ... '
        ! Read in fields from file
        if(nf90_open(trim(lw_gas_props_file), NF90_WRITE, ncid_lw) .eq. NF90_NOERR) then
           status = nf90_inq_varid(ncid_lw,'gas_names',varID)
@@ -318,8 +324,14 @@ contains
        endif
     endif
 
+    ! Sync processes before broadcasting
+#ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+#endif
+
     ! Broadcast arrays to all processors
 #ifdef MPI
+    write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
     call MPI_BCAST(minor_limits_gpt_upper, size(minor_limits_gpt_upper), MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(minor_limits_gpt_lower, size(minor_limits_gpt_lower), MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(kminor_start_upper,     size(kminor_start_upper),     MPI_INTEGER, mpiroot, mpicomm, ierr)
