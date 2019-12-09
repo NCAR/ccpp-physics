@@ -90,9 +90,12 @@ contains
          npairsLWcldy                       !   
 
     ! Local variables
-    integer :: dimID,varID,status,ierr,ncid_lw_clds
+    integer :: dimID,varID,status,ncid_lw_clds
     character(len=264) :: lw_cloud_props_file
     integer,parameter :: max_strlen=256
+#ifdef MPI
+    integer :: ierr
+#ebdif
 
     ! Initialize
     errmsg = ''

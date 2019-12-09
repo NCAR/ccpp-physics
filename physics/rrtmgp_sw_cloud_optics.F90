@@ -91,7 +91,9 @@ contains
     ! Local variables
     integer :: status,ncid_sw_clds,dimid,varID
     character(len=264) :: sw_cloud_props_file
-
+#ifdef MPI
+    integer :: ierr
+#ebdif
     ! Initialize
     errmsg = ''
     errflg = 0
