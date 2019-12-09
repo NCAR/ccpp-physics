@@ -156,19 +156,33 @@ contains
     write(*,*) "mpiroot: ",mpiroot
     write(*,*) "mpicomm: ",mpicomm
     call MPI_BCAST(ntemps_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr1: ",ierr
     call MPI_BCAST(npress_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr2: ",ierr
     call MPI_BCAST(nabsorbers_sw,                      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr3: ",ierr
     call MPI_BCAST(nminorabsorbers_sw,                 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr4: ",ierr
     call MPI_BCAST(nextrabsorbers_sw,                  1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr5: ",ierr
     call MPI_BCAST(nmixingfracs_sw,                    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr6: ",ierr
     call MPI_BCAST(nlayers_sw,                         1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr7: ",ierr
     call MPI_BCAST(nbnds_sw,                           1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr8: ",ierr
     call MPI_BCAST(ngpts_sw,                           1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr9: ",ierr
     call MPI_BCAST(npairs_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr10: ",ierr
     call MPI_BCAST(ncontributors_lower_sw,             1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr11: ",ierr
     call MPI_BCAST(ncontributors_upper_sw,             1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr12: ",ierr
     call MPI_BCAST(nminor_absorber_intervals_lower_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr13: ",ierr
     call MPI_BCAST(nminor_absorber_intervals_upper_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr14: ",ierr
 #endif
 
     ! Allocate space for arrays
@@ -317,64 +331,108 @@ contains
 #ifdef MPI
     write (*,*) 'Broadcasting RRTMGP shortwave k-distribution data ... '
     call MPI_BCAST(minor_limits_gpt_upper_sw, size(minor_limits_gpt_upper_sw), MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr15: ",ierr
     call MPI_BCAST(minor_limits_gpt_lower_sw, size(minor_limits_gpt_lower_sw), MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr16: ",ierr
     call MPI_BCAST(kminor_start_upper_sw,     size(kminor_start_upper_sw),     MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr17: ",ierr
     call MPI_BCAST(kminor_start_lower_sw,     size(kminor_start_lower_sw),     MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr18: ",ierr
     call MPI_BCAST(key_species_sw,            size(key_species_sw),            MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr19: ",ierr
     call MPI_BCAST(band2gpt_sw,               size(band2gpt_sw),               MPI_INTEGER, mpiroot, mpicomm, ierr)
+    write(*,*) "ierr20: ",ierr
 #ifndef SINGLE_PREC
     call MPI_BCAST(band_lims_sw,              size(band_lims_sw),              MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr21: ",ierr
     call MPI_BCAST(press_ref_sw,              size(press_ref_sw),              MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr22: ",ierr
     call MPI_BCAST(temp_ref_sw,               size(temp_ref_sw),               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr23: ",ierr
     call MPI_BCAST(kminor_lower_sw,           size(kminor_lower_sw),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr24: ",ierr
     call MPI_BCAST(kminor_upper_sw,           size(kminor_upper_sw),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr25: ",ierr
     call MPI_BCAST(scaling_gas_lower_sw,      size(scaling_gas_lower_sw),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr26: ",ierr
     call MPI_BCAST(scaling_gas_upper_sw,      size(scaling_gas_upper_sw),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr27: ",ierr
     call MPI_BCAST(vmr_ref_sw,                size(vmr_ref_sw),                MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr28: ",ierr
     call MPI_BCAST(kmajor_sw,                 size(kmajor_sw),                 MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr29: ",ierr
     call MPI_BCAST(temp_ref_p_sw,             1,                               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr30: ",ierr
     call MPI_BCAST(temp_ref_t_sw,             1,                               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr31: ",ierr
     call MPI_BCAST(press_ref_trop_sw,         1,                               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr32: ",ierr
     call MPI_BCAST(solar_source_sw,           size(solar_source_sw),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr33: ",ierr
     call MPI_BCAST(rayl_lower_sw,             size(rayl_lower_sw),             MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr34: ",ierr
     call MPI_BCAST(rayl_upper_sw,             size(rayl_upper_sw),             MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr35: ",ierr
 #else
     call MPI_BCAST(band_lims_sw,              size(band_lims_sw),              MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr36: ",ierr
     call MPI_BCAST(press_ref_sw,              size(press_ref_sw),              MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr37: ",ierr
     call MPI_BCAST(temp_ref_sw,               size(temp_ref_sw),               MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr38: ",ierr
     call MPI_BCAST(kminor_lower_sw,           size(kminor_lower_sw),           MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr39: ",ierr
     call MPI_BCAST(kminor_upper_sw,           size(kminor_upper_sw),           MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr40: ",ierr
     call MPI_BCAST(scaling_gas_lower_sw,      size(scaling_gas_lower_sw),      MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr41: ",ierr
     call MPI_BCAST(scaling_gas_upper_sw,      size(scaling_gas_upper_sw),      MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr42: ",ierr
     call MPI_BCAST(vmr_ref_sw,                size(vmr_ref_sw),                MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr43: ",ierr
     call MPI_BCAST(kmajor_sw,                 size(kmajor_sw),                 MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr44: ",ierr
     call MPI_BCAST(temp_ref_p_sw,             1,                               MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr45: ",ierr
     call MPI_BCAST(temp_ref_t_sw,             1,                               MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr46: ",ierr
     call MPI_BCAST(press_ref_trop_sw,         1,                               MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr47: ",ierr
     call MPI_BCAST(solar_source_sw,           size(solar_source_sw),           MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr48: ",ierr
     call MPI_BCAST(rayl_lower_sw,             size(rayl_lower_sw),             MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr49: ",ierr
     call MPI_BCAST(rayl_upper_sw,             size(rayl_upper_sw),             MPI_REAL,   mpiroot, mpicomm, ierr)
+    write(*,*) "ierr50: ",ierr
 #endif
     ! Character arrays
     do ij=1,nabsorbers_sw
        call MPI_BCAST(gas_names_sw(ij),         32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
     enddo
+    write(*,*) "ierr51: ",ierr
     do ij=1,nminorabsorbers_sw
        call MPI_BCAST(gas_minor_sw(ij),         32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
        call MPI_BCAST(identifier_minor_sw(ij),  32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
     enddo
+    write(*,*) "ierr52: ",ierr
     do ij=1,nminor_absorber_intervals_lower_sw
        call MPI_BCAST(minor_gases_lower_sw(ij), 32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
     enddo
+    write(*,*) "ierr53: ",ierr
     do ij=1,nminor_absorber_intervals_upper_sw
        call MPI_BCAST(minor_gases_upper_sw(ij), 32,  MPI_CHAR,   mpiroot, mpicomm, ierr)
     enddo
+    write(*,*) "ierr54: ",ierr
     ! Logical arrays (First convert to integer-array, then broadcast)
     !
     call MPI_BCAST(minor_scales_with_density_lower_sw, nminor_absorber_intervals_lower_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    write(*,*) "ierr55: ",ierr
     call MPI_BCAST(scale_by_complement_lower_sw,       nminor_absorber_intervals_lower_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    write(*,*) "ierr56: ",ierr
     call MPI_BCAST(minor_scales_with_density_upper_sw, nminor_absorber_intervals_upper_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    write(*,*) "ierr57: ",ierr
     call MPI_BCAST(scale_by_complement_upper_sw,       nminor_absorber_intervals_upper_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
+    write(*,*) "ierr58: ",ierr
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
