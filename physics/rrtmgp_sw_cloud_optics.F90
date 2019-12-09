@@ -93,7 +93,7 @@ contains
     character(len=264) :: sw_cloud_props_file
 #ifdef MPI
     integer :: ierr
-#ebdif
+#endif
     ! Initialize
     errmsg = ''
     errflg = 0

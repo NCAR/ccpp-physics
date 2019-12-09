@@ -116,7 +116,7 @@ contains
     integer,parameter :: max_strlen=256
 #ifdef MPI
     integer :: ierr
-#ebdif
+#endif
 
     ! Initialize
     errmsg = ''

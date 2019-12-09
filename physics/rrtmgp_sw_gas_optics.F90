@@ -110,7 +110,7 @@ contains
     character(len=264) :: sw_gas_props_file
 #ifdef MPI
     integer :: ierr
-#ebdif
+#endif
 
     ! Initialize
     errmsg = ''
@@ -153,9 +153,11 @@ contains
           status = nf90_close(ncid_sw)
        endif
     endif
-
+    
     ! Broadcast dimensions to all processors
 #ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+    write(*,*) "ierr0a: ",ierr
     write(*,*) "mpiroot: ",mpiroot
     write(*,*) "mpicomm: ",mpicomm
     call MPI_BCAST(ntemps_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
@@ -332,6 +334,8 @@ contains
 
     ! Broadcast arrays to all processors
 #ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+    write(*,*) "ierr0b: ",ierr
     write (*,*) 'Broadcasting RRTMGP shortwave k-distribution data ... '
     call MPI_BCAST(minor_limits_gpt_upper_sw, size(minor_limits_gpt_upper_sw), MPI_INTEGER, mpiroot, mpicomm, ierr)
     write(*,*) "ierr15: ",ierr
