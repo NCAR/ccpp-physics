@@ -153,6 +153,8 @@ contains
 
     ! Broadcast dimensions to all processors
 #ifdef MPI
+    write(*,*) "mpiroot: ",mpiroot
+    write(*,*) "mpicomm: ",mpicomm
     call MPI_BCAST(ntemps_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(npress_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(nabsorbers_sw,                      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
@@ -204,6 +206,7 @@ contains
 
     ! On master processor,  read in fields, broadcast to all processors
     if (mpirank .eq. mpiroot) then
+       write (*,*) 'Reading RRTMGP shortwave k-distribution data ... '
        ! Read in fields from file
        if(nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid_sw) .eq. NF90_NOERR) then
           status = nf90_inq_varid(ncid_sw,'gas_names',varID)
@@ -312,6 +315,7 @@ contains
 
     ! Broadcast arrays to all processors
 #ifdef MPI
+    write (*,*) 'Broadcasting RRTMGP shortwave k-distribution data ... '
     call MPI_BCAST(minor_limits_gpt_upper_sw, size(minor_limits_gpt_upper_sw), MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(minor_limits_gpt_lower_sw, size(minor_limits_gpt_lower_sw), MPI_INTEGER, mpiroot, mpicomm, ierr)
     call MPI_BCAST(kminor_start_upper_sw,     size(kminor_start_upper_sw),     MPI_INTEGER, mpiroot, mpicomm, ierr)
