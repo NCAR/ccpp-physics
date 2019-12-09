@@ -89,6 +89,7 @@ contains
          scale_by_complement_upper_sw          !  
     ! Dimensions (to be broadcast across all processors)
     integer :: &
+         str_len,                         & !
          ntemps_sw,                          & !  
          npress_sw,                          & !  
          ngpts_sw,                           & ! 
@@ -150,6 +151,8 @@ contains
           status = nf90_inquire_dimension(ncid_sw, dimid, len=nminor_absorber_intervals_lower_sw)
           status = nf90_inq_dimid(ncid_sw, 'minor_absorber_intervals_upper', dimid)
           status = nf90_inquire_dimension(ncid_sw, dimid, len=nminor_absorber_intervals_upper_sw)
+          status = nf90_inq_varid(ncid_lw,'str_len',varID)
+          status = nf90_get_var(ncid_lw,varID,str_len)
           status = nf90_close(ncid_sw)
        endif
     endif
@@ -371,11 +374,11 @@ contains
     call MPI_BCAST(rayl_upper_sw,             size(rayl_upper_sw),             MPI_REAL,   mpiroot, mpicomm, ierr)
 #endif
     ! Character arrays 
-    call MPI_BCAST(gas_names_sw,              size(gas_names_sw),              MPI_CHAR,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(gas_minor_sw,              size(gas_minor_sw),              MPI_CHAR,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(identifier_minor_sw,       size(identifier_minor_sw),       MPI_CHAR,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(minor_gases_lower_sw,      size(minor_gases_lower_sw),      MPI_CHAR,   mpiroot, mpicomm, ierr)
-    call MPI_BCAST(minor_gases_upper_sw,      size(minor_gases_upper_sw),      MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(gas_names_sw,              size(gas_names_sw)*str_len,                  MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(gas_minor_sw,              size(gas_minor_sw)*str_len,                  MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(identifier_minor_sw,       size(identifier_minor_sw)*str_len,           MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(minor_gases_lower_sw,      size(minor_gases_lower_sw)*str_len,          MPI_CHAR,   mpiroot, mpicomm, ierr)
+    call MPI_BCAST(minor_gases_upper_sw,      size(minor_gases_upper_sw)*str_len,          MPI_CHAR,   mpiroot, mpicomm, ierr)
     ! Logical arrays
     call MPI_BCAST(minor_scales_with_density_lower_sw, nminor_absorber_intervals_lower_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
     call MPI_BCAST(scale_by_complement_lower_sw,       nminor_absorber_intervals_lower_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
