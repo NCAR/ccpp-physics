@@ -499,6 +499,49 @@
   kind = kind_phys
   intent = in
   optional = F
+[hurr_pbl]
+  standard_name = flag_hurricane_PBL
+  long_name = flag for hurricane-specific options in PBL scheme
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[islimsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[var_ric]
+  standard_name = flag_variable_bulk_richardson_number
+  long_name = flag for calculating variable bulk richardson number for hurricane PBL
+  units = flag
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[coef_ric_l]
+  standard_name = coefficient_for_variable_bulk_richardson_number_over_land
+  long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over land
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[coef_ric_s]
+  standard_name = coefficient_for_variable_bulk_richardson_number_over_ocean
+  long_name = coefficient for calculating variable bulk richardson number for hurricane PBL over ocean
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
