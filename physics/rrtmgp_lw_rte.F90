@@ -109,8 +109,6 @@ contains
     !   flux_allsky%bnd_flux_dn => fluxLWBB_dn_allsky
     !endif
 
-    write(*,*) "lw_optical_props_clrsky(rte_lw): ",lw_optical_props_clrsky%tau(:,:,1)
-
     ! Compute clear-sky fluxes (if requested)
     ! Clear-sky fluxes are gas+aerosol
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%increment(lw_optical_props_clrsky))
