@@ -1,7 +1,13 @@
 !>  \file sfc_noahmp_drv.f
 !!  This file contains the NoahMP land surface scheme driver.
 
-!> This module contains the CCPP-compliant NoahMP land surface scheme driver.
+!>\defgroup NoahMP_LSM NoahMP LSM Model
+!! \brief This is the NoahMP LSM driver module, with the functionality of 
+!! preparing variables to run the NoahMP LSM subroutine noahmp_sflx(), calling NoahMP LSM and post-processing
+!! variables for return to the parent model suite including unit conversion, as well
+!! as diagnotics calculation.
+
+!> This module contains the CCPP-compliant NoahMP land surface model driver.
       module noahmpdrv
 
       implicit none
@@ -12,6 +18,9 @@
 
       contains
 
+!> \ingroup NoahMP_LSM
+!! \brief This subroutine is called during the CCPP initialization phase and calls set_soilveg() to 
+!! initialize soil and vegetation parameters for the chosen soil and vegetation data sources.
 !! \section arg_table_noahmpdrv_init Argument Table
 !! \htmlinclude noahmpdrv_init.html
 !!
@@ -38,9 +47,27 @@
       subroutine noahmpdrv_finalize
       end subroutine noahmpdrv_finalize
 
-!> \section arg_table_noahmpdrv_run Argument Table
+!> \ingroup NoahMP_LSM
+!! \brief This subroutine is the main CCPP entry point for the NoahMP LSM.
+!! \section arg_table_noahmpdrv_run Argument Table
 !! \htmlinclude noahmpdrv_run.html
 !!
+!! \section general_noahmpdrv NoahMP Driver General Algorithm
+!!  @{
+!!    - Initialize CCPP error handling variables.
+!!    - Set a flag to only continue with each grid cell if the fraction of land is non-zero.
+!!    - This driver may be called as part of an iterative loop. If called as the first "guess" run, 
+!!        save land-related prognostic fields to restore.
+!!    - Initialize output variables to zero and prepare variables for input into the NoahMP LSM.
+!!    - Call transfer_mp_parameters() to fill a derived datatype for input into the NoahMP LSM.
+!!    - Call noahmp_options() to set module-level scheme options for the NoahMP LSM.
+!!    - If the vegetation type is ice for the grid cell, call noahmp_options_glacier() to set 
+!!        module-level scheme options for NoahMP Glacier and call noahmp_glacier().
+!!    - For other vegetation types, call noahmp_sflx(), the entry point of the NoahMP LSM.
+!!    - Set output variables from the output of noahmp_glacier() and/or noahmp_sflx().
+!!    - Call penman() to calculate potential evaporation.
+!!    - Calculate the surface specific humidity and convert surface sensible and latent heat fluxes in W m-2 from their kinematic values.
+!!    - If a "guess" run, restore the land-related prognostic fields.
 !                                                                       !
 !     lheatstrg- logical, flag for canopy heat storage             1    !
 !                         parameterization                              !
@@ -968,8 +995,12 @@
       return
 !...................................
       end subroutine noahmpdrv_run
+!> @}
 !-----------------------------------
 
+!> \ingroup NoahMP_LSM
+!! \brief This subroutine fills in a derived data type of type noahmp_parameters with data
+!! from the module \ref noahmp_tables.
       subroutine transfer_mp_parameters (vegtype,soiltype,slopetype,    &
      &                                          soilcolor,parameters)
      
@@ -1134,7 +1165,10 @@
 
 !-----------------------------------------------------------------------&
 
-
+!> \ingroup NoahMP_LSM
+!! brief Calculate potential evaporation for the current point. Various
+!! partial sums/products are also calculated and passed back to the
+!! calling routine for later use.
       subroutine penman (sfctmp,sfcprs,ch,t2v,th2,prcp,fdown,ssoil,     &
      &                   cpfac,q2,q2sat,etp,snowng,frzgra,ffrozp,       &
      &                   dqsdt2,emissi_in,sncovr)
@@ -1143,10 +1177,6 @@
 
 ! ----------------------------------------------------------------------
 ! subroutine penman
-! ----------------------------------------------------------------------
-! calculate potential evaporation for the current point.  various
-! partial sums/products are also calculated and passed back to the
-! calling routine for later use.
 ! ----------------------------------------------------------------------
       implicit none
       logical, intent(in)     :: snowng, frzgra

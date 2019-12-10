@@ -759,7 +759,6 @@
 
 !      endif                                ! end_if_ntcw
 
-! CCPP
        do k = 1, LMK
          do i = 1, IM
             clouds1(i,k)  = clouds(i,k,1)
