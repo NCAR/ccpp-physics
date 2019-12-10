@@ -773,7 +773,7 @@ c
           do k = 1, kmpbl ! kmpbl is like a max possible pbl height
             if (zi(i,k) .le. 500. .and. zi(i,k+1) .gt. 500.) then ! find level bracketing 500 m
               spdk2 = SQRT(u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)) ! wspd near 500 m
-              wspm(i,1) = spdkw/0.6  ! now the Km limit for 500 m.  just store in K=1
+              wspm(i,1) = spdk2/0.6  ! now the Km limit for 500 m.  just store in K=1
               wspm(i,2) = float(k)  ! height of level at gridpoint i. store in K=2
             endif
           enddo !k
