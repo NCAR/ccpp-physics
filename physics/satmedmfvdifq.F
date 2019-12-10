@@ -196,7 +196,7 @@
      &                     rlmn,    rlmn1,  rlmx,   elmx,
      &                     ttend,   utend,  vtend,  qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
-     &                     tkmin,   xkzinv, xkgdx,
+     &                     tkmin,   tkminx, xkzinv, xkgdx,
      &                     zlup,    zldn,   bsum,
      &                     tem,     tem1,   tem2,
      &                     ptem,    ptem0,  ptem1,  ptem2
@@ -215,11 +215,11 @@
       parameter(prmin=0.25,prmax=4.0)
       parameter(pr0=1.0,prtke=1.0,prscu=0.67)
       parameter(f0=1.e-4,crbmin=0.15,crbmax=0.35)
-      parameter(tkmin=1.e-9,dspmax=10.0)
+      parameter(tkmin=1.e-9,tkminx=0.2,dspmax=10.0)
       parameter(qmin=1.e-8,qlmin=1.e-12,zfmin=1.e-8)
       parameter(aphi5=5.,aphi16=16.)
       parameter(elmfac=1.0,elefac=1.0,cql=100.)
-      parameter(dw2min=1.e-4,dkmax=1000.,xkgdx=25000.)
+      parameter(dw2min=1.e-4,dkmax=1000.,xkgdx=5000.)
       parameter(qlcr=3.5e-5,zstblmax=2500.,xkzinv=0.1)
       parameter(h1=0.33333333)
       parameter(ck0=0.4,ck1=0.15,ch0=0.4,ch1=0.15)
@@ -326,20 +326,20 @@
           xkzo(i,k)  = 0.0
           xkzmo(i,k) = 0.0
           if (k < kinver(i)) then
-!                                  vertical background diffusivity
-            ptem      = prsi(i,k+1) * tx1(i)
-            tem1      = 1.0 - ptem
-            tem2      = tem1 * tem1 * 10.0
-            tem2      = min(1.0, exp(-tem2))
-            xkzo(i,k) = xkzm_hx(i) * tem2
-!
+!                               minimum turbulent mixing length
             ptem      = prsl(i,k) * tx1(i)
             tem1      = 1.0 - ptem
             tem2      = tem1 * tem1 * 2.5
             tem2      = min(1.0, exp(-tem2))
             rlmnz(i,k)= rlmn * tem2
             rlmnz(i,k)= max(rlmnz(i,k), rlmn1)
-!                                 vertical background diffusivity for momentum
+!                               vertical background diffusivity
+            ptem      = prsi(i,k+1) * tx1(i)
+            tem1      = 1.0 - ptem
+            tem2      = tem1 * tem1 * 10.0
+            tem2      = min(1.0, exp(-tem2))
+            xkzo(i,k) = xkzm_hx(i) * tem2
+!                               vertical background diffusivity for momentum
             if (ptem >= xkzm_s) then
               xkzmo(i,k) = xkzm_mx(i)
               kx1(i)     = k + 1
@@ -727,20 +727,20 @@
 !
 !  background diffusivity decreasing with increasing surface layer stability
 !
-      do i = 1, im
-        if(.not.sfcflg(i)) then
-          tem = (1. + 5. * rbsoil(i))**2.
-!         tem = (1. + 5. * zol(i))**2.
-          frik(i) = 0.1 + 0.9 / tem
-        endif
-      enddo
+!     do i = 1, im
+!       if(.not.sfcflg(i)) then
+!         tem = (1. + 5. * rbsoil(i))**2.
+!!        tem = (1. + 5. * zol(i))**2.
+!         frik(i) = 0.1 + 0.9 / tem
+!       endif
+!     enddo
 !
-      do k = 1,km1
-        do i=1,im
-          xkzo(i,k) = frik(i) * xkzo(i,k)
-          xkzmo(i,k)= frik(i) * xkzmo(i,k)
-        enddo
-      enddo
+!     do k = 1,km1
+!       do i=1,im
+!         xkzo(i,k) = frik(i) * xkzo(i,k)
+!         xkzmo(i,k)= frik(i) * xkzmo(i,k)
+!       enddo
+!     enddo
 !
 ! The background vertical diffusivities in the inversion layers are limited 
 !    to be less than or equal to xkzminv
@@ -920,13 +920,14 @@
         do i = 1, im
           if(k == 1) then
             tem = ckz(i,1)
-            tem1 = xkzmo(i,1)
+            tem1 = 0.5 * xkzmo(i,1)
           else
             tem = 0.5 * (ckz(i,k-1) + ckz(i,k))
             tem1 = 0.5 * (xkzmo(i,k-1) + xkzmo(i,k))
           endif
           ptem = tem1 / (tem * elm(i,k))
           tkmnz(i,k) = ptem * ptem
+          tkmnz(i,k) = min(tkmnz(i,k), tkminx)
           tkmnz(i,k) = max(tkmnz(i,k), tkmin)
         enddo
       enddo
