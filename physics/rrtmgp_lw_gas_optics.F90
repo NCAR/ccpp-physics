@@ -10,9 +10,6 @@ module rrtmgp_lw_gas_optics
   use rrtmgp_aux,            only: check_error_msg
   use netcdf
 
-  ! Parameters
-
-
 contains
 
   ! #########################################################################################
@@ -453,14 +450,6 @@ contains
     call check_error_msg('rrtmgp_lw_gas_optics_run',sources%init(lw_gas_props))
     call check_error_msg('rrtmgp_lw_gas_optics_run',sources%alloc(ncol, Model%levs))
 
-    ! Print some diagnostics to test MPI
-    write(*,*) "lw_gas_props%get_ngas():      ",   lw_gas_props%get_ngas()
-    write(*,*) "lw_gas_props%get_gases():     ",   lw_gas_props%get_gases()
-    write(*,*) "lw_gas_props%get_press_min(): ",   lw_gas_props%get_press_min()
-    write(*,*) "lw_gas_props%get_press_max(): ",   lw_gas_props%get_press_max()
-    write(*,*) "lw_gas_props%get_temp_min():  ",   lw_gas_props%get_temp_min()
-    write(*,*) "lw_gas_props%get_temp_max():  ",   lw_gas_props%get_temp_max()
-
     ! Gas-optics 
     call check_error_msg('rrtmgp_lw_gas_optics_run',lw_gas_props%gas_optics(&
          p_lay,                   & ! IN  - Pressure @ layer-centers (Pa)
@@ -471,6 +460,8 @@ contains
          lw_optical_props_clrsky, & ! OUT - RRTMGP DDT: longwave optical properties
          sources,                 & ! OUT - RRTMGP DDT: source functions
          tlev=t_lev))               ! IN  - Temperature @ layer-interfaces (K) (optional)
+
+    write(*,*) "lw_optical_props_clrsky(gas_optics): ",lw_optical_props_clrsky%tau(:,:,1)
 
   end subroutine rrtmgp_lw_gas_optics_run
 
