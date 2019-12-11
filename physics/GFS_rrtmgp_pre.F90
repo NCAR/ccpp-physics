@@ -251,7 +251,7 @@ contains
           relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(QMIN, q_lay(iCol,iLay))/qs ) )
           qs_lay(iCol,iLay) = qs
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + fvirt*q_lay(iCol,iLay)) 
-          deltaZ(iCol,iLay) = (rog*0.001) * (log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
+          deltaZ(iCol,iLay) = (rog) * abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
        enddo
     enddo
 
