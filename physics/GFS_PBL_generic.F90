@@ -287,7 +287,7 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, epsq, errmsg, errflg)
+        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -302,7 +302,7 @@
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
-      real(kind=kind_phys), intent(in) :: dtf, epsq
+      real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac, fice
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
@@ -389,11 +389,7 @@
               dqdt(i,k,ntcw)  = dvdftra(i,k,2)
               dqdt(i,k,ntiw)  = dvdftra(i,k,3)
               dqdt(i,k,ntrw)  = dvdftra(i,k,4)
-              if(dvdftra(i,k,3) > epsq) then
-                dqdt(i,k,nqrimef) = dvdftra(i,k,5)/dvdftra(i,k,3)
-              else
-                dqdt(i,k,nqrimef) = 1.
-              end if
+              dqdt(i,k,nqrimef) = dvdftra(i,k,5)
               dqdt(i,k,ntoz)  = dvdftra(i,k,6)
             enddo
           enddo

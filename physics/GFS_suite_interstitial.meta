@@ -1043,15 +1043,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[gq0_rf]
-  standard_name = mass_weighted_rime_factor_updated_by_physics
-  long_name = mass weighted rime factor updated by physics
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [ntiw]
   standard_name = index_for_ice_cloud_condensate
   long_name = tracer index for  ice water
