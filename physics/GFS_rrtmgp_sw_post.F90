@@ -1,8 +1,7 @@
 module GFS_rrtmgp_sw_post 
   use machine,                   only: kind_phys
   use GFS_typedefs,              only: GFS_coupling_type, GFS_control_type, GFS_grid_type,  &
-                                       GFS_radtend_type, GFS_diag_type, GFS_statein_type,   &
-                                       GFS_interstitial_type
+                                       GFS_radtend_type, GFS_diag_type, GFS_statein_type
   use module_radiation_aerosols, only: NSPC1
   use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, profsw_type, cmpfsw_type
   use mo_gas_optics_rrtmgp,      only: ty_gas_optics_rrtmgp
@@ -27,16 +26,15 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post.html
 !!
-  subroutine GFS_rrtmgp_sw_post_run (Model, Interstitial, Grid, Diag, Radtend, Coupling,    &
-       Statein, scmpsw, nCol, p_lev, sw_gas_props, nday, idxday, fluxswUP_allsky,             &
-       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota,  &
-       mtopa, cld_frac, cldtausw, flxprf_sw, hsw0, errmsg, errflg)
+  subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling, Statein, scmpsw, &
+       nCol, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, &
+       sw_gas_props, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,     &
+       fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota, mtopa, cld_frac, cldtausw, flxprf_sw,&
+       hsw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                ! Fortran DDT: FV3-GFS model control parameters
-    type(GFS_Interstitial_type), intent(in) :: &
-         Interstitial         ! Fortran DDT: FV3-GFS interstitial arrays
     type(GFS_grid_type), intent(in) :: &
          Grid                 ! Fortran DDT: FV3-GFS grid and interpolation related data 
     type(GFS_coupling_type), intent(inout) :: &
@@ -56,6 +54,11 @@ contains
          sw_gas_props         ! DDT containing SW spectral information
     real(kind_phys), dimension(nCol, Model%levs+1), intent(in) :: &
          p_lev                ! Pressure @ model layer-interfaces    (hPa)
+    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
+         sfc_alb_nir_dir,   & ! Surface albedo (direct) 
+         sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
+         sfc_alb_uvvis_dir, & ! Surface albedo (direct)
+         sfc_alb_uvvis_dif    ! Surface albedo (diffuse)
     real(kind_phys), dimension(nCol, Model%levs+1), intent(in) :: &
          fluxswUP_allsky,   & ! SW All-sky flux                    (W/m2)
          fluxswDOWN_allsky, & ! SW All-sky flux                    (W/m2)
@@ -190,10 +193,10 @@ contains
           Coupling%visbmdi(i) = scmpsw(i)%visbm
           Coupling%visdfdi(i) = scmpsw(i)%visdf
           
-          Coupling%nirbmui(i) = scmpsw(i)%nirbm * Interstitial%sfc_alb_nir_dir(1,i)
-          Coupling%nirdfui(i) = scmpsw(i)%nirdf * Interstitial%sfc_alb_nir_dif(1,i)
-          Coupling%visbmui(i) = scmpsw(i)%visbm * Interstitial%sfc_alb_uvvis_dir(1,i)
-          Coupling%visdfui(i) = scmpsw(i)%visdf * Interstitial%sfc_alb_uvvis_dif(1,i)
+          Coupling%nirbmui(i) = scmpsw(i)%nirbm * sfc_alb_nir_dir(1,i)
+          Coupling%nirdfui(i) = scmpsw(i)%nirdf * sfc_alb_nir_dif(1,i)
+          Coupling%visbmui(i) = scmpsw(i)%visbm * sfc_alb_uvvis_dir(1,i)
+          Coupling%visdfui(i) = scmpsw(i)%visdf * sfc_alb_uvvis_dif(1,i)
        enddo
     else                   ! if_nday_block
        ! #######################################################################################

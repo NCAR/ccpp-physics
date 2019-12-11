@@ -42,15 +42,14 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run(Model, Interstitial, Grid, Sfcprop, Statein, ncol, p_lay,&
-       p_lev, tv_lay, relhum, tracer, sw_gas_props, nday, idxday, alb1d, RadTend,           &
-       Coupling, aerosolssw, aerodp, errmsg, errflg)
+  subroutine GFS_rrtmgp_sw_pre_run(Model, Grid, Sfcprop, Statein, ncol, p_lay,  p_lev,      &
+       tv_lay, relhum, tracer, sw_gas_props, nday, idxday, alb1d, sfc_alb_nir_dir,          &
+       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, RadTend, Coupling, aerosolssw,&
+       aerodp, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                ! DDT: FV3-GFS model control parameters
-    type(GFS_Interstitial_type),intent(inout) :: &
-         Interstitial
     type(GFS_grid_type), intent(in) :: &
          Grid                 ! DDT: FV3-GFS grid and interpolation related data 
     type(GFS_sfcprop_type), intent(in) :: &
@@ -77,6 +76,11 @@ contains
          idxday               ! Indices for daylit points
     real(kind_phys), dimension(ncol), intent(out) :: &
          alb1d                ! Surface albedo pertubation
+    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(out) :: &
+         sfc_alb_nir_dir,   & ! Surface albedo (direct) 
+         sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
+         sfc_alb_uvvis_dir, & ! Surface albedo (direct)
+         sfc_alb_uvvis_dif    ! Surface albedo (diffuse)
     type(GFS_radtend_type), intent(inout) :: &
          Radtend              ! DDT: FV3-GFS radiation tendencies 
     type(GFS_coupling_type), intent(inout) :: &
@@ -149,10 +153,10 @@ contains
   
     ! Spread across all SW bands
     do iBand=1,sw_gas_props%get_nband()
-       Interstitial%sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
-       Interstitial%sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
-       Interstitial%sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
-       Interstitial%sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
+       sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
+       sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
+       sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
+       sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
     enddo 
 
     ! #######################################################################################

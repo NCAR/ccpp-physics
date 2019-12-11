@@ -7,7 +7,6 @@ module GFS_rrtmgp_lw_pre
        GFS_sfcprop_type,         & ! Surface fields
        GFS_grid_type,            & ! Grid and interpolation related data
        GFS_statein_type,         & !
-       GFS_Interstitial_type,    & !
        GFS_radtend_type            ! Radiation tendencies needed in physics
   use module_radiation_surface,  only: &
        setemis                     ! Routine to compute surface-emissivity
@@ -36,7 +35,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_lw_pre.html
 !!
   subroutine GFS_rrtmgp_lw_pre_run (Model, Grid,  Sfcprop, Statein, ncol,  p_lay, p_lev,    &
-       tv_lay, relhum, tracer, lw_gas_props, Radtend, Interstitial, aerosolslw, aerodp,     &
+       tv_lay, relhum, tracer, lw_gas_props, Radtend, aerosolslw, aerodp, sfc_emiss_byband, &
        errmsg, errflg)
     
     ! Inputs
@@ -64,12 +63,12 @@ contains
     ! Outputs
     type(GFS_radtend_type), intent(inout) :: &
          Radtend              ! DDT: FV3-GFS radiation tendencies 
-    type(GFS_interstitial_type), intent(inout) :: &
-         Interstitial         ! DDT: FV3-GFS Interstitial arrays
     real(kind_phys), dimension(ncol,Model%levs,lw_gas_props%get_nband(),NF_AELW), intent(out) ::&
          aerosolslw           ! Aerosol radiative properties in each SW band.
     real(kind_phys), dimension(ncol,NSPC1), intent(inout) :: &
          aerodp               ! Vertical integrated optical depth for various aerosol species  
+    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &
+         sfc_emiss_byband     ! Surface emissivity in each band
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
@@ -93,7 +92,7 @@ contains
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()
-       Interstitial%sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
+       sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
     enddo
 
     ! #######################################################################################

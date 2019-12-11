@@ -2,7 +2,7 @@
 ! ###########################################################################################
 module rrtmgp_lw_rte
   use machine,                only: kind_phys
-  use GFS_typedefs,           only: GFS_control_type, GFS_interstitial_type, GFS_statein_type
+  use GFS_typedefs,           only: GFS_control_type, GFS_statein_type
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,        only: ty_cloud_optics
@@ -27,15 +27,14 @@ contains
 !! \section arg_table_rrtmgp_lw_rte_run
 !! \htmlinclude rrtmgp_lw_rte.html
 !!
-  subroutine rrtmgp_lw_rte_run(Model, Statein, Interstitial, ncol, lw_gas_props, p_lay, t_lay, p_lev, &
-       skt, sources, lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_aerosol, lslwr,&
-       fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
+  subroutine rrtmgp_lw_rte_run(Model, Statein, ncol, lw_gas_props, p_lay, t_lay, p_lev, skt,&
+       sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
+       lw_optical_props_aerosol, lslwr, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,&
+       fluxlwDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                   ! Fortran DDT containing FV3-GFS model control parameters 
-    type(GFS_Interstitial_type), intent(in) :: &
-         Interstitial                 ! Fortran DDT containing FV3-GFS radiation tendencies 
     type(GFS_statein_type), intent(in) :: &
          Statein                 ! Fortran DDT containing FV3-GFS prognostic state data in from dycore 
     integer, intent(in) :: &
@@ -58,6 +57,8 @@ contains
          sources
     logical, intent(in) :: &
          lslwr                   ! Flag to calculate LW irradiances
+    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
+         sfc_emiss_byband     ! Surface emissivity in each band
  
     ! Outputs
     character(len=*), intent(out) :: & 
@@ -114,10 +115,10 @@ contains
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%increment(lw_optical_props_clrsky))
     if (l_ClrSky_HR) then
        call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-            lw_optical_props_clrsky,            & ! IN  - optical-properties
-            top_at_1,                           & ! IN  - veritcal ordering flag
-            sources,                            & ! IN  - source function
-            Interstitial%sfc_emiss_byband,      & ! IN  - surface emissivity in each LW band
+            lw_optical_props_clrsky, & ! IN  - optical-properties
+            top_at_1,                & ! IN  - veritcal ordering flag
+            sources,                 & ! IN  - source function
+            sfc_emiss_byband,        & ! IN  - surface emissivity in each LW band
             flux_clrsky))
        ! Store fluxes
        fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
@@ -128,10 +129,10 @@ contains
     ! Clear-sky fluxes are (gas+aerosol)+clouds
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%increment(lw_optical_props_clrsky))
     call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-         lw_optical_props_clrsky,            & ! IN  - optical-properties
-         top_at_1,                           & ! IN  - veritcal ordering flag
-         sources,                            & ! IN  - source function
-         Interstitial%sfc_emiss_byband,      & ! IN  - surface emissivity in each LW band
+         lw_optical_props_clrsky, & ! IN  - optical-properties
+         top_at_1,                & ! IN  - veritcal ordering flag
+         sources,                 & ! IN  - source function
+         sfc_emiss_byband,        & ! IN  - surface emissivity in each LW band
          flux_allsky))
     ! Store fluxes
     fluxlwUP_allsky   = sum(flux_allsky%bnd_flux_up,dim=3)

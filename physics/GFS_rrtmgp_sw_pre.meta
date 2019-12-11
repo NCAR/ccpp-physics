@@ -9,14 +9,6 @@
   type = GFS_control_type
   intent = in
   optional = F
-[Interstitial]
-  standard_name = GFS_interstitial_type_instance
-  long_name = derived type GFS_interstitial_type in FV3
-  units = DDT
-  dimensions = ()
-  type = GFS_interstitial_type
-  intent = inout
-  optional = F
 [Grid]
   standard_name = GFS_grid_type_instance
   long_name = instance of derived type GFS_grid_type
@@ -123,6 +115,42 @@
   long_name = surface albedo perturbation
   units = frac
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_nir_dir]
+  standard_name = surface_albedo_nearIR_direct
+  long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_nir_dif]
+  standard_name = surface_albedo_nearIR_diffuse
+  long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_uvvis_dir]
+  standard_name =  surface_albedo_uvvis_dir
+  long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_uvvis_dif]
+  standard_name =  surface_albedo_uvvis_dif
+  long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
