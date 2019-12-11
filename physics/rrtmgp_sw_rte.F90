@@ -93,6 +93,8 @@ contains
                                     ! visdf - downward uv+vis diffused flux (W/m2)
 
     ! Local variables
+    real(kind_phys), dimension(sw_gas_props%get_nband(),nday) :: &
+         sfc_alb_dir,sfc_alb_dif
     type(ty_fluxes_byband) :: &
          flux_allsky, & ! All-sky flux (W/m2)
          flux_clrsky    ! Clear-sky flux (W/m2)
@@ -154,6 +156,10 @@ contains
        flux_clrsky%bnd_flux_up     => fluxSW_up_clrsky
        flux_clrsky%bnd_flux_dn     => fluxSW_dn_clrsky
 
+       ! In RRTMG, the near-IR and uv-visible surface albedos are averaged.
+       sfc_alb_dir = 0.5_kind_phys*(sfc_alb_nir_dir(:,idxday(1:nday)) + sfc_alb_uvvis_dir(:,idxday(1:nday)))
+       sfc_alb_dif = 0.5_kind_phys*(sfc_alb_nir_dif(:,idxday(1:nday)) + sfc_alb_uvvis_dif(:,idxday(1:nday)))
+
        ! Compute clear-sky fluxes (if requested)
        ! Clear-sky fluxes (gas+aerosol)
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol%increment(sw_optical_props_clrsky))
@@ -165,8 +171,8 @@ contains
                top_at_1,                          & ! IN  - veritcal ordering flag
                Radtend%coszen(idxday(1:nday)),    & ! IN  - Cosine of solar zenith angle
                toa_src_sw(idxday(1:nday),:),      & ! IN  - incident solar flux at TOA
-               sfc_alb_nir_dir(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (direct)
-               sfc_alb_nir_dif(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (diffuse)
+               sfc_alb_dir,                       & ! IN  - Shortwave surface albedo (direct)
+               sfc_alb_dif,                       & ! IN  - Shortwave surface albedo (diffuse)
                flux_clrsky))                        ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
           ! Store fluxes
           fluxswUP_clrsky(idxday(1:nday),:)   = sum(flux_clrsky%bnd_flux_up,dim=3)
@@ -183,8 +189,8 @@ contains
             top_at_1,                          & ! IN  - veritcal ordering flag
             Radtend%coszen(idxday(1:nday)),    & ! IN  - Cosine of solar zenith angle
             toa_src_sw(idxday(1:nday),:),      & ! IN  - incident solar flux at TOA
-            sfc_alb_nir_dir(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (direct)
-            sfc_alb_nir_dif(:,idxday(1:nday)), & ! IN  - Shortwave surface albedo (diffuse)
+            sfc_alb_dir,                       & ! IN  - Shortwave surface albedo (direct)
+            sfc_alb_dif,                       & ! IN  - Shortwave surface albedo (diffuse)
             flux_allsky))                        ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
        ! Store fluxes
        fluxswUP_allsky(idxday(1:nday),:)   = sum(flux_allsky%bnd_flux_up,dim=3)

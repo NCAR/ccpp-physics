@@ -138,7 +138,7 @@
   optional = F
 [toa_src_sw]
   standard_name = toa_incident_sw_flux_by_spectral_point
-  long_name = TOA shortwave incident flux at each spectral points (Radtend%toa_src_sw)
+  long_name = TOA shortwave incident flux at each spectral points
   units = W m-2
   dimensions = (horizontal_dimension,number_of_sw_spectral_points_rrtmgp)
   type = real

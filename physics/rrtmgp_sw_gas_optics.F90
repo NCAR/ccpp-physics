@@ -1,6 +1,6 @@
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
-  use GFS_typedefs,           only: GFS_control_type, GFS_interstitial_type
+  use GFS_typedefs,           only: GFS_control_type
   use module_radiation_gases, only: NF_VGAS
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
@@ -405,15 +405,13 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_run
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_run(Model, Interstitial, sw_gas_props, ncol, nday, idxday,&
-       p_lay, p_lev, t_lay, t_lev, gas_concentrations, lsswr, solcon,                       &
-       sw_optical_props_clrsky, errmsg, errflg)
+  subroutine rrtmgp_sw_gas_optics_run(Model, sw_gas_props, ncol, nday, idxday, p_lay, p_lev,&
+       toa_src_sw, t_lay, t_lev, gas_concentrations, lsswr, solcon, sw_optical_props_clrsky,&
+       errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model                   ! DDT: FV3-GFS  model control parameters
-    type(GFS_Interstitial_type),intent(inout) :: &
-         Interstitial            ! DDT: FV3-GFS Interstitial arrays
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props            ! RRTMGP DDT: spectral information for RRTMGP SW radiation scheme
     integer,intent(in) :: &
@@ -441,6 +439,8 @@ contains
          errflg                  ! Error code
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_clrsky ! RRTMGP DDT: clear-sky shortwave optical properties, spectral (tau,ssa,g) 
+    real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(out) :: &
+         toa_src_sw              ! TOA incident spectral flux (W/m2)
 
     ! Local variables
     integer :: ij,iGas
@@ -476,11 +476,11 @@ contains
             sw_optical_props_clrsky,   & ! OUT - RRTMGP DDT: Shortwave optical properties, by
                                          !                   spectral point (tau,ssa,g)
             toa_src_sw_temp))            ! OUT - TOA incident shortwave radiation (spectral)
-       Interstitial%toa_src_sw(idxday(1:nday),:) = toa_src_sw_temp
+       toa_src_sw(idxday(1:nday),:) = toa_src_sw_temp
        ! Scale incident flux
        do ij=1,nday
-          Interstitial%toa_src_sw(idxday(ij),:) = Interstitial%toa_src_sw(idxday(ij),:)*solcon/ &
-                                                  sum(Interstitial%toa_src_sw(idxday(ij),:))
+          toa_src_sw(idxday(ij),:) = toa_src_sw(idxday(ij),:)*solcon/ &
+                                     sum(toa_src_sw(idxday(ij),:))
        enddo
     endif
 

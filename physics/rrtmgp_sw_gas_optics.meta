@@ -79,14 +79,6 @@
   type = GFS_control_type
   intent = in
   optional = F
-[Interstitial]
-  standard_name = GFS_interstitial_type_instance
-  long_name = derived type GFS_interstitial_type in FV3
-  units = DDT
-  dimensions = ()
-  type = GFS_interstitial_type
-  intent = inout
-  optional = F
 [sw_gas_props]
   standard_name = coefficients_for_sw_gas_optics
   long_name = DDT containing spectral information for RRTMGP SW radiation scheme
@@ -118,6 +110,15 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = in
+  optional = F
+[toa_src_sw]
+  standard_name = toa_incident_sw_flux_by_spectral_point
+  long_name = TOA shortwave incident flux at each spectral points
+  units = W m-2
+  dimensions = (horizontal_dimension,number_of_sw_spectral_points_rrtmgp)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
