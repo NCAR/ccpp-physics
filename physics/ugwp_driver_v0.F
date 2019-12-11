@@ -48,7 +48,9 @@
      &,                            rain
 
        real(kind=kind_phys), intent(in), dimension(im,levs) :: ugrs
-     &,        vgrs, tgrs, qgrs, prsi, prsl, prslk, phii, phil, del
+     &,        vgrs, tgrs, qgrs, prsl, prslk, phil, del
+       real(kind=kind_phys), intent(in), dimension(im,levs+1) :: 
+     &         phii, prsi
 
 !      real(kind=kind_phys), intent(in) :: oro_stat(im,nmtvr)
        real(kind=kind_phys), intent(in), dimension(im) :: hprime, oc
@@ -258,6 +260,10 @@
 !ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
 !  
 !=====================================================================
+!>\ingroup cires_ugwp_run
+!> @{
+!!<b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to degraded forecast scores of simulations with revised schemes for subgrid-scale orography effects in FV3GFS, EMC reinstalled the original gwdps-code with updated efficiency factors for the mountain blocking and OGW drag. The GFS OGW is described in the separate section (\ref GFS_GWDPS) and its “call” moved into UGWP-driver subroutine. This combination of NGW and OGW schemes was tested in the FV3GFS-L127 medium-range forecasts (15-30 days) for C96, C192, C384 and C768 resolutions and work in progress to introduce the optimal choice for the scale-aware representations of the efficiency factors that will reflect the better simulations of GW activity by FV3 dynamical core at higher horizontal resolutions. With the MERRA-2 VMF function for NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme (\ref GFS_GWDPS), FV3GFS simulations can successfully forecast the recent major mid-winter sudden stratospheric warming (SSW) events of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset; Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year (2015-2018) FV3GFS simulations with UGWP-v0 also produce the equatorial QBO-like oscillations in the zonal wind and temperature anomalies.
+!!
       SUBROUTINE GWDPS_V0(IM,  km,    imx, do_tofd,
      &    Pdvdt, Pdudt, Pdtdt, Pkdis, U1,V1,T1,Q1,KPBL,
      &    PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT,
@@ -1248,7 +1254,9 @@
 !
 !23456==============================================================================
 
-
+!>\ingroup cires_ugwp_run
+!> @{
+!! 
       subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,
      &           tm1 , um1, vm1, qm1,
      &           prsl, prsi,   philg, xlatd, sinlat, coslat,
