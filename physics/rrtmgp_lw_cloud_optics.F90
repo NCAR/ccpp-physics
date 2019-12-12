@@ -351,22 +351,15 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_run()
   ! #########################################################################################
-  subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, ipsdlw0, icseed_lw, cld_frac, cld_lwp, &
-       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,             &
-       lw_cloud_props, lw_gas_props,  aerosolslw,                                           &
-       cldtaulw, lw_optical_props_clouds, lw_optical_props_aerosol, errmsg, errflg)
+  subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, cld_frac, cld_lwp, cld_reliq, cld_iwp, &
+       cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, lw_cloud_props, lw_gas_props,   &
+       cldtaulw, lw_optical_props_cloudsByBand,  errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
          Model               ! DDT containing FV3-GFS model control parameters 
     integer, intent(in) :: &
-         ncol,             & ! Number of horizontal gridpoints
-         ipsdlw0             ! Initial permutation seed for McICA
-    integer,intent(in),dimension(ncol) :: &
-         icseed_lw           ! auxiliary special cloud related array when module 
-                             ! variable isubclw=2, it provides permutation seed 
-                             ! for each column profile that are used for generating 
-                             ! random numbers. when isubclw /=2, it will not be used.
+         ncol                ! Number of horizontal gridpoints
     real(kind_phys), dimension(ncol,model%levs),intent(in) :: &
          cld_frac,         & ! Total cloud fraction by layer
          cld_lwp,          & ! Cloud liquid water path
@@ -381,29 +374,19 @@ contains
          lw_cloud_props      !
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props
-    real(kind_phys), intent(in),dimension(ncol, model%levs, lw_gas_props%get_nband(),3) :: &
-         aerosolslw            !
 
     ! Outputs
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
-         cldtaulw            ! approx 10.mu band layer cloud optical depth  
+         cldtaulw                      ! approx 10.mu band layer cloud optical depth  
     type(ty_optical_props_1scl),intent(out) :: &
-         lw_optical_props_clouds, & !
-         lw_optical_props_aerosol   !
+         lw_optical_props_cloudsByBand !
     integer, intent(out) :: &
-         errflg                  !
+         errflg                        !
     character(len=*), intent(out) :: &
-         errmsg                  !
+         errmsg                        !
 
     ! Local variables
-    integer :: iCol
-    integer,dimension(ncol) :: ipseed_lw
     logical,dimension(ncol,model%levs) :: liqmask, icemask
-    type(ty_optical_props_1scl) :: lw_optical_props_cloudsByBand
-    type(random_stat) :: rng_stat
-    real(kind_phys), dimension(lw_gas_props%get_ngpt(),model%levs,ncol) :: rng3D
-    real(kind_phys), dimension(lw_gas_props%get_ngpt()*model%levs) :: rng1D
-    logical, dimension(ncol,model%levs,lw_gas_props%get_ngpt()) :: cldfracMCICA
     real(kind_phys), dimension(ncol,model%levs,lw_gas_props%get_nband()) :: &
          tau_cld
 
@@ -412,19 +395,6 @@ contains
     errflg = 0
 
     if (.not. Model%lslwr) return
-
-    ! #######################################################################################
-    ! Change random number seed value for each radiation invocation (isubclw =1 or 2).
-    ! #######################################################################################
-    if(isubclw == 1) then      ! advance prescribed permutation seed
-       do iCol = 1, nCol
-          ipseed_lw(iCol) = ipsdlw0 + iCol
-       enddo
-    elseif (isubclw == 2) then ! use input array of permutaion seeds
-       do iCol = 1, nCol
-          ipseed_lw(iCol) = icseed_lw(iCol)
-       enddo
-    endif
     
     ! #######################################################################################
     ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
@@ -433,22 +403,11 @@ contains
     icemask = (cld_frac .gt. 0 .and. cld_iwp .gt. 0)
 
     ! #######################################################################################
-    ! Allocate space for RRTMGP DDTs containing cloud and aerosol radiative properties
+    ! Allocate space for RRTMGP DDTs containing cloud radiative properties
     ! #######################################################################################
     ! Cloud optics [nCol,model%levs,nBands]
     call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_1scl(&
          ncol, model%levs, lw_gas_props%get_band_lims_wavenumber()))
-    ! Aerosol optics [nCol,model%levs,nBands]
-    call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_aerosol%alloc_1scl(     &
-         ncol, model%levs, lw_gas_props%get_band_lims_wavenumber()))
-    ! Cloud optics [nCol,model%levs,nGpts]
-    call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_clouds%alloc_1scl(      &
-         ncol, model%levs, lw_gas_props))
-
-    ! #######################################################################################
-    ! Copy aerosol optical information to RRTMGP DDT
-    ! #######################################################################################
-    lw_optical_props_aerosol%tau = aerosolslw(:,:,:,1) * (1. - aerosolslw(:,:,:,2))
 
     ! #######################################################################################
     ! Compute cloud-optics for RTE.
@@ -478,27 +437,6 @@ contains
        endif
     endif
 
-    ! #######################################################################################
-    ! Call McICA to generate subcolumns.
-    ! #######################################################################################
-    ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-    ! and layers. ([nGpts,model%levs,nColumn]-> [nGpts*model%levs]*nColumn)
-    do iCol=1,ncol
-       call random_setseed(ipseed_lw(icol),rng_stat)
-       call random_number(rng1D,rng_stat)
-       rng3D(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),model%levs])
-    enddo
-    
-    ! Call McICA
-    select case ( iovrlw )
-       ! Maximumn-random 
-    case(1)
-       call check_error_msg('rrtmgp_lw_cloud_optics_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
-    end select
-    
-    ! Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_lw_cloud_optics_run',draw_samples(cldfracMCICA,lw_optical_props_cloudsByBand,lw_optical_props_clouds))
-    
     ! GFS_RRTMGP_POST_RUN() requires the LW optical depth ~10microns
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)
 

@@ -160,23 +160,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[icseed_sw]
-  standard_name = seed_random_numbers_sw_for_RRTMGP
-  long_name = seed for random number generation for shortwave radiation
-  units = none
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = in
-  optional = F
-[aerosolssw]
-  standard_name = RRTMGP_aerosol_optical_properties_for_shortwave_bands_01_16
-  long_name = aerosol optical properties for shortwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_lw_bands_rrtmgp,number_of_aerosol_output_fields_for_shortwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [sw_cloud_props]
   standard_name = coefficients_for_sw_cloud_optics
   long_name = DDT containing spectral information for cloudy RRTMGP SW radiation scheme
@@ -191,14 +174,6 @@
   units = DDT
   dimensions = ()
   type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
-[ipsdsw0]
-  standard_name = initial_permutation_seed_sw
-  long_name = initial seed for McICA SW
-  units = none
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [nday]
@@ -217,16 +192,8 @@
   type = integer
   intent = in
   optional = F
-[sw_optical_props_clouds]
-  standard_name = shortwave_optical_properties_for_cloudy_atmosphere
-  long_name = Fortran DDT containing RRTMGP optical properties
-  units = DDT
-  dimensions = ()
-  type = ty_optical_props_2str
-  intent = out
-  optional = F
-[sw_optical_props_aerosol]
-  standard_name = shortwave_optical_properties_for_aerosols
+[sw_optical_props_cloudsByBand]
+  standard_name = shortwave_optical_properties_for_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()

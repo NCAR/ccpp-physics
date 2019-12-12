@@ -102,24 +102,6 @@
   type = ty_gas_optics_rrtmgp
   intent = in
   optional = F
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[aerosolslw]
-  standard_name = RRTMGP_aerosol_optical_properties_for_longwave_bands_01_16
-  long_name = aerosol optical properties for longwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,vertical_dimension, number_of_lw_bands_rrtmgp,number_of_aerosol_output_fields_for_longwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [sfc_emiss_byband]
   standard_name = surface_emissivity_in_each_RRTMGP_LW_band
   long_name = surface emissivity in each RRTMGP LW band

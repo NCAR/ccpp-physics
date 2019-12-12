@@ -10,11 +10,6 @@ module GFS_rrtmgp_lw_pre
        GFS_radtend_type            ! Radiation tendencies needed in physics
   use module_radiation_surface,  only: &
        setemis                     ! Routine to compute surface-emissivity
-  use module_radiation_aerosols, only: &
-       NF_AESW,                  & ! Number of optical-fields in SW output (3=tau+g+omega)
-       NF_AELW,                  & ! Number of optical-fields in LW output (3=tau+g+omega)
-       setaer,                   & ! Routine to compute aerosol radiative properties (tau,g,omega)
-       NSPC1                       ! Number of species for vertically integrated aerosol optical-depth
   use mo_gas_optics_rrtmgp,  only: &
        ty_gas_optics_rrtmgp
 
@@ -35,8 +30,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_lw_pre.html
 !!
   subroutine GFS_rrtmgp_lw_pre_run (Model, Grid,  Sfcprop, Statein, ncol,  p_lay, p_lev,    &
-       tv_lay, relhum, tracer, lw_gas_props, Radtend, aerosolslw, aerodp, sfc_emiss_byband, &
-       errmsg, errflg)
+       tv_lay, relhum, tracer, lw_gas_props, Radtend, sfc_emiss_byband, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -63,20 +57,12 @@ contains
     ! Outputs
     type(GFS_radtend_type), intent(inout) :: &
          Radtend              ! DDT: FV3-GFS radiation tendencies 
-    real(kind_phys), dimension(ncol,Model%levs,lw_gas_props%get_nband(),NF_AELW), intent(out) ::&
-         aerosolslw           ! Aerosol radiative properties in each SW band.
-    real(kind_phys), dimension(ncol,NSPC1), intent(inout) :: &
-         aerodp               ! Vertical integrated optical depth for various aerosol species  
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &
          sfc_emiss_byband     ! Surface emissivity in each band
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag
-
-    ! Local
-    real(kind_phys), dimension(ncol, Model%levs, Model%rrtmgp_nBandsSW, NF_AESW) :: &
-         aerosolssw2
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -94,14 +80,6 @@ contains
     do iBand=1,lw_gas_props%get_nband()
        sfc_emiss_byband(iBand,1:NCOL) = Radtend%semis(1:NCOL)
     enddo
-
-    ! #######################################################################################
-    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-    ! #######################################################################################
-    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,:), tv_lay, relhum,                      &
-         Sfcprop%slmsk,  tracer, Grid%xlon, Grid%xlat, ncol, Model%levs, Model%levs+1,      &
-         .true., Model%lslwr, aerosolssw2, aerosolslw, aerodp)
-    
 
   end subroutine GFS_rrtmgp_lw_pre_run
   

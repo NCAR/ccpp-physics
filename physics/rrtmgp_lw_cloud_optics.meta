@@ -79,22 +79,6 @@
   type = integer
   intent = in
   optional = F
-[ipsdlw0]
-  standard_name = initial_permutation_seed_lw
-  long_name = initial seed for McICA LW
-  units = none
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[icseed_lw]
-  standard_name = seed_random_numbers_lw_for_RRTMGP
-  long_name = seed for random number generation for longwave radiation
-  units = none
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = in
-  optional = F
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -183,15 +167,6 @@
   intent = in
   type = ty_cloud_optics
   optional = F
-[aerosolslw]
-  standard_name = RRTMGP_aerosol_optical_properties_for_longwave_bands_01_16
-  long_name = aerosol optical properties for longwave bands 01-16
-  units = various
-  dimensions = (horizontal_dimension,vertical_dimension, number_of_lw_bands_rrtmgp,number_of_aerosol_output_fields_for_longwave_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [cldtaulw]
   standard_name = RRTMGP_cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
@@ -201,16 +176,8 @@
   kind = kind_phys
   intent = out
   optional = F
-[lw_optical_props_clouds]
-  standard_name = longwave_optical_properties_for_cloudy_atmosphere
-  long_name = Fortran DDT containing RRTMGP optical properties
-  units = DDT
-  dimensions = ()
-  type = ty_optical_props_1scl
-  intent = out
-  optional = F
-[lw_optical_props_aerosol]
-  standard_name = longwave_optical_properties_for_aerosols
+[lw_optical_props_cloudsByBand]
+  standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()

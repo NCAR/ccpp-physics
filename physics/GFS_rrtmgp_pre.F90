@@ -251,7 +251,7 @@ contains
           relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(QMIN, q_lay(iCol,iLay))/qs ) )
           qs_lay(iCol,iLay) = qs
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + fvirt*q_lay(iCol,iLay)) 
-          deltaZ(iCol,iLay) = (rog) * abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
+          deltaZ(iCol,iLay) = (rog*0.001) * abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
        enddo
     enddo
 
@@ -347,29 +347,29 @@ contains
     integer, intent(in) :: &
          ncol                 ! Number of horizontal gridpoints
     real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(in) :: &
-         tracer               !
+         tracer               ! Cloud condensate amount in layer by type ()
     real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
-         p_lay,             & !
-         t_lay,             & !
-         tv_lay,            & !
-         relhum,            & !
-         qs_lay,            & !
-         q_lay,             & !
-         deltaZ,            & !
-         deltaP
+         p_lay,             & ! Pressure @ model layer centers (Pa)
+         t_lay,             & ! Temperature @ layer centers (K)
+         tv_lay,            & ! Virtual temperature @ layer centers (K)
+         relhum,            & ! Relative humidity @ layer centers(1)
+         qs_lay,            & ! Saturation specific humidity @ layer center   (kg/kg)
+         q_lay,             & ! Specific humidity @ layer centers(kg/kg)
+         deltaZ,            & ! Layer thickness (km)
+         deltaP               ! Layer thickness (Pa)
     real(kind_phys), dimension(ncol,Model%levs+1), intent(in) :: &
-         p_lev                !
+         p_lev                ! Pressure @ model layer interface (Pa)
 
     ! Outputs
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS),intent(out) :: &
-         clouds               !
+         clouds               ! Cloud properties (NCOL,Model%levs,NF_CLDS)
     integer,dimension(ncol,3), intent(out) :: &
-         mbota,             & ! 
-         mtopa                !
+         mbota,             & ! Vertical indices for low, mid, hi cloud bases (NCOL,3)
+         mtopa                ! Vertical indices for low, mid, hi cloud tops (NCOL,3)
     real(kind_phys), dimension(ncol), intent(out)  ::&
-         de_lgth              !
+         de_lgth              ! Clouds decorrelation length (km)
     real(kind_phys), dimension(ncol, 5), intent(out) :: &
-         cldsa                !
+         cldsa                ! Fraction of clouds for low, mid, hi, tot, bl (NCOL,5)
 
     ! Local variables
     real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
@@ -499,7 +499,7 @@ contains
                Grid%xlat,            & ! IN  - Latitude                                       (radians)
                Grid%xlon,            & ! IN  - Longitude                                      (radians)
                Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
-               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaZ,               & ! IN  - Layer thickness                                (km)
                deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
                NCOL,                 & ! IN  - Number of horizontal gridpoints
                MODEL%LEVS,           & ! IN  - Number of model layers
@@ -529,7 +529,7 @@ contains
                Grid%xlat,            & ! IN  - Latitude                                       (radians)
                Grid%xlon,            & ! IN  - Longitude                                      (radians)
                Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
-               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaZ,               & ! IN  - Layer thickness                                (km)
                deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
                NCOL,                 & ! IN  - Number of horizontal gridpoints
                MODEL%LEVS,           & ! IN  - Number of model layers
@@ -565,7 +565,7 @@ contains
                Grid%xlat,            & ! IN  - Latitude                                       (radians)
                Grid%xlon,            & ! IN  - Longitude                                      (radians)
                Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
-               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaZ,               & ! IN  - Layer thickness                                (km)
                deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
                NCOL,                 & ! IN  - Number of horizontal gridpoints
                MODEL%LEVS,           & ! IN  - Number of model layers
@@ -597,7 +597,7 @@ contains
                Grid%xlon,            & ! IN  - Longitude                                      (radians)
                Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
                cldcov,               & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
-               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaZ,               & ! IN  - Layer thickness                                (km)
                deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
                NCOL,                 & ! IN  - Number of horizontal gridpoints
                MODEL%LEVS,           & ! IN  - Number of model layers
@@ -618,7 +618,7 @@ contains
                Grid%xlat,            & ! IN  - Latitude                                       (radians)
                Grid%xlon,            & ! IN  - Longitude                                      (radians)
                Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
-               deltaZ,               & ! IN  - Layer thickness                                (m)
+               deltaZ,               & ! IN  - Layer thickness                                (km)
                deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
                NCOL,                 & ! IN  - Number of horizontal gridpoints
                MODEL%LEVS,           & ! IN  - Number of model layers
@@ -649,7 +649,7 @@ contains
             Grid%xlat,                & ! IN  - Latitude                                       (radians)
             Grid%xlon,                & ! IN  - Longitude                                      (radians)
             Sfcprop%slmsk,            & ! IN  - Land/Sea mask                                  ()
-            deltaZ,                   & ! IN  - Layer thickness                                (m)
+            deltaZ,                   & ! IN  - Layer thickness                                (km)
             deltaP/100.,              & ! IN  - Layer thickness                                (hPa)
             Model%ntrac-1,            & ! IN  - Number of tracers
             Model%ntcw-1,             & ! IN  - Tracer index for cloud condensate (or liquid water)

@@ -15,13 +15,6 @@ module GFS_rrtmgp_sw_pre
   use module_radiation_surface,  only: &
        NF_ALBD,                  & ! Number of surface albedo categories (4; nir-direct, nir-diffuse, uvvis-direct, uvvis-diffuse)
        setalb                      ! Routine to compute surface albedo
-  ! DJS2019: This radiation_aerosols_module is a whole-lotta mess that needs some love. As it stands now, it's
-  !          entirely dependent on RRTMG legacy code.
-  use module_radiation_aerosols, only: &
-       NF_AESW,                  & ! Number of optical-fields in SW output (3=tau+g+omega)
-       NF_AELW,                  & ! Number of optical-fields in LW output (3=tau+g+omega)
-       setaer,                   & ! Routine to compute aerosol radiative properties (tau,g,omega)
-       NSPC1                        ! Number of species for vertically integrated aerosol optical-depth
   use surface_perturbation, only: & 
        cdfnor                      ! Routine to compute CDF (used to compute percentiles)
   use mo_gas_optics_rrtmgp,  only: &
@@ -44,8 +37,8 @@ contains
 !!
   subroutine GFS_rrtmgp_sw_pre_run(Model, Grid, Sfcprop, Statein, ncol, p_lay,  p_lev,      &
        tv_lay, relhum, tracer, sw_gas_props, nday, idxday, alb1d, sfc_alb_nir_dir,          &
-       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, RadTend, Coupling, aerosolssw,&
-       aerodp, errmsg, errflg)
+       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, RadTend, Coupling,            &
+       errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -85,10 +78,6 @@ contains
          Radtend              ! DDT: FV3-GFS radiation tendencies 
     type(GFS_coupling_type), intent(inout) :: &
          Coupling             ! DDT: FV3-GFS coupling arrays
-    real(kind_phys), dimension(ncol,Model%levs,sw_gas_props%get_nband(),NF_AESW), intent(out) ::&
-         aerosolssw           ! Aerosol radiative properties in each SW band.
-    real(kind_phys), dimension(ncol,NSPC1), intent(inout) :: &
-         aerodp               ! Vertical integrated optical depth for various aerosol species  
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
@@ -97,10 +86,6 @@ contains
     ! Local variables
     integer :: i, j, iCol, iBand, iLay
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
-    real(kind_phys), dimension(ncol, Model%levs, sw_gas_props%get_nband(), NF_AESW) :: &
-         aerosolssw2
-    real(kind_phys), dimension(ncol, Model%levs, Model%rrtmgp_nBandsLW, NF_AELW) :: &
-         aerosolslw
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -158,24 +143,6 @@ contains
        sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
        sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
     enddo 
-
-    ! #######################################################################################
-    ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-    ! #######################################################################################
-    call setaer(p_lev, p_lay, Statein%prslk(1:NCOL,:), tv_lay, relhum, Sfcprop%slmsk, tracer, &
-         Grid%xlon, Grid%xlat, NCOL, Model%levs, Model%levs+1, Model%lsswr, .true.,           &
-         aerosolssw2, aerosolslw, aerodp)
-
-    ! Store aerosol optical properties
-    ! SW. 
-    ! For RRTMGP SW the bands are now ordered from [IR(band) -> nIR -> UV], in RRTMG the 
-    ! band ordering was [nIR -> UV -> IR(band)]
-    aerosolssw(1:NCOL,:,1,1)                          = aerosolssw2(1:NCOL,:,sw_gas_props%get_nband(),1)
-    aerosolssw(1:NCOL,:,1,2)                          = aerosolssw2(1:NCOL,:,sw_gas_props%get_nband(),2)
-    aerosolssw(1:NCOL,:,1,3)                          = aerosolssw2(1:NCOL,:,sw_gas_props%get_nband(),3)
-    aerosolssw(1:NCOL,:,2:sw_gas_props%get_nband(),1) = aerosolssw2(1:NCOL,:,1:sw_gas_props%get_nband()-1,1)
-    aerosolssw(1:NCOL,:,2:sw_gas_props%get_nband(),2) = aerosolssw2(1:NCOL,:,1:sw_gas_props%get_nband()-1,2)
-    aerosolssw(1:NCOL,:,2:sw_gas_props%get_nband(),3) = aerosolssw2(1:NCOL,:,1:sw_gas_props%get_nband()-1,3)
 
   end subroutine GFS_rrtmgp_sw_pre_run
   
