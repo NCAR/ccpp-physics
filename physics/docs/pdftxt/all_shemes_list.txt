@@ -19,6 +19,7 @@ parameterizations in suites.
 - \b Land \b Surface \b Model
  - \subpage GFS_NOAH
  - \subpage GSD_RUCLSM
+ - \subpage NoahMP
 
 - \b Cumulus \b Parameterizations
  - \subpage GFS_SAMF
@@ -44,6 +45,7 @@ parameterizations in suites.
 - \b Gravity \b Wave \b Drag
  - \subpage GFS_GWDPS 
  - \subpage GFS_GWDC
+ - \subpage UGWPv0
 
 - \b Surface \b Layer \b and \b Simplified \b Ocean \b and \b Sea \b Ice \b Representation
  - \subpage GFS_SFCLYR

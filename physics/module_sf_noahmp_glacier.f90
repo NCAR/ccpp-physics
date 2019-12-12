@@ -1,3 +1,7 @@
+!>  \file module_sf_noahmp_glacier.f90
+!!  This file contains the NoahMP Glacier scheme.
+
+!>\ingroup NoahMP_LSM
 module noahmp_glacier_globals
 
   implicit none
@@ -109,6 +113,7 @@ module noahmp_glacier_globals
 end module noahmp_glacier_globals
 !------------------------------------------------------------------------------------------!
 
+!>\ingroup NoahMP_LSM
 module noahmp_glacier_routines
   use noahmp_glacier_globals
 #ifndef CCPP
@@ -150,6 +155,7 @@ contains
 !
 ! ==================================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine noahmp_glacier (&
                    iloc    ,jloc    ,cosz    ,nsnow   ,nsoil   ,dt      , & ! in : time/space/model-related
                    sfctmp  ,sfcprs  ,uu      ,vv      ,q2      ,soldn   , & ! in : forcing
@@ -356,6 +362,7 @@ contains
 
   end subroutine noahmp_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine atm_glacier (sfcprs ,sfctmp ,q2     ,soldn  ,cosz   ,thair  , &
                           qair   ,eair   ,rhoair ,solad  ,solai  , &
                           swdown )     
@@ -409,6 +416,7 @@ contains
   end subroutine atm_glacier
 ! ==================================================================================================
 ! --------------------------------------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine energy_glacier (nsnow  ,nsoil  ,isnow  ,dt     ,qsnow  ,rhoair , & !in
                              eair   ,sfcprs ,qair   ,sfctmp ,lwdn   ,uu     , & !in
                              vv     ,solad  ,solai  ,cosz   ,zref   ,         & !in
@@ -612,6 +620,7 @@ contains
 
   end subroutine energy_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine thermoprop_glacier (nsoil   ,nsnow   ,isnow   ,dzsnso  , & !in
                                  dt      ,snowh   ,snice   ,snliq   , & !in
                                  df      ,hcpct   ,snicev  ,snliqv  ,epore   , & !out
@@ -685,6 +694,7 @@ contains
   end subroutine thermoprop_glacier
 ! ==================================================================================================
 ! --------------------------------------------------------------------------------------------------
+!>\ingroup NoahMP_LSM  
   subroutine csnow_glacier (isnow   ,nsnow   ,nsoil   ,snice   ,snliq   ,dzsnso  , & !in
                             tksno   ,cvsno   ,snicev  ,snliqv  ,epore   )   !out
 ! --------------------------------------------------------------------------------------------------
@@ -741,6 +751,7 @@ contains
 
   end subroutine csnow_glacier
 !===================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine radiation_glacier (dt      ,tg      ,sneqvo  ,sneqv   ,cosz    , & !in
                                 qsnow   ,solad   ,solai   ,                   & !in
                                 albold  ,tauss   ,                            & !inout
@@ -831,6 +842,7 @@ contains
 
   end subroutine radiation_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine snow_age_glacier (dt,tg,sneqvo,sneqv,tauss,fage)
 ! --------------------------------------------------------------------------------------------------
   implicit none
@@ -885,6 +897,7 @@ contains
   end subroutine snow_age_glacier
 ! ==================================================================================================
 ! --------------------------------------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine snowalb_bats_glacier (nband,cosz,fage,albsnd,albsni)
 ! --------------------------------------------------------------------------------------------------
   implicit none
@@ -934,6 +947,7 @@ contains
   end subroutine snowalb_bats_glacier
 ! ==================================================================================================
 ! --------------------------------------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine snowalb_class_glacier (nband,qsnow,dt,alb,albold,albsnd,albsni)
 ! --------------------------------------------------------------------------------------------------
   implicit none
@@ -979,6 +993,7 @@ contains
 
   end subroutine snowalb_class_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine glacier_flux (nsoil   ,nsnow   ,emg     ,isnow   ,df      ,dzsnso  ,z0m     , & !in
                            zlvl    ,zpd     ,qair    ,sfctmp  ,rhoair  ,sfcprs  , & !in
                            ur      ,gamma   ,rsurf   ,lwdn    ,rhsur   ,smc     , & !in
@@ -1203,6 +1218,7 @@ contains
 
   end subroutine glacier_flux
 !  ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine esat(t, esw, esi, desw, desi)
 !---------------------------------------------------------------------------------------------------
 ! use polynomials to calculate saturation vapor pressure and derivative with
@@ -1254,7 +1270,7 @@ contains
 
   end subroutine esat
 ! ==================================================================================================
-
+!>\ingroup NoahMP_LSM
   subroutine sfcdif1_glacier(iter   ,zlvl   ,zpd    ,z0h    ,z0m    , & !in
                      qair   ,sfctmp ,h      ,rhoair ,mpe    ,ur     , & !in
 #ifdef CCPP
@@ -1428,6 +1444,7 @@ contains
 
   end subroutine sfcdif1_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine tsnosoi_glacier (nsoil   ,nsnow   ,isnow   ,dt      ,tbot    , & !in
                               ssoil   ,snowh   ,zbot    ,zsnso   ,df      , & !in
 			      hcpct   ,                                     & !in
@@ -1491,6 +1508,7 @@ contains
   end subroutine tsnosoi_glacier
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine hrt_glacier (nsnow     ,nsoil     ,isnow     ,zsnso     , & !in
                           stc       ,tbot      ,zbot      ,df        , & !in
                           hcpct     ,ssoil     ,phi       ,            & !in
@@ -1589,6 +1607,7 @@ contains
   end subroutine hrt_glacier
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine hstep_glacier (nsnow     ,nsoil     ,isnow     ,dt        ,  & !in
                             ai        ,bi        ,ci        ,rhsts     ,  & !inout
                             stc       )                                     !inout
@@ -1643,6 +1662,7 @@ contains
 
   end subroutine hstep_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine rosr12_glacier (p,a,b,c,d,delta,ntop,nsoil,nsnow)
 ! ----------------------------------------------------------------------
 ! subroutine rosr12
@@ -1703,6 +1723,7 @@ contains
   end subroutine rosr12_glacier
 ! ----------------------------------------------------------------------
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine phasechange_glacier (nsnow   ,nsoil   ,isnow   ,dt      ,fact    , & !in
                                   dzsnso  ,                                     & !in
                                   stc     ,snice   ,snliq   ,sneqv   ,snowh   , & !inout
@@ -1992,6 +2013,7 @@ contains
    
   end subroutine phasechange_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine water_glacier (nsnow  ,nsoil  ,imelt  ,dt     ,prcp   ,sfctmp , & !in
                             qvap   ,qdew   ,ficeold,zsoil  ,                 & !in
                             isnow  ,snowh  ,sneqv  ,snice  ,snliq  ,stc    , & !inout
@@ -2173,6 +2195,7 @@ contains
   end subroutine water_glacier
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine snowwater_glacier (nsnow  ,nsoil  ,imelt  ,dt     ,sfctmp , & !in
                                 snowhin,qsnow  ,qsnfro ,qsnsub ,qrain  , & !in
                                 ficeold,zsoil  ,                         & !in
@@ -2299,6 +2322,7 @@ contains
 
   end subroutine snowwater_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine snowfall_glacier (nsoil  ,nsnow  ,dt     ,qsnow  ,snowhin , & !in
                                sfctmp ,                                  & !in
                                isnow  ,snowh  ,dzsnso ,stc    ,snice   , & !inout
@@ -2364,6 +2388,7 @@ contains
   end subroutine snowfall_glacier
 ! ==================================================================================================
 ! ----------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine compact_glacier (nsnow  ,nsoil  ,dt     ,stc    ,snice , & !in
                               snliq  ,imelt  ,ficeold,                & !in
                               isnow  ,dzsnso )                          !inout
@@ -2463,6 +2488,7 @@ contains
 
   end subroutine compact_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine combine_glacier (nsnow  ,nsoil  ,                         & !in
                               isnow  ,sh2o   ,stc    ,snice  ,snliq  , & !inout
                               dzsnso ,sice   ,snowh  ,sneqv  ,         & !inout
@@ -2635,6 +2661,7 @@ contains
 ! ==================================================================================================
 
 ! ----------------------------------------------------------------------
+!>\ingroup NoahMP_LSM
   subroutine combo_glacier(dz,  wliq,  wice, t, dz2, wliq2, wice2, t2)
 ! ----------------------------------------------------------------------
     implicit none
@@ -2686,6 +2713,7 @@ contains
 
   end subroutine combo_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine divide_glacier (nsnow  ,nsoil  ,                         & !in
                              isnow  ,stc    ,snice  ,snliq  ,dzsnso  )  !inout
 ! ----------------------------------------------------------------------
@@ -2811,6 +2839,7 @@ contains
 
   end subroutine divide_glacier
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine snowh2o_glacier (nsnow  ,nsoil  ,dt     ,qsnfro ,qsnsub , & !in 
                               qrain  ,                                 & !in
                               isnow  ,dzsnso ,snowh  ,sneqv  ,snice  , & !inout
@@ -2958,6 +2987,7 @@ contains
   end subroutine snowh2o_glacier
 ! ********************* end of water subroutines ******************************************
 ! ==================================================================================================
+!>\ingroup NoahMP_LSM
   subroutine error_glacier (iloc   ,jloc   ,swdown ,fsa    ,fsr    ,fira   , &
                             fsh    ,fgev   ,ssoil  ,sag    ,prcp   ,edir   , &
 #ifdef CCPP
@@ -3043,6 +3073,7 @@ contains
  end subroutine error_glacier
 ! ==================================================================================================
 
+!>\ingroup NoahMP_LSM
   subroutine noahmp_options_glacier(idveg     ,iopt_crs  ,iopt_btr  ,iopt_run  ,iopt_sfc  ,iopt_frz , & 
                              iopt_inf  ,iopt_rad  ,iopt_alb  ,iopt_snf  ,iopt_tbot, iopt_stc )
 
