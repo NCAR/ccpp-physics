@@ -1852,7 +1852,15 @@
 ! mji - Activate exponential-random cloud overlap option
          case(5)
             ! Exponential-random overlap:
-            call wrf_error_fatal("Cloud Overlap case 5: ER has not yet been implemented. Stopping...") 
+#ifdef CCPP
+      errflg = 1
+      errmsg = "Cloud Overlap case 5: ER has not yet been implemented.  &
+                Stopping..."
+      return
+#else
+      call wrf_error_fatal("Cloud Overlap case 5: ER has not yet been   &
+                           implemented. Stopping...") 
+#endif
 
       end select
 
@@ -2192,7 +2200,14 @@
                          write(errmess,'(A,i5,i5,f8.2,f8.2)' )         &
                'ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &
                ,ig, lay, ciwpmc(ig,lay), radice
-                         call wrf_error_fatal(errmess)
+#ifdef CCPP
+      errflg = 1
+      errmsg = "ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS"
+      return
+#else
+      CALL wrf_error_fatal(errmess)
+#endif
+
                      end if
                      factor = (radice - 2._rb)/3._rb
                      index = int(factor)
@@ -2209,22 +2224,34 @@
                                  (fdlice3(index+1,ib) - fdlice3(index,ib))
                      if (fdelta(ig) .lt. 0.0_rb) then
                       write(errmess, *) 'FDELTA LESS THAN 0.0'
-                      call wrf_error_fatal(errmess)
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = "FDELTA LESS THAN 0.0"
+                      return
+#else
+                      CALL wrf_error_fatal(errmess)
+#endif
                      end if
                      if (fdelta(ig) .gt. 1.0_rb) then
                       write(errmess, *) 'FDELTA GT THAN 1.0'
-                      call wrf_error_fatal(errmess)
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = "FDELTA GT THAN 1.0"
+                      return
+#else
+                      CALL wrf_error_fatal(errmess)
+#endif
                      end if
                      forwice(ig) = fdelta(ig) + 0.5_rb / ssacoice(ig)
 ! See Fu 1996 p. 2067 
                      if (forwice(ig) .gt. gice(ig)) forwice(ig) = gice(ig)
 ! Check to ensure all calculated quantities are within physical limits.  
+
                      if (extcoice(ig) .lt. 0.0_rb) stop 'ICE EXTINCTION LESS THAN 0.0'
                      if (ssacoice(ig) .gt. 1.0_rb) stop 'ICE SSA GRTR THAN 1.0'
                      if (ssacoice(ig) .lt. 0.0_rb) stop 'ICE SSA LESS THAN 0.0'
                      if (gice(ig) .gt. 1.0_rb) stop 'ICE ASYM GRTR THAN 1.0'
                      if (gice(ig) .lt. 0.0_rb) stop 'ICE ASYM LESS THAN 0.0'
-
                   endif
 
 !!!!!!!!!!!!!!!!!! Mukul !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -2241,7 +2268,14 @@
                          write(errmess,'(A,i5,i5,f8.2,f8.2)' )         &
                'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &
                ,ig, lay, cswpmc(ig,lay), radsno
-                         call wrf_error_fatal(errmess)
+#ifdef CCPP
+                         errflg = 1
+                         errmsg ="ERROR: SNOW GENERALIZED EFFECTIVE SIZE&
+                                 OUT OF BOUNDS"
+                         return
+#else
+                         CALL wrf_error_fatal(errmess)
+#endif
                      end if
                      factor = (radsno - 2._rb)/3._rb
                      index = int(factor)
@@ -2258,11 +2292,23 @@
                                  (fdlice3(index+1,ib) - fdlice3(index,ib))
                      if (fdelta(ig) .lt. 0.0_rb) then
                       write(errmess, *) 'FDELTA LESS THAN 0.0'
-                      call wrf_error_fatal(errmess)
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = "FDELTA LESS THAN 0.0"
+                      return
+#else
+                      CALL wrf_error_fatal(errmess)
+#endif
                      end if
                      if (fdelta(ig) .gt. 1.0_rb) then
                       write(errmess, *) 'FDELTA GT THAN 1.0'
-                      call wrf_error_fatal(errmess)
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = 'FDELTA GT THAN 1.0'
+                      return
+#else
+                      CALL wrf_error_fatal(errmess)
+#endif
                      end if
                      forwsno(ig) = fdelta(ig) + 0.5_rb / ssacosno(ig)
 ! See Fu 1996 p. 2067
@@ -2270,23 +2316,53 @@
 ! Check to ensure all calculated quantities are within physical limits.  
                      if (extcosno(ig) .lt. 0.0_rb) then
                       write(errmess, *) 'SNOW EXTINCTION LESS THAN 0.0'
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = 'SNOW EXTINCTION LESS THAN 0.0'
+                      return
+#else
                       call wrf_error_fatal(errmess)
+#endif
                      end if
                      if (ssacosno(ig) .gt. 1.0_rb) then
                       write(errmess, *) 'SNOW SSA GRTR THAN 1.0'
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = 'SNOW SSA GRTR THAN 0.0'
+                      return
+#else
                       call wrf_error_fatal(errmess)
+#endif
                      end if
                      if (ssacosno(ig) .lt. 0.0_rb)  then
                       write(errmess, *) 'SNOW SSA LESS THAN 0.0'
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = 'SNOW SSA LESS THAN 0.0'
+                      return
+#else
                       call wrf_error_fatal(errmess)
+#endif
                      end if
                      if (gsno(ig) .gt. 1.0_rb)  then
                       write(errmess, *) 'SNOW ASYM GRTR THAN 1.0'
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = 'SNOW ASYM GRTR THAN 1.0'
+                      return
+#else
                       call wrf_error_fatal(errmess)
+#endif
                      end if
                      if (gsno(ig) .lt. 0.0_rb)  then
                       write(errmess, *) 'SNOW ASYM LESS THAN 0.0'
+#ifdef CCPP
+                      errflg = 1
+                      errmsg = 'SNOW ASYM LESS THAN 0.0'
+                      return
+#else
                       call wrf_error_fatal(errmess)
+#endif
                      end if
                   else
                      extcosno(ig) = 0.0_rb
@@ -10343,8 +10419,14 @@ CONTAINS
         PRESENT(waer400) .AND. &
         PRESENT(waer600) .AND. &
         PRESENT(waer999) ) ) THEN
+#ifdef CCPP
+      errflg = 1
+      errmsg = 'Warning: missing fields required for aerosol radiation'
+      return
+#else
       CALL wrf_error_fatal  &
       ('Warning: missing fields required for aerosol radiation' )
+#endif
       ENDIF
       ENDIF
 #endif
@@ -10400,7 +10482,13 @@ CONTAINS
                O31D(K)=O33D(I,K,J)
             ENDDO
          ELSE
+#ifdef CCPP
+            errflg = 1
+            errmsg = 'did not pass o33d'
+            return
+#else
             call wrf_error_fatal('did not pass O33d') ! FIXME: REMOVE THIS LINE
+#endif
             DO K=kts,kte
                O31D(K)=0.0
             ENDDO
@@ -11086,42 +11174,48 @@ CONTAINS
          end do
          if( slope < 0. ) then
             write(msg,'("ERROR: Negative total optical depth of ",f8.2," at point i,j,nb=",3i5)') slope,i,j,nb
+#ifdef CCPP
+            errflg = 1
+            errmsg = 'Error: Negative total optical depth'
+            return
+#else
             call wrf_error_fatal(msg)
+#endif
          else if( slope > 6. ) then
-            call wrf_message("-------------------------")
+!mz            call wrf_message("-------------------------")
             write(msg,'("WARNING: Large total sw optical depth of ",f8.2," at point i,j,nb=",3i5)') slope,i,j,nb
-            call wrf_message(msg)
+!mz            call wrf_message(msg)
 
-            call wrf_message("Diagnostics 1: k, tauaer300, tauaer400, tauaer600, tauaer999, tauaer")
+!mz            call wrf_message("Diagnostics 1: k, tauaer300, tauaer400, tauaer600, tauaer999, tauaer")
             do k=kts,kte
                write(msg,'(i4,5f8.2)') k, tauaer300(i,k,j), tauaer400(i,k,j), &
                     tauaer600(i,k,j), tauaer999(i,k,j),tauaer(ncol,k,nb)
-               call wrf_message(msg)
+!mz               call wrf_message(msg)
                !czhao set an up-limit here to avoid segmentation fault 
                !from extreme AOD
                tauaer(ncol,k,nb)=tauaer(ncol,k,nb)*6.0/slope 
             end do
 
-            call wrf_message("Diagnostics 2: k, gaer300, gaer400, gaer600, gaer999")
+!mz            call wrf_message("Diagnostics 2: k, gaer300, gaer400, gaer600, gaer999")
             do k=kts,kte
                write(msg,'(i4,4f8.2)') k, gaer300(i,k,j), gaer400(i,k,j), &
                     gaer600(i,k,j), gaer999(i,k,j)
-               call wrf_message(msg)
+!mz               call wrf_message(msg)
             end do
 
-            call wrf_message("Diagnostics 3: k, waer300, waer400, waer600, waer999")
+!mz            call wrf_message("Diagnostics 3: k, waer300, waer400, waer600, waer999")
             do k=kts,kte
                write(msg,'(i4,4f8.2)') k, waer300(i,k,j), waer400(i,k,j), &
                     waer600(i,k,j), waer999(i,k,j)
-               call wrf_message(msg)
+!mz               call wrf_message(msg)
             end do
 
-            call wrf_message("Diagnostics 4: k, ssaal, asyal, taual")
+!mz            call wrf_message("Diagnostics 4: k, ssaal, asyal, taual")
             do k=kts-1,kte
                write(msg,'(i4,3f8.2)') k, ssaaer(i,k,nb), asmaer(i,k,nb), tauaer(i,k,nb)
-               call wrf_message(msg)
+!mz               call wrf_message(msg)
             end do
-            call wrf_message("-------------------------")
+!mz            call wrf_message("-------------------------")
          endif
       enddo  ! nb
       endif  ! aer_ra_feedback
@@ -11301,7 +11395,7 @@ CONTAINS
 
 
 ! **************************************************************************     
-      SUBROUTINE rrtmg_swlookuptable
+      SUBROUTINE rrtmg_swlookuptable(mpirank,mpiroot)
 ! **************************************************************************     
 
 IMPLICIT NONE
@@ -11309,12 +11403,15 @@ IMPLICIT NONE
 ! Local                                    
       INTEGER :: i
       LOGICAL                 :: opened
-      LOGICAL , EXTERNAL      :: wrf_dm_on_monitor
+         integer,                   intent(in)    :: mpirank
+         integer,                   intent(in)    :: mpiroot
+!mz      LOGICAL , EXTERNAL      :: wrf_dm_on_monitor
 
       CHARACTER*80 errmess
       INTEGER rrtmg_unit
 
-      IF ( wrf_dm_on_monitor() ) THEN
+!mz      IF ( wrf_dm_on_monitor() ) THEN
+      IF(mpirank == mpiroot) THEN
         DO i = 10,99
           INQUIRE ( i , OPENED = opened )
           IF ( .NOT. opened ) THEN
@@ -11325,13 +11422,21 @@ IMPLICIT NONE
         rrtmg_unit = -1
  2010   CONTINUE
       ENDIF
-      CALL wrf_dm_bcast_bytes ( rrtmg_unit , IWORDSIZE )
+!mz      CALL wrf_dm_bcast_bytes ( rrtmg_unit , IWORDSIZE )
       IF ( rrtmg_unit < 0 ) THEN
+#ifdef CCPP
+            errflg = 1
+            errmsg = 'module_ra_rrtmg_sw: rrtm_swlookuptable: Can not  &
+                      find unused fortran unit to read in lookup table.'
+            return
+#else
         CALL wrf_error_fatal ( 'module_ra_rrtmg_sw: rrtm_swlookuptable: Can not '// &
                                'find unused fortran unit to read in lookup table.' )
+#endif
       ENDIF
 
-      IF ( wrf_dm_on_monitor() ) THEN
+!mz      IF ( wrf_dm_on_monitor() ) THEN
+      IF ( mpirank == mpiroot ) THEN
         OPEN(rrtmg_unit,FILE='RRTMG_SW_DATA',                  &
              FORM='UNFORMATTED',STATUS='OLD',ERR=9009)
       ENDIF
@@ -11351,12 +11456,18 @@ IMPLICIT NONE
       call sw_kgb28(rrtmg_unit)
       call sw_kgb29(rrtmg_unit)
 
-     IF ( wrf_dm_on_monitor() ) CLOSE (rrtmg_unit)
+     IF ( mpirank == mpiroot ) CLOSE (rrtmg_unit)
 
      RETURN
 9009 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error opening RRTMG_SW_DATA on unit ',rrtmg_unit
+#ifdef CCPP
+      errflg = 1
+      errmsg = 'module_ra_rrtmg_sw: error opening RRTMG_SW_DATA '
+      return
+#else
      CALL wrf_error_fatal(errmess)
+#endif
 
      END SUBROUTINE rrtmg_swlookuptable
 
@@ -11392,7 +11503,7 @@ IMPLICIT NONE
 
 ! Local                                    
       character*80 errmess
-      logical, external  :: wrf_dm_on_monitor
+!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11438,6 +11549,8 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
+
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -11453,10 +11566,30 @@ IMPLICIT NONE
       DM_BCAST_MACRO(forrefo)
       DM_BCAST_MACRO(sfluxrefo)
 
-     RETURN
-9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+      RETURN
+9010  CONTINUE
+      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading    &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
+      CALL wrf_error_fatal(errmess)
+
+#else
+
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, strrat1, layreffr, kao, kbo, selfrefo, &
+                           forrefo, sfluxrefo         
+         write(0,*) 'sw_kgb16: max/min(rayl) =',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat1,   size(strrat1),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
 
       end subroutine sw_kgb16
 
@@ -11521,6 +11654,7 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -11538,9 +11672,27 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
 
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
+                           forrefo, sfluxrefo
+         write(0,*) 'sw_kgb17: max/min(rayl) = ',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
       end subroutine sw_kgb17
 
 ! **************************************************************************
@@ -11604,6 +11756,7 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -11621,8 +11774,27 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
+                           forrefo, sfluxrefo
+         write(0,*) 'sw_kgb18: max/min(rayl) = ',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
 
       end subroutine sw_kgb18 
 
@@ -11687,6 +11859,7 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -11704,8 +11877,28 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
+                           forrefo, sfluxrefo
+         write(0,*) 'sw_kgb19: max/min(rayl) = ',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    size(strrat),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
+
 
       end subroutine sw_kgb19
 
@@ -11772,6 +11965,7 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -11789,8 +11983,27 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, layreffr, absch4o, kao, kbo, selfrefo, &
+                           forrefo, sfluxrefo 
+         write(0,*) 'sw_kgb20: max/min(rayl) = ',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(absch4o,   size(absch4o),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
 
       end subroutine sw_kgb20
 
@@ -11855,6 +12068,7 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -11872,8 +12086,27 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
+                           forrefo, sfluxrefo
+         write(0,*) 'sw_kgb21: max/min(rayl) =',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    size(strrat),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
+
 
       end subroutine sw_kgb21
 
@@ -11938,6 +12171,8 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
+
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -11955,8 +12190,28 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
+                           forrefo, sfluxrefo
+         write(0,*) 'sw_kgb22: max/min(rayl) =',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,  mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
+
 
       end subroutine sw_kgb22
 
@@ -12011,6 +12266,7 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -12027,8 +12283,27 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) raylo, givfac, layreffr, kao, selfrefo,      &
+                           forrefo, sfluxrefo
+         write(0,*) 'sw_kgb23: max/min(raylo) =',maxval(raylo),minval(raylo)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(raylo,      size(raylo),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(givfac,     size(givfac),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,   size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,        size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,   size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,    size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo,  size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
+
 
       end subroutine sw_kgb23
 
@@ -12097,6 +12372,8 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
+
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -12118,8 +12395,31 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) raylao, raylbo, strrat, layreffr, abso3ao,   &
+                           abso3bo, kao, kbo, selfrefo,                 &
+                           forrefo, sfluxrefo
+         write(0,*) 'sw_kgb24: max/min(raylao) =',maxval(raylao),minval(raylao)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(raylao,      size(raylao),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(raylbo,      size(raylbo),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,      size(strrat),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,    size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(abso3ao,     size(abso3ao),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(abso3bo,     size(abso3bo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,         size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,         size(kbo),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,    size(selfrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,     size(forrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo,   size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
 
       end subroutine sw_kgb24
 
@@ -12163,6 +12463,8 @@ IMPLICIT NONE
 !     in mb).  The fourth index, IG, goes from 1 to 16, and indicates
 !     which g-interval the absorption coefficients are for.
 
+#ifndef CCPP
+
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
 
@@ -12177,8 +12479,25 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) raylo, layreffr, abso3ao, abso3bo, kao,      &
+                           sfluxrefo
+         write(0,*) 'sw_kgb25: max/min(raylo) =',maxval(raylo),minval(raylo)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(raylo,     size(raylo),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(abso3ao,   size(abso3ao),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(abso3bo,   size(abso3bo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
 
       end subroutine sw_kgb25
 
@@ -12202,6 +12521,8 @@ IMPLICIT NONE
 
 !     Array raylo contains the Rayleigh extinction coefficient at all v for this band.
 
+#ifndef CCPP
+
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 
       IF ( wrf_dm_on_monitor() ) READ (rrtmg_unit,ERR=9010) &
@@ -12211,8 +12532,21 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) raylo, sfluxrefo
+         write(0,*) 'sw_kgb26: max/min(raylo) =',maxval(raylo),minval(raylo)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(raylo,      size(raylo),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo,  size(sfluxrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
+
 
       end subroutine sw_kgb26
 
@@ -12270,6 +12604,7 @@ IMPLICIT NONE
 !     pressure levels in mb).  The third index, IG, goes from 1 to 16,
 !     and tells us which g-interval the absorption coefficients are for.
 
+#ifndef CCPP
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -12285,8 +12620,24 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) raylo, scalekur, layreffr, kao, kbo, sfluxrefo
+         write(0,*) 'sw_kgb27: max/min(raylo) =',maxval(raylo),minval(raylo)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(raylo,     size(raylo),     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(scalekur,  size(scalekur),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
+
 
       end subroutine sw_kgb27
 
@@ -12339,6 +12690,8 @@ IMPLICIT NONE
 !     pressure levels in mb).  The third index, IG, goes from 1 to 16,
 !     and tells us which g-interval the absorption coefficients are for.
 
+#ifndef CCPP
+
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -12354,8 +12707,25 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, sfluxrefo
+         write(0,*) 'sw_kgb28: max/min(rayl) =',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    size(strrat),    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
+
 
       end subroutine sw_kgb28
 
@@ -12424,6 +12794,8 @@ IMPLICIT NONE
 !     JT = 1 refers to a temperature of 245.6, JT = 2 refers to 252.8,
 !     etc.  The second index runs over the g-channel (1 to 16).
 
+#ifndef CCPP
+
 #define DM_BCAST_MACRO(A) CALL wrf_dm_bcast_bytes ( A , size ( A ) * RWORDSIZE )
 #define DM_BCAST_REAL(A) CALL wrf_dm_bcast_real ( A , 1 )
 #define DM_BCAST_INTEGER(A) CALL wrf_dm_bcast_integer ( A , 1 )
@@ -12442,8 +12814,28 @@ IMPLICIT NONE
 
      RETURN
 9010 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading RRTMG_SW_DATA on unit ',rrtmg_unit
+     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
+                                  RRTMG_SW_DATA on unit ',rrtmg_unit
      CALL wrf_error_fatal(errmess)
+
+#else
+      IF (mpirank == mpiroot) THEN
+         read (rrtmg_unit) rayl, layreffr, absh2oo, absco2o, kao, kbo,  &
+                           selfrefo, forrefo, sfluxrefo
+         write(0,*) 'sw_kgb29: max/min(rayl) =',maxval(rayl),minval(rayl)
+      ENDIF
+#ifdef MPI
+      call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(absh2oo,   size(absh2oo),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(absco2o,   size(absco2o),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(selfrefo,  size(selfrefo),  MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(forrefo,   size(forrefo),   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+#endif
+#endif
 
       end subroutine sw_kgb29
 
