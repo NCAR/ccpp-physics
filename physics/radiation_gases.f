@@ -1189,7 +1189,11 @@
 
 !---------------------------------------------------------------
 
-!MZ* HAFS aerosol readin
+!> This subroutine is used in HWRF RRTMG, reads data from Ryan Torn, 
+!! computed from EC 6 types of aerosol data: organic carbon, sea salt,
+!! dust, black carbon, sulfalte and stratospheric aerosol (volcanic ashes).
+!! The data dimensions are 46 X 72 X 12 (pressure levels), and in unit
+!! of AOD per Pa. 
        subroutine aerosol_in(aerodm,pina,alevsiz,no_months,             &
                              no_src_types,XLAT,XLONG,                   &
                              ids, ide, jds, jde, kds, kde,              &
@@ -1218,10 +1222,6 @@
 
 
 ! Local
-!  Data from Ryan Torn, computed from EC 6 types of aerosol data:
-!    organic carbon, sea salt, dust, black carbon, sulfalte 
-!    and stratospheric aerosol (volcanic ashes)
-!  The data dimensions are 46 x 72 x 12 (pressure levels), and in unit of AOD per Pa
 
        INTEGER, PARAMETER :: latsiz = 46
        INTEGER, PARAMETER :: lonsiz = 72
@@ -1244,8 +1244,8 @@
 
 !-- read in aerosol optical depth pressure data
 
-     WRITE(message,*)'no_months = ',no_months
-     CALL wrf_debug(1,message)
+     !mz WRITE(message,*)'no_months = ',no_months
+     !mz CALL wrf_debug(1,message)
 
 ! pressure in mb
       pin_unit = 27
@@ -1338,9 +1338,9 @@
 
        END SUBROUTINE aerosol_in
 
-
 !!MZ* original from WRF/phys/module_physics_init.F
-      subroutine interp_vec(locvec,locwant,periodic,loc1,loc2,wght1,wght2)
+      subroutine interp_vec(locvec,locwant,periodic,loc1,loc2,          &
+                            wght1,wght2)
 
          implicit none
 
@@ -1406,18 +1406,18 @@
       end subroutine interp_vec
 
 !MZ* originally in WRF/phys/module_ra_cam_support.F, used for HAFS RRTMG
+!> This subroutine is used in HWRF RRTMG and assumes uniform distribution
+!! of ozone concentration. It should be replaced by monthly climatology
+!! that varies latitudinally and vertically.
       subroutine oznini(ozmixm,pin,levsiz,num_months,XLAT,              &
                          ids, ide, jds, jde, kds, kde,                  &
                          ims, ime, jms, jme, kms, kme,                  &
-                         its, ite, jts, jte, kts, kte)
-!
-! This subroutine assumes uniform distribution of ozone concentration.
-! It should be replaced by monthly climatology that varies latitudinally
-! and vertically
+                         its, ite, jts, jte, kts, kte,                  &
+                         mpirank, mpiroot,errflg,errmsg)
 !
 
 !MZ* #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
-!  use mpi
+     use mpi
 !  use module_dm, only: local_communicator
 !MZ*#endif
        IMPLICIT NONE
@@ -1434,6 +1434,10 @@
               INTENT(OUT   ) ::                                  OZMIXM
 
        REAL,  DIMENSION(levsiz), INTENT(OUT )  ::                   PIN
+      integer,                   intent(in)    :: mpirank
+      integer,                   intent(in)    :: mpiroot
+      character(len=*),          intent(  out) :: errmsg
+      integer,                   intent(  out) :: errflg
 
 ! Local
        INTEGER, PARAMETER :: latsiz = 64
@@ -1452,7 +1456,7 @@
       itf=min0(ite,ide-1)
 
       if_have_ozone: if(.not.have_ozone) then
-       call wrf_debug(1,'Do not have ozone.  Must read it in.')
+       !mz call wrf_debug(1,'Do not have ozone.  Must read it in.')
        ! Allocate and set local aliases:
        levsiz_ozone_save=levsiz
        allocate(plev_ozone_save(levsiz),lat_ozone_save(latsiz))
@@ -1460,15 +1464,17 @@
        plev=>plev_ozone_save
        lat_ozone=>lat_ozone_save
        ozmixin=>ozmixin_save
-#if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
-       if_master: if(wrf_dm_on_monitor()) then
-       call wrf_debug(1,'Master rank reads ozone.')
-#endif
+!mz #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
+!mz       if_master: if(wrf_dm_on_monitor()) then
+       if (mpirank == mpiroot) then
+       !mz call wrf_debug(1,'Master rank reads ozone.')
+         write (0,*) 'Master rank reads ozone.'
+!mz #endif
 
 !-- read in ozone pressure data
 
-     WRITE(message,*)'num_months = ',num_months
-     CALL wrf_debug(50,message)
+     WRITE(0,*)'num_months = ',num_months
+     !mz CALL wrf_debug(50,message)
 
       pin_unit = 27
         OPEN(pin_unit, FILE='ozone_plev.formatted',FORM='FORMATTED',STATUS='OLD')
@@ -1507,34 +1513,46 @@
       enddo
       enddo
       close(29)
-#if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
+!mz #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
       endif if_master
-      call wrf_debug(1,"Broadcast ozone to other ranks.")
-# if ( RWORDSIZE == DWORDSIZE )
+!mz      call wrf_debug(1,"Broadcast ozone to other ranks.")
+!# if ( RWORDSIZE == DWORDSIZE )
       call MPI_Bcast(ozmixin,size(ozmixin),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
       call MPI_Bcast(pin,size(pin),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
       plev=pin
       call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
-# else
+!mz# else
       call MPI_Bcast(ozmixin,size(ozmixin),MPI_REAL,0,local_communicator,ierr)
       call MPI_Bcast(pin,size(pin),MPI_REAL,0,local_communicator,ierr)
       plev=pin
       call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_REAL,0,local_communicator,ierr)
-# endif
-#endif
+!mz# endif
+!mz#endif
      else ! already read in ozone data
       ! Make sure, first:
       if(levsiz/=levsiz_ozone_save) then
+#ifdef CCPP
+         errflg = 1
+         errmsg = 'Logic error in caller: levsiz'
+         return
+#else
 3081     format('Logic error in caller: levsiz=',I0,' but prior call    &
                  used ',I0,'.')
          write(message,3081) levsiz,levsiz_ozone_save
          call wrf_error_fatal(message)
+#endif
       endif
 
       if(.not.(associated(plev_ozone_save) .and. &
                associated(lat_ozone_save) .and. &
                associated(ozmixin_save))) then
+#ifdef CCPP
+          errflg = 1
+          errmsg = 'Ozone save arrays are not allocated.'        
+          return
+#else
           call wrf_error_fatal('Ozone save arrays are not allocated.')
+#endif
       endif
       ! Recover the pointers to allocated data:
       plev=>plev_ozone_save
