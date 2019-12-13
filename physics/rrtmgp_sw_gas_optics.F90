@@ -1,6 +1,5 @@
 module rrtmgp_sw_gas_optics
   use machine,                only: kind_phys
-  use GFS_typedefs,           only: GFS_control_type
   use module_radiation_gases, only: NF_VGAS
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
@@ -121,11 +120,9 @@ contains
     errmsg = ''
     errflg = 0
 
-    ! Filenames are set in the gfs_physics_nml (GFS_typedefs.F90)
+    ! Filenames are set in the gphysics_nml
     sw_gas_props_file   = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_gas)
-    print*,'sw_gas_props_file: ',sw_gas_props_file
-    print*,'1; ',rrtmgp_root_dir
-    print*,'2; ',rrtmgp_sw_file_gas
+
     ! Read dimensions for k-distribution fields (only on master processor(0))
 !    if (mpirank .eq. mpiroot) then
        if(nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid_sw) .eq. NF90_NOERR) then

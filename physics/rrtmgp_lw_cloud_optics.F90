@@ -100,7 +100,7 @@ contains
 
     if (cld_optics_scheme .eq. 0) return
 
-    ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
+    ! Filenames are set in the physics_nml
     lw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_clouds)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
@@ -437,7 +437,7 @@ contains
        endif
     endif
 
-    ! GFS_RRTMGP_POST_RUN() requires the LW optical depth ~10microns
+    ! All-sky LW optical depth ~10microns
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)
 
   end subroutine rrtmgp_lw_cloud_optics_run

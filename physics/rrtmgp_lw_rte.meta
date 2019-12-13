@@ -1,25 +1,25 @@
 [ccpp-arg-table]
   name = rrtmgp_lw_rte_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
+[doLWrad]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
   dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[Statein]
-  standard_name = GFS_statein_type_instance
-  long_name = instance of derived type GFS_statein_type
-  units = DDT
-  dimensions = ()
-  type = GFS_statein_type
+  type = logical
   intent = in
   optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
   units = count
   dimensions = ()
   type = integer
@@ -108,14 +108,6 @@
   units = DDT
   dimensions = ()
   type = ty_source_func_lw
-  intent = in
-  optional = F
-[lslwr]
-  standard_name = flag_to_calc_lw
-  long_name = flag to calculate LW irradiances
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
   optional = F
 [hlw0]

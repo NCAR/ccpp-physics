@@ -1,6 +1,5 @@
 module rrtmgp_sw_rte
   use machine,                 only: kind_phys
-  use GFS_typedefs,            only: GFS_control_type, GFS_radtend_type, GFS_statein_type
   use mo_rte_kind,             only: wl
   use mo_gas_optics_rrtmgp,    only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,         only: ty_cloud_optics
@@ -27,37 +26,37 @@ contains
 !! \section arg_table_rrtmgp_sw_rte_run
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
-  subroutine rrtmgp_sw_rte_run(Model, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay,   &
-       p_lev, gas_concentrations, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,&
-       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clouds,           &
-       sw_optical_props_aerosol, lsswr, nday, idxday, hsw0, hswb, rrtmgp_nGases, active_gases_array, scmpsw, fluxswUP_allsky,  &
-       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
+  subroutine rrtmgp_sw_rte_run(doSWrad, nCol, nLev, nDay, idxday, coszen, p_lay, t_lay,      &
+       p_lev, sw_gas_props, gas_concentrations, sw_optical_props_clrsky, sfc_alb_nir_dir,    &
+       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw,                    &
+       sw_optical_props_clouds, sw_optical_props_aerosol, rrtmgp_nGases, active_gases_array, &
+       scmpsw, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky,       &
+       hsw0, hswb, errmsg, errflg)
 
     ! Inputs
-
+    logical, intent(in) :: &
+         doSWrad                    ! Flag to calculate SW irradiances
     integer, intent(in) :: &
-         rrtmgp_nGases       ! Number of trace gases active in RRTMGP
-    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
-         active_gases_array  ! Character array containing trace gases to include in RRTMGP
-
-    type(GFS_control_type), intent(in)    :: &
-         Model
-    type(GFS_radtend_type), intent(in)    :: &
-         Radtend
-    type(GFS_statein_type), intent(in) :: &
-         Statein                    ! DDT: FV3-GFS prognostic state data in from dycore 
-    integer, intent(in) :: &
-         ncol,                    & ! Number of horizontal gridpoints
-         nday                       ! Number of daytime points
+         nCol,                    & ! Number of horizontal gridpoints
+         nday,                    & ! Number of daytime points
+         nLev                       ! Number of vertical levels
     integer, intent(in), dimension(ncol) :: &
          idxday                     ! Index array for daytime points
-    real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
+    real(kind_phys),intent(in), dimension(ncol) :: &
+         coszen                     ! Cosize of SZA
+    real(kind_phys), dimension(ncol,NLev), intent(in) :: &
          p_lay,                   & ! Pressure @ model layer-centers (Pa)
          t_lay                      ! Temperature (K)
-    real(kind_phys), dimension(ncol,Model%levs+1), intent(in) :: &
+    real(kind_phys), dimension(ncol,NLev+1), intent(in) :: &
          p_lev                      ! Pressure @ model layer-interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props               ! RRTMGP DDT: SW spectral information
+    type(ty_gas_concs),intent(in) :: &
+         gas_concentrations         ! RRTMGP DDT: trace gas concentrations (vmr)
+    type(ty_optical_props_2str),intent(inout) :: &
+         sw_optical_props_clrsky, & ! RRTMGP DDT: shortwave clear-sky radiative properties 
+         sw_optical_props_clouds, & ! RRTMGP DDT: shortwave cloud radiative properties 
+         sw_optical_props_aerosol   ! RRTMGP DDT: shortwave aerosol radiative properties
     real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
          sfc_alb_nir_dir,         & ! Surface albedo (direct) 
          sfc_alb_nir_dif,         & ! Surface albedo (diffuse)
@@ -65,29 +64,28 @@ contains
          sfc_alb_uvvis_dif          ! Surface albedo (diffuse)
     real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(in) :: &
          toa_src_sw                 ! TOA incident spectral flux (W/m2)
-    type(ty_optical_props_2str),intent(inout) :: &
-         sw_optical_props_clrsky, & ! RRTMGP DDT: longwave clear-sky radiative properties 
-         sw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
-         sw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
-    type(ty_gas_concs),intent(in) :: &
-         gas_concentrations         ! RRTMGP DDT: trace gas concentrations   (vmr)
-    logical, intent(in) :: &
-         lsswr                      ! Flag to calculate SW irradiances
+    integer, intent(in) :: &
+         rrtmgp_nGases              ! Number of trace gases active in RRTMGP
+    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
+         active_gases_array         ! Character array containing trace gases to include in RRTMGP
+
+    ! Inputs (optional) (NOTE. We only need the optional arguments to know what fluxes to output, HR's are computed later)
+    real(kind_phys), dimension(ncol,NLev), optional, intent(inout) :: &
+         hsw0                       ! Clear-sky heating rate (K/sec)
+    real(kind_phys), dimension(ncol,NLev,sw_gas_props%get_nband()), intent(inout), optional :: &
+         hswb                       ! All-sky heating rate, by band (K/sec)
 
     ! Outputs
-    character(len=*), intent(out) :: errmsg
-    integer, intent(out) :: errflg
-    real(kind_phys), dimension(ncol,Model%levs+1), intent(inout) :: &
+    character(len=*), intent(out) :: &
+         errmsg                     ! CCPP error message
+    integer, intent(out) :: &
+         errflg                     ! CCPP error flag
+    real(kind_phys), dimension(ncol,NLev+1), intent(inout) :: &
          fluxswUP_allsky,         & ! RRTMGP upward all-sky flux profiles (W/m2)
          fluxswDOWN_allsky,       & ! RRTMGP downward all-sky flux profiles (W/m2)
          fluxswUP_clrsky,         & ! RRTMGP upward clear-sky flux profiles (W/m2)
          fluxswDOWN_clrsky          ! RRTMGP downward clear-sky flux profiles (W/m2)
 
-    ! Inputs (optional) (NOTE. We only need the optional arguments to know what fluxes to output, HR's are computed later)
-    real(kind_phys), dimension(ncol,Model%levs), optional, intent(inout) :: &
-         hsw0                       ! Clear-sky heating rate (K/sec)
-    real(kind_phys), dimension(ncol,Model%levs,sw_gas_props%get_nband()), intent(inout), optional :: &
-         hswb                       ! All-sky heating rate, by band (K/sec)
     ! Outputs (optional)
     type(cmpfsw_type), dimension(ncol), intent(inout),optional :: &
          scmpsw                     ! 2D surface fluxes, components:
@@ -104,9 +102,9 @@ contains
     type(ty_fluxes_byband) :: &
          flux_allsky, & ! All-sky flux (W/m2)
          flux_clrsky    ! Clear-sky flux (W/m2)
-    real(kind_phys), dimension(nday,Model%levs+1,sw_gas_props%get_nband()),target :: &
+    real(kind_phys), dimension(nday,NLev+1,sw_gas_props%get_nband()),target :: &
          fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
-    real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
+    real(kind_phys), dimension(ncol,NLev) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false., top_at_1
     integer :: iGas,iSFC,iTOA
     type(ty_optical_props_2str)  :: &
@@ -120,17 +118,17 @@ contains
     errmsg = ''
     errflg  = 0
 
-    if (.not. lsswr) return
+    if (.not. doSWrad) return
     if (nDay .gt. 0) then
 
        ! Vertical ordering?
-       top_at_1 = (p_lev(1,1) .lt. p_lev(1, Model%levs))
+       top_at_1 = (p_lev(1,1) .lt. p_lev(1, NLev))
        if (top_at_1) then 
-          iSFC = Model%levs+1
+          iSFC = NLev+1
           iTOA = 1
        else
           iSFC = 1
-          iTOA = Model%levs+1
+          iTOA = NLev+1
        endif
        
        ! Are any optional outputs requested? Need to know now to compute correct fluxes.
@@ -173,13 +171,13 @@ contains
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky%delta_scale())
        if (l_ClrSky_HR) then
           call check_error_msg('rrtmgp_sw_rte_run',rte_sw(     &
-               sw_optical_props_clrsky,           & ! IN  - optical-properties
-               top_at_1,                          & ! IN  - veritcal ordering flag
-               Radtend%coszen(idxday(1:nday)),    & ! IN  - Cosine of solar zenith angle
-               toa_src_sw(idxday(1:nday),:),      & ! IN  - incident solar flux at TOA
-               sfc_alb_dir,                       & ! IN  - Shortwave surface albedo (direct)
-               sfc_alb_dif,                       & ! IN  - Shortwave surface albedo (diffuse)
-               flux_clrsky))                        ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
+               sw_optical_props_clrsky,      & ! IN  - optical-properties
+               top_at_1,                     & ! IN  - veritcal ordering flag
+               coszen(idxday(1:nday)),       & ! IN  - Cosine of solar zenith angle
+               toa_src_sw(idxday(1:nday),:), & ! IN  - incident solar flux at TOA
+               sfc_alb_dir,                  & ! IN  - Shortwave surface albedo (direct)
+               sfc_alb_dif,                  & ! IN  - Shortwave surface albedo (diffuse)
+               flux_clrsky))                   ! OUT - Fluxes, clear-sky, 3D (nCol,NLev,nBand) 
           ! Store fluxes
           fluxswUP_clrsky(idxday(1:nday),:)   = sum(flux_clrsky%bnd_flux_up,dim=3)
           fluxswDOWN_clrsky(idxday(1:nday),:) = sum(flux_clrsky%bnd_flux_dn,dim=3)
@@ -191,13 +189,13 @@ contains
        ! Delta-scale optical properties
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds%delta_scale())
        call check_error_msg('rrtmgp_sw_rte_run',rte_sw(     &
-            sw_optical_props_clrsky,           & ! IN  - optical-properties
-            top_at_1,                          & ! IN  - veritcal ordering flag
-            Radtend%coszen(idxday(1:nday)),    & ! IN  - Cosine of solar zenith angle
-            toa_src_sw(idxday(1:nday),:),      & ! IN  - incident solar flux at TOA
-            sfc_alb_dir,                       & ! IN  - Shortwave surface albedo (direct)
-            sfc_alb_dif,                       & ! IN  - Shortwave surface albedo (diffuse)
-            flux_allsky))                        ! OUT - Fluxes, clear-sky, 3D (nCol,Model%levs,nBand) 
+            sw_optical_props_clrsky,      & ! IN  - optical-properties
+            top_at_1,                     & ! IN  - veritcal ordering flag
+            coszen(idxday(1:nday)),       & ! IN  - Cosine of solar zenith angle
+            toa_src_sw(idxday(1:nday),:), & ! IN  - incident solar flux at TOA
+            sfc_alb_dir,                  & ! IN  - Shortwave surface albedo (direct)
+            sfc_alb_dif,                  & ! IN  - Shortwave surface albedo (diffuse)
+            flux_allsky))                   ! OUT - Fluxes, clear-sky, 3D (nCol,NLev,nBand) 
        ! Store fluxes
        fluxswUP_allsky(idxday(1:nday),:)   = sum(flux_allsky%bnd_flux_up,dim=3)
        fluxswDOWN_allsky(idxday(1:nday),:) = sum(flux_allsky%bnd_flux_dn,dim=3)

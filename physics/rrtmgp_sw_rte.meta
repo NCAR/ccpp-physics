@@ -1,45 +1,12 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_rte_run
   type = scheme
-[rrtmgp_nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=128
-  intent = in
-  optional = F
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
+[doSWrad]
+  standard_name = flag_to_calc_sw
+  long_name = flag to calculate SW irradiances
+  units = flag
   dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = instance of derived type GFS_radtend_type
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = in
-  optional = F
-[Statein]
-  standard_name = GFS_statein_type_instance
-  long_name = instance of derived type GFS_statein_type
-  units = DDT
-  dimensions = ()
-  type = GFS_statein_type
+  type = logical
   intent = in
   optional = F
 [ncol]
@@ -48,6 +15,39 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[idxday]
+  standard_name = daytime_points
+  long_name = daytime points
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[coszen]
+  standard_name = cosine_of_zenith_angle
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [p_lay]
@@ -162,48 +162,23 @@
   kind = kind_phys
   intent = in
   optional = F
-[lsswr]
-  standard_name = flag_to_calc_sw
-  long_name = flag to calculate SW irradiances
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[nday]
-  standard_name = daytime_points_dimension
-  long_name = daytime points dimension
+[rrtmgp_nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP
   units = count
-  dimensions = ()
+  dimensions =  ()
   type = integer
   intent = in
   optional = F
-[idxday]
-  standard_name = daytime_points
-  long_name = daytime points
-  units = index
-  dimensions = (horizontal_dimension)
-  type = integer
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=128
   intent = in
   optional = F
-[hsw0]
-  standard_name = RRTMGP_sw_heating_rate_clear_sky
-  long_name = shortwave clear sky heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = T
-[hswb]
-  standard_name = RRTMGP_sw_heating_rate_spectral
-  long_name = shortwave total sky heating rate (spectral)
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_sw_spectral_points_rrtmgp)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = T
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
@@ -248,6 +223,24 @@
   kind = kind_phys
   intent = inout
   optional = F
+[hsw0]
+  standard_name = RRTMGP_sw_heating_rate_clear_sky
+  long_name = shortwave clear sky heating rate
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[hswb]
+  standard_name = RRTMGP_sw_heating_rate_spectral
+  long_name = shortwave total sky heating rate (spectral)
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_sw_spectral_points_rrtmgp)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -123,7 +123,7 @@ contains
     errmsg = ''
     errflg = 0
 
-    ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
+    ! Filenames are set in the physics_nml
     lw_gas_props_file  = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_gas)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
