@@ -74,6 +74,7 @@
   units = degree
   dimensions = (horizontal_dimension)
   type = real
+  kind = kind_phys
   intent = in
   optional = F
 [xlong]
@@ -82,6 +83,7 @@
   units = degree
   dimensions = (horizontal_dimension)
   type = real
+  kind = kind_phys
   intent = in
   optional = F
 [n_ozmixm]

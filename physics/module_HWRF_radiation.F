@@ -114,43 +114,6 @@
       kte = levr
 
 
-! Initialze ALBEDO in phy_init
-      ALBLND =0.2
-      
-      DO j=jts,jtf
-      DO i=its,itf
-         IF(XLAND(i,j) .LT. 1.5)THEN    !mz:land
-            IF(mminlu_loc .EQ. '    ') ALBBCK(i,j)=ALBLND
-            !EMBCK(i,j)=0.85
-            ALBEDO(i,j)=ALBBCK(i,j)
-            !EMISS(i,j)=EMBCK(i,j)
-            !THC(i,j)=THINLD
-            !ZNT(i,j)=ZZLND
-!#if  ! ( NMM_CORE == 1 )
-            !Z0(i,j)=ZZLND
-!#endif
-            !MAVAIL(i,j)=XMAVA
-         ELSE
-            IF(mminlu_loc .EQ. '    ') ALBBCK(i,j)=0.08
-            ALBEDO(i,j)=ALBBCK(i,j)
-            !EMBCK(i,j)=0.98
-            !EMISS(i,j)=EMBCK(i,j)
-            !THC(i,j)=THINLD
-            !ZNT(i,j)=ZZWTR
-!#if  ! ( NMM_CORE == 1 )
-            !Z0(i,j)=ZZWTR
-!#endif
-            !MAVAIL(i,j)=1.0
-         ENDIF
-
-      ENDDO
-      ENDDO
-
-
-
-
-
-
 !---------------------------------------------------------------------
 
 !-- calculate radiation time step
@@ -181,7 +144,9 @@
       CALL oznini(ozmixm,pin,levsiz,n_ozmixm,XLAT,                      &
                      ids, ide, jds, jde, kds, kde,                      &
                      ims, ime, jms, jme, kms, kme,                      &
-                     its, ite, jts, jte, kts, kte)
+                     its, ite, jts, jte, kts, kte,                      &
+                     mpirank, mpiroot, errflg, errmsg)
+                   
       if (errflg /= 0) return
 
       CALL aerosol_in(aerodm,pina,alevsiz,n_ozmixm-1,                   &
