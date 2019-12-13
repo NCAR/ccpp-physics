@@ -1,14 +1,40 @@
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_optics_init
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
+[cld_optics_scheme]
+  standard_name = rrtmgp_cloud_optics_flag
+  long_name = Flag to control which RRTMGP cloud-optics scheme
+  units = flag
+  dimensions =  ()
+  type = integer
   intent = in
   optional = F
+[nrghice]
+  standard_name = number_of_rrtmgp_ice_roughness
+  long_name = number of ice-roughness categories in RRTMGP calculation
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
+[rrtmgp_root_dir]
+  standard_name = directory_for_rte_rrtmgp_source_code
+  long_name = directory for rte+rrtmgp source code
+  units = none
+  dimensions =  ()
+  type = character
+  intent = in
+  optional = F
+  kind = len=128
+[rrtmgp_lw_file_clouds]
+  standard_name = rrtmgp_coeff_lw_cloud_optics 
+  long_name = file containing coefficients for RRTMGP LW cloud optics
+  units = none
+  dimensions =  ()
+  type = character
+  intent = in
+  optional = F
+  kind = len=128
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
@@ -63,12 +89,12 @@
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_optics_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
+[doLWrad]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
   dimensions = ()
-  type = GFS_control_type
+  type = logical
   intent = in
   optional = F
 [ncol]
@@ -76,6 +102,30 @@
   long_name = horizontal dimension
   units = count
   dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cld_optics_scheme]
+  standard_name = rrtmgp_cloud_optics_flag
+  long_name = Flag to control which RRTMGP cloud-optics scheme
+  units = flag
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
+[nrghice]
+  standard_name = number_of_rrtmgp_ice_roughness
+  long_name = number of ice-roughness categories in RRTMGP calculation
+  units = count
+  dimensions =  ()
   type = integer
   intent = in
   optional = F

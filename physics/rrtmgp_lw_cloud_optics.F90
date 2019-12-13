@@ -1,15 +1,9 @@
-!>\file rrtmgp_lw_cloud_optics.F90
-!! This file contains
 module rrtmgp_lw_cloud_optics
   use machine,                  only: kind_phys
-  use GFS_typedefs,             only: GFS_control_type
   use mo_rte_kind,              only: wl
   use mo_cloud_optics,          only: ty_cloud_optics
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
-  use physparam,                only: isubclw, iovrlw
   use mo_optical_props,         only: ty_optical_props_1scl
-  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
-  use mersenne_twister,         only: random_setseed, random_number, random_stat
   use mo_rrtmg_lw_cloud_optics, only: rrtmg_lw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
@@ -17,33 +11,36 @@ module rrtmgp_lw_cloud_optics
   public rrtmgp_lw_cloud_optics_init, rrtmgp_lw_cloud_optics_run, rrtmgp_lw_cloud_optics_finalize
 contains
 
-!! \section arg_table_rrtmgp_lw_cloud_optics_init
-!! \htmlinclude rrtmgp_lw_cloud_optics.html
-!!
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_init()
   ! #########################################################################################
-  subroutine rrtmgp_lw_cloud_optics_init(Model, mpicomm, mpirank, mpiroot, lw_cloud_props,  &
-       errmsg, errflg)
+!! \section arg_table_rrtmgp_lw_cloud_optics_init
+!! \htmlinclude rrtmgp_lw_cloud_optics.html
+!!
+  subroutine rrtmgp_lw_cloud_optics_init(cld_optics_scheme, nrghice, rrtmgp_root_dir,       &
+       rrtmgp_lw_file_clouds, mpicomm, mpirank, mpiroot, lw_cloud_props, errmsg, errflg)
 !#ifdef MPI
 !    use mpi
 !#endif
 
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model          ! DDT containing model control parameters
-    integer,intent(in) :: &
-         mpicomm,     & ! MPI communicator
-         mpirank,     & ! Current MPI rank
-         mpiroot        ! Master MPI rank
+    integer, intent(in) :: &
+         nrghice,            & ! Number of ice-roughness categories
+         cld_optics_scheme,  & ! Cloud-optics scheme
+         mpicomm,            & ! MPI communicator
+         mpirank,            & ! Current MPI rank
+         mpiroot               ! Master MPI rank
+    character(len=128),intent(in) :: &
+         rrtmgp_root_dir,    & ! RTE-RRTMGP root directory
+         rrtmgp_lw_file_clouds ! RRTMGP file containing coefficients used to compute clouds optical properties
  
     ! Outputs
     type(ty_cloud_optics),intent(out) :: &
-         lw_cloud_props ! DDT containing spectral information for RRTMGP LW radiation scheme
+         lw_cloud_props        ! RRTMGP DDT: spectral information for RRTMGP LW radiation scheme
     character(len=*), intent(out) :: &
-         errmsg         ! Error message
+         errmsg                ! Error message
     integer,          intent(out) :: &
-         errflg         ! Error code
+         errflg                ! Error code
 
     ! Variables that will be passed to cloud_optics%load()
     real(kind_phys) :: &
@@ -101,10 +98,10 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (Model%rrtmgp_cld_optics .eq. 0) return
+    if (cld_optics_scheme .eq. 0) return
 
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
-    lw_cloud_props_file = trim(Model%rrtmgp_root)//trim(Model%lw_file_clouds)
+    lw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_clouds)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
 !    if (mpirank .eq. mpiroot) then
@@ -131,14 +128,14 @@ contains
        endif
 
        ! Check to ensure that number of ice-roughness categories is feasible.
-       if (Model%rrtmgp_nrghice .gt. nrghice_lw) then
+       if (nrghice .gt. nrghice_lw) then
           errmsg = 'Number of RRTMGP ice-roughness categories requested in namelist file is not allowed'
        endif
 !    endif
 
 !    ! Broadcast dimensions to all processors
 !#ifdef MPI
-!    if (Model%rrtmgp_cld_optics .eq. 1 .or. Model%rrtmgp_cld_optics .eq. 2) then
+!    if (Cld_optics_scheme .eq. 1 .or. Cld_optics_scheme .eq. 2) then
 !       call MPI_BCAST(nbandLWcldy,  1, MPI_INTEGER, mpiroot, mpicomm, ierr)
 !       call MPI_BCAST(nrghice_lw,   1, MPI_INTEGER, mpiroot, mpicomm, ierr)
 !       call MPI_BCAST(nsize_liq,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
@@ -151,7 +148,7 @@ contains
 !    endif
 !#endif
 
-    if (Model%rrtmgp_cld_optics .eq. 1) then
+    if (Cld_optics_scheme .eq. 1) then
        allocate(lut_extliq(nsize_liq, nBandLWcldy))
        allocate(lut_ssaliq(nsize_liq, nBandLWcldy))
        allocate(lut_asyliq(nsize_liq, nBandLWcldy))
@@ -160,7 +157,7 @@ contains
        allocate(lut_asyice(nsize_ice, nBandLWcldy, nrghice_lw))
        allocate(band_lims_cldy(2, nBandLWcldy))
     endif
-    if (Model%rrtmgp_cld_optics .eq. 2) then
+    if (Cld_optics_scheme .eq. 2) then
        allocate(pade_extliq(nbandLWcldy, nsizereg,  ncoeff_ext ))
        allocate(pade_ssaliq(nbandLWcldy, nsizereg,  ncoeff_ssa_g))
        allocate(pade_asyliq(nbandLWcldy, nsizereg,  ncoeff_ssa_g))
@@ -179,7 +176,7 @@ contains
     ! On master processor, allocate space, read in fields, broadcast to all processors
 !    if (mpirank .eq. mpiroot) then
        ! 
-       if (Model%rrtmgp_cld_optics .eq. 1) then
+       if (Cld_optics_scheme .eq. 1) then
           write (*,*) 'Reading RRTMGP longwave cloud data (LUT) ... '
           !
           if(nf90_open(trim(lw_cloud_props_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
@@ -213,7 +210,7 @@ contains
           endif
        endif
        !
-       if (Model%rrtmgp_cld_optics .eq. 2) then
+       if (Cld_optics_scheme .eq. 2) then
           write (*,*) 'Reading RRTMGP longwave cloud data (PADE) ... '
           !
           if(nf90_open(trim(lw_cloud_props_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
@@ -262,7 +259,7 @@ contains
 
 !    ! Broadcast arrays to all processors
 !#ifdef MPI
-!    if (Model%rrtmgp_cld_optics .eq. 1) then
+!    if (Cld_optics_scheme .eq. 1) then
 !       write (*,*) 'Broadcasting RRTMGP longwave cloud data (LUT) ... '
 !#ifndef SINGLE_PREC
 !       call MPI_BCAST(radliq_lwr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
@@ -294,7 +291,7 @@ contains
 !       call MPI_BCAST(band_lims_cldy ,      size(band_lims_cldy),      MPI_REAL,               mpiroot, mpicomm, ierr)
 !#endif
 !    endif
-!    if (Model%rrtmgp_cld_optics .eq. 2) then
+!    if (Cld_optics_scheme .eq. 2) then
 !       write (*,*) 'Broadcasting RRTMGP longwave cloud data (PADE) ... '
 !#ifndef SINGLE_PREC
 !       call MPI_BCAST(pade_extliq,          size(pade_extliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
@@ -329,14 +326,14 @@ contains
 !#endif
 
     ! Load tables data for RRTMGP cloud-optics  
-    if (Model%rrtmgp_cld_optics .eq. 1) then
-       call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(Model%rrtmgp_nrghice))
+    if (cld_optics_scheme .eq. 1) then
+       call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(nrghice))
        call check_error_msg('lw_cloud_optics_init',lw_cloud_props%load(band_lims_cldy, &
             radliq_lwr, radliq_upr, radliq_fac, radice_lwr, radice_upr, radice_fac,    &
             lut_extliq, lut_ssaliq, lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
-    if (Model%rrtmgp_cld_optics .eq. 2) then
-       call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(Model%rrtmgp_nrghice))
+    if (cld_optics_scheme .eq. 2) then
+       call check_error_msg('lw_cloud_optics_init',lw_cloud_props%set_ice_roughness(nrghice))
        call check_error_msg('lw_cloud_optics_init',lw_cloud_props%load(band_lims_cldy, &
             pade_extliq, pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice,           &
             pade_asyice, pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,&
@@ -344,23 +341,26 @@ contains
     endif
   end subroutine rrtmgp_lw_cloud_optics_init
 
-
-!! \section arg_table_rrtmgp_lw_cloud_optics_run
-!! \htmlinclude rrtmgp_lw_cloud_optics.html
-!!
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_run()
   ! #########################################################################################
-  subroutine rrtmgp_lw_cloud_optics_run(Model, ncol, cld_frac, cld_lwp, cld_reliq, cld_iwp, &
-       cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, lw_cloud_props, lw_gas_props,   &
-       cldtaulw, lw_optical_props_cloudsByBand,  errmsg, errflg)
+!! \section arg_table_rrtmgp_lw_cloud_optics_run
+!! \htmlinclude rrtmgp_lw_cloud_optics.html
+!!
+  subroutine rrtmgp_lw_cloud_optics_run(doLWrad, nCol, nLev, cld_optics_scheme, nrghice,    &
+       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,      &
+       cld_rerain, lw_cloud_props, lw_gas_props, cldtaulw, lw_optical_props_cloudsByBand,   &
+       errmsg, errflg)
     
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model               ! DDT containing FV3-GFS model control parameters 
+    logical, intent(in) :: &
+         doLWrad            ! Logical flag for longwave radiation call
     integer, intent(in) :: &
-         ncol                ! Number of horizontal gridpoints
-    real(kind_phys), dimension(ncol,model%levs),intent(in) :: &
+         nCol,             & ! Number of horizontal gridpoints
+         nLev,             & ! Number of vertical levels
+         nrghice,          & ! Number of ice-roughness categories
+         cld_optics_scheme   ! Cloud-optics scheme
+    real(kind_phys), dimension(ncol,nLev),intent(in) :: &
          cld_frac,         & ! Total cloud fraction by layer
          cld_lwp,          & ! Cloud liquid water path
          cld_reliq,        & ! Cloud liquid effective radius
@@ -371,30 +371,30 @@ contains
          cld_rwp,          & ! Cloud rain water path       (used only fro RRTMG scheme)
          cld_rerain          ! Cloud rain effective radius (used only fro RRTMG scheme)
     type(ty_cloud_optics),intent(in) :: &
-         lw_cloud_props      !
+         lw_cloud_props      ! RRTMGP DDT: spectral information for RRTMGP LW radiation scheme
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props
-
+         lw_gas_props        ! RRTMGP DDT: spectral information for RRTMGP LW radiation scheme
+ 
     ! Outputs
-    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
-         cldtaulw                      ! approx 10.mu band layer cloud optical depth  
+    real(kind_phys), dimension(ncol,nLev), intent(out) :: &
+         cldtaulw                      ! Approx. 10.mu band layer cloud optical depth  
     type(ty_optical_props_1scl),intent(out) :: &
-         lw_optical_props_cloudsByBand !
+         lw_optical_props_cloudsByBand ! RRTMGP DDT: longwave cloud optical properties in each band
     integer, intent(out) :: &
-         errflg                        !
+         errflg                        ! Error flag
     character(len=*), intent(out) :: &
-         errmsg                        !
+         errmsg                        ! Error message
 
     ! Local variables
-    logical,dimension(ncol,model%levs) :: liqmask, icemask
-    real(kind_phys), dimension(ncol,model%levs,lw_gas_props%get_nband()) :: &
+    logical,dimension(ncol,nLev) :: liqmask, icemask
+    real(kind_phys), dimension(ncol,nLev,lw_gas_props%get_nband()) :: &
          tau_cld
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
-    if (.not. Model%lslwr) return
+    if (.not. doLWrad) return
     
     ! #######################################################################################
     ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
@@ -405,20 +405,20 @@ contains
     ! #######################################################################################
     ! Allocate space for RRTMGP DDTs containing cloud radiative properties
     ! #######################################################################################
-    ! Cloud optics [nCol,model%levs,nBands]
+    ! Cloud optics [nCol,nLev,nBands]
     call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_1scl(&
-         ncol, model%levs, lw_gas_props%get_band_lims_wavenumber()))
+         ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
 
     ! #######################################################################################
     ! Compute cloud-optics for RTE.
     ! #######################################################################################
-    if (Model%rrtmgp_cld_optics .gt. 0) then
+    if (rrtmgp_cld_optics .gt. 0) then
        ! i) RRTMGP cloud-optics.
        call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_cloud_props%cloud_optics(&
             ncol,                       & ! IN  - Number of horizontal gridpoints 
-            model%levs,                 & ! IN  - Number of vertical layers
+            nLev,                       & ! IN  - Number of vertical layers
             lw_cloud_props%get_nband(), & ! IN  - Number of LW bands
-            Model%rrtmgp_nrghice,       & ! IN  - Number of ice-roughness categories
+            nrghice,                    & ! IN  - Number of ice-roughness categories
             liqmask,                    & ! IN  - Liquid-cloud mask
             icemask,                    & ! IN  - Ice-cloud mask
             cld_lwp,                    & ! IN  - Cloud liquid water path
@@ -430,7 +430,7 @@ contains
     else
        ! ii) RRTMG cloud-optics.
        if (any(cld_frac .gt. 0)) then
-          call rrtmg_lw_cloud_optics(ncol, model%levs, lw_gas_props%get_nband(), cld_lwp,     &
+          call rrtmg_lw_cloud_optics(ncol, nLev, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow,    &
                cld_frac, tau_cld)
           lw_optical_props_cloudsByBand%tau = tau_cld

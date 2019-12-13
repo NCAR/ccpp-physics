@@ -18,29 +18,34 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_init
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_init(Model,  mpicomm, mpirank, mpiroot, sw_gas_props, &
-       ipsdsw0, errmsg, errflg)
+  subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_nGases,   &
+       active_gases_array, mpicomm, mpirank, mpiroot, sw_gas_props, ipsdsw0, errmsg, errflg)
     use netcdf
 !#ifdef MPI
 !    use mpi
 !#endif
 
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model      ! DDT containing model control parameters
+    character(len=128),intent(in) :: &
+         rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
+         rrtmgp_sw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
+    integer, intent(in) :: &
+         rrtmgp_nGases       ! Number of trace gases active in RRTMGP
+    character(len=128),dimension(rrtmgp_nGases), intent(in) :: &
+         active_gases_array  ! Character array containing trace gases to include in RRTMGP
     integer,intent(in) :: &
-         mpicomm, & ! MPI communicator
-         mpirank, & ! Current MPI rank
-         mpiroot    ! Master MPI rank
-
+         mpicomm,          & ! MPI communicator
+         mpirank,          & ! Current MPI rank
+         mpiroot             ! Master MPI rank
+ 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg     ! Error message
+         errmsg              ! Error message
     integer,          intent(out) :: &
-         errflg,  & ! Error code
-         ipsdsw0    !
+         errflg,           & ! Error code
+         ipsdsw0             !
     type(ty_gas_optics_rrtmgp),intent(out) :: &
-         sw_gas_props
+         sw_gas_props        ! RRTMGP DDT: 
 
     ! Fields from the K-distribution files
     ! Variables that will be passed to gas_optics%load()
@@ -117,8 +122,10 @@ contains
     errflg = 0
 
     ! Filenames are set in the gfs_physics_nml (GFS_typedefs.F90)
-    sw_gas_props_file   = trim(Model%rrtmgp_root)//trim(Model%sw_file_gas)
-
+    sw_gas_props_file   = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_gas)
+    print*,'sw_gas_props_file: ',sw_gas_props_file
+    print*,'1; ',rrtmgp_root_dir
+    print*,'2; ',rrtmgp_sw_file_gas
     ! Read dimensions for k-distribution fields (only on master processor(0))
 !    if (mpirank .eq. mpiroot) then
        if(nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid_sw) .eq. NF90_NOERR) then
@@ -381,8 +388,8 @@ contains
 !#endif
 
     ! Initialize gas concentrations and gas optics class with data
-    do iGas=1,Model%nGases
-       call check_error_msg('sw_gas_optics_init',gas_concentrations%set_vmr(Model%active_gases_array(iGas), 0._kind_phys))
+    do iGas=1,rrtmgp_nGases
+       call check_error_msg('sw_gas_optics_init',gas_concentrations%set_vmr(active_gases_array(iGas), 0._kind_phys))
     enddo
     call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations, gas_names_sw,   &
          key_species_sw, band2gpt_sw, band_lims_sw, press_ref_sw, press_ref_trop_sw, temp_ref_sw,   &
@@ -405,32 +412,35 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_run
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_run(Model, sw_gas_props, ncol, nday, idxday, p_lay, p_lev,&
-       toa_src_sw, t_lay, t_lev, gas_concentrations, lsswr, solcon, sw_optical_props_clrsky,&
-       errmsg, errflg)
+  subroutine rrtmgp_sw_gas_optics_run(doSWrad, nCol, nLev, nday, idxday, sw_gas_props, p_lay,&
+       p_lev, toa_src_sw, t_lay, t_lev, gas_concentrations, solcon, rrtmgp_nGases,           &
+       active_gases_array, sw_optical_props_clrsky, errmsg, errflg)
 
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model                   ! DDT: FV3-GFS  model control parameters
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props            ! RRTMGP DDT: spectral information for RRTMGP SW radiation scheme
+    logical, intent(in) :: &
+         doSWrad             ! Flag to calculate SW irradiances
     integer,intent(in) :: &
-         nday,                 & ! Number of daylit points.
-         ncol                    ! Number of horizontal points
+         nDay,                 & ! Number of daylit points.
+         nCol,                 & ! Number of horizontal points
+         nLev                    ! Number of vertical levels
     integer,intent(in),dimension(ncol) :: &
          idxday                  ! Indices for daylit points.
-    real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
+    type(ty_gas_optics_rrtmgp),intent(in) :: &
+         sw_gas_props            ! RRTMGP DDT: spectral information for RRTMGP SW radiation scheme
+    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
          p_lay,                & ! Pressure @ model layer-centers         (hPa)
          t_lay                   ! Temperature                            (K)
-    real(kind_phys), dimension(ncol,model%levs+1), intent(in) :: &
+    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
          p_lev,                & ! Pressure @ model layer-interfaces      (hPa)
          t_lev                   ! Temperature @ model levels
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
-    logical, intent(in) :: &
-         lsswr                   ! Flag to calculate SW irradiances
     real(kind_phys), intent(in) :: &
          solcon                  ! Solar constant
+    integer, intent(in) :: &
+         rrtmgp_nGases       ! Number of trace gases active in RRTMGP
+    character(len=128),dimension(rrtmgp_nGases), intent(in) :: &
+         active_gases_array  ! Character array containing trace gases to include in RRTMGP
 
     ! Output
     character(len=*), intent(out) :: &
@@ -444,7 +454,7 @@ contains
 
     ! Local variables
     integer :: ij,iGas
-    real(kind_phys), dimension(ncol,Model%levs) :: vmrTemp
+    real(kind_phys), dimension(ncol,nLev) :: vmrTemp
     real(kind_phys), dimension(nday,sw_gas_props%get_ngpt()) :: toa_src_sw_temp
     type(ty_gas_concs) :: &
          gas_concentrations_daylit    ! RRTMGP DDT: trace gas concentrations   (vmr)
@@ -453,18 +463,18 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (.not. Model%lsswr) return
+    if (.not. doSWrad) return
 
     if (nDay .gt. 0) then
        ! Allocate space
-       call check_error_msg('rrtmgp_sw_gas_optics_run',sw_optical_props_clrsky%alloc_2str(nday, model%levs, sw_gas_props))
+       call check_error_msg('rrtmgp_sw_gas_optics_run',sw_optical_props_clrsky%alloc_2str(nday, nLev, sw_gas_props))
 
        ! Subset the gas concentrations, only need daylit points.
-       do iGas=1,Model%nGases
+       do iGas=1,rrtmgp_nGases
           call check_error_msg('rrtmgp_sw_rte_run',&
-               gas_concentrations%get_vmr(trim(Model%active_gases_array(iGas)),vmrTemp))
+               gas_concentrations%get_vmr(trim(active_gases_array(iGas)),vmrTemp))
           call check_error_msg('rrtmgp_sw_rte_run',&
-               gas_concentrations_daylit%set_vmr(trim(Model%active_gases_array(iGas)),vmrTemp(idxday(1:nday),:)))
+               gas_concentrations_daylit%set_vmr(trim(active_gases_array(iGas)),vmrTemp(idxday(1:nday),:)))
        enddo
 
        ! Gas-optics
@@ -483,7 +493,6 @@ contains
                                      sum(toa_src_sw(idxday(ij),:))
        enddo
     endif
-
 
   end subroutine rrtmgp_sw_gas_optics_run
 

@@ -1,6 +1,5 @@
 module rrtmgp_lw_gas_optics
   use machine,               only: kind_phys
-  use GFS_typedefs,          only: GFS_control_type
   use mo_rte_kind,           only: wl
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs  
@@ -18,8 +17,8 @@ contains
 !! \section arg_table_rrtmgp_lw_gas_optics_init
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
-  subroutine rrtmgp_lw_gas_optics_init(Model, mpicomm, mpirank, mpiroot, lw_gas_props,      &
-       ipsdlw0, errmsg, errflg)
+  subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_nGases,   &
+       active_gases_array, mpicomm, mpirank, mpiroot, lw_gas_props, ipsdlw0, errmsg, errflg)
     use netcdf
 
 !#ifdef MPI
@@ -27,25 +26,30 @@ contains
 !#endif
 
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model        ! DDT containing model control parameters
+    character(len=128),intent(in) :: &
+         rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
+         rrtmgp_lw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
+    integer, intent(in) :: &
+         rrtmgp_nGases       ! Number of trace gases active in RRTMGP
+    character(len=128),dimension(rrtmgp_nGases), intent(in) :: &
+         active_gases_array  ! Character array containing trace gases to include in RRTMGP
     integer,intent(in) :: &
-         mpicomm,   & ! MPI communicator
-         mpirank,   & ! Current MPI rank
-         mpiroot      ! Master MPI rank
+         mpicomm,          & ! MPI communicator
+         mpirank,          & ! Current MPI rank
+         mpiroot             ! Master MPI rank
  
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg       ! Error message
+         errmsg              ! Error message
     integer,          intent(out) :: &
-         errflg,    & ! Error code
-         ipsdlw0
+         errflg,           & ! Error code
+         ipsdlw0             !
     type(ty_gas_optics_rrtmgp),intent(out) :: &
-         lw_gas_props ! DDT containing spectral information for RRTMGP LW radiation scheme
+         lw_gas_props        ! RRTMGP DDT:
 
     ! Variables that will be passed to gas_optics%load()
     type(ty_gas_concs) :: &
-         gas_concentrations
+         gas_concentrations                 ! RRTMGP DDT: trace gas concentrations (vmr)
     integer, dimension(:), allocatable :: &
          kminor_start_lower,              & !   
          kminor_start_upper                 !   
@@ -120,7 +124,7 @@ contains
     errflg = 0
 
     ! Filenames are set in the gfs_physics_nml (scm/src/GFS_typedefs.F90)
-    lw_gas_props_file  = trim(Model%rrtmgp_root)//trim(Model%lw_file_gas)
+    lw_gas_props_file  = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_gas)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
 !    if (mpirank .eq. mpiroot) then
@@ -382,8 +386,8 @@ contains
 !#endif
 
     ! Initialize gas concentrations and gas optics class with data
-    do iGas=1,Model%nGases
-       call check_error_msg('lw_gas_optics_init',gas_concentrations%set_vmr(Model%active_gases_array(iGas), 0._kind_phys))
+    do iGas=1,rrtmgp_nGases
+       call check_error_msg('lw_gas_optics_init',gas_concentrations%set_vmr(active_gases_array(iGas), 0._kind_phys))
     enddo    
     call check_error_msg('lw_gas_optics_init',lw_gas_props%load(gas_concentrations, gas_names, &
          key_species, band2gpt, band_lims, press_ref, press_ref_trop, temp_ref,  temp_ref_p,   &
@@ -404,30 +408,27 @@ contains
 !! \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
-  subroutine rrtmgp_lw_gas_optics_run(Model, lw_gas_props, ncol, p_lay, p_lev, t_lay,&
-       t_lev, skt, gas_concentrations, lslwr, lw_optical_props_clrsky, sources,   &
-       errmsg, errflg)
+  subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, lw_gas_props, p_lay, p_lev, t_lay,&
+       t_lev, skt, gas_concentrations, lw_optical_props_clrsky, sources,  errmsg, errflg)
 
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model                   ! DDT containing model control parameters
-
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props            ! DDT containing spectral information for RRTMGP LW radiation scheme
+    logical, intent(in) :: &
+         doLWrad                 ! Flag to calculate LW irradiances
     integer,intent(in) :: &
-         ncol                    ! Number of horizontal points
-    real(kind_phys), dimension(ncol,model%levs), intent(in) :: &
-         p_lay,                & ! Pressure @ model layer-centers         (hPa)
-         t_lay                   ! Temperature                            (K)
-    real(kind_phys), dimension(ncol,model%levs+1), intent(in) :: &
-         p_lev,                & ! Pressure @ model layer-interfaces      (hPa)
+         ncol,                &  ! Number of horizontal points
+         nLev                    ! Number of vertical levels
+    type(ty_gas_optics_rrtmgp),intent(in) :: &
+         lw_gas_props            ! RRTMGP DDT:
+    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
+         p_lay,                & ! Pressure @ model layer-centers (hPa)
+         t_lay                   ! Temperature (K)
+    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
+         p_lev,                & ! Pressure @ model layer-interfaces (hPa)
          t_lev                   ! Temperature @ model levels
     real(kind_phys), dimension(ncol), intent(in) :: &
-         skt                     ! Surface(skin) temperature              (K)
+         skt                     ! Surface(skin) temperature (K)
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
-    logical, intent(in) :: &
-         lslwr                   ! Flag to calculate LW irradiances
 
     ! Output
     character(len=*), intent(out) :: &
@@ -435,20 +436,20 @@ contains
     integer,          intent(out) :: &
          errflg                  ! Error code
     type(ty_optical_props_1scl),intent(out) :: &
-         lw_optical_props_clrsky    !
+         lw_optical_props_clrsky ! RRTMGP DDT: 
     type(ty_source_func_lw),intent(out) :: &
-         sources
+         sources                 ! RRTMGP DDT:
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
 
-    if (.not. Model%lslwr) return
+    if (.not. doLWrad) return
 
     ! Allocate space
-    call check_error_msg('rrtmgp_lw_gas_optics_run',lw_optical_props_clrsky%alloc_1scl(ncol, model%levs, lw_gas_props))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',lw_optical_props_clrsky%alloc_1scl(ncol, nLev, lw_gas_props))
     call check_error_msg('rrtmgp_lw_gas_optics_run',sources%init(lw_gas_props))
-    call check_error_msg('rrtmgp_lw_gas_optics_run',sources%alloc(ncol, Model%levs))
+    call check_error_msg('rrtmgp_lw_gas_optics_run',sources%alloc(ncol, nLev))
 
     ! Gas-optics 
     call check_error_msg('rrtmgp_lw_gas_optics_run',lw_gas_props%gas_optics(&

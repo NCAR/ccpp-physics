@@ -30,10 +30,16 @@ contains
   subroutine rrtmgp_sw_rte_run(Model, Radtend, Statein, ncol, sw_gas_props, p_lay, t_lay,   &
        p_lev, gas_concentrations, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,&
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clouds,           &
-       sw_optical_props_aerosol, lsswr, nday, idxday, hsw0, hswb, scmpsw, fluxswUP_allsky,  &
+       sw_optical_props_aerosol, lsswr, nday, idxday, hsw0, hswb, rrtmgp_nGases, active_gases_array, scmpsw, fluxswUP_allsky,  &
        fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
+
+    integer, intent(in) :: &
+         rrtmgp_nGases       ! Number of trace gases active in RRTMGP
+    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
+         active_gases_array  ! Character array containing trace gases to include in RRTMGP
+
     type(GFS_control_type), intent(in)    :: &
          Model
     type(GFS_radtend_type), intent(in)    :: &
@@ -142,11 +148,11 @@ contains
        fluxswDOWN_clrsky(:,:) = 0._kind_phys
        
        ! Subset the gas concentrations, only need daylit points.
-       do iGas=1,Model%nGases
+       do iGas=1,rrtmgp_nGases
           call check_error_msg('rrtmgp_sw_rte_run',&
-               gas_concentrations%get_vmr(trim(Model%active_gases_array(iGas)),vmrTemp))
+               gas_concentrations%get_vmr(trim(active_gases_array(iGas)),vmrTemp))
           call check_error_msg('rrtmgp_sw_rte_run',&
-               gas_concentrations_daylit%set_vmr(trim(Model%active_gases_array(iGas)),vmrTemp(idxday(1:nday),:)))
+               gas_concentrations_daylit%set_vmr(trim(active_gases_array(iGas)),vmrTemp(idxday(1:nday),:)))
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes

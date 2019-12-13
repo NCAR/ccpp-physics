@@ -67,13 +67,16 @@ contains
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-  subroutine GFS_rrtmgp_pre_init(Model, Radtend, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_init(Model, Radtend, active_gases_array, errmsg, errflg)
     ! Inputs
     type(GFS_control_type), intent(inout) :: &
          Model      ! DDT: FV3-GFS model control parameters
     type(GFS_radtend_type), intent(inout) :: &
-         Radtend     ! DDT: FV3-GFS radiation tendencies 
+         Radtend    ! DDT: FV3-GFS radiation tendencies 
+
     ! Outputs
+    character(len=128),dimension(Model%ngases), intent(out) :: &
+         active_gases_array  ! Character array containing trace gases to include in RRTMGP
     character(len=*), intent(out) :: &
          errmsg     ! Error message
     integer, intent(out) :: &  
@@ -106,7 +109,7 @@ contains
        gasIndices(Model%ngases,2)=len(trim(Model%active_gases))
        ! Now extract the gas names
        do ij=1,Model%ngases
-          Model%active_gases_array(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
+          active_gases_array(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
        enddo
     endif
   end subroutine GFS_rrtmgp_pre_init

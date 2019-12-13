@@ -1,12 +1,39 @@
 [ccpp-arg-table]
   name = rrtmgp_lw_gas_optics_init
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
+[rrtmgp_root_dir]
+  standard_name = directory_for_rte_rrtmgp_source_code
+  long_name = directory for rte+rrtmgp source code
+  units = none
+  dimensions =  ()
+  type = character
+  intent = in
+  optional = F
+  kind = len=128
+[rrtmgp_lw_file_gas]
+  standard_name = rrtmgp_kdistribution_lw
+  long_name = file containing RRTMGP LW k-distribution
+  units = none
+  dimensions =  ()
+  type = character
+  intent = in
+  optional = F
+  kind = len=128
+[rrtmgp_nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=128
   intent = in
   optional = F
 [mpirank]
@@ -71,20 +98,12 @@
 [ccpp-arg-table]
   name = rrtmgp_lw_gas_optics_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
+[doLWrad]
+  standard_name = flag_to_calc_lw
+  long_name = flag to calculate LW irradiances
+  units = flag
   dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
+  type = logical
   intent = in
   optional = F
 [ncol]
@@ -93,6 +112,22 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lw_gas_props]
+  standard_name = coefficients_for_lw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
   intent = in
   optional = F
 [p_lay]
@@ -148,13 +183,21 @@
   type = ty_gas_concs
   intent = in
   optional = F
-[lslwr]
-  standard_name = flag_to_calc_lw
-  long_name = flag to calculate LW irradiances
-  units = flag
+[lw_optical_props_clrsky]
+  standard_name = longwave_optical_properties_for_clear_sky
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
   dimensions = ()
-  type = logical
-  intent = in
+  type = ty_optical_props_1scl
+  intent = out
+  optional = F
+[sources]
+  standard_name = longwave_source_function
+  long_name = Fortran DDT containing RRTMGP source functions
+  units = DDT
+  dimensions = ()
+  type = ty_source_func_lw
+  intent = out
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -171,21 +214,5 @@
   units = flag
   dimensions = ()
   type = integer
-  intent = out
-  optional = F
-[lw_optical_props_clrsky]
-  standard_name = longwave_optical_properties_for_clear_sky
-  long_name = Fortran DDT containing RRTMGP optical properties
-  units = DDT
-  dimensions = ()
-  type = ty_optical_props_1scl
-  intent = out
-  optional = F
-[sources]
-  standard_name = longwave_source_function
-  long_name = Fortran DDT containing RRTMGP source functions
-  units = DDT
-  dimensions = ()
-  type = ty_source_func_lw
   intent = out
   optional = F

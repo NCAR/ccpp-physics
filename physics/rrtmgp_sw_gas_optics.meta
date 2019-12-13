@@ -1,12 +1,39 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_gas_optics_init
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
+[rrtmgp_root_dir]
+  standard_name = directory_for_rte_rrtmgp_source_code
+  long_name = directory for rte+rrtmgp source code
+  units = none
+  dimensions =  ()
+  type = character
+  intent = in
+  optional = F
+  kind = len=128
+[rrtmgp_sw_file_gas]
+  standard_name = rrtmgp_kdistribution_sw
+  long_name = file containing RRTMGP SW k-distribution
+  units = none
+  dimensions =  ()
+  type = character
+  intent = in
+  optional = F
+  kind = len=128
+[rrtmgp_nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=128
   intent = in
   optional = F
 [mpirank]
@@ -71,25 +98,25 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_gas_optics_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
+[doSWrad]
+  standard_name = flag_to_calc_sw
+  long_name = flag to calculate SW irradiances
+  units = flag
   dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
+  type = logical
   intent = in
   optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
   units = count
   dimensions = ()
   type = integer
@@ -111,14 +138,13 @@
   type = integer
   intent = in
   optional = F
-[toa_src_sw]
-  standard_name = toa_incident_sw_flux_by_spectral_point
-  long_name = TOA shortwave incident flux at each spectral points
-  units = W m-2
-  dimensions = (horizontal_dimension,number_of_sw_spectral_points_rrtmgp)
-  type = real
-  kind = kind_phys
-  intent = out
+[sw_gas_props]
+  standard_name = coefficients_for_sw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
   optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
@@ -156,20 +182,21 @@
   kind = kind_phys
   intent = in
   optional = F
+[toa_src_sw]
+  standard_name = toa_incident_sw_flux_by_spectral_point
+  long_name = TOA shortwave incident flux at each spectral points
+  units = W m-2
+  dimensions = (horizontal_dimension,number_of_sw_spectral_points_rrtmgp)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = in
-  optional = F
-[lsswr]
-  standard_name = flag_to_calc_sw
-  long_name = flag to calculate SW irradiances
-  units = flag
-  dimensions = ()
-  type = logical
   intent = in
   optional = F
 [solcon]
@@ -179,6 +206,23 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[rrtmgp_nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=128
   intent = in
   optional = F
 [errmsg]

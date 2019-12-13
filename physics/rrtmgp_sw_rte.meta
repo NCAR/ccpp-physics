@@ -1,6 +1,23 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_rte_run
   type = scheme
+[rrtmgp_nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
+[active_gases_array]
+  standard_name = list_of_active_gases_used_by_RRTMGP
+  long_name = list of active gases used by RRTMGP
+  units = none
+  dimensions =  (number_of_active_gases_used_by_RRTMGP)
+  type = character
+  kind = len=128
+  intent = in
+  optional = F
 [Model]
   standard_name = GFS_control_type_instance
   long_name = instance of derived type GFS_control_type
