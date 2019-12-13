@@ -13,7 +13,20 @@ contains
   ! #########################################################################################
   ! SUBROUTINE mcica_init
   ! #########################################################################################
-  subroutine rrtmgp_lw_cloud_sampling_init()
+!! \section arg_table_rrtmgp_lw_cloud_sampling_init
+!! \htmlinclude rrtmgp_lw_cloud_sampling.html
+!!
+  subroutine rrtmgp_lw_cloud_sampling_init(lw_gas_props, ipsdlw0)
+    ! Inputs
+    type(ty_gas_optics_rrtmgp),intent(in) :: &
+         lw_gas_props ! RRTMGP DDT: K-distribution data
+    ! Outputs
+    integer, intent(out) :: &
+         ipsdlw0      ! Initial permutation seed for McICA
+
+    ! Set initial permutation seed for McICA, initially set to number of G-points
+    ipsdlw0 = lw_gas_props%get_ngpt()
+
   end subroutine rrtmgp_lw_cloud_sampling_init
 
   ! #########################################################################################
@@ -46,9 +59,9 @@ contains
 
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg                         ! Error message
+         errmsg                         ! CCPP error message
     integer,          intent(out) :: &
-         errflg                         ! Error code
+         errflg                         ! CCPP error code
     type(ty_optical_props_1scl),intent(out) :: &
          lw_optical_props_clouds        ! RRTMGP DDT: Shortwave optical properties (cloudy atmosphere) 
 

@@ -77,14 +77,6 @@
   type = integer
   intent = out
   optional = F
-[ipsdsw0]
-  standard_name = initial_permutation_seed_sw
-  long_name = initial seed for McICA SW
-  units = none
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
 [sw_gas_props]
   standard_name = coefficients_for_sw_gas_optics
   long_name = DDT containing spectral information for RRTMGP SW radiation scheme

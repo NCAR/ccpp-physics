@@ -18,7 +18,7 @@ contains
 !! \htmlinclude rrtmgp_lw_gas_optics.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_nGases,   &
-       active_gases_array, mpicomm, mpirank, mpiroot, lw_gas_props, ipsdlw0, errmsg, errflg)
+       active_gases_array, mpicomm, mpirank, mpiroot, lw_gas_props, errmsg, errflg)
     use netcdf
 
 #ifdef MPI
@@ -40,12 +40,11 @@ contains
  
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg              ! Error message
+         errmsg              ! CCPP error message
     integer,          intent(out) :: &
-         errflg,           & ! Error code
-         ipsdlw0             !
+         errflg              ! CCPP error code
     type(ty_gas_optics_rrtmgp),intent(out) :: &
-         lw_gas_props        ! RRTMGP DDT:
+         lw_gas_props        ! RRTMGP DDT: longwave spectral information
 
     ! Variables that will be passed to gas_optics%load()
     type(ty_gas_concs) :: &
@@ -67,7 +66,7 @@ contains
          temp_ref_t                         ! Standard spectroscopic reference temperature [K]
     real(kind_phys), dimension(:), allocatable :: &
          press_ref,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa]   
-         temp_ref                           ! Remperatures for reference atmosphere; temp_ref(# reference layers) [K]  
+         temp_ref                           ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K]  
     real(kind_phys), dimension(:,:), allocatable :: &
          band_lims,                       & ! Beginning and ending wavenumber [cm -1] for each band  
          totplnk                            ! Integrated Planck function by band  
@@ -85,9 +84,9 @@ contains
     character(len=32),  dimension(:), allocatable :: &
          gas_names,                       & ! Names of absorbing gases  
          gas_minor,                       & ! Name of absorbing minor gas  
-         identifier_minor,                & ! unique string identifying minor gas  
-         minor_gases_lower,               & ! names of minor absorbing gases in lower atmosphere   
-         minor_gases_upper,               & ! names of minor absorbing gases in upper atmosphere   
+         identifier_minor,                & ! Unique string identifying minor gas  
+         minor_gases_lower,               & ! Names of minor absorbing gases in lower atmosphere   
+         minor_gases_upper,               & ! Names of minor absorbing gases in upper atmosphere   
          scaling_gas_lower,               & ! Absorption also depends on the concentration of this gas  
          scaling_gas_upper                  ! Absorption also depends on the concentration of this gas  
     logical(wl), dimension(:), allocatable :: &
@@ -98,27 +97,16 @@ contains
 
     ! Dimensions
     integer :: &
-         ntemps,                          & !   
-         npress,                          & !   
-         ngpts_lw,                        & !
-         nabsorbers,                      & !   
-         nextrabsorbers,                  & !   
-         nminorabsorbers,                 & !   
-         nmixingfracs,                    & !   
-         nlayers,                         & !   
-         nbnds,                           & !   
-         npairs,                          & !   
-         ninternalSourcetemps,            & !   
-         nminor_absorber_intervals_lower, & !   
-         nminor_absorber_intervals_upper, & !   
-         ncontributors_lower,             & !   
-         ncontributors_upper                !   
+         ntemps, npress, ngpts_lw, nabsorbers, nextrabsorbers, nminorabsorbers,&    
+         nmixingfracs, nlayers, nbnds, npairs, ninternalSourcetemps,           &
+         nminor_absorber_intervals_lower, nminor_absorber_intervals_upper,     &
+         ncontributors_lower, ncontributors_upper
 
     ! Local variables
-    integer :: ncid_lw,dimID,varID,status,iGas
-    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4, temp_log_array1, temp_log_array2, temp_log_array3, temp_log_array4
+    integer :: ncid_lw, dimID, varID, status, iGas
+    integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4, &
+         temp_log_array1, temp_log_array2, temp_log_array3, temp_log_array4
     character(len=264) :: lw_gas_props_file
-    integer,parameter :: max_strlen=256
 #ifdef MPI
     integer :: ierr
 #endif
@@ -402,9 +390,6 @@ contains
          scaling_gas_upper, scale_by_complement_lower, scale_by_complement_upper,              &
          kminor_start_lower, kminor_start_upper, totplnk, planck_frac, rayl_lower, rayl_upper))
 
-    ! Set initial permutation seed for McICA, initially set to number of G-points
-    ipsdlw0 = lw_gas_props%get_ngpt()
-
   end subroutine rrtmgp_lw_gas_optics_init
 
   ! #########################################################################################
@@ -433,17 +418,17 @@ contains
     real(kind_phys), dimension(ncol), intent(in) :: &
          skt                     ! Surface(skin) temperature (K)
     type(ty_gas_concs),intent(in) :: &
-         gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
+         gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
 
     ! Output
     character(len=*), intent(out) :: &
-         errmsg                  ! Error message
+         errmsg                  ! CCPP error message
     integer,          intent(out) :: &
-         errflg                  ! Error code
+         errflg                  ! CCPP error code
     type(ty_optical_props_1scl),intent(out) :: &
-         lw_optical_props_clrsky ! RRTMGP DDT: 
+         lw_optical_props_clrsky ! RRTMGP DDT: longwave clear-sky radiative properties
     type(ty_source_func_lw),intent(out) :: &
-         sources                 ! RRTMGP DDT:
+         sources                 ! RRTMGP DDT: longwave source functions
 
     ! Initialize CCPP error handling variables
     errmsg = ''

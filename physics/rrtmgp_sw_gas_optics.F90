@@ -18,7 +18,7 @@ contains
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
   subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_nGases,   &
-       active_gases_array, mpicomm, mpirank, mpiroot, sw_gas_props, ipsdsw0, errmsg, errflg)
+       active_gases_array, mpicomm, mpirank, mpiroot, sw_gas_props, errmsg, errflg)
     use netcdf
 #ifdef MPI
     use mpi
@@ -39,78 +39,70 @@ contains
  
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg              ! Error message
+         errmsg              ! CCPP error message
     integer,          intent(out) :: &
-         errflg,           & ! Error code
-         ipsdsw0             !
+         errflg              ! CCPP error code
     type(ty_gas_optics_rrtmgp),intent(out) :: &
-         sw_gas_props        ! RRTMGP DDT: 
+         sw_gas_props        ! RRTMGP DDT: shortwave spectral information
 
-    ! Fields from the K-distribution files
     ! Variables that will be passed to gas_optics%load()
     type(ty_gas_concs)  :: &
          gas_concentrations
     integer, dimension(:), allocatable :: &
-         kminor_start_lower_sw,              & !  
-         kminor_start_upper_sw                 !  
+         kminor_start_lower_sw,              & ! Starting index in the [1, nContributors] vector for a contributor
+                                               ! given by \"minor_gases_lower\" (lower atmosphere)  
+         kminor_start_upper_sw                 ! Starting index in the [1, nContributors] vector for a contributor 
+                                               ! given by \"minor_gases_upper\" (upper atmosphere)   
     integer, dimension(:,:), allocatable :: &
-         band2gpt_sw,                        & !  
-         minor_limits_gpt_lower_sw,          & !  
-         minor_limits_gpt_upper_sw             !  
+         band2gpt_sw,                        & ! Beginning and ending gpoint for each band    
+         minor_limits_gpt_lower_sw,          & ! Beginning and ending gpoint for each minor interval in lower atmosphere 
+         minor_limits_gpt_upper_sw             ! Beginning and ending gpoint for each minor interval in upper atmosphere 
     integer, dimension(:,:,:), allocatable :: &
-         key_species_sw                        !  
+         key_species_sw                        ! Key species pair for each band 
     real(kind_phys) :: &
-         press_ref_trop_sw,                  & !  
-         temp_ref_p_sw,                      & !  
-         temp_ref_t_sw                         !  
+         press_ref_trop_sw,                  & ! Reference pressure separating the lower and upper atmosphere [Pa]    
+         temp_ref_p_sw,                      & ! Standard spectroscopic reference pressure [Pa] 
+         temp_ref_t_sw                         ! Standard spectroscopic reference temperature [K] 
     real(kind_phys), dimension(:), allocatable :: &
-         press_ref_sw,                       & !  
-         temp_ref_sw,                        & !  
-         solar_source_sw                       !  
+         press_ref_sw,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa] 
+         temp_ref_sw,                        & ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K] 
+         solar_source_sw                       ! Stored solar source function from original RRTM 
     real(kind_phys), dimension(:,:), allocatable :: &
-         band_lims_sw                          !                          
+         band_lims_sw                          ! Beginning and ending wavenumber [cm -1] for each band                         
 
     real(kind_phys), dimension(:,:,:), allocatable :: &
-         vmr_ref_sw,                         & !  
-         kminor_lower_sw,                    & !  
-         kminor_upper_sw,                    & !  
-         rayl_lower_sw,                      & !  
-         rayl_upper_sw                         !  
+         vmr_ref_sw,                         & ! Volume mixing ratios for reference atmosphere
+         kminor_lower_sw,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
+                                               ! [nTemp x nEta x nContributors] array)
+         kminor_upper_sw,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
+                                               ! [nTemp x nEta x nContributors] array)
+         rayl_lower_sw,                      & ! Stored coefficients due to rayleigh scattering contribution
+         rayl_upper_sw                         ! Stored coefficients due to rayleigh scattering contribution
     real(kind_phys), dimension(:,:,:,:), allocatable :: &
-         kmajor_sw                             !  
+         kmajor_sw                             ! Stored absorption coefficients due to major absorbing gases
     character(len=32),  dimension(:), allocatable :: &
-         gas_names_sw,                       & !  
-         gas_minor_sw,                       & !  
-         identifier_minor_sw,                & !  
-         minor_gases_lower_sw,               & !  
-         minor_gases_upper_sw,               & !  
-         scaling_gas_lower_sw,               & !  
-         scaling_gas_upper_sw                  !  
+         gas_names_sw,                       & ! Names of absorbing gases
+         gas_minor_sw,                       & ! Name of absorbing minor gas
+         identifier_minor_sw,                & ! Unique string identifying minor gas
+         minor_gases_lower_sw,               & ! Names of minor absorbing gases in lower atmosphere
+         minor_gases_upper_sw,               & ! Names of minor absorbing gases in upper atmosphere
+         scaling_gas_lower_sw,               & ! Absorption also depends on the concentration of this gas
+         scaling_gas_upper_sw                  ! Absorption also depends on the concentration of this gas
     logical(wl), dimension(:), allocatable :: &
-         minor_scales_with_density_lower_sw, & !  
-         minor_scales_with_density_upper_sw, & !  
-         scale_by_complement_lower_sw,       & !  
-         scale_by_complement_upper_sw          !  
-    ! Dimensions (to be broadcast across all processors)
+         minor_scales_with_density_lower_sw, & ! Density scaling is applied to minor absorption coefficients
+         minor_scales_with_density_upper_sw, & ! Density scaling is applied to minor absorption coefficients
+         scale_by_complement_lower_sw,       & ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
+         scale_by_complement_upper_sw          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
+    ! Dimensions
     integer :: &
-         ntemps_sw,                          & !  
-         npress_sw,                          & !  
-         ngpts_sw,                           & ! 
-         nabsorbers_sw,                      & !  
-         nextrabsorbers_sw,                  & !  
-         nminorabsorbers_sw,                 & !  
-         nmixingfracs_sw,                    & !  
-         nlayers_sw,                         & !  
-         nbnds_sw,                           & !  
-         npairs_sw,                          & !  
-         nminor_absorber_intervals_lower_sw, & !  
-         nminor_absorber_intervals_upper_sw, & !  
-         ncontributors_lower_sw,             & !  
-         ncontributors_upper_sw                !  
+         ntemps_sw, npress_sw, ngpts_sw, nabsorbers_sw, nextrabsorbers_sw,       &
+         nminorabsorbers_sw, nmixingfracs_sw, nlayers_sw, nbnds_sw, npairs_sw,   &
+         nminor_absorber_intervals_lower_sw, nminor_absorber_intervals_upper_sw, &
+         ncontributors_lower_sw, ncontributors_upper_sw
 
     ! Local variables
-    integer :: status,ncid_sw,dimid,varID,iGas
-    integer,dimension(:),allocatable :: temp1,temp2,temp3,temp4
+    integer :: status, ncid_sw, dimid, varID, iGas
+    integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: sw_gas_props_file
 #ifdef MPI
     integer :: ierr
@@ -400,9 +392,6 @@ contains
          scale_by_complement_upper_sw, kminor_start_lower_sw, kminor_start_upper_sw,                &
          solar_source_sw, rayl_lower_sw, rayl_upper_sw))
 
-    ! Set initial permutation seed for McICA, initially set to number of G-points
-    ipsdsw0 = sw_gas_props%get_ngpt()
-
   end subroutine rrtmgp_sw_gas_optics_init
 
   ! #########################################################################################
@@ -417,7 +406,7 @@ contains
 
     ! Inputs
     logical, intent(in) :: &
-         doSWrad             ! Flag to calculate SW irradiances
+         doSWrad                 ! Flag to calculate SW irradiances
     integer,intent(in) :: &
          nDay,                 & ! Number of daylit points.
          nCol,                 & ! Number of horizontal points
@@ -427,25 +416,25 @@ contains
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props            ! RRTMGP DDT: spectral information for RRTMGP SW radiation scheme
     real(kind_phys), dimension(ncol,nLev), intent(in) :: &
-         p_lay,                & ! Pressure @ model layer-centers         (hPa)
-         t_lay                   ! Temperature                            (K)
+         p_lay,                & ! Pressure @ model layer-centers (hPa)
+         t_lay                   ! Temperature (K)
     real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
-         p_lev,                & ! Pressure @ model layer-interfaces      (hPa)
+         p_lev,                & ! Pressure @ model layer-interfaces (hPa)
          t_lev                   ! Temperature @ model levels
     type(ty_gas_concs),intent(in) :: &
-         gas_concentrations      ! RRTMGP DDT: trace gas concentrations   (vmr)
+         gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)
     real(kind_phys), intent(in) :: &
          solcon                  ! Solar constant
     integer, intent(in) :: &
-         rrtmgp_nGases       ! Number of trace gases active in RRTMGP
+         rrtmgp_nGases           ! Number of trace gases active in RRTMGP
     character(len=128),dimension(rrtmgp_nGases), intent(in) :: &
-         active_gases_array  ! Character array containing trace gases to include in RRTMGP
+         active_gases_array      ! Character array containing trace gases to include in RRTMGP
 
     ! Output
     character(len=*), intent(out) :: &
-         errmsg                  ! Error message
+         errmsg                  ! CCPP error message
     integer,          intent(out) :: &
-         errflg                  ! Error code
+         errflg                  ! CCPP error code
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_clrsky ! RRTMGP DDT: clear-sky shortwave optical properties, spectral (tau,ssa,g) 
     real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(out) :: &

@@ -77,14 +77,6 @@
   type = integer
   intent = out
   optional = F
-[ipsdlw0]
-  standard_name = initial_permutation_seed_lw
-  long_name = initial seed for McICA LW
-  units = none
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
 [lw_gas_props]
   standard_name = coefficients_for_lw_gas_optics
   long_name = DDT containing spectral information for RRTMGP LW radiation scheme

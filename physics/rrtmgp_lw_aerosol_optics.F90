@@ -60,9 +60,9 @@ contains
     type(ty_optical_props_1scl),intent(out) :: &
          lw_optical_props_aerosol ! RRTMGP DDT: Longwave aerosol optical properties (tau)
     integer, intent(out) :: &
-         errflg                   !
+         errflg                   ! CCPP error flag
     character(len=*), intent(out) :: &
-         errmsg                   !
+         errmsg                   ! CCPP error message
 
     ! Local variables
     real(kind_phys), dimension(nCol, nLev, lw_gas_props%get_nband(), NF_AELW) :: &

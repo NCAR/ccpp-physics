@@ -13,7 +13,20 @@ contains
   ! #########################################################################################
   ! SUBROUTINE mcica_init
   ! #########################################################################################
-  subroutine rrtmgp_sw_cloud_sampling_init()
+!! \section arg_table_rrtmgp_sw_cloud_sampling_init
+!! \htmlinclude rrtmgp_sw_cloud_sampling.html
+!!
+  subroutine rrtmgp_sw_cloud_sampling_init(sw_gas_props, ipsdsw0)
+    ! Inputs
+    type(ty_gas_optics_rrtmgp),intent(in) :: &
+         sw_gas_props ! RRTMGP DDT: K-distribution data
+    ! Outputs
+    integer, intent(out) :: &
+         ipsdsw0      ! Initial permutation seed for McICA
+
+    ! Set initial permutation seed for McICA, initially set to number of G-points
+    ipsdsw0 = sw_gas_props%get_ngpt()
+
   end subroutine rrtmgp_sw_cloud_sampling_init
 
   ! #########################################################################################

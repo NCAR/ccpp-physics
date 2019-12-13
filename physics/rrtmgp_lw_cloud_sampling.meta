@@ -1,4 +1,25 @@
 [ccpp-arg-table]
+  name = rrtmgp_lw_cloud_sampling_init
+  type = scheme
+[lw_gas_props]
+  standard_name = coefficients_for_lw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[ipsdlw0]
+  standard_name = initial_permutation_seed_lw
+  long_name = initial seed for McICA LW
+  units = none
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+######################################################
+[ccpp-arg-table]
   name = rrtmgp_lw_cloud_sampling_run
   type = scheme
 [doLWrad]

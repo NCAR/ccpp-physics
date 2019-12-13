@@ -45,11 +45,11 @@ contains
     real(kind_phys), dimension(ncol), intent(in) :: &
          skt                        ! Surface(skin) temperature (K)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props               ! DDT containing LW spectral information
+         lw_gas_props               ! RRTMGP DDT: longwave spectral information
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
          sfc_emiss_byband           ! Surface emissivity in each band
     type(ty_source_func_lw),intent(in) :: &
-         sources
+         sources                    ! RRTMGP DDT: longwave source functions
     type(ty_optical_props_1scl),intent(inout) :: &
          lw_optical_props_clrsky    ! RRTMGP DDT: longwave clear-sky radiative properties 
     type(ty_optical_props_1scl),intent(in) :: &
