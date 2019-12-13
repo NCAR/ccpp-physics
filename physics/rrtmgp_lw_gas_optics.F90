@@ -51,46 +51,50 @@ contains
     type(ty_gas_concs) :: &
          gas_concentrations                 ! RRTMGP DDT: trace gas concentrations (vmr)
     integer, dimension(:), allocatable :: &
-         kminor_start_lower,              & !   
-         kminor_start_upper                 !   
+         kminor_start_lower,              & ! Starting index in the [1, nContributors] vector for a contributor
+                                            ! given by \"minor_gases_lower\" (lower atmosphere)  
+         kminor_start_upper                 ! Starting index in the [1, nContributors] vector for a contributor 
+                                            ! given by \"minor_gases_upper\" (upper atmosphere)  
     integer, dimension(:,:), allocatable :: &
-         band2gpt,                        & !   
-         minor_limits_gpt_lower,          & !   
-         minor_limits_gpt_upper             !   
+         band2gpt,                        & ! Beginning and ending gpoint for each band   
+         minor_limits_gpt_lower,          & ! Beginning and ending gpoint for each minor interval in lower atmosphere  
+         minor_limits_gpt_upper             ! Beginning and ending gpoint for each minor interval in upper atmosphere
     integer, dimension(:,:,:), allocatable :: &
-         key_species                        !   
+         key_species                        ! Key species pair for each band  
     real(kind_phys) :: &
-         press_ref_trop,                  & !   
-         temp_ref_p,                      & !   
-         temp_ref_t                         !   
+         press_ref_trop,                  & ! Reference pressure separating the lower and upper atmosphere [Pa]   
+         temp_ref_p,                      & ! Standard spectroscopic reference pressure [Pa]
+         temp_ref_t                         ! Standard spectroscopic reference temperature [K]
     real(kind_phys), dimension(:), allocatable :: &
-         press_ref,                       & !   
-         temp_ref                           !   
+         press_ref,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa]   
+         temp_ref                           ! Remperatures for reference atmosphere; temp_ref(# reference layers) [K]  
     real(kind_phys), dimension(:,:), allocatable :: &
-         band_lims,                       & !   
-         totplnk                            !   
+         band_lims,                       & ! Beginning and ending wavenumber [cm -1] for each band  
+         totplnk                            ! Integrated Planck function by band  
     real(kind_phys), dimension(:,:,:), allocatable :: &
-         vmr_ref,                         & !   
-         kminor_lower,                    & !   
-         kminor_upper,                    & !   
-         rayl_lower,                      & !   
-         rayl_upper                         !   
+         vmr_ref,                         & ! volume mixing ratios for reference atmosphere   
+         kminor_lower,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to 
+                                            ! [nTemp x nEta x nContributors] array)  
+         kminor_upper,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to 
+                                            ! [nTemp x nEta x nContributors] array)  
+         rayl_lower,                      & ! Not used in LW, rather allocated(rayl_lower) is used  
+         rayl_upper                         ! Not used in LW, rather allocated(rayl_upper) is used    
     real(kind_phys), dimension(:,:,:,:), allocatable :: &
-         kmajor,                          & !   
-         planck_frac                        !    
+         kmajor,                          & ! Stored absorption coefficients due to major absorbing gases  
+         planck_frac                        ! Planck fractions   
     character(len=32),  dimension(:), allocatable :: &
-         gas_names,                       & !   
-         gas_minor,                       & !   
-         identifier_minor,                & !   
-         minor_gases_lower,               & !   
-         minor_gases_upper,               & !   
-         scaling_gas_lower,               & !   
-         scaling_gas_upper                  !   
+         gas_names,                       & ! Names of absorbing gases  
+         gas_minor,                       & ! Name of absorbing minor gas  
+         identifier_minor,                & ! unique string identifying minor gas  
+         minor_gases_lower,               & ! names of minor absorbing gases in lower atmosphere   
+         minor_gases_upper,               & ! names of minor absorbing gases in upper atmosphere   
+         scaling_gas_lower,               & ! Absorption also depends on the concentration of this gas  
+         scaling_gas_upper                  ! Absorption also depends on the concentration of this gas  
     logical(wl), dimension(:), allocatable :: &
-         minor_scales_with_density_lower, & !   
-         minor_scales_with_density_upper, & !   
-         scale_by_complement_lower,       & !   
-         scale_by_complement_upper          !   
+         minor_scales_with_density_lower, & ! Density scaling is applied to minor absorption coefficients   
+         minor_scales_with_density_upper, & ! Density scaling is applied to minor absorption coefficients 
+         scale_by_complement_lower,       & ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T) 
+         scale_by_complement_upper          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
 
     ! Dimensions
     integer :: &
@@ -325,7 +329,7 @@ contains
     ! Broadcast arrays to all processors
 #ifdef MPI
     call MPI_BARRIER(mpicomm, ierr)
-    write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
+    if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
     call MPI_BCAST(minor_limits_gpt_upper,   size(minor_limits_gpt_upper), MPI_INTEGER,            mpiroot, mpicomm, ierr)
     call MPI_BCAST(minor_limits_gpt_lower,   size(minor_limits_gpt_lower), MPI_INTEGER,            mpiroot, mpicomm, ierr)
     call MPI_BCAST(kminor_start_upper,       size(kminor_start_upper),     MPI_INTEGER,            mpiroot, mpicomm, ierr)
