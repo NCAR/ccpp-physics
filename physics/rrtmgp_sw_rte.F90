@@ -106,7 +106,7 @@ contains
          fluxSW_up_allsky, fluxSW_up_clrsky, fluxSW_dn_allsky, fluxSW_dn_clrsky, fluxSW_dn_dir_allsky
     real(kind_phys), dimension(ncol,NLev) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false., top_at_1
-    integer :: iGas,iSFC,iTOA
+    integer :: iGas,iSFC,iTOA,iBand
     type(ty_optical_props_2str)  :: &
          sw_optical_props_clouds_daylit,  & ! RRTMGP DDT: longwave cloud radiative properties 
          sw_optical_props_clrsky_daylit, & ! RRTMGP DDT: longwave clear-sky radiative properties 
@@ -160,9 +160,21 @@ contains
        flux_clrsky%bnd_flux_up     => fluxSW_up_clrsky
        flux_clrsky%bnd_flux_dn     => fluxSW_dn_clrsky
 
-       ! In RRTMG, the near-IR and uv-visible surface albedos are averaged.
-       sfc_alb_dir = 0.5_kind_phys*(sfc_alb_nir_dir(:,idxday(1:nday)) + sfc_alb_uvvis_dir(:,idxday(1:nday)))
-       sfc_alb_dif = 0.5_kind_phys*(sfc_alb_nir_dif(:,idxday(1:nday)) + sfc_alb_uvvis_dif(:,idxday(1:nday)))
+       !  *Note* Legacy RRTMG code. May need to revisit
+       do iBand=1,sw_gas_props%get_nband()
+          if (iBand .lt. 10) then
+             sfc_alb_dir(iBand,:) = sfc_alb_nir_dir(iBand,idxday(1:nday))
+             sfc_alb_dif(iBand,:) = sfc_alb_nir_dif(iBand,idxday(1:nday))
+          endif
+          if (iBand .eq. 10) then
+             sfc_alb_dir(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dir(iBand,idxday(1:nday)) + sfc_alb_uvvis_dir(iBand,idxday(1:nday)))
+             sfc_alb_dif(iBand,:) = 0.5_kind_phys*(sfc_alb_nir_dif(iBand,idxday(1:nday)) + sfc_alb_uvvis_dif(iBand,idxday(1:nday)))
+          endif
+          if (iBand .gt. 10) then
+             sfc_alb_dir(iBand,:) = sfc_alb_uvvis_dir(iBand,idxday(1:nday))
+             sfc_alb_dif(iBand,:) = sfc_alb_uvvis_dif(iBand,idxday(1:nday))
+          endif
+       enddo
 
        ! Compute clear-sky fluxes (if requested)
        ! Clear-sky fluxes (gas+aerosol)
