@@ -55,7 +55,7 @@
   intent = in
   optional = F
 [icseed_lw]
-  standard_name = seed_random_numbers_lw_for_RRTMGP
+  standard_name = seed_random_numbers_lw
   long_name = seed for random number generation for longwave radiation
   units = none
   dimensions = (horizontal_dimension)

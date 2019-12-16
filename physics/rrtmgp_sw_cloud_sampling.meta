@@ -71,7 +71,7 @@
   intent = in
   optional = F
 [icseed_sw]
-  standard_name = seed_random_numbers_sw_for_RRTMGP
+  standard_name = seed_random_numbers_sw
   long_name = seed for random number generation for shortwave radiation
   units = none
   dimensions = (horizontal_dimension)
