@@ -92,6 +92,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [mpicomm]
   standard_name = mpi_comm
   long_name = MPI communicator

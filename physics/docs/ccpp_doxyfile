@@ -120,6 +120,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMF.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_GWDC.txt     \
+                          pdftxt/UGWPv0.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
 ###                          pdftxt/GFS_SURFACE_PERT.txt    \
@@ -134,6 +135,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                          pdftxt/GFSphys_namelist.txt    \
 ###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
+                          pdftxt/NoahMP.txt \
 ### in-core MP
                         ../gfdl_fv_sat_adj.F90    \
 ### time_vary
@@ -172,6 +174,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../sflx.f    \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
+                        ../sfc_noahmp_drv.f \
+                        ../module_sf_noahmplsm.f90 \
+                        ../module_sf_noahmp_glacier.f90 \
+                        ../noahmp_tables.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL
@@ -199,6 +205,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Shallow Convection
                         ../samfshalcnv.f \
                         ../cnvc90.f \
+### Unified Gravity Wave
+                        ../cires_ugwp.F90 \
+                        ../ugwp_driver_v0.F \
+                        ../cires_ugwp_triggers.F90 \
 ### Microphysics
 ###                        ../gscond.f \
 ###                        ../precpd.f \

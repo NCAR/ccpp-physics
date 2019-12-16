@@ -656,7 +656,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, dqdti, errmsg, errflg)
+      gq0, clw, dqdti, imfdeepcnv, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -666,7 +666,7 @@
 
       integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imfdeepcnv
 
       logical,                                  intent(in) :: ltaerosol, cplchm
 
@@ -729,7 +729,7 @@
               gq0(i,k,ntcw) = clw(i,k,2)                     ! water
             enddo
           enddo
-          if (imp_physics == imp_physics_thompson) then
+          if (imp_physics == imp_physics_thompson .and. imfdeepcnv /= 3) then
             if (ltaerosol) then
               do k=1,levs
                 do i=1,im
