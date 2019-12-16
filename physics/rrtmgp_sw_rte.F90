@@ -165,10 +165,10 @@ contains
        sfc_alb_dif = 0.5_kind_phys*(sfc_alb_nir_dif(:,idxday(1:nday)) + sfc_alb_uvvis_dif(:,idxday(1:nday)))
 
        ! Compute clear-sky fluxes (if requested)
-       ! Clear-sky fluxes (gas+aerosol)
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol%increment(sw_optical_props_clrsky))
        ! Delta-scale optical properties
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky%delta_scale())
+       ! Clear-sky fluxes (gas+aerosol)
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_aerosol%increment(sw_optical_props_clrsky))
        if (l_ClrSky_HR) then
           call check_error_msg('rrtmgp_sw_rte_run',rte_sw(     &
                sw_optical_props_clrsky,      & ! IN  - optical-properties
