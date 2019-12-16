@@ -84,7 +84,7 @@
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, trans_aero, ntchs, ntchm,                   &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
-        satmedmf, qgrs, vdftra, errmsg, errflg)
+        satmedmf, qgrs, vdftra, dvdftra, xlon, xlat, lprnt, ipt, kdt, me, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -99,11 +99,17 @@
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
-      real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
+      real(kind=kind_phys), dimension(im),               intent(in)    :: xlat, xlon
+      real(kind=kind_phys), dimension(im, levs, ntrac),  intent(in)    :: qgrs
+      real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra, dvdftra
+
+      logical, intent(inout) :: lprnt
+      integer, intent(inout) :: ipt
+      integer, intent(in)    :: kdt, me
 
       character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      integer,          intent(out) :: errflg
+      real(kind=kind_phys), parameter :: rad2dg = 180.0/3.14159265359
 
       !local variables
       integer :: i, k, kk, k1, n
@@ -111,6 +117,37 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+
+      lprnt = .false.
+      ipt = 1
+!     do i=1,im
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-294.37) < 0.101     &
+!                          .and. abs(xlat(i)*rad2dg-4.1) < 0.101
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-308.88) < 0.101     &
+!                          .and. abs(xlat(i)*rad2dg+29.16) < 0.101
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-311.08) < 0.101     &
+!                          .and. abs(xlat(i)*rad2dg+28.27) < 0.101
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-113.48) < 0.101     &
+!                          .and. abs(xlat(i)*rad2dg-21.07) < 0.101
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.29) < 0.201     &
+!                          .and. abs(xlat(i)*rad2dg-17.45) < 0.201
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-169.453) < 0.501  &
+!                          .and. abs(xlat(i)*rad2dg-72.96) < 0.501
+!       if (kdt == 1) &
+!         write(2000+me,*)' i=',i,' xlon=',xlon(i)*rad2dg,          &
+!                       ' xlat=',xlat(i)*rad2dg,' me=',me
+!       if (lprnt) then
+!         ipt = i
+!         write(0,*)' GFS_PBL_generic_pre_run ipt=',ipt,'xlon=',xlon(i)*rad2dg,' xlat=',xlat(i)*rad2dg,' me=',me
+!         exit
+!       endif
+!     enddo
+!     if (lprnt) then
+!       write(0,*)' qgrsv=',qgrs(ipt,:,1)
+!       write(0,*)' qgrsw=',qgrs(ipt,:,2)
+!       write(0,*)' qgrsi=',qgrs(ipt,:,3)
+!     endif
 
 !DH: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
       if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
@@ -272,7 +309,8 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
+        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt,                           &
+        lprnt, ipt, kdt, me, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -286,6 +324,11 @@
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
+
+      logical, intent(inout) :: lprnt
+      integer, intent(inout) :: ipt
+      integer, intent(in)    :: kdt, me
+
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
@@ -463,10 +506,10 @@
         dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
       endif
 
-      if(cplflx)then
-        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
-        stop 
-      endif
+!     if(cplflx)then
+!       write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
+!       stop 
+!     endif
 
 !  --- ...  coupling insertion
 
@@ -522,10 +565,14 @@
           dtsfci_diag(i) = dtsfc1(i)
           dqsfci_diag(i) = dqsfc1(i)
         enddo
-  !       if (lprnt) then
-  !         write(0,*)' dusfc=',dusfc(ipr),' dusfc1=',dusfc1(ipr),' dtf=',
-  !    &     dtf,' kdt=',kdt,' lat=',lat
-  !       endif
+!         if (lprnt) then
+!           write(0,*)' dusfc=',dusfc_diag(ipt),' dusfc1=',dusfc1(ipt), &
+!      &              ' dvsfc=',dvsfc_diag(ipt),' dvsfc1=',dvsfc1(ipt), &
+!      &              ' dtsfc=',dtsfc_diag(ipt),' dtsfc1=',dvsfc1(ipt), &
+!      &              ' dtf=',dtf,' kdt=',kdt
+!           write(0,*)' dtdt=',dtdt(ipt,1:10)*86400
+!           write(0,*)' dqidt=',dqdt(ipt,1:10,ntiw)*86400
+!         endif
 
         if (ldiag3d) then
           if (lsidea) then
@@ -540,9 +587,9 @@
           endif
           do k=1,levs
             do i=1,im
-              du3dt_PBL(i,k) = du3dt_PBL(i,k) + dudt(i,k) * dtf
+              du3dt_PBL(i,k)  = du3dt_PBL(i,k)  + dudt(i,k) * dtf
               du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
-              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + dvdt(i,k) * dtf
+              dv3dt_PBL(i,k)  = dv3dt_PBL(i,k)  + dvdt(i,k) * dtf
               dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
             enddo
           enddo

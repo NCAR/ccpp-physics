@@ -97,7 +97,7 @@
 !!
     subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, ras, cscnv, do_ca,               &
       isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
-      gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,  &
+      gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g,  npdf3d, num_p3d, ncnvcld3d,                      &
       rainc, cldwrk, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf,                             &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d,                                                        &
       cape, tconvtend, qconvtend, uconvtend, vconvtend, errmsg, errflg)
@@ -115,7 +115,6 @@
       real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(in) :: ud_mf, dd_mf, dt_mf
       real(kind=kind_phys), intent(in) :: con_g
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: clw_ice, clw_liquid
       integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
 
       real(kind=kind_phys), dimension(im), intent(inout) :: rainc, cldwrk
@@ -144,7 +143,7 @@
       if (.not. ras .and. .not. cscnv) then
         if(do_ca) then
           do i=1,im
-            cape(i)=cld1d(i)
+            cape(i) = cld1d(i)
           enddo
         endif
         if (npdf3d == 3 .and. num_p3d == 4) then
@@ -179,13 +178,13 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-!              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
+!             dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k)-save_qv(i,k)) * frain
               du3dt(i,k) = du3dt(i,k) + (gu0(i,k)-save_u(i,k)) * frain
               dv3dt(i,k) = dv3dt(i,k) + (gv0(i,k)-save_v(i,k)) * frain
 
-!              upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
-!              dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
-!              det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
+!             upd_mf(i,k)  = upd_mf(i,k)  + ud_mf(i,k) * (con_g*frain)
+!             dwn_mf(i,k)  = dwn_mf(i,k)  + dd_mf(i,k) * (con_g*frain)
+!             det_mf(i,k)  = det_mf(i,k)  + dt_mf(i,k) * (con_g*frain)
             enddo
           enddo
         endif ! if (ldiag3d)

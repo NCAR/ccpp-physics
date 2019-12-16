@@ -154,7 +154,7 @@
       onebg = one/con_g
 
       do i = 1, im
-          rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
+        rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
 
 !> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
@@ -193,11 +193,11 @@
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !
-        call calpreciptype (kdt, nrcm, im, ix, levs, levs+1,           &
-                            rann, xlat, xlon, gt0,    &
-                            gq0(:,:,1), prsl, prsi,        &
-                            rain, phii, tsfc,           &  !input
-                            domr, domzr, domip, doms)                           ! output
+        call calpreciptype (kdt, nrcm, im, ix, levs, levs+1, &
+                            rann, xlat, xlon, gt0,           &
+                            gq0(:,:,1), prsl, prsi,          &
+                            rain, phii, tsfc,                &  ! input
+                            domr, domzr, domip, doms)           ! output
 !
 !        if (lprnt) print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS '
 !     &,DOMR(ipr),DOMZR(ipr),DOMIP(ipr),DOMS(ipr)
@@ -252,7 +252,7 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-!              dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
+!             dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
             enddo
           enddo
         endif
@@ -281,7 +281,7 @@
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
        
-        if (lsm/=lsm_ruc) then
+        if (lsm /= lsm_ruc) then
           do i = 1, im
             !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
             srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
@@ -309,7 +309,8 @@
           enddo
         endif ! lsm==lsm_ruc
       elseif( .not. cal_pre) then
-        if (imp_physics == imp_physics_mg) then              ! MG microphysics
+        if (imp_physics == imp_physics_mg) then          ! MG microphysics
+          tem = con_day / (dtp * con_p001)               ! mm / day
           do i=1,im
             tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
             if (rain(i)*tem > rainmin) then
@@ -338,7 +339,7 @@
 
       if (cplchm) then
         do i = 1, im
-             rainc_cpl(i) = rainc_cpl(i) + rainc(i)
+          rainc_cpl(i) = rainc_cpl(i) + rainc(i)
         enddo
       endif
 

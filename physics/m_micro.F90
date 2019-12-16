@@ -50,7 +50,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
 
     if (is_initialized) return
 
-    if (imp_physics/=imp_physics_mg) then
+    if (imp_physics /= imp_physics_mg) then
        write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Morrison-Gettelman MP"
        errflg = 1
        return
@@ -67,10 +67,10 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                             hetfrz_classnuc,                      &
                             mg_precip_frac_method,                &
                             mg_berg_eff_factor,                   &
-                            sed_supersat, do_sb_physics,          &
+                            sed_supersat,   do_sb_physics,        &
                             mg_do_ice_gmao, mg_do_liq_liu,        &
-                            mg_nccons, mg_nicons,                 &
-                            mg_ncnst, mg_ninst)
+                            mg_nccons,      mg_nicons,            &
+                            mg_ncnst,       mg_ninst)
     elseif (fprcp == 2) then
       call micro_mg_init3_0(kind_phys, gravit, rair, rh2o, cpair, &
                             tmelt, latvap, latice, mg_rhmini,     &
@@ -81,11 +81,11 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                             hetfrz_classnuc,                      &
                             mg_precip_frac_method,                &
                             mg_berg_eff_factor,                   &
-                            sed_supersat, do_sb_physics,          &
+                            sed_supersat,   do_sb_physics,        &
                             mg_do_ice_gmao, mg_do_liq_liu,        &
-                            mg_nccons,    mg_nicons,              &
-                            mg_ncnst,     mg_ninst,               &
-                            mg_ngcons,    mg_ngnst)
+                            mg_nccons,      mg_nicons,            &
+                            mg_ncnst,       mg_ninst,             &
+                            mg_ngcons,      mg_ngnst)
     else
       write(0,*)' fprcp = ',fprcp,' is not a valid option - aborting'
       stop
@@ -138,7 +138,7 @@ end subroutine m_micro_init
      &,                         skip_macro                              &
      &,                         lprnt, alf_fac, qc_min, pdfflag         &
      &,                         ipr, kdt, xlat, xlon, rhc_i,            &
-     &                          errmsg, errflg)
+     &                          me, errmsg, errflg)
 
        use machine ,      only: kind_phys
        use physcons,           grav   => con_g,    pi     => con_pi,    &
@@ -182,7 +182,7 @@ end subroutine m_micro_init
      &                       fourb3=4.0/3.0, RL_cub=1.0e-15, nmin=1.0
 
        integer, parameter :: ncolmicro = 1
-       integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag
+       integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag, me
        logical,intent(in) :: flipv, aero_in, skip_macro, lprnt, iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
@@ -642,7 +642,6 @@ end subroutine m_micro_init
 !        END DO
 !        deallocate (vmip)
 !      endif
-
 
        do l=lm-1,1,-1
          do i=1,im
@@ -1674,14 +1673,21 @@ end subroutine m_micro_init
 
 !TVQX1    = SUM( (  Q1 +  QL_TOT + QI_TOT(1:im,:,:))*DM, 3) &
 
-
       if (skip_macro) then
         do k=1,lm
           do i=1,im
+            QLCN(i,k) = QL_TOT(i,k) * FQA(i,k)
+            QLLS(i,k) = QL_TOT(i,k) - QLCN(i,k)
+            QICN(i,k) = QI_TOT(i,k) * FQA(i,k)
+            QILS(i,k) = QI_TOT(i,k) - QICN(i,k)
+
             CALL fix_up_clouds_2M(Q1(I,K),   TEMP(i,k), QLLS(I,K),      &
      &                            QILS(I,K), CLLS(I,K), QLCN(I,K),      &
      &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
      &                            NCPI(I,K), qc_min)
+
+            QL_TOT(I,K) = QLLS(I,K) + QLCN(I,K)
+            QI_TOT(I,K) = QILS(I,K) + QICN(I,K)
             if (rnw(i,k) <= qc_min(1)) then
               ncpl(i,k) = 0.0
             elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0

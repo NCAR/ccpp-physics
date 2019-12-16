@@ -423,7 +423,7 @@
   optional = F
 [qc]
   standard_name = cloud_condensed_water_mixing_ratio_at_lowest_model_layer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water at lowest model layer
+  long_name = mixing ratio of cloud water at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_dimension)
   type = real

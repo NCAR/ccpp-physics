@@ -27,7 +27,7 @@
   optional = F
 [qc]
   standard_name = cloud_condensed_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
+  long_name = no condensates) mixing ratio of cloud water (condensate)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -36,7 +36,7 @@
   optional = F
 [qi]
   standard_name = ice_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water
+  long_name = mixing ratio of ice water
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -45,7 +45,7 @@
   optional = F
 [qc_save]
   standard_name = cloud_condensed_water_mixing_ratio_save
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme
+  long_name = mixing ratio of cloud water (condensate) before entering a physics scheme
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -54,7 +54,7 @@
   optional = F
 [qi_save]
   standard_name = ice_water_mixing_ratio_save
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water before entering a physics scheme
+  long_name = mixing ratio of ice water before entering a physics scheme
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

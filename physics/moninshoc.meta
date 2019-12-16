@@ -137,7 +137,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [ntke]
   standard_name = index_for_turbulent_kinetic_energy_vertical_diffusion_tracer

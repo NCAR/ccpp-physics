@@ -251,8 +251,10 @@ contains
 subroutine micro_mg_init(                                         &
      kind, gravit, rair, rh2o, cpair,                             &
      tmelt_in, latvap, latice,                                    &
-     rhmini_in, micro_mg_dcs,ts_auto, mg_qcvar,                   & !++ag
-     micro_mg_do_hail_in, micro_mg_do_graupel_in,                 &!--ag
+     rhmini_in, micro_mg_dcs,ts_auto, mg_qcvar,                   &
+!++ag
+     micro_mg_do_hail_in, micro_mg_do_graupel_in,                 &
+!--ag
      microp_uniform_in, do_cldice_in, use_hetfrz_classnuc_in,     &
      micro_mg_precip_frac_method_in, micro_mg_berg_eff_factor_in, &
      allow_sed_supersat_in, do_sb_physics_in,                     &
@@ -437,8 +439,10 @@ subroutine micro_mg_tend (                                       &
      qcn,                          qin,                          &
      ncn,                          nin,                          &
      qrn,                          qsn,                          &
-     nrn,                          nsn,                          &!++ag
-     qgr,                          ngr,                          &!--ag
+     nrn,                          nsn,                          &
+!++ag
+     qgr,                          ngr,                          &
+!--ag
      relvar,                       accre_enhan_i,                &
      p,                            pdel,                         &
      cldn,    liqcldf,        icecldf,       qsatfac,            &
@@ -449,8 +453,10 @@ subroutine micro_mg_tend (                                       &
      qctend,                       qitend,                       &
      nctend,                       nitend,                       &
      qrtend,                       qstend,                       &
-     nrtend,                       nstend,                       &!++ag
-     qgtend,                       ngtend,                       &!--ag
+     nrtend,                       nstend,                       &
+!++ag
+     qgtend,                       ngtend,                       &
+!--ag
      effc,               effc_fn,            effi,               &
      sadice,                       sadsnow,                      &
      prect,                        preci,                        &
@@ -459,30 +465,42 @@ subroutine micro_mg_tend (                                       &
      prain,                        prodsnow,                     &
      cmeout,                       deffi,                        &
      pgamrad,                      lamcrad,                      &
-     qsout,                        dsout,                        &!++ag
-     qgout,     ngout,             dgout,                        &!--ag
-     lflx,               iflx,                                   &!++ag
-     gflx,                                                       &!--ag
-     rflx,               sflx,               qrout,              &!++ag
-     reff_rain,          reff_snow,          reff_grau,          &!--ag
+     qsout,                        dsout,                        &
+!++ag
+     qgout,     ngout,             dgout,                        &
+!--ag
+     lflx,               iflx,                                   &
+!++ag
+     gflx,                                                       &
+!--ag
+     rflx,               sflx,               qrout,              &
+!++ag
+     reff_rain,          reff_snow,          reff_grau,          &
+!--ag
      qcsevap,            qisevap,            qvres,              &
      cmeitot,            vtrmc,              vtrmi,              &
-     umr,                          ums,                          &!++ag
-     umg,                qgsedten,                               &!--ag
+     umr,                          ums,                          &
+!++ag
+     umg,                qgsedten,                               &
+!--ag
      qcsedten,                     qisedten,                     &
      qrsedten,                     qssedten,                     &
      pratot,                       prctot,                       &
      mnuccctot,          mnuccttot,          msacwitot,          &
      psacwstot,          bergstot,           bergtot,            &
      melttot,                      homotot,                      &
-     qcrestot,           prcitot,            praitot,            &!++ag
-     qirestot,           mnuccrtot, mnuccritot, pracstot,        &!--ag
-     meltsdttot,         frzrdttot,          mnuccdtot,          &!++ag
+     qcrestot,           prcitot,            praitot,            &
+!++ag
+     qirestot,           mnuccrtot, mnuccritot, pracstot,        &
+!--ag
+     meltsdttot,         frzrdttot,          mnuccdtot,          &
+!++ag
      pracgtot,           psacwgtot,          pgsacwtot,          &
      pgracstot,          prdgtot,                                &
      qmultgtot,          qmultrgtot,         psacrtot,           &
      npracgtot,          nscngtot,           ngracstot,          &
-     nmultgtot,          nmultrgtot,         npsacwgtot,         &!--ag
+     nmultgtot,          nmultrgtot,         npsacwgtot,         &
+!--ag
      nrout,                        nsout,                        &
      refl,               arefl,              areflz,             &
      frefl,              csrfl,              acsrfl,             &
@@ -490,8 +508,10 @@ subroutine micro_mg_tend (                                       &
      ncai,                         ncal,                         &
      qrout2,                       qsout2,                       &
      nrout2,                       nsout2,                       &
-     drout2,                       dsout2,                       &!++ag
-     qgout2,             ngout2,   dgout2,   freqg,              &!--ag
+     drout2,                       dsout2,                       &
+!++ag
+     qgout2,             ngout2,   dgout2,   freqg,              &
+!--ag
      freqs,                        freqr,                        &
      nfice,                        qcrat,                        &
      prer_evap, xlat, xlon, lprnt, iccn, aero_in, nlball)
