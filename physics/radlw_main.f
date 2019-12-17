@@ -1022,6 +1022,8 @@
      &       cldfmc, taucld                                             &
      &     )
 
+          cldfmc = ceiling(cldfmc)
+
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
 
