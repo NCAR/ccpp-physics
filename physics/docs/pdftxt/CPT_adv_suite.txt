@@ -1,5 +1,5 @@
 /**
-\page csawmg_page csawmg Suite
+\page csawmg_page SCM csawmg Suite
 
 \section csawmg_suite_overview Overview
 

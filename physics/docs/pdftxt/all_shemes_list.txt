@@ -3,7 +3,7 @@
 
 \section allscheme_overview Physics Parameterizations 
 
-In the CCPP-Physics v3.0 release, each parameterization is in its own modern Fortran module,
+In the NOAA's Unified Forecast System (UFS) public release, each parameterization is in its own modern Fortran module,
  which facilitates model development and
 code maintenance. While some individual parameterization can be invoked for the GMTB SCM, most users will assemble the 
 parameterizations in suites. 
@@ -13,7 +13,7 @@ parameterizations in suites.
 
 - \b PBL \b and \b Turbulence
  - \subpage GFS_HEDMF
- - \subpage GFS_SATMEDMF
+ - \subpage GFS_SATMEDMFQ
  - \subpage GSD_MYNNEDMF
 
 - \b Land \b Surface \b Model
@@ -43,9 +43,7 @@ parameterizations in suites.
  - \subpage GFS_H2OPHYS
 
 - \b Gravity \b Wave \b Drag
- - \subpage GFS_GWDPS 
- - \subpage GFS_GWDC
- - \subpage UGWPv0
+ - \subpage GFS_UGWPv0
 
 - \b Surface \b Layer \b and \b Simplified \b Ocean \b and \b Sea \b Ice \b Representation
  - \subpage GFS_SFCLYR
@@ -81,25 +79,27 @@ to the parameterization.
 
 \section allsuite_overview Physics Suites
 
-The CCPP v3 includes the suite used in the GFS v15 implemented operationally in June 2019 (suite GFS_v15). Additionally, it includes three
-developmental suites which are undergoing testing for possible future implementation in the UFS. Suite GFS_v15plus is identical to suite
-GFS_v15 except for a replacement in the PBL parameterization (Han et al. 2019 \cite Han_2019 ). Suite csawmg differs from GFS_v15 as it 
+The CCPP  includes the suite used in the GFS v15.2 implemented operationally in Nov 2019 (suite GFS_v15.2) and a proposed version 16beta to be implemented operationally in 2021.
+ Additionally, it includes two
+developmental suites which are undergoing testing for possible future implementation in the UFS. Suite GFS_v16beta is identical to suite
+GFS_v15.2 except for an update in the PBL parameterization (Han et al. 2019 \cite Han_2019 ) and \ref GFS_UGWPv0. Suite csawmg differs from GFS_v15 as it 
 contains different convection and microphysics schemes made available through a NOAA Climate Process Team (CPT) with components developed 
-at multiple research centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Suite GSD_v0 differs from GFS_v15 as it 
+at multiple research centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Suite GSD_v0 differs from GFS_v15.2 as it 
 uses the convection, microphysics, and boundary layer schemes employed in the Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR \cite Benjamin_2016 )
 operational models and was assembled by NOAA/GSD. An assessment of an earlier version of these suites can be found in 
 <a href="https://ufscommunity.org/#/science/physics"> the UFS portal </a>
-and in <a href="https://dtcenter.org/eval/gmtb/phytest2019/"> the GMTB website </a> .
+and in <a href="https://dtcenter.org/eval/gmtb/phytest2019/"> the GMTB website </a> . 
 
 Table 1.  Physics suite options included in this documentation. 
 \tableofcontents
-|   Phys suites    |      GFS_v15         |      GFS_v15plus     |       csawmg        |        GSD_v0        |
-|------------------|----------------------|----------------------|---------------------|----------------------|
-| Deep Cu          | \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
-| Shallow Cu       | \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF and \ref cu_gf_sh_group   |
-| Microphysics     | \ref GFDL_cloud      |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
-| PBL/TURB         | \ref GFS_HEDMF       |  \ref GFS_SATMEDMF   |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
-| Land             | \ref GFS_NOAH        |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
+|   Phys suites    |     GFS_v15p2                     |   GFS_v16beta        |       csawmg        |    GSD_v1            |
+|------------------|-----------------------------------|----------------------|---------------------|----------------------|
+| Deep Cu          | \ref GFS_SAMFdeep                 |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
+| Shallow Cu       | \ref GFS_SAMFshal                 |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF and \ref cu_gf_sh_group   |
+| Microphysics     | \ref GFDL_cloud                   |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
+| PBL/TURB         | \ref GFS_HEDMF                    |  \ref GFS_SATMEDMFQ  |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
+| Land             | \ref GFS_NOAH                     |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
+| Gravity Wave Drag| \ref GFS_UGWPv0                   |  \ref GFS_UGWPv0     |  \ref GFS_UGWPv0    | \ref GFS_UGWPv0      |
 \tableofcontents
 
 

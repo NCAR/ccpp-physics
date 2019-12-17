@@ -1,5 +1,5 @@
 /**
-\page GSD_v0_page GSD_v0 Suite 
+\page GSD_v0_page SCM GSD_v1 Suite 
 
 \section gsd_suite_overview Overview
 
@@ -8,7 +8,7 @@ numerical forecast guidance for weather-sensitive users, including those in the 
 The RUC started to run every hour starting in 1998. Significant weather forecasting problems that occur in the 0- to 
 12-hr range include severe weather in all seasons (for example, tornadoes, severe thunderstorms, crippling snow, and 
 ice storms) and hazards to aviation (for example, clear air turbulence, icing, and downbursts). The RUC soon became a
-key model for short-range convectiion forecasts and for the pre-convective environments.
+key model for short-range convection forecasts and for the pre-convective environments.
 
 The RAP, which replaced the RUC in 2012, runs hourly at the National Centers for Environmental Prediction (NCEP), providing
 high frequency updates of current conditions and short-range forecasts over North America at 13km resolution. A CONUS-nested 

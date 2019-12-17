@@ -2,7 +2,13 @@
 \mainpage Introduction 
 
 Welcome to the scientific documentation for the parameterizations available in the Common 
-Community Physics Package (CCPP) v3.0 public release.  
+Community Physics Package (CCPP) for the Unified Forecast System (UFS) public release.  
+
+The Unified Foreacst System (UFS) is a community-based, coupled comprehensive Earth system modeling system.
+The UFS numerical applications span local to global domains and predictive time scales from sub-hourly analyses
+to seasonal predictions. It is designed to support the Weather Enterprise and to be the source system for
+NOAA's operational numerical weather prediction applications.For more details and current UFS events, please
+go to the UFS Community Web Portal at https://ufscommunity.org/ 
 
 The CCPP-Physics is envisioned to contain parameterizations used by NOAA operational models for weather through
 seasonal prediction timescales, as well as developmental schemes under consideration for upcoming 
@@ -15,7 +21,7 @@ Finite-Volume Cubed-Sphere (FV3) dynamic core.
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 3.0 (June 2019), and more details on it may be found on the
+The latest CCPP public release is Version 3.X (Jan 2019), and more details on it may be found on the
 <a href="https://dtcenter.org/gmtb/users/ccpp/"> CCPP website </a> hosted by the Global Model Test
 Bed (GMTB) of the Developmental Testbed Center (DTC).
 
