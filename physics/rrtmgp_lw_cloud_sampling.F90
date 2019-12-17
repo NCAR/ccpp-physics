@@ -72,6 +72,7 @@ contains
     real(kind_phys), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D
     real(kind_phys), dimension(lw_gas_props%get_ngpt()*nLev) :: rng1D
     logical, dimension(ncol,nLev,lw_gas_props%get_ngpt()) :: cldfracMCICA
+    real(kind_phys), dimension(ncol,nLev) :: cld_frac_noSamp
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -102,12 +103,15 @@ contains
        call random_number(rng1D,rng_stat)
        rng3D(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
     enddo
-    
+
+    ! Test: Remove McICA sampling error by setting cloud-fraction to one.
+    cld_frac_noSamp = ceiling(cld_frac)
+
     ! Call McICA
     select case ( iovrlw )
        ! Maximumn-random 
     case(1)
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac_noSamp,cldfracMCICA))       
     end select
     
     ! Map band optical depth to each g-point using McICA
