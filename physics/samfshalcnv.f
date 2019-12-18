@@ -55,7 +55,7 @@
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                        &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
-     &     clam,c0s,c1,pgcon,asolfac,errmsg,errflg)
+     &     clam,c0s,c1,pgcon,asolfac,hwrf_samfshal,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
@@ -82,6 +82,7 @@
 !
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, pgcon
+      logical,          intent(in)  :: hwrf_samfshal      
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -140,8 +141,8 @@ c
 !
 !  parameters for updraft velocity calculation
       real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
-     &                     bb1,     bb2
-!    &                     bb1,     bb2,     wucb
+!     &                     bb1,     bb2
+     &                     bb1,     bb2,     wucb
 
 cc
 c  physical parameters
@@ -167,11 +168,7 @@ c  physical parameters
       parameter(dtke=tkemx-tkemn)
       parameter(dthk=25.)
       parameter(cinpcrmx=180.,cinpcrmn=120.)
-#ifdef HWRF_SCALESAS
-     parameter(cinacrmx=-120.,cinacrmn=-120.)
-#else
-      parameter(cinacrmx=-120.,cinacrmn=-80.)
-#endif
+      parameter(cinacrmx=-120.)
       parameter(crtlamd=3.e-4)
       parameter(dtmax=10800.,dtmin=600.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
@@ -255,12 +252,18 @@ c-----------------------------------------------------------------------
       fact1 = (cvap-cliq)/rv
       fact2 = hvap/rv-fact1*t0c
 
+      if (hwrf_samfshal) then
+             cinacrmn=-120.
+      else
+             cinacrmn=-80.
+      endif
+
 c-----------------------------------------------------------------------
-#ifndef HWRF_SCALESAS
+      if (.not.hwrf_samfshal) then
 !>  ## Determine whether to perform aerosol transport
-      do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
-      if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
-#endif
+        do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
+        if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
+      endif
 !
 !************************************************************************
 !     convert input Pa terms to Cb terms  -- Moorthi
@@ -296,10 +299,10 @@ c
         vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
 
-#ifdef HWRF_SCALESAS
+        if (hwrf_samfshal) then
           scaldfunc(i)=-1.0  ! wang initialized
           sigmagfm(i)=-1.0
-#endif
+        endif
       enddo
 !!
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
@@ -312,11 +315,11 @@ c
 !>  - determine aerosol-aware rain conversion parameter over land
       do i=1,im
         if(islimsk(i) == 1) then
-#ifdef HWRF_SCALESAS
+         if (hwrf_samfshal) then
            c0(i) = c0l
-#else
+         else
            c0(i) = c0s*asolfac
-#endif
+         endif
         else
            c0(i) = c0s
         endif
@@ -354,19 +357,15 @@ c
       dt2   = delt
 !
 c  model tunable parameters are all here
-#ifdef HWRF_SCALESAS
-     clam    = .3
-     aafac   = .1
-     pgcon   = 0.55
-#else
-      aafac   = .05
-#endif
+      if (hwrf_samfshal) then
+        aafac   = .1
+      else
+        aafac   = .05
+      endif
 c     evef    = 0.07
       evfact  = 0.3
       evfactl = 0.3
 !
-!     pgcon   = 0.7     ! Gregory et al. (1997, QJRMS)
-!     pgcon   = 0.55    ! Zhang & Wu (2003,JAS)
       w1l     = -8.e-3
       w2l     = -4.e-2
       w3l     = -5.e-3
@@ -409,16 +408,16 @@ c
       do k = 1, km1
         do i=1,im
           zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
-#ifdef HWRF_SCALESAS
-          xlamue(i,k) = clam / zi(i,k)
-#endif
+          if (hwrf_samfshal) then
+            xlamue(i,k) = clam / zi(i,k)
+          endif
         enddo
       enddo
-#ifdef HWRF_SCALESAS
-      do i=1,im
+      if (hwrf_samfshal) then
+       do i=1,im
         xlamue(i,km) = xlamue(i,km1)
-      enddo
-#endif
+       enddo
+      endif
 c
 c  pbl height
 c
@@ -473,9 +472,9 @@ c
 !
 !  initialize tracer variables
 !
-#ifndef HWRF_SCALESAS
-      do n = 3, ntr+2
-        kk = n-2
+      if (.not.hwrf_samfshal) then
+        do n = 3, ntr+2
+          kk = n-2
         do k = 1, km
           do i = 1, im
             if (cnvflg(i) .and. k <= kmax(i)) then
@@ -485,8 +484,8 @@ c
             endif
           enddo
         enddo
-      enddo
-#endif
+        enddo
+      endif
 !>  - Calculate saturation specific humidity and enforce minimum moisture values.
       do k = 1, km
         do i=1,im
@@ -582,17 +581,17 @@ c
           endif
         enddo
       enddo
-#ifndef HWRF_SCALESAS
-      do n = 1, ntr
-      do k = 1, km1
+      if (.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 1, km1
         do i=1,im
           if (cnvflg(i) .and. k <= kmax(i)-1) then
             ctro(i,k,n) = .5 * (ctro(i,k,n) + ctro(i,k+1,n))
           endif
         enddo
-      enddo
-      enddo
-#endif
+       enddo
+       enddo
+      endif
 c
 c  look for the level of free convection as cloud base
 c
@@ -693,17 +692,17 @@ c
 !
 !
 
-#ifdef HWRF_SCALESAS
 !c
 !c  specify the detrainment rate for the updrafts
 !c
+      if (hwrf_samfshal) then
       do i = 1, im
         if(cnvflg(i)) then
           xlamud(i) = xlamue(i,kbcon(i))
 !         xlamud(i) = crtlamd
         endif
       enddo
-#else
+      else
       if(ntk > 0) then
         do i= 1, im
           if(cnvflg(i)) then
@@ -779,7 +778,7 @@ c
           xlamud(i) = 0.001 * clamt(i)
         endif
       enddo
-#endif
+      endif    ! hwrf_samfshal
 c
 c  determine updraft mass flux for the subcloud layers
 c
@@ -835,7 +834,7 @@ c
         endif
       enddo
 !  for tracers
-#ifndef HWRF_SCALESAS
+      if (.not. hwrf_samfshal) then
       do n = 1, ntr
         do i = 1, im
           if(cnvflg(i)) then
@@ -844,7 +843,7 @@ c
           endif
         enddo
       enddo
-#endif
+      endif
 c
 !  cm is an enhancement factor in entrainment rates for momentum
 !
@@ -873,9 +872,9 @@ c
           endif
         enddo
       enddo
-#ifndef HWRF_SCALESAS
-      do n = 1, ntr
-      do k = 2, km1
+      if (.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k < kmax(i)) then
@@ -887,9 +886,9 @@ c
             endif
           endif
         enddo
-      enddo
-      enddo
-#endif
+       enddo
+       enddo
+      endif
 c
 c   taking account into convection inhibition due to existence of
 c    dry layers below cloud base
@@ -959,9 +958,9 @@ c
       do i = 1, im
         if(cnvflg(i)) then
 !
-#ifdef HWRF_SCALESAS
+         if (hwrf_samfshal) then
             cinacr = cinacrmx
-#else
+         else
           if(islimsk(i) == 1) then
             w1 = w1l
             w2 = w2l
@@ -988,9 +987,7 @@ c
           tem = 1. - tem
           tem1= .5*(cinacrmx-cinacrmn)
           cinacr = cinacrmx - tem * tem1
-!
-!         cinacr = cinacrmx
-#endif
+         endif
           if(cina(i) < cinacr) cnvflg(i) = .false.
         endif
       enddo
@@ -1030,16 +1027,11 @@ c
 !
           k = kbcon(i)
           dp = 1000. * del(i,k)
-#ifdef HWRF_SCALESAS
-          xmbmax(i) = dp / (g * dt2)
-#else
-          xmbmax(i) = dp / (2. * grav * dt2)
-#endif
-!
-!         xmbmax(i) = dp / (grav * dt2)
-!
-!         tem = dp / (grav * dt2)
-!         xmbmax(i) = min(tem, xmbmax(i))
+          if (hwrf_samfshal) then
+            xmbmax(i) = dp / (grav * dt2)
+          else
+            xmbmax(i) = dp / (2. * grav * dt2)
+          endif
         endif
       enddo
 c
@@ -1262,19 +1254,10 @@ c
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
 !
-!     bb1 = 2. * (1.+bet1*cd1)
-!     bb2 = 2. / (f1*(1.+gam1))
-!
-!     bb1 = 3.9
-!     bb2 = 0.67
-!
-!     bb1 = 2.0
-!     bb2 = 4.0
-!
       bb1 = 4.0
       bb2 = 0.8
 !
-#ifdef HWRF_SCALESAS
+      if (hwrf_samfshal) then
       do i = 1, im
        if (cnvflg(i)) then
          k = kbcon1(i)
@@ -1287,7 +1270,7 @@ c
          endif
        endif
       enddo
-#endif
+      endif
       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -1421,17 +1404,17 @@ c
           endif
         enddo
       enddo
-#ifndef HWRF_SCALESAS
-      do n = 1, ntr
-      do k = 1, km
+      if (.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 1, km
         do i = 1, im
           if(cnvflg(i) .and. k <= kmax(i)) then
             dellae(i,k,n) = 0.
           endif
         enddo
-      enddo
-      enddo
-#endif
+       enddo
+       enddo
+      endif
 c
 c--- changed due to subsidence and entrainment
 c
@@ -1476,9 +1459,9 @@ cj
           endif
         enddo
       enddo
-#ifndef HWRF_SCALESAS
-      do n = 1, ntr
-      do k = 2, km1
+      if(.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k < ktcon(i)) then
@@ -1491,9 +1474,9 @@ cj
             endif
           endif
         enddo
-      enddo
-      enddo
-#endif
+       enddo
+       enddo
+      endif
 c
 c------- cloud top
 c
@@ -1518,7 +1501,7 @@ c
      &                     qlko_ktcon(i) * grav / dp
         endif
       enddo
-#ifndef HWRF_SCALESAS
+      if (.not.hwrf_samfshal) then
       do n = 1, ntr
       do i = 1, im
         if(cnvflg(i)) then
@@ -1529,7 +1512,7 @@ c
         endif
       enddo
       enddo
-#endif
+      endif
 !
 !  compute convective turn-over time
 !
@@ -1538,10 +1521,10 @@ c
         if(cnvflg(i)) then
           tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
           dtconv(i) = tem / wc(i)
-#ifndef HWRF_SCALESAS
-          tfac = 1. + gdx(i) / 75000.
-          dtconv(i) = tfac * dtconv(i)
-#endif
+          if (.not.hwrf_samfshal) then
+            tfac = 1. + gdx(i) / 75000.
+            dtconv(i) = tfac * dtconv(i)
+          endif
           dtconv(i) = max(dtconv(i),dtmin)
           dtconv(i) = max(dtconv(i),dt2)
           dtconv(i) = min(dtconv(i),dtmax)
@@ -1616,17 +1599,17 @@ c
         endif
       enddo
 !
-#ifndef HWRF_SCALESAS
 !> - Transport aerosols if present
 !
-      if (do_aerosols)
+      if (.not.hwrf_samfshal) then
+       if (do_aerosols)
      &  call samfshalcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
 !    &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
      &  cnvflg, kb, kmax, kbcon, ktcon, fscav,
 !    &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
      &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
      &  qtr, qaero)
-#endif
+      endif
 !
 !> ## For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !! - Recalculate saturation specific humidity.
@@ -1656,13 +1639,13 @@ c
         delvbar(i) = 0.
         qcond(i) = 0.
       enddo
-#ifndef HWRF_SCALESAS
-      do n = 1, ntr
-      do i = 1, im
+      if (.not. hwrf_samfshal) then
+       do n = 1, ntr
+       do i = 1, im
         delebar(i,n) = 0.
-      enddo
-      enddo
-#endif
+       enddo
+       enddo
+      endif
       do k = 1, km
         do i = 1, im
           if (cnvflg(i)) then
@@ -1685,7 +1668,7 @@ c
           endif
         enddo
       enddo
-#ifndef HWRF_SCALESAS
+      if (.not.hwrf_samfshal) then
       do n = 1, ntr
          kk = n+2
       do k = 1, km
@@ -1700,7 +1683,7 @@ c
         enddo
       enddo
       enddo
-#endif
+      endif
 !
 !> - Recalculate saturation specific humidity using the updated temperature.
       do k = 1, km
@@ -1871,8 +1854,8 @@ c
 !
       endif
 !> - Store aerosol concentrations if present
-#ifndef HWRF_SCALESAS
-      if (do_aerosols) then
+      if (.not. hwrf_samfshal) then
+       if (do_aerosols) then
         do n = 1, ntc
           kk = n + itc - 1
           do k = 1, km
@@ -1884,7 +1867,7 @@ c
           enddo
         enddo
        endif
-#endif
+      endif
 !
 ! hchuang code change
 !
@@ -1910,7 +1893,7 @@ c
 !
 !   include TKE contribution from shallow convection
 !
-#ifndef HWRF_SCALESAS
+      if (.not.hwrf_samfshal) then
       if (ntk > 0) then
 !
       do k = 2, km1
@@ -1928,7 +1911,7 @@ c
       enddo
 !
       endif
-#endif
+      endif
 !!
       return
       end subroutine samfshalcnv_run
