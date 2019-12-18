@@ -13,7 +13,7 @@ parameterizations in suites.
 
 - \b PBL \b and \b Turbulence
  - \subpage GFS_HEDMF
- - \subpage GFS_SATMEDMFQ
+ - \subpage GFS_SATMEDMEFVDIFQ
  - \subpage GSD_MYNNEDMF
 
 - \b Land \b Surface \b Model

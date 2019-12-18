@@ -112,7 +112,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_NOAH.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
                           pdftxt/GFS_HEDMF.txt    \
-                          pdftxt/GFS_SATMEDMFQ.txt    \
+                          pdftxt/GFS_SATMEDMFVDIFQ.txt    \
 ##                          pdftxt/GFS_NoahMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
 ##                          pdftxt/GFS_GWDPS.txt    \
