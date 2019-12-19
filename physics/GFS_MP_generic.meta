@@ -30,6 +30,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = logical flag for 3D tracer diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_aw]
   standard_name = flag_for_Arakawa_Wu_adjustment
   long_name = flag for Arakawa Wu scale-aware adjustment
@@ -261,6 +269,14 @@
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = logical flag for 3D tracer diagnostics
   units = flag
   dimensions = ()
   type = logical
