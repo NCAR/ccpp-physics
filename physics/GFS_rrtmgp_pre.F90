@@ -113,8 +113,6 @@ contains
        enddo
     endif
 
-    open(77,file='dump.rrtmgp.cloudprops.txt',status='unknown')
-
   end subroutine GFS_rrtmgp_pre_init
 
   ! #########################################################################################
@@ -327,64 +325,12 @@ contains
     cld_swp    = clouds(:,:,8)  
     cld_resnow = clouds(:,:,9)  
     
-    write(77,*) "####################"
-    write(77,*) ncol,Model%levs
-    do iCol=1,NCOL
-       write(77,*) iCol, grid%xlon(iCol), grid%xlat(iCol)
-       !
-       write(77,*) "p_lay"
-       write(77,*) p_lay(iCol,:)/100.
-       !
-       write(77,*) "t_lay"
-       write(77,*) t_lay(iCol,:)
-       !
-       write(77,*) "tv_lay"
-       write(77,*) tv_lay(iCol,:)
-       !
-       write(77,*) "relhum"
-       write(77,*) relhum(iCol,:)
-       !
-       write(77,*) "qs_lay"
-       write(77,*) qs_lay(iCol,:)
-       !
-       write(77,*) "q_lay"
-       write(77,*) q_lay(iCol,:)
-       !
-       write(77,*) "cld_frac"
-       write(77,*) cld_frac(iCol,:)
-       !
-       write(77,*) "cld_lwp"
-       write(77,*) cld_lwp(iCol,:)
-       !
-       write(77,*) "cld_reliq"
-       write(77,*) cld_reliq(iCol,:)
-       !
-       write(77,*) "cld_iwp"
-       write(77,*) cld_iwp(iCol,:)
-       !
-       write(77,*) "cld_reice"
-       write(77,*) cld_reice(iCol,:)
-       !
-       write(77,*) "cld_rwp"
-       write(77,*) cld_rwp(iCol,:)
-       !
-       write(77,*) "cld_rerain"
-       write(77,*) cld_rerain(iCol,:)
-       !
-       write(77,*) "cld_swp"
-       write(77,*) cld_swp(iCol,:)
-       !
-       write(77,*) "cld_resnow"
-       write(77,*) cld_resnow(iCol,:)
-    enddo
-
   end subroutine GFS_rrtmgp_pre_run
   
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_pre_finalize
   ! #########################################################################################
   subroutine GFS_rrtmgp_pre_finalize ()
-    close(77)
   end subroutine GFS_rrtmgp_pre_finalize
 
   ! #########################################################################################
@@ -482,14 +428,41 @@ contains
        enddo
     endif
 
+    if (Model%uni_cld) then
+       if (Model%effr_in) then
+          cldcov(:,:)  = Tbd%phy_f3d(:,:,Model%indcld)
+          effr_l(:,:)  = Tbd%phy_f3d(:,:,2)
+          effr_i(:,:)  = Tbd%phy_f3d(:,:,3)
+          effr_r(:,:)  = Tbd%phy_f3d(:,:,4)
+          effr_s(:,:)  = Tbd%phy_f3d(:,:,5)
+       else
+          do k=1,model%levs
+             do i=1,ncol
+                cldcov(i,k) = Tbd%phy_f3d(i,k,Model%indcld)
+             enddo
+          enddo
+       endif
+    elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
+       cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
+       if (Model%effr_in) then
+          effr_l(:,:)  = Tbd%phy_f3d(:,:,1)
+          effr_i(:,:)  = Tbd%phy_f3d(:,:,2)
+          effr_r(:,:)  = Tbd%phy_f3d(:,:,3)
+          effr_s(:,:)  = Tbd%phy_f3d(:,:,4)
+       endif
+    else                                                           ! neither of the other two cases
+       cldcov = 0.0
+    endif
+
+
     ! Add suspended convective cloud water to grid-scale cloud water
     ! only for cloud fraction & radiation computation it is to enhance 
     ! cloudiness due to suspended convec cloud water for zhao/moorthi's 
     ! (imp_phys=99) & ferrier's (imp_phys=5) microphysics schemes
     if ((Model%num_p3d == 4) .and. (Model%npdf3d == 3)) then       ! same as Model%imp_physics = 99
-       delta_q(1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,5)
-       cnv_w  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,6)
-       cnv_c  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,7)
+       delta_q(1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,Model%levs:1:-1,5)
+       cnv_w  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,Model%levs:1:-1,6)
+       cnv_c  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,Model%levs:1:-1,7)
     elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then ! same as MOdel%imp_physics=98
        delta_q(1:ncol,1:Model%levs) = 0.0
        cnv_w  (1:ncol,1:Model%levs) = Tbd%phy_f3d(1:ncol,1:Model%levs,Model%num_p3d+1)
@@ -508,37 +481,6 @@ contains
     ! For MG prognostic cloud scheme, add in convective cloud water to liquid-and-ice-cloud condensate
     if (Model%imp_physics == 10) then
        cld_condensate(1:NCOL,1:Model%levs,1) = cld_condensate(1:NCOL,1:Model%levs,1) + cnv_w(1:NCOL,1:Model%levs) + cld_condensate(1:NCOL,1:Model%levs,2)
-    endif
-
-    if (Model%uni_cld) then
-       if (Model%effr_in) then
-          cldcov(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,Model%indcld)
-          effr_l(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,2)
-          effr_i(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,3)
-          effr_r(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,4)
-          effr_s(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,5)
-       else
-          do k=1,model%levs
-             do i=1,ncol
-                cldcov(i,k) = Tbd%phy_f3d(i,k,Model%indcld)
-                if (tracer(i,k,model%ntcw) .gt. 0 .or. tracer(i,k,model%ntiw) .gt. 0) then
-                   cldcov(i,k) = 0.1
-                else
-                   cldcov(i,k) = 0.0
-                endif
-             enddo
-          enddo
-       endif
-    elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
-       cldcov(1:NCOL,1:Model%levs) = tracer(1:NCOL,1:Model%levs,Model%ntclamt)
-       if (Model%effr_in) then
-          effr_l(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,1)
-          effr_i(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,2)
-          effr_r(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,3)
-          effr_s(1:ncol,1:Model%levs)  = Tbd%phy_f3d(1:ncol,1:Model%levs,4)
-       endif
-    else                                                           ! neither of the other two cases
-       cldcov = 0.0
     endif
 
     ! #######################################################################################

@@ -10,7 +10,6 @@
 !! \section arg_table_GFS_rrtmg_pre_init Argument Table
 !!
       subroutine GFS_rrtmg_pre_init ()
-        open(77,file='dump.rrtmg.cloudprops.txt',status='unknown')
       end subroutine GFS_rrtmg_pre_init
 
 !> \section arg_table_GFS_rrtmg_pre_run Argument Table
@@ -691,45 +690,10 @@
               effrs(i,lyb) = effrs(i,lya)
             enddo
           endif
-        endif
+       endif
 
         if (Model%imp_physics == 99) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
-        endif
-
-        if (Model%imp_physics == 10) then
-          ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK) + ccnd(1:IM,1:LMK,2)
-        endif
-
-        if (Model%uni_cld) then
-          if (Model%effr_in) then
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                 cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
-                 effrl(i,k1)  = Tbd%phy_f3d(i,k,2)
-                 effri(i,k1)  = Tbd%phy_f3d(i,k,3)
-                 effrr(i,k1)  = Tbd%phy_f3d(i,k,4)
-                 effrs(i,k1)  = Tbd%phy_f3d(i,k,5)
-              enddo
-            enddo
-          else
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                 cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
-                 if (tracer1(i,k,ntcw) .gt. 0 .or. tracer1(i,k,ntiw) .gt. 0) then
-                    cldcov(i,k1) = 0.1
-                 else
-                    cldcov(i,k1) = 0.0
-                 endif
-              enddo
-            enddo
-          endif
-        elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
-          cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,Model%ntclamt)
-        else                                                           ! neither of the other two cases
-          cldcov = 0.0
         endif
 
         if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
@@ -821,59 +785,6 @@
          enddo
        enddo
 
-    write(77,*) "####################"
-    write(77,*) im,Model%levs
-    do i=1,im
-       write(77,*) i, grid%xlon(i), grid%xlat(i)
-       !
-       write(77,*) "p_lay"
-       write(77,*) plyr(i,:)
-       !
-       write(77,*) "t_lay"
-       write(77,*) tlyr(i,:)
-       !
-       write(77,*) "tv_lay"
-       write(77,*) tvly(i,:)
-       !
-       write(77,*) "relhum"
-       write(77,*) rhly(i,:)
-       !
-       write(77,*) "qs_lay"
-       write(77,*) qstl(i,:)
-       !
-       write(77,*) "q_lay"
-       write(77,*) qlyr(i,:)
-       !
-       write(77,*) "cld_frac"
-       write(77,*) clouds1(i,:)
-       !
-       write(77,*) "cld_lwp"
-       write(77,*) clouds2(i,:)
-       !
-       write(77,*) "cld_reliq"
-       write(77,*) clouds3(i,:)
-       !
-       write(77,*) "cld_iwp"
-       write(77,*) clouds4(i,:)
-       !
-       write(77,*) "cld_reice"
-       write(77,*) clouds5(i,:)
-       !
-       write(77,*) "cld_rwp"
-       write(77,*) clouds6(i,:)
-       !
-       write(77,*) "cld_rerain"
-       write(77,*) clouds7(i,:)
-       !
-       write(77,*) "cld_swp"
-       write(77,*) clouds8(i,:)
-       !
-       write(77,*) "cld_resnow"
-       write(77,*) clouds9(i,:)
-    enddo
-
-
-
 ! mg, sfc-perts
 !  ---  scale random patterns for surface perturbations with
 !  perturbation size
@@ -893,7 +804,6 @@
 !> \section arg_table_GFS_rrtmg_pre_finalize Argument Table
 !!
       subroutine GFS_rrtmg_pre_finalize ()
-        close(77)
       end subroutine GFS_rrtmg_pre_finalize
 
 !! @}
