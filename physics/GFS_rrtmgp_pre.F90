@@ -112,6 +112,9 @@ contains
           active_gases_array(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
        enddo
     endif
+
+    open(77,file='dump.rrtmgp.cloudprops.txt',status='unknown')
+
   end subroutine GFS_rrtmgp_pre_init
 
   ! #########################################################################################
@@ -322,7 +325,58 @@ contains
     cld_rwp    = clouds(:,:,6)  
     cld_rerain = clouds(:,:,7)  
     cld_swp    = clouds(:,:,8)  
-    cld_resnow = clouds(:,:,9)    
+    cld_resnow = clouds(:,:,9)  
+    
+    write(77,*) "####################"
+    write(77,*) ncol,Model%levs
+    do iCol=1,NCOL
+       write(77,*) iCol, grid%xlon(iCol), grid%xlat(iCol)
+       !
+       write(77,*) "p_lay"
+       write(77,*) p_lay(iCol,:)/100.
+       !
+       write(77,*) "t_lay"
+       write(77,*) t_lay(iCol,:)
+       !
+       write(77,*) "tv_lay"
+       write(77,*) tv_lay(iCol,:)
+       !
+       write(77,*) "relhum"
+       write(77,*) relhum(iCol,:)
+       !
+       write(77,*) "qs_lay"
+       write(77,*) qs_lay(iCol,:)
+       !
+       write(77,*) "q_lay"
+       write(77,*) q_lay(iCol,:)
+       !
+       write(77,*) "cld_frac"
+       write(77,*) cld_frac(iCol,:)
+       !
+       write(77,*) "cld_lwp"
+       write(77,*) cld_lwp(iCol,:)
+       !
+       write(77,*) "cld_reliq"
+       write(77,*) cld_reliq(iCol,:)
+       !
+       write(77,*) "cld_iwp"
+       write(77,*) cld_iwp(iCol,:)
+       !
+       write(77,*) "cld_reice"
+       write(77,*) cld_reice(iCol,:)
+       !
+       write(77,*) "cld_rwp"
+       write(77,*) cld_rwp(iCol,:)
+       !
+       write(77,*) "cld_rerain"
+       write(77,*) cld_rerain(iCol,:)
+       !
+       write(77,*) "cld_swp"
+       write(77,*) cld_swp(iCol,:)
+       !
+       write(77,*) "cld_resnow"
+       write(77,*) cld_resnow(iCol,:)
+    enddo
 
   end subroutine GFS_rrtmgp_pre_run
   
@@ -330,6 +384,7 @@ contains
   ! SUBROUTINE GFS_rrtmgp_pre_finalize
   ! #########################################################################################
   subroutine GFS_rrtmgp_pre_finalize ()
+    close(77)
   end subroutine GFS_rrtmgp_pre_finalize
 
   ! #########################################################################################

@@ -1014,6 +1014,7 @@
 
         if ( lcf1 ) then
 
+          cldfrc = ceiling(cldfrc)
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
@@ -1021,8 +1022,6 @@
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
-
-          cldfmc = ceiling(cldfmc)
 
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)

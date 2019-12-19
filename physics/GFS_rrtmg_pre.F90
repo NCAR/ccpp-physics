@@ -10,6 +10,7 @@
 !! \section arg_table_GFS_rrtmg_pre_init Argument Table
 !!
       subroutine GFS_rrtmg_pre_init ()
+        open(77,file='dump.rrtmg.cloudprops.txt',status='unknown')
       end subroutine GFS_rrtmg_pre_init
 
 !> \section arg_table_GFS_rrtmg_pre_run Argument Table
@@ -820,6 +821,58 @@
          enddo
        enddo
 
+    write(77,*) "####################"
+    write(77,*) im,Model%levs
+    do i=1,im
+       write(77,*) i, grid%xlon(i), grid%xlat(i)
+       !
+       write(77,*) "p_lay"
+       write(77,*) plyr(i,:)
+       !
+       write(77,*) "t_lay"
+       write(77,*) tlyr(i,:)
+       !
+       write(77,*) "tv_lay"
+       write(77,*) tvly(i,:)
+       !
+       write(77,*) "relhum"
+       write(77,*) rhly(i,:)
+       !
+       write(77,*) "qs_lay"
+       write(77,*) qstl(i,:)
+       !
+       write(77,*) "q_lay"
+       write(77,*) qlyr(i,:)
+       !
+       write(77,*) "cld_frac"
+       write(77,*) clouds1(i,:)
+       !
+       write(77,*) "cld_lwp"
+       write(77,*) clouds2(i,:)
+       !
+       write(77,*) "cld_reliq"
+       write(77,*) clouds3(i,:)
+       !
+       write(77,*) "cld_iwp"
+       write(77,*) clouds4(i,:)
+       !
+       write(77,*) "cld_reice"
+       write(77,*) clouds5(i,:)
+       !
+       write(77,*) "cld_rwp"
+       write(77,*) clouds6(i,:)
+       !
+       write(77,*) "cld_rerain"
+       write(77,*) clouds7(i,:)
+       !
+       write(77,*) "cld_swp"
+       write(77,*) clouds8(i,:)
+       !
+       write(77,*) "cld_resnow"
+       write(77,*) clouds9(i,:)
+    enddo
+
+
 
 ! mg, sfc-perts
 !  ---  scale random patterns for surface perturbations with
@@ -840,6 +893,7 @@
 !> \section arg_table_GFS_rrtmg_pre_finalize Argument Table
 !!
       subroutine GFS_rrtmg_pre_finalize ()
+        close(77)
       end subroutine GFS_rrtmg_pre_finalize
 
 !! @}
