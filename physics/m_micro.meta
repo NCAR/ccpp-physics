@@ -781,7 +781,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[aero_in]
+[iaerclm]
   standard_name = flag_for_aerosol_input_MG
   long_name = flag for using aerosols in Morrison-Gettelman microphysics
   units = flag

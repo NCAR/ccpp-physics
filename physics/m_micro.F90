@@ -134,7 +134,7 @@ end subroutine m_micro_init
      &,                         CLLS_io,  KCBL                          &
      &,                         CLDREFFL, CLDREFFI, CLDREFFR, CLDREFFS  &
      &,                         CLDREFFG, aerfld_i                      &
-     &,                         aero_in,  naai_i, npccn_i, iccn         &
+     &,                         naai_i, npccn_i, iccn                   &
      &,                         skip_macro                              &
      &,                         lprnt, alf_fac, qc_min, pdfflag         &
      &,                         ipr, kdt, xlat, xlon, rhc_i,            &
@@ -183,7 +183,7 @@ end subroutine m_micro_init
 
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag
-       logical,intent(in) :: flipv, aero_in, skip_macro, lprnt, iccn
+       logical,intent(in) :: flipv, skip_macro, lprnt, iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
        real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
@@ -439,7 +439,7 @@ end subroutine m_micro_init
              temp(i,k)      = t_io(i,ll)
              radheat(i,k)   = lwheat_i(i,ll) + swheat_i(i,ll)
              rhc(i,k)       = rhc_i(i,ll)
-             if (iccn) then
+             if (iccn == 1) then
                CDNC_NUC(i,k) = npccn_i(i,ll)
                INC_NUC(i,k)  = naai_i (i,ll)
              endif
@@ -500,7 +500,7 @@ end subroutine m_micro_init
              temp(i,k)      = t_io(i,k)
              radheat(i,k)   = lwheat_i(i,k) + swheat_i(i,k)
              rhc(i,k)       = rhc_i(i,k)
-             if (iccn) then
+             if (iccn == 1) then
                CDNC_NUC(i,k) = npccn_i(i,k)
                INC_NUC(i,k)  = naai_i (i,k)
              endif
@@ -663,7 +663,7 @@ end subroutine m_micro_init
            NCPL(i,l)   = MAX( NCPL(i,l), 0.)
            NCPI(i,l)   = MAX( NCPI(i,l), 0.)
            RAD_CF(i,l) = max(0.0, min(CLLS(i,l)+CLCN(i,l), 1.0))
-           if (.not. iccn) then
+           if (iccn .ne. 1) then
              CDNC_NUC(i,l) = 0.0
              INC_NUC(i,l)  = 0.0
            endif
@@ -719,7 +719,7 @@ end subroutine m_micro_init
 !
 
        allocate(AERMASSMIX(IM,LM,15))
-       if ( aero_in ) then
+       if (iccn == 2) then
          AERMASSMIX(:,:,1:ntrcaer) = aerfld_i(:,:,1:ntrcaer)
        else
          AERMASSMIX(:,:,1:5) = 1.e-6
@@ -984,7 +984,7 @@ end subroutine m_micro_init
              SC_ICE(i,k) = ((tice-temp(i,k))*tx1 + (temp(i,k)-t_ice_all)*rhc(i,k)) &
                          * t_ice_denom
            endif
-           if (.not. iccn) then
+           if (iccn .ne. 1) then
              CDNC_NUC(I,k) = npccninr8(k)
              INC_NUC (I,k) = naair8(k)
            endif
@@ -1119,7 +1119,7 @@ end subroutine m_micro_init
 !           temp(i,k)   = th1(i,k) * PK(i,k)
             RAD_CF(i,k) = min(CLLS(i,k)+CLCN(i,k), 1.0)
 !
-            if (.not. iccn) then
+            if (iccn .ne. 1) then
               if (PFRZ(i,k) > 0.0) then
                 INC_NUC(i,k)  = INC_NUC(i,k)  * PFRZ(i,k)
                 NHET_NUC(i,k) = NHET_NUC(i,k) * PFRZ(i,k)
@@ -1490,7 +1490,7 @@ end subroutine m_micro_init
      &         drout2,                       dsout2,                    &
      &         freqs,                        freqr,                     &
      &         nfice,                        qcrat,                     &
-     &         prer_evap, xlat(i), xlon(i), lprint, iccn, aero_in,      &
+     &         prer_evap, xlat(i), xlon(i), lprint, iccn,               &
      &         lev_sed_strt)
 !
             LS_PRC2(I) = max(1000.*(prectr8(1)-precir8(1)), 0.0)
@@ -1625,7 +1625,7 @@ end subroutine m_micro_init
      &         qgout2,             ngout2,   dgout2, freqg,             &
      &         freqs,                        freqr,                     &
      &         nfice,                        qcrat,                     &
-     &         prer_evap, xlat(i), xlon(i), lprint, iccn, aero_in,      &
+     &         prer_evap, xlat(i), xlon(i), lprint, iccn,               &
      &         lev_sed_strt)
 
             LS_PRC2(I) = max(1000.*(prectr8(1)-precir8(1)), 0.0)
