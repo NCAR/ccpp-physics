@@ -216,9 +216,7 @@ c-----------------------------------------------------------------------
       fact1 = (cvap-cliq)/rv
       fact2 = hvap/rv-fact1*t0c
 
-      if (hwrf_samfshal) then
-             cinacrmn=-120.
-      else
+      if (.not.hwrf_samfshal) then
              cinacrmn=-80.
       endif
 
@@ -243,7 +241,8 @@ c
 c  initialize arrays
 c
 !>  - Initialize column-integrated and other single-value-per-column variable arrays.
-      do i=1,im
+      if(hwrf_samfshal) then
+       do i=1,im
         cnvflg(i) = .true.
         if(kcnv(i) == 1) cnvflg(i) = .false.
         if(cnvflg(i)) then
@@ -262,12 +261,32 @@ c
         cina(i) = 0.
         vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
-
-        if (hwrf_samfshal) then
           scaldfunc(i)=-1.0  ! wang initialized
           sigmagfm(i)=-1.0
+       enddo
+
+      else !gfs_samfshal
+       do i=1,im
+        cnvflg(i) = .true.
+        if(kcnv(i) == 1) cnvflg(i) = .false.
+        if(cnvflg(i)) then
+          kbot(i)=km+1
+          ktop(i)=0
         endif
-      enddo
+        rn(i)=0.
+        kbcon(i)=km
+        ktcon(i)=1
+        ktconn(i)=1
+        kb(i)=km
+        pdot(i) = 0.
+        qlko_ktcon(i) = 0.
+        edt(i)  = 0.
+        aa1(i)  = 0.
+        cina(i) = 0.
+        vshear(i) = 0.
+        gdx(i) = sqrt(garea(i))
+       enddo
+      endif
 !!
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
       totflg = .true.
@@ -279,11 +298,7 @@ c
 !>  - determine aerosol-aware rain conversion parameter over land
       do i=1,im
         if(islimsk(i) == 1) then
-         if (hwrf_samfshal) then
-           c0(i) = c0l
-         else
            c0(i) = c0s*asolfac
-         endif
         else
            c0(i) = c0s
         endif
@@ -369,17 +384,21 @@ c
         enddo
       enddo
 !>  - Calculate interface height
-      do k = 1, km1
+      if(hwrf_samfshal) then
+       do k = 1, km1
         do i=1,im
           zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
-          if (hwrf_samfshal) then
-            xlamue(i,k) = clam / zi(i,k)
-          endif
+          xlamue(i,k) = clam / zi(i,k)
         enddo
-      enddo
-      if (hwrf_samfshal) then
+       enddo
        do i=1,im
         xlamue(i,km) = xlamue(i,km1)
+       enddo
+      else
+       do k = 1, km1
+        do i=1,im
+          zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
+        enddo
        enddo
       endif
 c
@@ -545,6 +564,7 @@ c
           endif
         enddo
       enddo
+
       if (.not.hwrf_samfshal) then
        do n = 1, ntr
        do k = 1, km1
@@ -649,12 +669,12 @@ c
 !c  specify the detrainment rate for the updrafts
 !c
       if (hwrf_samfshal) then
-      do i = 1, im
+       do i = 1, im
         if(cnvflg(i)) then
           xlamud(i) = xlamue(i,kbcon(i))
 !         xlamud(i) = crtlamd
         endif
-      enddo
+       enddo
       else
       if(ntk > 0) then
         do i= 1, im
@@ -825,6 +845,7 @@ c
           endif
         enddo
       enddo
+
       if (.not.hwrf_samfshal) then
        do n = 1, ntr
        do k = 2, km1
@@ -908,12 +929,17 @@ c
         enddo
       enddo
 !> - Turn off convection if the CIN is less than a critical value (cinacr) which is inversely proportional to the large-scale vertical velocity.
-      do i = 1, im
+
+      if (hwrf_samfshal) then
+       do i = 1, im
         if(cnvflg(i)) then
-!
-         if (hwrf_samfshal) then
-            cinacr = cinacrmx
-         else
+          cinacr = cinacrmx
+          if(cina(i) < cinacr) cnvflg(i) = .false.
+        endif
+       enddo
+      else
+       do i = 1, im
+        if(cnvflg(i)) then
           if(islimsk(i) == 1) then
             w1 = w1l
             w2 = w2l
@@ -942,8 +968,8 @@ c
           cinacr = cinacrmx - tem * tem1
          endif
           if(cina(i) < cinacr) cnvflg(i) = .false.
-        endif
-      enddo
+       enddo
+      endif
 !!
       totflg = .true.
       do i=1,im
@@ -974,19 +1000,23 @@ c
 c  specify upper limit of mass flux at cloud base
 c
 !> - Calculate the maximum value of the cloud base mass flux using the CFL-criterion-based formula of Han and Pan (2011) \cite han_and_pan_2011, equation 7.
-      do i = 1, im
+      if(hwrf_samfshal) then
+       do i = 1, im
         if(cnvflg(i)) then
-!         xmbmax(i) = .1
-!
           k = kbcon(i)
           dp = 1000. * del(i,k)
-          if (hwrf_samfshal) then
-            xmbmax(i) = dp / (grav * dt2)
-          else
-            xmbmax(i) = dp / (2. * grav * dt2)
-          endif
+          xmbmax(i) = dp / (grav * dt2)
         endif
-      enddo
+       enddo
+      else
+       do i = 1, im
+        if(cnvflg(i)) then
+          k = kbcon(i)
+          dp = 1000. * del(i,k)
+          xmbmax(i) = dp / (2. * grav * dt2)
+        endif
+       enddo
+      endif
 c
 c  compute cloud moisture property and precipitation
 c

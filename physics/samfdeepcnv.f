@@ -305,7 +305,41 @@ c-----------------------------------------------------------------------
 c
 c  initialize arrays
 c
-      do i=1,im
+      if (.not.hwrf_samfdeep) then
+       do i=1,im
+        cnvflg(i) = .true.
+        rn(i)=0.
+        mbdt(i)=10.
+        kbot(i)=km+1
+        ktop(i)=0
+        kbcon(i)=km
+        ktcon(i)=1
+        ktconn(i)=1
+        dtconv(i) = 3600.
+        cldwrk(i) = 0.
+        pdot(i) = 0.
+        lmin(i) = 1
+        jmin(i) = 1
+        qlko_ktcon(i) = 0.
+        edt(i)  = 0.
+        edto(i) = 0.
+        edtx(i) = 0.
+!       acrt(i) = 0.
+!       acrtfct(i) = 1.
+        aa1(i)  = 0.
+        aa2(i)  = 0.
+        xaa0(i) = 0.
+        cina(i) = 0.
+        pwavo(i)= 0.
+        pwevo(i)= 0.
+        xpwav(i)= 0.
+        xpwev(i)= 0.
+        vshear(i) = 0.
+        gdx(i) = sqrt(garea(i))
+       enddo
+
+      else
+       do i=1,im
         cnvflg(i) = .true.
         rn(i)=0.
         mbdt(i)=10.
@@ -336,26 +370,22 @@ c
         vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
 
-       if( hwrf_samfdeep ) then
-         scaldfunc(i)=-1.0   
+        !mz*HWRF SAS
+         scaldfunc(i)=-1.0
          sigmagfm(i)=-1.0
          sigmuout(i)=-1.0
-       endif
-      enddo
+       enddo
+      endif
 !
-      c0l=c0s*asolfac
 !>  - determine aerosol-aware rain conversion parameter over land
       do i=1,im
         if(islimsk(i) == 1) then
-          if (hwrf_samfdeep) then
-           c0(i) = c0l
-          else
            c0(i) = c0s*asolfac
-          endif
         else
            c0(i) = c0s
         endif
       enddo
+
 !>  - determine rain conversion parameter above the freezing level which exponentially decreases with decreasing temperature from Han et al.'s (2017) \cite han_et_al_2017 equation 8.
       do k = 1, km
         do i = 1, im
@@ -478,14 +508,21 @@ c
         enddo
       enddo
 !>  - Calculate interface height
-      do k = 1, km1
+      if (hwrf_samfdeep) then
+        do k = 1, km1
         do i=1,im
           zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
-          if (hwrf_samfdeep) then
-             xlamue(i,k) = clam / zi(i,k)
-          endif   
+          xlamue(i,k) = clam / zi(i,k)
         enddo
-      enddo
+        enddo
+      else
+        do k = 1, km1
+        do i=1,im
+          zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
+        enddo
+        enddo
+      endif
+
 c
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c   convert surface pressure to mb from cb
@@ -860,19 +897,29 @@ c  final entrainment and detrainment rates as the sum of turbulent part and
 c    organized one depending on the environmental relative humidity
 c    (Bechtold et al., 2008; Derbyshire et al., 2011)
 c
-      do k = 2, km1
+      if (hwrf_samfdeep) then
+        do k = 2, km1
+        do i=1,im
+          if(cnvflg(i) .and.
+     &      (k > kbcon(i) .and. k < kmax(i))) then
+              tem = cxlamu * frh(i,k) * fent2(i,k)
+              xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
+          endif
+        enddo
+        enddo
+      else
+        do k = 2, km1
         do i=1,im
           if(cnvflg(i) .and.
      &      (k > kbcon(i) .and. k < kmax(i))) then
               tem = cxlame * frh(i,k) * fent2(i,k)
               xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
-              if (.not.hwrf_samfdeep) then
-                  tem1 = cxlamd * frh(i,k)
-                  xlamud(i,k) = xlamud(i,k) + tem1
-              endif
+              tem1 = cxlamd * frh(i,k)
+              xlamud(i,k) = xlamud(i,k) + tem1
           endif
         enddo
-      enddo
+        enddo
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c
@@ -1055,10 +1102,17 @@ c
         enddo
       enddo
 !> - Turn off convection if the CIN is less than a critical value (cinacr) which is inversely proportional to the large-scale vertical velocity.
-      do i = 1, im
+
+      if(hwrf_samfdeep) then
+       do i = 1, im
         if(cnvflg(i)) then
-!
-         if (.not.hwrf_samfdeep) then
+          cinacr = cinacrmx
+          if(cina(i) < cinacr) cnvflg(i) = .false.
+        endif
+       enddo
+      else   !gfs_samfdeep
+       do i = 1, im
+        if(cnvflg(i)) then
           if(islimsk(i) == 1) then
             w1 = w1l
             w2 = w2l
@@ -1085,12 +1139,10 @@ c
           tem = 1. - tem
           tem1= .5*(cinacrmx-cinacrmn)
           cinacr = cinacrmx - tem * tem1
-         else
-          cinacr = cinacrmx
-         endif
           if(cina(i) < cinacr) cnvflg(i) = .false.
         endif
-      enddo
+       enddo
+      endif !hwrf_samfdeep
 !!
       totflg = .true.
       do i=1,im
@@ -1168,17 +1220,23 @@ c
 c  specify upper limit of mass flux at cloud base
 c
 !> - Calculate the maximum value of the cloud base mass flux using the CFL-criterion-based formula of Han and Pan (2011) \cite han_and_pan_2011, equation 7.
-      do i = 1, im
+      if(hwrf_samfdeep) then
+       do i = 1, im
         if(cnvflg(i)) then
           k = kbcon(i)
           dp = 1000. * del(i,k)
-          if (.not.hwrf_samfdeep) then
-             xmbmax(i) = dp / (2. * grav * dt2)
-          else
-             xmbmax(i) = dp / (grav * dt2)
-          endif
+          xmbmax(i) = dp / (grav * dt2)
         endif
-      enddo
+       enddo
+      else
+       do i = 1, im
+        if(cnvflg(i)) then
+          k = kbcon(i)
+          dp = 1000. * del(i,k)
+          xmbmax(i) = dp / (2. * grav * dt2)
+        endif
+       enddo
+      endif
 c
 c  compute cloud moisture property and precipitation
 c
@@ -1578,11 +1636,19 @@ c
         endif
       enddo
       enddo
-      do i = 1, im
-        if (hwrf_samfdeep) then
+
+      if (hwrf_samfdeep) then
+       do i = 1, im
         beta = betas
         if(islimsk(i) == 1) beta = betal
-        else
+        if(cnvflg(i)) then
+          dz  = (sumx(i)+zi(i,1))/float(kbcon(i))
+          tem = 1./float(kbcon(i))
+          xlamd(i) = (1.-beta**tem)/dz
+        endif
+       enddo
+      else
+       do i = 1, im
         betamn = betas
         if(islimsk(i) == 1) betamn = betal
         if(ntk > 0) then
@@ -1598,13 +1664,13 @@ c
         else
           beta = betamn
         endif
-        endif
         if(cnvflg(i)) then
           dz  = (sumx(i)+zi(i,1))/float(kbcon(i))
           tem = 1./float(kbcon(i))
           xlamd(i) = (1.-beta**tem)/dz
         endif
-      enddo
+       enddo
+      endif
 c
 c  determine downdraft mass flux
 c
@@ -2323,18 +2389,29 @@ c
 !  compute convective turn-over time
 !
 !> - Following Bechtold et al. (2008) \cite bechtold_et_al_2008, the convective adjustment time (dtconv) is set to be proportional to the convective turnover time, which is computed using the mean updraft velocity (wc) and the cloud depth. It is also proportional to the grid size (gdx).
-      do i= 1, im
+
+      if(hwrf_samfdeep) then
+       do i= 1, im
         if(cnvflg(i)) then
           tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
           dtconv(i) = tem / wc(i)
-          if (.not.hwrf_samfdeep) then
-             tfac = 1. + gdx(i) / 75000.
-             dtconv(i) = tfac * dtconv(i)
-          endif
           dtconv(i) = max(dtconv(i),dtmin)
           dtconv(i) = min(dtconv(i),dtmax)
         endif
-      enddo
+       enddo
+      else
+       do i= 1, im
+        if(cnvflg(i)) then
+          tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
+          dtconv(i) = tem / wc(i)
+          tfac = 1. + gdx(i) / 75000.
+          dtconv(i) = tfac * dtconv(i)
+          dtconv(i) = max(dtconv(i),dtmin)
+          dtconv(i) = min(dtconv(i),dtmax)
+        endif
+       enddo
+      endif
+      
 !
 !> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
       do i= 1, im
@@ -2438,21 +2515,35 @@ c
       enddo
 !
 !> - Then, calculate the reduction factor (scaldfunc) of the vertical convective eddy transport of mass flux as a function of updraft fraction from the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013 (also see Han et al.'s (2017) \cite han_et_al_2017 equation 1 and 2). The final cloud base mass flux with scale-aware parameterization is obtained from the mass flux when sigmagfm << 1, multiplied by the reduction factor (Han et al.'s (2017) \cite han_et_al_2017 equation 2).
-      do i = 1, im
+      if(hwrf_samfdeep) then
+       do i = 1, im
         if(cnvflg(i)) then
           if (gdx(i) < dxcrtuf) then
             scaldfunc(i) = (1.-sigmagfm(i)) * (1.-sigmagfm(i))
             scaldfunc(i) = max(min(scaldfunc(i), 1.0), 0.)
-            if (hwrf_samfdeep) then
-                sigmuout(i)=sigmagfm(i)
-            endif
+            sigmuout(i)=sigmagfm(i)
           else
             scaldfunc(i) = 1.0
           endif
           xmb(i) = xmb(i) * scaldfunc(i)
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
-      enddo
+       enddo
+
+      else
+       do i = 1, im
+        if(cnvflg(i)) then
+          if (gdx(i) < dxcrtuf) then
+            scaldfunc(i) = (1.-sigmagfm(i)) * (1.-sigmagfm(i))
+            scaldfunc(i) = max(min(scaldfunc(i), 1.0), 0.)
+          else
+            scaldfunc(i) = 1.0
+          endif
+          xmb(i) = xmb(i) * scaldfunc(i)
+          xmb(i) = min(xmb(i),xmbmax(i))
+        endif
+       enddo
+      endif
 
       if (.not.hwrf_samfdeep) then
 !> - If stochastic physics using cellular automata is .true. then perturb the mass-flux here:
