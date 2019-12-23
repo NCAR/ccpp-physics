@@ -415,8 +415,8 @@
   intent = inout
   optional = F
 [qg]
-  standard_name = cloud_graupel_mixing ratio
-  long_name = the ratio of the mass of graupel to the mass of dry air
+  standard_name = mass_weighted_rime_factor_mixing ratio
+  long_name = the ratio of the mass of rime factor to the mass of dry air
   units = kg kg-1
   dimensions = (horizontal_dimension, vertical_dimension)
   type = real
@@ -496,8 +496,8 @@
   intent = inout
   optional = F
 [RLWIN]
-  standard_name = surface_downward_longwave_flux
-  long_name = surface downward longwave flux
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -505,8 +505,8 @@
   intent = inout
   optional = F
 [RSWIN]
-  standard_name = surface_downward_shortwave_flux
-  long_name = surface downward shortwave flux
+  standard_name = surface_downwelling_shortwave_flux
+  long_name = surface downward shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -514,8 +514,8 @@
   intent = inout
   optional = F
 [RSWINC]
-  standard_name = surface_downward_shortwave_flux_assuming_clear_sky
-  long_name = surface downward shortwave flux assuming clear sky
+  standard_name = surface_downwelling_shortwave_flux_assuming_clear_sky
+  long_name = surface downwelling shortwave flux assuming clear sky at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -523,8 +523,8 @@
   intent = inout
   optional = F
 [RSWOUT]
-  standard_name = surface_upward_shortwave_flux
-  long_name = upward shortwave at surface
+  standard_name = surface_upwelling_shortwave_flux
+  long_name = surface upwelling shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -534,15 +534,6 @@
 [RLWTOA]
   standard_name = toa_outgoing_longwave_flux
   long_name = outgoing LW flux at top of atmosphere
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[RSWTOA]
-  standard_name = toa_outgoing_shortwave_flux
-  long_name = outgoing SW flux at top of atmosphere
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -638,7 +629,7 @@
   intent = inout
   optional = F
 [re_cloud]
-  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle
+  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_meter
   long_name = eff. radius of cloud liquid water particle in meter
   units = m
   dimensions = (horizontal_dimension, vertical_dimension)
@@ -647,7 +638,7 @@
   intent = in
   optional = F
 [re_ice]
-  standard_name = effective_radius_of_stratiform_cloud_ice_particle
+  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_meter
   long_name = eff. radius of cloud ice water particle in meter
   units = m
   dimensions = (horizontal_dimension, vertical_dimension)
@@ -656,7 +647,7 @@
   intent = in
   optional = F
 [re_snow]
-  standard_name = effective_radius_of_stratiform_cloud_snow_particle
+  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_meter
   long_name = effective radius of cloud snow particle in meter
   units = m
   dimensions = (horizontal_dimension, vertical_dimension)
@@ -689,18 +680,18 @@
   intent = inout
   optional = F
 [hrswpd]
-  standard_name = daily shortwave heating rates
-  long_name
-  units 
+  standard_name = shortwave_heating_rate_per_day
+  long_name = shortwave heating rate per day
+  units = K d-1
   dimension =  (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
 [hrlwpd]
-  standard_name = daily longwave heating rates
-  long_name
-  units
+  standard_name = longwave_heating_rate_per_day
+  long_name = longwave heating rate perday
+  units = K d-1
   dimension =  (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
@@ -744,7 +735,7 @@
   optional = F
 [SWUPB]
   standard_name = surface_instantaneous_upwelling_shortwave_flux
-  long_name = instantaneous upwelling shortwave flux at bottom
+  long_name = surface upwelling shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -753,7 +744,7 @@
   optional = F
 [SWUPBC]
   standard_name = surface_instantaneous_upwelling_shortwave_flux_assuming_clear_sky
-  long_name = instantaneous upwelling shortwave flux at bottom assuming clear sky
+  long_name = surface upwelling shortwave flux assuming clear sky
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -762,7 +753,7 @@
   optional = F
 [SWDNB]
   standard_name = surface_instantaneous_downwelling_shortwave_flux
-  long_name = instantaneous downwelling shortwave flux at bottom
+  long_name = surface downwelling shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -771,7 +762,7 @@
   optional = F 
 [SWDNBC]
   standard_name = surface_instantaneous_downwelling_shortwave_flux_assuming_clear_sky
-  long_name = instantaneous downwelling shortwave flux at bottom assuming clear sky
+  long_name = surface downwelling shortwave flux assuming clear sky at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -994,36 +985,36 @@
   kind = kind_phys
   intent = inout
   optional = F
-[SWVISDIR] 
-  standard_name = direct_visible_component_of_shortwave_radiation
-  long_name = direct visible component of SW radiation
+[SWVISDIR]         
+  standard_name = surface_downwelling_direct_visible_shortwave_flux
+  long_name = surface downwelling direct visible shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
-[SWVISDIF]
-  standard_name = diffuse_visible_component_of_shortwave_radiation
-  long_name = diffuse visible component of SW radiation
+[SWVISDIF]     
+  standard_name = surface_downwelling_diffuse_visible_shortwave_flux
+  long_name = surface downwelling diffuse visible shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
-[SWNIRDIR] 
-  standard_name = direct_near_infrared_component_of_shortwave_radiation
-  long_name = direct NIR component of SW radiation
+[SWNIRDIR]
+  standard_name = surface_downwelling_direct_near_infrared_shortwave_flux
+  long_name = surface downwelling beam near-infrared shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = F
-[SWNIRDIF]               
-  standard_name = diffuse_near_infrared_component_of_shortwave_radiation
-  long_name = diffuse NIR component of SW radiation
+[SWNIRDIF]  
+  standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux
+  long_name = surface downwelling diffuse near-infrared shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real

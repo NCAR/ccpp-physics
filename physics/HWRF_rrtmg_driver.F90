@@ -10,7 +10,7 @@ CONTAINS
               ,ITIMESTEP,JULDAY, JULIAN,JULYR                           &
               ,NPHS  O3RAD  ,                           &
               ,P8W  ,P ,PI  ,        RADT                               & 
-              ,RHO    ,RLWTOA  ,RSWTOA ,RTHRATEN                        &
+              ,RHO    ,RLWTOA  ,RTHRATEN                        &
               ,RTHRATENLW    ,RTHRATENSW   ,HRSWPD, HRLWPD              &
               ,SNOW   ,STEPRA ,SWDOWN  ,SWDOWNC                         &
               ,T8W     ,T ,                  TSK ,VEGFRA                &
@@ -365,9 +365,8 @@ CONTAINS
 !mz                                                      CFRACM,     & 
                                                       CZMEAN        
    REAL, DIMENSION( ims:ime, jms:jme ),                           &
-         INTENT(INOUT)  ::                                        &
-                                                      RLWTOA,     & 
-                                                      RSWTOA,     
+         INTENT(INOUT)  ::                   RLWTOA 
+!mz                                                      RSWTOA,     
 !mz                                                      ACFRST,     & 
 !mz                                                      ACFRCV       
 

@@ -190,7 +190,7 @@
      &                    ,ALBEDO,EPSR                                  &
      &                    ,F_ICE,F_RAIN,SM,CLDFRA                       &
      &                    ,RLWTT,RSWTT,RLWIN,RSWIN,RSWINC,RSWOUT,GSW,   &
-     &                    ,RLWTOA,RSWTOA,CZMEAN                         &
+     &                    ,RLWTOA,CZMEAN                         &
      &                    ,SNOW,SICE, NUM_OZMIXM,OZMIXM,PIN,LEVSIZ      &
      &                    ,RTHRATEN,RTHRATENLW,RTHRATENSW               &
      &                    ,re_cloud,re_ice,re_snow                      &
@@ -280,7 +280,7 @@
      &                                                ,RLWIN,RLWTOA     &
      &                                                ,RSWIN,RSWOUT     &
      &                                                ,GSW              &
-     &                                                ,RSWINC,RSWTOA
+     &                                                ,RSWINC
       REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::         &
      &                                                        ,RLWTT    &
      &                                                        ,RSWTT
@@ -615,7 +615,7 @@
      &                 ,has_reqc=has_reqc                               &
      &                 ,has_reqi=has_reqi                               &
      &                 ,has_reqs=has_reqs                               &
-     &                 ,RSWTOA=RSWTOA,RLWTOA=RLWTOA                     &
+     &                 ,RLWTOA=RLWTOA                     &
      &                 ,CZMEAN=CZMEAN                                   &
 !     &                 ,ACFRST=ACFRST
 !     &                 ,NCFRST=NCFRST                     &
