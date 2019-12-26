@@ -21,7 +21,7 @@ Finite-Volume Cubed-Sphere (FV3) dynamic core.
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 3.X (Jan 2019), and more details on it may be found on the
+The latest CCPP public release is Version 4.0 (Jan 2019), and more details on it may be found on the
 <a href="https://dtcenter.org/gmtb/users/ccpp/"> CCPP website </a> hosted by the Global Model Test
 Bed (GMTB) of the Developmental Testbed Center (DTC).
 

@@ -56,9 +56,10 @@ The advanced csawmg physics suite uses the parameterizations in the following or
       <scheme>GFS_suite_stateout_reset</scheme>
       <scheme>get_prs_fv3</scheme>
       <scheme>GFS_suite_interstitial_1</scheme>
-      <scheme>dcyc2t3</scheme>
       <scheme>GFS_surface_generic_pre</scheme>
       <scheme>GFS_surface_composites_pre</scheme>
+      <scheme>dcyc2t3</scheme>
+      <scheme>GFS_surface_composites_inter</scheme>
       <scheme>GFS_suite_interstitial_2</scheme>
     </subcycle>
     <!-- Surface iteration loop -->
@@ -83,8 +84,9 @@ The advanced csawmg physics suite uses the parameterizations in the following or
       <scheme>hedmf</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
       <scheme>GFS_GWD_generic_pre</scheme>
-      <scheme>gwdps</scheme>
-      <scheme>gwdps_post</scheme>
+      <scheme>cires_ugwp</scheme>
+      <scheme>cires_ugwp_post</scheme>
+      <scheme>GFS_GWD_generic_post</scheme>
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys_2015</scheme>
@@ -96,12 +98,8 @@ The advanced csawmg physics suite uses the parameterizations in the following or
       <scheme>cs_conv</scheme>
       <scheme>cs_conv_post</scheme>
       <scheme>GFS_DCNV_generic_post</scheme>
-      <scheme>gwdc_pre</scheme>
-      <scheme>gwdc</scheme>
-      <scheme>gwdc_post</scheme>
       <scheme>GFS_SCNV_generic_pre</scheme>
       <scheme>samfshalcnv</scheme>
-      <scheme>samfshalcnv_post</scheme>
       <scheme>GFS_SCNV_generic_post</scheme>
       <scheme>GFS_suite_interstitial_4</scheme>
       <scheme>cnvc90</scheme>
@@ -111,13 +109,11 @@ The advanced csawmg physics suite uses the parameterizations in the following or
       <scheme>m_micro_post</scheme>
       <scheme>cs_conv_aw_adj</scheme>
       <scheme>GFS_MP_generic_post</scheme>
-      <scheme>sfc_sice_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
     </subcycle>
   </group>
   <!-- <finalize></finalize> -->
 </suite>
-
 \endcode
 
 \section cpt_nml_option Namelist Option 
@@ -126,6 +122,7 @@ The advanced csawmg physics suite uses the parameterizations in the following or
        fhzero         = 6.
        ldiag3d        = .true.
        fhcyc          = 24.
+       nst_anl        = .true.
        use_ufo        = .true.
        pre_rad        = .false.
        crtrh          = 0.93,0.90,0.95
@@ -147,25 +144,40 @@ The advanced csawmg physics suite uses the parameterizations in the following or
        shal_cnv       = .true.
        cal_pre        = .false.
        redrag         = .true.
-       dspheat        = .true.
+       dspheat        = .false.
        hybedmf        = .true.
        satmedmf       = .false.
-       lheatstrg      = .true.
+       lheatstrg      = .false.
        random_clds    = .true.
        trans_trac     = .true.
-       cnvcld         = .true.
+       cnvcld         = .false.
        imfshalcnv     = 2
        imfdeepcnv     = -1
        cdmbgwd        = 3.5,0.25
        prslrd0        = 0.
        ivegsrc        = 1
        isot           = 1
+       lsm            = 1
+       iopt_dveg      = 2
+       iopt_crs       = 1
+       iopt_btr       = 1
+       iopt_run       = 1
+       iopt_sfc       = 1
+       iopt_frz       = 1
+       iopt_inf       = 1
+       iopt_rad       = 1
+       iopt_alb       = 2
+       iopt_snf       = 4
+       iopt_tbot      = 2
+       iopt_stc       = 1
        oz_phys        = .false.
        oz_phys_2015   = .true.
        debug          = .false.
+
        ras            = .false.
        cscnv          = .true.
        do_shoc        = .false.
+       shoc_parm      = 7000.0,1.0,2.0,0.7,-999.0
        do_aw          = .true.
        shoc_cld       = .false.
        h2o_phys       = .true.
@@ -173,8 +185,6 @@ The advanced csawmg physics suite uses the parameterizations in the following or
        xkzm_h         = 0.5
        xkzm_m         = 0.5
        xkzm_s         = 1.0
-       nstf_name      = 2,1,1,0,5
-       nst_anl        = .true.
        ccwf           = 1.0,1.0
        dlqf           = 0.25,0.05
        mg_dcs         = 200.0
@@ -190,18 +200,35 @@ The advanced csawmg physics suite uses the parameterizations in the following or
        mg_do_ice_gmao = .false.
        mg_do_liq_liu  = .true.
        cs_parm        = 8.0,4.0,1.0e3,3.5e3,20.0,1.0,0.0,1.0,0.6,0.0
-       shoc_parm      = 7000.0,1.0,2.0,0.7,-999.0
        ctei_rm        = 0.60,0.23
        max_lon        = 8000
        max_lat        = 4000
        rhcmax         = 0.9999999
        effr_in        = .true.
+       
+       nstf_name      = 2,1,1,0,5
        ltaerosol      = .false.
        lradar         = .false.
        cplflx         = .false.
        iau_delthrs    = 6
        iaufhrs        = 30
        iau_inc_files  = "''"
+/
+
+&cires_ugwp_nml
+       knob_ugwp_solver  = 2
+       knob_ugwp_source  = 1,1,0,0
+       knob_ugwp_wvspec  = 1,25,25,25
+       knob_ugwp_azdir   = 2,4,4,4
+       knob_ugwp_stoch   = 0,0,0,0
+       knob_ugwp_effac   = 1,1,1,1
+       knob_ugwp_doaxyz  = 1
+       knob_ugwp_doheat  = 1
+       knob_ugwp_dokdis  = 1
+       knob_ugwp_ndx4lh  = 1
+       knob_ugwp_version = 0
+       launch_level      = 25
+/
 /
 \endcode
 
