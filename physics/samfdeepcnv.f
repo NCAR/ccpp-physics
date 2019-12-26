@@ -130,8 +130,8 @@
      &                     cxlame,  cxlamd,
      &                     cxlamu,  
      &                     xlamde,  xlamdd,
-     &                     crtlamu, crtlamd,
-     &                     crtlame, c0l
+     &                     crtlamd,
+     &                     crtlame
 !
 !     real(kind=kind_phys) detad
       real(kind=kind_phys) adw,     aup,     aafac,   d0,
@@ -139,7 +139,7 @@
      &                     dh,      dhh,     dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
      &                     dt2,     dtmax,   dtmin,
-     &                     dxcrtas, dxcrtuf, dxcrtuf_hwrf,
+     &                     dxcrtas, dxcrtuf, 
      &                     dv1h,    dv2h,    dv3h,
      &                     dv1q,    dv2q,    dv3q,
      &                     dz,      dz1,     e1,      edtmax,
@@ -204,7 +204,7 @@ c  physical parameters
 !     parameter(c0s=.002,c1=.002,d0=.01)
 !     parameter(d0=.01)
       parameter(d0=.001)
-!mz      parameter(c0l=c0s*asolfac)
+!      parameter(c0l=c0s*asolfac)
 !
 ! asolfac: aerosol-aware parameter based on Lim (2011)
 !      asolfac= cx / c0s(=.002)
@@ -223,7 +223,7 @@ c  physical parameters
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
-      parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3,dxcrtuf_hwrf=25.e3)
+      parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3)
 !
 !  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
@@ -234,7 +234,6 @@ c  physical parameters
 !  for updraft velocity calculation
       real(kind=kind_phys) wu2(im,km),     buo(im,km),    drag(im,km)
       real(kind=kind_phys) wc(im),         scaldfunc(im), sigmagfm(im)
-      real(kind=kind_phys) sigmuout(im)
 !
 c  cloud water
 !     real(kind=kind_phys) tvo(im,km)
@@ -370,10 +369,10 @@ c
         vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
 
-        !mz*HWRF SAS
+        !HWRF SAS
          scaldfunc(i)=-1.0
          sigmagfm(i)=-1.0
-         sigmuout(i)=-1.0
+!         sigmuout(i)=-1.0
        enddo
       endif
 !
@@ -449,7 +448,6 @@ c
       edtmaxs = .3
       if (hwrf_samfdeep) then
         aafac   = .1
-        crtlamu = 1.0e-4
         cxlamu  = 1.0e-3
       else
         aafac   = .05
@@ -840,7 +838,7 @@ c
 c  assume that updraft entrainment rate above cloud base is
 c    same as that at cloud base
 c
-!> - Calculate the entrainment rate according to Han and Pan (2011) \cite han_and_pan_2011 , equation 8, after Bechtold et al. (2008) \cite bechtold_et_al_2008, equation 2 given by:
+!> - In HWRF samfdeep, calculate the entrainment rate according to Han and Pan (2011) \cite han_and_pan_2011 , equation 8, after Bechtold et al. (2008) \cite bechtold_et_al_2008, equation 2 given by:
 !!  \f[
 !!  \epsilon = \epsilon_0F_0 + d_1\left(1-RH\right)F_1
 !!  \f]
@@ -866,17 +864,23 @@ c
 !! (The updraft detrainment rate is set constant and equal to the entrainment rate at cloud base.)
 !!
 !> - The updraft detrainment rate is vertically constant and proportional to clamt
-      do k = 1, km1
+      if (hwrf_samfdeep) then
+       do k = 1, km1
         do i=1,im
           if(cnvflg(i) .and. k < kmax(i)) then
-            if (hwrf_samfdeep) then
                 xlamud(i,k) = xlamx(i)
-            else
-                xlamud(i,k) = 0.001 * clamt(i)
-            endif
           endif
         enddo
-      enddo
+       enddo
+      else
+       do k = 1, km1
+        do i=1,im
+          if(cnvflg(i) .and. k < kmax(i)) then
+                xlamud(i,k) = 0.001 * clamt(i)
+          endif
+        enddo
+       enddo
+      endif
 c
 c  entrainment functions decreasing with height (fent),
 c    mimicking a cloud ensemble
@@ -2503,6 +2507,18 @@ c
 !!
 
 !> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
+      if(hwrf_samfdeep) then
+      do i = 1, im
+        if(cnvflg(i)) then
+          tem = min(max(xlamx(i), 7.e-5), 3.e-4)
+          tem = 0.2 / tem
+          tem1 = 3.14 * tem * tem
+          sigmagfm(i) = tem1 / garea(i)
+          sigmagfm(i) = max(sigmagfm(i), 0.001)
+          sigmagfm(i) = min(sigmagfm(i), 0.999)
+        endif
+      enddo
+      else
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 7.e-5), 3.e-4)
@@ -2513,24 +2529,10 @@ c
           sigmagfm(i) = min(sigmagfm(i), 0.999)
         endif
       enddo
+      endif
 !
 !> - Then, calculate the reduction factor (scaldfunc) of the vertical convective eddy transport of mass flux as a function of updraft fraction from the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013 (also see Han et al.'s (2017) \cite han_et_al_2017 equation 1 and 2). The final cloud base mass flux with scale-aware parameterization is obtained from the mass flux when sigmagfm << 1, multiplied by the reduction factor (Han et al.'s (2017) \cite han_et_al_2017 equation 2).
-      if(hwrf_samfdeep) then
-       do i = 1, im
-        if(cnvflg(i)) then
-          if (gdx(i) < dxcrtuf) then
-            scaldfunc(i) = (1.-sigmagfm(i)) * (1.-sigmagfm(i))
-            scaldfunc(i) = max(min(scaldfunc(i), 1.0), 0.)
-            sigmuout(i)=sigmagfm(i)
-          else
-            scaldfunc(i) = 1.0
-          endif
-          xmb(i) = xmb(i) * scaldfunc(i)
-          xmb(i) = min(xmb(i),xmbmax(i))
-        endif
-       enddo
 
-      else
        do i = 1, im
         if(cnvflg(i)) then
           if (gdx(i) < dxcrtuf) then
@@ -2543,7 +2545,6 @@ c
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
        enddo
-      endif
 
       if (.not.hwrf_samfdeep) then
 !> - If stochastic physics using cellular automata is .true. then perturb the mass-flux here:
