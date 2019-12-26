@@ -12,11 +12,11 @@ set(CMAKE_MACOSX_RPATH 1)
 
 if(POLICY CMP0048)
     cmake_policy(SET CMP0048 NEW)
-    project(ccppphys VERSION 3.0.0)
+    project(ccppphys VERSION 4.0.0)
 else(POLICY CMP0048)
     project(ccppphys)
-    set(PROJECT_VERSION 3.0.0)
-    set(PROJECT_VERSION_MAJOR 3)
+    set(PROJECT_VERSION 4.0.0)
+    set(PROJECT_VERSION_MAJOR 4)
     set(PROJECT_VERSION_MINOR 0)
     set(PROJECT_VERSION_PATCH 0)
 endif(POLICY CMP0048)
@@ -27,7 +27,7 @@ endif(POLICY CMP0042)
 
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
-set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
+set(AUTHORS "Grant J. Firl" "Dom Heinzeller" "Laurie Carson" "Ligia Bernardet" "Man Zhang")
 
 #------------------------------------------------------------------------------
 # Enable Fortran
