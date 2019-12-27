@@ -14,7 +14,7 @@
 !> \section arg_table_GFS_SCNV_generic_pre_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_pre_run.html
 !!
-      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, gt0, gq0_water_vapor, &
+      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gt0, gq0_water_vapor, &
         save_t, save_qv, errmsg, errflg)
 
         use machine,               only: kind_phys
@@ -22,7 +22,7 @@
         implicit none
 
         integer, intent(in) :: im, levs
-        logical, intent(in) :: ldiag3d
+        logical, intent(in) :: ldiag3d, qdiag3d
         real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
 
         real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_t, save_qv
@@ -41,14 +41,14 @@
               save_t(i,k)   = gt0(i,k)
             enddo
           enddo
-        endif
-!        if (ldiag3d) then
-!          do k=1,levs
-!            do i=1,im
-!              save_qv(i,k) = gq0_water_vapor(i,k)
-!            enddo
-!          enddo
-!        endif
+          if (qdiag3d) then
+             do k=1,levs
+                do i=1,im
+                   save_qv(i,k) = gq0_water_vapor(i,k)
+                enddo
+             enddo
+          endif
+       endif
 
     end subroutine GFS_SCNV_generic_pre_run
 
@@ -67,7 +67,7 @@
 !> \section arg_table_GFS_SCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
-      subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, cplchm, &
+      subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, cplchm, &
         frain, gt0, gq0_water_vapor, save_t, save_qv, dqdti, dt3dt, dq3dt, clw,   &
         shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,                   &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                     &
@@ -78,7 +78,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, nn
-      logical, intent(in) :: lssav, ldiag3d, cplchm
+      logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_t, save_qv
@@ -137,9 +137,15 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)  - save_t(i,k))   * frain
-!              dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
             enddo
           enddo
+          if (qdiag3d) then
+             do k=1,levs
+                do i=1,im
+                   dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
+                enddo
+             enddo
+          endif
         endif
       endif   ! end if_lssav
 !

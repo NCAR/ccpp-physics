@@ -25,7 +25,9 @@
 !> @{
       subroutine rayleigh_damp_run (                                    &
      &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,                     &
-     &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,errmsg,errflg)
+     &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,                          &
+     &           ldiag3d,du3dt,dv3dt,dt3dt,                             &
+     &           errmsg,errflg)
 !
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -66,12 +68,15 @@
       USE MACHINE , ONLY : kind_phys
       implicit none
 !
-      logical,intent(in)                 :: lsidea
+      logical,intent(in)                 :: lsidea,ldiag3d
       integer,intent(in)                 :: im, ix, km,levr
       real(kind=kind_phys),intent(in)    :: DT, CP, PRSLRD0, ral_ts
       real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IX,KM)
       real(kind=kind_phys),intent(in)    :: U1(IX,KM), V1(IX,KM)
       real(kind=kind_phys),intent(inout) :: A(IX,KM), B(IX,KM), C(IX,KM)
+      real(kind=kind_phys),intent(inout) :: du3dt(IX,KM)
+      real(kind=kind_phys),intent(inout) :: dv3dt(IX,KM)
+      real(kind=kind_phys),intent(inout) :: dt3dt(IX,KM)
       character(len=*),    intent(out)   :: errmsg
       integer,             intent(out)   :: errflg
 
@@ -79,7 +84,7 @@
       real(kind=kind_phys), parameter :: cons1=1.0, cons2=2.0, half=0.5
       real(kind=kind_phys) DTAUX, DTAUY, wrk1, rtrd1, rfactrd, wrk2
      &,                    ENG0, ENG1, tem1, tem2, dti, hfbcpdt, rtrd
-      real(kind=kind_phys) tx1(im)
+      real(kind=kind_phys) tx1(im), deltaA, deltaB, deltaC
       integer              i, k
 !
       ! Initialize CCPP error handling variables
@@ -112,9 +117,17 @@
           tem1    = U1(I,K) + DTAUX
           tem2    = V1(I,K) + DTAUY
           ENG1    = tem1*tem1 + tem2*tem2
-          A(I,K)  = A(I,K) + DTAUY * dti
-          B(I,K)  = B(I,K) + DTAUX * dti
-          C(I,K)  = C(I,K) + max((ENG0-ENG1),0.0) * hfbcpdt
+          deltaA  = DTAUY * dti
+          deltaB  = DTAUX * dti
+          deltaC  = max((ENG0-ENG1),0.0) * hfbcpdt
+          A(I,K)  = A(I,K) + deltaA
+          B(I,K)  = B(I,K) + deltaB
+          C(I,K)  = C(I,K) + deltaC
+          IF(ldiag3d) THEN
+             dv3dt(I,K) = dv3dt(I,K) + deltaA
+             du3dt(I,K) = du3dt(I,K) + deltaB
+             dt3dt(I,K) = dt3dt(I,K) + deltaC
+          ENDIF
         ENDDO
       ENDDO
 

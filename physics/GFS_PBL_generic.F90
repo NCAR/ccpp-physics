@@ -281,7 +281,7 @@
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires,                                                                                                 &
-        ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
+        ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,              &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
@@ -299,7 +299,7 @@
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
+      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
       real(kind=kind_phys), intent(in) :: dtf
@@ -571,6 +571,21 @@
               dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
             enddo
           enddo
+          if (qdiag3d) then
+             do k=1,levs
+                do i=1,im
+                   tem  = dqdt(i,k,ntqv) * dtf
+                   dq3dt(i,k) = dq3dt(i,k) + tem
+                enddo
+             enddo
+             if (ntoz > 0) then
+                do k=1,levs
+                   do i=1,im
+                      dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + dqdt(i,k,ntoz) * dtf
+                   enddo
+                enddo
+             endif
+          endif
         endif
 
       endif   ! end if_lssav

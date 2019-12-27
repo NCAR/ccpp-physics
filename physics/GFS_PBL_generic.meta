@@ -617,6 +617,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [lsidea]
   standard_name = flag_idealized_physics
   long_name = flag for idealized physics
