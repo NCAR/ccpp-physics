@@ -464,7 +464,8 @@ subroutine micro_mg_tend (                                       &
   real(r8), intent(in) :: liqcldf(mgncol,nlev)    ! liquid cloud fraction (no units)
   real(r8), intent(in) :: icecldf(mgncol,nlev)    ! ice cloud fraction (no units)
   real(r8), intent(in) :: qsatfac(mgncol,nlev)    ! subgrid cloud water saturation scaling factor (no units)
-  logical, intent(in)  :: lprnt, iccn
+  logical, intent(in)  :: lprnt
+  integer, intent(in)  :: iccn
 
 
   ! used for scavenging
