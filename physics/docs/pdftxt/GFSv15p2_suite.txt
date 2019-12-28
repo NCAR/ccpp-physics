@@ -3,38 +3,37 @@
 
 \section gfs1_suite_overview Overview
 
-Version 15.2.0 of the Global Forecast System (GFS) was implemented operationally by the NOAA
+Version 15p2 of the Global Forecast System (GFS) was implemented operationally by the NOAA
 National Centers for Environmental Prediction (NCEP) on November 7, 2019, begining with the 1200
 Coordinated Universal Time (UTC) run.
 
-GFS version 15.1.0 was implemented into operations at the 12Z cycle on June 12, 2019. It was the
+GFS version 15p1 was implemented into operations at the 12Z cycle on June 12, 2019. It was the
 first GFS implementation with the finite-volume cubed-sphere (FV3) dynamical core as the the NWS's
-Next Generation Global Prediction System (NGGPS)
+Next Generation Global Prediction System (NGGPS).
 
-The GFS v15.2.0 physics suite uses the parameterizations in the following order:
+The GFS v15p2 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref GFS_NOAH
  - \ref GFS_SFCSICE
  - \ref GFS_HEDMF
- - \ref GFS_GWDPS
+ - \ref GFS_UGWPv0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
  - \ref GFS_SAMFdeep
- - \ref GFS_GWDC
  - \ref GFS_SAMFshal
  - \ref GFDL_cloud
  - \ref GFS_CALPRECIPTYPE
 
 \section sdf_gfsv15p2 Suite Definition File 
 
-The GFS v15.2.0 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v15:
+The GFS v15p2 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v15:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v15" lib="ccppphys" ver="3">
+<suite name="FV3_GFS_v15p2" lib="ccppphys" ver="3">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">

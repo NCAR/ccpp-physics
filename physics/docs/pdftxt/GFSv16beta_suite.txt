@@ -19,7 +19,7 @@ The GFS v16beta physics suite uses the parameterizations in the following order:
  - \ref GFS_NSST
  - \ref GFS_NOAH
  - \ref GFS_SFCSICE
- - \ref GFS_GFS_SATMEDMFVDIFQ
+ - \ref GFS_SATMEDMFVDIFQ
  - \ref GFS_UGWPv0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
@@ -29,9 +29,9 @@ The GFS v16beta physics suite uses the parameterizations in the following order:
  - \ref GFDL_cloud
  - \ref GFS_CALPRECIPTYPE
 
-\section sdf_gfsv15 Suite Definition File 
+\section sdf_gfsv16b Suite Definition File 
 
-The GFS v15 suite uses the parameterizations in the following order, as defined in  \c SCM_GFS_v15:
+The GFS v16beta suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v16beta:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 

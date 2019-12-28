@@ -201,6 +201,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <td>1
 <tr><td>imfdeepcnv      <td>gfs_control_type          <td>flag for mass-flux deep convective scheme:\n 
                                                       <ul>
+                                                      <li>-1: Chikira-Sugiyama deep convection (with \b cscnv = .T.)
                                                       <li> 1: July 2010 version of SAS convective scheme (operational version as of 2016) 
                                                       <li> 2: scale- & aerosol-aware mass-flux deep convective scheme (2017) 
                                                       <li> 3: scale- & aerosol-aware Grell-Freitas scheme (GSD)
@@ -219,8 +220,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>prslrd0         <td>gfs_control_type          <td>pressure level above which to apply Rayleigh damping    <td>0.0d0
 <tr><td>lsm             <td>gfs_control_type          <td>flag for land surface model to use    \n
                                                       <ul>
-                                                      <li> 0: OSU LSM
-                                                      <li> 1: NOAH LSM
+                                                      <li> 1: Noah LSM
                                                       <li> 2: RUC LSM
                                                       </ul>
                                                       <td>1
@@ -363,7 +363,9 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       </ul>
                                                       <td>1
 <tr><td>lsoil_lsm         <td>gfs_control_type  <td>number of soil layers internal to land surface model   <td>-1
-<tr><td colspan="4" align= center>\b Stochastic \b Physics \b Specific \b Parameters
+<tr><td>ldiag_ugwp        <td>GFS_control_type           <td>flag for CIRES UGWP diagnostics               <td>.false.           
+<tr><td>do_ugwp           <td>GFS_control_type           <td>flag for CIRES Unified Gravity Wave Drag Parameterization  <td>.false.
+<tr><td>do_tofd           <td>GFS_control_type           <td>flag for turbulent orographic form drag       <td>.false.
 <tr><td>do_sppt           <td>gfs_control_type  <td>flag for stochastic SPPT option                        <td>.false.
 <tr><td>do_shum           <td>gfs_control_type  <td>flag for stochastic SHUM option                        <td>.false.
 <tr><td>do_skeb           <td>gfs_control_type  <td>flag for stochastic SKEB option                        <td>.false.
@@ -511,8 +513,5 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>launch_level      <td>cires_ugwp_module          <td>parameter has been introduced by EMC during implementation. It defines the interface model level from the surface at which NGWs are launched. \n
                                                              Default value for FV3GFS-64L, launch_level=25 and for FV3GFS-128L, launch_level=52.
                                                          <td>55 
-<tr><td>ldiag_ugwp        <td>GFS_control_type           <td>flag for CIRES UGWP diagnostics                                                        <td>.false.
-<tr><td>do_ugwp           <td>GFS_control_type           <td>flag for CIRES Unified Gravity Wave Drag Parameterization                              <td>.false.
-<tr><td>do_tofd           <td>GFS_control_type           <td>flag for turbulent orographic form drag                                                <td>.false.
 </table>
 */
