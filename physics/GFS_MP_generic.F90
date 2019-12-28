@@ -16,13 +16,13 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, lprnt, ipr, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
-      integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
-      logical,                                          intent(in) :: ldiag3d, do_aw
+      integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac, ipr
+      logical,                                          intent(in) :: ldiag3d, do_aw, lprnt
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
@@ -86,15 +86,15 @@
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
         do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, raincprv, rainncprv, iceprv, snowprv, graupelprv,      &
-        dtp, errmsg, errflg)
+        dtp, lprnt, ipr, errmsg, errflg)
 !
       use machine, only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
+      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, ipr
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg
-      logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm
+      logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm, lprnt
 
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rainc, rain1, xlat, xlon, tsfc
@@ -263,7 +263,7 @@
       do k = 1, levs-1
         do i = 1, im
           if (prsl(i,k) > p850 .and. prsl(i,k+1) <= p850) then
-            t850(i) = gt0(i,k) - (prsl(i,k)-p850) / &
+            t850(i) = gt0(i,k) - (prsl(i,k)-p850) /  &
                       (prsl(i,k)-prsl(i,k+1)) *      &
                       (gt0(i,k)-gt0(i,k+1))
           endif
@@ -358,8 +358,6 @@
         do i=1,im
           pwat(i) = pwat(i) + del(i,k)*(gq0(i,k,1)+work1(i))
         enddo
-!     if (lprnt .and. i == ipr) write(0,*)' gq0=',
-!    &gq0(i,k,1),' qgrs=',qgrs(i,k,1),' work2=',work2(i),' k=',k
       enddo
       do i=1,im
         pwat(i) = pwat(i) * onebg

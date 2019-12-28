@@ -15,14 +15,14 @@
 !! \htmlinclude GFS_SCNV_generic_pre_run.html
 !!
       subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, gt0, gq0_water_vapor, &
-        save_t, save_qv, errmsg, errflg)
+        save_t, save_qv, lprnt, ipr, errmsg, errflg)
 
         use machine,               only: kind_phys
 
         implicit none
 
-        integer, intent(in) :: im, levs
-        logical, intent(in) :: ldiag3d
+        integer, intent(in) :: im, levs, ipr
+        logical, intent(in) :: ldiag3d, lprnt
         real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
 
         real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_t, save_qv
@@ -51,6 +51,7 @@
 !        endif
 
     end subroutine GFS_SCNV_generic_pre_run
+
 
     end module GFS_SCNV_generic_pre
 

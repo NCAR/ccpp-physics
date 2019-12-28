@@ -20,14 +20,14 @@
     subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, do_cnvgwd, do_ca,        &
                                          isppt_deep, gu0, gv0, gt0, gq0_water_vapor, &
                                          save_u, save_v, save_t, save_qv, ca_deep,   &
-                                         errmsg, errflg)
+                                         lprnt, ipr, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs
-      logical, intent(in) :: ldiag3d, do_cnvgwd, do_ca, isppt_deep
+      integer, intent(in) :: im, levs, ipr
+      logical, intent(in) :: ldiag3d, do_cnvgwd, do_ca, isppt_deep, lprnt
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gu0
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gv0
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gt0
@@ -100,14 +100,14 @@
       gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g,  npdf3d, num_p3d, ncnvcld3d,                      &
       rainc, cldwrk, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf,                             &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d,                                                        &
-      cape, tconvtend, qconvtend, uconvtend, vconvtend, errmsg, errflg)
+      cape, tconvtend, qconvtend, uconvtend, vconvtend, lprnt, ipr, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs
-      logical, intent(in) :: lssav, ldiag3d, ras, cscnv, do_ca, isppt_deep
+      integer, intent(in) :: im, levs, ipr
+      logical, intent(in) :: lssav, ldiag3d, ras, cscnv, do_ca, isppt_deep, lprnt
 
       real(kind=kind_phys), intent(in) :: frain, dtf
       real(kind=kind_phys), dimension(im), intent(in) :: rain1, cld1d

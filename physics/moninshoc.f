@@ -119,17 +119,20 @@
 !
       if (ix < im) stop
 !
-      if (lprnt) write(0,*)' in moninshoc tsea=',tsea(ipr)
-     &,    ' grav=',grav, rd, cp, hvap, fv,' ipr=',ipr
-     &,' ntke=',ntke,' ntcw=',ntcw
-      if (lprnt) write(0,*)' in moninshoc tin=',t1(ipr,:)
-      if (lprnt) write(0,*)' in moninshoc qin=',q1(ipr,:,1)
-      if (lprnt) write(0,*)' in moninshoc qwin=',q1(ipr,:,2)
-      if (lprnt) write(0,*)' in moninshoc qiin=',q1(ipr,:,3)
+!     if (lprnt) write(0,*)' in moninshoc tsea=',tsea(ipr)
+!    &,    ' grav=',grav, rd, cp, hvap, fv,' ipr=',ipr
+!    &,' ntke=',ntke,' ntcw=',ntcw
+!     if (lprnt) write(0,*)' in moninshoc tin=',t1(ipr,:)
+!     if (lprnt) write(0,*)' in moninshoc qin=',q1(ipr,:,1)
+!     if (lprnt) write(0,*)' in moninshoc qwin=',q1(ipr,:,2)
+!     if (lprnt) write(0,*)' in moninshoc qiin=',q1(ipr,:,3)
+
       dt2   = delt
       rdt   = 1. / dt2
       km1   = km - 1
       kmpbl = km / 2
+!
+      rtg = 0.0
 !
       do k=1,km
         do i=1,im
@@ -167,6 +170,7 @@
           endif
         enddo
       enddo
+
 !     if (lprnt) then
 !       write(0,*)' tx1=',tx1(ipr),' kinver=',kinver(ipr)
 !       write(0,*)' xkzo=',xkzo(ipr,:)
@@ -376,6 +380,9 @@
           dkt(i,k) = max(min(tkh(i,kp1)+xkzo(i,k), dkmax), xkzo(i,k))
         enddo
       enddo
+
+!     if (lprnt) write(0,*)' tkh=',tkh(ipr,:)
+!     if (lprnt) write(0,*)' dkt=',dkt(ipr,:)
 !
 !     compute tridiagonal matrix elements for heat and moisture
 !

@@ -528,6 +528,12 @@ end subroutine m_micro_init
            enddo
          endif
        endif
+!      if (lprnt) then
+!        write(0,*)' inmic qlcn=',qlcn(ipr,:)
+!        write(0,*)' inmic qlls=',qlls(ipr,:)
+!        write(0,*)' inmic qicn=',qicn(ipr,:)
+!        write(0,*)' inmic qils=',qils(ipr,:)
+!      endif
 !
        DT_MOIST = dt_i
        dt_r8    = dt_i
@@ -1540,7 +1546,9 @@ end subroutine m_micro_init
 !           if(lprint) then
 !             write(0,*)' calling micro_mg_tend3_0 qcvar3=',qcvar3,' i=',i
 !             write(0,*)' qcr8=',qcr8(:)
+!             write(0,*)' qir8=',qir8(:)
 !             write(0,*)' ncr8=',ncr8(:)
+!             write(0,*)' nir8=',nir8(:)
 !             write(0,*)' npccninr8=',npccninr8(:)
 !             write(0,*)' plevr8=',plevr8(:)
 !             write(0,*)' ter8=',ter8(:)
@@ -1845,7 +1853,7 @@ end subroutine m_micro_init
        if (allocated(ALPHT_X)) deallocate (ALPHT_X)
 
 !     if (lprnt) then
-!       write(0,*)' rn_o=',rn_o(ipr),' ls_prc2=',ls_prc2(ipr),' ls_snr=',ls_snr(ipr)
+!       write(0,*)' rn_o=',rn_o(ipr),' ls_prc2=',ls_prc2(ipr),' ls_snr=',ls_snr(ipr),' kdt=',kdt
 !       write(0,*)' end micro_mg_tend t_io= ', t_io(ipr,:)
 !       write(0,*)' end micro_mg_tend clls_io= ', clls_io(ipr,:)
 !     endif

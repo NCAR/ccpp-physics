@@ -25,9 +25,9 @@ end subroutine shoc_finalize
 !!
 #endif
 subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt, &
-                     dtp, me, prsl, delp, phii, phil, u, v, omega, rhc,                                            &
-                     supice, pcrit,  cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,                             &
-                     gt0, gq0, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc,                            &
+                     dtp, me, prsl, delp, phii, phil, u, v, omega, rhc,                                         &
+                     supice, pcrit,  cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,                          &
+                     gt0, gq0, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc,                         &
                      cld_sgs, tke, tkh, wthv_sec, lprnt, ipr, errmsg, errflg)
 
     implicit none
@@ -117,6 +117,8 @@ subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, 
 
     !GFDL lat has no meaning inside of shoc - changed to "1"
 
+!   if(lprnt) write(0,*)' befncpi=',ncpi(ipr,:)
+!   if(lprnt) write(0,*)' tkh=',tkh(ipr,:)
 
     call shoc_work (ix, nx, nzm, nzm+1, dtp, me, 1, prsl, delp,                             &
                     phii, phil, u, v, omega, gt0, gq0(:,:,1), qi, qc, qsnw, qrn,            &
@@ -125,6 +127,7 @@ subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, 
                     ntlnc, ncpl, ncpi,                                                      &
                     con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt)
 
+!   if(lprnt) write(0,*)' aftncpi=',ncpi(ipr,:)
     if (ntiw < 0) then   ! this is valid only for Zhao-Carr scheme
       do k=1,nzm
          do i=1,nx
@@ -400,6 +403,14 @@ end subroutine shoc_run
       zi(i,k) = phii(i,k) * ggri
     enddo
   enddo
+
+! if (lprnt) write(0,*)' tabsin=',tabs(ipr,:)
+! if (lprnt) write(0,*)' qcin=',qc(ipr,:)
+! if (lprnt) write(0,*)' qwvin=',qwv(ipr,:)
+! if (lprnt) write(0,*)' qiin=',qi(ipr,:)
+! if (lprnt) write(0,*)' qplin=',qpl(ipr,:)
+! if (lprnt) write(0,*)' qpiin=',qpi(ipr,:)
+! if (lprnt) write(0,*)' tkein=',tke(ipr,:)
 !
 ! move water from vapor to condensate if the condensate is negative
 !
@@ -415,6 +426,23 @@ end subroutine shoc_run
         tabs(i,k) = tabs(i,k) - fac_sub  * qi(i,k)
         qi(i,k)   = zero
       endif
+!
+!    testing removal of ice when too warm to sustain ice 
+!
+!     if (qi(i,k) > zero .and. tabs(i,k) > 273.16) then
+!       wrk = (tabs(i,k) - 273.16) / fac_sub
+!       if (wrk < qi(i,k)) then
+!         wrk       = qi(i,k) - wrk
+!         qi(i,k)   = wrk
+!         qwv(i,k)  = qwv(i,k) + wrk
+!         tabs(i,k) = 273.16
+!       else
+!         tabs(i,k) = tabs(i,k) - qi(i,k) / fac_sub
+!         qwv(i,k)  = qwv(i,k)  + qi(i,k)
+!         qi(i,k)   = 0.0
+!       endif
+!     endif
+
     enddo
   enddo
 ! fill negative water vapor from below
@@ -426,6 +454,9 @@ end subroutine shoc_run
       endif
     enddo
   enddo
+
+! if (lprnt) write(0,*)' tabsin2=',tabs(ipr,:)
+! if (lprnt) write(0,*)' qwvin2=',qwv(ipr,:)
 
   do k=1,nzm
     do i=1,nx
@@ -454,10 +485,15 @@ end subroutine shoc_run
 ! Liquid/ice water static energy - ! Note the the units are degrees K
       hl(i,k) = tabs(i,k) + gamaz(i,k) - fac_cond*(qcl(i,k)+qpl(i,k)) &
                                        - fac_sub *(qci(i,k)+qpi(i,k))
+!     if (lprnt .and. i == ipr .and. k<=10) write(0,*)' hl=',hl(i,k), &
+!     ' tabs=',tabs(i,k),' gamaz=',gamaz(i,k), ' fac_cond=',fac_cond, &
+!     ' qcl=',qcl(i,k),' qpl=',qpl(i,k),' qci=',qci(i,k),' qpi=',qpi(i,k),&
+!     ' fac_sub=',fac_sub,' k=',k
       w3(i,k) = zero
     enddo
   enddo
 
+! if (lprnt) write(0,*)' hlin=',hl(ipr,1:40)
 
 ! Define vertical grid increments for later use in the vertical differentiation
 
@@ -510,6 +546,8 @@ end subroutine shoc_run
               * sqrt(tke(i,k)) / (zl(i,ku) - zl(i,kd))
          w_sec(i,k) = max(twoby3 * tke(i,k) - twoby15 * wrk, zero)
 !        w_sec(i,k) = max(twoby3 * tke(i,k), zero)
+!     if(lprnt .and. i == ipr .and. k <40) write(0,*)' w_sec=',w_sec(i,k),' tke=',tke(i,k),&
+!    ' tkh=',tkh(i,ka),tkh(i,kb),' w=',w(i,ku),w(i,kd),' prnum=',prnum(i,ka),prnum(i,kb),' k=',k
       else
          w_sec(i,k) = zero
       endif
@@ -577,6 +615,11 @@ end subroutine shoc_run
 ! and moisture variables
 
   call assumed_pdf()
+
+! if (lprnt) write(0,*)' tabsout=',tabs(ipr,1:40)
+! if (lprnt) write(0,*)' qcout=',qc(ipr,1:40)
+! if (lprnt) write(0,*)' qwvout=',qwv(ipr,1:40)
+! if (lprnt) write(0,*)' qiout=',qi(ipr,1:40)
 
 contains
 
@@ -684,11 +727,20 @@ contains
         wrk  = (dtn*Cee) / smixt(i,k)
         wrk1 = wtke + dtn*(a_prod_sh+a_prod_bu)
 
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' wtke=',wtke,' wrk1=',wrk1,&
+!       ' a_prod_sh=',a_prod_sh,' a_prod_bu=',a_prod_bu,' dtn=',dtn,' smixt=',   &
+!         smixt(i,k),' tkh=',tkh(i,ku),tkh(i,kd),' def2=',def2(i,ku),def2(i,kd)  &
+!       ,' prnum=',prnum(i,ku),prnum(i,kd),' wthv_sec=',wthv_sec(i,k),' thv=',thv(i,k)
+
         do itr=1,nitr                        ! iterate for implicit solution
           wtke   = min(max(min_tke, wtke), max_tke)
           a_diss = wrk*sqrt(wtke)            ! Coefficient in the TKE dissipation term
           wtke   = wrk1 / (one+a_diss)
           wtke   = tkef1*wtke + tkef2*wtk2   ! tkef1+tkef2 = 1.0
+
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' wtke=',wtke,' wtk2=',wtk2,&
+!        ' a_diss=',a_diss,' a_prod_sh=',a_prod_sh,' a_prod_bu=',a_prod_bu,      &
+!        ' wrk1=',wrk1,' itr=',itr,' k=',k
 
           wtk2   = wtke
 
@@ -711,6 +763,9 @@ contains
                            tscale1/(one+lambda*buoy_sgs*tscale1*tscale1))
         endif
 
+! if (lprnt .and. i == ipr .and. k<40) write(0,*)' isotropy=',isotropy(i,k),&
+!        ' buoy_sgs=',buoy_sgs,' lambda=',lambda,' tscale1=',tscale1
+
 ! TKE budget terms
 
 !       tkesbdiss(i,k)       = a_diss
@@ -728,6 +783,8 @@ contains
         tkh(i,k) = min(tkhmax, wrk * (isotropy(i,k)  * tke(i,k)    &
                                    +  isotropy(i,k1) * tke(i,k1))) ! Eddy thermal diffusivity
       enddo ! i
+!     if (lprnt) write(0,*)' shocendtkh=',tkh(ipr,k),' tke=',tke(ipr,k),&
+!       tke(ipr,k1),' isot=',isotropy(ipr,k),isotropy(ipr,k1),'k=',k,' k1=',k1
     enddo   ! k
 
 
@@ -1320,6 +1377,7 @@ contains
 !       wthlsec  = wthl_sec(i,k)
 
 ! Compute square roots of some variables so we don't have to do it again
+!     if (lprnt .and. i == ipr .and. k<10) write(0,*)' w_sec=',w_sec(i,k),' k=',k
         if (w_sec(i,k) > zero) then
           sqrtw2  = sqrt(w_sec(i,k))
         else
@@ -1386,6 +1444,8 @@ contains
 
 !  Find parameters of the  PDF of liquid/ice static energy
 
+!       if (lprnt .and. i == ipr .and. k<10) write(0,*)' thlsec=',thlsec,' w1_2=',w1_2,' w1_1=',w1_1,&
+!             ' thl_first=',thl_first,' k=',k,' wthlsec=',wthlsec,sqrtw2,sqrtthl
         IF (thlsec <= thl_tol*thl_tol .or. abs(w1_2-w1_1) <= w_thresh) THEN
           thl1_1     = thl_first
           thl1_2     = thl_first
@@ -1415,8 +1475,13 @@ contains
             thl2_2 = zero
           endif
 !
+!         if (lprnt .and. i == ipr .and. k<10) write(0,*)' thl1_1=',thl1_1,' sqrtthl=',sqrtthl,' thl_first=',thl_first,&
+!           ' thl1_2=',thl1_2,' corrtest1=',corrtest1,' w1_2=',w1_2,' w1_1=',w1_1
+
           thl1_1 = thl1_1*sqrtthl + thl_first
           thl1_2 = thl1_2*sqrtthl + thl_first
+
+!         if (lprnt .and. i == ipr .and. k<40) write(0,*)' thl1_1=',thl1_1,' thl1_2=',thl1_2
 
           sqrtthl2_1 = sqrt(thl2_1)
           sqrtthl2_2 = sqrt(thl2_2)
@@ -1438,6 +1503,9 @@ contains
 
           qw1_1 = - corrtest2 / w1_2            ! A.7
           qw1_2 = - corrtest2 / w1_1            ! A.8
+
+!       if (lprnt .and. i == ipr .and. k<10) write(0,*)' qw1_1=',qw1_1,' corrtest2=',corrtest2,&
+!         ' w1_2=',w1_2,' wqwsec=',wqwsec,' sqrtw2=',sqrtw2,' sqrtqt=',sqrtqt,' qwsec=',qwsec
 
           tsign = abs(qw1_2-qw1_1)
 
@@ -1498,6 +1566,9 @@ contains
         Tl1_1 = thl1_1 - gamaz(i,k)
         Tl1_2 = thl1_2 - gamaz(i,k)
 
+!       if (lprnt .and. i == ipr .and. k<40) write(0,*)' Tl1_1=',Tl1_1,' Tl1_2=',Tl1_2,&
+!       ' wrk1=',wrk1,' thl1_1=',thl1_1,' thl1_2=',thl1_2,' qpl=',qpl(i,k),' qpi=',qpi(i,k)
+
 ! Now compute qs
 
 ! Partition based on temperature for the first plume
@@ -1505,6 +1576,7 @@ contains
         IF (Tl1_1 >= tbgmax) THEN
           lstarn1  = lcond
           esval    = min(fpvsl(Tl1_1), pval)
+!         if (lprnt .and. i == ipr .and. k<40) write(0,*)' esval=',esval,' pval=',pval,' eps=',eps
           qs1      = eps * esval / (pval-0.378d0*esval)
         ELSE IF (Tl1_1 <= tbgmin) THEN
           lstarn1  = lsub
@@ -1568,6 +1640,8 @@ contains
         s1     = qw1_1 - wrk                                              ! A.17
         cthl1  = cqt1*wrk*cpolv*beta1*pkap                                ! A.20
 
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' in shoc s1=',s1,' qw1_1=',qw1_1,'wrk=',wrk,&
+!    ' qs1=',qs1,' beta1=',beta1,' cqt1=',cqt1
         wrk1   = cthl1 * cthl1
         wrk2   = cqt1  * cqt1
 !       std_s1 = sqrt(max(zero,wrk1*thl2_1+wrk2*qw2_1-2.*cthl1*sqrtthl2_1*cqt1*sqrtqw2_1*r_qwthl_1))
@@ -1580,6 +1654,9 @@ contains
         IF (std_s1 > zero) THEN
           wrk = s1 / (std_s1*sqrt2)
           C1 = max(zero, min(one, half*(one+erf(wrk))))                   ! A.15
+
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' in shoc wrk=',wrk,' s1=',s1,'std=',std_s1,&
+!         ' c1=',c1*100,' qs1=',qs1,' qw1_1=',qw1_1,' k=',k
 
           IF (C1 > zero) qn1 = s1*C1 + (std_s1*sqrtpii)*exp(-wrk*wrk)     ! A.16
 !!      ELSEIF (s1 >= qcmin) THEN
@@ -1639,6 +1716,11 @@ contains
         qi1 = qn1 - ql1
         qi2 = qn2 - ql2
 
+!     if (lprnt .and. i == ipr .and. k<40) write(0,*)' in shoc qi=',qi1,qi2,' ql=',ql1,ql2,&
+!        ' c1=',c1,' c2=',c2,' s1=',s1,' s2=',s2,' k=',k,' tl1=',tl1_1,tl1_2,' om1=',om1,'om2=',om2&
+!       ,' tbgmin=',tbgmin,'a_bg=',a_bg
+
+
         diag_qn = min(max(zero, aterm*qn1 + onema*qn2), total_water(i,k))
         diag_ql = min(max(zero, aterm*ql1 + onema*ql2), diag_qn)
         diag_qi = diag_qn - diag_ql
@@ -1651,6 +1733,10 @@ contains
                                          + fac_sub *(diag_qi+qpi(i,k)) &
                   + tkesbdiss(i,k) * (dtn/cp)      ! tke dissipative heating
 
+! if (lprnt .and. i == ipr .and. k < 40) write(0,*)' tabsout=',tabs(ipr,k),' k=',k&
+!    ,' hl=',hl(i,k),' gamaz=',gamaz(i,k),' diag_ql=',diag_ql,' qpl=',qpl(i,k)&
+!    ,' diag_qi=',diag_qi,' qpi=',qpi(i,k),' diag_qn =',diag_qn ,' aterm=',aterm,' onema=',onema&
+!    ,' qn1=',qn1 ,' qn2=',qn2,' ql1=',ql1,' ql2=',ql2
 ! Update moisture fields
 
 ! Update ncpl and ncpi Anning Cheng 03/11/2016
@@ -1720,7 +1806,7 @@ contains
 
 
   real function esatw(t)
-    real t      ! temperature (K)
+    real t	! temperature (K)
     real a0,a1,a2,a3,a4,a5,a6,a7,a8
     data a0,a1,a2,a3,a4,a5,a6,a7,a8 /                       &
          6.11239921,       0.443987641,     0.142986287e-1, &
@@ -1733,8 +1819,8 @@ contains
 
   real function qsatw(t,p)
 !    implicit none
-    real t      ! temperature (K)
-    real p      ! pressure    (Pa)
+    real t	! temperature (K)
+    real p	! pressure    (Pa)
     real esat
 !   esat  = fpvs(t)
     esat  = fpvsl(t)
@@ -1745,7 +1831,7 @@ contains
 
 
   real function esati(t)
-    real t      ! temperature (K)
+    real t	! temperature (K)
     real a0,a1,a2,a3,a4,a5,a6,a7,a8
     data a0,a1,a2,a3,a4,a5,a6,a7,a8 /                     &
          6.11147274,     0.503160820,     0.188439774e-1, &

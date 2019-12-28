@@ -122,18 +122,10 @@
       lprnt = .false.
       ipt = 1
 !     do i=1,im
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-294.37) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg-4.1) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-308.88) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg+29.16) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-311.08) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg+28.27) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-113.48) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg-21.07) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.29) < 0.201     &
-!                          .and. abs(xlat(i)*rad2dg-17.45) < 0.201
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-169.453) < 0.501  &
-!                          .and. abs(xlat(i)*rad2dg-72.96) < 0.501
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-97.50) < 0.101    &
+!                          .and. abs(xlat(i)*rad2dg-24.48) < 0.101
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-293.91) < 0.101    &
+!                          .and. abs(xlat(i)*rad2dg+72.02) < 0.101
 !       if (kdt == 1) &
 !         write(2000+me,*)' i=',i,' xlon=',xlon(i)*rad2dg,          &
 !                       ' xlat=',xlat(i)*rad2dg,' me=',me
@@ -145,8 +137,8 @@
 !     enddo
 !     if (lprnt) then
 !       write(0,*)' qgrsv=',qgrs(ipt,:,1)
-!       write(0,*)' qgrsw=',qgrs(ipt,:,2)
-!       write(0,*)' qgrsi=',qgrs(ipt,:,3)
+!       write(0,*)' qgrsi=',qgrs(ipt,:,ntiw)
+!       write(0,*)' qgrsw=',qgrs(ipt,:,ntcw)
 !     endif
 
 !DH: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
@@ -565,14 +557,6 @@
           dtsfci_diag(i) = dtsfc1(i)
           dqsfci_diag(i) = dqsfc1(i)
         enddo
-!         if (lprnt) then
-!           write(0,*)' dusfc=',dusfc_diag(ipt),' dusfc1=',dusfc1(ipt), &
-!      &              ' dvsfc=',dvsfc_diag(ipt),' dvsfc1=',dvsfc1(ipt), &
-!      &              ' dtsfc=',dtsfc_diag(ipt),' dtsfc1=',dvsfc1(ipt), &
-!      &              ' dtf=',dtf,' kdt=',kdt
-!           write(0,*)' dtdt=',dtdt(ipt,1:10)*86400
-!           write(0,*)' dqidt=',dqdt(ipt,1:10,ntiw)*86400
-!         endif
 
         if (ldiag3d) then
           if (lsidea) then

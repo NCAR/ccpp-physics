@@ -73,7 +73,7 @@
 !     real(kind=kind_phys), parameter :: TF=230.16, TCR=260.16          &
 !     real(kind=kind_phys), parameter :: TF=233.16, TCR=263.16          &
       real(kind=kind_phys), parameter :: TF=233.16, TCR=273.16          &
-     &,                                  TCRF=1.0/(TCR-TF),TCL=2.0
+     &,                                  TCRF=1.0/(TCR-TF), TCL=2.0
 
 !
 !    For pressure gradient force in momentum mixing
@@ -305,7 +305,7 @@
 !
       Implicit none
 !
-      LOGICAL FLIPV, lprnt,revap
+      LOGICAL FLIPV, lprnt
 !
 !      input
 !
@@ -364,7 +364,7 @@
      &,                    rainp
 !     integer                          :: nrcmax    ! Maximum # of random clouds per 1200s
 !
-      Integer              KCR,  KFX, NCMX, NC,  KTEM, I,   ii, L, lm1  &
+      Integer              KCR,  KFX, NCMX, NC,  KTEM, I,   ii, Lm1, l  &
      &,                    ntrc, ia,  ll,   km1, kp1,  ipt, lv, KBL, n  &
      &,                    KRMIN, KRMAX, KFMAX, kblmx, irnd,ib          &
      &,                    kblmn, ksfc, ncrnd
@@ -385,8 +385,6 @@
       endif
       trcmin = -99999.0
       if (ntk-2 > 0) trcmin(ntk-2) = 1.0d-4
-!     nrcmax = nrcm
-!     nrcmax = 32
 
 !> - Initialize CCPP error handling variables
 
@@ -461,6 +459,7 @@
       DO IPT=1,IM
 
         lprint = lprnt .and. ipt == ipr
+        ia     = ipr
 
         tem1    = max(zero, min(one, (log(area(ipt)) - dxmin) * dxinv))
         tem2    = one - tem1
@@ -470,6 +469,9 @@
         c0i     = (psauras(1)*tem1 + psauras(2)*tem2) * tem
         c0      = (prauras(1)*tem1 + prauras(2)*tem2) * tem
         if (ccwfac == zero) ccwfac = half
+
+!      if (lprint) write(0,*)' c0=',c0,' c0i=',c0i,' dlq_fac=',dlq_fac, &
+!    &                       ' ccwf=',ccwf
 
 !
 !       ctei = .false.
@@ -528,7 +530,7 @@
         KTEM    = MIN(K,KFMAX)
         KFX     = KTEM - KCR
 
-!     if(lprint)write(0,*)' enter RASCNV k=',k,' ktem=',ktem             &
+!     if(lprint)write(0,*)' enter RASCNV k=',k,' ktem=',ktem            &
 !    &,               ' krmax=',krmax,' kfmax=',kfmax                   &
 !    &,               ' krmin=',krmin,' ncrnd=',ncrnd                   &
 !    &,               ' kcr=',kcr, ' cdrag=',cdrag(ipr)
@@ -553,8 +555,6 @@
             IC(KFX+I) = IRND + KRMIN
           ENDDO
         ENDIF
-!
-      ia = ipr
 !
 !     if (me == 0) write(0,*)' in rascnv: k=',k,' lprnt=',lprnt
 !     if (lprint) then
@@ -1199,7 +1199,7 @@
 
         DDVEL(ipt) = DDVEL(ipt) * DDFAC * GRAV / (prs(KP1)-prs(K))
 
-!       if (lprint) write(0,*)' ddvel=',ddvel(ipt)
+!       if (lprint) write(0,*)' ddvel=',ddvel(ipt),' ddfac=',ddfac
 
 !
       ENDDO                            ! End of the IPT Loop!
@@ -2685,7 +2685,7 @@
 !
 !     if(lprnt) write(0,*)' wfn=',wfn,' acr=',acr,' akm=',akm           &
 !    &,' amb=',amb,' KD=',kd,' cldfrd=',cldfrd                          &
-!    &,' rel_fac=',rel_fac,' prskd=',prs(kd)
+!    &,' rel_fac=',rel_fac,' prskd=',prs(kd),' revap=',revap
 
 !===>   RELAXATION AND CLIPPING FACTORS
 !
@@ -2858,6 +2858,7 @@
         TX1 = zero
         TX2 = zero
 !
+!       if (lprnt) write(0,*)' revap=',revap
         IF (REVAP) THEN !     REEVAPORATION OF FALLING CONVECTIVE RAIN
 !
          tem = zero
@@ -2875,7 +2876,8 @@
 !!       tem1 = sqrt(max(1.0, min(100.0,(4.0E10/max(area,one))))) ! 20100902
          tem1 = sqrt(max(one, min(100.0,(6.25E10/max(area,one))))) ! 20110530
 
-!        if (lprnt) write(0,*)' clfr0=',clf(tem),' tem=',tem,' tem1=',tem1
+!        if (lprnt) write(0,*)' clfr0=',clf(tem),' tem=',tem,' tem1=',  &
+!    &                        tem1
 
 !        clfrac = max(ZERO, min(ONE,  rknob*clf(tem)*tem1))
 !        clfrac = max(ZERO, min(0.25, rknob*clf(tem)*tem1))
@@ -2972,9 +2974,9 @@
           CUP = CUP + TX1 + DOF * AMB * sigf(kbl)
         ENDIF
 
-!     if (lprnt) write(0,*)' tx1=',tx1,' tx2=',tx2,' dof=',dof
-!    &,' cup=',cup*86400/dt,' amb=',amb
-!    &,' amb=',amb,' cup=',cup,' clfrac=',clfrac,' cldfrd=',cldfrd
+!     if (lprnt) write(0,*)' tx1=',tx1,' tx2=',tx2,' dof=',dof          &
+!    &,' cup=',cup*86400/dt,' amb=',amb                                 &
+!    &,' amb=',amb,' cup=',cup,' clfrac=',clfrac,' cldfrd=',cldfrd      &
 !    &,' ddft=',ddft,' kd=',kd,' kbl=',kbl,' k=',k
 !
 !    Convective transport (mixing) of passive tracers

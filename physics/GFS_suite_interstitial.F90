@@ -460,9 +460,9 @@
 !!
 #endif
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,      &
-      ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlon, xlat, gq0, imp_physics, imp_physics_mg,                     &
+      ntiw, ntlnc, ntinc, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, xlon, xlat, gq0, imp_physics, imp_physics_mg,       &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, prsi, prsl, &
-      prslk, rhcbot, rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver, ras, lprnt, ipt, kdt, me,                     &
+      prslk, rhcbot, rhcpbl, rhctop, rhcmax, islmsk, work1, work2, kpbl, kinver, ras, lprnt, ipt, kdt, me,                    &
       clw, rhc, save_qc, save_qi, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -470,9 +470,9 @@
       implicit none
 
       ! interface variables
-      integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw,     &
-        ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
-        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, kdt, me
+      integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntlnc, ntinc, &
+        ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr,          &
+        imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, kdt, me
       integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
       logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
@@ -512,8 +512,10 @@
       lprnt = .false.
       ipt = 1
 !     do i=1,im
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-294.37) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg-4.1) < 0.101
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-97.50) < 0.101     &
+!                          .and. abs(xlat(i)*rad2dg-24.48) < 0.101
+!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-293.91) < 0.101     &
+!                          .and. abs(xlat(i)*rad2dg+72.02) < 0.101
 !       lprnt = kdt >=   1 .and. abs(grid%xlon(i)*rad2dg-308.88) < 0.101  &
 !                          .and. abs(grid%xlat(i)*rad2dg+29.16) < 0.101
 !       lprnt = kdt >=   135 .and. abs(xlon(i)*rad2dg-95.27) < 0.101     &
@@ -568,6 +570,7 @@
         do n=2,ntrac
           if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
                n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
+               n /= ntlnc .and. n /= ntinc .and.                    &
                n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc) then
             tracers = tracers + 1
             do k=1,levs
@@ -606,7 +609,7 @@
               rhc(i,k) = min(rhcmax, max(0.7, 1.0-tx2(i)*tem1*tem2))
             enddo
           enddo
-          if (kdt == 1 .and. me == 0) write(0,*)' rhc=',rhc(1,:)
+!         if (kdt == 1 .and. me == 0) write(0,*)' rhc=',rhc(1,:)
         else
           do k=1,levs
             do i=1,im
@@ -670,6 +673,7 @@
 !     if (lprnt) write(0,*)' clwice=',clw(ipt,:,1)
 !     if (lprnt) write(0,*)' clwwat=',clw(ipt,:,2)
 !     if (lprnt) write(0,*)' rhc=',rhc(ipt,:)
+!     if (lprnt) write(0,*)' gq01=',gq0(ipt,:,1)
 
     end subroutine GFS_suite_interstitial_3_run
 
@@ -691,7 +695,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, dqdti, errmsg, errflg)
+      gq0, clw, dqdti, gt0, lprnt, ipr, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -701,12 +705,12 @@
 
       integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, ipr
 
-      logical,                                  intent(in) :: ltaerosol, cplchm
+      logical,                                  intent(in) :: ltaerosol, cplchm, lprnt
 
       real(kind=kind_phys),                     intent(in) :: con_pi, dtf
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc, gt0
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),    intent(in) :: save_qi
 
@@ -739,6 +743,7 @@
 !         if ( n /= ntcw .and. n /= ntiw .and. n /= ntclamt) then
           if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
                n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
+               n /= ntlnc .and. n /= ntinc .and.                    &
                n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc ) then
               tracers = tracers + 1
             do k=1,levs
@@ -806,6 +811,16 @@
           enddo
         enddo
       endif
+
+!       if (lprnt) then
+!         write(0,*)' aft shallow physics'
+!         write(0,*)'qt0s=',gt0(ipr,:)
+!         write(0,*)'qq0s=',gq0(ipr,:,1)
+!         write(0,*)'qq0ws=',gq0(ipr,:,ntcw)
+!         write(0,*)'qq0is=',gq0(ipr,:,ntiw)
+!         write(0,*)'qq0ntic=',gq0(ipr,:,8)
+!         write(0,*)'qq0os=',gq0(ipr,:,12)
+!       endif
 
     end subroutine GFS_suite_interstitial_4_run
 

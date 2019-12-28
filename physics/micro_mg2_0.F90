@@ -1678,7 +1678,7 @@ subroutine micro_mg_tend (                                       &
      if (do_cldice) then
 
        call ice_deposition_sublimation(t(:,k), q(:,k), qi(:,k), ni(:,k), &
-            icldm(:,k), rho(:,k), dv(:,k), qvl(:,k), qvi(:,k), &
+            cldm(:,k), rho(:,k), dv(:,k), qvl(:,k), qvi(:,k), &
             berg(:,k), vap_dep(:,k), ice_sublim(:,k), mgncol)
 
        do i=1,mgncol

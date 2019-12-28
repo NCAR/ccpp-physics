@@ -1145,6 +1145,22 @@
   type = integer
   intent = in
   optional = F
+[ntlnc]
+  standard_name = index_for_liquid_cloud_number_concentration
+  long_name = tracer index for liquid number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntinc]
+  standard_name = index_for_ice_cloud_number_concentration
+  long_name = tracer index for ice    number concentration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ntclamt]
   standard_name = index_for_cloud_amount
   long_name = tracer index for cloud amount integer
@@ -1732,6 +1748,31 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = inout
+  optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[lprnt]
+  standard_name = flag_print
+  long_name = control flag for diagnostic print out
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
+  optional = F
+[ipr]
+  standard_name = horizontal_index_of_printed_column
+  long_name = horizontal index of printed column
+  units = index
+  dimensions = ()
+  type = integer
   intent = inout
   optional = F
 [errmsg]
