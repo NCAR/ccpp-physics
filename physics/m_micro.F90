@@ -183,7 +183,8 @@ end subroutine m_micro_init
 
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag
-       logical,intent(in) :: flipv, skip_macro, lprnt, iccn
+       logical,intent(in) :: flipv, skip_macro, lprnt
+       integer,intent(in) :: iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
        real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
