@@ -234,7 +234,7 @@ end subroutine m_micro_init
        integer kcldtopcvn,i,k,ll, kbmin, NAUX, nbincontactdust,l
        integer, dimension(im) :: kct
        real (kind=kind_phys) T_ICE_ALL, USE_AV_V,BKGTAU,LCCIRRUS,       &
-     &    NPRE_FRAC, Nct, Wct, fcn, ksa1, tauxr8, DT_Moist, dt_r8,      &
+     &    NPRE_FRAC, Nct, Wct, fcn, ksa1, tauxr8, DT_Moist, dt_r8, tem, &
      &    TMAXLL, USURF,LTS_UP, LTS_LOW, MIN_EXP, fracover, c2_gw, est3
 
        real(kind=kind_phys), allocatable, dimension(:,:) ::             &
@@ -546,12 +546,12 @@ end subroutine m_micro_init
      &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
      &                            NCPI(I,K), qc_min)
              if (rnw(i,k) <= qc_min(1)) then
-               ncpl(i,k) = 0.0
-             elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
-               ncpl(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+               ncpr(i,k) = 0.0
+             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
              endif
              if (snw(i,k) <= qc_min(2)) then
-               ncpl(i,k) = 0.0
+               ncps(i,k) = 0.0
              elseif (ncps(i,k) <= nmin) then
                ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
              endif
@@ -564,6 +564,7 @@ end subroutine m_micro_init
            enddo
          enddo
        endif
+
        do i=1,im
          KCBL(i)     = max(LM-KCBL(i),10)
          KCT(i)      = 10

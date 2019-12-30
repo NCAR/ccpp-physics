@@ -1659,9 +1659,9 @@ contains
 !         ' c1=',c1*100,' qs1=',qs1,' qw1_1=',qw1_1,' k=',k
 
           IF (C1 > zero) qn1 = s1*C1 + (std_s1*sqrtpii)*exp(-wrk*wrk)     ! A.16
-!!      ELSEIF (s1 >= qcmin) THEN
-!!        C1  = one
-!!        qn1 = s1
+        ELSEIF (s1 >= qcmin) THEN
+          C1  = one
+          qn1 = s1
         ENDIF
 
 ! now compute non-precipitating cloud condensate 
@@ -1694,9 +1694,9 @@ contains
             wrk = s2 / (std_s2*sqrt2)
             C2  = max(zero, min(one, half*(one+erf(wrk))))
             IF (C2 > zero) qn2 = s2*C2 + (std_s2*sqrtpii)*exp(-wrk*wrk)
-!!        ELSEIF (s2 >= qcmin) THEN
-!!          C2  = one
-!!          qn2 = s2
+          ELSEIF (s2 >= qcmin) THEN
+            C2  = one
+            qn2 = s2
           ENDIF
 
         ENDIF
