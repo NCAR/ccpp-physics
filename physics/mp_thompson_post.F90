@@ -16,11 +16,9 @@ module mp_thompson_post
 
 contains
 
-#if 0
 !! \section arg_table_mp_thompson_post_init Argument Table
 !! \htmlinclude mp_thompson_post_init.html
 !!
-#endif
    subroutine mp_thompson_post_init(ncol, ttendlim, errmsg, errflg)
 
       implicit none
@@ -61,11 +59,9 @@ contains
 
    end subroutine mp_thompson_post_init
 
-#if 0
 !! \section arg_table_mp_thompson_post_run Argument Table
 !! \htmlinclude mp_thompson_post_run.html
 !!
-#endif
    subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, &
                                    kdt, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
@@ -132,11 +128,9 @@ contains
 
    end subroutine mp_thompson_post_run
 
-#if 0
 !! \section arg_table_mp_thompson_post_finalize Argument Table
 !! \htmlinclude mp_thompson_post_finalize.html
 !!
-#endif
    subroutine mp_thompson_post_finalize(errmsg, errflg)
 
       implicit none
