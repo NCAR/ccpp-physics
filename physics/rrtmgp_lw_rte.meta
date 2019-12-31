@@ -128,6 +128,15 @@
   kind = kind_phys
   intent = in
   optional = T
+[secdiff]
+  standard_name = secant_of_diffusivity_angle_each_RRTMGP_LW_band
+  long_name = secant of diffusivity angle in each RRTMGP LW band
+  units = none
+  dimensions = (number_of_lw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [fluxlwUP_allsky]
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile

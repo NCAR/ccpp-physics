@@ -49,6 +49,8 @@ module GFS_rrtmgp_pre
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs
   use rrtmgp_aux,            only: check_error_msg!, rrtmgp_minP, rrtmgp_minT
+  use mo_rrtmgp_constants,   only: grav, avogad
+  use mo_rrtmg_lw_cloud_optics
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -122,7 +124,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_pre.html
 !!
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
-       ncol,                                                                            & ! IN
+       ncol, lw_gas_props, sec_diff_byband,                                             & ! IN
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, cld_frac, cld_lwp,                & ! OUT
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,         & ! OUT
        tv_lay, relhum, tracer, cldsa, mtopa, mbota, de_lgth,  gas_concentrations,       & ! OUT
@@ -145,6 +147,8 @@ contains
          Tbd                  ! DDT: FV3-GFS data not yet assigned to a defined container
     integer, intent(in)    :: &
          ncol                 ! Number of horizontal grid points
+   type(ty_gas_optics_rrtmgp),intent(in) :: &
+         lw_gas_props               ! RRTMGP DDT: longwave spectral information
 
     ! Outputs
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
@@ -186,16 +190,19 @@ contains
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
     real(kind_phys), dimension(ncol), intent(out)  :: &
          de_lgth              ! Decorrelation length
+    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol),intent(out) :: &
+         sec_diff_byband
 
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
     logical :: top_at_1
-    real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
-    real(kind_phys) :: es, qs
+    real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o, coldry, tem0, colamt
+    real(kind_phys) :: es, qs, tem1, tem2
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
     real(kind_phys), dimension(ncol, Model%levs) :: qs_lay, q_lay, deltaZ, deltaP, o3_lay
     real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS) :: clouds
+    real(kind_phys), dimension(ncol) ::  precipitableH2o
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -296,6 +303,40 @@ contains
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('n2o', gas_vmr(:,:,2)))
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('h2o', vmr_h2o))
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('o3',  vmr_o3))
+
+    ! #######################################################################################
+    ! Compute diffusivity angle adjustments for each longwave band
+    ! *NOTE* Legacy RRTMGP code 
+    ! #######################################################################################
+    ! Conpute diffusivity angle adjustments.
+    ! First need to compute precipitable water in each column
+    tem0   = (1._kind_phys - vmr_h2o)*amd + vmr_h2o*amw
+    coldry = ( 1.0e-20 * 1.0e3 *avogad)*(deltap*.01) / (100.*grav*tem0*(1._kind_phys + vmr_h2o))
+    colamt = max(0._kind_phys, coldry*vmr_h2o)
+    do iCol=1,nCol
+       tem1   = 0._kind_phys
+       tem2   = 0._kind_phys   
+       do iLay=1,Model%levs
+          tem1 = tem1 + coldry(iCol,iLay)+colamt(iCol,iLay)
+          tem2 = tem2 + colamt(iCol,iLay)
+       enddo
+       precipitableH2o(iCol) = p_lev(iCol,iSFC)*0.01*(10._kind_phys*tem2 / (amdw*tem1*grav))
+    enddo
+
+    ! Reset diffusivity angle for Bands 2-3 and 5-9 to vary (between 1.50
+    ! and 1.80) as a function of total column water vapor.  the function
+    ! has been defined to minimize flux and cooling rate errors in these bands
+    ! over a wide range of precipitable water values.    
+    do iCol=1,nCol
+       do iBand = 1, lw_gas_props%get_nband()
+          if (iBand==1 .or. iBand==4 .or. iBand==10) then
+             sec_diff_byband(iBand,iCol) = diffusivityB1410
+          else
+             sec_diff_byband(iBand,iCol) = min( diffusivityHigh, max(diffusivityLow, &
+                  a0(iBand)+a1(iBand)*exp(a2(iBand)*precipitableH2o(iCol))))
+          endif
+       enddo
+    enddo
 
     ! #######################################################################################
     ! Radiation time step (output) (Is this really needed?) (Used by some diangostics)

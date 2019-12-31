@@ -28,8 +28,8 @@ contains
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, nCol, nLev, p_lay, t_lay, p_lev, skt, lw_gas_props, &
        sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
-       lw_optical_props_aerosol, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,       &
-       fluxlwDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
+       lw_optical_props_aerosol, secdiff, fluxlwUP_allsky, fluxlwDOWN_allsky,               &
+       fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -55,7 +55,8 @@ contains
     type(ty_optical_props_1scl),intent(in) :: &
          lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
          lw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
-
+    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol),intent(in) :: &
+         secdiff
     ! Outputs
     real(kind_phys), dimension(ncol,nLev+1), intent(out) :: &
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
@@ -74,6 +75,8 @@ contains
          hlw0                        ! Clear-sky heating rate (K/sec)
 
     ! Local variables
+    integer :: &
+         iCol, iBand
     type(ty_fluxes_byband) :: &
          flux_allsky, flux_clrsky
     real(kind_phys), dimension(ncol,nLev+1,lw_gas_props%get_nband()),target :: &
@@ -100,9 +103,20 @@ contains
     flux_clrsky%bnd_flux_up => fluxLW_up_clrsky
     flux_clrsky%bnd_flux_dn => fluxLW_dn_clrsky
 
+    !
     ! Compute clear-sky fluxes (if requested)
-    ! Clear-sky fluxes are gas+aerosol
+    !
+    ! Add aerosol optics to gas optics
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%increment(lw_optical_props_clrsky))
+
+    ! Apply diffusivity angle adjustment (RRTMG legacy)
+    do iCol=1,nCol
+       do iBand=1,lw_gas_props%get_nband()
+          lw_optical_props_clrsky%tau(iCol,1:nLev,iBand) = lw_optical_props_clrsky%tau(iCol,1:nLev,iBand)*secdiff(iBand,iCol)
+       enddo
+    enddo
+
+    ! Call RTE solver
     if (l_ClrSky_HR) then
        call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
             lw_optical_props_clrsky, & ! IN  - optical-properties
@@ -115,9 +129,20 @@ contains
        fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
     endif
 
+    !
     ! All-sky fluxes
-    ! Clear-sky fluxes are (gas+aerosol)+clouds
+    !
+
+    ! Apply diffusivity angle adjustment (RRTMG legacy)
+    do iCol=1,nCol
+       do iBand=1,lw_gas_props%get_nband()
+          lw_optical_props_clrsky%tau(iCol,1:nLev,iBand) = lw_optical_props_clrsky%tau(iCol,1:nLev,iBand)*secdiff(iBand,iCol)
+       enddo
+    enddo
+    ! Add cloud optics to clear-sky optics
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%increment(lw_optical_props_clrsky))
+
+    ! Call RTE solver
     call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
          lw_optical_props_clrsky, & ! IN  - optical-properties
          top_at_1,                & ! IN  - veritcal ordering flag
