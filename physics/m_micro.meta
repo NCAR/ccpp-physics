@@ -806,7 +806,7 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = 0
+  optional = F
 [skip_macro]
   standard_name = flag_skip_macro
   long_name = flag to skip cloud macrophysics in Morrison scheme
