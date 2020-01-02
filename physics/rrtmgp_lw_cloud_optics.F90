@@ -395,8 +395,7 @@ contains
 
     ! Local variables
     logical,dimension(ncol,nLev) :: liqmask, icemask
-    real(kind_phys), dimension(ncol,nLev,lw_gas_props%get_nband()) :: &
-         tau_cld
+    integer :: k
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -412,6 +411,7 @@ contains
     ! Cloud optics [nCol,nLev,nBands]
     call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_1scl(&
          ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
+    lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
 
     ! Compute cloud-optics for RTE.
     if (rrtmgp_cld_optics .gt. 0) then
@@ -434,8 +434,7 @@ contains
        if (any(cld_frac .gt. 0)) then
           call rrtmg_lw_cloud_optics(ncol, nLev, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, &
-               cld_frac, tau_cld)
-          lw_optical_props_cloudsByBand%tau = tau_cld
+               cld_frac, lw_optical_props_cloudsByBand%tau)
        endif
     endif
 

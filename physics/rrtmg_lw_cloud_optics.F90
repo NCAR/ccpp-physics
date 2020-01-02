@@ -646,19 +646,16 @@ contains
                                fint*(absice3(index+1,ib) - absice3(index,ib)) ))
                        enddo
                     endif
-                 endif 
-              else
-                 tau_rain   = 0.
-                 tau_snow   = 0.
-                 tau_liq(:) = 0.
-                 tau_ice(:) = 0.
-              endif
-              ! Cloud optical depth
-              do ib = 1, nBandsLW
-                 tau_cld(ij,ik,ib) = tau_ice(ib) + tau_liq(ib) + tau_rain + tau_snow
-              enddo
-           end do
-        end do
+                 endif
+ 
+                 ! Cloud optical depth
+                 do ib = 1, nBandsLW
+                    tau_cld(ij,ik,ib) = tau_ice(ib) + tau_liq(ib) + tau_rain + tau_snow
+                 enddo
+
+              endif ! Cloud layer?
+           end do   ! Layer
+        end do      ! Column
      endif
    end subroutine rrtmg_lw_cloud_optics
    ! #######################################################################################
