@@ -29,7 +29,7 @@ The GFS v15p2 physics suite uses the parameterizations in the following order:
 
 \section sdf_gfsv15p2 Suite Definition File 
 
-The GFS v15p2 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v15:
+The GFS v15p2 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v15p2:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 

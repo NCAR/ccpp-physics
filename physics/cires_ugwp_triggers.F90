@@ -464,9 +464,12 @@
 !
 !      
 !>\ingroup cires_ugwp_run
-!> @{
-!!
-!!
+!! This subroutine describes the latitudinal shape of the VMF-function
+!! as displayed in Figure 3 of Molod et al. (2015). The enhanced values
+!! of VMF in the equatorial region result in QBO-like oscillations
+!! in the equatorial zonal winds and more realistic simulations of 
+!! the equatorial dynamics in the GEOS-5 operational and MERRA-2
+!! reanalysis products.
       subroutine slat_geos5_tamp(im, tau_amp, xlatdeg, tau_gw)
 !=================
 ! GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>

@@ -10,12 +10,11 @@ The advanced csawmg physics suite uses the parameterizations in the following or
  - \ref GFS_NOAH
  - \ref GFS_SFCSICE
  - \ref GFS_HEDMF
- - \ref GFS_GWDPS
+ - \ref GFS_UGWPv0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
  - \ref CSAW_scheme
- - \ref GFS_GWDC
  - \ref GFS_SAMFshal
  - \ref CPT_MG3
  - \ref mod_cs_conv_aw_adj

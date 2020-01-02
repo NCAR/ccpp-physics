@@ -167,7 +167,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <td>0
 <tr><td>lwhtr           <td>gfs_control_type          <td>logical flag for output of longwave heating rate       <td>.true.
 <tr><td>swhtr           <td>gfs_control_type          <td>logical flag for output of shortwave heating rate      <td>.true.
-<tr><td>cnvgwd          <td>gfs_control_type          <td>logical flag for convective gravity wave drag scheme   <td>.false.
+<tr><td>cnvgwd          <td>gfs_control_type          <td>logical flag for convective gravity wave drag scheme dependent on maxval(cdmbgwd(3:4) == 0.0)   <td>.false.
 <tr><td>shal_cnv        <td>gfs_control_type          <td>logical flag for calling shallow convection            <td>.false.
 <tr><td>lmfshal         <td>gfs_control_type          <td>flag for mass-flux shallow convection scheme in the cloud fraction calculation  <td>shal_cnv .and. (imfshalcnv > 0) 
 <tr><td>lmfdeep2        <td>gfs_control_type          <td>flag for mass-flux deep convection scheme in the cloud fraction calculation <td>imfdeepcnv == 2 .or. 3 .or.4
@@ -364,7 +364,12 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <td>1
 <tr><td>lsoil_lsm         <td>gfs_control_type  <td>number of soil layers internal to land surface model   <td>-1
 <tr><td>ldiag_ugwp        <td>GFS_control_type           <td>flag for CIRES UGWP diagnostics               <td>.false.           
-<tr><td>do_ugwp           <td>GFS_control_type           <td>flag for CIRES Unified Gravity Wave Drag Parameterization  <td>.false.
+<tr><td>do_ugwp           <td>GFS_control_type           <td>flag for CIRES UGWP revised OGW  
+                                                         <ul>
+                                                         <li> .T.: revised gwdps_v0
+                                                         <li> .F.: GFS operational orographic gwdps 
+                                                         </ul>
+                                                         <td>.false.
 <tr><td>do_tofd           <td>GFS_control_type           <td>flag for turbulent orographic form drag       <td>.false.
 <tr><td>do_sppt           <td>gfs_control_type  <td>flag for stochastic SPPT option                        <td>.false.
 <tr><td>do_shum           <td>gfs_control_type  <td>flag for stochastic SHUM option                        <td>.false.

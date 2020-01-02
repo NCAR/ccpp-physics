@@ -262,22 +262,39 @@
 !=====================================================================
 !>\ingroup cires_ugwp_run
 !> @{
-!!<b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to degraded forecast scores of simulations with revised schemes for subgrid-scale orography effects in FV3GFS, EMC reinstalled the original gwdps-code with updated efficiency factors for the mountain blocking and OGW drag. The GFS OGW is described in the separate section (\ref GFS_GWDPS) and its “call” moved into UGWP-driver subroutine. This combination of NGW and OGW schemes was tested in the FV3GFS-L127 medium-range forecasts (15-30 days) for C96, C192, C384 and C768 resolutions and work in progress to introduce the optimal choice for the scale-aware representations of the efficiency factors that will reflect the better simulations of GW activity by FV3 dynamical core at higher horizontal resolutions. With the MERRA-2 VMF function for NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme (\ref GFS_GWDPS), FV3GFS simulations can successfully forecast the recent major mid-winter sudden stratospheric warming (SSW) events of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset; Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year (2015-2018) FV3GFS simulations with UGWP-v0 also produce the equatorial QBO-like oscillations in the zonal wind and temperature anomalies.
+!!<b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to 
+!! degraded forecast scores of simulations with revised schemes for 
+!! subgrid-scale orography effects in FV3GFS, EMC reinstalled the 
+!! original gwdps-code with updated efficiency factors for the mountain
+!! blocking and OGW drag. The GFS OGW is described in the separate section 
+!! (\ref gfs_gwdps) and its “call” moved into UGWP-driver subroutine.
+!! This combination of NGW and OGW schemes was tested in the FV3GFS-L127
+!! medium-range forecasts (15-30 days) for C96, C192, C384 and C768 
+!! resolutions and work in progress to introduce the optimal choice for
+!! the scale-aware representations of the efficiency factors that will 
+!! reflect the better simulations of GW activity by FV3 dynamical core 
+!! at higher horizontal resolutions. With the MERRA-2 VMF function for 
+!! NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme 
+!! (\ref GFS_GWDPS), FV3GFS simulations can successfully forecast the 
+!! recent major mid-winter sudden stratospheric warming (SSW) events 
+!! of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset; 
+!! Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year 
+!! (2015-2018) FV3GFS simulations with UGWP-v0 also produce the equatorial 
+!! QBO-like oscillations in the zonal wind and temperature anomalies.
 !!
-      SUBROUTINE GWDPS_V0(IM,  km,    imx, do_tofd,
-     &    Pdvdt, Pdudt, Pdtdt, Pkdis, U1,V1,T1,Q1,KPBL,
-     &    PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT,
-     &    sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD,
-     &    DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea,
-     $    cdmbgwd, me, master, rdxzb,
-     &    zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,
+!> modified/revised version of gwdps.f with bug fixes, tofd, appropriate
+!! computation of kref for OGW + COORDE diagnostics. all constants/
+!! parameters inside cires_ugwp_initialize.F90.
+      SUBROUTINE GWDPS_V0(IM,  km,    imx, do_tofd,                     &
+     &    Pdvdt, Pdudt, Pdtdt, Pkdis, U1,V1,T1,Q1,KPBL,                 &
+     &    PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT,                       &
+     &    sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD,        &
+     &    DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea,                 &
+     $    cdmbgwd, me, master, rdxzb,                                   &
+     &    zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,                       &
      &    dudt_mtb, dudt_ogw, dudt_tms)
 !----------------------------------------
 ! ugwp_v0
-!
-! modified/revised version of gwdps.f (with bug fixes, tofd, appropriate
-!   computation of kref for OGW + COORDE diagnostics
-!   all constants/parameters inside cires_ugwp_initialize.F90 
 !----------------------------------------    
 
       USE MACHINE ,      ONLY : kind_phys
@@ -1257,10 +1274,10 @@
 !>\ingroup cires_ugwp_run
 !> @{
 !! 
-      subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,
-     &           tm1 , um1, vm1, qm1,
-     &           prsl, prsi,   philg, xlatd, sinlat, coslat,
-     &           pdudt, pdvdt, pdtdt, dked, tau_ngw,
+      subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,                   &
+     &           tm1 , um1, vm1, qm1,                                   &
+     &           prsl, prsi,   philg, xlatd, sinlat, coslat,            &
+     &           pdudt, pdvdt, pdtdt, dked, tau_ngw,                    &
      &           mpi_id, master, kdt)
 !
 
@@ -1851,17 +1868,15 @@
 
        return
        end subroutine fv3_ugwp_solv2_v0
-!-------------------------------------------------------------------------------
-!
-! Part-3 of UGWP-V01 Dissipative (eddy) effects of UGWP it will be activated
-!           after tests of OGW (new revision) and NGW with MERRA-2 forcing.
-!
-!-------------------------------------------------------------------------------
-      subroutine edmix_ugwp_v0(im, levs,   dtp,
-     &                         t1, u1, v1, q1, del,
-     &                         prsl,  prsi, phil, prslk,
-     &                         pdudt, pdvdt, pdTdt, pkdis,
-     &                         ed_dudt, ed_dvdt, ed_dTdt,
+
+!>\ingroup cires_ugwp_run
+!! Part-3 of UGWP-V01 Dissipative (eddy) effects of UGWP it will be activated
+!!           after tests of OGW (new revision) and NGW with MERRA-2 forcing.
+      subroutine edmix_ugwp_v0(im, levs,   dtp,                         &
+     &                         t1, u1, v1, q1, del,                     &
+     &                         prsl,  prsi, phil, prslk,                &
+     &                         pdudt, pdvdt, pdTdt, pkdis,              &
+     &                         ed_dudt, ed_dvdt, ed_dTdt,               &
      &                         me, master, kdt )
 !
       use machine,           only : kind_phys
@@ -2023,6 +2038,8 @@
   
       end subroutine edmix_ugwp_v0
 
+!>\ingroup cires_ugwp_run
+!! explicit diffusion solver
       subroutine diff_1d_wtend(levs, dt, F, F1, Km, rdp, rdpm, S, S1)
       use machine,      only: kind_phys
       implicit none
@@ -2059,6 +2076,8 @@
        S1(k) = F1(k)
       end subroutine diff_1d_wtend
 
+!>\ingroup cires_ugwp_run
+!! explicit "eddy" smoother for tendencies.
       subroutine diff_1d_ptend(levs, dt, F, Km, rdp, rdpm, S)
        use machine,      only: kind_phys
        implicit none
