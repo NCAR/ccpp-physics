@@ -139,7 +139,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../gfdl_fv_sat_adj.F90    \
 ### time_vary
                         ../GFS_time_vary_pre.fv3.F90 \
-                        ../GFS_rrtmg_setup.F90       \
                         ../GFS_rad_time_vary.fv3.F90  \
                         ../GFS_phys_time_vary.fv3.F90 \
                         ../ozne_def.f                 \

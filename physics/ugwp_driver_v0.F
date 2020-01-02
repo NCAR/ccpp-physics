@@ -1,4 +1,5 @@
-!!23456	
+!>\file ugwp_driver_v0.F
+
        module sso_coorde
 !
 ! specific to COORDE-2019 project OGW switches/sensitivity
@@ -260,8 +261,7 @@
 !ugwp-v0 subroutines: GWDPS_V0 and fv3_ugwp_solv2_v0	
 !  
 !=====================================================================
-!>\ingroup cires_ugwp_run
-!> @{
+!>\ingroup cires_ugwp_run_mod
 !!<b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to 
 !! degraded forecast scores of simulations with revised schemes for 
 !! subgrid-scale orography effects in FV3GFS, EMC reinstalled the 
@@ -275,7 +275,7 @@
 !! reflect the better simulations of GW activity by FV3 dynamical core 
 !! at higher horizontal resolutions. With the MERRA-2 VMF function for 
 !! NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme 
-!! (\ref GFS_GWDPS), FV3GFS simulations can successfully forecast the 
+!! (gwdps), FV3GFS simulations can successfully forecast the 
 !! recent major mid-winter sudden stratospheric warming (SSW) events 
 !! of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset; 
 !! Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year 
@@ -326,11 +326,11 @@
       real(kind=kind_phys), intent(in) :: dtp         !  time step
       real(kind=kind_phys), intent(in) :: cdmbgwd(2)
           
-      real(kind=kind_phys), intent(in), dimension(im,km) ::
-     &                                   u1,  v1,   t1,    q1,
-     &                                   del, prsl, prslk, phil
+      real(kind=kind_phys), intent(in), dimension(im,km) ::             &
+     &                                   u1,  v1,   t1,    q1,          &
+     &                                   del, prsl, prslk, phil         &
       real(kind=kind_phys), intent(in),dimension(im,km+1):: prsi, phii
-      real(kind=kind_phys), intent(in) :: xlatd(im),sinlat(im),
+      real(kind=kind_phys), intent(in) :: xlatd(im),sinlat(im),         &
      &                                    coslat(im)
       real(kind=kind_phys), intent(in) :: sparea(im)
 
@@ -341,13 +341,13 @@
       real(kind=kind_phys)             :: SIGMA(IM),   GAMMA(IM)
       
 !output -phys-tend
-      real(kind=kind_phys),dimension(im,km),intent(out) ::
+      real(kind=kind_phys),dimension(im,km),intent(out) ::              &
      &                      Pdvdt,    Pdudt,    Pkdis, Pdtdt
 ! output - diag-coorde
      &,                     dudt_mtb, dudt_ogw, dudt_tms
 !                     
-      real(kind=kind_phys),dimension(im) :: RDXZB,   zmtb,    zogw
-     &,                                     tau_ogw, tau_mtb, tau_tofd
+      real(kind=kind_phys),dimension(im) :: RDXZB,   zmtb,    zogw      &
+     &,                                     tau_ogw, tau_mtb, tau_tofd  &
      &,                                     dusfc,   dvsfc
 !
 !---------------------------------------------------------------------
@@ -1271,8 +1271,7 @@
 !
 !23456==============================================================================
 
-!>\ingroup cires_ugwp_run
-!> @{
+!>\ingroup cires_ugwp_run_mod
 !! 
       subroutine fv3_ugwp_solv2_v0(klon, klev, dtime,                   &
      &           tm1 , um1, vm1, qm1,                                   &
@@ -1869,7 +1868,7 @@
        return
        end subroutine fv3_ugwp_solv2_v0
 
-!>\ingroup cires_ugwp_run
+!>\ingroup cires_ugwp_run_mod
 !! Part-3 of UGWP-V01 Dissipative (eddy) effects of UGWP it will be activated
 !!           after tests of OGW (new revision) and NGW with MERRA-2 forcing.
       subroutine edmix_ugwp_v0(im, levs,   dtp,                         &
@@ -2038,7 +2037,7 @@
   
       end subroutine edmix_ugwp_v0
 
-!>\ingroup cires_ugwp_run
+!>\ingroup cires_ugwp_run_mod
 !! explicit diffusion solver
       subroutine diff_1d_wtend(levs, dt, F, F1, Km, rdp, rdpm, S, S1)
       use machine,      only: kind_phys
@@ -2076,7 +2075,7 @@
        S1(k) = F1(k)
       end subroutine diff_1d_wtend
 
-!>\ingroup cires_ugwp_run
+!>\ingroup cires_ugwp_run_mod
 !! explicit "eddy" smoother for tendencies.
       subroutine diff_1d_ptend(levs, dt, F, Km, rdp, rdpm, S)
        use machine,      only: kind_phys

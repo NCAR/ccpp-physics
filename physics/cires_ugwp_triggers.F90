@@ -1,3 +1,7 @@
+!>\file cires_ugwp_triggers.F90
+!!
+
+!>\ingroup cires_ugwp_run_mod
         subroutine ugwp_triggers
         implicit none
         write(6,*) ' physics-based triggers for UGWP ' 
@@ -62,7 +66,8 @@
 !
       return
       end SUBROUTINE  subs_diag_geo
-!      
+!  
+!>\ingroup cires_ugwp_run_mod
       subroutine get_xy_pt(V, Vx, Vy, nx, ny, dlam1, dlat)
 !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ! compute for each Vert-column: grad(V)
@@ -87,6 +92,7 @@
 
     end subroutine get_xy_pt
     
+!>\ingroup cires_ugwp_run_mod
     subroutine get_xyd_wind( V, Vx, Vy, Vyd, nx, ny, dlam1, dlat, divJp, divJm)
 !    
 ! compute for each Vert-column: grad(V)
@@ -119,6 +125,7 @@
 
       end  subroutine get_xyd_wind
 
+!>\ingroup cires_ugwp_run_mod
       subroutine trig3d_fjets( nx, ny, nz, U, V, T, Q, P3D, PS, delp, delz, lon, lat, pmid, trig3d_fgf)
       implicit none
       integer ::  nx, ny, nz
@@ -161,8 +168,11 @@
         trig3d_fgf(:,:,k) =   -ptx*ptx*ux - pty*pty*vy -(vx+uyd)*ptx*pty
 
       enddo
+
+!>\ingroup cires_ugwp_run_mod
       end  subroutine trig3d_fjets
       
+!>\ingroup cires_ugwp_run_mod
       subroutine trig3d_okubo( nx, ny, nz, U, V, T, Q, P3d, PS, delp, delz, lon, lat, pmid, trig3d_okw)
       implicit none
       integer ::  nx, ny, nz
@@ -212,6 +222,7 @@
       enddo   
       end  subroutine trig3d_okubo     
 !      
+!>\ingroup cires_ugwp_run_mod
       subroutine trig3d_dconv(nx, ny, nz, U, V, T, Q, P3d, PS, delp, delz, lon, lat, pmid, trig3d_conv, &
                               dcheat3d, precip2d, cld_klevs2d, scheat3d)
 
@@ -230,6 +241,7 @@
       integer :: k
       end subroutine trig3d_dconv
 
+!>\ingroup cires_ugwp_run_mod
       subroutine cires_3d_triggers( nx, ny, nz, lon, lat, pmid,          &
         U, V, W, T, Q, delp, delz, p3d, PS, HS, Hyam, Hybm, Hyai, Hybi,  &
         trig3d_okw, trig3d_fgf, trig3d_conv,                             &
@@ -283,6 +295,7 @@
 ! specify time-dep bulk sources:   taub, klev,  if_src, nf_src
 !
 !==================================================================================
+!>\ingroup cires_ugwp_run_mod
       subroutine get_spectra_tau_convgw &
       (nw, im, levs, dcheat,  scheat, precip, icld, xlatd, sinlat, coslat,taub, klev, if_src, nf_src)
 !
@@ -352,6 +365,7 @@
 !      print *, '   get_spectra_tau_convgw '  
       end subroutine get_spectra_tau_convgw
 !
+!>\ingroup cires_ugwp_run_mod
       subroutine get_spectra_tau_nstgw(nw, im, levs, trig_fgf, xlatd, sinlat, coslat, taub, klev, if_src, nf_src)
       integer                      :: nw, im, levs 
       real, dimension(im, levs)    :: trig_fgf
@@ -412,6 +426,7 @@
 !                 
       end subroutine get_spectra_tau_nstgw   
 ! 
+!>\ingroup cires_ugwp_run_mod
       subroutine get_spectra_tau_okw(nw, im, levs,  trig_okw, xlatd, sinlat, coslat, taub, klev, if_src, nf_src)
       integer                      :: nw, im, levs 
       real, dimension(im, levs)    :: trig_okw
@@ -463,7 +478,7 @@
 !
 !
 !      
-!>\ingroup cires_ugwp_run
+!>\ingroup cires_ugwp_run_mod
 !! This subroutine describes the latitudinal shape of the VMF-function
 !! as displayed in Figure 3 of Molod et al. (2015). The enhanced values
 !! of VMF in the equatorial region result in QBO-like oscillations
@@ -503,6 +518,7 @@
 !      
       end subroutine slat_geos5_tamp
       
+!>\ingroup cires_ugwp_run_mod
       subroutine slat_geos5(im, xlatdeg, tau_gw)
 !=================
 ! GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>
@@ -541,6 +557,8 @@
       enddo
 !      
       end subroutine slat_geos5
+
+!>\ingroup cires_ugwp_run_mod
       subroutine init_nazdir(naz,  xaz,  yaz)
       use ugwp_common , only : pi2
       implicit none

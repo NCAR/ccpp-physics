@@ -72,8 +72,8 @@
       public
 !
 !> derived type for LW fluxes at top of atmosphere
-!! \section arg_table_topflw_type
-!! \htmlinclude topflw_type.html
+! \section arg_table_topflw_type
+! \htmlinclude topflw_type.html
 !!
       type topflw_type                      !< define type construct for radiation fluxes at toa
         real (kind=kind_phys) :: upfxc      !< total sky upward flux at toa
@@ -81,8 +81,8 @@
       end type topflw_type
 !
 !> derived type for LW fluxes at surface
-!! \section arg_table_sfcflw_type
-!! \htmlinclude sfcflw_type.html
+! \section arg_table_sfcflw_type
+! \htmlinclude sfcflw_type.html
 !!
       type sfcflw_type                      !< define type construct for radiation fluxes at surface
         real (kind=kind_phys) :: upfxc      !< total sky upward flux at sfc

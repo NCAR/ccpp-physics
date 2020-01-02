@@ -112,6 +112,6 @@ and dynamical instability of waves described by the linear
 \ref arg_table_cires_ugwp_run
 
 \section gen_al_ugwpv0 General Algorithm
-\ref cires_ugwp_run
+\ref gen_cires_ugwp_run
 
 */

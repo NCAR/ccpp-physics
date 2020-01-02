@@ -1,7 +1,10 @@
+!>\file cires_vert_orodis.F90 
+
 ! subroutine ugwp_drag_mtb
 ! subroutine ugwp_taub_oro  
 ! subroutine ugwp_oro_lsatdis  
 !
+!>\ingroup cires_ugwp_run_mod
      subroutine ugwp_drag_mtb( iemax,  nz,                              &
         elvpd, elvp, hprime , sigma, theta, oc,  oa4, clx4, gam, zpbl,  &
         up, vp, tp, qp, dp, zpm, zpi, pmid, pint, idxzb, drmtb,taumtb)
@@ -266,6 +269,7 @@
 ! ugwp_taub_oro  - Computes  [taulin,  taufrb,  drlee(levs) ]
 !     
 ! 
+!>\ingroup cires_ugwp_run_mod
       subroutine ugwp_taub_oro(levs, izb, kxw, tau_izb,  fcor,                 &
           hprime , sigma, theta, oc,  oa4, clx4, gamm,                         &
           elvp, up, vp, tp, qp, dp, zpm, zpi, pmid, pint, xn, yn, umag,        &
@@ -765,6 +769,7 @@
 !           fcor(j), c2f2(j), up, vp, tp, qp, dp, zpm, zpi, pmid1, pint1,            &
 !	   xn, yn, umag, drtau, kdis_oro)
  
+!>\ingroup cires_ugwp_run_mod
       subroutine ugwp_oro_lsatdis( krefj, levs,  tauogw,  tautot,  tau_src,     &
            kxw, fcor,  kxridge, up, vp, tp, qp, dp, zpm, zpi, pmid, pint,       &
            xn, yn, umag, drtau, kdis)
@@ -926,6 +931,7 @@
       end  subroutine ugwp_oro_lsatdis
 !
 !
+!>\ingroup cires_ugwp_run_mod
      subroutine ugwp_tofd(im, levs, sigflt, elvmax, zpbl,  u, v, zmid, &
                           utofd, vtofd, epstofd, krf_tofd)
        use machine ,      only : kind_phys 
@@ -974,6 +980,7 @@
      end subroutine ugwp_tofd  
 !
 !     
+!>\ingroup cires_ugwp_run_mod
      subroutine ugwp_tofd1d(levs, sigflt, elvmax, zsurf, zpbl,  u, v, &
                             zmid, utofd, vtofd, epstofd, krf_tofd)
        use machine ,      only : kind_phys 

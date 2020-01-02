@@ -73,8 +73,8 @@
       public
 !
 !> derived type for SW fluxes at TOA
-!! \section arg_table_topfsw_type
-!! \htmlinclude topfsw_type.html
+! \section arg_table_topfsw_type
+! \htmlinclude topfsw_type.html
 !!
       type topfsw_type
         real (kind=kind_phys) :: upfxc      !< total-sky upward flux
@@ -83,8 +83,8 @@
       end type topfsw_type
 !
 !> derived type for SW fluxes at surface
-!! \section arg_table_sfcfsw_type
-!! \htmlinclude sfcfsw_type.html
+! \section arg_table_sfcfsw_type
+! \htmlinclude sfcfsw_type.html
 !!
       type sfcfsw_type
         real (kind=kind_phys) :: upfxc      !< total-sky upward flux
@@ -102,8 +102,8 @@
       end type profsw_type
 !
 !> derived type for special components of surface SW fluxes
-!! \section arg_table_cmpfsw_type
-!! \htmlinclude cmpfsw_type.html
+! \section arg_table_cmpfsw_type
+! \htmlinclude cmpfsw_type.html
 !!
       type cmpfsw_type
         real (kind=kind_phys) :: uvbfc      !< total-sky downward flux cover UV-B spectrum

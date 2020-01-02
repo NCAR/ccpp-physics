@@ -31,7 +31,7 @@ contains
 ! ------------------------------------------------------------------------
 ! CCPP entry points for CIRES Unified Gravity Wave Physics (UGWP) scheme v0
 ! ------------------------------------------------------------------------
-!>\ingroup cires_ugwp_run
+!>\ingroup cires_ugwp_run_mod
 !> The subroutine initializes the CIRES UGWP.
 !> \section arg_table_cires_ugwp_init Argument Table
 !! \htmlinclude cires_ugwp_init.html
@@ -134,7 +134,9 @@ contains
 ! -----------------------------------------------------------------------
 !  order = dry-adj=>conv=mp-aero=>radiation -sfc/land- chem -> vertdiff-> [rf-gws]=> ion-re
 ! -----------------------------------------------------------------------
-!>\defgroup cires_ugwp_run CIRES Unified Gravity Wave Physics Module 
+
+!>\defgroup cires_ugwp_run_mod CIRES Unified Gravity Wave Physics Module 
+!>@{
 !! The physics of NGWs in the UGWP framework (Yudin et al. 2018 \cite yudin_et_al_2018) 
 !! is represented by four GW-solvers, which have been introduced in 
 !! Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, 
@@ -185,6 +187,7 @@ contains
 !> \section arg_table_cires_ugwp_run Argument Table
 !! \htmlinclude cires_ugwp_run.html
 !>\section gen_cires_ugwp_run General Algorithm
+!!@{
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
          oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
          do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat, area,             &
@@ -407,5 +410,7 @@ contains
     gw_dudt = gw_dudt*(1.-pked) +  ed_dudt*pked
 
     end subroutine cires_ugwp_run
+!!@}
+!>@}
 
 end module cires_ugwp

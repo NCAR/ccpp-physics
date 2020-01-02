@@ -1,3 +1,6 @@
+!>\file cires_vert_wmsdis.F90
+
+!>\ingroup cires_ugwp_run_mod
   subroutine ugwp_wmsdis_naz(levs, ksrc, nw, naz, kxw, taub_lat, ch, xaz, yaz,    &
               fcor, c2f2, dp, zmid, zint, pmid, pint, rho, ui, vi, ti,            &
               kvg, ktg, krad, kion, bn2i, bvi, rhoi, ax, ay, eps, ked, tau1)
@@ -124,6 +127,7 @@
 
 
 ! =======================================================================
+!>\ingroup cires_ugwp_run_mod
    subroutine ugwp_wmsdis_az1(levs, ksrc, nw, kxw, ch, dch, taub_sp, tau_bulk,  &
           spnorm, fcor, c2f2, zm, zi, rho, um, tm, bn2, bn, rhoi,  bnrho,       &
           dzirho, dzpi, kvg, ktg, krad, kion, kmol, eps, ked, tau ) 
@@ -325,6 +329,7 @@
       end subroutine ugwp_wmsdis_az1
 !
 !
+!>\ingroup cires_ugwp_run_mod
       subroutine FVS93_ugwps(nw,  ch,  dch, taub_sp, spnorm, nslope, bn2, bn, bnrhos)
       implicit none
       integer :: nw, nslope
