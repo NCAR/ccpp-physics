@@ -164,7 +164,7 @@
             else
                ! Update the value of ntrcaer in aerclm_def with the value defined
                ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-               ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
+               ! If Model%iaerclm is .true., then ntrcaer == ntrcaerm
                ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
                ! Read aerosol climatology
                call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
@@ -172,13 +172,13 @@
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
             ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-            ! If Model%aero_in is .false., then ntrcaer == 1
+            ! If Model%iaerclm is .false., then ntrcaer == 1
             ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
          endif
 
 !$OMP section
 !> - Call read_cidata() to read IN and CCN data
-         if (Model%iccn == 1) then
+         if (Model%iccn) then
            call read_cidata  ( Model%me, Model%master)
            ! No consistency check needed for in/ccn data, all values are
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
@@ -242,7 +242,7 @@
          endif
 
 !> - Call setindxci() to initialize IN and CCN data
-         if (Model%iccn == 1) then
+         if (Model%iccn) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxci (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_ci,       &
@@ -451,7 +451,7 @@
         endif
 
 !> - Call ciinterpol() to make IN and CCN data interpolation
-        if (Model%iccn == 1) then
+        if (Model%iccn) then
 !$OMP do schedule (dynamic,1)
           do nb = 1, nblks
             call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &

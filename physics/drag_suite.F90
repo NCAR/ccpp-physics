@@ -485,7 +485,7 @@
                            varmax_fd = 150.,                     &
                            beta_ss = 0.1,                        &
                            beta_fd = 0.2
-   real(kind=kind_phys)                 :: var_temp
+   real(kind=kind_phys)                 :: var_temp, var_temp2
 
 ! added Beljaars orographic form drag
    real(kind=kind_phys), dimension(im,km) :: utendform,vtendform
@@ -1060,7 +1060,9 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
               !tauwavex0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*u1(i,3)
               var_temp = MIN(varss(i),varmax_ss) +                                   &
                             MAX(0.,beta_ss*(varss(i)-varmax_ss))
-              tauwavex0=0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)*u1(i,kvar)
+              ! Note:  This is a semi-implicit treatment of the time differencing
+              var_temp2 = 0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)  ! this is greater than zero
+              tauwavex0=-var_temp2*u1(i,kvar)/(1.+var_temp2*deltim)
               tauwavex0=tauwavex0*ss_taper
             else
               tauwavex0=0.
@@ -1073,7 +1075,8 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
               !tauwavey0=0.5*XNBV*xlinv(i)*(2.*MIN(varss(i),40.))**2*ro(i,kts)*v1(i,3)
               var_temp = MIN(varss(i),varmax_ss) +                                   &
                             MAX(0.,beta_ss*(varss(i)-varmax_ss))
-              tauwavey0=0.5*XNBV*xlinv(i)*(2.*var_temp)**2*ro(i,kvar)*v1(i,kvar)
+              ! Note:  This is a semi-implicit treatment of the time differencing
+              tauwavey0=-var_temp2*v1(i,kvar)/(1.+var_temp2*deltim)
               tauwavey0=tauwavey0*ss_taper
             else
               tauwavey0=0.
@@ -1154,10 +1157,12 @@ IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
          DO k=kts,km
             wsp=SQRT(u1(i,k)**2 + v1(i,k)**2)
             ! alpha*beta*Cmd*Ccorr*2.109 = 12.*1.*0.005*0.6*2.109 = 0.0759
-            utendform(i,k)=-0.0759*wsp*u1(i,k)* &
-                           EXP(-(zl(i,k)/H_efold)**1.5)*a2*zl(i,k)**(-1.2)*ss_taper
-            vtendform(i,k)=-0.0759*wsp*v1(i,k)* &
-                           EXP(-(zl(i,k)/H_efold)**1.5)*a2*zl(i,k)**(-1.2)*ss_taper
+            var_temp = 0.0759*EXP(-(zl(i,k)/H_efold)**1.5)*a2*       &
+                              zl(i,k)**(-1.2)*ss_taper   ! this is greater than zero
+            !  Note:  This is a semi-implicit treatment of the time differencing
+            !  per Beljaars et al. (2004, QJRMS)
+            utendform(i,k) = - var_temp*wsp*u1(i,k)/(1. + var_temp*deltim*wsp)
+            vtendform(i,k) = - var_temp*wsp*v1(i,k)/(1. + var_temp*deltim*wsp)
             !IF(zl(i,k) > 4000.) exit
          ENDDO
       ENDIF

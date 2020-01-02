@@ -181,10 +181,9 @@ module cs_conv
 !                                 spblcrit=0.03, & !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.035,& !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.025,& !< minimum cloudbase height in p/ps
-                                  cincrit=-10.0, &
-                                  capecrit=0.0
-!                                 cincrit=-120.0
-!                                 cincrit=-100.0
+                                  cincrit= -150.0
+!                                 cincrit= -120.0
+!                                 cincrit= -100.0
 
 !DD precz0 and  preczh control partitioning of water between detrainment
 !DD   and precipitation. Decrease for more precip
@@ -1080,22 +1079,8 @@ module cs_conv
      DO I=ISTS,IENS
        CAPE(i)  = zero
        CIN(i)   = zero
-!      JBUOY(i) = 0
+       JBUOY(i) = 0
      enddo
-
-!Anning Cheng, CIN from the cloud base to positive buoy layer only
-     DO I=ISTS,IENS
-       if (kb(i) > 0) then
-         DO K=kb(i),KMAX
-           BUOY = (GDH(I,1)-GDHS(I,K)) / ((one+ELOCP*FDQS(I,K)) * CP*GDT(I,K))
-           if (BUOY < 0.) then
-             CIN(I) = CIN(I) + BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
-           else
-            cycle  
-           end if
-         ENDDO
-       end if
-     ENDDO
      DO K=2,KMAX
        DO I=ISTS,IENS
          if (kb(i) > 0) then
@@ -1104,22 +1089,21 @@ module cs_conv
            ELSE
               BUOY = (GDS(I,1)-GDS(I,K)) / (CP*GDT(I,K))
            END IF
-           IF (BUOY > zero) THEN
+           IF (BUOY > zero .AND. JBUOY(I) >=  -1) THEN
               CAPE(I) = CAPE(I) + BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
-!          IF (BUOY > zero .AND. JBUOY(I) /=  0) THEN
-!             CAPE(I) = CAPE(I) + BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
-!             JBUOY(I) = 2
-!          ELSEIF (BUOY < zero .AND. JBUOY(I) /= 2) THEN
-!             CIN(I) = CIN(I) - BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
-!             JBUOY(I) = 1
+              JBUOY(I) = 2
+           ELSEIF (BUOY < zero .AND. JBUOY(I) /= 2) THEN
+              CIN(I) = CIN(I) - BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
+              JBUOY(I) = -1
            ENDIF
          endif
        ENDDO
      ENDDO
      DO I=ISTS,IENS
-!      IF (JBUOY(I) /= 2) CIN(I) = -999.D0
-       if (cin(i) < cincrit .or. cape(i) <capecrit) kb(i) = -1
+       IF (JBUOY(I) /= 2) CIN(I) = -999.D0
+       if (cin(i) < cincrit) kb(i) = -1
      ENDDO
+
 !DDsigma some initialization  before summing over cloud type
 !> -# Initialize variables before summing over cloud types
    do k=1,kmax    ! Moorthi
