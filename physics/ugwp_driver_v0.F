@@ -262,7 +262,7 @@
 !  
 !=====================================================================
 !>\ingroup cires_ugwp_run_mod
-!!<b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to 
+!!<b>Note for the sub-grid scale orography scheme in UGWP v0:</b> Due to 
 !! degraded forecast scores of simulations with revised schemes for 
 !! subgrid-scale orography effects in FV3GFS, EMC reinstalled the 
 !! original gwdps-code with updated efficiency factors for the mountain
@@ -279,7 +279,7 @@
 !! recent major mid-winter sudden stratospheric warming (SSW) events 
 !! of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset; 
 !! Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year 
-!! (2015-2018) FV3GFS simulations with UGWP-v0 also produce the equatorial 
+!! (2015-2018) FV3GFS simulations with UGWP v0 also produce the equatorial 
 !! QBO-like oscillations in the zonal wind and temperature anomalies.
 !!
 !> modified/revised version of gwdps.f with bug fixes, tofd, appropriate
@@ -1869,7 +1869,7 @@
        end subroutine fv3_ugwp_solv2_v0
 
 !>\ingroup cires_ugwp_run_mod
-!! Part-3 of UGWP-V01 Dissipative (eddy) effects of UGWP it will be activated
+!! Part-3 of UGWP v1 Dissipative (eddy) effects of UGWP it will be activated
 !!           after tests of OGW (new revision) and NGW with MERRA-2 forcing.
       subroutine edmix_ugwp_v0(im, levs,   dtp,                         &
      &                         t1, u1, v1, q1, del,                     &

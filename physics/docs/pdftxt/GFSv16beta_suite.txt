@@ -4,23 +4,19 @@
 \section gfsv16beta_suite_overview Overview
 
 Version 16 of the Global Forecast System (GFS) will be implemented operationally by the NOAA
-National Centers for Environmental Prediction (NCEP) in 2021. GFSv16beta is a prototype of GFSv16 suite, which 
-will increase vertical resolution from 64 to 127 vertical levels and raise model top from 54 km to 80 km; increase
-horizontal resolution from 13 km to 10 km and include advanced physics chosen from physics test plan:
-- PBL/turbulence: \ref GFS_HEDMF -> \ref GFS_SATMEDMFVDIFQ
-- Gravity Wave Drag: \ref GFS_UGWPv0
-- Radiation: updates to cloud-overlap assumptions
-- Microphysics: improvements to \ref GFDL_cloud
+National Centers for Environmental Prediction (NCEP) in 2021. GFS_v16beta is a prototype of 
+the GFS_v16 suite. The main difference between the GFS_v15p2 and GFS_v16beta suites is the 
+replacement of the K-based EDMF PBL scheme with a moist TKE based one.
 
 
-The GFS v16beta physics suite uses the parameterizations in the following order:
+The GFS_v16beta physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref GFS_NOAH
  - \ref GFS_SFCSICE
  - \ref GFS_SATMEDMFVDIFQ
- - \ref GFS_UGWPv0
+ - \ref GFS_UGWP_v0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
@@ -30,12 +26,10 @@ The GFS v16beta physics suite uses the parameterizations in the following order:
  - \ref GFS_CALPRECIPTYPE
 
 \section sdf_gfsv16b Suite Definition File 
-
-The GFS v16beta suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v16beta:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_GFS_v16beta" lib="ccppphys" ver="3">
+<suite name="FV3_GFS_v16beta" lib="ccppphys" ver="4">
   <!-- <init></init> -->
   <group name="fast_physics">
     <subcycle loop="1">
@@ -130,7 +124,7 @@ The GFS v16beta suite uses the parameterizations in the following order, as defi
 
 \endcode
 
-\section gfs15_nml_opt_des Namelist Option 
+\section gfs16beta_nml_opt_des Namelist 
 \code
 &gfs_physics_nml
   fhzero            = 6

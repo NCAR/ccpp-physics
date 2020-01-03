@@ -1,30 +1,24 @@
 /**
-\page GSD_v0_page SCM GSD_v1 Suite 
+\page GSD_v1_page  GSD_v1 Suite 
 
 \section gsd_suite_overview Overview
 
-The original Rapid Update Cycle (RUC), implemented in 1994, was designed to provide accurate short-range (0 to 12-hr)
-numerical forecast guidance for weather-sensitive users, including those in the U.S. aviation community. 
-The RUC started to run every hour starting in 1998. Significant weather forecasting problems that occur in the 0- to 
-12-hr range include severe weather in all seasons (for example, tornadoes, severe thunderstorms, crippling snow, and 
-ice storms) and hazards to aviation (for example, clear air turbulence, icing, and downbursts). The RUC soon became a
-key model for short-range convection forecasts and for the pre-convective environments.
+Suite GSD_v1 contains the parameterizations used in the NOAA operational Rapid Refresh (RAP)
+and High-Resolution Rapid Refresh (HRRR) models. These models runs at 13- and 3- km resolution,
+respectively.
 
-The RAP, which replaced the RUC in 2012, runs hourly at the National Centers for Environmental Prediction (NCEP), providing
-high frequency updates of current conditions and short-range forecasts over North America at 13km resolution. A CONUS-nested 
-version at 3-km resolution called the High Resolution Rapid Refresh (HRRR), was implemented in the fall of 2014.
 
 Additional Model Information Links: 
 - https://rapidrefresh.noaa.gov
 - https://rapidrefresh.noaa.gov/hrrr/
 
-The advanced GSD RAP/HRRR physics suite uses the parameterizations in the following order:
+The GSD_v1 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref GSD_RUCLSM
  - \ref GSD_MYNNEDMF
- - \ref GFS_UGWPv0
+ - \ref GFS_UGWP_v0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
@@ -35,12 +29,10 @@ The advanced GSD RAP/HRRR physics suite uses the parameterizations in the follow
  - \ref GFS_CALPRECIPTYPE
 
 \section sdf_gsdsuite Suite Definition File 
-
-The GSD RAP/HRRR physics suite uses the parameterizations in the following order, as defined in  \c SCM_GSD_v0:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_GSD_v0" lib="ccppphys" ver="3.0.0">
+<suite name="SCM_GSD_v1" lib="ccppphys" ver="4">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -129,7 +121,7 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
 </suite>
 \endcode
 
-\section gsd_nml_option Namelist Option
+\section gsd_nml_option Namelist 
 \code
 &gfs_physics_nml
        fhzero            = 6.
