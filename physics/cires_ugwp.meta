@@ -850,6 +850,60 @@
   type = integer
   intent = in
   optional = F
+[ldu3dt_ogw]
+  standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in x wind due to orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+[ldv3dt_ogw]
+  standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in y wind due to orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+[ldt3dt_ogw]
+  standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in temperature due to orographic gravity wave drag
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+[ldu3dt_cgw]
+  standard_name = cumulative_change_in_x_wind_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in x wind due to convective gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+[ldv3dt_cgw]
+  standard_name = cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in y wind due to convective gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+[ldt3dt_cgw]
+  standard_name = cumulative_change_in_temperature_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in temperature due to convective gravity wave drag
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

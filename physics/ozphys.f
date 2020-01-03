@@ -51,7 +51,7 @@
 !> @{
       subroutine ozphys_run (                                           &
      &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
-     &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
+     &  prsl, prdout, oz_coeff, delp, ldiag3d, qdiag3d,                 &
      &  ozp1, ozp2, ozp3, ozp4, con_g, me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
@@ -72,7 +72,7 @@
      &                     prsl(ix,levs), tin(ix,levs), delp(ix,levs),  &
      &                     con_g
       real :: gravi
-      logical, intent(in) :: ldiag3d
+      logical, intent(in) :: ldiag3d, qdiag3d
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -157,12 +157,12 @@
             oz(i,l)   = (ozib(i) + prod(i,1)*dt) / (1.0 + prod(i,2)*dt)
           enddo
 !
-          !if (ldiag3d) then     !     ozone change diagnostics
-          !  do i=1,im
-          !    ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
-          !    ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-          !  enddo
-          !endif
+          if (ldiag3d .and. qdiag3d) then     !     ozone change diagnostics
+            do i=1,im
+              ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
+              ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
+            enddo
+          endif
         endif
 !> - Calculate the 4 terms of prognostic ozone change during time \a dt:  
 !!  - ozp1(:,:) - Ozone production from production/loss ratio 
@@ -178,14 +178,14 @@
 !    &,' ozib=',ozib(i),' l=',l,' tin=',tin(i,l),'colo3=',colo3(i,l+1)
             oz(i,l) = (ozib(i)  + tem*dt) / (1.0 + prod(i,2)*dt)
           enddo
-          !if (ldiag3d) then     !     ozone change diagnostics
-          !  do i=1,im
-          !    ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
-          !    ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-          !    ozp3(i,l) = ozp3(i,l) + prod(i,3)*tin(i,l)*dt
-          !    ozp4(i,l) = ozp4(i,l) + prod(i,4)*colo3(i,l+1)*dt
-          !  enddo
-          !endif
+          if(ldiag3d .and. qdiag3d) then
+            do i=1,im
+              ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
+              ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
+              ozp3(i,l) = ozp3(i,l) + prod(i,3)*tin(i,l)*dt
+              ozp4(i,l) = ozp4(i,l) + prod(i,4)*colo3(i,l+1)*dt
+            enddo
+          endif
         endif
 
       enddo                                ! vertical loop
