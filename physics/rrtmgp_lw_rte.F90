@@ -123,7 +123,7 @@ contains
             top_at_1,                & ! IN  - veritcal ordering flag
             sources,                 & ! IN  - source function
             sfc_emiss_byband,        & ! IN  - surface emissivity in each LW band
-            flux_clrsky))
+            flux_clrsky,n_gauss_angles=3))
        ! Store fluxes
        fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
        fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
@@ -148,7 +148,7 @@ contains
          top_at_1,                & ! IN  - veritcal ordering flag
          sources,                 & ! IN  - source function
          sfc_emiss_byband,        & ! IN  - surface emissivity in each LW band
-         flux_allsky))
+         flux_allsky,n_gauss_angles=3))
     ! Store fluxes
     fluxlwUP_allsky   = sum(flux_allsky%bnd_flux_up,dim=3)
     fluxlwDOWN_allsky = sum(flux_allsky%bnd_flux_dn,dim=3) 

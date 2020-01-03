@@ -199,7 +199,8 @@ contains
     real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o, coldry, tem0, colamt
     real(kind_phys) :: es, qs, tem1, tem2
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
-    real(kind_phys), dimension(ncol, Model%levs) :: qs_lay, q_lay, deltaZ, deltaP, o3_lay
+    real(kind_phys), dimension(ncol, Model%levs) :: qs_lay, q_lay, deltaZ, deltaP, o3_lay, p_lay_log
+    real(kind_phys), dimension(ncol, Model%levs+1) :: p_lev_log
     real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
     real(kind_phys), dimension(ncol, Model%levs, NF_CLDS) :: clouds
     real(kind_phys), dimension(ncol) ::  precipitableH2o
@@ -241,15 +242,35 @@ contains
 
     ! Temperature at layer-interfaces
     if (top_at_1) then
+       ! Log of pressure (used for temperature level interpolation)
+       p_lay_log             = log(p_lay)
+       p_lev_log(:,1)        = log(max(1.0e-6,p_lev(:,1)))
+       p_lev_log(:,2:iSFC+1) = log(p_lev(:,2:iSFC+1))
+       !
        t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
-       t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
+       do iLay=2,iSFC
+          t_lev(1:nCol,iLay) = t_lay(1:nCol,iLay) + (t_lay(1:nCol,iLay-1)-t_lay(1:nCol,iLay)) * &
+               (p_lev_log(1:nCol,iLay)   - p_lay_log(1:nCol,iLay)) / &
+               (p_lay_log(1:nCol,iLay-1) - p_lay_log(1:nCol,iLay))
+       enddo
+       !t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
        t_lev(1:NCOL,iSFC+1) = Sfcprop%tsfc(1:NCOL)
     else
+       ! Log of pressure (used for temperature level interpolation)
+       p_lay_log             = log(p_lay)
+       p_lev_log(:,1)        = log(max(1.0e-6,p_lev(:,1)))
+       p_lev_log(:,2:iTOA+1) = log(p_lev(:,2:iTOA+1))
+       !
        t_lev(1:NCOL,1)      = Sfcprop%tsfc(1:NCOL)
-       t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
+       do iLay=2,iTOA
+          t_lev(1:nCol,iLay) = t_lay(1:nCol,iLay-1) + (t_lay(1:nCol,iLay)-t_lay(1:nCol,iLay-1)) * &
+               (p_lev_log(1:nCol,iLay)-p_lay_log(1:nCol,iLay-1)) / &
+               (p_lay_log(1:nCol,iLay)-p_lay_log(1:nCol,iLay-1))
+       enddo
+       !t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
        t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
     endif
-    
+
     ! Compute layer pressure thicknes
     deltaP = abs(p_lev(:,2:model%levs+1)-p_lev(:,1:model%levs))
 
