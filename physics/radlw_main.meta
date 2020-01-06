@@ -207,6 +207,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[xlon]
+  standard_name = longitude
+  long_name = longitude
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[xlat]
+  standard_name = latitude
+  long_name = latitude
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [npts]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension

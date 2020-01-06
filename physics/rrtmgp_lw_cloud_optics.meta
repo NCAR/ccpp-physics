@@ -226,6 +226,24 @@
   intent = in
   type = ty_cloud_optics
   optional = F
+[lon]
+  standard_name = longitude
+  long_name = longitude
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lat]
+  standard_name = latitude
+  long_name = latitude
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [cldtaulw]
   standard_name = RRTMGP_cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth

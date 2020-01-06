@@ -359,7 +359,7 @@ contains
 !!
   subroutine rrtmgp_lw_cloud_optics_run(doLWrad, nCol, nLev, cld_optics_scheme, nrghice,    &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,      &
-       cld_rerain, p_lay, lw_cloud_props, lw_gas_props,                                     &
+       cld_rerain, p_lay, lw_cloud_props, lw_gas_props, lon, lat,                           &
        cldtaulw, lw_optical_props_cloudsByBand, errmsg, errflg)
     
     ! Inputs
@@ -370,6 +370,9 @@ contains
          nLev,             & ! Number of vertical levels
          nrghice,          & ! Number of ice-roughness categories
          cld_optics_scheme   ! Cloud-optics scheme
+    real(kind_phys), dimension(nCol), intent(in) :: &
+         lon,              & ! Longitude
+         lat                 ! Latitude
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
          p_lay,            & ! Layer pressure (Pa)
          cld_frac,         & ! Total cloud fraction by layer
@@ -449,8 +452,8 @@ contains
     write(47,*),"nLay: ",nLev
     do iCol=1,nCol
        do iLay=1,nLev
-          write(47,"(21f8.2)") p_lay(iCol,iLay)/100.,cld_lwp(iCol,iLay),cld_reliq(iCol,iLay),&
-               cld_iwp(iCol,iLay),cld_reice(iCol,iLay),tau_cld(iCol,iLay,:)
+          write(47,"(23f8.2)") p_lay(iCol,iLay)/100.,cld_lwp(iCol,iLay),cld_reliq(iCol,iLay),&
+               cld_iwp(iCol,iLay),cld_reice(iCol,iLay),tau_cld(iCol,iLay,:),lon(iCol), lat(iCol)
        enddo
     enddo
 
