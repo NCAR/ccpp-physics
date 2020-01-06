@@ -178,7 +178,7 @@
 
 !$OMP section
 !> - Call read_cidata() to read IN and CCN data
-         if (Model%iccn) then
+         if (Model%iccn == 1) then
            call read_cidata  ( Model%me, Model%master)
            ! No consistency check needed for in/ccn data, all values are
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
@@ -242,7 +242,7 @@
          endif
 
 !> - Call setindxci() to initialize IN and CCN data
-         if (Model%iccn) then
+         if (Model%iccn == 1) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxci (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_ci,       &
@@ -451,7 +451,7 @@
         endif
 
 !> - Call ciinterpol() to make IN and CCN data interpolation
-        if (Model%iccn) then
+        if (Model%iccn == 1) then
 !$OMP do schedule (dynamic,1)
           do nb = 1, nblks
             call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &

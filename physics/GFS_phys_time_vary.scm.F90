@@ -119,7 +119,7 @@
             ntrcaer = size(Tbd%aer_nm, dim=3)
          endif
          
-         if (Model%iccn) then
+         if (Model%iccn == 1) then
             call read_cidata  ( Model%me, Model%master)
             ! No consistency check needed for in/ccn data, all values are
             ! hardcoded in module iccn_def.F and GFS_typedefs.F90
@@ -156,7 +156,7 @@
                               Model%me, Model%master)
          endif
           !--- read in and initialize IN and CCN
-         if (Model%iccn) then
+         if (Model%iccn == 1) then
              call setindxci (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_ci,       &
                              Grid%jindx2_ci, Grid%ddy_ci, Grid%xlon_d,  &
                              Grid%iindx1_ci, Grid%iindx2_ci, Grid%ddx_ci)
@@ -331,7 +331,7 @@
                              Tbd%aer_nm)
         endif
          !--- ICCN interpolation
-        if (Model%iccn) then
+        if (Model%iccn == 1) then
             call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
                              Grid%jindx1_ci, Grid%jindx2_ci,    &
                              Grid%ddy_ci,Grid%iindx1_ci,        &
