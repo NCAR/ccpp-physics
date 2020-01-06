@@ -7,15 +7,15 @@
 
       contains
 
-!> \defgroup satmedmfvdifq GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF, updated version) Scheme Module
+!> \defgroup satmedmfvdifq GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (moist TKE-EDMF) Scheme Module
 !! @{
 !! \brief This subroutine contains all of the logic for the
-!! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF, updated version) scheme.
+!! scale-aware TKE-based moist eddy-diffusion mass-flux (moist TKE-EDMF) scheme.
 !! For local turbulence mixing, a TKE closure model is used.
-!! Updated version of satmedmfvdif.f (May 2019) to have better low level
-!! inversion, to reduce the cold bias in lower troposphere,
-!! and to reduce the negative wind speed bias in upper troposphere
-
+!! This scheme is an updated version of satmedmfvdif.f (May 2019) to better represent 
+!! low level inversions, and to address the negative biases of temperature in lower troposphere
+!! and of wind speed in the upper troposphere present in GFS v15.
+!!
 !> \section arg_table_satmedmfvdifq_init Argument Table
 !! \htmlinclude satmedmfvdifq_init.html
 !!

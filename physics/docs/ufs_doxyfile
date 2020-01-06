@@ -1,6 +1,6 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Common Community Physics Package (CCPP) Scientific Documentation"
+PROJECT_NAME           = "CCPP Scientific Documentation"
 PROJECT_NUMBER         = ""
 PROJECT_BRIEF          = "v4.0"
 PROJECT_LOGO           = img/dtc_logo.png
@@ -115,13 +115,12 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SATMEDMFVDIFQ.txt    \
 ##                          pdftxt/GFS_NoahMP.txt    \
                           pdftxt/GFS_UGWPv0.txt   \
-##                          pdftxt/GFS_GWDPS.txt    \
+                          pdftxt/GFS_GWDPS.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
                           pdftxt/GFS_RAYLEIGH.txt \
                           pdftxt/GFS_SAMF.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
-###                          pdftxt/GFS_GWDC.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
                           pdftxt/GFS_CALPRECIPTYPE.txt   \

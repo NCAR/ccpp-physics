@@ -1,13 +1,16 @@
 /**
-\page GFSsuite_nml Namelist Options Description
+\page CCPPsuite_nml_desp Namelist Options Description
 
-At runtime, the SCM and the UFS Atmosphere access runtime configurations from file \c input.nml. This file contains
-various namelists that control aspects of the I/O, dynamics, physics etc. Most physics-related options are grouped into
-two namelists:\b &gfs_physics_nml and \b &gfdl_cloud_microphysics_nml, with additional specifications for stochastic physics in
+The SCM and the UFS Atmosphere access runtime configurations from file \c input.nml. This file contains
+various namelists records that control aspects of the I/O, dynamics, physics etc. Most physics-related options are in
+reords \b &gfs_physics_nml and \b &cires_ugwp_nml. When using the GFDL microphysics scheme, variables in namelist 
+\b &gfdl_cloud_microphysics_nml are also used. Additional specifications for stochastic physics are in
 namelists \b &stochy_nam and \b &nam_sfcperts.
 
 - Namelist \b &gfdl_cloud_microphysics_nml is only relevant when the GFDL microphysics is used, and its variables are defined in
 module_gfdl_cloud_microphys.F90.
+
+- Namelist \b &cires_ugwp_nml specifies options for the use of CIRES Unified Gravity Wave Physics Version 0.
 
 - Namelist \b &gfs_physics_nml pertains to all of the suites used, but some of the variables are only relevant for specific 
 parameterizations. Its variables are defined in file GFS_typedefs.F90 in the host model.
@@ -15,7 +18,6 @@ parameterizations. Its variables are defined in file GFS_typedefs.F90 in the hos
 - Namelist \b &stochy_nam specifies options for the use of SPPT, SKEB and SHUM, while namelist \b &nam_sfcperts specifies whether
 and how stochastic perturbations are used in the Noah Land Surface Model.
 
-- Namelist \b &cires_ugwp_nml specifies options for the use of CIRES Unified Gravity Wave Physics Version 0.
 
 <table>
 <caption id="multi_row">NML Description</caption>
@@ -463,7 +465,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>icloud_f          <td>gfdl_cloud_microphys_mod   <td>flag (0,1,or 2) for cloud fraction diagnostic scheme                                       <td>0
 <tr><td>mp_time           <td>gfdl_cloud_microphys_mod   <td>time step of GFDL cloud microphysics                                                       <td>150.
 <tr><td colspan="4" align= center>\b &cires_ugwp_nml
-<tr><td>knob_ugwp_version <td>cires_ugwp_module          <td>parameter selects a version of the UGWP-implementation in FV3GFS-127L  \n       
+<tr><td>knob_ugwp_version <td>cires_ugwp_module          <td>parameter selects a version of the UGWP implementation in FV3GFS-127L  \n       
                                                          <ul>
                                                          <li> 0: default version delivered to EMC in Jan 2019 for implementation
                                                          <li> 1: version of UGWP under development that plans to consider the physics-based sources of NGWs (\b knob_ugwp_wvspec [2:4]), options for stochastic and deterministic excitation of waves (\b knob_ugwp_stoch), and switches between different UGWP schemes (\b knob_ugwp_solver)
@@ -484,7 +486,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>knob_ugwp_dokdis  <td>cires_ugwp_module          <td>parameter controls application of the eddy diffusion due to instability of NGWs \n
                                                          <ul>
                                                          <li> 0: the eddy diffusion tendencies due to NGWs are calculated but tendencies do not change the model state vector
-                                                         <li> 1: it computes eddy diffusion coefficient due to instability of NGWs; in UGWP-v0, eddy viscosity, heat conductivity and tracer diffusion are not activated
+                                                         <li> 1: it computes eddy diffusion coefficient due to instability of NGWs; in UGWP v0, eddy viscosity, heat conductivity and tracer diffusion are not activated
                                                          </ul>
                                                          <td>0
 <tr><td>knob_ugwp_solver  <td>cires_ugwp_module          <td>parameter controls the selection of UGWP-solvers(wave propagation, dissipation and wave breaking) for NGWs  \n
@@ -505,9 +507,9 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                              (2) convective (\b knob_ugwp_wvspec[2]=25), \n
                                                              (3) frontal (\b knob_ugwp_wvspec[3]=25) activity, \n
                                                              (4) \b knob_ugwp_wvspec[4] represents number of wave excited by dynamical imbalances that may mimic both convective and front-jet mechanisms of GW triggering. \n
-                                                             In UGWP-v0, first two elements of the array, \b knob_ugwp_wvspec(1:2), control number of waves for stationary (OGW) and nonstationary waves (NGWs).
+                                                             In UGWP v0, first two elements of the array, \b knob_ugwp_wvspec(1:2), control number of waves for stationary (OGW) and nonstationary waves (NGWs).
                                                          <td>1,32,32,32
-<tr><td>knob_ugwp_azdir   <td>cires_ugwp_module          <td>four-dimensional array that defines number of azimuths for propagation of GWs triggered by four types of physics-based sources (orography, convection, front-jets, and dynamical imbalance). In UGWP-v0, first two elements of the array, \b knob_ugwp_azdir(1:2), control number of azimuths for OGW and NGWs respectively.                                                      
+<tr><td>knob_ugwp_azdir   <td>cires_ugwp_module          <td>four-dimensional array that defines number of azimuths for propagation of GWs triggered by four types of physics-based sources (orography, convection, front-jets, and dynamical imbalance). In UGWP v0, first two elements of the array, \b knob_ugwp_azdir(1:2), control number of azimuths for OGW and NGWs respectively.                                                      
                                                          <td>2,4,4,4
 <tr><td>knob_ugwp_stoch   <td>cires_ugwp_module          <td>four-dimensional array that control stochastic selection of GWs triggered by four types of physics-based sources. \n
                                                              Default values:0,0,0,0 - reflect determinstic selection of GW parameters without stochastic selection                                                       

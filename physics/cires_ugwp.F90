@@ -147,7 +147,7 @@ contains
 !! thermosphere for WAM applications, considers appropriate 
 !! scale-dependent dissipation of waves near the model top lid providing
 !! momentum and energy conservation in the vertical column physics 
-!! (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP-v0,
+!! (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP v0,
 !! a modification of Scinocca (2003) \cite scinocca_2003 scheme for 
 !! NGWs with non-hydrostatic and rotational effects for GW propagations 
 !! and background dissipation is represented by the subroutine  
@@ -157,7 +157,7 @@ contains
 !! horizontal phase velocities, azimuthal directions and magnitude of
 !!  the vertical momentum flux (VMF).
 !!
-!! In UGWP-v0, the specification for the VMF function is adopted from 
+!! In UGWP v0, the specification for the VMF function is adopted from 
 !! the Goddard Earth Observing System Version 5 (GEOS-5) global atmosphere
 !! model of the National Aeronautic and Space Administration (NASA) Goddard
 !! Space Flight Center (GSFC) Global Modeling and Assimilation Office (GMAO), 
@@ -172,13 +172,13 @@ contains
 !! realistic simulations of the equatorial dynamics in GEOS-5 operational
 !! and MERRA-2 reanalysis products. 
 !!
-!! The UGWP-v0 code has been enhanced by scientists from NOAA's EMC to 
+!! The UGWP v0 code has been enhanced by scientists from NOAA's EMC to 
 !! modulate the zonal mean NGW forcing by three-dimensional distributions
 !! of the total precipitation (as a proxy for the excitation of NGWs by
 !! convection) and vertically-integrated (surface-tropopause) turbulent 
 !! kinetic energy. The vertically extented configuration of the UFS 
 !! weather model is being tuned using reanalysis products from MERRA-2 and 
-!! the European Centre for Medium-Range Weather Forecasts (ERA-5), ALONG
+!! the European Centre for Medium-Range Weather Forecasts (ERA-5), along
 !! with temperature, ozone, and water vapor observations of middle 
 !! atmosphere satellite missions. The verification scores with updated
 !! NGW forcing, as reported elsewhere by EMC researchers, display noticeable
@@ -411,5 +411,4 @@ contains
 
     end subroutine cires_ugwp_run
 !>@}
-
 end module cires_ugwp

@@ -1,16 +1,16 @@
 /**
-\page csawmg_page SCM csawmg Suite
+\page csawmg_page csawmg Suite
 
 \section csawmg_suite_overview Overview
 
-The advanced csawmg physics suite uses the parameterizations in the following order:
+The csawmg physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref GFS_NOAH
  - \ref GFS_SFCSICE
  - \ref GFS_HEDMF
- - \ref GFS_UGWPv0
+ - \ref GFS_UGWP_v0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
@@ -21,12 +21,10 @@ The advanced csawmg physics suite uses the parameterizations in the following or
  - \ref GFS_CALPRECIPTYPE
 
 \section sdf_cpt_suite Suite Definition File 
-
-The advanced csawmg physics suite uses the parameterizations in the following order, as defined in  \c SCM_csawmg :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_csawmg" lib="ccppphys" ver="3.0.0">
+<suite name="SCM_csawmg" lib="ccppphys" ver="4">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -115,7 +113,7 @@ The advanced csawmg physics suite uses the parameterizations in the following or
 </suite>
 \endcode
 
-\section cpt_nml_option Namelist Option 
+\section cpt_nml_option Namelist 
 \code
 &gfs_physics_nml
        fhzero         = 6.
