@@ -207,7 +207,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[xlon]
+[lon]
   standard_name = longitude
   long_name = longitude
   units = radians
@@ -216,7 +216,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[xlat]
+[lat]
   standard_name = latitude
   long_name = latitude
   units = radians

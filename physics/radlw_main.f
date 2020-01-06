@@ -390,7 +390,7 @@
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
-     &       dzlyr,delpin,de_lgth,xlon,xlat,                            &
+     &       dzlyr,delpin,de_lgth, lon, lat,                            &
      &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
      &       hlwc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
@@ -589,7 +589,7 @@
      &       cld_od
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
-     &       sfgtmp, de_lgth, xlon, xlat
+     &       sfgtmp, de_lgth, lon,  lat
 
       real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
      &       aeraod, aerssa
@@ -1169,7 +1169,7 @@
 
         do k=1,nlay
            write(47,"(23f8.2)")  plyr(iplon,k),clwp(k),relw(k),ciwp(k), &
-     &          reiw(k),taucld(:,k),xlon(k),xlat(k)
+     &          reiw(k),taucld(:,k),lon(iplon),lat(iplon)
         enddo
         
 
