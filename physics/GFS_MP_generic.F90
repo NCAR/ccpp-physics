@@ -16,7 +16,7 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_qv, save_q, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
@@ -26,7 +26,7 @@
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t
+      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
 
       character(len=*), intent(out) :: errmsg
@@ -44,7 +44,17 @@
             save_t(i,k) = gt0(i,k)
           enddo
         enddo
-        if(do_aw .or. (qdiag3d .and. ldiag3d)) then
+        if(qdiag3d) then
+           do k=1,levs
+              do i=1,im
+                 ! Here, gq0(...,1) is used instead of gq0_water_vapor
+                 ! to be consistent with the GFS_MP_generic_post_run
+                 ! code.
+                 save_qv(i,k) = gq0(i,k,1)
+              enddo
+           enddo
+        endif
+        if(do_aw) then
            save_q(1:im,:,1) = gq0(1:im,:,1)
            do n=ntcw,ntcw+nncl-1
               save_q(1:im,:,n) = gq0(1:im,:,n)

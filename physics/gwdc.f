@@ -1501,7 +1501,6 @@
       endif   ! end if_lssav
 
       if (ldiag3d) then
-         write(0,*) 'update gwdc tend'
          du3dt(:,:) = du3dt(:,:) + gwdcu(:,:)  * dtf
          dv3dt(:,:) = dv3dt(:,:) + gwdcv(:,:)  * dtf
       endif

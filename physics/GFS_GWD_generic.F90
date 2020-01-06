@@ -93,7 +93,6 @@ contains
 
       if (lssav) then
         if (ldiag3d .and. gwd_generic_tend) then
-          write(0,*) 'gwd_generic_tend'
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) - dtdt(i,k)*dtf
@@ -155,7 +154,6 @@ contains
         dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
 
         if (ldiag3d .and. gwd_generic_tend) then
-          write(0,*) 'gwd_generic_tend'
           du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
           dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
           dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf

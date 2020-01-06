@@ -857,6 +857,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = inout
 [ldv3dt_ogw]
   standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in y wind due to orographic gravity wave drag
@@ -864,6 +865,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = inout
 [ldt3dt_ogw]
   standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in temperature due to orographic gravity wave drag
@@ -871,6 +873,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = inout
 [ldu3dt_cgw]
   standard_name = cumulative_change_in_x_wind_due_to_convective_gravity_wave_drag
   long_name = cumulative change in x wind due to convective gravity wave drag
@@ -878,6 +881,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = inout
 [ldv3dt_cgw]
   standard_name = cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag
   long_name = cumulative change in y wind due to convective gravity wave drag
@@ -885,6 +889,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = inout
 [ldt3dt_cgw]
   standard_name = cumulative_change_in_temperature_due_to_convective_gravity_wave_drag
   long_name = cumulative change in temperature due to convective gravity wave drag
@@ -892,6 +897,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = inout
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -904,6 +910,7 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

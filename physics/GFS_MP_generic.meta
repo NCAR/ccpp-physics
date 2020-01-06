@@ -97,6 +97,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[save_qv]
+  standard_name = water_vapor_specific_humidity_save
+  long_name = water vapor specific humidity before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
