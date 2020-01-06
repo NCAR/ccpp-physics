@@ -99,6 +99,8 @@ contains
     errmsg = ''
     errflg = 0
 
+    open(47,file='rrtmgp_clds.txt',status='unknown')
+
     if (cld_optics_scheme .eq. 0) return
 
     ! Filenames are set in the physics_nml
@@ -357,8 +359,8 @@ contains
 !!
   subroutine rrtmgp_lw_cloud_optics_run(doLWrad, nCol, nLev, cld_optics_scheme, nrghice,    &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,      &
-       cld_rerain, lw_cloud_props, lw_gas_props, cldtaulw, lw_optical_props_cloudsByBand,   &
-       errmsg, errflg)
+       cld_rerain, p_lay, lw_cloud_props, lw_gas_props,                                     &
+       cldtaulw, lw_optical_props_cloudsByBand, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -369,6 +371,7 @@ contains
          nrghice,          & ! Number of ice-roughness categories
          cld_optics_scheme   ! Cloud-optics scheme
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
+         p_lay,            & ! Layer pressure (Pa)
          cld_frac,         & ! Total cloud fraction by layer
          cld_lwp,          & ! Cloud liquid water path
          cld_reliq,        & ! Cloud liquid effective radius
@@ -397,10 +400,12 @@ contains
     logical,dimension(ncol,nLev) :: liqmask, icemask
     real(kind_phys), dimension(ncol,nLev,lw_gas_props%get_nband()) :: &
          tau_cld
+    integer :: iCol, iLay
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
+    tau_cld = 0.
 
     if (.not. doLWrad) return
     
@@ -438,6 +443,16 @@ contains
           lw_optical_props_cloudsByBand%tau = tau_cld
        endif
     endif
+    
+    write(47,*) "In rrtmgp_lw_cloud_optics: "
+    write(47,*),"nCol: ",nCol
+    write(47,*),"nLay: ",nLev
+    do iCol=1,nCol
+       do iLay=1,nLev
+          write(47,"(21f8.2)") p_lay(iCol,iLay)/100.,cld_lwp(iCol,iLay),cld_reliq(iCol,iLay),&
+               cld_iwp(iCol,iLay),cld_reice(iCol,iLay),tau_cld(iCol,iLay,:)
+       enddo
+    enddo
 
     ! All-sky LW optical depth ~10microns
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)
@@ -448,5 +463,6 @@ contains
   ! SUBROUTINE rrtmgp_lw_cloud_optics_finalize()
   ! #########################################################################################
   subroutine rrtmgp_lw_cloud_optics_finalize()
+    close(47)
   end subroutine rrtmgp_lw_cloud_optics_finalize
 end module rrtmgp_lw_cloud_optics

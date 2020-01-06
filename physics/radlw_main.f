@@ -353,8 +353,9 @@
       contains
 ! ================
 
-         subroutine rrtmg_lw_init ()
-         end subroutine rrtmg_lw_init
+      subroutine rrtmg_lw_init ()
+      open(47,file='rrtmg_clds.txt',status='unknown')
+      end subroutine rrtmg_lw_init
 
 !> \defgroup module_radlw_main GFS RRTMG Longwave Module 
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
@@ -717,6 +718,9 @@
 !     endif
 
 !  --- ...  loop over horizontal npts profiles
+      write(47,*) "In radlw_main: "
+      write(47,*),"nCol: ",npts
+      write(47,*),"nLay: ",nLay
 
       lab_do_iplon : do iplon = 1, npts
 
@@ -1162,6 +1166,13 @@
 
 !> -# Save outputs.
 
+
+        do k=1,nlay
+           write(47,"(21f8.2)")  plyr(iplon,k),clwp(k),relw(k),ciwp(k), &
+     &          reiw(k),taucld(:,k)
+        enddo
+        
+
         topflx(iplon)%upfxc = totuflux(nlay)
         topflx(iplon)%upfx0 = totuclfl(nlay)
 
@@ -1247,6 +1258,7 @@
 !-----------------------------------
 !> @}
       subroutine rrtmg_lw_finalize ()
+      close(47)
       end subroutine rrtmg_lw_finalize 
 
 

@@ -201,6 +201,15 @@
   type = real
   intent = in
   kind = kind_phys
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure layer
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [lw_gas_props]
   standard_name = coefficients_for_lw_gas_optics
   long_name = DDT containing spectral information for RRTMGP LW radiation scheme
