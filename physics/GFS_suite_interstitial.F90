@@ -662,9 +662,10 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, dqdti, imfdeepcnv, imfdeepcnv_gf, errmsg, errflg)
+      gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, imfdeepcnv, imfdeepcnv_gf, errmsg, errflg)
 
       use machine,               only: kind_phys
+      use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
 
       implicit none
 
@@ -683,6 +684,11 @@
 
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
+      real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
+      real(kind=kind_phys),                           intent(in) :: con_rd
+      real(kind=kind_phys), dimension(im,levs),       intent(in), optional :: nwfa, save_tcp
+      real(kind=kind_phys), dimension(im,levs),       intent(in) :: spechum
+
       ! dqdti may not be allocated
       real(kind=kind_phys), dimension(:,:),           intent(inout) :: dqdti
 
@@ -693,10 +699,12 @@
       ! local variables
       integer :: i,k,n,tracers
 
-      real(kind=kind_phys) :: liqm, icem
-
-      liqm = 4./3.*con_pi*1.e-12
-      icem = 4./3.*con_pi*3.2768*1.e-14*890.
+      real(kind=kind_phys), dimension(im,levs) :: rho_dryar
+      real(kind=kind_phys), dimension(im,levs) :: qv_mp !< kg kg-1 (dry mixing ratio)
+      real(kind=kind_phys), dimension(im,levs) :: qc_mp !< kg kg-1 (dry mixing ratio)
+      real(kind=kind_phys), dimension(im,levs) :: qi_mp !< kg kg-1 (dry mixing ratio)
+      real(kind=kind_phys), dimension(im,levs) :: nc_mp !< kg-1 (dry mixing ratio)
+      real(kind=kind_phys), dimension(im,levs) :: ni_mp !< kg-1 (dry mixing ratio)
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -729,6 +737,7 @@
             imp_physics == imp_physics_zhao_carr_pdf .or. &
             imp_physics == imp_physics_gfdl) then
            gq0(1:im,:,ntcw) = clw(1:im,:,1) + clw(1:im,:,2)
+
         elseif (ntiw > 0) then
           do k=1,levs
             do i=1,im
@@ -736,25 +745,31 @@
               gq0(i,k,ntcw) = clw(i,k,2)                     ! water
             enddo
           enddo
-!         if (imp_physics == imp_physics_thompson) then
-          if (imp_physics == imp_physics_thompson .and. imfdeepcnv /= imfdeepcnv_gf) then
-            if (ltaerosol) then
-              do k=1,levs
-                do i=1,im
-                  gq0(i,k,ntlnc) = gq0(i,k,ntlnc)  &
-                           +  max(0.0, (clw(i,k,2)-save_qc(i,k))) / liqm
-                  gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
-                           +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
-                enddo
-              enddo
-            else
-              do k=1,levs
-                do i=1,im
-                  gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
-                           +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
-                enddo
-              enddo
-            endif
+
+          if (imp_physics == imp_physics_thompson) then
+             do k=1,levs
+               do i=1,im
+                 !> - Density of air in kg m-3
+                 rho_dryar(i,k) = prsl(i,k)/(con_rd*save_tcp(i,k))
+               
+                 !> - Convert specific humidity/moist mixing ratios to dry mixing ratios
+                 qv_mp(i,k) = spechum(i,k)/(1.0_kind_phys-spechum(i,k))
+                 qc_mp(i,k) = save_qc(i,k)/(1.0_kind_phys-spechum(i,k))
+                 qi_mp(i,k) = save_qi(i,k)/(1.0_kind_phys-spechum(i,k))
+
+                 !> - Convert number concentrations from moist to dry
+                 nc_mp(i,k) = gq0(i,k,ntlnc)/(1.0_kind_phys-spechum(i,k))
+                 ni_mp(i,k) = gq0(i,k,ntinc)/(1.0_kind_phys-spechum(i,k)) 
+
+
+                 nc_mp(i,k) = nc_mp(i,k) + max(0.0, make_DropletNumber(qc_mp(i,k) * rho_dryar(i,k), nwfa(i,k)) * (1.0/rho_dryar(i,k)))
+                 ni_mp(i,k) = ni_mp(i,k) + max(0.0, make_IceNumber(qi_mp(i,k) * rho_dryar(i,k), save_tcp(i,k)) * (1.0/rho_dryar(i,k)))
+
+                 !> - Convert number concentrations from dry to moist
+                 gq0(i,k,ntlnc) = nc_mp(i,k)/(1.0_kind_phys+qv_mp(i,k))
+                 gq0(i,k,ntinc) = ni_mp(i,k)/(1.0_kind_phys+qv_mp(i,k))
+               enddo
+             enddo
           endif
 
         else
@@ -764,6 +779,7 @@
             enddo
           enddo
         endif   ! end if_ntiw
+
       else
         do k=1,levs
           do i=1,im

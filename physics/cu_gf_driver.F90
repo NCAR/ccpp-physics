@@ -9,7 +9,6 @@ module cu_gf_driver
    use machine   , only: kind_phys
    use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
-   use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
 
    implicit none
 
@@ -74,7 +73,6 @@ contains
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
-               nwfa,con_rd,gq0,ntinc,ntlnc,imp_physics,imp_physics_thompson,    &
                errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
@@ -125,12 +123,6 @@ contains
    !
    real(kind=kind_phys), dimension( im ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
-
-!  additional variables for number concentrations
-   real(kind=kind_phys), intent(in) :: nwfa(1:im,1:km)
-   real(kind=kind_phys), intent(in) :: con_rd
-   real(kind=kind_phys), dimension(im,km,ntracer), intent(inout) :: gq0
-   integer, intent(in) :: imp_physics,imp_physics_thompson,ntlnc,ntinc
 
    integer, intent(in   ) :: imfshalcnv
    character(len=*), intent(out) :: errmsg
@@ -826,25 +818,7 @@ contains
                 cliw(i,k) = max(0.,cliw(i,k) + tem)
                endif
 
-!
-!> calculate cloud water and cloud ice number concentrations
-!
-               rho_dryar(i,k) = p2di(i,k)/(con_rd*t(i,k)) ! Density of dry air in kg m-3
-               if (imp_physics == imp_physics_thompson) then
-                 if ((tem*tem1)>1.e-5) then
-                    gq0(i,k,ntinc) = max(0., gq0(i,k,ntinc) +           &
-                    make_IceNumber(tem*tem1*rho_dryar(i,k), t(i,k)) *   &
-                    (1/rho_dryar(i,k)))
-                 end if
-                 if ((tem*(1-tem1))>1.e-5) then
-                    gq0(i,k,ntlnc) = max(0., gq0(i,k,ntlnc) +           &
-                    make_DropletNumber(tem*(1-tem1)*rho_dryar(i,k), nwfa(i,k)) &
-                    * (1/rho_dryar(i,k)))
-                 end if
-               end if
-
              enddo
-
 
             gdc(i,1,10)=forcing(i,1)
             gdc(i,2,10)=forcing(i,2)

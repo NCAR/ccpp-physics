@@ -17,16 +17,17 @@
 !! \htmlinclude GFS_DCNV_generic_pre_run.html
 !!
 #endif
-    subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, do_cnvgwd, do_ca,        &
-                                         isppt_deep, gu0, gv0, gt0, gq0_water_vapor, &
-                                         save_u, save_v, save_t, save_qv, ca_deep,   &
-                                         errmsg, errflg)
+    subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, do_cnvgwd, do_ca,           &
+                                         isppt_deep, imp_physics, imp_physics_thompson, & 
+                                         gu0, gv0, gt0, gq0_water_vapor,                &
+                                         save_u, save_v, save_t, save_tcp, save_qv,     &
+                                         ca_deep, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs
+      integer, intent(in) :: im, levs, imp_physics, imp_physics_thompson
       logical, intent(in) :: ldiag3d, do_cnvgwd, do_ca, isppt_deep
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gu0
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gv0
@@ -35,6 +36,7 @@
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_u
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_v
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_t
+      real(kind=kind_phys), dimension(im,levs), intent(out), optional :: save_tcp
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_qv
       real(kind=kind_phys), dimension(im),      intent(in)    :: ca_deep
       character(len=*), intent(out) :: errmsg
@@ -66,6 +68,14 @@
         do k=1,levs
           do i=1,im
             save_t(i,k) = gt0(i,k)
+          enddo
+        enddo
+      endif
+
+      if (imp_physics == imp_physics_thompson) then
+        do k=1,levs
+          do i=1,im
+            save_tcp(i,k) = gt0(i,k)
           enddo
         enddo
       endif
