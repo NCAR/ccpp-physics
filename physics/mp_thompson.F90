@@ -217,7 +217,7 @@ module mp_thompson
 
          !> - Convert number concentrations from moist to dry
          ni_mp = ni/(1.0_kind_phys-spechum)
-         nr_mp = ni/(1.0_kind_phys-spechum)
+         nr_mp = nr/(1.0_kind_phys-spechum)
          if (is_aerosol_aware) then
              nc_mp = nc/(1.0_kind_phys-spechum)
          end if
