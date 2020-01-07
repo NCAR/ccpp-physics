@@ -115,6 +115,8 @@ contains
     errmsg = ''
     errflg = 0
 
+    write(*,"(a12,3i10)") 'MPI ranks: ',mpirank,mpiroot,mpicomm
+
     ! Filenames are set in the physics_nml
     lw_gas_props_file  = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_gas)
 

@@ -118,6 +118,12 @@ contains
     errmsg = ''
     errflg  = 0
 
+    ! Initialize output fluxes
+    fluxswUP_allsky(:,:)   = 0._kind_phys
+    fluxswDOWN_allsky(:,:) = 0._kind_phys
+    fluxswUP_clrsky(:,:)   = 0._kind_phys
+    fluxswDOWN_clrsky(:,:) = 0._kind_phys
+
     if (.not. doSWrad) return
     if (nDay .gt. 0) then
 
@@ -138,12 +144,6 @@ contains
        if ( l_scmpsw ) then
           scmpsw = cmpfsw_type (0., 0., 0., 0., 0., 0.)
        endif
-
-       ! Initialize fluxes
-       fluxswUP_allsky(:,:)   = 0._kind_phys
-       fluxswDOWN_allsky(:,:) = 0._kind_phys
-       fluxswUP_clrsky(:,:)   = 0._kind_phys
-       fluxswDOWN_clrsky(:,:) = 0._kind_phys
        
        ! Subset the gas concentrations, only need daylit points.
        do iGas=1,rrtmgp_nGases
@@ -154,6 +154,11 @@ contains
        enddo
 
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
+       fluxSW_up_allsky(:,:,:)     = 0._kind_phys
+       fluxSW_dn_allsky(:,:,:)     = 0._kind_phys
+       fluxSW_dn_dir_allsky(:,:,:) = 0._kind_phys
+       fluxSW_up_clrsky(:,:,:)     = 0._kind_phys
+       fluxSW_dn_clrsky(:,:,:)     = 0._kind_phys
        flux_allsky%bnd_flux_up     => fluxSW_up_allsky
        flux_allsky%bnd_flux_dn     => fluxSW_dn_allsky
        flux_allsky%bnd_flux_dn_dir => fluxSW_dn_dir_allsky

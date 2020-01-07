@@ -255,6 +255,9 @@
       use module_radlw_avplank, only : totplnk
       use module_radlw_ref,     only : preflog, tref, chi_mls
 !
+#ifdef MPI
+      use mpi
+#endif
       implicit none
 !
       private
@@ -352,10 +355,19 @@
 ! ================
       contains
 ! ================
+!! \section arg_table_rrtmg_lw_init
+!! \htmlinclude rrtmg_lw.html
+!!
+        subroutine rrtmg_lw_init (mpicomm, mpirank, mpiroot)
+          ! Inputs
+          integer, intent(in) :: mpicomm,mpirank,mpiroot
 
-      subroutine rrtmg_lw_init ()
-      open(47,file='rrtmg_clds.txt',status='unknown')
-      end subroutine rrtmg_lw_init
+          if (mpirank .eq. mpiroot) then
+             print*,'DJS+ Opening file containing RRTMG LW cloud fields'
+             open(47,file='rrtmg_clds.txt',status='unknown')
+          endif
+
+        end subroutine rrtmg_lw_init
 
 !> \defgroup module_radlw_main GFS RRTMG Longwave Module 
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
@@ -381,7 +393,7 @@
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
 !! \section arg_table_rrtmg_lw_run Argument Table
-!! \htmlinclude rrtmg_lw_run.html
+!! \htmlinclude rrtmg_lw.html
 !!
 !> \section gen_lwrad RRTMG Longwave Radiation Scheme General Algorithm
 !> @{
@@ -1257,9 +1269,20 @@
       end subroutine rrtmg_lw_run
 !-----------------------------------
 !> @}
-      subroutine rrtmg_lw_finalize ()
-      close(47)
-      end subroutine rrtmg_lw_finalize 
+!! \section arg_table_rrtmg_lw_finalize Argument Table
+!! \htmlinclude rrtmg_lw.html
+!!
+      subroutine rrtmg_lw_finalize (mpicomm, mpirank, mpiroot)
+        ! Inputs
+        integer, intent(in) :: mpicomm,mpirank,mpiroot
+        ! Local variables
+        integer :: ierr
+        
+#ifdef MPI
+        call MPI_BARRIER(mpicomm, ierr)
+#endif
+        close(47)
+      end subroutine rrtmg_lw_finalize
 
 
 

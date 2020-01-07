@@ -7,6 +7,9 @@ module rrtmgp_lw_cloud_optics
   use mo_rrtmg_lw_cloud_optics, only: rrtmg_lw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
+#ifdef MPI
+    use mpi
+#endif
 
   public rrtmgp_lw_cloud_optics_init, rrtmgp_lw_cloud_optics_run, rrtmgp_lw_cloud_optics_finalize
 contains
@@ -19,9 +22,6 @@ contains
 !!
   subroutine rrtmgp_lw_cloud_optics_init(cld_optics_scheme, nrghice, rrtmgp_root_dir,       &
        rrtmgp_lw_file_clouds, mpicomm, mpirank, mpiroot, lw_cloud_props, errmsg, errflg)
-#ifdef MPI
-    use mpi
-#endif
 
     ! Inputs
     integer, intent(in) :: &
@@ -99,7 +99,10 @@ contains
     errmsg = ''
     errflg = 0
 
-    open(47,file='rrtmgp_clds.txt',status='unknown')
+    if (mpirank .eq. mpiroot) then
+       print*,'DJS+ Opening file containing RRTMGP LW cloud fields'
+       open(47,file='rrtmgp_clds.txt',status='unknown')
+    endif
 
     if (cld_optics_scheme .eq. 0) return
 
@@ -443,8 +446,8 @@ contains
           call rrtmg_lw_cloud_optics(ncol, nLev, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, &
                cld_frac, tau_cld)
-          lw_optical_props_cloudsByBand%tau = tau_cld
        endif
+       lw_optical_props_cloudsByBand%tau = tau_cld
     endif
     
     write(47,*) "In rrtmgp_lw_cloud_optics: "
@@ -465,7 +468,22 @@ contains
   ! #########################################################################################
   ! SUBROUTINE rrtmgp_lw_cloud_optics_finalize()
   ! #########################################################################################
-  subroutine rrtmgp_lw_cloud_optics_finalize()
+!! \section arg_table_rrtmgp_lw_cloud_optics_finalize
+!! \htmlinclude rrtmgp_lw_cloud_optics.html
+!!
+  subroutine rrtmgp_lw_cloud_optics_finalize(mpicomm, mpirank, mpiroot)
+    ! Inputs
+    integer, intent(in) :: &
+         mpicomm,            & ! MPI communicator
+         mpirank,            & ! Current MPI rank
+         mpiroot               ! Master MPI rank
+    ! Local variables
+    integer :: ierr
+
+#ifdef MPI
+    call MPI_BARRIER(mpicomm, ierr)
+#endif
     close(47)
+
   end subroutine rrtmgp_lw_cloud_optics_finalize
 end module rrtmgp_lw_cloud_optics
