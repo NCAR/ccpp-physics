@@ -1183,6 +1183,10 @@
            write(47,"(23f8.2)")  plyr(iplon,k),clwp(k),relw(k),ciwp(k), &
      &          reiw(k),taucld(:,k),lon(iplon),lat(iplon)
         enddo
+        do k=1,nlay+1
+           write(47,"(5f8.2)") plvl(iplon,k),totuflux(k-1),totdflux(k-1)&
+     &         ,totuclfl(k-1),totdclfl(k-1)
+        enddo
         
 
         topflx(iplon)%upfxc = totuflux(nlay)

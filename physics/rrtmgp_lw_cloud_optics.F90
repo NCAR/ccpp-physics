@@ -447,8 +447,8 @@ contains
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, &
                cld_frac, tau_cld)
        endif
-       lw_optical_props_cloudsByBand%tau = tau_cld
     endif
+    lw_optical_props_cloudsByBand%tau = tau_cld
     
     write(47,*) "In rrtmgp_lw_cloud_optics: "
     write(47,*),"nCol: ",nCol

@@ -76,7 +76,7 @@ contains
 
     ! Local variables
     integer :: &
-         iCol, iBand
+         iCol, iBand, iLay
     type(ty_fluxes_byband) :: &
          flux_allsky, flux_clrsky
     real(kind_phys), dimension(ncol,nLev+1,lw_gas_props%get_nband()),target :: &
@@ -156,6 +156,14 @@ contains
     ! Only output fluxes by-band when heating-rate profiles by band are requested.
     !if (l_AllSky_HR_byband) then
     !endif
+
+    write(47,*) "In rrtmgp_lw_rte: "
+    do iCol=1,nCol
+       do iLay=1,nLev+1
+          write(47,"(5f8.2)") p_lev(iCol,iLay)/100.,fluxlwUP_allsky(iCol,iLay),fluxlwDOWN_allsky(iCol,iLay),&
+               fluxlwUP_clrsky(iCol,iLay),fluxlwDOWN_clrsky(iCol,iLay)
+       enddo
+    enddo
 
   end subroutine rrtmgp_lw_rte_run
   
