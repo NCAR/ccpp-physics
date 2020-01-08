@@ -1195,10 +1195,10 @@
 !! The data dimensions are 46 X 72 X 12 (pressure levels), and in unit
 !! of AOD per Pa. 
        subroutine aerosol_in(aerodm,pina,alevsiz,no_months,             &
-                             no_src_types,XLAT,XLONG,                   &
-                             ids, ide, jds, jde, kds, kde,              &
-                             ims, ime, jms, jme, kms, kme,              &
-                             its, ite, jts, jte, kts, kte)
+     &                       no_src_types,XLAT,XLONG,                   &
+     &                       ids, ide, jds, jde, kds, kde,              &
+     &                       ims, ime, jms, jme, kms, kme,              &
+     &                       its, ite, jts, jte, kts, kte)
 !
 ! Adaped from oznini in CAM 
 ! It should be replaced by monthly climatology that varies latitudinally  and vertically
@@ -1206,17 +1206,18 @@
        IMPLICIT NONE
 
        INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde,   &
-                                           ims,ime, jms,jme, kms,kme,   &
-                                           its,ite, jts,jte, kts,kte
+     &                                     ims,ime, jms,jme, kms,kme,   &
+     &                                     its,ite, jts,jte, kts,kte
 
        INTEGER,      INTENT(IN   )    ::   alevsiz, no_months,          &
-                                           no_src_types
+     &                                     no_src_types
 
        REAL,  DIMENSION( ims:ime, jms:jme ), INTENT(IN   )  ::     XLAT,&
-                                                                  XLONG
+     &                                                             XLONG
 
-       REAL,  DIMENSION( ims:ime, alevsiz, jms:jme, no_months, no_src_types ),      &
-          INTENT(OUT   ) ::                         aerodm
+      REAL,  DIMENSION( ims:ime, alevsiz, jms:jme, no_months,           &
+     &                                             no_src_types ),      &
+     &     INTENT(OUT   ) ::                         aerodm
 
        REAL,  DIMENSION(alevsiz), INTENT(OUT )  ::      pina
 
@@ -1226,14 +1227,15 @@
        INTEGER, PARAMETER :: latsiz = 46
        INTEGER, PARAMETER :: lonsiz = 72
        INTEGER :: i, j, k, itf, jtf, ktf, m, pin_unit,                  &
-                  lat_unit, lon_unit, od_unit, ks, il, jl
+     &            lat_unit, lon_unit, od_unit, ks, il, jl
        INTEGER :: ilon1, ilon2, jlat1, jlat2
        REAL    :: interp_pt, interp_pt_lat, interp_pt_lon, wlat1, wlat2,&
-                  wlon1, wlon2
+     &            wlon1, wlon2
        CHARACTER*256 :: message
 
-       REAL,  DIMENSION( lonsiz, alevsiz, latsiz, no_months, no_src_types ) ::   &
-                                                            aerodin
+       REAL,  DIMENSION( lonsiz, alevsiz, latsiz, no_months,            &
+     &                                              no_src_types ) ::   &
+     &                                                     aerodin
 
        REAL,  DIMENSION(latsiz)   ::             lat_od, aertmp1
        REAL,  DIMENSION(lonsiz)   ::             lon_od, aertmp2
@@ -1244,12 +1246,11 @@
 
 !-- read in aerosol optical depth pressure data
 
-     !mz WRITE(message,*)'no_months = ',no_months
-     !mz CALL wrf_debug(1,message)
 
 ! pressure in mb
-      pin_unit = 27
-        OPEN(pin_unit, FILE='aerosol_plev.formatted',FORM='FORMATTED',STATUS='OLD')
+       pin_unit = 27
+        OPEN(pin_unit, FILE='aerosol_plev.formatted',FORM='FORMATTED',  &
+     &        STATUS='OLD')
         do k = 1,alevsiz
         READ (pin_unit,*) pina(k)
         end do
@@ -1262,7 +1263,8 @@
 !-- read in aerosol optical depth lat data
 
       lat_unit = 28
-        OPEN(lat_unit, FILE='aerosol_lat.formatted',FORM='FORMATTED',STATUS='OLD')
+        OPEN(lat_unit, FILE='aerosol_lat.formatted',FORM='FORMATTED',   &
+     &        STATUS='OLD')
         do j = 1,latsiz
         READ (lat_unit,*) lat_od(j)
         end do
@@ -1271,7 +1273,8 @@
 !-- read in aerosol optical depth lon data
 
       lon_unit = 29
-        OPEN(lon_unit, FILE='aerosol_lon.formatted',FORM='FORMATTED',STATUS='OLD')
+        OPEN(lon_unit, FILE='aerosol_lon.formatted',FORM='FORMATTED',   &
+     &        STATUS='OLD')
         do j = 1,lonsiz
         READ (lon_unit,*) lon_od(j)
         end do
@@ -1280,7 +1283,8 @@
 
 !-- read in ozone data
       od_unit = 30
-         OPEN(od_unit, FILE='aerosol.formatted',FORM='FORMATTED',STATUS='OLD')
+         OPEN(od_unit, FILE='aerosol.formatted',FORM='FORMATTED',       &
+     &        STATUS='OLD')
          do ks=1,no_src_types
          do m=1,no_months
          do j=1,latsiz  ! latsiz=46
@@ -1312,16 +1316,19 @@
       do i=its,itf
         interp_pt_lat=XLAT(i,j)
         interp_pt_lon=XLONG(i,j)
-        call interp_vec(lat_od,interp_pt_lat,.true.,jlat1,jlat2,wlat1,wlat2)
-        call interp_vec(lon_od,interp_pt_lon,.true.,ilon1,ilon2,wlon1,wlon2)
+        call interp_vec(lat_od,interp_pt_lat,.true.,jlat1,jlat2,wlat1,  &
+     &                  wlat2)
+        call interp_vec(lon_od,interp_pt_lon,.true.,ilon1,ilon2,wlon1,  &
+     &                  wlon2)
 
         do ks = 1,no_src_types
         do m  = 1,no_months
         do k  = 1,alevsiz
-          aerodm(i,k,j,m,ks) = wlon1 * (wlat1 * aerodin(ilon1,k,jlat1,m,ks)  + &
-                                        wlat2 * aerodin(ilon1,k,jlat2,m,ks)) + &
-                               wlon2 * (wlat1 * aerodin(ilon2,k,jlat1,m,ks)  + &
-                                        wlat2 * aerodin(ilon2,k,jlat2,m,ks))
+          aerodm(i,k,j,m,ks) = wlon1 *                                  &
+     &                          (wlat1 * aerodin(ilon1,k,jlat1,m,ks)  + &
+     &                           wlat2 * aerodin(ilon1,k,jlat2,m,ks)) + &
+     &                  wlon2 * (wlat1 * aerodin(ilon2,k,jlat1,m,ks)  + &
+     &                           wlat2 * aerodin(ilon2,k,jlat2,m,ks))
         end do
         end do
         end do
@@ -1340,7 +1347,7 @@
 
 !!MZ* original from WRF/phys/module_physics_init.F
       subroutine interp_vec(locvec,locwant,periodic,loc1,loc2,          &
-                            wght1,wght2)
+     &                       wght1,wght2)
 
          implicit none
 
@@ -1410,28 +1417,30 @@
 !! of ozone concentration. It should be replaced by monthly climatology
 !! that varies latitudinally and vertically.
       subroutine oznini(ozmixm,pin,levsiz,num_months,XLAT,              &
-                         ids, ide, jds, jde, kds, kde,                  &
-                         ims, ime, jms, jme, kms, kme,                  &
-                         its, ite, jts, jte, kts, kte,                  &
-                         mpirank, mpiroot,errflg,errmsg)
+     &                  mpicomm,                                        &
+     &                  ids, ide, jds, jde, kds, kde,                   &
+     &                  ims, ime, jms, jme, kms, kme,                   &
+     &                  its, ite, jts, jte, kts, kte,                   &
+     &                  mpirank, mpiroot,errflg,errmsg)
 !
 
 !MZ* #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
-     use mpi
+       use mpi
 !  use module_dm, only: local_communicator
 !MZ*#endif
        IMPLICIT NONE
 
        INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde,   &
-                                           ims,ime, jms,jme, kms,kme,   &
-                                           its,ite, jts,jte, kts,kte
+     &                                     ims,ime, jms,jme, kms,kme,   &
+     &                                     its,ite, jts,jte, kts,kte
 
        INTEGER,      INTENT(IN   )    ::   levsiz, num_months
+       INTEGER,      INTENT(IN   )    ::   mpicomm
 
        REAL,  DIMENSION( ims:ime, jms:jme ), INTENT(IN   )  ::     XLAT
 
        REAL,  DIMENSION( ims:ime, levsiz, jms:jme, num_months ),        &
-              INTENT(OUT   ) ::                                  OZMIXM
+     &        INTENT(OUT   ) ::                                  OZMIXM
 
        REAL,  DIMENSION(levsiz), INTENT(OUT )  ::                   PIN
       integer,                   intent(in)    :: mpirank
@@ -1442,7 +1451,12 @@
 ! Local
        INTEGER, PARAMETER :: latsiz = 64
        INTEGER, PARAMETER :: lonsiz = 1
-       INTEGER :: i, j, k, itf, jtf, ktf, m, pin_unit, lat_unit, oz_unit, ierr
+       logical :: have_ozone= .false.
+       integer :: levsiz_ozone_save = -1
+       real, pointer :: ozmixin_save(:,:,:,:), lat_ozone_save(:),       &
+     &                  plev_ozone_save(:)
+       INTEGER :: i, j, k, itf, jtf, ktf, m, pin_unit, lat_unit,        &
+     &            oz_unit, ierr
        REAL    :: interp_pt
        CHARACTER*255 :: message
        real, pointer :: ozmixin(:,:,:,:), lat_ozone(:), plev(:)
@@ -1473,11 +1487,12 @@
 
 !-- read in ozone pressure data
 
-     WRITE(0,*)'num_months = ',num_months
-     !mz CALL wrf_debug(50,message)
+       WRITE(0,*)'num_months = ',num_months
+      !mz CALL wrf_debug(50,message)
 
       pin_unit = 27
-        OPEN(pin_unit, FILE='ozone_plev.formatted',FORM='FORMATTED',STATUS='OLD')
+        OPEN(pin_unit, FILE='ozone_plev.formatted',FORM='FORMATTED',    &
+     &       STATUS='OLD')
         do k = 1,levsiz
         READ (pin_unit,*)plev(k)
         end do
@@ -1491,7 +1506,8 @@
 !-- read in ozone lat data
 
       lat_unit = 28
-        OPEN(lat_unit, FILE='ozone_lat.formatted',FORM='FORMATTED',STATUS='OLD')
+        OPEN(lat_unit, FILE='ozone_lat.formatted',FORM='FORMATTED',     &
+     &       STATUS='OLD')
         do j = 1,latsiz
         READ (lat_unit,*)lat_ozone(j)
         end do
@@ -1514,21 +1530,24 @@
       enddo
       close(29)
 !mz #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
-      endif if_master
+       endif  !if_master
 !mz      call wrf_debug(1,"Broadcast ozone to other ranks.")
 !# if ( RWORDSIZE == DWORDSIZE )
-      call MPI_Bcast(ozmixin,size(ozmixin),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
-      call MPI_Bcast(pin,size(pin),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
+      call MPI_Bcast(ozmixin,size(ozmixin),MPI_DOUBLE_PRECISION,0,      &
+     &               mpicomm,ierr)
+      call MPI_Bcast(pin,size(pin),MPI_DOUBLE_PRECISION,0,              &
+     &               mpicomm,ierr)
       plev=pin
-      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_DOUBLE_PRECISION,0,local_communicator,ierr)
+      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_DOUBLE_PRECISION,0,  &
+     &               mpicomm,ierr)
 !mz# else
-      call MPI_Bcast(ozmixin,size(ozmixin),MPI_REAL,0,local_communicator,ierr)
-      call MPI_Bcast(pin,size(pin),MPI_REAL,0,local_communicator,ierr)
-      plev=pin
-      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_REAL,0,local_communicator,ierr)
+!      call MPI_Bcast(ozmixin,size(ozmixin),MPI_REAL,0,local_communicator,ierr)
+!      call MPI_Bcast(pin,size(pin),MPI_REAL,0,local_communicator,ierr)
+!      plev=pin
+!      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_REAL,0,local_communicator,ierr)
 !mz# endif
 !mz#endif
-     else ! already read in ozone data
+      else ! already read in ozone data
       ! Make sure, first:
       if(levsiz/=levsiz_ozone_save) then
 #ifdef CCPP
@@ -1537,15 +1556,15 @@
          return
 #else
 3081     format('Logic error in caller: levsiz=',I0,' but prior call    &
-                 used ',I0,'.')
+     &            used ',I0,'.')
          write(message,3081) levsiz,levsiz_ozone_save
          call wrf_error_fatal(message)
 #endif
       endif
 
-      if(.not.(associated(plev_ozone_save) .and. &
-               associated(lat_ozone_save) .and. &
-               associated(ozmixin_save))) then
+      if(.not.(associated(plev_ozone_save) .and.                        &
+     &         associated(lat_ozone_save) .and.                         &
+     &         associated(ozmixin_save))) then
 #ifdef CCPP
           errflg = 1
           errmsg = 'Ozone save arrays are not allocated.'        
@@ -1580,7 +1599,8 @@
       do k=1,levsiz
       do i=its,itf
          interp_pt=XLAT(i,j)
-         ozmixm(i,k,j,m)=lin_interpol2(lat_ozone(:),ozmixin(1,k,:,m),interp_pt)
+         ozmixm(i,k,j,m)=lin_interpol2(lat_ozone(:),ozmixin(1,k,:,m),   &
+     &                   interp_pt)
       enddo
       enddo
       enddo
@@ -1666,10 +1686,10 @@
 
 
         SUBROUTINE ozn_time_int(julday,julian,ozmixm,ozmixt,levsiz,     &
-                                num_months,                             &
-                                ids , ide , jds , jde , kds , kde ,     &
-                                ims , ime , jms , jme , kms , kme ,     &
-                                its , ite , jts , jte , kts , kte )
+     &                          num_months,                             &
+     &                          ids , ide , jds , jde , kds , kde ,     &
+     &                          ims , ime , jms , jme , kms , kme ,     &
+     &                          its , ite , jts , jte , kts , kte )
 
 ! adapted from oznint from CAM module
 !  input: ozmixm - read from physics_init
@@ -1679,26 +1699,27 @@
          IMPLICIT NONE
 
          INTEGER,    INTENT(IN) ::           ids,ide, jds,jde, kds,kde, &
-                                             ims,ime, jms,jme, kms,kme, &
-                                             its,ite, jts,jte, kts,kte
+     &                                       ims,ime, jms,jme, kms,kme, &
+     &                                       its,ite, jts,jte, kts,kte
 
          INTEGER,      INTENT(IN   )    ::   levsiz, num_months
 
          REAL,  DIMENSION( ims:ime, levsiz, jms:jme, num_months ),      &
-                       INTENT(IN   )    ::           ozmixm
+     &                 INTENT(IN   )    ::           ozmixm
 
          INTEGER, INTENT(IN )      ::        JULDAY
          REAL,    INTENT(IN )      ::        JULIAN
 
-         REAL,  DIMENSION( ims:ime, levsiz, jms:jme ),      &
-                     INTENT(OUT  ) ::           ozmixt
+         REAL,  DIMENSION( ims:ime, levsiz, jms:jme ),                  &
+     &                INTENT(OUT  ) ::           ozmixt
 
          !Local
          REAL      :: intJULIAN
          integer   :: np1,np,nm,m,k,i,j
          integer   :: IJUL
          integer, dimension(12) ::  date_oz
-         data date_oz/16, 45, 75, 105, 136, 166, 197, 228, 258, 289, 319, 350/
+         data date_oz/16, 45, 75, 105, 136, 166, 197, 228, 258, 289,    &
+     &                319, 350/
          real, parameter :: daysperyear = 365.  ! number of days in a year
          real      :: cdayozp, cdayozm
          real      :: fact1, fact2, deltat
@@ -1765,7 +1786,8 @@
         do j=jts,jte
         do k=1,levsiz
         do i=its,ite
-            ozmixt(i,k,j) = ozmixm(i,k,j,nm)*fact1 + ozmixm(i,k,j,np)*fact2
+            ozmixt(i,k,j) = ozmixm(i,k,j,nm)*fact1 +                    &
+     &                      ozmixm(i,k,j,np)*fact2
         end do
         end do
         end do
@@ -1773,9 +1795,9 @@
         END SUBROUTINE ozn_time_int
 
         SUBROUTINE ozn_p_int(p ,pin, levsiz, ozmixt, o3vmr,             &
-                              ids , ide , jds , jde , kds , kde ,       &
-                              ims , ime , jms , jme , kms , kme ,       &
-                              its , ite , jts , jte , kts , kte )
+     &                        ids , ide , jds , jde , kds , kde ,       &
+     &                        ims , ime , jms , jme , kms , kme ,       &
+     &                        its , ite , jts , jte , kts , kte )
 
 !-----------------------------------------------------------------------
 !
@@ -1794,8 +1816,8 @@
 ! Arguments
 !
         INTEGER,    INTENT(IN) ::           ids,ide, jds,jde, kds,kde,  &
-                                            ims,ime, jms,jme, kms,kme,  &
-                                            its,ite, jts,jte, kts,kte
+     &                                      ims,ime, jms,jme, kms,kme,  &
+     &                                      its,ite, jts,jte, kts,kte
 
         integer, intent(in) :: levsiz              ! number of ozone layers
 
@@ -1874,8 +1896,8 @@
             do i=its,ite
                dpu = pmid(i,k) - pin(kupper(i))
                dpl = pin(kupper(i)+1) - pmid(i,k)
-               o3vmr(i,kout,j) = (ozmixt(i,kupper(i),j)*dpl + &
-                             ozmixt(i,kupper(i)+1,j)*dpu)/(dpl + dpu)
+               o3vmr(i,kout,j) = (ozmixt(i,kupper(i),j)*dpl +           &
+     &                  ozmixt(i,kupper(i)+1,j)*dpu)/(dpl + dpu)
             end do
             goto 35
          end if
@@ -1896,15 +1918,15 @@
          else
             dpu = pmid(i,k) - pin(kupper(i))
             dpl = pin(kupper(i)+1) - pmid(i,k)
-            o3vmr(i,kout,j) = (ozmixt(i,kupper(i),j)*dpl + &
-                          ozmixt(i,kupper(i)+1,j)*dpu)/(dpl + dpu)
+            o3vmr(i,kout,j) = (ozmixt(i,kupper(i),j)*dpl +              &
+     &                     ozmixt(i,kupper(i)+1,j)*dpu)/(dpl + dpu)
          end if
       end do
 
       if (kount.gt.ncol) then
         !mz call wrf_error_fatal ('OZN_P_INT: Bad ozone data: non-monotonicity suspected')
         write(0,*) "OZN_P_INT: Bad ozone data: non-monotonicity         &
-                    suspected"
+     &               suspected"
         return
       end if
 35    continue
@@ -1914,8 +1936,6 @@
 
       return
       END SUBROUTINE ozn_p_int
-
-
 
       end module module_radiation_gases  !
 !========================================!

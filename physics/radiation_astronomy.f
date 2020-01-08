@@ -1041,16 +1041,17 @@
 
 !----------------------------------------------------------------------
 
-      SUBROUTINE ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,GLON,GLAT,CZEN,     &
-                        MYIS,MYIE,MYJS,MYJE,                           & IDS,IDE, JDS,JDE, KDS,KDE,                     &
-                        IMS,IME, JMS,JME, KMS,KME,                     &
-                        ITS,ITE, JTS,JTE, KTS,KTE                      )
+      SUBROUTINE ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,GLON,GLAT,CZEN,      &
+     &                  MYIS,MYIE,MYJS,MYJE,                            &
+     &                  IDS,IDE, JDS,JDE, KDS,KDE,                      &
+     &                  IMS,IME, JMS,JME, KMS,KME,                      &
+     &                  ITS,ITE, JTS,JTE, KTS,KTE                      )
 !----------------------------------------------------------------------
       IMPLICIT NONE
 !----------------------------------------------------------------------
-      INTEGER, INTENT(IN)        :: IDS,IDE, JDS,JDE, KDS,KDE ,        &
-                                    IMS,IME, JMS,JME, KMS,KME ,        &
-                                    ITS,ITE, JTS,JTE, KTS,KTE
+      INTEGER, INTENT(IN)        :: IDS,IDE, JDS,JDE, KDS,KDE ,         &
+     &                              IMS,IME, JMS,JME, KMS,KME ,         &
+     &                              ITS,ITE, JTS,JTE, KTS,KTE
       INTEGER, INTENT(IN)        :: MYJS,MYJE,MYIS,MYIE
 
       REAL,    INTENT(IN)        :: TIMES
@@ -1061,15 +1062,15 @@
       REAL,    INTENT(IN), DIMENSION(IMS:IME,JMS:JME) :: GLAT,GLON
       REAL,    INTENT(OUT), DIMENSION(IMS:IME,JMS:JME) :: CZEN
 
-      REAL,    PARAMETER :: GSTC1=24110.54841,GSTC2=8640184.812866,    &
-                            GSTC3=9.3104E-2,GSTC4=-6.2E-6,             &
-                            PI=3.1415926,PI2=2.*PI,PIH=0.5*PI,         &
-!#$                         DEG2RD=1.745329E-2,OBLIQ=23.440*DEG2RD,    &
-                            DEG2RD=3.1415926/180.,OBLIQ=23.440*DEG2RD, &
-                            ZEROJD=2451545.0
+      REAL,    PARAMETER :: GSTC1=24110.54841,GSTC2=8640184.812866,     &
+     &                      GSTC3=9.3104E-2,GSTC4=-6.2E-6,              &
+     &                      PI=3.1415926,PI2=2.*PI,PIH=0.5*PI,          &
+!#$                         DEG2RD=1.745329E-2,OBLIQ=23.440*DEG2RD,     &
+     &                      DEG2RD=3.1415926/180.,OBLIQ=23.440*DEG2RD,  &
+     &                      ZEROJD=2451545.0
 
-      REAL    :: DAY,YFCTR,ADDDAY,STARTYR,DATJUL,DIFJD,SLONM,   &
-                 ANOM,SLON,DEC,RA,DATJ0,TU,STIM0,SIDTIM,HRANG
+      REAL    :: DAY,YFCTR,ADDDAY,STARTYR,DATJUL,DIFJD,SLONM,           &
+     &           ANOM,SLON,DEC,RA,DATJ0,TU,STIM0,SIDTIM,HRANG
       REAL    :: HRLCL,SINALT
       INTEGER :: KMNTH,KNT,IDIFYR,J,I
       LOGICAL :: LEAP
@@ -1167,8 +1168,8 @@
 !***  THE ZENITH ANGLE IS THE COMPLEMENT OF THE ALTITUDE THUS THE
 !***  COSINE OF THE ZENITH ANGLE EQUALS THE SINE OF THE ALTITUDE.
 !***
-      SINALT=SIN(DEC)*SIN(GLAT(I,J))+COS(DEC)*COS(HRLCL)* &
-       COS(GLAT(I,J))
+      SINALT=SIN(DEC)*SIN(GLAT(I,J))+COS(DEC)*COS(HRLCL)*               &
+     &  COS(GLAT(I,J))
       IF(SINALT.LT.0.)SINALT=0.
       CZEN(I,J)=SINALT
   100 CONTINUE
