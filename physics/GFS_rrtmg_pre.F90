@@ -1,4 +1,4 @@
-!> \file GFS_rrtmg_pre.f90
+!> \file GFS_rrtmg_pre.F90
 !! This file contains
       module GFS_rrtmg_pre
 

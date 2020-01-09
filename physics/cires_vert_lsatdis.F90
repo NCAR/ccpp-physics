@@ -1,3 +1,6 @@
+!>\file cires_vert_lsatdis.F90
+
+!>\ingroup cires_ugwp_run_mod
    subroutine ugwp_lsatdis_naz(levs, ksrc, nw, naz, kxw, taub_spect, ch, xaz, yaz,  &                                 
               fcor, c2f2, dp, zmid, zint, pmid, pint, rho, ui, vi, ti,              &
               kvg, ktg, krad, kion, bn2i, bvi, rhoi, ax, ay, eps, ked, tau1)
@@ -101,6 +104,7 @@
          
     end subroutine ugwp_lsatdis_naz
 !
+!>\ingroup cires_ugwp_run_mod
     subroutine ugwp_lsatdis_az1(levs, ksrc, nw, kxw, ch, taub_sp,               &
           fcor, c2f2, zm, zi, rho, um, tm, bn2, bn, rhoi,                       &
           dzirho, dzpi, kvg, ktg, krad, kion, kmol, eps, ked, tau )
@@ -510,6 +514,7 @@
 !
          end subroutine ugwp_lsatdis_az1
 !	 
+!>\ingroup cires_ugwp_run_mod
          subroutine ugwp_limit_1d(ax, ay,eps, ked, levs) 
            use cires_ugwp_module, only : max_kdis, max_eps, max_axyz
            implicit none

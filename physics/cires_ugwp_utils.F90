@@ -1,4 +1,6 @@
-!  
+!>\file cires_ugwp_utils.F90
+
+!>\ingroup cires_ugwp_run_mod  
       subroutine um_flow(nz, klow, ktop, up, vp, tp, qp, dp, zpm, zpi, &
                          pmid, pint, bn2, uhm, vhm, bn2hm, rhohm)
 !
@@ -61,6 +63,7 @@
       end subroutine um_flow
 !
 !
+!>\ingroup cires_ugwp_run_mod
       subroutine mflow_tauz(levs, up, vp, tp, qp, dp, zpm, zpi, &
         pmid, pint, rho, ui, vi, ti, bn2i, bvi, rhoi)
 
@@ -132,6 +135,7 @@
       end subroutine mflow_tauz
 
 !     
+!>\ingroup cires_ugwp_run_mod
       subroutine get_unit_vector(u, v, u_n, v_n, mag)
       implicit  none
       real, intent(in) :: u, v
