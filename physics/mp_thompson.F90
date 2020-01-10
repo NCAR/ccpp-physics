@@ -27,7 +27,7 @@ module mp_thompson
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd,            &
+      subroutine mp_thompson_init(ncol, nlev, con_g, con_rd, restart,   &
                                   imp_physics, imp_physics_thompson,    &
                                   spechum, qc, qr, qi, qs, qg, ni, nr,  &
                                   is_aerosol_aware, nc, nwfa2d, nifa2d, &
@@ -39,11 +39,12 @@ module mp_thompson
          implicit none
 
          ! Interface variables
-         integer,                   intent(in)    :: ncol
-         integer,                   intent(in)    :: nlev
-         real(kind_phys),           intent(in)    :: con_g, con_rd
-         integer,                   intent(in)    :: imp_physics
-         integer,                   intent(in)    :: imp_physics_thompson
+         integer,                   intent(in   ) :: ncol
+         integer,                   intent(in   ) :: nlev
+         real(kind_phys),           intent(in   ) :: con_g, con_rd
+         logical,                   intent(in   ) :: restart
+         integer,                   intent(in   ) :: imp_physics
+         integer,                   intent(in   ) :: imp_physics_thompson
          ! Hydrometeors
          real(kind_phys),           intent(inout) :: spechum(:,:)
          real(kind_phys),           intent(inout) :: qc(:,:)
@@ -66,16 +67,16 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: phil(:,:)
          real(kind_phys),           intent(in   ) :: area(:)
          ! Cloud effective radii
-         real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
-         real(kind_phys), optional, intent(  out) :: re_ice(:,:)
-         real(kind_phys), optional, intent(  out) :: re_snow(:,:)
+         real(kind_phys), optional, intent(inout) :: re_cloud(:,:)
+         real(kind_phys), optional, intent(inout) :: re_ice(:,:)
+         real(kind_phys), optional, intent(inout) :: re_snow(:,:)
          ! MPI information
-         integer,                   intent(in)    :: mpicomm
-         integer,                   intent(in)    :: mpirank
-         integer,                   intent(in)    :: mpiroot
+         integer,                   intent(in   ) :: mpicomm
+         integer,                   intent(in   ) :: mpirank
+         integer,                   intent(in   ) :: mpiroot
          ! Threading/blocking information
-         integer,                   intent(in)    :: threads
-         integer,                   intent(in)    :: blkno
+         integer,                   intent(in   ) :: threads
+         integer,                   intent(in   ) :: blkno
          ! CCPP error handling
          character(len=*),          intent(  out) :: errmsg
          integer,                   intent(  out) :: errflg
@@ -172,6 +173,12 @@ module mp_thompson
                                mpicomm=mpicomm, mpirank=mpirank, mpiroot=mpiroot,    &
                                threads=threads, errmsg=errmsg, errflg=errflg)
             if (errflg /= 0) return
+         end if
+
+         ! For restart runs, the init is done here
+         if (restart) then
+             is_initialized = .true.
+             return
          end if
 
          ! Fix initial values of hydrometeors
@@ -361,7 +368,7 @@ module mp_thompson
                  do k = 1, nlev
                      re_cloud(i,k) = 2.49E-6
                      re_ice(i,k)   = 4.99E-6
-                     re_snow(i,k)  = 9.99E-6 
+                     re_snow(i,k)  = 9.99E-6
                  end do
              end do
              do i = 1, ncol
@@ -376,6 +383,12 @@ module mp_thompson
                      re_snow(i,k)  = MAX(9.99E-6, MIN(re_snow(i,k), 999.E-6))
                  end do
              end do
+             ! Convert to micron: required for bit-for-bit identical restarts;
+             ! otherwise entering mp_thompson_init and converting mu to m and
+             ! back (without updating re_*) introduces b4b differences.
+             re_cloud = 1.0E6*re_cloud
+             re_ice   = 1.0E6*re_ice
+             re_snow  = 1.0E6*re_snow
          else if (.not.present(re_cloud) .and. .not.present(re_ice) .and. .not.present(re_snow)) then
              ! Do nothing
          else
