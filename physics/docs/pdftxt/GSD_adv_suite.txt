@@ -1,47 +1,38 @@
 /**
-\page GSD_v0_page GSD_v0 Suite 
+\page GSD_v1_page  GSD_v1 Suite 
 
 \section gsd_suite_overview Overview
 
-The original Rapid Update Cycle (RUC), implemented in 1994, was designed to provide accurate short-range (0 to 12-hr)
-numerical forecast guidance for weather-sensitive users, including those in the U.S. aviation community. 
-The RUC started to run every hour starting in 1998. Significant weather forecasting problems that occur in the 0- to 
-12-hr range include severe weather in all seasons (for example, tornadoes, severe thunderstorms, crippling snow, and 
-ice storms) and hazards to aviation (for example, clear air turbulence, icing, and downbursts). The RUC soon became a
-key model for short-range convectiion forecasts and for the pre-convective environments.
+Suite GSD_v1 contains the parameterizations used in the NOAA operational Rapid Refresh (RAP)
+and High-Resolution Rapid Refresh (HRRR) models. These models runs at 13- and 3- km resolution,
+respectively.
 
-The RAP, which replaced the RUC in 2012, runs hourly at the National Centers for Environmental Prediction (NCEP), providing
-high frequency updates of current conditions and short-range forecasts over North America at 13km resolution. A CONUS-nested 
-version at 3-km resolution called the High Resolution Rapid Refresh (HRRR), was implemented in the fall of 2014.
 
 Additional Model Information Links: 
 - https://rapidrefresh.noaa.gov
 - https://rapidrefresh.noaa.gov/hrrr/
 
-The advanced GSD RAP/HRRR physics suite uses the parameterizations in the following order:
+The GSD_v1 physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
  - \ref GSD_RUCLSM
  - \ref GSD_MYNNEDMF
- - \ref GFS_GWDPS
+ - \ref GFS_UGWP_v0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
  - \ref GSD_CU_GF
    - \ref cu_gf_deep_group
    - \ref cu_gf_sh_group
- - \ref GFS_GWDC
  - \ref GSD_THOMPSON
  - \ref GFS_CALPRECIPTYPE
 
 \section sdf_gsdsuite Suite Definition File 
-
-The GSD RAP/HRRR physics suite uses the parameterizations in the following order, as defined in  \c SCM_GSD_v0:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_GSD_v0" lib="ccppphys" ver="3.0.0">
+<suite name="SCM_GSD_v1" lib="ccppphys" ver="4">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">
@@ -72,9 +63,10 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
       <scheme>GFS_suite_stateout_reset</scheme>
       <scheme>get_prs_fv3</scheme>
       <scheme>GFS_suite_interstitial_1</scheme>
-      <scheme>dcyc2t3</scheme>
       <scheme>GFS_surface_generic_pre</scheme>
       <scheme>GFS_surface_composites_pre</scheme>
+      <scheme>dcyc2t3</scheme>
+      <scheme>GFS_surface_composites_inter</scheme>
       <scheme>GFS_suite_interstitial_2</scheme>
     </subcycle>
     <!-- Surface iteration loop -->
@@ -85,6 +77,9 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
       <scheme>sfc_nst</scheme>
       <scheme>sfc_nst_post</scheme>
       <scheme>lsm_ruc</scheme>
+      <scheme>lsm_ruc_sfc_sice_pre</scheme>
+      <scheme>sfc_sice</scheme>
+      <scheme>lsm_ruc_sfc_sice_post</scheme>
       <scheme>GFS_surface_loop_control_part2</scheme>
     </subcycle>
     <!-- End of surface iteration loop -->
@@ -96,8 +91,9 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
       <scheme>GFS_surface_generic_post</scheme>
       <scheme>mynnedmf_wrapper</scheme>
       <scheme>GFS_GWD_generic_pre</scheme>
-      <scheme>gwdps</scheme>
-      <scheme>gwdps_post</scheme>
+      <scheme>cires_ugwp</scheme>
+      <scheme>cires_ugwp_post</scheme>
+      <scheme>GFS_GWD_generic_post</scheme>
       <scheme>rayleigh_damp</scheme>
       <scheme>GFS_suite_stateout_update</scheme>
       <scheme>ozphys_2015</scheme>
@@ -108,9 +104,6 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
       <scheme>cu_gf_driver_pre</scheme>
       <scheme>cu_gf_driver</scheme>
       <scheme>GFS_DCNV_generic_post</scheme>
-      <scheme>gwdc_pre</scheme>
-      <scheme>gwdc</scheme>
-      <scheme>gwdc_post</scheme>
       <scheme>GFS_SCNV_generic_pre</scheme>
       <scheme>GFS_SCNV_generic_post</scheme>
       <scheme>GFS_suite_interstitial_4</scheme>
@@ -126,73 +119,149 @@ The GSD RAP/HRRR physics suite uses the parameterizations in the following order
   </group>
   <!-- <finalize></finalize> -->
 </suite>
-
 \endcode
 
-\section gsd_nml_option Namelist Option
+\section gsd_nml_option Namelist 
 \code
 &gfs_physics_nml
-       fhzero         = 6.
-       h2o_phys       = .true.
-       ldiag3d        = .true.
-       fhcyc          = 0.
-       nst_anl        = .true.
-       use_ufo        = .true.
-       pre_rad        = .false.
-       ncld           = 5
-       imp_physics    = 8
-       ltaerosol      = .true.
-       lradar         = .true.
-       ttendlim       = -999.
-       pdfcld         = .false.
-       fhswr          = 3600.
-       fhlwr          = 3600.
-       ialb           = 1
-       iems           = 1
-       iaer           = 111
-       ico2           = 2
-       isubc_sw       = 2
-       isubc_lw       = 2
-       isol           = 2
-       lwhtr          = .true.
-       swhtr          = .true.
-       cnvgwd         = .true.
-       shal_cnv       = .true.
-       cal_pre        = .false.
-       redrag         = .true.
-       dspheat        = .true.
-       hybedmf        = .false.
-       satmedmf       = .false.
-       lheatstrg      = .false.
-       do_mynnedmf    = .true.
-       do_mynnsfclay  = .false.
-       random_clds    = .false.
-       trans_trac     = .true.
-       cnvcld         = .true.
-       imfshalcnv     = 3
-       imfdeepcnv     = 3
-       cdmbgwd        = 3.5,0.25
-       prslrd0        = 0.
-       ivegsrc        = 1
-       isot           = 1
-       debug          = .false.
-       oz_phys        = .false.
-       oz_phys_2015   = .true.
-       nstf_name      = 2,1,1,0,5
-       cplflx         = .false.
-       iau_delthrs    = 6
-       iaufhrs        = 30
-       iau_inc_files  = "''"
-       do_sppt        = .false.
-       do_shum        = .false.
-       do_skeb        = .false.
-       do_sfcperts    = .false.
-       lsm            = 2
-       lsoil_lsm      = 9
+       fhzero            = 6.
+       h2o_phys          = .true.
+       ldiag3d           = .true.
+       fhcyc             = 0.
+       nst_anl           = .true.
+       use_ufo           = .true.
+       pre_rad           = .false.
+       ncld              = 5
+       imp_physics       = 8
+       ltaerosol         = .true.
+       lradar            = .true.
+       ttendlim          = 0.004
+       pdfcld            = .false.
+       fhswr             = 3600.
+       fhlwr             = 3600.
+       ialb              = 1
+       iems              = 1
+       iaer              = 111
+       ico2              = 2
+       isubc_sw          = 2
+       isubc_lw          = 2
+       isol              = 2
+       lwhtr             = .true.
+       swhtr             = .true.
+       cnvgwd            = .true.
+       shal_cnv          = .true.
+       cal_pre           = .false.
+       redrag            = .true.
+       dspheat           = .true.
+       hybedmf           = .false.
+       satmedmf          = .false.
+       lheatstrg         = .false.
+       do_mynnedmf       = .true.
+       do_mynnsfclay     = .false.
+       random_clds       = .false.
+       trans_trac        = .true.
+       cnvcld            = .true.
+       imfshalcnv        = 3
+       imfdeepcnv        = 3
+       cdmbgwd           = 3.5,0.25
+       prslrd0           = 0.
+       ivegsrc           = 1
+       isot              = 1
+       debug             = .false.
+       oz_phys           = .false.
+       oz_phys_2015      = .true.
+       nstf_name         = 2,1,1,0,5
+       cplflx            = .false.
+       iau_delthrs       = 6
+       iaufhrs           = 30
+       iau_inc_files     = "''"
+       do_sppt           = .false.
+       do_shum           = .false.
+       do_skeb           = .false.
+       do_sfcperts       = .false.
+       lsm               = 3
+       lsoil_lsm         = 9
+       iopt_dveg         = 2
+       iopt_crs          = 1
+       iopt_btr          = 1
+       iopt_run          = 1
+       iopt_sfc          = 1
+       iopt_frz          = 1
+       iopt_inf          = 1
+       iopt_rad          = 1
+       iopt_alb          = 2
+       iopt_snf          = 4
+       iopt_tbot         = 2
+       iopt_stc          = 1
        icloud_bl         = 1
        bl_mynn_tkeadvect = .true.
        bl_mynn_edmf      = 1
        bl_mynn_edmf_mom  = 1
+       gwd_opt           = 1
+/
+
+&gfdl_cloud_microphysics_nml
+       sedi_transport    = .true.
+       do_sedi_heat      = .false.
+       rad_snow          = .true.
+       rad_graupel       = .true.
+       rad_rain          = .true.
+       const_vi          = .F.
+       const_vs          = .F.
+       const_vg          = .F.
+       const_vr          = .F.
+       vi_max            = 1.
+       vs_max            = 2.
+       vg_max            = 12.
+       vr_max            = 12.
+       qi_lim            = 1.
+       prog_ccn          = .false.
+       do_qa             = .false.
+       fast_sat_adj      = .false.
+       tau_l2v           = 225.
+       tau_v2l           = 150.
+       tau_g2v           = 900.
+       rthresh           = 10.e-6 
+       dw_land           = 0.16
+       dw_ocean          = 0.10
+       ql_gen            = 1.0e-3
+       ql_mlt            = 1.0e-3
+       qi0_crt           = 8.0E-5
+       qs0_crt           = 1.0e-3
+       tau_i2s           = 1000.
+       c_psaci           = 0.05
+       c_pgacs           = 0.01
+       rh_inc            = 0.30
+       rh_inr            = 0.30
+       rh_ins            = 0.30
+       ccn_l             = 300.
+       ccn_o             = 100.
+       c_paut            = 0.5
+       c_cracw           = 0.8
+       use_ppm           = .false.
+       use_ccn           = .true.
+       mono_prof         = .true.
+       z_slope_liq       = .true.
+       z_slope_ice       = .true.
+       de_ice            = .false.
+       fix_negative      = .true.
+       icloud_f          = 1
+       mp_time           = 150.
+/
+
+&cires_ugwp_nml
+       knob_ugwp_solver  = 2
+       knob_ugwp_source  = 1,1,0,0
+       knob_ugwp_wvspec  = 1,25,25,25
+       knob_ugwp_azdir   = 2,4,4,4
+       knob_ugwp_stoch   = 0,0,0,0
+       knob_ugwp_effac   = 1,1,1,1
+       knob_ugwp_doaxyz  = 1
+       knob_ugwp_doheat  = 1
+       knob_ugwp_dokdis  = 1
+       knob_ugwp_ndx4lh  = 1
+       knob_ugwp_version = 0
+       launch_level      = 25
 /
 \endcode
 

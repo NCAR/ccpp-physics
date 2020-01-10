@@ -1,3 +1,4 @@
+!>\file cires_ugwp_module.F90
 !
 module  cires_ugwp_module
 
@@ -106,6 +107,7 @@ module  cires_ugwp_module
 ! init  of cires_ugwp   (_init)  called from GFS_driver.F90
 !
 ! -----------------------------------------------------------------------
+!>\ingroup cires_ugwp_run_mod
    subroutine cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
               fn_nml, lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
               pa_rf_in, tau_rf_in)
@@ -289,6 +291,7 @@ module  cires_ugwp_module
 !       Diag%zmtb, Diag%zlwb, Diag%zogw, Diag%du3dt_mtb,             &
 !       Diag%du3dt_ogw, Diag%du3dt_tms )
 
+!>\ingroup cires_ugwp_run_mod
     subroutine cires_ugwp_driver                                     &
        (im, levs, dtp, kdt, me, lprnt,   lonr,                       & 
        pa_rf, tau_rf, cdmbgwd,  xlat, xlatd, sinlat,  coslat,        &
@@ -629,6 +632,7 @@ module  cires_ugwp_module
 !=============================================
 
 
+!>\ingroup cires_ugwp_run_mod
      subroutine cires_ugwp_advance
 !-----------------------------------------------------------------------
 !
@@ -653,6 +657,7 @@ module  cires_ugwp_module
 ! -----------------------------------------------------------------------
 
 
+!>\ingroup cires_ugwp_run_mod
   subroutine cires_ugwp_mod_finalize
 !
 ! deallocate sources/spectra & some diagnostics need to find where "deaalocate them"

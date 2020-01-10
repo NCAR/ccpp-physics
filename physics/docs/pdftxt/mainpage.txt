@@ -1,22 +1,22 @@
 /**
 \mainpage Introduction 
 
-Welcome to the scientific documentation for the parameterizations available in the Common 
-Community Physics Package (CCPP) v3.0 public release.  
+Welcome to the scientific documentation for the parameterizations and suites available in the Common 
+Community Physics Package (CCPP) v4.  
 
-The CCPP-Physics is envisioned to contain parameterizations used by NOAA operational models for weather through
-seasonal prediction timescales, as well as developmental schemes under consideration for upcoming 
+The CCPP-Physics is envisioned to contain parameterizations used in NOAA's Unified Forecast System (UFS) 
+applications for weather through seasonal prediction timescales, encompassing operational schemes as well as 
+developmental schemes under consideration for upcoming 
 operational implementations. This version contains all parameterizations of the current operational GFS,
-plus additional developmental schemes. The CCPP can currently be used with the Single Column Model (SCM) developed 
-by the Global Model Test Bed (GMTB) of the Developmental Testbed Center, as well as with the atmospheric component
-of NOAA's Unified Forecast System (UFS-Atmosphere), which employs the the non-hydrostatic 
-Finite-Volume Cubed-Sphere (FV3) dynamic core.  
+plus additional developmental schemes. There are four suites supported for use with the Single Column Model (SCM) 
+developed by the Development Testbed Center (GFS_v15p2, GFS_v16beta, GSD_v1, and csawmg), and two suites
+supported for use with the atmospheric component of the UFS (i.e., GFS_v15p2 and GFS_v16beta).
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 3.0 (June 2019), and more details on it may be found on the
-<a href="https://dtcenter.org/gmtb/users/ccpp/"> CCPP website </a> hosted by the Global Model Test
-Bed (GMTB) of the Developmental Testbed Center (DTC).
+The latest CCPP public release is Version 4.0 (January 2019), and more details on it may be found on the
+<a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP website </a> hosted by
+the Developmental Testbed Center (DTC).
 
 */

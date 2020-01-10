@@ -37,7 +37,7 @@
       end subroutine ozphys_2015_finalize
 
 
-!>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Scheme Module
+!>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Scheme
 !! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval

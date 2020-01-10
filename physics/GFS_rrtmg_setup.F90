@@ -1,4 +1,4 @@
-!> \file GFS_rrtmg_setup.f90
+!> \file GFS_rrtmg_setup.F90
 !! This file contains
 module GFS_rrtmg_setup
 
@@ -646,9 +646,7 @@ module GFS_rrtmg_setup
 !! \param slag           equation of time in radians
 !! \param sdec,cdec      sine and cosine of the solar declination angle
 !! \param solcon         solar constant adjusted by sun-earth distance \f$(W/m^2)\f$
-!> \section gen_radupdate General Algorithm
-!> @{
-!-----------------------------------
+!! \section gen_radupdate General Algorithm
       subroutine radupdate( idate,jdate,deltsw,deltim,lsswr, me,        &
      &                      slag,sdec,cdec,solcon)
 !...................................
