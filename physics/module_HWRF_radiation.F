@@ -854,3 +854,4 @@
 !-----------------------------------------------------------------------
 !
       END SUBROUTINE HWRF_radiation_run
+      END MODULE HWRF_radiation

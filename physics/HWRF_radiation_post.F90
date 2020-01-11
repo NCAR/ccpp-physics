@@ -1,19 +1,10 @@
 !>\file HWRF_radiation_post.F90
 !! This file applies temperature tendency due to HWRF radiation.
       module HWRF_radiation_post
-
-      implicit none
-     
-      private
-      
-      public :: HWRF_radiation_post_init, HWRF_radiation_post_run,      &
-                HWRF_radiation_post_finalize
-
-
       contains
 
       subroutine HWRF_radiation_post_init ()
-      end subroutine HWRF_radiation_pre_init
+      end subroutine HWRF_radiation_post_init
 
       subroutine HWRF_radiation_post_finalize ()
       end subroutine HWRF_radiation_post_finalize
@@ -32,10 +23,11 @@
       IMPLICIT NONE
 
       !-- interface variables
-      INTEGER,               INTENT(IN) :: IHRST,JULDAY,JULYR,NTSD
+      INTEGER,               INTENT(IN) :: NCOL, NLAY, IHRST,JULDAY,    &
+     &                                     JULYR,NTSD
       !MZ* dt-time step for physics?
       REAL(KIND_PHYS),       INTENT(IN) :: DT,XTIME
-      REAL(KIND_PHYS),DIMENSION(1:NCOL),INTENT(IN) :: CZMEAN,GLAT,GLON  &
+      REAL(KIND_PHYS),DIMENSION(1:NCOL),INTENT(IN) :: CZMEAN,GLAT,GLON  
 
       REAL(KIND_PHYS),DIMENSION(1:NCOL,1:NLAY),INTENT(IN) :: RLWTT      &
      &                                                     ,RSWTT
@@ -46,7 +38,7 @@
 
       !-- local variables
       INTEGER            :: I,K
-      INTEGER,           :: IDS,IDE,JDS,JDE,KDS,KDE                     &
+      INTEGER            :: IDS,IDE,JDS,JDE,KDS,KDE                     &
      &                     ,IMS,IME,JMS,JME,KMS,KME                     &
      &                     ,ITS,ITE,JTS,JTE,KTS,KTE
 
@@ -87,7 +79,7 @@
      &           ,XTIME,IHRST,glat,glon                                 &
      &           ,czen,czmean,t                                         &
      &           ,rswtt,rlwtt                                           &
-     &           ,IDS,IDF,JDS,JDF,KDS,KDE                               &
+     &           ,IDS,IDE,JDS,JDE,KDS,KDE                               &
      &           ,IMS,IME,JMS,JME,KMS,KME                               &
      &           ,ITS,ITE,JTS,JTE,KTS,KTE)
 !

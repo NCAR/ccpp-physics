@@ -1,12 +1,13 @@
 [ccpp-arg-table]
-  name = HWRF_radiation_pre_run
+  name = HWRF_radiation_post_run
   type = scheme
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
   units = count
   dimensions = ()
-  type = in
+  type = integer
+  intent = in
   optional = F
 [nlay]
   standard_name = adjusted_vertical_layer_dimension_for_radiation
@@ -137,4 +138,3 @@
   type = integer
   intent = out
   optional = F
-

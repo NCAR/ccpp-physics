@@ -4,13 +4,6 @@
 !> This module contains the CCPP-compliant ETAMP_TO_MOIST in HWRF .
      module HWRF_radiation_pre
 
-     implicit none
-
-     private
-
-     public :: HWRF_radiation_pre_init, HWRF_radiation_pre_run,           &
-               HWRF_radiation_pre_finalize
-
      contains
 
      subroutine HWRF_radiation_pre_init ()
@@ -37,10 +30,7 @@
 !-- Argument Variables
 !----------------------
 !
-       INTEGER,INTENT(IN) :: LM,IME
-!
-
-      LOGICAL,INTENT(IN) :: SPEC_ADV
+      INTEGER,INTENT(IN) :: LM,IME
       REAL(kind=kind_phys),DIMENSION(1:IME,1:LM),INTENT(IN) ::  CWM,QV, &
                                                                 QC,QI,  &
                                                                 QR
@@ -112,4 +102,4 @@
 
       end subroutine HWRF_radiation_pre_run
 
-  end module HWRF_radiation_pre
+      end module HWRF_radiation_pre

@@ -6,7 +6,8 @@
   long_name = horizontal loop extent
   units = count
   dimensions = ()
-  type = in
+  type = integer
+  intent = in
   optional = F
 [nlev]
   standard_name = vertical_dimension
@@ -63,7 +64,7 @@
 [levsiz]
   standard_name = number_of_ozone_data_levels_for_CAM_radiation
   long_name = number of ozone data levels for CAM radiation (59)
-  units = counts
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -89,7 +90,7 @@
 [n_ozmixm]
   standard_name = number_of_CAM_ozone_data_months
   long_name = number of CAM ozone data months
-  units = counts
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -97,7 +98,7 @@
 [alevsiz]
   standard_name = number_of_Tegen_aerosol_optical_depth_data_levels
   long_name = number of Tegen aerosol optical depth data levels (12)
-  units = counts
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -105,7 +106,7 @@
 [no_src_types]
   standard_name = number_of_EC_aerosol_types
   long_name = number of aerosol types from EC (6)
-  units = counts
+  units = count
   dimensions = ()
   type = integer
   intent = in 
@@ -156,7 +157,7 @@
   standard_name = Tegen_aerosol_optical_depth
   long_name = Tegen aerosol optical depth
   units = AOD Pa-1
-  dimensions = (horizontal_dimension, number_of_Tegen_aerosol_optical_depth_data_levels, number_of_CAM_ozone_data_months-1, number_of_EC_aerosol_types )
+  dimensions = (horizontal_dimension, number_of_Tegen_aerosol_optical_depth_data_levels, number_of_CAM_ozone_data_months_minus_one, number_of_EC_aerosol_types)
   type = real
   kind = kind_phys
   intent = inout
@@ -273,7 +274,7 @@
   type = integer
   intent = in
   optional = F
-[NPHS]      !nml 2,6,6
+[NPHS]      
   standard_name = number_of_physics_timesteps_between_calls_to_HWRF_turbulence_and_microphysics 
   long_name = number of physics timesteps between calls to HWRF turbulence and microphysics
   units = count
@@ -299,7 +300,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[NRADS]   !mz: nml 30,90,270
+[NRADS]   
   standard_name = number_of_physics_timesteps_between_calls_to_HWRF_shortwave_radiation
   long_name = number of timesteps between calls to HWRF shortwave radiation
   units = count
@@ -352,7 +353,7 @@
   intent = in
   optional = F
 [T]
-  standart_name = air_temperature
+  standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
   dimensions = (horizontal_dimension, vertical_dimension)
@@ -415,8 +416,8 @@
   intent = inout
   optional = F
 [qg]
-  standard_name = mass_weighted_rime_factor_mixing ratio
-  long_name = the ratio of the mass of rime factor to the mass of dry air
+  standard_name = cloud_graupel_mixing_ratio
+  long_name = the ratio of the mass of graupel to the mass of dry air
   units = kg kg-1
   dimensions = (horizontal_dimension, vertical_dimension)
   type = real
@@ -541,7 +542,7 @@
   intent = inout
   optional = F
 [CZMEAN]
-  standard_name = mean_cosine_of_zenith_angle_between_SW_radition_calls
+  standard_name = mean_cosine_of_zenith_angle_between_SW_radiation_calls
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_dimension)
@@ -596,7 +597,7 @@
 [LEVSIZ]
   standard_name = number_of_ozone_data_levels_for_CAM_radiation
   long_name = number of ozone data levels for CAM radiation (59)
-  units = counts
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -657,7 +658,7 @@
   optional = F
 [has_reqc]
   standard_name = flag_for_has_effective_radius_of_cloud_water
-  long_name = flag for has effective radius of cloud water (Thompson MP only)
+  long_name = flag for has effective radius of cloud water
   units = flag
   dimensions = ()
   type = integer
@@ -665,15 +666,15 @@
   optional = F
 [has_reqi]
   standard_name = flag_for_has_effective_radius_of_cloud_ice
-  long_name = flag for has effective radius of cloud ice (Thompson MP only)
+  long_name = flag for has effective radius of cloud ice
   units = flag
   dimensions = ()
   type = integer
   intent = inout
   optional = F
 [has_reqs]
-  standard_name = flag_for_has_effective_radius_of_snow
-  long_name = flag for has effective radius of snow (Thompson MP only)
+  standard_name = flag_for_has_effective_radius_of_cloud_snow
+  long_name = flag for has effective radius of cloud snow
   units = flag
   dimensions = ()
   type = integer
@@ -683,7 +684,7 @@
   standard_name = shortwave_heating_rate_per_day
   long_name = shortwave heating rate per day
   units = K d-1
-  dimension =  (horizontal_dimension, vertical_dimension)
+  dimensions =  (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -692,7 +693,7 @@
   standard_name = longwave_heating_rate_per_day
   long_name = longwave heating rate perday
   units = K d-1
-  dimension =  (horizontal_dimension, vertical_dimension)
+  dimensions =  (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
