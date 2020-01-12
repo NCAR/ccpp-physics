@@ -35,6 +35,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [imp_physics]
   standard_name = flag_for_microphysics_scheme
   long_name = choice of microphysics scheme
@@ -214,30 +222,30 @@
   optional = F
 [re_cloud]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
-  long_name = eff. radius of cloud liquid water particle in micrometer (meter here)
-  units = m
+  long_name = eff. radius of cloud liquid water particle in micrometer
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = T
 [re_ice]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
-  long_name = eff. radius of cloud ice water particle in micrometer (meter here)
-  units = m
+  long_name = eff. radius of cloud ice water particle in micrometer
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = T
 [re_snow]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
-  long_name = effective radius of cloud snow particle in micrometer  (meter here)
-  units = m
+  long_name = effective radius of cloud snow particle in micrometer
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = T
 [mpicomm]
   standard_name = mpi_comm
