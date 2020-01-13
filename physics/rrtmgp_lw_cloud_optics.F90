@@ -110,7 +110,7 @@ contains
     lw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_clouds)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
-    if (mpirank .eq. mpiroot) then
+!    if (mpirank .eq. mpiroot) then
        if(nf90_open(trim(lw_cloud_props_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
           status = nf90_inq_dimid(ncid_lw_clds, 'nband', dimid)
           status = nf90_inquire_dimension(ncid_lw_clds, dimid, len=nbandLWcldy)
@@ -137,28 +137,28 @@ contains
        if (nrghice .gt. nrghice_lw) then
           errmsg = 'Number of RRTMGP ice-roughness categories requested in namelist file is not allowed'
        endif
-    endif
+!    endif
 
     ! Broadcast dimensions to all processors
-#ifdef MPI
-    call MPI_BCAST(nbandSWcldy_sw,     1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-    if (cld_optics_scheme .eq. 1) then
-       call MPI_BARRIER(mpicomm, ierr)
-       call MPI_BCAST(nrghice_sw,      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BCAST(nsize_liq_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BCAST(nsize_ice_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BARRIER(mpicomm, ierr)
-    endif
-    if (cld_optics_scheme .eq. 2) then
-       call MPI_BARRIER(mpicomm, ierr)
-       call MPI_BCAST(nrghice_sw,      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BCAST(nsizereg_sw,     1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BCAST(ncoeff_ext_sw,   1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BCAST(ncoeff_ssa_g_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BCAST(nbound_sw,       1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-       call MPI_BARRIER(mpicomm, ierr)
-    endif
-#endif
+!#ifdef MPI
+!    call MPI_BCAST(nbandSWcldy_sw,     1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!    if (cld_optics_scheme .eq. 1) then
+!       call MPI_BARRIER(mpicomm, ierr)
+!       call MPI_BCAST(nrghice_sw,      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(nsize_liq_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(nsize_ice_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BARRIER(mpicomm, ierr)
+!    endif
+!    if (cld_optics_scheme .eq. 2) then
+!       call MPI_BARRIER(mpicomm, ierr)
+!       call MPI_BCAST(nrghice_sw,      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(nsizereg_sw,     1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(ncoeff_ext_sw,   1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(ncoeff_ssa_g_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(nbound_sw,       1, MPI_INTEGER, mpiroot, mpicomm, ierr)
+!       call MPI_BARRIER(mpicomm, ierr)
+!    endif
+!#endif
 
     if (Cld_optics_scheme .eq. 1) then
        allocate(lut_extliq(nsize_liq, nBandLWcldy))
@@ -186,7 +186,7 @@ contains
     endif
 
     ! On master processor, allocate space, read in fields, broadcast to all processors
-    if (mpirank .eq. mpiroot) then
+!    if (mpirank .eq. mpiroot) then
        if (Cld_optics_scheme .eq. 1) then
           write (*,*) 'Reading RRTMGP longwave cloud data (LUT) ... '
           if(nf90_open(trim(lw_cloud_props_file), NF90_WRITE, ncid_lw_clds) == NF90_NOERR) then
@@ -264,79 +264,79 @@ contains
              status = nf90_close(ncid_lw_clds)
           endif
        endif
-    endif
+!    endif
 
     ! Broadcast arrays to all processors
-#ifdef MPI
-    if (cld_optics_scheme .eq. 1) then
-       if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP shortwave cloud data (LUT) ... '
-       call MPI_BARRIER(mpicomm, ierr)
-#ifndef SINGLE_PREC
-       call MPI_BCAST(radliq_lwr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radliq_upr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radliq_fac,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_lwr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_upr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_fac,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_extliq,           size(lut_extliq),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_ssaliq,           size(lut_ssaliq),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_asyliq,           size(lut_asyliq),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_extice,           size(lut_extice),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_ssaice,           size(lut_ssaice),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_asyice,           size(lut_asyice),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)    
-#else
-       call MPI_BCAST(radliq_lwr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radliq_upr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radliq_fac,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_lwr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_upr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(radice_fac,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_extliq,           size(lut_extliq),          MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_ssaliq,           size(lut_ssaliq),          MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_asyliq,           size(lut_asyliq),          MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_extice,           size(lut_extice),          MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_ssaice,           size(lut_ssaice),          MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(lut_asyice,           size(lut_asyice),          MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_REAL,               mpiroot, mpicomm, ierr)
-#endif 
-       call MPI_BARRIER(mpicomm, ierr)
-    endif
-    if (cld_optics_scheme .eq. 2) then
-       if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP shortwave cloud data (PADE) ... '
-       call MPI_BARRIER(mpicomm, ierr)
-#ifndef SINGLE_PREC
-       call MPI_BCAST(pade_extliq,          size(pade_extliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_ssaliq,          size(pade_ssaliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_asyliq,          size(pade_asyliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_extice,          size(pade_extice),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_ssaice,          size(pade_ssaice),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_asyice,          size(pade_asyice),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_extliq,  size(pade_sizereg_extliq), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_ssaliq,  size(pade_sizereg_ssaliq), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_asyliq,  size(pade_sizereg_asyliq), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_extice,  size(pade_sizereg_extice), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_ssaice,  size(pade_sizereg_ssaice), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_asyice,  size(pade_sizereg_asyice), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)    
-#else
-       call MPI_BCAST(pade_extliq,          size(pade_extliq),         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_ssaliq,          size(pade_ssaliq),         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_asyliq,          size(pade_asyliq),         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_extice,          size(pade_extice),         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_ssaice,          size(pade_ssaice),         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_asyice,          size(pade_asyice),         MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_extliq,  size(pade_sizereg_extliq), MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_ssaliq,  size(pade_sizereg_ssaliq), MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_asyliq,  size(pade_sizereg_asyliq), MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_extice,  size(pade_sizereg_extice), MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_ssaice,  size(pade_sizereg_ssaice), MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(pade_sizereg_asyice,  size(pade_sizereg_asyice), MPI_REAL,               mpiroot, mpicomm, ierr)
-       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_REAL,               mpiroot, mpicomm, ierr)
-#endif
-       call MPI_BARRIER(mpicomm, ierr)
-    endif
-#endif
+!#ifdef MPI
+!    if (cld_optics_scheme .eq. 1) then
+!       if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP shortwave cloud data (LUT) ... '
+!       call MPI_BARRIER(mpicomm, ierr)
+!#ifndef SINGLE_PREC
+!       call MPI_BCAST(radliq_lwr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radliq_upr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radliq_fac,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radice_lwr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radice_upr,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radice_fac,           1,                         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_extliq,           size(lut_extliq),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_ssaliq,           size(lut_ssaliq),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_asyliq,           size(lut_asyliq),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_extice,           size(lut_extice),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_ssaice,           size(lut_ssaice),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_asyice,           size(lut_asyice),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)    
+!#else
+!       call MPI_BCAST(radliq_lwr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radliq_upr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radliq_fac,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radice_lwr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radice_upr,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(radice_fac,           1,                         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_extliq,           size(lut_extliq),          MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_ssaliq,           size(lut_ssaliq),          MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_asyliq,           size(lut_asyliq),          MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_extice,           size(lut_extice),          MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_ssaice,           size(lut_ssaice),          MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(lut_asyice,           size(lut_asyice),          MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_REAL,               mpiroot, mpicomm, ierr)
+!#endif 
+!       call MPI_BARRIER(mpicomm, ierr)
+!    endif
+!    if (cld_optics_scheme .eq. 2) then
+!       if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP shortwave cloud data (PADE) ... '
+!       call MPI_BARRIER(mpicomm, ierr)
+!#ifndef SINGLE_PREC
+!       call MPI_BCAST(pade_extliq,          size(pade_extliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_ssaliq,          size(pade_ssaliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_asyliq,          size(pade_asyliq),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_extice,          size(pade_extice),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_ssaice,          size(pade_ssaice),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_asyice,          size(pade_asyice),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_extliq,  size(pade_sizereg_extliq), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_ssaliq,  size(pade_sizereg_ssaliq), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_asyliq,  size(pade_sizereg_asyliq), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_extice,  size(pade_sizereg_extice), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_ssaice,  size(pade_sizereg_ssaice), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_asyice,  size(pade_sizereg_asyice), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)    
+!#else
+!       call MPI_BCAST(pade_extliq,          size(pade_extliq),         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_ssaliq,          size(pade_ssaliq),         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_asyliq,          size(pade_asyliq),         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_extice,          size(pade_extice),         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_ssaice,          size(pade_ssaice),         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_asyice,          size(pade_asyice),         MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_extliq,  size(pade_sizereg_extliq), MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_ssaliq,  size(pade_sizereg_ssaliq), MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_asyliq,  size(pade_sizereg_asyliq), MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_extice,  size(pade_sizereg_extice), MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_ssaice,  size(pade_sizereg_ssaice), MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(pade_sizereg_asyice,  size(pade_sizereg_asyice), MPI_REAL,               mpiroot, mpicomm, ierr)
+!       call MPI_BCAST(band_lims_cldy,       size(band_lims_cldy),      MPI_REAL,               mpiroot, mpicomm, ierr)
+!#endif
+!       call MPI_BARRIER(mpicomm, ierr)
+!    endif
+!#endif
 
     ! Load tables data for RRTMGP cloud-optics  
     if (cld_optics_scheme .eq. 1) then
@@ -423,6 +423,7 @@ contains
     ! Cloud optics [nCol,nLev,nBands]
     call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_1scl(&
          ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
+    lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
 
     ! Compute cloud-optics for RTE.
     if (rrtmgp_cld_optics .gt. 0) then
@@ -447,8 +448,8 @@ contains
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, &
                cld_frac, tau_cld)
        endif
-    endif
-    lw_optical_props_cloudsByBand%tau = tau_cld
+       lw_optical_props_cloudsByBand%tau = tau_cld
+    endif    
     
     write(47,*) "In rrtmgp_lw_cloud_optics: "
     write(47,*),"nCol: ",nCol
@@ -459,6 +460,8 @@ contains
                cld_iwp(iCol,iLay),cld_reice(iCol,iLay),tau_cld(iCol,iLay,:),lon(iCol), lat(iCol)
        enddo
     enddo
+
+    lw_optical_props_cloudsByBand%tau(:,:,2) = lw_optical_props_cloudsByBand%tau(:,:,1)
 
     ! All-sky LW optical depth ~10microns
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)

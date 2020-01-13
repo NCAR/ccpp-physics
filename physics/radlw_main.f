@@ -1039,6 +1039,8 @@
      &       cldfmc, taucld                                             &
      &     )
 
+          taucld(2,:) = taucld(1,:)
+
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
 
