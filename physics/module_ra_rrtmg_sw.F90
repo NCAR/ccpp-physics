@@ -11407,7 +11407,7 @@ CONTAINS
                        ids, ide, jds, jde, kds, kde,                &
                        ims, ime, jms, jme, kms, kme,                &
                        its, ite, jts, jte, kts, kte,                &
-                       mpirank,mpiroot, errflg, errmsg    )
+                       mpirank,mpiroot, mpicomm, errmsg,errflg)
 !--------------------------------------------------------------------
       IMPLICIT NONE
 !--------------------------------------------------------------------
@@ -11417,25 +11417,27 @@ CONTAINS
                                      ims, ime, jms, jme, kms, kme,  &
                                      its, ite, jts, jte, kts, kte
       integer,                   intent(in)    :: mpirank
-      integer,                   intent(in)    :: mpiroot
+      integer,                   intent(in)    :: mpiroot, mpicomm
       character(len=*),          intent(out)   :: errmsg
       integer,                   intent(out)   :: errflg
 
 
 ! Read in absorption coefficients and other data
       IF ( allowed_to_read ) THEN
-           CALL rrtmg_swlookuptable (mpirank,mpiroot, errflg, errmsg)
+           CALL rrtmg_swlookuptable (mpirank,mpiroot,mpicomm,           &
+                                      errflg, errmsg)
       ENDIF
 
 ! Perform g-point reduction and other initializations
 ! Specific heat of dry air (cp) used in flux to heating rate conversion factor.
-      call rrtmg_sw_ini(cp)
+      call rrtmg_sw_ini(con_cp)
 
       END SUBROUTINE rrtmg_swinit
 
 
 ! **************************************************************************     
-      SUBROUTINE rrtmg_swlookuptable(mpirank,mpiroot, errflg, errmsg)
+      SUBROUTINE rrtmg_swlookuptable(mpirank,mpiroot,mpicomm,           &
+                                     errflg, errmsg)
 ! **************************************************************************     
 
       IMPLICIT NONE
@@ -11444,7 +11446,7 @@ CONTAINS
       INTEGER :: i
       LOGICAL                 :: opened
       integer,                   intent(in)    :: mpirank
-      integer,                   intent(in)    :: mpiroot
+      integer,                   intent(in)    :: mpiroot, mpicomm
       character(len=*),          intent(out)   :: errmsg
       integer,                   intent(out)   :: errflg
 
@@ -11628,15 +11630,15 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat1, layreffr, kao, kbo, selfrefo, &
                            forrefo, sfluxrefo         
-         write(0,*) 'sw_kgb16: max/min(rayl) =',maxval(rayl),minval(rayl)
+         write(0,*) 'sw_kgb16: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat1,   size(strrat1),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     ! call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
+     !                mpiroot, mpicomm, mpierr)
+     ! call MPI_BCAST(strrat1,   size(strrat1),  MPI_DOUBLE_PRECISION,   &
+     !                mpiroot, mpicomm, mpierr)
+     ! call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+     !                mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
@@ -11746,15 +11748,15 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
                            forrefo, sfluxrefo
-         write(0,*) 'sw_kgb17: max/min(rayl) = ',maxval(rayl),minval(rayl)
+     !    write(0,*) 'sw_kgb17: max/min(rayl) = ',maxval(rayl),minval(rayl)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     ! call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
+     !                mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
@@ -11862,15 +11864,15 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
                            forrefo, sfluxrefo
-         write(0,*) 'sw_kgb18: max/min(rayl) = ',maxval(rayl),minval(rayl)
+      !   write(0,*) 'sw_kgb18: max/min() = ',maxval(rayl),minval(rayl)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
@@ -11911,7 +11913,7 @@ CONTAINS
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
-!     Array rayl contains the Rayleigh extinction coefficient at v = 4900 cm-1.
+!     Array ayl contains the Rayleigh extinction coefficient at v = 4900 cm-1.
 
 !     The array KAO contains absorption coefs at the 16 chosen g-values 
 !     for a range of pressure levels> ~100mb, temperatures, and binary
@@ -11979,15 +11981,15 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
                            forrefo, sfluxrefo
-         write(0,*) 'sw_kgb19: max/min(rayl) = ',maxval(rayl),minval(rayl)
+       !  write(0,*) 'sw_kgb19: max/min(rayl) = ',maxval(rayl),minval(rayl)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
@@ -12098,13 +12100,13 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, layreffr, absch4o, kao, kbo, selfrefo, &
                            forrefo, sfluxrefo 
-         write(0,*) 'sw_kgb20: max/min(rayl) = ',maxval(rayl),minval(rayl)
+        ! write(0,*) 'sw_kgb20: max/min(rayl) = ',maxval(rayl),minval(rayl)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(absch4o,   size(absch4o),  MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
@@ -12214,15 +12216,15 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
                            forrefo, sfluxrefo
-         write(0,*) 'sw_kgb21: max/min(rayl) =',maxval(rayl),minval(rayl)
+         !write(0,*) 'sw_kgb21: max/min(rayl) =',maxval(rayl),minval(rayl)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
@@ -12253,7 +12255,7 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit
+      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
 #ifdef MPI
          integer :: mpierr
 #endif
@@ -12333,15 +12335,15 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
                            forrefo, sfluxrefo
-         write(0,*) 'sw_kgb22: max/min(rayl) =',maxval(rayl),minval(rayl)
+        ! write(0,*) 'sw_kgb22: max/min(rayl) =',maxval(rayl),minval(rayl)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
@@ -12445,10 +12447,10 @@ CONTAINS
 #ifdef MPI
       call MPI_BCAST(raylo,      size(raylo),    MPI_DOUBLE_PRECISION,  &
                      mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(givfac,     size(givfac),   MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,   size(layreffr), MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(givfac,     size(givfac),   MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,   size(layreffr), MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),      MPI_DOUBLE_PRECISION,  &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo), MPI_DOUBLE_PRECISION,  &
@@ -12573,10 +12575,10 @@ CONTAINS
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(raylbo,      size(raylbo),   MPI_DOUBLE_PRECISION, &
                      mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,      size(strrat),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,    size(layreffr), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(strrat,      size(strrat),   MPI_DOUBLE_PRECISION, &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,    size(layreffr), MPI_DOUBLE_PRECISION, &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3ao,     size(abso3ao),  MPI_DOUBLE_PRECISION, &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3bo,     size(abso3bo),  MPI_DOUBLE_PRECISION, &
@@ -12611,7 +12613,7 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit
+      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot,mpicomm
 #ifdef MPI
          integer :: mpierr
 #endif
@@ -12672,8 +12674,8 @@ CONTAINS
 #ifdef MPI
       call MPI_BCAST(raylo,     size(raylo),    MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3ao,   size(abso3ao),  MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3bo,   size(abso3bo),  MPI_DOUBLE_PRECISION,   &
@@ -12700,7 +12702,7 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit
+      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
 #ifdef MPI
          integer :: mpierr
 #endif
@@ -12758,9 +12760,9 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit
+      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
 
 
@@ -12832,10 +12834,10 @@ CONTAINS
 #ifdef MPI
       call MPI_BCAST(raylo,     size(raylo),     MPI_DOUBLE_PRECISION,  &
                      mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(scalekur,  size(scalekur),  MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(scalekur,  size(scalekur),  MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION,  &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION,  &
@@ -12927,15 +12929,15 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, sfluxrefo
-         write(0,*) 'sw_kgb28: max/min(rayl) =',maxval(rayl),minval(rayl)
+         write(0,*) 'sw_kgb28: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    size(strrat),    MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(strrat,    size(strrat),    MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION,  &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION,  &
@@ -13047,13 +13049,13 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, layreffr, absh2oo, absco2o, kao, kbo,  &
                            selfrefo, forrefo, sfluxrefo
-         write(0,*) 'sw_kgb29: max/min(rayl) =',maxval(rayl),minval(rayl)
+         write(0,*) 'sw_kgb29: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
+      !call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
+      !               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(absh2oo,   size(absh2oo),   MPI_DOUBLE_PRECISION,  &
                      mpiroot, mpicomm, mpierr)
       call MPI_BCAST(absco2o,   size(absco2o),   MPI_DOUBLE_PRECISION,  &

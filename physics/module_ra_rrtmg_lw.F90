@@ -12956,12 +12956,13 @@ CONTAINS
 
 !====================================================================
       SUBROUTINE rrtmg_lwinit(                                          &
-                       p_top, allowed_to_read ,                         &
-                       ids, ide, jds, jde, kds, kde,                    &
-                       ims, ime, jms, jme, kms, kme,                    &
-                       its, ite, jts, jte, kts, kte,                    &
-                       mpirank, mpiroot, mpicomm,                       &
-                       errmsg, errflg             )
+!mz                       p_top, 
+     &                  allowed_to_read ,                               &
+     &                  ids, ide, jds, jde, kds, kde,                   &
+     &                  ims, ime, jms, jme, kms, kme,                   &
+     &                  its, ite, jts, jte, kts, kte,                   &
+     &                  mpirank, mpiroot, mpicomm,                      &
+     &                  errmsg, errflg             )
 
 !--------------------------------------------------------------------
       IMPLICIT NONE
@@ -12976,12 +12977,13 @@ CONTAINS
       INTEGER , INTENT(IN)           :: ids, ide, jds, jde, kds, kde,   &
                                         ims, ime, jms, jme, kms, kme,   &
                                         its, ite, jts, jte, kts, kte
-       REAL, INTENT(IN)               :: p_top 
+!mz       REAL, INTENT(IN)               :: p_top 
 
 ! Steven Cavallo.  Added for buffer layer adjustment.   December 2010.
-       NLAYERS = kme + nint(p_top*0.01/deltap)- 1 ! Model levels plus new levels.
-                                              ! nlayers will subsequently 
-                                              ! replace kte+1
+!mz: set ltp =0 as default as in GFS rrtmg
+!mz       NLAYERS = kme + nint(p_top*0.01/deltap)- 1 ! Model levels plus new levels.
+!mz                                              ! nlayers will subsequently 
+!mz                                              ! replace kte+1
 
 ! Read in absorption coefficients and other data
       IF ( allowed_to_read ) THEN

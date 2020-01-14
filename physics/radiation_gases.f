@@ -217,7 +217,7 @@
 
 !  ---  public interfaces
 
-      public  gas_init, gas_update, getgases, getozn
+      public  gas_init, gas_update, getgases, getozn, aerosol_in, oznini
 
 
 ! =================

@@ -140,7 +140,7 @@
 ! total number of zenith angle iterations
       integer               :: nstp    =6
 
-      public  sol_init, sol_update, coszmn
+      public  sol_init, sol_update, coszmn, cal_mon_day, zenith
 
 
 ! =================
@@ -1040,7 +1040,6 @@
 
 
 !----------------------------------------------------------------------
-
       SUBROUTINE ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,GLON,GLAT,CZEN,      &
      &                  MYIS,MYIE,MYJS,MYJE,                            &
      &                  IDS,IDE, JDS,JDE, KDS,KDE,                      &

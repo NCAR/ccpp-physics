@@ -1,46 +1,65 @@
 !>\file HWRF_rrtmg_driver.F
 
-MODULE HWRF_rrtmg_driver
- 
-CONTAINS
+      MODULE HWRF_rrtmg_driver
 
-   SUBROUTINE radiation_driver (ALBEDO                                  &
+      USE module_model_constants
+      USE module_ra_rrtmg_lw   , ONLY : rrtmg_lwrad
+      USE module_ra_rrtmg_sw   , ONLY : rrtmg_swrad
+
+      IMPLICIT NONE
+
+!MZ:  HWRF namelist
+      integer, parameter, private  :: aer_opt        = 1
+      integer, parameter, private  :: o3input        = 2
+      integer, parameter, private  :: swint_opt      = 0
+      integer, parameter, private  :: ra_call_offset = -1
+      integer, parameter, private  :: ICLOUD         = 3
+      integer, parameter, private  :: cldovrlp       = 4
+      real,    parameter, private  :: cam_abs_freq_s = 21600. !default CAM clearsky longwave absorption calculation frequency
+      INTEGER, parameter, private  :: aer_type       = 1      ! aerosol type: 1 is SF79 rural, 2 is SF79 urban 
+      LOGICAL, parameter, private  :: is_CAMMGMP_used  = .false. ! CAM
+      LOGICAL, parameter, private  :: warm_rain  = .false.
+      INTEGER, parameter, private  :: sf_surface_physics = 2
+      INTEGER, parameter, private  :: calc_clean_atm_diag = 0
+
+      CONTAINS
+
+      SUBROUTINE radiation_driver (ALBEDO                               &
               ,CZMEAN ,DT                                               &
               ,DZ8W   ,EMISS  ,GLW     ,GMT    ,GSW                     & 
               ,ITIMESTEP,JULDAY, JULIAN,JULYR                           &
-              ,NPHS  O3RAD  ,                           &
+              ,NPHS,  O3RAD                                             &
               ,P8W  ,P ,PI  ,        RADT                               & 
-              ,RHO    ,RLWTOA  ,RTHRATEN                        &
+              ,RHO    ,RLWTOA  ,RTHRATEN                                &
               ,RTHRATENLW    ,RTHRATENSW   ,HRSWPD, HRLWPD              &
               ,SNOW   ,STEPRA ,SWDOWN  ,SWDOWNC                         &
               ,T8W     ,T ,                  TSK ,VEGFRA                &
-              ,XICE ,XLAND  ,XLAT ,XLONG ,YR                 &
-!Optional solar variables
-              ,DECLINX ,SOLCONX ,COSZEN ,HRANG    &
-              ,Z                                             &
-              ,ALEVSIZ, no_src_types               &
-              ,LEVSIZ, N_OZMIXM,   N_AEROSOLC                            &
+              ,XICE ,XLAND  ,XLAT ,XLONG ,YR                            &
+              ,DECLINX ,SOLCONX ,COSZEN ,HRANG                          &
+              ,Z                                                        &
+              ,ALEVSIZ, no_src_types                                    &
+              ,LEVSIZ, N_OZMIXM,   N_AEROSOLC                           &
               ,PAERLEV                                                  & 
-              ,XTIME                                           &
-              ,CURR_SECS    &
-              ,IDS,IDE, JDS,JDE, KDS,KDE          &
-              ,IMS,IME, JMS,JME, KMS,KME          &
-              ,kts, kte                          &
-              , CLDFRA,ZNU       &
+              ,XTIME                                                    &
+              ,CURR_SECS                                                &
+              ,IDS,IDE, JDS,JDE, KDS,KDE                                &
+              ,IMS,IME, JMS,JME, KMS,KME                                &
+              ,kts, kte                                                 &
+              , CLDFRA                                                  &
 #if (EM_CORE == 1)
-              , lradius,iradius                     &
+              , lradius,iradius                                         &
 #endif
-              , re_cloud, re_ice, re_snow           & ! G. Thompson
-              , has_reqc, has_reqi, has_reqs        & ! G. Thompson
-              , PB                                                &
-              , F_ICE_PHY,F_RAIN_PHY       &
-              , QV, F_QV                     &
-              , QC, F_QC                     &
-              , QR, F_QR                     &
-              , QI, F_QI                     &
-              , QS, F_QS                     &
-              , QG, F_QG                     &
-              , QNDROP, F_QNDROP    &
+              , re_cloud, re_ice, re_snow                               & ! G. Thompson
+              , has_reqc, has_reqi, has_reqs                            & ! G. Thompson
+              , PB                                                      &
+              , F_ICE_PHY,F_RAIN_PHY                                    &
+              , QV, F_QV                                                &
+              , QC, F_QC                                                &
+              , QR, F_QR                                                &
+              , QI, F_QI                                                &
+              , QS, F_QS                                                &
+              , QG, F_QG                                                &
+              , QNDROP, F_QNDROP                                        &
               ,ACSWUPT   ,ACSWUPTC            &
               ,ACSWDNT   ,ACSWDNTC            &
               ,ACSWUPB   ,ACSWUPBC            &
@@ -61,7 +80,7 @@ CONTAINS
               ,SWCF                           &
               , PINA, aodtot           &
               ,OZMIXM, PIN                    &
-              ,CALC_CLEAN_ATM_DIAG            &
+!mz              ,CALC_CLEAN_ATM_DIAG            &
               ,AER_RA_FEEDBACK                &
               ,TAUAER300, TAUAER400 & ! jcb
               ,TAUAER600, TAUAER999 & ! jcb
@@ -83,24 +102,14 @@ CONTAINS
               ,LWUPFLX,LWUPFLXC,LWDNFLX,LWDNFLXC                          & ! Optional
               ,ALSWVISDIR, ALSWVISDIF, ALSWNIRDIR, ALSWNIRDIF             & !fds ssib alb comp (06/2010)
               ,SWVISDIR, SWVISDIF, SWNIRDIR, SWNIRDIF                     & !fds ssib swr comp (06/2010)
-              ,SF_SURFACE_PHYSICS, IS_CAMMGMP_USED                        & !fds
+!mz              ,SF_SURFACE_PHYSICS &!IS_CAMMGMP_USED                        & !fds
               ,swddir,swddni,swddif                                       & ! jararias 2013/08
               ,swddirc,swddnic                                            & ! PAJ: clear-sky direct irradiance
-              ,swdown_ref,swddir_ref,coszen_ref,Gx,gg,Bx,bb               &
-              ,mp_physics                                                 &
-              ,EFCG,EFCS,EFIG,EFIS,EFSG,   &!mzaercu_opt   
-              ,EFSS                                                       &
-                                                                          )
-
-
+!              ,swdown_ref,swddir_ref,coszen_ref                           & !,Gx,gg,Bx,bb               &
+              ,mp_physics, imp_physics_fer_hires                          &
+              ,EFCG,EFCS,EFIG,EFIS,EFSG                                   &!mzaercu_opt   
+              ,EFSS,mpirank, mpiroot,errflg, errmsg ) 
 !-------------------------------------------------------------------------
-
-!mz:TO-DO
-   USE module_model_constants
-
-   USE module_ra_rrtmg_lw   , ONLY : rrtmg_lwrad
-   USE module_ra_rrtmg_sw   , ONLY : rrtmg_swrad
-
    !  This driver calls subroutines for the radiation parameterizations.
    !
    !  short wave radiation choices:
@@ -112,7 +121,7 @@ CONTAINS
    !  4. rrtmg_lw - Added November 2008, MJIacono, AER, Inc.
    !
 !----------------------------------------------------------------------
-   IMPLICIT NONE
+        IMPLICIT NONE
 !======================================================================
 ! Grid structure in physics part of WRF
 ! 
@@ -203,34 +212,25 @@ CONTAINS
 !
 !==================================================================
 !
-!MZ: operational NML for HWRF
-   integer, parameter     :: aer_opt        = 1
-   integer, parameter     :: o3input        = 2
-   integer, parameter     :: swint_opt      = 0
-   integer, parameter     :: ra_call_offset = -1
-   integer, parameter     :: ICLOUD         = 3
-   integer, parameter     :: cldovrlp       = 4 
-   real,    parameter     :: cam_abs_freq_s = 21600. !default CAM clearsky longwave absorption calculation frequency
-   INTEGER, parameter     :: aer_type       = 1      ! aerosol type: 1 is SF79 rural, 2 is SF79 urban 
-   LOGICAL, parameter     :: is_CAMMGMP_used  = .false. ! CAM
-   LOGICAL, parameter     :: warm_rain  = .false.
-   INTEGER, parameter     :: sf_surface_physics = 2
-!-------------------------------------------------------------------
 
 
-   INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde, &
-                                       ims,ime, jms,jme, kms,kme, &
+   INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde,       &
+                                       ims,ime, jms,jme, kms,kme,       &
                                                          kts,kte  
-   INTEGER,      INTENT(IN   )    ::   mp_physics
+   INTEGER,      INTENT(IN   )    ::   mpirank, mpiroot
+   character(len=*),          intent(  out) :: errmsg
+   integer,                   intent(  out) :: errflg
+
+   INTEGER,      INTENT(IN   )    ::   mp_physics, imp_physics_fer_hires 
    INTEGER,      INTENT(IN   )    ::   STEPRA     
    INTEGER,      INTENT(IN   )    ::   alevsiz, no_src_types
    INTEGER,      INTENT(IN   )    ::   levsiz, n_ozmixm
    INTEGER,      INTENT(IN   )    ::   paerlev, n_aerosolc      
    REAL,         INTENT(IN   )       ::   RADT
-   REAL, DIMENSION( ims:ime, jms:jme ),                           &
-         INTENT(IN   )  ::                                 XLAND, &
-                                                            XICE, &
-                                                             TSK, &
+   REAL, DIMENSION( ims:ime, jms:jme ),                                 &
+         INTENT(IN   )  ::                                 XLAND,       &
+                                                            XICE,       &
+                                                             TSK,       &
                                                           VEGFRA, &
                                                             SNOW 
    REAL,  DIMENSION( ims:ime, levsiz, jms:jme, n_ozmixm ),  OPTIONAL,    &
@@ -270,20 +270,19 @@ CONTAINS
                                  waer300,waer400,waer600,waer999
 
 
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL ,       &
 #if ( WRF_CHEM == 1 )
+   REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL ,       &
          INTENT(IN ) ::  tauaerlw1,tauaerlw2,tauaerlw3,tauaerlw4, & ! czhao 
                          tauaerlw5,tauaerlw6,tauaerlw7,tauaerlw8, & ! czhao 
                          tauaerlw9,tauaerlw10,tauaerlw11,tauaerlw12, & ! czhao 
                          tauaerlw13,tauaerlw14,tauaerlw15,tauaerlw16
 
-   INTEGER, INTENT(IN   ), OPTIONAL  ::   aer_ra_feedback
    INTEGER, OPTIONAL, INTENT(IN   )    :: progn
 #endif
-   INTEGER, INTENT(IN   )  ::   calc_clean_atm_diag
+!mz   INTEGER, INTENT(IN   )  ::   calc_clean_atm_diag
+    INTEGER, INTENT(IN   ), OPTIONAL  ::   aer_ra_feedback
+   
 
-!
-!
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                  &
          INTENT(INOUT)  ::                              RTHRATEN, &
                                                       RTHRATENLW, &
@@ -343,10 +342,10 @@ CONTAINS
    REAL, DIMENSION( ims:ime, jms:jme ),  INTENT(OUT) :: swddir, & ! All-sky SW broadband surface direct irradiance
                                                         swddni, & ! All-sky SW broadband surface direct normal irradiance
                                                         swddif    ! All-sky SW broadband surface diffuse irradiance
-   REAL, DIMENSION( ims:ime, jms:jme ),  INTENT(INOUT) :: Gx,Bx,gg,bb, & ! For SW sza-interpolation
-                                                          swdown_ref,  &
-                                                          swddir_ref,  &
-                                                          coszen_ref
+!   REAL, DIMENSION( ims:ime, jms:jme ),  INTENT(INOUT) ::              & !Gx,Bx,gg,bb, & ! For SW sza-interpolation
+!                                                          swdown_ref,  &
+!                                                          swddir_ref,  &
+!                                                          coszen_ref
 ! ------------------------------------------------------------------------------ jararias 2013/11    -----------
 !
    REAL, INTENT(IN  )   ::                                GMT,dt, &
@@ -393,7 +392,7 @@ CONTAINS
          OPTIONAL,                                                   &
          INTENT(IN   ) ::                                            &
                                                           F_ICE_PHY, &
-                                                         F_RAIN_PHY, &
+                                                         F_RAIN_PHY
                                                 !      CLDFRA_MP_ALL     !mz EM  specific
 
 #if (EM_CORE == 1)
@@ -406,7 +405,7 @@ CONTAINS
 
    REAL, DIMENSION( ims:ime, jms:jme ),                           &
          OPTIONAL,                                                &
-         INTENT(OUT) ::                                   SWDOWNC, SWDDIRC, SWDDNIC
+         INTENT(OUT) ::                 SWDOWNC, SWDDIRC, SWDDNIC
 !MZ:IKJ
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                  &
          OPTIONAL,                                                &
@@ -518,16 +517,16 @@ CONTAINS
 
 ! initialize data
 
-     if ((itimestep.eq.1).and.(swint_opt.eq.1)) then
-        do j=jts,jte
-           do i=its,ite
-              Bx(i,j)=0.
-              bb(i,j)=0.
-              Gx(i,j)=0.
-              gg(i,j)=0.
-           end do
-        end do
-     end if
+!mz     if ((itimestep.eq.1).and.(swint_opt.eq.1)) then
+!mz        do j=jts,jte
+!mz           do i=its,ite
+!mz              Bx(i,j)=0.
+!mz              bb(i,j)=0.
+!mz              Gx(i,j)=0.
+!mz              gg(i,j)=0.
+!           end do
+!        end do
+!     end if
 
      DO j=jts,jte
      DO i=its,ite
@@ -688,14 +687,13 @@ CONTAINS
 !ccc Added for time-varying trace gases.
                   YR=YR,JULIAN=JULIAN,                              &
 !ccc
+                  mp_physics=mp_physics,                            &
+                  imp_physics_fer_hires= imp_physics_fer_hires,     & 
                   IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde,&
                   IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme,&
                   ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte,&
                   LWUPFLX=LWUPFLX,LWUPFLXC=LWUPFLXC,                &
-                  LWDNFLX=LWDNFLX,LWDNFLXC=LWDNFLXC,                &
-                  mp_physics=mp_physics                             )
-
-
+                  LWDNFLX=LWDNFLX,LWDNFLXC=LWDNFLXC )
 
         DO j=jts,jte
         DO k=kts,kte
@@ -734,12 +732,12 @@ CONTAINS
                      QV3D=qv,QC3D=qc,QR3D=qr,                          &
                      QI3D=qi,QS3D=qs,QG3D=qg,                          &
                      O3INPUT=O3INPUT,O33D=O3RAD,                       &
-                     AER_OPT=AER_OPT,aerod=aerod,no_src=no_src_types,  &
+                     AER_OPT=AER_OPT, no_src=no_src_types,             & !mz  aerod=aerod
                      ALSWVISDIR=alswvisdir ,ALSWVISDIF=alswvisdif,     &  !Zhenxin ssib alb comp (06/2010)
                      ALSWNIRDIR=alswnirdir ,ALSWNIRDIF=alswnirdif,     &  !Zhenxin ssib alb comp (06/2010)
                      SWVISDIR=swvisdir ,SWVISDIF=swvisdif,             &  !Zhenxin ssib swr comp (06/2010)
                      SWNIRDIR=swnirdir ,SWNIRDIF=swnirdif,             &  !Zhenxin ssib swr comp (06/2010)
-!                     SF_SURFACE_PHYSICS=sf_surface_physics,            &  !Zhenxin ssib sw_phy   (06/2010)
+                     SF_SURFACE_PHYSICS=sf_surface_physics,            &  !Zhenxin ssib sw_phy   (06/2010)
                      F_QV=f_qv,F_QC=f_qc,F_QR=f_qr,                    &
                      F_QI=f_qi,F_QS=f_qs,F_QG=f_qg,                    &
                      RE_CLOUD=re_cloud,RE_ICE=re_ice,RE_SNOW=re_snow,  & ! G. Thompson
@@ -757,6 +755,8 @@ CONTAINS
 #endif
                      calc_clean_atm_diag=calc_clean_atm_diag,          &
                      QNDROP3D=qndrop,F_QNDROP=f_qndrop,                &
+                     mp_physics=mp_physics,                            &
+                     imp_physics_fer_hires=imp_physics_fer_hires,      &
                      IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde,&
                      IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme,&
                      ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte,&
@@ -768,7 +768,8 @@ CONTAINS
                      use_aer3d=use_aer3d,                               & ! bug fix, SGT 2015/03
                      swddir=swddir,swddni=swddni,swddif=swddif,         & ! jararias 2013/08/10
                      swdownc=swdownc, swddnic=swddnic, swddirc=swddirc, & ! PAJ
-                     xcoszen=coszen,julian=julian,mp_physics=mp_physics ) ! jararias 2013/08/14
+                     xcoszen=coszen,julian=julian,                      &
+                     errflg=errflg, errmsg=errmsg               ) ! jararias 2013/08/14
 
              DO j=jts,jte
              DO k=kts,kte
@@ -848,16 +849,17 @@ CONTAINS
         ENDIF
 
       ! parameters update for SW surface fluxes interpolation
-      IF (swint_opt.EQ.1) THEN
+!mz
+!      IF (swint_opt.EQ.1) THEN
          ! interpolation applies on all-sky fluxes (swddir, swdown)
-         CALL update_swinterp_parameters(ims,ime,jms,jme,its,ite,jts,jte,   &
-                                         coszen,coszen_loc,swddir,swdown,   &
-                                         swddir_ref,bb,Bx,swdown_ref,gg,Gx, &
-                                         coszen_ref                         )
-      ENDIF
+!         CALL update_swinterp_parameters(ims,ime,jms,jme,its,ite,jts,jte,   &
+!                                         coszen,coszen_loc,swddir,swdown,   &
+!                                         swddir_ref,bb,Bx,swdown_ref,gg,Gx, &
+!                                         coszen_ref                         )
+!      ENDIF
 
-   ENDDO
-   !$OMP END PARALLEL DO
+!mz   ENDDO
+!mz   !$OMP END PARALLEL DO
 
    IF ( associated(tauaer_sw) ) deallocate(tauaer_sw)
    IF ( associated(ssaaer_sw) ) deallocate(ssaaer_sw)
@@ -867,14 +869,15 @@ CONTAINS
 
  ! jararias, aug 2013
  ! SW surface fluxes interpolation (meaningful when not in a Radiation_step)
- if (swint_opt .eq. 1) then
-    call wrf_debug(100,'SW surface irradiance interpolation')
-
-      call interp_sw_radiation(ims,ime,jms,jme,its,ite,jts,jte,  &
-                               coszen_ref,coszen_loc,swddir_ref, &
-                               bb,Bx,swdown_ref,gg,Gx,albedo,    &
-                               swdown,swddir,swddni,swddif,gsw   )
- end if
+!mz
+! if (swint_opt .eq. 1) then
+!    call wrf_debug(100,'SW surface irradiance interpolation')
+!
+!      call interp_sw_radiation(ims,ime,jms,jme,its,ite,jts,jte,  &
+!                               coszen_ref,coszen_loc,swddir_ref, &
+!                               bb,Bx,swdown_ref,gg,Gx,albedo,    &
+!                               swdown,swddir,swddni,swddif,gsw   )
+! end if
 
 
 
@@ -885,8 +888,8 @@ CONTAINS
 #else
    DTaccum = RADT*60
 #endif
-   !$OMP PARALLEL DO   &
-   !$OMP PRIVATE ( ij ,i,j,k,its,ite,jts,jte)
+!mz   !$OMP PARALLEL DO   &
+!mz   !$OMP PRIVATE ( ij ,i,j,k,its,ite,jts,jte)
 
 !mz   DO ij = 1 , num_tiles
 !mz     its = i_start(ij)
@@ -972,7 +975,7 @@ CONTAINS
    SUBROUTINE radconst(XTIME,DECLIN,SOLCON,JULIAN,                   &
                        DEGRAD,DPD                                    )
 !---------------------------------------------------------------------
-   USE module_wrf_error
+!mz   USE module_wrf_error
    IMPLICIT NONE
 !---------------------------------------------------------------------
 
@@ -1042,6 +1045,7 @@ CONTAINS
        enddo
    END SUBROUTINE calc_coszen
 
+!mz:delete due to swint_opt = 0
    subroutine update_swinterp_parameters(ims,ime,jms,jme,its,ite,jts,jte, &
                                          coszen,coszen_loc,swddir,swdown, &
                                          swddir_ref,bb,Bx,                &

@@ -171,6 +171,14 @@
   kind = kind_phys
   intent = inout
   optional = T
+[mpicomm]
+  standard_name = mpi_comm
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [mpiroot]
   standard_name = mpi_root
   long_name = master MPI-rank
@@ -215,6 +223,22 @@
 [ccpp-arg-table]
   name = HWRF_radiation_run
   type = scheme
+[NCOL]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[NLEV]
+  standard_name = vertical_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [NTSD]
   standard_name = index_of_time_step
   long_name = current forecast interation
@@ -532,6 +556,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[GSW]     ???
+  standard_name =  surface_net_downward_shortwave_flux
+  long_name = surface net downward shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [RLWTOA]
   standard_name = toa_outgoing_longwave_flux
   long_name = outgoing LW flux at top of atmosphere
@@ -680,6 +713,26 @@
   type = integer
   intent = inout
   optional = F
+[swddir]   ???
+[swddni]   ???
+[swddif]   ???
+[swddirc]  ???
+[swddnic]  ???
+[coszen]   ???
+[hrang]    ???
+[xlat]     ???
+[xlong]    ????
+[paerlev]   ???
+[alevsiz]   ???
+[no_src_types]    ???
+[cam_abs_freq_s] ???
+[icloud]    ???
+[cldovrlp]   ???
+[ra_call_offset]   ???
+[o3input]     ???
+[aer_opt]    ???
+[o3rad]      ???
+[sf_surface_physics] ???
 [hrswpd]
   standard_name = shortwave_heating_rate_per_day
   long_name = shortwave heating rate per day

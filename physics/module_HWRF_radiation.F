@@ -6,12 +6,18 @@
       use machine, only : kind_phys
 !-----------------------------------------------------------------------
       USE MODULE_MODEL_CONSTANTS
-      USE module_radiation_astronomy ,ONLY : CAL_MON_DAY,ZENITH
+      !USE module_radiation_astronomy ,ONLY : CAL_MON_DAY,ZENITH
       USE HWRF_rrtmg_driver
 !-----------------------------------------------------------------------
+      implicit none
 !
-      public : HWRF_radiation_init, HWRF_radiation_run,                 &
-               HWRF_radiation_finalize
+      public :: HWRF_radiation_init, HWRF_radiation_run,                &
+     &          HWRF_radiation_finalize
+      
+      private
+      LOGICAL :: acswalloc = .false.
+      LOGICAL :: aclwalloc = .false.
+
 
       CONTAINS
      
@@ -19,15 +25,15 @@
 !! \htmlinclude HWRF_radiation_init.html
 !!
       SUBROUTINE HWRF_radiation_init(ncol, nlev, KDT,                   &
-                      RTHRATEN,RTHRATENLW,                              &
-                      RTHRATENSW,CLDFRA,                                &
-                      levsiz,XLAT,XLONG,n_ozmixm,                       &
-                      alevsiz,no_src_types,                             &
-                      has_reqc,has_reqi,has_reqs,                       &
-                      ozmixm,pin,                                       &
-                      aerodm,pina,                                      &
-                      mpiroot,mpirank,                                  &
-                      errmsg, errflg )
+     &                RTHRATEN,RTHRATENLW,                              &
+     &                RTHRATENSW,CLDFRA,                                &
+     &                levsiz,XLAT,XLONG,n_ozmixm,                       &
+     &                alevsiz,no_src_types,                             &
+     &                has_reqc,has_reqi,has_reqs,                       &
+     &                ozmixm,pin,                                       &
+     &                aerodm,pina,                                      &
+     &                mpicomm, mpiroot,mpirank,                         &
+     &                errmsg, errflg )
 !---------------------------------------------------------------------
       USE module_ra_rrtmg_lw  , ONLY : rrtmg_lwinit
       USE module_ra_rrtmg_sw  , ONLY : rrtmg_swinit
@@ -35,38 +41,39 @@
 !---------------------------------------------------------------------
       IMPLICIT NONE
 
-      INTEGER,                   INTENT(IN   )    :: levsiz, n_ozmixm
-      INTEGER,                   INTENT(IN   )    :: NCOL, NLAY, KDT
-      INTEGER,                   INTENT(IN   )    :: alevsiz, no_src_types
-      INTEGER,                   INTENT(INOUT)    :: has_reqc, has_reqi,&
-                                                     has_reqs
-      INTEGER,                   INTENT(IN   )    :: mpirank
-      INTEGER,                   INTENT(IN   )    :: mpiroot
+      INTEGER,               INTENT(IN   )    :: levsiz, n_ozmixm
+      INTEGER,               INTENT(IN   )    :: NCOL, nlev, KDT
+      INTEGER,               INTENT(IN   )    :: alevsiz, no_src_types
+      INTEGER,               INTENT(INOUT)    :: has_reqc, has_reqi,    &
+     &                                           has_reqs
+      INTEGER,               INTENT(IN   )    :: mpirank
+      INTEGER,               INTENT(IN   )    :: mpiroot
+      INTEGER,               INTENT(IN   )    :: mpicomm
       REAL(KIND_PHYS),  DIMENSION(1:ncol) , INTENT(IN) ::  XLAT, XLONG
       REAL(KIND_PHYS),  DIMENSION(1:ncol, levsiz, n_ozmixm ),           &
-                                                           OPTIONAL,    &
-          INTENT(INOUT) ::                                  OZMIXM
-      REAL(KIND_PHYS),  DIMENSION(1:ncol, alevsiz, n_ozmixm-1, no_src_types ),
-                                                         OPTIONAL,      &
-          INTENT(INOUT) ::                                  aerodm
-      REAL(KIND_PHYS), DIMENSION(levsiz), OPTIONAL, INTENT(INOUT)  ::  PIN
-      REAL(KIND_PHYS), DIMENSION(alevsiz), OPTIONAL, INTENT(INOUT) ::  PINA
+     &                                              OPTIONAL,           &
+     &                                          INTENT(INOUT) :: OZMIXM
+
+      REAL(KIND_PHYS),                                                  &
+     &      DIMENSION(1:ncol, alevsiz, n_ozmixm-1, no_src_types ),      &
+     &                                                   OPTIONAL,      &
+     &     INTENT(INOUT) ::                                  aerodm
+      REAL(KIND_PHYS), DIMENSION(levsiz), OPTIONAL, INTENT(INOUT) ::PIN
+      REAL(KIND_PHYS), DIMENSION(alevsiz), OPTIONAL, INTENT(INOUT)::PINA
       REAL(KIND_PHYS), DIMENSION(1:ncol, 1:nlev) , INTENT(INOUT) ::     &
-                                                              RTHRATEN, &
-                                                            RTHRATENLW, &
-                                                            RTHRATENSW, &
-                                                              CLDFRA
+     &                                                        RTHRATEN, &
+     &                                                      RTHRATENLW, &
+     &                                                      RTHRATENSW, &
+     &                                                      CLDFRA
       CHARACTER(LEN=*),          INTENT(  OUT) :: errmsg
       INTEGER,                   INTENT(  OUT) :: errflg
 
       !local
       LOGICAL, PARAMETER             :: allowed_to_read =.true.
       INTEGER                        :: ids, ide, jds, jde, kds, kde,   &
-                                        ims, ime, jms, jme, kms, kme,   &
-                                        its, ite, jts, jte, kts, kte
+     &                                  ims, ime, jms, jme, kms, kme,   &
+     &                                  its, ite, jts, jte, kts, kte
 
-      LOGICAL :: acswalloc = .false.
-      LOGICAL :: aclwalloc = .false.
       INTEGER :: i, j, k
 
 
@@ -109,9 +116,9 @@
       kds = 1
       kms = 1
       kts = 1
-      kde = levr
-      kme = levr
-      kte = levr
+      kde = nlev
+      kme = nlev
+      kte = nlev
 
 
 !---------------------------------------------------------------------
@@ -124,14 +131,12 @@
 !-- initialization
 !MZ: rad_reset 
       IF(KDT .LE. 1) THEN
-      DO j=jts,jte
-      DO k=kts,kte
-      DO i=its,ite
-        RTHRATEN(i,k,j)=0.
-        RTHRATENLW(i,k,j)=0.
-        RTHRATENSW(i,k,j)=0.
-        CLDFRA(i,k,j)=0.
-      ENDDO
+      DO k=1,nlev
+      DO i=1,ncol
+        RTHRATEN(i,k)=0.
+        RTHRATENLW(i,k)=0.
+        RTHRATENSW(i,k)=0.
+        CLDFRA(i,k)=0.
       ENDDO
       ENDDO
       ENDIF
@@ -142,34 +147,39 @@
 !   Interpolation of aerosols is done on domain 1 only
 
       CALL oznini(ozmixm,pin,levsiz,n_ozmixm,XLAT,                      &
-                     ids, ide, jds, jde, kds, kde,                      &
-                     ims, ime, jms, jme, kms, kme,                      &
-                     its, ite, jts, jte, kts, kte,                      &
-                     mpirank, mpiroot, errflg, errmsg)
+     &               ids, ide, jds, jde, kds, kde,                      &
+     &               ims, ime, jms, jme, kms, kme,                      &
+     &               its, ite, jts, jte, kts, kte,                      &
+     &               mpicomm, mpirank, mpiroot, errflg, errmsg)
                    
       if (errflg /= 0) return
 
       CALL aerosol_in(aerodm,pina,alevsiz,n_ozmixm-1,                   &
-                     no_src_types,XLAT,XLONG,                           &
-                     ids, ide, jds, jde, kds, kde,                      &
-                     ims, ime, jms, jme, kms, kme,                      &
-                     its, ite, jts, jte, kts, kte)
+     &               no_src_types,XLAT,XLONG,                           &
+     &               ids, ide, jds, jde, kds, kde,                      &
+     &               ims, ime, jms, jme, kms, kme,                      &
+     &               its, ite, jts, jte, kts, kte)
       if (errflg /= 0) return
 
       CALL rrtmg_lwinit(                                                &
-                     ltp, allowed_to_read,                              &
-                     ids, ide, jds, jde, kds, kde,                      &
-                     ims, ime, jms, jme, kms, kme,                      &
-                     its, ite, jts, jte, kts, kte)
+     &               allowed_to_read,                                   &
+     &               ids, ide, jds, jde, kds, kde,                      &
+     &               ims, ime, jms, jme, kms, kme,                      &
+     &               its, ite, jts, jte, kts, kte,                      &
+     &               mpirank, mpiroot, mpicomm,                         &
+     &               errmsg, errflg       )
+     
       if (errflg /= 0) return
 
       aclwalloc = .true.
 
       CALL rrtmg_swinit(                                                &
-                     allowed_to_read ,                                  &
-                     ids, ide, jds, jde, kds, kde,                      &
-                     ims, ime, jms, jme, kms, kme,                      &
-                     its, ite, jts, jte, kts, kte )
+     &               allowed_to_read ,                                  &
+     &               ids, ide, jds, jde, kds, kde,                      &
+     &               ims, ime, jms, jme, kms, kme,                      &
+     &               its, ite, jts, jte, kts, kte,                      &
+     &               mpirank, mpiroot, mpicomm,                         &
+     &               errmsg, errflg )
       if (errflg /= 0) return
 
       acswalloc = .true.
@@ -183,23 +193,25 @@
 !> \section arg_table_HWRF_radiation_run Argument Table
 !! \htmlinclude HWRF_radiation_run.html
 !!
-      SUBROUTINE HWRF_radiation_run (NTSD,DT,JULDAY,JULYR,XTIME,JULIAN  &
+       SUBROUTINE HWRF_radiation_run (NCOL,NLEV, NTSD,DT                &
+     &                    ,JULDAY,JULYR,XTIME,JULIAN                    &
      &                    ,IHRST,NPHS,GLAT,GLON                         &
      &                    ,NRADS,NRADL, DX ,p8w,prsl,tsfc,T,Q           &
      &                    ,QV,QC,QI,QR,QS,QG                            & !MOIST: dry mixing ratio
      &                    ,ALBEDO,EPSR                                  &
      &                    ,F_ICE,F_RAIN,SM,CLDFRA                       &
-     &                    ,RLWTT,RSWTT,RLWIN,RSWIN,RSWINC,RSWOUT,GSW,   &
-     &                    ,RLWTOA,CZMEAN                         &
+     &                    ,RLWTT,RSWTT,RLWIN,RSWIN,RSWINC,RSWOUT,GSW    &
+     &                    ,RLWTOA,CZMEAN                                &
      &                    ,SNOW,SICE, NUM_OZMIXM,OZMIXM,PIN,LEVSIZ      &
      &                    ,RTHRATEN,RTHRATENLW,RTHRATENSW               &
      &                    ,re_cloud,re_ice,re_snow                      &
      &                    ,has_reqc,has_reqi,has_reqs                   &
      &                    ,swddir, swddni,swddif, swddirc,swddnic       &
-     &                    ,gx,bx,gg,bb,swdown_ref, swddir_ref           &
-     &                    ,coszen_ref, coszen,hrang,xlat,xlong          &
-     &                    ,paerlev, ALEVSIZ,no_src_types,               &   !NML
-     &                    ,CAM_ABS_FREQ_S,swint_opt,icloud,cldovrlp     &
+!     &                    ,gx,bx,gg,bb,swdown_ref, swddir_ref           &
+!     &                    ,coszen_ref, 
+     &                    ,coszen,hrang,xlat,xlong                      &
+     &                    ,paerlev, ALEVSIZ,no_src_types                &   !NML
+     &                    ,CAM_ABS_FREQ_S,icloud,cldovrlp               &
      &                    ,RA_CALL_OFFSET, o3input,aer_opt,o3rad        &
      &                    ,sf_surface_physics                           &
      &                    ,hrswpd,hrlwpd                                &
@@ -217,139 +229,135 @@
      &                    ,ERRMSG, ERRFLG    )
 
 !***********************************************************************
+      USE module_radiation_astronomy ,ONLY : CAL_MON_DAY,ZENITH
       IMPLICIT NONE
 
       INTEGER,         INTENT(IN) :: IHRST,JULDAY,JULYR                 &
      &                              ,NPHS,NRADL,NRADS,NTSD              &
-     &                              ,NUM_OZMIXM,LEVSIZ
+     &                              ,NUM_OZMIXM
 
-      INTEGER,         INTENT(IN) :: NCOL, NLAY
+      INTEGER,         INTENT(IN) :: NCOL,NLEV 
       REAL(KIND_PHYS), INTENT(IN) :: DX
       REAL(KIND_PHYS), INTENT(IN) :: OZMIXM(1:NCOL,LEVSIZ,NUM_OZMIXM)   &
-                                    ,PIN(LEVSIZ)
+     &                               ,PIN(LEVSIZ)
 !MZ: predefine in GFS_typedef
-      integer,         intent(in) :: swint_opt
+!      integer,         intent(in) :: swint_opt
       INTEGER,         INTENT(IN) :: o3input, aer_opt
       INTEGER,         INTENT(IN) :: ICLOUD,ra_call_offset
       INTEGER,         INTENT(IN) :: cldovrlp        
       INTEGER,         INTENT(IN) :: alevsiz, no_src_types
-      INTEGER,         INTENT(IN) :: levsiz, n_ozmixm
-      INTEGER,         INTENT(IN) :: paerlev, n_aerosolc,
+      INTEGER,         INTENT(IN) :: levsiz !, n_ozmixm
+      INTEGER,         INTENT(IN) :: paerlev!, n_aerosolc
       REAL(KIND_PHYS), INTENT(IN) :: cam_abs_freq_s
-      LOGICAL,         INTENT(IN) :: warm_rain
+!      LOGICAL,         INTENT(IN) :: warm_rain
       INTEGER,    OPTIONAL, INTENT(IN   )    ::  sf_surface_physics
-!
-!      INTEGER,         DIMENSION(1:NCOL),   INTENT(INOUT) :: NCFRCV,    &
-!                                                             NCFRST
 
       REAL(KIND_PHYS), INTENT(IN) :: DT,XTIME,JULIAN
 
       REAL(KIND_PHYS), DIMENSION(1:ncol),      INTENT(IN)    :: ALBEDO  &
      &                                             ,EPSR,GLAT,GLON      &
-!MZ     &                                             ,HBM2                &
-     &                                             ,SICE,SM      &
+     &                                             ,SICE,SM             &
      &                                             ,SNOW
 !MZ ,VEGFRC
 !MZ      REAL(KIND_PHYS),DIMENSION(1:ncol),       INTENT(INOUT) :: CUPPT
-      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(IN)    :: Q,T,Z,  &
-                                                                prsl
-      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay+1),INTENT(IN)  :: p8w 
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlev),INTENT(IN)    :: Q,T,    & !Z,  &
+     &                                                           prsl
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlev+1),INTENT(IN)  :: p8w 
       REAL(KIND_PHYS),DIMENSION(1:ncol),       INTENT(IN)  :: tsfc
 
-      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(IN)    :: F_ICE   &
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlev),INTENT(IN)    :: F_ICE   &
      &                                                         ,F_RAIN
       REAL(KIND_PHYS),DIMENSION(1:NCOL),       INTENT(INOUT) :: SWDDIR  &
-                                                               ,SWDDNI  &
-                                                               ,SWDDIF  &
-                                                               ,SWDDNIC &
-                                                               ,SWDDIRC 
-      REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) :: COSZEN
+     &                                                         ,SWDDNI  &
+     &                                                         ,SWDDIF  &
+     &                                                         ,SWDDNIC &
+     &                                                         ,SWDDIRC 
+      REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) ::      &
+     &                                                          COSZEN
       REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) :: HRANG
       REAL(KIND_PHYS),DIMENSION(1:ncol) , INTENT(IN) ::  XLAT, XLONG
-      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::RTHRATEN &
-                                                            ,RTHRATENSW &
-                                                            ,RTHRATENLW
-      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::    QV   &
-                                                                  ,QC   &
-                                                                  ,QI   &
-                                                                  ,QR   &
-                                                                  ,QS   &
-                                                                  ,QG
-      REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) ::                &!ACFRCV,ACFRST  &
-!     &                                                ,HBOT,HTOP        &
-     &                                                ,RLWIN,RLWTOA     &
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlev),INTENT(INOUT) ::RTHRATEN &
+     &                                                      ,RTHRATENSW &
+     &                                                       ,RTHRATENLW
+      REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlev),INTENT(INOUT) ::    QV   &
+     &                                                            ,QC   &
+     &                                                            ,QI   &
+     &                                                            ,QR   &
+     &                                                            ,QS   &
+     &                                                            ,QG
+      REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) ::                &
+     &                                                 RLWIN,RLWTOA     &
      &                                                ,RSWIN,RSWOUT     &
      &                                                ,GSW              &
      &                                                ,RSWINC
-      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) ::         &
-     &                                                        ,RLWTT    &
+      REAL(kind_phys),DIMENSION(1:ncol,1:nlev),INTENT(INOUT) ::         &
+     &                                                         RLWTT    &
      &                                                        ,RSWTT
       REAL(kind_phys),DIMENSION(1:ncol),INTENT(INOUT) ::                &
-     &                                                        CZMEAN    &
-!     &                                                        ,SIGT4
-      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(INOUT) :: CLDFRA
+     &                                                        CZMEAN    
+      REAL(kind_phys),DIMENSION(1:ncol,1:nlev),INTENT(INOUT) :: CLDFRA
       REAL(kind_phys), DIMENSION(1:ncol), INTENT(INOUT) ::              &
-                            ACSWUPT,ACSWUPTC,ACSWDNT,ACSWDNTC,          &
-                            ACSWUPB,ACSWUPBC,ACSWDNB,ACSWDNBC,          &
-                            ACLWUPT,ACLWUPTC,ACLWDNT,ACLWDNTC,          &
-                            ACLWUPB,ACLWUPBC,ACLWDNB,ACLWDNBC
+     &                      ACSWUPT,ACSWUPTC,ACSWDNT,ACSWDNTC,          &
+     &                      ACSWUPB,ACSWUPBC,ACSWDNB,ACSWDNBC,          &
+     &                      ACLWUPT,ACLWUPTC,ACLWDNT,ACLWDNTC,          &
+     &                      ACLWUPB,ACLWUPBC,ACLWDNB,ACLWDNBC
 
       ! TOA and surface, upward and downward, total and clear fluxes
       REAL(kind_phys), DIMENSION(1:ncol), INTENT(INOUT) ::              &
-                              SWUPT,  SWUPTC,  SWDNT,  SWDNTC,          &
-                              SWUPB,  SWUPBC,  SWDNB,  SWDNBC,          &
-                              LWUPT,  LWUPTC,  LWDNT,  LWDNTC,          &
-                              LWUPB,  LWUPBC,  LWDNB,  LWDNBC
+     &                        SWUPT,  SWUPTC,  SWDNT,  SWDNTC,          &
+     &                        SWUPB,  SWUPBC,  SWDNB,  SWDNBC,          &
+     &                        LWUPT,  LWUPTC,  LWDNT,  LWDNTC,          &
+     &                        LWUPB,  LWUPBC,  LWDNB,  LWDNBC
       REAL(kind_phys), DIMENSION(1:ncol), INTENT(OUT  )  ::   SWVISDIR, &
-                                                              SWVISDIF, &
-                                                              SWNIRDIR, &
-                                                              SWNIRDIF
+     &                                                        SWVISDIF, &
+     &                                                        SWNIRDIR, &
+     &                                                        SWNIRDIF
       !..Additions for coupling cloud physics effective radii and radiation.  
-      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(IN):: re_cloud,   &
-                                                            re_ice,     &
-                                                            re_snow
+      REAL(kind_phys),DIMENSION(1:ncol,1:nlev),INTENT(IN):: re_cloud,   &
+     &                                                      re_ice,     &
+     &                                                      re_snow
       INTEGER, INTENT(INOUT):: has_reqc, has_reqi, has_reqs
 
       !..Output daily longwave and shortwave heating rates: 
-      REAL(kind_phys),DIMENSION(1:ncol,1:nlay),INTENT(OUT):: hrlwpd,hrswpd
-!mz      LOGICAL,INTENT(IN) :: RESTRT
-!-----------------------------------------------------------------------
-!***  LOCAL VARIABLES
-!-----------------------------------------------------------------------
-      INTEGER :: I,IENDX,II,ISTAT,J,JDAY,JMONTH,K,KMNTH,N,NRAD,         &
-                 NUM_AEROSOLC
-      INTEGER,DIMENSION(3) :: IDAT
-      INTEGER,DIMENSION(12) :: MONTH=(/31,28,31,30,31,30,31,31          &
-     &                                ,30,31,30,31/)
-!
-      REAL(kind_phys) :: CAPA,DAYI,FICE,FRAIN,GMT,HOUR,PLYR,            &
-     &       ,QI,QR,QW,RADT,TIMES,WC,TDUM
-!
-      REAL(kind_phys),DIMENSION(1:nlay-1) :: QL,TL
-!
-      REAL(kind_phys),DIMENSION(1:ncol) :: CZEN   !mz,HBOTR,HTOPR      &
-     &                                  ,SWCF, LWCF                     &
-     &                                   ,REXNSFC,SWNETDN           &
-     &                                  ,TOT,TOTLWDN,TOTSWDN,TOTSWDNC   &
-     &                                  ,XLAND
-      REAL(kind_phys),DIMENSION(1:ncol,1:nlay) :: CLFR,DZ               &
-     &                                          ,P_PHY,PI_PHY       &
-     &                                          ,RR,T8W                 &
-     &                                          ,THRATENLW,THRATENSW    &
-     &                                          ,TH_PHY,T_PHY
-!
-
-      REAL(kind_phys) :: DXKM, DYKM
-
-      INTEGER            :: IDS,IDE,JDS,JDE,KDS,KDE                     &
-     &                     ,IMS,IME,JMS,JME,KMS,KME                     &
-     &                     ,ITS,ITE,JTS,JTE,KTS,KTE
-
+      REAL(kind_phys),DIMENSION(1:ncol,1:nlev),INTENT(OUT):: hrlwpd,    &
+     &                                                       hrswpd
       integer,                   intent(in)    :: mpirank
       integer,                   intent(in)    :: mpiroot
       character(len=*),          intent(  out) :: errmsg
       integer,                   intent(  out) :: errflg
 
+!-----------------------------------------------------------------------
+!***  LOCAL VARIABLES
+!-----------------------------------------------------------------------
+      INTEGER :: I,IENDX,II,ISTAT,J,JDAY,JMONTH,K,KMNTH,N,NRAD,         &
+     &           NUM_AEROSOLC
+      INTEGER,DIMENSION(3) :: IDAT
+      INTEGER,DIMENSION(12) :: MONTH=(/31,28,31,30,31,30,31,31          &
+     &                                ,30,31,30,31/)
+!
+      REAL(kind_phys) :: CAPA,DAYI,FICE,FRAIN,GMT,HOUR,PLYR,            &
+     &                   QW,RADT,TIMES,WC,TDUM
+!
+      REAL(kind_phys),DIMENSION(1:nlev-1) :: QL,TL
+!
+      REAL(kind_phys),DIMENSION(1:ncol) :: CZEN                         &
+     &                                  ,SWCF, LWCF                     &
+     &                                  ,REXNSFC,SWNETDN                &
+     &                                  ,TOT,TOTLWDN,TOTSWDN,TOTSWDNC   &
+     &                                  ,XLAND
+      REAL(kind_phys),DIMENSION(1:ncol,1:nlev) :: CLFR,DZ               &
+     &                                          ,P_PHY,PI_PHY           &
+     &                                          ,RR,T8W                 &
+     &                                          ,THRATENLW,THRATENSW    &
+     &                                          ,TH_PHY,T_PHY
+      REAL(kind_phys) :: DXKM, DYKM
+      integer :: ntsd_rad
+
+      INTEGER            :: IDS,IDE,JDS,JDE,KDS,KDE                     &
+     &                     ,IMS,IME,JMS,JME,KMS,KME                     &
+     &                     ,ITS,ITE,JTS,JTE,KTS,KTE                     &
+     &                     ,myis,myis1,myie,myie1                       &
+     &                     ,myjs,myjs2,myje,myje2
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -358,7 +366,7 @@
       ! Check initialization state
       if (.not.acswalloc .or. .not. aclwalloc) then
           write(errmsg, fmt='((a))') 'HWRF_radiation_run called before  &
-                                      HWRF_radiation_init'
+     &                                HWRF_radiation_init'
           errflg = 1
           return
       end if
@@ -387,9 +395,9 @@
       kds    =    1
       kms    =    1
       kts    =    1
-      kde    =    nlay
-      kme    =    nlay
-      kte    =    nlay
+      kde    =    nlev
+      kme    =    nlev
+      kte    =    nlev
 
 !----------------------------------------------------------------------
 !***  RADIATION
@@ -411,14 +419,8 @@
         NTSD_rad=ntsd+1
       ENDIF
 
-      IF(MOD(NTSD_rad,GRID%NRADS)==0.OR.                               &
-     &   MOD(NTSD_rad,GRID%NRADL)==0)THEN
+      IF(MOD(NTSD_rad,NRADS)==0.OR. MOD(NTSD_rad,NRADL)==0)THEN
 
-
-
-       
-
-     
 !
 !-----------------------------------------------------------------------
 !***** NOTE: THIS IS HARDWIRED FOR CALLS TO LONGWAVE AND SHORTWAVE
@@ -440,16 +442,20 @@
 !
 !-----------------------------------------------------------------------
 !
-      DO J=MYJS2,MYJE2
-      DO I=MYIS1,MYIE1
+!mz      DO J=MYJS2,MYJE2
+!mz      DO I=MYIS1,MYIE1
+
+      DO I=1,NCOL
 !
 !mz        PDSL(I,J)=PD(I,J)*RES(I,J)
 !mz        P8W(I,KTE+1,J)=PT
-        XLAND(I,J)=SM(I,J)+1.
+!        XLAND(I,J)=SM(I,J)+1.
+         XLAND(I)=SM(I)+1.
 !mz        PSFC=PD(I,J)+PDTOP+PT
 !mz        REXNSFC(I,J)=(PSFC*1.E-5)**CAPA
 !mz        TSFC(I,J)=THS(I,J)*REXNSFC(I,J)
-        T8W(I,KTS,J)=TSFC(I,J)
+!        T8W(I,KTS,J)=TSFC(I,J)
+        T8W(I,1) = TSFC(I)
 !MZ:eta1-interface sigma value in pressure domain 
 !   eta2-interface sigma value in sigma domain
 !  pdtop-mass at i,j in pressure domain, Pa
@@ -461,78 +467,80 @@
 !        Z_PHY(I,KTS,J)=Z(I,J,KTS)
 !        HT(I,J)=Z(I,J,KTS)
       ENDDO
-      ENDDO
+!      ENDDO
 !
 !-----------------------------------------------------------------------
 !***  FILL THE SINGLE-COLUMN INPUT
 !-----------------------------------------------------------------------
 !
-      DO J=MYJS2,MYJE2
-      DO I=MYIS1,MYIE1
-        DO K=KTS,KTE
+      !DO J=MYJS2,MYJE2
+      DO I = 1,NCOL      !MYIS1,MYIE1
+        DO K =1,NLEV     !KTS,KTE
           !mz DPL=DETA1(K)*PDTOP+DETA2(K)*PDSL(I,J)
-          QL(K)=MAX(Q(I,J,K),EPSQ)
+          !! QL(K)=MAX(Q(I,J,K),EPSQ)
+          QL(K) = MAX(Q(I,K),EPSQ)
           !mz PLYR=AETA1(K)*PDTOP+AETA2(K)*PDSL(I,J)+PT
-          PLYR = PRSL(I,J,K)
-          TL(K)=T(I,J,K)
+          !!PLYR = PRSL(I,J,K)
+          PLYR = PRSL(I,K)
+          !!TL(K)=T(I,J,K)
+          TL(K)=T(I,K)
 !
-          RR(I,K,J)=PLYR/(R_D*TL(K)*(1.+P608*QL(K)))
-          T_PHY(I,K,J)=TL(K)
-          TH_PHY(I,K,J)=TL(K)*(1.E5/PLYR)**CAPA
+          !!RR(I,K,J)=PLYR/(R_D*TL(K)*(1.+P608*QL(K)))
+          RR(I,K)=PLYR/(R_D*TL(K)*(1.+P608*QL(K)))
+          T_PHY(I,K)=TL(K)
+          TH_PHY(I,K)=TL(K)*(1.E5/PLYR)**CAPA
           !mz P8W(I,K+1,J)=ETA1(K+1)*PDTOP+ETA2(K+1)*PDSL(I,J)+PT
-          P_PHY(I,K,J)=PLYR
-          PI_PHY(I,K,J)=(PLYR*1.E-5)**CAPA
-          DZ(I,K,J)=TL(K)*(P608*QL(K)+1.)*R_D                           &
-     &                 *(P8W(I,K,J)-P8W(I,K+1,J))                       &
-     &                 /(P_PHY(I,K,J)*G)
+          P_PHY(I,K)=PLYR
+          PI_PHY(I,K)=(PLYR*1.E-5)**CAPA
+          DZ(I,K)=TL(K)*(P608*QL(K)+1.)*R_D                             &
+     &                 *(P8W(I,K)-P8W(I,K+1))                           &
+     &                 /(P_PHY(I,K)*G)
 !
-          RTHRATEN(I,K,J)=0.
-          THRATENLW(I,K,J)=0.
-          THRATENSW(I,K,J)=0.
+          RTHRATEN(I,K)=0.
+          THRATENLW(I,K)=0.
+          THRATENSW(I,K)=0.
 
         ENDDO
 !
-        DO K=KTS+1,KTE
-          T8W(I,K,J)=0.5*(TL(K-1)+TL(K))
+        DO K=2, NLEV    !KTS+1,KTE
+          T8W(I,K)=0.5*(TL(K-1)+TL(K))
         ENDDO
 !        T8W(I,KTE+1,J)=-1.E20 
 ! For RRTM 
-        T8W(I,KTE+1,J)=T8W(I,KTE,J) + 0.5*(T8W(I,KTE,J)-T8W(I,KTE-1,J))
+        T8W(I,KTE+1)=T8W(I,KTE) + 0.5*(T8W(I,KTE)-T8W(I,KTE-1))
 !
       ENDDO
-      ENDDO
+!      ENDDO
 !
       GMT=REAL(IHRST)
 !
-      DO K=KMS,KME
-        DO J=JMS,JME
-        DO I=IMS,IME
-          CLDFRA(I,J,K)=0.
-        ENDDO
-        ENDDO
+      DO K=1,NLEV !KMS,KME
+      !  DO J=JMS,JME
+      DO I=1,NCOL !IMS,IME
+          CLDFRA(I,K)=0.
+      ENDDO
       ENDDO
 !
-      DO J=JMS,JME
-        DO I=IMS,IME
+     !   DO J=JMS,JME
+        DO I=1, ncol !IMS,IME
 !          CFRACH(I,J)=0.
 !          CFRACL(I,J)=0.
 !          CFRACM(I,J)=0.
-          CZMEAN(I,J)=0.
+          CZMEAN(I)=0.
 !          SIGT4(I,J)=0.
-          TOTSWDN(I,J)=0.   ! TOTAL (clear+cloudy sky) shortwave down at the surface
-          TOTSWDNC(I,J)=0.  ! CLEAR SKY shortwave down at the surface
-          SWNETDN(I,J)=0.   ! Net (down - up) total (clear+cloudy sky) shortwave at the surface
-          TOTLWDN(I,J)=0.   ! Total longwave down at the surface
+          TOTSWDN(I)=0.   ! TOTAL (clear+cloudy sky) shortwave down at the surface
+          TOTSWDNC(I)=0.  ! CLEAR SKY shortwave down at the surface
+          SWNETDN(I)=0.   ! Net (down - up) total (clear+cloudy sky) shortwave at the surface
+          TOTLWDN(I)=0.   ! Total longwave down at the surface
 !mz          CUPPTR(I,J)=CUPPT(I,J)   ! Temporary array set to zero in radiation
 !mz          HTOPR(I,J) =0.
 !mz          HBOTR(I,J) = REAL(KTE+1)
 !          HBOTR(I,J) =0.
-          SWCF(I,J) =0.
-          LWCF(I,J) =0.
+          SWCF(I) =0.
+          LWCF(I) =0.
 !
 !
         ENDDO
-      ENDDO
 !
 !-------------------------------------------------------------------
 !
@@ -546,12 +554,13 @@
      &                 ,KTS=KTS,KTE=KTE,                                &
      &                 ,ITIMESTEP=NTSD_rad,DT=DT                        &
      &                 ,DX=DXKM,DY=DYKM                                 &
-     &                 ,swint_opt=swint_opt                             &
+!     &                 ,swint_opt=swint_opt                             &
      &                 ,SWDDIR=swddir,SWDDNI=swddni,SWDDIF=swddif       &
      &                 ,SWDDIRC=swddirc,SWDDNIC=swddnic                 &
-     &                 ,Gx=Gx,Bx=Bx,gg=gg,bb=bb                         &
-     &                 ,swdown_ref=swdown_ref,swddir_ref=swddir_ref     &
-     &                 ,coszen_ref=coszen_ref,coszen=coszen             &
+!     &                 ,Gx=Gx,Bx=Bx,gg=gg,bb=bb                         &
+!     &                 ,swdown_ref=swdown_ref,swddir_ref=swddir_ref     &
+!     &                 ,coszen_ref=coszen_ref                           &
+     &                 ,coszen=coszen                                   &
      &                 ,hrang=hrang                                     &
      &                 ,RTHRATENLW=THRATENLW,RTHRATENSW=THRATENSW       &
      &                 ,RTHRATEN=RTHRATEN                               &
@@ -615,7 +624,7 @@
      &                 ,has_reqc=has_reqc                               &
      &                 ,has_reqi=has_reqi                               &
      &                 ,has_reqs=has_reqs                               &
-     &                 ,RLWTOA=RLWTOA                     &
+     &                 ,RLWTOA=RLWTOA                                   &
      &                 ,CZMEAN=CZMEAN                                   &
 !     &                 ,ACFRST=ACFRST
 !     &                 ,NCFRST=NCFRST                     &
@@ -625,18 +634,19 @@
      &                 ,LWCF=LWCF,SWCF=SWCF                             &
      &                 ,O3INPUT=O3INPUT,AER_OPT=AER_OPT,O3RAD=o3rad     &
      &                 ,SF_SURFACE_PHYSICS=SF_SURFACE_PHYSICS           &
-     &                 ,QV,F_QV=F_QV      &
-     &                 ,QC,F_QC=F_QC      &
-     &                 ,QR,F_QR=F_QR      &
-     &                 ,QI,F_QI=F_QI      &
-     &                 ,QS,F_QS=F_QS      &
-     &                 ,QG,F_QG=F_QG      &
+     &                 ,QV,F_QV=F_QV                                    &
+     &                 ,QC,F_QC=F_QC                                    &
+     &                 ,QR,F_QR=F_QR                                    &
+     &                 ,QI,F_QI=F_QI                                    &
+     &                 ,QS,F_QS=F_QS                                    &
+     &                 ,QG,F_QG=F_QG                                    &
      &                 ,IS_CAMMGMP_USED=IS_CAMMGMP_USED                 &
-     &                 ,EXPLICIT_CONVECTION=config_flags%cu_physics==0  &
-     &                 ,AERCU_OPT=config_flags%aercu_opt                &
-     &                 ,CU_PHYSICS=config_flags%cu_physics              &
+!     &                 ,EXPLICIT_CONVECTION=config_flags%cu_physics==0  &
+!     &                 ,AERCU_OPT=config_flags%aercu_opt                &
+!mz     &                 ,CU_PHYSICS=config_flags%cu_physics              &
      &                 ,MP_PHYSICS=CONFIG_FLAGS%MP_PHYSICS              &
-     &                 ,CALC_CLEAN_ATM_DIAG=CONFIG_FLAGS%CALC_CLEAN_ATM_DIAG)
+     &                 ,imp_physics_fer_hires = imp_physics_fer_hires   &
+     &         ,CALC_CLEAN_ATM_DIAG=CONFIG_FLAGS%CALC_CLEAN_ATM_DIAG)
 
 
 !
