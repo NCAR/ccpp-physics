@@ -64,7 +64,9 @@
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
-     &   xkzminv,moninq_fac,errmsg,errflg)
+     &   xkzminv,moninq_fac,lssav,ldiag3d,qdiag3d,lsidea,ntoz,          &
+     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,                       &
+     &   errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -74,16 +76,18 @@
 !
 !     arguments
 !
-      logical, intent(in) :: lprnt
+      logical, intent(in) :: lprnt,lssav,ldiag3d,qdiag3d,lsidea
       integer, intent(in) :: ipr
-      integer, intent(in) :: ix, im, km, ntrac, ntcw, kinver(im)
+      integer, intent(in) :: ix, im, km, ntrac, ntcw, kinver(im), ntoz
       integer, intent(out) :: kpbl(im)
 
 !
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
-     &                     tau(im,km),    rtg(im,km,ntrac)
+     &                     tau(im,km),    rtg(im,km,ntrac)\
+      real(kind=kind_phys), intent(inout), dimension(ix,km) ::          &
+     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(ix,km),     v1(ix,km),                    &
      &                     t1(ix,km),     q1(ix,km,ntrac),              &
@@ -1037,6 +1041,17 @@ c
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
+            if(lssav .and. ldiag3d) then
+               if(lsidea) then
+                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*rdt
+               else
+                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) +                     &
+     &                 ((ttend-hlw(i,k)-hsw(i,k)*xmu(i))*rdt)
+               endif
+               if(qdiag3d) then
+                  dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*rdt
+               endif
+            endif
          enddo
       enddo
       if(ntrac >= 2) then
@@ -1049,6 +1064,15 @@ c
             enddo
           enddo
         enddo
+        if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d) then
+          is = (ntoz-1) * km
+          do k = 1, km
+            do i = 1, im
+              qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
+              do3dt(i,k,kk) = do3dt(i,k,kk)+qtend
+            enddo
+          enddo
+        endif
       endif
 !
 !   compute tke dissipation rate
@@ -1150,6 +1174,10 @@ c
             dv(i,k)  = dv(i,k)  + vtend
             dusfc(i) = dusfc(i) + conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
+            if(lssav .and. ldiag3d) then
+               du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
+               dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
+            endif
 !
 !  for dissipative heating for ecmwf model
 !
