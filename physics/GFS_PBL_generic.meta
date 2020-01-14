@@ -161,6 +161,14 @@
   type = integer
   intent = in
   optional = F
+[nqrimef]
+  standard_name = index_for_mass_weighted_rime_factor
+  long_name = tracer index for mass weighted rime factor
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [trans_aero]
   standard_name = flag_for_aerosol_convective_transport_and_PBL_diffusion
   long_name = flag for aerosol convective transport and PBL diffusion
@@ -233,6 +241,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
@@ -286,15 +302,6 @@
   standard_name = vertically_diffused_tracer_concentration
   long_name = tracer concentration diffused by PBL scheme
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_vertical_diffusion_tracers)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dvdftra]
-  standard_name = tendency_of_vertically_diffused_tracer_concentration
-  long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
-  units = kg kg-1 s-1
   dimensions = (horizontal_dimension,vertical_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
@@ -532,6 +539,14 @@
   type = integer
   intent = in
   optional = F
+[nqrimef]
+  standard_name = index_for_mass_weighted_rime_factor
+  long_name = tracer index for mass weighted rime factor
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [trans_aero]
   standard_name = flag_for_aerosol_convective_transport_and_PBL_diffusion
   long_name = flag for aerosol convective transport and PBL diffusion
@@ -599,6 +614,14 @@
 [imp_physics_mg]
   standard_name = flag_for_morrison_gettelman_microphysics_scheme
   long_name = choice of Morrison-Gettelman microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
   units = flag
   dimensions = ()
   type = integer

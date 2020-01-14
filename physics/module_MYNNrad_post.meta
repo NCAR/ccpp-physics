@@ -25,6 +25,22 @@
   type = integer
   intent = in
   optional = F
+[flag_init]
+  standard_name = flag_for_first_time_step
+  long_name = flag signaling first time step for time integration loop
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[flag_restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [qc]
   standard_name = cloud_condensed_water_mixing_ratio
   long_name = no condensates) mixing ratio of cloud water (condensate)

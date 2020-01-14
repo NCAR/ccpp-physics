@@ -183,11 +183,6 @@
 
         enddo
 
-!     if(cplflx)then
-!       write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
-!       stop
-!     endif
-
       if (cplflx) then
         do i=1,im
           islmsk_cice(i) = nint(slimskin_cpl(i))

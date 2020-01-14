@@ -70,6 +70,51 @@
   type = GFS_radtend_type
   intent = inout
   optional = F
+[f_ice]
+  standard_name = fraction_of_ice_water_cloud
+  long_name = fraction of ice water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[f_rain]
+  standard_name = fraction_of_rain_water_cloud
+  long_name = fraction of rain water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[f_rimef]
+  standard_name = rime_factor
+  long_name = rime factor
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[flgmin]
+  standard_name = minimum_large_ice_fraction
+  long_name = minimum large ice fraction in F-A mp scheme
+  units = frac
+  dimensions = (2)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cwm]
+  standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
+  long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [lm]
   standard_name = number_of_vertical_layers_for_radiation_calculations
   long_name = number of vertical layers for radiation calculation

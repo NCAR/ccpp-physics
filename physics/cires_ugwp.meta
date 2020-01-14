@@ -25,6 +25,15 @@
   type = integer
   intent = in
   optional = F
+[input_nml_file]
+  standard_name = namelist_filename_for_internal_file_reads
+  long_name = character string to store full namelist contents
+  units = none
+  dimensions = (number_of_lines_of_namelist_filename_for_internal_file_reads)
+  type = character
+  kind = len=*
+  intent = in
+  optional = F
 [logunit]
   standard_name = iounit_log
   long_name = fortran unit number for writing logfile

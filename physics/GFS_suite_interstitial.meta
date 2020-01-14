@@ -9,6 +9,14 @@
   type = GFS_interstitial_type
   intent = inout
   optional = F
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1300,6 +1308,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [prsi]
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
@@ -1741,6 +1757,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [dqdti]
   standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
   long_name = instantaneous moisture tendency due to convection
@@ -1750,14 +1775,21 @@
   kind = kind_phys
   intent = inout
   optional = F
-[gt0]
-  standard_name = air_temperature_updated_by_physics
-  long_name = temperature updated by physics
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfdeepcnv_gf]
+  standard_name = flag_for_gf_deep_convection_scheme
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [lprnt]
   standard_name = flag_print
