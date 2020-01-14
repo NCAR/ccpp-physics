@@ -253,6 +253,9 @@
       INTEGER,    OPTIONAL, INTENT(IN   )    ::  sf_surface_physics
 
       REAL(KIND_PHYS), INTENT(IN) :: DT,XTIME,JULIAN
+      REAL(KIND_PHYS), DIMENSION(1:ncol,1:nlev), OPTIONAL ,             &
+     &                 INTENT(INOUT)  ::                       o3rad
+
 
       REAL(KIND_PHYS), DIMENSION(1:ncol),      INTENT(IN)    :: ALBEDO  &
      &                                             ,EPSR,GLAT,GLON      &

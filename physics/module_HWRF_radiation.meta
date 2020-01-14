@@ -714,25 +714,175 @@
   intent = inout
   optional = F
 [swddir]   ???
+  standard_name = 
+  long_name =
+  units = 
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [swddni]   ???
+  standard_name = 
+  long_name =
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [swddif]   ???
+  standard_name = 
+  long_name = 
+  units = 
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [swddirc]  ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [swddnic]  ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [coszen]   ???
+  standard_name = 
+  long_name =
+  units =
+  dimensions = (horizontal_dimension) 
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = T
 [hrang]    ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = T
 [xlat]     ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F 
 [xlong]    ????
+  standard_name =
+  long_name =
+  units =
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [paerlev]   ???
+  standard_name = 
+  long_name = 
+  units =
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [alevsiz]   ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [no_src_types]    ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cam_abs_freq_s] ???
+  standard_name = 
+  long_name = 
+  units =
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [icloud]    ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cldovrlp]   ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ra_call_offset]   ???
+  standard_name =
+  long_name =
+  units =     
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [o3input]     ???
+  standard_name =
+  long_name = 
+  units =     
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [aer_opt]    ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [o3rad]      ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = (horizontal_dimension, vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
 [sf_surface_physics] ???
+  standard_name =
+  long_name =
+  units =
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F 
 [hrswpd]
   standard_name = shortwave_heating_rate_per_day
   long_name = shortwave heating rate per day
