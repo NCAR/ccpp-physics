@@ -433,12 +433,12 @@ contains
             nLev,                          & ! IN  - Number of vertical layers
             lw_cloud_props%get_nband(),    & ! IN  - Number of LW bands
             nrghice,                       & ! IN  - Number of ice-roughness categories
-            liqmask,                       & ! IN  - Liquid-cloud mask
-            icemask,                       & ! IN  - Ice-cloud mask
-            cld_lwp,                       & ! IN  - Cloud liquid water path
-            cld_iwp,                       & ! IN  - Cloud ice water path
-            cld_reliq,                     & ! IN  - Cloud liquid effective radius
-            cld_reice,                     & ! IN  - Cloud ice effective radius
+            liqmask,                       & ! IN  - Liquid-cloud mask (1)
+            icemask,                       & ! IN  - Ice-cloud mask (1)
+            cld_lwp,                       & ! IN  - Cloud liquid water path (g/m2)
+            cld_iwp,                       & ! IN  - Cloud ice water path (g/m2)
+            cld_reliq,                     & ! IN  - Cloud liquid effective radius (microns)
+            cld_reice,                     & ! IN  - Cloud ice effective radius (microns)
             lw_optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
                                              !       in each band
     else
@@ -461,7 +461,7 @@ contains
        enddo
     enddo
 
-    lw_optical_props_cloudsByBand%tau(:,:,2) = lw_optical_props_cloudsByBand%tau(:,:,1)
+    !lw_optical_props_cloudsByBand%tau(:,:,2) = lw_optical_props_cloudsByBand%tau(:,:,1)
 
     ! All-sky LW optical depth ~10microns
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)

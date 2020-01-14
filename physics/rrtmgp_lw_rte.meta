@@ -25,6 +25,14 @@
   type = integer
   intent = in
   optional = F
+[nGauss_angles]
+  standard_name = number_of_angles_used_in_gaussian_quadrature
+  long_name = Number of angles used in Gaussian quadrature
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure layer
@@ -92,7 +100,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_1scl
-  intent = in
+  intent = inout
   optional = F
 [lw_optical_props_aerosol]
   standard_name = longwave_optical_properties_for_aerosols

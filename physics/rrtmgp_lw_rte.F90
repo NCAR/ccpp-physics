@@ -28,7 +28,7 @@ contains
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, nCol, nLev, p_lay, t_lay, p_lev, skt, lw_gas_props, &
        sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
-       lw_optical_props_aerosol, secdiff, fluxlwUP_allsky, fluxlwDOWN_allsky,               &
+       lw_optical_props_aerosol, secdiff, nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky,&
        fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
 
     ! Inputs
@@ -36,7 +36,8 @@ contains
          doLWrad                    ! Logical flag for longwave radiation call
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
-         nLev                       ! Number of vertical levels
+         nLev,                    & ! Number of vertical levels
+         nGauss_angles              ! Number of angles used in Gaussian quadrature
     real(kind_phys), dimension(ncol,nLev), intent(in) :: &
          p_lay,                   & ! Pressure @ model layer-centers (hPa)
          t_lay                      ! Temperature (K)
@@ -51,9 +52,9 @@ contains
     type(ty_source_func_lw),intent(in) :: &
          sources                    ! RRTMGP DDT: longwave source functions
     type(ty_optical_props_1scl),intent(inout) :: &
+         lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
          lw_optical_props_clrsky    ! RRTMGP DDT: longwave clear-sky radiative properties 
     type(ty_optical_props_1scl),intent(in) :: &
-         lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
          lw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol),intent(in) :: &
          secdiff
@@ -119,11 +120,12 @@ contains
     ! Call RTE solver
     if (l_ClrSky_HR) then
        call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-            lw_optical_props_clrsky, & ! IN  - optical-properties
-            top_at_1,                & ! IN  - veritcal ordering flag
-            sources,                 & ! IN  - source function
-            sfc_emiss_byband,        & ! IN  - surface emissivity in each LW band
-            flux_clrsky,n_gauss_angles=3))
+            lw_optical_props_clrsky,         & ! IN  - optical-properties
+            top_at_1,                        & ! IN  - veritcal ordering flag
+            sources,                         & ! IN  - source function
+            sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+            flux_clrsky,                     & ! OUT - Fluxes
+            n_gauss_angles = nGauss_angles))
        ! Store fluxes
        fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
        fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
@@ -136,7 +138,7 @@ contains
     ! Apply diffusivity angle adjustment (RRTMG legacy)
     do iCol=1,nCol
        do iBand=1,lw_gas_props%get_nband()
-          lw_optical_props_clrsky%tau(iCol,1:nLev,iBand) = lw_optical_props_clrsky%tau(iCol,1:nLev,iBand)*secdiff(iBand,iCol)
+          lw_optical_props_clouds%tau(iCol,1:nLev,iBand) = lw_optical_props_clouds%tau(iCol,1:nLev,iBand)*secdiff(iBand,iCol)
        enddo
     enddo
     ! Add cloud optics to clear-sky optics
@@ -144,11 +146,12 @@ contains
 
     ! Call RTE solver
     call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-         lw_optical_props_clrsky, & ! IN  - optical-properties
-         top_at_1,                & ! IN  - veritcal ordering flag
-         sources,                 & ! IN  - source function
-         sfc_emiss_byband,        & ! IN  - surface emissivity in each LW band
-         flux_allsky,n_gauss_angles=3))
+         lw_optical_props_clrsky,         & ! IN  - optical-properties
+         top_at_1,                        & ! IN  - veritcal ordering flag
+         sources,                         & ! IN  - source function
+         sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+         flux_allsky,                     & ! OUT - Flxues 
+         n_gauss_angles = nGauss_angles))
     ! Store fluxes
     fluxlwUP_allsky   = sum(flux_allsky%bnd_flux_up,dim=3)
     fluxlwDOWN_allsky = sum(flux_allsky%bnd_flux_dn,dim=3) 
@@ -160,7 +163,7 @@ contains
     write(47,*) "In rrtmgp_lw_rte: "
     do iCol=1,nCol
        do iLay=1,nLev+1
-          write(47,"(5f8.2)") p_lev(iCol,iLay)/100.,fluxlwUP_allsky(iCol,iLay),fluxlwDOWN_allsky(iCol,iLay),&
+          write(47,"(35f8.2)") p_lev(iCol,iLay)/100.,flux_allsky%bnd_flux_up(iCol,iLay,:),flux_allsky%bnd_flux_dn(iCol,iLay,:),&
                fluxlwUP_clrsky(iCol,iLay),fluxlwDOWN_clrsky(iCol,iLay)
        enddo
     enddo

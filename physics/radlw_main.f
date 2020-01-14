@@ -1039,7 +1039,7 @@
      &       cldfmc, taucld                                             &
      &     )
 
-          taucld(2,:) = taucld(1,:)
+!djs          taucld(2,:) = taucld(1,:)
 
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
@@ -3690,7 +3690,6 @@
 
 !> -# Process longwave output from band for total and clear streams.
 !!    Calculate upward, downward, and net flux.
-
       flxfac = wtdiff * fluxfac
 
       do k = 0, nlay
@@ -3705,6 +3704,12 @@
         totdflux(k) = totdflux(k) * flxfac
         totuclfl(k) = totuclfl(k) * flxfac
         totdclfl(k) = totdclfl(k) * flxfac
+      enddo
+
+
+      do k=0,nlay
+         write(47,"(32f8.2)") toturad(k,:)*flxfac,                      &
+     &        totdrad(k,:)*flxfac
       enddo
 
 !> -# Calculate net fluxes and heating rates.
