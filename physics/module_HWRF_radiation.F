@@ -211,7 +211,8 @@
 !     &                    ,coszen_ref, 
      &                    ,coszen,hrang,xlat,xlong                      &
      &                    ,paerlev, ALEVSIZ,no_src_types                &   !NML
-     &                    ,CAM_ABS_FREQ_S,icloud,cldovrlp               &
+!     &                    ,CAM_ABS_FREQ_S,
+     &                    ,icloud,cldovrlp               &
      &                    ,RA_CALL_OFFSET, o3input,aer_opt,o3rad        &
      &                    ,sf_surface_physics                           &
      &                    ,hrswpd,hrlwpd                                &
@@ -248,7 +249,7 @@
       INTEGER,         INTENT(IN) :: alevsiz, no_src_types
       INTEGER,         INTENT(IN) :: levsiz !, n_ozmixm
       INTEGER,         INTENT(IN) :: paerlev!, n_aerosolc
-      REAL(KIND_PHYS), INTENT(IN) :: cam_abs_freq_s
+!      REAL(KIND_PHYS), INTENT(IN) :: cam_abs_freq_s
 !      LOGICAL,         INTENT(IN) :: warm_rain
       INTEGER,    OPTIONAL, INTENT(IN   )    ::  sf_surface_physics
 
@@ -572,7 +573,7 @@
      &                 ,XLAT=XLAT,XLONG=XLONG,ALBEDO=ALBEDO,EMISS=EPSR  &
      &                 ,XICE=SICE,XLAND=XLAND,Z=Z,TSK=TSFC              &
      &                 ,N_AEROSOLC=NUM_AEROSOLC,PAERLEV=PAERLEV         &
-     &                 ,CAM_ABS_FREQ_S=CAM_ABS_FREQ_S                   &
+!     &                 ,CAM_ABS_FREQ_S=CAM_ABS_FREQ_S                   &
      &                 ,ALEVSIZ=ALEVSIZ,no_src_types=no_src_types       &
      &                 ,LEVSIZ=LEVSIZ,N_OZMIXM=NUM_OZMIXM               &
      &                 ,OZMIXM=OZMIXM,PIN=PIN                           &

@@ -556,9 +556,9 @@
   kind = kind_phys
   intent = inout
   optional = F
-[GSW]     ???
-  standard_name =  surface_net_downward_shortwave_flux
-  long_name = surface net downward shortwave flux at current time
+[GSW]
+  standard_name =  surface_net_downwelling_shortwave_flux
+  long_name = surface net downwelling shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -713,172 +713,164 @@
   type = integer
   intent = inout
   optional = F
-[swddir]   ???
-  standard_name = 
-  long_name =
-  units = 
+[swddir]
+  standard_name = surface_shortwave_broadband_downward_direct_horizontal_irradiance 
+  long_name = All-sky broadband surface direct horizontal irradiance
+  units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[swddni]   ???
-  standard_name = 
-  long_name =
+[swddni]
+  standard_name = surface_shortwave_broadband_downward_direct_normal_irradiance 
+  long_name = All-sky broadband surface normal irradiance
+  dimensions = (horizontal_dimension)
+  units = W m-2
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[swddif]
+  standard_name = surface_shortwave_broadband_downward_diffuse_irradiance 
+  long_name = All-sky broadband surface diffuse irradiance
+  units =  W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[swddif]   ???
-  standard_name = 
-  long_name = 
-  units = 
+[swddirc]
+  standard_name = surface_shortwave_broadband_downward_direct_horizontal_irradiance_assuming_clear_sky
+  long_name = clear-sky shortwave surface downward direct irradiance
+  units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[swddirc]  ???
-  standard_name =
-  long_name =
-  units =
+[swddnic]
+  standard_name = surface_shortwave_broadband_downward_direct_normal_irradiance_assuming_clear_sky
+  long_name = clear-sky shortwave surface downward direct normal irradiance
+  units = W m -2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[swddnic]  ???
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[coszen]   ???
-  standard_name = 
-  long_name =
-  units =
+[coszen]   
+  standard_name = cosine_of_zenith_angle 
+  long_name = mean cos of zenith angle over rad call period
+  units = none
   dimensions = (horizontal_dimension) 
   type = real
   kind = kind_phys
   intent = out
   optional = T
-[hrang]    ???
-  standard_name =
-  long_name =
-  units =
+[hrang]
+  standard_name = solar_hour_angle
+  long_name = solar hour angle
+  units = radians
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
   optional = T
-[xlat]     ???
-  standard_name =
-  long_name =
-  units =
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F 
-[xlong]    ????
-  standard_name =
-  long_name =
-  units =
+[xlat]
+  standard_name = latitude_degree
+  long_name = latitude in degrees
+  units = degree
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[paerlev]   ???
-  standard_name = 
-  long_name = 
-  units =
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[alevsiz]   ???
-  standard_name =
-  long_name =
-  units =
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[no_src_types]    ???
-  standard_name =
-  long_name =
-  units =
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[cam_abs_freq_s] ???
-  standard_name = 
-  long_name = 
-  units =
-  dimensions = ()
+[xlong]
+  standard_name = longitude_degree
+  long_name = longitude in degrees
+  units = degree
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[icloud]    ???
-  standard_name =
-  long_name =
-  units =
+[paerlev]   
+  standard_name = number_of_aerosol_data_levels_for_CAM_radiation
+  long_name = number of aerosol data levels for CAM radiation (29)
+  units = count
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[cldovrlp]   ???
-  standard_name =
-  long_name =
-  units =
+[alevsiz]   
+  standard_name = number_of_Tegen_aerosol_optical_depth_data_levels
+  long_name = number of Tegen aerosol optical depth data levels (12)
+  units = count
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[ra_call_offset]   ???
-  standard_name =
-  long_name =
-  units =     
+[no_src_types]    
+  standard_name = number_of_EC_aerosol_types
+  long_name = number of aerosol types from EC (6)
+  units = count
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[o3input]     ???
-  standard_name =
-  long_name = 
-  units =     
+[icloud]
+  standard_name = flag_for_cloud_effect_to_the_optical_depth_in_hwrf_rrtmg
+  long_name = cloud effect to the optical depth in radiation
+  units = flag
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[aer_opt]    ???
-  standard_name =
-  long_name =
-  units =
+[cldovrlp]
+  standard_name = flag_for_cloud_overlap_assumption_in_hwrf_rrtmg  
+  long_name = flag for cloud overlap assumption in HWRF rrtmg
+  units = flag
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[o3rad]      ???
-  standard_name =
-  long_name =
-  units =
+[ra_call_offset] 
+  standard_name = radiation_call_offset
+  long_name = radiation call offset
+  units = flag    
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[o3input]
+  standard_name = flag_for_ozone_input_for_hwrf_rrtmg
+  long_name = ozone input option for radiation (currently hwrf rrtmg only)
+  units = flag  
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[aer_opt]
+  standard_name = flag_for_aerosol_input_for_hwrf_rrtmg
+  long_name = aerosol input option for radiation (currently hwrf rrtmg only)
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[o3rad]
+  standard_name = ozone_3d_content_for_hwrf_rrtmg
+  long_name = radiation 3D ozone
+  units = ppmv
   dimensions = (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = T
-[sf_surface_physics] ???
-  standard_name =
-  long_name =
-  units =
+[sf_surface_physics] 
+  standard_name = flag_for_land_surface_scheme
+  long_name = flag for land surface model
+  units = flag
   dimensions = ()
   type = integer
   intent = in
