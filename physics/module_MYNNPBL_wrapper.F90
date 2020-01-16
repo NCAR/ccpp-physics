@@ -25,7 +25,7 @@
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  ix,im,levs,                     &
      &  flag_init,flag_restart,         &
-     &  lssav, ldiag3d, lsidea,         & 
+     &  lssav, ldiag3d, qdiag3d, lsidea,&
      &  delt,dtf,dx,zorl,               &
      &  phii,u,v,omega,t3d,             &
      &  qgrs_water_vapor,               &
@@ -56,7 +56,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_ice_cloud, dqdt_ozone,                        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    &
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    &
-     &  dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, &
+     &  du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,      &
+     &  do3dt_PBL, dq3dt_PBL, dt3dt_PBL,                   &
      &  htrsw, htrlw, xmu,                                 &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
@@ -154,7 +155,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
   
-  LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea
+  LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea, qdiag3d
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
                              lprnt, do_mynnsfclay
@@ -224,8 +225,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        RTHRATEN
      real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
     &        Tsq, Qsq, Cov, exch_h, exch_m
-     real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt,       &
-    &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD
+     real(kind=kind_phys), dimension(:,:), intent(inout) ::              &
+    &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,               &
+    &        do3dt_PBL, dq3dt_PBL, dt3dt_PBL
     real(kind=kind_phys), dimension(im), intent(in) :: xmu
     real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
      !LOCAL
@@ -285,7 +287,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       endif
 
   ! Assign variables for each microphysics scheme
-        if (imp_physics == imp_physics_wsm6) then
+        init_if_imp_physics: if (imp_physics == imp_physics_wsm6) then
   ! WSM6
          FLAG_QI = .true.
          FLAG_QNI= .false.
@@ -314,7 +316,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           enddo
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
-          if(ltaerosol) then
+          tmp_init_if_aer: if(ltaerosol) then
             FLAG_QI = .true.
             FLAG_QNI= .true.
             FLAG_QC = .true.
@@ -366,7 +368,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 qnifa(i,k) = 0.
               enddo
             enddo
-          endif
+          endif tmp_init_if_aer
         elseif (imp_physics == imp_physics_gfdl) then
   ! GFDL MP
           FLAG_QI = .true.
@@ -420,7 +422,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 qnifa(i,k) = 0.
             enddo
           enddo
-        endif
+        endif init_if_imp_physics
 
        if (lprnt)write(0,*)"prepping MYNN-EDMF variables..."
 
@@ -436,7 +438,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              pattern_spp_pbl(i,k)=0.0
          enddo
       enddo
-      do i=1,im
+      big_init_i_loop: do i=1,im
          if (slmsk(i)==1. .or. slmsk(i)==2.) then !sea/land/ice mask (=0/1/2) in FV3
             xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
          else
@@ -479,9 +481,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !        qsfc(i)=qss(i)
 !        ps(i)=pgr(i)
 !        wspd(i)=wind(i)
-      enddo
+      enddo big_init_i_loop
 
-      if (lprnt) then
+      lprnt_before: if (lprnt) then
          print*
          write(0,*)"===CALLING mynn_bl_driver; input:"
          print*,"bl_mynn_tkebudget=",bl_mynn_tkebudget," bl_mynn_tkeadvect=",bl_mynn_tkeadvect
@@ -518,7 +520,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          !print*,"exch_h:",exch_h(1,1),exch_h(1,2),exch_h(1,levs) ! - intent(out)
          !print*,"exch_m:",exch_m(1,1),exch_m(1,2),exch_m(1,levs) ! - intent(out)
          print*,"max cf_bl:",maxval(cldfra_bl(1,:))
-      endif
+      endif lprnt_before
 
 
               CALL  mynn_bl_driver(                                    &
@@ -591,6 +593,26 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               dvdt(i,k) = dvdt(i,k) + RVBLTEN(i,k)
            enddo
         enddo
+        accum_duvt3dt: if(lssav) then
+          if(ldiag3d) then
+            do k = 1, levs
+              do i = 1, im
+                du3dt_PBL(i,k) = du3dt_PBL(i,k) + RUBLTEN(i,k)*dtf
+                dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + RVBLTEN(i,k)*dtf
+              enddo
+            enddo
+          endif
+          if_lsidea: if (lsidea) then
+            dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + RTHBLTEN(i,k)*exner(i,k)*dtf
+          elseif(ldiag3d) then
+            do k=1,levs
+              do i=1,im
+                tem  = RTHBLTEN(i,k)*exner(i,k) - (htrlw(i,k)+htrsw(i,k)*xmu(i))
+                dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + tem*dtf
+              enddo
+            enddo
+          endif if_lsidea
+        endif accum_duvt3dt
         !Update T, U and V:
         !do k = 1, levs
         !   do i = 1, im
@@ -601,7 +623,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
         !enddo
 
         !DO moist/scalar/tracer tendencies:
-        if (imp_physics == imp_physics_wsm6) then
+        if_imp_physics: if (imp_physics == imp_physics_wsm6) then
            ! WSM6
            do k=1,levs
              do i=1,im
@@ -611,6 +633,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)        = 0.0
              enddo
            enddo
+           if(lssav .and. ldiag3d .and. qdiag3d) then
+             do k=1,levs
+               do i=1,im
+                 dq3dt_PBL(i,k)  = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+               enddo
+             enddo
+           endif
            !Update moist species:
            !do k=1,levs
            !  do i=1,im
@@ -622,8 +651,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            !enddo
         elseif (imp_physics == imp_physics_thompson) then
            ! Thompson-Aerosol
-           if(ltaerosol) then
-             do k=1,levs
+           thmp_if_ltaerosol: if(ltaerosol) then
+             thmp_aer_tend: do k=1,levs
                do i=1,im
                  dqdt_water_vapor(i,k)             = RQVBLTEN(i,k)/(1.0 + qv(i,k))
                  dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k)/(1.0 + qv(i,k))
@@ -634,7 +663,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_water_aer_num_conc(i,k)      = RQNWFABLTEN(i,k)
                  dqdt_ice_aer_num_conc(i,k)        = RQNIFABLTEN(i,k)
                enddo
-             enddo
+             enddo thmp_aer_tend
+             if(lssav .and. ldiag3d .and. qdiag3d) then
+               do k=1,levs
+                 do i=1,im
+                   dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+                 enddo
+               enddo
+             endif
              !do k=1,levs
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -649,7 +685,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              !enddo
            else
              !Thompson (2008)
-             do k=1,levs
+             thmp_noaer_tend: do k=1,levs
                do i=1,im
                  dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
                  dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
@@ -657,7 +693,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
                  !dqdt_ozone(i,k)         = 0.0
                enddo
-             enddo
+             enddo thmp_noaer_tend
+             if(lssav .and. ldiag3d .and. qdiag3d) then
+               do k=1,levs
+                 do i=1,im
+                   dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+                 enddo
+               enddo
+             endif
              !do k=1,levs
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -667,10 +710,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              !    !dqdt_ozone(i,k)        = 0.0
              !  enddo
              !enddo
-           endif !end thompson choice
+           endif thmp_if_ltaerosol !end thompson choice
         elseif (imp_physics == imp_physics_gfdl) then
            ! GFDL MP
-           do k=1,levs
+           gfdl_mp_tend: do k=1,levs
              do i=1,im
                dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
                dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
@@ -680,7 +723,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_graupel(i,k)       = 0.0
                !dqdt_ozone(i,k)         = 0.0
              enddo
-           enddo
+           enddo gfdl_mp_tend
+           if(lssav .and. ldiag3d .and. qdiag3d) then
+             do k=1,levs
+               do i=1,im
+                 dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+               enddo
+             enddo
+           endif
            !do k=1,levs
            !  do i=1,im
            !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -702,30 +752,16 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)         = 0.0
              enddo
            enddo
-       endif
-       
-       if (lssav .and. ldiag3d) then
-         if (lsidea) then
-           dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
-         else
-           do k=1,levs
-             do i=1,im
-               tem  = dtdt(i,k) - (htrlw(i,k)+htrsw(i,k)*xmu(i))
-               dt3dt(i,k) = dt3dt(i,k) + tem*dtf
+           if(lssav .and. ldiag3d .and. qdiag3d) then
+             do k=1,levs
+               do i=1,im
+                 dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+               enddo
              enddo
-           enddo
-         endif
-         do k=1,levs
-           do i=1,im
-             du3dt_PBL(i,k) = du3dt_PBL(i,k) + dudt(i,k) * dtf
-             du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
-             dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + dvdt(i,k) * dtf
-             dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
-           enddo
-         enddo
-       endif
+           endif
+       endif if_imp_physics
        
-       if (lprnt) then
+       lprnt_after: if (lprnt) then
           print*
           print*,"===Finished with mynn_bl_driver; output:"
           print*,"T:",t3d(1,1),t3d(1,2),t3d(1,levs)
@@ -764,7 +800,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"ktop_shallow:",ktop_shallow(1)," maxmf:",maxmf(1)
           print*,"nup:",nupdraft(1)
           print*
-       endif
+       endif lprnt_after
 
 
   END SUBROUTINE mynnedmf_wrapper_run

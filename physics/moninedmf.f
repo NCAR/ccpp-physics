@@ -65,7 +65,7 @@
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,lssav,ldiag3d,qdiag3d,lsidea,ntoz,          &
-     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,                       &
+     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
      &   errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -85,9 +85,9 @@
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
-     &                     tau(im,km),    rtg(im,km,ntrac)\
+     &                     tau(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(inout), dimension(ix,km) ::          &
-     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL
+     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(ix,km),     v1(ix,km),                    &
      &                     t1(ix,km),     q1(ix,km,ntrac),              &
@@ -1046,7 +1046,7 @@ c
                   dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*rdt
                else
                   dt3dt_PBL(i,k) = dt3dt_PBL(i,k) +                     &
-     &                 ((ttend-hlw(i,k)-hsw(i,k)*xmu(i))*rdt)
+     &                 ((ttend-hlw(i,k)-swh(i,k)*xmu(i))*rdt)
                endif
                if(qdiag3d) then
                   dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*rdt
@@ -1069,7 +1069,7 @@ c
           do k = 1, km
             do i = 1, im
               qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
-              do3dt(i,k,kk) = do3dt(i,k,kk)+qtend
+              do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
             enddo
           enddo
         endif
