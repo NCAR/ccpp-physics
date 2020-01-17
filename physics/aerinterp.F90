@@ -16,169 +16,185 @@ module aerinterp
 contains
 
       SUBROUTINE read_aerdata (me, master, iflip, idate )
-
-      use machine,  only: kind_phys
+      use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
       use netcdf
 
 !--- in/out
       integer, intent(in) :: me, master, iflip, idate(4)
-
 !--- locals
-      integer      :: ncid, varid
-      integer      :: i, j, k, n, ii, ijk, imon, klev
-      character    :: fname*50, mn*2, fldname*10
+      integer      :: ncid, varid, ndims, dim1, dim2, dim3, hmx
+      integer      :: i, j, k, n, ii, imon, klev
+      character    :: fname*50, mn*2, vname*10
       logical      :: file_exist
-      real(kind=4), allocatable, dimension(:,:,:)   :: ps_clm
-      real(kind=4), allocatable, dimension(:,:,:,:) :: delp_clm
-      real(kind=4), allocatable, dimension(:,:,:,:) :: aer_clm
-      real(kind=4), allocatable, dimension(:,:,:,:) :: airden_clm
-      real(kind=4), allocatable, dimension(:)       :: pres_tmp
 
-      allocate (delp_clm(lonsaer,latsaer,lmerra,1))
-      allocate (aer_clm(lonsaer,latsaer,lmerra,1))
-      allocate (airden_clm(lonsaer,latsaer,lmerra,1))
-      allocate (ps_clm(lonsaer,latsaer,1))
-      allocate (pres_tmp(lmerra))
-
-! allocate aerclm_def arrays: aerin and aer_pres
-      allocate (aerin(lonsaer,latsaer,levsaer,ntrcaer,timeaer))
-      allocate (aer_pres(lonsaer,latsaer,levsaer,timeaer))
-
+      integer, allocatable  :: invardims(:)
+      real(kind=kind_io4),allocatable,dimension(:,:,:) :: buff
+      real(kind=kind_io4),allocatable,dimension(:,:,:,:):: buffx
+      real(kind=kind_io4),allocatable,dimension(:,:)   :: pres_tmp
+      real(kind=kind_io8),allocatable,dimension(:)     :: aer_lati
+      real(kind=kind_io8),allocatable,dimension(:)     :: aer_loni
+!
+!! ===================================================================
       if (me == master) then
          if ( iflip == 0 )  then             ! data from toa to sfc
-          print *, "EJ, GFS is top-down"
+          print *, "GFS is top-down"
          else
-          print *, "EJ, GFS is bottom-up"
+          print *, "GFS is bottom-up"
          endif
       endif
+!
+!! ===================================================================
+!! fetch dim spec and lat/lon from m01 data set
+!! ===================================================================
+      fname=trim("aeroclim.m"//'01'//".nc")
+      inquire (file = fname, exist = file_exist)
+      if (.not. file_exist ) then
+         print *, 'fname not found, abort'
+         stop 8888
+      endif
+      call nf_open(fname , nf90_NOWRITE, ncid)
 
+      vname =  trim(specname(1))
+      call nf_inq_varid(ncid, vname, varid)
+      call nf_inq_varndims(ncid, varid, ndims)
+
+      if(.not. allocated(invardims)) allocate(invardims(3))
+      call nf_inq_vardimid(ncid,varid,invardims)
+      call nf_inq_dimlen(ncid, invardims(1), dim1)
+      call nf_inq_dimlen(ncid, invardims(2), dim2)
+      call nf_inq_dimlen(ncid, invardims(3), dim3)
+
+! specify latsaer, lonsaer, hmx
+      lonsaer = dim1
+      latsaer = dim2
+      hmx = int(dim1/2)       ! to swap long from W-E to E-W
+
+      if(me==master) then
+         print *, 'MERRA2 dim: ',dim1, dim2, dim3
+      endif
+
+! allocate arrays
+      if (.not. allocated(aer_loni)) then
+        allocate (aer_loni(lonsaer))
+        allocate (aer_lati(latsaer))
+      endif
+
+      if (.not. allocated(aer_lat)) then
+        allocate(aer_lat(latsaer))
+        allocate(aer_lon(lonsaer))
+        allocate(aerin(lonsaer,latsaer,levsaer,ntrcaerm,timeaer))
+        allocate(aer_pres(lonsaer,latsaer,levsaer,timeaer))
+      endif
+
+! construct lat/lon array
+      call nf_inq_varid(ncid, 'lat', varid)
+      call nf_get_var(ncid, varid, aer_lati)
+      call nf_inq_varid(ncid, 'lon', varid)
+      call nf_get_var(ncid, varid, aer_loni)
+
+      do i = 1, hmx     ! flip from (-180,180) to (0,360)
+        if(aer_loni(i)<0.)  aer_loni(i)=aer_loni(i)+360.
+        aer_lon(i+hmx) = aer_loni(i) 
+        aer_lon(i)     = aer_loni(i+hmx) 
+      enddo
+
+      do i = 1, latsaer
+        aer_lat(i)     = aer_lati(i) 
+      enddo
+
+      call nf_close(ncid)
+
+! allocate local working arrays
+      if (.not. allocated(buff)) then
+        allocate (buff(lonsaer, latsaer, dim3))
+        allocate (pres_tmp(lonsaer,dim3))
+      endif
+      if (.not. allocated(buffx)) then
+        allocate (buffx(lonsaer, latsaer, dim3,1))
+      endif
+
+!! ===================================================================
+!! loop thru m01 - m12 for aer/pres array
+!! ===================================================================
       do imon = 1, timeaer
-       !ijk = imon + idate(2)+int(idate(3)/16)-2
-       !if ( ijk .le. 0 )  ijk = 12
-       !if ( ijk .eq. 13 ) ijk = 1
-       !if ( ijk .eq. 14 ) ijk = 2
        write(mn,'(i2.2)') imon
-       fname=trim("merra2C.aerclim.2003-2014.m"//mn//".nc")
-       if (me == master) print *, "EJ,aerosol climo:", fname, &
+       fname=trim("aeroclim.m"//mn//".nc")
+       if (me == master) print *, "aerosol climo:", fname, &
                          "for imon:",imon,idate
 
        inquire (file = fname, exist = file_exist)
        if ( file_exist ) then
         if (me == master) print *,     &
-                         "EJ, aerosol climo found; proceed the run" 
+                         "aerosol climo found; proceed the run" 
        else
-        print *,"EJ, Error! aerosol climo not found; abort the run"
+        print *,"Error! aerosol climo not found; abort the run"
         stop 555
        endif
 
-       call nf_open(fname, NF90_NOWRITE, ncid)
+       call nf_open(fname , nf90_NOWRITE, ncid)
 
-! merra2 data is top down
-! for GFS, iflip 0: toa to sfc; 1: sfc to toa
-
-! read aerosol mixing ratio arrays (kg/kg)
-! construct 4-d aerosol mass concentration (kg/m3)
-       call nf_inq_varid(ncid, 'AIRDENS', varid)
-       call nf_get_var(ncid, varid, airden_clm)
-!      if(me==master)  print *, "EJ, read airdens", airden_clm(1,1,:,1)
-
-       do ii = 1, ntrcaer
-        fldname=specname(ii)
-        call nf_inq_varid(ncid, fldname, varid)
-        call nf_get_var(ncid, varid, aer_clm)
-!       if(me==master)  print *, "EJ, read ", fldname, aer_clm(1,1,:,1)
-        do i = 1, lonsaer
-        do j = 1, latsaer
-        do k = 1, levsaer 
-! input is from toa to sfc
-         if ( iflip == 0 )  then             ! data from toa to sfc
-           klev = k
-         else                                ! data from sfc to top
-           klev = ( lmerra - k ) + 1
-         endif 
-         aerin(i,j,k,ii,imon) = aer_clm(i,j,klev,1)*airden_clm(i,j,klev,1) 
-        enddo     !k-loop (lev)
-        enddo     !j-loop (lat)
-        enddo     !i-loop (lon)
-       enddo      !ii-loop (ntrac)
-
-! aer_clm is top-down (following MERRA2)
-! aerin is bottom-up (following GFS)
-
-!      if ( imon == 1 .and.  me == master ) then
-!        print *, 'EJ, du1(1,1) :', aerin(1,1,:,1,imon)
-!      endif
-
-! construct 3-d pressure array (Pa)
-       call nf_inq_varid(ncid, "PS", varid)
-       call nf_get_var(ncid, varid, ps_clm)
+! ====> construct 3-d pressure array (Pa)
        call nf_inq_varid(ncid, "DELP", varid)
-       call nf_get_var(ncid, varid, delp_clm)
+       call nf_get_var(ncid, varid, buff) 
 
-!      if ( imon == 1 .and.  me == master ) then
-!        print *, 'EJ, ps_clm:', ps_clm(1,1,1)
-!        print *, 'EJ, delp_clm:', delp_clm(1,1,:,1)
-!      endif
-
-       do i = 1, lonsaer
        do j = 1, latsaer
+        do i = 1, lonsaer
+! constract pres_tmp (top-down), note input is top-down
+         pres_tmp(i,1) = 0.
+         do k=2, dim3
+          pres_tmp(i,k) = pres_tmp(i,k-1)+buff(i,j,k)
+         enddo    !k-loop 
+        enddo     !i-loop (lon)
 
-! constract pres_tmp (top-down)
-        pres_tmp(1) = 0.
-        do k=2, lmerra
-         pres_tmp(k) = pres_tmp(k-1) + delp_clm(i,j,k,1)
-        enddo
-!       if (imon==1 .and.  me==master .and. i==1 .and. j==1 ) then
-!        print *, 'EJ, pres_tmp:', pres_tmp(:)
-!       endif
-
-! extract pres_tmp to fill aer_pres
+! extract pres_tmp to fill aer_pres (in  Pa)
         do k = 1, levsaer
          if ( iflip == 0 )  then             ! data from toa to sfc
            klev = k
          else                                ! data from sfc to top
-           klev = ( lmerra - k ) + 1
+           klev = ( dim3 - k ) + 1
          endif 
-         aer_pres(i,j,k,imon)=  pres_tmp(klev)
+         do i = 1, hmx
+         aer_pres(i+hmx,j,k,imon)= 1.d0*pres_tmp(i,klev)
+         aer_pres(i,j,k,imon)    = 1.d0*pres_tmp(i+hmx,klev)
+         enddo     !i-loop (lon)
         enddo     !k-loop (lev)
-!       if (imon==1 .and.  me==master .and. i==1 .and. j==1 ) then
-!        print *, 'EJ, aer_pres:', aer_pres(i,j,:,imon) 
-!       endif
-
        enddo     !j-loop (lat)
-       enddo     !i-loop (lon)
 
-!      if (imon==1 .and.  me==master ) then
-!        print *, 'EJx, aer_pres_i1:',(aer_pres(1,1:180,levsaer,imon) )
-!      endif
+! ====> construct 4-d aerosol array (kg/kg)
+! merra2 data is top down
+! for GFS, iflip 0: toa to sfc; 1: sfc to toa
+       DO ii = 1, ntrcaerm
+         vname=trim(specname(ii))
+         call nf_inq_varid(ncid, vname, varid)
+         call nf_get_var(ncid, varid, buffx)
 
-! construct lat/lon array
-       if (imon == 1 ) then
-        call nf_inq_varid(ncid, "lat", varid)
-        call nf_get_var(ncid, varid, aer_lat)
-        call nf_inq_varid(ncid, "lon", varid)
-        call nf_get_var(ncid, varid, aer_lon)
-        do i = 1, lonsaer
-          if(aer_lon(i) < 0.)  aer_lon(i) = aer_lon(i) + 360.
-        enddo
-!       if (imon==1 .and. me == master) then
-! print *, "EJ, lat:", aer_lat(:)
-! print *, "EJ, lon:", aer_lon(:)
-!       endif
-       endif
+         do j = 1, latsaer
+         do k = 1, levsaer 
+! input is from toa to sfc
+          if ( iflip == 0 )  then             ! data from toa to sfc
+            klev = k
+          else                                ! data from sfc to top
+            klev = ( dim3 - k ) + 1
+          endif 
+          do i = 1, hmx
+          aerin(i+hmx,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
+          aerin(i,j,k,ii,imon) = 1.d0*buffx(i+hmx,j,klev,1)
+          enddo    !i-loop (lon)
+         enddo     !k-loop (lev)
+         enddo     !j-loop (lat)
+
+       ENDDO           ! ii-loop (ntracaerm)
 
 ! close the file
        call nf_close(ncid)
       enddo      !imon-loop
-
 !---
-      deallocate (ps_clm, delp_clm, pres_tmp, aer_clm, airden_clm )
-      if (me == master) then
-        write(*,*) 'Reading in GOCART aerosols data'
-      endif
+      deallocate (aer_loni, aer_lati)
+      deallocate (buff, pres_tmp)
+      deallocate (buffx)
 
-      END SUBROUTINE read_aerdata
+      END SUBROUTINE read_aerdata 
 !
 !**********************************************************************
 !
@@ -214,11 +230,6 @@ contains
           ddy(j) = 1.0
         endif
  
-!       if (me == master .and. j<= 3) then
-!       print *,'EJj,',j,' dlat=',dlat(j),' jindx12=',jindx1(j),&
-!         jindx2(j),' aer_lat=',aer_lat(jindx1(j)),              &
-!         aer_lat(jindx2(j)),' ddy=',ddy(j)
-!       endif
       ENDDO
 
       DO J=1,npts
@@ -237,11 +248,6 @@ contains
         else
           ddx(j) = 1.0
         endif
-!       if (me == master .and. j<= 3) then
-!       print *,'EJi,',j,' dlon=',dlon(j),' iindx12=',iindx1(j),&
-!        iindx2(j),' aer_lon=',aer_lon(iindx1(j)),              &
-!        aer_lon(iindx2(j)),' ddx=',ddx(j)
-!       endif
       ENDDO
  
       RETURN
@@ -265,7 +271,8 @@ contains
       integer  IDAT(8),JDAT(8)
 !
       real(kind=kind_phys) DDY(npts), ddx(npts),ttt
-      real(kind=kind_phys) aerout(npts,lev,ntrcaer),aerpm(npts,levsaer,ntrcaer)
+      real(kind=kind_phys) aerout(npts,lev,ntrcaer)
+      real(kind=kind_phys) aerpm(npts,levsaer,ntrcaer)
       real(kind=kind_phys) prsl(npts,lev), aerpres(npts,levsaer)
       real(kind=kind_phys) RINC(5), rjday
       integer jdow, jdoy, jday
@@ -286,7 +293,6 @@ contains
       else
         CALL W3MOVDAT(RINC,IDAT,JDAT)
       endif
-!     if(me==master) print *,'EJ, IDAT ',IDAT(1:3), IDAT(5)
 !
       jdow = 0
       jdoy = 0
@@ -307,15 +313,8 @@ contains
       tx1 = (aer_time(n2) - rjday) / (aer_time(n2) - aer_time(n1))
       tx2 = 1.0 - tx1
       if (n2 > 12) n2 = n2 -12 
-!     if(me==master)print *,'EJ,rjday=',rjday, ';aer_time,tx1,tx='   &
-!    ,        aer_time(n1),aer_time(n2),tx1,tx2,n1,n2
-!    
-!     if(me==master) then
-!      DO L=1,levsaer
-!       print *,'EJ,aerin(n1,n2)=',L,aerin(1,1,L,1,n1),aerin(1,1,L,1,n2)
-!      ENDDO
-!     endif
 
+!
       DO L=1,levsaer
         DO J=1,npts
           J1  = JINDX1(J)
@@ -338,51 +337,41 @@ contains
           +tx2*(TEMI*TEMJ*aer_pres(I1,J1,L,n2)+DDX(j)*DDY(J)*aer_pres(I2,J2,L,n2) &
                +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2)) 
 
-!         IF(me==master .and. j==1) THEN
-!          print *, 'EJ,aer/ps:',L,aerpm(j,L,1),aerpres(j,L)
-!          if(L==1) then
-!             print *, 'EJ, wgt:',TEMI*TEMJ,DDX(j)*DDY(J),TEMI*DDY(j),DDX(j)*TEMJ
-!             print *, 'EJ, aerx:',aerin(I1,J1,L,ii,n1), &
-!             aerin(I2,J2,L,ii,n1), aerin(I1,J2,L,ii,n1), aerin(I2,J1,L,ii,n1)
-!             print *, 'EJ, aery:',aerin(I1,J1,L,ii,n2), &
-!             aerin(I2,J2,L,ii,n2), aerin(I1,J2,L,ii,n2), aerin(I2,J1,L,ii,n2)
-!          endif
-!         ENDIF 
         ENDDO
       ENDDO
 
-! note: input is set to be same as GFS 
+! don't flip, input is the same direction as GFS  (bottom-up)
       DO J=1,npts
         DO L=1,lev
-           if(prsl(j,l).ge.aerpres(j,levsaer)) then
+           if(prsl(j,L).ge.aerpres(j,1)) then 
               DO ii=1, ntrcaer
-               aerout(j,l,ii)=aerpm(j,levsaer,ii)
+               aerout(j,L,ii)=aerpm(j,1,ii)        !! sfc level
               ENDDO
-           else if(prsl(j,l).le.aerpres(j,1)) then
+           else if(prsl(j,L).le.aerpres(j,levsaer)) then 
               DO ii=1, ntrcaer
-               aerout(j,l,ii)=aerpm(j,1,ii)
+               aerout(j,L,ii)=aerpm(j,levsaer,ii)  !! toa top
               ENDDO
            else
-             DO  k=levsaer-1,1,-1
-               IF(prsl(j,l)>aerpres(j,k)) then
+             DO  k=1, levsaer-1      !! from sfc to toa
+              IF(prsl(j,L)<aerpres(j,k).and.prsl(j,L)>aerpres(j,k+1)) then
                  i1=k
                  i2=min(k+1,levsaer)
                  exit
-               end if
-             end do
-             DO ii = 1, ntrcaer
-             aerout(j,l,ii)=aerpm(j,i1,ii)+(aerpm(j,i2,ii)-aerpm(j,i1,ii))&
-                 /(aerpres(j,i2)-aerpres(j,i1))*(prsl(j,l)-aerpres(j,i1))
-!            IF(me==master .and. j==1 .and. ii==1) then
-!             print *, 'EJ, aerout:',aerout(j,l,ii), aerpm(j,i1,ii), &
-!                aerpm(j,i2,ii), aerpres(j,i2), aerpres(j,i1), prsl(j,l)
-!            ENDIF
+              ENDIF
              ENDDO
-           endif
-        ENDDO
-      ENDDO
+             temi = prsl(j,L)-aerpres(j,i2)
+             temj = aerpres(j,i1) - prsl(j,L)
+             tx1 = temi/(aerpres(j,i1) - aerpres(j,i2))
+             tx2 = temj/(aerpres(j,i1) - aerpres(j,i2))
+             DO ii = 1, ntrcaer
+           aerout(j,L,ii)= aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
+             ENDDO
+           endif 
+        ENDDO   !L-loop
+      ENDDO     !J-loop
 !
-      RETURN
+      RETURN 
       END SUBROUTINE aerinterpol
 
 end module aerinterp
+
