@@ -404,7 +404,6 @@
      &           im, adjsfcdsw, adjsfcnsw, adjsfcusw,                   &
      &           errmsg, errflg)
 
-      use GFS_typedefs, only: GFS_diag_type
       use machine,      only: kind_phys
 
       implicit none
