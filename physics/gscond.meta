@@ -1,10 +1,10 @@
 [ccpp-arg-table]
-  name = gscond_init
+  name = zhaocarr_gscond_init
   type = scheme
 
 ########################################################################
 [ccpp-arg-table]
-  name = gscond_finalize
+  name = zhaocarr_gscond_finalize
   type = scheme
 
 ########################################################################
