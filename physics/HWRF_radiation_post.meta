@@ -50,6 +50,15 @@
   type = integer
   intent = in
   optional = F
+[XTIME]
+  standard_name = minute_since_simulation_start
+  long_name =
+  units =
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [ihrst]
   standard_name = gmt
   long_name =

@@ -2,7 +2,7 @@
 !NCEP_MESO:MODEL_LAYER: PHYSICS
 !
 !***********************************************************************
-      SUBROUTINE RDTEMP(NTSD,DT,JULDAY,JULYR,IHRST,GLAT,GLON      &
+      SUBROUTINE RDTEMP(NTSD,DT,JULDAY,JULYR,IHRST,GLAT,GLON            &
      &                 ,CZEN,CZMEAN,T,RSWTT,RLWTT                       &
      &                 ,IDS,IDE,JDS,JDE,KDS,KDE                         &
      &                 ,IMS,IME,JMS,JME,KMS,KME                         &
@@ -33,8 +33,9 @@
 !   MACHINE : IBM SP
 !$$$  
 !-----------------------------------------------------------------------
-      USE MODULE_MPP
-      USE MODULE_RA_GFDLETA,ONLY : CAL_MON_DAY,ZENITH
+!mz      USE MODULE_MPP
+!mz      USE MODULE_RA_GFDLETA,ONLY : CAL_MON_DAY,ZENITH
+      USE module_radiation_astronomy ,ONLY : CAL_MON_DAY,ZENITH
 !-----------------------------------------------------------------------
 !
       IMPLICIT NONE
@@ -76,6 +77,8 @@
 !
       REAL :: DEGRAD=3.1415926/180.
       real :: xlat1,xlon1
+
+      INTEGER :: MYIS, MYIE, MYJS, MYJE
 !
 !-----------------------------------------------------------------------
 !-----------------------------------------------------------------------

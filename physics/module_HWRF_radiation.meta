@@ -87,7 +87,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[n_ozmixm]
+[num_ozmixm]
   standard_name = number_of_CAM_ozone_data_months
   long_name = number of CAM ozone data months
   units = count
@@ -137,7 +137,7 @@
   optional = F
 [ozmixm]
   standard_name = CAM_ozone_mixing_ratio
-  long_name = CAM_ozone_mixing_ratio
+  long_name = CAM ozone mixing ratio
   units = kg kg-1
   dimensions = (horizontal_dimension,number_of_ozone_data_levels_for_CAM_radiation, number_of_CAM_ozone_data_months)
   type = real
@@ -601,7 +601,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[NUM_OZMINXM]
+[NUM_OZMIXM]
   standard_name = number_of_CAM_ozone_data_months
   long_name = number of CAM ozone data months
   units = count
@@ -611,7 +611,7 @@
   optional = F
 [ozmixm]
  standard_name = CAM_ozone_mixing_ratio
- long_name = CAM_ozone_mixing_ratio
+ long_name = CAM ozone mixing ratio
  units = kg kg-1
  dimensions = (horizontal_dimension,number_of_ozone_data_levels_for_CAM_radiation, number_of_CAM_ozone_data_months)
  type = real
@@ -875,6 +875,38 @@
   type = integer
   intent = in
   optional = F 
+[swint_opt]
+  standard_name = flag_for_HWRF_shortwave_interpolation_option
+  long_name = interpolation option for HWRF SW radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[calc_clean_atm_diag]
+  standard_name = flag_for_HWRF_rrtmg_clean_sky_diagnostics
+  long_name = flag for HWRF RRTMG clean sky diagnostics
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mp_physics]
+  standard_name = flag_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [hrswpd]
   standard_name = shortwave_heating_rate_per_day
   long_name = shortwave heating rate per day
@@ -911,6 +943,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[SWUPTCLN]
+  standard_name = toa_instantaneous_upwelling_shortwave_flux_assuming_clean_sky   
+  long_name = instantaneous upwelling clean sky shortwave flux at TOA             
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F            
 [SWDNT]
   standard_name = toa_instantaneous_downwelling_shortwave_flux
   long_name = instantaneous downwelling shortwave flux at TOA
@@ -929,6 +970,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[SWDNTCLN]
+  standard_name = toa_instantaneous_downwelling_shortwave_flux_assuming_clean_sky 
+  long_name = instantaneous downwelling clean sky shortwave flux at TOA           
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F          
 [SWUPB]
   standard_name = surface_instantaneous_upwelling_shortwave_flux
   long_name = surface upwelling shortwave flux at current time
@@ -947,6 +997,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[SWUPBCLN]
+  standard_name = surface_instantaneous_upwelling_shortwave_flux_assuming_clean_sky
+  long_name = surface upwelling shortwave flux assuming clean sky                 
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F            
 [SWDNB]
   standard_name = surface_instantaneous_downwelling_shortwave_flux
   long_name = surface downwelling shortwave flux at current time
@@ -965,6 +1024,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[SWDNBCLN]
+  standard_name = surface_instantaneous_downwelling_shortwave_flux_assuming_clean_sky
+  long_name = surface downwelling shortwave flux assuming clean sky at current time
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F            
 [LWUPT]
   standard_name = toa_instantaneous_upwelling_longwave_flux
   long_name = instantaneous upwelling longwave flux at TOA
@@ -983,6 +1051,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[LWUPTCLN]
+  standard_name = toa_instantaneous_upwelling_longwave_flux_assuming_clean_sky    
+  long_name = instantaneous upwelling clean sky longwave flux at TOA              
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F                 
 [LWDNT]
   standard_name = toa_instantaneous_downwelling_longwave_flux
   long_name = instantaneous downwelling longwave flux at TOA
@@ -1001,6 +1078,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[LWDNTCLN]
+  standard_name = toa_instantaneous_downwelling_longwave_flux_assuming_clean_sky  
+  long_name = instantaneous downwelling clean sky longwave flux at TOA            
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F               
 [LWUPB]
   standard_name = surface_instantaneous_upwelling_longwave_flux
   long_name = instantaneous upwelling longwave flux at bottom
@@ -1019,6 +1105,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[LWUPBCLN]
+  standard_name = surface_instantaneous_upwelling_longwave_flux_assuming_clean_sky
+  long_name = instantaneous upwelling longwave flux at bottom assuming clean sky  
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F                
 [LWDNB]
   standard_name = surface_instantaneous_downwelling_longwave_flux
   long_name = instantaneous downwelling longwave flux at bottom
@@ -1037,6 +1132,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[LWDNBCLN]                                                                          
+  standard_name = surface_instantaneous_downwelling_longwave_flux_assuming_clean_sky
+  long_name = instantaneous downwelling longwave flux at bottom assuming clean sky
+  units = W m-2                                                                   
+  dimensions = (horizontal_dimension)                                             
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = inout                                                                  
+  optional = F               
 [ACSWUPT]
   standard_name = toa_upwelling_shortwave_flux_accumulated_in_radiation_time_step
   long_name = upwelling shortwave flux at TOA accumulated in radiation time step
@@ -1189,7 +1293,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+  optional = T 
 [SWVISDIF]     
   standard_name = surface_downwelling_diffuse_visible_shortwave_flux
   long_name = surface downwelling diffuse visible shortwave flux at current time
@@ -1198,7 +1302,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+  optional = T 
 [SWNIRDIR]
   standard_name = surface_downwelling_direct_near_infrared_shortwave_flux
   long_name = surface downwelling beam near-infrared shortwave flux at current time
@@ -1207,7 +1311,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+  optional = T
 [SWNIRDIF]  
   standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux
   long_name = surface downwelling diffuse near-infrared shortwave flux at current time
@@ -1216,7 +1320,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
+  optional = T
 [MPIROOT]
   standard_name = mpi_root
   long_name = master MPI-rank

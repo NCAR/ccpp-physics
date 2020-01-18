@@ -11917,8 +11917,8 @@ CONTAINS
       errmsg = "Warning: missing fields required for aerosol radiation"
       return
 #else
-      CALL wrf_error_fatal  &
-      ('Warning: missing fields required for aerosol radiation' )
+!      CALL wrf_error_fatal  &
+!      ('Warning: missing fields required for aerosol radiation' )
 #endif
       ENDIF
       ENDIF
@@ -12718,7 +12718,7 @@ CONTAINS
             errmsg = "ERROR: Negative total lw optical depth"
             return
 #else
-            call wrf_error_fatal(msg)
+!            call wrf_error_fatal(msg)
 #endif
          else if( slope > 5. ) then
             !mz call wrf_message("-------------------------")
@@ -13036,8 +13036,8 @@ CONTAINS
                  unused fortran unit to read in lookup table."
         return
 #else
-        CALL wrf_error_fatal ( 'module_ra_rrtmg_lw: rrtm_lwlookuptable: Can not '// &
-                               'find unused fortran unit to read in lookup table.' )
+!        CALL wrf_error_fatal ( 'module_ra_rrtmg_lw: rrtm_lwlookuptable: Can not '// &
+!                               'find unused fortran unit to read in lookup table.' )
 #endif
       ENDIF
 
@@ -13076,7 +13076,7 @@ CONTAINS
       errmsg = "module_ra_rrtmg_lw: error opening RRTMG_LW_DATA "
       return
 #else
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #endif
 
      END SUBROUTINE rrtmg_lwlookuptable
@@ -13187,7 +13187,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                  RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -13302,7 +13302,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, selfrefo,    &
@@ -13453,7 +13453,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mn2o,    &
@@ -13576,7 +13576,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo,              &
@@ -13716,7 +13716,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-      CALL wrf_error_fatal(errmess)
+!      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mo3,     &
@@ -13834,7 +13834,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, kao, kao_mco2, cfc11adjo, cfc12o, &
@@ -13973,7 +13973,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mco2,    &
@@ -14123,7 +14123,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-      CALL wrf_error_fatal(errmess)
+!      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mco2,    &
@@ -14274,7 +14274,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mn2o,    &
@@ -14387,7 +14387,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-      CALL wrf_error_fatal(errmess)
+!      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, selfrefo,    &
@@ -14511,7 +14511,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-      CALL wrf_error_fatal(errmess)
+!      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mo2,     &
@@ -14611,7 +14611,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, kao, selfrefo, forrefo
@@ -14730,7 +14730,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kao_mco2, kao_mco,&
@@ -14849,7 +14849,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo,              &
@@ -14960,7 +14960,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, kao, kao_mn2, selfrefo, forrefo 
@@ -15072,7 +15072,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN

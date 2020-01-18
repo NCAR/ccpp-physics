@@ -1558,7 +1558,7 @@
 3081     format('Logic error in caller: levsiz=',I0,' but prior call    &
      &            used ',I0,'.')
          write(message,3081) levsiz,levsiz_ozone_save
-         call wrf_error_fatal(message)
+!         call wrf_error_fatal(message)
 #endif
       endif
 
@@ -1570,7 +1570,7 @@
           errmsg = 'Ozone save arrays are not allocated.'        
           return
 #else
-          call wrf_error_fatal('Ozone save arrays are not allocated.')
+!          call wrf_error_fatal('Ozone save arrays are not allocated.')
 #endif
       endif
       ! Recover the pointers to allocated data:

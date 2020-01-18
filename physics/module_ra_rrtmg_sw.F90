@@ -1875,8 +1875,8 @@
                 Stopping..."
       return
 #else
-      call wrf_error_fatal("Cloud Overlap case 5: ER has not yet been   &
-                           implemented. Stopping...") 
+!      call wrf_error_fatal("Cloud Overlap case 5: ER has not yet been   &
+!                           implemented. Stopping...") 
 #endif
 
       end select
@@ -2226,7 +2226,7 @@
       errmsg = "ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS"
       return
 #else
-      CALL wrf_error_fatal(errmess)
+!      CALL wrf_error_fatal(errmess)
 #endif
 
                      end if
@@ -2250,7 +2250,7 @@
                       errmsg = "FDELTA LESS THAN 0.0"
                       return
 #else
-                      CALL wrf_error_fatal(errmess)
+!                      CALL wrf_error_fatal(errmess)
 #endif
                      end if
                      if (fdelta(ig) .gt. 1.0_rb) then
@@ -2260,7 +2260,7 @@
                       errmsg = "FDELTA GT THAN 1.0"
                       return
 #else
-                      CALL wrf_error_fatal(errmess)
+!                      CALL wrf_error_fatal(errmess)
 #endif
                      end if
                      forwice(ig) = fdelta(ig) + 0.5_rb / ssacoice(ig)
@@ -2283,10 +2283,10 @@
 !!!! an improvement.
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                  if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then
-                     radsno = resnmc(lay)
-                     if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then
-                         write(errmess,'(A,i5,i5,f8.2,f8.2)' )         &
+               if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then
+                  radsno = resnmc(lay)
+                 if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then
+                        write(errmess,'(A,i5,i5,f8.2,f8.2)' )         &
                'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &
                ,ig, lay, cswpmc(ig,lay), radsno
 #ifdef CCPP
@@ -2295,7 +2295,7 @@
                                  OUT OF BOUNDS"
                          return
 #else
-                         CALL wrf_error_fatal(errmess)
+!                         CALL wrf_error_fatal(errmess)
 #endif
                      end if
                      factor = (radsno - 2._rb)/3._rb
@@ -2318,7 +2318,7 @@
                       errmsg = "FDELTA LESS THAN 0.0"
                       return
 #else
-                      CALL wrf_error_fatal(errmess)
+!                      CALL wrf_error_fatal(errmess)
 #endif
                      end if
                      if (fdelta(ig) .gt. 1.0_rb) then
@@ -2328,7 +2328,7 @@
                       errmsg = 'FDELTA GT THAN 1.0'
                       return
 #else
-                      CALL wrf_error_fatal(errmess)
+!                      CALL wrf_error_fatal(errmess)
 #endif
                      end if
                      forwsno(ig) = fdelta(ig) + 0.5_rb / ssacosno(ig)
@@ -2342,7 +2342,7 @@
                       errmsg = 'SNOW EXTINCTION LESS THAN 0.0'
                       return
 #else
-                      call wrf_error_fatal(errmess)
+!                      call wrf_error_fatal(errmess)
 #endif
                      end if
                      if (ssacosno(ig) .gt. 1.0_rb) then
@@ -2352,7 +2352,7 @@
                       errmsg = 'SNOW SSA GRTR THAN 0.0'
                       return
 #else
-                      call wrf_error_fatal(errmess)
+!                      call wrf_error_fatal(errmess)
 #endif
                      end if
                      if (ssacosno(ig) .lt. 0.0_rb)  then
@@ -2362,7 +2362,7 @@
                       errmsg = 'SNOW SSA LESS THAN 0.0'
                       return
 #else
-                      call wrf_error_fatal(errmess)
+!                      call wrf_error_fatal(errmess)
 #endif
                      end if
                      if (gsno(ig) .gt. 1.0_rb)  then
@@ -2372,7 +2372,7 @@
                       errmsg = 'SNOW ASYM GRTR THAN 1.0'
                       return
 #else
-                      call wrf_error_fatal(errmess)
+!                      call wrf_error_fatal(errmess)
 #endif
                      end if
                      if (gsno(ig) .lt. 0.0_rb)  then
@@ -2382,7 +2382,7 @@
                       errmsg = 'SNOW ASYM LESS THAN 0.0'
                       return
 #else
-                      call wrf_error_fatal(errmess)
+!                      call wrf_error_fatal(errmess)
 #endif
                      end if
                   else
@@ -10450,8 +10450,8 @@ CONTAINS
       errmsg = 'Warning: missing fields required for aerosol radiation'
       return
 #else
-      CALL wrf_error_fatal  &
-      ('Warning: missing fields required for aerosol radiation' )
+!      CALL wrf_error_fatal  &
+!      ('Warning: missing fields required for aerosol radiation' )
 #endif
       ENDIF
       ENDIF
@@ -11217,7 +11217,8 @@ CONTAINS
 !#endif
          else if( slope > 6. ) then
 !mz            call wrf_message("-------------------------")
-            write(msg,'("WARNING: Large total sw optical depth of ",f8.2," at point i,j,nb=",3i5)') slope,i,j,nb
+            write(msg,'("WARNING: Large total sw optical depth of ",    &
+                  f8.2," at point i,j,nb=",3i5)') slope,i,j,nb
 !mz            call wrf_message(msg)
 
 !mz            call wrf_message("Diagnostics 1: k, tauaer300, tauaer400, tauaer600, tauaer999, tauaer")
@@ -11475,7 +11476,7 @@ CONTAINS
                       find unused fortran unit to read in lookup table.'
             return
 #else
-        CALL wrf_error_fatal ( 'module_ra_rrtmg_sw: rrtm_swlookuptable: Can not '// &
+!        CALL wrf_error_fatal ( 'module_ra_rrtmg_sw: rrtm_swlookuptable: Can not '// &
                                'find unused fortran unit to read in lookup table.' )
 #endif
       ENDIF
@@ -11512,7 +11513,7 @@ CONTAINS
       errmsg = 'module_ra_rrtmg_sw: error opening RRTMG_SW_DATA '
       return
 #else
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #endif
 
        END SUBROUTINE rrtmg_swlookuptable
@@ -11623,7 +11624,7 @@ CONTAINS
 9010  CONTINUE
       WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading    &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-      CALL wrf_error_fatal(errmess)
+!      CALL wrf_error_fatal(errmess)
 
 #else
 
@@ -11676,7 +11677,7 @@ CONTAINS
 
 ! Local                                    
       character*80 errmess
-      logical, external  :: wrf_dm_on_monitor
+!      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11742,7 +11743,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -11858,7 +11859,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -11975,7 +11976,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -12094,7 +12095,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -12211,7 +12212,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
@@ -12329,7 +12330,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -12436,7 +12437,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -12561,7 +12562,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -12663,7 +12664,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -12728,7 +12729,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -12825,7 +12826,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) raylo, scalekur, layreffr, kao, kbo, sfluxrefo
@@ -12924,7 +12925,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
@@ -13043,7 +13044,7 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-     CALL wrf_error_fatal(errmess)
+!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN

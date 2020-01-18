@@ -9,18 +9,18 @@
       IMPLICIT NONE
 
 !MZ:  HWRF namelist
-      integer, parameter, private  :: aer_opt        = 1
-      integer, parameter, private  :: o3input        = 2
-      integer, parameter, private  :: swint_opt      = 0
-      integer, parameter, private  :: ra_call_offset = -1
-      integer, parameter, private  :: ICLOUD         = 3
-      integer, parameter, private  :: cldovrlp       = 4
+!      integer, parameter, private  :: aer_opt        = 1
+!      integer, parameter, private  :: o3input        = 2
+!      integer, parameter, private  :: swint_opt      = 0
+!      integer, parameter, private  :: ra_call_offset = -1
+!      integer, parameter, private  :: ICLOUD         = 3
+!      integer, parameter, private  :: cldovrlp       = 4
       real,    parameter, private  :: cam_abs_freq_s = 21600. !default CAM clearsky longwave absorption calculation frequency
-      INTEGER, parameter, private  :: aer_type       = 1      ! aerosol type: 1 is SF79 rural, 2 is SF79 urban 
+!      INTEGER, parameter, private  :: aer_type       = 1      ! aerosol type: 1 is SF79 rural, 2 is SF79 urban 
       LOGICAL, parameter, private  :: is_CAMMGMP_used  = .false. ! CAM
       LOGICAL, parameter, private  :: warm_rain  = .false.
-      INTEGER, parameter, private  :: sf_surface_physics = 2
-      INTEGER, parameter, private  :: calc_clean_atm_diag = 0
+!      INTEGER, parameter, private  :: sf_surface_physics = 2
+!      INTEGER, parameter, private  :: calc_clean_atm_diag = 0
 
       CONTAINS
 
@@ -29,19 +29,24 @@
               ,DZ8W   ,EMISS  ,GLW     ,GMT    ,GSW                     & 
               ,ITIMESTEP,JULDAY, JULIAN,JULYR                           &
               ,NPHS,  O3RAD                                             &
+!mz:NML
+              ,o3input, aer_opt, swint_opt, ra_call_offset              &
+              ,icloud, cldovrlp                                         &
+              ,sf_surface_physics                                       &
               ,P8W  ,P ,PI  ,        RADT                               & 
               ,RHO    ,RLWTOA  ,RTHRATEN                                &
               ,RTHRATENLW    ,RTHRATENSW   ,HRSWPD, HRLWPD              &
               ,SNOW   ,STEPRA ,SWDOWN  ,SWDOWNC                         &
-              ,T8W     ,T ,                  TSK ,VEGFRA                &
+              ,T8W     ,T ,                  TSK                        &!,VEGFRA    &
               ,XICE ,XLAND  ,XLAT ,XLONG ,YR                            &
-              ,DECLINX ,SOLCONX ,COSZEN ,HRANG                          &
-              ,Z                                                        &
+!              ,DECLINX ,SOLCONX 
+              ,COSZEN ,HRANG                          &
+!mz              ,Z                                                        &
               ,ALEVSIZ, no_src_types                                    &
               ,LEVSIZ, N_OZMIXM,   N_AEROSOLC                           &
               ,PAERLEV                                                  & 
               ,XTIME                                                    &
-              ,CURR_SECS                                                &
+!mz              ,CURR_SECS                                                &
               ,IDS,IDE, JDS,JDE, KDS,KDE                                &
               ,IMS,IME, JMS,JME, KMS,KME                                &
               ,kts, kte                                                 &
@@ -51,15 +56,15 @@
 #endif
               , re_cloud, re_ice, re_snow                               & ! G. Thompson
               , has_reqc, has_reqi, has_reqs                            & ! G. Thompson
-              , PB                                                      &
+!mz              , PB                                                      &
               , F_ICE_PHY,F_RAIN_PHY                                    &
-              , QV, F_QV                                                &
-              , QC, F_QC                                                &
-              , QR, F_QR                                                &
-              , QI, F_QI                                                &
-              , QS, F_QS                                                &
-              , QG, F_QG                                                &
-              , QNDROP, F_QNDROP                                        &
+              , QV                                                      &!, F_QV  &
+              , QC                                                      &!, F_QC&
+              , QR                                                      &!, F_QR&
+              , QI                                                      &!, F_QI&
+              , QS                                                      &!, F_QS&
+              , QG                                                      &!, F_QG&
+!              , QNDROP, F_QNDROP                                        &
               ,ACSWUPT   ,ACSWUPTC            &
               ,ACSWDNT   ,ACSWDNTC            &
               ,ACSWUPB   ,ACSWUPBC            &
@@ -78,15 +83,16 @@
               ,LWDNB ,LWDNBC, LWDNBCLN        &
               ,LWCF                           &
               ,SWCF                           &
-              , PINA, aodtot           &
+              ,dx,dy                          &
+!              , PINA, aodtot           &
               ,OZMIXM, PIN                    &
-!mz              ,CALC_CLEAN_ATM_DIAG            &
+              ,CALC_CLEAN_ATM_DIAG            &
+#if ( WRF_CHEM == 1 )
               ,AER_RA_FEEDBACK                &
               ,TAUAER300, TAUAER400 & ! jcb
               ,TAUAER600, TAUAER999 & ! jcb
               ,GAER300, GAER400, GAER600, GAER999 & ! jcb
               ,WAER300, WAER400, WAER600, WAER999 & ! jcb
-#if ( WRF_CHEM == 1 )
               ,TAUAERlw1,  TAUAERlw2  &
               ,TAUAERlw3,  TAUAERlw4  &
               ,TAUAERlw5,  TAUAERlw6  &
@@ -97,18 +103,16 @@
               ,TAUAERlw15, TAUAERlw16  &
               ,progn                                            &
 #endif
-              ,dx,dy                 &
               ,SWUPFLX,SWUPFLXC,SWDNFLX,SWDNFLXC                          & ! Optional
               ,LWUPFLX,LWUPFLXC,LWDNFLX,LWDNFLXC                          & ! Optional
               ,ALSWVISDIR, ALSWVISDIF, ALSWNIRDIR, ALSWNIRDIF             & !fds ssib alb comp (06/2010)
               ,SWVISDIR, SWVISDIF, SWNIRDIR, SWNIRDIF                     & !fds ssib swr comp (06/2010)
-!mz              ,SF_SURFACE_PHYSICS &!IS_CAMMGMP_USED                        & !fds
               ,swddir,swddni,swddif                                       & ! jararias 2013/08
               ,swddirc,swddnic                                            & ! PAJ: clear-sky direct irradiance
 !              ,swdown_ref,swddir_ref,coszen_ref                           & !,Gx,gg,Bx,bb               &
               ,mp_physics, imp_physics_fer_hires                          &
-              ,EFCG,EFCS,EFIG,EFIS,EFSG                                   &!mzaercu_opt   
-              ,EFSS,mpirank, mpiroot,errflg, errmsg ) 
+!              ,EFCG,EFCS,EFIG,EFIS,EFSG,EFSS                                   &!mzaercu_opt   
+              ,mpirank, mpiroot,errflg, errmsg ) 
 !-------------------------------------------------------------------------
    !  This driver calls subroutines for the radiation parameterizations.
    !
@@ -223,6 +227,14 @@
 
    INTEGER,      INTENT(IN   )    ::   mp_physics, imp_physics_fer_hires 
    INTEGER,      INTENT(IN   )    ::   STEPRA     
+   INTEGER,      INTENT(IN   )    ::   AER_OPT
+   INTEGER,      INTENT(IN   )    ::   O3INPUT
+   INTEGER,      INTENT(IN   )    ::   swint_opt
+   INTEGER,      INTENT(IN   )    ::   ra_call_offset
+   INTEGER,      INTENT(IN   )    ::   icloud
+   INTEGER,      INTENT(IN   )    ::   cldovrlp
+!   REAL,         INTENT(IN   )    ::   cam_abs_freq_s
+   INTEGER,      INTENT(IN   )    ::   sf_surface_physics
    INTEGER,      INTENT(IN   )    ::   alevsiz, no_src_types
    INTEGER,      INTENT(IN   )    ::   levsiz, n_ozmixm
    INTEGER,      INTENT(IN   )    ::   paerlev, n_aerosolc      
@@ -231,23 +243,23 @@
          INTENT(IN   )  ::                                 XLAND,       &
                                                             XICE,       &
                                                              TSK,       &
-                                                          VEGFRA, &
+                                                          !VEGFRA, &
                                                             SNOW 
    REAL,  DIMENSION( ims:ime, levsiz, jms:jme, n_ozmixm ),  OPTIONAL,    &
           INTENT(IN   ) ::                                  OZMIXM
-   REAL,  DIMENSION( ims:ime, jms:jme ), OPTIONAL,                &
-          INTENT(INOUT) ::                                  AODTOT
+!   REAL,  DIMENSION( ims:ime, jms:jme ), OPTIONAL,                &
+!          INTENT(INOUT) ::                                  AODTOT
 
    REAL,  DIMENSION( ims:ime, levsiz, jms:jme, n_ozmixm ) :: OZFLG
 
    REAL,  DIMENSION(levsiz), OPTIONAL, INTENT(IN )  ::     PIN
-   REAL,  DIMENSION(alevsiz), OPTIONAL, INTENT(IN )  ::     PINA
+!   REAL,  DIMENSION(alevsiz), OPTIONAL, INTENT(IN )  ::     PINA
 
    INTEGER, INTENT(IN   )  ::   julyr
 !
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                  &
          INTENT(IN ) ::                                     dz8w, &
-                                                               z, &
+!                                                               z, &
                                                              p8w, &
                                                                p, &
                                                               pi, &
@@ -255,22 +267,21 @@
                                                              t8w, &
                                                              rho
 
-  REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL,        &
-        INTENT(IN)     ::                            EFCG,       & 
-                                                     EFCS,       &
-                                                     EFIG,       &
-                                                     EFIS,       &
-                                                     EFSG,       &
-                                                     EFSS
+!  REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL,        &
+!        INTENT(IN)     ::                            EFCG,       & 
+!                                                     EFCS,       &
+!                                                     EFIG,       &
+!                                                     EFIS,       &
+!                                                     EFSG,       &
+!                                                     EFSS
 
-
+#if ( WRF_CHEM == 1 )
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL ,       &
          INTENT(IN ) ::  tauaer300,tauaer400,tauaer600,tauaer999, & ! jcb
                                  gaer300,gaer400,gaer600,gaer999, & ! jcb
                                  waer300,waer400,waer600,waer999
 
 
-#if ( WRF_CHEM == 1 )
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL ,       &
          INTENT(IN ) ::  tauaerlw1,tauaerlw2,tauaerlw3,tauaerlw4, & ! czhao 
                          tauaerlw5,tauaerlw6,tauaerlw7,tauaerlw8, & ! czhao 
@@ -278,9 +289,9 @@
                          tauaerlw13,tauaerlw14,tauaerlw15,tauaerlw16
 
    INTEGER, OPTIONAL, INTENT(IN   )    :: progn
-#endif
-!mz   INTEGER, INTENT(IN   )  ::   calc_clean_atm_diag
     INTEGER, INTENT(IN   ), OPTIONAL  ::   aer_ra_feedback
+#endif
+   INTEGER, INTENT(IN   )  ::   calc_clean_atm_diag
    
 
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                  &
@@ -353,7 +364,7 @@
    INTEGER, INTENT(IN  ),OPTIONAL ::                          YR
 !
    INTEGER, INTENT(IN  ) ::                    JULDAY, itimestep
-   REAL, INTENT(IN ),OPTIONAL     ::                    CURR_SECS
+!   REAL, INTENT(IN ),OPTIONAL     ::                    CURR_SECS
 !mz: dyn_em specific
 !   LOGICAL, INTENT(IN ),OPTIONAL  ::              ADAPT_STEP_FLAG
 
@@ -410,10 +421,16 @@
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ),                  &
          OPTIONAL,                                                &
          INTENT(INOUT ) ::                                        &
-                                                               pb &
-                                        ,qv,qc,qr,qi,qs,qg,qndrop
+!mz                                                            pb &
+                                        qv,qc,qr,qi,qs,qg    !,qndrop
 
-   LOGICAL, OPTIONAL ::     f_qv,f_qc,f_qr,f_qi,f_qs,f_qg,f_qndrop
+!mz     LOGICAL, OPTIONAL ::     f_qv,f_qc,f_qr,f_qi,f_qs,f_qg !,f_qndrop
+     LOGICAL, PARAMETER :: f_qv = .true.
+     LOGICAL, PARAMETER :: f_qc = .true.
+     LOGICAL, PARAMETER :: f_qr = .true.
+     LOGICAL, PARAMETER :: f_qi = .true.
+     LOGICAL, PARAMETER :: f_qs = .true.
+     LOGICAL, PARAMETER :: f_qg = .true.
 
 
 
@@ -451,7 +468,7 @@
 !------------------------------------------------------------------
 ! solar related variables are added to declaration
 !-------------------------------------------------
-   REAL, OPTIONAL, INTENT(OUT) :: DECLINX,SOLCONX
+!mz   REAL, OPTIONAL, INTENT(OUT) :: DECLINX,SOLCONX
    REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme), INTENT(OUT) :: COSZEN
    REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme), INTENT(OUT) :: HRANG
 !------------------------------------------------------------------
@@ -504,11 +521,12 @@
      CALL radconst(XTIME,DECLIN,SOLCON,JULIAN,               &
                    DEGRAD,DPD                                )
 
-     IF(PRESENT(declinx).AND.PRESENT(solconx))THEN
+!mz
+!     IF(PRESENT(declinx).AND.PRESENT(solconx))THEN
 ! saved to state arrays used in surface driver
-       declinx=declin
-       solconx=solcon
-     ENDIF
+!       declinx=declin
+!       solconx=solcon
+!     ENDIF
 
 !   outputs: coszen, hrang
      call calc_coszen(ims,ime,jms,jme,its,ite,jts,jte,  &
@@ -600,22 +618,22 @@
            ENDDO
            
 !mz           IF (PRESENT(F_QS)) THEN
-!mz              DO j = jts,jte
-!mz              DO k = kts,kte
-!mz              DO i = its,ite
-!mz                 qs_save(i,k,j) = qs(i,k,j)
-!mz              ENDDO
-!mz              ENDDO
-!mz              ENDDO
-!mz           ELSE
               DO j = jts,jte
               DO k = kts,kte
               DO i = its,ite
-                 qs_save(i,k,j) = 0.0
+                 qs_save(i,k,j) = qs(i,k,j)
               ENDDO
+             ENDDO
               ENDDO
-              ENDDO
-!mz           ENDIF
+!mz           ELSE
+!              DO j = jts,jte
+!              DO k = kts,kte
+!              DO i = its,ite
+!                 qs_save(i,k,j) = 0.0
+!              ENDDO
+!              ENDDO
+!              ENDDO
+!           ENDIF
 
            write(0,*)"in HWRF rad driver: call cldfra3 to use gthompson cloud fraction scheme"
            CALL cal_cldfra3(CLDFRA, qv, qc, qi, qs,                     &
@@ -683,7 +701,7 @@
                   progn=progn,                                      &
 #endif
                   calc_clean_atm_diag=calc_clean_atm_diag,          &
-                  QNDROP3D=qndrop,F_QNDROP=f_qndrop,                &
+!mz                  QNDROP3D=qndrop,F_QNDROP=f_qndrop,                &
 !ccc Added for time-varying trace gases.
                   YR=YR,JULIAN=JULIAN,                              &
 !ccc
@@ -754,7 +772,7 @@
                      progn=progn,                                      &
 #endif
                      calc_clean_atm_diag=calc_clean_atm_diag,          &
-                     QNDROP3D=qndrop,F_QNDROP=f_qndrop,                &
+!                     QNDROP3D=qndrop,F_QNDROP=f_qndrop,                &
                      mp_physics=mp_physics,                            &
                      imp_physics_fer_hires=imp_physics_fer_hires,      &
                      IDS=ids,IDE=ide, JDS=jds,JDE=jde, KDS=kds,KDE=kde,&
@@ -798,7 +816,7 @@
 !        IF (PRESENT(CLDFRA) .AND.                                       &
 !            PRESENT(F_QC) .AND. PRESENT ( F_QI ) ) THEN
 !           CALL wrf_debug (150, 'DEBUG-GT, back to micro-only Qc and Qi')
-           write(0,*)'DEBUG-HWRF-RRTMG, back to micro-only Qc and Qi'
+!           write(0,*)'DEBUG-HWRF-RRTMG, back to micro-only Qc and Qi'
            DO j = jts,jte
            DO k = kts,kte
            DO i = its,ite
@@ -807,7 +825,7 @@
            ENDDO
            ENDDO
            ENDDO
-           IF (PRESENT(F_QS)) THEN
+!mz           IF (PRESENT(F_QS)) THEN
               DO j = jts,jte
               DO k = kts,kte
               DO i = its,ite
@@ -815,11 +833,11 @@
               ENDDO
               ENDDO
               ENDDO
-           ENDIF
+!mz           ENDIF
 
-        IF (PRESENT(CLDFRA) ) THEN
-           CALL wrf_debug (150, 'DEBUG-GT, back to micro-only Qc and Qi')
-           IF (PRESENT(F_QC)) THEN
+!mz        IF (PRESENT(CLDFRA) ) THEN
+!           CALL wrf_debug (150, 'DEBUG-GT, back to micro-only Qc and Qi')
+!           IF (PRESENT(F_QC)) THEN
               DO j = jts,jte
               DO k = kts,kte
               DO i = its,ite
@@ -827,8 +845,8 @@
               ENDDO
               ENDDO
               ENDDO
-           ENDIF
-           IF (PRESENT(F_QI)) THEN
+!           ENDIF
+!           IF (PRESENT(F_QI)) THEN
               DO j = jts,jte
               DO k = kts,kte
               DO i = its,ite
@@ -836,8 +854,8 @@
               ENDDO
               ENDDO
               ENDDO
-           ENDIF
-           IF (PRESENT(F_QS)) THEN
+!           ENDIF
+!           IF (PRESENT(F_QS)) THEN
               DO j = jts,jte
               DO k = kts,kte
               DO i = its,ite
@@ -845,14 +863,13 @@
               ENDDO
               ENDDO
               ENDDO
-           ENDIF
-        ENDIF
+!           ENDIF
+!mz        ENDIF
 
       ! parameters update for SW surface fluxes interpolation
-!mz
-!      IF (swint_opt.EQ.1) THEN
-         ! interpolation applies on all-sky fluxes (swddir, swdown)
-!         CALL update_swinterp_parameters(ims,ime,jms,jme,its,ite,jts,jte,   &
+!mz      IF (swint_opt.EQ.1) THEN
+!mz         ! interpolation applies on all-sky fluxes (swddir, swdown)
+!mz         CALL update_swinterp_parameters(ims,ime,jms,jme,its,ite,jts,jte,   &
 !                                         coszen,coszen_loc,swddir,swdown,   &
 !                                         swddir_ref,bb,Bx,swdown_ref,gg,Gx, &
 !                                         coszen_ref                         )
@@ -1045,7 +1062,6 @@
        enddo
    END SUBROUTINE calc_coszen
 
-!mz:delete due to swint_opt = 0
    subroutine update_swinterp_parameters(ims,ime,jms,jme,its,ite,jts,jte, &
                                          coszen,coszen_loc,swddir,swdown, &
                                          swddir_ref,bb,Bx,                &
@@ -1897,7 +1913,7 @@ SUBROUTINE ozn_p_int(p ,pin, levsiz, ozmixt, o3vmr, &
 
       if (kount.gt.ncol) then
 !        call endrun ('OZN_P_INT: Bad ozone data: non-monotonicity suspected')
-         call wrf_error_fatal ('OZN_P_INT: Bad ozone data: non-monotonicity suspected')
+!mz         call wrf_error_fatal ('OZN_P_INT: Bad ozone data: non-monotonicity suspected')
       end if
 35    continue
 
@@ -2154,7 +2170,7 @@ SUBROUTINE aer_p_int(p ,pin, levsiz, aerodt, aerod, no_src, pf, totaod,   &
       end do
 
       if (kount.gt.ncol) then
-         call wrf_error_fatal ('AER_P_INT: Bad aerosol data: non-monotonicity suspected')
+!         call wrf_error_fatal ('AER_P_INT: Bad aerosol data: non-monotonicity suspected')
       end if
 35    continue
 
