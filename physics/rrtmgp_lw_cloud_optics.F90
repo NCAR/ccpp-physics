@@ -99,11 +99,6 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (mpirank .eq. mpiroot) then
-       print*,'DJS+ Opening file containing RRTMGP LW cloud fields'
-       open(47,file='rrtmgp_clds.txt',status='unknown')
-    endif
-
     if (cld_optics_scheme .eq. 0) return
 
     ! Filenames are set in the physics_nml
@@ -450,19 +445,7 @@ contains
        endif
        lw_optical_props_cloudsByBand%tau = tau_cld
     endif    
-    
-    write(47,*) "In rrtmgp_lw_cloud_optics: "
-    write(47,*),"nCol: ",nCol
-    write(47,*),"nLay: ",nLev
-    do iCol=1,nCol
-       do iLay=1,nLev
-          write(47,"(23f8.2)") p_lay(iCol,iLay)/100.,cld_lwp(iCol,iLay),cld_reliq(iCol,iLay),&
-               cld_iwp(iCol,iLay),cld_reice(iCol,iLay),tau_cld(iCol,iLay,:),lon(iCol), lat(iCol)
-       enddo
-    enddo
-
-    !lw_optical_props_cloudsByBand%tau(:,:,2) = lw_optical_props_cloudsByBand%tau(:,:,1)
-
+ 
     ! All-sky LW optical depth ~10microns
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)
 
@@ -486,7 +469,6 @@ contains
 #ifdef MPI
     call MPI_BARRIER(mpicomm, ierr)
 #endif
-    close(47)
 
   end subroutine rrtmgp_lw_cloud_optics_finalize
 end module rrtmgp_lw_cloud_optics

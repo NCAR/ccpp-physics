@@ -362,11 +362,7 @@
           ! Inputs
           integer, intent(in) :: mpicomm,mpirank,mpiroot
 
-          if (mpirank .eq. mpiroot) then
-             print*,'DJS+ Opening file containing RRTMG LW cloud fields'
-             open(47,file='rrtmg_clds.txt',status='unknown')
-          endif
-
+        
         end subroutine rrtmg_lw_init
 
 !> \defgroup module_radlw_main GFS RRTMG Longwave Module 
@@ -730,10 +726,6 @@
 !     endif
 
 !  --- ...  loop over horizontal npts profiles
-      write(47,*) "In radlw_main: "
-      write(47,*),"nCol: ",npts
-      write(47,*),"nLay: ",nLay
-
       lab_do_iplon : do iplon = 1, npts
 
 !> -# Read surface emissivity.
@@ -1179,16 +1171,6 @@
         endif   ! end if_isubclw_block
 
 !> -# Save outputs.
-
-
-        do k=1,nlay
-           write(47,"(23f8.2)")  plyr(iplon,k),clwp(k),relw(k),ciwp(k), &
-     &          reiw(k),taucld(:,k),lon(iplon),lat(iplon)
-        enddo
-        do k=1,nlay+1
-           write(47,"(5f8.2)") plvl(iplon,k),totuflux(k-1),totdflux(k-1)&
-     &         ,totuclfl(k-1),totdclfl(k-1)
-        enddo
         
 
         topflx(iplon)%upfxc = totuflux(nlay)
@@ -1287,7 +1269,6 @@
 #ifdef MPI
         call MPI_BARRIER(mpicomm, ierr)
 #endif
-        close(47)
       end subroutine rrtmg_lw_finalize
 
 
@@ -3704,12 +3685,6 @@
         totdflux(k) = totdflux(k) * flxfac
         totuclfl(k) = totuclfl(k) * flxfac
         totdclfl(k) = totdclfl(k) * flxfac
-      enddo
-
-
-      do k=0,nlay
-         write(47,"(32f8.2)") toturad(k,:)*flxfac,                      &
-     &        totdrad(k,:)*flxfac
       enddo
 
 !> -# Calculate net fluxes and heating rates.

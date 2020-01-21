@@ -160,14 +160,6 @@ contains
     !if (l_AllSky_HR_byband) then
     !endif
 
-    write(47,*) "In rrtmgp_lw_rte: "
-    do iCol=1,nCol
-       do iLay=1,nLev+1
-          write(47,"(35f8.2)") p_lev(iCol,iLay)/100.,flux_allsky%bnd_flux_up(iCol,iLay,:),flux_allsky%bnd_flux_dn(iCol,iLay,:),&
-               fluxlwUP_clrsky(iCol,iLay),fluxlwDOWN_clrsky(iCol,iLay)
-       enddo
-    enddo
-
   end subroutine rrtmgp_lw_rte_run
   
   ! #########################################################################################

@@ -109,6 +109,7 @@ contains
 
     ! Call McICA
     select case ( iovrlw )
+    case(0)
        ! Maximumn-random 
     case(1)
        call check_error_msg('rrtmgp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac_noSamp,cldfracMCICA))       
