@@ -1,7 +1,7 @@
 module rrtmgp_lw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
-  use physparam,                only: isubcsw, iovrsw
+  use physparam,                only: isubclw, iovrlw
   use mo_optical_props,         only: ty_optical_props_1scl
   use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
