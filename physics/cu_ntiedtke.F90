@@ -148,7 +148,7 @@ contains
 !-----------------------------------------------------------------------
 !          level 1 subroutine 'tiecnvn'
 !-----------------------------------------------------------------
-      subroutine cu_ntiedtke_run(pu,pv,pt,pqv,pqvf,ptf,clw,poz,pzz,prsl,prsi,pomg,   &
+      subroutine cu_ntiedtke_run(pu,pv,pt,pqv,tdi,qvdi,pqvf,ptf,clw,poz,pzz,prsl,prsi,pomg,   &
                                  evap,hfx,zprecc,lmask,lq,ix,km,dt,dx,kbot,ktop,kcnv,&
                                  ktrac,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
 !-----------------------------------------------------------------
@@ -162,13 +162,9 @@ contains
       integer, dimension( lq ),   intent(in)  :: lmask
       real(kind=kind_phys), dimension( lq ),     intent(in ) :: evap, hfx, dx
       real(kind=kind_phys), dimension( ix , km ),     intent(inout) :: pu, pv, pt, pqv
-      real(kind=kind_phys), dimension( ix , km ),     intent(in )   :: poz, prsl, pomg, pqvf, ptf
+      real(kind=kind_phys), dimension( ix , km ),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
       real(kind=kind_phys), dimension( ix , km+1 ),   intent(in )   :: pzz, prsi
-      ! DH* TODO - check dimensions of clw, ktrac+2 seems to be smaller
-      ! than the actual dimensions (ok as long as only indices 1 and 2
-      ! are accessed here, and as long as these contain what is expected);
-      ! better to expand into the cloud-ice and cloud-water components *DH
-      real(kind=kind_phys), dimension( ix , km, ktrac+2 ),    intent(inout ) ::  clw
+      real(kind=kind_phys), dimension( ix , km, ktrac ),    intent(inout ) ::  clw
 
       integer, dimension( lq ),   intent(out)  :: kbot, ktop, kcnv
       real(kind=kind_phys), dimension( lq ),   intent(out)  :: zprecc
@@ -188,7 +184,7 @@ contains
       real(kind=kind_phys) ztp1(lq,km),    zqp1(lq,km),  ztu(lq,km),   zqu(lq,km),&
      &     zlu(lq,km),     zlude(lq,km), zmfu(lq,km),  zmfd(lq,km),  zmfude_rate(lq,km),&
      &     zqsat(lq,km),   zrain(lq)
-      real(kind=kind_phys) pcen(lq,km,ktrac),ptenc(lq,km,ktrac) 
+      real(kind=kind_phys) pcen(lq,km,ktrac-2),ptenc(lq,km,ktrac-2) 
 
       integer icbot(lq),   ictop(lq),     ktype(lq),   lndj(lq)
       logical locum(lq)
@@ -246,9 +242,9 @@ contains
           zqs  = min(0.5,zqs)                                         
           zcor = 1./(1.-vtmpc1*zqs)                                    
           zqsat(j,k1)=zqs*zcor      
-          pqte(j,k1)=pqvf(j,k) 
+          pqte(j,k1)=pqvf(j,k)+(pqv(j,k)-qvdi(j,k))/ztmst 
           zqq(j,k1) =pqte(j,k1)
-          ptte(j,k1)=ptf(j,k)
+          ptte(j,k1)=ptf(j,k)+(pt(j,k)-tdi(j,k))/ztmst
           ztt(j,k1) =ptte(j,k1)
           ud_mf(j,k1)=0.
           dd_mf(j,k1)=0.
@@ -258,7 +254,7 @@ contains
         end do
       end do
 
-      do n=1,ktrac
+      do n=1,ktrac-2
         do k=1,km
           k1=km-k+1
           do j=1,lq
@@ -289,7 +285,7 @@ contains
      &     zqp1,     pum1,     pvm1,     pverv,   zqsat,&
      &     pqhfl,    ztmst,    pap,      paph,    pgeo, &
      &     ptte,     pqte,     pvom,     pvol,    prsfc,&
-     &     pssfc,    locum,    ktrac,    pcen,    ptenc,&
+     &     pssfc,    locum,    ktrac-2,  pcen,    ptenc,&
      &     ktype,    icbot,    ictop,    ztu,     zqu,  &
      &     zlu,      zlude,    zmfu,     zmfd,    zrain,&
      &     pcte,     phhfl,    lndj,     pgeoh,   zmfude_rate, dx)
@@ -314,7 +310,7 @@ contains
           pt(j,k) = ztp1(j,k1)+(ptte(j,k1)-ztt(j,k1))*ztmst
           pqv(j,k)= zqp1(j,k1)+(pqte(j,k1)-zqq(j,k1))*ztmst
           ud_mf(j,k)= zmfu(j,k1)*ztmst
-          dd_mf(j,k)= zmfd(j,k1)*ztmst
+          dd_mf(j,k)= -zmfd(j,k1)*ztmst
           dt_mf(j,k)= zmfude_rate(j,k1)*ztmst
           cnvw(j,k) = zlude(j,k1)*ztmst*g/(prsi(j,k)-prsi(j,k+1))
           cnvc(j,k) = 0.04 * log(1. + 675. * ud_mf(j,k))
@@ -344,16 +340,14 @@ contains
         end do
       endif
 !
-      if (ktrac > 0) then
-        do n=1,ktrac
-          do k=1,km
-            k1=km-k+1
-            do j=1,lq
-              clw(j,k,n+2)=pcen(j,k,n)+ptenc(j,k1,n)*ztmst
-            end do
-          end do
-        end do
-      end if
+!      do n=1,ktrac-2
+!        do k=1,km
+!          k1=km-k+1
+!          do j=1,lq
+!            clw(j,k,n+2)=pcen(j,k,n)+ptenc(j,k1,n)*ztmst
+!          end do
+!        end do
+!      end do
 !
       return
       end subroutine cu_ntiedtke_run
