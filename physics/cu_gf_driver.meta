@@ -358,65 +358,6 @@
   type = integer
   intent = in
   optional = F
-[nwfa]
-  standard_name = water_friendly_aerosol_number_concentration
-  long_name = number concentration of water-friendly aerosols
-  units = kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[con_rd]
-  standard_name = gas_constant_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[gq0]
-  standard_name = tracer_concentration_updated_by_physics
-  long_name = tracer concentration updated by physics
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
-  type = real 
-  kind = kind_phys
-  intent = inout
-  optional = F
-[ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
-  long_name = tracer index for ice number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
-  long_name = tracer index for liquid number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics]
-  standard_name = flag_for_microphysics_scheme
-  long_name = choice of microphysics scheme
-  units = flag
-  dimensions = () 
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
-  long_name = choice of Thompson microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
