@@ -67,7 +67,7 @@ contains
 !!
 #endif
    subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, &
-                                        mpicomm, mpirank, mpiroot, errmsg, errflg)
+                                   kdt, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
       implicit none
 
@@ -78,6 +78,7 @@ contains
       real(kind_phys), dimension(1:ncol,1:nlev), intent(inout) :: tgrs
       real(kind_phys), dimension(1:ncol,1:nlev), intent(in)    :: prslk
       real(kind_phys),                           intent(in)    :: dtp
+      integer,                                   intent(in)    :: kdt
       ! MPI information
       integer,          intent(in   ) :: mpicomm
       integer,          intent(in   ) :: mpirank
@@ -115,8 +116,8 @@ contains
 
             if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
 #ifdef DEBUG
-              write(0,*) "mp_thompson_post_run mp_tend limiter: i, k, t_old, t_new, t_lim:", &
-                         & i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
+              write(0,'(a,3i6,3e16.7)') "mp_thompson_post_run mp_tend limiter: kdt, i, k, t_old, t_new, t_lim:", &
+                                      & kdt, i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
 #endif
               events = events + 1
             end if
@@ -125,7 +126,8 @@ contains
       end do
 
       if (events > 0) then
-        write(0,'(a,i0,a,i0,a)') "mp_thompson_post_run: mp_tend_lim applied ", events, "/", nlev*ncol, " times"
+        write(0,'(a,i0,a,i0,a,i0)') "mp_thompson_post_run: mp_tend_lim applied ", events, "/", nlev*ncol, &
+                                  & " times at timestep ", kdt
       end if
 
    end subroutine mp_thompson_post_run
