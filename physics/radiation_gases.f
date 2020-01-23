@@ -1417,15 +1417,16 @@
 !! of ozone concentration. It should be replaced by monthly climatology
 !! that varies latitudinally and vertically.
       subroutine oznini(ozmixm,pin,levsiz,num_months,XLAT,              &
-     &                  mpicomm,                                        &
      &                  ids, ide, jds, jde, kds, kde,                   &
      &                  ims, ime, jms, jme, kms, kme,                   &
      &                  its, ite, jts, jte, kts, kte,                   &
-     &                  mpirank, mpiroot,errflg,errmsg)
+     &                  mpicomm, mpirank, mpiroot,errflg,errmsg)
 !
 
 !MZ* #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
+#ifdef MPI
        use mpi
+#endif
 !  use module_dm, only: local_communicator
 !MZ*#endif
        IMPLICIT NONE
@@ -1533,13 +1534,12 @@
        endif  !if_master
 !mz      call wrf_debug(1,"Broadcast ozone to other ranks.")
 !# if ( RWORDSIZE == DWORDSIZE )
-      call MPI_Bcast(ozmixin,size(ozmixin),MPI_DOUBLE_PRECISION,0,      &
-     &               mpicomm,ierr)
-      call MPI_Bcast(pin,size(pin),MPI_DOUBLE_PRECISION,0,              &
-     &               mpicomm,ierr)
+#ifdef MPI
+      call MPI_Bcast(ozmixin,size(ozmixin),MPI_REAL,0,  mpicomm,ierr)
+      call MPI_Bcast(pin,size(pin),MPI_REAL,0, mpicomm,ierr)
       plev=pin
-      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_DOUBLE_PRECISION,0,  &
-     &               mpicomm,ierr)
+      call MPI_Bcast(lat_ozone,size(lat_ozone),MPI_REAL,0, mpicomm,ierr)
+#endif
 !mz# else
 !      call MPI_Bcast(ozmixin,size(ozmixin),MPI_REAL,0,local_communicator,ierr)
 !      call MPI_Bcast(pin,size(pin),MPI_REAL,0,local_communicator,ierr)

@@ -2,6 +2,7 @@
 
       module parkind
 !     implicit none
+      use machine, only : kind_phys
       save
 
 !------------------------------------------------------------------
@@ -30,17 +31,20 @@
 !      integer, parameter :: kind_rm = selected_real_kind(6)  ! 4 byte real
 !      integer, parameter :: kind_rn = kind(1.0)              ! native real
 
-#if 0
+!#if 0
+!mz native_rwordsize =4 in WRF-NMM
 ! Modified for WRF:
-#if (RWORDSIZE == 8)
-      integer, parameter :: kind_rb = selected_real_kind(12) ! 8 byte real
-#endif
-#if (RWORDSIZE == 4)
-      integer, parameter :: kind_rb = selected_real_kind(6)  ! 4 byte real
-#endif
-#else
-       integer, parameter :: kind_rb = kind(1.0)              ! native real
-#endif
+!#if (RWORDSIZE == 8)
+!     ! integer, parameter :: kind_rb = selected_real_kind(12) ! 8 byte real
+!#endif
+!#if (RWORDSIZE == 4)
+!      !integer, parameter :: kind_rb = selected_real_kind(6)  ! 4 byte real
+!#endif
+!#else
+      ! integer, parameter :: kind_rb = kind(1.0)              ! native real
+       integer, parameter :: kind_r4 = selected_real_kind(6)
+       integer, parameter :: kind_rb = kind_phys
+!#endif
 
       end module parkind
 
@@ -235,9 +239,9 @@
 
       module rrlw_kg01
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4   
+      use machine, only : kind_phys
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -263,11 +267,11 @@
 
       integer(kind=im), parameter :: no1  = 16
 
-      real(kind=rb) :: fracrefao(no1)  , fracrefbo(no1)
-      real(kind=rb) :: kao(5,13,no1)
-      real(kind=rb) :: kbo(5,13:59,no1)
-      real(kind=rb) :: kao_mn2(19,no1) , kbo_mn2(19,no1)
-      real(kind=rb) :: selfrefo(10,no1), forrefo(4,no1)
+      real(kind=r4) :: fracrefao(no1)  , fracrefbo(no1)
+      real(kind=r4) :: kao(5,13,no1)
+      real(kind=r4) :: kbo(5,13:59,no1)
+      real(kind=r4) :: kao_mn2(19,no1) , kbo_mn2(19,no1)
+      real(kind=r4) :: selfrefo(10,no1), forrefo(4,no1)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 1
@@ -294,11 +298,11 @@
 
       integer(kind=im), parameter :: ng1  = 10
 
-      real(kind=rb) :: fracrefa(ng1)  , fracrefb(ng1)
-      real(kind=rb) :: ka(5,13,ng1)   , absa(65,ng1)
-      real(kind=rb) :: kb(5,13:59,ng1), absb(235,ng1)
-      real(kind=rb) :: ka_mn2(19,ng1) , kb_mn2(19,ng1)
-      real(kind=rb) :: selfref(10,ng1), forref(4,ng1)
+      real(kind=r4) :: fracrefa(ng1)  , fracrefb(ng1)
+      real(kind=r4) :: ka(5,13,ng1)   , absa(65,ng1)
+      real(kind=r4) :: kb(5,13:59,ng1), absb(235,ng1)
+      real(kind=r4) :: ka_mn2(19,ng1) , kb_mn2(19,ng1)
+      real(kind=r4) :: selfref(10,ng1), forref(4,ng1)
 
       equivalence (ka(1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -306,9 +310,8 @@
 
       module rrlw_kg02
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb , r4=> kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -332,10 +335,10 @@
 
       integer(kind=im), parameter :: no2  = 16
 
-      real(kind=rb) :: fracrefao(no2)   , fracrefbo(no2)
-      real(kind=rb) :: kao(5,13,no2)
-      real(kind=rb) :: kbo(5,13:59,no2)
-      real(kind=rb) :: selfrefo(10,no2) , forrefo(4,no2)
+      real(kind=r4) :: fracrefao(no2)   , fracrefbo(no2)
+      real(kind=r4) :: kao(5,13,no2)
+      real(kind=r4) :: kbo(5,13:59,no2)
+      real(kind=r4) :: selfrefo(10,no2) , forrefo(4,no2)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 2
@@ -362,12 +365,12 @@
 
       integer(kind=im), parameter :: ng2  = 12
 
-      real(kind=rb) :: fracrefa(ng2)  , fracrefb(ng2)
-      real(kind=rb) :: ka(5,13,ng2)   , absa(65,ng2)
-      real(kind=rb) :: kb(5,13:59,ng2), absb(235,ng2)
-      real(kind=rb) :: selfref(10,ng2), forref(4,ng2)
+      real(kind=r4) :: fracrefa(ng2)  , fracrefb(ng2)
+      real(kind=r4) :: ka(5,13,ng2)   , absa(65,ng2)
+      real(kind=r4) :: kb(5,13:59,ng2), absb(235,ng2)
+      real(kind=r4) :: selfref(10,ng2), forref(4,ng2)
 
-      real(kind=rb) :: refparam(13)
+      real(kind=r4) :: refparam(13)
 
       equivalence (ka(1,1,1),absa(1,1)),(kb(1,13,1),absb(1,1))
 
@@ -375,9 +378,8 @@
 
       module rrlw_kg03
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -403,12 +405,12 @@
 
       integer(kind=im), parameter :: no3  = 16
 
-      real(kind=rb) :: fracrefao(no3,9) ,fracrefbo(no3,5)
-      real(kind=rb) :: kao(9,5,13,no3)
-      real(kind=rb) :: kbo(5,5,13:59,no3)
-      real(kind=rb) :: kao_mn2o(9,19,no3), kbo_mn2o(5,19,no3)
-      real(kind=rb) :: selfrefo(10,no3)
-      real(kind=rb) :: forrefo(4,no3)
+      real(kind=r4) :: fracrefao(no3,9) ,fracrefbo(no3,5)
+      real(kind=r4) :: kao(9,5,13,no3)
+      real(kind=r4) :: kbo(5,5,13:59,no3)
+      real(kind=r4) :: kao_mn2o(9,19,no3), kbo_mn2o(5,19,no3)
+      real(kind=r4) :: selfrefo(10,no3)
+      real(kind=r4) :: forrefo(4,no3)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 3
@@ -436,12 +438,12 @@
 
       integer(kind=im), parameter :: ng3  = 16
 
-      real(kind=rb) :: fracrefa(ng3,9) ,fracrefb(ng3,5)
-      real(kind=rb) :: ka(9,5,13,ng3)  ,absa(585,ng3)
-      real(kind=rb) :: kb(5,5,13:59,ng3),absb(1175,ng3)
-      real(kind=rb) :: ka_mn2o(9,19,ng3), kb_mn2o(5,19,ng3)
-      real(kind=rb) :: selfref(10,ng3)
-      real(kind=rb) :: forref(4,ng3)
+      real(kind=r4) :: fracrefa(ng3,9) ,fracrefb(ng3,5)
+      real(kind=r4) :: ka(9,5,13,ng3)  ,absa(585,ng3)
+      real(kind=r4) :: kb(5,5,13:59,ng3),absb(1175,ng3)
+      real(kind=r4) :: ka_mn2o(9,19,ng3), kb_mn2o(5,19,ng3)
+      real(kind=r4) :: selfref(10,ng3)
+      real(kind=r4) :: forref(4,ng3)
 
       equivalence (ka(1,1,1,1),absa(1,1)),(kb(1,1,13,1),absb(1,1))
 
@@ -449,9 +451,8 @@
 
       module rrlw_kg04
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -475,10 +476,10 @@
 
       integer(kind=im), parameter :: no4  = 16
 
-      real(kind=rb) :: fracrefao(no4,9)  ,fracrefbo(no4,5)
-      real(kind=rb) :: kao(9,5,13,no4)
-      real(kind=rb) :: kbo(5,5,13:59,no4)
-      real(kind=rb) :: selfrefo(10,no4)  ,forrefo(4,no4)
+      real(kind=r4) :: fracrefao(no4,9)  ,fracrefbo(no4,5)
+      real(kind=r4) :: kao(9,5,13,no4)
+      real(kind=r4) :: kbo(5,5,13:59,no4)
+      real(kind=r4) :: selfrefo(10,no4)  ,forrefo(4,no4)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 4
@@ -503,10 +504,10 @@
 
       integer(kind=im), parameter :: ng4  = 14
 
-      real(kind=rb) :: fracrefa(ng4,9)  ,fracrefb(ng4,5)
-      real(kind=rb) :: ka(9,5,13,ng4)   ,absa(585,ng4)
-      real(kind=rb) :: kb(5,5,13:59,ng4),absb(1175,ng4)
-      real(kind=rb) :: selfref(10,ng4)  ,forref(4,ng4)
+      real(kind=r4) :: fracrefa(ng4,9)  ,fracrefb(ng4,5)
+      real(kind=r4) :: ka(9,5,13,ng4)   ,absa(585,ng4)
+      real(kind=r4) :: kb(5,5,13:59,ng4),absb(1175,ng4)
+      real(kind=r4) :: selfref(10,ng4)  ,forref(4,ng4)
 
       equivalence (ka(1,1,1,1),absa(1,1)),(kb(1,1,13,1),absb(1,1))
 
@@ -514,9 +515,8 @@
 
       module rrlw_kg05
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -542,13 +542,13 @@
 
       integer(kind=im), parameter :: no5  = 16
 
-      real(kind=rb) :: fracrefao(no5,9) ,fracrefbo(no5,5)
-      real(kind=rb) :: kao(9,5,13,no5)
-      real(kind=rb) :: kbo(5,5,13:59,no5)
-      real(kind=rb) :: kao_mo3(9,19,no5)
-      real(kind=rb) :: selfrefo(10,no5)
-      real(kind=rb) :: forrefo(4,no5)
-      real(kind=rb) :: ccl4o(no5)
+      real(kind=r4) :: fracrefao(no5,9) ,fracrefbo(no5,5)
+      real(kind=r4) :: kao(9,5,13,no5)
+      real(kind=r4) :: kbo(5,5,13:59,no5)
+      real(kind=r4) :: kao_mo3(9,19,no5)
+      real(kind=r4) :: selfrefo(10,no5)
+      real(kind=r4) :: forrefo(4,no5)
+      real(kind=r4) :: ccl4o(no5)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 5
@@ -576,13 +576,13 @@
 
       integer(kind=im), parameter :: ng5  = 16
 
-      real(kind=rb) :: fracrefa(ng5,9) ,fracrefb(ng5,5)
-      real(kind=rb) :: ka(9,5,13,ng5)   ,absa(585,ng5)
-      real(kind=rb) :: kb(5,5,13:59,ng5),absb(1175,ng5)
-      real(kind=rb) :: ka_mo3(9,19,ng5)
-      real(kind=rb) :: selfref(10,ng5)
-      real(kind=rb) :: forref(4,ng5)
-      real(kind=rb) :: ccl4(ng5)
+      real(kind=r4) :: fracrefa(ng5,9) ,fracrefb(ng5,5)
+      real(kind=r4) :: ka(9,5,13,ng5)   ,absa(585,ng5)
+      real(kind=r4) :: kb(5,5,13:59,ng5),absb(1175,ng5)
+      real(kind=r4) :: ka_mo3(9,19,ng5)
+      real(kind=r4) :: selfref(10,ng5)
+      real(kind=r4) :: forref(4,ng5)
+      real(kind=r4) :: ccl4(ng5)
       
       equivalence (ka(1,1,1,1),absa(1,1)),(kb(1,1,13,1),absb(1,1))
 
@@ -590,7 +590,7 @@
 
       module rrlw_kg06
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
 !     implicit none
       save
@@ -617,14 +617,14 @@
 
       integer(kind=im), parameter :: no6  = 16
 
-      real(kind=rb) , dimension(no6) :: fracrefao
-      real(kind=rb) :: kao(5,13,no6)
-      real(kind=rb) :: kao_mco2(19,no6)
-      real(kind=rb) :: selfrefo(10,no6)
-      real(kind=rb) :: forrefo(4,no6)
+      real(kind=r4) , dimension(no6) :: fracrefao
+      real(kind=r4) :: kao(5,13,no6)
+      real(kind=r4) :: kao_mco2(19,no6)
+      real(kind=r4) :: selfrefo(10,no6)
+      real(kind=r4) :: forrefo(4,no6)
 
-      real(kind=rb) , dimension(no6) :: cfc11adjo
-      real(kind=rb) , dimension(no6) :: cfc12o
+      real(kind=r4) , dimension(no6) :: cfc11adjo
+      real(kind=r4) , dimension(no6) :: cfc12o
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 6
@@ -650,14 +650,14 @@
 
       integer(kind=im), parameter :: ng6  = 8
 
-      real(kind=rb) , dimension(ng6) :: fracrefa
-      real(kind=rb) :: ka(5,13,ng6),absa(65,ng6)
-      real(kind=rb) :: ka_mco2(19,ng6)
-      real(kind=rb) :: selfref(10,ng6)
-      real(kind=rb) :: forref(4,ng6)
+      real(kind=r4) , dimension(ng6) :: fracrefa
+      real(kind=r4) :: ka(5,13,ng6),absa(65,ng6)
+      real(kind=r4) :: ka_mco2(19,ng6)
+      real(kind=r4) :: selfref(10,ng6)
+      real(kind=r4) :: forref(4,ng6)
 
-      real(kind=rb) , dimension(ng6) :: cfc11adj
-      real(kind=rb) , dimension(ng6) :: cfc12
+      real(kind=r4) , dimension(ng6) :: cfc11adj
+      real(kind=r4) , dimension(ng6) :: cfc12
 
       equivalence (ka(1,1,1),absa(1,1))
 
@@ -665,7 +665,7 @@
 
       module rrlw_kg07
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb ,r4 =>kind_r4
 
 !     implicit none
       save
@@ -693,14 +693,14 @@
 
       integer(kind=im), parameter :: no7  = 16
 
-      real(kind=rb) , dimension(no7) :: fracrefbo
-      real(kind=rb) :: fracrefao(no7,9)
-      real(kind=rb) :: kao(9,5,13,no7)
-      real(kind=rb) :: kbo(5,13:59,no7)
-      real(kind=rb) :: kao_mco2(9,19,no7)
-      real(kind=rb) :: kbo_mco2(19,no7)
-      real(kind=rb) :: selfrefo(10,no7)
-      real(kind=rb) :: forrefo(4,no7)
+      real(kind=r4) , dimension(no7) :: fracrefbo
+      real(kind=r4) :: fracrefao(no7,9)
+      real(kind=r4) :: kao(9,5,13,no7)
+      real(kind=r4) :: kbo(5,13:59,no7)
+      real(kind=r4) :: kao_mco2(9,19,no7)
+      real(kind=r4) :: kbo_mco2(19,no7)
+      real(kind=r4) :: selfrefo(10,no7)
+      real(kind=r4) :: forrefo(4,no7)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 7
@@ -727,14 +727,14 @@
 
       integer(kind=im), parameter :: ng7  = 12
 
-      real(kind=rb) , dimension(ng7) :: fracrefb
-      real(kind=rb) :: fracrefa(ng7,9)
-      real(kind=rb) :: ka(9,5,13,ng7) ,absa(585,ng7)
-      real(kind=rb) :: kb(5,13:59,ng7),absb(235,ng7)
-      real(kind=rb) :: ka_mco2(9,19,ng7)
-      real(kind=rb) :: kb_mco2(19,ng7)
-      real(kind=rb) :: selfref(10,ng7)
-      real(kind=rb) :: forref(4,ng7)
+      real(kind=r4) , dimension(ng7) :: fracrefb
+      real(kind=r4) :: fracrefa(ng7,9)
+      real(kind=r4) :: ka(9,5,13,ng7) ,absa(585,ng7)
+      real(kind=r4) :: kb(5,13:59,ng7),absb(235,ng7)
+      real(kind=r4) :: ka_mco2(9,19,ng7)
+      real(kind=r4) :: kb_mco2(19,ng7)
+      real(kind=r4) :: selfref(10,ng7)
+      real(kind=r4) :: forref(4,ng7)
 
       equivalence (ka(1,1,1,1),absa(1,1)),(kb(1,13,1),absb(1,1))
 
@@ -742,9 +742,8 @@
 
       module rrlw_kg08
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -775,20 +774,20 @@
 
       integer(kind=im), parameter :: no8  = 16
 
-      real(kind=rb) , dimension(no8) :: fracrefao
-      real(kind=rb) , dimension(no8) :: fracrefbo
-      real(kind=rb) , dimension(no8) :: cfc12o
-      real(kind=rb) , dimension(no8) :: cfc22adjo
+      real(kind=r4) , dimension(no8) :: fracrefao
+      real(kind=r4) , dimension(no8) :: fracrefbo
+      real(kind=r4) , dimension(no8) :: cfc12o
+      real(kind=r4) , dimension(no8) :: cfc22adjo
 
-      real(kind=rb) :: kao(5,13,no8)
-      real(kind=rb) :: kao_mco2(19,no8)
-      real(kind=rb) :: kao_mn2o(19,no8)
-      real(kind=rb) :: kao_mo3(19,no8)
-      real(kind=rb) :: kbo(5,13:59,no8)
-      real(kind=rb) :: kbo_mco2(19,no8)
-      real(kind=rb) :: kbo_mn2o(19,no8)
-      real(kind=rb) :: selfrefo(10,no8)
-      real(kind=rb) :: forrefo(4,no8)
+      real(kind=r4) :: kao(5,13,no8)
+      real(kind=r4) :: kao_mco2(19,no8)
+      real(kind=r4) :: kao_mn2o(19,no8)
+      real(kind=r4) :: kao_mo3(19,no8)
+      real(kind=r4) :: kbo(5,13:59,no8)
+      real(kind=r4) :: kbo_mco2(19,no8)
+      real(kind=r4) :: kbo_mn2o(19,no8)
+      real(kind=r4) :: selfrefo(10,no8)
+      real(kind=r4) :: forrefo(4,no8)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 8
@@ -821,20 +820,20 @@
 
       integer(kind=im), parameter :: ng8  = 8
 
-      real(kind=rb) , dimension(ng8) :: fracrefa
-      real(kind=rb) , dimension(ng8) :: fracrefb
-      real(kind=rb) , dimension(ng8) :: cfc12
-      real(kind=rb) , dimension(ng8) :: cfc22adj
+      real(kind=r4) , dimension(ng8) :: fracrefa
+      real(kind=r4) , dimension(ng8) :: fracrefb
+      real(kind=r4) , dimension(ng8) :: cfc12
+      real(kind=r4) , dimension(ng8) :: cfc22adj
 
-      real(kind=rb) :: ka(5,13,ng8)    ,absa(65,ng8)
-      real(kind=rb) :: kb(5,13:59,ng8) ,absb(235,ng8)
-      real(kind=rb) :: ka_mco2(19,ng8)
-      real(kind=rb) :: ka_mn2o(19,ng8)
-      real(kind=rb) :: ka_mo3(19,ng8)
-      real(kind=rb) :: kb_mco2(19,ng8)
-      real(kind=rb) :: kb_mn2o(19,ng8)
-      real(kind=rb) :: selfref(10,ng8)
-      real(kind=rb) :: forref(4,ng8)
+      real(kind=r4) :: ka(5,13,ng8)    ,absa(65,ng8)
+      real(kind=r4) :: kb(5,13:59,ng8) ,absb(235,ng8)
+      real(kind=r4) :: ka_mco2(19,ng8)
+      real(kind=r4) :: ka_mn2o(19,ng8)
+      real(kind=r4) :: ka_mo3(19,ng8)
+      real(kind=r4) :: kb_mco2(19,ng8)
+      real(kind=r4) :: kb_mn2o(19,ng8)
+      real(kind=r4) :: selfref(10,ng8)
+      real(kind=r4) :: forref(4,ng8)
 
       equivalence (ka(1,1,1),absa(1,1)),(kb(1,13,1),absb(1,1))
 
@@ -842,7 +841,7 @@
 
       module rrlw_kg09
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
 !     implicit none
       save
@@ -870,15 +869,15 @@
 
       integer(kind=im), parameter :: no9  = 16
 
-      real(kind=rb) , dimension(no9) :: fracrefbo
+      real(kind=r4) , dimension(no9) :: fracrefbo
 
-      real(kind=rb) :: fracrefao(no9,9)
-      real(kind=rb) :: kao(9,5,13,no9)
-      real(kind=rb) :: kbo(5,13:59,no9)
-      real(kind=rb) :: kao_mn2o(9,19,no9)
-      real(kind=rb) :: kbo_mn2o(19,no9)
-      real(kind=rb) :: selfrefo(10,no9)
-      real(kind=rb) :: forrefo(4,no9)
+      real(kind=r4) :: fracrefao(no9,9)
+      real(kind=r4) :: kao(9,5,13,no9)
+      real(kind=r4) :: kbo(5,13:59,no9)
+      real(kind=r4) :: kao_mn2o(9,19,no9)
+      real(kind=r4) :: kbo_mn2o(19,no9)
+      real(kind=r4) :: selfrefo(10,no9)
+      real(kind=r4) :: forrefo(4,no9)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 9
@@ -906,14 +905,14 @@
 
       integer(kind=im), parameter :: ng9  = 12
 
-      real(kind=rb) , dimension(ng9) :: fracrefb
-      real(kind=rb) :: fracrefa(ng9,9)
-      real(kind=rb) :: ka(9,5,13,ng9) ,absa(585,ng9)
-      real(kind=rb) :: kb(5,13:59,ng9) ,absb(235,ng9)
-      real(kind=rb) :: ka_mn2o(9,19,ng9)
-      real(kind=rb) :: kb_mn2o(19,ng9)
-      real(kind=rb) :: selfref(10,ng9)
-      real(kind=rb) :: forref(4,ng9)
+      real(kind=r4) , dimension(ng9) :: fracrefb
+      real(kind=r4) :: fracrefa(ng9,9)
+      real(kind=r4) :: ka(9,5,13,ng9) ,absa(585,ng9)
+      real(kind=r4) :: kb(5,13:59,ng9) ,absb(235,ng9)
+      real(kind=r4) :: ka_mn2o(9,19,ng9)
+      real(kind=r4) :: kb_mn2o(19,ng9)
+      real(kind=r4) :: selfref(10,ng9)
+      real(kind=r4) :: forref(4,ng9)
 
       equivalence (ka(1,1,1,1),absa(1,1)),(kb(1,13,1),absb(1,1))
 
@@ -921,9 +920,8 @@
 
       module rrlw_kg10
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -947,13 +945,13 @@
 
       integer(kind=im), parameter :: no10 = 16
 
-      real(kind=rb) , dimension(no10) :: fracrefao
-      real(kind=rb) , dimension(no10) :: fracrefbo
+      real(kind=r4) , dimension(no10) :: fracrefao
+      real(kind=r4) , dimension(no10) :: fracrefbo
 
-      real(kind=rb) :: kao(5,13,no10)
-      real(kind=rb) :: kbo(5,13:59,no10)
-      real(kind=rb) :: selfrefo(10,no10)
-      real(kind=rb) :: forrefo(4,no10)
+      real(kind=r4) :: kao(5,13,no10)
+      real(kind=r4) :: kbo(5,13:59,no10)
+      real(kind=r4) :: selfrefo(10,no10)
+      real(kind=r4) :: forrefo(4,no10)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 10
@@ -979,13 +977,13 @@
 
       integer(kind=im), parameter :: ng10 = 6
 
-      real(kind=rb) , dimension(ng10) :: fracrefa
-      real(kind=rb) , dimension(ng10) :: fracrefb
+      real(kind=r4) , dimension(ng10) :: fracrefa
+      real(kind=r4) , dimension(ng10) :: fracrefb
 
-      real(kind=rb) :: ka(5,13,ng10)   , absa(65,ng10)
-      real(kind=rb) :: kb(5,13:59,ng10), absb(235,ng10)
-      real(kind=rb) :: selfref(10,ng10)
-      real(kind=rb) :: forref(4,ng10)
+      real(kind=r4) :: ka(5,13,ng10)   , absa(65,ng10)
+      real(kind=r4) :: kb(5,13:59,ng10), absb(235,ng10)
+      real(kind=r4) :: selfref(10,ng10)
+      real(kind=r4) :: forref(4,ng10)
 
       equivalence (ka(1,1,1),absa(1,1)),(kb(1,13,1),absb(1,1))
 
@@ -993,9 +991,8 @@
 
       module rrlw_kg11
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -1021,15 +1018,15 @@
 
       integer(kind=im), parameter :: no11 = 16
 
-      real(kind=rb) , dimension(no11) :: fracrefao
-      real(kind=rb) , dimension(no11) :: fracrefbo
+      real(kind=r4) , dimension(no11) :: fracrefao
+      real(kind=r4) , dimension(no11) :: fracrefbo
 
-      real(kind=rb) :: kao(5,13,no11)
-      real(kind=rb) :: kbo(5,13:59,no11)
-      real(kind=rb) :: kao_mo2(19,no11)
-      real(kind=rb) :: kbo_mo2(19,no11)
-      real(kind=rb) :: selfrefo(10,no11)
-      real(kind=rb) :: forrefo(4,no11)
+      real(kind=r4) :: kao(5,13,no11)
+      real(kind=r4) :: kbo(5,13:59,no11)
+      real(kind=r4) :: kao_mo2(19,no11)
+      real(kind=r4) :: kbo_mo2(19,no11)
+      real(kind=r4) :: selfrefo(10,no11)
+      real(kind=r4) :: forrefo(4,no11)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 11
@@ -1057,15 +1054,15 @@
 
       integer(kind=im), parameter :: ng11 = 8
 
-      real(kind=rb) , dimension(ng11) :: fracrefa
-      real(kind=rb) , dimension(ng11) :: fracrefb
+      real(kind=r4) , dimension(ng11) :: fracrefa
+      real(kind=r4) , dimension(ng11) :: fracrefb
 
-      real(kind=rb) :: ka(5,13,ng11)   , absa(65,ng11)
-      real(kind=rb) :: kb(5,13:59,ng11), absb(235,ng11)
-      real(kind=rb) :: ka_mo2(19,ng11)
-      real(kind=rb) :: kb_mo2(19,ng11)
-      real(kind=rb) :: selfref(10,ng11)
-      real(kind=rb) :: forref(4,ng11)
+      real(kind=r4) :: ka(5,13,ng11)   , absa(65,ng11)
+      real(kind=r4) :: kb(5,13:59,ng11), absb(235,ng11)
+      real(kind=r4) :: ka_mo2(19,ng11)
+      real(kind=r4) :: kb_mo2(19,ng11)
+      real(kind=r4) :: selfref(10,ng11)
+      real(kind=r4) :: forref(4,ng11)
 
       equivalence (ka(1,1,1),absa(1,1)),(kb(1,13,1),absb(1,1))
 
@@ -1073,7 +1070,7 @@
 
       module rrlw_kg12
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
 !     implicit none
       save
@@ -1097,10 +1094,10 @@
 
       integer(kind=im), parameter :: no12 = 16
 
-      real(kind=rb) :: fracrefao(no12,9)
-      real(kind=rb) :: kao(9,5,13,no12)
-      real(kind=rb) :: selfrefo(10,no12)
-      real(kind=rb) :: forrefo(4,no12)
+      real(kind=r4) :: fracrefao(no12,9)
+      real(kind=r4) :: kao(9,5,13,no12)
+      real(kind=r4) :: selfrefo(10,no12)
+      real(kind=r4) :: forrefo(4,no12)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 12
@@ -1123,10 +1120,10 @@
 
       integer(kind=im), parameter :: ng12 = 8
 
-      real(kind=rb) :: fracrefa(ng12,9)
-      real(kind=rb) :: ka(9,5,13,ng12) ,absa(585,ng12)
-      real(kind=rb) :: selfref(10,ng12)
-      real(kind=rb) :: forref(4,ng12)
+      real(kind=r4) :: fracrefa(ng12,9)
+      real(kind=r4) :: ka(9,5,13,ng12) ,absa(585,ng12)
+      real(kind=r4) :: selfref(10,ng12)
+      real(kind=r4) :: forref(4,ng12)
 
       equivalence (ka(1,1,1,1),absa(1,1))
 
@@ -1134,9 +1131,8 @@
 
       module rrlw_kg13
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -1161,15 +1157,15 @@
 
       integer(kind=im), parameter :: no13 = 16
 
-      real(kind=rb) , dimension(no13) :: fracrefbo
+      real(kind=r4) , dimension(no13) :: fracrefbo
 
-      real(kind=rb) :: fracrefao(no13,9)
-      real(kind=rb) :: kao(9,5,13,no13)
-      real(kind=rb) :: kao_mco2(9,19,no13)
-      real(kind=rb) :: kao_mco(9,19,no13)
-      real(kind=rb) :: kbo_mo3(19,no13)
-      real(kind=rb) :: selfrefo(10,no13)
-      real(kind=rb) :: forrefo(4,no13)
+      real(kind=r4) :: fracrefao(no13,9)
+      real(kind=r4) :: kao(9,5,13,no13)
+      real(kind=r4) :: kao_mco2(9,19,no13)
+      real(kind=r4) :: kao_mco(9,19,no13)
+      real(kind=r4) :: kbo_mo3(19,no13)
+      real(kind=r4) :: selfrefo(10,no13)
+      real(kind=r4) :: forrefo(4,no13)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 13
@@ -1195,15 +1191,15 @@
 
       integer(kind=im), parameter :: ng13 = 4
 
-      real(kind=rb) , dimension(ng13) :: fracrefb
+      real(kind=r4) , dimension(ng13) :: fracrefb
 
-      real(kind=rb) :: fracrefa(ng13,9)
-      real(kind=rb) :: ka(9,5,13,ng13) ,absa(585,ng13)
-      real(kind=rb) :: ka_mco2(9,19,ng13)
-      real(kind=rb) :: ka_mco(9,19,ng13)
-      real(kind=rb) :: kb_mo3(19,ng13)
-      real(kind=rb) :: selfref(10,ng13)
-      real(kind=rb) :: forref(4,ng13)
+      real(kind=r4) :: fracrefa(ng13,9)
+      real(kind=r4) :: ka(9,5,13,ng13) ,absa(585,ng13)
+      real(kind=r4) :: ka_mco2(9,19,ng13)
+      real(kind=r4) :: ka_mco(9,19,ng13)
+      real(kind=r4) :: kb_mo3(19,ng13)
+      real(kind=r4) :: selfref(10,ng13)
+      real(kind=r4) :: forref(4,ng13)
 
       equivalence (ka(1,1,1,1),absa(1,1))
 
@@ -1211,9 +1207,8 @@
 
       module rrlw_kg14
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -1237,13 +1232,13 @@
 
       integer(kind=im), parameter :: no14 = 16
 
-      real(kind=rb) , dimension(no14) :: fracrefao
-      real(kind=rb) , dimension(no14) :: fracrefbo
+      real(kind=r4) , dimension(no14) :: fracrefao
+      real(kind=r4) , dimension(no14) :: fracrefbo
 
-      real(kind=rb) :: kao(5,13,no14)
-      real(kind=rb) :: kbo(5,13:59,no14)
-      real(kind=rb) :: selfrefo(10,no14)
-      real(kind=rb) :: forrefo(4,no14)
+      real(kind=r4) :: kao(5,13,no14)
+      real(kind=r4) :: kbo(5,13:59,no14)
+      real(kind=r4) :: selfrefo(10,no14)
+      real(kind=r4) :: forrefo(4,no14)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 14
@@ -1269,13 +1264,13 @@
 
       integer(kind=im), parameter :: ng14 = 2
 
-      real(kind=rb) , dimension(ng14) :: fracrefa
-      real(kind=rb) , dimension(ng14) :: fracrefb
+      real(kind=r4) , dimension(ng14) :: fracrefa
+      real(kind=r4) , dimension(ng14) :: fracrefb
 
-      real(kind=rb) :: ka(5,13,ng14)   ,absa(65,ng14)
-      real(kind=rb) :: kb(5,13:59,ng14),absb(235,ng14)
-      real(kind=rb) :: selfref(10,ng14)
-      real(kind=rb) :: forref(4,ng14)
+      real(kind=r4) :: ka(5,13,ng14)   ,absa(65,ng14)
+      real(kind=r4) :: kb(5,13:59,ng14),absb(235,ng14)
+      real(kind=r4) :: selfref(10,ng14)
+      real(kind=r4) :: forref(4,ng14)
 
       equivalence (ka(1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -1283,9 +1278,8 @@
 
       module rrlw_kg15
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -1308,11 +1302,11 @@
 
       integer(kind=im), parameter :: no15 = 16
 
-      real(kind=rb) :: fracrefao(no15,9)
-      real(kind=rb) :: kao(9,5,13,no15)
-      real(kind=rb) :: kao_mn2(9,19,no15)
-      real(kind=rb) :: selfrefo(10,no15)
-      real(kind=rb) :: forrefo(4,no15)
+      real(kind=r4) :: fracrefao(no15,9)
+      real(kind=r4) :: kao(9,5,13,no15)
+      real(kind=r4) :: kao_mn2(9,19,no15)
+      real(kind=r4) :: selfrefo(10,no15)
+      real(kind=r4) :: forrefo(4,no15)
 
 
 !-----------------------------------------------------------------
@@ -1337,11 +1331,11 @@
 
       integer(kind=im), parameter :: ng15 = 2
 
-      real(kind=rb) :: fracrefa(ng15,9)
-      real(kind=rb) :: ka(9,5,13,ng15) ,absa(585,ng15)
-      real(kind=rb) :: ka_mn2(9,19,ng15)
-      real(kind=rb) :: selfref(10,ng15)
-      real(kind=rb) :: forref(4,ng15)
+      real(kind=r4) :: fracrefa(ng15,9)
+      real(kind=r4) :: ka(9,5,13,ng15) ,absa(585,ng15)
+      real(kind=r4) :: ka_mn2(9,19,ng15)
+      real(kind=r4) :: selfref(10,ng15)
+      real(kind=r4) :: forref(4,ng15)
 
       equivalence (ka(1,1,1,1),absa(1,1))
 
@@ -1349,9 +1343,8 @@
 
       module rrlw_kg16
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -1374,13 +1367,13 @@
 
       integer(kind=im), parameter :: no16 = 16
 
-      real(kind=rb) , dimension(no16) :: fracrefbo
+      real(kind=r4) , dimension(no16) :: fracrefbo
 
-      real(kind=rb) :: fracrefao(no16,9)
-      real(kind=rb) :: kao(9,5,13,no16)
-      real(kind=rb) :: kbo(5,13:59,no16)
-      real(kind=rb) :: selfrefo(10,no16)
-      real(kind=rb) :: forrefo(4,no16)
+      real(kind=r4) :: fracrefao(no16,9)
+      real(kind=r4) :: kao(9,5,13,no16)
+      real(kind=r4) :: kbo(5,13:59,no16)
+      real(kind=r4) :: selfrefo(10,no16)
+      real(kind=r4) :: forrefo(4,no16)
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 16
@@ -1405,13 +1398,13 @@
 
       integer(kind=im), parameter :: ng16 = 2
 
-      real(kind=rb) , dimension(ng16) :: fracrefb
+      real(kind=r4) , dimension(ng16) :: fracrefb
 
-      real(kind=rb) :: fracrefa(ng16,9)
-      real(kind=rb) :: ka(9,5,13,ng16) ,absa(585,ng16)
-      real(kind=rb) :: kb(5,13:59,ng16), absb(235,ng16)
-      real(kind=rb) :: selfref(10,ng16)
-      real(kind=rb) :: forref(4,ng16)
+      real(kind=r4) :: fracrefa(ng16,9)
+      real(kind=r4) :: ka(9,5,13,ng16) ,absa(585,ng16)
+      real(kind=r4) :: kb(5,13:59,ng16), absb(235,ng16)
+      real(kind=r4) :: selfref(10,ng16)
+      real(kind=r4) :: forref(4,ng16)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -1420,9 +1413,8 @@
 
       module rrlw_ref
 
-      use parkind, only : im => kind_im, rb => kind_rb
+      use parkind, only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -1442,18 +1434,17 @@
 ! chi_mls:  real   : 
 !------------------------------------------------------------------
 
-      real(kind=rb) , dimension(59) :: pref
-      real(kind=rb) , dimension(59) :: preflog
-      real(kind=rb) , dimension(59) :: tref
-      real(kind=rb) :: chi_mls(7,59)
+      real(kind=r4) , dimension(59) :: pref
+      real(kind=r4) , dimension(59) :: preflog
+      real(kind=r4) , dimension(59) :: tref
+      real(kind=r4) :: chi_mls(7,59)
 
       end module rrlw_ref
 
       module rrlw_tbl
 
-      use parkind, only : im => kind_im, rb => kind_rb
+      use parkind, only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -1484,20 +1475,19 @@
 
       integer(kind=im), parameter :: ntbl = 10000
 
-      real(kind=rb), parameter :: tblint = 10000.0_rb
+      real(kind=r4), parameter :: tblint = 10000.0_rb
 
-      real(kind=rb) , dimension(0:ntbl) :: tau_tbl
-      real(kind=rb) , dimension(0:ntbl) :: exp_tbl
-      real(kind=rb) , dimension(0:ntbl) :: tfn_tbl
+      real(kind=r4) , dimension(0:ntbl) :: tau_tbl
+      real(kind=r4) , dimension(0:ntbl) :: exp_tbl
+      real(kind=r4) , dimension(0:ntbl) :: tfn_tbl
 
-      real(kind=rb), parameter :: pade = 0.278_rb
-      real(kind=rb) :: bpade
+      real(kind=r4), parameter :: pade = 0.278_rb
+      real(kind=r4) :: bpade
 
       end module rrlw_tbl
 
       module rrlw_vsn
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -1551,10 +1541,9 @@
 
       module rrlw_wvn
 
-      use parkind, only : im => kind_im, rb => kind_rb
+      use parkind, only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrtm, only : nbndlw, mg, ngptlw, maxinpx
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -1604,12 +1593,12 @@
       integer(kind=im) :: nspa(nbndlw)
       integer(kind=im) :: nspb(nbndlw)
 
-      real(kind=rb) :: wavenum1(nbndlw)
-      real(kind=rb) :: wavenum2(nbndlw)
-      real(kind=rb) :: delwave(nbndlw)
+      real(kind=r4) :: wavenum1(nbndlw)
+      real(kind=r4) :: wavenum2(nbndlw)
+      real(kind=r4) :: delwave(nbndlw)
 
-      real(kind=rb) :: totplnk(181,nbndlw)
-      real(kind=rb) :: totplk16(181)
+      real(kind=r4) :: totplnk(181,nbndlw)
+      real(kind=r4) :: totplk16(181)
 
       integer(kind=im) :: ngc(nbndlw)
       integer(kind=im) :: ngs(nbndlw)
@@ -1617,8 +1606,8 @@
       integer(kind=im) :: ngb(ngptlw)
       integer(kind=im) :: ngm(nbndlw*mg)
 
-      real(kind=rb) :: wt(mg)
-      real(kind=rb) :: rwgt(nbndlw*mg)
+      real(kind=r4) :: wt(mg)
+      real(kind=r4) :: rwgt(nbndlw*mg)
 
       integer(kind=im) :: nxmol
       integer(kind=im) :: ixindx(maxinpx)
@@ -12998,7 +12987,7 @@ CONTAINS
 
 ! **************************************************************************     
       SUBROUTINE rrtmg_lwlookuptable(mpirank,mpiroot,mpicomm,           &
-                                     errflg,errmsg)
+     &                                errflg,errmsg)
 ! **************************************************************************     
 
       IMPLICIT NONE
@@ -13018,68 +13007,59 @@ CONTAINS
 
       !mz IF ( wrf_dm_on_monitor() ) THEN
       IF (MPIRANK == MPIROOT ) THEN
-        DO i = 10,99
+        DO i = 10,999 !mz 99
+          rrtmg_unit = -1
           INQUIRE ( i , OPENED = opened )
           IF ( .NOT. opened ) THEN
             rrtmg_unit = i
             GOTO 2010
           ENDIF
         ENDDO
-        rrtmg_unit = -1
  2010   CONTINUE
-      ENDIF
-      !mz CALL wrf_dm_bcast_bytes ( rrtmg_unit , IWORDSIZE )
-      IF ( rrtmg_unit < 0 ) THEN
-#ifdef CCPP
-        errflg = 1
-        errmsg = "module_ra_rrtmg_lw: rrtmg_lwlookuptable: Can not find &
-                 unused fortran unit to read in lookup table."
-        return
-#else
-!        CALL wrf_error_fatal ( 'module_ra_rrtmg_lw: rrtm_lwlookuptable: Can not '// &
-!                               'find unused fortran unit to read in lookup table.' )
-#endif
-      ENDIF
+        write (0,*)' rrtmg_unit = ', rrtmg_unit
+        IF ( rrtmg_unit < 0 ) THEN
+            errflg = 1
+            errmsg = "module_ra_rrtmg_lw: rrtmg_lwlookuptable: Can not  &
+                      find unused fortran unit to read in lookup table."
+            errmsg = trim(errmsg)//NEW_LINE('A')//' ABORTING!'
+            return
+        ENDIF
+       ENDIF
 
-      !mz IF ( wrf_dm_on_monitor() ) THEN
-      IF (MPIRANK == MPIROOT) THEN
-        OPEN(rrtmg_unit,FILE='RRTMG_LW_DATA',                           &
-             FORM='UNFORMATTED',STATUS='OLD',ERR=9009)
-      ENDIF
+      IF (MPIRANK == MPIROOT ) THEN  
+      !mz big_endian 
+        OPEN(rrtmg_unit,FILE='RRTMG_LW_DATA', convert='BIG_ENDIAN',     &
+     &       FORM='UNFORMATTED',STATUS='OLD',ERR=9009)
 
-      call lw_kgb01(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb02(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb03(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb04(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb05(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb06(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb07(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb08(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb09(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb10(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb11(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb12(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb13(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb14(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb15(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call lw_kgb16(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      call lw_kgb01(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb02(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb03(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb04(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb05(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb06(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb07(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb08(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb09(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb10(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb11(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb12(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb13(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb14(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb15(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+      call lw_kgb16(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
 
-     !mz IF ( wrf_dm_on_monitor() ) CLOSE (rrtmg_unit)
-      IF ( mpirank == mpiroot ) CLOSE (rrtmg_unit)
+      CLOSE (rrtmg_unit)
+      ENDIF 
 
      RETURN
 9009 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error opening     &
                                  RRTMG_LW_DATA on unit ',rrtmg_unit
-#ifdef CCPP
       errflg = 1
       errmsg = "module_ra_rrtmg_lw: error opening RRTMG_LW_DATA "
       return
-#else
-!     CALL wrf_error_fatal(errmess)
-#endif
 
-     END SUBROUTINE rrtmg_lwlookuptable
+      END SUBROUTINE rrtmg_lwlookuptable
 
 ! **************************************************************************     
 !  RRTMG Longwave Radiative Transfer Model
@@ -13098,29 +13078,41 @@ CONTAINS
 ! **************************************************************************     
 
 ! **************************************************************************
-      subroutine lw_kgb01(rrtmg_unit,mpirank,mpiroot,mpicomm)
+      subroutine lw_kgb01(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg01, only : fracrefao, fracrefbo, kao, kbo, kao_mn2,    &
-                            kbo_mn2, absa, absb,                        &
-                            selfrefo, forrefo
+     &                       kbo_mn2, absa, absb,                       &
+     &                       selfrefo, forrefo
+
 #ifdef MPI
-       use mpi
+      use mpi
 #endif
 
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
-         ! MPI variables
-         integer :: mpierr
+      ! MPI variables
+       integer :: mpierr
 #endif
+
 
 ! Local                                    
       character*80 errmess
 !mz      logical, external  :: wrf_dm_on_monitor
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13190,59 +13182,79 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 
 #else
-      IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mn2,     &
-                           kbo_mn2, selfrefo, forrefo
+      if (mpirank == mpiroot) then 
+         read (rrtmg_unit,err=9010) fracrefao, fracrefbo, kao, kbo,     &
+     &              kao_mn2,  kbo_mn2, selfrefo, forrefo
          write(0,*) 'lw_kgb01: max/min(fracrefao) =',maxval(fracrefao), &
-                     minval(fracrefao)
-      ENDIF
-#ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao),  MPI_DOUBLE_PRECISION,&
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo),  MPI_DOUBLE_PRECISION,&
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),        MPI_DOUBLE_PRECISION,&
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),        MPI_DOUBLE_PRECISION,&
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mn2,    size(kao_mn2),    MPI_DOUBLE_PRECISION,&
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mn2,    size(kbo_mn2),    MPI_DOUBLE_PRECISION,&
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),   MPI_DOUBLE_PRECISION,&
-                     mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),    MPI_DOUBLE_PRECISION,&
-                      mpiroot, mpicomm, mpierr)
-#endif
-#endif
+     &                minval(fracrefao)
+      endif
+       
 
+9010  continue
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit     
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb01 "
+
+      ! After reading the tables, broadcast the information to all MPI tasks.
+      ! First, broadcast the current error code from MPI master (0 = success)
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return
+#ifdef MPI
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kao_mn2,    size(kao_mn2),   MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(kbo_mn2,    size(kbo_mn2),   MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)                          
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)                   
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr) 
+#endif
+#endif
 
       end subroutine lw_kgb01
 
 ! **************************************************************************
-      subroutine lw_kgb02(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb02(rrtmg_unit,mpirank, mpiroot, mpicomm,         &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg02, only : fracrefao, fracrefbo, kao, kbo,             &
-                            selfrefo, forrefo
-
+     &                      selfrefo, forrefo
 #ifdef MPI
-       use mpi
+      use mpi
 #endif
-
-
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank,mpiroot, mpicomm
-#ifdef MPI
-         integer :: mpierr
-#endif
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+#ifdef MPI                                                                                            
+      ! MPI variables                                                                                 
+       integer :: mpierr                                 
+#endif   
+
 
 ! Local                                    
       character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+
+         ! Initialize the CCPP error handling variables
+         errmsg = ''
+         errflg = 0            
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13304,36 +13316,49 @@ CONTAINS
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
 !     CALL wrf_error_fatal(errmess)
 #else
-      IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, selfrefo,    &
-                           forrefo
-         write(0,*) 'lw_kgb02: max/min(fracrefao) =',maxval(fracrefao),minval(fracrefao)
-      ENDIF
-#ifdef MPI
+      if (mpirank == mpiroot) then
+         read (rrtmg_unit,err=9010) fracrefao, fracrefbo, kao, kbo,     &
+     &                    selfrefo,  forrefo
+         write(0,*) 'lw_kgb02: max/min(fracrefao) =',maxval(fracrefao), &
+     &               minval(fracrefao)
+      endif
+9010    continue
+!        WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading  &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit 
+        errflg = 1
+        errmsg = " error reading RRTMG_LW_DATA in lw_kgb02 "
+
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return 
+#ifdef MPI                                                                                            
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-           mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)                   
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-           mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-           mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr) 
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-           mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)       
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-           mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-           mpiroot, mpicomm, mpierr)
-#endif
+     &               mpiroot, mpicomm, mpierr)  
+#endif                                                                                                
+
 #endif
 
 
       end subroutine lw_kgb02
 
 ! **************************************************************************
-      subroutine lw_kgb03(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb03(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg03, only : fracrefao, fracrefbo, kao, kbo, kao_mn2o,   &
-                            kbo_mn2o, selfrefo, forrefo
+     &                      kbo_mn2o, selfrefo, forrefo
 
 #ifdef MPI
       use mpi
@@ -13343,7 +13368,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit,mpirank,mpiroot,mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
          ! MPI variables
       integer :: mpierr
@@ -13351,7 +13382,10 @@ CONTAINS
 
 ! Local                                    
       character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13456,56 +13490,79 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mn2o,    &
-                           kbo_mn2o, selfrefo, forrefo 
-         write(0,*) 'lw_kgb03: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+         read (rrtmg_unit,err=9010) fracrefao, fracrefbo, kao, kbo,     &
+     &                     kao_mn2o, kbo_mn2o, selfrefo, forrefo 
+         !write(0,*) 'lw_kgb03: fracrefao =', fracrefao                  
+         write(0,*) 'lw_kgb03: max/min(kao_mn2o) =', maxval(kao_mn2o),  &
+     &               minval(kao_mn2o)
       ENDIF
+
+9010  continue 
+      !WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+     !&                             RRTMG_LW_DATA on unit ',rrtmg_unit 
+      errflg = 1 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb03 "       
+                                                                
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return                       
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
       end subroutine lw_kgb03 
 
 ! **************************************************************************
-      subroutine lw_kgb04(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb04(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                   errmsg, errflg)
 ! **************************************************************************
 
-#ifdef MPI
-      use mpi
-#endif
-
       use rrlw_kg04, only : fracrefao, fracrefbo, kao, kbo, selfrefo,   &
-                            forrefo
+     &                      forrefo
+
+#ifdef MPI
+      use mpi 
+#endif  
 
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
       character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13576,56 +13633,75 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading     &
                                   RRTMG_LW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo,              &
-                           selfrefo, forrefo
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
+     &                     selfrefo, forrefo
          write(0,*) 'lw_kgb04: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+
+9010  continue 
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!     &                             RRTMG_LW_DATA on unit ',rrtmg_unit  
+      errflg = 1      
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb04 "  
+                                                 
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return                     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
 
       end subroutine lw_kgb04
 
 ! **************************************************************************
-      subroutine lw_kgb05(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb05(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
-#ifdef MPI
-      use mpi
-#endif
-
       use rrlw_kg05, only : fracrefao, fracrefbo, kao, kbo, kao_mo3,    &
-                            selfrefo, forrefo, ccl4o
+     &                      selfrefo, forrefo, ccl4o
+
+#ifdef MPI                                                                                                                            
+      use mpi
+#endif          
 
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
       character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13720,58 +13796,77 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mo3,     &
-                           ccl4o, selfrefo, forrefo
-         write(0,*) 'lw_kgb05: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &                     ccl4o, selfrefo, forrefo
+         write(0,*) 'lw_kgb05: max/min(ccl4o) =',                       &
+     &               maxval(ccl4o),minval(ccl4o)
       ENDIF
+9010  continue    
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit  
+      errflg = 1    
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb05 "  
+                                                              
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return              
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mo3,    size(kao_mo3),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(ccl4o,      size(ccl4o),     MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
-
       end subroutine lw_kgb05
 
 ! **************************************************************************
-      subroutine lw_kgb06(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb06(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
-
-#ifdef MPI
-       use mpi
-#endif
 
       use rrlw_kg06
 !     use rrlw_kg06, only : fracrefao, kao, kao_mco2, selfrefo, forrefo, &
 !                           cfc11adjo, cfc12o
 
+#ifdef MPI                                                                                                                            
+       use mpi 
+#endif     
+
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
-         ! MPI variables
+      ! MPI variables
       integer :: mpierr
 #endif
 
 ! Local                                    
       character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13838,39 +13933,46 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, kao, kao_mco2, cfc11adjo, cfc12o, &
-                           selfrefo, forrefo
+     &                     selfrefo, forrefo
          write(0,*) 'lw_kgb06: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+9010  continue                               
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!     &                          RRTMG_LW_DATA on unit ',rrtmg_unit  
+      errflg = 1   
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb06 "   
+                                                   
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return                                      
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(cfc11adjo,  size(cfc11adjo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(cfc12o,     size(cfc12o),    MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
-
-
       end subroutine lw_kgb06
 
 ! **************************************************************************
-      subroutine lw_kgb07(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb07(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
-
-      use rrlw_kg07, only : fracrefao, fracrefbo, kao, kbo, kao_mco2, &
-                            kbo_mco2, selfrefo, forrefo
+      use rrlw_kg07, only : fracrefao, fracrefbo, kao, kbo, kao_mco2,   &
+     &                      kbo_mco2, selfrefo, forrefo
 #ifdef MPI
        use mpi
 #endif
@@ -13879,14 +13981,21 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
       character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13977,57 +14086,77 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mco2,    &
-                           kbo_mco2, selfrefo, forrefo 
-         write(0,*) 'lw_kgb07: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &                     kbo_mco2, selfrefo, forrefo 
+         write(0,*) 'lw_kgb07: max/min(kao_mco2) =',                    &
+     &               maxval(kao_mco2),minval(kao_mco2)
       ENDIF
+9010  continue             
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit 
+      errflg = 1                   
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb07 "       
+                                                                  
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return                     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo_mco2,   size(kbo_mco2),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
       end subroutine lw_kgb07
 
 ! **************************************************************************
-      subroutine lw_kgb08(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb08(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg08, only : fracrefao, fracrefbo, kao, kao_mco2,        &
-                            kao_mn2o,                                   &
-                            kao_mo3, kbo, kbo_mco2, kbo_mn2o, selfrefo, &
-                            forrefo, cfc12o, cfc22adjo
+     &                      kao_mn2o,                                   &
+     &                      kao_mo3, kbo, kbo_mco2, kbo_mn2o, selfrefo, &
+     &                      forrefo, cfc12o, cfc22adjo
+
 #ifdef MPI
        use mpi
 #endif
-
 
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+!      character*80 errmess
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14127,67 +14256,84 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mco2,    &
-                           kbo_mco2, kao_mn2o, &
-         kbo_mn2o, kao_mo3, cfc12o, cfc22adjo, selfrefo, forrefo
-         write(0,*) 'lw_kgb08: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &                      kbo_mco2, kao_mn2o,                         &
+     &    kbo_mn2o, kao_mo3, cfc12o, cfc22adjo, selfrefo, forrefo
+         write(0,*) 'lw_kgb08: max/min(cfc12o) =',                      &
+     &               maxval(cfc12o),minval(cfc12o)
       ENDIF
+
+9010  continue                      
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!     &                             RRTMG_LW_DATA on unit ',rrtmg_unit 
+      errflg = 1                         
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb08 " 
+                                                               
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+      if (errflg/=0) return         
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo_mco2,   size(kbo_mco2),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mo3,    size(kao_mo3),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(cfc12o,     size(cfc12o),    MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(cfc22adjo,  size(cfc22adjo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
-
       end subroutine lw_kgb08
 
 ! **************************************************************************
-      subroutine lw_kgb09(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb09(rrtmg_unit, mpirank, mpiroot, mpicomm,       &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg09, only : fracrefao, fracrefbo, kao, kbo, kao_mn2o,   &
-                            kbo_mn2o, selfrefo, forrefo
+     &                       kbo_mn2o, selfrefo, forrefo
+
 #ifdef MPI
        use mpi
 #endif
-
 
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+!      character*80 errmess
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14278,27 +14424,38 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mn2o,    &
-                           kbo_mn2o, selfrefo, forrefo
+     &                     kbo_mn2o, selfrefo, forrefo
          write(0,*) 'lw_kgb09: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+
+9010  continue    
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit  
+      errflg = 1                  
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb09 "     
+                                                         
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
+      if (errflg/=0) return      
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -14306,11 +14463,12 @@ CONTAINS
       end subroutine lw_kgb09
 
 ! **************************************************************************
-      subroutine lw_kgb10(rrtmg_unit, mpirank, mpiroot,mpicomm)
+      subroutine lw_kgb10(rrtmg_unit, mpirank, mpiroot,mpicomm,         &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg10, only : fracrefao, fracrefbo, kao, kbo, selfrefo,   &
-                            forrefo
+     &                      forrefo
 
 #ifdef MPI
        use mpi
@@ -14320,14 +14478,22 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
-      character*80 errmess
+!      character*80 errmess
 !mz      logical, external  :: wrf_dm_on_monitor
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14391,23 +14557,34 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, selfrefo,    &
-                           forrefo 
+     &                     forrefo 
          write(0,*) 'lw_kgb10: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+9010  continue           
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!     &                           RRTMG_LW_DATA on unit ',rrtmg_unit  
+      errflg = 1    
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb10 " 
+                                                           
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+      if (errflg/=0) return   
+
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -14415,7 +14592,8 @@ CONTAINS
       end subroutine lw_kgb10
 
 ! **************************************************************************
-      subroutine lw_kgb11(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb11(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg11, only : fracrefao, fracrefbo, kao, kbo, kao_mo2, &
@@ -14428,14 +14606,21 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+!      character*80 errmess
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14519,30 +14704,41 @@ CONTAINS
          write(0,*) 'lw_kgb11: max/min(fracrefao) =',                   &
                      maxval(fracrefao),minval(fracrefao)
       ENDIF
+9010  continue             
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit 
+      errflg = 1                                   
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb11 "   
+                                       
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+      if (errflg/=0) return                                     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mo2,    size(kao_mo2),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo_mo2,    size(kbo_mo2),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
       end subroutine lw_kgb11
 
 ! **************************************************************************
-      subroutine lw_kgb12(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb12(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg12, only : fracrefao, kao, selfrefo, forrefo
@@ -14553,14 +14749,22 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+!      character*80 errmess
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14616,25 +14820,36 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, kao, selfrefo, forrefo
          write(0,*) 'lw_kgb12: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+
+9010  continue 
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!     &                           RRTMG_LW_DATA on unit ',rrtmg_unit 
+      errflg = 1                         
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb12 "   
+                                                               
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
+      if (errflg/=0) return    
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
 
       end subroutine lw_kgb12
 
 ! **************************************************************************
-      subroutine lw_kgb13(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb13(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg13, only : fracrefao, fracrefbo, kao,                  &
@@ -14649,13 +14864,23 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
       integer :: mpierr
 #endif
 ! Local                                    
       character*80 errmess
 !mz      logical, external  :: wrf_dm_on_monitor
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14734,56 +14959,73 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kao_mco2, kao_mco,&
-                           kbo_mo3, selfrefo, forrefo
+     &                     kbo_mo3, selfrefo, forrefo
          write(0,*) 'lw_kgb13: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+
+9010  continue  
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                   RRTMG_LW_DATA on unit ',rrtmg_unit  
+      errflg = 1                        
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb13 "  
+                           
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
+      if (errflg/=0) return                                           
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mco,    size(kao_mco),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo_mo3,    size(kbo_mo3),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
       end subroutine lw_kgb13
 
 ! **************************************************************************
-      subroutine lw_kgb14(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb14(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg14, only : fracrefao, fracrefbo, kao, kbo, selfrefo,   &
-                            forrefo
+     &                      forrefo
 
 #ifdef MPI
        use mpi
 #endif
 
-
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
-
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
       character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14853,31 +15095,42 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo,              &
-                           selfrefo, forrefo
+     &                     selfrefo, forrefo
          write(0,*) 'lw_kgb14: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+
+9010  continue             
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!     &                             RRTMG_LW_DATA on unit ',rrtmg_unit 
+      errflg = 1                                                 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb14 "  
+                                                        
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
+      if (errflg/=0) return    
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
 
       end subroutine lw_kgb14
 
 ! **************************************************************************
-      subroutine lw_kgb15(rrtmg_unit,mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb15(rrtmg_unit,mpirank, mpiroot, mpicomm,         &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg15, only : fracrefao, kao, kao_mn2, selfrefo, forrefo
@@ -14889,14 +15142,22 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit,mpirank,mpiroot,mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+!      character*80 errmess
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -14965,19 +15226,29 @@ CONTAINS
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, kao, kao_mn2, selfrefo, forrefo 
          write(0,*) 'lw_kgb15: max/min(fracrefao) =',                   &
-                     maxval(fracrefao),minval(fracrefao)
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+9010  continue            
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit  
+      errflg = 1                                                
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb15 "     
+                                        
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
+      if (errflg/=0) return     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao_mn2,    size(kao_mn2),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -14985,28 +15256,36 @@ CONTAINS
       end subroutine lw_kgb15
 
 ! **************************************************************************
-      subroutine lw_kgb16(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine lw_kgb16(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrlw_kg16, only : fracrefao, fracrefbo, kao, kbo, selfrefo,   &
-                            forrefo
+     &                      forrefo
 #ifdef MPI
        use mpi
 #endif
-
 
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
 ! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
+!      character*80 errmess
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -15077,22 +15356,33 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, selfrefo,    &
-                           forrefo
-         write(0,*) 'lw_kgb16: max/min(fracrefao) =',maxval(fracrefao),minval(fracrefao)
+     &                      forrefo
+         write(0,*) 'lw_kgb16: max/min(fracrefao) =',                   &
+     &               maxval(fracrefao),minval(fracrefao)
       ENDIF
+9010  continue                                    
+!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
+!                                 RRTMG_LW_DATA on unit ',rrtmg_unit    
+      errflg = 1                                                   
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb16 "  
+                                            
+      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! First, broadcast the current error code from MPI master (0 = success)                         
+      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+      if (errflg/=0) return             
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
