@@ -43,8 +43,6 @@
 !!
     subroutine GFS_suite_ini_fini_test_run (errmsg, errflg)
 
-      use GFS_typedefs, only: GFS_interstitial_type
-
       implicit none
 
       ! interface variables
