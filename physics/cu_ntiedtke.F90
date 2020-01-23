@@ -184,13 +184,13 @@ contains
       real(kind=kind_phys) ztp1(lq,km),    zqp1(lq,km),  ztu(lq,km),   zqu(lq,km),&
      &     zlu(lq,km),     zlude(lq,km), zmfu(lq,km),  zmfd(lq,km),  zmfude_rate(lq,km),&
      &     zqsat(lq,km),   zrain(lq)
-      real(kind=kind_phys) pcen(lq,km,ktrac-2),ptenc(lq,km,ktrac-2) 
+      real(kind=kind_phys),allocatable ::  pcen(:,:,:),ptenc(:,:,:) 
 
       integer icbot(lq),   ictop(lq),     ktype(lq),   lndj(lq)
       logical locum(lq)
 !
       real(kind=kind_phys) ztmst,fliq,fice,ztc,zalf,tt
-      integer i,j,k,k1,n,km1
+      integer i,j,k,k1,n,km1,ktracer
       real(kind=kind_phys) ztpp1
       real(kind=kind_phys) zew,zqs,zcor
 !
@@ -254,16 +254,33 @@ contains
         end do
       end do
 
-      do n=1,ktrac-2
-        do k=1,km
-          k1=km-k+1
-          do j=1,lq
-            pcen(j,k1,n) = clw(j,k,n+2)
-            ptenc(j,k1,n)= 0.
+      if(ktrac > 2) then
+        ktracer = ktrac - 2
+        allocate(pcen(lq,km,ktracer))
+        allocate(ptenc(lq,km,ktracer))
+        do n=1,ktracer
+          do k=1,km
+            k1=km-k+1
+            do j=1,lq
+              pcen(j,k1,n) = clw(j,k,n+2)
+              ptenc(j,k1,n)= 0.
+            end do
           end do
         end do
-      end do
-
+      else
+        ktracer = 2
+        allocate(pcen(lq,km,ktracer))
+        allocate(ptenc(lq,km,ktracer))
+        do n=1,ktracer
+          do k=1,km
+            do j=1,lq
+              pcen(j,k,n) = 0.
+              ptenc(j,k,n)= 0.
+            end do
+          end do
+        end do
+      end if
+      
 !      print *, "pgeo=",pgeo(1,:)
 !      print *, "pgeoh=",pgeoh(1,:)
 !      print *, "pap=",pap(1,:)
@@ -285,7 +302,7 @@ contains
      &     zqp1,     pum1,     pvm1,     pverv,   zqsat,&
      &     pqhfl,    ztmst,    pap,      paph,    pgeo, &
      &     ptte,     pqte,     pvom,     pvol,    prsfc,&
-     &     pssfc,    locum,    ktrac-2,  pcen,    ptenc,&
+     &     pssfc,    locum,    ktracer,  pcen,    ptenc,&
      &     ktype,    icbot,    ictop,    ztu,     zqu,  &
      &     zlu,      zlude,    zmfu,     zmfd,    zrain,&
      &     pcte,     phhfl,    lndj,     pgeoh,   zmfude_rate, dx)
@@ -339,15 +356,21 @@ contains
           end do
         end do
       endif
+
 !
-!      do n=1,ktrac-2
-!        do k=1,km
-!          k1=km-k+1
-!          do j=1,lq
-!            clw(j,k,n+2)=pcen(j,k,n)+ptenc(j,k1,n)*ztmst
+! Currently, vertical mixing of tracers are turned off
+!      if(ktrac > 2) then
+!        do n=1,ktrac-2
+!          do k=1,km
+!            k1=km-k+1
+!            do j=1,lq
+!              clw(j,k,n+2)=pcen(j,k,n)+ptenc(j,k1,n)*ztmst
+!            end do
 !          end do
 !        end do
-!      end do
+!      end if
+      deallocate(pcen)
+      deallocate(ptenc)
 !
       return
       end subroutine cu_ntiedtke_run
