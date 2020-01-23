@@ -924,11 +924,6 @@ MODULE module_mp_thompson
 
       call cpu_time(stime)
 
-!$OMP parallel num_threads(threads)
-
-!$OMP sections
-
-!$OMP section
 !>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table
       if (mpirank==mpiroot) write(0,*) '  creating rain collecting graupel table'
       call cpu_time(stime)
@@ -936,17 +931,12 @@ MODULE module_mp_thompson
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing rain collecting graupel table took ",f10.3," seconds.")', etime-stime
 
-!$OMP section
 !>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table
       if (mpirank==mpiroot) write (*,*) '  creating rain collecting snow table'
       call cpu_time(stime)
       call qr_acr_qs
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing rain collecting snow table took ",f10.3," seconds.")', etime-stime
-
-!$OMP end sections
-
-!$OMP end parallel
 
 !>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table
       if (mpirank==mpiroot) write(0,*) '  creating freezing of water drops table'
