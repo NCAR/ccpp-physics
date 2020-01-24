@@ -263,7 +263,7 @@
 
       module rrsw_kg16
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng16
 
 !     implicit none
@@ -289,13 +289,13 @@
 
       integer(kind=im), parameter :: no16 = 16
 
-      real(kind=rb) :: kao(9,5,13,no16)
-      real(kind=rb) :: kbo(5,13:59,no16)
-      real(kind=rb) :: selfrefo(10,no16), forrefo(3,no16)
-      real(kind=rb) :: sfluxrefo(no16)
+      real(kind=r4) :: kao(9,5,13,no16)
+      real(kind=r4) :: kbo(5,13:59,no16)
+      real(kind=r4) :: selfrefo(10,no16), forrefo(3,no16)
+      real(kind=r4) :: sfluxrefo(no16)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl, strrat1
+      real(kind=r4) :: rayl, strrat1
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 16
@@ -317,10 +317,10 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng16) , absa(585,ng16)
-      real(kind=rb) :: kb(5,13:59,ng16), absb(235,ng16)
-      real(kind=rb) :: selfref(10,ng16), forref(3,ng16)
-      real(kind=rb) :: sfluxref(ng16)
+      real(kind=r4) :: ka(9,5,13,ng16) , absa(585,ng16)
+      real(kind=r4) :: kb(5,13:59,ng16), absb(235,ng16)
+      real(kind=r4) :: selfref(10,ng16), forref(3,ng16)
+      real(kind=r4) :: sfluxref(ng16)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -328,10 +328,9 @@
 
       module rrsw_kg17
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng17
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -354,13 +353,13 @@
 
       integer(kind=im), parameter :: no17 = 16
 
-      real(kind=rb) :: kao(9,5,13,no17)
-      real(kind=rb) :: kbo(5,5,13:59,no17)
-      real(kind=rb) :: selfrefo(10,no17), forrefo(4,no17)
-      real(kind=rb) :: sfluxrefo(no17,5)
+      real(kind=r4) :: kao(9,5,13,no17)
+      real(kind=r4) :: kbo(5,5,13:59,no17)
+      real(kind=r4) :: selfrefo(10,no17), forrefo(4,no17)
+      real(kind=r4) :: sfluxrefo(no17,5)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl, strrat
+      real(kind=r4) :: rayl, strrat
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 17
@@ -382,10 +381,10 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng17) , absa(585,ng17)
-      real(kind=rb) :: kb(5,5,13:59,ng17), absb(1175,ng17)
-      real(kind=rb) :: selfref(10,ng17), forref(4,ng17)
-      real(kind=rb) :: sfluxref(ng17,5)
+      real(kind=r4) :: ka(9,5,13,ng17) , absa(585,ng17)
+      real(kind=r4) :: kb(5,5,13:59,ng17), absb(1175,ng17)
+      real(kind=r4) :: selfref(10,ng17), forref(4,ng17)
+      real(kind=r4) :: sfluxref(ng17,5)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,1,13,1),absb(1,1))
 
@@ -393,10 +392,9 @@
 
       module rrsw_kg18
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng18
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -419,13 +417,13 @@
 
       integer(kind=im), parameter :: no18 = 16
 
-      real(kind=rb) :: kao(9,5,13,no18)
-      real(kind=rb) :: kbo(5,13:59,no18)
-      real(kind=rb) :: selfrefo(10,no18), forrefo(3,no18)
-      real(kind=rb) :: sfluxrefo(no18,9)
+      real(kind=r4) :: kao(9,5,13,no18)
+      real(kind=r4) :: kbo(5,13:59,no18)
+      real(kind=r4) :: selfrefo(10,no18), forrefo(3,no18)
+      real(kind=r4) :: sfluxrefo(no18,9)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl, strrat
+      real(kind=r4) :: rayl, strrat
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 18
@@ -447,10 +445,10 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng18), absa(585,ng18)
-      real(kind=rb) :: kb(5,13:59,ng18), absb(235,ng18)
-      real(kind=rb) :: selfref(10,ng18), forref(3,ng18)
-      real(kind=rb) :: sfluxref(ng18,9)
+      real(kind=r4) :: ka(9,5,13,ng18), absa(585,ng18)
+      real(kind=r4) :: kb(5,13:59,ng18), absb(235,ng18)
+      real(kind=r4) :: selfref(10,ng18), forref(3,ng18)
+      real(kind=r4) :: sfluxref(ng18,9)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -458,7 +456,7 @@
 
       module rrsw_kg19
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng19
 
 !     implicit none
@@ -484,13 +482,13 @@
 
       integer(kind=im), parameter :: no19 = 16
 
-      real(kind=rb) :: kao(9,5,13,no19)
-      real(kind=rb) :: kbo(5,13:59,no19)
-      real(kind=rb) :: selfrefo(10,no19), forrefo(3,no19)
-      real(kind=rb) :: sfluxrefo(no19,9)
+      real(kind=r4) :: kao(9,5,13,no19)
+      real(kind=r4) :: kbo(5,13:59,no19)
+      real(kind=r4) :: selfrefo(10,no19), forrefo(3,no19)
+      real(kind=r4) :: sfluxrefo(no19,9)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl, strrat
+      real(kind=r4) :: rayl, strrat
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 19
@@ -512,10 +510,10 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng19), absa(585,ng19)
-      real(kind=rb) :: kb(5,13:59,ng19), absb(235,ng19)
-      real(kind=rb) :: selfref(10,ng19), forref(3,ng19)
-      real(kind=rb) :: sfluxref(ng19,9)
+      real(kind=r4) :: ka(9,5,13,ng19), absa(585,ng19)
+      real(kind=r4) :: kb(5,13:59,ng19), absb(235,ng19)
+      real(kind=r4) :: selfref(10,ng19), forref(3,ng19)
+      real(kind=r4) :: sfluxref(ng19,9)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -523,10 +521,9 @@
 
       module rrsw_kg20
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng20
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -550,14 +547,14 @@
 
       integer(kind=im), parameter :: no20 = 16
 
-      real(kind=rb) :: kao(5,13,no20)
-      real(kind=rb) :: kbo(5,13:59,no20)
-      real(kind=rb) :: selfrefo(10,no20), forrefo(4,no20)
-      real(kind=rb) :: sfluxrefo(no20)
-      real(kind=rb) :: absch4o(no20)
+      real(kind=r4) :: kao(5,13,no20)
+      real(kind=r4) :: kbo(5,13:59,no20)
+      real(kind=r4) :: selfrefo(10,no20), forrefo(4,no20)
+      real(kind=r4) :: sfluxrefo(no20)
+      real(kind=r4) :: absch4o(no20)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl 
+      real(kind=r4) :: rayl 
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 20
@@ -580,11 +577,11 @@
 ! absch4  : real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(5,13,ng20), absa(65,ng20)
-      real(kind=rb) :: kb(5,13:59,ng20), absb(235,ng20)
-      real(kind=rb) :: selfref(10,ng20), forref(4,ng20)
-      real(kind=rb) :: sfluxref(ng20)
-      real(kind=rb) :: absch4(ng20)
+      real(kind=r4) :: ka(5,13,ng20), absa(65,ng20)
+      real(kind=r4) :: kb(5,13:59,ng20), absb(235,ng20)
+      real(kind=r4) :: selfref(10,ng20), forref(4,ng20)
+      real(kind=r4) :: sfluxref(ng20)
+      real(kind=r4) :: absch4(ng20)
 
       equivalence (ka(1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -592,10 +589,9 @@
 
       module rrsw_kg21
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng21
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -618,13 +614,13 @@
 
       integer(kind=im), parameter :: no21 = 16
 
-      real(kind=rb) :: kao(9,5,13,no21)
-      real(kind=rb) :: kbo(5,5,13:59,no21)
-      real(kind=rb) :: selfrefo(10,no21), forrefo(4,no21)
-      real(kind=rb) :: sfluxrefo(no21,9)
+      real(kind=r4) :: kao(9,5,13,no21)
+      real(kind=r4) :: kbo(5,5,13:59,no21)
+      real(kind=r4) :: selfrefo(10,no21), forrefo(4,no21)
+      real(kind=r4) :: sfluxrefo(no21,9)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl, strrat
+      real(kind=r4) :: rayl, strrat
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 21
@@ -646,10 +642,10 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng21), absa(585,ng21)
-      real(kind=rb) :: kb(5,5,13:59,ng21), absb(1175,ng21)
-      real(kind=rb) :: selfref(10,ng21), forref(4,ng21)
-      real(kind=rb) :: sfluxref(ng21,9)
+      real(kind=r4) :: ka(9,5,13,ng21), absa(585,ng21)
+      real(kind=r4) :: kb(5,5,13:59,ng21), absb(1175,ng21)
+      real(kind=r4) :: selfref(10,ng21), forref(4,ng21)
+      real(kind=r4) :: sfluxref(ng21,9)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,1,13,1),absb(1,1))
 
@@ -657,7 +653,7 @@
 
       module rrsw_kg22
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb ,r4 => kind_r4
       use parrrsw, only : ng22
 
 !     implicit none
@@ -683,13 +679,13 @@
 
       integer(kind=im), parameter :: no22 = 16
 
-      real(kind=rb) :: kao(9,5,13,no22)
-      real(kind=rb) :: kbo(5,13:59,no22)
-      real(kind=rb) :: selfrefo(10,no22), forrefo(3,no22)
-      real(kind=rb) :: sfluxrefo(no22,9)
+      real(kind=r4) :: kao(9,5,13,no22)
+      real(kind=r4) :: kbo(5,13:59,no22)
+      real(kind=r4) :: selfrefo(10,no22), forrefo(3,no22)
+      real(kind=r4) :: sfluxrefo(no22,9)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl, strrat
+      real(kind=r4) :: rayl, strrat
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 22
@@ -711,10 +707,10 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng22), absa(585,ng22)
-      real(kind=rb) :: kb(5,13:59,ng22), absb(235,ng22)
-      real(kind=rb) :: selfref(10,ng22), forref(3,ng22)
-      real(kind=rb) :: sfluxref(ng22,9)
+      real(kind=r4) :: ka(9,5,13,ng22), absa(585,ng22)
+      real(kind=r4) :: kb(5,13:59,ng22), absb(235,ng22)
+      real(kind=r4) :: selfref(10,ng22), forref(3,ng22)
+      real(kind=r4) :: sfluxref(ng22,9)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -722,7 +718,7 @@
 
       module rrsw_kg23
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng23
 
 !     implicit none
@@ -748,13 +744,13 @@
 
       integer(kind=im), parameter :: no23 = 16
 
-      real(kind=rb) :: kao(5,13,no23)
-      real(kind=rb) :: selfrefo(10,no23), forrefo(3,no23)
-      real(kind=rb) :: sfluxrefo(no23)
-      real(kind=rb) :: raylo(no23)
+      real(kind=r4) :: kao(5,13,no23)
+      real(kind=r4) :: selfrefo(10,no23), forrefo(3,no23)
+      real(kind=r4) :: sfluxrefo(no23)
+      real(kind=r4) :: raylo(no23)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: givfac
+      real(kind=r4) :: givfac
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 23
@@ -776,9 +772,9 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(5,13,ng23), absa(65,ng23)
-      real(kind=rb) :: selfref(10,ng23), forref(3,ng23)
-      real(kind=rb) :: sfluxref(ng23), rayl(ng23)
+      real(kind=r4) :: ka(5,13,ng23), absa(65,ng23)
+      real(kind=r4) :: selfref(10,ng23), forref(3,ng23)
+      real(kind=r4) :: sfluxref(ng23), rayl(ng23)
 
       equivalence (ka(1,1,1),absa(1,1))
 
@@ -786,7 +782,7 @@
 
       module rrsw_kg24
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng24
 
 !     implicit none
@@ -816,15 +812,15 @@
 
       integer(kind=im), parameter :: no24 = 16
 
-      real(kind=rb) :: kao(9,5,13,no24)
-      real(kind=rb) :: kbo(5,13:59,no24)
-      real(kind=rb) :: selfrefo(10,no24), forrefo(3,no24)
-      real(kind=rb) :: sfluxrefo(no24,9)
-      real(kind=rb) :: abso3ao(no24), abso3bo(no24)
-      real(kind=rb) :: raylao(no24,9), raylbo(no24)
+      real(kind=r4) :: kao(9,5,13,no24)
+      real(kind=r4) :: kbo(5,13:59,no24)
+      real(kind=r4) :: selfrefo(10,no24), forrefo(3,no24)
+      real(kind=r4) :: sfluxrefo(no24,9)
+      real(kind=r4) :: abso3ao(no24), abso3bo(no24)
+      real(kind=r4) :: raylao(no24,9), raylbo(no24)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: strrat
+      real(kind=r4) :: strrat
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 24
@@ -850,12 +846,12 @@
 ! raylb   : real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng24), absa(585,ng24)
-      real(kind=rb) :: kb(5,13:59,ng24), absb(235,ng24)
-      real(kind=rb) :: selfref(10,ng24), forref(3,ng24)
-      real(kind=rb) :: sfluxref(ng24,9)
-      real(kind=rb) :: abso3a(ng24), abso3b(ng24)
-      real(kind=rb) :: rayla(ng24,9), raylb(ng24)
+      real(kind=r4) :: ka(9,5,13,ng24), absa(585,ng24)
+      real(kind=r4) :: kb(5,13:59,ng24), absb(235,ng24)
+      real(kind=r4) :: selfref(10,ng24), forref(3,ng24)
+      real(kind=r4) :: sfluxref(ng24,9)
+      real(kind=r4) :: abso3a(ng24), abso3b(ng24)
+      real(kind=r4) :: rayla(ng24,9), raylb(ng24)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -863,7 +859,7 @@
 
       module rrsw_kg25
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng25
 
 !     implicit none
@@ -889,10 +885,10 @@
 
       integer(kind=im), parameter :: no25 = 16
 
-      real(kind=rb) :: kao(5,13,no25)
-      real(kind=rb) :: sfluxrefo(no25)
-      real(kind=rb) :: abso3ao(no25), abso3bo(no25)
-      real(kind=rb) :: raylo(no25)
+      real(kind=r4) :: kao(5,13,no25)
+      real(kind=r4) :: sfluxrefo(no25)
+      real(kind=r4) :: abso3ao(no25), abso3bo(no25)
+      real(kind=r4) :: raylo(no25)
 
       integer(kind=im) :: layreffr
 
@@ -915,10 +911,10 @@
 ! rayl    : real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(5,13,ng25), absa(65,ng25)
-      real(kind=rb) :: sfluxref(ng25)
-      real(kind=rb) :: abso3a(ng25), abso3b(ng25)
-      real(kind=rb) :: rayl(ng25)
+      real(kind=r4) :: ka(5,13,ng25), absa(65,ng25)
+      real(kind=r4) :: sfluxref(ng25)
+      real(kind=r4) :: abso3a(ng25), abso3b(ng25)
+      real(kind=r4) :: rayl(ng25)
 
       equivalence (ka(1,1,1),absa(1,1))
 
@@ -926,7 +922,7 @@
 
       module rrsw_kg26
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng26
 
 !     implicit none
@@ -949,8 +945,8 @@
 
       integer(kind=im), parameter :: no26 = 16
 
-      real(kind=rb) :: sfluxrefo(no26)
-      real(kind=rb) :: raylo(no26)
+      real(kind=r4) :: sfluxrefo(no26)
+      real(kind=r4) :: raylo(no26)
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 26
@@ -967,17 +963,16 @@
 ! rayl    : real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: sfluxref(ng26)
-      real(kind=rb) :: rayl(ng26)
+      real(kind=r4) :: sfluxref(ng26)
+      real(kind=r4) :: rayl(ng26)
 
       end module rrsw_kg26
 
       module rrsw_kg27
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng27
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -999,13 +994,13 @@
 
       integer(kind=im), parameter :: no27 = 16
 
-      real(kind=rb) :: kao(5,13,no27)
-      real(kind=rb) :: kbo(5,13:59,no27)
-      real(kind=rb) :: sfluxrefo(no27)
-      real(kind=rb) :: raylo(no27)
+      real(kind=r4) :: kao(5,13,no27)
+      real(kind=r4) :: kbo(5,13:59,no27)
+      real(kind=r4) :: sfluxrefo(no27)
+      real(kind=r4) :: raylo(no27)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: scalekur
+      real(kind=r4) :: scalekur
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 27
@@ -1026,10 +1021,10 @@
 ! rayl    : real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(5,13,ng27), absa(65,ng27)
-      real(kind=rb) :: kb(5,13:59,ng27), absb(235,ng27)
-      real(kind=rb) :: sfluxref(ng27)
-      real(kind=rb) :: rayl(ng27)
+      real(kind=r4) :: ka(5,13,ng27), absa(65,ng27)
+      real(kind=r4) :: kb(5,13:59,ng27), absb(235,ng27)
+      real(kind=r4) :: sfluxref(ng27)
+      real(kind=r4) :: rayl(ng27)
 
       equivalence (ka(1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -1037,10 +1032,9 @@
 
       module rrsw_kg28
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng28
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -1061,12 +1055,12 @@
 
       integer(kind=im), parameter :: no28 = 16
 
-      real(kind=rb) :: kao(9,5,13,no28)
-      real(kind=rb) :: kbo(5,5,13:59,no28)
-      real(kind=rb) :: sfluxrefo(no28,5)
+      real(kind=r4) :: kao(9,5,13,no28)
+      real(kind=r4) :: kbo(5,5,13:59,no28)
+      real(kind=r4) :: sfluxrefo(no28,5)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl, strrat
+      real(kind=r4) :: rayl, strrat
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 28
@@ -1084,9 +1078,9 @@
 ! sfluxref: real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(9,5,13,ng28), absa(585,ng28)
-      real(kind=rb) :: kb(5,5,13:59,ng28), absb(1175,ng28)
-      real(kind=rb) :: sfluxref(ng28,5)
+      real(kind=r4) :: ka(9,5,13,ng28), absa(585,ng28)
+      real(kind=r4) :: kb(5,5,13:59,ng28), absb(1175,ng28)
+      real(kind=r4) :: sfluxref(ng28,5)
 
       equivalence (ka(1,1,1,1),absa(1,1)), (kb(1,1,13,1),absb(1,1))
 
@@ -1094,7 +1088,7 @@
 
       module rrsw_kg29
 
-      use parkind ,only : im => kind_im, rb => kind_rb
+      use parkind ,only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : ng29
 
 !     implicit none
@@ -1122,14 +1116,14 @@
 
       integer(kind=im), parameter :: no29 = 16
 
-      real(kind=rb) :: kao(5,13,no29)
-      real(kind=rb) :: kbo(5,13:59,no29)
-      real(kind=rb) :: selfrefo(10,no29), forrefo(4,no29)
-      real(kind=rb) :: sfluxrefo(no29)
-      real(kind=rb) :: absh2oo(no29), absco2o(no29)
+      real(kind=r4) :: kao(5,13,no29)
+      real(kind=r4) :: kbo(5,13:59,no29)
+      real(kind=r4) :: selfrefo(10,no29), forrefo(4,no29)
+      real(kind=r4) :: sfluxrefo(no29)
+      real(kind=r4) :: absh2oo(no29), absco2o(no29)
 
       integer(kind=im) :: layreffr
-      real(kind=rb) :: rayl
+      real(kind=r4) :: rayl
 
 !-----------------------------------------------------------------
 ! rrtmg_sw COMBINED abs. coefficients for interval 29
@@ -1151,11 +1145,11 @@
 ! absco2  : real     
 !-----------------------------------------------------------------
 
-      real(kind=rb) :: ka(5,13,ng29), absa(65,ng29)
-      real(kind=rb) :: kb(5,13:59,ng29), absb(235,ng29)
-      real(kind=rb) :: selfref(10,ng29), forref(4,ng29)
-      real(kind=rb) :: sfluxref(ng29)
-      real(kind=rb) :: absh2o(ng29), absco2(ng29)
+      real(kind=r4) :: ka(5,13,ng29), absa(65,ng29)
+      real(kind=r4) :: kb(5,13:59,ng29), absb(235,ng29)
+      real(kind=r4) :: selfref(10,ng29), forref(4,ng29)
+      real(kind=r4) :: sfluxref(ng29)
+      real(kind=r4) :: absh2o(ng29), absco2(ng29)
 
       equivalence (ka(1,1,1),absa(1,1)), (kb(1,13,1),absb(1,1))
 
@@ -1163,9 +1157,8 @@
 
       module rrsw_ref
 
-      use parkind, only : im => kind_im, rb => kind_rb
+      use parkind, only : im => kind_im, rb => kind_rb, r4 => kind_r4
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -1184,15 +1177,15 @@
 ! tref   :  real   : Reference temperature levels for MLS profile
 !------------------------------------------------------------------
 
-      real(kind=rb) , dimension(59) :: pref
-      real(kind=rb) , dimension(59) :: preflog
-      real(kind=rb) , dimension(59) :: tref
+      real(kind=r4) , dimension(59) :: pref
+      real(kind=r4) , dimension(59) :: preflog
+      real(kind=r4) , dimension(59) :: tref
 
       end module rrsw_ref
 
       module rrsw_tbl
 
-      use parkind, only : im => kind_im, rb => kind_rb
+      use parkind, only : im => kind_im, rb => kind_rb ,r4 => kind_r4
 
 !     implicit none
       save
@@ -1219,21 +1212,20 @@
 
       integer(kind=im), parameter :: ntbl = 10000
 
-      real(kind=rb), parameter :: tblint = 10000.0_rb
+      real(kind=r4), parameter :: tblint = 10000.0_rb
 
-      real(kind=rb), parameter :: od_lo = 0.06_rb
+      real(kind=r4), parameter :: od_lo = 0.06_rb
 
-      real(kind=rb) :: tau_tbl
-      real(kind=rb) , dimension(0:ntbl) :: exp_tbl
+      real(kind=r4) :: tau_tbl
+      real(kind=r4) , dimension(0:ntbl) :: exp_tbl
 
-      real(kind=rb), parameter :: pade = 0.278_rb
-      real(kind=rb) :: bpade
+      real(kind=r4), parameter :: pade = 0.278_rb
+      real(kind=r4) :: bpade
 
       end module rrsw_tbl
 
       module rrsw_vsn
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -1289,10 +1281,9 @@
 
       module rrsw_wvn
 
-      use parkind, only : im => kind_im, rb => kind_rb
+      use parkind, only : im => kind_im, rb => kind_rb, r4 => kind_r4
       use parrrsw, only : nbndsw, mg, ngptsw, jpb1, jpb2
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -1329,9 +1320,9 @@
       integer(kind=im) :: nspa(jpb1:jpb2)
       integer(kind=im) :: nspb(jpb1:jpb2)
 
-      real(kind=rb) :: wavenum1(jpb1:jpb2)
-      real(kind=rb) :: wavenum2(jpb1:jpb2)
-      real(kind=rb) :: delwave(jpb1:jpb2)
+      real(kind=r4) :: wavenum1(jpb1:jpb2)
+      real(kind=r4) :: wavenum2(jpb1:jpb2)
+      real(kind=r4) :: delwave(jpb1:jpb2)
 
       integer(kind=im) :: ngc(nbndsw)
       integer(kind=im) :: ngs(nbndsw)
@@ -1339,8 +1330,8 @@
       integer(kind=im) :: ngb(ngptsw)
       integer(kind=im) :: ngm(nbndsw*mg)
 
-      real(kind=rb) :: wt(mg)
-      real(kind=rb) :: rwgt(nbndsw*mg)
+      real(kind=r4) :: wt(mg)
+      real(kind=r4) :: rwgt(nbndsw*mg)
 
       end module rrsw_wvn
 
@@ -11467,54 +11458,44 @@ CONTAINS
         ENDDO
         rrtmg_unit = -1
  2010   CONTINUE
-      ENDIF
-!mz      CALL wrf_dm_bcast_bytes ( rrtmg_unit , IWORDSIZE )
-      IF ( rrtmg_unit < 0 ) THEN
-#ifdef CCPP
+        IF ( rrtmg_unit < 0 ) THEN
             errflg = 1
-            errmsg = 'module_ra_rrtmg_sw: rrtm_swlookuptable: Can not  &
+            errmsg = 'module_ra_rrtmg_sw: rrtm_swlookuptable: Can not   &
                       find unused fortran unit to read in lookup table.'
             return
-#else
-!        CALL wrf_error_fatal ( 'module_ra_rrtmg_sw: rrtm_swlookuptable: Can not '// &
-                               'find unused fortran unit to read in lookup table.' )
-#endif
+         ENDIF
       ENDIF
 
 !mz      IF ( wrf_dm_on_monitor() ) THEN
       IF ( mpirank == mpiroot ) THEN
-        OPEN(rrtmg_unit,FILE='RRTMG_SW_DATA',                  &
+        OPEN(rrtmg_unit,FILE='RRTMG_SW_DATA', convert='BIG_ENDIAN',     &
              FORM='UNFORMATTED',STATUS='OLD',ERR=9009)
+
+      call sw_kgb16(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb17(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb18(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb19(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb20(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb21(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb22(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb23(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb24(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb25(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb26(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb27(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb28(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb29(rrtmg_unit,mpirank, mpiroot,mpicomm)
+
+      CLOSE (rrtmg_unit)
       ENDIF
-
-      call sw_kgb16(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb17(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb18(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb19(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb20(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb21(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb22(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb23(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb24(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb25(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb26(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb27(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb28(rrtmg_unit, mpirank, mpiroot, mpicomm)
-      call sw_kgb29(rrtmg_unit, mpirank, mpiroot, mpicomm)
-
-     IF ( mpirank == mpiroot ) CLOSE (rrtmg_unit)
 
      RETURN
 9009 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error opening     &
                            RRTMG_SW_DATA on unit ',rrtmg_unit
-#ifdef CCPP
       errflg = 1
       errmsg = 'module_ra_rrtmg_sw: error opening RRTMG_SW_DATA '
       return
-#else
-!     CALL wrf_error_fatal(errmess)
-#endif
 
        END SUBROUTINE rrtmg_swlookuptable
 
@@ -11539,8 +11520,8 @@ CONTAINS
       subroutine sw_kgb16(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg16, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            rayl, strrat1, layreffr
+      use rrsw_kg16, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
+     &                      rayl, strrat1, layreffr
 #ifdef MPI
        use mpi
 #endif
@@ -11549,15 +11530,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit   
+      integer,              intent(in)  :: mpirank 
+      integer,              intent(in)  :: mpiroot    
+      integer,              intent(in)  :: mpicomm 
 #ifdef MPI
-         integer :: mpierr
+       integer :: mpierr
 #endif
-
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11624,32 +11603,31 @@ CONTAINS
 9010  CONTINUE
       WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading    &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!      CALL wrf_error_fatal(errmess)
 
 #else
 
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, strrat1, layreffr, kao, kbo, selfrefo, &
-                           forrefo, sfluxrefo         
+     &                      forrefo, sfluxrefo         
          write(0,*) 'sw_kgb16: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-     ! call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-     !                mpiroot, mpicomm, mpierr)
-     ! call MPI_BCAST(strrat1,   size(strrat1),  MPI_DOUBLE_PRECISION,   &
-     !                mpiroot, mpicomm, mpierr)
-     ! call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-     !                mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat1,   1,  MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -11659,8 +11637,8 @@ CONTAINS
       subroutine sw_kgb17(rrtmg_unit,  mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg17, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            rayl, strrat, layreffr
+      use rrsw_kg17, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
+     &                      rayl, strrat, layreffr
 
 #ifdef MPI
        use mpi
@@ -11670,14 +11648,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit,mpirank,mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11747,27 +11724,28 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
-                           forrefo, sfluxrefo
-     !    write(0,*) 'sw_kgb17: max/min(rayl) = ',maxval(rayl),minval(rayl)
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
+     &                     forrefo, sfluxrefo
+         write(0,*) 'sw_kgb17: max/min(kao) = ',                       &
+     &               maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-     ! call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-     !                mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
       end subroutine sw_kgb17
@@ -11776,8 +11754,8 @@ CONTAINS
       subroutine sw_kgb18(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg18, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            rayl, strrat, layreffr
+      use rrsw_kg18, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
+     &                      rayl, strrat, layreffr
 #ifdef MPI
        use mpi
 #endif
@@ -11786,14 +11764,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit , mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11859,31 +11836,30 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
-                           forrefo, sfluxrefo
-      !   write(0,*) 'sw_kgb18: max/min() = ',maxval(rayl),minval(rayl)
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
+     &                     forrefo, sfluxrefo
+         write(0,*) 'sw_kgb18: max/min(kbo) = ',maxval(kbo),minval(kbo)
       ENDIF
 #ifdef MPI
-      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -11893,8 +11869,8 @@ CONTAINS
       subroutine sw_kgb19(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg19, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            rayl, strrat, layreffr
+      use rrsw_kg19, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
+     &                      rayl, strrat, layreffr
 #ifdef MPI
        use mpi
 #endif
@@ -11903,14 +11879,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit,mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
       integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11976,34 +11951,33 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
-                           forrefo, sfluxrefo
-       !  write(0,*) 'sw_kgb19: max/min(rayl) = ',maxval(rayl),minval(rayl)
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
+     &                     forrefo, sfluxrefo
+         write(0,*) 'sw_kgb19: max/min(forrefo) = ',                    &
+     &               maxval(forrefo),minval(forrefo)
       ENDIF
 #ifdef MPI
-      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
 
       end subroutine sw_kgb19
 
@@ -12011,23 +11985,22 @@ CONTAINS
       subroutine sw_kgb20(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg20, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            absch4o, rayl, layreffr
+      use rrsw_kg20, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
+     &                      absch4o, rayl, layreffr
 #ifdef MPI
-       use mpi
+      use mpi
 #endif
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit,mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
       integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12095,31 +12068,30 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, layreffr, absch4o, kao, kbo, selfrefo, &
-                           forrefo, sfluxrefo 
-        ! write(0,*) 'sw_kgb20: max/min(rayl) = ',maxval(rayl),minval(rayl)
+     &                     forrefo, sfluxrefo 
+         write(0,*) 'sw_kgb20: max/min(kao) = ', maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(absch4o,   size(absch4o),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -12129,8 +12101,8 @@ CONTAINS
       subroutine sw_kgb21(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg21, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            rayl, strrat, layreffr
+      use rrsw_kg21, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
+     &                      rayl, strrat, layreffr
 #ifdef MPI
        use mpi
 #endif
@@ -12139,14 +12111,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit,mpirank,mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12215,39 +12186,38 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
-                           forrefo, sfluxrefo
-         !write(0,*) 'sw_kgb21: max/min(rayl) =',maxval(rayl),minval(rayl)
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
+     &                     forrefo, sfluxrefo
+         write(0,*) 'sw_kgb21: max/min(kao) =',                        &
+     &               maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
-           mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
-
       end subroutine sw_kgb21
 
 ! **************************************************************************
       subroutine sw_kgb22(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg22, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            rayl, strrat, layreffr
+      use rrsw_kg22, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
+     &                      rayl, strrat, layreffr
 
 #ifdef MPI
        use mpi
@@ -12256,14 +12226,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
          integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12330,34 +12299,32 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo, &
-                           forrefo, sfluxrefo
-        ! write(0,*) 'sw_kgb22: max/min(rayl) =',maxval(rayl),minval(rayl)
+         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
+     &                     forrefo, sfluxrefo
+        write(0,*) 'sw_kgb22: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      !call MPI_BCAST(rayl,      size(rayl),     MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(strrat,    size(strrat),   MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo), MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
 
       end subroutine sw_kgb22
 
@@ -12365,8 +12332,8 @@ CONTAINS
       subroutine sw_kgb23(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg23, only : kao, selfrefo, forrefo, sfluxrefo, &
-                            raylo, givfac, layreffr
+      use rrsw_kg23, only : kao, selfrefo, forrefo, sfluxrefo,          &
+     &                      raylo, givfac, layreffr
 #ifdef MPI
       use mpi
 #endif
@@ -12375,14 +12342,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
       integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12437,29 +12403,29 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) raylo, givfac, layreffr, kao, selfrefo,      &
-                           forrefo, sfluxrefo
-         write(0,*) 'sw_kgb23: max/min(raylo) =',maxval(raylo),minval(raylo)
+     &                     forrefo, sfluxrefo
+         write(0,*) 'sw_kgb23: max/min(raylo) =',                       &
+     &               maxval(raylo),minval(raylo)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylo,      size(raylo),    MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(givfac,     size(givfac),   MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,   size(layreffr), MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(givfac,     1,   MPI_DOUBLE_PRECISION,  &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,   1, MPI_INTEGER,  &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),      MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,   size(selfrefo), MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),  MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo,  size(sfluxrefo),MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -12470,8 +12436,8 @@ CONTAINS
 ! **************************************************************************
 
       use rrsw_kg24, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
-                            raylao, raylbo, abso3ao, abso3bo, strrat,   &
-                            layreffr
+     &                      raylao, raylbo, abso3ao, abso3bo, strrat,   &
+     &                      layreffr
 #ifdef MPI
        use mpi
 #endif
@@ -12480,14 +12446,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12562,38 +12527,37 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
-
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) raylao, raylbo, strrat, layreffr, abso3ao,   &
-                           abso3bo, kao, kbo, selfrefo,                 &
-                           forrefo, sfluxrefo
-         write(0,*) 'sw_kgb24: max/min(raylao) =',maxval(raylao),minval(raylao)
+     &                     abso3bo, kao, kbo, selfrefo,                 &
+     &                     forrefo, sfluxrefo
+         write(0,*) 'sw_kgb24: max/min(raylao) =',                      &
+     &               maxval(raylao),minval(raylao)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylao,      size(raylao),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(raylbo,      size(raylbo),   MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(strrat,      size(strrat),   MPI_DOUBLE_PRECISION, &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,    size(layreffr), MPI_DOUBLE_PRECISION, &
-      !               mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,      1,   MPI_DOUBLE_PRECISION, &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,    1, MPI_INTEGER, &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3ao,     size(abso3ao),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3bo,     size(abso3bo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,         size(kao),      MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,         size(kbo),      MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,    size(selfrefo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,     size(forrefo),  MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo,   size(sfluxrefo),MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -12603,8 +12567,8 @@ CONTAINS
       subroutine sw_kgb25(rrtmg_unit,mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg25, only : kao, sfluxrefo, &
-                            raylo, abso3ao, abso3bo, layreffr
+      use rrsw_kg25, only : kao, sfluxrefo,                             &
+     &                      raylo, abso3ao, abso3bo, layreffr
 
 #ifdef MPI
        use mpi
@@ -12614,19 +12578,17 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot,mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
+
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
 
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
-
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
-
 !     Array raylo contains the Rayleigh extinction coefficient at all v = 2925 cm-1.
-
 !     Arrays abso3ao and abso3bo contain the ozone absorption coefficient at 
 !     all v for this band for the upper and lower atmosphere.
 
@@ -12664,25 +12626,25 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) raylo, layreffr, abso3ao, abso3bo, kao,      &
-                           sfluxrefo
-         write(0,*) 'sw_kgb25: max/min(raylo) =',maxval(raylo),minval(raylo)
+     &                     sfluxrefo
+         write(0,*) 'sw_kgb25: max/min(raylo) =',                       &
+     &               maxval(raylo),minval(raylo)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylo,     size(raylo),    MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr), MPI_DOUBLE_PRECISION,   &
-      !               mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3ao,   size(abso3ao),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3bo,   size(abso3bo),  MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
 #endif
@@ -12696,24 +12658,22 @@ CONTAINS
 
       use rrsw_kg26, only : sfluxrefo, raylo
 #ifdef MPI
-       use mpi
+      use mpi
 #endif
 
       implicit none
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
 
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
-
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
-
 !     Array raylo contains the Rayleigh extinction coefficient at all v for this band.
 
 #ifndef CCPP
@@ -12729,30 +12689,27 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
-
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) raylo, sfluxrefo
-         write(0,*) 'sw_kgb26: max/min(raylo) =',maxval(raylo),minval(raylo)
+         write(0,*) 'sw_kgb26: max/min(raylo) =',                       &
+     &               maxval(raylo),minval(raylo)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylo,      size(raylo),     MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo,  size(sfluxrefo), MPI_DOUBLE_PRECISION, &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
-
       end subroutine sw_kgb26
 
 ! **************************************************************************
       subroutine sw_kgb27(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg27, only : kao, kbo, sfluxrefo, raylo, &
-                            scalekur, layreffr
+      use rrsw_kg27, only : kao, kbo, sfluxrefo, raylo,                 &
+     &                       scalekur, layreffr
 #ifdef MPI
        use mpi
 #endif
@@ -12761,15 +12718,13 @@ CONTAINS
       save
 
 ! Input
-      integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      integer,              intent(in)  :: rrtmg_unit
+      integer,              intent(in)  :: mpirank
+      integer,              intent(in)  :: mpiroot
+      integer,              intent(in)  :: mpicomm
 #ifdef MPI
       integer :: mpierr
 #endif
-
-
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 !     The values in array sfluxrefo were obtained using the "low resolution"
@@ -12826,7 +12781,6 @@ CONTAINS
 9010 CONTINUE
      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error reading     &
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
-!     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) raylo, scalekur, layreffr, kao, kbo, sfluxrefo
@@ -12834,17 +12788,17 @@ CONTAINS
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylo,     size(raylo),     MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(scalekur,  size(scalekur),  MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(scalekur,  1,  MPI_DOUBLE_PRECISION,  &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,  &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 
@@ -12855,8 +12809,8 @@ CONTAINS
       subroutine sw_kgb28(rrtmg_unit, mpirank, mpiroot, mpicomm)
 ! **************************************************************************
 
-      use rrsw_kg28, only : kao, kbo, sfluxrefo, &
-                            rayl, strrat, layreffr
+      use rrsw_kg28, only : kao, kbo, sfluxrefo,                        &
+     &                      rayl, strrat, layreffr
 #ifdef MPI
        use mpi
 #endif
@@ -12867,12 +12821,9 @@ CONTAINS
 ! Input
       integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
 
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12933,22 +12884,20 @@ CONTAINS
          write(0,*) 'sw_kgb28: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      !call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(strrat,    size(strrat),    MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,      MPI_DOUBLE_PRECISION,  &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(strrat,    1,    MPI_DOUBLE_PRECISION,  &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,  &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
-
       end subroutine sw_kgb28
 
 ! **************************************************************************
@@ -12956,9 +12905,9 @@ CONTAINS
 ! **************************************************************************
 
       use rrsw_kg29, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
-                            absh2oo, absco2o, rayl, layreffr
+     &                      absh2oo, absco2o, rayl, layreffr
 #ifdef MPI
-       use mpi
+      use mpi
 #endif
 
       implicit none
@@ -12970,9 +12919,6 @@ CONTAINS
          integer :: mpierr
 #endif
 
-! Local                                    
-      character*80 errmess
-!mz      logical, external  :: wrf_dm_on_monitor
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -13049,28 +12995,28 @@ CONTAINS
 #else
       IF (mpirank == mpiroot) THEN
          read (rrtmg_unit) rayl, layreffr, absh2oo, absco2o, kao, kbo,  &
-                           selfrefo, forrefo, sfluxrefo
+     &                     selfrefo, forrefo, sfluxrefo
          write(0,*) 'sw_kgb29: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      !call MPI_BCAST(rayl,      size(rayl),      MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
-      !call MPI_BCAST(layreffr,  size(layreffr),  MPI_DOUBLE_PRECISION,  &
-      !               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(rayl,      1,      MPI_DOUBLE_PRECISION,  &
+     &               mpiroot, mpicomm, mpierr)
+      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,  &
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(absh2oo,   size(absh2oo),   MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(absco2o,   size(absco2o),   MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kbo,       size(kbo),       MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(selfrefo,  size(selfrefo),  MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,   size(forrefo),   MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION,  &
-                     mpiroot, mpicomm, mpierr)
+     &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
 

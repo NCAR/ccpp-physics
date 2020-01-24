@@ -13007,7 +13007,7 @@ CONTAINS
 
       !mz IF ( wrf_dm_on_monitor() ) THEN
       IF (MPIRANK == MPIROOT ) THEN
-        DO i = 10,999 !mz 99
+        DO i = 10,99
           rrtmg_unit = -1
           INQUIRE ( i , OPENED = opened )
           IF ( .NOT. opened ) THEN
@@ -13795,8 +13795,8 @@ CONTAINS
 !      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mo3,     &
-     &                     ccl4o, selfrefo, forrefo
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
+     &             kao_mo3,  ccl4o, selfrefo, forrefo
          write(0,*) 'lw_kgb05: max/min(ccl4o) =',                       &
      &               maxval(ccl4o),minval(ccl4o)
       ENDIF
@@ -13932,8 +13932,8 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, kao, kao_mco2, cfc11adjo, cfc12o, &
-     &                     selfrefo, forrefo
+         read (rrtmg_unit, err=9010) fracrefao, kao, kao_mco2,          &
+     &               cfc11adjo, cfc12o,  selfrefo, forrefo
          write(0,*) 'lw_kgb06: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
@@ -14085,8 +14085,8 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mco2,    &
-     &                     kbo_mco2, selfrefo, forrefo 
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
+     &      kao_mco2,  kbo_mco2, selfrefo, forrefo 
          write(0,*) 'lw_kgb07: max/min(kao_mco2) =',                    &
      &               maxval(kao_mco2),minval(kao_mco2)
       ENDIF
@@ -14255,8 +14255,8 @@ CONTAINS
 !      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mco2,    &
-     &                      kbo_mco2, kao_mn2o,                         &
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
+     &     kao_mco2,  kbo_mco2, kao_mn2o,                               &
      &    kbo_mn2o, kao_mo3, cfc12o, cfc22adjo, selfrefo, forrefo
          write(0,*) 'lw_kgb08: max/min(cfc12o) =',                      &
      &               maxval(cfc12o),minval(cfc12o)
@@ -14423,8 +14423,8 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mn2o,    &
-     &                     kbo_mn2o, selfrefo, forrefo
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
+     &   kao_mn2o,   kbo_mn2o, selfrefo, forrefo
          write(0,*) 'lw_kgb09: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
@@ -14556,8 +14556,8 @@ CONTAINS
 !      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, selfrefo,    &
-     &                     forrefo 
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
+     &  selfrefo,   forrefo 
          write(0,*) 'lw_kgb10: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
@@ -14699,8 +14699,8 @@ CONTAINS
 !      CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, kao_mo2,     &
-                           kbo_mo2, selfrefo, forrefo
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
+     &        kao_mo2, kbo_mo2, selfrefo, forrefo
          write(0,*) 'lw_kgb11: max/min(fracrefao) =',                   &
                      maxval(fracrefao),minval(fracrefao)
       ENDIF
@@ -14818,7 +14818,7 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, kao, selfrefo, forrefo
+         read (rrtmg_unit, err=9010) fracrefao, kao, selfrefo, forrefo
          write(0,*) 'lw_kgb12: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
@@ -14958,8 +14958,8 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kao_mco2, kao_mco,&
-     &                     kbo_mo3, selfrefo, forrefo
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao,         &
+     &  kao_mco2, kao_mco, kbo_mo3, selfrefo, forrefo
          write(0,*) 'lw_kgb13: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
@@ -15094,7 +15094,7 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo,              &
+         read (rrtmg_unit, err=9010) fracrefao, fracrefbo, kao, kbo,    &
      &                     selfrefo, forrefo
          write(0,*) 'lw_kgb14: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
@@ -15224,7 +15224,8 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, kao, kao_mn2, selfrefo, forrefo 
+         read (rrtmg_unit, err=9010) fracrefao, kao, kao_mn2, selfrefo, &
+     &           forrefo 
          write(0,*) 'lw_kgb15: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
@@ -15355,21 +15356,21 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo, selfrefo,    &
-     &                      forrefo
+         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo,              &
+     &     selfrefo,  forrefo
          write(0,*) 'lw_kgb16: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
-9010  continue                                    
+!9010  continue                                    
 !      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
 !                                 RRTMG_LW_DATA on unit ',rrtmg_unit    
-      errflg = 1                                                   
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb16 "  
+!      errflg = 1                                                   
+!      errmsg = " error reading RRTMG_LW_DATA in lw_kgb16 "  
                                             
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
+      ! After reading the tables, broadcast the information to all MPI tasks.
       ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-      if (errflg/=0) return             
+      !call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+      !if (errflg/=0) return             
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -15385,8 +15386,6 @@ CONTAINS
      &               mpiroot, mpicomm, mpierr)
 #endif
 #endif
-
-
       end subroutine lw_kgb16
 
 !===============================================================================
