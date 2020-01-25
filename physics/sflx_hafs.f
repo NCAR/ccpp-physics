@@ -284,6 +284,10 @@
 
       integer,               parameter :: nsold   = 4           !< max soil layers
 
+      integer                          :: defined_soil
+      integer                          :: defined_veg
+      integer                          :: defined_slope
+
 !     real (kind=kind_phys), parameter :: gs      = con_g       !< con_g   =9.80665
       real (kind=kind_phys), parameter :: gs1     = 9.8         !< con_g in sfcdif
       real (kind=kind_phys), parameter :: gs2     = 9.81        !< con_g in snowpack, frh2o
@@ -295,15 +299,15 @@
 !     real (kind=kind_phys), parameter :: rd      = con_rd      ! con_rd  =287.05
       real (kind=kind_phys), parameter :: rd1     = 287.04      ! con_rd in sflx, penman, canres
       real (kind=kind_phys), parameter :: cp      = con_cp      ! con_cp  =1004.6
-      real (kind=kind_phys), parameter :: cp1     = 1004.5      ! con_cp in sflx, canres
+      real (kind=kind_phys), parameter :: cp      = 1004.5      ! con_cp in sflx, canres
       real (kind=kind_phys), parameter :: cp2     = 1004.0      ! con_cp in htr
 !     real (kind=kind_phys), parameter :: cph2o   = con_cliq    ! con_cliq=4.1855e+3
-      real (kind=kind_phys), parameter :: cph2o1  = 4.218e+3    ! con_cliq in penman, snopac
+      real (kind=kind_phys), parameter :: cph2o   = 4.218e+3    ! con_cliq in penman, snopac
       real (kind=kind_phys), parameter :: cph2o2  = 4.2e6       ! con_cliq in hrt *unit diff!
       real (kind=kind_phys), parameter :: cpice   = con_csol    ! con_csol=2.106e+3
       real (kind=kind_phys), parameter :: cpice1  = 2.106e6     ! con_csol in hrt *unit diff!
 !     real (kind=kind_phys), parameter :: sigma   = con_sbc     ! con_sbc=5.6704e-8
-      real (kind=kind_phys), parameter :: sigma1  = 5.67e-8     ! con_sbc in penman, nopac, snopac
+      real (kind=kind_phys), parameter :: sigma   = 5.67e-8     ! con_sbc in penman, nopac, snopac
 
 !  ---  inputs:
       integer, intent(in) :: nsoil, couple, icein, vegtyp, soiltyp,     &
@@ -365,6 +369,14 @@
       runoff3 = 0.0
       snomlt  = 0.0
 
+      if ( .not. ua_phys ) then
+          flx4 = 0.0
+          fvb  = 0.0
+          fbur = 0.0
+          fgsn = 0.0
+      endif
+
+
 !  --- ...  define local variable ice to achieve:
 !             sea-ice case,          ice =  1
 !             non-glacial land,      ice =  0
@@ -373,39 +385,7 @@
 !    note - for open-sea, sflx should *not* have been called. set green
 !           vegetation fraction (shdfac) = 0.
 
-!> - Set ice = -1 and green vegetation fraction (shdfac) = 0 for glacial-ice land.
-      shdfac0 = shdfac
-      ice = icein
-
-      if(ivegsrc == 2) then
-       if (vegtyp == 13) then
-        ice = -1
-        shdfac = 0.0
-       endif
-      endif
-
-      if(ivegsrc == 1) then
-       if (vegtyp == 15) then
-        ice = -1
-        shdfac = 0.0
-       endif
-      endif
-
-!> - Calculate soil layer depth below ground.
-      if (ice == 1) then
-
-        shdfac = 0.0
-
-!>  - For ice, set green vegetation fraction (shdfac) = 0.
-!! and set sea-ice layers of equal thickness and sum to 3 meters
-
-        do kz = 1, nsoil
-          zsoil(kz) = -3.0 * float(kz) / float(nsoil)
-        enddo
-
-      else
-
-!>  - Otherwise, calculate depth (negative) below ground from top skin sfc to 
+!>  - Calculate depth (negative) below ground from top skin sfc to 
 !! bottom of each soil layer.
 !    note - sign of zsoil is negative (denoting below ground)
 
@@ -414,8 +394,6 @@
           zsoil(kz) = -sldpth(kz) + zsoil(kz-1)
         end do
 
-      endif   ! end if_ice_block
-
 !  --- ...  next is crucial call to set the land-surface parameters,
 !           including soil-type and veg-type dependent parameters.
 !           set shdfac=0.0 for bare soil surfaces
@@ -423,28 +401,33 @@
 !> - Call redprm() to set the land-surface paramters,
 !! including soil-type and veg-type dependent parameters.
       call redprm
+!...................................
+!  ---  inputs:
+     &     ( nsoil, vegtyp, soiltyp, slopetyp, sldpth, zsoil,           &
+!  ---  outputs
+     &       cfactr, cmcmax, rsmin, rsmax, topt, refkdt, kdt,           &
+     &       sbeta, shdfac, rgl, hs, zbot, frzx, psisat, slope,         &
+     &       snup, salp, bexp, dksat, dwsat, smcmax, smcwlt,            &
+     &       smcref, smcdry, f1, quartz, fxexp, rtdis, nroot,           &
+     &       czil, xlai, csoil, lvcoef, laimin, laimax,                 &
+     &       emissmin, emissmax, albedomin, albedomax, z0min, z0max,    &
+     &       ztopv, zbotv 
+     &     )
+
 !        if(ivegsrc == 1) then
 !only igbp type has urban
 !urban
 !MKB vegtyp=isurban in HWRF, need to check whether 13/31 and isurban are
 !same
          if(vegtyp == 13)then
-!MKB All these parms below are uncommented in hwrf
              shdfac=0.05
              rsmin=400.0
              smcmax = 0.45
              smcref = 0.42
              smcwlt = 0.40
              smcdry = 0.40
-!MKB End of mods
-!MKB Commented below
-!              rsmin=400.0*(1-shdfac0)+40.0*shdfac0   ! gvf
-!              shdfac=shdfac0                         ! gvf
-!              smcmax = 0.45*(1-shdfac0)+smcmax*shdfac0
-!              smcref = 0.42*(1-shdfac0)+smcref*shdfac0
-!              smcwlt = 0.40*(1-shdfac0)+smcwlt*shdfac0
-!              smcdry = 0.40*(1-shdfac0)+smcdry*shdfac0
-!MKB
+          endif
+
          if(shdfac >= shdmax )then
             embrd = emissmax
             if (.not. rdlai2d)then
@@ -473,17 +456,17 @@
                interp_fraction = max ( interp_fraction, 0.0 )
                ! Scale Emissivity and LAI between emissmin and emissmax
                ! by interp_fraction
-               embrd = ( ( 1.0 - interp_fraction ) * emissmin ) +            &
+               embrd = ( ( 1.0 - interp_fraction ) * emissmin ) +       &
      &           ( interp_fraction * emissmax )
                if (.not. rdlai2d)then
-                 xlai  = ( ( 1.0 - interp_fraction ) * laimin ) +            &
+                 xlai  = ( ( 1.0 - interp_fraction ) * laimin ) +       &
      &            ( interp_fraction * laimax )
                endif
                if (.not. usemonalb)then
-                  alb   = ( ( 1.0 - interp_fraction ) * albedomax ) +        &
+                  alb   = ( ( 1.0 - interp_fraction ) * albedomax ) +   &
      &             ( interp_fraction * albedomin )
                endif
-                  z0brd = ( ( 1.0 - interp_fraction ) * z0min ) +            &
+                  z0brd = ( ( 1.0 - interp_fraction ) * z0min ) +       &
      &             ( interp_fraction * z0max )
 
             else
@@ -501,17 +484,7 @@
 
          endif
 
-         endif
-!        endif
 
-!  ---  inputs:                                                            !
-!          ( nsoil, vegtyp, soiltyp, slopetyp, sldpth, zsoil,              !
-!  ---  outputs:                                                           !
-!            cfactr, cmcmax, rsmin, rsmax, topt, refkdt, kdt,              !
-!            sbeta, shdfac, rgl, hs, zbot, frzx, psisat, slope,            !
-!            snup, salp, bexp, dksat, dwsat, smcmax, smcwlt,               !
-!            smcref, smcdry, f1, quartz, fxexp, rtdis, nroot,              !
-!            z0, czil, xlai, csoil )                                       !
 
 !> - Initialize precipitation logicals.
 
@@ -532,14 +505,19 @@
          else
           sndens = sneqv / snowh
            if(sndens > 1.0) then
+!MKB What is equiv of fatal_error in FV3?
              fatal_error( 'physical snow depth is less than snow water       &
      &        equiv.' )
+!           stop 333
             endif
+
          call csnow
-!  ---  inputs:                                                         !
-!          ( sndens,                                                    !
-!            sncond )                                                   !
-!  ---  outputs:                                                        !
+!  ---  inputs:
+     &     ( sndens,                                                    &
+!  ---  outputs:
+     &       sncond                                                     &
+     &     )
+
         endif
 
 
@@ -554,7 +532,7 @@
 !> snow defined when fraction of frozen precip (ffrozp) > 0.5,
 ! passed in from model microphysics.
 
-        if (ffrozp > 0.5) then !MKB
+        if (ffrozp > 0.5) then
           snowng = .true.
         else
           if (t1 <= tfreez) frzgra = .true.
@@ -577,17 +555,21 @@
 !>  - Call snow_new() to update snow density based on new snowfall,
 !! using old and new snow.
         call snow_new
-!  ---  inputs:                                                         !
-!          ( sfctmp, sn_new,                                            !
-!  ---  input/outputs:                                                  !
-!            snowh, sndens )                                            !
+!...................................
+!  ---  inputs:
+     &     ( sfctmp, sn_new,                                            &
+!  ---  input/outputs:
+     &       snowh, sndens                                              &
+     &     )
 
 !>  - Call csnow() to update snow thermal conductivity.
-        call csnow
-!  ---  inputs:                                                         !
-!          ( sndens,                                                    !
-!  ---  outputs:                                                        !
-!            sncond )                                                   !
+         call csnow
+!...................................
+!  ---  inputs:
+     &     ( sndens,                                                    &
+!  ---  outputs:
+     &       sncond                                                     &
+     &     )
 
       else
 
@@ -615,23 +597,24 @@
 !  --- ...  determine snow fraction cover.
 !           determine surface albedo modification due to snowdepth state.
 !>  - Call snfrac() to calculate snow fraction cover.
-          call snfrac
-!  ---  inputs:                                                         !
-!          ( sneqv, snup, salp, snowh,                                  !
-!  ---  outputs:                                                        !
-!            sncovr )                                                   !
-          call snfrac (sneqv,snup,salp,snowh,sncovr,                    &
-                         xlai,shdfac,fvb,gama,fbur,                     &
-                         fgsn,ztopv,zbotv,ua_phys)
+
+          call snfrac                                                   &
+!...................................
+!  ---  inputs:
+     &     ( sneqv, snup, salp, snowh,                                  &
+     &       ztopv, zbotv, shdfac, xlai, shdfac, ua_phys                &
+!  ---  outputs:
+     &       sncovr, fvb, gama, fbur, fgsn                              &
+     &     )
 
             if ( ua_phys ) then
               if(sfctmp <= t1) then
-                ru = 0.
+                ru = 0.0
               else
-                ru = 100.*shdfac*fgsn*min((sfctmp-t1)/5., 1.)                &
+                ru = 100.0*shdfac*fgsn*min((sfctmp-t1)/5.0, 1.0)        &
      &            *(1.-exp(-xlai))
               endif
-              ch = ch/(1.+ru*ch)
+              ch = ch/(1.0+ru*ch)
             endif
 
             sncovr = min(sncovr,0.98)
@@ -639,25 +622,16 @@
 
 !>  - Call alcalc() to calculate surface albedo modification due to snowdepth
 !! state.
-          call alcalc
-!  ---  inputs:                                                         !
-!          ( alb, snoalb, shdfac, shdmin, sncovr, tsnow,                !
-!  ---  outputs:                                                        !
-!            albedo )                                                   !
+          call  alcalc                                                 &
+!...................................
+!  ---  inputs:
+     &     ( alb, snoalb, shdfac, shdmin, sncovr, tsnow,embrd,dt,lvcoef &
+!  ---  outputs:
+     &       albedo, sfcems, snotime1                                   &
+     &     )
 
         endif   ! end if_sneqv_block
 
-      endif   ! end if_ice_block
-
-!  --- ...  thermal conductivity for sea-ice case, glacial-ice case
-!> - Calculate thermal diffusivity (\a df1):
-!>  - For sea-ice case and glacial-ice case, this is constant(\f$df1=2.2\f$).
-
-      if (ice /= 0) then
-
-        df1 = 2.2
-
-      else
 !>  - For non-glacial land case, call tdfcnd() to calculate the thermal
 !! diffusivity of top soil layer (\cite peters-lidard_et_al_1998).
 
@@ -681,29 +655,26 @@
 
         call tdfcnd                                                     &
 !  ---  inputs:
-     &     ( smc(1), quartz, smcmax, sh2o(1),                           &
+     &     ( smc(1), qz, smcmax, sh2o(1), bexp, psisat, soiltyp,        &
+     &       opt_thcnd,                                                 &
 !  ---  outputs:
      &       df1                                                        &
      &     )
-!       if(ivegsrc == 1) then
-!only igbp type has urban
+
 !urban
-!           if ( vegtyp == 13 ) df1=3.24
-!       endif
+           if ( vegtyp == 13 ) df1=3.24
 
 !>   - Add subsurface heat flux reduction effect from the
 !!  overlying green canopy, adapted from section 2.1.2 of
 !!  \cite peters-lidard_et_al_1997.
 !wz only urban for igbp type
-        if(ivegsrc == 1 .and. vegtyp == 13) then
-          df1 = 3.24*(1.-shdfac) + shdfac*df1*exp(sbeta*shdfac)
-        else
           df1 = df1 * exp( sbeta*shdfac )
-        endif
 
-      endif   ! end if_ice_block
+            if (  sncovr .gt. 0.97 ) then
+               df1 = sncond
+            endif
 
-!  --- ...  finally "plane parallel" snowpack effect following
+!> --- ...  finally "plane parallel" snowpack effect following
 !           v.j. linardini reference cited above. note that dtot is
 !           combined depth of snowdepth and thickness of first soil layer
 
@@ -722,7 +693,7 @@
 !  --- ...  1. harmonic mean (series flow)
 
 !       df1  = (sncond*df1) / (frcsoi*sncond + frcsno*df1)
-!       df1h = (sncond*df1) / (frcsoi*sncond + frcsno*df1)
+        df1h = (sncond*df1) / (frcsoi*sncond + frcsno*df1)
 
 !  --- ...  2. arithmetic mean (parallel flow)
 
@@ -750,14 +721,29 @@
 !     if (couple == 0) then            ! uncoupled mode
         if (sncovr > 0.0) then
 
-          call snowz0
-!  ---  inputs:                                                         !
-!          ( sncovr,                                                    !
-!  ---  input/outputs:                                                  !
-!            z0 )                                                       !
+          call snowz0                                                   &
+!...................................
+!  ---  inputs:
+     &     ( sncovr,z0brd,snowh,fbur,fgsn,shdmax,ua_phys,               &
+!  ---  input/outputs:
+     &       z0                                                         &
+     &     )
+
+         else
+
+            z0=z0brd
+
+         if(ua_phys)  
+
+          call snowz0                                                   &
+!...................................
+!  ---  inputs:
+     &     ( sncovr,z0brd,snowh,fbur,fgsn,shdmax,ua_phys,               &
+!  ---  input/outputs:
+     &       z0                                                         &
+     &     )
 
         endif
-!     endif
 
 !> - Calculate virtual temps and virtual potential temps needed by
 !!           subroutines sfcdif and penman.
@@ -794,74 +780,56 @@
 !!  downward longwave (\a lwdn) as input of penman() and other surface
 !! energy budget calculations.
 
-      if (couple == 0) then                      !......uncoupled mode
-
-!  --- ...  uncoupled mode:
-!           compute surface exchange coefficients
-
-        t1v  = t1  * (1.0 + 0.61 * q2)
-        th2v = th2 * (1.0 + 0.61 * q2)
-
-        call sfcdif
-!  ---  inputs:                                                         !
-!          ( zlvl, z0, t1v, th2v, sfcspd, czil,                         !
-!  ---  input/outputs:                                                  !
-!            cm, ch )                                                   !
-
 !     swnet = net solar radiation into the ground (w/m2; dn-up) from input
 !     fdown  = net solar + downward lw flux at sfc (w/m2)
 
         fdown = swnet + lwdn
 
-      else                                       !......coupled mode
 
-!  --- ...  coupled mode (couple .ne. 0):
-!           surface exchange coefficients computed externally and passed in,
-!           hence subroutine sfcdif not called.
+! calc virtual temps and virtual potential temps needed by subroutines
+! penman.
+         t2v = sfctmp * (1.0+ 0.61 * q2 )
 
-!     swnet = net solar radiation into the ground (w/m2; dn-up) from input
-!     fdown  = net solar + downward lw flux at sfc (w/m2)
-
-        fdown = swnet + lwdn
-
-      endif   ! end if_couple_block
-!
-!  ---  enhance cp as a function of z0 to mimic heat storage
-!
-      cpx   = cp
-      cpx1  = cp1
-      cpfac = 1.0
-      if (lheatstrg) then
-        if ((ivegsrc == 1 .and. vegtyp /= 13)
-     &                    .or.  ivegsrc == 2) then
-          xx1   = (z0 - z0min) / (z0max - z0min)
-          xx2   = 1.0 + min(max(xx1, 0.0), 1.0)
-          cpx   = cp  * xx2
-          cpx1  = cp1 * xx2
-          cpfac = cp / cpx
-        endif
-      endif
+!        iout=0
+!        if(iout.eq.1) then
+!         print*,'before penman'
+!         print*,' sfctmp',sfctmp,'sfcprs',sfcprs,'ch',ch,'t2v',t2v, &
+!          'th2',th2,'prcp',prcp,'fdown',fdown,'t24',t24,'ssoil',ssoil, &
+!          'q2',q2,'q2sat',q2sat,'etp',etp,'rch',rch,                   &
+!          'epsca',epsca,'rr',rr  ,'snowng',snowng,'frzgra',frzgra,     &
+!          'dqsdt2',dqsdt2,'flx2',flx2,'snowh',snowh,'sneqv',sneqv,     &
+!          'dsoil',dsoil,' frcsno',frcsno,' sncovr',sncovr,' dtot',dtot,&
+!          'zsoil (1)',zsoil(1),' df1',df1,'t1',t1,' stc1',stc(1),      &
+!          'albedo',albedo,'smc',smc,'stc',stc,'sh2o',sh2o
+!        endif
 
 !> - Call penman() to calculate potential evaporation (\a etp),
 !! and other partial products and sums for later
 !! calculations.
 
       call penman
-!  ---  inputs:                                                         !
-!          ( sfctmp, sfcprs, sfcems, ch, t2v, th2, prcp, fdown,         !
-!            cpx, cpfac, ssoil, q2, q2sat, dqsdt2, snowng, frzgra,      !
-!  ---  outputs:                                                        !
-!            t24, etp, rch, epsca, rr, flx2 )                           !
+!...................................
+!  ---  inputs:
+     &     ( sfctmp, sfcprs, sfcems, ch, t2v, th2, prcp, fdown,         &
+     &       cpx, cpfac, ssoil, q2, q2sat, dqsdt2, snowng, frzgra,      &
+     &       sncovr, sneqv, albedo, soldn, stc1,                        &
+!  ---  outputs:
+     &       t24, etp, rch, epsca, rr, flx2, etpn, flx4                 &
+     &     )
 
 !> - Call canres() to calculate the canopy resistance and convert it
 !! into pc if nonzero greenness fraction.
 
-      if (shdfac > 0.) then
+      if ((shdfac > 0.0) .and. (xlai > 0.0)) then
 
 !  --- ...  frozen ground extension: total soil water "smc" was replaced
 !           by unfrozen soil water "sh2o" in call to canres below
 
-        call canres
+!MKB format
+        call     canres (swdn,ch,sfctmp,q2,sfcprs,smc,zsoil,nsoil,      &
+                         smcwlt,smcref,rsmin,rc,pc,nroot,q2sat,dqsdt2,  &
+                         topt,rsmax,rgl,hs,xlai,                        &
+                         rcs,rct,rcq,rcsoil,sfcems)
 !  ---  inputs:                                                         !
 !          ( nsoil, nroot, swdn, ch, q2, q2sat, dqsdt2, sfctmp,         !
 !            cpx1, sfcprs, sfcems, sh2o, smcwlt, smcref, zsoil, rsmin,  !
@@ -869,6 +837,8 @@
 !  ---  outputs:                                                        !
 !            rc, pc, rcs, rct, rcq, rcsoil )                            !
 
+         else
+            rc = 0.0
       endif
 
 !> - Now decide major pathway branch to take depending on whether
@@ -881,17 +851,24 @@
 !! and heat flux values and update soil moisture contant and soil heat
 !! content values.
         call nopac
-!  ---  inputs:                                                         !
-!          ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref,           !
-!            smcdry, cmcmax, dt, shdfac, sbeta, sfctmp, sfcems,         !
-!            t24, th2, fdown, epsca, bexp, pc, rch, rr, cfactr,         !
-!            slope, kdt, frzx, psisat, zsoil, dksat, dwsat,             !
-!            zbot, ice, rtdis, quartz, fxexp, csoil,                    !
-!  ---  input/outputs:                                                  !
-!            cmc, t1, stc, sh2o, tbot,                                  !
-!  ---  outputs:                                                        !
-!            eta, smc, ssoil, runoff1, runoff2, runoff3, edir,          !
-!            ec, et, ett, beta, drip, dew, flx1, flx3 )                 !
+!...................................
+!  ---  inputs:
+     &     ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref,           &
+     &       smcdry, cmcmax, dt, shdfac, sbeta, sfctmp, sfcems,         &
+     &       t24, th2, fdown, epsca, bexp, pc, rch, rr, cfactr,         &
+     &       slope, kdt, frzx, psisat, zsoil, dksat, dwsat,             &
+     &       zbot, rtdis, quartz, fxexp, csoil,                         &
+     &       opt_thcnd,                                                 &
+!  ---  input for fasdas (FDDA) (Not used for HAFS):
+     &       qfx_phy, hcpct_fasdas, xsda_qfx, qfx_phy, xqnorm, fasdas,  &
+!  ---  input/outputs:
+     &       cmc, t1, stc, sh2o, tbot,                                  &
+     &       sfhead1rt, infxs1rt, rtpnd1,                               &
+!  ---  outputs:
+     &       eta, smc, ssoil, runoff1, runoff2, runoff3, edir,          &
+     &       ec, et, ett, beta, drip, dew, flx1, flx3,                  &
+     &       hcpct_fasdas                                               &
+     &     )
 
       else
 
@@ -998,15 +975,13 @@
 !-----------------------------------
 !>\ingroup Noah_LSM
 !> This subroutine calculates albedo including snow effect (0 -> 1).
-      subroutine alcalc (alb, snoalb, embrd, shdfac, shdmin, sncovr,    &
-     &                   tsnow, albedo, sfcems, dt, snowng, snotime1,   &
-     &                   lvcoef)
+      subroutine alcalc                                                 &
 !...................................
 !  ---  inputs:
-!    &     ( alb, snoalb, shdfac, shdmin, sncovr, tsnow,                &
+     &     ( alb, snoalb, shdfac, shdmin, sncovr, tsnow,embrd,dt,lvcoef &
 !  ---  outputs:
-!    &       albedo                                                     &
-!    &     )
+     &       albedo, sfcems, snotime1                                   &
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -1028,6 +1003,7 @@
 !                                                                       !
 !  outputs to calling program:                                          !
 !     albedo   - real, surface albedo including snow effect        1    !
+!     sfcems   - real, sfc LW emissivity (fractional)              1    !
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
@@ -1036,7 +1012,10 @@
       real (kind=kind_phys), intent(in)  :: alb, snoalb, embrd, shdfac, &
      &       shdmin, sncovr, tsnow, dt, lvcoef
 
+      logical (kind=kind_phys), intent(in) :: snowng
+
       real (kind=kind_phys), intent(out) :: snotime1
+
 
 !  ---  outputs:
       real (kind=kind_phys), intent(out) :: albedo, sfcems
@@ -1058,7 +1037,7 @@
 
 !         albedo = alb + (1.0-(shdfac-shdmin))*sncovr*(snoalb-alb)
           albedo = alb + sncovr * (snoalb - alb)
-          emissi = embrd + sncovr * (emissi_s - embrd)
+          sfcems = embrd + sncovr * (emissi_s - embrd)
 
 
 ! --- base formulation (dickinson et al., 1986, cogley et al., 1990)
@@ -1119,9 +1098,9 @@
           if (snowng) then
              snotime1 = 0.
           else
-           snotime1=snotime1+dt
+             snotime1=snotime1+dt
 !               if (tsnow.lt.273.16) then
-                   snoalb2=snoalb1*(snacca**((snotime1/86400.0)**snaccb))
+             snoalb2=snoalb1*(snacca**((snotime1/86400.0)**snaccb))
 !               else
 !                  snoalb2
 !                  =snoalb1*(snthwa**((snotime1/86400.0)**snthwb))
@@ -1156,7 +1135,7 @@
       subroutine canres (swdn,ch,sfctmp,q2,sfcprs,smc,zsoil,nsoil,      &
                          smcwlt,smcref,rsmin,rc,pc,nroot,q2sat,dqsdt2,  &
                          topt,rsmax,rgl,hs,xlai,                        &
-                         rcs,rct,rcq,rcsoil,emissi)
+                         rcs,rct,rcq,rcsoil,sfcems)
 
 !  ---  inputs:
 !    &     ( nsoil, nroot, swdn, ch, q2, q2sat, dqsdt2, sfctmp,         &
@@ -1301,7 +1280,7 @@
 !           evaporation (containing rc term).
 
       rc = rsmin / (xlai*rcs*rct*rcq*rcsoil)
-      rr = (4.0*sfcems*sigma1*rd1/cpx1) * (sfctmp**4.0)/(sfcprs*ch) + 1.0
+      rr = (4.0*sfcems*sigma*rd1/cpx1) * (sfctmp**4.0)/(sfcprs*ch) + 1.0
       delta = (lsubc/cpx1) * dqsdt2
 
       pc = (rr + delta) / (rr*(1.0 + rc*ch) + delta)
@@ -1315,18 +1294,18 @@
 !-----------------------------------
 !>\ingroup Noah_LSM
 !> This subroutine calculates snow termal conductivity
-      subroutine csnow (sndens, sncond)
+      subroutine csnow
 !...................................
 !  ---  inputs:
-!    &     ( sndens,                                                    &
+     &     ( sndens,                                                    &
 !  ---  outputs:
-!    &       sncond                                                     &
-!    &     )
-
+     &       sncond                                                     &
+     &     )
+ 
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
-!  subroutine csnow calculates snow termal conductivity                 !
+!  subroutine csnow calculates snow thermal conductivity                 !
 !                                                                       !
 !  subprogram called:  none                                             !
 !                                                                       !
@@ -1336,10 +1315,11 @@
 !     sndens   - real, snow density                                1    !
 !                                                                       !
 !  outputs to the calling program:                                      !
-!     sncond   - real, snow termal conductivity                    1    !
+!     sncond   - real, snow thermal conductivity                   1    !
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  constant parameters:
       real (kind=kind_phys), parameter :: unit = 0.11631
 
@@ -1383,17 +1363,22 @@
       subroutine nopac
 !...................................
 !  ---  inputs:
-!    &     ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref,           &
-!    &       smcdry, cmcmax, dt, shdfac, sbeta, sfctmp, sfcems,         &
-!    &       t24, th2, fdown, epsca, bexp, pc, rch, rr, cfactr,         &
-!    &       slope, kdt, frzx, psisat, zsoil, dksat, dwsat,             &
-!    &       zbot, ice, rtdis, quartz, fxexp, csoil,                    &
+     &     ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref,           &
+     &       smcdry, cmcmax, dt, shdfac, sbeta, sfctmp, sfcems,         &
+     &       t24, th2, fdown, epsca, bexp, pc, rch, rr, cfactr,         &
+     &       slope, kdt, frzx, psisat, zsoil, dksat, dwsat,             &
+     &       zbot, rtdis, quartz, fxexp, csoil,                         &
+     &       opt_thcnd,                                                 &
+!  ---  input for fasdas (FDDA) (Not used for HAFS):
+     &       qfx_phy, hcpct_fasdas, xsda_qfx, qfx_phy, xqnorm, fasdas,  &
 !  ---  input/outputs:
-!    &       cmc, t1, stc, sh2o, tbot,                                  &
+     &       cmc, t1, stc, sh2o, tbot,                                  &
+     &       sfhead1rt, infxs1rt, rtpnd1,                               &
 !  ---  outputs:
-!    &       eta, smc, ssoil, runoff1, runoff2, runoff3, edir,          &
-!    &       ec, et, ett, beta, drip, dew, flx1, flx3                   &
-!    &     )
+     &       eta, smc, ssoil, runoff1, runoff2, runoff3, edir,          &
+     &       ec, et, ett, beta, drip, dew, flx1, flx3,                  &
+     &       hcpct_fasdas                                               &
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -1471,30 +1456,41 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  inputs:
-!     integer, intent(in) :: nsoil, nroot, ice
+      integer, intent(in) :: nsoil, nroot
+      integer, intent(in) :: opt_thcnd
 
-!     real (kind=kind_phys), intent(in) :: etp, prcp, smcmax,           &
-!    &       smcwlt, smcref, smcdry, cmcmax, dt, shdfac, sbeta,         &
-!    &       sfctmp, sfcems, t24, th2, fdown, epsca, bexp, pc,          &
-!    &       rch, rr, cfactr, slope, kdt, frzx, psisat,                 &
-!    &       zsoil(nsoil), dksat, dwsat, zbot, rtdis(nsoil),            &
-!    &       quartz, fxexp, csoil
+      real (kind=kind_phys), intent(in) :: etp, prcp, smcmax,           &
+     &       smcwlt, smcref, smcdry, cmcmax, dt, shdfac, sbeta,         &
+     &       sfctmp, sfcems, t24, th2, fdown, epsca, bexp, pc,          &
+     &       rch, rr, cfactr, slope, kdt, frzx, psisat,                 &
+     &       dksat, dwsat, zbot, quartz, fxexp, csoil
+
+      real (kind=kind_phys), dimension(nsoil), intent(in) :: zsoil,rtdis
 
 !  ---  input/outputs:
-!     real (kind=kind_phys), intent(inout) :: cmc, t1, stc(nsoil),      &
-!    &       sh2o(nsoil), tbot
+      real (kind=kind_phys), intent(inout) :: cmc, t1, tbot     
+      real (kind=kind_phys), dimension(nsoil), intent(inout) :: stc,sh2o 
 
 !  ---  outputs:
-!     real (kind=kind_phys), intent(out) :: eta, smc(nsoil), ssoil,     &
-!    &       runoff1, runoff2, runoff3, edir, ec, et(nsoil), ett,       &
-!    &       beta, drip, dew, flx1, flx3
+      real (kind=kind_phys), intent(out) :: eta, smc(nsoil), ssoil,     &
+     &       runoff1, runoff2, runoff3, edir, ec, et(nsoil), ett,       &
+     &       beta, drip, dew, flx1, flx3
+
+!  --- ... fasdas
+      real (kind=kind_phys), intent(out) :: hcpct_fasdas
 
 !  ---  locals:
       real (kind=kind_phys) :: df1, eta1, etp1, prcp1, yy, yynum,       &
      &       zz1, ec1, edir1, et1(nsoil), ett1
 
       integer :: k
+
+!  --- ... fasdas
+      real (kind=kind_phys), dimension(nsoil) :: eft, wetty
+      real (kind=kind_phys) :: qfx_phy, xsda_qfx, xqnorm
+      integer :: fasdas
 
 !
 !===> ...  begin here
@@ -1509,13 +1505,31 @@
       ec   = 0.0
       ec1  = 0.0
 
+
+! fasdas
+!
+      qfx_phy = 0.0
+! end fasdas
+
       do k = 1, nsoil
         et (k) = 0.0
         et1(k) = 0.0
+
+!
+! fasdas
+!
+        wetty(k) = 1.0
+!
+! end fasdas
+!
+
       enddo
 
       ett  = 0.0
       ett1 = 0.0
+
+!djg ndhms/wrf-hydro edit...
+      etpnd1 = 0.0
 
       if (etp > 0.0) then
 
@@ -1530,6 +1544,49 @@
      &       eta1, edir1, ec1, et1, ett1                                &
      &     )
 
+
+!
+! fasdas
+!
+      if( fasdas == 1 ) then
+        do k=1,nsoil
+        qfx_phy = qfx_phy + et1(k)   ! m/s
+! dont add moisture fluxes if soil moisture is = or > smcref
+        if(smc(k).ge.smcref.and.xsda_qfx.gt.0.0) wetty(k)=0.0
+        end do
+       qfx_phy = edir1+ec1+qfx_phy    ! m/s
+       eall_now = qfx_phy           ! m/s
+       qfx_phy = qfx_phy*1000.0     ! kg/m2/s
+
+       if(eall_now.ne.0.0) then
+       efdir = (edir1/eall_now)*xsda_qfx*1.0e-03*xqnorm
+       efdir = efdir * wetty(1)
+          !twg2015 bugfix flip sign to conform to net upward flux
+           edir1 = edir1 + efdir    ! new value
+
+       efc = (ec1/eall_now)*xsda_qfx*1.0e-03*xqnorm
+       !twg2015 bugfix flip sign to conform to net upward flux
+       ec1 = ec1 + efc         ! new value
+
+
+       do k=1,nsoil
+        eft(k) = (et1(k)/eall_now)*xsda_qfx*1.0e-03*xqnorm
+        eft(k) =  eft(k) * wetty(k)
+        !twg2015 bugfix flip sign to conform to net upward flux
+        et1(k) = et1(k) + eft(k) ! new value
+       end do
+
+
+       end if ! for non-zero eall_now
+      else
+        qfx_phy = 0.0
+      endif
+!
+! end fasdas
+!
+
+
+
         call smflx                                                      &
 !  ---  inputs:
      &     ( nsoil, dt, kdt, smcmax, smcwlt, cmcmax, prcp1,             &
@@ -1541,17 +1598,61 @@
      &       smc, runoff1, runoff2, runoff3, drip                       &
      &     )
 
+! ----------------------------------------------------------------------
+! convert modeled evapotranspiration from  m s-1  to  kg m-2 s-1.
+! ----------------------------------------------------------------------
+
+         eta = eta1 * 1000.0
+
+! ----------------------------------------------------------------------
+! if etp < 0, assume dew forms (transform etp1 into dew and reinitialize
+! etp1 to zero).
+! ----------------------------------------------------------------------
       else
-
-!  --- ...  if etp < 0, assume dew forms (transform etp1 into dew and
-!           reinitialize etp1 to zero).
-
-        eta1 = 0.0
-        dew  = -etp1
+         dew = - etp1
 
 !  --- ...  convert prcp from 'kg m-2 s-1' to 'm s-1' and add dew amount.
 
         prcp1 = prcp1 + dew
+
+!
+! fasdas
+!
+     if( fasdas == 1 ) then
+       do k=1,nsoil
+        qfx_phy = qfx_phy + et1(k)   ! m/s
+! dont add moisture fluxes if soil moisture is = or > smcref
+        if(smc(k).ge.smcref.and.xsda_qfx.gt.0.0) wetty(k)=0.0
+       end do
+       qfx_phy = edir1+ec1+qfx_phy    ! m/s
+        eall_now = qfx_phy     ! m/s
+       qfx_phy = qfx_phy*1000.0    ! kg/m2/s
+
+       if(eall_now.ne.0.0) then
+       efdir = (edir1/eall_now)*xsda_qfx*1.0e-03*xqnorm
+        efdir =  efdir * wetty(1)
+          !twg2015 bugfix flip sign to conform to net upward flux
+           edir1 = edir1 + efdir    ! new value
+
+        efc = (ec1/eall_now)*xsda_qfx*1.0e-03*xqnorm
+        !twg2015 bugfix flip sign to conform to net upward flux
+        ec1 = ec1+ efc         ! new value
+
+       do k=1,nsoil
+        eft(k) = (et1(k)/eall_now)*xsda_qfx*1.0e-03*xqnorm
+        eft(k) = eft(k) * wetty(k)
+        !twg2015 bugfix flip sign to conform to net upward flux
+        et1(k) = et1(k) + eft(k)   ! new value
+       end do
+
+        end if ! for non-zero eall_now
+      else
+        qfx_phy = 0.0
+      endif
+!
+! end fasdas
+!
+
 
         call smflx                                                      &
 !  ---  inputs:
@@ -1566,9 +1667,21 @@
 
       endif   ! end if_etp_block
 
+!  --- ...  based on etp and e values, determine beta
+
+      if ( etp <= 0.0 ) then
+        beta = 0.0
+        eta = etp
+        if ( etp < 0.0 ) then
+          beta = 1.0
+        endif
+      else
+        beta = eta / etp
+      endif
+
 !  --- ...  convert modeled evapotranspiration fm  m s-1  to  kg m-2 s-1
 
-      eta  = eta1 * 1000.0
+!      eta  = eta1 * 1000.0
       edir = edir1 * 1000.0
       ec   = ec1 * 1000.0
 
@@ -1577,17 +1690,6 @@
       enddo
 
       ett = ett1 * 1000.0
-
-!  --- ...  based on etp and e values, determine beta
-
-      if ( etp <= 0.0 ) then
-        beta = 0.0
-        if ( etp < 0.0 ) then
-          beta = 1.0
-        endif
-      else
-        beta = eta / etp
-      endif
 
 !  --- ...  get soil thermal diffuxivity/conductivity for top soil lyr,
 !           calc. adjusted top lyr soil temp and adjusted soil flux, then
@@ -1601,8 +1703,8 @@
      &     )
 !      if(ivegsrc == 1) then
 !urban
-!        if ( vegtyp == 13 ) df1=3.24
-!      endif
+      if ( vegtyp == 13 ) df1=3.24
+      endif
 
 !  --- ... vegetation greenness fraction reduction in subsurface heat
 !          flux via reduction factor, which is convenient to apply here
@@ -1610,16 +1712,12 @@
 !          sub sfc heat flux (see additional comments on veg effect
 !          sub-sfc heat flx in routine sflx)
 !wz only urban for igbp type
-        if(ivegsrc == 1 .and. vegtyp == 13) then
-          df1 = 3.24*(1.-shdfac) + shdfac*df1*exp(sbeta*shdfac)
-        else
           df1 = df1 * exp( sbeta*shdfac )
-        endif
 
 !  --- ...  compute intermediate terms passed to routine hrt (via routine
 !           shflx below) for use in computing subsurface heat flux in hrt
 
-      yynum = fdown - sfcems*sigma1*t24
+      yynum = fdown - sfcems*sigma*t24
       yy = sfctmp + (yynum/rch + th2 - sfctmp - beta*epsca)/rr
       zz1 = df1/(-0.5*zsoil(1)*rch*rr) + 1.0
 
@@ -1637,7 +1735,7 @@
 !           they are not used here in snopac.  flx2 (freezing rain heat flux)
 !           was similarly initialized in the penman routine.
 
-      flx1 = 0.0
+      flx1 = cph2o * prcp * (t1- sfctmp)
       flx3 = 0.0
 !
       return
@@ -1654,11 +1752,12 @@
       subroutine penman
 !...................................
 !  ---  inputs:
-!    &     ( sfctmp, sfcprs, sfcems, ch, t2v, th2, prcp, fdown,         &
-!    &       cpx, cpfac, ssoil, q2, q2sat, dqsdt2, snowng, frzgra,      &
+     &     ( sfctmp, sfcprs, sfcems, ch, t2v, th2, prcp, fdown,         &
+     &       cpx, cpfac, ssoil, q2, q2sat, dqsdt2, snowng, frzgra,      &
+     &       sncovr, sneqv, albedo, soldn, stc1,                        &
 !  ---  outputs:
-!    &       t24, etp, rch, epsca, rr, flx2                             &
-!    &     )
+     &       t24, etp, rch, epsca, rr, flx2, etpn, flx4                 &
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -1701,49 +1800,83 @@
 !  ====================    end of description    =====================  !
 !
 !  ---  inputs:
-!     real (kind=kind_phys), intent(in) :: sfctmp, sfcprs, sfcems,      &
-!    &       ch, t2v, th2, prcp, fdown, ssoil, q2, q2sat, dqsdt2
+      real (kind=kind_phys), intent(in) :: sfctmp, sfcprs, sfcems,      &
+     &       ch, t2v, th2, prcp, fdown, ssoil, q2, q2sat, dqsdt2
 
-!     logical, intent(in) :: snowng, frzgra
+      real (kind=kind_phys), intent(in) :: sncovr, aoasis, albedo       &
+      real (kind=kind_phys), intent(in) :: fvb, gama, stc1       &
+
+      logical, intent(in) :: snowng, frzgra, ua_phys
 
 !  ---  outputs:
-!     real (kind=kind_phys), intent(out) :: t24, etp, rch, epsca,       &
-!    &       rr, flx2
+      real (kind=kind_phys), intent(out) :: t24, etp, rch, epsca,       &
+     &       rr, flx2, etpn, flx4
 
 !  ---  locals:
       real (kind=kind_phys) :: a, delta, fnet, rad, rho
+      real (kind=kind_phys) :: elcp1, lvs 
+
+!  ---  parameters:
+      real (kind=kind_phys) parameter :: elcp = 2.4888e+3, lsubc =      &
+     &                                   2.501000e+6,cp = 1004.6 
+      real (kind=kind_phys) parameter :: lsubs = 2.83e+6                &
+      real (kind=kind_phys) parameter :: algdsn = 0.5, alvgsn = 0.13    &
 
 !
 !===> ...  begin here
 !
+      elcp1  = (1.0-sncovr)*elcp  + sncovr*elcp*lsubs/lsubc
+      lvs    = (1.0-sncovr)*lsubc + sncovr*lsubs
+
       flx2 = 0.0
 
-!  --- ...  prepare partial quantities for penman equation.
-
-!MKB      delta = elcp * cpfac * dqsdt2
-!MKB in hwrf
-      delta = elcp * dqsdt2
+      delta = elcp1 * dqsdt2
       t24 = sfctmp * sfctmp * sfctmp * sfctmp
-!MKB      rr  = t24 * 6.48e-8 / (sfcprs*ch) + 1.0
-!MKB rr in hwrf (sfcems is emissi in hwrf)
       rr  = sfcems * t24 * 6.48e-8 / (sfcprs*ch) + 1.0
       rho = sfcprs / (rd1*t2v)
-      rch = rho * cpx * ch
+      rch = rho * cp * ch
 
 !  --- ...  adjust the partial sums / products with the latent heat
 !           effects caused by falling precipitation.
 
       if (.not. snowng) then
-        if (prcp > 0.0)  rr = rr + cph2o1*prcp/rch
+        if (prcp > 0.0)  rr = rr + cph2o*prcp/rch
       else
-! ---- ...  fractional snowfall/rainfall
-!MKB        rr = rr + (cpice*ffrozp+cph2o1*(1.-ffrozp))                      &
-!MKB in hwrf
         rr = rr + cpice                                                      &
      &       *prcp/rch
       endif
 
-      fnet = fdown - sfcems*sigma1*t24 - ssoil
+      fnet = fdown - sfcems*sigma*t24 - ssoil
+
+
+      flx4 = 0.0
+      if(ua_phys) then
+        if(sneqv > 0. .and. fnet > 0. .and. soldn > 0. ) then
+! solar radiation absorbed by vegetated fraction
+         totabs = (1.-albedo)*soldn*fvb           ! solar radiation absorbed 
+         ucabs = min(totabs,((1.0-algdsn)*(1.0-alvgsn)*soldn*gama)*fvb)
+
+!         print*,'penman',ucabs,totabs,soldn,gama,fvb
+!         ucabs -> solar radiation absorbed under canopy
+!         ucabs = min(totabs,(0.44*soldn*gama)*fvb)  
+         flx4 = min(totabs - ucabs, min(250., 0.5*(1.-albedo)*soldn))
+        endif
+
+        signck = (stc1-273.15)*(sfctmp-273.15)
+
+        if(flx4 > 0. .and. (signck <= 0. .or. stc1 < 273.15)) then
+          if(fnet >= flx4) then
+           fnetn = fnet - flx4
+          else
+           flx4 = fnet
+           fnetn = 0.
+          endif
+        else
+          flx4 = 0.0
+          fnetn = 0.
+        endif
+      endif
+
 
 !  --- ...  include the latent heat effects of frzng rain converting to ice
 !           on impact in the calculation of flx2 and fnet.
@@ -1753,16 +1886,22 @@
         fnet = fnet - flx2
       endif
 
+      if(ua_phys) fnetn = fnetn - flx2
+! ----------------------------------------------------------------------
+! finish penman equation calculations.
+! ----------------------------------------------------------------------
+      endif
+
+
 !  --- ...  finish penman equation calculations.
 
       rad = fnet/rch + th2 - sfctmp
-      a = elcp * cpfac * (q2sat - q2)
+      a = elcp * (q2sat - q2)
       epsca = (a*rr + rad*delta) / (delta + rr)
-!MKB for hwrf
 ! Fei-Mike
       if (epsca > 0.) epsca = epsca * aoasis
         etp = epsca * rch /lvs
-!MKB      etp = epsca * rch / lsubc
+!       etp = epsca * rch / lsubc
 
       if (ua_phys) then
         radn = fnetn / rch + th2 - sfctmp
@@ -1784,14 +1923,16 @@
       subroutine redprm
 !...................................
 !  ---  inputs:
-!    &     ( nsoil, vegtyp, soiltyp, slopetyp, sldpth, zsoil,              &
-!  ---  outputs:
-!    &       cfactr, cmcmax, rsmin, rsmax, topt, refkdt, kdt,              &
-!    &       sbeta, shdfac, rgl, hs, zbot, frzx, psisat, slope,            &
-!    &       snup, salp, bexp, dksat, dwsat, smcmax, smcwlt,               &
-!    &       smcref, smcdry, f1, quartz, fxexp, rtdis, nroot,              &
-!    &       z0, czil, xlai, csoil                                         &
-!    &     )
+     &     ( nsoil, vegtyp, soiltyp, slopetyp, sldpth, zsoil,           &
+!  ---  outputs
+     &       cfactr, cmcmax, rsmin, rsmax, topt, refkdt, kdt,           &
+     &       sbeta, shdfac, rgl, hs, zbot, frzx, psisat, slope,         &
+     &       snup, salp, bexp, dksat, dwsat, smcmax, smcwlt,            &
+     &       smcref, smcdry, f1, quartz, fxexp, rtdis, nroot,           &
+     &       czil, xlai, csoil, lvcoef, laimin, laimax,                 &
+     &       emissmin, emissmax, albedomin, albedomax, z0min, z0max,    &
+     &       ztopv, zbotv 
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -1952,24 +2093,42 @@
 !     czil     - real, param to cal roughness length of heat       1    !
 !     xlai     - real, leaf area index                             1    !
 !     csoil    - real, soil heat capacity (j m-3 k-1)              1    !
+!     laimin   - real, Min leaf area index through the year [no dims]   !          
+!     laimax   - real, Max leaf area index through the year [no dims]   !          
+!     emissmin - real, Min backgrd emissivity through the year[fraction]!          
+!     emissmax - real, Max backgrd emissivity through the year[fraction]!          
+!     albedomin- real, Min backgrd albedo through the year[fraction]    !          
+!     albedomax- real, Max backgrd albedo through the year[fraction]    !          
+!     z0min    - real, Min bkgd roughness len through the year [m]      !          
+!     z0max    - real, Max bkgd roughness len through the year [m]      !          
+!     lvcoef   - real, user defined coefficient for adjusting snow albe !
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
       use namelist_soilveg
 
-!  ---  input:
-!     integer, intent(in) :: nsoil, vegtyp, soiltyp, slopetyp
+      implicit none
 
-!     real (kind=kind_phys), intent(in) :: sldpth(nsoil), zsoil(nsoil)
+!  ---  input:
+      integer, intent(in) :: nsoil, vegtyp, soiltyp, slopetyp
+
+      real (kind=kind_phys), intent(in) :: sldpth(nsoil), zsoil(nsoil)
 
 !  ---  outputs:
-!     real (kind=kind_phys), intent(out) :: cfactr, cmcmax, rsmin,      &
-!    &       rsmax, topt, refkdt, kdt, sbeta, shdfac, rgl, hs, zbot,    &
-!    &       frzx, psisat, slope, snup, salp, bexp, dksat, dwsat,       &
-!    &       smcmax, smcwlt, smcref, smcdry, f1, quartz, fxexp, z0,     &
-!    &       czil, xlai, csoil, rtdis(nsoil)
+      real (kind=kind_phys), intent(out) :: cfactr, cmcmax, rsmin,      &
+     &       rsmax, topt, refkdt, kdt, sbeta, shdfac, rgl, hs, zbot,    &
+     &       frzx, psisat, slope, snup, salp, bexp, dksat, dwsat,       &
+     &       smcmax, smcwlt, smcref, smcdry, f1, quartz, fxexp,         &
+     &       czil, xlai, csoil, rtdis(nsoil), lvcoef, laimin, laimax,   &
+     &       emissmin, emissmax, albedomin, albedomax, z0min, z0max,    &
+     &       ztopv, zbotv          
 
-!     integer, intent(out) :: nroot
+      integer, intent(out) :: nroot
+!  --- ...parameters:
+      integer, parameter :: max_slopetyp=30,max_soiltyp=30,max_vegtyp=30
+
+!  --- ...logical:
+      logical :: local
 
 !  ---  locals:
       real (kind=kind_phys) :: frzfact, frzk, refdk
@@ -1995,22 +2154,21 @@
         stop 333
       endif
 
+
 !  --- ...  set-up universal parameters (not dependent on soiltyp, vegtyp
 !           or slopetyp)
 
       zbot   = zbot_data
       salp   = salp_data
-      cfactr = cfactr_data
-      cmcmax = cmcmax_data
       sbeta  = sbeta_data
-      rsmax  = rsmax_data
-      topt   = topt_data
       refdk  = refdk_data
       frzk   = frzk_data
       fxexp  = fxexp_data
       refkdt = refkdt_data
       czil   = czil_data
       csoil  = csoil_data
+      kdt    = refkdt * dksat / refdk
+      lvcoef = lvcoef_data
 
 !  --- ...  set-up soil parameters
 
@@ -2018,37 +2176,50 @@
       dksat = satdk(soiltyp)
       dwsat = satdw(soiltyp)
       f1    = f11  (soiltyp)
-      kdt   = refkdt * dksat / refdk
-
       psisat = satpsi(soiltyp)
       quartz = qtz   (soiltyp)
       smcdry = drysmc(soiltyp)
       smcmax = maxsmc(soiltyp)
       smcref = refsmc(soiltyp)
       smcwlt = wltsmc(soiltyp)
+      slope  = slope_data(slopetyp)
 
       frzfact = (smcmax / smcref) * (0.412 / 0.468)
 
 !  --- ...  to adjust frzk parameter to actual soil type: frzk * frzfact
 
+      frzfact = (smcmax / smcref) * (0.412 / 0.468)
       frzx = frzk * frzfact
 
 !  --- ...  set-up vegetation parameters
 
-      nroot = nroot_data(vegtyp)
-      snup  = snupx(vegtyp)
-      rsmin = rsmtbl(vegtyp)
-
-      rgl = rgltbl(vegtyp)
-      hs  = hstbl(vegtyp)
+      topt   = topt_data
+      cmcmax = cmcmax_data
+      cfactr = cfactr_data
+      rsmax  = rsmax_data
+      nroot  = nroot_data(vegtyp)
+      snup   = snupx(vegtyp)
+      rsmin  = rsmtbl(vegtyp)
+      rgl    = rgltbl(vegtyp)
+      hs     = hstbl(vegtyp)
 ! roughness lengthe is defined in sfcsub
 !     z0  = z0_data(vegtyp)
       xlai= lai_data(vegtyp)
+      emissmin  = emissmintbl  (vegtyp)
+      emissmax  = emissmaxtbl  (vegtyp)
+      laimin    = laimintbl    (vegtyp)
+      laimax    = laimaxtbl    (vegtyp)
+      z0min     = z0mintbl     (vegtyp)
+      z0max     = z0maxtbl     (vegtyp)
+      albedomin = albedomintbl (vegtyp)
+      albedomax = albedomaxtbl (vegtyp)
+      ztopv     = ztopvtbl     (vegtyp)
+      zbotv     = zbotvtbl     (vegtyp)
 
       if (vegtyp == bare) shdfac = 0.0
 
       if (nroot > nsoil) then
-        write(*,*) 'warning: too many root layers'
+        write(*,*) 'warning: too many root layers', nsoil, nroot
         stop 333
       endif
 
@@ -2360,15 +2531,14 @@
 !-----------------------------------
 !>\ingroup Noah_LSM
 !> This subroutine calculates snow fraction (0->1).
-      subroutine snfrac (sneqv,snup,salp,snowh,sncovr,                  &
-                         xlai,shdfac,fvb,gama,fbur,                     &
-                         fgsn,ztopv,zbotv,ua_phys)
+      subroutine snfrac                                                 &
 !...................................
 !  ---  inputs:
-!    &     ( sneqv, snup, salp, snowh,                                  &
+     &     ( sneqv, snup, salp, snowh,                                  &
+     &       ztopv, zbotv, shdfac, xlai, shdfac, ua_phys                &
 !  ---  outputs:
-!    &       sncovr                                                     &
-!    &     )
+     &       sncovr, fvb, gama, fbur, fgsn                              &
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -2398,7 +2568,6 @@
       real (kind=kind_phys),  intent(in)     :: ztopv    ! ua: height of canopy top
       real (kind=kind_phys),  intent(in)     :: zbotv    ! ua: height of canopy bottom
       real (kind=kind_phys),  intent(in)     :: shdfac   ! ua: vegetation fraction
-      real (kind=kind_phys),  intent(in)     :: ztopv    ! flag for ua option 
 
       real (kind=kind_phys),  intent(inout)  :: xlai     ! ua: lai modified by snow
 
@@ -2505,18 +2674,23 @@
       subroutine snopac
 !...................................
 !  ---  inputs:
-!    &     ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref, smcdry,   &
-!    &       cmcmax, dt, df1, sfcems, sfctmp, t24, th2, fdown, epsca,   &
-!    &       bexp, pc, rch, rr, cfactr, slope, kdt, frzx, psisat,       &
-!    &       zsoil, dwsat, dksat, zbot, shdfac, ice, rtdis, quartz,     &
-!    &       fxexp, csoil, flx2, snowng,                                &
+     &     ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref, smcdry,   &
+     &       cmcmax, dt, df1, sfcems, sfctmp, t24, th2, fdown, epsca,   &
+     &       bexp, pc, rch, rr, cfactr, slope, kdt, frzx, psisat,       &
+     &       zsoil, dwsat, dksat, zbot, shdfac, rtdis, quartz,          &
+     &       fxexp, csoil, flx2, snowng,                                &
+     &       opt_thcnd,                                                 &
+!  ---  input for fasdas (FDDA) (Not used for HAFS):
+     &       qfx_phy, hcpct_fasdas, qfx_phy, fasdas,                    &
 !  ---  input/outputs:
-!    &       prcp1, cmc, t1, stc, sncovr, sneqv, sndens, snowh,         &
-!    &       sh2o, tbot, beta,                                          &
+     &       prcp1, cmc, t1, stc, sncovr, sneqv, sndens, snowh,         &
+     &       sh2o, tbot, beta,                                          &
+     &       sfhead1rt, infxs1rt, rtpnd1,                               &
 !  ---  outputs:
-!    &       smc, ssoil, runoff1, runoff2, runoff3, edir, ec, et,       &
-!    &       ett, snomlt, drip, dew, flx1, flx3, esnow                  &
-!    &     )
+     &       smc, ssoil, runoff1, runoff2, runoff3, edir, ec, et,       &
+     &       ett, snomlt, drip, dew, flx1, flx3, esnow, etns            &
+     &       hcpct_fasdas                                               &
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -2606,32 +2780,37 @@
       real, parameter :: esdmin = 1.e-6
 
 !  ---  inputs:
-!     integer, intent(in) :: nsoil, nroot, ice
+      integer, intent(in) :: nsoil, nroot, ice
 
-!     real (kind=kind_phys), intent(in) :: etp, prcp, smcmax, smcref,   &
-!    &       smcwlt, smcdry, cmcmax, dt, df1, sfcems, sfctmp, t24,      &
-!    &       th2, fdown, epsca, bexp, pc, rch, rr, cfactr, slope, kdt,  &
-!    &       frzx, psisat, dwsat, dksat, zbot, shdfac, quartz,          &
-!    &       csoil, fxexp, flx2, zsoil(nsoil), rtdis(nsoil)
+      real (kind=kind_phys), intent(in) :: etp, prcp, smcmax, smcref,   &
+     &       smcwlt, smcdry, cmcmax, dt, df1, sfcems, sfctmp, t24,      &
+     &       th2, fdown, epsca, bexp, pc, rch, rr, cfactr, slope, kdt,  &
+     &       frzx, psisat, dwsat, dksat, zbot, shdfac, quartz,          &
+     &       csoil, fxexp, flx2, zsoil(nsoil), rtdis(nsoil)
 
-!     logical, intent(in) :: snowng
+      logical, intent(in) :: snowng
 
 !  ---  input/outputs:
-!     real (kind=kind_phys), intent(inout) :: prcp1, t1, sncovr, sneqv, &
-!    &       sndens, snowh, cmc, tbot, beta, sh2o(nsoil), stc(nsoil)
+      real (kind=kind_phys), intent(inout) :: prcp1, t1, sncovr, sneqv, &
+     &       sndens, snowh, cmc, tbot, beta, sh2o(nsoil), stc(nsoil)
 
 !  ---  outputs:
-!     real (kind=kind_phys), intent(out) :: ssoil, runoff1, runoff2,    &
-!    &       runoff3, edir, ec, et(nsoil), ett, snomlt, drip, dew,      &
-!    &       flx1, flx3, esnow, smc(nsoil)
+      real (kind=kind_phys), intent(out) :: ssoil, runoff1, runoff2,    &
+     &       runoff3, edir, ec, et(nsoil), ett, snomlt, drip, dew,      &
+     &       flx1, flx3, esnow, smc(nsoil), etns
 
 !  ---  locals:
       real (kind=kind_phys):: denom, dsoil, dtot, etp1, ssoil1,         &
      &       snoexp, ex, t11, t12, t12a, t12b, yy, zz1, seh, t14,       &
-     &       ec1, edir1, ett1, etns, etns1, esnow1, esnow2, etanrg,     &
+     &       ec1, edir1, ett1, etns1, esnow1, esnow2, etanrg,           &
      &       et1(nsoil)
 
       integer k
+
+!  --- ... fasdas
+      real (kind=kind_phys), dimension(nsoil) :: eft, wetty
+      real (kind=kind_phys) :: qfx_phy, xsda_qfx, xqnorm
+      integer :: fasdas
 
 !     data snoexp /1.0/    !!! <----- for noah v2.7
       data snoexp /2.0/    !!! <----- for noah v2.7.1
@@ -3027,10 +3206,10 @@
       subroutine snow_new
 !...................................
 !  ---  inputs:
-!    &     ( sfctmp, sn_new,                                            &
+     &     ( sfctmp, sn_new,                                            &
 !  ---  input/outputs:
-!    &       snowh, sndens                                              &
-!    &     )
+     &       snowh, sndens                                              &
+     &     )
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -3053,11 +3232,12 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  inputs:
-!     real(kind=kind_phys), intent(in) :: sfctmp, sn_new
+      real(kind=kind_phys), intent(in) :: sfctmp, sn_new
 
 !  ---  input/outputs:
-!     real(kind=kind_phys), intent(inout) :: snowh, sndens
+      real(kind=kind_phys), intent(inout) :: snowh, sndens
 
 !  ---  locals:
       real(kind=kind_phys) :: dsnew, snowhc, hnewc, newsnc, tempc
@@ -3085,7 +3265,11 @@
 !  --- ...  adjustment of snow density depending on new snowfall
 
       hnewc  = newsnc / dsnew
-      sndens = (snowhc*sndens + hnewc*dsnew) / (snowhc + hnewc)
+      if (snowhc + hnewc < 1.0e-3) then
+         sndens = max(dsnew,sndens)
+      else
+         sndens = (snowhc * sndens + hnewc * dsnew)/ (snowhc + hnewc)
+      endif
       snowhc = snowhc + hnewc
       snowh  = snowhc * 0.01
 !
@@ -3101,9 +3285,9 @@
       subroutine snowz0
 !...................................
 !  ---  inputs:
-!    &     ( sncovr,                                                    &
+     &     ( sncovr,z0brd,snowh,fbur,fgsn,shdmax,ua_phys,               &
 !  ---  input/outputs:
-!    &       z0                                                         &
+     &       z0                                                         &
 !    &     )
 
 ! ===================================================================== !
@@ -3124,21 +3308,43 @@
 !  ====================    end of description    =====================  !
 !
 !  ---  inputs:
-!     real(kind=kind_phys), intent(in) :: sncovr
+     real(kind=kind_phys), intent(in) :: sncovr, z0brd, snowh, fbur
+     real(kind=kind_phys), intent(in) :: fgsn, shdmax, snowh
 
-!  ---  input/outputs:
-!     real(kind=kind_phys), intent(inout) :: z0
+!  ---  outputs:
+     real(kind=kind_phys), intent(out) :: z0
 
-!  ---  locals:
-      real(kind=kind_phys) :: z0s
+!  ---  logical:
+      logical :: ua_phys
+!  ---  parameters:
+      real(kind=kind_phys), parameter :: z0s = 0.001, z0g = 0.01
+!  --- locals:
+      real (kind_phys) :: burial, z0eff, fv, a1, a2
 !
 !===> ...  begin here
 !
-!     z0s = 0.001                     ! snow roughness length:=0.001 (m)
-!  --- ...  current noah lsm condition - mbek, 09-oct-2001
-      z0s = z0
 
-      z0 = (1.0 - sncovr)*z0 + sncovr*z0s
+      if(ua_phys) then
+
+          fv = shdmax * (1.-fbur)
+          a1 = (1.-fv)**2*((1.-fgsn**2)*log(z0g) + (fgsn**2)*log(z0s))
+          a2 = (1.-(1.-fv)**2)*log(z0brd)
+          z0 = exp(a1+a2)
+
+      else
+
+!m        z0 = (1.- sncovr)* z0brd + sncovr * z0s
+          burial = 7.0*z0brd - snowh
+          if(burial.le.0.0007) then
+              z0eff = z0s
+          else
+              z0eff = burial/7.0
+          endif
+
+          z0 = (1.- sncovr)* z0brd + sncovr * z0eff
+
+      endif
+
 
 !
       return
@@ -3153,7 +3359,7 @@
 !! of the soil for a given point and time.
       subroutine tdfcnd                                                 &
 !  ---  inputs:
-     &     ( smc, qz, smcmax, sh2o,                                     &
+     &     ( smc, qz, smcmax, sh2o, bexp, psisat, soiltyp, opt_thcnd,   &
 !  ---  outputs:
      &       df                                                         &
      &     )
@@ -3188,6 +3394,10 @@
 !     qz       - real, quartz content (soil type dependent)        1    !
 !     smcmax   - real, porosity                                    1    !
 !     sh2o     - real, top layer unfrozen soil moisture            1    !
+!     bexp     - real, soil type "b" parameter                     1    !
+!     psisat   - real, saturated soil potential                    1    !
+!     soiltyp  - integer, soil type                                1    !
+!     opt_thcnd- integer, option to treat thermal conductivity     1    !
 !                                                                       !
 !  outputs:                                                             !
 !     df       - real, soil thermal diffusivity and conductivity   1    !
@@ -3202,6 +3412,7 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  input:
       real (kind=kind_phys), intent(in) :: smc, qz, smcmax, sh2o
 
@@ -3210,75 +3421,99 @@
 
 !  ---  locals:
       real (kind=kind_phys) :: gammd, thkdry, ake, thkice, thko,        &
-     &       thkqtz, thksat, thks, thkw, satratio, xu, xunfroz
+     &       thkqtz, thksat, thks, thkw, satratio, xu, xunfroz,         &
+     &       akei, akel, psif, pf
 !
 !===> ...  begin here
 !
 !  --- ...  if the soil has any moisture content compute a partial sum/product
 !           otherwise use a constant value which works well with most soils
 
+      if ( opt_thcnd == 1 .or. ( opt_thcnd == 2 .and. (soiltyp /= 4     &
+     &                         .and. soiltyp /= 3)) )then
 !  --- ...  saturation ratio:
-
-      satratio = smc / smcmax
-
 !  --- ...  parameters  w/(m.k)
-      thkice = 2.2
-      thkw   = 0.57
-      thko   = 2.0
+
+        satratio = smc / smcmax
+
+!  --- ...  ice conductivity
+        thkice = 2.2
+
+!  --- ...  water conductivity
+        thkw   = 0.57
+!  --- ...  thermal conductivity of "other" soil components
+        thko   = 2.0
 !     if (qz <= 0.2) thko = 3.0
-      thkqtz = 7.7
+
+!  --- ...  quartz conductivity
+        thkqtz = 7.7
 
 !  --- ...  solids' conductivity
 
-      thks = (thkqtz**qz) * (thko**(1.0-qz))
+        thks = (thkqtz**qz) * (thko**(1.0-qz))
 
 !  --- ...  unfrozen fraction (from 1., i.e., 100%liquid, to 0. (100% frozen))
 
-      xunfroz = (sh2o + 1.e-9) / (smc + 1.e-9)
+        xunfroz = (sh2o) / (smc)
 
 !  --- ...  unfrozen volume for saturation (porosity*xunfroz)
 
-      xu=xunfroz*smcmax
+        xu=xunfroz*smcmax
 
 !  --- ...  saturated thermal conductivity
 
-      thksat = thks**(1.-smcmax) * thkice**(smcmax-xu) * thkw**(xu)
+        thksat = thks**(1.-smcmax) * thkice**(smcmax-xu) * thkw**(xu)
 
 !  --- ...  dry density in kg/m3
 
-      gammd = (1.0 - smcmax) * 2700.0
+        gammd = (1.0 - smcmax) * 2700.0
 
 !  --- ...  dry thermal conductivity in w.m-1.k-1
 
-      thkdry = (0.135*gammd + 64.7) / (2700.0 - 0.947*gammd)
+        thkdry = (0.135*gammd + 64.7) / (2700.0 - 0.947*gammd)
 
-      if ( sh2o+0.0005 < smc ) then         ! frozen
+!  --- ...  frozen
+        akei = satratio
 
-        ake = satratio
-
-      else                                  ! unfrozen
+!  --- ...  unfrozen
 
 !  --- ...  range of validity for the kersten number (ake)
-        if ( satratio > 0.1 ) then
+          if ( satratio > 0.1 ) then
 
 !  --- ...  kersten number (using "fine" formula, valid for soils containing
 !           at least 5% of particles with diameter less than 2.e-6 meters.)
 !           (for "coarse" formula, see peters-lidard et al., 1998).
 
-          ake = log10( satratio ) + 1.0
+            akel = log10( satratio ) + 1.0
 
-        else
+          else
 
 !  --- ...  use k = kdry
-          ake = 0.0
+            akel = 0.0
 
-        endif   ! end if_satratio_block
-
-      endif   ! end if_sh2o+0.0005_block
+          endif   ! end if_satratio_block
+        
+        ake = ((smc-sh2o)*akei + sh2o*akel)/smc
 
 !  --- ...  thermal conductivity
 
-      df = ake * (thksat - thkdry) + thkdry
+        df = ake * (thksat - thkdry) + thkdry
+
+      else       ! opt_thcnd
+
+! --- ...   use the mccumber and pielke approach for silt loam (4), sandy loam (3)
+
+         psif = psisat*100.*(smcmax/(smc))**bexp
+! --- ...     psif should be in [cm] to compute pf
+           pf=log10(abs(psif))
+! --- ...     hk is for mccumber thermal conductivity
+         if(pf.le.5.1) then
+           df=420.*exp(-(pf+2.7))
+         else
+           df=.1744
+         end if
+
+      endif  ! for opt_thcnd options 
 !
       return
 !...................................
@@ -4902,6 +5137,7 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  inputs:
       integer, intent(in) :: nsoil
 
@@ -5154,6 +5390,7 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  inputs:
       integer, intent(in) :: nsoil
 
@@ -5286,7 +5523,7 @@ c ----------------------------------------------------------------------
      &     )
 
         infmax = max( infmax, wcnd )
-        infmax = min( infmax, px )
+        infmax = min( infmax, px/dt )
 
         if (pcpdrp > infmax) then
           runoff1 = pcpdrp - infmax
@@ -5449,9 +5686,9 @@ c ----------------------------------------------------------------------
 !  input/outputs:                                                       !
 !     cmc      - real, canopy moisture content                     1    !
 !     rhstt    - real, soil water time tendency                  nsoil  !
-!     ai       - real, matrix coefficients                       nsold  !
-!     bi       - real, matrix coefficients                       nsold  !
-!     ci       - real, matrix coefficients                       nsold  !
+!     ai       - real, matrix coefficients                       nsoil  !
+!     bi       - real, matrix coefficients                       nsoil  !
+!     ci       - real, matrix coefficients                       nsoil  !
 !                                                                       !
 !  outputs:                                                             !
 !     sh2oout  - real, updated soil moisture content             nsoil  !
@@ -5460,6 +5697,7 @@ c ----------------------------------------------------------------------
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  input:
       integer, intent(in) :: nsoil
 
@@ -5470,7 +5708,7 @@ c ----------------------------------------------------------------------
 
 !  ---  inout/outputs:
       real (kind=kind_phys), intent(inout) :: cmc, rhstt(nsoil),        &
-     &       ai(nsold), bi(nsold), ci(nsold)
+     &       ai(nsoil), bi(nsoil), ci(nsoil)
 
 !  ---  outputs:
       real (kind=kind_phys), intent(out) :: sh2oout(nsoil), runoff3,    &
@@ -5500,7 +5738,7 @@ c ----------------------------------------------------------------------
         rhsttin(k) = rhstt(k)
       enddo
 
-      do k = 1, nsold
+      do k = 1, nsoil
         ciin(k) = ci(k)
       enddo
 
@@ -5595,6 +5833,7 @@ c ----------------------------------------------------------------------
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  input:
       integer, intent(in) :: k, nsoil
 
@@ -5673,6 +5912,7 @@ c ----------------------------------------------------------------------
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  input:
       integer, intent(in) :: nsoil, k
 
@@ -5682,7 +5922,8 @@ c ----------------------------------------------------------------------
       real (kind=kind_phys), intent(out) :: tavg
 
 !  ---  locals:
-      real (kind=kind_phys) :: dz, dzh, x0, xdn, xup
+      real (kind=kind_phys) :: dz, dzh, x0, xdn, xup, t0
+ 
 !
 !===> ...  begin here
 !
@@ -5782,6 +6023,7 @@ c ----------------------------------------------------------------------
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  input:
       integer, intent(in) :: nsoil, nroot
 
@@ -5910,6 +6152,7 @@ c ----------------------------------------------------------------------
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  input:
       real (kind=kind_phys), intent(in)  :: smc, smcmax, bexp, dksat,   &
      &       dwsat, sicemax
@@ -5924,8 +6167,9 @@ c ----------------------------------------------------------------------
 !
 !  --- ...  calc the ratio of the actual to the max psbl soil h2o content
 
-      factr1 = min(1.0, max(0.0, 0.2/smcmax))
-      factr2 = min(1.0, max(0.0, smc/smcmax))
+      factr1 = 0.05 / smcmax
+      factr2 = smc / smcmax
+      factr1 = min(factr1,factr2)
 
 !  --- ...  prep an expntl coef and calc the soil water diffusivity
 
@@ -5963,6 +6207,6 @@ c ----------------------------------------------------------------------
 ! =========================== !
 
 !...................................
-      end subroutine gfssflx
+      end subroutine gfssflx_hafs
 !! @}
 !-----------------------------------
