@@ -1473,6 +1473,9 @@
       real (kind=kind_phys), intent(inout) :: cmc, t1, tbot     
       real (kind=kind_phys), dimension(nsoil), intent(inout) :: stc,sh2o 
 
+!djg ndhms/wrf-hydro edit...
+       real (kind=kind_phys), intent(inout) :: sfhead1rt,infxs1rt,etpnd1
+
 !  ---  outputs:
       real (kind=kind_phys), intent(out) :: eta, smc(nsoil), ssoil,     &
      &       runoff1, runoff2, runoff3, edir, ec, et(nsoil), ett,       &
@@ -2682,9 +2685,11 @@
      &       opt_thcnd,                                                 &
 !  ---  input for fasdas (FDDA) (Not used for HAFS):
      &       qfx_phy, hcpct_fasdas, qfx_phy, fasdas,                    &
+!  ---  input/inout for ua_phys:
+     &       ua_phys, etpn, etpnd1, etp1n, flx4,                        &
 !  ---  input/outputs:
      &       prcp1, cmc, t1, stc, sncovr, sneqv, sndens, snowh,         &
-     &       sh2o, tbot, beta,                                          &
+     &       sh2o, tbot, beta, ribb,                                    &
      &       sfhead1rt, infxs1rt, rtpnd1,                               &
 !  ---  outputs:
      &       smc, ssoil, runoff1, runoff2, runoff3, edir, ec, et,       &
@@ -2777,22 +2782,35 @@
 !  ====================    end of description    =====================  !
 !
 !  ---  constant parameters:
-      real, parameter :: esdmin = 1.e-6
+      real, parameter :: esdmin = 1.e-6, lsubc = 2.501000e+6,           &
+     &  lsubs = 2.83e+6, snoexp = 2.0 
 
 !  ---  inputs:
-      integer, intent(in) :: nsoil, nroot, ice
+      integer, intent(in) :: nsoil, nroot, ice, ua_phys
 
       real (kind=kind_phys), intent(in) :: etp, prcp, smcmax, smcref,   &
      &       smcwlt, smcdry, cmcmax, dt, df1, sfcems, sfctmp, t24,      &
      &       th2, fdown, epsca, bexp, pc, rch, rr, cfactr, slope, kdt,  &
      &       frzx, psisat, dwsat, dksat, zbot, shdfac, quartz,          &
-     &       csoil, fxexp, flx2, zsoil(nsoil), rtdis(nsoil)
-
+     &       opt_thcnd, csoil, fxexp, flx2, zsoil(nsoil), rtdis(nsoil)
+      
       logical, intent(in) :: snowng
+
+! ---- ... ua_phys
+      real (kind=kind_phys), intent(inout) :: etpn
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: prcp1, t1, sncovr, sneqv, &
-     &       sndens, snowh, cmc, tbot, beta, sh2o(nsoil), stc(nsoil)
+     &       sndens, snowh, cmc, tbot, beta, sh2o(nsoil), stc(nsoil),   & 
+     &       esd, ribb, qsat
+
+!djg ndhms/wrf-hydro edit...
+       real (kind=kind_phys), intent(inout) :: sfhead1rt, infxs1rt,     &
+     &       etpnd1
+
+! ---- ... ua_phys
+      real (kind=kind_phys), intent(inout) :: flx4
+
 
 !  ---  outputs:
       real (kind=kind_phys), intent(out) :: ssoil, runoff1, runoff2,    &
@@ -2800,20 +2818,21 @@
      &       flx1, flx3, esnow, smc(nsoil), etns
 
 !  ---  locals:
-      real (kind=kind_phys):: denom, dsoil, dtot, etp1, ssoil1,         &
+      real (kind=kind_phys):: denom, dsoil, dtot, etp1,etp2,etp3,ssoil1,&
      &       snoexp, ex, t11, t12, t12a, t12b, yy, zz1, seh, t14,       &
-     &       ec1, edir1, ett1, etns1, esnow1, esnow2, etanrg,           &
-     &       et1(nsoil)
+     &       ec1, edir1, ett1, etns1, esnow1, esnow2, etanrg, rsnow,    &
+     &       et1(nsoil), sncond
 
-      integer k
+! ---- ... ua_phys
+      real (kind=kind_phys) :: etp1n
+
+      integer :: k
 
 !  --- ... fasdas
       real (kind=kind_phys), dimension(nsoil) :: eft, wetty
-      real (kind=kind_phys) :: qfx_phy, xsda_qfx, xqnorm
+      real (kind=kind_phys) :: qfx_phy, hcpct_fasdas
       integer :: fasdas
 
-!     data snoexp /1.0/    !!! <----- for noah v2.7
-      data snoexp /2.0/    !!! <----- for noah v2.7.1
 
 !  --- ...  convert potential evap (etp) from kg m-2 s-1 to m s-1 and then to an
 !           amount (m) given timestep (dt) and call it an effective snowpack
@@ -2832,6 +2851,7 @@
 
       prcp1 = prcp1 * 0.001
 
+      dew = 0.0
       edir  = 0.0
       edir1 = 0.0
 
@@ -2851,29 +2871,34 @@
       esnow1= 0.0
       esnow2= 0.0
 
-      dew = 0.0
       etp1 = etp * 0.001
+
+!djg ndhms/wrf-hydro edit...
+      etpnd1 = 0.0
+
+! ----------------------------------------------------------------------
+! if etp<0 (downward) then dewfall (=frostfall in this case).
+! ----------------------------------------------------------------------
+      beta = 1.0
 
       if (etp < 0.0) then
 
 !  --- ...  if etp<0 (downward) then dewfall (=frostfall in this case).
-
-        dew = -etp1
-        esnow2 = etp1 * dt
-        etanrg = etp * ((1.0-sncovr)*lsubc + sncovr*lsubs)
-
+         if ( ( ribb >= 0.1 ) .and. ( fdown > 150.0 ) ) then
+            etp=(min(etp*(1.0-ribb),0.)*sncovr/0.980 +                  &
+     &      etp*(0.980-sncovr))/0.980
+         endif
+         if(etp == 0.) beta = 0.0
+         etp1 = etp * 0.001
+         if(ua_phys) etp1n = etpn * 0.001
+         dew = -etp1
+         esnow2 = etp1*dt
+         etanrg = etp*((1.-sncovr)*lsubc + sncovr*lsubs)
       else
+         etp1 = etp * 0.001
+         if(ua_phys) etp1n = etpn * 0.001
 
-!  --- ...  etp >= 0, upward moisture flux
-
-        if (ice /= 0) then           ! for sea-ice and glacial-ice case
-
-          esnow = etp
-          esnow1 = esnow * 0.001
-          esnow2 = esnow1 * dt
-          etanrg = esnow * lsubs
-
-        else                         ! for non-glacial land case
+         !  land case
 
           if (sncovr < 1.0) then
 
@@ -2903,18 +2928,34 @@
               et(k) = et1(k) * 1000.0
             enddo
 
+!
+! fasdas
+!
+            if( fasdas ==  1 ) then
+              qfx_phy = edir + ec
+              do k=1,nsoil
+                 qfx_phy = qfx_phy + et(k)
+              end do
+            endif
+!
+! end fasdas
+!
+
             ett = ett1 * 1000.0
             etns = etns1 * 1000.0
+
+!djg ndhms/wrf-hydro edit...
+            etpnd1 = etpnd1*1000.
+
 
           endif   ! end if_sncovr_block
 
           esnow = etp * sncovr
 !         esnow1 = etp * 0.001
+         if(ua_phys) esnow = etpn*sncovr   ! use adjusted etp
           esnow1 = esnow * 0.001
           esnow2 = esnow1 * dt
           etanrg = esnow*lsubs + etns*lsubc
-
-        endif   ! end if_ice_block
 
       endif   ! end if_etp_block
 
@@ -2926,10 +2967,9 @@
       flx1 = 0.0
       if ( snowng ) then
 !  --- ... fractional snowfall/rainfall
-        flx1 = (cpice* ffrozp + cph2o1*(1.-ffrozp))                     &
-     &         * prcp * (t1 - sfctmp)
+         flx1 = cpice * prcp * (t1- sfctmp)
       else
-        if (prcp > 0.0) flx1 = cph2o1 * prcp * (t1 - sfctmp)
+        if (prcp > 0.0) flx1 = cph2o * prcp * (t1 - sfctmp)
       endif
 
 !  --- ...  calculate an 'effective snow-grnd sfc temp' (t12) based on heat
@@ -2945,7 +2985,7 @@
 
 !     t12a = ( (fdown - flx1 - flx2 - sigma1*t24) / rch                 &
 !    &     + th2 - sfctmp - beta*epsca ) / rr
-      t12a = ( (fdown - flx1 - flx2 - sfcems*sigma1*t24) / rch          &
+      t12a = ( (fdown - flx1 - flx2 - sfcems*sigma*t24) / rch          &
      &     + th2 - sfctmp - etanrg/rch ) / rr
 
       t12b = df1 * stc(1) / (dtot * rr * rch)
@@ -2970,7 +3010,10 @@
         ex = 0.0
         snomlt = 0.0
 
+      if(ua_phys) flx4 = 0.0
+
       else
+
 
 !  --- ...  if the 'effective snow-grnd sfc temp' is above freezing, snow melt
 !           will occur.  call the snow melt rate,ex and amt, snomlt.  revise the
@@ -2990,8 +3033,8 @@
 !           for the linear case (snoexp = 1).
 
 !       t1 = tfreez * sncovr**snoexp + t12 * (1.0 - sncovr**snoexp)
-        t1 = tfreez * max(0.01,sncovr**snoexp) +                          &
-     & 			t12 * (1.0 - max(0.01,sncovr**snoexp))
+        t1 = tfreez * max(0.01,sncovr**snoexp) +                        &
+     & 	t12 * (1.0 - max(0.01,sncovr**snoexp))
 
         beta = 1.0
         ssoil = df1 * (t1 - stc(1)) / dtot
