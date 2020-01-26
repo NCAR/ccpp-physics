@@ -290,14 +290,14 @@
 
 !     real (kind=kind_phys), parameter :: gs      = con_g       !< con_g   =9.80665
       real (kind=kind_phys), parameter :: gs1     = 9.8         !< con_g in sfcdif
-      real (kind=kind_phys), parameter :: gs2     = 9.81        !< con_g in snowpack, frh2o
+      real (kind=kind_phys), parameter :: gs      = 9.81        !< con_g in snowpack, frh2o
       real (kind=kind_phys), parameter :: tfreez  = con_t0c     !< con_t0c =273.16
       real (kind=kind_phys), parameter :: lsubc   = 2.501e+6    !< con_hvap=2.5000e+6
       real (kind=kind_phys), parameter :: lsubf   = 3.335e5     !< con_hfus=3.3358e+5
       real (kind=kind_phys), parameter :: lsubs   = 2.83e+6     ! ? in sflx, snopac
       real (kind=kind_phys), parameter :: elcp    = 2.4888e+3   ! ? in penman
 !     real (kind=kind_phys), parameter :: rd      = con_rd      ! con_rd  =287.05
-      real (kind=kind_phys), parameter :: rd1     = 287.04      ! con_rd in sflx, penman, canres
+      real (kind=kind_phys), parameter :: rd      = 287.04      ! con_rd in sflx, penman, canres
       real (kind=kind_phys), parameter :: cp      = con_cp      ! con_cp  =1004.6
       real (kind=kind_phys), parameter :: cp      = 1004.5      ! con_cp in sflx, canres
       real (kind=kind_phys), parameter :: cp2     = 1004.0      ! con_cp in htr
@@ -870,32 +870,59 @@
      &       hcpct_fasdas                                               &
      &     )
 
+           eta_kinematic = eta
+
       else
 
 !>  - For a snowpack is present, call snopac().
         call snopac
-!  ---  inputs:                                                         !
-!          ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref, smcdry,   !
-!            cmcmax, dt, df1, sfcems, sfctmp, t24, th2, fdown, epsca,   !
-!            bexp, pc, rch, rr, cfactr, slope, kdt, frzx, psisat,       !
-!            zsoil, dwsat, dksat, zbot, shdfac, ice, rtdis, quartz,     !
-!            fxexp, csoil, flx2, snowng,                                !
-!  ---  input/outputs:                                                  !
-!            prcp1, cmc, t1, stc, sncovr, sneqv, sndens, snowh,         !
-!            sh2o, tbot, beta,                                          !
-!  ---  outputs:                                                        !
-!            smc, ssoil, runoff1, runoff2, runoff3, edir, ec, et,       !
-!            ett, snomlt, drip, dew, flx1, flx3, esnow )                !
+!...................................
+!  ---  inputs:
+     &     ( nsoil, nroot, etp, prcp, smcmax, smcwlt, smcref, smcdry,   &
+     &       cmcmax, dt, df1, sfcems, sfctmp, t24, th2, fdown, epsca,   &
+     &       bexp, pc, rch, rr, cfactr, slope, kdt, frzx, psisat,       &
+     &       zsoil, dwsat, dksat, zbot, shdfac, rtdis, quartz,          &
+     &       fxexp, csoil, flx2, snowng,                                &
+     &       opt_thcnd,                                                 &
+!  ---  input for fasdas (FDDA) (Not used for HAFS):
+     &       qfx_phy, hcpct_fasdas, qfx_phy, fasdas,                    &
+!  ---  input/inout for ua_phys:
+     &       ua_phys, etpn, etpnd1, etp1n, flx4,                        &
+!  ---  input/outputs:
+     &       prcp1, cmc, t1, stc, sncovr, sneqv, sndens, snowh,         &
+     &       sh2o, tbot, beta, ribb,                                    &
+     &       sfhead1rt, infxs1rt, rtpnd1,                               &
+!  ---  outputs:
+     &       smc, ssoil, runoff1, runoff2, runoff3, edir, ec, et,       &
+     &       ett, snomlt, drip, dew, flx1, flx3, esnow, etns            &
+     &       hcpct_fasdas                                               &
+     &     )
+
+            eta_kinematic =  esnow + etns - 1000.0*dew
 
       endif
+
 !> - Noah LSM post-processing:
 !>  - Calculate sensible heat (h) for return to parent model.
 
-      sheat = -(ch*cp1*sfcprs) / (rd1*t2v) * (th2 - t1)
+      sheat = -(ch*cp*sfcprs) / (rd*t2v) * (th2 - t1)
+
+      if(ua_phys) sheat = sheat + flx4
+!
+! fasdas
+!
+      if ( fasdas == 1 ) then
+        hfx_phy = sheat
+      endif
+!
+! end fasdas
+!
+
 
 !>  - Convert units and/or sign of total evap (eta), potential evap (etp),
 !!  subsurface heat flux (s), and runoffs for what parent model expects.
 !   convert eta from kg m-2 s-1 to w m-2
+!     lsubc was lvh2o in WRF: latent heat of water evap (J/kg)
 !     eta = eta * lsubc
 !     etp = etp * lsubc
 
@@ -906,9 +933,13 @@
         et(k) = et(k) * lsubc
       enddo
 
+      etpnd1=etpnd1 * lsubc 
+
       ett = ett * lsubc
       esnow = esnow * lsubs
       etp = etp * ((1.0 - sncovr)*lsubc + sncovr*lsubs)
+
+      if(ua_phys) etpn = etpn*((1.-sncovr)*lsubc + sncovr*lsubs)
 
       if (etp > 0.) then
         eta = edir + ec + ett + esnow
@@ -918,13 +949,21 @@
 
       beta = eta / etp
 
+      endif
+! ----------------------------------------------------------------------
+! determine beta (ratio of actual to potential evap)
+! ----------------------------------------------------------------------
+      if (etp == 0.0) then
+        beta = 0.0
+      else
+        beta = eta/etp
+      endif
+
 !>  - Convert the sign of soil heat flux so that:
 !!   -  ssoil>0: warm the surface  (night time)
 !!   -  ssoil<0: cool the surface  (day time)
 
       ssoil = -1.0 * ssoil
-
-      if (ice == 0) then
 
 !>  - For the case of land (but not glacial-ice):
 !!  convert runoff3 (internal layer runoff from supersat) from \f$m\f$
@@ -933,16 +972,6 @@
 
         runoff3 = runoff3 / dt
         runoff2 = runoff2 + runoff3
-
-      else
-
-!>  - For the case of sea-ice (ice=1) or glacial-ice (ice=-1), add any
-!! snowmelt directly to surface runoff (runoff1) since there is no
-!! soil medium, and thus no call to subroutine smflx (for soil
-!! moisture tendency).
-
-        runoff1 = snomlt / dt
-      endif
 
 !>  - Calculate total column soil moisture in meters (soilm) and root-zone
 !! soil moisture availability (fraction) relative to porosity/saturation.
@@ -954,12 +983,26 @@
 
       soilwm = -1.0 * (smcmax - smcwlt) * zsoil(1)
       soilww = -1.0 * (smc(1) - smcwlt) * zsoil(1)
-      do k = 2, nroot
-        soilwm = soilwm + (smcmax - smcwlt) * (zsoil(k-1) - zsoil(k))
-        soilww = soilww + (smc(k) - smcwlt) * (zsoil(k-1) - zsoil(k))
-      enddo
 
-      soilw = soilww / soilwm
+
+      do k = 1,nsoil
+         smav(k)=(smc(k) - smcwlt)/(smcmax - smcwlt)
+       end do
+
+      if (nroot >= 2) then
+         do k = 2,nroot
+           soilwm = soilwm + (smcmax - smcwlt)*(zsoil(k-1)-zsoil (k))
+           soilww = soilww + (smc(k) - smcwlt)*(zsoil(k-1)-zsoil (k))
+          end do
+      end if
+      if (soilwm .lt. 1.e-6) then
+         soilwm = 0.0
+         soilw  = 0.0
+         soilm  = 0.0
+      else
+         soilw = soilww / soilwm
+      end if
+
 !
       return
 
@@ -1280,7 +1323,7 @@
 !           evaporation (containing rc term).
 
       rc = rsmin / (xlai*rcs*rct*rcq*rcsoil)
-      rr = (4.0*sfcems*sigma*rd1/cpx1) * (sfctmp**4.0)/(sfcprs*ch) + 1.0
+      rr = (4.0*sfcems*sigma*rd/cpx1) * (sfctmp**4.0)/(sfcprs*ch) + 1.0
       delta = (lsubc/cpx1) * dqsdt2
 
       pc = (rr + delta) / (rr*(1.0 + rc*ch) + delta)
@@ -1597,6 +1640,8 @@
      &       edir1, ec1, et1,                                           &
 !  ---  input/outputs:
      &       cmc, sh2o,                                                 &
+!  ---  wrf hydro input/outputs:
+     &       fhead1rt,infxs1rt,                                         &
 !  ---  outputs:
      &       smc, runoff1, runoff2, runoff3, drip                       &
      &     )
@@ -1664,6 +1709,8 @@
      &       edir1, ec1, et1,                                           &
 !  ---  input/outputs:
      &       cmc, sh2o,                                                 &
+!  ---  wrf hydro input/outputs:
+     &       fhead1rt,infxs1rt,                                         &
 !  ---  outputs:
      &       smc, runoff1, runoff2, runoff3, drip                       &
      &     )
@@ -1836,7 +1883,7 @@
       delta = elcp1 * dqsdt2
       t24 = sfctmp * sfctmp * sfctmp * sfctmp
       rr  = sfcems * t24 * 6.48e-8 / (sfcprs*ch) + 1.0
-      rho = sfcprs / (rd1*t2v)
+      rho = sfcprs / (rd*t2v)
       rch = rho * cp * ch
 
 !  --- ...  adjust the partial sums / products with the latent heat
@@ -1845,7 +1892,7 @@
       if (.not. snowng) then
         if (prcp > 0.0)  rr = rr + cph2o*prcp/rch
       else
-        rr = rr + cpice                                                      &
+        rr = rr + cpice                                                 &
      &       *prcp/rch
       endif
 
@@ -3049,21 +3096,42 @@
           ex = 0.0
           snomlt = 0.0
           flx3 = 0.0
-
+            if(ua_phys) flx4 = 0.0
+! ----------------------------------------------------------------------
+! sublimation less than depth of snowpack
+! snowpack (esd) reduced by esnow2 (depth of sublimated snow)
+! ----------------------------------------------------------------------
         else
 
 !  --- ...  potential evap (sublimation) less than depth of snowpack, retain
 !           beta=1.
 
           sneqv = sneqv - esnow2
+          etp3 = etp * lsubc
+
           seh = rch * (t1 - th2)
 
           t14 = t1 * t1
           t14 = t14 * t14
 
-          flx3 = fdown - flx1 - flx2 - sfcems*sigma1*t14                &
+          flx3 = fdown - flx1 - flx2 - sfcems*sigma*t14                &
      &         - ssoil - seh - etanrg
           if (flx3 <= 0.0) flx3 = 0.0
+
+
+
+            if(ua_phys .and. flx4 > 0. .and. flx3 > 0.) then
+              if(flx3 >= flx4) then
+                flx3 = flx3 - flx4
+              else
+                flx4 = flx3
+                flx3 = 0.
+              endif
+            else
+              flx4 = 0.0
+            endif
+
+
 
           ex = flx3 * 0.001 / lsubf
 
@@ -3095,7 +3163,7 @@
 
         endif   ! end if_sneqv-esnow2_block
 
-!       prcp1 = prcp1 + ex
+        prcp1 = prcp1 + ex
 
 !  --- ...  if non-glacial land, add snowmelt rate (ex) to precip rate to be used
 !           in subroutine smflx (soil moisture evolution) via infiltration.
@@ -3104,7 +3172,6 @@
 !           runoff/baseflow later near the end of sflx (after return from call to
 !           subroutine snopac)
 
-        if (ice == 0) prcp1 = prcp1 + ex
 
       endif   ! end if_t12<=tfreez_block
 
@@ -3117,17 +3184,18 @@
 !           if sea-ice (ice=1) or glacial-ice (ice=-1), skip call to smflx, since
 !           no soil medium for sea-ice or glacial-ice
 
-      if (ice == 0) then
 
         call smflx                                                        &
 !  ---  inputs:
-     &     ( nsoil, dt, kdt, smcmax, smcwlt, cmcmax, prcp1,               &
-     &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,              &
-     &       edir1, ec1, et1,                                             &
+     &     ( nsoil, dt, kdt, smcmax, smcwlt, cmcmax, prcp1,             &
+     &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,            &
+     &       edir1, ec1, et1,                                           &
 !  ---  input/outputs:
-     &       cmc, sh2o,                                                   &
+     &       cmc, sh2o,                                                 &
+!  ---  wrf hydro input/outputs:
+     &       fhead1rt,infxs1rt,                                         &
 !  ---  outputs:
-     &       smc, runoff1, runoff2, runoff3, drip                         &
+     &       smc, runoff1, runoff2, runoff3, drip                       &
      &     )
 
       endif
@@ -3162,78 +3230,27 @@
 !  --- ...  snow depth and density adjustment based on snow compaction.  yy is
 !           assumed to be the soil temperture at the top of the soil column.
 
-      if (ice == 0) then              ! for non-glacial land
 
-        if (sneqv > 0.0) then
+      if (sneqv > 0.0) then
 
           call snowpack                                                 &
 !  ---  inputs:
-     &     ( sneqv, dt, t1, yy,                                         &
+     &     ( sneqv, dtsec, tsnow, tsoil,                                &
+!  ---  ua_phys inputs:
+     &     ( snomlt, ua_phys,                                           &
 !  ---  input/outputs:
      &       snowh, sndens                                              &
      &     )
 
-        else
+      else
 
           sneqv = 0.0
           snowh = 0.0
           sndens = 0.0
-!         sncond = 1.0
+          sncond = 1.0
           sncovr = 0.0
 
-        endif   ! end if_sneqv_block
-
-!  --- ...  over sea-ice or glacial-ice, if s.w.e. (sneqv) below threshold lower
-!           bound (0.01 m for sea-ice, 0.10 m for glacial-ice), then set at
-!           lower bound and store the source increment in subsurface runoff/
-!           baseflow (runoff2).  note:  runoff2 is then a negative value (as
-!           a flag) over sea-ice or glacial-ice, in order to achieve water balance.
-
-      elseif (ice == 1) then          ! for sea-ice
-
-        if (sneqv >= 0.01) then
-
-          call snowpack                                                 &
-!  ---  inputs:
-     &     ( sneqv, dt, t1, yy,                                         &
-!  ---  input/outputs:
-     &       snowh, sndens                                              &
-     &     )
-
-        else
-
-!         sndens = sneqv / snowh
-!         runoff2 = -(0.01 - sneqv) / dt
-          sneqv = 0.01
-          snowh = 0.05
-          sncovr = 1.0
-!         snowh = sneqv / sndens
-
-        endif   ! end if_sneqv_block
-
-      else                            ! for glacial-ice
-
-        if (sneqv >= 0.10) then
-
-          call snowpack                                                 &
-!  ---  inputs:
-     &     ( sneqv, dt, t1, yy,                                         &
-!  ---  input/outputs:
-     &       snowh, sndens                                              &
-     &     )
-
-        else
-
-!         sndens = sneqv / snowh
-!         runoff2 = -(0.10 - sneqv) / dt
-          sneqv = 0.10
-          snowh = 0.50
-          sncovr = 1.0
-!         snowh = sneqv / sndens
-
-        endif   ! end if_sneqv_block
-
-      endif   ! end if_ice_block
+      endif   ! end if_sneqv_block
 
 !
       return
@@ -3350,12 +3367,13 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  inputs:
-     real(kind=kind_phys), intent(in) :: sncovr, z0brd, snowh, fbur
-     real(kind=kind_phys), intent(in) :: fgsn, shdmax, snowh
+      real(kind=kind_phys), intent(in) :: sncovr, z0brd, snowh, fbur
+      real(kind=kind_phys), intent(in) :: fgsn, shdmax, snowh
 
 !  ---  outputs:
-     real(kind=kind_phys), intent(out) :: z0
+      real(kind=kind_phys), intent(out) :: z0
 
 !  ---  logical:
       logical :: ua_phys
@@ -3627,6 +3645,7 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  inputs:
       integer, intent(in) :: nsoil, nroot
 
@@ -3718,6 +3737,34 @@
 !...................................
       end subroutine evapo
 !-----------------------------------
+
+       subroutine fac2mit
+! ---  input
+     &  (smcmax,
+! ---  output
+     &  flimit)
+
+        implicit none               
+        real, intent(in)  :: smcmax
+        real, intent(out) :: flimit
+
+        flimit = 0.90
+
+        if ( smcmax == 0.395 ) then
+           flimit = 0.59
+        else if ( ( smcmax == 0.434 ) .or. ( smcmax == 0.404 ) ) then
+           flimit = 0.85
+        else if ( ( smcmax == 0.465 ) .or. ( smcmax == 0.406 ) ) then
+           flimit = 0.86
+        else if ( ( smcmax == 0.476 ) .or. ( smcmax == 0.439 ) ) then
+           flimit = 0.74
+        else if ( ( smcmax == 0.200 ) .or. ( smcmax == 0.464 ) ) then
+           flimit = 0.80
+        endif
+
+! ----------------------------------------------------------------------
+      return 
+! ----------------------------------------------------------------------
 
 
 !-----------------------------------
@@ -3892,15 +3939,17 @@
 !! that is updated with prognostic equations. The canopy moisture content
 !! (cmc) is also updated. Frozen ground version: new states added: sh2o and
 !! frozen ground correction factor, frzx and parameter slope.
-      subroutine smflx                                                    &
+      subroutine smflx                                                  &
 !  ---  inputs:
-     &     ( nsoil, dt, kdt, smcmax, smcwlt, cmcmax, prcp1,               &
-     &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,              &
-     &       edir1, ec1, et1,                                             &
+     &     ( nsoil, dt, kdt, smcmax, smcwlt, cmcmax, prcp1,             &
+     &       zsoil, slope, frzx, bexp, dksat, dwsat, shdfac,            &
+     &       edir1, ec1, et1,                                           &
 !  ---  input/outputs:
-     &       cmc, sh2o,                                                   &
+     &       cmc, sh2o,                                                 &
+!  ---  wrf hydro input/outputs:
+     &       fhead1rt,infxs1rt,                                         &
 !  ---  outputs:
-     &       smc, runoff1, runoff2, runoff3, drip                         &
+     &       smc, runoff1, runoff2, runoff3, drip                       &
      &     )
 
 ! ===================================================================== !
@@ -3949,6 +3998,7 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  inputs:
       integer, intent(in) :: nsoil
 
@@ -3958,15 +4008,19 @@
 
 !  ---  input/outputs:
       real (kind=kind_phys),  intent(inout) :: cmc, sh2o(nsoil)
+      real (kind=kind_phys),  intent(inout) :: smc(nsoil)
+
+!  --- wrf hydro input/output
+      real (kind=kind_phys),  intent(inout) :: sfhead1rt,infxs1rt
 
 !  ---  outputs:
-      real (kind=kind_phys),  intent(out) :: smc(nsoil), runoff1,       &
+      real (kind=kind_phys),  intent(out) :: runoff1,                   &
      &       runoff2, runoff3, drip
 
 !  ---  locals:
       real (kind=kind_phys) :: dummy, excess, pcpdrp, rhsct, trhsct,    &
-     &       rhstt(nsold), sice(nsold), sh2oa(nsold), sh2ofg(nsold),    &
-     &       ai(nsold), bi(nsold), ci(nsold)
+     &       rhstt(nsoil), sice(nsoil), sh2oa(nsoil), sh2ofg(nsoil),    &
+     &       ai(nsoil), bi(nsoil), ci(nsoil), stcf(nsoil), rhsts(nsoil)
 
       integer :: i, k
 !
@@ -4021,8 +4075,27 @@
 !         of section 2 of kalnay and kanamitsu
 !       pcpdrp is units of kg/m**2/s or mm/s, zsoil is negative depth in m
 
+! ----------------------------------------------------------------------
+!  according to dr. ken mitchell's suggestion, add the second contraint
+!  to remove numerical instability of runoff and soil moisture
+!  flimit is a limit value for fac2
+      fac2=0.0
+      do i=1,nsoil
+         fac2=max(fac2,sh2o(i)/smcmax)
+      enddo
+      call fac2mit(smcmax,flimit)
+
+! ----------------------------------------------------------------------
+! frozen ground version:
+! smc states replaced by sh2o states in srt subr.  sh2o & sice states
+! inc&uded in sstep subr.  frozen ground correction factor, frzfact
+! added.  all water balance calculations using unfrozen water
+! ----------------------------------------------------------------------
+
+
 !     if ( pcpdrp .gt. 0.0 ) then
-      if ( (pcpdrp*dt) > (0.001*1000.0*(-zsoil(1))*smcmax) ) then
+      if ( ( (pcpdrp * dt) > (0.0001*1000.0* (- zsoil (1))* smcmax) )   &
+           .or. (fac2 > flimit) ) then
 
 !  --- ...  frozen ground version:
 !           smc states replaced by sh2o states in srt subr.  sh2o & sice states
@@ -4088,7 +4161,6 @@
 
       endif
 
-!     runof = runoff
 !
       return
 !...................................
@@ -4105,7 +4177,9 @@
 !! and \a sndens .
       subroutine snowpack                                               &
 !  ---  inputs:
-     &     ( esd, dtsec, tsnow, tsoil,                                  &
+     &     ( sneqv, dtsec, tsnow, tsoil,                                &
+!  ---  ua_phys inputs:
+     &     ( snomlt, ua_phys,                                           &
 !  ---  input/outputs:
      &       snowh, sndens                                              &
      &     )
@@ -4138,12 +4212,16 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
+      implicit none
 !  ---  parameter constants:
       real (kind=kind_phys), parameter :: c1 = 0.01
       real (kind=kind_phys), parameter :: c2 = 21.0
+      real (kind=kind_phys), parameter :: kn = 4000.0
 
 !  ---  inputs:
-      real (kind=kind_phys), intent(in) :: esd, dtsec, tsnow, tsoil
+      real (kind=kind_phys), intent(in) :: sneqv, dtsec, tsnow, tsoil
+      logical, intent(in)    :: ua_phys  ! ua: flag for ua option
+      real (kind=kind_phys), intent(in) :: snomlt   ! ua: snow melt [m]
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: snowh, sndens
@@ -4151,6 +4229,7 @@
 !  ---  locals:
       real (kind=kind_phys) :: bfac, dsx, dthr, dw, snowhc, pexp,       &
      &       tavgc, tsnowc, tsoilc, esdc, esdcx
+      real (kind=kind_phys)  :: snomltc  ! ua: snow melt [cm]
 
       integer :: ipol, j
 !
@@ -4159,8 +4238,9 @@
 !  --- ...  conversion into simulation units
 
       snowhc = snowh * 100.0
-      esdc   = esd * 100.0
+      esdc   = sneqv * 100.0
       dthr   = dtsec / 3600.0
+      if(ua_phys) snomltc = snomlt * 100.0
       tsnowc = tsnow - tfreez
       tsoilc = tsoil - tfreez
 
@@ -4241,8 +4321,11 @@
 
       if (tsnowc >= 0.0) then
         dw = 0.13 * dthr / 24.0
+         if ( ua_phys .and. tsoilc >= 0.) then
+             dw = min (dw, 0.13*snomltc/(esdcx+0.13*snomltc))
+         endif
         sndens = sndens*(1.0 - dw) + dw
-        if (sndens > 0.40) sndens = 0.40
+        if (sndens >= 0.40) sndens = 0.40
       endif
 
 !  --- ...  calculate snow depth (cm) from snow water equivalent and snow
@@ -5277,7 +5360,9 @@
 !  ====================    end of description    =====================  !
 !
 !  ---  parameter constants:
-      real (kind=kind_phys), parameter :: dh2o = 1.0000e3
+      real (kind=kind_phys), parameter :: dh2o  = 1.0000e3
+      real (kind=kind_phys), parameter :: hlice = 3.3350e5
+      real (kind=kind_phys), parameter :: t0    = 2.7315e2
 
 !  ---  inputs:
       integer, intent(in) :: nsoil, k
@@ -5292,7 +5377,8 @@
       real (kind=kind_phys), intent(out) :: tsrc
 
 !  ---  locals:
-      real (kind=kind_phys) :: dz, free, xh2o
+      real (kind=kind_phys) :: df, dz, dzh, free, tsnsr, tdn, tm, xh2o
+      real (kind=kind_phys) :: tup, tz, x0, xdn, xup                  
 
 !  ---  external functions:
 !     real (kind=kind_phys) :: frh2o
@@ -5324,7 +5410,7 @@
 
       call frh2o                                                        &
 !  ---  inputs:
-     &     ( tavg, smc, sh2o, smcmax, bexp, psisat,                     &
+     &     (tkelv, smc, sh2o, smcmax, bexp, psisat,                     &
 !  ---  outputs:
      &       free                                                       &
      &     )
@@ -5427,9 +5513,9 @@
 !     rhstt    - real, soil water time tendency                  nsoil  !
 !     runoff1  - real, surface runoff not infiltrating sfc         1    !
 !     runoff2  - real, sub surface runoff (baseflow)               1    !
-!     ai       - real, matrix coefficients                       nsold  !
-!     bi       - real, matrix coefficients                       nsold  !
-!     ci       - real, matrix coefficients                       nsold  !
+!     ai       - real, matrix coefficients                       nsoil  !
+!     bi       - real, matrix coefficients                       nsoil  !
+!     ci       - real, matrix coefficients                       nsoil  !
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
@@ -5443,18 +5529,23 @@
       real (kind=kind_phys), intent(in) :: edir, pcpdrp, dwsat, dksat,  &
      &       smcmax, smcwlt, bexp, dt, slope, kdt, frzx
 
+
 !  --- outputs:
       real (kind=kind_phys), intent(out) :: runoff1, runoff2,           &
-     &      rhstt(nsoil), ai(nsold), bi(nsold), ci(nsold)
+     &      rhstt(nsoil), ai(nsoil), bi(nsoil), ci(nsoil)
 
 
 !  ---  locals:
       real (kind=kind_phys) :: acrt, dd, ddt, ddz, ddz2, denom, denom2, &
      &       dice, dsmdz, dsmdz2, dt1, fcr, infmax, mxsmc, mxsmc2, px,  &
      &       numer, pddum, sicemax, slopx, smcav, sstt, sum, val, wcnd, &
-     &       wcnd2, wdf, wdf2, dmax(nsold)
+     &       wcnd2, wdf, wdf2, dmax(nsoil)
 
-      integer :: cvfrz, ialp1, iohinf, j, jj, k, ks
+!  ---  wrf_hydro locals:
+      real (kind=kind_phys) :: sfcwatr, chcksm
+
+      integer :: ialp1, iohinf, j, jj, k, ks
+
 !
 !===> ...  begin here
 !
@@ -5529,11 +5620,11 @@ c ----------------------------------------------------------------------
 !  --- ...  frozen ground version:
 !           reduction of infiltration based on frozen ground parameters
 
-        fcr = 1.
+        fcr = 1.0
 
         if (dice > 1.e-2) then
           acrt = cvfrz * frzx / dice
-          sum = 1.
+          sum = 1.0
 
           ialp1 = cvfrz - 1
           do j = 1, ialp1
