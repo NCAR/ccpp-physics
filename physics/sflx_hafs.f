@@ -122,7 +122,8 @@
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax)
+     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax,      &
+     &       flx4, fvb, fbur, fgsn, ztopv, zbotv, gama, fnet, etpn, ru  &!  --- ua_phys
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -282,6 +283,10 @@
 !          at the present time, those diverse values are kept temperately to
 !          provide the same result as the original codes.  -- y.t.h.  may09
 
+!MKB These came through WRF Registry, need to think how to get them in
+!CCPP
+      integer,               parameter :: opt_thcnd   = 1           !< thermal conductivity
+
       integer,               parameter :: nsold   = 4           !< max soil layers
 
       integer                          :: defined_soil
@@ -326,6 +331,8 @@
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
      &       stc(nsoil), smc(nsoil), sh2o(nsoil), ch, cm
 
+      real (kind=kind_phys), intent(inout) :: fhead1rt,infxs1rt, etpnd1
+
 !  ---  outputs:
       integer, intent(out) :: nroot
 
@@ -334,7 +341,8 @@
      &       beta, etp, ssoil, flx1, flx2, flx3, snomlt, sncovr,        &
      &       runoff1, runoff2, runoff3, rc, pc, rsmin, xlai, rcs,       &
      &       rct, rcq, rcsoil, soilw, soilm, smcwlt, smcdry, smcref,    &
-     &       smcmax
+     &       smcmax,                                                    &
+     &       eta_kinematic 
 
 !  ---  locals:
 !     real (kind=kind_phys) ::  df1h,
@@ -359,6 +367,20 @@
       real (kind=kind_phys)            :: cpx, cpx1, cpfac, xx1, xx2
       real (kind=kind_phys), parameter :: z0min=0.2_kind_phys,          &
      &                                    z0max=1.0_kind_phys
+
+      logical, intent(in)               :: ua_phys   ! ua: flag for ua option
+      real (kind=kind_phys),intent(out) :: flx4      ! ua: energy added to sensible heat
+      real (kind=kind_phys),intent(out) :: fvb       ! ua: frac. veg. w/snow beneath
+      real (kind=kind_phys),intent(out) :: fbur      ! ua: fraction of canopy buried
+      real (kind=kind_phys),intent(out) :: fgsn      ! ua: ground snow cover fraction
+      real                              :: ztopv     ! ua: height of canopy top
+      real                              :: zbotv     ! ua: height of canopy bottom
+      real                              :: gama      ! ua: = exp(-1.* xlai)
+      real                              :: fnet      ! ua:
+      real                              :: etpn      ! ua:
+      real                              :: ru        ! ua:
+
+      ua_phys = .false.
 !
 !===> ...  begin here
 !
@@ -860,7 +882,7 @@
      &       zbot, rtdis, quartz, fxexp, csoil,                         &
      &       opt_thcnd,                                                 &
 !  ---  input for fasdas (FDDA) (Not used for HAFS):
-     &       qfx_phy, hcpct_fasdas, xsda_qfx, qfx_phy, xqnorm, fasdas,  &
+     &       qfx_phy, hcpct_fasdas, xsda_qfx, xqnorm, fasdas,           &
 !  ---  input/outputs:
      &       cmc, t1, stc, sh2o, tbot,                                  &
      &       sfhead1rt, infxs1rt, rtpnd1,                               &
@@ -1413,7 +1435,7 @@
      &       zbot, rtdis, quartz, fxexp, csoil,                         &
      &       opt_thcnd,                                                 &
 !  ---  input for fasdas (FDDA) (Not used for HAFS):
-     &       qfx_phy, hcpct_fasdas, xsda_qfx, qfx_phy, xqnorm, fasdas,  &
+     &       qfx_phy, hcpct_fasdas, xsda_qfx, xqnorm, fasdas,           &
 !  ---  input/outputs:
      &       cmc, t1, stc, sh2o, tbot,                                  &
      &       sfhead1rt, infxs1rt, rtpnd1,                               &
@@ -4510,7 +4532,7 @@
 
       else
 
-        if (ck /= 0.0) then
+      if (ck /= 0.0) then
 
 !  --- ...  option 1: iterated solution for nonzero ck
 !                     in koren et al, jgr, 1999, eqn 17
@@ -4525,10 +4547,12 @@
 
 !  --- ...  start of iterations
 
+       if (swl < 0.) swl = 0.
+
           do while ( (nlog < 10) .and. (kcount == 0) )
             nlog = nlog + 1
 
-            df = alog( (psis*gs2/lsubf) * ( (1.0 + ck*swl)**2.0 )       &
+            df = alog( (psis*gs/lsubf) * ( (1.0 + ck*swl)**2.0 )       &
      &         * (smcmax/(smc-swl))**bx ) - alog(-(tkelv-tfreez)/tkelv)
 
             denom = 2.0*ck/(1.0 + ck*swl) + bx/(smc - swl)
@@ -4557,12 +4581,14 @@
 
         endif   ! end if_ck_block
 
+      endif   ! end if_ck_block
+
 !  --- ...  option 2: explicit solution for flerchinger eq. i.e. ck=0
 !                     in koren et al., jgr, 1999, eqn 17
 !           apply physical bounds to flerchinger solution
 
         if (kcount == 0) then
-          fk = ( ( (lsubf/(gs2*(-psis)))                                &
+          fk = ( ( (lsubf/(gs*(-psis)))                                &
      &       * ((tkelv-tfreez)/tkelv) )**(-1/bx) ) * smcmax
 
           fk = max( fk, 0.02 )
@@ -4588,11 +4614,13 @@
 !  ---  inputs:
      &     ( nsoil, stc, smc, smcmax, zsoil, yy, zz1, tbot,             &
      &       zbot, psisat, dt, bexp, df1, quartz, csoil, vegtyp,        &
-     &       shdfac,                                                    &
+     &       shdfac, soiltyp,                                           &
 !  ---  input/outputs:
      &       sh2o,                                                      &
 !  ---  outputs:
-     &       rhsts, ai, bi, ci                                          &
+     &       rhsts, ai, bi, ci,                                         &
+!  ---  outputs for fasdas:
+     &       hcpct_fasdasi                                              &
      &     )
 
 ! ===================================================================== !
@@ -4631,14 +4659,14 @@
 !                                                                       !
 !  outputs:                                                             !
 !     rhsts    - real, time tendency of soil thermal diffusion   nsoil  !
-!     ai       - real, matrix coefficients                       nsold  !
-!     bi       - real, matrix coefficients                       nsold  !
-!     ci       - real, matrix coefficients                       nsold  !
+!     ai       - real, matrix coefficients                       nsoil  !
+!     bi       - real, matrix coefficients                       nsoil  !
+!     ci       - real, matrix coefficients                       nsoil  !
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
 !  ---  inputs:
-      integer, intent(in) :: nsoil, vegtyp
+      integer, intent(in) :: nsoil, vegtyp, soiltyp
 
       real (kind=kind_phys),  intent(in) :: stc(nsoil), smc(nsoil),     &
      &       smcmax, zsoil(nsoil), yy, zz1, tbot, zbot, psisat, dt,     &
@@ -4648,8 +4676,12 @@
       real (kind=kind_phys),  intent(inout) :: sh2o(nsoil)
 
 !  ---  outputs:
-      real (kind=kind_phys),  intent(out) :: rhsts(nsoil), ai(nsold),   &
-     &       bi(nsold), ci(nsold)
+      real (kind=kind_phys),  intent(out) :: rhsts(nsoil), ai(nsoil),   &
+     &       bi(nsoil), ci(nsoil)
+
+! fasdas
+!
+      real (kind=kind_phys), intent(out) :: hcpct_fasdas
 
 !  ---  locals:
       real (kind=kind_phys) :: ddz, ddz2, denom, df1n, df1k, dtsdz,     &
@@ -4663,15 +4695,12 @@
 !
 !===> ...  begin here
 !
-        csoil_loc=csoil
-
-       if (ivegsrc == 1)then
 !urban
         if( vegtyp == 13 ) then
-!           csoil_loc=3.0e6
-            csoil_loc=3.0e6*(1.-shdfac)+csoil*shdfac  ! gvf
+            csoil_loc=3.0e6
+        else
+            csoil_loc=csoil
         endif
-       endif
 
 !  --- ...  initialize logical for soil layer temperature averaging.
 
@@ -4699,13 +4728,23 @@
 
       dtsdz = (stc(1) - stc(2)) / (-0.5*zsoil(2))
       ssoil = df1 * (stc(1) - yy) / (0.5*zsoil(1)*zz1)
-      rhsts(1) = (df1*dtsdz - ssoil) / (zsoil(1)*hcpct)
+
+      denom = (zsoil (1) * hcpct)
+
+! ----------------------------------------------------------------------
+! next capture the vertical difference of the heat flux at top and
+! bottom of first soil layer for use in heat flux constraint applied to
+! potential soil freezing/thawing in routine snksrc.
+! ----------------------------------------------------------------------
+!     rhsts(1) = (df1*dtsdz - ssoil) / (zsoil(1)*hcpct)
+      rhsts (1) = (df1 * dtsdz - ssoil) / denom
+
 
 !  --- ...  next capture the vertical difference of the heat flux at top and
 !           bottom of first soil layer for use in heat flux constraint applied to
 !           potential soil freezing/thawing in routine snksrc.
 
-      qtot = ssoil - df1*dtsdz
+      qtot = -1.0* rhsts (1)* denom
 
 !  --- ...  if temperature averaging invoked (itavg=true; else skip):
 !           set temp "tsurf" at top of soil column (for use in freezing soil
@@ -4738,10 +4777,9 @@
 !           compute heat source/sink (and change in frozen water content)
 !           due to possible soil water phase change
 
-      if ( (sice > 0.0) .or. (tsurf < tfreez) .or.                      &
+        if ( (sice > 0.0) .or. (tsurf < tfreez) .or.                      &
      &     (stc(1) < tfreez) .or. (tbk < tfreez) ) then
 
-        if (itavg) then
 
           call tmpavg                                                   &
 !  ---  inputs:
@@ -4750,16 +4788,10 @@
      &       tavg                                                       &
      &     )
 
-        else
-
-          tavg = stc(1)
-
-        endif   ! end if_itavg_block
-
         call snksrc                                                     &
 !  ---  inputs:
      &     ( nsoil, 1, tavg, smc(1), smcmax, psisat, bexp, dt,          &
-     &       qtot, zsoil, shdfac,                                       &
+     &       qtot, zsoil,                                               &
 !  ---  input/outputs:
      &       sh2o(1),                                                   &
 !  ---  outputs:
@@ -4767,9 +4799,28 @@
      &     )
 
 
-        rhsts(1) = rhsts(1) - tsnsr / ( zsoil(1)*hcpct )
+        rhsts(1) = rhsts(1) - tsnsr / denom 
 
-      endif   ! end if_sice_block
+        endif   ! end if_sice_block
+      else 
+         if ( (sice > 0.) .or. (stc (1) < t0) ) then
+        call snksrc                                                     &
+!  ---  inputs:
+     &     ( nsoil, 1, tavg, smc(1), smcmax, psisat, bexp, dt,          &
+     &       qtot, zsoil,                                               &
+!  ---  input/outputs:
+     &       sh2o(1),                                                   &
+!  ---  outputs:
+     &       tsnsr                                                      &
+     &     )
+!          rhsts(1) = rhsts(1) - tsnsr / ( zsoil(1) * hcpct )
+            rhsts (1) = rhsts (1) - tsnsr / denom
+         endif
+! ----------------------------------------------------------------------
+! this ends section for top soil layer.
+! ----------------------------------------------------------------------
+      endif
+
 
 !  ===  this ends section for top soil layer.
 
@@ -4802,12 +4853,8 @@
      &     )
 !urban
 !     if (ivegsrc == 1)then
-!      if ( vegtyp == 13 ) df1n = 3.24
+       if ( vegtyp == 13 ) df1n = 3.24
 !     endif
-!wz only urban for igbp type
-        if(ivegsrc == 1 .and. vegtyp == 13) then
-          df1n = 3.24*(1.-shdfac) + shdfac*df1n
-        endif
 
 !  --- ...  calc the vertical soil temp gradient thru this layer
 
@@ -4833,7 +4880,7 @@
 
           endif
 
-        else
+        endif
 
 !  --- ...  special case of bottom soil layer:  calculate thermal diffusivity
 !           for bottom layer.
@@ -4886,33 +4933,43 @@
         qtot = -1.0 * denom * rhsts(k)
         sice = smc(k) - sh2o(k)
 
-        if ( (sice > 0.0) .or. (tbk < tfreez) .or.                      &
-     &       (stc(k) < tfreez) .or. (tbk1 < tfreez) ) then
-
-          if (itavg) then
-
+      if (itavg) then
             call tmpavg                                                 &
 !  ---  inputs:
      &     ( tbk, stc(k), tbk1, zsoil, nsoil, k,                        &
 !  ---  outputs:
      &       tavg                                                       &
      &     )
-
-          else
-            tavg = stc(k)
-          endif
+        if ( (sice > 0.0) .or. (tbk < tfreez) .or.                      &
+     &       (stc(k) < tfreez) .or. (tbk1 < tfreez) ) then
 
           call snksrc                                                   &
 !  ---  inputs:
      &     ( nsoil, k, tavg, smc(k), smcmax, psisat, bexp, dt,          &
-     &       qtot, zsoil, shdfac,                                       &
+     &       qtot, zsoil,                                               &
 !  ---  input/outputs:
      &       sh2o(k),                                                   &
 !  ---  outputs:
      &       tsnsr                                                      &
      &     )
+             rhsts(k) = rhsts(k) - tsnsr/denom
+ 
+         endif
 
-          rhsts(k) = rhsts(k) - tsnsr/denom
+        else
+        if ( (sice > 0.0) .or. (stc(k) < tfreez) ) then
+          call snksrc                                                   &
+!  ---  inputs:
+     &     ( nsoil, k, tavg, smc(k), smcmax, psisat, bexp, dt,          &
+     &       qtot, zsoil,                                               &
+!  ---  input/outputs:
+     &       sh2o(k),                                                   &
+!  ---  outputs:
+     &       tsnsr                                                      &
+     &     )
+             rhsts(k) = rhsts(k) - tsnsr/denom
+          endif
+
         endif
 
 !  --- ...  calc matrix coefs, ai, and bi for this layer.
@@ -4934,182 +4991,6 @@
 !...................................
       end subroutine hrt
 !-----------------------------------
-
-
-!-----------------------------------
-!>\ingroup Noah_LSM
-!> This subroutine calculates the right hand side of the time tendency
-!! term of the soil thermal diffusion equation for sea-ice (ice = 1) or
-!! glacial-ice (ice).
-      subroutine hrtice                                                 &
-!  ---  inputs:
-     &     ( nsoil, stc, zsoil, yy, zz1, df1, ice,                      &
-!  ---  input/outputs:
-     &       tbot,                                                      &
-!  ---  outputs:
-     &       rhsts, ai, bi, ci                                          &
-     &     )
-
-! ===================================================================== !
-!  description:                                                         !
-!                                                                       !
-!  subroutine hrtice calculates the right hand side of the time tendency!
-!  term of the soil thermal diffusion equation for sea-ice (ice = 1) or !
-!  glacial-ice (ice). compute (prepare) the matrix coefficients for the !
-!  tri-diagonal matrix of the implicit time scheme.                     !
-!  (note:  this subroutine only called for sea-ice or glacial ice, but  !
-!  not for non-glacial land (ice = 0).                                  !
-!                                                                       !
-!  subprogram called:  none                                             !
-!                                                                       !
-!                                                                       !
-!  ====================  defination of variables  ====================  !
-!                                                                       !
-!  inputs:                                                       size   !
-!     nsoil    - integer, number of soil layers                    1    !
-!     stc      - real, soil temperature                          nsoil  !
-!     zsoil    - real, soil depth (negative sign, as below grd)  nsoil  !
-!     yy       - real, soil temperature at the top of column       1    !
-!     zz1      - real,                                             1    !
-!     df1      - real, thermal diffusivity and conductivity        1    !
-!     ice      - integer, sea-ice flag (=1: sea-ice, =0: land)     1    !
-!                                                                       !
-!  input/outputs:                                                       !
-!     tbot     - real, bottom soil temperature                     1    !
-!                                                                       !
-!  outputs:                                                             !
-!     rhsts    - real, time tendency of soil thermal diffusion   nsoil  !
-!     ai       - real, matrix coefficients                       nsold  !
-!     bi       - real, matrix coefficients                       nsold  !
-!     ci       - real, matrix coefficients                       nsold  !
-!                                                                       !
-!  ====================    end of description    =====================  !
-!
-!  ---  inputs:
-      integer, intent(in) :: nsoil, ice
-
-      real (kind=kind_phys), intent(in) :: stc(nsoil), zsoil(nsoil),    &
-     &       yy, zz1, df1
-
-!  ---  input/outputs:
-      real (kind=kind_phys), intent(inout) :: tbot
-
-!  ---  outputs:
-      real (kind=kind_phys), intent(out) :: rhsts(nsoil), ai(nsold),    &
-     &       bi(nsold), ci(nsold)
-
-!  ---  locals:
-      real (kind=kind_phys) :: ddz, ddz2, denom, dtsdz, dtsdz2,         &
-     &       hcpct, ssoil, zbot
-
-      integer :: k
-
-!
-!===> ...  begin here
-!
-!  --- ...  set a nominal universal value of the sea-ice specific heat capacity,
-!           hcpct = 1880.0*917.0 = 1.72396e+6 (source:  fei chen, 1995)
-!           set bottom of sea-ice pack temperature: tbot = 271.16
-!           set a nominal universal value of glacial-ice specific heat capacity,
-!           hcpct = 2100.0*900.0 = 1.89000e+6 (source:  bob grumbine, 2005)
-!           tbot passed in as argument, value from global data set
-
-      if (ice == 1) then
-!  --- ...  sea-ice
-        hcpct = 1.72396e+6
-        tbot = 271.16
-      else
-!  --- ...  glacial-ice
-        hcpct = 1.89000e+6
-      endif
-
-!  --- ...  the input argument df1 is a universally constant value of sea-ice
-!           and glacial-ice thermal diffusivity, set in sflx as df1 = 2.2.
-
-!  --- ...  set ice pack depth.  use tbot as ice pack lower boundary temperature
-!           (that of unfrozen sea water at bottom of sea ice pack).  assume ice
-!           pack is of n=nsoil layers spanning a uniform constant ice pack
-!           thickness as defined by zsoil(nsoil) in routine sflx.
-!           if glacial-ice, set zbot = -25 meters
-
-      if (ice == 1) then
-!  --- ...  sea-ice
-        zbot = zsoil(nsoil)
-      else
-!  --- ...  glacial-ice
-        zbot = -25.0
-      endif
-
-!  --- ...  calc the matrix coefficients ai, bi, and ci for the top layer
-
-      ddz = 1.0 / (-0.5*zsoil(2))
-      ai(1) = 0.0
-      ci(1) = (df1*ddz) / (zsoil(1)*hcpct)
-      bi(1) = -ci(1) + df1 / (0.5*zsoil(1)*zsoil(1)*hcpct*zz1)
-
-!  --- ...  calc the vertical soil temp gradient btwn the top and 2nd soil
-!           layers. recalc/adjust the soil heat flux.  use the gradient and
-!           flux to calc rhsts for the top soil layer.
-
-      dtsdz = (stc(1) - stc(2)) / (-0.5*zsoil(2))
-      ssoil = df1 * (stc(1) - yy) / (0.5*zsoil(1)*zz1)
-      rhsts(1) = (df1*dtsdz - ssoil) / (zsoil(1)*hcpct)
-
-!  --- ...  initialize ddz2
-
-      ddz2 = 0.0
-
-!  --- ...  loop thru the remaining soil layers, repeating the above process
-
-      do k = 2, nsoil
-
-        if (k /= nsoil) then
-
-!  --- ...  calc the vertical soil temp gradient thru this layer.
-
-          denom = 0.5 * (zsoil(k-1) - zsoil(k+1))
-          dtsdz2 = (stc(k) - stc(k+1)) / denom
-
-!  --- ...  calc the matrix coef, ci, after calc'ng its partial product.
-
-          ddz2 = 2.0 / (zsoil(k-1) - zsoil(k+1))
-          ci(k) = -df1*ddz2 / ((zsoil(k-1) - zsoil(k))*hcpct)
-
-        else
-
-!  --- ...  calc the vertical soil temp gradient thru the lowest layer.
-
-          dtsdz2 = (stc(k) - tbot)                                      &
-     &           / (0.5*(zsoil(k-1) + zsoil(k)) - zbot)
-
-!  --- ...  set matrix coef, ci to zero.
-
-          ci(k) = 0.0
-
-        endif   ! end if_k_block
-
-!  --- ...  calc rhsts for this layer after calc'ng a partial product.
-
-        denom = (zsoil(k) - zsoil(k-1)) * hcpct
-        rhsts(k) = (df1*dtsdz2 - df1*dtsdz) / denom
-
-!  --- ...  calc matrix coefs, ai, and bi for this layer.
-
-        ai(k) = - df1*ddz / ((zsoil(k-1) - zsoil(k)) * hcpct)
-        bi(k) = -(ai(k) + ci(k))
-
-!  --- ...  reset values of dtsdz and ddz for loop to next soil lyr.
-
-        dtsdz = dtsdz2
-        ddz   = ddz2
-
-      enddo   ! end do_k_loop
-!
-      return
-!...................................
-      end subroutine hrtice
-!-----------------------------------
-
 
 !-----------------------------------
 !>\ingroup Noah_LSM
@@ -5140,9 +5021,9 @@
 !                                                                       !
 !  input/outputs:                                                       !
 !     rhsts    - real, time tendency of soil thermal diffusion   nsoil  !
-!     ai       - real, matrix coefficients                       nsold  !
-!     bi       - real, matrix coefficients                       nsold  !
-!     ci       - real, matrix coefficients                       nsold  !
+!     ai       - real, matrix coefficients                       nsoil  !
+!     bi       - real, matrix coefficients                       nsoil  !
+!     ci       - real, matrix coefficients                       nsoil  !
 !                                                                       !
 !  outputs:                                                             !
 !     stcout   - real, updated soil temperature                  nsoil  !
@@ -5156,7 +5037,7 @@
 
 !  ---  input/outputs:
       real (kind=kind_phys),  intent(inout) :: rhsts(nsoil),            &
-     &      ai(nsold), bi(nsold), ci(nsold)
+     &      ai(nsoil), bi(nsoil), ci(nsoil)
 
 !  ---  outputs:
       real (kind=kind_phys),  intent(out) :: stcout(nsoil)
@@ -5184,7 +5065,7 @@
          rhstsin(k) = rhsts(k)
       enddo
 
-      do k = 1, nsold
+      do k = 1, nsoil
         ciin(k) = ci(k)
       enddo
 
@@ -5321,7 +5202,7 @@
       subroutine snksrc                                                 &
 !  ---  inputs:
      &     ( nsoil, k, tavg, smc, smcmax, psisat, bexp, dt,             &
-     &       qtot, zsoil, shdfac,                                       &
+     &       qtot, zsoil,                                               &
 !  ---  input/outputs:
      &       sh2o,                                                      &
 !  ---  outputs:
@@ -5361,7 +5242,6 @@
 !
 !  ---  parameter constants:
       real (kind=kind_phys), parameter :: dh2o  = 1.0000e3
-      real (kind=kind_phys), parameter :: hlice = 3.3350e5
       real (kind=kind_phys), parameter :: t0    = 2.7315e2
 
 !  ---  inputs:
@@ -5383,14 +5263,6 @@
 !  ---  external functions:
 !     real (kind=kind_phys) :: frh2o
 
-!urban
-!      if (ivegsrc == 1)then
-!           if ( vegtyp == 13 ) df1=3.24
-!      endif
-!wz only urban for igbp type
-        if(ivegsrc == 1 .and. vegtyp == 13) then
-          df1 = 3.24*(1.-shdfac) + shdfac*df1
-        endif
 !
 !===> ...  begin here
 !
