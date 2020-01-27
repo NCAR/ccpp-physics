@@ -1,0 +1,41 @@
+/**
+\page NoahMP GFS NoahMP Land Surface Model
+\section des_noahmp  Description
+
+This implementation of the NoahMP Land Surface Model (LSM) is adapted from the version implemented in WRF v3.7 with additions by NOAA EMC staff to work with the UFS Atmosphere model. Authoritative documentation of the NoahMP scheme can be accessed at the following links:
+
+[University of Texas at Austin NoahMP Documentation](http://www.jsg.utexas.edu/noah-mp "University of Texas at Austin NoahMP Documentation")
+
+[NCAR Research Application Laboratory NoahMP Documentation](https://ral.ucar.edu/solutions/products/noah-multiparameterization-land-surface-model-noah-mp-lsm "NCAR RAL NoahMP Documentation")
+
+A primary reference for the NoahMP LSM is Niu et al. (2011) \cite niu_et_al_2011.
+
+The CCPP interface to the NoahMP LSM is a driving software layer on top of the actual NoahMP LSM. During the run sequence, code organization is as follows:
++ \ref noahmpdrv_run() calls
+ + \ref transfer_mp_parameters()
+ + \ref noahmp_options()
+ + \ref noahmp_options_glacier() and noahmp_glacier() if over the ice vegetation type (glacier)
+ + \ref noahmp_sflx() if over other vegetation types
+ + \ref penman()
+ 
+Note that noahmp_glacer() and noahmp_sflx() are the actual NoahMP codes.
+ 
+\section Default NoahMP LSM Options used in UFS atmosphere
++ Dynamic Vegetation (opt_dveg): 2 [On]
++ Canopy Stomatal Resistance (opt_crs): 1 [Ball-Berry]
++ Soil Moisture Factor for Stomatal Resistance (opt_btr): 1 [Noah soil moisture]
++ Runoff and Groundwater (opt_run): 1 [topmodel with groundwater (Niu et al. 2007 \cite niu_et_al_2007)]
++ Surface Layer Drag Coeff (opt_sfc): 1 [Monin-Obukhov]
++ Supercooled Liquid Water or Ice Fraction (opt_frz): 1 [no iteration (Niu and Yang, 2006 \cite niu_and_yang_2006)]
++ Frozen Soil Permeability (opt_inf): 1 [linear effects, more permeable (Niu and Yang, 2006, \cite niu_and_yang_2006)]
++ Radiation Transfer (opt_rad): 1 [modified two-stream (gap = f(solar angle, 3d structure ...)<1-fveg)]
++ Ground Snow Surface Albedo (opt_alb): 2 [class]
++ Partitioning Precipitation into Rainfall & Snowfall (opt_snf): 4 [use microphysics output]
++ Lower Boundary Condition of Soil Temperature (opt_tbot): 2 [tbot at zbot (8m) read from a file (original Noah)]
++ Snow/Soil Temperature Time Scheme (only layer 1) (opt_stc): 1 [semi-implicit; flux top boundary condition] 
+
+\section intra_noahmp Intraphysics Communication
+ +  GFS NoahMP LSM Driver (\ref arg_table_noahmpdrv_run)
+\section gen_al_noahmp General Algorithm of Driver
++ \ref general_noahmpdrv
+*/
