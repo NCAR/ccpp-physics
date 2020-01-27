@@ -1506,6 +1506,8 @@ subroutine micro_mg_tend (                                       &
       do i=1,mgncol
         if (t(i,k) < icenuct) then
           ncai(i,k) = naai(i,k)*rho(i,k)
+          ncai(i,k) = min(ncai(i,k), 710.0e3_r8)
+          naai(i,k) = ncai(i,k)*rhoinv(i,k)
         else
           naai(i,k) = zero
           ncai(i,k) = zero

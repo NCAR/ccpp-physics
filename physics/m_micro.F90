@@ -973,17 +973,19 @@ end subroutine m_micro_init
 !          if(temp(i,k) > T_ICE_ALL) SC_ICE(i,k) = 1.0
 !          if(temp(i,k) > TICE)      SC_ICE(i,k) = rhc(i,k)
 !
-           if(temp(i,k) < T_ICE_ALL) then
-!            SC_ICE(i,k) = max(SC_ICE(I,k), 1.2)
-             SC_ICE(i,k) = max(SC_ICE(I,k), 1.5)
-           elseif(temp(i,k) > TICE) then
-             SC_ICE(i,k) = rhc(i,k)
-           else
-!            SC_ICE(i,k) = 1.0
-!            tx1 = max(SC_ICE(I,k), 1.2)
-             tx1 = max(SC_ICE(I,k), 1.5)
-             SC_ICE(i,k) = ((tice-temp(i,k))*tx1 + (temp(i,k)-t_ice_all)*rhc(i,k)) &
-                         * t_ice_denom
+           if(iccn == 0) then
+             if(temp(i,k) < T_ICE_ALL) then
+!              SC_ICE(i,k) = max(SC_ICE(I,k), 1.2)
+               SC_ICE(i,k) = max(SC_ICE(I,k), 1.5)
+             elseif(temp(i,k) > TICE) then
+               SC_ICE(i,k) = rhc(i,k)
+             else
+!              SC_ICE(i,k) = 1.0
+!              tx1 = max(SC_ICE(I,k), 1.2)
+               tx1 = max(SC_ICE(I,k), 1.5)
+               SC_ICE(i,k) = ((tice-temp(i,k))*tx1 + (temp(i,k)-t_ice_all)*rhc(i,k)) &
+                           * t_ice_denom
+             endif
            endif
            if (iccn .ne. 1) then
              CDNC_NUC(I,k) = npccninr8(k)
