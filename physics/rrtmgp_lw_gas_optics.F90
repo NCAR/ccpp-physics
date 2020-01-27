@@ -116,7 +116,7 @@ contains
     errflg = 0
 
 #ifdef MPI
-    call MPI_BARRIER(mpicomm, mpierr)
+    !call MPI_BARRIER(mpicomm, mpierr)
 #endif
 
     write(*,"(a12,3i10)") 'MPI ranks: ',mpirank,mpiroot,mpicomm
@@ -167,7 +167,7 @@ contains
     ! Broadcast dimensions to all processors
 #ifdef MPI
     ! Hold up until data is read in on master processor
-    call MPI_BARRIER(mpicomm, mpierr)
+    !call MPI_BARRIER(mpicomm, mpierr)
 
     if (ierr .eq. 0) then
        call MPI_BCAST(ntemps,                          1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
