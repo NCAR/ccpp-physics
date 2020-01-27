@@ -903,3 +903,92 @@ MKB Addition
   kind = kind_phys
   intent = in
   optional = F
+[tbot]
+  standard_name = bottom_soil_temperature
+  long_name = bottom_soil_temperature (local yearly-mean sfc air tmp) 
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cmc]
+  standard_name = canopy_water_amount
+  long_name = canopy moisture content
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[t1]
+  standard_name = ground_canopy_snowpack_effect_skin_temperature
+  long_name = ground canopy snowpack effect skin temperature 
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sh2o]
+  standard_name = volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model
+  long_name = volume fraction of unfrozen soil moisture for lsm
+  units = frac
+  dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sneqv]
+  standard_name = surface_snow_thickness_water_equivalent
+  long_name = water equivalent snow depth
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[z0]
+  standard_name = time_varying_roughness_length
+  long_name = time varying roughness length
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[z0brd]
+  standard_name = background_fixed_roughness_length
+  long_name = background fixed roughness length
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nroot]
+  standard_name = number_of_root_layers         
+  long_name = number of root layers function of vegtype
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[shdfac]
+  standard_name = areal_coverage_vegetation_area_fraction
+  long_name = areal coverage of green veg
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snowh]
+  standard_name = actual_snow_depth 
+  long_name = snow depth
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
