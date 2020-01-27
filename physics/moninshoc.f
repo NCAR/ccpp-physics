@@ -31,7 +31,6 @@
      &                          prsi,del,prsl,prslk,phii,phil,delt,
      &                          dusfc,dvsfc,dtsfc,dqsfc,dkt,hpbl,
      &                          kinver,xkzm_m,xkzm_h,xkzm_s,xkzminv,
-     &                          lprnt,ipr,me,
      &                          grav, rd, cp, hvap, fv,
      &                          errmsg,errflg)
 !
@@ -42,9 +41,8 @@
 !
 !     arguments
 !
-      logical,                                  intent(in) :: lprnt
       integer,                                  intent(in) :: ix, im,
-     &  km, ntrac, ntcw, ncnd, ntke, ipr, me
+     &  km, ntrac, ntcw, ncnd, ntke
       integer, dimension(im),                   intent(in) ::  kinver
 
       real(kind=kind_phys),                     intent(in) :: delt,
@@ -119,14 +117,6 @@
 !
       if (ix < im) stop
 !
-!     if (lprnt) write(0,*)' in moninshoc tsea=',tsea(ipr)
-!    &,    ' grav=',grav, rd, cp, hvap, fv,' ipr=',ipr
-!    &,' ntke=',ntke,' ntcw=',ntcw
-!     if (lprnt) write(0,*)' in moninshoc tin=',t1(ipr,:)
-!     if (lprnt) write(0,*)' in moninshoc qin=',q1(ipr,:,1)
-!     if (lprnt) write(0,*)' in moninshoc qwin=',q1(ipr,:,2)
-!     if (lprnt) write(0,*)' in moninshoc qiin=',q1(ipr,:,3)
-
       dt2   = delt
       rdt   = 1. / dt2
       km1   = km - 1
@@ -170,12 +160,6 @@
           endif
         enddo
       enddo
-
-!     if (lprnt) then
-!       write(0,*)' tx1=',tx1(ipr),' kinver=',kinver(ipr)
-!       write(0,*)' xkzo=',xkzo(ipr,:)
-!       write(0,*)' xkzmo=',xkzmo(ipr,:)
-!     endif
 !
 !  diffusivity in the inversion layer is set to be xkzminv (m^2/s)
 !
@@ -219,7 +203,6 @@
         enddo
       enddo
 !
-!     if (lprnt) write(0,*)' heat=',heat(ipr),' evap=',evap(ipr)
       do i = 1,im
          sflux(i)  = heat(i) + evap(i)*fv*theta(i,1)
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
@@ -380,9 +363,6 @@
           dkt(i,k) = max(min(tkh(i,kp1)+xkzo(i,k), dkmax), xkzo(i,k))
         enddo
       enddo
-
-!     if (lprnt) write(0,*)' tkh=',tkh(ipr,:)
-!     if (lprnt) write(0,*)' dkt=',dkt(ipr,:)
 !
 !     compute tridiagonal matrix elements for heat and moisture
 !
@@ -391,8 +371,6 @@
          a1(i,1) = t1(i,1)   + beta(i) * heat(i)
          a2(i,1) = q1(i,1,1) + beta(i) * evap(i)
       enddo
-!     if (lprnt) write(0,*)' a1=',a1(ipr,1),' beta=',beta(ipr)
-!    &,' heat=',heat(ipr), ' t1=',t1(ipr,1)
 
       ntloc = 1
       if(ntrac > 1) then
@@ -557,8 +535,6 @@
         enddo
       endif
 !
-!     if (lprnt) write(0,*)' in moninshoc tau=',tau(ipr,:)*86400
-
       return
       end subroutine moninshoc_run
 

@@ -379,10 +379,6 @@ contains
             gflx(i) = txl*gflx_lnd(i)   + tem*gflx_ice(i)   + txo*gflx_ocn(i)
           endif
           tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_ocn(i)
-         !tsfc(i)   = txl*tsfc_lnd(i)   + txi*tsfc_ice(i)   + txo*tsfc_ocn(i)
-
-          ! DH* NOTE THIS IS UNNECESSARY BECAUSE DONE BEFORE? Diag%cmm(i)       = txl*cmm3(i,1)    + txi*cmm3(i,2)    + txo*cmm3(i,3)
-          ! DH* NOTE THIS IS UNNECESSARY BECAUSE DONE BEFORE? Diag%chh(i)       = txl*chh3(i,1)    + txi*chh3(i,2)    + txo*chh3(i,3)
 
           zorll(i) = zorl_lnd(i)
           zorlo(i) = zorl_ocn(i)

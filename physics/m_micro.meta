@@ -61,6 +61,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tmelt]
   standard_name = triple_point_temperature_of_water
   long_name = triple point temperature of water
@@ -823,14 +832,6 @@
   type = logical
   intent = in
   optional = F
-[lprnt]
-  standard_name = flag_print
-  long_name = control flag for diagnostic print out
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [alf_fac]
   standard_name = mg_tuning_factor_for_alphas
   long_name = tuning factor for alphas (alpha = 1 - critical relative humidity)
@@ -853,14 +854,6 @@
   standard_name = flag_for_pdf_for_morrison_gettelman_microphysics_scheme
   long_name = pdf flag for MG macrophysics
   units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ipr]
-  standard_name = horizontal_index_of_printed_column
-  long_name = horizontal index of printed column
-  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -898,14 +891,6 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[me]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [errmsg]

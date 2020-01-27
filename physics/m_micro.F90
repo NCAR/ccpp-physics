@@ -20,7 +20,7 @@ contains
 !! \htmlinclude m_micro_init.html
 !!
 subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, cpair,&
-                        tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,      &
+                        eps, tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,  &
                         mg_rhmini, microp_uniform, do_cldice, hetfrz_classnuc,        &
                         mg_precip_frac_method, mg_berg_eff_factor, sed_supersat,      &
                         do_sb_physics, mg_do_hail,  mg_do_graupel, mg_nccons,         &
@@ -38,7 +38,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                                         sed_supersat, do_sb_physics, mg_do_hail,        &
                                         mg_do_graupel, mg_nccons, mg_nicons, mg_ngcons, &
                                         mg_do_ice_gmao, mg_do_liq_liu
-    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, tmelt, latvap, latice
+    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, eps, tmelt, latvap, latice
     real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(2), mg_rhmini, &
                                         mg_berg_eff_factor, mg_ncnst, mg_ninst, mg_ngnst
     character(len=16),    intent(in) :: mg_precip_frac_method
@@ -60,7 +60,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
       call ini_micro (mg_dcs, mg_qcvar, mg_ts_auto_ice(1))
     elseif (fprcp == 1) then
       call micro_mg_init2_0(kind_phys, gravit, rair, rh2o, cpair, &
-                            tmelt, latvap, latice, mg_rhmini,     &
+                            eps, tmelt, latvap, latice, mg_rhmini,&
                             mg_dcs, mg_ts_auto_ice,               &
                             mg_qcvar,                             &
                             microp_uniform, do_cldice,            &
@@ -73,7 +73,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                             mg_ncnst,       mg_ninst)
     elseif (fprcp == 2) then
       call micro_mg_init3_0(kind_phys, gravit, rair, rh2o, cpair, &
-                            tmelt, latvap, latice, mg_rhmini,     &
+                            eps, tmelt, latvap, latice, mg_rhmini,&
                             mg_dcs, mg_ts_auto_ice,               &
                             mg_qcvar,                             &
                             mg_do_hail,       mg_do_graupel,      &
@@ -136,9 +136,9 @@ end subroutine m_micro_init
      &,                         CLDREFFG, aerfld_i                      &
      &,                         aero_in,  naai_i, npccn_i, iccn         &
      &,                         skip_macro                              &
-     &,                         lprnt, alf_fac, qc_min, pdfflag         &
-     &,                         ipr, kdt, xlat, xlon, rhc_i,            &
-     &                          me, errmsg, errflg)
+     &,                         alf_fac, qc_min, pdfflag                &
+     &,                         kdt, xlat, xlon, rhc_i,                 &
+     &                          errmsg, errflg)
 
        use machine ,      only: kind_phys
        use physcons,           grav   => con_g,    pi     => con_pi,    &
@@ -182,8 +182,8 @@ end subroutine m_micro_init
      &                       fourb3=4.0/3.0, RL_cub=1.0e-15, nmin=1.0
 
        integer, parameter :: ncolmicro = 1
-       integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag, me
-       logical,intent(in) :: flipv, aero_in, skip_macro, lprnt, iccn
+       integer,intent(in) :: im, ix,lm, kdt, fprcp, pdfflag
+       logical,intent(in) :: flipv, aero_in, skip_macro, iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
        real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
@@ -379,7 +379,8 @@ end subroutine m_micro_init
        type (AerProps)                     :: AeroAux, AeroAux_b
        real, allocatable, dimension(:,:,:) :: AERMASSMIX
 
-       logical :: use_average_v, ltrue, lprint
+       logical :: use_average_v, ltrue, lprint, lprnt
+       integer :: ipr
 
 !==================================
 !====2-moment Microhysics=
@@ -406,6 +407,9 @@ end subroutine m_micro_init
 ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
+
+       lprnt = .false.
+       ipr   = 1
 
 !      rhr8 = 1.0
        if(flipv) then

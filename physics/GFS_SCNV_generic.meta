@@ -61,22 +61,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[lprnt]
-  standard_name = flag_print
-  long_name = control flag for diagnostic print out
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = inout
-  optional = F
-[ipr]
-  standard_name = horizontal_index_of_printed_column
-  long_name = horizontal index of printed column
-  units = index
-  dimensions = ()
-  type = integer
-  intent = inout
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -468,7 +468,7 @@
                imp_physics_gfdl, imp_physics_thompson,                    &
                imp_physics_wsm6, imp_physics_fer_hires, prsi,             &
                prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,        &
-               work1, work2, kpbl, kinver, ras, lprnt, ipt, kdt, me,      &
+               work1, work2, kpbl, kinver, ras, me,                       &
                clw, rhc, save_qc, save_qi, errmsg, errflg)
 
       use machine, only: kind_phys
@@ -478,7 +478,7 @@
       ! interface variables
       integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntlnc, ntinc, &
         ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr,          &
-        imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires, kdt, me
+        imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires, me
       integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
       logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
@@ -493,8 +493,6 @@
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
       real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
-      logical,                                        intent(inout) :: lprnt
-      integer,                                        intent(inout) :: ipt
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -508,41 +506,12 @@
       !                   turnrhcrit = 0.900, turnrhcrit_upper = 0.150
       ! in the following inverse of slope_mg and slope_upmg are specified
       real(kind=kind_phys),parameter :: slope_mg   = 50.0_kind_phys,   &
-                                        slope_upmg = 25.0_kind_phys,   &
-                                        rad2dg     = 180.0/3.14159265359
+                                        slope_upmg = 25.0_kind_phys
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      lprnt = .false.
-      ipt = 1
-!     do i=1,im
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-97.50) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg-24.48) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-293.91) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg+72.02) < 0.101
-!       lprnt = kdt >=   1 .and. abs(grid%xlon(i)*rad2dg-308.88) < 0.101  &
-!                          .and. abs(grid%xlat(i)*rad2dg+29.16) < 0.101
-!       lprnt = kdt >=   135 .and. abs(xlon(i)*rad2dg-95.27) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg-26.08) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-311.08) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg+28.27) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-113.48) < 0.101     &
-!                          .and. abs(xlat(i)*rad2dg-21.07) < 0.101
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-269.29) < 0.201     &
-!                          .and. abs(xlat(i)*rad2dg-17.45) < 0.201
-!       lprnt = kdt >=   1 .and. abs(xlon(i)*rad2dg-169.453) < 0.501  &
-!                          .and. abs(xlat(i)*rad2dg-72.96) < 0.501
-!       if (kdt == 1) &
-!         write(2000+me,*)' i=',i,' xlon=',xlon(i)*rad2dg,          &
-!                       ' xlat=',xlat(i)*rad2dg,' me=',me
-!       if (lprnt) then
-!         ipt = i
-!         write(0,*)' ipt=',ipt,'xlon=',xlon(i)*rad2dg,' xlat=',xlat(i)*rad2dg,' me=',me
-!         exit
-!       endif
-!     enddo
 !
 !GF* The following section (initializing convective variables) is already executed in GFS_typedefs%interstitial_phys_reset
 !       do k=1,levs
@@ -615,7 +584,6 @@
               rhc(i,k) = min(rhcmax, max(0.7, 1.0-tx2(i)*tem1*tem2))
             enddo
           enddo
-!         if (kdt == 1 .and. me == 0) write(0,*)' rhc=',rhc(1,:)
         else
           do k=1,levs
             do i=1,im
@@ -676,11 +644,6 @@
         rhc(:,:) = 1.0
       endif   ! end if_ntcw
 
-!     if (lprnt) write(0,*)' clwice=',clw(ipt,:,1)
-!     if (lprnt) write(0,*)' clwwat=',clw(ipt,:,2)
-!     if (lprnt) write(0,*)' rhc=',rhc(ipt,:)
-!     if (lprnt) write(0,*)' gq01=',gq0(ipt,:,1)
-
     end subroutine GFS_suite_interstitial_3_run
 
   end module GFS_suite_interstitial_3
@@ -701,7 +664,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, gt0, dqdti, imfdeepcnv, imfdeepcnv_gf, lprnt, ipr, errmsg, errflg)
+      gq0, clw, gt0, dqdti, imfdeepcnv, imfdeepcnv_gf, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -711,9 +674,9 @@
 
       integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imfdeepcnv, imfdeepcnv_gf, ipr
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imfdeepcnv, imfdeepcnv_gf
 
-      logical,                                  intent(in) :: ltaerosol, cplchm, lprnt
+      logical,                                  intent(in) :: ltaerosol, cplchm
 
       real(kind=kind_phys),                     intent(in) :: con_pi, dtf
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc, gt0
@@ -820,16 +783,6 @@
           enddo
         enddo
       endif
-
-!       if (lprnt) then
-!         write(0,*)' aft shallow physics'
-!         write(0,*)'qt0s=',gt0(ipr,:)
-!         write(0,*)'qq0s=',gq0(ipr,:,1)
-!         write(0,*)'qq0ws=',gq0(ipr,:,ntcw)
-!         write(0,*)'qq0is=',gq0(ipr,:,ntiw)
-!         write(0,*)'qq0ntic=',gq0(ipr,:,8)
-!         write(0,*)'qq0os=',gq0(ipr,:,12)
-!       endif
 
     end subroutine GFS_suite_interstitial_4_run
 

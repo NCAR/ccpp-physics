@@ -1429,30 +1429,6 @@
   type = logical
   intent = in
   optional = F
-[lprnt]
-  standard_name = flag_print
-  long_name = control flag for diagnostic print out
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = inout
-  optional = F
-[ipt]
-  standard_name = horizontal_index_of_printed_column
-  long_name = horizontal index of printed column
-  units = index
-  dimensions = ()
-  type = integer
-  intent = inout
-  optional = F
-[kdt]
-  standard_name = index_of_time_step
-  long_name = current forecast iteration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = current MPI-rank
@@ -1790,22 +1766,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
-[lprnt]
-  standard_name = flag_print
-  long_name = control flag for diagnostic print out
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = inout
-  optional = F
-[ipr]
-  standard_name = horizontal_index_of_printed_column
-  long_name = horizontal index of printed column
-  units = index
-  dimensions = ()
-  type = integer
-  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

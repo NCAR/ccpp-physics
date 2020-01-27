@@ -16,13 +16,13 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, lprnt, ipr, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
-      integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac, ipr
-      logical,                                          intent(in) :: ldiag3d, do_aw, lprnt
+      integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
+      logical,                                          intent(in) :: ldiag3d, do_aw
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
@@ -86,15 +86,15 @@
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
         do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
-        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, lprnt, ipr, errmsg, errflg)
+        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, errmsg, errflg)
 !
       use machine, only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, ipr
+      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm, lprnt
+      logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm
 
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rainc, rain1, xlat, xlon, tsfc
@@ -217,14 +217,6 @@
                             rain, phii, tsfc,                &  ! input
                             domr, domzr, domip, doms)           ! output
 !
-!        if (lprnt) print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS '
-!     &,DOMR(ipr),DOMZR(ipr),DOMIP(ipr),DOMS(ipr)
-!        do i=1,im
-!         if (abs(xlon(i)*57.29578-114.0) .lt. 0.2  .and.
-!     &    abs(xlat(i)*57.29578-40.0) .lt. 0.2)
-!     &    print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS ',
-!     &    DOMR(i),DOMZR(i),DOMIP(i),DOMS(i)
-!       end do
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
 
         if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_thompson) then
