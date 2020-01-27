@@ -308,7 +308,6 @@ contains
     call MPI_BCAST(press_ref_trop,                  1,                            MPI_REAL,               mpiroot, mpicomm, mpierr)
     call MPI_BCAST(totplnk,                         size(totplnk),                MPI_REAL,               mpiroot, mpicomm, mpierr)
     call MPI_BCAST(planck_frac,                     size(planck_frac),            MPI_REAL,               mpiroot, mpicomm, mpierr)
-#endif
     ! Character arrays
     do ij=1,nabsorbers
        call MPI_BCAST(gas_names(ij),                len(gas_names(ij)),           MPI_CHAR,               mpiroot, mpicomm, mpierr)
