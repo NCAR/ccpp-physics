@@ -40,6 +40,7 @@
 !!\param[in] swnet        real, downward SW net (dn-up) flux (\f$W/m^2\f$)
 !!\param[in] lwdn         real, downward LW radiation flux (\f$W/m^2\f$)
 !!\param[in] sfcems       real, sfc LW emissivity (fractional)
+!!\param[in] embrd        real, background sfc LW emissivity (fractional)
 !!\param[in] sfcprs       real, pressure at height zlvl above ground(\f$Pa\f$)
 !!\param[in] sfctmp       real, air temp at height zlvl above ground (\f$K\f$)
 !!\param[in] sfcspd       real, wind speed at height zlvl above ground (\f$m s^{-1}\f$)
@@ -56,9 +57,11 @@
 !!\param[in] shdmax       real, max areal coverage of green veg (fraction)
 !!\param[in] alb          real, background snow-free sfc albedo (fraction)
 !!\param[in] snoalb       real, max albedo over deep snow (fraction)
-!!\param[in] xlaip        real, perturbation of leave area index (perturbation)
-!!\param[in] lheatstrg    logical, flag for canopy heat storage parameterization 
+!!\param[in] usemonalb    logical, use 2d field (.true.) vs table (.false.)values 
+!!\param[in,out] snotime1 real, initial number of timesteps since last
+!!snowfall 
 !!\param[in,out] tbot     real, bottom soil temp (\f$K\f$) (local yearly-mean sfc air temp)
+!!\param[in,out] z0brd    real, background fixed roughness length (m)
 !!\param[in,out] cmc      real, canopy moisture content (\f$m\f$)
 !!\param[in,out] t1       real, ground/canopy/snowpack eff skin temp (\f$K\f$)
 !!\param[in,out] stc      real, soil temp (\f$K\f$)
@@ -70,11 +73,13 @@
 !!\param[in,out] cm       real, sfc exchange coeff for momentum
 !! (\f$ms^{-1}\f$), note: conductance since it's been mult by wind
 !!\param[in,out] z0       real, roughness length (\f$m\f$)
+!!\param[in,out] ribb     real, documentation needed 
 !!\param[out] nroot       integer, number of root layers
 !!\param[out] shdfac      real, aeral coverage of green veg (fraction)
 !!\param[out] snowh       real, snow depth (\f$m\f$)
 !!\param[out] albedo      real, sfc albedo incl snow effect (fraction)
 !!\param[out] eta         real, downward latent heat flux (\f$W/m^2\f$)
+!!\param[out] eta_kinematic real, actual latent heat flux (\f$Kg/m^{-2}s^{-1}\f$)
 !!\param[out] sheat       real, downward sensible heat flux (\f$W/m^2\f$)
 !!\param[out] ec          real, canopy water evaporation (\f$W/m^2\f$)
 !!\param[out] edir        real, direct soil evaporation (\f$W/m^2\f$)
@@ -90,6 +95,10 @@
 !!\param[out] flx1        real, precip-snow sfc flux  (\f$W/m^2\f$)
 !!\param[out] flx2        real, freezing rain latent heat flux (\f$W/m^2\f$)
 !!\param[out] flx3        real, phase-change heat flux from snowmelt (\f$W/m^2\f$)
+!!\param[out] flx4        real, energy added to sensible heat(ua_phys) (\f$W/m^2\f$)
+!!\param[out] fvb         real, frac veg w/snow beneath (ua_phys) (fraction)
+!!\param[out] fbur        real, frac of canopy buried (ua_phys) (fraction)
+!!\param[out] fgsn        real, frac of ground snow cover (ua_phys) (fraction)
 !!\param[out] runoff1     real, surface runoff (\f$ms^{-1}\f$) not infiltrating sfc
 !!\param[out] runoff2     real, sub sfc runoff (\f$ms^{-1}\f$) (baseflow)
 !!\param[out] runoff3     real, excess of porosity for a given soil layer
@@ -105,6 +114,9 @@
 !!\param[out] rcsoil      real, soil moisture rc factor (dimensionless)
 !!\param[out] soilw       real, available soil moisture in root zone
 !!\param[out] soilm       real, total soil column moisture (frozen+unfrozen) (\f$m\f$)
+!!\param[out] q1          real, mixing ratio at surface;used for diag (\f$kgkg^{-1}\f$)
+!!\param[out] smav        real, soil mois avail for each lyr, frac bet
+!!                              smcwlt and smcmax 
 !!\param[out] smcwlt      real, wilting point (volumetric)
 !!\param[out] smcdry      real, dry soil moisture threshold (volumetric)
 !!\param[out] smcref      real, soil moisture threshold (volumetric)
@@ -116,14 +128,15 @@
      &       swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 &
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, ivegsrc,             &
      &       vegtyp, soiltyp, slopetyp, shdmin, shdmax, alb, snoalb,    &
-     &       lheatstrg, usemonalb, rdlai2d,                             &!  ---  input/outputs:
+     &       z0brd, usemonalb, snotime1, ribb,                          &!  ---  input/outputs:
      &       tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,z0,           &!  ---  outputs:
      &       nroot, shdfac, snowh, albedo, eta, sheat, ec,              &
      &       edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         &
      &       flx1, flx2, flx3, runoff1, runoff2, runoff3,               &
      &       snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        &
-     &       rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax,      &
-     &       flx4, fvb, fbur, fgsn, ztopv, zbotv, gama, fnet, etpn, ru  &!  --- ua_phys
+     &       rcsoil, soilw, soilm, q1, smav, smcwlt, smcdry, smcref,    &
+     &       smcmax, embrd, eta_kinematic,                              &
+     &       flx4, fvb, fbur, fgsn                                       !  --- ua_phys
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -144,6 +157,7 @@
 !            swdn, swnet, lwdn, sfcems, sfcprs, sfctmp,                 !
 !            sfcspd, prcp, q2, q2sat, dqsdt2, th2,ivegsrc,              !
 !            vegtyp, soiltyp, slopetyp, shdmin, shdmax, alb, snoalb,    !
+!            z0brd, usemonalb,                                          !
 !  ---  input/outputs:                                                  !
 !            tbot, cmc, t1, stc, smc, sh2o, sneqv, ch, cm,              !
 !  ---  outputs:                                                        !
@@ -151,7 +165,7 @@
 !            edir, et, ett, esnow, drip, dew, beta, etp, ssoil,         !
 !            flx1, flx2, flx3, runoff1, runoff2, runoff3,               !
 !            snomlt, sncovr, rc, pc, rsmin, xlai, rcs, rct, rcq,        !
-!            rcsoil, soilw, soilm, smcwlt, smcdry, smcref, smcmax )     !
+!            rcsoil, soilw, soilm, q1, smcwlt, smcdry, smcref, smcmax ) !
 !                                                                       !
 !                                                                       !
 !  subprograms called:  redprm, snow_new, csnow, snfrac, alcalc,        !
@@ -190,6 +204,7 @@
 !     swnet    - real, downward sw net (dn-up) flux (w/m**2)       1    !
 !     lwdn     - real, downward lw radiation flux (w/m**2)         1    !
 !     sfcems   - real, sfc lw emissivity (fractional)              1    !
+!     embrd    - real, background sfc lw emissivity (fractional)   1    !
 !     sfcprs   - real, pressure at height zlvl abv ground(pascals) 1    !
 !     sfctmp   - real, air temp at height zlvl abv ground (k)      1    !
 !     sfcspd   - real, wind speed at height zlvl abv ground (m/s)  1    !
@@ -207,12 +222,11 @@
 !     shdmax   - real, max areal coverage of green veg (fraction)  1    !
 !     alb      - real, bkground snow-free sfc albedo (fraction)    1    !
 !     snoalb   - real, max albedo over deep snow     (fraction)    1    !
-!     lheatstrg- logical, flag for canopy heat storage             1    !
-!                         parameterization                              !
 !                                                                       !
 !  input/outputs:                                                       !
 !     tbot     - real, bottom soil temp (k)                        1    !
 !                      (local yearly-mean sfc air temp)                 !
+!     z0brd    - real, background fixed roughness length (m)       1    !
 !     cmc      - real, canopy moisture content (m)                 1    !
 !     t1       - real, ground/canopy/snowpack eff skin temp (k)    1    !
 !     stc      - real, soil temp (k)                             nsoil  !
@@ -232,6 +246,7 @@
 !     snowh    - real, snow depth (m)                              1    !
 !     albedo   - real, sfc albedo incl snow effect (fraction)      1    !
 !     eta      - real, downward latent heat flux (w/m2)            1    !
+!     eta_kinematic - real, actual latent heat flux (w/m2)         1    !
 !     sheat    - real, downward sensible heat flux (w/m2)          1    !
 !     ec       - real, canopy water evaporation (w/m2)             1    !
 !     edir     - real, direct soil evaporation (w/m2)              1    !
@@ -247,6 +262,7 @@
 !     flx1     - real, precip-snow sfc flux  (w/m2)                1    !
 !     flx2     - real, freezing rain latent heat flux (w/m2)       1    !
 !     flx3     - real, phase-change heat flux from snowmelt (w/m2) 1    !
+!     flx4     - real, energy added to sensible heat(ua_phys)w/m2) 1    !
 !     snomlt   - real, snow melt (m) (water equivalent)            1    !
 !     sncovr   - real, fractional snow cover                       1    !
 !     runoff1  - real, surface runoff (m/s) not infiltrating sfc   1    !
@@ -262,6 +278,8 @@
 !     rcsoil   - real, soil moisture rc factor   (dimensionless)   1    !
 !     soilw    - real, available soil mois in root zone            1    !
 !     soilm    - real, total soil column mois (frozen+unfrozen) (m)1    !
+!     q1       - real, mixing ratio at surface (kg kg-1)           1    !
+!     smav     - real, soil mois avail for each layer              1    !
 !     smcwlt   - real, wilting point (volumetric)                  1    !
 !     smcdry   - real, dry soil mois threshold (volumetric)        1    !
 !     smcref   - real, soil mois threshold     (volumetric)        1    !
@@ -323,13 +341,13 @@
      &       sfcspd, prcp, q2, q2sat, dqsdt2, th2, shdmin, shdmax, alb, &
      &       snoalb,                                                    &
 
-      logical, intent(in) :: lheatstrg
-      logical, intent(in) :: usemonalb
+      logical, intent(in) :: usemonalb                  !true for HWRF
       logical, intent(in) :: rdlai2d
 
 !  ---  input/outputs:
       real (kind=kind_phys), intent(inout) :: tbot, cmc, t1, sneqv,     &
-     &       stc(nsoil), smc(nsoil), sh2o(nsoil), ch, cm
+     &       stc(nsoil), smc(nsoil), sh2o(nsoil), ch, cm, z0brd,        &
+     &       snotime1, ribb
 
       real (kind=kind_phys), intent(inout) :: fhead1rt,infxs1rt, etpnd1
 
@@ -340,8 +358,8 @@
      &       eta, sheat, ec, edir, et(nsoil), ett, esnow, drip, dew,    &
      &       beta, etp, ssoil, flx1, flx2, flx3, snomlt, sncovr,        &
      &       runoff1, runoff2, runoff3, rc, pc, rsmin, xlai, rcs,       &
-     &       rct, rcq, rcsoil, soilw, soilm, smcwlt, smcdry, smcref,    &
-     &       smcmax,                                                    &
+     &       rct, rcq, rcsoil, soilw, soilm, q1, smav, smcwlt, smcdry,  &
+     &       smcref, smcmax, embrd                                      &
      &       eta_kinematic 
 
 !  ---  locals:
@@ -381,6 +399,7 @@
       real                              :: ru        ! ua:
 
       ua_phys = .false.
+      rdlai2d = .false.
 !
 !===> ...  begin here
 !
@@ -834,7 +853,7 @@
 !  ---  inputs:
      &     ( sfctmp, sfcprs, sfcems, ch, t2v, th2, prcp, fdown,         &
      &       cpx, cpfac, ssoil, q2, q2sat, dqsdt2, snowng, frzgra,      &
-     &       sncovr, sneqv, albedo, soldn, stc1,                        &
+     &       sncovr, aoasis, sneqv, albedo, soldn, stc1,                &
 !  ---  outputs:
      &       t24, etp, rch, epsca, rr, flx2, etpn, flx4                 &
      &     )
@@ -924,6 +943,7 @@
 
       endif
 
+      q1=q2+eta_kinematic*cp/rch
 !> - Noah LSM post-processing:
 !>  - Calculate sensible heat (h) for return to parent model.
 
@@ -1079,7 +1099,7 @@
 
       logical (kind=kind_phys), intent(in) :: snowng
 
-      real (kind=kind_phys), intent(out) :: snotime1
+      real (kind=kind_phys), intent(inout) :: snotime1
 
 
 !  ---  outputs:
@@ -1826,7 +1846,7 @@
 !  ---  inputs:
      &     ( sfctmp, sfcprs, sfcems, ch, t2v, th2, prcp, fdown,         &
      &       cpx, cpfac, ssoil, q2, q2sat, dqsdt2, snowng, frzgra,      &
-     &       sncovr, sneqv, albedo, soldn, stc1,                        &
+     &       sncovr, aoasis, sneqv, albedo, soldn, stc1,                &
 !  ---  outputs:
      &       t24, etp, rch, epsca, rr, flx2, etpn, flx4                 &
      &     )
