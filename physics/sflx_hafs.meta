@@ -615,15 +615,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[runoff]
-  standard_name = surface_runoff_flux
-  long_name = surface runoff flux
-  units = kg m-2 s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [cmm]
   standard_name = surface_drag_wind_speed_for_momentum_in_air_over_land
   long_name = momentum exchange coefficient over land
@@ -991,4 +982,382 @@ MKB Addition
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[albedo]
+  standard_name = surface_albedo_incl_snow_effect
+  long_name = surface albedo incl snow effect 
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[eta]
+  standard_name = instantaneous_downward_latent_heat_flux
+  long_name = instantaneous downward latent heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[eta_kinematic]
+  standard_name = actual_latent_heat_flux
+  long_name = actual latent heat flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sheat]
+  standard_name = instantaneous_sensible_heat_flux
+  long_name = instantaneous sensible heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ec]
+  standard_name = evaporation_from_canopy_intercepted_rainfall 
+  long_name = evaporation from canopy intercepted rainfall 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[edir]
+  standard_name = direct_evaporation_from_soil 
+  long_name = direct_evaporation_from_soil 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[et]
+  standard_name = transpiration_through_plant_canopy
+  long_name = transpiration through plant canopy 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ett]
+  standard_name = total_plant_transpiration 
+  long_name = total plant transpiration 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[esnow]
+  standard_name = sublimation_from_snowpack 
+  long_name = sublimation from snowpack 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[drip]
+  standard_name = throughfall_of_precip_dew 
+  long_name = through-fall of precip and or dew in excess of canopy water holding capacity
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dew]
+  standard_name = dewfall 
+  long_name = dewfall or frostfall for t<273.15 
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[beta]
+  standard_name = ratio_of_actual_potential_evap
+  long_name = ratio of actual/potential evaporation 
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[etp]
+  standard_name = potential_evap
+  long_name = potential evaporation 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ssoil]
+  standard_name = upward_soil_heat_flux
+  long_name = upward soil heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[flx1]
+  standard_name = precip_snow_sfc_flux 
+  long_name = precip snow sfc flux 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[flx2]
+  standard_name = freezing_rain_latent_heat_flux
+  long_name = freezing rain latent heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[flx3]
+  standard_name = phase_change_heat_flux_from_snow_melt
+  long_name = phase change heat flux from snow melt 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[flx4]
+  standard_name = energy_added_to_sensible_heat
+  long_name = energy added to sensible heat ua_phys 
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[fvb]
+  standard_name = fraction_of_veg_with_snow_beneath
+  long_name = fraction of veg with snow beneath ua_phys
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[fbur]
+  standard_name = fraction_of_canopy_buried
+  long_name = fraction of canopy buried ua_phys
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[fgsn]
+  standard_name = fraction_of_ground_snow_cover
+  long_name = fraction of ground snow cover ua_phys 
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[runoff1]
+  standard_name = surface_runoff
+  long_name = surface runoff not infiltrating sfc 
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[runoff2]
+  standard_name = sub_surface_runoff
+  long_name = sub surface runoff baseflow 
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[runoff3]
+  standard_name = excess_porosity 
+  long_name = excess of porosity for a given soil layer 
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snowmlt]
+  standard_name = surface_snow_melt
+  long_name = snow melt during timestep
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sncovr]
+  standard_name = fractional_snow_cover
+  long_name = fractional snow cover
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rc]
+  standard_name = canopy_resistance    
+  long_name = canopy resistance 
+  units = s m-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[pc]
+  standard_name = plant_coefficient    
+  long_name = plant coefficient 
+  units = frac 
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rsmin]
+  standard_name = min_canopy_resistance
+  long_name = min canopy resistance
+  units = s m-1 
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[xlai]
+  standard_name = leaf_area_index
+  long_name = leaf_area_index 
+  units = index 
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rcs]
+  standard_name = incoming_solar_rc_factor
+  long_name = incoming solar rc factor 
+  units = index 
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rct]
+  standard_name = air_temperature_rc_factor
+  long_name = air temperature rc factor 
+  units = index 
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rcq]
+  standard_name = atmospheric_vapor_pressure_deficit_rc_factor
+  long_name = atmospheric vapor pressure deficit rc factor 
+  units = index 
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rcsoil]
+  standard_name = soil_moisture_rc_factor
+  long_name = soil moisture rc factor 
+  units = index 
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[soilw]
+  standard_name = soil_moisture_root_zone
+  long_name = available soil moisture in root zone 
+  units = frac 
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[soilm]
+  standard_name = total_soil_column_moisture_content
+  long_name = total soil column moisture content frozen and unfrozen 
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[q1]
+  standard_name = effective_mixing_ratio_at_surface
+  long_name = effective mixing ratio at surface 
+  units = kg kg-1 
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[smav]
+  standard_name = soil_moisture_availability_for_each_layer
+  long_name = soil moisture availabilty for each layer
+  units = frac 
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[smcwlt]
+  standard_name = volume_fraction_of_condensed_water_in_soil_at_wilting_point
+  long_name = wilting point (volumetric)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[smcref]
+  standard_name = threshold_volume_fraction_of_condensed_water_in_soil
+  long_name = soil moisture threshold (volumetric)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[smcdry]
+  standard_name = threshold_volume_fraction_of_dry_moisture_in_soil
+  long_name = dry soil moisture threshold where dry evap from top layer ends (volumetric)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[smcmax]
+  standard_name = porosity
+  long_name = saturated value of soil moisture (volumetric)
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
