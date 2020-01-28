@@ -60,17 +60,17 @@ contains
          minor_limits_gpt_upper             ! Beginning and ending gpoint for each minor interval in upper atmosphere
     integer, dimension(:,:,:), allocatable :: &
          key_species                        ! Key species pair for each band  
-    real(kind_phys) :: &
+    real(kind=8) :: &
          press_ref_trop,                  & ! Reference pressure separating the lower and upper atmosphere [Pa]   
          temp_ref_p,                      & ! Standard spectroscopic reference pressure [Pa]
          temp_ref_t                         ! Standard spectroscopic reference temperature [K]
-    real(kind_phys), dimension(:), allocatable :: &
+    real(kind=8), dimension(:), allocatable :: &
          press_ref,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa]   
          temp_ref                           ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K]  
-    real(kind_phys), dimension(:,:), allocatable :: &
+    real(kind=8), dimension(:,:), allocatable :: &
          band_lims,                       & ! Beginning and ending wavenumber [cm -1] for each band  
          totplnk                            ! Integrated Planck function by band  
-    real(kind_phys), dimension(:,:,:), allocatable :: &
+    real(kind=8), dimension(:,:,:), allocatable :: &
          vmr_ref,                         & ! volume mixing ratios for reference atmosphere   
          kminor_lower,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to 
                                             ! [nTemp x nEta x nContributors] array)  
@@ -78,7 +78,7 @@ contains
                                             ! [nTemp x nEta x nContributors] array)  
          rayl_lower,                      & ! Not used in LW, rather allocated(rayl_lower) is used  
          rayl_upper                         ! Not used in LW, rather allocated(rayl_upper) is used    
-    real(kind_phys), dimension(:,:,:,:), allocatable :: &
+    real(kind=8), dimension(:,:,:,:), allocatable :: &
          kmajor,                          & ! Stored absorption coefficients due to major absorbing gases  
          planck_frac                        ! Planck fractions   
     character(len=32),  dimension(:), allocatable :: &
@@ -270,68 +270,65 @@ contains
     endif
 
 #ifdef MPI
-!    if (mpirank .ne. mpiroot) then
-       ! Wait for processor 0 to catch up...
-       call MPI_BARRIER(mpicomm, mpierr)
-       ! Broadcast data
-       write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
-       call MPI_BCAST(ntemps,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(npress,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nabsorbers,                      1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nminorabsorbers,                 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nextrabsorbers,                  1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nmixingfracs,                    1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nlayers,                         1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nbnds,                           1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(ngpts_lw,                        1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(npairs,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(ncontributors_lower,             1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(ncontributors_upper,             1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nminor_absorber_intervals_lower, 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nminor_absorber_intervals_upper, 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(ninternalSourcetemps,            1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(minor_limits_gpt_upper,          size(minor_limits_gpt_upper), MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(minor_limits_gpt_lower,          size(minor_limits_gpt_lower), MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(kminor_start_upper,              size(kminor_start_upper),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(kminor_start_lower,              size(kminor_start_lower),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(key_species,                     size(key_species),            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(band2gpt,                        size(band2gpt),               MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(band_lims,                       size(band_lims),              MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(press_ref,                       size(press_ref),              MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(temp_ref,                        size(temp_ref),               MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(kminor_lower,                    size(kminor_lower),           MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(kminor_upper,                    size(kminor_upper),           MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(scaling_gas_lower,               size(scaling_gas_lower),      MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(scaling_gas_upper,               size(scaling_gas_upper),      MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(vmr_ref,                         size(vmr_ref),                MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(kmajor,                          size(kmajor),                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(temp_ref_p,                      1,                            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(temp_ref_t,                      1,                            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(press_ref_trop,                  1,                            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(totplnk,                         size(totplnk),                MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(planck_frac,                     size(planck_frac),            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       ! Character arrays
-       do ij=1,nabsorbers
-          call MPI_BCAST(gas_names(ij),                len(gas_names(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
-       enddo
-       do ij=1,nminorabsorbers
-          call MPI_BCAST(gas_minor(ij),                len(gas_minor(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
-          call MPI_BCAST(identifier_minor(ij),         len(identifier_minor(ij)),    MPI_CHAR,    mpiroot, mpicomm, mpierr)
-       enddo
-       do ij=1,nminor_absorber_intervals_lower
-          call MPI_BCAST(minor_gases_lower(ij),        len(minor_gases_lower(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
-       enddo
-       do ij=1,nminor_absorber_intervals_upper
-          call MPI_BCAST(minor_gases_upper(ij),        len(minor_gases_upper(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
-       enddo
-       ! Logical arrays
-       call MPI_BCAST(minor_scales_with_density_lower, nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
-!    else
-       call MPI_BARRIER(mpicomm, mpierr)
-!    endif
+    ! Wait for processor 0 to catch up...
+    call MPI_BARRIER(mpicomm, mpierr)
+    ! Broadcast data
+    write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
+    call MPI_BCAST(ntemps,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(npress,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nabsorbers,                      1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nminorabsorbers,                 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nextrabsorbers,                  1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nmixingfracs,                    1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nlayers,                         1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nbnds,                           1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(ngpts_lw,                        1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(npairs,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(ncontributors_lower,             1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(ncontributors_upper,             1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nminor_absorber_intervals_lower, 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nminor_absorber_intervals_upper, 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(ninternalSourcetemps,            1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_limits_gpt_upper,          size(minor_limits_gpt_upper), MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_limits_gpt_lower,          size(minor_limits_gpt_lower), MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_start_upper,              size(kminor_start_upper),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_start_lower,              size(kminor_start_lower),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(key_species,                     size(key_species),            MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(band2gpt,                        size(band2gpt),               MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(band_lims,                       size(band_lims),              MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(press_ref,                       size(press_ref),              MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(temp_ref,                        size(temp_ref),               MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_lower,                    size(kminor_lower),           MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_upper,                    size(kminor_upper),           MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scaling_gas_lower,               size(scaling_gas_lower),      MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scaling_gas_upper,               size(scaling_gas_upper),      MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(vmr_ref,                         size(vmr_ref),                MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kmajor,                          size(kmajor),                 MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(temp_ref_p,                      1,                            MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(temp_ref_t,                      1,                            MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(press_ref_trop,                  1,                            MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(totplnk,                         size(totplnk),                MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(planck_frac,                     size(planck_frac),            MPI_DOUBLE_PRECISION,    mpiroot, mpicomm, mpierr)
+    ! Character arrays
+    do ij=1,nabsorbers
+       call MPI_BCAST(gas_names(ij),                len(gas_names(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
+    enddo
+    do ij=1,nminorabsorbers
+       call MPI_BCAST(gas_minor(ij),                len(gas_minor(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(identifier_minor(ij),         len(identifier_minor(ij)),    MPI_CHAR,    mpiroot, mpicomm, mpierr)
+    enddo
+    do ij=1,nminor_absorber_intervals_lower
+       call MPI_BCAST(minor_gases_lower(ij),        len(minor_gases_lower(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
+    enddo
+    do ij=1,nminor_absorber_intervals_upper
+       call MPI_BCAST(minor_gases_upper(ij),        len(minor_gases_upper(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
+    enddo
+    ! Logical arrays
+    call MPI_BCAST(minor_scales_with_density_lower, nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
