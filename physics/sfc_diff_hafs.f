@@ -220,9 +220,9 @@
             czilc = 0.8
 
             tem1 = 1.0 - sigmaf(i)
-            ztmax_lnd = z0max_lnd*exp( - tem1*tem1
+            ztmax_lnd = z0max_lnd*exp( - tem1*tem1                      &
      &                     * czilc*ca*sqrt(ustar(i,1)*(0.01/1.5e-05)))
-            ztmax_ice = z0max_ice*exp( - tem1*tem1
+            ztmax_ice = z0max_ice*exp( - tem1*tem1                      &
      &                     * czilc*ca*sqrt(ustar(i,2)*(0.01/1.5e-05)))
 
 
@@ -307,7 +307,9 @@
       enddo
 
       return
+!................................
       end subroutine sfc_diff
+!................................
 
 
 !----------------------------------------
@@ -472,7 +474,11 @@
 !! add fitted z0,zt curves for hurricane application (used in hwrf/hmon)
 !! weiguo wang, 2019-0425
 
-       subroutine znot_m_v6(uref,znotm)
+       subroutine znot_m_v6                                             &
+!      inputs
+     &   (uref,                                                         &
+!      outputs
+     &    znotm)
        implicit none
 ! calculate areodynamical roughness over water with input 10-m wind
 ! for low-to-moderate winds, try to match the cd-u10 relationship from coare v3.5 (edson et al. 2013)
@@ -520,9 +526,16 @@
         print*, 'wrong input uref value:',uref
        endif
 
+      return
+!.................................
        end subroutine znot_m_v6
+!.................................
 
        subroutine znot_t_v6(uref,znott)
+!      inputs
+     &   (uref,
+!      outputs
+     &    znott)
        implicit none
 ! calculate scalar roughness over water with input 10-m wind
 ! for low-to-moderate winds, try to match the ck-u10 relationship from coare algorithm
@@ -593,10 +606,16 @@
          print*, 'wrong input uref value:',uref
        endif
 
+      return
+!.................................
        end subroutine znot_t_v6
+!.................................
 
-
-       subroutine znot_m_v7(uref,znotm)
+       subroutine znot_m_v7                                             &
+!      inputs
+     &   (uref,                                                         &
+!      outputs
+     &    znotm)
         implicit none
 ! calculate areodynamical roughness over water with input 10-m wind
 ! for low-to-moderate winds, try to match the cd-u10 relationship from coare v3.5 (edson et al. 2013)
@@ -645,9 +664,17 @@
         print*, 'wrong input uref value:',uref
        endif
 
+      return
+!.................................
       end subroutine znot_m_v7
-      subroutine znot_t_v7(uref,znott)
-       implicit none
+!.................................
+
+      subroutine znot_t_v7                                              &
+!      inputs
+     &   (uref,                                                         &
+!      outputs
+     &    znott)
+
 ! calculate scalar roughness over water with input 10-m wind
 ! for low-to-moderate winds, try to match the ck-u10 relationship from coare algorithm
 ! for high winds, try to retain the ck-u10 relationship of fy2015 hwrf
@@ -659,6 +686,7 @@
 ! znott(meter):   scalar roughness scale over water
 !
 
+      implicit none
       real (kind=kind_phys), intent(in) :: uref
       real (kind=kind_phys), intent(out):: znott
 
@@ -698,19 +726,19 @@
         if (uref >= 0.0 .and. uref < 5.9 ) then
             znott = p00
          elseif (uref >= 5.9 .and. uref <= 15.4) then
-           znott = p15*uref**5 + p14*uref**4 + p13*uref**3 + 
+           znott = p15*uref**5 + p14*uref**4 + p13*uref**3 +            & 
      &             p12*uref**2 + p11*uref + p10
          elseif (uref > 15.4 .and. uref <= 21.6) then
-           znott = p25*uref**5 + p24*uref**4 + p23*uref**3 + 
+           znott = p25*uref**5 + p24*uref**4 + p23*uref**3 +            & 
      &             p22*uref**2 + p21*uref + p20
          elseif (uref > 21.6 .and. uref <= 42.6) then
-           znott = p35*uref**5 + p34*uref**4 + p33*uref**3 + 
+           znott = p35*uref**5 + p34*uref**4 + p33*uref**3 +            & 
      &             p32*uref**2 + p31*uref + p30
          elseif ( uref > 42.6 .and. uref <= 53.0) then
-           znott = p45*uref**5 + p44*uref**4 + p43*uref**3 + 
+           znott = p45*uref**5 + p44*uref**4 + p43*uref**3 +            & 
      &             p42*uref**2 + p41*uref + p40
          elseif ( uref > 53.0 .and. uref <= 80.0) then
-           znott = p56*uref**6 + p55*uref**5 + p54*uref**4 + 
+           znott = p56*uref**6 + p55*uref**5 + p54*uref**4 +            & 
      &             p53*uref**3 + p52*uref**2 + p51*uref + p50
          elseif ( uref > 80.0) then
            znott = p60
@@ -718,7 +746,10 @@
            print*, 'wrong input uref value:',uref
          endif
 
-        end subroutine znot_t_v7
+      return
+!.................................
+      end subroutine znot_t_v7
+!.................................
 
 
 !---------------------------------
