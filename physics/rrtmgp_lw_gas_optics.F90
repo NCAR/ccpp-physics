@@ -276,75 +276,75 @@ contains
        ! Broadcast data
        write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
        call MPI_BCAST(ntemps,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 1 ',mpierr
+       write(*,*) 'Broadcasting 1 ',mpierr, mpicomm
        call MPI_BCAST(npress,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 2 ',mpierr
+       write(*,*) 'Broadcasting 2 ',mpierr, mpicomm
        call MPI_BCAST(nabsorbers,                      1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 3 ',mpierr
+       write(*,*) 'Broadcasting 3 ',mpierr, mpicomm
        call MPI_BCAST(nminorabsorbers,                 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 4 ',mpierr
+       write(*,*) 'Broadcasting 4 ',mpierr, mpicomm
        call MPI_BCAST(nextrabsorbers,                  1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 5 ',mpierr
+       write(*,*) 'Broadcasting 5 ',mpierr, mpicomm
        call MPI_BCAST(nmixingfracs,                    1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 6 ',mpierr
+       write(*,*) 'Broadcasting 6 ',mpierr, mpicomm
        call MPI_BCAST(nlayers,                         1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 7 ',mpierr
+       write(*,*) 'Broadcasting 7 ',mpierr, mpicomm
        call MPI_BCAST(nbnds,                           1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 8 ',mpierr
+       write(*,*) 'Broadcasting 8 ',mpierr, mpicomm
        call MPI_BCAST(ngpts_lw,                        1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 9 ',mpierr
+       write(*,*) 'Broadcasting 9 ',mpierr, mpicomm
        call MPI_BCAST(npairs,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 10 ',mpierr
+       write(*,*) 'Broadcasting 10 ',mpierr, mpicomm
        call MPI_BCAST(ncontributors_lower,             1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 11 ',mpierr
+       write(*,*) 'Broadcasting 11 ',mpierr, mpicomm
        call MPI_BCAST(ncontributors_upper,             1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 12 ',mpierr
+       write(*,*) 'Broadcasting 12 ',mpierr, mpicomm
        call MPI_BCAST(nminor_absorber_intervals_lower, 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 13 ',mpierr
+       write(*,*) 'Broadcasting 13 ',mpierr, mpicomm
        call MPI_BCAST(nminor_absorber_intervals_upper, 1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 14 ',mpierr
+       write(*,*) 'Broadcasting 14 ',mpierr, mpicomm
        call MPI_BCAST(ninternalSourcetemps,            1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 15 ',mpierr
+       write(*,*) 'Broadcasting 15 ',mpierr, mpicomm
        call MPI_BCAST(minor_limits_gpt_upper,          size(minor_limits_gpt_upper), MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 16 ',mpierr
+       write(*,*) 'Broadcasting 16 ',mpierr, mpicomm
        call MPI_BCAST(minor_limits_gpt_lower,          size(minor_limits_gpt_lower), MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 17 ',mpierr
+       write(*,*) 'Broadcasting 17 ',mpierr, mpicomm
        call MPI_BCAST(kminor_start_upper,              size(kminor_start_upper),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 18 ',mpierr
+       write(*,*) 'Broadcasting 18 ',mpierr, mpicomm
        call MPI_BCAST(kminor_start_lower,              size(kminor_start_lower),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 19 ',mpierr
+       write(*,*) 'Broadcasting 19 ',mpierr, mpicomm
        call MPI_BCAST(key_species,                     size(key_species),            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 20 ',mpierr
+       write(*,*) 'Broadcasting 20 ',mpierr, mpicomm
        call MPI_BCAST(band2gpt,                        size(band2gpt),               MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 21 ',mpierr
+       write(*,*) 'Broadcasting 21 ',mpierr, mpicomm
        call MPI_BCAST(band_lims,                       size(band_lims),              MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 22 ',mpierr
+       write(*,*) 'Broadcasting 22 ',mpierr, mpicomm
        call MPI_BCAST(press_ref,                       size(press_ref),              MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 23 ',mpierr
+       write(*,*) 'Broadcasting 23 ',mpierr, mpicomm
        call MPI_BCAST(temp_ref,                        size(temp_ref),               MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 24 ',mpierr
+       write(*,*) 'Broadcasting 24 ',mpierr, mpicomm
        call MPI_BCAST(kminor_lower,                    size(kminor_lower),           MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 25 ',mpierr
+       write(*,*) 'Broadcasting 25 ',mpierr, mpicomm
        call MPI_BCAST(kminor_upper,                    size(kminor_upper),           MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 26 ',mpierr
+       write(*,*) 'Broadcasting 26 ',mpierr, mpicomm
        call MPI_BCAST(scaling_gas_lower,               size(scaling_gas_lower),      MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 27 ',mpierr
+       write(*,*) 'Broadcasting 27 ',mpierr, mpicomm
        call MPI_BCAST(scaling_gas_upper,               size(scaling_gas_upper),      MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 28 ',mpierr
+       write(*,*) 'Broadcasting 28 ',mpierr, mpicomm
        call MPI_BCAST(vmr_ref,                         size(vmr_ref),                MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 29 ',mpierr
+       write(*,*) 'Broadcasting 29 ',mpierr, mpicomm
        call MPI_BCAST(kmajor,                          size(kmajor),                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 30 ',mpierr
+       write(*,*) 'Broadcasting 30 ',mpierr, mpicomm
        call MPI_BCAST(temp_ref_p,                      1,                            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 31 ',mpierr
+       write(*,*) 'Broadcasting 31 ',mpierr, mpicomm
        call MPI_BCAST(temp_ref_t,                      1,                            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 32 ',mpierr
+       write(*,*) 'Broadcasting 32 ',mpierr, mpicomm
        call MPI_BCAST(press_ref_trop,                  1,                            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 33 ',mpierr
+       write(*,*) 'Broadcasting 33 ',mpierr, mpicomm
        call MPI_BCAST(totplnk,                         size(totplnk),                MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 34 ',mpierr
+       write(*,*) 'Broadcasting 34 ',mpierr, mpicomm
        call MPI_BCAST(planck_frac,                     size(planck_frac),            MPI_REAL,    mpiroot, mpicomm, mpierr)
-       write(*,*) 'Broadcasting 35 ',mpierr
+       write(*,*) 'Broadcasting 35 ',mpierr, mpicomm
        ! Character arrays
        do ij=1,nabsorbers
           call MPI_BCAST(gas_names(ij),                len(gas_names(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
