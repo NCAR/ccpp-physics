@@ -270,9 +270,9 @@ contains
     endif
 
 #ifdef MPI
-    if (mpirank .ne. mpiroot) then
-       ! Wait for processor 0 to catch up...
-       call MPI_BARRIER(mpicomm, mpierr)
+!    if (mpirank .ne. mpiroot) then
+!       ! Wait for processor 0 to catch up...
+!       call MPI_BARRIER(mpicomm, mpierr)
        ! Broadcast data
        write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
        call MPI_BCAST(ntemps,                          1,                            MPI_INTEGER, mpiroot, mpicomm, mpierr)
@@ -364,9 +364,9 @@ contains
        call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
        call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
        call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
-    else
-       call MPI_BARRIER(mpicomm, mpierr)
-    endif
+!    else
+!       call MPI_BARRIER(mpicomm, mpierr)
+!    endif
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
