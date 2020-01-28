@@ -270,7 +270,7 @@ contains
     endif
 
 #ifdef MPI
-    if (mpirank .ne. mpiroot) then
+!    if (mpirank .ne. mpiroot) then
        ! Wait for processor 0 to catch up...
        call MPI_BARRIER(mpicomm, mpierr)
        ! Broadcast data
@@ -329,9 +329,9 @@ contains
        call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
        call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
        call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
-    else
+!    else
        call MPI_BARRIER(mpicomm, mpierr)
-    endif
+!    endif
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
