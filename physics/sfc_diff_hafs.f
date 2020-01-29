@@ -20,6 +20,88 @@
       subroutine sfc_diff_finalize
       end subroutine sfc_diff_finalize
 
+!> \defgroup GFS_diff_main GFS Surface Layer Scheme Module
+!> @{
+!> \brief This subroutine calculates surface roughness length.
+!!
+!! This subroutine includes the surface roughness length formulation
+!! based on the surface sublayer scheme in
+!! Zeng and Dickinson (1998) \cite zeng_and_dickinson_1998.
+!> \section arg_table_sfc_diff_run Argument Table
+!! \htmlinclude sfc_diff_run.html
+!!
+!>  \section general_diff GFS Surface Layer Scheme General Algorithm
+!! - Calculate the thermal roughness length formulation over the ocean
+!(see eq. (25) and (26)
+!!  in Zeng et al. (1998) \cite zeng_et_al_1998).
+!! - Calculate Zeng's momentum roughness length formulation over land
+!and sea ice.
+!! - Calculate the new vegetation-dependent formulation of thermal
+!roughness length
+!! (Zheng et al.(2009) \cite zheng_et_al_2009).
+!! Zheng et al. (2009) \cite zheng_et_al_2009 proposed a new formulation
+!on
+!! \f$ln(Z_{0m}^,/Z_{0t})\f$ as follows:
+!! \f[
+!!  ln(Z_{0m}^,/Z_{0t})=(1-GVF)^2C_{zil}k(u*Z_{0g}/\nu)^{0.5}
+!! \f]
+!! where \f$Z_{0m}^,\f$ is the effective momentum roughness length
+!! computed in the following equation for each grid, \f$Z_{0t}\f$
+!! is the roughness lenghth for heat, \f$C_{zil}\f$ is a coefficient
+!! (taken as 0.8), k is the Von Karman constant (0.4),
+!! \f$\nu=1.5\times10^{-5}m^{2}s^{-1}\f$ is the molecular viscosity,
+!! \f$u*\f$ is the friction velocity, and \f$Z_{0g}\f$ is the bare
+!! soil roughness length for momentum (taken as 0.01).
+!! \n In order to consider the convergence of \f$Z_{0m}\f$ between
+!! fully vegetated and bare soil, the effective \f$Z_{0m}^,\f$ is
+!! computed:
+!! \f[
+!!
+!\ln(Z_{0m}^,)=(1-GVF)^{2}\ln(Z_{0g})+\left[1-(1-GVF)^{2}\right]\ln(Z_{0m})
+!!\f]
+!! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and
+!\f$stress\f$ as inputs of other \a sfc schemes.
+!!
+!!\param[in] ps           real, surface air pressure (\f$Pa\f$) 
+!!\param[in] u1           real, zonal wind velocity (\f$m/s\f$)         
+!!\param[in] v1           real, meridional wind velocity (\f$m/s\f$)         
+!!\param[in] t1           real, air temperature (\f$K\f$)         
+!!\param[in] q1           real, water vapor mixing ratio (\f$kg/kg\f$)         
+!!\param[in] z1           real, height above ground (\f$m\f$)         
+!!\param[in] prsl1        real, air pressure at lowest level (\f$Pa\f$)         
+!!\param[in] prslki       real, ratio of exner func bet midlayer and
+!!                              interface at lowest model layer         
+!!\param[in] ddvel        real, (\f$\f$)
+!!\param[in] sigmaf       real,  real fractional cover of green vegetation bounded on the bottom(\f$frac\f$)
+!!\param[in] vegtyp       integer, vegetation type classification 
+!!\param[in] shdmax       real, max areal coverage of green veg (fraction)
+!!\param[in] ivegsrc      integer, vegetation type dataset choice 
+!!\param[in] z0pert       real, perturbation of momentum roughness length 
+!!\param[in] ztpert       real, perturbation of heat to momentum roughness length ratio (frac) 
+!!\param[in] flag_iter    flag, flag for perturbation
+!!\param[in] redrag       logical, flag for reduced drag coefficient over sea
+!!\param[in] u10m         real, zonal wind at 10 m (\f$m/s\f$)         
+!!\param[in] v10m         real, meridional wind at 10 m (\f$m/s\f$)         
+!!\param[in] sfc_z0_type  integer, flag for surface roughness option over ocean         
+!!\param[in] wet          logical, flag nonzero wet surface fraction         
+!!\param[in] dry          logical, flag nonzero land surface fraction         
+!!\param[in] ice          logical, flag nonzero ice surface fraction         
+!!\param[in] tskin        real, surface skin temperature (\f$K\f$)         
+!!\param[in] tsurf        real, surface skin temperature after iter (\f$K\f$)         
+!!\param[in] snwdph       real, surface snow thickness water equiv (\f$mm\f$)         
+!!\param[in] z0rl         real, surface snow thickness (\f$cm\f$)         
+!!\param[in,out] ustar    real, surface friction velocity (\f$m/s\f$)         
+!!\param[in,out] cm       real, surface drag coeff for momentum in air  
+!!\param[in,out] ch       real, surface drag coeff for heat and moisture in air  
+!!\param[in,out] rb       real, bulk richardson number at lowest mo lev  
+!!\param[in,out] stress   real, surface wind stress (\f$m2/s2\f$)  
+!!\param[in,out] fm       real, Monin Obukhov simi func for momentum  
+!!\param[in,out] fh       real, Monin Obukhov simi func for heat 
+!!\param[in,out] fm       real, Monin Obukhov simi func for momentum 10m
+!!\param[in,out] fh       real, Monin Obukhov simi func for heat 2m 
+!!\param[out] wind        real, wind speed at lowest mod lev (\f$m/s\f$) 
+
+
       subroutine sfc_diff_hafs(im,ps,u1,v1,t1,q1,z1,                    &!intent(in)
      &                    prsl1,prslki,ddvel,                           &!intent(in)
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &!intent(in)
@@ -27,9 +109,10 @@
      &                    flag_iter,redrag,                             &!intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &!wang,z0 type !intent(in)
      &                    wet,dry,icy,                                  &!intent(in)
-     &                    tskin, tsurf, snwdph, z0rl, ustar,
-     &                    cm, ch, rb, stress, fm, fh, fm10, fh2,
-     &                    wind)                                         &!intent(out)
+     &                    tskin, tsurf, snwdph, z0rl, ustar,            &
+     &                    cm, ch, rb, stress, fm, fh, fm10, fh2,        &
+     &                    wind,                                         &
+     &                    errmsg,errflg)                                &!intent(out)
 !
       use funcphys, only : fpvs
       use physcons, rvrdm1 => con_fvirt
