@@ -101,7 +101,7 @@
   standard_name = minimum_large_ice_fraction
   long_name = minimum large ice fraction in F-A mp scheme
   units = frac
-  dimensions = (2)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in

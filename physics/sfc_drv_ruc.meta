@@ -544,6 +544,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
+  intent = in
   optional = F
 [sfalb]
   standard_name = surface_diffused_shortwave_albedo
