@@ -154,7 +154,7 @@ contains
        status = nf90_inquire_dimension(ncid, dimid, len = nminor_absorber_intervals_upper)
        status = nf90_inq_dimid(        ncid, 'temperature_Planck',             dimid)
        status = nf90_inquire_dimension(ncid, dimid, len = ninternalSourcetemps)
-     
+    endif
        ! Allocate space for arrays
        allocate(gas_names(nabsorbers))
        allocate(scaling_gas_lower(nminor_absorber_intervals_lower))
@@ -186,7 +186,7 @@ contains
        allocate(temp4(nminor_absorber_intervals_upper))
        allocate(totplnk(ninternalSourcetemps, nbnds))
        allocate(planck_frac(ngpts_lw, nmixingfracs, npress+1, ntemps))
-
+    if (mpirank .eq. mpiroot) then
        ! Read in fields from file
        write (*,*) 'Reading RRTMGP longwave k-distribution data ... '
        status = nf90_inq_varid(ncid, 'gas_names',                   varID)
@@ -265,7 +265,7 @@ contains
 #ifdef MPI
 !    if (mpirank .ne. mpiroot) then
     ! Wait for processor 0 to catch up...
-    call MPI_BARRIER(mpicomm, mpierr)
+    !call MPI_BARRIER(mpicomm, mpierr)
     
     ! Broadcast data
     write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
