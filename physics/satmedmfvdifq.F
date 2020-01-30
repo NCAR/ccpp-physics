@@ -184,7 +184,7 @@
      &                     buop,    shrp,   dtn,
      &                     prnum,   prmax,  prmin,  prtke,
      &                     prscu,   pr0,    ri,
-     &                     dw2,     dw2min, zk,     
+     &                     dw2,     dw2min, zk,
      &                     elmfac,  elefac, dspmax,
      &                     alp,     clwt,   cql,
      &                     f0,      robn,   crbmin, crbmax,
@@ -193,7 +193,8 @@
      &                     epsi,    beta,   chx,    cqx,
      &                     rdt,     rdz,    qmin,   qlmin,
      &                     rimin,   rbcr,   rbint,  tdzmin,
-     &                     rlmn,    rlmn1,  rlmx,   elmx,
+     &                     rlmn,    rlmn1,  rlmn2,
+     &                     rlmx,    elmx,
      &                     ttend,   utend,  vtend,  qtend,
      &                     zfac,    zfmin,  vk,     spdk2,
      &                     tkmin,   tkminx, xkzinv, xkgdx,
@@ -205,13 +206,14 @@
 !
       real(kind=kind_phys) qlcr, zstblmax
 !
-      real(kind=kind_phys) h1 
+      real(kind=kind_phys) h1
 !!
       parameter(wfac=7.0,cfac=3.0)
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
       parameter(vk=0.4,rimin=-100.)
       parameter(rbcr=0.25,zolcru=-0.02,tdzmin=1.e-3)
-      parameter(rlmn=30.,rlmn1=5.,rlmx=300.,elmx=300.)
+      parameter(rlmn=30.,rlmn1=5.,rlmn2=10.)
+      parameter(rlmx=300.,elmx=300.)
       parameter(prmin=0.25,prmax=4.0)
       parameter(pr0=1.0,prtke=1.0,prscu=0.67)
       parameter(f0=1.e-4,crbmin=0.15,crbmax=0.35)
@@ -751,8 +753,9 @@
 !         if(tem1 > 1.e-5) then
           tem1 = tvx(i,k+1)-tvx(i,k)
           if(tem1 > 0.) then
-             xkzo(i,k)  = min(xkzo(i,k),xkzinv)
-             xkzmo(i,k) = min(xkzmo(i,k),xkzinv)
+             xkzo(i,k)  = min(xkzo(i,k), xkzinv)
+             xkzmo(i,k) = min(xkzmo(i,k), xkzinv)
+             rlmnz(i,k) = min(rlmnz(i,k), rlmn2)
           endif
         enddo
       enddo
