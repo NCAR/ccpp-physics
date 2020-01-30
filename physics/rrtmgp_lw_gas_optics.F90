@@ -265,7 +265,7 @@ contains
 #ifdef MPI
 !    if (mpirank .ne. mpiroot) then
     ! Wait for processor 0 to catch up...
-    !call MPI_BARRIER(mpicomm, mpierr)
+    call MPI_BARRIER(mpicomm, mpierr)
     
     ! Broadcast data
     write (*,*) 'Broadcasting RRTMGP longwave k-distribution data ... '
