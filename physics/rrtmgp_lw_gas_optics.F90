@@ -340,25 +340,30 @@ contains
     call MPI_BCAST(planck_frac,                     size(planck_frac),            MPI_REAL,    mpiroot, mpicomm, mpierr)
     write(*,*) 'Broadcasting 35 ',mpierr, mpicomm
     ! Character arrays
-    do ij=1,nabsorbers
-       call MPI_BCAST(gas_names(ij),                len(gas_names(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
-    enddo
+    !do ij=1,nabsorbers
+    !   call MPI_BCAST(gas_names(ij),                len(gas_names(ij)),           MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
+    !enddo
+    call MPI_BCAST(gas_names,                size(gas_names),           MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
     write(*,*) 'Broadcasting 36 ',mpierr, mpicomm
-    do ij=1,nminorabsorbers
-       call MPI_BCAST(gas_minor(ij),                len(gas_minor(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
-    enddo
+    !do ij=1,nminorabsorbers
+    !   call MPI_BCAST(gas_minor(ij),                len(gas_minor(ij)),           MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
+    !enddo
+    call MPI_BCAST(gas_minor,                size(gas_minor),           MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
     write(*,*) 'Broadcasting 37 ',mpierr, mpicomm
-    do ij=1,nminorabsorbers
-       call MPI_BCAST(identifier_minor(ij),         len(identifier_minor(ij)),    MPI_CHAR,    mpiroot, mpicomm, mpierr)
-    enddo
+    !do ij=1,nminorabsorbers
+    !   call MPI_BCAST(identifier_minor(ij),         len(identifier_minor(ij)),    MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
+    !enddo
+    call MPI_BCAST(identifier_minor,         size(identifier_minor),    MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
     write(*,*) 'Broadcasting 38 ',mpierr, mpicomm
-    do ij=1,nminor_absorber_intervals_lower
-       call MPI_BCAST(minor_gases_lower(ij),        len(minor_gases_lower(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
-    enddo
+    !do ij=1,nminor_absorber_intervals_lower
+    !   call MPI_BCAST(minor_gases_lower(ij),        len(minor_gases_lower(ij)),   MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
+    !enddo
+    call MPI_BCAST(minor_gases_lower,        size(minor_gases_lower),   MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
     write(*,*) 'Broadcasting 39 ',mpierr, mpicomm
-    do ij=1,nminor_absorber_intervals_upper
-       call MPI_BCAST(minor_gases_upper(ij),        len(minor_gases_upper(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
-    enddo
+    !do ij=1,nminor_absorber_intervals_upper
+    !   call MPI_BCAST(minor_gases_upper(ij),        len(minor_gases_upper(ij)),   MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
+    !enddo
+    call MPI_BCAST(minor_gases_upper,        size(minor_gases_upper),   MPI_CHARACTER,    mpiroot, mpicomm, mpierr)
     write(*,*) 'Broadcasting 40 ',mpierr, mpicomm
     ! Logical arrays
     call MPI_BCAST(minor_scales_with_density_lower, nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
