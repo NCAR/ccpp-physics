@@ -343,21 +343,34 @@ contains
     do ij=1,nabsorbers
        call MPI_BCAST(gas_names(ij),                len(gas_names(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
     enddo
+    write(*,*) 'Broadcasting 36 ',mpierr, mpicomm
     do ij=1,nminorabsorbers
        call MPI_BCAST(gas_minor(ij),                len(gas_minor(ij)),           MPI_CHAR,    mpiroot, mpicomm, mpierr)
+    enddo
+    write(*,*) 'Broadcasting 37 ',mpierr, mpicomm
+    do ij=1,nminorabsorbers
        call MPI_BCAST(identifier_minor(ij),         len(identifier_minor(ij)),    MPI_CHAR,    mpiroot, mpicomm, mpierr)
     enddo
+    write(*,*) 'Broadcasting 38 ',mpierr, mpicomm
     do ij=1,nminor_absorber_intervals_lower
        call MPI_BCAST(minor_gases_lower(ij),        len(minor_gases_lower(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
     enddo
+    write(*,*) 'Broadcasting 39 ',mpierr, mpicomm
     do ij=1,nminor_absorber_intervals_upper
        call MPI_BCAST(minor_gases_upper(ij),        len(minor_gases_upper(ij)),   MPI_CHAR,    mpiroot, mpicomm, mpierr)
     enddo
+    write(*,*) 'Broadcasting 40 ',mpierr, mpicomm
     ! Logical arrays
     call MPI_BCAST(minor_scales_with_density_lower, nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    write(*,*) 'Broadcasting 41 ',mpierr, mpicomm
     call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    write(*,*) 'Broadcasting 42 ',mpierr, mpicomm
     call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    write(*,*) 'Broadcasting 43 ',mpierr, mpicomm
     call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,  mpiroot, mpicomm, mpierr)
+    write(*,*) 'Broadcasting 44 ',mpierr, mpicomm
+    call MPI_BARRIER(mpicomm, mpierr)
+    write(*,*) 'Broadcasting 45 ',mpierr, mpicomm
 #endif
 
     ! Initialize gas concentrations and gas optics class with data
