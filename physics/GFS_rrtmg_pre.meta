@@ -270,6 +270,67 @@
   kind = kind_phys
   intent = out
   optional = F
+[qc]
+  standard_name = cloud_condensed_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qi]
+  standard_name = ice_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nc]
+  standard_name = cloud_droplet_number_concentration
+  long_name = cloud droplet number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[ni]
+  standard_name = ice_number_concentration
+  long_name = ice number concentration
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nwfa]
+  standard_name = water_friendly_aerosol_number_concentration
+  long_name = number concentration of water-friendly aerosols
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfdeepcnv_gf]
+  standard_name = flag_for_gf_deep_convection_scheme
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [gasvmr_co2]
   standard_name = volume_mixing_ratio_co2
   long_name = CO2 volume mixing ratio

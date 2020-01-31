@@ -75,7 +75,7 @@ contains
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                nwfa,con_rd,gq0,ntinc,ntlnc,imp_physics,imp_physics_thompson,    &
-               errmsg,errflg)
+               qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -98,8 +98,9 @@ contains
    integer      :: its,ite, jts,jte, kts,kte 
    integer, intent(in   ) :: im,ix,km,ntracer
 
-   real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceqv_spechum,w,phil
-   real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( ix , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
+   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: qci_conv
    real(kind=kind_phys),  dimension( ix )   :: rand_mom,rand_vmas
    real(kind=kind_phys),  dimension( ix,4 ) :: rand_clos
    real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
@@ -751,6 +752,7 @@ contains
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
                gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
+               qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
                gdc(i,k,3)=(outtm(i,k))*86400. 
                gdc(i,k,4)=(outts(i,k))*86400.

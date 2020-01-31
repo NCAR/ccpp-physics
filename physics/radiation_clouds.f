@@ -243,7 +243,7 @@
       integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
-     &                 cld_init, progcld5, progcld4o
+     &                 cld_init, progcld5, progcld4o, gethml
 
 
 ! =================
@@ -2468,13 +2468,13 @@
 !
 !===> ... begin here
 !
-      do nf=1,nf_clds
-        do k=1,nlay
-          do i=1,ix
-            clouds(i,k,nf) = 0.0
-          enddo
-        enddo
-      enddo
+      !do nf=1,nf_clds
+      !  do k=1,nlay
+      !    do i=1,ix
+      !      clouds(i,k,nf) = 0.0
+      !    enddo
+      !  enddo
+      !enddo
 !     clouds(:,:,:) = 0.0
 
       do k = 1, NLAY
@@ -2514,7 +2514,8 @@
 
         do k = 1, NLAY
           do i = 1, IX
-            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
+            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)  &
+     &                + clw(i,k,ntrw) + clw(i,k,ntgl)
           enddo
         enddo
 !> - Find top pressure for each cloud domain for given latitude.
@@ -2558,30 +2559,30 @@
 !> - Calculate layer cloud fraction.
 
         clwmin = 0.0
-        if (.not. lmfshal) then
-          do k = 1, NLAY
-          do i = 1, IX
-            clwt = 1.0e-6 * (plyr(i,k)*0.001)
+        !if (.not. lmfshal) then
+          !do k = 1, NLAY
+          !do i = 1, IX
+          !  clwt = 1.0e-6 * (plyr(i,k)*0.001)
 !           clwt = 2.0e-6 * (plyr(i,k)*0.001)
 
-            if (clwf(i,k) > clwt) then
+            !if (clwf(i,k) > clwt) then
 
-              onemrh= max( 1.e-10, 1.0-rhly(i,k) )
-              clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
+            !  onemrh= max( 1.e-10, 1.0-rhly(i,k) )
+            !  clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 
-              tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
-              tem1  = 2000.0 / tem1
+            !  tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)
+            !  tem1  = 2000.0 / tem1
 
 !             tem1  = 1000.0 / tem1
 
-              value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
-              tem2  = sqrt( sqrt(rhly(i,k)) )
+            !  value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
+            !  tem2  = sqrt( sqrt(rhly(i,k)) )
 
-              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
-            endif
-          enddo
-          enddo
-        else
+            !  cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+            !endif
+          !enddo
+          !enddo
+        !else
           do k = 1, NLAY
           do i = 1, IX
             clwt = 1.0e-6 * (plyr(i,k)*0.001)
@@ -2592,11 +2593,11 @@
               clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )
 !
               tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan
-              if (lmfdeep2) then
-                tem1  = xrc3 / tem1
-              else
+              !if (lmfdeep2) then
+              !  tem1  = xrc3 / tem1
+              !else
                 tem1  = 100.0 / tem1
-              endif
+              !endif
 !
               value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )
               tem2  = sqrt( sqrt(rhly(i,k)) )
@@ -2605,14 +2606,14 @@
             endif
           enddo
           enddo
-        endif
+        !endif
 
       endif                                ! if (uni_cld) then
 
       do k = 1, NLAY
         do i = 1, IX
           if (cldtot(i,k) < climit) then
-            cldtot(i,k) = 0.0
+            !cldtot(i,k) = 0.0
             cwp(i,k)    = 0.0
             cip(i,k)    = 0.0
             crp(i,k)    = 0.0

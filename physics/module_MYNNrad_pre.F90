@@ -85,6 +85,13 @@ SUBROUTINE mynnrad_pre_run(                &
               qi_save(i,k) = qi(i,k)
               clouds1(i,k) = CLDFRA_BL(i,k)
 
+         !IF (qr(i,k) > 1.0e-7 .OR. qs(i,k) > 1.0e-7) then ! .OR. &
+            !(Model%imfdeepcnv == Model%imfdeepcnv_gf .AND.  qci_conv(i,k)>1.0e-7)) THEN
+         !Keep Xu-RandalL clouds fraction 
+         !ELSE
+         !    clouds1(i,k) = CLDFRA_BL(i,k)
+         !ENDIF
+
               IF (qc(i,k) < 1.E-6 .AND. qi(i,k) < 1.E-8 .AND. CLDFRA_BL(i,k)>0.001) THEN
                 !Partition the BL clouds into water & ice according to a linear
                 !approximation of Hobbs et al. (1974). This allows us to only use
