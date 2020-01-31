@@ -209,9 +209,9 @@ real(r8) :: tmelt       !< freezing point of water (K)
 ! latent heats of:
 real(r8) :: xxlv        !< vaporization
 real(r8) :: xlf         !< freezing
-real(r8) :: xxls        !v sublimation
+real(r8) :: xxls        !< sublimation
 
-real(r8) :: rhmini      !v Minimum rh for ice cloud fraction > 0.
+real(r8) :: rhmini      !< Minimum rh for ice cloud fraction > 0.
 
 ! flags
 logical  :: microp_uniform, do_cldice, use_hetfrz_classnuc,  &
