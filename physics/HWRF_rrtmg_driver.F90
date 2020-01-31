@@ -38,15 +38,17 @@
               ,RTHRATENLW    ,RTHRATENSW   ,HRSWPD, HRLWPD              &
               ,SNOW   ,STEPRA ,SWDOWN  ,SWDOWNC                         &
               ,T8W     ,T ,                  TSK                        &!,VEGFRA    &
-              ,XICE ,XLAND  ,XLAT ,XLONG ,YR                            &
+              ,XICE ,XLAND  ,XLAT ,XLONG ,YR                  &
+              ,sinlat, coslat, solhr                                    &
 !              ,DECLINX ,SOLCONX 
-              ,COSZEN ,HRANG                          &
+              ,COSZEN,SOLCON                                            &
 !mz              ,Z                                                        &
               ,ALEVSIZ, no_src_types                                    &
               ,LEVSIZ, N_OZMIXM,   N_AEROSOLC                           &
               ,PAERLEV                                                  & 
               ,XTIME                                                    &
 !mz              ,CURR_SECS                                                &
+              ,its,ite,jts,jte                                          &
               ,IDS,IDE, JDS,JDE, KDS,KDE                                &
               ,IMS,IME, JMS,JME, KMS,KME                                &
               ,kts, kte                                                 &
@@ -125,6 +127,8 @@
    !  4. rrtmg_lw - Added November 2008, MJIacono, AER, Inc.
    !
 !----------------------------------------------------------------------
+      !mz: use GFS utilities
+      use module_radiation_astronomy,only: calc_coszmn
         IMPLICIT NONE
 !======================================================================
 ! Grid structure in physics part of WRF
@@ -220,7 +224,7 @@
 
    INTEGER,      INTENT(IN   )    ::   ids,ide, jds,jde, kds,kde,       &
                                        ims,ime, jms,jme, kms,kme,       &
-                                                         kts,kte  
+                                       its,ite, jts,jte, kts,kte  
    INTEGER,      INTENT(IN   )    ::   mpirank, mpiroot
    character(len=*),          intent(  out) :: errmsg
    integer,                   intent(  out) :: errflg
@@ -428,13 +432,14 @@
      LOGICAL, PARAMETER :: f_qv = .true.
      LOGICAL, PARAMETER :: f_qc = .true.
      LOGICAL, PARAMETER :: f_qr = .true.
-     LOGICAL, PARAMETER :: f_qi = .true.
+     LOGICAL, PARAMETER :: f_qi = .false.
      LOGICAL, PARAMETER :: f_qs = .true.
      LOGICAL, PARAMETER :: f_qg = .true.
 
 
 
      REAL, OPTIONAL, INTENT(IN) :: dx,dy
+     REAL, INTENT(IN) :: SOLCON
 !mz     REAL, DIMENSION( ims:ime, jms:jme ), OPTIONAL, INTENT(IN)  :: ht
 
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ), OPTIONAL ,       &
@@ -442,15 +447,15 @@
 
 
 ! LOCAL  VAR
-   REAL, DIMENSION( ims:ime, jms:jme ) ::             GLAT,GLON
    REAL, DIMENSION( ims:ime, kms:kme, jms:jme ) ::    CEMISS
    REAL, DIMENSION( ims:ime, jms:jme ) ::             coszr
    REAL, DIMENSION( ims:ime, levsiz, jms:jme )  ::    ozmixt
+   REAL, DIMENSION( ims:ime, jms:jme )  :: xlatd, xlond
 
-   REAL    ::    DECLIN,SOLCON 
-   INTEGER ::    i,j,k,its,ite,jts,jte,ij
-   INTEGER ::    STEPABS
-   LOGICAL ::    doabsems, use_aer3d
+   REAL    ::    DECLIN   !,SOLCON 
+   INTEGER ::    i,j,k,ij
+!   INTEGER ::    STEPABS
+   LOGICAL ::     use_aer3d !,doabsems,
    INTEGER ::    s
 
    REAL    ::    OBECL,SINOB,SXLONG,ARG,DECDEG,                  &
@@ -467,21 +472,26 @@
    REAL    ::    cldji,cldlji
 !------------------------------------------------------------------
 ! solar related variables are added to declaration
+!mz*: use radiation_astronomy
 !-------------------------------------------------
 !mz   REAL, OPTIONAL, INTENT(OUT) :: DECLINX,SOLCONX
-   REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme), INTENT(OUT) :: COSZEN
-   REAL, OPTIONAL, DIMENSION( ims:ime, jms:jme), INTENT(OUT) :: HRANG
+   REAL,   INTENT(IN) ::  SOLHR
+   REAL,  DIMENSION( ims:ime, jms:jme), INTENT(IN) ::  SINLAT, COSLAT
+   REAL,  DIMENSION( ims:ime, jms:jme), INTENT(IN) :: COSZEN
+!local
+!   REAL,  DIMENSION( ims:ime, jms:jme) :: coszdg
 !------------------------------------------------------------------
-
+   REAL :: DEGRAD=3.1415926/180.     !mz
    real :: ioh,kt,airmass,kd
    real, dimension(ims:ime,jms:jme) :: coszen_loc,hrang_loc
 
 !  the following three arrays may be dimensioned by (ims,ime,kms,kme,jms,jme,aerosol_vars)
    real, dimension(:,:,:,:), pointer :: tauaer_sw=>null(), ssaaer_sw=>null(), asyaer_sw=>null()
 
+
          gridkm = SQRT(dx*0.001*dx*0.001 + dy*0.001*dy*0.001)
 
-      if (itimestep .LE. 100) then
+      if (itimestep .LE. 100 .and. mpirank == mpiroot) then
          WRITE ( 0 , * ) 'Grid spacing in km ', dx, dy, gridkm
       endif
 
@@ -497,13 +507,13 @@
 
 
 ! CAM-specific additional radiation frequency - cam_abs_freq_s (=21600s by default)
-     STEPABS = nint(cam_abs_freq_s/(dt*STEPRA))*STEPRA
-     IF (itimestep .eq. 1 .or. mod(itimestep,STEPABS) .eq. 1 + ra_call_offset &
-                                        .or. STEPABS .eq. 1 ) THEN
-       doabsems = .true.
-     ELSE
-       doabsems = .false.
-     ENDIF
+!     STEPABS = nint(cam_abs_freq_s/(dt*STEPRA))*STEPRA
+!     IF (itimestep .eq. 1 .or. mod(itimestep,STEPABS) .eq. 1 + ra_call_offset &
+!                                        .or. STEPABS .eq. 1 ) THEN
+!       doabsems = .true.
+!     ELSE
+!       doabsems = .false.
+!     ENDIF
 
 
    use_aer3d=.false.
@@ -518,8 +528,8 @@
 ! moved up and out of OMP loop because it only needs to be computed once
 ! and because it is not entirely thread-safe (XT24, TOLOCTM and XXLAT need
 ! their thread-privacy)  JM 20100217
-     CALL radconst(XTIME,DECLIN,SOLCON,JULIAN,               &
-                   DEGRAD,DPD                                )
+!       CALL radconst(XTIME,DECLIN,SOLCON,JULIAN,               &
+!     &              DEGRAD,DPD                                )
 
 !mz
 !     IF(PRESENT(declinx).AND.PRESENT(solconx))THEN
@@ -529,9 +539,30 @@
 !     ENDIF
 
 !   outputs: coszen, hrang
-     call calc_coszen(ims,ime,jms,jme,its,ite,jts,jte,  &
-                      julian,xtime+radt*0.5,gmt, &
-                      declin,degrad,xlong,xlat,coszen,hrang)
+!mz HWRF call
+!     call calc_coszen(ims,ime,jms,jme,its,ite,jts,jte,  &
+!                      julian,xtime+radt*0.5,gmt, &
+!                      declin,degrad,xlong,xlat,coszen,hrang)
+
+
+
+!     if(mpirank == mpiroot) then
+!       write(0,*)'coszmn: max/min(xlong) = ',maxval(xlong),minval(xlong)
+!       write(0,*)'coszmn: max/min(sinlat) = ',maxval(sinlat),minval(sinlat)
+!       write(0,*)'coszmn: max/min(coslat) = ',maxval(coslat),minval(coslat)
+!       write(0,*)'coszmn: solhr = ', solhr
+!     endif
+
+!       call calc_coszmn( ims,ime,jms,jme,its,ite,jts,jte,               &
+!     &                   xlong,sinlat,coslat,solhr,                     &     ! ---  inputs
+!     &                   coszen, coszdg     )                           ! ---  outputs
+
+!     if(mpirank == mpiroot) then
+!       write(0,*)'coszmn: max/min(coszen) = ',maxval(coszen),minval(coszen)
+!       write(0,*)'coszmn: max/min(coszdg) = ',maxval(coszdg),minval(coszdg)
+!     endif
+
+
 
 ! initialize data
 
@@ -546,6 +577,7 @@
 !        end do
 !     end if
 
+!mz move to above
      DO j=jts,jte
      DO i=its,ite
         GSW(I,J)=0.
@@ -554,8 +586,8 @@
         swddir(i,j)=0.  
         swddni(i,j)=0.  
         swddif(i,j)=0. 
-        GLAT(I,J)=XLAT(I,J)*DEGRAD
-        GLON(I,J)=XLONG(I,J)*DEGRAD
+        XLATD(I,J)=XLAT(I,J)/DEGRAD        !radians-> degree
+        XLOND(I,J)=XLONG(I,J)/DEGRAD
      ENDDO
      ENDDO
 
@@ -635,19 +667,38 @@
 !              ENDDO
 !           ENDIF
 
-           write(0,*)"in HWRF rad driver: call cldfra3 to use gthompson cloud fraction scheme"
+           
+           if(mpirank == mpiroot) then
+              write(0,*)"in HWRF rad driver: call &
+     & cldfra3 to use gthompson cloud fraction scheme"
+             ! write(0,*)'cldfra3: max/min(p)     = ', maxval(p), minval(p)
+             ! write(0,*)'cldfra3: max/min(t)     = ', maxval(t), minval(t)
+             ! write(0,*)'cldfra3: max/min(qv)    = ', maxval(qv), minval(qv)
+             ! write(0,*)'cldfra3: max/min(qc)    = ', maxval(qc), minval(qc)
+             ! write(0,*)'cldfra3: max/min(qi)    = ', maxval(qi), minval(qi)
+             ! write(0,*)'cldfra3: max/min(qs)    = ', maxval(qs), minval(qs)
+             ! write(0,*)'cldfra3: max/min(rho)   = ', maxval(rho), minval(rho)
+             ! write(0,*)'cldfra3: max/min(xland) = ', maxval(xland), minval(xland)
+           endif
            CALL cal_cldfra3(CLDFRA, qv, qc, qi, qs,                     &
      &                 p,t,rho, XLAND, gridkm,                          &
      &                 ids,ide, jds,jde, kds,kde,                       &
      &                 ims,ime, jms,jme, kms,kme,                       &
      &                 its,ite, jts,jte, kts,kte)
-
+           if(mpirank == mpiroot) then
+            write(0,*)'cal_cldfra3::max/min(cldfra) =', maxval(cldfra), &
+     &                 minval(cldfra)
+           endif
 
 !     Interpolating climatological ozone and aerosol to model time and levels
 !     Adapted from camrad code
      IF ( o3input .EQ. 2 ) THEN
 ! this is the CAM version interpolate to model time-step
-        write(0,*)'Have o3rad'
+        if(mpirank == mpiroot) then
+             write(0,*)'Have o3rad'
+             write(0,*)'julday, julyr, julian= ',julday, julyr, julian
+             write(0,*)'max/min(ozmixm) = ', maxval(ozmixm), minval(ozmixm)
+        endif
         call ozn_time_int(julday,julian,ozmixm,ozmixt,levsiz,n_ozmixm,    &
                               ids , ide , jds , jde , kds , kde ,     &
                               ims , ime , jms , jme , kms , kme ,     &
@@ -658,10 +709,20 @@
                               ids , ide , jds , jde , kds , kde ,     &
                               ims , ime , jms , jme , kms , kme ,     &
                               its , ite , jts , jte , kts , kte )
+        if(mpirank == mpiroot) then
+             write(0,*)'max/min(o3rad) = ', maxval(o3rad), minval(o3rad)
+        endif
+
      ENDIF
 
 
-             write(0,*)"call rrtmg_lw"
+             if(mpirank == mpiroot) then 
+               write(0,*)"call rrtmg_lw"
+               write(0,*)"max/min(p8w) = ", maxval(p8w),minval(p8w)
+               write(0,*)"max/min(p) = ", maxval(p),minval(p)
+                write(0,*)"max/min(pi) = ", maxval(pi),minval(pi)
+                write(0,*)"max/min(dz8w) = ", maxval(dz8w),minval(dz8w)
+             endif
              CALL RRTMG_LWRAD(                                      &
                   RTHRATENLW=RTHRATEN,                              &
                   HRLWPD=HRLWPD,                                    & ! J. Henderson AER
@@ -722,8 +783,19 @@
         ENDDO
         ENDDO
         ENDDO
+           
+!mz
+        write(0,*)'mz: max/min(RTHRATENLW) = ',                       &
+     &    maxval(RTHRATENLW),minval(RTHRATENLW)
 
-             if(mpirank==mpiroot)write(0,*) 'CALL HWRF_rrtmg_sw'
+
+
+             if(mpirank==mpiroot) then
+                   write(0,*) 'CALL HWRF_rrtmg_sw'
+                   write(0,*)'mz*rrtmg_swrad: solcon = ',solcon
+                   
+             endif
+                 
              CALL RRTMG_SWRAD(                                         &
                      RTHRATENSW=RTHRATENSW,                            &
                      HRSWPD=HRSWPD,                                    & ! J. Henderson AER
@@ -732,8 +804,8 @@
                      SWUPB=SWUPB,SWUPBC=SWUPBC,SWUPBCLN=SWUPBCLN,      &
                      SWDNB=SWDNB,SWDNBC=SWDNBC,SWDNBCLN=SWDNBCLN,      &
                      SWCF=SWCF,GSW=GSW,                                &
-                     XTIME=XTIME,GMT=GMT,XLAT=XLAT,XLONG=XLONG,        &
-                     RADT=RADT,DEGRAD=DEGRAD,DECLIN=DECLIN,            &
+                     XLAT=XLATD,XLONG=XLOND,                           &
+                     RADT=RADT,DEGRAD=DEGRAD,                          &
                      COSZR=COSZR,JULDAY=JULDAY,SOLCON=SOLCON,          &
                      ALBEDO=ALBEDO,t3d=t,t8w=t8w,TSK=TSK,              &
                      p3d=p,p8w=p8w,pi3d=pi,rho3d=rho,                  &
@@ -1032,7 +1104,6 @@
    SOLCON=1370.*ECCFAC
    
    END SUBROUTINE radconst
-
 
    SUBROUTINE calc_coszen(ims,ime,jms,jme,its,ite,jts,jte,  &
                           julian,xtime,gmt, &

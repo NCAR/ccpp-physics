@@ -75,6 +75,9 @@
      &                                  its, ite, jts, jte, kts, kte
 
       INTEGER :: i, j, k
+      REAL(KIND_PHYS) :: DEGRAD=3.1415926/180. 
+      !mz in degree
+      REAL(KIND_PHYS),  DIMENSION(1:ncol) :: xlatd, xlond
 
 
       ! Initialize the CCPP error handling variables
@@ -140,13 +143,19 @@
       ENDDO
       ENDDO
       ENDIF
+!mz convert xlat/xlong to degree
+     
+      DO i=1,ncol       
+        xlatd(i)= xlat(i)/degrad
+        xlond(i) = xlong(i)/degrad
+      enddo
 
 !-- use CAM ozone and some aerosol profiles in HWRF rad schemes
 !   n_ozmixm: no of months; levsiz: = 59, vertical dim
 !   Read in CAM ozone data, and interpolate data to model grid
 !   Interpolation of aerosols is done on domain 1 only
 
-      CALL oznini(ozmixm,pin,levsiz,num_ozmixm,XLAT,                    &
+      CALL oznini(ozmixm,pin,levsiz,num_ozmixm,XLATD,                   &
      &               ids, ide, jds, jde, kds, kde,                      &
      &               ims, ime, jms, jme, kms, kme,                      &
      &               its, ite, jts, jte, kts, kte,                      &
@@ -154,22 +163,13 @@
                    
       if (errflg /= 0) return
      
-      if (mpirank == mpiroot) then
-       write(0,*) 'max/min(ozmixm) = ', maxval(ozmixm), minval(ozmixm)
-       write(0,*) 'max/min(pin)    = ', maxval(pin), minval(pin)
-      endif
 
       CALL aerosol_in(aerodm,pina,alevsiz,num_ozmixm-1,                 &
-     &               no_src_types,XLAT,XLONG,                           &
+     &               no_src_types,XLATD,XLOND,                          &
      &               ids, ide, jds, jde, kds, kde,                      &
      &               ims, ime, jms, jme, kms, kme,                      &
      &               its, ite, jts, jte, kts, kte)
       if (errflg /= 0) return
-
-      if (mpirank == mpiroot) then
-       write(0,*) 'max/min(aerodm) = ', maxval(aerodm), minval(aerodm)
-       write(0,*) 'max/min(pina)   = ', maxval(pina), minval(pina)
-      endif
 
       CALL rrtmg_lwinit(                                                &
      &               allowed_to_read,                                   &
@@ -180,6 +180,7 @@
      &               errmsg, errflg       )
      
       if (errflg /= 0) return
+      if(mpirank ==mpiroot)write (0,*)'HWRF rrtmg_lwinit completed...'
 
       aclwalloc = .true.
 
@@ -191,6 +192,7 @@
      &               mpirank, mpiroot, mpicomm,                         &
      &               errmsg, errflg )
       if (errflg /= 0) return
+      if (mpirank == mpiroot)write(0,*)'HWRF rrtmg_swinit completed' 
 
       acswalloc = .true.
 
@@ -204,12 +206,12 @@
 !! \htmlinclude HWRF_radiation_run.html
 !!
        SUBROUTINE HWRF_radiation_run (NCOL,NLEV, NTSD,DT                &
-     &                    ,JULDAY,JULYR,XTIME,JULIAN                    &
-     &                    ,IHRST,NPHS,GLAT,GLON                         &
+     &                    ,JULDAY,JULYR,JULIAN                          &
+     &                    ,IHRST,NPHS                                   &
      &                    ,NRADS,NRADL, DX ,p8w,prsl,tsfc,T,Q           &
      &                    ,QV,QC,QI,QR,QS,QG                            & !MOIST: dry mixing ratio
-     &                    ,ALBEDO,EPSR                                  &
-     &                    ,F_ICE,F_RAIN,SM,CLDFRA                       &
+!     &                    ,EPSR                                        & !Radtend%semis
+     &                    ,F_ICE,F_RAIN,slmsk,CLDFRA                       &
      &                    ,RLWTT,RSWTT,RLWIN,RSWIN,RSWINC,RSWOUT,GSW    &
      &                    ,RLWTOA,CZMEAN                                &
      &                    ,SNOW,SICE, NUM_OZMIXM,OZMIXM,PIN,LEVSIZ      &
@@ -217,9 +219,9 @@
      &                    ,re_cloud,re_ice,re_snow                      &
      &                    ,has_reqc,has_reqi,has_reqs                   &
      &                    ,swddir, swddni,swddif, swddirc,swddnic       &
-     &                    ,coszen,hrang,xlat,xlong                      &
+     &                    ,sinlat,coslat,solhr,solcon, radtend          &
+     &                    ,xlat,xlong                                   &
      &                    ,paerlev, ALEVSIZ,no_src_types                &
-!     &                    ,CAM_ABS_FREQ_S                               &
      &                    ,icloud,cldovrlp                              &
      &                    ,RA_CALL_OFFSET, o3input,aer_opt,o3rad        &
      &                    ,sf_surface_physics                           &
@@ -243,12 +245,16 @@
 !mz-new
      &                    ,SWVISDIR ,SWVISDIF                           &
      &                    ,SWNIRDIR, SWNIRDIF                           &
-     &                    ,MPIROOT, MPIRANK                             &
+     &                    ,MPIROOT, MPIRANK,MPICOMM                     &
      &                    ,ERRMSG, ERRFLG    )
 
 !***********************************************************************
       USE module_radiation_astronomy ,ONLY : CAL_MON_DAY,ZENITH
+      USE GFS_typedefs,               ONLY : GFS_radtend_type
+
       IMPLICIT NONE
+     
+      type(GFS_radtend_type),              intent(in) :: Radtend
 
       INTEGER,         INTENT(IN) :: IHRST,JULDAY,JULYR                 &
      &                              ,NPHS,NRADL,NRADS,NTSD              &
@@ -272,14 +278,14 @@
 !      LOGICAL,         INTENT(IN) :: warm_rain
       INTEGER,    OPTIONAL, INTENT(IN   )    ::  sf_surface_physics
 
-      REAL(KIND_PHYS), INTENT(IN) :: DT,XTIME,JULIAN
+      REAL(KIND_PHYS), INTENT(IN) :: DT,JULIAN
       REAL(KIND_PHYS), DIMENSION(1:ncol,1:nlev), OPTIONAL ,             &
      &                 INTENT(INOUT)  ::                       o3rad
 
 
-      REAL(KIND_PHYS), DIMENSION(1:ncol),      INTENT(IN)    :: ALBEDO  &
-     &                                             ,EPSR,GLAT,GLON      &
-     &                                             ,SICE,SM             &
+      REAL(KIND_PHYS), DIMENSION(1:ncol),      INTENT(IN)    ::         & !ALBEDO  &
+!     &                                              EPSR                &
+     &                                             SICE,slmsk          &
      &                                             ,SNOW
 !MZ      REAL(KIND_PHYS),DIMENSION(1:ncol),       INTENT(INOUT) :: CUPPT
       REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlev),INTENT(IN)    :: Q,T,    &
@@ -294,9 +300,10 @@
      &                                                         ,SWDDIF  &
      &                                                         ,SWDDNIC &
      &                                                         ,SWDDIRC 
-      REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) ::      &
-     &                                                          COSZEN
-      REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) :: HRANG
+      REAL(KIND_PHYS), DIMENSION(1:NCOL), INTENT(in) :: sinlat, coslat
+      REAL(KIND_PHYS), INTENT(in) :: solhr,solcon
+!      REAL(KIND_PHYS), DIMENSION(1:NCOL), INTENT(OUT) :: COSZEN
+!mz      REAL(KIND_PHYS), OPTIONAL, DIMENSION(1:NCOL), INTENT(OUT) :: HRANG
       REAL(KIND_PHYS),DIMENSION(1:ncol) , INTENT(IN) ::  XLAT, XLONG
       REAL(KIND_PHYS),DIMENSION(1:ncol,1:nlev),INTENT(INOUT) ::RTHRATEN &
      &                                                      ,RTHRATENSW &
@@ -360,6 +367,7 @@
      &                                                       hrswpd
       integer,                   intent(in)    :: mpirank
       integer,                   intent(in)    :: mpiroot
+      INTEGER,               INTENT(IN   )    :: mpicomm
       character(len=*),          intent(  out) :: errmsg
       integer,                   intent(  out) :: errflg
 
@@ -373,7 +381,7 @@
      &                                ,30,31,30,31/)
 !
       REAL(kind_phys) :: CAPA,DAYI,FICE,FRAIN,GMT,HOUR,PLYR,            &
-     &                   QW,RADT,TIMES,WC,TDUM
+     &                   QW,RADT,TIMES,WC,TDUM,XTIME
 !
       REAL(kind_phys),DIMENSION(1:nlev-1) :: QL,TL
 !
@@ -388,6 +396,7 @@
      &                                          ,THRATENLW,THRATENSW    &
      &                                          ,TH_PHY,T_PHY
       REAL(kind_phys) :: DXKM, DYKM
+      REAL(KIND_PHYS), DIMENSION(1:ncol) :: sm
       integer :: ntsd_rad
 
       INTEGER            :: IDS,IDE,JDS,JDE,KDS,KDE                     &
@@ -396,10 +405,16 @@
      &                     ,myis,myis1,myie,myie1                       &
      &                     ,myjs,myjs2,myje,myje2
 
+      LOGICAL, PARAMETER             :: allowed_to_read =.true.
+
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
 
+      !mz 
+      if(mpirank == mpiroot) write(0,*)'start HWRF_radiation_run '
+      if(mpirank == mpiroot) write(0,*)'ntsd, nrads,nradl = ',          &
+     &   ntsd, nrads, nradl       
       ! Check initialization state
       if (.not.acswalloc .or. .not. aclwalloc) then
           write(errmsg, fmt='((a))') 'HWRF_radiation_run called before  &
@@ -436,6 +451,29 @@
       kme    =    nlev
       kte    =    nlev
 
+!      CALL rrtmg_lwinit(                                                &
+!     &               allowed_to_read,                                   &
+!     &               ids, ide, jds, jde, kds, kde,                      &
+!     &               ims, ime, jms, jme, kms, kme,                      &
+!     &               its, ite, jts, jte, kts, kte,                      &
+!     &               mpirank, mpiroot, mpicomm,                         &
+!     &               errmsg, errflg       )
+
+!      if (errflg /= 0) return
+!      if(mpirank ==mpiroot)write (0,*)'HWRF rrtmg_lwinit completed...'
+
+!      aclwalloc = .true.
+
+!      CALL rrtmg_swinit(                                                &
+!     &               allowed_to_read ,                                  &
+!     &               ids, ide, jds, jde, kds, kde,                      &
+!     &               ims, ime, jms, jme, kms, kme,                      &
+!     &               its, ite, jts, jte, kts, kte,                      &
+!     &               mpirank, mpiroot, mpicomm,                         &
+!     &               errmsg, errflg )     
+!      if (errflg /= 0) return                         
+!      if (mpirank == mpiroot)write(0,*)'HWRF rrtmg_swinit completed'   
+!      acswalloc = .true.                 
 !----------------------------------------------------------------------
 !***  RADIATION
 !----------------------------------------------------------------------
@@ -452,11 +490,20 @@
 !***  Call radiation just BEFORE the top of the hour
 !***  so that updated fields are written to history files.
 !
+!mz
       IF (NTSD > 0) then
         NTSD_rad=ntsd+1
       ENDIF
 
-      IF(MOD(NTSD_rad,NRADS)==0.OR. MOD(NTSD_rad,NRADL)==0)THEN
+!mz*:minute_since_simulation_start
+      XTIME = ntsd*dt/60.
+
+      if(mpirank == mpiroot) then
+         write(0,*)'ntsd,ntsd_rad, nrads,nradl,xtime = ',               &
+     &   ntsd,ntsd_rad, nrads, nradl, xtime
+      endif
+
+!mz      IF(MOD(NTSD_rad,NRADS)==0.OR. MOD(NTSD_rad,NRADL)==0)THEN
 
 !
 !-----------------------------------------------------------------------
@@ -467,6 +514,15 @@
       NRAD=NRADS
       RADT=DT*NRADS/60.
 !
+!mz
+      DO I = 1,NCOL
+         if (slmsk(i) == 0.) then !sea
+           sm(i) = 1.
+          else
+           sm(i) =0.   !land or ice (mz: is it true?)
+          endif
+      ENDDO
+
 !-----------------------------------------------------------------------
 !
       CAPA=R_D/CP
@@ -586,9 +642,23 @@
 !
 !-----------------------------------------------------------------------
 
-      CALL RADIATION_DRIVER (ALBEDO=ALBEDO                              &
+      if (mpirank == mpiroot) then
+          write(0,*)'mz: NRAD, RADT =', NRAD,RADT
+     !     write(0,*)'mz: max/min(dx) =', maxval(dx), minval(dx)
+     !     write(0,*)'mz: max/min(sm) =', maxval(sm), minval(sm)
+     !     write(0,*)'mz: max/min(tsfc) =', maxval(tsfc), minval(tsfc)
+          write(0,*)'mz: max/min(Radtend%sfalb) =',                     &
+     &               maxval(Radtend%sfalb), minval(Radtend%sfalb)
+          write(0,*)'mz: max/min(Radtend%coszen) =',                    &
+     &               maxval(Radtend%coszen), minval(Radtend%coszen)
+          write(0,*)'mz: max/min(Radtend%semis) =',                     &
+     &               maxval(Radtend%semis), minval(Radtend%semis)
+      endif
+
+
+      CALL RADIATION_DRIVER (ALBEDO=Radtend%sfalb                       &
      &                 ,CZMEAN=CZMEAN ,DT=DT                            &
-     &                 ,DZ8W=DZ,EMISS=EPSR,GLW=TOTLWDN, GMT=GMT         &
+     &                 ,DZ8W=DZ,EMISS=Radtend%semis,GLW=TOTLWDN, GMT=GMT&
      &                 ,GSW=SWNETDN                                     &
      &                 ,ITIMESTEP=NTSD_rad ,JULDAY=JULDAY               &
      &                 ,JULIAN=JULIAN,JULYR=JULYR                       &
@@ -608,12 +678,18 @@
      &                 ,XICE=SICE,XLAND=XLAND                           &
      &                 ,XLAT=XLAT,XLONG=XLONG                           &
      &                 ,YR=JULYR                                        &
-     &                 ,coszen=coszen                                   &
-     &                 ,hrang=hrang                                     &
+     &                 ,sinlat=sinlat                                   &
+     &                 ,coslat=coslat                                   &
+     &                 ,solhr= solhr                                    &
+     &                 ,coszen=Radtend%coszen                           &
+     &                 ,solcon = solcon                                 &
+!mz     &                 ,hrang=hrang                                     &
      &                 ,ALEVSIZ=ALEVSIZ,no_src_types=no_src_types       &
      &                 ,LEVSIZ=LEVSIZ,N_OZMIXM=NUM_OZMIXM               &
      &                 ,N_AEROSOLC=NUM_AEROSOLC,PAERLEV=PAERLEV         &
      &                 ,XTIME=XTIME                                     &
+     &                 ,ITS=ITS,ITE=ITE                                 &
+     &                 ,JTS=JTS,JTE=JTE                                 &
      &                 ,IDS=IDS,IDE=IDE,JDS=JDS                         &
      &                 ,JDE=JDE,KDS=KDS,KDE=KDE                         &
      &                 ,IMS=IMS,IME=IME,JMS=JMS,JME=JME,KMS=KMS,KME=KME &
@@ -671,48 +747,47 @@
 !-----------------------------------------------------------------------
 !
 !-----------------------------------------------------------------------
-      nrads_block: IF(MOD(NTSD_rad,NRADS)==0)THEN
+!mz      nrads_block: IF(MOD(NTSD_rad,NRADS)==0)THEN
 !-----------------------------------------------------------------------
 !***  COMPUTE CZMEAN FOR NON-GFDL SHORTWAVE
 !-----------------------------------------------------------------------
-        !  DO J=MYJS,MYJE
-          DO I=1,ncol
+!mz          DO I=1,ncol
          
-            CZMEAN(I)=0.
-            TOT(I)=0.
-          ENDDO
+!            CZMEAN(I)=0.
+!            TOT(I)=0.
+!          ENDDO
 !
-          CALL CAL_MON_DAY(JULDAY,JULYR,JMONTH,JDAY)
-          IDAT(1)=JMONTH
-          IDAT(2)=JDAY
-          IDAT(3)=JULYR
+!          CALL CAL_MON_DAY(JULDAY,JULYR,JMONTH,JDAY)
+!          IDAT(1)=JMONTH
+!          IDAT(2)=JDAY
+!          IDAT(3)=JULYR
 !
-          DO II=0,NRADS,NPHS
-            TIMES=NTSD_rad*DT+II*DT
-            CALL ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,GLON,GLAT,CZEN       &
-     &                 ,MYIS,MYIE,MYJS,MYJE                             &
-     &                 ,IDS,IDE,JDS,JDE,KDS,KDE                         &
-     &                 ,IMS,IME,JMS,JME,KMS,KME                         &
-     &                 ,ITS,ITE,JTS,JTE,KTS,KTE)
+!          DO II=0,NRADS,NPHS
+!            TIMES=NTSD_rad*DT+II*DT
+!            CALL ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,XLONG,XLAT,CZEN      &
+!     &                 ,MYIS,MYIE,MYJS,MYJE                             &
+!     &                 ,IDS,IDE,JDS,JDE,KDS,KDE                         &
+!     &                 ,IMS,IME,JMS,JME,KMS,KME                         &
+!     &                 ,ITS,ITE,JTS,JTE,KTS,KTE)
 !
 !mz!$omp parallel do                                                       &
 !mz!$omp& private(i,j)
            ! DO J=MYJS,MYJE
-            DO I= 1,ncol !MYIS,MYIE
-              IF(CZEN(I)>0.)THEN
-                CZMEAN(I)=CZMEAN(I)+CZEN(I)
-                TOT(I)=TOT(I)+1.
-              ENDIF
-            ENDDO
+!            DO I= 1,ncol !MYIS,MYIE
+!              IF(CZEN(I)>0.)THEN
+!                CZMEAN(I)=CZMEAN(I)+CZEN(I)
+!                TOT(I)=TOT(I)+1.
+!              ENDIF
+!            ENDDO
 !
-          ENDDO
+!          ENDDO
 !
 !mz!$omp parallel do                                                       &
 !mz!$omp& private(i,j)
           !DO J=MYJS,MYJE
-          DO I=1,ncol  !MYIS,MYIE
-            IF(TOT(I)>0.)CZMEAN(I)=CZMEAN(I)/TOT(I)
-          ENDDO
+!          DO I=1,ncol  !MYIS,MYIE
+!            IF(TOT(I)>0.)CZMEAN(I)=CZMEAN(I)/TOT(I)
+!          ENDDO
           !ENDDO
 !
 !-----------------------------------------------------------------------
@@ -725,7 +800,8 @@
           DO I=1,ncol !YIS1,MYIE1
 !
 !MZ            IF(HBM2(I,J)>0.5)THEN
-              TOTSWDN(I)=SWNETDN(I)/(1.-ALBEDO(I))
+!              TOTSWDN(I)=SWNETDN(I)/(1.-ALBEDO(I))
+              TOTSWDN(I)=SWNETDN(I)/(1.-Radtend%sfalb(I))
 !
 !--- No value currently available for clear-sky solar fluxes from
 !    non GFDL schemes, though it's needed for air quality forecasts.
@@ -767,13 +843,13 @@
           ENDDO
 !        ENDDO
 !
-      ENDIF nrads_block
+!mz      ENDIF nrads_block
 !
 !-----------------------------------------------------------------------
 !***  LONGWAVE
 !-----------------------------------------------------------------------
 !
-      nradl_block: IF(MOD(NTSD_rad,NRADL)==0)THEN
+!mz      nradl_block: IF(MOD(NTSD_rad,NRADL)==0)THEN
 !
 !$omp parallel do                                                       &
 !$omp& private(i,iendx,j)
@@ -808,7 +884,7 @@
 !
 !        ENDDO
 !
-      ENDIF nradl_block
+!      ENDIF nradl_block
 !
 !-----------------------------------------------------------------------
 !***  STORE 3D CLOUD FRACTIONS.
@@ -870,7 +946,7 @@
       ENDDO
       !ENDDO
      
-      ENDIF    !radiation loop
+!mz      ENDIF    !radiation loop
 
 !
 !-----------------------------------------------------------------------

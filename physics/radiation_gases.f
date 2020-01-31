@@ -1479,12 +1479,9 @@
        plev=>plev_ozone_save
        lat_ozone=>lat_ozone_save
        ozmixin=>ozmixin_save
-!mz #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
-!mz       if_master: if(wrf_dm_on_monitor()) then
+
        if (mpirank == mpiroot) then
-       !mz call wrf_debug(1,'Master rank reads ozone.')
          write (0,*) 'Master rank reads ozone.'
-!mz #endif
 
 !-- read in ozone pressure data
 
@@ -1497,12 +1494,19 @@
         do k = 1,levsiz
         READ (pin_unit,*)plev(k)
         end do
+!mz
+        write(0,*) 'ozone_plev: max/min(plev) = ',                      &
+     &              maxval(plev), minval(plev) 
       close(27)
 
       do k=1,levsiz
          plev(k) = plev(k)*100.
       end do
       pin=plev ! copy to grid array
+!mz
+        write(0,*) 'ozone_plev: max/min(pin) = ',                       &
+     &              maxval(pin), minval(pin)
+
 
 !-- read in ozone lat data
 
@@ -1512,6 +1516,10 @@
         do j = 1,latsiz
         READ (lat_unit,*)lat_ozone(j)
         end do
+!mz
+        write(0,*) 'ozone_lat: max/min(lat_ozone) = ',                  &
+     &              maxval(lat_ozone), minval(lat_ozone)
+
       close(28)
 
 
@@ -1529,6 +1537,10 @@
       enddo
       enddo
       enddo
+!mz
+        write(0,*) 'ozone: max/min(ozmixin) = ',                        &
+     &              maxval(ozmixin), minval(ozmixin)
+
       close(29)
 !mz #if ( defined( DM_PARALLEL ) && ( ! defined( STUBMPI ) ) )
        endif  !if_master

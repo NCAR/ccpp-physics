@@ -68,13 +68,13 @@
       errflg = 0
 
 
-      if (mpirank == mpiroot )  then
-         write(0,*)'------- kdt = ', kdt
-         write(0,*)'max/min(qv) = ',maxval(qv),minval(qv)
-         write(0,*)'max/min(qc) = ',maxval(qc),minval(qc)
-         write(0,*)'max/min(qi) = ',maxval(qi),minval(qi)
-         write(0,*)'max/min(qr) = ',maxval(qr),minval(qr)
-      endif
+!      if (mpirank == mpiroot )  then
+!         write(0,*)'------- kdt = ', kdt
+!         write(0,*)'max/min(qv) = ',maxval(qv),minval(qv)
+!         write(0,*)'max/min(qc) = ',maxval(qc),minval(qc)
+!         write(0,*)'max/min(qi) = ',maxval(qi),minval(qi)
+!         write(0,*)'max/min(qr) = ',maxval(qr),minval(qr)
+!      endif
 
       DO K=1,LM
         DO I=1,IME
@@ -92,15 +92,15 @@
         ENDDO
       ENDDO
 
-      if (mpirank == mpiroot )  then
-         write(0,*)'------------'
-         write(0,*)'max/min(qv_r) = ',maxval(qv_r),minval(qv_r)
-         write(0,*)'max/min(qc_r) = ',maxval(qc_r),minval(qc_r)
-         write(0,*)'max/min(qi_r) = ',maxval(qi_r),minval(qi_r)
-         write(0,*)'max/min(qr_r) = ',maxval(qr_r),minval(qr_r)
-         write(0,*)'max/min(qg_r) = ',maxval(qg_r),minval(qg_r) 
-         write(0,*)'max/min(qs_r) = ',maxval(qs_r),minval(qs_r)
-      endif
+!      if (mpirank == mpiroot )  then
+!         write(0,*)'------------'
+!         write(0,*)'max/min(qv_r) = ',maxval(qv_r),minval(qv_r)
+!         write(0,*)'max/min(qc_r) = ',maxval(qc_r),minval(qc_r)
+!         write(0,*)'max/min(qi_r) = ',maxval(qi_r),minval(qi_r)
+!         write(0,*)'max/min(qr_r) = ',maxval(qr_r),minval(qr_r)
+!         write(0,*)'max/min(qg_r) = ',maxval(qg_r),minval(qg_r) 
+!         write(0,*)'max/min(qs_r) = ',maxval(qs_r),minval(qs_r)
+!      endif
 
 
       end subroutine HWRF_radiation_pre_run

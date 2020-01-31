@@ -140,7 +140,8 @@
 ! total number of zenith angle iterations
       integer               :: nstp    =6
 
-      public  sol_init, sol_update, coszmn, cal_mon_day, zenith
+      public  sol_init, sol_update, coszmn, calc_coszmn, cal_mon_day,   &
+     &        zenith
 
 
 ! =================
@@ -905,6 +906,68 @@
 !...................................
       end subroutine coszmn
 !! @}
+!mz:calc_coszmn is modified from coszmn in order to use in HWRF rrtmg
+      subroutine calc_coszmn( ims,ime,jms,jme,its,ite,jts,jte,          &
+     &                        xlon,sinlat,coslat,solhr,                 &     ! ---  inputs
+     &                        coszen, coszdg     )                      &     ! ---  outputs
+
+      implicit none
+
+!  ---  inputs:                                                                            
+      integer, intent(in) :: ims,ime,jms,jme,its,ite,jts,jte
+
+      real (kind=kind_phys), dimension(ims:ime,jms:jme),                &
+     &                       intent(in) :: sinlat, coslat, xlon
+      real (kind=kind_phys), intent(in) :: solhr
+
+!  ---  outputs:                                                                           
+      real (kind=kind_phys),dimension(ims:ime,jms:jme),                 &
+     &                      intent(out) :: coszen, coszdg
+!  ---  locals: 
+      real (kind=kind_phys) :: coszn, cns, solang, rstp
+
+      integer,allocatable,dimension(:,:) :: istsun 
+      integer :: i, it, j
+
+!===>  ...  begin here                                                                     
+
+      solang = pid12 * (solhr - f12)         ! solar angle at present time                 
+      rstp = 1.0 / float(nstp)
+
+      allocate(istsun(ims:ime,jms:jme))
+
+      do j=jts,jte
+      do i=its,ite
+        coszen(i,j) = 0.0
+        istsun(i,j) = 0
+      enddo
+      enddo
+
+      do it = 1, nstp
+        cns = solang + (float(it)-0.5)*anginc + sollag
+        do j=jts,jte
+        do i=its,ite
+          coszn     = sindec * sinlat(i,j) + cosdec * coslat(i,j)       &
+     &                                   * cos(cns+xlon(i,j))
+          coszen(i,j) = coszen(i,j) + max(0.0, coszn)
+          if (coszn > czlimt) istsun(i,j) = istsun(i,j) + 1
+        enddo
+        enddo
+      enddo
+
+!  --- ...  compute time averages
+
+      do j=jts,jte
+      do i=its,ite
+        coszdg(i,j) = coszen(i,j) * rstp
+        if (istsun(i,j) > 0) coszen(i,j) = coszen(i,j) / istsun(i,j)
+      enddo
+      enddo
+      
+      deallocate(istsun)
+      return
+!................................... 
+      end subroutine calc_coszmn  
 !-----------------------------------
 
 !>\ingroup module_radiation_astronomy

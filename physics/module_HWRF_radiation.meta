@@ -70,18 +70,18 @@
   intent = in
   optional = F
 [xlat]
-  standard_name = latitude_degree
-  long_name = latitude in degrees
-  units = degree
+  standard_name = latitude
+  long_name = latitude
+  units = radians
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [xlong]
-  standard_name = longitude_degree
-  long_name = longitude in degrees
-  units = degree
+  standard_name = longitude
+  long_name = longitude
+  units = radians
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -272,15 +272,6 @@
   type = integer
   intent = in
   optional = F
-[XTIME]
-  standard_name = minute_since_simulation_start
-  long_name =
-  units =
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [JULIAN]
   standard_name = julian_day
   long_name =  julian day
@@ -304,24 +295,6 @@
   units = count
   dimensions = ()
   type = integer
-  intent = in
-  optional = F
-[GLAT]
-  standard_name = latitude
-  long_name = latitude
-  units = radians
-  dimensions = (horizontal_dimension) 
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[GLON]
-  standard_name = longitude
-  long_name = longitude
-  units = radians
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [NRADS]   
@@ -448,24 +421,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[ALBEDO]
-  standard_name = surface_albedo
-  long_name = surface albedo
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[EPSR]
-  standard_name = surface_longwave_emissivity
-  long_name = surface lw emissivity in fraction
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [F_ICE]
   standard_name = fraction_of_ice_water_cloud
   long_name = fraction of ice water cloud
@@ -484,9 +439,9 @@
   kind = kind_phys
   intent = in
   optional = F
-[SM]
-  standard_name = sea_mask
-  long_name = sea mask; =1 for sea, =0 for land
+[slmsk]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_dimension)
   type = real
@@ -575,7 +530,7 @@
   intent = inout
   optional = F
 [CZMEAN]
-  standard_name = mean_cosine_of_zenith_angle_between_SW_radiation_calls
+  standard_name = cosine_of_zenith_angle
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_dimension)
@@ -758,37 +713,63 @@
   kind = kind_phys
   intent = inout
   optional = F
-[coszen]   
-  standard_name = cosine_of_zenith_angle 
-  long_name = mean cos of zenith angle over rad call period
+[sinlat]
+  standard_name = sine_of_latitude
+  long_name = sine of latitude
   units = none
-  dimensions = (horizontal_dimension) 
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = T
-[hrang]
-  standard_name = solar_hour_angle
-  long_name = solar hour angle
-  units = radians
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
-  optional = T
+  intent = in
+  optional = F
+[coslat]
+  standard_name = cosine_of_latitude
+  long_name = cosine of latitude
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[solhr]
+  standard_name = forecast_hour_of_the_day
+  long_name = time in hours after 00z at the current timestep
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[solcon]
+  standard_name = solar_constant                                                  
+  long_name = solar constant (sun-earth distant adjusted)                         
+  units = W m-2                                                                   
+  dimensions = ()                                                                 
+  type = real                                                                     
+  kind = kind_phys                                                                
+  intent = in                                                                    
+  optional = F         
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = Fortran DDT containing FV3-GFS radiation tendencies
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = in
+  optional = F
 [xlat]
-  standard_name = latitude_degree
-  long_name = latitude in degrees
-  units = degree
+  standard_name = latitude
+  long_name = latitude
+  units = radians
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [xlong]
-  standard_name = longitude_degree
-  long_name = longitude in degrees
-  units = degree
+  standard_name = longitude
+  long_name = longitude
+  units = radians
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -1332,6 +1313,14 @@
 [MPIRANK]
   standard_name = mpi_rank
   long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mpicomm]
+  standard_name = mpi_comm
+  long_name = MPI communicator
   units = index
   dimensions = ()
   type = integer

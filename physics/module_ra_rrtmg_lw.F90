@@ -4997,6 +4997,8 @@ contains
       call taugb15
       call taugb16
 
+
+
       contains
 
 !----------------------------------------------------------------------------
@@ -10993,6 +10995,8 @@ contains
 !  Prepare atmospheric profile from GCM for use in RRTMG, and define
 !  other input parameters.  
 
+!mz
+        ! write(0,*)'call inatm() to prepare atmos profiles ...'
          call inatm (iplon, nlay, icld, iaer, &
               play, plev, tlay, tlev, tsfc, h2ovmr, &
               o3vmr, co2vmr, ch4vmr, n2ovmr, o2vmr, cfc11vmr, cfc12vmr, &
@@ -11008,6 +11012,8 @@ contains
 !  effective radius must be passed into cldprop.  Cloud fraction and cloud
 !  optical depth are transferred to rrtmg_lw arrays in cldprop.  
 
+!mz
+        ! write(0,*)'call cldprmc() to set cloud optical properties' 
          call cldprmc(nlayers, inflag, iceflag, liqflag, cldfmc, ciwpmc, &
                       clwpmc, cswpmc, reicmc, relqmc, resnmc, ncbands, taucmc)
 
@@ -11016,6 +11022,7 @@ contains
 ! coefficients and indices needed to compute the optical depths
 ! by interpolating data from stored reference atmospheres. 
 
+         write(0,*)'call setcoef in LWRAD'
          call setcoef(nlayers, istart, pavel, tavel, tz, tbound, semiss, &
                       coldry, wkl, wbrodl, &
                       laytrop, jp, jt, jt1, planklay, planklev, plankbnd, &
@@ -11030,6 +11037,7 @@ contains
 !  Calculate the gaseous optical depths and Planck fractions for 
 !  each longwave spectral band.
 
+         write(0,*)'call taumol in LWRAD'
          call taumol(nlayers, pavel, wx, coldry, &
                      laytrop, jp, jt, jt1, planklay, planklev, plankbnd, &
                      colh2o, colco2, colo3, coln2o, colco, colch4, colo2, &
@@ -11086,6 +11094,8 @@ contains
             totdclnlfl(k) = 0.0
          end do
 #endif
+!mz
+         !write(0,*)'call rtrnmc in LWRAD'
          call rtrnmc(nlayers, istart, iend, iout, pz, semiss, ncbands, &
                      cldfmc, taucmc, planklay, planklev, plankbnd, &
                      pwvcm, fracs, taut, &
@@ -11937,16 +11947,22 @@ CONTAINS
 !mz
 !ccc
 
+!mz
+      ! write(0,*) 'in LWRAD, max/min(p8w) = ',maxval(p8w),minval(p8w)
+      ! write(0,*) 'in LWRAD, max/min(t8w) = ',maxval(t8w),minval(t8w)
+      ! write(0,*) 'in LWRAD, its,ite,jts,jte,kte = ',its,ite,jts,jte,kte
+
 ! latitude loop
-  j_loop: do j = jts,jte
+      j_loop: do j = jts,jte
 
 ! longitude loop
-     i_loop: do i = its,ite
+      i_loop: do i = its,ite
 
          do k=kts,kte+1
             Pw1D(K) = p8w(I,K,J)/100.
             Tw1D(K) = t8w(I,K,J)
          enddo
+        !write(0,*) 'mz*in LWRAD, pw1d,tw1d'
 
          DO K=kts,kte
             QV1D(K)=0.
@@ -11956,6 +11972,7 @@ CONTAINS
             QS1D(K)=0.
             CLDFRA1D(k)=0.
          ENDDO
+        ! write(0,*) 'mz*in LWRAD, initialize q*'
 
          DO K=kts,kte
             QV1D(K)=QV3D(I,K,J)
@@ -11979,9 +11996,12 @@ CONTAINS
             RHO1D(K)=RHO3D(I,K,J)
             DZ1D(K)=dz8w(I,K,J)
          ENDDO
+         !write(0,*) 'mz*in LWRAD, initialize tten1d...'
 
 ! moist variables
 
+!mz
+         !write(0,*)'mz* icloud=',icloud
          IF (ICLOUD .ne. 0) THEN
             IF ( PRESENT( CLDFRA3D ) ) THEN
               DO K=kts,kte
@@ -12065,7 +12085,8 @@ CONTAINS
             ENDIF
 
 ! mji - For MP option 5
-            IF ( PRESENT(F_QI) .and. PRESENT(F_QC) .and. PRESENT(F_QS) .and. PRESENT(F_ICE_PHY) ) THEN
+!            IF ( PRESENT(F_QI) .and. PRESENT(F_QC) .and. PRESENT(F_QS) .and. PRESENT(F_ICE_PHY) ) THEN
+!mz
                IF ( F_QC .and. .not. F_QI .and. F_QS ) THEN
                   DO K=kts,kte
                      qi1d(k) = 0.1*qs3d(i,k,j)
@@ -12075,7 +12096,7 @@ CONTAINS
                      qc1d(k) = max(0.,qc1d(k))
                   ENDDO
                ENDIF
-            ENDIF
+!            ENDIF
 
         ENDIF
 
@@ -12088,6 +12109,9 @@ CONTAINS
 !mz        IF ( mp_physics == FER_MP_HIRES .OR. &
 !mz             mp_physics == FER_MP_HIRES_ADVECT) THEN
 !mz#endif
+!mz     
+       ! write(0,*)'mz* mp_physics,imp_physics_fer_hires = ',            &
+     !& mp_physics,imp_physics_fer_hires
         IF (mp_physics == imp_physics_fer_hires) THEN
                   DO K=kts,kte
                      qi1d(k) = qi3d(i,k,j)
@@ -12097,6 +12121,7 @@ CONTAINS
                      qc1d(k) = max(0.,qc1d(k))
                   ENDDO
         ENDIF
+
 
 !         EMISS0=EMISS(I,J)
 !         GLW0=0. 
@@ -12113,6 +12138,8 @@ CONTAINS
 ! Edited for top of model adjustment (nlayers = kte + 1).  
 ! Steven Cavallo, December 2010
          nlay = nlayers ! Keep these indices the same
+!mz      
+!         write(0,*)'mz: nlay = ',nlay
 
 ! Select cloud overlap assumption (1 = random, 2 = maximum-random, 3 = maximum, 4 = exponential, 5 = exponential-random
          icld=cldovrlp ! J. Henderson AER assign namelist variable cldovrlp to existing icld
@@ -12486,8 +12513,8 @@ CONTAINS
 
 
 !link the aerosol feedback to cloud  -czhao
-  if( PRESENT( progn ) ) then
-    if (progn == 1) then
+      if( PRESENT( progn ) ) then
+      if (progn == 1) then
 !jdfcz     if(prescribe==0) then
 
       pi = 4.*atan(1.0)
@@ -12518,12 +12545,12 @@ CONTAINS
 !     call relcalc(ncol, pcols, pver, tlay, landfrac, landm, icefrac, reliq, snowh)
 !     write(0,*) 'lw prescribe aerosol',maxval(qndrop3d)
 !jdfcz     endif
-    else  ! progn   
+      else  ! progn   
       call relcalc(ncol, pcols, pver, tlay, landfrac, landm, icefrac, reliq, snowh)
-    endif
-  else   !present(progn) 
+      endif
+      else   !present(progn) 
       call relcalc(ncol, pcols, pver, tlay, landfrac, landm, icefrac, reliq, snowh)
-  endif
+      endif
 
 ! following Kristjansson and Mitchell
             call reicalc(ncol, pcols, pver, tlay, reice)
@@ -12764,14 +12791,14 @@ CONTAINS
             lwupbc(i,j)    = uflxc(1,1)
             lwdnb(i,j)     = dflx(1,1)
             lwdnbc(i,j)    = dflxc(1,1)
-			if(calc_clean_atm_diag .gt. 0)then
+            if(calc_clean_atm_diag .gt. 0)then
 ! Output up and down toa fluxes for clean sky
-            	lwuptcln(i,j)  = uflxcln(1,nlayers+1)
-            	lwdntcln(i,j)  = dflxcln(1,nlayers+1)
+                lwuptcln(i,j)  = uflxcln(1,nlayers+1)
+                lwdntcln(i,j)  = dflxcln(1,nlayers+1)
 ! Output up and down surface fluxes for clean sky
-            	lwupbcln(i,j)  = uflxcln(1,1)
-            	lwdnbcln(i,j)  = dflxcln(1,1)
-			end if
+                lwupbcln(i,j)  = uflxcln(1,1)
+                lwdnbcln(i,j)  = dflxcln(1,1)
+            end if
          endif
 
 ! Output up and down layer fluxes for total and clear sky.
@@ -12795,11 +12822,11 @@ CONTAINS
 
 !
       end do i_loop
-   end do j_loop                                           
+      end do j_loop                                           
 
 !-------------------------------------------------------------------
 
-   END SUBROUTINE RRTMG_LWRAD
+      END SUBROUTINE RRTMG_LWRAD
 
  
 !-------------------------------------------------------------------------
@@ -12970,18 +12997,23 @@ CONTAINS
 
 ! Steven Cavallo.  Added for buffer layer adjustment.   December 2010.
 !mz: set ltp =0 as default as in GFS rrtmg
+          NLAYERS = kme
 !mz       NLAYERS = kme + nint(p_top*0.01/deltap)- 1 ! Model levels plus new levels.
 !mz                                              ! nlayers will subsequently 
 !mz                                              ! replace kte+1
 
 ! Read in absorption coefficients and other data
       IF ( allowed_to_read ) THEN
-        CALL rrtmg_lwlookuptable(mpirank,mpiroot,mpicomm,errflg,errmsg)
+!mz        CALL rrtmg_lwlookuptable(mpirank,mpiroot,mpicomm,errflg,errmsg)
       ENDIF
+
+!mz      if(mpirank == mpiroot)write(0,*) 'rrtmg_lwlookuptable completed..'
 
 ! Perform g-point reduction and other initializations
 ! Specific heat of dry air (cp) used in flux to heating rate conversion factor.
      call rrtmg_lw_ini(cp)
+!mz   
+      if(mpirank == mpiroot)write(0,*) 'rrtmg_lw_ini completed...'
 
       END SUBROUTINE rrtmg_lwinit
 
@@ -13189,17 +13221,6 @@ CONTAINS
      &                minval(fracrefao)
       endif
        
-
-9010  continue
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit     
-      errflg = 1
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb01 "
-
-      ! After reading the tables, broadcast the information to all MPI tasks.
-      ! First, broadcast the current error code from MPI master (0 = success)
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -13218,6 +13239,12 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr) 
 #endif
+      return
+9010  continue                                                   
+      errflg = 1                                                 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb01 "       
+                                                                 
+      return                                
 #endif
 
       end subroutine lw_kgb01
@@ -13322,17 +13349,8 @@ CONTAINS
          write(0,*) 'lw_kgb02: max/min(fracrefao) =',maxval(fracrefao), &
      &               minval(fracrefao)
       endif
-9010    continue
-!        WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading  &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit 
-        errflg = 1
-        errmsg = " error reading RRTMG_LW_DATA in lw_kgb02 "
 
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return 
-#ifdef MPI                                                                                            
+#ifdef MPI                                                                       
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)                   
       call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
@@ -13345,11 +13363,13 @@ CONTAINS
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)  
-#endif                                                                                                
-
+#endif                                                                            
+        return
+9010    continue
+        errflg = 1
+        errmsg = " error reading RRTMG_LW_DATA in lw_kgb02 "
+        return    
 #endif
-
-
       end subroutine lw_kgb02
 
 ! **************************************************************************
@@ -13497,16 +13517,6 @@ CONTAINS
      &               minval(kao_mn2o)
       ENDIF
 
-9010  continue 
-      !WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-     !&                             RRTMG_LW_DATA on unit ',rrtmg_unit 
-      errflg = 1 
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb03 "       
-                                                                
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return                       
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -13525,6 +13535,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue                                                   
+      errflg = 1                                                 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb03 "       
+      return       
 #endif
 
       end subroutine lw_kgb03 
@@ -13641,16 +13656,6 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 
-9010  continue 
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!     &                             RRTMG_LW_DATA on unit ',rrtmg_unit  
-      errflg = 1      
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb04 "  
-                                                 
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return                     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -13665,6 +13670,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue                                                   
+      errflg = 1                                                 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb04 "       
+      return             
 #endif
 
       end subroutine lw_kgb04
@@ -13800,16 +13810,7 @@ CONTAINS
          write(0,*) 'lw_kgb05: max/min(ccl4o) =',                       &
      &               maxval(ccl4o),minval(ccl4o)
       ENDIF
-9010  continue    
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit  
-      errflg = 1    
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb05 "  
                                                               
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return              
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -13828,6 +13829,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue                                                   
+      errflg = 1                                                 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb05 "       
+      return       
 #endif
       end subroutine lw_kgb05
 
@@ -13840,7 +13846,7 @@ CONTAINS
 !     use rrlw_kg06, only : fracrefao, kao, kao_mco2, selfrefo, forrefo, &
 !                           cfc11adjo, cfc12o
 
-#ifdef MPI                                                                                                                            
+#ifdef MPI                   
        use mpi 
 #endif     
 
@@ -13856,7 +13862,6 @@ CONTAINS
       integer,              intent(out) :: errflg
 
 #ifdef MPI
-      ! MPI variables
       integer :: mpierr
 #endif
 
@@ -13866,7 +13871,6 @@ CONTAINS
      ! Initialize the CCPP error handling variables
         errmsg = ''
         errflg = 0
-
 
 !     Arrays fracrefao and fracrefbo are the Planck fractions for the lower
 !     and upper atmosphere.
@@ -13937,16 +13941,6 @@ CONTAINS
          write(0,*) 'lw_kgb06: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
-9010  continue                               
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!     &                          RRTMG_LW_DATA on unit ',rrtmg_unit  
-      errflg = 1   
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb06 "   
-                                                   
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return                                      
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -13963,6 +13957,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue                                                   
+      errflg = 1                                                 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb06 "       
+      return       
 #endif
       end subroutine lw_kgb06
 
@@ -14090,16 +14089,6 @@ CONTAINS
          write(0,*) 'lw_kgb07: max/min(kao_mco2) =',                    &
      &               maxval(kao_mco2),minval(kao_mco2)
       ENDIF
-9010  continue             
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit 
-      errflg = 1                   
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb07 "       
-                                                                  
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return                     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -14118,6 +14107,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue                                                   
+      errflg = 1                                                 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb07 "       
+      return       
 #endif
 
       end subroutine lw_kgb07
@@ -14262,16 +14256,6 @@ CONTAINS
      &               maxval(cfc12o),minval(cfc12o)
       ENDIF
 
-9010  continue                      
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!     &                             RRTMG_LW_DATA on unit ',rrtmg_unit 
-      errflg = 1                         
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb08 " 
-                                                               
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-      if (errflg/=0) return         
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -14300,6 +14284,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb08 " 
+      return
 #endif
       end subroutine lw_kgb08
 
@@ -14429,16 +14418,6 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 
-9010  continue    
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit  
-      errflg = 1                  
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb09 "     
-                                                         
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
-      if (errflg/=0) return      
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -14457,8 +14436,12 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb09 "
+      return
 #endif
-
 
       end subroutine lw_kgb09
 
@@ -14561,17 +14544,6 @@ CONTAINS
          write(0,*) 'lw_kgb10: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
-9010  continue           
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!     &                           RRTMG_LW_DATA on unit ',rrtmg_unit  
-      errflg = 1    
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb10 " 
-                                                           
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-      if (errflg/=0) return   
-
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -14586,8 +14558,13 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
-#endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb10 "
+      return
 
+#endif
 
       end subroutine lw_kgb10
 
@@ -14704,16 +14681,6 @@ CONTAINS
          write(0,*) 'lw_kgb11: max/min(fracrefao) =',                   &
                      maxval(fracrefao),minval(fracrefao)
       ENDIF
-9010  continue             
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit 
-      errflg = 1                                   
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb11 "   
-                                       
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-      if (errflg/=0) return                                     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -14732,6 +14699,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb11 "
+      return
 #endif
 
       end subroutine lw_kgb11
@@ -14822,17 +14794,6 @@ CONTAINS
          write(0,*) 'lw_kgb12: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
-
-9010  continue 
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!     &                           RRTMG_LW_DATA on unit ',rrtmg_unit 
-      errflg = 1                         
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb12 "   
-                                                               
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm,   mpierr)
-      if (errflg/=0) return    
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -14843,6 +14804,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue 
+      errflg = 1 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb12 " 
+      return
 #endif
 
       end subroutine lw_kgb12
@@ -14964,16 +14930,6 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 
-9010  continue  
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                   RRTMG_LW_DATA on unit ',rrtmg_unit  
-      errflg = 1                        
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb13 "  
-                           
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
-      if (errflg/=0) return                                           
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -14992,6 +14948,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1 
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb13 " 
+      return          
 #endif
       end subroutine lw_kgb13
 
@@ -15100,16 +15061,6 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 
-9010  continue             
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!     &                             RRTMG_LW_DATA on unit ',rrtmg_unit 
-      errflg = 1                                                 
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb14 "  
-                                                        
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
-      if (errflg/=0) return    
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -15124,6 +15075,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb14 " 
+      return       
 #endif
 
       end subroutine lw_kgb14
@@ -15229,16 +15185,7 @@ CONTAINS
          write(0,*) 'lw_kgb15: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
-9010  continue            
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit  
-      errflg = 1                                                
-      errmsg = " error reading RRTMG_LW_DATA in lw_kgb15 "     
                                         
-      ! After reading the tables, broadcast the information to all MPI tasks.                         
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr) 
-      if (errflg/=0) return     
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -15251,6 +15198,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb15 "
+      return    
 #endif
 
 
@@ -15356,21 +15308,11 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) fracrefao, fracrefbo, kao, kbo,              &
+         read (rrtmg_unit,err=9010) fracrefao, fracrefbo, kao, kbo,     &
      &     selfrefo,  forrefo
          write(0,*) 'lw_kgb16: max/min(fracrefao) =',                   &
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
-!9010  continue                                    
-!      WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_lw: error reading    &
-!                                 RRTMG_LW_DATA on unit ',rrtmg_unit    
-!      errflg = 1                                                   
-!      errmsg = " error reading RRTMG_LW_DATA in lw_kgb16 "  
-                                            
-      ! After reading the tables, broadcast the information to all MPI tasks.
-      ! First, broadcast the current error code from MPI master (0 = success)                         
-      !call MPI_BCAST(errflg, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
-      !if (errflg/=0) return             
 #ifdef MPI
       call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -15385,6 +15327,11 @@ CONTAINS
       call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+       return
+9010  continue
+      errflg = 1                                                   
+      errmsg = " error reading RRTMG_LW_DATA in lw_kgb16 "  
+      return             
 #endif
       end subroutine lw_kgb16
 

@@ -656,7 +656,6 @@
       use parkind ,only : im => kind_im, rb => kind_rb ,r4 => kind_r4
       use parrrsw, only : ng22
 
-!     implicit none
       save
 
 !-----------------------------------------------------------------
@@ -1185,9 +1184,8 @@
 
       module rrsw_tbl
 
-      use parkind, only : im => kind_im, rb => kind_rb ,r4 => kind_r4
+      use parkind, only : im => kind_im, rb => kind_rb, r4 => kind_r4 
 
-!     implicit none
       save
 
 !------------------------------------------------------------------
@@ -10018,8 +10016,8 @@ CONTAINS
                        swupb, swupbc, swupbcln, swdnb, swdnbc, swdnbcln, &
 !                      swupflx, swupflxc, swdnflx, swdnflxc,      &
                        swcf, gsw,                                 &
-                       xtime, gmt, xlat, xlong,                   &
-                       radt, degrad, declin,                      &
+                       xlat, xlong,                               &
+                       radt, degrad,                              &!declin, 
                        coszr, julday, solcon,                     &
                        albedo, t3d, t8w, tsk,                     &
                        p3d, p8w, pi3d, rho3d,                     &
@@ -10092,7 +10090,7 @@ CONTAINS
 
    INTEGER, INTENT(IN  )     ::                           JULDAY
    REAL, INTENT(IN    )      ::                      RADT,DEGRAD, &
-                                         XTIME,DECLIN,SOLCON,GMT
+                                                     SOLCON      !mz*declin,gmt,xtime
 
    REAL, DIMENSION( ims:ime, jms:jme )                          , &
          INTENT(IN   )  ::                                  XLAT, &
@@ -10454,11 +10452,13 @@ CONTAINS
 ! Pressures are in mb
 
 ! latitude loop
-  j_loop: do j = jts,jte
+      j_loop: do j = jts,jte
 
 ! longitude loop
-     i_loop: do i = its,ite
+      i_loop: do i = its,ite
          rho1d(kts:kte)=rho3d(i,kts:kte,j) ! BUG FIX (SGT): this was uninitialized
+!mz
+         write(0,*)'mz* swrad: initialize rhold'
 !
 ! Do shortwave by default, deactivate below if sun below horizon
          dorrsw = .true.
@@ -10468,6 +10468,8 @@ CONTAINS
           ! jararias, 14/08/2013
           coszr(i,j)=xcoszen(i,j)
           coszrs=xcoszen(i,j)
+!mz
+         if(coszrs.gt.0.0) write(0,*)'swrad: coszrs>0'
 
 ! Set flag to prevent shortwave calculation when sun below horizon
          if (coszrs.le.0.0) dorrsw = .false.
@@ -10478,6 +10480,9 @@ CONTAINS
             Pw1D(K) = p8w(I,K,J)/100.
             Tw1D(K) = t8w(I,K,J)
          enddo
+
+!mz
+         write(0,*)'mz* swrad: initialize q*'
 
          DO K=kts,kte
             QV1D(K)=0.
@@ -10499,14 +10504,7 @@ CONTAINS
                O31D(K)=O33D(I,K,J)
             ENDDO
          ELSE
-!mz
-!#ifdef CCPP
-!            errflg = 1
-!            errmsg = 'did not pass o33d'
-!            return
-!#else
 !            call wrf_error_fatal('did not pass O33d') ! FIXME: REMOVE THIS LINE
-!#endif
             DO K=kts,kte
                O31D(K)=0.0
             ENDDO
@@ -10521,6 +10519,8 @@ CONTAINS
 
 ! moist variables
 
+!zm
+         write(0,*)'SWRAD: ICLOUD=',ICLOUD
          IF (ICLOUD .ne. 0) THEN
             IF ( PRESENT( CLDFRA3D ) ) THEN
               DO K=kts,kte
@@ -10604,7 +10604,7 @@ CONTAINS
             ENDIF
 
 ! mji - For MP option 5
-            IF ( PRESENT(F_QI) .and. PRESENT(F_QC) .and. PRESENT(F_QS) .and. PRESENT(F_ICE_PHY) ) THEN
+!mz            IF ( PRESENT(F_QI) .and. PRESENT(F_QC) .and. PRESENT(F_QS) .and. PRESENT(F_ICE_PHY) ) THEN
                IF ( F_QC .and. .not. F_QI .and. F_QS ) THEN
                   DO K=kts,kte
                      qi1d(k) = 0.1*qs3d(i,k,j)
@@ -10613,7 +10613,7 @@ CONTAINS
                      qi1d(k) = max(0.,qi1d(k))
                      qc1d(k) = max(0.,qc1d(k))
                   ENDDO
-               ENDIF
+!mz               ENDIF
             ENDIF
 
          ENDIF
@@ -10650,6 +10650,8 @@ CONTAINS
          ncol = 1
 ! Add extra layer from top of model to top of atmosphere
          nlay = (kte - kts + 1) + 1
+!mz
+         write(0,*)'mz*swrad : nlay =',nlay
 
 ! Select cloud overlap assumption (1 = random, 2 = maximum-random, 3 = maximum, 4 = exponential, 5 = exponential-random
          icld=cldovrlp ! J. Henderson AER assign namelist variable cldovrlp to existing icld
@@ -11416,13 +11418,17 @@ CONTAINS
 
 ! Read in absorption coefficients and other data
       IF ( allowed_to_read ) THEN
-           CALL rrtmg_swlookuptable (mpirank,mpiroot,mpicomm,           &
-                                      errflg, errmsg)
+!mz           CALL rrtmg_swlookuptable (mpirank,mpiroot,mpicomm,           &
+!mz                                      errflg, errmsg)
       ENDIF
-
+!mz
+!      if(mpirank == mpiroot) write(0,*)'rrtmg_swlookuptable completed .'
+!
 ! Perform g-point reduction and other initializations
 ! Specific heat of dry air (cp) used in flux to heating rate conversion factor.
       call rrtmg_sw_ini(con_cp)
+!mz 
+      if(mpirank == mpiroot) write(0,*)'rrtmg_sw_ini completed'
 
       END SUBROUTINE rrtmg_swinit
 
@@ -11471,28 +11477,28 @@ CONTAINS
         OPEN(rrtmg_unit,FILE='RRTMG_SW_DATA', convert='BIG_ENDIAN',     &
              FORM='UNFORMATTED',STATUS='OLD',ERR=9009)
 
-      call sw_kgb16(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb17(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb18(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb19(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb20(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb21(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb22(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb23(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb24(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb25(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb26(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb27(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb28(rrtmg_unit,mpirank, mpiroot,mpicomm)
-      call sw_kgb29(rrtmg_unit,mpirank, mpiroot,mpicomm)
+      call sw_kgb16(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb17(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb18(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb19(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb20(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb21(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb22(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb23(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb24(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb25(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb26(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb27(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb28(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
+      call sw_kgb29(rrtmg_unit,mpirank, mpiroot,mpicomm,errmsg,errflg)
 
       CLOSE (rrtmg_unit)
       ENDIF
 
      RETURN
 9009 CONTINUE
-     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error opening     &
-                           RRTMG_SW_DATA on unit ',rrtmg_unit
+!     WRITE( errmess , '(A,I4)' ) 'module_ra_rrtmg_sw: error opening     &
+!                           RRTMG_SW_DATA on unit ',rrtmg_unit
       errflg = 1
       errmsg = 'module_ra_rrtmg_sw: error opening RRTMG_SW_DATA '
       return
@@ -11517,7 +11523,8 @@ CONTAINS
 ! **************************************************************************
 
 ! **************************************************************************
-      subroutine sw_kgb16(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb16(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg,errflg)
 ! **************************************************************************
 
       use rrsw_kg16, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -11534,9 +11541,16 @@ CONTAINS
       integer,              intent(in)  :: mpirank 
       integer,              intent(in)  :: mpiroot    
       integer,              intent(in)  :: mpicomm 
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
        integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11607,16 +11621,16 @@ CONTAINS
 #else
 
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat1, layreffr, kao, kbo, selfrefo, &
-     &                      forrefo, sfluxrefo         
+         read (rrtmg_unit,err=9010) rayl, strrat1, layreffr, kao, kbo,  &
+     &       selfrefo, forrefo, sfluxrefo         
          write(0,*) 'sw_kgb16: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat1,   1,  MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(strrat1,   1,  MPI_DOUBLE_PRECISION,               &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,                         &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
@@ -11629,12 +11643,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue                                                                                                               
+      errflg = 1                                                                                                             
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb16 "                                                                   
+      return   
 #endif
 
       end subroutine sw_kgb16
 
 ! **************************************************************************
-      subroutine sw_kgb17(rrtmg_unit,  mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb17(rrtmg_unit,  mpirank, mpiroot, mpicomm,      &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg17, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -11652,9 +11672,17 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11724,17 +11752,17 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
-     &                     forrefo, sfluxrefo
-         write(0,*) 'sw_kgb17: max/min(kao) = ',                       &
+         read (rrtmg_unit,err=9010) rayl, strrat, layreffr, kao, kbo,   &
+     &     selfrefo,  forrefo, sfluxrefo
+         write(0,*) 'sw_kgb17: max/min(kao) = ',                        &
      &               maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,              &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,                         &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
@@ -11747,11 +11775,17 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_LW_DATA in sw_kgb17 "
+      return
 #endif
       end subroutine sw_kgb17
 
 ! **************************************************************************
-      subroutine sw_kgb18(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb18(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg18, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -11768,9 +11802,15 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11839,16 +11879,17 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
-     &                     forrefo, sfluxrefo
+         read (rrtmg_unit,err=9010) rayl, strrat, layreffr, kao, kbo,   &
+     &        selfrefo,  forrefo, sfluxrefo
          write(0,*) 'sw_kgb18: max/min(kbo) = ',maxval(kbo),minval(kbo)
       ENDIF
+
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,              &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,                         &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
@@ -11861,12 +11902,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb18 "
+      return
 #endif
 
       end subroutine sw_kgb18 
 
 ! **************************************************************************
-      subroutine sw_kgb19(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb19(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+    &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg19, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -11883,9 +11930,14 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -11954,17 +12006,17 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
-     &                     forrefo, sfluxrefo
+         read (rrtmg_unit,err=9010) rayl, strrat, layreffr, kao, kbo,   &
+     &             selfrefo,  forrefo, sfluxrefo
          write(0,*) 'sw_kgb19: max/min(forrefo) = ',                    &
      &               maxval(forrefo),minval(forrefo)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,              &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,                         &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
@@ -11977,12 +12029,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb19 "
+      return
 #endif
 
       end subroutine sw_kgb19
 
 ! **************************************************************************
-      subroutine sw_kgb20(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb20(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg20, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -11998,9 +12056,15 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12071,8 +12135,8 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, layreffr, absch4o, kao, kbo, selfrefo, &
-     &                     forrefo, sfluxrefo 
+         read (rrtmg_unit,err=9010) rayl, layreffr, absch4o, kao, kbo,  &
+     &     selfrefo, forrefo, sfluxrefo 
          write(0,*) 'sw_kgb20: max/min(kao) = ', maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
@@ -12093,12 +12157,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb20 "
+      return
 #endif
 
       end subroutine sw_kgb20
 
 ! **************************************************************************
-      subroutine sw_kgb21(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb21(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg,errflg)
 ! **************************************************************************
 
       use rrsw_kg21, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -12115,9 +12185,16 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12186,17 +12263,17 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
-     &                     forrefo, sfluxrefo
-         write(0,*) 'sw_kgb21: max/min(kao) =',                        &
+         read (rrtmg_unit,err=9010) rayl, strrat, layreffr, kao, kbo,   &
+     &        selfrefo,  forrefo, sfluxrefo
+         write(0,*) 'sw_kgb21: max/min(kao) =',                         &
      &               maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,              &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+      call MPI_BCAST(layreffr,  1, MPI_INTEGER,                         &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
@@ -12209,11 +12286,17 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb21 "
+      return
 #endif
       end subroutine sw_kgb21
 
 ! **************************************************************************
-      subroutine sw_kgb22(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb22(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg,errflg)
 ! **************************************************************************
 
       use rrsw_kg22, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -12230,9 +12313,15 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
-         integer :: mpierr
+      integer :: mpierr
 #endif
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12302,16 +12391,16 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, selfrefo,  &
-     &                     forrefo, sfluxrefo
+         read (rrtmg_unit,err=9010) rayl, strrat, layreffr, kao, kbo,   &
+     &     selfrefo, forrefo, sfluxrefo
         write(0,*) 'sw_kgb22: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(rayl,      1,     MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    1,   MPI_DOUBLE_PRECISION,   &
+      call MPI_BCAST(strrat,    1,     MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1, MPI_INTEGER,   &
+      call MPI_BCAST(layreffr,  1,     MPI_INTEGER,                     &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),      MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
@@ -12324,12 +12413,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb22 "
+      return
 #endif
 
       end subroutine sw_kgb22
 
 ! **************************************************************************
-      subroutine sw_kgb23(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb23(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg23, only : kao, selfrefo, forrefo, sfluxrefo,          &
@@ -12346,9 +12441,14 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12406,17 +12506,17 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) raylo, givfac, layreffr, kao, selfrefo,      &
-     &                     forrefo, sfluxrefo
-         write(0,*) 'sw_kgb23: max/min(raylo) =',                       &
-     &               maxval(raylo),minval(raylo)
+         read (rrtmg_unit, err=9010) raylo, givfac, layreffr, kao,      &
+     &      selfrefo,  forrefo, sfluxrefo
+         write(0,*) 'sw_kgb23: max/min(kao) =',                         &
+     &               maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylo,      size(raylo),    MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(givfac,     1,   MPI_DOUBLE_PRECISION,  &
+      call MPI_BCAST(givfac,     1,   MPI_DOUBLE_PRECISION,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,   1, MPI_INTEGER,  &
+      call MPI_BCAST(layreffr,   1, MPI_INTEGER,                        &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,        size(kao),      MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
@@ -12427,12 +12527,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo,  size(sfluxrefo),MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue                                       
+      errflg = 1 
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb23 "
+      return      
 #endif
 
       end subroutine sw_kgb23
 
 ! **************************************************************************
-      subroutine sw_kgb24(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb24(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg24, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
@@ -12450,9 +12556,15 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12529,20 +12641,19 @@ CONTAINS
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) raylao, raylbo, strrat, layreffr, abso3ao,   &
-     &                     abso3bo, kao, kbo, selfrefo,                 &
-     &                     forrefo, sfluxrefo
-         write(0,*) 'sw_kgb24: max/min(raylao) =',                      &
-     &               maxval(raylao),minval(raylao)
+         read (rrtmg_unit, err=9010) raylao, raylbo, strrat, layreffr,  &
+     &    abso3ao, abso3bo, kao, kbo, selfrefo,   forrefo, sfluxrefo
+         write(0,*) 'sw_kgb24: max/min(kao) =',                         &
+     &               maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylao,      size(raylao),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(raylbo,      size(raylbo),   MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,      1,   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(strrat,      1,   MPI_DOUBLE_PRECISION,            &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,    1, MPI_INTEGER, &
+      call MPI_BCAST(layreffr,    1, MPI_INTEGER,                       &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(abso3ao,     size(abso3ao),  MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
@@ -12559,12 +12670,17 @@ CONTAINS
       call MPI_BCAST(sfluxrefo,   size(sfluxrefo),MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb24 "
+      return
 #endif
-
       end subroutine sw_kgb24
 
 ! **************************************************************************
-      subroutine sw_kgb25(rrtmg_unit,mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb25(rrtmg_unit,mpirank, mpiroot, mpicomm, errmsg, &
+     &                    errflg)
 ! **************************************************************************
 
       use rrsw_kg25, only : kao, sfluxrefo,                             &
@@ -12582,10 +12698,16 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 !     Array raylo contains the Rayleigh extinction coefficient at all v = 2925 cm-1.
@@ -12629,10 +12751,10 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) raylo, layreffr, abso3ao, abso3bo, kao,      &
-     &                     sfluxrefo
-         write(0,*) 'sw_kgb25: max/min(raylo) =',                       &
-     &               maxval(raylo),minval(raylo)
+         read (rrtmg_unit,err=9010) raylo, layreffr, abso3ao, abso3bo,  &
+     &     kao, sfluxrefo
+         write(0,*) 'sw_kgb25: max/min(kao) =',                         &
+     &               maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylo,     size(raylo),    MPI_DOUBLE_PRECISION,   &
@@ -12648,12 +12770,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo),MPI_DOUBLE_PRECISION,   &
                      mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb25 "
+      return          
 #endif
 
       end subroutine sw_kgb25
 
 ! **************************************************************************
-      subroutine sw_kgb26(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb26(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg26, only : sfluxrefo, raylo
@@ -12669,9 +12797,15 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 !     Array raylo contains the Rayleigh extinction coefficient at all v for this band.
@@ -12691,7 +12825,7 @@ CONTAINS
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) raylo, sfluxrefo
+         read (rrtmg_unit, err=9010) raylo, sfluxrefo
          write(0,*) 'sw_kgb26: max/min(raylo) =',                       &
      &               maxval(raylo),minval(raylo)
       ENDIF
@@ -12701,11 +12835,17 @@ CONTAINS
       call MPI_BCAST(sfluxrefo,  size(sfluxrefo), MPI_DOUBLE_PRECISION, &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue 
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb26  "
+      return        
 #endif
       end subroutine sw_kgb26
 
 ! **************************************************************************
-      subroutine sw_kgb27(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb27(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg27, only : kao, kbo, sfluxrefo, raylo,                 &
@@ -12722,9 +12862,16 @@ CONTAINS
       integer,              intent(in)  :: mpirank
       integer,              intent(in)  :: mpiroot
       integer,              intent(in)  :: mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
+
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 !     The values in array sfluxrefo were obtained using the "low resolution"
@@ -12783,15 +12930,16 @@ CONTAINS
                                   RRTMG_SW_DATA on unit ',rrtmg_unit
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) raylo, scalekur, layreffr, kao, kbo, sfluxrefo
-         write(0,*) 'sw_kgb27: max/min(raylo) =',maxval(raylo),minval(raylo)
+         read (rrtmg_unit,err=9010) raylo, scalekur, layreffr, kao, kbo,&
+     &                               sfluxrefo
+         write(0,*) 'sw_kgb27: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
       call MPI_BCAST(raylo,     size(raylo),     MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(scalekur,  1,  MPI_DOUBLE_PRECISION,  &
+      call MPI_BCAST(scalekur,  1,  MPI_DOUBLE_PRECISION,               &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,  &
+      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,                        &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
@@ -12800,13 +12948,18 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue 
+      errflg = 1  
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb27  " 
+      return              
 #endif
-
 
       end subroutine sw_kgb27
 
 ! **************************************************************************
-      subroutine sw_kgb28(rrtmg_unit, mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb28(rrtmg_unit, mpirank, mpiroot, mpicomm,        &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
       use rrsw_kg28, only : kao, kbo, sfluxrefo,                        &
@@ -12820,10 +12973,15 @@ CONTAINS
 
 ! Input
       integer, intent(in) :: rrtmg_unit, mpirank, mpiroot, mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
 #ifdef MPI
       integer :: mpierr
 #endif
 
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
@@ -12880,15 +13038,16 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, strrat, layreffr, kao, kbo, sfluxrefo
+         read (rrtmg_unit,err=9010) rayl, strrat, layreffr, kao, kbo,   &
+     &                              sfluxrefo
          write(0,*) 'sw_kgb28: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,      MPI_DOUBLE_PRECISION,  &
+      call MPI_BCAST(rayl,      1,      MPI_DOUBLE_PRECISION,           &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(strrat,    1,    MPI_DOUBLE_PRECISION,  &
+      call MPI_BCAST(strrat,    1,    MPI_DOUBLE_PRECISION,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,  &
+      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,                        &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(kao,       size(kao),       MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
@@ -12897,14 +13056,20 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1 
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb28  " 
+      return       
 #endif
       end subroutine sw_kgb28
 
 ! **************************************************************************
-      subroutine sw_kgb29(rrtmg_unit,mpirank, mpiroot, mpicomm)
+      subroutine sw_kgb29(rrtmg_unit,mpirank, mpiroot, mpicomm,         &
+     &                    errmsg, errflg)
 ! **************************************************************************
 
-      use rrsw_kg29, only : kao, kbo, selfrefo, forrefo, sfluxrefo, &
+      use rrsw_kg29, only : kao, kbo, selfrefo, forrefo, sfluxrefo,     &
      &                      absh2oo, absco2o, rayl, layreffr
 #ifdef MPI
       use mpi
@@ -12915,11 +13080,16 @@ CONTAINS
 
 ! Input
       integer, intent(in) :: rrtmg_unit,mpirank,mpiroot, mpicomm
+      character(len=*),     intent(out) :: errmsg
+      integer,              intent(out) :: errflg
+
 #ifdef MPI
          integer :: mpierr
 #endif
 
-
+     ! Initialize the CCPP error handling variables
+        errmsg = ''
+        errflg = 0
 !     Array sfluxrefo contains the Kurucz solar source function for this band. 
 
 !     Array rayl contains the Rayleigh extinction coefficient at all v = 2200 cm-1.
@@ -12994,14 +13164,14 @@ CONTAINS
 
 #else
       IF (mpirank == mpiroot) THEN
-         read (rrtmg_unit) rayl, layreffr, absh2oo, absco2o, kao, kbo,  &
-     &                     selfrefo, forrefo, sfluxrefo
+         read (rrtmg_unit,err=9010) rayl, layreffr, absh2oo, absco2o,   &
+     &     kao, kbo, selfrefo, forrefo, sfluxrefo
          write(0,*) 'sw_kgb29: max/min(kao) =',maxval(kao),minval(kao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(rayl,      1,      MPI_DOUBLE_PRECISION,  &
+      call MPI_BCAST(rayl,      1,      MPI_DOUBLE_PRECISION,           &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,  &
+      call MPI_BCAST(layreffr,  1,  MPI_INTEGER,                        &
      &               mpiroot, mpicomm, mpierr)
       call MPI_BCAST(absh2oo,   size(absh2oo),   MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
@@ -13018,6 +13188,11 @@ CONTAINS
       call MPI_BCAST(sfluxrefo, size(sfluxrefo), MPI_DOUBLE_PRECISION,  &
      &               mpiroot, mpicomm, mpierr)
 #endif
+      return
+9010  continue
+      errflg = 1
+      errmsg = " error reading RRTMG_SW_DATA in sw_kgb29  "
+      return
 #endif
 
       end subroutine sw_kgb29

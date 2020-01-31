@@ -67,6 +67,7 @@
 !!
       subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
         nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
+        do_hwrfrrtmg, julyr,julday,                                              &
         julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys
@@ -78,7 +79,7 @@
         integer,                          intent(in)    :: lsm, lsm_noahmp,      &
                                                            nsswr, nslwr, me,     &
                                                            master, nscyc
-        logical,                          intent(in)    :: debug
+        logical,                          intent(in)    :: debug, do_hwrfrrtmg
         real(kind=kind_phys),             intent(in)    :: dtp
 
         integer,                          intent(out)   :: kdt, yearlen, ipt
@@ -86,6 +87,7 @@
                                                            lslwr
         real(kind=kind_phys),             intent(out)   :: sec, phour, zhour,    &
                                                            fhour, julian, solhr
+        integer,                          intent(out)   :: julyr,julday
 
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
@@ -121,7 +123,7 @@
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
 
-        if(lsm == lsm_noahmp) then
+        if(lsm == lsm_noahmp .or. do_hwrfrrtmg) then
           !GJF* These calculations were originally in GFS_physics_driver.F90 for
           !     NoahMP. They were moved to this routine since they only depend
           !     on time (not space). Note that this code is included as-is from
@@ -141,6 +143,10 @@
 
           julian = float(jd1-jd0) + fjd
 
+          !MZ* using GFS w3lib to calculate julyr and julday in HWRF
+          julyr =  jdat(1)
+          julday = jdat(3) 
+          
           !
           ! Year length
           !

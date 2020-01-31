@@ -186,6 +186,14 @@
   type = integer
   intent = out
   optional = F
+[do_hwrfrrtmg]
+  standard_name = flag_for_hwrf_rrtmg
+  long_name = flag for hwrf rrtmg
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [julian]
   standard_name = julian_day
   long_name = julian day
@@ -193,6 +201,22 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = out
+  optional = F
+[julyr]
+  standard_name = julian_year_in_integer
+  long_name = julian year in integer
+  units = years
+  dimensions = ()
+  type = integer
+  intent = out 
+  optional = F
+[julday]
+  standard_name = julian_day_in_integer
+  long_name = julian day in integer
+  units = days
+  dimensions = ()
+  type = integer
   intent = out
   optional = F
 [yearlen]

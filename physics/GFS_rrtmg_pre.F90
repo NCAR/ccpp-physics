@@ -325,6 +325,7 @@
       endif                               ! end_if_ntoz
 
 !>  - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
+      
       if (Model%lsswr) then
         call coszmn (Grid%xlon,Grid%sinlat,           &     !  ---  inputs
                      Grid%coslat,Model%solhr, IM, me, &

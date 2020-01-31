@@ -17,6 +17,14 @@
   type = integer
   intent = in
   optional = F
+[jdat]
+  standard_name = forecast_date_and_time
+  long_name = current forecast date and time
+  units = none
+  dimensions = (8)
+  type = integer
+  intent = in
+  optional = F
 [ntsd]
   standard_name = index_of_time_step
   long_name = current forecast iteration
@@ -50,15 +58,6 @@
   type = integer
   intent = in
   optional = F
-[XTIME]
-  standard_name = minute_since_simulation_start
-  long_name =
-  units =
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [ihrst]
   standard_name = gmt
   long_name =
@@ -86,7 +85,7 @@
   intent = in
   optional = F
 [czmean]
-  standard_name = mean_cosine_of_zenith_angle_between_SW_radiation_calls
+  standard_name = cosine_of_zenith_angle
   long_name = mean cos of zenith angle over rad call period
   units = none
   dimensions = (horizontal_dimension)
@@ -98,7 +97,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating
   long_name = tendency of air temperature due to shortwave heating
   units = K s-1
-  dimensions = (horizontal_dimension, adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -107,7 +106,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating
   long_name = tendency of air temperature due to longwave heating
   units = K s-1
-  dimensions = (horizontal_dimension, adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension, vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -122,13 +121,13 @@
   intent = inout
   optional = F
 [czen]
-  standard_name = cosine_of_zenith_angle
-  long_name = cosine of zenith angle
+  standard_name = instantaneous_cosine_of_zenith_angle
+  long_name = cosine of zenith angle at current time
   units = none
-  dimensions = (1)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
