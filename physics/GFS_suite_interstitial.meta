@@ -534,7 +534,7 @@
   optional = F
 [qgrs_cloud_water]
   standard_name = cloud_condensed_water_mixing_ratio
-  long_name = mixing ratio of cloud water (condensate)
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -1457,7 +1457,7 @@
   optional = F
 [save_qc]
   standard_name = cloud_condensed_water_mixing_ratio_save
-  long_name = mixing ratio of cloud water (condensate) before entering a physics scheme
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) before entering a physics scheme
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -1690,7 +1690,7 @@
   optional = F
 [save_qc]
   standard_name = cloud_condensed_water_mixing_ratio_save
-  long_name = mixing ratio of cloud water (condensate) before entering a physics scheme
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) before entering a physics scheme
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
