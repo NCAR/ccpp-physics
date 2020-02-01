@@ -316,24 +316,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[oa4]
-  standard_name = asymmetry_of_subgrid_orography
-  long_name = asymmetry of subgrid orography
-  units = none
-  dimensions = (horizontal_dimension,4)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[clx]
-  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
-  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
-  units = frac
-  dimensions = (horizontal_dimension,4)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [theta]
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with_respect to east of maximum subgrid orographic variations
@@ -366,6 +348,24 @@
   long_name = maximum of subgrid orography
   units = m
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[clx]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
+  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
+  units = frac
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oa4]
+  standard_name = asymmetry_of_subgrid_orography
+  long_name = asymmetry of subgrid orography
+  units = none
+  dimensions = (horizontal_dimension,4)
   type = real
   kind = kind_phys
   intent = in
