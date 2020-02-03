@@ -434,7 +434,7 @@ c
 !!  The temperature of the thermal is of primary importance. For the initial estimate of the PBL height, the thermal is assumed to have one of two temperatures. If the boundary layer is stable, the thermal is assumed to have a temperature equal to the surface virtual temperature. Otherwise, the thermal is assumed to have the same virtual potential temperature as the lowest model level. For the stable case, the critical bulk Richardson number becomes a function of the wind speed and roughness length, otherwise it is set to a tunable constant.
 !  compute the pbl height
 !
-      if (.not. hurr_pbl) then
+      if (.not. (hurr_pbl .and. moninq_fac < 0.0)) then
         do i=1,im
            flg(i) = .false.
            rbup(i) = rbsoil(i)
@@ -766,7 +766,7 @@ c
 ! RGF determine wspd at roughly 500 m above surface, or as close as possible,
 ! reuse SPDK2
 !  zi(i,k) is AGL, right?  May not matter if applied only to water grid points
-      if(hurr_pbl .and. moninq_fac .lt. 0.0) then
+      if(hurr_pbl .and. moninq_fac < 0.0) then
         do i=1,im
           spdk2 = 0.
           wspm(i,1) = 0.
@@ -784,7 +784,7 @@ c
 !     compute diffusion coefficients below pbl
 !>  ## Compute diffusion coefficients below the PBL top
 !!  Below the PBL top, the diffusion coefficients (\f$K_m\f$ and \f$K_h\f$) are calculated according to equation 2 in Hong and Pan (1996) \cite hong_and_pan_1996 where a different value for \f$w_s\f$ (PBL vertical velocity scale) is used depending on the PBL stability. \f$K_h\f$ is calculated from \f$K_m\f$ using the Prandtl number. The calculated diffusion coefficients are checked so that they are bounded by maximum values and the local background diffusion coefficients.
-      if (.not. hurr_pbl) then
+      if (.not. (hurr_pbl .and. moninq_fac < 0.0)) then
         do k = 1, kmpbl
           do i=1,im
             if(k < kpbl(i)) then
@@ -814,7 +814,7 @@ c
           enddo !i
         enddo !k
       else
-        !hurricane PBL case (note that the i and k loop order has been switched)
+        !hurricane PBL case and moninq_fac < 0 (note that the i and k loop order has been switched)
         do i=1, im
           do k=1, kmpbl
             if (k < kpbl(i)) then
@@ -889,6 +889,8 @@ c
 ! (2) alpha test
 ! if alpha < 0, find alpha for each column and do the loop again
 ! if alpha > 0, we are finished
+      
+!GJF: redundant check for moninq_fac < 0?
             if (moninq_fac .lt. 0.) then      ! variable alpha test
 ! k-level of layer around 500 m
               kLOC = INT(wspm(i,2))
@@ -969,10 +971,10 @@ c
                   enddo ! K loop
                 endif ! xDKU .ge. wspm(i,1)
               endif ! kpbl(i) .ge. kLOC
-            endif ! moninq_fac < 0
+            endif ! moninq_fac < 0 (GJF: redundant?)
           endif ! islimsk == 0
         enddo ! I loop
-      endif ! not hurr_pbl
+      endif ! not (hurr_pbl and moninq_fac < 0)
 !
 ! compute diffusion coefficients based on local scheme above pbl
 !>  ## Compute diffusion coefficients above the PBL top
@@ -1154,7 +1156,7 @@ c
           do i=1,im
             if(scuflg(i)) then
                !! if K needs to be adjusted by alpha, then no need to add this term
-               if (moninq_fac == 1.0) then
+               if (.not. (hurr_pbl .and. moninq_fac < 0.0)) then
                  dkt(i,k) = dkt(i,k)+ckt(i,k)
                  dku(i,k) = dku(i,k)+cku(i,k)
                end if
@@ -1305,7 +1307,7 @@ c
 !     add dissipative heating at the first model layer
 !
 !>  Next, the temperature tendency is updated following equation 14.
-      if (hurr_pbl) then
+      if (hurr_pbl .and. moninq_fac < 0.0) then
         ttend_fac = 0.7
       else
         ttend_fac = 0.5
