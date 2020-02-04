@@ -219,6 +219,14 @@
   type = integer
   intent = out
   optional = F
+[gmt]
+  standard_name = greenwich_mean_time_of_model_start 
+  long_name = Greenwich mean time of model start in hour
+  units = hours
+  dimensions = ()
+  type = real 
+  intent = out
+  optional = F
 [yearlen]
   standard_name = number_of_days_in_year
   long_name = number of days in a year

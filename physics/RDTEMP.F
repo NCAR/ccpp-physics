@@ -3,7 +3,7 @@
 !
 !***********************************************************************
       SUBROUTINE RDTEMP(NTSD,DT,JDAT,JULDAY,JULYR,IHRST,GLAT,GLON       &
-     &                 ,CZEN,CZMEAN,T,RSWTT,RLWTT                       &
+     &                 ,CZMEAN,T,RSWTT,RLWTT                            &
      &                 ,IDS,IDE,JDS,JDE,KDS,KDE                         &
      &                 ,IMS,IME,JMS,JME,KMS,KME                         &
      &                 ,ITS,ITE,JTS,JTE,KTS,KTE)
@@ -57,7 +57,7 @@
 !
       REAL,DIMENSION(IMS:IME,JMS:JME,KMS:KME),INTENT(INOUT) :: T
 !
-      REAL,DIMENSION(IMS:IME,JMS:JME),INTENT(in) :: CZEN
+      REAL,DIMENSION(IMS:IME,JMS:JME):: CZEN
 !
 !-----------------------------------------------------------------------
 !***  LOCAL VARIABLES
@@ -90,13 +90,12 @@
 !
 !***  GET CURRENT VALUE OF COS(ZENITH ANGLE)
 !
-!      TIMES=NTSD*DT
-!MZ      TIMES=XTIME*60.
+      TIMES=NTSD*DT
 !
-!      DO J=MYJS,MYJE
-!      DO I=MYIS,MYIE
-!        XLAT2(I,J)=GLAT(I,J)
-!        XLON2(I,J)=GLON(I,J)
+      DO J=MYJS,MYJE
+      DO I=MYIS,MYIE
+        XLAT2(I,J)=GLAT(I,J)
+        XLON2(I,J)=GLON(I,J)
 !!!!!!!!!!!!Remove the following lines after bit-correct answers
 !!!!!!!!!!!!are established with the control
 !       xlat1=glat(i,j)/degrad
@@ -105,8 +104,8 @@
 !       xlon2(i,j)=xlon1*degrad
 !!!!!!!!!!!!
 !!!!!!!!!!!!
-!      ENDDO
-!      ENDDO
+      ENDDO
+      ENDDO
 !
 !mz WRF
 !      CALL CAL_MON_DAY(JULDAY,JULYR,JMONTH,JDAY)
@@ -116,26 +115,25 @@
 !      IDAT(3)=JULYR
 
 !mz* using existing interstitials
-!      IDAT(1)=jdat(2)
-!      IDAT(2)=jdat(3)
-!      IDAT(3)=jdat(1)
+      IDAT(1)=jdat(2)
+      IDAT(2)=jdat(3)
+      IDAT(3)=jdat(1)
 !
 !mz   
-      write(0,*)'rdtemp:max/min(czen) =', maxval(czen),minval(czen)
-      write(0,*)'rdtemp:max/min(czmean) =',maxval(czmean),minval(czmean)
-      write(0,*)'rdtemp:ntsd,dt,times,ihrst =',                  &
-!     &       ntsd,dt, times,ihrst
-!      CALL ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,XLON2,XLAT2,CZEN2          &
-!     &           ,MYIS,MYIE,MYJS,MYJE                                   &
-!     &           ,IDS,IDE,JDS,JDE,KDS,KDE                               &
-!     &           ,IMS,IME,JMS,JME,KMS,KME                               &
-!     &           ,ITS,ITE,JTS,JTE,KTS,KTE)
+      !write(0,*)'rdtemp:max/min(czmean) =',maxval(czmean),minval(czmean)
+      !write(0,*)'rdtemp:idat1,2,3 = ', idat(1),idat(2),idat(3)
+      !write(0,*)'rdtemp: times,ihrst   =    ', times,ihrst 
+      CALL ZENITH(TIMES,DAYI,HOUR,IDAT,IHRST,XLON2,XLAT2,CZEN2          &
+     &           ,MYIS,MYIE,MYJS,MYJE                                   &
+     &           ,IDS,IDE,JDS,JDE,KDS,KDE                               &
+     &           ,IMS,IME,JMS,JME,KMS,KME                               &
+     &           ,ITS,ITE,JTS,JTE,KTS,KTE)
 !mz
-!      write(0,*)'rdtemp: max/min(czen2) =', maxval(czen2),minval(czen2)
+      !write(0,*)'rdtemp: max/min(czen2) =', maxval(czen2),minval(czen2)
 !
       DO J=MYJS,MYJE
       DO I=MYIS,MYIE
-!        CZEN(I,J)=CZEN2(I,J)
+        CZEN(I,J)=CZEN2(I,J)
         IF(CZMEAN(I,J)>0.)THEN 
           FACTR(I,J)=CZEN(I,J)/CZMEAN(I,J)
         ELSE
@@ -145,9 +143,9 @@
       ENDDO
 !
 !mz*
-      write(0,*)'RDTEMP: max/min(factr) = ',maxval(factr),minval(factr) 
-      write(0,*)'RDTEMP: max/min(rswtt) = ',maxval(rswtt),minval(rswtt) 
-      write(0,*)'RDTEMP: max/min(rlwtt) = ',maxval(rlwtt),minval(rlwtt)
+      !write(0,*)'RDTEMP: max/min(factr) = ',maxval(factr),minval(factr) 
+      !write(0,*)'RDTEMP: max/min(rswtt) = ',maxval(rswtt),minval(rswtt) 
+      !write(0,*)'RDTEMP: max/min(rlwtt) = ',maxval(rlwtt),minval(rlwtt)
 
 
       DO K=KTS,KTE
@@ -160,7 +158,6 @@
         ENDDO
         ENDDO
       ENDDO
-      write(0,*)'RDTEMP: max/min(T) = ', maxval(T), minval(T) 
 
 !-----------------------------------------------------------------------
       END SUBROUTINE RDTEMP

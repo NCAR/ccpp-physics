@@ -3,7 +3,7 @@
 
       MODULE HWRF_radiation
 !
-      use machine, only : kind_phys
+      use machine, only : kind_io4,kind_io4
 !-----------------------------------------------------------------------
       USE MODULE_MODEL_CONSTANTS
       !USE module_radiation_astronomy ,ONLY : CAL_MON_DAY,ZENITH
@@ -207,7 +207,7 @@
 !!
        SUBROUTINE HWRF_radiation_run (NCOL,NLEV, NTSD,DT                &
      &                    ,JULDAY,JULYR,JULIAN                          &
-     &                    ,IHRST,NPHS                                   &
+     &                    ,GMT,NPHS                                     &
      &                    ,NRADS,NRADL, DX ,p8w,prsl,tsfc,T,Q           &
      &                    ,QV,QC,QI,QR,QS,QG                            & !MOIST: dry mixing ratio
 !     &                    ,EPSR                                        & !Radtend%semis
@@ -256,12 +256,12 @@
      
       type(GFS_radtend_type),              intent(in) :: Radtend
 
-      INTEGER,         INTENT(IN) :: IHRST,JULDAY,JULYR                 &
+      INTEGER,         INTENT(IN) :: JULDAY,JULYR                 &
      &                              ,NPHS,NRADL,NRADS,NTSD              &
      &                              ,NUM_OZMIXM
 
       INTEGER,         INTENT(IN) :: NCOL,NLEV 
-      REAL(KIND_PHYS), INTENT(IN) :: DX(1:ncol)
+      REAL(KIND_PHYS), INTENT(IN) :: DX(1:ncol),GMT
       integer,         intent(in)    :: mp_physics
       integer,         intent(in)    :: imp_physics_fer_hires
 
@@ -380,7 +380,7 @@
       INTEGER,DIMENSION(12) :: MONTH=(/31,28,31,30,31,30,31,31          &
      &                                ,30,31,30,31/)
 !
-      REAL(kind_phys) :: CAPA,DAYI,FICE,FRAIN,GMT,HOUR,PLYR,            &
+      REAL(kind_phys) :: CAPA,DAYI,FICE,FRAIN,HOUR,PLYR,            &
      &                   QW,RADT,TIMES,WC,TDUM,XTIME
 !
       REAL(kind_phys),DIMENSION(1:nlev-1) :: QL,TL
@@ -607,7 +607,7 @@
       ENDDO
 !      ENDDO
 !
-      GMT=REAL(IHRST)
+!      GMT=REAL(IHRST)
 !
       DO K=1,NLEV 
       !  DO J=JMS,JME
@@ -620,7 +620,7 @@
 !          CFRACH(I,J)=0.
 !          CFRACL(I,J)=0.
 !          CFRACM(I,J)=0.
-          CZMEAN(I)=0.
+!          CZMEAN(I)=0.
 !          SIGT4(I,J)=0.
           TOTSWDN(I)=0.   ! TOTAL (clear+cloudy sky) shortwave down at the surface
           TOTSWDNC(I)=0.  ! CLEAR SKY shortwave down at the surface
@@ -643,21 +643,22 @@
 !-----------------------------------------------------------------------
 
       if (mpirank == mpiroot) then
-          write(0,*)'mz: NRAD, RADT =', NRAD,RADT
-     !     write(0,*)'mz: max/min(dx) =', maxval(dx), minval(dx)
+          write(0,*)'mz: NRAD, RADT,dt =', NRAD,RADT,dt
+          write(0,*)'mz: bfe driver, julday,julyr, julian=',            &
+     &               julday, julyr,julian
      !     write(0,*)'mz: max/min(sm) =', maxval(sm), minval(sm)
      !     write(0,*)'mz: max/min(tsfc) =', maxval(tsfc), minval(tsfc)
-          write(0,*)'mz: max/min(Radtend%sfalb) =',                     &
-     &               maxval(Radtend%sfalb), minval(Radtend%sfalb)
-          write(0,*)'mz: max/min(Radtend%coszen) =',                    &
-     &               maxval(Radtend%coszen), minval(Radtend%coszen)
-          write(0,*)'mz: max/min(Radtend%semis) =',                     &
-     &               maxval(Radtend%semis), minval(Radtend%semis)
+     !     write(0,*)'mz: max/min(Radtend%sfalb) =',                     &
+     !&               maxval(Radtend%sfalb), minval(Radtend%sfalb)
+     !     write(0,*)'mz: max/min(Radtend%coszen) =',                    &
+     !&               maxval(Radtend%coszen), minval(Radtend%coszen)
+     !     write(0,*)'mz: max/min(Radtend%semis) =',                     &
+     !&               maxval(Radtend%semis), minval(Radtend%semis)
       endif
 
 
       CALL RADIATION_DRIVER (ALBEDO=Radtend%sfalb                       &
-     &                 ,CZMEAN=CZMEAN ,DT=DT                            &
+     &                 ,DT=DT                            &
      &                 ,DZ8W=DZ,EMISS=Radtend%semis,GLW=TOTLWDN, GMT=GMT&
      &                 ,GSW=SWNETDN                                     &
      &                 ,ITIMESTEP=NTSD_rad ,JULDAY=JULDAY               &

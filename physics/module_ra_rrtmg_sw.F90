@@ -10458,7 +10458,7 @@ CONTAINS
       i_loop: do i = its,ite
          rho1d(kts:kte)=rho3d(i,kts:kte,j) ! BUG FIX (SGT): this was uninitialized
 !mz
-         write(0,*)'mz* swrad: initialize rhold'
+        ! write(0,*)'mz* swrad: initialize rhold'
 !
 ! Do shortwave by default, deactivate below if sun below horizon
          dorrsw = .true.
@@ -10469,7 +10469,8 @@ CONTAINS
           coszr(i,j)=xcoszen(i,j)
           coszrs=xcoszen(i,j)
 !mz
-         if(coszrs.gt.0.0) write(0,*)'swrad: coszrs>0'
+!          write(0,*)'swrad: max/min(xcoszen)   =',                      &
+!     &            maxval(xcoszen),minval(xcoszen)
 
 ! Set flag to prevent shortwave calculation when sun below horizon
          if (coszrs.le.0.0) dorrsw = .false.
@@ -10482,7 +10483,7 @@ CONTAINS
          enddo
 
 !mz
-         write(0,*)'mz* swrad: initialize q*'
+         !write(0,*)'mz* swrad: initialize q*'
 
          DO K=kts,kte
             QV1D(K)=0.
@@ -10520,7 +10521,7 @@ CONTAINS
 ! moist variables
 
 !zm
-         write(0,*)'SWRAD: ICLOUD=',ICLOUD
+!         write(0,*)'SWRAD: ICLOUD=',ICLOUD
          IF (ICLOUD .ne. 0) THEN
             IF ( PRESENT( CLDFRA3D ) ) THEN
               DO K=kts,kte
@@ -10651,7 +10652,7 @@ CONTAINS
 ! Add extra layer from top of model to top of atmosphere
          nlay = (kte - kts + 1) + 1
 !mz
-         write(0,*)'mz*swrad : nlay =',nlay
+!         write(0,*)'mz*swrad : nlay =',nlay
 
 ! Select cloud overlap assumption (1 = random, 2 = maximum-random, 3 = maximum, 4 = exponential, 5 = exponential-random
          icld=cldovrlp ! J. Henderson AER assign namelist variable cldovrlp to existing icld
@@ -11418,11 +11419,11 @@ CONTAINS
 
 ! Read in absorption coefficients and other data
       IF ( allowed_to_read ) THEN
-!mz           CALL rrtmg_swlookuptable (mpirank,mpiroot,mpicomm,           &
-!mz                                      errflg, errmsg)
+!           CALL rrtmg_swlookuptable (mpirank,mpiroot,mpicomm,           &
+!                                      errflg, errmsg)
       ENDIF
 !mz
-!      if(mpirank == mpiroot) write(0,*)'rrtmg_swlookuptable completed .'
+      if(mpirank == mpiroot) write(0,*)'rrtmg_swlookuptable completed .'
 !
 ! Perform g-point reduction and other initializations
 ! Specific heat of dry air (cp) used in flux to heating rate conversion factor.
@@ -11437,6 +11438,9 @@ CONTAINS
       SUBROUTINE rrtmg_swlookuptable(mpirank,mpiroot,mpicomm,           &
                                      errflg, errmsg)
 ! **************************************************************************     
+#ifdef MPI
+      use mpi
+#endif
 
       IMPLICIT NONE
 
@@ -11452,6 +11456,11 @@ CONTAINS
 
       CHARACTER*80 errmess
       INTEGER rrtmg_unit
+
+#ifdef MPI
+      ! MPI variables
+       integer :: mpierr
+#endif
 
 !mz      IF ( wrf_dm_on_monitor() ) THEN
       IF(mpirank == mpiroot) THEN
@@ -11472,7 +11481,9 @@ CONTAINS
          ENDIF
       ENDIF
 
-!mz      IF ( wrf_dm_on_monitor() ) THEN
+#ifdef MPI
+        call MPI_BARRIER(mpicomm,mpierr)
+#endif
       IF ( mpirank == mpiroot ) THEN
         OPEN(rrtmg_unit,FILE='RRTMG_SW_DATA', convert='BIG_ENDIAN',     &
              FORM='UNFORMATTED',STATUS='OLD',ERR=9009)

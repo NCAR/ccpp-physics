@@ -67,7 +67,7 @@
 !!
       subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
         nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
-        do_hwrfrrtmg, julyr,julday,                                              &
+        do_hwrfrrtmg, julyr,julday,gmt,                                          &
         julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys
@@ -88,6 +88,7 @@
         real(kind=kind_phys),             intent(out)   :: sec, phour, zhour,    &
                                                            fhour, julian, solhr
         integer,                          intent(out)   :: julyr,julday
+        real(kind=kind_phys),             intent(out)   :: gmt
 
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
@@ -122,6 +123,9 @@
         zhour = phour
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
+
+        !MZ* calculate GMT 
+        GMT=float(idat(5))+float(idat(6))/60.+float(idat(7))/3600.
 
         if(lsm == lsm_noahmp .or. do_hwrfrrtmg) then
           !GJF* These calculations were originally in GFS_physics_driver.F90 for

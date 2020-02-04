@@ -58,12 +58,13 @@
   type = integer
   intent = in
   optional = F
-[ihrst]
-  standard_name = gmt
-  long_name =
-  units =
+[gmt]
+  standard_name = greenwich_mean_time_of_model_start
+  long_name = Greenwich mean time of model start in hour
+  units = hours
   dimensions = ()
-  type = integer
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [glat]
@@ -84,13 +85,12 @@
   kind = kind_phys
   intent = in
   optional = F
-[czmean]
-  standard_name = cosine_of_zenith_angle
-  long_name = mean cos of zenith angle over rad call period
-  units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = Fortran DDT containing FV3-GFS radiation tendencies
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
   intent = in
   optional = F
 [rswtt]

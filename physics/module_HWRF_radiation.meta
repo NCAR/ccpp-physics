@@ -281,12 +281,13 @@
   kind = kind_phys
   intent = in
   optional = F
-[IHRST]
-  standard_name = gmt
-  long_name =
-  units =
+[gmt]
+  standard_name = greenwich_mean_time_of_model_start
+  long_name = Greenwich mean time of model start in hour
+  units = hours
   dimensions = ()
-  type = integer
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [NPHS]      

@@ -42,8 +42,8 @@
 !#endif
 !#else
       ! integer, parameter :: kind_rb = kind(1.0)              ! native real
-       integer, parameter :: kind_r4 = selected_real_kind(6)
-       integer, parameter :: kind_rb = kind_phys
+       integer, parameter :: kind_r4 = selected_real_kind(6)    !selected_real_kind(6)
+       integer, parameter :: kind_rb = selected_real_kind(6)
 !#endif
 
       end module parkind
@@ -266,12 +266,18 @@
 !-----------------------------------------------------------------
 
       integer(kind=im), parameter :: no1  = 16
+!mz* dynamic arrays
+!      real(kind=r4),allocatable :: fracrefao(no1)  , fracrefbo(no1)
+!      real(kind=r4),allocatable :: kao(5,13,no1)
+!      real(kind=r4),allocatable :: kbo(5,13:59,no1)
+!      real(kind=r4),allocatable :: kao_mn2(19,no1) , kbo_mn2(19,no1)
+!      real(kind=r4),allocatable :: selfrefo(10,no1), forrefo(4,no1)
 
-      real(kind=r4) :: fracrefao(no1)  , fracrefbo(no1)
-      real(kind=r4) :: kao(5,13,no1)
-      real(kind=r4) :: kbo(5,13:59,no1)
-      real(kind=r4) :: kao_mn2(19,no1) , kbo_mn2(19,no1)
-      real(kind=r4) :: selfrefo(10,no1), forrefo(4,no1)
+      real(kind=r4),allocatable,dimension(:) :: fracrefao, fracrefbo 
+      real(kind=r4),allocatable,dimension(:,:,:) :: kao   
+      real(kind=r4),allocatable,dimension(:,:,:) :: kbo 
+      real(kind=r4),allocatable,dimension(:,:):: kao_mn2 , kbo_mn2 
+      real(kind=r4),allocatable,dimension(:,:):: selfrefo, forrefo  
 
 !-----------------------------------------------------------------
 ! rrtmg_lw COMBINED abs. coefficients for interval 1
@@ -1593,12 +1599,12 @@
       integer(kind=im) :: nspa(nbndlw)
       integer(kind=im) :: nspb(nbndlw)
 
-      real(kind=r4) :: wavenum1(nbndlw)
-      real(kind=r4) :: wavenum2(nbndlw)
-      real(kind=r4) :: delwave(nbndlw)
+      real(kind=rb) :: wavenum1(nbndlw)
+      real(kind=rb) :: wavenum2(nbndlw)
+      real(kind=rb) :: delwave(nbndlw)
 
-      real(kind=r4) :: totplnk(181,nbndlw)
-      real(kind=r4) :: totplk16(181)
+      real(kind=rb) :: totplnk(181,nbndlw)
+      real(kind=rb) :: totplk16(181)
 
       integer(kind=im) :: ngc(nbndlw)
       integer(kind=im) :: ngs(nbndlw)
@@ -1606,8 +1612,8 @@
       integer(kind=im) :: ngb(ngptlw)
       integer(kind=im) :: ngm(nbndlw*mg)
 
-      real(kind=r4) :: wt(mg)
-      real(kind=r4) :: rwgt(nbndlw*mg)
+      real(kind=rb) :: wt(mg)
+      real(kind=rb) :: rwgt(nbndlw*mg)
 
       integer(kind=im) :: nxmol
       integer(kind=im) :: ixindx(maxinpx)
@@ -8278,7 +8284,7 @@ contains
 
 ! ------- Local -------
       integer(kind=im) :: jt, jp, igc, ipr, iprsm 
-      real(kind=rb) :: sumk, sumk1, sumk2, sumf1, sumf2
+      real(kind=r4) :: sumk, sumk1, sumk2, sumf1, sumf2
 
 
       do jt = 1,5
@@ -11022,7 +11028,7 @@ contains
 ! coefficients and indices needed to compute the optical depths
 ! by interpolating data from stored reference atmospheres. 
 
-         write(0,*)'call setcoef in LWRAD'
+        ! write(0,*)'call setcoef in LWRAD'
          call setcoef(nlayers, istart, pavel, tavel, tz, tbound, semiss, &
                       coldry, wkl, wbrodl, &
                       laytrop, jp, jt, jt1, planklay, planklev, plankbnd, &
@@ -11037,7 +11043,7 @@ contains
 !  Calculate the gaseous optical depths and Planck fractions for 
 !  each longwave spectral band.
 
-         write(0,*)'call taumol in LWRAD'
+        ! write(0,*)'call taumol in LWRAD'
          call taumol(nlayers, pavel, wx, coldry, &
                      laytrop, jp, jt, jt1, planklay, planklev, plankbnd, &
                      colh2o, colco2, colo3, coln2o, colco, colch4, colo2, &
@@ -11543,8 +11549,8 @@ CONTAINS
                        ids,ide, jds,jde, kds,kde,                       &
                        ims,ime, jms,jme, kms,kme,                       &
                        its,ite, jts,jte, kts,kte,                       &
-                       lwupflx, lwupflxc, lwdnflx, lwdnflxc             &
-                                                                  )
+                       lwupflx, lwupflxc, lwdnflx, lwdnflxc,            &
+                       mpirank,mpiroot,errmsg,errflg                   )
 !------------------------------------------------------------------
 !ccc To use clWRF time varying trace gases
 !mz      USE MODULE_RA_CLWRF_SUPPORT, ONLY : read_CAMgases
@@ -11560,7 +11566,10 @@ CONTAINS
 
       INTEGER, INTENT(IN )      ::        ICLOUD
       INTEGER, INTENT(IN )      ::        MP_PHYSICS,                   &
-                                          imp_physics_fer_hires
+                                          imp_physics_fer_hires,        &
+                                          mpirank,mpiroot
+      character(len=*),          intent(  out) :: errmsg
+      integer,                   intent(  out) :: errflg
 !
       REAL, DIMENSION( ims:ime, kms:kme, jms:jme )                 , &
          INTENT(IN   ) ::                                   dz8w, &
@@ -11571,33 +11580,33 @@ CONTAINS
                                                             pi3d, &
                                                            rho3d
 
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )                 , &
+      REAL, DIMENSION( ims:ime, kms:kme, jms:jme )                 , &
          INTENT(INOUT)  ::                            RTHRATENLW
 
-   REAL, DIMENSION( ims:ime, jms:jme )                          , &
+      REAL, DIMENSION( ims:ime, jms:jme )                          , &
          INTENT(INOUT)  ::                                   GLW, &
                                                              OLR, &
                                                             LWCF
 
-   REAL, DIMENSION( ims:ime, jms:jme )                          , &
+      REAL, DIMENSION( ims:ime, jms:jme )                          , &
          INTENT(IN   )  ::                                 EMISS, &
                                                              TSK
 
-   REAL, INTENT(IN  )   ::                                   R,G
+      REAL, INTENT(IN  )   ::                                   R,G
 
-   REAL, DIMENSION( ims:ime, jms:jme )                          , &
+      REAL, DIMENSION( ims:ime, jms:jme )                          , &
          INTENT(IN   )  ::                                 XLAND, &
                                                             XICE, &
                                                             SNOW
 !ccc Added for time-varying trace gases.
-   INTEGER, INTENT(IN    ) ::                                 yr
-   REAL, INTENT(IN    ) ::                                julian
+      INTEGER, INTENT(IN    ) ::                                 yr
+      REAL, INTENT(IN    ) ::                                julian
 !ccc
 
 !
 ! Optional
 !
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )                 , &
+         REAL, DIMENSION( ims:ime, kms:kme, jms:jme )                 , &
          OPTIONAL                                               , &
          INTENT(IN   ) ::                                         &
                                                         CLDFRA3D, &
@@ -11613,19 +11622,19 @@ CONTAINS
                                                         QNDROP3D
 
 !..Added by G. Thompson to couple cloud physics effective radii.
-   REAL, DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(IN)::         &
+         REAL, DIMENSION(ims:ime,kms:kme,jms:jme), INTENT(IN)::         &
                                                         re_cloud, &
                                                           re_ice, &
                                                          re_snow
-   INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
+         INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 
 !..Added by J. Henderson AER to output LW daily heating rates [K d-1].
-   REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(OUT)::      &
+         REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(OUT)::      &
                                                           hrlwpd
 
-   real pi,third,relconst,lwpmin,rhoh2o
+         real pi,third,relconst,lwpmin,rhoh2o
 
-   REAL, DIMENSION( ims:ime, kms:kme, jms:jme )                 , &
+         REAL, DIMENSION( ims:ime, kms:kme, jms:jme )                 , &
          OPTIONAL                                               , &
          INTENT(IN   ) ::                                         &
                                                        F_ICE_PHY, &
@@ -11946,11 +11955,20 @@ CONTAINS
 !#endif
 !mz
 !ccc
-
-!mz
-      ! write(0,*) 'in LWRAD, max/min(p8w) = ',maxval(p8w),minval(p8w)
-      ! write(0,*) 'in LWRAD, max/min(t8w) = ',maxval(t8w),minval(t8w)
-      ! write(0,*) 'in LWRAD, its,ite,jts,jte,kte = ',its,ite,jts,jte,kte
+       if (mpirank==mpiroot) then
+       write(0,*) 'in LWRAD, max/min(p8w) = ',maxval(p8w),minval(p8w)
+       write(0,*) 'in LWRAD, max/min(t8w) = ',maxval(t8w),minval(t8w)
+       write(0,*) 'in LWRAD, max/min(qv3d)= ',maxval(qv3d),minval(qv3d)
+       write(0,*) 'in LWRAD, max/min(qc3d)= ',maxval(qc3d),minval(qc3d)
+       write(0,*) 'in LWRAD, max/min(qi3d)= ',maxval(qi3d),minval(qi3d)
+       write(0,*) 'in LWRAD, max/min(qr3d)= ',maxval(qr3d),minval(qr3d)
+       write(0,*) 'in LWRAD, max/min(t3d)= ',maxval(t3d),minval(t3d)
+       write(0,*) 'in LWRAD, max/min(p3d)= ',maxval(p3d),minval(p3d)
+       write(0,*) 'in LWRAD, max/min(RHO3d)= ',maxval(RHO3d),minval(RHO3d)
+       write(0,*) 'in LWRAD, max/min(dz8w)= ',maxval(dz8w),minval(dz8w)
+       write(0,*) 'in LWRAD, max/min(CLDFRA3D)= ',maxval(CLDFRA3D),minval(CLDFRA3D)
+       write(0,*) 'in LWRAD, its,ite,jts,jte,kte = ',its,ite,jts,jte,kte
+       endif
 
 ! latitude loop
       j_loop: do j = jts,jte
@@ -11962,7 +11980,6 @@ CONTAINS
             Pw1D(K) = p8w(I,K,J)/100.
             Tw1D(K) = t8w(I,K,J)
          enddo
-        !write(0,*) 'mz*in LWRAD, pw1d,tw1d'
 
          DO K=kts,kte
             QV1D(K)=0.
@@ -11972,7 +11989,6 @@ CONTAINS
             QS1D(K)=0.
             CLDFRA1D(k)=0.
          ENDDO
-        ! write(0,*) 'mz*in LWRAD, initialize q*'
 
          DO K=kts,kte
             QV1D(K)=QV3D(I,K,J)
@@ -11996,12 +12012,9 @@ CONTAINS
             RHO1D(K)=RHO3D(I,K,J)
             DZ1D(K)=dz8w(I,K,J)
          ENDDO
-         !write(0,*) 'mz*in LWRAD, initialize tten1d...'
 
 ! moist variables
 
-!mz
-         !write(0,*)'mz* icloud=',icloud
          IF (ICLOUD .ne. 0) THEN
             IF ( PRESENT( CLDFRA3D ) ) THEN
               DO K=kts,kte
@@ -12824,6 +12837,10 @@ CONTAINS
       end do i_loop
       end do j_loop                                           
 
+!mz
+       if(mpirank==mpiroot) then
+           write(0,*) 'lwrad: max/min(hrlwpd)  =',maxval(hrlwpd),minval(hrlwpd)
+       endif
 !-------------------------------------------------------------------
 
       END SUBROUTINE RRTMG_LWRAD
@@ -13004,10 +13021,10 @@ CONTAINS
 
 ! Read in absorption coefficients and other data
       IF ( allowed_to_read ) THEN
-!mz        CALL rrtmg_lwlookuptable(mpirank,mpiroot,mpicomm,errflg,errmsg)
+        CALL rrtmg_lwlookuptable(mpirank,mpiroot,mpicomm,errflg,errmsg)
       ENDIF
 
-!mz      if(mpirank == mpiroot)write(0,*) 'rrtmg_lwlookuptable completed..'
+      if(mpirank == mpiroot)write(0,*) 'rrtmg_lwlookuptable completed..'
 
 ! Perform g-point reduction and other initializations
 ! Specific heat of dry air (cp) used in flux to heating rate conversion factor.
@@ -13021,6 +13038,9 @@ CONTAINS
       SUBROUTINE rrtmg_lwlookuptable(mpirank,mpiroot,mpicomm,           &
      &                                errflg,errmsg)
 ! **************************************************************************     
+#ifdef MPI
+      use mpi
+#endif 
 
       IMPLICIT NONE
 
@@ -13036,6 +13056,10 @@ CONTAINS
 
       CHARACTER*80 errmess
       INTEGER rrtmg_unit
+#ifdef MPI
+      ! MPI variables
+       integer :: mpierr
+#endif
 
       !mz IF ( wrf_dm_on_monitor() ) THEN
       IF (MPIRANK == MPIROOT ) THEN
@@ -13058,27 +13082,30 @@ CONTAINS
         ENDIF
        ENDIF
 
+#ifdef MPI
+        call MPI_BARRIER(mpicomm,mpierr)
+#endif
       IF (MPIRANK == MPIROOT ) THEN  
       !mz big_endian 
         OPEN(rrtmg_unit,FILE='RRTMG_LW_DATA', convert='BIG_ENDIAN',     &
      &       FORM='UNFORMATTED',STATUS='OLD',ERR=9009)
 
       call lw_kgb01(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb02(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb03(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb04(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb05(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb06(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb07(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb08(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb09(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb10(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb11(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb12(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb13(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb14(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb15(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
-      call lw_kgb16(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!mz      call lw_kgb02(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb03(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb04(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb05(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb06(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb07(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb08(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb09(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb10(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb11(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb12(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb13(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb14(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb15(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
+!      call lw_kgb16(rrtmg_unit,mpirank, mpiroot, mpicomm,errmsg, errflg)
 
       CLOSE (rrtmg_unit)
       ENDIF 
@@ -13214,6 +13241,15 @@ CONTAINS
 !     CALL wrf_error_fatal(errmess)
 
 #else
+      !mz* allocate space for lookup tables
+      if (.NOT. ALLOCATED(fracrefao)) ALLOCATE(fracrefao(16))
+      if (.NOT. ALLOCATED(fracrefbo)) ALLOCATE(fracrefbo(16))
+      if (.NOT. ALLOCATED(kao)) ALLOCATE(kao(5,13,16))
+      if (.NOT. ALLOCATED(kbo)) ALLOCATE(kbo(5,13:59,16))
+      if (.NOT. ALLOCATED(kao_mn2)) ALLOCATE(kao_mn2(19,16))
+      if (.NOT. ALLOCATED(kbo_mn2)) ALLOCATE(kbo_mn2(19,16))
+      if (.NOT. ALLOCATED(selfrefo)) ALLOCATE(selfrefo(10,16))
+      if (.NOT. ALLOCATED(forrefo)) ALLOCATE(forrefo(4,16))
       if (mpirank == mpiroot) then 
          read (rrtmg_unit,err=9010) fracrefao, fracrefbo, kao, kbo,     &
      &              kao_mn2,  kbo_mn2, selfrefo, forrefo
@@ -13222,21 +13258,21 @@ CONTAINS
       endif
        
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mn2,    size(kao_mn2),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mn2,    size(kao_mn2),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mn2,    size(kbo_mn2),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mn2,    size(kbo_mn2),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)                          
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)                   
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr) 
 #endif
       return
@@ -13351,17 +13387,17 @@ CONTAINS
       endif
 
 #ifdef MPI                                                                       
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)                   
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr) 
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)       
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)  
 #endif                                                                            
         return
@@ -13518,21 +13554,21 @@ CONTAINS
       ENDIF
 
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -13657,17 +13693,17 @@ CONTAINS
       ENDIF
 
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -13706,8 +13742,6 @@ CONTAINS
       integer :: mpierr
 #endif
 
-! Local                                    
-      character*80 errmess
 
      ! Initialize the CCPP error handling variables
         errmsg = ''
@@ -13812,21 +13846,21 @@ CONTAINS
       ENDIF
                                                               
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mo3,    size(kao_mo3),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mo3,    size(kao_mo3),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(ccl4o,      size(ccl4o),     MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(ccl4o,      size(ccl4o),     MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -13864,9 +13898,6 @@ CONTAINS
 #ifdef MPI
       integer :: mpierr
 #endif
-
-! Local                                    
-      character*80 errmess
 
      ! Initialize the CCPP error handling variables
         errmsg = ''
@@ -13942,19 +13973,19 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(cfc11adjo,  size(cfc11adjo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(cfc11adjo,  size(cfc11adjo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(cfc12o,     size(cfc12o),    MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(cfc12o,     size(cfc12o),    MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -13990,8 +14021,6 @@ CONTAINS
       integer :: mpierr
 #endif
 
-! Local                                    
-      character*80 errmess
      ! Initialize the CCPP error handling variables
         errmsg = ''
         errflg = 0
@@ -14090,21 +14119,21 @@ CONTAINS
      &               maxval(kao_mco2),minval(kao_mco2)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mco2,   size(kbo_mco2),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mco2,   size(kbo_mco2),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -14257,31 +14286,31 @@ CONTAINS
       ENDIF
 
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mco2,   size(kbo_mco2),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mco2,   size(kbo_mco2),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mo3,    size(kao_mo3),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mo3,    size(kao_mo3),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(cfc12o,     size(cfc12o),    MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(cfc12o,     size(cfc12o),    MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(cfc22adjo,  size(cfc22adjo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(cfc22adjo,  size(cfc22adjo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -14419,21 +14448,21 @@ CONTAINS
       ENDIF
 
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mn2o,   size(kao_mn2o),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mn2o,   size(kbo_mn2o),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -14545,17 +14574,17 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -14682,21 +14711,21 @@ CONTAINS
                      maxval(fracrefao),minval(fracrefao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mo2,    size(kao_mo2),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mo2,    size(kao_mo2),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mo2,    size(kbo_mo2),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mo2,    size(kbo_mo2),   MPI_REAL,             &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -14795,13 +14824,13 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -14931,21 +14960,21 @@ CONTAINS
       ENDIF
 
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mco2,   size(kao_mco2),  MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mco,    size(kao_mco),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mco,    size(kao_mco),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo_mo3,    size(kbo_mo3),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo_mo3,    size(kbo_mo3),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -15062,17 +15091,17 @@ CONTAINS
       ENDIF
 
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -15187,15 +15216,15 @@ CONTAINS
       ENDIF
                                         
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao_mn2,    size(kao_mn2),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao_mn2,    size(kao_mn2),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
 #endif
       return
@@ -15314,17 +15343,17 @@ CONTAINS
      &               maxval(fracrefao),minval(fracrefao)
       ENDIF
 #ifdef MPI
-      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefao,  size(fracrefao), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(fracrefbo,  size(fracrefbo), MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kao,        size(kao),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kao,        size(kao),       MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(kbo,        size(kbo),       MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(kbo,        size(kbo),       MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(selfrefo,   size(selfrefo),  MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
-      call MPI_BCAST(forrefo,    size(forrefo),   MPI_DOUBLE_PRECISION, &
+      call MPI_BCAST(forrefo,    size(forrefo),   MPI_REAL, &
      &               mpiroot, mpicomm, mpierr)
 #endif
        return

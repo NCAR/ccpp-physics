@@ -25,11 +25,10 @@
       CONTAINS
 
       SUBROUTINE radiation_driver (ALBEDO                               &
-              ,CZMEAN ,DT                                               &
+               ,DT                                                      &
               ,DZ8W   ,EMISS  ,GLW     ,GMT    ,GSW                     & 
               ,ITIMESTEP,JULDAY, JULIAN,JULYR                           &
               ,NPHS,  O3RAD                                             &
-!mz:NML
               ,o3input, aer_opt, swint_opt, ra_call_offset              &
               ,icloud, cldovrlp                                         &
               ,sf_surface_physics                                       &
@@ -37,10 +36,9 @@
               ,RHO    ,RLWTOA  ,RTHRATEN                                &
               ,RTHRATENLW    ,RTHRATENSW   ,HRSWPD, HRLWPD              &
               ,SNOW   ,STEPRA ,SWDOWN  ,SWDOWNC                         &
-              ,T8W     ,T ,                  TSK                        &!,VEGFRA    &
-              ,XICE ,XLAND  ,XLAT ,XLONG ,YR                  &
+              ,T8W     ,T ,                  TSK                        &
+              ,XICE ,XLAND  ,XLAT ,XLONG ,YR                            &
               ,sinlat, coslat, solhr                                    &
-!              ,DECLINX ,SOLCONX 
               ,COSZEN,SOLCON                                            &
 !mz              ,Z                                                        &
               ,ALEVSIZ, no_src_types                                    &
@@ -373,11 +371,6 @@
 !   LOGICAL, INTENT(IN ),OPTIONAL  ::              ADAPT_STEP_FLAG
 
    INTEGER,INTENT(IN)                                       :: NPHS
-   REAL, DIMENSION( ims:ime, jms:jme ),INTENT(OUT)          ::    &
-!mz                                                      CFRACH,     & 
-!mz                                                      CFRACL,     &
-!mz                                                      CFRACM,     & 
-                                                      CZMEAN        
    REAL, DIMENSION( ims:ime, jms:jme ),                           &
          INTENT(INOUT)  ::                   RLWTOA 
 !mz                                                      RSWTOA,     
@@ -699,12 +692,12 @@
              write(0,*)'julday, julyr, julian= ',julday, julyr, julian
              write(0,*)'max/min(ozmixm) = ', maxval(ozmixm), minval(ozmixm)
         endif
+! interpolate to model time-step
         call ozn_time_int(julday,julian,ozmixm,ozmixt,levsiz,n_ozmixm,    &
                               ids , ide , jds , jde , kds , kde ,     &
                               ims , ime , jms , jme , kms , kme ,     &
                               its , ite , jts , jte , kts , kte )
-
-! interpolate to model model levels
+! interpolate to model levels
         call ozn_p_int(p ,pin, levsiz, ozmixt, o3rad, &
                               ids , ide , jds , jde , kds , kde ,     &
                               ims , ime , jms , jme , kms , kme ,     &
@@ -772,7 +765,9 @@
                   IMS=ims,IME=ime, JMS=jms,JME=jme, KMS=kms,KME=kme,&
                   ITS=its,ITE=ite, JTS=jts,JTE=jte, KTS=kts,KTE=kte,&
                   LWUPFLX=LWUPFLX,LWUPFLXC=LWUPFLXC,                &
-                  LWDNFLX=LWDNFLX,LWDNFLXC=LWDNFLXC )
+                  LWDNFLX=LWDNFLX,LWDNFLXC=LWDNFLXC,                &
+                  mpirank=mpirank,mpiroot=mpiroot,                  &  
+                  errmsg=errmsg, errflg=errflg)
 
         DO j=jts,jte
         DO k=kts,kte
@@ -785,12 +780,12 @@
         ENDDO
            
 !mz
-        write(0,*)'mz: max/min(RTHRATENLW) = ',                       &
+
+             if(mpirank==mpiroot) then
+         write(0,*)'mz: max/min(RTHRATENLW) = ',                       &
      &    maxval(RTHRATENLW),minval(RTHRATENLW)
 
 
-
-             if(mpirank==mpiroot) then
                    write(0,*) 'CALL HWRF_rrtmg_sw'
                    write(0,*)'mz*rrtmg_swrad: solcon = ',solcon
                    
@@ -883,6 +878,15 @@
            SWDOWN(I,J)=GSW(I,J)/(1.-ALBEDO(I,J))
         ENDDO
         ENDDO
+
+             if(mpirank==mpiroot) then
+            write(0,*)'mz: max/min(RTHRATENSW) = ',                     &
+     &    maxval(RTHRATENSW),minval(RTHRATENSW)
+          write(0,*)'mz: max/min(SWDOWN) = ',                           &
+     &    maxval(SWDOWN),minval(SWDOWN)
+             endif
+
+
 
 
 !        IF (PRESENT(CLDFRA) .AND.                                       &

@@ -14,20 +14,23 @@
 !! \htmlinclude HWRF_radiation_post_run.html
 !!
       subroutine HWRF_radiation_post_run (ncol, nlay,JDAT,              &
-                            ntsd, dt,  julday, julyr,  ihrst,           &
-                            glat, glon, czmean, rswtt, rlwtt,           &
+                            ntsd, dt,  julday, julyr,gmt,               &
+       !                     glat, glon, czmean, rswtt, rlwtt,           &
+                            glat, glon, Radtend, rswtt, rlwtt,          &
                             t, czen, errmsg, errflg)
       
       USE MACHINE , only : kind_phys
+      USE GFS_typedefs,               ONLY : GFS_radtend_type
 
       IMPLICIT NONE
+      type(GFS_radtend_type),              intent(in) :: Radtend
 
       !-- interface variables
-      INTEGER,               INTENT(IN) :: NCOL, NLAY, IHRST,JULDAY,    &
+      INTEGER,               INTENT(IN) :: NCOL, NLAY, JULDAY,          &
      &                                     JULYR,NTSD,JDAT(1:8)
       !MZ* dt-time step for physics?
-      REAL(KIND_PHYS),       INTENT(IN) :: DT
-      REAL(KIND_PHYS),DIMENSION(1:NCOL),INTENT(IN) :: CZMEAN,GLAT,GLON  
+      REAL(KIND_PHYS),       INTENT(IN) :: DT,GMT
+      REAL(KIND_PHYS),DIMENSION(1:NCOL),INTENT(IN) :: GLAT,GLON  
 
       REAL(KIND_PHYS),DIMENSION(1:NCOL,1:NLAY),INTENT(IN) :: RLWTT      &
      &                                                     ,RSWTT
@@ -37,6 +40,7 @@
       REAL(KIND_PHYS),DIMENSION(1:NCOL),INTENT(in) :: CZEN
 
       !-- local variables
+      INTEGER            ::ihrst
       INTEGER            :: I,K
       INTEGER            :: IDS,IDE,JDS,JDE,KDS,KDE                     &
      &                     ,IMS,IME,JMS,JME,KMS,KME                     &
@@ -77,10 +81,14 @@
 !
 !mz* 
       xtime = ntsd*dt/60.
+      ihrst = nint(gmt)
+      !write(0,*)'mz: radiation_post, ihrst,gmt=',ihrst,gmt
+      !write(0,*)'radiation_post,max/min(coszen) =',                     &
+      !&            maxval(Radtend%coszen),minval(Radtend%coszen)
 
       CALL RDTEMP(ntsd,DT,JDAT,JULDAY,JULYR                             &
-     &           ,XTIME,IHRST,glat,glon                                 &
-     &           ,czen,czmean,t                                         &
+     &           ,IHRST,glat,glon                                       &
+     &           ,Radtend%coszen,t                                      &
      &           ,rswtt,rlwtt                                           &
      &           ,IDS,IDE,JDS,JDE,KDS,KDE                               &
      &           ,IMS,IME,JMS,JME,KMS,KME                               &

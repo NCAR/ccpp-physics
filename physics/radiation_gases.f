@@ -1464,6 +1464,11 @@
 !   REAL, DIMENSION( lonsiz, levsiz, latsiz, num_months )    ::   &
 !                                                            OZMIXIN
 
+#ifdef mpi
+       integer ierr
+
+#endif 
+
 !MZ*   logical, external :: wrf_dm_on_monitor
 
       jtf=min0(jte,jde-1)
@@ -1480,6 +1485,9 @@
        lat_ozone=>lat_ozone_save
        ozmixin=>ozmixin_save
 
+#ifdef MPI                                                                                             
+        call MPI_BARRIER(mpicomm,ierr)                        
+#endif  
        if (mpirank == mpiroot) then
          write (0,*) 'Master rank reads ozone.'
 
@@ -1538,7 +1546,7 @@
       enddo
       enddo
 !mz
-        write(0,*) 'ozone: max/min(ozmixin) = ',                        &
+        write(0,*) 'ozini: max/min(ozmixin) = ',                        &
      &              maxval(ozmixin), minval(ozmixin)
 
       close(29)
@@ -1605,6 +1613,19 @@
 !    real :: g                            ! interpolated function value
 !---------------------------------------------------------------------------
 
+!mz
+      if (mpirank == mpiroot) then
+        write(0,*)'interp_pt:max/min(ozmixin)=',                        &
+     &             maxval(ozmixin),minval(ozmixin)
+        write(0,*)'interp_pt:max/min(xlat)=',                           &
+     &             maxval(xlat),minval(xlat)
+        write(0,*)'interp_pt:max/min(lat_ozone)=',                      &
+     &             maxval(lat_ozone),minval(lat_ozone)
+        write(0,*)'interp_pt:its,itf,jts,jtf,levsiz=',                  &
+     &            its,itf,jts,jtf,levsiz 
+
+      endif
+
 
       do m=2,num_months
       do j=jts,jtf
@@ -1617,6 +1638,11 @@
       enddo
       enddo
       enddo
+
+!mz  
+      if (mpirank == mpiroot) then
+        write(0,*)'ozini:max/min(ozmixm)=',maxval(ozmixm),minval(ozmixm)
+      endif
 
 ! Old code for fixed ozone
 
