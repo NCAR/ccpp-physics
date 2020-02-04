@@ -733,6 +733,7 @@
                endif
               end do
             end do
+            ! Call Thompson's subroutine to compoute effective radii
             do i = 1, im
               call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),     &
                                    nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:),   &
@@ -975,8 +976,8 @@
                enddo
 
              !  --- call progcld5 to get Xu-Randall total cloud cover (clouds(:,1:LMK,1))
-             !  tgs: a short subroutine could be made of progcld5 only to
-             !       compute total cloud fraction.
+             !  tgs: a short subroutine could be made of progcld5 to
+             !       compute only total cloud fraction.
                   call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1, &  !  --- inputs
                          Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
@@ -988,6 +989,7 @@
                          Tbd%phy_f3d(:,:,Model%nseffr),                 &
                          clouds,cldsa,mtopa,mbota, de_lgth)               !  --- outputs
 
+         !tgs - let's use the PBL cloud fraction
          do k=1,lmk
              do i=1,im
              !IF (tracer1(i,k,ntrw) > 1.0e-7 .OR. tracer1(i,k,ntsw) > 1.0e-7) then
@@ -996,7 +998,6 @@
              !    clouds(i,k,1) = clouds(i,k,1)
              !ELSE
                ! MYNN sub-grid cloud fraction 
-               !tgs - let's use only PBL cloud fraction
                   cldcov(i,k)    = clouds1(i,k)
                   clouds(i,k,1)  = clouds1(i,k)
              !ENDIF
