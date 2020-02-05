@@ -20,7 +20,7 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   & ! input
           Tbd, Cldprop, Coupling,                                    &
-          Radtend, qc, qi, nc, ni, nwfa,                             & ! input/output
+          Radtend, qc, qi, nwfa,                                     & ! input/output
           imfdeepcnv, imfdeepcnv_gf,                                 &
           f_ice, f_rain, f_rimef, flgmin, cwm,                       & ! F-A mp scheme only
           lm, im, lmk, lmp,                                          & ! input
@@ -89,8 +89,6 @@
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: qc
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: qi
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: nc
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: ni
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: nwfa
 
 
@@ -989,20 +987,29 @@
                          Tbd%phy_f3d(:,:,Model%nseffr),                 &
                          clouds,cldsa,mtopa,mbota, de_lgth)               !  --- outputs
 
-         !tgs - let's use the PBL cloud fraction
-         do k=1,lmk
-             do i=1,im
-             !IF (tracer1(i,k,ntrw) > 1.0e-7 .OR. tracer1(i,k,ntsw) > 1.0e-7) then
-             !  ! Xu-Randall cloud fraction computed in progcld5
-             !    cldcov(i,k) = clouds(i,k,1)
-             !    clouds(i,k,1) = clouds(i,k,1)
-             !ELSE
-               ! MYNN sub-grid cloud fraction 
-                  cldcov(i,k)    = clouds1(i,k)
-                  clouds(i,k,1)  = clouds1(i,k)
-             !ENDIF
-            enddo
-         enddo
+           if(Model%do_mynnedmf) then
+           !tgs - let's use the PBL cloud fraction for now
+             do k=1,lmk
+               do i=1,im
+                 !IF (tracer1(i,k,ntrw) > 1.0e-7 .OR. tracer1(i,k,ntsw) > 1.0e-7) then
+                 !  ! Xu-Randall cloud fraction computed in progcld5
+                 !    cldcov(i,k) = clouds(i,k,1)
+                 !ELSE
+                 ! MYNN sub-grid cloud fraction 
+                    cldcov(i,k)    = clouds1(i,k)
+                    clouds(i,k,1)  = clouds1(i,k)
+                 !ENDIF
+                enddo
+              enddo
+           elseif (Model%imfdeepcnv == Model%imfdeepcnv_gf ) then ! GF conv
+             do k=1,lmk
+               do i=1,im
+               ! Xu-Randall cloud fraction computed in progcld5
+                  cldcov(i,k)    = clouds(i,k,1)
+               enddo
+             enddo
+           endif
+
              if( .not. clduni) then
                   !  --- call progcld5 for interaction with the radiation with setting
                   !  --- uni_cld=.true. to keep precomputed cloud

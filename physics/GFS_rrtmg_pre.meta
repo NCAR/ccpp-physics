@@ -288,24 +288,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[nc]
-  standard_name = cloud_droplet_number_concentration
-  long_name = cloud droplet number concentration
-  units = kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = T
-[ni]
-  standard_name = ice_number_concentration
-  long_name = ice number concentration
-  units = kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [nwfa]
   standard_name = water_friendly_aerosol_number_concentration
   long_name = number concentration of water-friendly aerosols
