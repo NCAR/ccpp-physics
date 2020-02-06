@@ -601,7 +601,7 @@
   type = logical
   intent = in
   optional = F
-[pbl_generic_tend]
+[flag_for_pbl_generic_tend]
   standard_name = true_if_GFS_PBL_generic_should_calculate_tendencies
   long_name = true if GFS_PBL_generic should calculate tendencies
   units = flag

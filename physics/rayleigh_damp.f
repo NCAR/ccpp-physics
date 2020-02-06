@@ -74,9 +74,9 @@
       real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IX,KM)
       real(kind=kind_phys),intent(in)    :: U1(IX,KM), V1(IX,KM)
       real(kind=kind_phys),intent(inout) :: A(IX,KM), B(IX,KM), C(IX,KM)
-      real(kind=kind_phys),intent(inout) :: du3dt(IX,KM)
-      real(kind=kind_phys),intent(inout) :: dv3dt(IX,KM)
-      real(kind=kind_phys),intent(inout) :: dt3dt(IX,KM)
+      real(kind=kind_phys),intent(inout) :: du3dt(:,:)
+      real(kind=kind_phys),intent(inout) :: dv3dt(:,:)
+      real(kind=kind_phys),intent(inout) :: dt3dt(:,:)
       character(len=*),    intent(out)   :: errmsg
       integer,             intent(out)   :: errflg
 

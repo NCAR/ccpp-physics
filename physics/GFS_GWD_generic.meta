@@ -177,7 +177,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[gwd_generic_tend]
+[flag_for_gwd_generic_tend]
   standard_name = true_if_GFS_GWD_generic_should_calculate_tendencies
   long_name = true if GFS_GWD_generic should calculate tendencies
   units = flag
@@ -326,7 +326,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[gwd_generic_tend]
+[flag_for_gwd_generic_tend]
   standard_name = true_if_GFS_GWD_generic_should_calculate_tendencies
   long_name = true if GFS_GWD_generic should calculate tendencies
   units = flag

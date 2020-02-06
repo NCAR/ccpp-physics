@@ -281,7 +281,7 @@
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires,                                                                                                 &
-        ltaerosol, cplflx, cplchm, lssav, pbl_generic_tend, ldiag3d, qdiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,              &
+        ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,              &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
@@ -301,7 +301,7 @@
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
-      logical, intent(in) :: pbl_generic_tend
+      logical, intent(in) :: flag_for_pbl_generic_tend
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
@@ -553,7 +553,7 @@
   !    &     dtf,' kdt=',kdt,' lat=',lat
   !       endif
 
-        if (ldiag3d .and. pbl_generic_tend) then
+        if (ldiag3d .and. flag_for_pbl_generic_tend) then
           if (lsidea) then
             dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
           else

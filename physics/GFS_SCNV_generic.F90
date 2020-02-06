@@ -71,6 +71,7 @@
         frain, gt0, gq0_water_vapor, save_t, save_qv, dqdti, dt3dt, dq3dt, clw,   &
         shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,                   &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                     &
+        flag_for_scnv_generic_tend,                                               &
         imfshalcnv, imfshalcnv_sas, imfshalcnv_samf, errmsg, errflg)
 
       use machine,               only: kind_phys
@@ -78,7 +79,7 @@
       implicit none
 
       integer, intent(in) :: im, levs, nn
-      logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm
+      logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_t, save_qv
@@ -132,7 +133,7 @@
         endif
       endif
 
-      if (lssav) then
+      if (lssav .and. flag_for_scnv_generic_tend) then
         if (ldiag3d) then
           do k=1,levs
             do i=1,im

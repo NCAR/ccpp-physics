@@ -66,7 +66,7 @@
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,lssav,ldiag3d,qdiag3d,lsidea,ntoz,          &
      &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
-     &   errmsg,errflg)
+     &   flag_for_pbl_generic_tend, errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -77,6 +77,7 @@
 !     arguments
 !
       logical, intent(in) :: lprnt,lssav,ldiag3d,qdiag3d,lsidea
+      logical, intent(in) :: flag_for_pbl_generic_tend
       integer, intent(in) :: ipr
       integer, intent(in) :: ix, im, km, ntrac, ntcw, kinver(im), ntoz
       integer, intent(out) :: kpbl(im)
@@ -1041,7 +1042,8 @@ c
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
-            if(lssav .and. ldiag3d) then
+            if(lssav .and. ldiag3d .and. .not.                          &
+     &                flag_for_pbl_generic_tend) then
                if(lsidea) then
                   dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*rdt
                else
@@ -1064,7 +1066,8 @@ c
             enddo
           enddo
         enddo
-        if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d) then
+        if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
+     &               flag_for_pbl_generic_tend) then
           is = (ntoz-1) * km
           do k = 1, km
             do i = 1, im
@@ -1174,7 +1177,8 @@ c
             dv(i,k)  = dv(i,k)  + vtend
             dusfc(i) = dusfc(i) + conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
-            if(lssav .and. ldiag3d) then
+            if(lssav .and. ldiag3d .and. .not.                          &
+     &             flag_for_pbl_generic_tend) then
                du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
                dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
             endif

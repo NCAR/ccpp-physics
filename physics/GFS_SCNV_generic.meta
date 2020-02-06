@@ -332,6 +332,13 @@
   kind = kind_phys
   intent = inout
   optional = F
+[flag_for_scnv_generic_tend]
+  standard_name = true_if_GFS_SCNV_generic_should_calculate_tendencies
+  long_name = true if GFS_SCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [imfshalcnv]
   standard_name = flag_for_mass_flux_shallow_convection_scheme
   long_name = flag for mass-flux shallow convection scheme

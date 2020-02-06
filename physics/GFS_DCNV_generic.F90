@@ -99,7 +99,7 @@
       isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
       gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g, clw_ice, clw_liquid, npdf3d, num_p3d, ncnvcld3d,  &
       rainc, cldwrk, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf,                             &
-      cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d,                                                        &
+      cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d, flag_for_dcnv_generic_tend,                            &
       cape, tconvtend, qconvtend, uconvtend, vconvtend, errmsg, errflg)
 
       use machine,               only: kind_phys
@@ -108,6 +108,7 @@
 
       integer, intent(in) :: im, levs
       logical, intent(in) :: lssav, ldiag3d, ras, cscnv, do_ca, isppt_deep, qdiag3d
+      logical, intent(in) :: flag_for_dcnv_generic_tend
 
       real(kind=kind_phys), intent(in) :: frain, dtf
       real(kind=kind_phys), dimension(im), intent(in) :: rain1, cld1d
@@ -175,7 +176,7 @@
           cldwrk (i)  = cldwrk (i)  + cld1d(i) * dtf
         enddo
 
-        if (ldiag3d) then
+        if (ldiag3d .and. flag_for_dcnv_generic_tend) then
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain

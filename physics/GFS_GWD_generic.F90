@@ -20,7 +20,7 @@ contains
      &           oc, oa4, clx, theta,                                   &
      &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
      &           dudt, dvdt, dtdt, du3dt, dv3dt, dt3dt, dtf,            &
-     &           gwd_generic_tend, errmsg, errflg)
+     &           flag_for_gwd_generic_tend, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
@@ -32,7 +32,7 @@ contains
      &  oc(im), oa4(im,4), clx(im,4),                                   &
      &  theta(im), sigma(im), gamma(im), elvmax(im)
 
-      logical, intent(in) :: lssav, ldiag3d, gwd_generic_tend
+      logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
       real(kind=kind_phys), intent(in) :: dtdt(im,levs), dudt(im,levs), dvdt(im,levs)
       ! dt3dt only allocated only if ldiag3d is .true.
       real(kind=kind_phys), intent(inout) :: dt3dt(:,:), du3dt(:,:), dv3dt(:,:)
@@ -92,7 +92,7 @@ contains
       endif   ! end if_nmtvr
 
       if (lssav) then
-        if (ldiag3d .and. gwd_generic_tend) then
+        if (ldiag3d .and. flag_for_gwd_generic_tend) then
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) - dtdt(i,k)*dtf
@@ -128,12 +128,12 @@ contains
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
-      &  dugwd, dvgwd, du3dt, dv3dt, dt3dt, gwd_generic_tend, errmsg, errflg)
+      &  dugwd, dvgwd, du3dt, dv3dt, dt3dt, flag_for_gwd_generic_tend, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
       
-      logical, intent(in) :: lssav, ldiag3d, gwd_generic_tend
+      logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
       
       real(kind=kind_phys), intent(in) :: dusfcg(:), dvsfcg(:)
       real(kind=kind_phys), intent(in) :: dudt(:,:), dvdt(:,:), dtdt(:,:)
@@ -153,7 +153,7 @@ contains
         dugwd(:) = dugwd(:) + dusfcg(:)*dtf
         dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
 
-        if (ldiag3d .and. gwd_generic_tend) then
+        if (ldiag3d .and. flag_for_gwd_generic_tend) then
           du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
           dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
           dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf

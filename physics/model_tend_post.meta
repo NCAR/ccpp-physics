@@ -1,0 +1,216 @@
+[ccpp-arg-table]
+  name = model_tend_post_init
+  type = scheme
+[ccpp-arg-table]
+  name = model_tend_post_finalize
+  type = scheme
+[ccpp-arg-table]
+  name = model_tend_post_run
+  type = scheme
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = zonal wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = meridional wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gq0_water_vapor]
+  standard_name = water_vapor_specific_humidity_updated_by_physics
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[t_start]
+  standard_name = temperature_at_start_of_ccpp
+  long_name = temperature at start of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[u_start]
+  standard_name = x_wind_at_start_of_ccpp
+  long_name = x wind at start of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[v_start]
+  standard_name = y_wind_at_start_of_ccpp
+  long_name = y wind at start of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[q_start]
+  standard_name = water_vapor_specific_humidity_at_start_of_ccpp
+  long_name = water vapor specific humidity at start of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[t_end]
+  standard_name = temperature_at_end_of_ccpp
+  long_name = temperature at end of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[u_end]
+  standard_name = x_wind_at_end_of_ccpp
+  long_name = x wind at end of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[v_end]
+  standard_name = y_wind_at_end_of_ccpp
+  long_name = y wind at start of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[q_end]
+  standard_name = water_vapor_specific_humidity_at_end_of_ccpp
+  long_name = water vapor specific humidity at end of ccpp
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dt3dt_ccpp]
+  standard_name = cumulative_change_in_temperature_from_ccpp
+  long_name = cumulative change in temperature from CCPP
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du3dt_ccpp]
+  standard_name = cumulative_change_in_x_wind_from_ccpp
+  long_name = cumulative change in x wind from CCPP
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3dt_ccpp]
+  standard_name = cumulative_change_in_y_wind_from_ccpp
+  long_name = cumulative change in y wind from CCPP
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dq3dt_ccpp]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_from_CCPP
+  long_name = cumulative change in water vapor specific humidity from CCPP
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[levs]
+  standard_name = vertical_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[ntrac]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+[index_for_water_vapor]
+  standard_name = index_for_water_vapor
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+
+
+
+
+
+
+
