@@ -97,8 +97,8 @@
         rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
-        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, raincprv, rainncprv, iceprv, snowprv, graupelprv,      &
-        dtp, errmsg, errflg)
+        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
+        graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, errmsg, errflg)
 !
       use machine, only: kind_phys
 
@@ -133,13 +133,18 @@
       real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
       real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
 
-      ! Rainfall variables previous time step (update for RUC LSM)
-      integer, intent(in) :: lsm, lsm_ruc
+      ! Rainfall variables previous time step
+      integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
       real(kind=kind_phys), dimension(im),      intent(inout) :: raincprv
       real(kind=kind_phys), dimension(im),      intent(inout) :: rainncprv
       real(kind=kind_phys), dimension(im),      intent(inout) :: iceprv
       real(kind=kind_phys), dimension(im),      intent(inout) :: snowprv
       real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: draincprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: drainncprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: diceprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnowprv
+      real(kind=kind_phys), dimension(im),      intent(inout) :: dgraupelprv
 
       real(kind=kind_phys),                     intent(in)    :: dtp
 
@@ -165,7 +170,7 @@
       errflg = 0
 
       onebg = one/con_g
-
+      
       do i = 1, im
           rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
@@ -197,14 +202,23 @@
         tprcp   = max (0.,rain) ! time-step convective and explicit precip
         ice     = frain*rain1*sr                  ! time-step ice
       end if
-
-      if (lsm==lsm_ruc) then
-        if (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_thompson) then
+      
+      if (lsm==lsm_ruc .or. lsm==lsm_noahmp) then
             raincprv(:)   = rainc(:)
             rainncprv(:)  = frain * rain1(:)
             iceprv(:)     = ice(:)
             snowprv(:)    = snow(:)
             graupelprv(:) = graupel(:)
+        !for NoahMP, calculate precipitation rates from liquid water equivalent thickness for use in next time step
+        !Note (GJF): Precipitation LWE thicknesses are multiplied by the frain factor, and are thus on the dynamics time step, but the conversion as written
+        !            (with dtp in the denominator) assumes the rate is calculated on the physics time step. This only works as expected when dtf=dtp (i.e. when frain=1).
+        if (lsm == lsm_noahmp) then
+          tem = 1.0 / (dtp*con_p001) !GJF: This conversion was taken from GFS_physics_driver.F90, but should denominator also have the frain factor?
+          draincprv(:)   = tem * raincprv(:)
+          drainncprv(:)  = tem * rainncprv(:)
+          dsnowprv(:)    = tem * snowprv(:)
+          dgraupelprv(:) = tem * graupelprv(:)
+          diceprv(:)     = tem * iceprv(:)
         end if
       end if
 

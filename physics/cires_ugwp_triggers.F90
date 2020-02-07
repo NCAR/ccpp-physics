@@ -463,6 +463,10 @@
 !
 !
 !      
+!>\ingroup cires_ugwp_run
+!> @{
+!!
+!!
       subroutine slat_geos5_tamp(im, tau_amp, xlatdeg, tau_gw)
 !=================
 ! GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>

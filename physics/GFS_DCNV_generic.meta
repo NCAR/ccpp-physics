@@ -49,6 +49,14 @@
   type = logical
   intent = in
   optional = F
+[cplchm]
+  standard_name = flag_for_chemistry_coupling
+  long_name = flag controlling cplchm collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [isppt_deep]
   standard_name = flag_for_combination_of_sppt_with_isppt_deep
   long_name = switch for combination with isppt_deep.
@@ -137,6 +145,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[dqdti]
+  standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
+  long_name = instantaneous moisture tendency due to convection
+  units = kg kg-1 s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

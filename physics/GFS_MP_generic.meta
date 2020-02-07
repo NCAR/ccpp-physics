@@ -799,6 +799,14 @@
   type = integer
   intent = in
   optional = F
+[lsm_noahmp]
+  standard_name = flag_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [raincprv]
   standard_name = lwe_thickness_of_convective_precipitation_amount_from_previous_timestep
   long_name = convective_precipitation_amount from previous timestep
@@ -839,6 +847,51 @@
   standard_name = lwe_thickness_of_graupel_amount_from_previous_timestep
   long_name = graupel amount from previous timestep
   units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[draincprv]
+  standard_name = convective_precipitation_rate_from_previous_timestep
+  long_name = convective precipitation rate from previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[drainncprv]
+  standard_name = explicit_rainfall_rate_from_previous_timestep
+  long_name = explicit rainfall rate previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[diceprv]
+  standard_name = ice_precipitation_rate_from_previous_timestep
+  long_name = ice precipitation rate from previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dsnowprv]
+  standard_name = snow_precipitation_rate_from_previous_timestep
+  long_name = snow precipitation rate from previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dgraupelprv]
+  standard_name = graupel_precipitation_rate_from_previous_timestep
+  long_name = graupel precipitation rate from previous timestep
+  units = mm s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

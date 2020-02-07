@@ -2395,7 +2395,8 @@ ENDIF
 
 !-----------------------------------------------------------------------
 !>\ingroup hafs_famp
-      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,mpiroot,THREADS)
+      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,mpiroot,THREADS, &
+        errmsg,errflg)
 !-----------------------------------------------------------------------
 !-------------------------------------------------------------------------------
 !---  SUBPROGRAM DOCUMENTATION BLOCK
@@ -2448,11 +2449,13 @@ ENDIF
       INTEGER, PARAMETER :: MDR1=XMR1, MDR2=XMR2, MDR3=XMR3
 !
 !     VARIABLES PASSED IN
-      real,INTENT(IN) :: GSMDT
-      INTEGER,   INTENT(IN) :: MYPE 
-      INTEGER,   INTENT(IN) :: MPIROOT
-      INTEGER,   INTENT(IN) :: MPI_COMM_COMP
-      INTEGER,   INTENT(IN) :: THREADS
+      REAL,             INTENT(IN) :: GSMDT
+      INTEGER,          INTENT(IN) :: MYPE 
+      INTEGER,          INTENT(IN) :: MPIROOT
+      INTEGER,          INTENT(IN) :: MPI_COMM_COMP
+      INTEGER,          INTENT(IN) :: THREADS
+      CHARACTER(LEN=*), INTENT(OUT)   :: errmsg
+      INTEGER,          INTENT(OUT)   :: errflg
 !
 !-----------------------------------------------------------------------
 !     LOCAL VARIABLES
@@ -2486,12 +2489,11 @@ ENDIF
             ENDIF
           ENDDO
           IF (etampnew_unit1<0) THEN
-            write(0,*)'FERRIER_INIT_hr: Can not find unused fortran '  &
-                     ,'unit to read in lookup tables'
-            write(0,*)' ABORTING!'
-#ifdef MPI
-            call MPI_ABORT(MPI_COMM_COMP, rc, IRTN)
-#endif
+            errmsg = 'FERRIER_INIT_hr: Can not find unused fortran &
+                     &unit to read in lookup tables'
+            errmsg = trim(errmsg)//NEW_LINE('A')//' ABORTING!'
+            errflg = 1
+            RETURN 
           ENDIF
         ENDIF
 !
