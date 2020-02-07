@@ -187,10 +187,11 @@
 
       if (cplflx) then
         do i=1,im
-          islmsk_cice(i) = int(slimskin_cpl(i)+0.5)
-          if(islmsk_cice(i) == 4)then
-            flag_cice(i)   = .true.
-            ulwsfc_cice(i) = ulwsfcin_cpl(i)
+          islmsk_cice(i) = nint(slimskin_cpl(i))
+          flag_cice(i)   = (islmsk_cice(i) == 4)
+
+          if (flag_cice(i)) then
+!           ulwsfc_cice(i) = ulwsfcin_cpl(i)
             dusfc_cice(i)  = dusfcin_cpl(i)
             dvsfc_cice(i)  = dvsfcin_cpl(i)
             dtsfc_cice(i)  = dtsfcin_cpl(i)
