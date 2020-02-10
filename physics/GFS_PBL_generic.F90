@@ -331,6 +331,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
+      real(kind=kind_phys), parameter :: huge=1.0d30
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
@@ -498,13 +499,13 @@
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
-!            if (fice(i) == ceanfrac(i)) then ! use results from CICE
-!              dusfci_cpl(i) = dusfc_cice(i)
-!              dvsfci_cpl(i) = dvsfc_cice(i)
-!              dtsfci_cpl(i) = dtsfc_cice(i)
-!              dqsfci_cpl(i) = dqsfc_cice(i)
-!            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
-            if (wet(i)) then                   ! use stress_ocean from sfc_diff for opw component at mixed point
+            if (fice(i) == oceanfrac(i)) then ! use results from CICE
+              dusfci_cpl(i) = dusfc_cice(i)
+              dvsfci_cpl(i) = dvsfc_cice(i)
+              dtsfci_cpl(i) = dtsfc_cice(i)
+              dqsfci_cpl(i) = dqsfc_cice(i)
+!           elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
+            elseif (wet(i)) then                   ! use stress_ocean from sfc_diff for opw component at mixed point
               if (icy(i) .or. dry(i)) then
                 tem1 = max(q1(i), 1.e-8)
                 rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
@@ -518,7 +519,7 @@
                 endif
                 dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
                 dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
-              else                                                    ! use results from PBL scheme for 100% open ocean
+              else                                       ! use results from PBL scheme for 100% open ocean
                 dusfci_cpl(i) = dusfc1(i)
                 dvsfci_cpl(i) = dvsfc1(i)
                 dtsfci_cpl(i) = dtsfc1(i)
@@ -530,6 +531,12 @@
             dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfci_cpl(i) * dtf
             dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfci_cpl(i) * dtf
             dqsfc_cpl (i) = dqsfc_cpl(i) + dqsfci_cpl(i) * dtf
+!
+          else
+            dusfc_cpl(i) = huge
+            dvsfc_cpl(i) = huge
+            dtsfc_cpl(i) = huge
+            dqsfc_cpl(i) = huge
 !!
           endif ! Ocean only, NO LAKES
         enddo
