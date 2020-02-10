@@ -8,6 +8,9 @@ module rrtmgp_sw_gas_optics
   use mo_optical_props,       only: ty_optical_props_2str
   use mo_compute_bc,          only: compute_bc
   use netcdf
+#ifdef MPI
+  use mpi
+#endif
 
 contains
 
@@ -19,10 +22,6 @@ contains
 !!
   subroutine rrtmgp_sw_gas_optics_init(rrtmgp_root_dir, rrtmgp_sw_file_gas, rrtmgp_nGases,   &
        active_gases_array, mpicomm, mpirank, mpiroot, sw_gas_props, errmsg, errflg)
-    use netcdf
-#ifdef MPI
-    use mpi
-#endif
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -49,348 +48,284 @@ contains
     type(ty_gas_concs)  :: &
          gas_concentrations
     integer, dimension(:), allocatable :: &
-         kminor_start_lower_sw,              & ! Starting index in the [1, nContributors] vector for a contributor
-                                               ! given by \"minor_gases_lower\" (lower atmosphere)  
-         kminor_start_upper_sw                 ! Starting index in the [1, nContributors] vector for a contributor 
-                                               ! given by \"minor_gases_upper\" (upper atmosphere)   
+         kminor_start_lower,              & ! Starting index in the [1, nContributors] vector for a contributor
+                                            ! given by \"minor_gases_lower\" (lower atmosphere)  
+         kminor_start_upper                 ! Starting index in the [1, nContributors] vector for a contributor 
+                                            ! given by \"minor_gases_upper\" (upper atmosphere)   
     integer, dimension(:,:), allocatable :: &
-         band2gpt_sw,                        & ! Beginning and ending gpoint for each band    
-         minor_limits_gpt_lower_sw,          & ! Beginning and ending gpoint for each minor interval in lower atmosphere 
-         minor_limits_gpt_upper_sw             ! Beginning and ending gpoint for each minor interval in upper atmosphere 
+         band2gpt,                        & ! Beginning and ending gpoint for each band    
+         minor_limits_gpt_lower,          & ! Beginning and ending gpoint for each minor interval in lower atmosphere 
+         minor_limits_gpt_upper             ! Beginning and ending gpoint for each minor interval in upper atmosphere 
     integer, dimension(:,:,:), allocatable :: &
-         key_species_sw                        ! Key species pair for each band 
+         key_species                        ! Key species pair for each band 
     real(kind_phys) :: &
-         press_ref_trop_sw,                  & ! Reference pressure separating the lower and upper atmosphere [Pa]    
-         temp_ref_p_sw,                      & ! Standard spectroscopic reference pressure [Pa] 
-         temp_ref_t_sw                         ! Standard spectroscopic reference temperature [K] 
+         press_ref_trop,                  & ! Reference pressure separating the lower and upper atmosphere [Pa]    
+         temp_ref_p,                      & ! Standard spectroscopic reference pressure [Pa] 
+         temp_ref_t                         ! Standard spectroscopic reference temperature [K] 
     real(kind_phys), dimension(:), allocatable :: &
-         press_ref_sw,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa] 
-         temp_ref_sw,                        & ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K] 
-         solar_source_sw                       ! Stored solar source function from original RRTM 
+         press_ref,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa] 
+         temp_ref,                        & ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K] 
+         solar_source                       ! Stored solar source function from original RRTM 
     real(kind_phys), dimension(:,:), allocatable :: &
-         band_lims_sw                          ! Beginning and ending wavenumber [cm -1] for each band                         
+         band_lims                          ! Beginning and ending wavenumber [cm -1] for each band                         
 
     real(kind_phys), dimension(:,:,:), allocatable :: &
-         vmr_ref_sw,                         & ! Volume mixing ratios for reference atmosphere
-         kminor_lower_sw,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
-                                               ! [nTemp x nEta x nContributors] array)
-         kminor_upper_sw,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
-                                               ! [nTemp x nEta x nContributors] array)
-         rayl_lower_sw,                      & ! Stored coefficients due to rayleigh scattering contribution
-         rayl_upper_sw                         ! Stored coefficients due to rayleigh scattering contribution
+         vmr_ref,                         & ! Volume mixing ratios for reference atmosphere
+         kminor_lower,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
+                                            ! [nTemp x nEta x nContributors] array)
+         kminor_upper,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
+                                            ! [nTemp x nEta x nContributors] array)
+         rayl_lower,                      & ! Stored coefficients due to rayleigh scattering contribution
+         rayl_upper                         ! Stored coefficients due to rayleigh scattering contribution
     real(kind_phys), dimension(:,:,:,:), allocatable :: &
-         kmajor_sw                             ! Stored absorption coefficients due to major absorbing gases
+         kmajor                             ! Stored absorption coefficients due to major absorbing gases
     character(len=32),  dimension(:), allocatable :: &
-         gas_names_sw,                       & ! Names of absorbing gases
-         gas_minor_sw,                       & ! Name of absorbing minor gas
-         identifier_minor_sw,                & ! Unique string identifying minor gas
-         minor_gases_lower_sw,               & ! Names of minor absorbing gases in lower atmosphere
-         minor_gases_upper_sw,               & ! Names of minor absorbing gases in upper atmosphere
-         scaling_gas_lower_sw,               & ! Absorption also depends on the concentration of this gas
-         scaling_gas_upper_sw                  ! Absorption also depends on the concentration of this gas
+         gas_names,                       & ! Names of absorbing gases
+         gas_minor,                       & ! Name of absorbing minor gas
+         identifier_minor,                & ! Unique string identifying minor gas
+         minor_gases_lower,               & ! Names of minor absorbing gases in lower atmosphere
+         minor_gases_upper,               & ! Names of minor absorbing gases in upper atmosphere
+         scaling_gas_lower,               & ! Absorption also depends on the concentration of this gas
+         scaling_gas_upper                  ! Absorption also depends on the concentration of this gas
     logical(wl), dimension(:), allocatable :: &
-         minor_scales_with_density_lower_sw, & ! Density scaling is applied to minor absorption coefficients
-         minor_scales_with_density_upper_sw, & ! Density scaling is applied to minor absorption coefficients
-         scale_by_complement_lower_sw,       & ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
-         scale_by_complement_upper_sw          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
+         minor_scales_with_density_lower, & ! Density scaling is applied to minor absorption coefficients
+         minor_scales_with_density_upper, & ! Density scaling is applied to minor absorption coefficients
+         scale_by_complement_lower,       & ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
+         scale_by_complement_upper          ! Absorption is scaled by concentration of scaling_gas (F) or its complement (T)
     ! Dimensions
     integer :: &
-         ntemps_sw, npress_sw, ngpts_sw, nabsorbers_sw, nextrabsorbers_sw,       &
-         nminorabsorbers_sw, nmixingfracs_sw, nlayers_sw, nbnds_sw, npairs_sw,   &
-         nminor_absorber_intervals_lower_sw, nminor_absorber_intervals_upper_sw, &
-         ncontributors_lower_sw, ncontributors_upper_sw
+         ntemps, npress, ngpts, nabsorbers, nextrabsorbers,       &
+         nminorabsorbers, nmixingfracs, nlayers, nbnds, npairs,   &
+         nminor_absorber_intervals_lower, nminor_absorber_intervals_upper, &
+         ncontributors_lower, ncontributors_upper
 
     ! Local variables
-    integer :: status, ncid_sw, dimid, varID, iGas
+    integer :: status, ncid, dimid, varID, iGas
     integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: sw_gas_props_file
 #ifdef MPI
-    integer :: ierr
+    integer :: mpierr
 #endif
 
     ! Initialize
     errmsg = ''
     errflg = 0
 
+    write(*,"(a52,3i20)") 'rrtmgp_sw_gas_optics.F90:_init(): RRTMGP MPI ranks: ',mpirank,mpiroot,mpicomm
+
     ! Filenames are set in the gphysics_nml
     sw_gas_props_file   = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_gas)
 
     ! Read dimensions for k-distribution fields (only on master processor(0))
-!    if (mpirank .eq. mpiroot) then
-       if(nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid_sw) .eq. NF90_NOERR) then
-          status = nf90_inq_dimid(ncid_sw, 'temperature', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=ntemps_sw)
-          status = nf90_inq_dimid(ncid_sw, 'pressure', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=npress_sw)
-          status = nf90_inq_dimid(ncid_sw, 'absorber', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nabsorbers_sw)
-          status = nf90_inq_dimid(ncid_sw, 'minor_absorber', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nminorabsorbers_sw)
-          status = nf90_inq_dimid(ncid_sw, 'absorber_ext', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nextrabsorbers_sw)
-          status = nf90_inq_dimid(ncid_sw, 'mixing_fraction', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nmixingfracs_sw)
-          status = nf90_inq_dimid(ncid_sw, 'atmos_layer', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nlayers_sw)
-          status = nf90_inq_dimid(ncid_sw, 'bnd', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nbnds_sw)
-          status = nf90_inq_dimid(ncid_sw, 'gpt', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=ngpts_sw)
-          status = nf90_inq_dimid(ncid_sw, 'pair', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=npairs_sw)
-          status = nf90_inq_dimid(ncid_sw, 'contributors_lower', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=ncontributors_lower_sw)
-          status = nf90_inq_dimid(ncid_sw, 'contributors_upper', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=ncontributors_upper_sw)
-          status = nf90_inq_dimid(ncid_sw, 'minor_absorber_intervals_lower', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nminor_absorber_intervals_lower_sw)
-          status = nf90_inq_dimid(ncid_sw, 'minor_absorber_intervals_upper', dimid)
-          status = nf90_inquire_dimension(ncid_sw, dimid, len=nminor_absorber_intervals_upper_sw)
-          status = nf90_close(ncid_sw)
-       endif
-!    endif
+    if (mpirank .eq. mpiroot) then
+       ! Open file
+       status = nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid)
 
-    ! Broadcast dimensions to all processors
-!#ifdef MPI
-!    call MPI_BARRIER(mpicomm, ierr)
-!    call MPI_BCAST(ntemps_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(npress_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nabsorbers_sw,                      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nminorabsorbers_sw,                 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nextrabsorbers_sw,                  1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nmixingfracs_sw,                    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nlayers_sw,                         1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nbnds_sw,                           1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(ngpts_sw,                           1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(npairs_sw,                          1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(ncontributors_lower_sw,             1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(ncontributors_upper_sw,             1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nminor_absorber_intervals_lower_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(nminor_absorber_intervals_upper_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    call MPI_BARRIER(mpicomm, ierr)
-!#endif
+       ! Read dimensions for k-distribution fields
+       status = nf90_inq_dimid(ncid, 'temperature', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=ntemps)
+       status = nf90_inq_dimid(ncid, 'pressure', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=npress)
+       status = nf90_inq_dimid(ncid, 'absorber', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nabsorbers)
+       status = nf90_inq_dimid(ncid, 'minor_absorber',dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nminorabsorbers)
+       status = nf90_inq_dimid(ncid, 'absorber_ext', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nextrabsorbers)
+       status = nf90_inq_dimid(ncid, 'mixing_fraction', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nmixingfracs)
+       status = nf90_inq_dimid(ncid, 'atmos_layer', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nlayers)
+       status = nf90_inq_dimid(ncid, 'bnd', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nbnds)
+       status = nf90_inq_dimid(ncid, 'gpt', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=ngpts)
+       status = nf90_inq_dimid(ncid, 'pair', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=npairs)
+       status = nf90_inq_dimid(ncid, 'contributors_lower',dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=ncontributors_lower)
+       status = nf90_inq_dimid(ncid, 'contributors_upper', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=ncontributors_upper)
+       status = nf90_inq_dimid(ncid, 'minor_absorber_intervals_lower', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nminor_absorber_intervals_lower)
+       status = nf90_inq_dimid(ncid, 'minor_absorber_intervals_upper', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nminor_absorber_intervals_upper)
+ 
+       ! Allocate space for arrays
+       allocate(gas_names(nabsorbers))
+       allocate(scaling_gas_lower(nminor_absorber_intervals_lower))
+       allocate(scaling_gas_upper(nminor_absorber_intervals_upper))
+       allocate(gas_minor(nminorabsorbers))
+       allocate(identifier_minor(nminorabsorbers))
+       allocate(minor_gases_lower(nminor_absorber_intervals_lower))
+       allocate(minor_gases_upper(nminor_absorber_intervals_upper))
+       allocate(minor_limits_gpt_lower(npairs,nminor_absorber_intervals_lower))
+       allocate(minor_limits_gpt_upper(npairs,nminor_absorber_intervals_upper))
+       allocate(band2gpt(2,nbnds))
+       allocate(key_species(2,nlayers,nbnds))
+       allocate(band_lims(2,nbnds))
+       allocate(press_ref(npress))
+       allocate(temp_ref(ntemps))
+       allocate(vmr_ref(nlayers, nextrabsorbers, ntemps))
+       allocate(kminor_lower(ncontributors_lower, nmixingfracs, ntemps))
+       allocate(kmajor(ngpts, nmixingfracs,  npress+1, ntemps))
+       allocate(kminor_start_lower(nminor_absorber_intervals_lower))
+       allocate(kminor_upper(ncontributors_upper, nmixingfracs, ntemps))
+       allocate(kminor_start_upper(nminor_absorber_intervals_upper))
+       allocate(minor_scales_with_density_lower(nminor_absorber_intervals_lower))
+       allocate(minor_scales_with_density_upper(nminor_absorber_intervals_upper))
+       allocate(scale_by_complement_lower(nminor_absorber_intervals_lower))
+       allocate(scale_by_complement_upper(nminor_absorber_intervals_upper))
+       allocate(rayl_upper(ngpts, nmixingfracs, ntemps))
+       allocate(rayl_lower(ngpts, nmixingfracs, ntemps))
+       allocate(solar_source(ngpts))
+       allocate(temp1(nminor_absorber_intervals_lower))
+       allocate(temp2(nminor_absorber_intervals_upper))
+       allocate(temp3(nminor_absorber_intervals_lower))
+       allocate(temp4(nminor_absorber_intervals_upper))
 
-    ! Allocate space for arrays
-    allocate(gas_names_sw(nabsorbers_sw))
-    allocate(scaling_gas_lower_sw(nminor_absorber_intervals_lower_sw))
-    allocate(scaling_gas_upper_sw(nminor_absorber_intervals_upper_sw))
-    allocate(gas_minor_sw(nminorabsorbers_sw))
-    allocate(identifier_minor_sw(nminorabsorbers_sw))
-    allocate(minor_gases_lower_sw(nminor_absorber_intervals_lower_sw))
-    allocate(minor_gases_upper_sw(nminor_absorber_intervals_upper_sw))
-    allocate(minor_limits_gpt_lower_sw(npairs_sw,nminor_absorber_intervals_lower_sw))
-    allocate(minor_limits_gpt_upper_sw(npairs_sw,nminor_absorber_intervals_upper_sw))
-    allocate(band2gpt_sw(2,nbnds_sw))
-    allocate(key_species_sw(2,nlayers_sw,nbnds_sw))
-    allocate(band_lims_sw(2,nbnds_sw))
-    allocate(press_ref_sw(npress_sw))
-    allocate(temp_ref_sw(ntemps_sw))
-    allocate(vmr_ref_sw(nlayers_sw, nextrabsorbers_sw, ntemps_sw))
-    allocate(kminor_lower_sw(ncontributors_lower_sw, nmixingfracs_sw, ntemps_sw))
-    allocate(kmajor_sw(ngpts_sw, nmixingfracs_sw,  npress_sw+1, ntemps_sw))
-    allocate(kminor_start_lower_sw(nminor_absorber_intervals_lower_sw))
-    allocate(kminor_upper_sw(ncontributors_upper_sw, nmixingfracs_sw, ntemps_sw))
-    allocate(kminor_start_upper_sw(nminor_absorber_intervals_upper_sw))
-    allocate(minor_scales_with_density_lower_sw(nminor_absorber_intervals_lower_sw))
-    allocate(minor_scales_with_density_upper_sw(nminor_absorber_intervals_upper_sw))
-    allocate(scale_by_complement_lower_sw(nminor_absorber_intervals_lower_sw))
-    allocate(scale_by_complement_upper_sw(nminor_absorber_intervals_upper_sw))
-    allocate(rayl_upper_sw(ngpts_sw, nmixingfracs_sw, ntemps_sw))
-    allocate(rayl_lower_sw(ngpts_sw, nmixingfracs_sw, ntemps_sw))
-    allocate(solar_source_sw(ngpts_sw))
-    allocate(temp1(nminor_absorber_intervals_lower_sw))
-    allocate(temp2(nminor_absorber_intervals_upper_sw))
-    allocate(temp3(nminor_absorber_intervals_lower_sw))
-    allocate(temp4(nminor_absorber_intervals_upper_sw))
-
-    ! On master processor,  read in fields, broadcast to all processors
-!    if (mpirank .eq. mpiroot) then
-       write (*,*) 'Reading RRTMGP shortwave k-distribution data ... '
        ! Read in fields from file
-       if(nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid_sw) .eq. NF90_NOERR) then
-          status = nf90_inq_varid(ncid_sw,'gas_names',varID)
-          status = nf90_get_var(ncid_sw,varID,gas_names_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'scaling_gas_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,scaling_gas_lower_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'scaling_gas_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,scaling_gas_upper_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'gas_minor',varID)
-          status = nf90_get_var(ncid_sw,varID,gas_minor_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'identifier_minor',varID)
-          status = nf90_get_var(ncid_sw,varID,identifier_minor_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'minor_gases_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,minor_gases_lower_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'minor_gases_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,minor_gases_upper_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'minor_limits_gpt_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,minor_limits_gpt_lower_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'minor_limits_gpt_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,minor_limits_gpt_upper_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'bnd_limits_gpt',varID)
-          status = nf90_get_var(ncid_sw,varID,band2gpt_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'key_species',varID)
-          status = nf90_get_var(ncid_sw,varID,key_species_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'bnd_limits_wavenumber',varID)
-          status = nf90_get_var(ncid_sw,varID,band_lims_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'press_ref',varID)
-          status = nf90_get_var(ncid_sw,varID,press_ref_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'temp_ref',varID)
-          status = nf90_get_var(ncid_sw,varID,temp_ref_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'absorption_coefficient_ref_P',varID)
-          status = nf90_get_var(ncid_sw,varID,temp_ref_p_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'absorption_coefficient_ref_T',varID)
-          status = nf90_get_var(ncid_sw,varID,temp_ref_t_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'press_ref_trop',varID)
-          status = nf90_get_var(ncid_sw,varID,press_ref_trop_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'kminor_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,kminor_lower_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'kminor_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,kminor_upper_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'vmr_ref',varID)
-          status = nf90_get_var(ncid_sw,varID,vmr_ref_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'kmajor',varID)
-          status = nf90_get_var(ncid_sw,varID,kmajor_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'kminor_start_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,kminor_start_lower_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'kminor_start_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,kminor_start_upper_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'solar_source',varID)
-          status = nf90_get_var(ncid_sw,varID,solar_source_sw)
-          !
-          status = nf90_inq_varid(ncid_sw,'rayl_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,rayl_lower_sw)
+       write (*,*) 'Reading RRTMGP shortwave k-distribution data ... '
+       status = nf90_inq_varid(ncid, 'gas_names', varID)
+       status = nf90_get_var(  ncid, varID, gas_names)       
+       status = nf90_inq_varid(ncid, 'scaling_gas_lower', varID)
+       status = nf90_get_var(  ncid, varID, scaling_gas_lower)       
+       status = nf90_inq_varid(ncid, 'scaling_gas_upper', varID)
+       status = nf90_get_var(  ncid, varID, scaling_gas_upper)       
+       status = nf90_inq_varid(ncid, 'gas_minor', varID)
+       status = nf90_get_var(  ncid, varID, gas_minor)       
+       status = nf90_inq_varid(ncid, 'identifier_minor', varID)
+       status = nf90_get_var(  ncid, varID, identifier_minor)       
+       status = nf90_inq_varid(ncid, 'minor_gases_lower', varID)
+       status = nf90_get_var(  ncid, varID, minor_gases_lower)       
+       status = nf90_inq_varid(ncid, 'minor_gases_upper', varID)
+       status = nf90_get_var(  ncid, varID, minor_gases_upper)       
+       status = nf90_inq_varid(ncid, 'minor_limits_gpt_lower', varID)
+       status = nf90_get_var(  ncid, varID, minor_limits_gpt_lower)       
+       status = nf90_inq_varid(ncid, 'minor_limits_gpt_upper', varID)
+       status = nf90_get_var(  ncid, varID, minor_limits_gpt_upper)       
+       status = nf90_inq_varid(ncid, 'bnd_limits_gpt', varID)
+       status = nf90_get_var(  ncid, varID, band2gpt)       
+       status = nf90_inq_varid(ncid, 'key_species', varID)
+       status = nf90_get_var(  ncid, varID, key_species)       
+       status = nf90_inq_varid(ncid,'bnd_limits_wavenumber', varID)
+       status = nf90_get_var(  ncid, varID, band_lims)       
+       status = nf90_inq_varid(ncid, 'press_ref', varID)
+       status = nf90_get_var(  ncid, varID, press_ref)       
+       status = nf90_inq_varid(ncid, 'temp_ref', varID)
+       status = nf90_get_var(  ncid, varID, temp_ref)       
+       status = nf90_inq_varid(ncid, 'absorption_coefficient_ref_P', varID)
+       status = nf90_get_var(  ncid, varID, temp_ref_p)
+       status = nf90_inq_varid(ncid, 'absorption_coefficient_ref_T', varID)
+       status = nf90_get_var(  ncid, varID, temp_ref_t)       
+       status = nf90_inq_varid(ncid, 'press_ref_trop', varID)
+       status = nf90_get_var(  ncid, varID, press_ref_trop)       
+       status = nf90_inq_varid(ncid, 'kminor_lower', varID)
+       status = nf90_get_var(  ncid, varID, kminor_lower)       
+       status = nf90_inq_varid(ncid, 'kminor_upper', varID)
+       status = nf90_get_var(  ncid, varID, kminor_upper)       
+       status = nf90_inq_varid(ncid, 'vmr_ref', varID)
+       status = nf90_get_var(  ncid, varID, vmr_ref)       
+       status = nf90_inq_varid(ncid, 'kmajor', varID)
+       status = nf90_get_var(  ncid, varID, kmajor)      
+       status = nf90_inq_varid(ncid, 'kminor_start_lower', varID)
+       status = nf90_get_var(  ncid, varID, kminor_start_lower)       
+       status = nf90_inq_varid(ncid, 'kminor_start_upper', varID)
+       status = nf90_get_var(  ncid, varID, kminor_start_upper)       
+       status = nf90_inq_varid(ncid, 'solar_source', varID)
+       status = nf90_get_var(  ncid, varID, solar_source)       
+       status = nf90_inq_varid(ncid, 'rayl_lower', varID)
+       status = nf90_get_var(  ncid, varID, rayl_lower)
+       status = nf90_inq_varid(ncid, 'rayl_upper', varID)
+       status = nf90_get_var(  ncid, varID, rayl_upper)
 
-          status = nf90_inq_varid(ncid_sw,'rayl_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,rayl_upper_sw)
+       ! Logical fields are read in as integers and then converted to logicals.
+       status = nf90_inq_varid(ncid,'minor_scales_with_density_lower', varID)
+       status = nf90_get_var(  ncid, varID,temp1)
+       minor_scales_with_density_lower(:) = .false.
+       where(temp1 .eq. 1) minor_scales_with_density_lower(:) = .true.
+       status = nf90_inq_varid(ncid,'minor_scales_with_density_upper', varID)
+       status = nf90_get_var(  ncid, varID,temp2)
+       minor_scales_with_density_upper(:) = .false.
+       where(temp2 .eq. 1) minor_scales_with_density_upper(:) = .true.
+       status = nf90_inq_varid(ncid,'scale_by_complement_lower', varID)
+       status = nf90_get_var(  ncid, varID,temp3)
+       scale_by_complement_lower(:) = .false.
+       where(temp3 .eq. 1) scale_by_complement_lower(:) = .true.       
+       status = nf90_inq_varid(ncid,'scale_by_complement_upper', varID)
+       status = nf90_get_var(  ncid, varID,temp4)
+       scale_by_complement_upper(:) = .false.
+       where(temp4 .eq. 1) scale_by_complement_upper(:) = .true.
+       
+       ! Close
+       status = nf90_close(ncid)
+    endif
 
-          ! Logical fields are read in as integers and then converted to logicals.
-          status = nf90_inq_varid(ncid_sw,'minor_scales_with_density_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,temp1)
-          minor_scales_with_density_lower_sw(:) = .false.
-          where(temp1 .eq. 1) minor_scales_with_density_lower_sw(:) = .true.
-          !
-          status = nf90_inq_varid(ncid_sw,'minor_scales_with_density_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,temp2)
-          minor_scales_with_density_upper_sw(:) = .false.
-          where(temp2 .eq. 1) minor_scales_with_density_upper_sw(:) = .true.
-          !
-          status = nf90_inq_varid(ncid_sw,'scale_by_complement_lower',varID)
-          status = nf90_get_var(ncid_sw,varID,temp3)
-          scale_by_complement_lower_sw(:) = .false.
-          where(temp3 .eq. 1) scale_by_complement_lower_sw(:) = .true.
-          !
-          status = nf90_inq_varid(ncid_sw,'scale_by_complement_upper',varID)
-          status = nf90_get_var(ncid_sw,varID,temp4)
-          scale_by_complement_upper_sw(:) = .false.
-          where(temp4 .eq. 1) scale_by_complement_upper_sw(:) = .true.
-          
-          ! Close
-          status = nf90_close(ncid_sw)
-       endif
-!    endif
+#ifdef MPI
+    ! Wait for processor 0 to catch up...
+    call MPI_BARRIER(mpicomm, mpierr)
+    
+    ! Broadcast data
+    write (*,*) 'Broadcasting RRTMGP shortwave k-distribution data ... '
+    call MPI_BCAST(ntemps,                          1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(npress,                          1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nabsorbers,                      1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nminorabsorbers,                 1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nextrabsorbers,                  1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nmixingfracs,                    1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nlayers,                         1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nbnds,                           1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(ngpts,                           1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(npairs,                          1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(ncontributors_lower,             1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(ncontributors_upper,             1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nminor_absorber_intervals_lower, 1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(nminor_absorber_intervals_upper, 1,                               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_limits_gpt_upper,          size(minor_limits_gpt_upper),    MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_limits_gpt_lower,          size(minor_limits_gpt_lower),    MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_start_upper,              size(kminor_start_upper),        MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_start_lower,              size(kminor_start_lower),        MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(key_species,                     size(key_species),               MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(band2gpt,                        size(band2gpt),                  MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(band_lims,                       size(band_lims),                 MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(press_ref,                       size(press_ref),                 MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(temp_ref,                        size(temp_ref),                  MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_lower,                    size(kminor_lower),              MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kminor_upper,                    size(kminor_upper),              MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scaling_gas_lower,               size(scaling_gas_lower),         MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scaling_gas_upper,               size(scaling_gas_upper),         MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(vmr_ref,                         size(vmr_ref),                   MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(kmajor,                          size(kmajor),                    MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(temp_ref_p,                      1,                               MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(temp_ref_t,                      1,                               MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(press_ref_trop,                  1,                               MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(solar_source,                    size(solar_source),              MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(rayl_lower,                      size(rayl_lower),                MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(rayl_upper,                      size(rayl_upper),                MPI_REAL,      mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(gas_names,                       size(gas_names),                 MPI_CHARACTER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(gas_minor,                       size(gas_minor),                 MPI_CHARACTER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(identifier_minor,                size(identifier_minor),          MPI_CHARACTER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_gases_lower,               size(minor_gases_lower),         MPI_CHARACTER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_gases_upper,               size(minor_gases_upper),         MPI_CHARACTER, mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_scales_with_density_lower, nminor_absorber_intervals_lower, MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scale_by_complement_lower,       nminor_absorber_intervals_lower, MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(minor_scales_with_density_upper, nminor_absorber_intervals_upper, MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+    call MPI_BCAST(scale_by_complement_upper,       nminor_absorber_intervals_upper, MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+    ! Don't advance until data broadcast complete on all processors
+    call MPI_BARRIER(mpicomm, mpierr)
+#endif
 
-    ! Broadcast arrays to all processors
-!#ifdef MPI
-!    call MPI_BARRIER(mpicomm, ierr)
-!    if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP shortwave k-distribution data ... '
-!    call MPI_BCAST(minor_limits_gpt_upper_sw,   size(minor_limits_gpt_upper_sw), MPI_INTEGER,            mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(minor_limits_gpt_lower_sw,   size(minor_limits_gpt_lower_sw), MPI_INTEGER,            mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kminor_start_upper_sw,       size(kminor_start_upper_sw),     MPI_INTEGER,            mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kminor_start_lower_sw,       size(kminor_start_lower_sw),     MPI_INTEGER,            mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(key_species_sw,              size(key_species_sw),            MPI_INTEGER,            mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(band2gpt_sw,                 size(band2gpt_sw),               MPI_INTEGER,            mpiroot, mpicomm, ierr)
-!#ifndef SINGLE_PREC
-!    call MPI_BCAST(band_lims_sw,                size(band_lims_sw),              MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(press_ref_sw,                size(press_ref_sw),              MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(temp_ref_sw,                 size(temp_ref_sw),               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kminor_lower_sw,             size(kminor_lower_sw),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kminor_upper_sw,             size(kminor_upper_sw),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(scaling_gas_lower_sw,        size(scaling_gas_lower_sw),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(scaling_gas_upper_sw,        size(scaling_gas_upper_sw),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(vmr_ref_sw,                  size(vmr_ref_sw),                MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kmajor_sw,                   size(kmajor_sw),                 MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(temp_ref_p_sw,               1,                               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(temp_ref_t_sw,               1,                               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(press_ref_trop_sw,           1,                               MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(solar_source_sw,             size(solar_source_sw),           MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(rayl_lower_sw,               size(rayl_lower_sw),             MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(rayl_upper_sw,               size(rayl_upper_sw),             MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!#else
-!    call MPI_BCAST(band_lims_sw,                size(band_lims_sw),              MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(press_ref_sw,                size(press_ref_sw),              MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(temp_ref_sw,                 size(temp_ref_sw),               MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kminor_lower_sw,             size(kminor_lower_sw),           MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kminor_upper_sw,             size(kminor_upper_sw),           MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(scaling_gas_lower_sw,        size(scaling_gas_lower_sw),      MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(scaling_gas_upper_sw,        size(scaling_gas_upper_sw),      MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(vmr_ref_sw,                  size(vmr_ref_sw),                MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(kmajor_sw,                   size(kmajor_sw),                 MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(temp_ref_p_sw,               1,                               MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(temp_ref_t_sw,               1,                               MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(press_ref_trop_sw,           1,                               MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(solar_source_sw,             size(solar_source_sw),           MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(rayl_lower_sw,               size(rayl_lower_sw),             MPI_REAL,               mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(rayl_upper_sw,               size(rayl_upper_sw),             MPI_REAL,               mpiroot, mpicomm, ierr)
-!#endif
-!    ! Character arrays
-!    do ij=1,nabsorbers_sw
-!       call MPI_BCAST(gas_names_sw(ij),         len(gas_names_sw(ij)),           MPI_CHAR,               mpiroot, mpicomm, ierr)
-!    enddo
-!    do ij=1,nminorabsorbers_sw
-!       call MPI_BCAST(gas_minor_sw(ij),         len(gas_minor_sw(ij)),           MPI_CHAR,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(identifier_minor_sw(ij),  len(identifier_minor_sw(ij)),    MPI_CHAR,               mpiroot, mpicomm, ierr)
-!    enddo
-!    do ij=1,nminor_absorber_intervals_lower_sw
-!       call MPI_BCAST(minor_gases_lower_sw(ij), len(minor_gases_lower_sw(ij)),   MPI_CHAR,               mpiroot, mpicomm, ierr)
-!    enddo
-!    do ij=1,nminor_absorber_intervals_upper_sw
-!       call MPI_BCAST(minor_gases_upper_sw(ij), len(minor_gases_upper_sw(ij)),   MPI_CHAR,               mpiroot, mpicomm, ierr)
-!    enddo
-!
-!    ! Logical arrays
-!    call MPI_BCAST(minor_scales_with_density_lower_sw, nminor_absorber_intervals_lower_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(scale_by_complement_lower_sw,       nminor_absorber_intervals_lower_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(minor_scales_with_density_upper_sw, nminor_absorber_intervals_upper_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
-!    call MPI_BCAST(scale_by_complement_upper_sw,       nminor_absorber_intervals_upper_sw, MPI_LOGICAL,  mpiroot, mpicomm, ierr)
-!    call MPI_BARRIER(mpicomm, ierr)
-!#endif
-
-    ! Initialize gas concentrations and gas optics class with data
+    ! Initialize gas concentrations and gas optics class
     do iGas=1,rrtmgp_nGases
        call check_error_msg('sw_gas_optics_init',gas_concentrations%set_vmr(active_gases_array(iGas), 0._kind_phys))
     enddo
-    call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations, gas_names_sw,   &
-         key_species_sw, band2gpt_sw, band_lims_sw, press_ref_sw, press_ref_trop_sw, temp_ref_sw,   &
-         temp_ref_p_sw, temp_ref_t_sw, vmr_ref_sw, kmajor_sw, kminor_lower_sw, kminor_upper_sw,     &
-         gas_minor_sw,identifier_minor_sw, minor_gases_lower_sw, minor_gases_upper_sw,              &
-         minor_limits_gpt_lower_sw,minor_limits_gpt_upper_sw, minor_scales_with_density_lower_sw,   &
-         minor_scales_with_density_upper_sw, scaling_gas_lower_sw,                                  &
-         scaling_gas_upper_sw, scale_by_complement_lower_sw,                                        &
-         scale_by_complement_upper_sw, kminor_start_lower_sw, kminor_start_upper_sw,                &
-         solar_source_sw, rayl_lower_sw, rayl_upper_sw))
+    call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations, gas_names, &
+         key_species, band2gpt, band_lims, press_ref, press_ref_trop, temp_ref, temp_ref_p,    &
+         temp_ref_t, vmr_ref, kmajor, kminor_lower, kminor_upper, gas_minor, identifier_minor, &
+         minor_gases_lower, minor_gases_upper, minor_limits_gpt_lower,minor_limits_gpt_upper,  &
+         minor_scales_with_density_lower, minor_scales_with_density_upper, scaling_gas_lower,  &
+         scaling_gas_upper, scale_by_complement_lower, scale_by_complement_upper,              &
+         kminor_start_lower, kminor_start_upper, solar_source, rayl_lower, rayl_upper))
 
   end subroutine rrtmgp_sw_gas_optics_init
 

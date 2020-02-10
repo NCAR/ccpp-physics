@@ -8,9 +8,12 @@ module rrtmgp_sw_cloud_optics
   use mo_rrtmg_sw_cloud_optics, only: rrtmg_sw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
+#ifdef MPI
+  use mpi
+#endif
 
+  public rrtmgp_sw_cloud_optics_init, rrtmgp_sw_cloud_optics_run, rrtmgp_sw_cloud_optics_finalize
 contains
-
   ! #########################################################################################
   ! SUBROUTINE sw_cloud_optics_init
   ! #########################################################################################
@@ -19,14 +22,11 @@ contains
 !!
   subroutine rrtmgp_sw_cloud_optics_init(cld_optics_scheme, nrghice, rrtmgp_root_dir,       &
        rrtmgp_sw_file_clouds, mpicomm, mpirank, mpiroot, sw_cloud_props, errmsg, errflg)
-    use netcdf
-!#ifdef MPI
-!    use mpi
-!#endif
 
     ! Inputs
+    integer, intent(inout) :: &
+         nrghice               ! Number of ice-roughness categories
     integer, intent(in) :: &
-         nrghice,            & ! Number of ice-roughness categories
          cld_optics_scheme,  & ! Cloud-optics scheme
          mpicomm,            & ! MPI communicator
          mpirank,            & ! Current MPI rank
@@ -46,53 +46,53 @@ contains
     ! Variables that will be passed to cloud_optics%load()
     ! cld_optics_scheme = 1
     real(kind_phys) :: &
-         radliq_lwr_sw,          & ! Liquid particle size lower bound for LUT interpolation   
-         radliq_upr_sw,          & ! Liquid particle size upper bound for LUT interpolation
-         radliq_fac_sw,          & ! Factor for calculating LUT interpolation indices for liquid   
-         radice_lwr_sw,          & ! Ice particle size upper bound for LUT interpolation  
-         radice_upr_sw,          & ! Ice particle size lower bound for LUT interpolation
-         radice_fac_sw             ! Factor for calculating LUT interpolation indices for ice  
+         radliq_lwr,          & ! Liquid particle size lower bound for LUT interpolation   
+         radliq_upr,          & ! Liquid particle size upper bound for LUT interpolation
+         radliq_fac,          & ! Factor for calculating LUT interpolation indices for liquid   
+         radice_lwr,          & ! Ice particle size upper bound for LUT interpolation  
+         radice_upr,          & ! Ice particle size lower bound for LUT interpolation
+         radice_fac             ! Factor for calculating LUT interpolation indices for ice  
     real(kind_phys), dimension(:,:), allocatable :: &
-         lut_extliq_sw,          & ! LUT shortwave liquid extinction coefficient  
-         lut_ssaliq_sw,          & ! LUT shortwave liquid single scattering albedo   
-         lut_asyliq_sw,          & ! LUT shortwave liquid asymmetry parameter  
-         band_lims_cldy_sw         ! Beginning and ending wavenumber [cm -1] for each band                           
+         lut_extliq,          & ! LUT shortwave liquid extinction coefficient  
+         lut_ssaliq,          & ! LUT shortwave liquid single scattering albedo   
+         lut_asyliq,          & ! LUT shortwave liquid asymmetry parameter  
+         band_lims         ! Beginning and ending wavenumber [cm -1] for each band                           
     real(kind_phys), dimension(:,:,:), allocatable :: &
-         lut_extice_sw,          & ! LUT shortwave ice extinction coefficient
-         lut_ssaice_sw,          & ! LUT shortwave ice single scattering albedo
-         lut_asyice_sw             ! LUT shortwave ice asymmetry parameter
+         lut_extice,          & ! LUT shortwave ice extinction coefficient
+         lut_ssaice,          & ! LUT shortwave ice single scattering albedo
+         lut_asyice             ! LUT shortwave ice asymmetry parameter
     ! cld_optics_scheme = 2
     real(kind_phys), dimension(:), allocatable :: &
-         pade_sizereg_extliq_sw, & ! Particle size regime boundaries for shortwave liquid extinction 
-                                   ! coefficient for Pade interpolation  
-         pade_sizereg_ssaliq_sw, & ! Particle size regime boundaries for shortwave liquid single 
-                                   ! scattering albedo for Pade interpolation 
-         pade_sizereg_asyliq_sw, & ! Particle size regime boundaries for shortwave liquid asymmetry 
-                                   ! parameter for Pade interpolation  
-         pade_sizereg_extice_sw, & ! Particle size regime boundaries for shortwave ice extinction 
-                                   ! coefficient for Pade interpolation  
-         pade_sizereg_ssaice_sw, & ! Particle size regime boundaries for shortwave ice single 
-                                   ! scattering albedo for Pade interpolation 
-         pade_sizereg_asyice_sw    ! Particle size regime boundaries for shortwave ice asymmetry 
-                                   ! parameter for Pade interpolation  
+         pade_sizereg_extliq, & ! Particle size regime boundaries for shortwave liquid extinction 
+                                ! coefficient for Pade interpolation  
+         pade_sizereg_ssaliq, & ! Particle size regime boundaries for shortwave liquid single 
+                                ! scattering albedo for Pade interpolation 
+         pade_sizereg_asyliq, & ! Particle size regime boundaries for shortwave liquid asymmetry 
+                                ! parameter for Pade interpolation  
+         pade_sizereg_extice, & ! Particle size regime boundaries for shortwave ice extinction 
+                                ! coefficient for Pade interpolation  
+         pade_sizereg_ssaice, & ! Particle size regime boundaries for shortwave ice single 
+                                ! scattering albedo for Pade interpolation 
+         pade_sizereg_asyice    ! Particle size regime boundaries for shortwave ice asymmetry 
+                                ! parameter for Pade interpolation  
     real(kind_phys), dimension(:,:,:), allocatable :: &
-         pade_extliq_sw,         & ! PADE coefficients for shortwave liquid extinction
-         pade_ssaliq_sw,         & ! PADE coefficients for shortwave liquid single scattering albedo
-         pade_asyliq_sw            ! PADE coefficients for shortwave liquid asymmetry parameter
+         pade_extliq,         & ! PADE coefficients for shortwave liquid extinction
+         pade_ssaliq,         & ! PADE coefficients for shortwave liquid single scattering albedo
+         pade_asyliq            ! PADE coefficients for shortwave liquid asymmetry parameter
     real(kind_phys), dimension(:,:,:,:), allocatable :: &
-         pade_extice_sw,         & ! PADE coefficients for shortwave ice extinction
-         pade_ssaice_sw,         & ! PADE coefficients for shortwave ice single scattering albedo
-         pade_asyice_sw            ! PADE coefficients for shortwave ice asymmetry parameter
+         pade_extice,         & ! PADE coefficients for shortwave ice extinction
+         pade_ssaice,         & ! PADE coefficients for shortwave ice single scattering albedo
+         pade_asyice            ! PADE coefficients for shortwave ice asymmetry parameter
     ! Dimensions
     integer :: &
-         nrghice_sw, nbandSWcldy_sw, nsize_liq_sw, nsize_ice_sw, nsizereg_sw,&
-         ncoeff_ext_sw, ncoeff_ssa_g_sw, nbound_sw, npairsSWcldy_sw
+         nrghice_fromfile, nBand, nSize_liq, nSize_ice, nSizereg,&
+         nCoeff_ext, nCoeff_ssa_g, nBound, nPairs
 
     ! Local variables
-    integer :: status,ncid_sw_clds,dimid,varID
+    integer :: status,ncid,dimid,varID
     character(len=264) :: sw_cloud_props_file
 #ifdef MPI
-    integer :: ierr
+    integer :: mpierr
 #endif
     ! Initialize
     errmsg = ''
@@ -103,248 +103,215 @@ contains
     ! Filenames are set in the physics_nml
     sw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_clouds)
 
-    ! Read dimensions for k-distribution fields (only on master processor(0))
-!    if (mpirank .eq. mpiroot) then
-       if(nf90_open(trim(sw_cloud_props_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
-          status = nf90_inq_dimid(ncid_sw_clds, 'nband', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nbandSWcldy_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'nrghice', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nrghice_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'nsize_liq', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nsize_liq_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'nsize_ice', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nsize_ice_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'nsizereg', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nsizereg_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'ncoeff_ext', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=ncoeff_ext_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'ncoeff_ssa_g', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=ncoeff_ssa_g_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'nbound', dimid)
-          status = nf90_inquire_dimension(ncid_sw_clds, dimid, len=nbound_sw)
-          status = nf90_inq_dimid(ncid_sw_clds, 'pair', dimid)
+    ! On master processor only...
+    if (mpirank .eq. mpiroot) then
+       ! Open file
+       status = nf90_open(trim(sw_cloud_props_file), NF90_WRITE, ncid)
 
-       endif
+       ! Read dimensions
+       status = nf90_inq_dimid(ncid, 'nband', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nBand)
+       status = nf90_inq_dimid(ncid, 'nrghice', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nrghice_fromfile)
+       status = nf90_inq_dimid(ncid, 'nsize_liq', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nSize_liq)
+       status = nf90_inq_dimid(ncid, 'nsize_ice', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nSize_ice)
+       status = nf90_inq_dimid(ncid, 'nsizereg', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nSizereg)
+       status = nf90_inq_dimid(ncid, 'ncoeff_ext', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nCoeff_ext)
+       status = nf90_inq_dimid(ncid, 'ncoeff_ssa_g', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nCoeff_ssa_g)
+       status = nf90_inq_dimid(ncid, 'nbound', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nBound)
+       status = nf90_inq_dimid(ncid, 'pair', dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len=nPairs)
  
-       ! Check to ensure that number of ice-roughness categories is feasible.
-       if (nrghice .gt. nrghice_sw) then
-          errmsg = 'Number of RRTMGP ice-roughness categories requested in namelist file is not allowed'
+       ! Has the number of ice-roughnesses been provided from the namelist?
+       ! If not provided, use all categories in file (default)
+       if (nrghice .eq. 0) then
+          nrghice = nrghice_fromfile
        endif
-!    endif
+       ! If provided in the namelist, check to ensure that number of ice-roughness categories is feasible.
+       if (nrghice .gt. nrghice_fromfile) then
+          errmsg  = 'Number of RRTMGP ice-roughness categories requested in namelist file is not allowed. Using nrghice from file...'
+          nrghice = nrghice_fromfile
+       endif
 
-    ! Broadcast dimensions to all processors
-!#ifdef MPI
-!    call MPI_BCAST(nbandSWcldy_sw,     1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!    if (cld_optics_scheme .eq. 1) then
-!       call MPI_BARRIER(mpicomm, ierr)
-!       call MPI_BCAST(nrghice_sw,      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(nsize_liq_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(nsize_ice_sw,    1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BARRIER(mpicomm, ierr)
-!    endif
-!    if (cld_optics_scheme .eq. 2) then
-!       call MPI_BARRIER(mpicomm, ierr)
-!       call MPI_BCAST(nrghice_sw,      1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(nsizereg_sw,     1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(ncoeff_ext_sw,   1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(ncoeff_ssa_g_sw, 1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(nbound_sw,       1, MPI_INTEGER, mpiroot, mpicomm, ierr)
-!       call MPI_BARRIER(mpicomm, ierr)
-!    endif
-!#endif
+       ! Allocate space for arrays
+       if (cld_optics_scheme .eq. 1) then
+          allocate(lut_extliq(nSize_liq, nBand))
+          allocate(lut_ssaliq(nSize_liq, nBand))
+          allocate(lut_asyliq(nSize_liq, nBand))
+          allocate(lut_extice(nSize_ice, nBand, nrghice))
+          allocate(lut_ssaice(nSize_ice, nBand, nrghice))
+          allocate(lut_asyice(nSize_ice, nBand, nrghice))
+       endif
+       if (cld_optics_scheme .eq. 2) then
+          allocate(pade_extliq(nBand, nSizeReg,  nCoeff_ext ))
+          allocate(pade_ssaliq(nBand, nSizeReg,  nCoeff_ssa_g))
+          allocate(pade_asyliq(nBand, nSizeReg,  nCoeff_ssa_g))
+          allocate(pade_extice(nBand, nSizeReg,  nCoeff_ext,   nrghice))
+          allocate(pade_ssaice(nBand, nSizeReg,  nCoeff_ssa_g, nrghice))
+          allocate(pade_asyice(nBand, nSizeReg,  nCoeff_ssa_g, nrghice))
+          allocate(pade_sizereg_extliq(nBound))
+          allocate(pade_sizereg_ssaliq(nBound))
+          allocate(pade_sizereg_asyliq(nBound))
+          allocate(pade_sizereg_extice(nBound))
+          allocate(pade_sizereg_ssaice(nBound))
+          allocate(pade_sizereg_asyice(nBound))
+       endif
+       allocate(band_lims(2,nBand))
 
-    if (cld_optics_scheme .eq. 1) then
-       allocate(lut_extliq_sw(nsize_liq_sw, nBandSWcldy_sw))
-       allocate(lut_ssaliq_sw(nsize_liq_sw, nBandSWcldy_sw))
-       allocate(lut_asyliq_sw(nsize_liq_sw, nBandSWcldy_sw))
-       allocate(lut_extice_sw(nsize_ice_sw, nBandSWcldy_sw, nrghice_sw))
-       allocate(lut_ssaice_sw(nsize_ice_sw, nBandSWcldy_sw, nrghice_sw))
-       allocate(lut_asyice_sw(nsize_ice_sw, nBandSWcldy_sw, nrghice_sw))
-    endif
-    if (cld_optics_scheme .eq. 2) then
-       allocate(pade_extliq_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ext_sw ))
-       allocate(pade_ssaliq_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw))
-       allocate(pade_asyliq_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw))
-       allocate(pade_extice_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ext_sw,   nrghice_sw))
-       allocate(pade_ssaice_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw, nrghice_sw))
-       allocate(pade_asyice_sw(nbandSWcldy_sw, nsizereg_sw,  ncoeff_ssa_g_sw, nrghice_sw))
-       allocate(pade_sizereg_extliq_sw(nbound_sw))
-       allocate(pade_sizereg_ssaliq_sw(nbound_sw))
-       allocate(pade_sizereg_asyliq_sw(nbound_sw))
-       allocate(pade_sizereg_extice_sw(nbound_sw))
-       allocate(pade_sizereg_ssaice_sw(nbound_sw))
-       allocate(pade_sizereg_asyice_sw(nbound_sw))
-    endif
-    allocate(band_lims_cldy_sw(2,nbandSWcldy_sw))
-
-    ! On master processor, allocate space, read in fields, broadcast to all processors
-!    if (mpirank .eq. mpiroot) then
+       ! Read in fields from file
        if (cld_optics_scheme .eq. 1) then
           write (*,*) 'Reading RRTMGP shortwave cloud data (LUT) ... '
-          if(nf90_open(trim(sw_cloud_props_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
-             status = nf90_inq_varid(ncid_sw_clds,'radliq_lwr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radliq_lwr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radliq_upr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radliq_upr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radliq_fac',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radliq_fac_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radice_lwr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radice_lwr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radice_upr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radice_upr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radice_fac',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radice_fac_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'lut_extliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,lut_extliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'lut_ssaliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,lut_ssaliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'lut_asyliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,lut_asyliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'lut_extice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,lut_extice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'lut_ssaice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,lut_ssaice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'lut_asyice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,lut_asyice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'bnd_limits_wavenumber',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,band_lims_cldy_sw)
-             status = nf90_close(ncid_sw_clds)
-          endif
+          status = nf90_inq_varid(ncid,'radliq_lwr',varID)
+          status = nf90_get_var(ncid,varID,radliq_lwr)
+          status = nf90_inq_varid(ncid,'radliq_upr',varID)
+          status = nf90_get_var(ncid,varID,radliq_upr)
+          status = nf90_inq_varid(ncid,'radliq_fac',varID)
+          status = nf90_get_var(ncid,varID,radliq_fac)
+          status = nf90_inq_varid(ncid,'radice_lwr',varID)
+          status = nf90_get_var(ncid,varID,radice_lwr)
+          status = nf90_inq_varid(ncid,'radice_upr',varID)
+          status = nf90_get_var(ncid,varID,radice_upr)
+          status = nf90_inq_varid(ncid,'radice_fac',varID)
+          status = nf90_get_var(ncid,varID,radice_fac)
+          status = nf90_inq_varid(ncid,'lut_extliq',varID)
+          status = nf90_get_var(ncid,varID,lut_extliq)
+          status = nf90_inq_varid(ncid,'lut_ssaliq',varID)
+          status = nf90_get_var(ncid,varID,lut_ssaliq)
+          status = nf90_inq_varid(ncid,'lut_asyliq',varID)
+          status = nf90_get_var(ncid,varID,lut_asyliq)
+          status = nf90_inq_varid(ncid,'lut_extice',varID)
+          status = nf90_get_var(ncid,varID,lut_extice)
+          status = nf90_inq_varid(ncid,'lut_ssaice',varID)
+          status = nf90_get_var(ncid,varID,lut_ssaice)
+          status = nf90_inq_varid(ncid,'lut_asyice',varID)
+          status = nf90_get_var(ncid,varID,lut_asyice)
+          status = nf90_inq_varid(ncid,'bnd_limits_wavenumber',varID)
+          status = nf90_get_var(ncid,varID,band_lims)
        endif
-       !
        if (cld_optics_scheme .eq. 2) then
           write (*,*) 'Reading RRTMGP shortwave cloud data (PADE) ... '
-          if(nf90_open(trim(sw_cloud_props_file), NF90_WRITE, ncid_sw_clds) == NF90_NOERR) then
-             status = nf90_inq_varid(ncid_sw_clds,'radliq_lwr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radliq_lwr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radliq_upr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radliq_upr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radliq_fac',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radliq_fac_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radice_lwr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radice_lwr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radice_upr',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radice_upr_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'radice_fac',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,radice_fac_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_extliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_extliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_ssaliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_ssaliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_asyliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_asyliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_extice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_extice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_ssaice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_ssaice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_asyice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_asyice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_extliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_extliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_ssaliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_ssaliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_asyliq',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_asyliq_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_extice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_extice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_ssaice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_ssaice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'pade_sizreg_asyice',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,pade_sizereg_asyice_sw)
-             status = nf90_inq_varid(ncid_sw_clds,'bnd_limits_wavenumber',varID)
-             status = nf90_get_var(ncid_sw_clds,varID,band_lims_cldy_sw)
-             status = nf90_close(ncid_sw_clds)
-          endif
+          status = nf90_inq_varid(ncid,'radliq_lwr',varID)
+          status = nf90_get_var(ncid,varID,radliq_lwr)
+          status = nf90_inq_varid(ncid,'radliq_upr',varID)
+          status = nf90_get_var(ncid,varID,radliq_upr)
+          status = nf90_inq_varid(ncid,'radliq_fac',varID)
+          status = nf90_get_var(ncid,varID,radliq_fac)
+          status = nf90_inq_varid(ncid,'radice_lwr',varID)
+          status = nf90_get_var(ncid,varID,radice_lwr)
+          status = nf90_inq_varid(ncid,'radice_upr',varID)
+          status = nf90_get_var(ncid,varID,radice_upr)
+          status = nf90_inq_varid(ncid,'radice_fac',varID)
+          status = nf90_get_var(ncid,varID,radice_fac)
+          status = nf90_inq_varid(ncid,'pade_extliq',varID)
+          status = nf90_get_var(ncid,varID,pade_extliq)
+          status = nf90_inq_varid(ncid,'pade_ssaliq',varID)
+          status = nf90_get_var(ncid,varID,pade_ssaliq)
+          status = nf90_inq_varid(ncid,'pade_asyliq',varID)
+          status = nf90_get_var(ncid,varID,pade_asyliq)
+          status = nf90_inq_varid(ncid,'pade_extice',varID)
+          status = nf90_get_var(ncid,varID,pade_extice)
+          status = nf90_inq_varid(ncid,'pade_ssaice',varID)
+          status = nf90_get_var(ncid,varID,pade_ssaice)
+          status = nf90_inq_varid(ncid,'pade_asyice',varID)
+          status = nf90_get_var(ncid,varID,pade_asyice)
+          status = nf90_inq_varid(ncid,'pade_sizreg_extliq',varID)
+          status = nf90_get_var(ncid,varID,pade_sizereg_extliq)
+          status = nf90_inq_varid(ncid,'pade_sizreg_ssaliq',varID)
+          status = nf90_get_var(ncid,varID,pade_sizereg_ssaliq)
+          status = nf90_inq_varid(ncid,'pade_sizreg_asyliq',varID)
+          status = nf90_get_var(ncid,varID,pade_sizereg_asyliq)
+          status = nf90_inq_varid(ncid,'pade_sizreg_extice',varID)
+          status = nf90_get_var(ncid,varID,pade_sizereg_extice)
+          status = nf90_inq_varid(ncid,'pade_sizreg_ssaice',varID)
+          status = nf90_get_var(ncid,varID,pade_sizereg_ssaice)
+          status = nf90_inq_varid(ncid,'pade_sizreg_asyice',varID)
+          status = nf90_get_var(ncid,varID,pade_sizereg_asyice)
+          status = nf90_inq_varid(ncid,'bnd_limits_wavenumber',varID)
+          status = nf90_get_var(ncid,varID,band_lims)
        endif
-!    endif
 
-    ! Broadcast arrays to all processors
-!#ifdef MPI
-!    if (cld_optics_scheme .eq. 1) then
-!       if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP shortwave cloud data (LUT) ... '
-!       call MPI_BARRIER(mpicomm, ierr)
-!#ifndef SINGLE_PREC
-!       call MPI_BCAST(radliq_lwr_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radliq_upr_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radliq_fac_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radice_lwr_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radice_upr_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radice_fac_sw,           1,                            MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_extliq_sw,           size(lut_extliq_sw),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_ssaliq_sw,           size(lut_ssaliq_sw),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_asyliq_sw,           size(lut_asyliq_sw),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_extice_sw,           size(lut_extice_sw),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_ssaice_sw,           size(lut_ssaice_sw),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_asyice_sw,           size(lut_asyice_sw),          MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(band_lims_cldy_sw,       size(band_lims_cldy_sw),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)    
-!#else
-!       call MPI_BCAST(radliq_lwr_sw,           1,                            MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radliq_upr_sw,           1,                            MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radliq_fac_sw,           1,                            MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radice_lwr_sw,           1,                            MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radice_upr_sw,           1,                            MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(radice_fac_sw,           1,                            MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_extliq_sw,           size(lut_extliq_sw),          MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_ssaliq_sw,           size(lut_ssaliq_sw),          MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_asyliq_sw,           size(lut_asyliq_sw),          MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_extice_sw,           size(lut_extice_sw),          MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_ssaice_sw,           size(lut_ssaice_sw),          MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(lut_asyice_sw,           size(lut_asyice_sw),          MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(band_lims_cldy_sw,       size(band_lims_cldy_sw),      MPI_REAL,               mpiroot, mpicomm, ierr)
-!#endif 
-!       call MPI_BARRIER(mpicomm, ierr)
-!    endif
-!    if (cld_optics_scheme .eq. 2) then
-!       if (mpirank==mpiroot) write (*,*) 'Broadcasting RRTMGP shortwave cloud data (PADE) ... '
-!       call MPI_BARRIER(mpicomm, ierr)
-!#ifndef SINGLE_PREC
-!       call MPI_BCAST(pade_extliq_sw,          size(pade_extliq_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_ssaliq_sw,          size(pade_ssaliq_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_asyliq_sw,          size(pade_asyliq_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_extice_sw,          size(pade_extice_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_ssaice_sw,          size(pade_ssaice_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_asyice_sw,          size(pade_asyice_sw),         MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_extliq_sw,  size(pade_sizereg_extliq_sw), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_ssaliq_sw,  size(pade_sizereg_ssaliq_sw), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_asyliq_sw,  size(pade_sizereg_asyliq_sw), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_extice_sw,  size(pade_sizereg_extice_sw), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_ssaice_sw,  size(pade_sizereg_ssaice_sw), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_asyice_sw,  size(pade_sizereg_asyice_sw), MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(band_lims_cldy_sw,       size(band_lims_cldy_sw),      MPI_DOUBLE_PRECISION,   mpiroot, mpicomm, ierr)    
-!#else
-!       call MPI_BCAST(pade_extliq_sw,          size(pade_extliq_sw),         MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_ssaliq_sw,          size(pade_ssaliq_sw),         MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_asyliq_sw,          size(pade_asyliq_sw),         MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_extice_sw,          size(pade_extice_sw),         MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_ssaice_sw,          size(pade_ssaice_sw),         MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_asyice_sw,          size(pade_asyice_sw),         MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_extliq_sw,  size(pade_sizereg_extliq_sw), MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_ssaliq_sw,  size(pade_sizereg_ssaliq_sw), MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_asyliq_sw,  size(pade_sizereg_asyliq_sw), MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_extice_sw,  size(pade_sizereg_extice_sw), MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_ssaice_sw,  size(pade_sizereg_ssaice_sw), MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(pade_sizereg_asyice_sw,  size(pade_sizereg_asyice_sw), MPI_REAL,               mpiroot, mpicomm, ierr)
-!       call MPI_BCAST(band_lims_cldy_sw,       size(band_lims_cldy_sw),      MPI_REAL,               mpiroot, mpicomm, ierr)
-!#endif
-!       call MPI_BARRIER(mpicomm, ierr)
-!    endif
-!#endif
+       ! Close file
+       status = nf90_close(ncid)       
+    endif
+
+#ifdef MPI
+    if (cld_optics_scheme .eq. 1) then
+       ! Wait for processor 0 to catch up...
+       call MPI_BARRIER(mpicomm, mpierr)
+
+       ! Broadcast data
+       write (*,*) 'Broadcasting RRTMGP shortwave cloud-optics data ... '
+       call MPI_BCAST(nBand,          1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nrghice,        1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nSize_liq,      1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nSize_ice,      1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(radliq_lwr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(radliq_upr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(radliq_fac,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(radice_lwr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(radice_upr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(radice_fac,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(lut_extliq,     size(lut_extliq),  MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(lut_ssaliq,     size(lut_ssaliq),  MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(lut_asyliq,     size(lut_asyliq),  MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(lut_extice,     size(lut_extice),  MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(lut_ssaice,     size(lut_ssaice),  MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(lut_asyice,     size(lut_asyice),  MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(band_lims,      size(band_lims),   MPI_REAL,    mpiroot, mpicomm, mpierr)
+
+       ! Don't advance until data broadcast complete on all processors
+       call MPI_BARRIER(mpicomm, mpierr)
+    endif
+    if (cld_optics_scheme .eq. 2) then
+       ! Wait for processor 0 to catch up...
+       call MPI_BARRIER(mpicomm, mpierr)
+
+      ! Broadcast data
+       write (*,*) 'Broadcasting RRTMGP shortwave cloud-optics data ... '
+       call MPI_BCAST(nBand,               1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nrghice,             1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nSizeReg,            1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nCoeff_ext,          1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nCoeff_ssa_g,        1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(nBound,              1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_extliq,         size(pade_extliq),         MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_ssaliq,         size(pade_ssaliq),         MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_asyliq,         size(pade_asyliq),         MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_extice,         size(pade_extice),         MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_ssaice,         size(pade_ssaice),         MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_asyice,         size(pade_asyice),         MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_sizereg_extliq, size(pade_sizereg_extliq), MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_sizereg_ssaliq, size(pade_sizereg_ssaliq), MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_sizereg_asyliq, size(pade_sizereg_asyliq), MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_sizereg_extice, size(pade_sizereg_extice), MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_sizereg_ssaice, size(pade_sizereg_ssaice), MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(pade_sizereg_asyice, size(pade_sizereg_asyice), MPI_REAL,    mpiroot, mpicomm, mpierr)
+       call MPI_BCAST(band_lims,           size(band_lims),           MPI_REAL,    mpiroot, mpicomm, mpierr)
+
+       ! Don't advance until data broadcast complete on all processors
+       call MPI_BARRIER(mpicomm, mpierr)
+    endif
+#endif
 
     ! Load tables data for RRTMGP cloud-optics  
     if (cld_optics_scheme .eq. 1) then
        call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice))
-       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_lims_cldy_sw,   &
-            radliq_lwr_sw, radliq_upr_sw, radliq_fac_sw, radice_lwr_sw, radice_upr_sw,      &
-            radice_fac_sw, lut_extliq_sw, lut_ssaliq_sw, lut_asyliq_sw, lut_extice_sw,      &
-            lut_ssaice_sw, lut_asyice_sw))
+       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_lims,   &
+            radliq_lwr, radliq_upr, radliq_fac, radice_lwr, radice_upr,  radice_fac,     &
+            lut_extliq, lut_ssaliq, lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
     if (cld_optics_scheme .eq. 2) then
        call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice))
-       call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_lims_cldy_sw,  &
-            pade_extliq_sw, pade_ssaliq_sw, pade_asyliq_sw, pade_extice_sw, pade_ssaice_sw, &
-            pade_asyice_sw, pade_sizereg_extliq_sw, pade_sizereg_ssaliq_sw,                 &
-            pade_sizereg_asyliq_sw, pade_sizereg_extice_sw, pade_sizereg_ssaice_sw,         &
-            pade_sizereg_asyice_sw))
+       call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_lims,  &
+            pade_extliq, pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice, pade_asyice,&
+            pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,               &
+            pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
     endif
   end subroutine rrtmgp_sw_cloud_optics_init
 

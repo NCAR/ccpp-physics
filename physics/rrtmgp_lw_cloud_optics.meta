@@ -15,7 +15,7 @@
   units = count
   dimensions =  ()
   type = integer
-  intent = in
+  intent = inout
   optional = F
 [rrtmgp_root_dir]
   standard_name = directory_for_rte_rrtmgp_source_code
