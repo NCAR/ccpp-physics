@@ -8,9 +8,6 @@ module rrtmgp_sw_cloud_optics
   use mo_rrtmg_sw_cloud_optics, only: rrtmg_sw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
-#ifdef MPI
-  use mpi
-#endif
 
   public rrtmgp_sw_cloud_optics_init, rrtmgp_sw_cloud_optics_run, rrtmgp_sw_cloud_optics_finalize
 contains
@@ -91,9 +88,7 @@ contains
     ! Local variables
     integer :: status,ncid,dimid,varID
     character(len=264) :: sw_cloud_props_file
-#ifdef MPI
-    integer :: mpierr
-#endif
+
     ! Initialize
     errmsg = ''
     errflg = 0
@@ -104,7 +99,7 @@ contains
     sw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_clouds)
 
     ! On master processor only...
-    if (mpirank .eq. mpiroot) then
+!    if (mpirank .eq. mpiroot) then
        ! Open file
        status = nf90_open(trim(sw_cloud_props_file), NF90_WRITE, ncid)
 
@@ -238,66 +233,7 @@ contains
 
        ! Close file
        status = nf90_close(ncid)       
-    endif
-
-#ifdef MPI
-    if (cld_optics_scheme .eq. 1) then
-       ! Wait for processor 0 to catch up...
-       call MPI_BARRIER(mpicomm, mpierr)
-
-       ! Broadcast data
-       write (*,*) 'Broadcasting RRTMGP shortwave cloud-optics data ... '
-       call MPI_BCAST(nBand,          1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nrghice,        1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nSize_liq,      1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nSize_ice,      1,                 MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(radliq_lwr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(radliq_upr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(radliq_fac,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(radice_lwr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(radice_upr,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(radice_fac,     1,                 MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(lut_extliq,     size(lut_extliq),  MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(lut_ssaliq,     size(lut_ssaliq),  MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(lut_asyliq,     size(lut_asyliq),  MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(lut_extice,     size(lut_extice),  MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(lut_ssaice,     size(lut_ssaice),  MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(lut_asyice,     size(lut_asyice),  MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(band_lims,      size(band_lims),   MPI_REAL,    mpiroot, mpicomm, mpierr)
-
-       ! Don't advance until data broadcast complete on all processors
-       call MPI_BARRIER(mpicomm, mpierr)
-    endif
-    if (cld_optics_scheme .eq. 2) then
-       ! Wait for processor 0 to catch up...
-       call MPI_BARRIER(mpicomm, mpierr)
-
-      ! Broadcast data
-       write (*,*) 'Broadcasting RRTMGP shortwave cloud-optics data ... '
-       call MPI_BCAST(nBand,               1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nrghice,             1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nSizeReg,            1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nCoeff_ext,          1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nCoeff_ssa_g,        1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(nBound,              1,                         MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_extliq,         size(pade_extliq),         MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_ssaliq,         size(pade_ssaliq),         MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_asyliq,         size(pade_asyliq),         MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_extice,         size(pade_extice),         MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_ssaice,         size(pade_ssaice),         MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_asyice,         size(pade_asyice),         MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_sizereg_extliq, size(pade_sizereg_extliq), MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_sizereg_ssaliq, size(pade_sizereg_ssaliq), MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_sizereg_asyliq, size(pade_sizereg_asyliq), MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_sizereg_extice, size(pade_sizereg_extice), MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_sizereg_ssaice, size(pade_sizereg_ssaice), MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(pade_sizereg_asyice, size(pade_sizereg_asyice), MPI_REAL,    mpiroot, mpicomm, mpierr)
-       call MPI_BCAST(band_lims,           size(band_lims),           MPI_REAL,    mpiroot, mpicomm, mpierr)
-
-       ! Don't advance until data broadcast complete on all processors
-       call MPI_BARRIER(mpicomm, mpierr)
-    endif
-#endif
+!    endif
 
     ! Load tables data for RRTMGP cloud-optics  
     if (cld_optics_scheme .eq. 1) then
