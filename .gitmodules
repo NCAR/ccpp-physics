@@ -1,4 +1,4 @@
 [submodule "physics/rte-rrtmgp"]
 	path = physics/rte-rrtmgp
-	url = https://dustinswales@github.com/dustinswales/rte-rrtmgp
-        branch = rrtmgp-CCPP
+	url = https://dustinswales@github.com/RobertPincus/rte-rrtmgp
+        branch = dtc/ccpp
