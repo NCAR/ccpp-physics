@@ -58,9 +58,25 @@ module GFS_rrtmgp_pre
        amo3  = 47.9982_kind_phys,  & ! Modelular weight of ozone       (g/mol)
        amdw  = amd/amw,            & ! Molecular weight of dry air / water vapor
        amdo3 = amd/amo3              ! Molecular weight of dry air / ozone
-  
-  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize
-  
+
+  ! Some common trace gas on/off flags. 
+  ! This allows for control over which trace gases are used in RRTMGP radiation scheme via
+  ! namelist.
+  logical :: &
+       isActive_h2o   = .false., & !
+       isActive_co2   = .false., & !
+       isActive_o3    = .false., & !
+       isActive_n2o   = .false., & !
+       isActive_ch4   = .false., & !
+       isActive_o2    = .false., & !
+       isActive_ccl4  = .false., & !
+       isActive_cfc11 = .false., & !
+       isActive_cfc12 = .false., & !
+       isActive_cfc22 = .false.    !
+  integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
+       iStr_cfc11, iStr_cfc12, iStr_cfc22 
+
+  public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
 contains
   
   ! #########################################################################################
@@ -77,7 +93,7 @@ contains
          Radtend    ! DDT: FV3-GFS radiation tendencies 
 
     ! Outputs
-    character(len=128),dimension(Model%ngases), intent(out) :: &
+    character(len=*),dimension(Model%ngases), intent(out) :: &
          active_gases_array  ! Character array containing trace gases to include in RRTMGP
     character(len=*), intent(out) :: &
          errmsg     ! Error message
@@ -93,27 +109,72 @@ contains
     errmsg = ''
     errflg = 0
 
+    if (len(Model%active_gases) .eq. 0) return
+    
     ! Which gases are active? Provided via physics namelist.
-    if (len(Model%active_gases) .gt. 0) then
 
-       ! Pull out gas names from list...
-       ! First grab indices in character array corresponding to start:end of gas name.
-       gasIndices(1,1)=1
-       count=1
-       do ij=1,len(Model%active_gases)
-          tempstr=trim(Model%active_gases(ij:ij))
-          if (tempstr .eq. '_') then
-             gasIndices(count,2)=ij-1
-             gasIndices(count+1,1)=ij+1
-             count=count+1
-          endif
-       enddo
-       gasIndices(Model%ngases,2)=len(trim(Model%active_gases))
-       ! Now extract the gas names
-       do ij=1,Model%ngases
-          active_gases_array(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
-       enddo
-    endif
+    ! Pull out gas names from list...
+    ! First grab indices in character array corresponding to start:end of gas name.
+    gasIndices(1,1)=1
+    count=1
+    do ij=1,len(Model%active_gases)
+       tempstr=trim(Model%active_gases(ij:ij))
+       if (tempstr .eq. '_') then
+          gasIndices(count,2)=ij-1
+          gasIndices(count+1,1)=ij+1
+          count=count+1
+       endif
+    enddo
+    gasIndices(Model%ngases,2)=len(trim(Model%active_gases))
+    
+    ! Now extract the gas names
+    do ij=1,Model%ngases
+       active_gases_array(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
+    enddo
+
+    ! Which gases are active? (This is purely for flexibility)
+    do ij=1,Model%ngases
+       if(trim(active_gases_array(ij)) .eq. 'h2o')   then
+          isActive_h2o   = .true. 
+          istr_h2o       = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'co2')   then
+          isActive_co2   = .true.
+          istr_co2       = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'o3')    then
+          isActive_o3    = .true.
+          istr_o3        = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'n2o')   then
+          isActive_n2o   = .true.
+          istr_n2o       = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'ch4')   then
+          isActive_ch4   = .true.
+          istr_ch4       = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'o2')    then
+          isActive_o2    = .true.
+          istr_o2        = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'ccl4')  then
+          isActive_ccl4  = .true.
+          istr_ccl4      = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'cfc11') then
+          isActive_cfc11 = .true.
+          istr_cfc11     = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'cfc12') then
+          isActive_cfc12 = .true.
+          istr_cfc12     = ij
+       endif
+       if(trim(active_gases_array(ij)) .eq. 'cfc22') then
+          isActive_cfc22 = .true.       
+          istr_cfc22     = ij
+       endif
+    enddo
 
   end subroutine GFS_rrtmgp_pre_init
 
@@ -123,11 +184,11 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre.html
 !!
-  subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd, & ! IN
-       ncol, lw_gas_props, sec_diff_byband,                                             & ! IN
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, cld_frac, cld_lwp,                & ! OUT
-       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,         & ! OUT
-       tv_lay, relhum, tracer, cldsa, mtopa, mbota, de_lgth,  gas_concentrations,       & ! OUT
+  subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd,  & ! IN
+       ncol, lw_gas_props, active_gases_array,                                           & ! IN
+       sec_diff_byband, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, cld_frac, cld_lwp,& ! OUT
+       cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,          & ! OUT
+       tv_lay, relhum, tracer, cldsa, mtopa, mbota, de_lgth,  gas_concentrations,        & ! OUT
        errmsg, errflg)
     
     ! Inputs
@@ -147,8 +208,10 @@ contains
          Tbd                  ! DDT: FV3-GFS data not yet assigned to a defined container
     integer, intent(in)    :: &
          ncol                 ! Number of horizontal grid points
-   type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props               ! RRTMGP DDT: longwave spectral information
+    type(ty_gas_optics_rrtmgp),intent(in) :: &
+         lw_gas_props         ! RRTMGP DDT: longwave spectral information
+    character(len=*),dimension(Model%ngases), intent(in) :: &
+         active_gases_array   ! Character array containing trace gases to include in RRTMGP
 
     ! Outputs
     real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
@@ -296,13 +359,14 @@ contains
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
     
-    ! Populate RRTMGP DDT w/ gas-concentrations
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('o2',  gas_vmr(:,:,4)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('co2', gas_vmr(:,:,1)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('ch4', gas_vmr(:,:,3)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('n2o', gas_vmr(:,:,2)))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('h2o', vmr_h2o))
-    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr('o3',  vmr_o3))
+    ! Initialize and opulate RRTMGP DDT w/ gas-concentrations
+    call check_error_msg('sw_gas_optics_init',gas_concentrations%init(active_gases_array))
+    if (isActive_o2)  call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o2),  gas_vmr(:,:,4)))
+    if (isActive_co2) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_co2), gas_vmr(:,:,1)))
+    if (isActive_ch4) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_ch4), gas_vmr(:,:,3)))
+    if (isActive_n2o) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_n2o), gas_vmr(:,:,2)))
+    if (isActive_h2o) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_h2o), vmr_h2o))
+    if (isActive_o3)  call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o3),  vmr_o3))
 
     ! #######################################################################################
     ! Compute diffusivity angle adjustments for each longwave band

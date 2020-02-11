@@ -26,7 +26,7 @@ contains
          rrtmgp_lw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
     integer, intent(in) :: &
          rrtmgp_nGases       ! Number of trace gases active in RRTMGP
-    character(len=128),dimension(rrtmgp_nGases), intent(in) :: &
+    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
          active_gases_array  ! Character array containing trace gases to include in RRTMGP
     integer,intent(in) :: &
          mpicomm,          & ! MPI communicator
@@ -257,9 +257,7 @@ contains
 !    endif
 
     ! Initialize gas concentrations and gas optics class
-    do iGas=1,rrtmgp_nGases
-       call check_error_msg('lw_gas_optics_init',gas_concentrations%set_vmr(active_gases_array(iGas), 0._kind_phys))
-    enddo    
+    call check_error_msg('lw_gas_optics_init',gas_concentrations%init(active_gases_array))
     call check_error_msg('lw_gas_optics_init',lw_gas_props%load(gas_concentrations, gas_names, &
          key_species, band2gpt, band_lims, press_ref, press_ref_trop, temp_ref,  temp_ref_p,   &
          temp_ref_t, vmr_ref, kmajor, kminor_lower, kminor_upper, gas_minor, identifier_minor, &

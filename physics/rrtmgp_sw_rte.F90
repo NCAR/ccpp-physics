@@ -146,6 +146,7 @@ contains
        endif
        
        ! Subset the gas concentrations, only need daylit points.
+       call check_error_msg('rrtmgp_sw_rte_run',gas_concentrations_daylit%init(active_gases_array))
        do iGas=1,rrtmgp_nGases
           call check_error_msg('rrtmgp_sw_rte_run',&
                gas_concentrations%get_vmr(trim(active_gases_array(iGas)),vmrTemp))
