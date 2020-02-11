@@ -1,5 +1,5 @@
 !>\file  mp_fer_hires.F90
-!! This file contains 
+!! This file contains the Ferrier-Aligo microphysics scheme driver. 
 
 !
 module mp_fer_hires
@@ -113,7 +113,7 @@ module mp_fer_hires
  
      end subroutine mp_fer_hires_init
 
-!>\defgroup hafs_famp HAFS Ferrier-Aligo Cloud Microphysics Scheme
+!>\defgroup hafs_famp HWRF Ferrier-Aligo Microphysics Scheme
 !> This is the CCPP-compliant FER_HIRES driver module.
 !> \section arg_table_mp_fer_hires_run Argument Table
 !! \htmlinclude mp_fer_hires_run.html
@@ -124,9 +124,8 @@ module mp_fer_hires
                          ,T,Q,CWM                                       &
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
-                         ,QC,QR,QI,QG                                   & ! wet mixing ratio
-                         !,qc_m,qi_m,qr_m                               & 
-                         ,PREC                                          &!,ACPREC  -MZ:not used 
+                         ,QC,QR,QI,QG                                   & 
+                         ,PREC                                          & 
                          ,mpirank, mpiroot, threads                     &
                          ,refl_10cm                                     &
                          ,RHGRD,dx                                      &
@@ -169,12 +168,8 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qi(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev) ! QRIMEF
-    !  real(kind_phys),   intent(  out) :: qc_m(1:ncol,1:nlev)
-    !  real(kind_phys),   intent(  out) :: qr_m(1:ncol,1:nlev)
-    !  real(kind_phys),   intent(  out) :: qi_m(1:ncol,1:nlev)
 
       real(kind_phys),   intent(inout) :: prec(1:ncol)
-!      real(kind_phys)                  :: acprec(1:ncol)   !MZ: change to local
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
       real(kind_phys),   intent(in   ) :: rhgrd
       real(kind_phys),   intent(in   ) :: dx(1:ncol)
@@ -188,7 +183,6 @@ module mp_fer_hires
       integer            :: I,J,K,N
       integer            :: lowlyr(1:ncol)
       integer            :: dx1
-      !real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
       real(kind_phys)    :: PCPCOL
       real(kind_phys)    :: ql(1:nlev),tl(1:nlev)
       real(kind_phys)    :: rainnc(1:ncol),rainncv(1:ncol)
@@ -253,12 +247,8 @@ module mp_fer_hires
 !***  FILL THE SINGLE-COLUMN INPUT
 !-----------------------------------------------------------------------
 !
-        DO K=LM,1,-1   ! We are moving down from the top in the flipped arrays
+        DO K=LM,1,-1   !mz* We are moving down from the top in the flipped arrays
          
-!
-!          TL(K)=T(I,K)
-!          QL(K)=AMAX1(Q(I,K),EPSQ)
-!
 !***  CALL MICROPHYSICS
 
 !MZ* in HWRF

@@ -1,9 +1,9 @@
 !>\file module_MP_FER_HIRES.F90
 !! "Modified" fer_hires microphysics - 11 July 2016 version
 !!
-! (1) Ice nucleation: Fletcher (1962) replaces Meyers et al. (1992)
-! (2) Cloud ice is a simple function of the number concentration from (1), and it
-!     is no longer a fractional function of the large ice.  Thus, the FLARGE &
+!! (1) Ice nucleation: Fletcher (1962) replaces Meyers et al. (1992)
+!! (2) Cloud ice is a simple function of the number concentration from (1), and it
+!!     is no longer a fractional function of the large ice.  Thus, the FLARGE &
 !     FSMALL parameters are no longer used.
 ! (3) T_ICE_init=-12 deg C provides a slight delay in the initial onset of ice.
 ! (4) NLImax is a function of rime factor (RF) and temperature.  
@@ -255,26 +255,25 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------------------------------------------------------------------
       IMPLICIT NONE
 !-----------------------------------------------------------------------
-      INTEGER,INTENT(IN) :: D_SS,IMS,IME,LM,DX1    !ZM ,ITIMESTEP
+      INTEGER,INTENT(IN) :: D_SS,IMS,IME,LM,DX1    
       REAL, INTENT(IN) 	    :: DT,RHgrd
       INTEGER,   INTENT(IN) :: THREADS
-      REAL, INTENT(IN),     DIMENSION(ims:ime,  lm+1)::      &
+      REAL, INTENT(IN),     DIMENSION(ims:ime,  lm+1)::                 &
      &                      prsi
-      REAL, INTENT(IN),     DIMENSION(ims:ime,  lm)::      &
+      REAL, INTENT(IN),     DIMENSION(ims:ime,  lm)::                   &
      &                      p_phy
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm)::      &
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm)::                   &
      &                      q,qt,t_phy
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm ) ::    &
-!Aligo Oct 23,2019: dry mixing ratio for cloud species
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm )::                  &    !Aligo Oct 23,2019: dry mixing ratio for cloud species
      &                      qc,qr,qs
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm) ::    &
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm) ::                  &
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY
-      REAL, INTENT(OUT),    DIMENSION(ims:ime,  lm) ::      & !jul28
-     &                      refl_10cm               !jul28
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime)           ::     &
+      REAL, INTENT(OUT),    DIMENSION(ims:ime,  lm) ::                  & 
+     &                      refl_10cm               
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime)      ::                  &
      &                                                   RAINNC,RAINNCV
       REAL, INTENT(OUT),    DIMENSION(ims:ime):: SR
-      REAL, INTENT(OUT),    DIMENSION( ims:ime, lm ) ::        &
+      REAL, INTENT(OUT),    DIMENSION( ims:ime, lm ) ::                 &
      &                      TRAIN_PHY
 !
       INTEGER, DIMENSION( ims:ime ),INTENT(INOUT) :: LOWLYR
@@ -297,19 +296,19 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       INTEGER :: LSFC,I_index,J_index,L
       INTEGER,DIMENSION(ims:ime) :: LMH
       REAL :: TC,QI,QRdum,QW,Fice,Frain,DUM,ASNOW,ARAIN
-      REAL,DIMENSION(lm) :: P_col,Q_col,T_col,WC_col,              &
+      REAL,DIMENSION(lm) :: P_col,Q_col,T_col,WC_col,                   &
          RimeF_col,QI_col,QR_col,QW_col, THICK_col,DPCOL,pcond1d,       &
          pidep1d,piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,     &
-         pimlt1d,praut1d,pracw1d,prevp1d,pisub1d,pevap1d,DBZ_col,       & !jul28
+         pimlt1d,praut1d,pracw1d,prevp1d,pisub1d,pevap1d,DBZ_col,       & 
          NR_col,NS_col,vsnow1d,vrain11d,vrain21d,vci1d,NSmICE1d,        &
-         INDEXS1d,INDEXR1d,RFlag1d,RHC_col   !jul28  !jun01
+         INDEXS1d,INDEXR1d,RFlag1d,RHC_col 
 !
 !-----------------------------------------------------------------------
 !**********************************************************************
 !-----------------------------------------------------------------------
 !
 
-! MZ: HWRF practice start 
+! mz*: HWRF practice start 
 !----------
 !2015-03-30, recalculate some constants which may depend on phy time step
         CALL MY_GROWTH_RATES_NMM_hr  (DT)
@@ -334,14 +333,6 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !
         BRAUT=DT*1.1E10*BETA6/NCW
 
-       !write(*,*)'dt=',dt
-       !write(*,*)'pi=',pi
-       !write(*,*)'c1=',c1
-       !write(*,*)'ciacw=',ciacw 
-       !write(*,*)'ciacr=',ciacr 
-       !write(*,*)'cracw=',cracw 
-       !write(*,*)'araut=',araut
-       !write(*,*)'braut=',braut
 !! END OF adding, 2015-03-30
 !-----------
 
@@ -354,7 +345,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 
        DO k = 1,lm
        DO i = ims,ime
-	 TRAIN_PHY  (i,k)=0.
+         TRAIN_PHY  (i,k)=0.
        ENDDO
        ENDDO
 
@@ -465,7 +456,7 @@ ENDIF
 !
           I_index=I
           J_index=1
-       CALL EGCP01COLUMN_hr ( ARAIN, ASNOW, DT, RHC_col,                  &
+       CALL EGCP01COLUMN_hr ( ARAIN, ASNOW, DT, RHC_col,                &
      & I_index, J_index, LSFC,                                          &
      & P_col, QI_col, QR_col, Q_col, QW_col, RimeF_col, T_col,          &
      & THICK_col, WC_col,LM,pcond1d,pidep1d,                            &
@@ -627,16 +618,38 @@ ENDIF
 !!\param qi_col    vertical column of model ice mixing ratio (kg/kg)
 !!\param qr_col    vertical column of model rain ratio (kg/kg)
 !!\param q_col     vertical column of model water vapor specific humidity (kg/kg)
-!!\param qw_col
-!!\param rimef_col
-!!\param t_col
-!!\param thick_col
-!!\param wc_col
-!!\param lm
-!!\param pcond1d
-!!\param pidep1d
-!!\param piacw1d
-!!\param piacwi1d
+!!\param qw_col    vertical column of model cloud water mixing ratio (kg/kg) 
+!!\param rimef_col vertical column of rime factor for ice in model (ratio, defined below)
+!!\param t_col     vertical column of model temperature (deg K) 
+!!\param thick_col vertical column of model mass thickness (density*height increment)
+!!\param wc_col    vertical column of model mixing ratio of total condensate (kg/kg)
+!!\param lm        vertical dimension
+!!\param pcond1d   net cloud water condensation (>0) or evaporation (<0) (kg/kg)
+!!\param pidep1d   net ice deposition (>0) or sublimation (<0) (kg/kg)
+!!\param piacw1d   cloud water collection by precipitation ice (kg/kg)
+!!\param piacwi1d  cloud water riming onto precipitation ice at <0 (kg/kg)
+!!\param piacwr1d  accreted cloud water shed to form rain at >0 (kg/kg)
+!!\param piacr1d   freezing of supercooled rain to precipitation ice (kg/kg)
+!!\param picnd1d   condensation onto wet, melting ice (kg/kg)
+!!\param pievp1d   evaporation from wet, melting ice (kg/kg)
+!!\param pimlt1d   melting of precipitation ice to form rain (kg/kg)   
+!!\param praut1d   droplet self_collection (autoconversion) to form rain (kg/kg)
+!!\param pracw1d   cloud water collection (accretion) by rain (kg/kg)
+!!\param prevp1d   rain evaporation (kg/kg)
+!!\param pisub1d
+!!\param pevap1d 
+!!\param DBZ_col   vertical column of radar reflectivity (dBZ)
+!!\param NR_col    vertical column of rain number concentration (m^-3)
+!!\param NS_col    vertical column of snow number concentration (m^-3)
+!!\param vsnow1d   fall speed of rimed snow w/ air resistance correction
+!!\param vrain11d  fall speed of rain into grid from above (m/s)
+!!\param vrain21d  fall speed of rain out of grid box to the level below (m/s)
+!!\param vci1d     Fall speed of 50-micron ice crystals w/ air resistance correction
+!!\param NSmICE1d  number concentration of small ice crystals at current level
+!!\param INDEXS1d
+!!\param INDEXR1d
+!!\param RFlag1d
+!!\param DX1
       SUBROUTINE EGCP01COLUMN_hr ( ARAIN, ASNOW, DTPH, RHC_col,          &
      & I_index, J_index, LSFC,                                           &
      & P_col, QI_col, QR_col, Q_col, QW_col, RimeF_col, T_col,           &
