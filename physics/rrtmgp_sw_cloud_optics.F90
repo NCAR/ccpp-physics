@@ -91,6 +91,7 @@ contains
     ! Local variables
     integer :: status,ncid,dimid,varID
     character(len=264) :: sw_cloud_props_file
+    integer,parameter ::  nrghice_default=2
 #ifdef MPI
     integer :: mpierr
 #endif
@@ -128,15 +129,17 @@ contains
        status = nf90_inq_dimid(ncid, 'pair', dimid)
        status = nf90_inquire_dimension(ncid, dimid, len=nPairs)
  
-       ! Has the number of ice-roughnesses been provided from the namelist?
-       ! If not provided, use all categories in file (default)
+       ! Has the number of ice-roughnesses to use been provided from the namelist?
+       ! If not provided, use default number of ice-roughness categories
        if (nrghice .eq. 0) then
+          nrghice = nrghice_default
+       else
           nrghice = nrghice_fromfile
-       endif
-       ! If provided in the namelist, check to ensure that number of ice-roughness categories is feasible.
-       if (nrghice .gt. nrghice_fromfile) then
-          errmsg  = 'Number of RRTMGP ice-roughness categories requested in namelist file is not allowed. Using nrghice from file...'
-          nrghice = nrghice_fromfile
+          ! If provided in the namelist, check to ensure that number of ice-roughness categories is feasible.
+          if (nrghice .gt. nrghice_fromfile) then
+             errmsg  = 'Number of RRTMGP ice-roughness categories requested in namelist file is not allowed. Using default number of categories.'
+             nrghice = nrghice_default
+          endif
        endif
 
        ! Allocate space for arrays
@@ -144,17 +147,17 @@ contains
           allocate(lut_extliq(nSize_liq, nBand))
           allocate(lut_ssaliq(nSize_liq, nBand))
           allocate(lut_asyliq(nSize_liq, nBand))
-          allocate(lut_extice(nSize_ice, nBand, nrghice))
-          allocate(lut_ssaice(nSize_ice, nBand, nrghice))
-          allocate(lut_asyice(nSize_ice, nBand, nrghice))
+          allocate(lut_extice(nSize_ice, nBand, nrghice_fromfile))
+          allocate(lut_ssaice(nSize_ice, nBand, nrghice_fromfile))
+          allocate(lut_asyice(nSize_ice, nBand, nrghice_fromfile))
        endif
        if (cld_optics_scheme .eq. 2) then
           allocate(pade_extliq(nBand, nSizeReg,  nCoeff_ext ))
           allocate(pade_ssaliq(nBand, nSizeReg,  nCoeff_ssa_g))
           allocate(pade_asyliq(nBand, nSizeReg,  nCoeff_ssa_g))
-          allocate(pade_extice(nBand, nSizeReg,  nCoeff_ext,   nrghice))
-          allocate(pade_ssaice(nBand, nSizeReg,  nCoeff_ssa_g, nrghice))
-          allocate(pade_asyice(nBand, nSizeReg,  nCoeff_ssa_g, nrghice))
+          allocate(pade_extice(nBand, nSizeReg,  nCoeff_ext,   nrghice_fromfile))
+          allocate(pade_ssaice(nBand, nSizeReg,  nCoeff_ssa_g, nrghice_fromfile))
+          allocate(pade_asyice(nBand, nSizeReg,  nCoeff_ssa_g, nrghice_fromfile))
           allocate(pade_sizereg_extliq(nBound))
           allocate(pade_sizereg_ssaliq(nBound))
           allocate(pade_sizereg_asyliq(nBound))
@@ -301,18 +304,17 @@ contains
 
     ! Load tables data for RRTMGP cloud-optics  
     if (cld_optics_scheme .eq. 1) then
-       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice))
-       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_lims,   &
+       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_lims,        &
             radliq_lwr, radliq_upr, radliq_fac, radice_lwr, radice_upr,  radice_fac,     &
             lut_extliq, lut_ssaliq, lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
     if (cld_optics_scheme .eq. 2) then
-       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice))
-       call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_lims,  &
+       call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_lims,       &
             pade_extliq, pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice, pade_asyice,&
             pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,               &
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
     endif
+    call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice))
   end subroutine rrtmgp_sw_cloud_optics_init
 
   ! #########################################################################################
@@ -390,12 +392,12 @@ contains
        if (cld_optics_scheme .gt. 0) then
           ! RRTMGP cloud-optics.
           call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_cloud_props%cloud_optics(&
-               nday,                         & ! IN  - Number of daylit gridpoints
-               nLev,                         & ! IN  - Number of vertical layers
-               sw_cloud_props%get_nband(),   & ! IN  - Number of SW bands
-               nrghice,                      & ! IN  - Number of ice-roughness categories
-               liqmask,                      & ! IN  - Liquid-cloud mask
-               icemask,                      & ! IN  - Ice-cloud mask
+               !nday,                         & ! IN  - Number of daylit gridpoints
+               !nLev,                         & ! IN  - Number of vertical layers
+               !sw_cloud_props%get_nband(),   & ! IN  - Number of SW bands
+               !nrghice,                      & ! IN  - Number of ice-roughness categories
+               !liqmask,                      & ! IN  - Liquid-cloud mask
+               !icemask,                      & ! IN  - Ice-cloud mask
                cld_lwp(idxday(1:nday),:),    & ! IN  - Cloud liquid water path
                cld_iwp(idxday(1:nday),:),    & ! IN  - Cloud ice water path
                cld_reliq(idxday(1:nday),:),  & ! IN  - Cloud liquid effective radius

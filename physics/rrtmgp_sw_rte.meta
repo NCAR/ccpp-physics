@@ -176,7 +176,7 @@
   units = none
   dimensions =  (number_of_active_gases_used_by_RRTMGP)
   type = character
-  kind = len=128
+  kind = len=*
   intent = in
   optional = F
 [scmpsw]
