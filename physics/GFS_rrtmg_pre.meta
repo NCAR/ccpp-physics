@@ -70,6 +70,15 @@
   type = GFS_radtend_type
   intent = inout
   optional = F
+[dx]
+  standard_name = cell_size
+  long_name = relative dx for the grid cell
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [f_ice]
   standard_name = fraction_of_ice_water_cloud
   long_name = fraction of ice water cloud
@@ -564,6 +573,23 @@
   type = integer
   intent = out
   optional = F
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+
 
 ########################################################################
 [ccpp-arg-table]
