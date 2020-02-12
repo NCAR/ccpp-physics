@@ -410,23 +410,22 @@ MODULE module_mp_thompson
 !! lookup tables in Thomspson scheme.
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
-      SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
-                          ids, ide, jds, jde, kds, kde,     &
-                          ims, ime, jms, jme, kms, kme,     &
-                          its, ite, jts, jte, kts, kte,     &
-                          mpicomm, mpirank, mpiroot,        &
-                          threads, errmsg, errflg)
+      SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa, &
+                               mpicomm, mpirank, mpiroot,  &
+                               threads, errmsg, errflg)
 
       IMPLICIT NONE
 
-      INTEGER, INTENT(IN):: ids,ide, jds,jde, kds,kde, &
-                            ims,ime, jms,jme, kms,kme, &
-                            its,ite, jts,jte, kts,kte
-
 !..OPTIONAL variables that control application of aerosol-aware scheme
 
-      REAL, DIMENSION(ims:ime,kms:kme,jms:jme), OPTIONAL, INTENT(IN) :: nwfa, nifa
-      REAL, DIMENSION(ims:ime,jms:jme),         OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
+#if 0
+      REAL, DIMENSION(:,:,:), OPTIONAL, INTENT(IN) :: nwfa, nifa
+      REAL, DIMENSION(:,:),   OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
+#else
+! DH* 20200208 - change dimensions for nasty init hack
+      REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: nwfa, nifa
+      REAL, DIMENSION(:),   OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
+#endif
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
