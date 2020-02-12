@@ -1077,7 +1077,6 @@
 
         if (zcf1 > f_zero) then     ! cloudy sky column
 
-           cfrac = ceiling(cfrac)
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &
@@ -1085,7 +1084,7 @@
 !  ---  outputs:
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &
      &     )
-          
+
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band 10 is approx to the 0.55 mu spectrum
 
