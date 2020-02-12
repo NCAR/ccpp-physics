@@ -15,7 +15,7 @@
 !!
       subroutine GFS_rrtmg_post_run (Model, Grid, Diag, Radtend, Statein, &
               Coupling, scmpsw, im, lm, ltp, kt, kb, kd, raddt, aerodp,   &
-              cldsa, mtopa, mbota, clouds1, cldtaulw, cldtausw,           &
+              cldsa, mtopa, mbota, clouds1, cldtaulw, cldtausw, nday,     &
               errmsg, errflg)
 
       use machine,                             only: kind_phys
@@ -41,7 +41,7 @@
       type(GFS_diag_type),                 intent(inout) :: Diag
       type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(in) :: scmpsw
 
-      integer,              intent(in) :: im, lm, ltp, kt, kb, kd
+      integer,              intent(in) :: im, lm, ltp, kt, kb, kd, nday
       real(kind=kind_phys), intent(in) :: raddt
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),          intent(in) :: aerodp
@@ -152,18 +152,40 @@
               Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * Statein%prsi(i,itop+kt)
               Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * Statein%prsi(i,ibtc+kb)
               Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * Statein%tgrs(i,itop)
-
-!       Anning adds optical depth and emissivity output
-              tem1 = 0.
-              tem2 = 0.
-              do k=ibtc,itop
-                tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
-                tem2 = tem2 + cldtaulw(i,k)      ! approx 10. mu channel
-              enddo
-              Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
-              Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
             enddo
           enddo
+
+!       Anning adds optical depth and emissivity output
+          if (Model%lsswr .and. (nday > 0)) then
+            do j = 1, 3
+              do i = 1, IM
+                tem0d = raddt * cldsa(i,j)
+                itop  = mtopa(i,j) - kd
+                ibtc  = mbota(i,j) - kd
+                tem1 = 0.
+                do k=ibtc,itop
+                  tem1 = tem1 + cldtausw(i,k)      ! approx .55 um channel
+                enddo
+                Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
+              enddo
+            enddo
+          endif
+
+          if (Model%lslwr) then
+            do j = 1, 3
+              do i = 1, IM
+                tem0d = raddt * cldsa(i,j)
+                itop  = mtopa(i,j) - kd
+                ibtc  = mbota(i,j) - kd
+                tem2 = 0.
+                do k=ibtc,itop
+                  tem2 = tem2 + cldtaulw(i,k)      ! approx 10. um channel
+                enddo
+                Diag%fluxr(i,46-j) = Diag%fluxr(i,46-j) + tem0d * (1.0-exp(-tem2))
+              enddo
+            enddo
+          endif
+
         endif
 
       endif                                ! end_if_lssav
