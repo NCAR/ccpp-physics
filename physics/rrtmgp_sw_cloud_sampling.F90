@@ -109,15 +109,11 @@ contains
           rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
        enddo
        
-
-       ! Test: Remove McICA sampling error by setting cloud-fraction to one.
-       cld_frac_noSamp = ceiling(cld_frac)
-
        ! Call McICA
        select case ( iovrsw )
           ! Maximumn-random 
        case(1)
-          call check_error_msg('rrtmgp_sw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac_noSamp,cldfracMCICA))       
+          call check_error_msg('rrtmgp_sw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
        end select
        
        ! Map band optical depth to each g-point using McICA
