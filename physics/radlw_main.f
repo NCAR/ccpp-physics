@@ -255,9 +255,6 @@
       use module_radlw_avplank, only : totplnk
       use module_radlw_ref,     only : preflog, tref, chi_mls
 !
-#ifdef MPI
-      use mpi
-#endif
       implicit none
 !
       private
@@ -355,15 +352,9 @@
 ! ================
       contains
 ! ================
-!! \section arg_table_rrtmg_lw_init
-!! \htmlinclude rrtmg_lw.html
-!!
-        subroutine rrtmg_lw_init (mpicomm, mpirank, mpiroot)
-          ! Inputs
-          integer, intent(in) :: mpicomm,mpirank,mpiroot
 
-        
-        end subroutine rrtmg_lw_init
+         subroutine rrtmg_lw_init ()
+         end subroutine rrtmg_lw_init
 
 !> \defgroup module_radlw_main GFS RRTMG Longwave Module 
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
@@ -389,7 +380,7 @@
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
 !! \section arg_table_rrtmg_lw_run Argument Table
-!! \htmlinclude rrtmg_lw.html
+!! \htmlinclude rrtmg_lw_run.html
 !!
 !> \section gen_lwrad RRTMG Longwave Radiation Scheme General Algorithm
 !> @{
@@ -398,7 +389,7 @@
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
-     &       dzlyr,delpin,de_lgth, lon, lat,                            &
+     &       dzlyr,delpin,de_lgth,                                      &
      &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
      &       hlwc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
@@ -597,7 +588,7 @@
      &       cld_od
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
-     &       sfgtmp, de_lgth, lon,  lat
+     &       sfgtmp, de_lgth
 
       real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
      &       aeraod, aerssa
@@ -726,6 +717,7 @@
 !     endif
 
 !  --- ...  loop over horizontal npts profiles
+
       lab_do_iplon : do iplon = 1, npts
 
 !> -# Read surface emissivity.
@@ -1022,7 +1014,6 @@
 
         if ( lcf1 ) then
 
-          cldfrc = ceiling(cldfrc)
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
@@ -1030,8 +1021,6 @@
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
-
-!djs          taucld(2,:) = taucld(1,:)
 
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band-7 is apprx 10mu channel (or use spectral mean of bands 6-8)
@@ -1171,7 +1160,6 @@
         endif   ! end if_isubclw_block
 
 !> -# Save outputs.
-        
 
         topflx(iplon)%upfxc = totuflux(nlay)
         topflx(iplon)%upfx0 = totuclfl(nlay)
@@ -1257,19 +1245,8 @@
       end subroutine rrtmg_lw_run
 !-----------------------------------
 !> @}
-!! \section arg_table_rrtmg_lw_finalize Argument Table
-!! \htmlinclude rrtmg_lw.html
-!!
-      subroutine rrtmg_lw_finalize (mpicomm, mpirank, mpiroot)
-        ! Inputs
-        integer, intent(in) :: mpicomm,mpirank,mpiroot
-        ! Local variables
-        integer :: ierr
-        
-#ifdef MPI
-        call MPI_BARRIER(mpicomm, ierr)
-#endif
-      end subroutine rrtmg_lw_finalize
+      subroutine rrtmg_lw_finalize ()
+      end subroutine rrtmg_lw_finalize 
 
 
 
@@ -3671,6 +3648,7 @@
 
 !> -# Process longwave output from band for total and clear streams.
 !!    Calculate upward, downward, and net flux.
+
       flxfac = wtdiff * fluxfac
 
       do k = 0, nlay
