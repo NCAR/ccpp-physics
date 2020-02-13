@@ -19,7 +19,6 @@ contains
        t_start,u_start,v_start,q_start,  &
        t_end, u_end, v_end, q_end,                             &
        dt3dt_ccpp, du3dt_ccpp, dv3dt_ccpp, dq3dt_ccpp,         &
-!       dt3dt_total, du3dt_total, dv3dt_total, dq3dt_total,     &
        im, levs, ntrac, index_for_water_vapor,                 &
        lssav, ldiag3d, qdiag3d, errmsg,errflg)
     use machine,               only: kind_phys
@@ -32,8 +31,6 @@ contains
     real(kind=kind_phys), dimension(:,:),       intent(inout) :: q_end
     real(kind=kind_phys), dimension(:,:),       intent(inout) :: du3dt_ccpp, dv3dt_ccpp
     real(kind=kind_phys), dimension(:,:),       intent(inout) :: dt3dt_ccpp, dq3dt_ccpp
-    ! real(kind=kind_phys), dimension(:,:),       intent(inout) :: du3dt_total, dv3dt_total
-    ! real(kind=kind_phys), dimension(:,:),       intent(inout) :: dt3dt_total, dq3dt_total
 
     integer, intent(in) :: im, levs, ntrac, kdt
     integer, intent(in) :: index_for_water_vapor
@@ -49,6 +46,8 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
+
+    print *, 'in model_tend_post_run'
 
     diag_enabled: if(lssav .and. ldiag3d) then
       if(any(gt0(1:im,1:levs)<1e-3)) then
@@ -73,14 +72,6 @@ contains
 
       do k=1,levs
         do i=1,im
-          ! if(t_end(i,k)>1e-3 .and. gt0(i,k)>1e-3) then
-          !     dt3dt_total(i,k) = dt3dt_total(i,k) + gt0(i,k)-t_end(i,k)
-          !     du3dt_total(i,k) = du3dt_total(i,k) + gu0(i,k)-u_end(i,k)
-          !     dv3dt_total(i,k) = dv3dt_total(i,k) + gv0(i,k)-v_end(i,k)
-          !     if(qdiag3d) then
-          !       dq3dt_total(i,k) = dq3dt_total(i,k) + gq0_water_vapor(i,k)-q_end(i,k)
-          !     endif
-          ! endif
           t_end(i,k) = gt0(i,k)
           u_end(i,k) = gu0(i,k)
           v_end(i,k) = gv0(i,k)

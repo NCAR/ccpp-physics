@@ -50,6 +50,8 @@ subroutine model_tend_pre_run(dtp, kdt,                     &
   errmsg = ''
   errflg = 0
 
+  print *,'in model_tend_pre_run'
+
   if(Lssav .and. ldiag3d) then
     do k=1,levs
       do i=1,im

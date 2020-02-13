@@ -33,6 +33,24 @@
   type = logical
   intent = in
   optional = F
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = updated x-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = updated y-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [gt0]
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
@@ -51,6 +69,22 @@
   kind = kind_phys
   intent = in
   optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -69,6 +103,13 @@
   kind = kind_phys
   intent = inout
   optional = F
+[flag_for_scnv_generic_tend]
+  standard_name = true_if_GFS_SCNV_generic_should_calculate_tendencies
+  long_name = true if GFS_SCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -156,6 +197,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = updated x-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = updated y-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [gt0]
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
@@ -174,6 +233,22 @@
   kind = kind_phys
   intent = in
   optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -201,6 +276,22 @@
   kind = kind_phys
   intent = inout
   optional = F
+[du3dt]
+  standard_name = cumulative_change_in_x_wind_due_to_shal_convection
+  long_name = cumulative change in x wind due to shallow convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3dt]
+  standard_name = cumulative_change_in_y_wind_due_to_shal_convection
+  long_name = cumulative change in y wind due to shallow convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [dt3dt]
   standard_name = cumulative_change_in_temperature_due_to_shal_convection
   long_name = cumulative change in temperature due to shal conv.

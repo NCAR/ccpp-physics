@@ -1068,7 +1068,8 @@ c
         enddo
         if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
      &               flag_for_pbl_generic_tend) then
-          is = (ntoz-1) * km
+          kk = ntoz
+          is = (kk-1) * km
           do k = 1, km
             do i = 1, im
               qtend = (a2(i,k+is)-q1(i,k,kk))*rdt

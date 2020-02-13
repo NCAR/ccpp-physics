@@ -49,8 +49,10 @@ subroutine total_tend_run(dtp, kdt,                     &
 
   good=0
 
+  print *,'entered total_tend_run'
+
   if(Lssav .and. ldiag3d) then
-    print *,'total_tend_run'
+    print *,'if = TRUE in total_tend_run'
     do k=1,levs
       do i=1,im
         if(t_start(i,k)>1e-3 .and. tgrs(i,k)>1e-3) then

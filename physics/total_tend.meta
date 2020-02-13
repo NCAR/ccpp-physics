@@ -1,15 +1,15 @@
 [ccpp-arg-table]
-  name = total_tend_pre_init
+  name = total_tend_init
   type = scheme
 
 ########################################################################
 [ccpp-arg-table]
-  name = total_tend_pre_finalize
+  name = total_tend_finalize
   type = scheme
 
 ########################################################################
 [ccpp-arg-table]
-  name = total_tend_pre_run
+  name = total_tend_run
   type = scheme
 [dtp]
   standard_name = time_step_for_physics
@@ -60,14 +60,6 @@
   type = real
   kind = kind_phys
   intent = in
-[t_start]
-  standard_name = temperature_at_start_of_ccpp
-  long_name = temperature at start of ccpp
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
 [t_start]
   standard_name = temperature_at_total_check_point
   long_name = temperature when model total is calculated in ccpp

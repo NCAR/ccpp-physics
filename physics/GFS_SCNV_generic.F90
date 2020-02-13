@@ -14,18 +14,18 @@
 !> \section arg_table_GFS_SCNV_generic_pre_run Argument Table
 !! \htmlinclude GFS_SCNV_generic_pre_run.html
 !!
-      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gt0, gq0_water_vapor, &
-        save_t, save_qv, errmsg, errflg)
+      subroutine GFS_SCNV_generic_pre_run (im, levs, ldiag3d, qdiag3d, gu0, gv0, gt0, gq0_water_vapor, &
+        save_u, save_v, save_t, save_qv, flag_for_scnv_generic_tend, errmsg, errflg)
 
         use machine,               only: kind_phys
 
         implicit none
 
         integer, intent(in) :: im, levs
-        logical, intent(in) :: ldiag3d, qdiag3d
-        real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
+        logical, intent(in) :: ldiag3d, qdiag3d, flag_for_scnv_generic_tend
+        real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
 
-        real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_t, save_qv
+        real(kind=kind_phys), dimension(im,levs), intent(inout) :: save_u, save_v, save_t, save_qv
         character(len=*),                 intent(out) :: errmsg
         integer,                          intent(out) :: errflg
 
@@ -35,9 +35,12 @@
         errmsg = ''
         errflg = 0
 
-        if (ldiag3d) then
+        save_fields: if (ldiag3d .and. flag_for_scnv_generic_tend) then
+          print *,'save fields in GFS_SCNV_generic_pre_run'
           do k=1,levs
             do i=1,im
+              save_u(i,k)   = gu0(i,k)
+              save_v(i,k)   = gv0(i,k)
               save_t(i,k)   = gt0(i,k)
             enddo
           enddo
@@ -48,7 +51,7 @@
                 enddo
              enddo
           endif
-       endif
+       endif save_fields
 
     end subroutine GFS_SCNV_generic_pre_run
 
@@ -68,7 +71,7 @@
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, cplchm, &
-        frain, gt0, gq0_water_vapor, save_t, save_qv, dqdti, dt3dt, dq3dt, clw,   &
+        frain, gu0, gv0, gt0, gq0_water_vapor, save_u, save_v, save_t, save_qv, dqdti, du3dt, dv3dt, dt3dt, dq3dt, clw,   &
         shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,                   &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                     &
         flag_for_scnv_generic_tend,                                               &
@@ -81,12 +84,12 @@
       integer, intent(in) :: im, levs, nn
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: gt0, gq0_water_vapor
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_t, save_qv
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_u, save_v, save_t, save_qv
 
       ! dqdti, dt3dt, dq3dt, only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, dq3dt
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: du3dt, dv3dt, dt3dt, dq3dt
       real(kind=kind_phys), dimension(im,levs,nn), intent(inout) :: clw
 
       ! Post code for SAS/SAMF
@@ -112,7 +115,7 @@
       errmsg = ''
       errflg = 0
 
-      if (imfshalcnv==imfshalcnv_sas .or. imfshalcnv==imfshalcnv_samf) then
+      update_cnvw_cnvc: if (imfshalcnv==imfshalcnv_sas .or. imfshalcnv==imfshalcnv_samf) then
         do i=1,im
           rainc(i) = rainc(i) + frain * rain1(i)
         enddo
@@ -131,13 +134,19 @@
             enddo
           enddo
         endif
-      endif
+      endif update_cnvw_cnvc
 
-      if (lssav .and. flag_for_scnv_generic_tend) then
+      diagtend: if (lssav .and. flag_for_scnv_generic_tend) then
+        print *,'diagtend in GFS_SCNV_generic.F90'
+        if(frain<1e-5) then
+          print *,'bad frain: ',frain
+        endif
         if (ldiag3d) then
           do k=1,levs
             do i=1,im
-              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)  - save_t(i,k))   * frain
+              du3dt(i,k) = du3dt(i,k) + (gu0(i,k) - save_u(i,k)) * frain
+              dv3dt(i,k) = dv3dt(i,k) + (gv0(i,k) - save_v(i,k)) * frain
+              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k) - save_t(i,k)) * frain
             enddo
           enddo
           if (qdiag3d) then
@@ -148,7 +157,7 @@
              enddo
           endif
         endif
-      endif   ! end if_lssav
+      endif diagtend
 !
       if (cplchm) then
         do k=1,levs
