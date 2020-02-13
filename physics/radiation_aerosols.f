@@ -169,7 +169,7 @@
       use module_radlw_parameters, only : NBDLW,  wvnlw1, wvnlw2
 !
       use funcphys,                     only : fpkap
-      use aerclm_def,                   only : ntrcaer
+      use aerclm_def,                   only : ntrcaerm
 
 !
       implicit   none
@@ -3499,7 +3499,7 @@
 !  --- ...  invoke gocart aerosol initialization
 
 
-      if (KCM /= ntrcaer ) then
+      if (KCM /= ntrcaerm ) then
         print *, 'ERROR in # of gocart aer species',KCM
         stop 3000
       endif
