@@ -1218,6 +1218,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [gq0]
   standard_name = tracer_concentration_updated_by_physics
   long_name = tracer concentration updated by physics
@@ -1427,6 +1436,15 @@
   standard_name = ice_water_mixing_ratio_save
   long_name = cloud ice water mixing ratio before entering a physics scheme
   units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[save_tcp]
+  standard_name = air_temperature_save_from_cumulus_paramterization
+  long_name = air temperature after cumulus parameterization
+  units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -1709,7 +1727,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = T
+  optional = F
 [con_rd]
   standard_name = gas_constant_dry_air
   long_name = ideal gas constant for dry air
@@ -1727,7 +1745,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = T
+  optional = F
 [spechum]
   standard_name = water_vapor_specific_humidity
   long_name = water vapor specific humidity

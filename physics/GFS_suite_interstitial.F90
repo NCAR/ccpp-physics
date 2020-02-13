@@ -463,13 +463,13 @@
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv,       &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
-               xlat, gq0, imp_physics, imp_physics_mg,                  &
+               xlat, gt0, gq0, imp_physics, imp_physics_mg,             &
                imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
                imp_physics_gfdl, imp_physics_thompson,                  &
                imp_physics_wsm6, imp_physics_fer_hires, prsi,           &
                prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,      &
                work1, work2, kpbl, kinver,clw, rhc, save_qc, save_qi,   &
-               errmsg, errflg)
+               save_tcp, errmsg, errflg)
 
       use machine, only: kind_phys
 
@@ -487,11 +487,13 @@
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: prsl, prslk
       real(kind=kind_phys), dimension(im, levs+1),      intent(in) :: prsi
       real(kind=kind_phys), dimension(im),              intent(in) :: xlat
+      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
       real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
+      real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_tcp ! ONLY ALLOCATE FOR THOMPSON! TODO
       real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
 
       character(len=*), intent(out) :: errmsg
@@ -615,8 +617,9 @@
       elseif (imp_physics == imp_physics_thompson) then
         do k=1,levs
           do i=1,im
-            clw(i,k,1) = gq0(i,k,ntiw)                    ! ice
-            clw(i,k,2) = gq0(i,k,ntcw)                    ! water
+            clw(i,k,1)    = gq0(i,k,ntiw)                    ! ice
+            clw(i,k,2)    = gq0(i,k,ntcw)                    ! water
+            save_tcp(i,k) = gt0(i,k)
           enddo
         enddo
         if(ltaerosol) then
@@ -625,6 +628,7 @@
         else
           save_qi(:,:) = clw(:,:,1)
         endif
+
       elseif (imp_physics == imp_physics_wsm6 .or. imp_physics == imp_physics_mg .or. imp_physics == imp_physics_fer_hires) then
         do k=1,levs
           do i=1,im
@@ -686,7 +690,7 @@
       real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
       real(kind=kind_phys),                           intent(in) :: con_rd
-      real(kind=kind_phys), dimension(im,levs),       intent(in), optional :: nwfa, save_tcp
+      real(kind=kind_phys), dimension(:,:),           intent(in) :: nwfa, save_tcp
       real(kind=kind_phys), dimension(im,levs),       intent(in) :: spechum
 
       ! dqdti may not be allocated
@@ -699,7 +703,7 @@
       ! local variables
       integer :: i,k,n,tracers
 
-      real(kind=kind_phys), dimension(im,levs) :: rho_dryar
+      real(kind=kind_phys), dimension(im,levs) :: rho_dryair
       real(kind=kind_phys), dimension(im,levs) :: qv_mp !< kg kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: qc_mp !< kg kg-1 (dry mixing ratio)
       real(kind=kind_phys), dimension(im,levs) :: qi_mp !< kg kg-1 (dry mixing ratio)
@@ -746,28 +750,31 @@
             enddo
           enddo
 
-          if (imp_physics == imp_physics_thompson) then
+          if (imp_physics == imp_physics_thompson .and. (ntlnc>0 .or. ntinc>0)) then
              do k=1,levs
                do i=1,im
                  !> - Density of air in kg m-3
-                 rho_dryar(i,k) = prsl(i,k)/(con_rd*save_tcp(i,k))
-               
-                 !> - Convert specific humidity/moist mixing ratios to dry mixing ratios
+                 rho_dryair(i,k) = prsl(i,k)/(con_rd*save_tcp(i,k))
+                 !> - Convert specific humidity to dry mixing ratio
                  qv_mp(i,k) = spechum(i,k)/(1.0_kind_phys-spechum(i,k))
-                 qc_mp(i,k) = save_qc(i,k)/(1.0_kind_phys-spechum(i,k))
-                 qi_mp(i,k) = save_qi(i,k)/(1.0_kind_phys-spechum(i,k))
-
-                 !> - Convert number concentrations from moist to dry
-                 nc_mp(i,k) = gq0(i,k,ntlnc)/(1.0_kind_phys-spechum(i,k))
-                 ni_mp(i,k) = gq0(i,k,ntinc)/(1.0_kind_phys-spechum(i,k)) 
-
-
-                 nc_mp(i,k) = nc_mp(i,k) + max(0.0, make_DropletNumber(qc_mp(i,k) * rho_dryar(i,k), nwfa(i,k)) * (1.0/rho_dryar(i,k)))
-                 ni_mp(i,k) = ni_mp(i,k) + max(0.0, make_IceNumber(qi_mp(i,k) * rho_dryar(i,k), save_tcp(i,k)) * (1.0/rho_dryar(i,k)))
-
-                 !> - Convert number concentrations from dry to moist
-                 gq0(i,k,ntlnc) = nc_mp(i,k)/(1.0_kind_phys+qv_mp(i,k))
-                 gq0(i,k,ntinc) = ni_mp(i,k)/(1.0_kind_phys+qv_mp(i,k))
+                 if (ntlnc>0) then
+                   !> - Convert moist mixing ratio to dry mixing ratio
+                   qc_mp(i,k) = save_qc(i,k)/(1.0_kind_phys-spechum(i,k))
+                   !> - Convert number concentration from moist to dry
+                   nc_mp(i,k) = gq0(i,k,ntlnc)/(1.0_kind_phys-spechum(i,k))
+                   nc_mp(i,k) = nc_mp(i,k) + max(0.0, make_DropletNumber(qc_mp(i,k) * rho_dryair(i,k), nwfa(i,k)) * (1.0/rho_dryair(i,k)))
+                   !> - Convert number concentrations from dry to moist
+                   gq0(i,k,ntlnc) = nc_mp(i,k)/(1.0_kind_phys+qv_mp(i,k))
+                 endif
+                 if (ntinc>0) then
+                   !> - Convert moist mixing ratio to dry mixing ratio
+                   qi_mp(i,k) = save_qi(i,k)/(1.0_kind_phys-spechum(i,k))
+                   !> - Convert number concentration from moist to dry
+                   ni_mp(i,k) = gq0(i,k,ntinc)/(1.0_kind_phys-spechum(i,k)) 
+                   ni_mp(i,k) = ni_mp(i,k) + max(0.0, make_IceNumber(qi_mp(i,k) * rho_dryair(i,k), save_tcp(i,k)) * (1.0/rho_dryair(i,k)))
+                   !> - Convert number concentrations from dry to moist
+                   gq0(i,k,ntinc) = ni_mp(i,k)/(1.0_kind_phys+qv_mp(i,k))
+                 endif
                enddo
              enddo
           endif
