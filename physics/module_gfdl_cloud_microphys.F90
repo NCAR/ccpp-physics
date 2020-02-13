@@ -3320,7 +3320,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
             else
                 tc (k) = tk (k) - tice
                 vti (k) = (3. + log10 (qi (k) * den (k))) * (tc (k) * (aa * tc (k) + bb) + cc) + dd * tc (k) + ee
-                vti (k) = vi0 * exp (log_10 * vti (k)) * 0.8 
+                vti (k) = vi0 * exp (log_10 * vti (k)) * 0.9
                 vti (k) = min (vi_max, max (vf_min, vti (k)))
             endif
         enddo
