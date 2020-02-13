@@ -3584,33 +3584,33 @@
                                      
       RH_00L = 0.7  + SQRT(1./(25.0+gridkm*gridkm*gridkm)) 
       RH_00O = 0.81 + SQRT(1./(50.0+gridkm*gridkm*gridkm)) 
-          
-      DO j = jts,jte                           
-      DO k = kts,kte                      
-      DO i = its,ite       
-         RHI_max = 0.0             
-         CLDFRA(I,K,J) = 0.0              
-                                                           
+
+      DO j = jts,jte
+      DO k = kts,kte
+      DO i = its,ite 
+         RHI_max = 0.0
+         CLDFRA(I,K,J) = 0.0
+
          if (qc(i,k,j).gt.1.E-6 .or. qi(i,k,j).ge.1.E-7 .or.qs(i,k,j)   &
-     &       .gt.1.E-5) then                      
-            CLDFRA(I,K,J) = 1.0                                                                            
-            qvsat(i,k,j) = qv(i,k,j)                                                                       
-         else                                                                                              
-            TK   = t(i,k,j)                                                                                
-            TC   = TK - 273.16                                                                             
-                                                                                                           
-            qvsw = rslf(P(i,k,j), TK)                                                                      
-            qvsi = rsif(P(i,k,j), TK)                                                                      
-                                                                                                           
-            if (tc .ge. -12.0) then                                                                        
-               qvsat(i,k,j) = qvsw                                                                         
-            elseif (tc .lt. -20.0) then                                                                    
-               qvsat(i,k,j) = qvsi                                                                         
-            else                                                                                           
-               qvsat(i,k,j) = qvsw - (qvsw-qvsi)*(-12.0-tc)/(-12.0+20.)                                    
-            endif                                                                                          
-            RHUM = MAX(0.01, MIN(qv(i,k,j)/qvsat(i,k,j), 0.9999))                                          
-                                                                                                           
+     &       .gt.1.E-5) then
+            CLDFRA(I,K,J) = 1.0
+            qvsat(i,k,j) = qv(i,k,j)
+         else
+            TK   = t(i,k,j)
+            TC   = TK - 273.16
+
+            qvsw = rslf(P(i,k,j), TK)
+            qvsi = rsif(P(i,k,j), TK)
+
+            if (tc .ge. -12.0) then
+               qvsat(i,k,j) = qvsw
+            elseif (tc .lt. -20.0) then
+               qvsat(i,k,j) = qvsi
+            else
+               qvsat(i,k,j) = qvsw - (qvsw-qvsi)*(-12.0-tc)/(-12.0+20.)
+            endif
+            RHUM = MAX(0.01, MIN(qv(i,k,j)/qvsat(i,k,j), 0.9999))
+                                                                                           
             IF ((XLAND(I,J)-1.5).GT.0.) THEN         !--- Ocean                        
                RH_00 = RH_00O                                                                              
             ELSE                                     !--- Land                         
