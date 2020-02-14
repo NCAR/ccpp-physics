@@ -136,7 +136,7 @@ contains
         tprcp_ocn(i) = tprcp(i)
         tprcp_lnd(i) = tprcp(i)
         tprcp_ice(i) = tprcp(i)
-        if (wet(i) .or. icy(i)) then                   ! Water
+        if (wet(i)) then                   ! Water
             zorl_ocn(i) = zorlo(i)
             tsfc_ocn(i) = tsfco(i)
            tsurf_ocn(i) = tsfco(i)
