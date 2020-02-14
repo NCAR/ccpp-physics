@@ -27,11 +27,10 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, nCol, nLev, nDay, idxday, coszen, p_lay, t_lay,      &
-       p_lev, sw_gas_props, gas_concentrations, sw_optical_props_clrsky, sfc_alb_nir_dir,    &
-       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw,                    &
-       sw_optical_props_clouds, sw_optical_props_aerosol, rrtmgp_nGases, active_gases_array, &
-       scmpsw, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky,       &
-       hsw0, hswb, errmsg, errflg)
+       p_lev, sw_gas_props, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,       &
+       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clouds,            &
+       sw_optical_props_aerosol, rrtmgp_nGases, active_gases_array, scmpsw, fluxswUP_allsky, &
+       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, hsw0, hswb, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -51,10 +50,9 @@ contains
          p_lev                      ! Pressure @ model layer-interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props               ! RRTMGP DDT: SW spectral information
-    type(ty_gas_concs),intent(in) :: &
-         gas_concentrations         ! RRTMGP DDT: trace gas concentrations (vmr)
     type(ty_optical_props_2str),intent(inout) :: &
-         sw_optical_props_clrsky, & ! RRTMGP DDT: shortwave clear-sky radiative properties 
+         sw_optical_props_clrsky    ! RRTMGP DDT: shortwave clear-sky radiative properties 
+   type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_clouds, & ! RRTMGP DDT: shortwave cloud radiative properties 
          sw_optical_props_aerosol   ! RRTMGP DDT: shortwave aerosol radiative properties
     real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
@@ -107,16 +105,12 @@ contains
     real(kind_phys), dimension(ncol,NLev) :: vmrTemp
     logical :: l_ClrSky_HR=.false., l_AllSky_HR_byband=.false., l_scmpsw=.false., top_at_1
     integer :: iGas,iSFC,iTOA,iBand
-    type(ty_optical_props_2str)  :: &
-         sw_optical_props_clouds_daylit,  & ! RRTMGP DDT: longwave cloud radiative properties 
-         sw_optical_props_clrsky_daylit, & ! RRTMGP DDT: longwave clear-sky radiative properties 
-         sw_optical_props_aerosol_daylit   ! RRTMGP DDT: longwave aerosol radiative properties
-    type(ty_gas_concs) :: &
-         gas_concentrations_daylit    ! RRTMGP DDT: trace gas concentrations   (vmr)
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg  = 0
+
+    if (.not. doSWrad) return
 
     ! Initialize output fluxes
     fluxswUP_allsky(:,:)   = 0._kind_phys
@@ -124,7 +118,6 @@ contains
     fluxswUP_clrsky(:,:)   = 0._kind_phys
     fluxswDOWN_clrsky(:,:) = 0._kind_phys
 
-    if (.not. doSWrad) return
     if (nDay .gt. 0) then
 
        ! Vertical ordering?
@@ -145,15 +138,6 @@ contains
           scmpsw = cmpfsw_type (0., 0., 0., 0., 0., 0.)
        endif
        
-       ! Subset the gas concentrations, only need daylit points.
-       call check_error_msg('rrtmgp_sw_rte_run',gas_concentrations_daylit%init(active_gases_array))
-       do iGas=1,rrtmgp_nGases
-          call check_error_msg('rrtmgp_sw_rte_run',&
-               gas_concentrations%get_vmr(trim(active_gases_array(iGas)),vmrTemp))
-          call check_error_msg('rrtmgp_sw_rte_run',&
-               gas_concentrations_daylit%set_vmr(trim(active_gases_array(iGas)),vmrTemp(idxday(1:nday),:)))
-       enddo
-
        ! Initialize RRTMGP DDT containing 2D(3D) fluxes
        fluxSW_up_allsky(:,:,:)     = 0._kind_phys
        fluxSW_dn_allsky(:,:,:)     = 0._kind_phys
@@ -205,7 +189,7 @@ contains
        ! All-sky fluxes (clear-sky + clouds)
        call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds%increment(sw_optical_props_clrsky))
        ! Delta-scale optical properties
-       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clouds%delta_scale())
+       call check_error_msg('rrtmgp_sw_rte_run',sw_optical_props_clrsky%delta_scale())
        call check_error_msg('rrtmgp_sw_rte_run',rte_sw(     &
             sw_optical_props_clrsky,      & ! IN  - optical-properties
             top_at_1,                     & ! IN  - veritcal ordering flag

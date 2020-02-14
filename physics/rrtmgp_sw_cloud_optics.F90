@@ -392,12 +392,6 @@ contains
        if (cld_optics_scheme .gt. 0) then
           ! RRTMGP cloud-optics.
           call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_cloud_props%cloud_optics(&
-               !nday,                         & ! IN  - Number of daylit gridpoints
-               !nLev,                         & ! IN  - Number of vertical layers
-               !sw_cloud_props%get_nband(),   & ! IN  - Number of SW bands
-               !nrghice,                      & ! IN  - Number of ice-roughness categories
-               !liqmask,                      & ! IN  - Liquid-cloud mask
-               !icemask,                      & ! IN  - Ice-cloud mask
                cld_lwp(idxday(1:nday),:),    & ! IN  - Cloud liquid water path
                cld_iwp(idxday(1:nday),:),    & ! IN  - Cloud ice water path
                cld_reliq(idxday(1:nday),:),  & ! IN  - Cloud liquid effective radius
@@ -406,6 +400,9 @@ contains
                                                !       in each band (tau,ssa,g)
        else
           ! RRTMG cloud-optics
+          tau_cld(:,:,:) = 0._kind_phys
+          ssa_cld(:,:,:) = 0._kind_phys
+          asy_cld(:,:,:) = 0._kind_phys
           if (any(cld_frac .gt. 0)) then
              call rrtmg_sw_cloud_optics(nday, nLev, sw_gas_props%get_nband(),       &
                   cld_lwp(idxday(1:nday),:), cld_reliq(idxday(1:nday),:),           &
@@ -413,10 +410,10 @@ contains
                   cld_rwp(idxday(1:nday),:), cld_rerain(idxday(1:nday),:),          &
                   cld_swp(idxday(1:nday),:), cld_resnow(idxday(1:nday),:),          &
                   cld_frac(idxday(1:nday),:), tau_cld, ssa_cld, asy_cld)
-             sw_optical_props_cloudsByBand%tau(:,:,:) = tau_cld
-             sw_optical_props_cloudsByBand%ssa(:,:,:) = ssa_cld
-             sw_optical_props_cloudsByBand%g(:,:,:)   = asy_cld
           endif
+          sw_optical_props_cloudsByBand%tau(:,:,:) = tau_cld
+          sw_optical_props_cloudsByBand%ssa(:,:,:) = ssa_cld
+          sw_optical_props_cloudsByBand%g(:,:,:)   = asy_cld
        endif
 
        ! All-sky SW optical depth ~0.55microns

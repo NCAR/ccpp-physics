@@ -109,14 +109,6 @@
   type = ty_optical_props_2str
   intent = in
   optional = F
-[gas_concentrations]
-  standard_name = Gas_concentrations_for_RRTMGP_suite
-  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_concs
-  intent = in
-  optional = F
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
