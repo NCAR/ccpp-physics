@@ -270,33 +270,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[qc]
-  standard_name = cloud_condensed_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[qi]
-  standard_name = ice_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[nwfa]
-  standard_name = water_friendly_aerosol_number_concentration
-  long_name = number concentration of water-friendly aerosols
-  units = kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = T
 [imfdeepcnv]
   standard_name = flag_for_mass_flux_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme

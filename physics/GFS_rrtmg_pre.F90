@@ -20,7 +20,7 @@
       ! in the CCPP version - they are defined in the interstitial_create routine
       subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   & ! input
           Tbd, Cldprop, Coupling,                                    &
-          Radtend, qc, qi, nwfa,                                     & ! input/output
+          Radtend,                                                   & ! input/output
           imfdeepcnv, imfdeepcnv_gf,                                 &
           f_ice, f_rain, f_rimef, flgmin, cwm,                       & ! F-A mp scheme only
           lm, im, lmk, lmp,                                          & ! input
@@ -87,11 +87,6 @@
       type(GFS_cldprop_type),              intent(in)    :: Cldprop
       type(GFS_coupling_type),             intent(in)    :: Coupling
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: qc
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: qi
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: nwfa
-
-
       integer,              intent(in)  :: im, lm, lmk, lmp
       integer,              intent(in)  :: imfdeepcnv, imfdeepcnv_gf
       integer,              intent(out) :: kd, kt, kb
@@ -154,7 +149,7 @@
       integer, intent(out) :: errflg
 
       ! Local variables
-      integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl, ncndl, ntlnc, ntinc
+      integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl, ncndl, ntlnc, ntinc, ntwa
 
       integer :: i, j, k, k1, k2, lsk, lv, n, itop, ibtc, LP1, lla, llb, lya, lyb
 
@@ -170,7 +165,7 @@
       ! for Thompson MP
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
-                                  qi_mp, qs_mp, nc_mp, ni_mp
+                                  qi_mp, qs_mp, nc_mp, ni_mp, nwfa
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP+1) :: tem2db
 !     real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP+1) :: hz
@@ -205,6 +200,7 @@
       ntrw  = Model%ntrw
       ntsw  = Model%ntsw
       ntgl  = Model%ntgl
+      ntwa  = Model%ntwa
       ncndl = min(Model%ncnd,4)
 
       LP1 = LM + 1               ! num of in/out levels
@@ -297,15 +293,6 @@
           tracer1(:,k1,j) = max(0.0, Statein%qgrs(:,k2,j))
         enddo
       enddo
-      if ((Model%do_mynnedmf.or. (imfdeepcnv == imfdeepcnv_gf)) .and. Model%kdt > 1) then
-      ! for MYNN PBL and GF convective include subgrid clouds into tracer1 
-        do k = 1, LM
-          k1 = k + kd
-          k2 = k + lsk
-          tracer1(:,k1,ntcw) = max(0.0, qc(:,k2))
-          tracer1(:,k1,ntiw) = max(0.0, qi(:,k2))
-        enddo
-      endif
 !
       if (ivflip == 0) then                                ! input data from toa to sfc
         do i = 1, IM
@@ -595,6 +582,7 @@
               qs_mp (i,k) = tracer1(i,k,ntsw)/(1.-qvs)
               nc_mp (i,k) = tracer1(i,k,ntlnc)/(1.-qvs)
               ni_mp (i,k) = tracer1(i,k,ntinc)/(1.-qvs)
+              nwfa  (i,k) = tracer1(i,k,ntwa)
             endif
             enddo
           enddo
@@ -731,7 +719,7 @@
                endif
               end do
             end do
-            ! Call Thompson's subroutine to compoute effective radii
+            ! Call Thompson's subroutine to compute effective radii
             do i = 1, im
               call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),     &
                                    nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:),   &
@@ -747,32 +735,31 @@
                  re_snow(i,k)  = MAX(9.99, MIN(re_snow(i,k)*1.e6, 999.))
               end do
             end do
-     if(1==2) then
-     write(0,'(a,3e16.7)') " before progclduni: re_cloud min/mean/max =", &
-       minval(re_cloud), &
-       sum(re_cloud)/real(size(re_cloud)), &
-       maxval(re_cloud)
-     write(0,'(a,3e16.7)') " before progclduni: re_ice min/mean/max =", &
-       minval(re_ice), &
-       sum(re_ice)/real(size(re_ice)), &
-       maxval(re_ice)
-     write(0,'(a,3e16.7)') " before progclduni: clouds3 min/mean/max =", &
-       minval(clouds3), &
-       sum(clouds3)/real(size(clouds3)), &
-       maxval(clouds3)
-     write(0,'(a,3e16.7)') " before progclduni: clouds5 min/mean/max =", &
-       minval(clouds5), &
-       sum(clouds5)/real(size(clouds5)), &
-       maxval(clouds5)
-     write(0,'(a,3e16.7)') " before progcld5: phy_f3d cl min/mean/max =", &
-       minval(Tbd%phy_f3d(:,:,Model%nleffr)), & 
-       sum(Tbd%phy_f3d(:,:,Model%nleffr))/real(size(Tbd%phy_f3d(:,:,Model%nleffr))), &
-       maxval(Tbd%phy_f3d(:,:,Model%nleffr))
-     write(0,'(a,3e16.7)')" before progcld5: phy_f3d ice min/mean/max =", &
-       minval(Tbd%phy_f3d(:,:,Model%nieffr)), & 
-       sum(Tbd%phy_f3d(:,:,Model%nieffr))/real(size(Tbd%phy_f3d(:,:,Model%nieffr))), &
-       maxval(Tbd%phy_f3d(:,:,Model%nieffr))
-      endif
+
+     !write(0,'(a,3e16.7)') " before progclduni: re_cloud min/mean/max =", &
+     !  minval(re_cloud), &
+     !  sum(re_cloud)/real(size(re_cloud)), &
+     !  maxval(re_cloud)
+     !write(0,'(a,3e16.7)') " before progclduni: re_ice min/mean/max =", &
+     !  minval(re_ice), &
+     !  sum(re_ice)/real(size(re_ice)), &
+     !  maxval(re_ice)
+     !write(0,'(a,3e16.7)') " before progclduni: clouds3 min/mean/max =", &
+     !  minval(clouds3), &
+     !  sum(clouds3)/real(size(clouds3)), &
+     !  maxval(clouds3)
+     !write(0,'(a,3e16.7)') " before progclduni: clouds5 min/mean/max =", &
+     !  minval(clouds5), &
+     !  sum(clouds5)/real(size(clouds5)), &
+     !  maxval(clouds5)
+     !write(0,'(a,3e16.7)') " before progcld5: phy_f3d cl min/mean/max =", &
+     !  minval(Tbd%phy_f3d(:,:,Model%nleffr)), & 
+     !  sum(Tbd%phy_f3d(:,:,Model%nleffr))/real(size(Tbd%phy_f3d(:,:,Model%nleffr))), &
+     !  maxval(Tbd%phy_f3d(:,:,Model%nleffr))
+     !write(0,'(a,3e16.7)')" before progcld5: phy_f3d ice min/mean/max =", &
+     !  minval(Tbd%phy_f3d(:,:,Model%nieffr)), & 
+     !  sum(Tbd%phy_f3d(:,:,Model%nieffr))/real(size(Tbd%phy_f3d(:,:,Model%nieffr))), &
+     !  maxval(Tbd%phy_f3d(:,:,Model%nieffr))
 
             do k=1,lm
               k1 = k + kd
