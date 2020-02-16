@@ -3,7 +3,7 @@
 !! updraft parcel properties for thermals driven by surface heating 
 !! for use in the TKE-EDMF PBL scheme (updated version).
 
-!>\ingroup satmedmfq
+!>\ingroup satmedmfvdifq
 !! This subroutine computes mass flux and updraft parcel properties for
 !! thermals driven by surface heating. 
 !!\section mfpbltq_gen GFS mfpblt General Algorithm 
