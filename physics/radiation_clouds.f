@@ -3610,104 +3610,99 @@
                qvsat(i,k,j) = qvsw - (qvsw-qvsi)*(-12.0-tc)/(-12.0+20.)
             endif
             RHUM = MAX(0.01, MIN(qv(i,k,j)/qvsat(i,k,j), 0.9999))
-                                                                                           
-            IF ((XLAND(I,J)-1.5).GT.0.) THEN         !--- Ocean                        
-               RH_00 = RH_00O                                                                              
-            ELSE                                     !--- Land                         
-               RH_00 = RH_00L                                                                              
-            ENDIF                                                                                          
-                                                                                                           
-            if (tc .ge. -12.0) then                                                                        
-              RHUM = MIN(0.999, RHUM)                                                                     
-              CLDFRA(I,K,J) = MAX(0.0, 1.0-SQRT((1.0-RHUM)/(1.-RH_00)))                                   
-            elseif (tc.lt.-12..and.tc.gt.-70. .and. RHUM.gt.RH_00L) then                                   
-              RHUM = MAX(0.01, MIN(qv(i,k,j)/qvsat(i,k,j), 1.0 - 1.E-6))                                  
-              CLDFRA(I,K,J) = MAX(0., 1.0-SQRT((1.0-RHUM)/(1.0-RH_00L)))                                  
-            endif                                                                                          
-            CLDFRA(I,K,J) = MIN(0.90, CLDFRA(I,K,J))                                                       
-                                                                                                           
-         endif                                                                                             
-      ENDDO                                                                                                
-      ENDDO                                                                                                
-      ENDDO                                                                                                
-                                                                                              
-                                                                                                           
-!..Prepare for a 1-D column to find various cloud layers.                                                  
-                                                                                                           
-      DO j = jts,jte                                                                                       
-      DO i = its,ite                                                                                       
-!        if (i.gt.10.and.i.le.20 .and. j.gt.10.and.j.le.20) then                                           
-!          debug_flag = .true.                                                                             
-!        else                                                                                              
-!           debug_flag = .false.                                                                           
-!        endif                                                                                             
-                                                                                                           
-!        if (rand_perturb_on .eq. 1) then                                                                  
-!           entrmnt = MAX(0.01, MIN(0.99, 0.5 + rand_pert(i,1,j)*0.5))                                     
-!        else                                                                                              
-            entrmnt = 0.5                                                                                  
-!        endif                                                                                             
-                                                                                                           
-         DO k = kts,kte                                                                                    
-            qvs1d(k) = qvsat(i,k,j)                                                                        
-            cfr1d(k) = cldfra(i,k,j)                                                                       
-            T1d(k) = t(i,k,j)                                                                              
-            P1d(k) = p(i,k,j)                                                                              
-            R1d(k) = rho(i,k,j)                                                                            
-            qc1d(k) = qc(i,k,j)                                                                            
-            qi1d(k) = qi(i,k,j)                                                                            
-            qs1d(k) = qs(i,k,j)                                                                            
-         ENDDO                                                                                             
-                                                                                                           
-!     if (debug_flag) then                                                                                 
-!       WRITE (dbg_msg,*) 'DEBUG-GT: finding cloud layers at point  (',  i, ', ', j, ')'                    
-!       CALL wrf_debug (150, dbg_msg)                                                                      
-!     endif                                                                                                
+
+            IF ((XLAND(I,J)-1.5).GT.0.) THEN         !--- Ocean
+               RH_00 = RH_00O
+            ELSE                                     !--- Land
+               RH_00 = RH_00L
+            ENDIF
+
+            if (tc .ge. -12.0) then
+              RHUM = MIN(0.999, RHUM)
+              CLDFRA(I,K,J) = MAX(0.0, 1.0-SQRT((1.0-RHUM)/(1.-RH_00)))
+            elseif (tc.lt.-12..and.tc.gt.-70. .and. RHUM.gt.RH_00L) then
+              RHUM = MAX(0.01, MIN(qv(i,k,j)/qvsat(i,k,j), 1.0 - 1.E-6))
+              CLDFRA(I,K,J) = MAX(0., 1.0-SQRT((1.0-RHUM)/(1.0-RH_00L)))
+            endif
+            CLDFRA(I,K,J) = MIN(0.90, CLDFRA(I,K,J))
+
+         endif
+      ENDDO
+      ENDDO
+      ENDDO
+
+
+!..Prepare for a 1-D column to find various cloud layers.
+
+      DO j = jts,jte
+      DO i = its,ite
+!        if (i.gt.10.and.i.le.20 .and. j.gt.10.and.j.le.20) then
+!          debug_flag = .true.
+!        else
+!           debug_flag = .false.
+!        endif
+
+!        if (rand_perturb_on .eq. 1) then
+!           entrmnt = MAX(0.01, MIN(0.99, 0.5 + rand_pert(i,1,j)*0.5))
+!        else
+            entrmnt = 0.5
+!        endif
+
+         DO k = kts,kte
+            qvs1d(k) = qvsat(i,k,j)
+            cfr1d(k) = cldfra(i,k,j)
+            T1d(k) = t(i,k,j)
+            P1d(k) = p(i,k,j)
+            R1d(k) = rho(i,k,j)
+            qc1d(k) = qc(i,k,j)
+            qi1d(k) = qi(i,k,j)
+            qs1d(k) = qs(i,k,j)
+         ENDDO
+
+!     if (debug_flag) then
+!       WRITE (dbg_msg,*) 'DEBUG-GT: finding cloud layers at point  (',  i, ', ', j, ')' 
+!       CALL wrf_debug (150, dbg_msg)
+!     endif 
          call find_cloudLayers(qvs1d, cfr1d, T1d, P1d, R1d, entrmnt,    &
      &                         debug_flag, qc1d, qi1d, qs1d, kts,kte)  
-                                           
-         DO k = kts,kte                                    
-            cldfra(i,k,j) = cfr1d(k)           
-            qc(i,k,j) = qc1d(k)                                                                            
-            qi(i,k,j) = qi1d(k)                                        
-         ENDDO                                                                                             
-      ENDDO                                                                                                
-      ENDDO                                                                                                
-                                                                                                           
-                                                                                                           
-      END SUBROUTINE cal_cldfra3                                                                           
-                                                                                                           
-                                                                                                           
-!+---+-----------------------------------------------------------------+                                   
-!..From cloud fraction array, find clouds of multi-level depth and
-!compute                                 
-!.. a reasonable value of LWP or IWP that might be contained in that
-!depth,                                
-!.. unless existing LWC/IWC is already there.                                                              
-                                                                     
+
+         DO k = kts,kte
+            cldfra(i,k,j) = cfr1d(k)
+            qc(i,k,j) = qc1d(k)
+            qi(i,k,j) = qi1d(k)
+         ENDDO
+      ENDDO
+      ENDDO
+
+
+      END SUBROUTINE cal_cldfra3
+!+---+-----------------------------------------------------------------+
+!..From cloud fraction array, find clouds of multi-level depth and compute
+!.. a reasonable value of LWP or IWP that might be contained in that depth,
+!.. unless existing LWC/IWC is already there.
+
       SUBROUTINE find_cloudLayers(qvs1d, cfr1d, T1d, P1d, R1d, entrmnt, &
      &                            debugfl, qc1d, qi1d, qs1d, kts,kte) 
-!                                                                                                          
-      IMPLICIT NONE                                                                                        
-!                                                                                                          
-      INTEGER, INTENT(IN):: kts, kte                                                                       
-      LOGICAL, INTENT(IN):: debugfl                                                                        
-      REAL, INTENT(IN):: entrmnt                                                                           
-      REAL, DIMENSION(kts:kte), INTENT(IN):: qvs1d,T1d,P1d,R1d                                             
-      REAL, DIMENSION(kts:kte), INTENT(INOUT):: cfr1d                                                      
-      REAL, DIMENSION(kts:kte), INTENT(INOUT):: qc1d, qi1d, qs1d                                           
-                                                                                                           
-!..Local vars.                                                                                             
-      REAL, DIMENSION(kts:kte):: theta, dz                                                                 
-      REAL:: Z1, Z2, theta1, theta2, ht1, ht2                                                              
-      INTEGER:: k, k2, k_tropo, k_m12C, k_m40C, k_cldb, k_cldt, kbot                                       
-      LOGICAL:: in_cloud                                                                                   
-      character*512 dbg_msg                                                                                
-                                                                                                           
-!+---+                                                                                                     
-                                                                                                           
-      k_m12C = 0                                                                                           
-      k_m40C = 0                                                                                           
+!
+      IMPLICIT NONE
+
+      INTEGER, INTENT(IN):: kts, kte
+      LOGICAL, INTENT(IN):: debugfl
+      REAL, INTENT(IN):: entrmnt
+      REAL, DIMENSION(kts:kte), INTENT(IN):: qvs1d,T1d,P1d,R1d
+      REAL, DIMENSION(kts:kte), INTENT(INOUT):: cfr1d
+      REAL, DIMENSION(kts:kte), INTENT(INOUT):: qc1d, qi1d, qs1d
+
+!..Local vars.
+      REAL, DIMENSION(kts:kte):: theta, dz
+      REAL:: Z1, Z2, theta1, theta2, ht1, ht2
+      INTEGER:: k, k2, k_tropo, k_m12C, k_m40C, k_cldb, k_cldt, kbot
+      LOGICAL:: in_cloud
+      character*512 dbg_msg
+
+
+      k_m12C = 0
+      k_m40C = 0
       DO k = kte, kts, -1                                                                                  
          theta(k) = T1d(k)*((100000.0/P1d(k))**(287.05/1004.))                                             
          if (T1d(k)-273.16 .gt. -40.0 .and. P1d(k).gt.7000.0) k_m40C =  &
