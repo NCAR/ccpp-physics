@@ -514,33 +514,6 @@
       errmsg = ''
       errflg = 0
 
-      !GF* The following section (initializing convective variables) is already executed in GFS_typedefs%interstitial_phys_reset
-      ! do k=1,levs
-      !   do i=1,im
-      !     clw(i,k,1) = 0.0
-      !     clw(i,k,2) = -999.9
-      !   enddo
-      ! enddo
-      ! if (Model%imfdeepcnv >= 0 .or.  Model%imfshalcnv > 0  .or. &
-      !     (Model%npdf3d == 3     .and. Model%num_p3d   == 4) .or. &
-      !     (Model%npdf3d == 0     .and. Model%ncnvcld3d == 1) ) then
-      !   do k=1,levs
-      !     do i=1,im
-      !       cnvc(i,k)  = 0.0
-      !       cnvw(i,k)  = 0.0
-      !     enddo
-      !   enddo
-      ! endif
-      ! if(imp_physics == 8) then
-      !   if(Model%ltaerosol) then
-      !     ice00 (:,:) = 0.0
-      !     liq0  (:,:) = 0.0
-      !   else
-      !     ice00 (:,:) = 0.0
-      !   endif
-      ! endif
-      !*GF
-
       if (cscnv .or. satmedmf .or. trans_trac ) then
         tracers = 2
         do n=2,ntrac
@@ -598,6 +571,8 @@
             enddo
           enddo
         endif
+      else
+        rhc(:,:) = 1.0
       endif
 
       if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_zhao_carr_pdf) then   ! zhao-carr microphysics
@@ -628,7 +603,6 @@
         else
           save_qi(:,:) = clw(:,:,1)
         endif
-
       elseif (imp_physics == imp_physics_wsm6 .or. imp_physics == imp_physics_mg .or. imp_physics == imp_physics_fer_hires) then
         do k=1,levs
           do i=1,im
@@ -636,15 +610,7 @@
             clw(i,k,2) = gq0(i,k,ntcw)                    ! water
           enddo
         enddo
-      else       ! if_ntcw
-        !GF* never executed unless imp_physics = imp_physics_zhao_carr or imp_physics_zhao_carr_pdf
-        ! do i=1,im
-        !   psautco_l(i) = Model%psautco(1)*work1(i) + Model%psautco(2)*work2(i)
-        !   prautco_l(i) = Model%prautco(1)*work1(i) + Model%prautco(2)*work2(i)
-        ! enddo
-        !*GF
-        rhc(:,:) = 1.0
-      endif   ! end if_ntcw
+      endif
 
     end subroutine GFS_suite_interstitial_3_run
 
