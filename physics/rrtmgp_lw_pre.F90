@@ -29,7 +29,7 @@ contains
 !> \section arg_table_rrtmgp_lw_pre_run
 !! \htmlinclude rrtmgp_lw_pre.html
 !!
-  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, lon, lat, lsmask, zorl, snowd, sncovr, tsfc, &
+  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, lon, lat, slmsk, zorl, snowd, sncovr, tsfc, &
        nmtvr, hprime, lw_gas_props, sfc_emiss_byband, errmsg, errflg)
     
     ! Inputs
@@ -41,7 +41,7 @@ contains
     real(kind_phys), dimension(nCol), intent(in) :: &
          lon,               & ! Longitude
          lat,               & ! Latitude
-         lsmask,            & ! Land/sea/sea-ice mask
+         slmsk,            & ! Land/sea/sea-ice mask
          zorl,              & ! Surface roughness length (cm)
          snowd,             & ! water equivalent snow depth (mm)
          sncovr,            & ! Surface snow are fraction (1)
@@ -72,7 +72,7 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (lon, lat, lsmask, snowd, sncovr, zorl, tsfc, tsfc, hprime, nCol, sfc_emiss)
+    call setemis (lon, lat, slmsk, snowd, sncovr, zorl, tsfc, tsfc, hprime, nCol, sfc_emiss)
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()
