@@ -1017,14 +1017,15 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg)
+                              errmsg, errflg, reset, kdt)
 
       implicit none
 
 !..Subroutine arguments
       INTEGER, INTENT(IN):: ids,ide, jds,jde, kds,kde, &
                             ims,ime, jms,jme, kms,kme, &
-                            its,ite, jts,jte, kts,kte
+                            its,ite, jts,jte, kts,kte, &
+                            kdt
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
                           qv, qc, qr, qi, qs, qg, ni, nr
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
@@ -1055,6 +1056,7 @@ MODULE module_mp_thompson
                           vt_dbz_wt
       LOGICAL, OPTIONAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in
+      LOGICAL, INTENT (IN) :: reset
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
@@ -1077,6 +1079,8 @@ MODULE module_mp_thompson
       INTEGER:: i_start, j_start, i_end, j_end
       LOGICAL, OPTIONAL, INTENT(IN) :: diagflag
       INTEGER, OPTIONAL, INTENT(IN) :: do_radar_ref
+      logical :: melti = .false.
+
       ! CCPP error handling
       character(len=*), optional, intent(  out) :: errmsg
       integer,          optional, intent(  out) :: errflg
@@ -1372,15 +1376,25 @@ MODULE module_mp_thompson
          enddo
 
 !> - Call calc_refl10cm()
+
          IF ( PRESENT (diagflag) ) THEN
          if (diagflag .and. do_radar_ref == 1) then
+!
+         ! Only set melti to true at the output times
+            if (reset) then
+               melti=.true.
+            else
+               melti=.false.
+            endif
+!
           if (present(vt_dbz_wt) .and. present(first_time_step)) then
             call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                t1d, p1d, dBZ, kts, kte, i, j,      &
-                                vt_dbz_wt(i,:,j), first_time_step)
+                                t1d, p1d, dBZ, kts, kte, i, j,      & 
+                                melti, kdt,vt_dbz_wt(i,:,j),            &
+                                first_time_step)
           else
              call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                 t1d, p1d, dBZ, kts, kte, i, j)
+                                 t1d, p1d, dBZ, kts, kte, i, j,melti,kdt)
           end if
           do k = kts, kte
              refl_10cm(i,k,j) = MAX(-35., dBZ(k))
@@ -1587,7 +1601,7 @@ MODULE module_mp_thompson
       INTEGER:: idx_tc, idx_t, idx_s, idx_g1, idx_g, idx_r1, idx_r,     &
                 idx_i1, idx_i, idx_c, idx, idx_d, idx_n, idx_in
 
-      LOGICAL:: melti, no_micro
+      LOGICAL:: no_micro
       LOGICAL, DIMENSION(kts:kte):: L_qc, L_qi, L_qr, L_qs, L_qg
       LOGICAL:: debug_flag
       INTEGER:: nu_c
@@ -5214,12 +5228,13 @@ MODULE module_mp_thompson
 !! of frozen species remaining from what initially existed at the
 !! melting level interface.
       subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,     &
-               t1d, p1d, dBZ, kts, kte, ii, jj, vt_dBZ, first_time_step)
+               t1d, p1d, dBZ, kts, kte, ii, jj, melti,kdt,vt_dBZ,       &
+               first_time_step)
 
       IMPLICIT NONE
 
 !..Sub arguments
-      INTEGER, INTENT(IN):: kts, kte, ii, jj
+      INTEGER, INTENT(IN):: kts, kte, ii, jj, kdt
       REAL, DIMENSION(kts:kte), INTENT(IN)::                            &
                           qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, t1d, p1d
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: dBZ
@@ -5247,7 +5262,7 @@ MODULE module_mp_thompson
       DOUBLE PRECISION:: fmelt_s, fmelt_g
 
       INTEGER:: i, k, k_0, kbot, n
-      LOGICAL:: melti
+      LOGICAL, INTENT(IN):: melti
       LOGICAL, DIMENSION(kts:kte):: L_qr, L_qs, L_qg
 
       DOUBLE PRECISION:: cback, x, eta, f_d
@@ -5400,18 +5415,16 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !..Locate K-level of start of melting (k_0 is level above).
 !+---+-----------------------------------------------------------------+
-      melti = .false.
       k_0 = kts
-      do k = kte-1, kts, -1
-         if ( (temp(k).gt.273.15) .and. L_qr(k)                         &
+      if ( melti ) then
+        K_LOOP:do k = kte-1, kts, -1
+          if ((temp(k).gt.273.15) .and. L_qr(k)                         &
      &                            .and. (L_qs(k+1).or.L_qg(k+1)) ) then
-            k_0 = MAX(k+1, k_0)
-            melti=.true.
-            goto 195
-         endif
-      enddo
- 195  continue
-
+             k_0 = MAX(k+1, k_0)
+             EXIT K_LOOP
+          endif
+        enddo K_LOOP
+      endif
 !+---+-----------------------------------------------------------------+
 !..Assume Rayleigh approximation at 10 cm wavelength. Rain (all temps)
 !.. and non-water-coated snow and graupel when below freezing are

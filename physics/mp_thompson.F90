@@ -38,7 +38,6 @@ module mp_thompson
          ! Interface variables
          integer,                   intent(in)    :: ncol
          integer,                   intent(in)    :: nlev
-
          logical,                   intent(in)    :: is_aerosol_aware
          real(kind_phys), optional, intent(inout) :: nwfa2d(1:ncol)
          real(kind_phys), optional, intent(inout) :: nifa2d(1:ncol)
@@ -138,13 +137,13 @@ module mp_thompson
 !>\ingroup aathompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
-      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,         &
+      subroutine mp_thompson_run(ncol, nlev, kdt, con_g, con_rd,         &
                               spechum, qc, qr, qi, qs, qg, ni, nr,       &
                               is_aerosol_aware, nc, nwfa, nifa,          &
                               nwfa2d, nifa2d,                            &
                               tgrs, prsl, phii, omega, dtp,              &
                               prcp, rain, graupel, ice, snow, sr,        &
-                              refl_10cm, do_radar_ref,                   &
+                              refl_10cm, reset, do_radar_ref,            &
                               re_cloud, re_ice, re_snow,                 &
                               mpicomm, mpirank, mpiroot,                 &
                               errmsg, errflg)
@@ -156,6 +155,7 @@ module mp_thompson
          ! Dimensions and constants
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
+         integer,                   intent(in   ) :: kdt
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
          ! Hydrometeors
@@ -168,12 +168,12 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: ni(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
          ! Aerosols
-         logical,                   intent(in)    :: is_aerosol_aware
-         real(kind_phys), optional, intent(inout) :: nc(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(inout) :: nwfa(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(inout) :: nifa(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(in   ) :: nwfa2d(1:ncol)
-         real(kind_phys), optional, intent(in   ) :: nifa2d(1:ncol)
+         logical,                   intent(in)    :: is_aerosol_aware,reset
+         real(kind_phys), optional, intent(inout) :: nc(:,:)
+         real(kind_phys), optional, intent(inout) :: nwfa(:,:)
+         real(kind_phys), optional, intent(inout) :: nifa(:,:)
+         real(kind_phys), optional, intent(in   ) :: nwfa2d(:)
+         real(kind_phys), optional, intent(in   ) :: nifa2d(:)
          ! State variables and timestep information
          real(kind_phys),           intent(inout) :: tgrs(1:ncol,1:nlev)
          real(kind_phys),           intent(in   ) :: prsl(1:ncol,1:nlev)
@@ -359,7 +359,7 @@ module mp_thompson
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg)
+                              errmsg=errmsg, errflg=errflg, reset=reset, kdt=kdt)
 
          else
             call mp_gt_driver(qv=qv_mp, qc=qc_mp, qr=qr_mp, qi=qi_mp, qs=qs_mp, qg=qg_mp,    &
@@ -376,7 +376,7 @@ module mp_thompson
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg)
+                              errmsg=errmsg, errflg=errflg, reset=reset, kdt=kdt)
          end if
          if (errflg/=0) return
 
