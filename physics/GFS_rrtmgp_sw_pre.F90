@@ -69,7 +69,7 @@ contains
          facwf,            & ! Fractional coverage with weak cosz dependency
          fice,             & ! Ice fraction over open water
          tisfc               ! Sea ice surface skin temperature
-    real(kind_phys), dimension(ncol,nmtvr), intent(in) :: &
+    real(kind_phys), dimension(ncol), intent(in) :: &
          hprime               ! orographic metrics 
     real(kind_phys), dimension(ncol,nlev),intent(in) :: &
          p_lay,             & ! Layer pressure
@@ -147,7 +147,7 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setalb() to setup surface albedo.
     ! #######################################################################################
-    call setalb (slmsk, snowd, sncovr, snoalb, zorl, coszen, tsfc, tsfc, hprime(:,1), alvsf,     &
+    call setalb (slmsk, snowd, sncovr, snoalb, zorl, coszen, tsfc, tsfc, hprime, alvsf,     &
          alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, NCOL, alb1d, pertalb, sfcalb)
        
     ! Approximate mean surface albedo from vis- and nir-  diffuse values.
