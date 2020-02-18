@@ -89,10 +89,10 @@
   intent = in
   optional = F
 [hprime]
-  standard_name = standard_deviation_of_subgrid_orography
-  long_name = standard deviation of subgrid orography
-  units = m
-  dimensions = (horizontal_dimension)
+  standard_name = statistical_measures_of_subgrid_orography
+  long_name = orographic metrics
+  units = various
+  dimensions = (horizontal_dimension,number_of_statistical_measures_of_subgrid_orography)
   type = real
   kind = kind_phys
   intent = in

@@ -136,11 +136,11 @@ contains
     !
 
     ! Apply diffusivity angle adjustment (RRTMG legacy)
-    do iCol=1,nCol
-       do iBand=1,lw_gas_props%get_nband()
-          lw_optical_props_clouds%tau(iCol,1:nLev,iBand) = lw_optical_props_clouds%tau(iCol,1:nLev,iBand)*secdiff(iBand,iCol)
-       enddo
-    enddo
+    !do iCol=1,nCol
+    !   do iBand=1,lw_gas_props%get_nband()
+    !      lw_optical_props_clouds%tau(iCol,1:nLev,iBand) = lw_optical_props_clouds%tau(iCol,1:nLev,iBand)*secdiff(iBand,iCol)
+    !   enddo
+    !enddo
     ! Add cloud optics to clear-sky optics
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%increment(lw_optical_props_clrsky))
 
