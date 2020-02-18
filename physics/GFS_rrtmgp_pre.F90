@@ -361,12 +361,12 @@ contains
     
     ! Initialize and opulate RRTMGP DDT w/ gas-concentrations
     call check_error_msg('sw_gas_optics_init',gas_concentrations%init(active_gases_array))
-    if (isActive_o2)  call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o2),  gas_vmr(:,:,4)))
-    if (isActive_co2) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_co2), gas_vmr(:,:,1)))
-    if (isActive_ch4) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_ch4), gas_vmr(:,:,3)))
-    if (isActive_n2o) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_n2o), gas_vmr(:,:,2)))
-    if (isActive_h2o) call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_h2o), vmr_h2o))
-    if (isActive_o3)  call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o3),  vmr_o3))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o2),  gas_vmr(:,:,4)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_co2), gas_vmr(:,:,1)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_ch4), gas_vmr(:,:,3)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_n2o), gas_vmr(:,:,2)))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_h2o), vmr_h2o))
+    call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o3),  vmr_o3))
 
     ! #######################################################################################
     ! Compute diffusivity angle adjustments for each longwave band
