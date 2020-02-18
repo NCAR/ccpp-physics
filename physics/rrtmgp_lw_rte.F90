@@ -52,9 +52,9 @@ contains
     type(ty_source_func_lw),intent(in) :: &
          sources                    ! RRTMGP DDT: longwave source functions
     type(ty_optical_props_1scl),intent(inout) :: &
-         lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
          lw_optical_props_clrsky    ! RRTMGP DDT: longwave clear-sky radiative properties 
     type(ty_optical_props_1scl),intent(in) :: &
+         lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
          lw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol),intent(in) :: &
          secdiff
