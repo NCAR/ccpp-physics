@@ -100,7 +100,7 @@
   units = DDT
   dimensions = ()
   type = ty_optical_props_1scl
-  intent = inout
+  intent = in
   optional = F
 [lw_optical_props_aerosol]
   standard_name = longwave_optical_properties_for_aerosols
