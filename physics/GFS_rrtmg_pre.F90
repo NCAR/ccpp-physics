@@ -3,6 +3,7 @@
       module GFS_rrtmg_pre
 
       public GFS_rrtmg_pre_run
+
       contains
 
 !> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
@@ -274,7 +275,7 @@
           tracer1(:,k1,j) = max(0.0, Statein%qgrs(:,k2,j))
         enddo
       enddo
-
+!
       if (ivflip == 0) then                                ! input data from toa to sfc
         do i = 1, IM
           plvl(i,1+kd) = 0.01 * Statein%prsi(i,1)          ! pa to mb (hpa)
@@ -592,7 +593,6 @@
           enddo
         endif
 !
-
         if (Model%uni_cld) then
           if (Model%effr_in) then
             do k=1,lm
@@ -690,11 +690,12 @@
               effrs(i,lyb) = effrs(i,lya)
             enddo
           endif
-       endif
+         endif
 
         if (Model%imp_physics == 99) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
+
 
         if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics

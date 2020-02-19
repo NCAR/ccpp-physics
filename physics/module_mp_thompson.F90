@@ -444,7 +444,6 @@ MODULE module_mp_thompson
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
 #endif
 
-      write(*,"(a45,3i20)") 'MODULE_MP_THOMPSON(thompson_init): MPI ranks: ',mpirank,mpiroot,mpicomm
 
 
       is_aerosol_aware = .FALSE.
@@ -5586,7 +5585,6 @@ MODULE module_mp_thompson
          continue
 
          ierr = 0
-         write(*,"(a45,3i20)") 'MODULE_MP_THOMPSON(readwrite_tables): MPI ranks: ',mpirank,mpiroot,mpicomm
 
          ! Test if SIONlib file containing pre-computed tables exists
          inquire(file=trim(filename), exist=exists)
