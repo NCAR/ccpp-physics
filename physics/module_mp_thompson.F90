@@ -444,8 +444,6 @@ MODULE module_mp_thompson
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
 #endif
 
-
-
       is_aerosol_aware = .FALSE.
       micro_init = .FALSE.
 

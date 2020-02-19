@@ -690,7 +690,7 @@
               effrs(i,lyb) = effrs(i,lya)
             enddo
           endif
-         endif
+        endif
 
         if (Model%imp_physics == 99) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
