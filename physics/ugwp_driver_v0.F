@@ -162,6 +162,7 @@
            if (cdmbgwd(4) > 0.0) then
              do i=1,im
                turb_fac(i) = 0.0
+               tem(i)      = 0.0
              enddo
              if (ntke > 0) then
                do k=1,(levs+levs)/3
