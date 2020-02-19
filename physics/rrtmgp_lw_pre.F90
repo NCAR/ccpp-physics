@@ -29,39 +29,35 @@ contains
 !> \section arg_table_rrtmgp_lw_pre_run
 !! \htmlinclude rrtmgp_lw_pre.html
 !!
-  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, lon, lat, slmsk, zorl, snowd, sncovr, tsfc, &
-       nmtvr, hprime, lw_gas_props, sfc_emiss_byband, errmsg, errflg)
+  subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, tsfc, &
+       hprime, lw_gas_props, sfc_emiss_byband, semis, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
-         doLWrad              ! Logical flag for longwave radiation call
+         doLWrad          ! Logical flag for longwave radiation call
     integer, intent(in) :: &
-         nCol,              & ! Number of horizontal grid points
-         nmtvr                ! number of topographic variables in GWD
+         nCol             ! Number of horizontal grid points
     real(kind_phys), dimension(nCol), intent(in) :: &
-         lon,               & ! Longitude
-         lat,               & ! Latitude
-         slmsk,            & ! Land/sea/sea-ice mask
-         zorl,              & ! Surface roughness length (cm)
-         snowd,             & ! water equivalent snow depth (mm)
-         sncovr,            & ! Surface snow are fraction (1)
-         tsfc                 ! Surface skin temperature (K)
-    real(kind_phys), dimension(nCol,nmtvr), intent(in) :: &
-         hprime               ! Standard deviation of subgrid orography
-
+         xlon,          & ! Longitude
+         xlat,          & ! Latitude
+         slmsk,         & ! Land/sea/sea-ice mask
+         zorl,          & ! Surface roughness length (cm)
+         snowd,         & ! water equivalent snow depth (mm)
+         sncovr,        & ! Surface snow are fraction (1)
+         tsfc,          & ! Surface skin temperature (K)
+         hprime           ! Standard deviation of subgrid orography
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props         ! RRTMGP DDT: spectral information for LW calculation
+         lw_gas_props     ! RRTMGP DDT: spectral information for LW calculation
 
     ! Outputs 
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &
-         sfc_emiss_byband     ! Surface emissivity in each band
+         sfc_emiss_byband ! Surface emissivity in each band
     character(len=*), intent(out) :: &
-         errmsg               ! Error message
+         errmsg           ! Error message
     integer, intent(out) :: &  
-         errflg               ! Error flag
-
-    ! Local fields
-    real(kind_phys), dimension(nCol) :: sfc_emiss
+         errflg           ! Error flag
+    real(kind_phys), dimension(nCol), intent(out) :: &
+         semis
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -72,11 +68,11 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (lon, lat, slmsk, snowd, sncovr, zorl, tsfc, tsfc, hprime(:,1), nCol, sfc_emiss)
+    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfc, tsfc, hprime, nCol, semis)
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()
-       sfc_emiss_byband(iBand,1:NCOL) = sfc_emiss(1:NCOL)
+       sfc_emiss_byband(iBand,:) = semis
     enddo
 
   end subroutine rrtmgp_lw_pre_run

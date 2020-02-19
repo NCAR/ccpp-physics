@@ -17,15 +17,7 @@
   type = integer
   intent = in
   optional = F
-[nmtvr]
-  standard_name = number_of_statistical_measures_of_subgrid_orography
-  long_name = number of topographic variables in GWD
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[lon]
+[xlon]
   standard_name = longitude
   long_name = longitude
   units = radians
@@ -34,7 +26,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[lat]
+[xlat]
   standard_name = latitude
   long_name = latitude
   units = radians
@@ -89,10 +81,10 @@
   intent = in
   optional = F
 [hprime]
-  standard_name = statistical_measures_of_subgrid_orography
-  long_name = orographic metrics
-  units = various
-  dimensions = (horizontal_dimension,number_of_statistical_measures_of_subgrid_orography)
+  standard_name = standard_deviation_of_subgrid_orography
+  long_name = standard deviation of subgrid orography
+  units = m
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -104,6 +96,15 @@
   dimensions = ()
   type = ty_gas_optics_rrtmgp
   intent = in
+  optional = F
+[semis]
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [sfc_emiss_byband]
   standard_name = surface_emissivity_in_each_RRTMGP_LW_band
