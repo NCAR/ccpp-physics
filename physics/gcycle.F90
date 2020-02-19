@@ -1,5 +1,5 @@
 !>\file gcycle.F90
-!! This file repopulates specific time-varying surface properties for 
+!! This file repopulates specific time-varying surface properties for
 !! atmospheric forecast runs.
 
 !>\ingroup mod_GFS_phys_time_vary
@@ -41,7 +41,7 @@
         TG3FCS (Model%nx*Model%ny),             &
         CNPFCS (Model%nx*Model%ny),             &
         AISFCS (Model%nx*Model%ny),             &
-!        F10MFCS(Model%nx*Model%ny),             &
+!       F10MFCS(Model%nx*Model%ny),             &
         VEGFCS (Model%nx*Model%ny),             &
         VETFCS (Model%nx*Model%ny),             &
         SOTFCS (Model%nx*Model%ny),             &
@@ -64,7 +64,7 @@
 
     character(len=6) :: tile_num_ch
     real(kind=kind_phys), parameter :: pifac=180.0/pi
-    real(kind=kind_phys)            :: sig1t
+    real(kind=kind_phys)            :: sig1t, dt_warm
     integer :: npts, len, nb, ix, jx, ls, ios
     logical :: exists
 !
@@ -110,7 +110,7 @@
           ZORFCS  (len)          = Sfcprop(nb)%zorl   (ix)
           TG3FCS  (len)          = Sfcprop(nb)%tg3    (ix)
           CNPFCS  (len)          = Sfcprop(nb)%canopy (ix)
-!          F10MFCS (len)          = Sfcprop(nb)%f10m   (ix)
+!         F10MFCS (len)          = Sfcprop(nb)%f10m   (ix)
           VEGFCS  (len)          = Sfcprop(nb)%vfrac  (ix)
           VETFCS  (len)          = Sfcprop(nb)%vtype  (ix)
           SOTFCS  (len)          = Sfcprop(nb)%stype  (ix)
@@ -191,21 +191,30 @@
       close (Model%nlunit)
 #endif
 
-      len = 0 
+      len = 0
       do nb = 1,nblks
         do ix = 1,size(Grid(nb)%xlat,1)
           len = len + 1
           Sfcprop(nb)%slmsk  (ix) = SLIFCS  (len)
           if ( Model%nstf_name(1) > 0 ) then
              Sfcprop(nb)%tref(ix) = TSFFCS  (len)
+             dt_warm = (Sfcprop(nb)%xt(ix) + Sfcprop(nb)%xt(ix) ) &
+                     / Sfcprop(nb)%xz(ix) 
+             Sfcprop(nb)%tsfco(ix) = Sfcprop(nb)%tref(ix)         &
+                                   + dt_warm - Sfcprop(nb)%dt_cool(ix)
           else
-             Sfcprop(nb)%tsfc(ix) = TSFFCS  (len)
+             Sfcprop(nb)%tsfc(ix)  = TSFFCS  (len)
+             Sfcprop(nb)%tsfco(ix) = TSFFCS  (len)
           endif
+!         if (abs(slifcs(len) - 1.0) > 0.1) then
+!         if (sicfcs(len) < 1.0) then
+!           Sfcprop(nb)%tsfco(ix) = TSFFCS  (len)
+!         endif
           Sfcprop(nb)%weasd  (ix) = SNOFCS  (len)
           Sfcprop(nb)%zorl   (ix) = ZORFCS  (len)
           Sfcprop(nb)%tg3    (ix) = TG3FCS  (len)
           Sfcprop(nb)%canopy (ix) = CNPFCS  (len)
-!          Sfcprop(nb)%f10m   (ix) = F10MFCS (len)
+!         Sfcprop(nb)%f10m   (ix) = F10MFCS (len)
           Sfcprop(nb)%vfrac  (ix) = VEGFCS  (len)
           Sfcprop(nb)%vtype  (ix) = VETFCS  (len)
           Sfcprop(nb)%stype  (ix) = SOTFCS  (len)
@@ -240,6 +249,6 @@
 !     call mymaxmin(slifcs,len,len,1,'slifcs')
 !
 !     if (Model%me .eq. 0) print*,'executed gcycle during hour=',fhour
-      
+
       RETURN
       END

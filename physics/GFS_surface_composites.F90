@@ -123,6 +123,7 @@ contains
               wet(i) = .true.
   !           tsfco(i) = tgice
               if (.not. cplflx) tsfco(i) = max(tisfc(i), tgice)
+  !           if (.not. cplflx .or. lakefrac(i) > zero) tsfco(i) = max(tsfco(i), tisfc(i), tgice)
   !           tsfco(i) = max((tsfc(i) - cice(i)*tisfc(i)) &
   !                                     / (one - cice(i)), tgice)
             endif
