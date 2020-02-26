@@ -198,7 +198,7 @@
           Sfcprop(nb)%slmsk  (ix) = SLIFCS  (len)
           if ( Model%nstf_name(1) > 0 ) then
              Sfcprop(nb)%tref(ix) = TSFFCS  (len)
-            if ( Model%nstf_name(2) = 0 ) then
+            if ( Model%nstf_name(2) == 0 ) then
               dt_warm = (Sfcprop(nb)%xt(ix) + Sfcprop(nb)%xt(ix) ) &
                       / Sfcprop(nb)%xz(ix) 
               Sfcprop(nb)%tsfco(ix) = Sfcprop(nb)%tref(ix)         &
