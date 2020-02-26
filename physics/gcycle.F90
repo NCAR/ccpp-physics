@@ -198,18 +198,16 @@
           Sfcprop(nb)%slmsk  (ix) = SLIFCS  (len)
           if ( Model%nstf_name(1) > 0 ) then
              Sfcprop(nb)%tref(ix) = TSFFCS  (len)
-             dt_warm = (Sfcprop(nb)%xt(ix) + Sfcprop(nb)%xt(ix) ) &
-                     / Sfcprop(nb)%xz(ix) 
-             Sfcprop(nb)%tsfco(ix) = Sfcprop(nb)%tref(ix)         &
-                                   + dt_warm - Sfcprop(nb)%dt_cool(ix)
+            if ( Model%nstf_name(2) = 0 ) then
+              dt_warm = (Sfcprop(nb)%xt(ix) + Sfcprop(nb)%xt(ix) ) &
+                      / Sfcprop(nb)%xz(ix) 
+              Sfcprop(nb)%tsfco(ix) = Sfcprop(nb)%tref(ix)         &
+                                    + dt_warm - Sfcprop(nb)%dt_cool(ix)
+            endif
           else
              Sfcprop(nb)%tsfc(ix)  = TSFFCS  (len)
              Sfcprop(nb)%tsfco(ix) = TSFFCS  (len)
           endif
-!         if (abs(slifcs(len) - 1.0) > 0.1) then
-!         if (sicfcs(len) < 1.0) then
-!           Sfcprop(nb)%tsfco(ix) = TSFFCS  (len)
-!         endif
           Sfcprop(nb)%weasd  (ix) = SNOFCS  (len)
           Sfcprop(nb)%zorl   (ix) = ZORFCS  (len)
           Sfcprop(nb)%tg3    (ix) = TG3FCS  (len)
