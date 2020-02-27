@@ -389,42 +389,61 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>skebint           <td>compns_stochy_mod      <td>                                                                               <td>0
 <tr><td colspan="4" align= center>\b &gfdl_cloud_microphysics_nml
 <tr><td>sedi_transport    <td>gfdl_cloud_microphys_mod   <td>logical flag for turning on horizontal momentum transport during sedimentation     <td>.true.
+<tr><td>do_sedi_w         <td>gfdl_cloud_microphys_mod   <td>\a .true. to turn on vertical motion transport during sedimentation. (not supported in GFS physics)   <td>.false.      
 <tr><td>do_sedi_heat      <td>gfdl_cloud_microphys_mod   <td>logical flag for turning on horizontal heat transport during sedimentation         <td>.true.
 <tr><td>rad_snow          <td>gfdl_cloud_microphys_mod   <td>logical flag for considering snow in cloud fraction calculation                    <td>.true.
 <tr><td>rad_graupel       <td>gfdl_cloud_microphys_mod   <td>logical flag for considering graupel in cloud fraction calculation                 <td>.true.
 <tr><td>rad_rain          <td>gfdl_cloud_microphys_mod   <td>logical flag for considering rain in cloud fraction calculation                    <td>.true.
+<tr><td>cld_min           <td>gfdl_cloud_microphys_mod   <td>minimum cloud fraction. If total cloud condensate exceeds 1.0e-6 kg/kg, cloud fraction cannot be less than \p cld_min        <td>0.05
 <tr><td>const_vi          <td>gfdl_cloud_microphys_mod   <td>logical flag for using constant cloud ice fall speed                               <td>.false.
 <tr><td>const_vs          <td>gfdl_cloud_microphys_mod   <td>logical flag for using constant snow fall speed                                    <td>.false.
 <tr><td>const_vg          <td>gfdl_cloud_microphys_mod   <td>logical flag for using constant graupel fall speed                                 <td>.false.
 <tr><td>const_vr          <td>gfdl_cloud_microphys_mod   <td>logical flag for using constant rain fall speed                                    <td>.false.
+<tr><td>vi_fac            <td>gfdl_cloud_microphys_mod   <td>tunable factor for cloud ice fall or the constant cloud ice fall speed when \p const_vi is .true.      <td>1.
+<tr><td>vr_fac            <td>gfdl_cloud_microphys_mod   <td>tunable factor for rain fall or the constant rain fall speed when \p const_vr is .true.                <td>1.
+<tr><td>vs_fac            <td>gfdl_cloud_microphys_mod   <td>tunable factor for snow fall or the constant snow fall speed when \p const_vs is .true.                <td>1.
+<tr><td>vg_fac            <td>gfdl_cloud_microphys_mod   <td>tunable factor for graupel fall or the constant graupel fall speed when \p const_vg is .true.          <td>1.
 <tr><td>vi_max            <td>gfdl_cloud_microphys_mod   <td>maximum fall speed for cloud ice                                                   <td>0.5
 <tr><td>vs_max            <td>gfdl_cloud_microphys_mod   <td>maximum fall speed for snow                                                        <td>5.0
 <tr><td>vg_max            <td>gfdl_cloud_microphys_mod   <td>maximum fall speed for graupel                                                     <td>8.0
 <tr><td>vr_max            <td>gfdl_cloud_microphys_mod   <td>maximum fall speed for rain                                                        <td>12.0
 <tr><td>qi_lim            <td>gfdl_cloud_microphys_mod   <td>cloud ice limiter to prevent large ice built up in cloud ice freezing and deposition       <td>1.
 <tr><td>prog_ccn          <td>gfdl_cloud_microphys_mod   <td>logical flag for activating prognostic CCN (not supported in GFS Physics)                  <td>.false.
-<tr><td>do_qa             <td>gfdl_cloud_microphys_mod   <td>logical flag for activating inline cloud fraction diagnosis in fast saturation adjustment  <td>.true.
-<tr><td>fast_sat_adj      <td>gfdl_cloud_microphys_mod   <td>logical flag for adjusting cloud water evaporation/freezing, cloud ice deposition when fast saturation adjustment is activated                                 <td>.true.
+<tr><td>do_qa             <td>gfdl_cloud_microphys_mod   <td>\a .true. to activate inline cloud fraction diagnosis in fast saturation adjustment. \a .false. to activate inline cloud fraction diagnosis in major cloud microphysics  <td>.true.
+<tr><td>fast_sat_adj      <td>gfdl_cloud_microphys_mod   <td>logical flag for adjusting cloud water evaporation (cloud water -> water vapor), cloud water freezing (cloud water -> cloud ice), cloud ice deposition (water vapor -> cloud ice) when fast saturation adjustment is activated (\b do_sat_adj = .true. in \b fv_core_nml block)                                 <td>.true.
 <tr><td>tau_l2v           <td>gfdl_cloud_microphys_mod   <td>time scale for evaporation of cloud water to water vapor. Increasing(decreasing) \p tau_l2v can decrease(boost) deposition of cloud water to water vapor       <td>300.
 <tr><td>tau_v2l           <td>gfdl_cloud_microphys_mod   <td>time scale for condensation of water vapor to cloud water. Increasing(decreasing) \p tau_v2l can decrease(boost) condensation of water vapor to cloud water    <td>150.
 <tr><td>tau_g2v           <td>gfdl_cloud_microphys_mod   <td>time scale for sublimation of graupel to water vapor. Increasing(decreasing) \p tau_g2v can decrease(boost) sublimation of graupel to water vapor              <td>900.
+<tr><td>tau_g2r           <td>gfdl_cloud_microphys_mod   <td>time scale for graupel melting. Increasing(decreasing) \p tau_g2r can decrease(boost) melting of graupel to rain (graupel-> rain)                              <td>600.
+<tr><td>tau_v2g           <td>gfdl_cloud_microphys_mod   <td>time scale for deposition of water vapor to graupel. Increasing(decreasing) \p tau_v2g can decrease(boost) deposition of water vapor to graupel (water vapor -> graupel)     <td>21600.
+<tr><td>tau_l2r           <td>gfdl_cloud_microphys_mod   <td>time scale for autoconversion of cloud water to rain. Increasing(decreasing) \p tau_l2r can decrese(boost) autoconversion of cloud water to rain (cloud water -> rain)       <td>900.
+<tr><td>tau_r2g           <td>gfdl_cloud_microphys_mod   <td>time scale for freezing of rain to graupel. Increasing(decreasing) \p tau_r2g can decrease(boost) freezing of rain to graupel (rain->graupel)                  <td>900.
+<tr><td>tau_i2s           <td>gfdl_cloud_microphys_mod   <td>time scale for autoconversion of cloud ice to snow. Increasing(decreasing) \p tau_i2s can decrease(boost) autoconversion of cloud ice to snow (cloud ice -> snow)            <td>1000.
+<tr><td>tau_imlt          <td>gfdl_cloud_microphys_mod   <td>time scale for cloud ice melting. Increasing(decreasing) \p tau_imlt can decrease(boost) melting of cloud ice to cloud water or rain (cloud ice -> cloud water or rain)     <td>600.
+<tr><td>tau_smlt          <td>gfdl_cloud_microphys_mod   <td>time scale for snow melting. Increasing(decreasing) \p tau_smlt can decrease(boost) melting of snow to cloud water or rain (snow-> cloud water or rain)        <td>900.
 <tr><td>rthresh           <td>gfdl_cloud_microphys_mod   <td>critical cloud water radius for autoconversion (cloud water -> rain). Increasing(decreasing) of \p rthresh makes the autoconversion harder(easier)             <td>10.0e-6
 <tr><td>dw_land           <td>gfdl_cloud_microphys_mod   <td>base value for subgrid deviation/variability over land                                     <td>0.20
 <tr><td>dw_ocean          <td>gfdl_cloud_microphys_mod   <td>base value for subgrid deviation/variability over ocean                                    <td>0.10
 <tr><td>ql_gen            <td>gfdl_cloud_microphys_mod   <td>maximum value for cloud water generated from condensation of water vapor (water vapor-> cloud water)    <td>1.0e-3
-<tr><td>ql_mlt            <td>gfdl_cloud_microphys_mod   <td>maximum value of cloud water allowed from melted cloud ice (cloud ice -> cloud water or rain)           <td>2.0e-3
-<tr><td>qi0_crt           <td>gfdl_cloud_microphys_mod   <td>threshold of cloud ice to snow autoconversion (cloud ice -> snow)                          <td>1.0e-4
-<tr><td>qs0_crt           <td>gfdl_cloud_microphys_mod   <td>threshold of snow to graupel autoconversion (snow -> graupel)                              <td>1.0e-3
-<tr><td>tau_i2s           <td>gfdl_cloud_microphys_mod   <td>time scale for autoconversion of cloud ice to snow                                         <td>1000.
-<tr><td>c_psaci           <td>gfdl_cloud_microphys_mod   <td>accretion efficiency of cloud ice to snow                                                  <td>0.02
-<tr><td>c_pgacs           <td>gfdl_cloud_microphys_mod   <td>accretion efficiency of snow to graupel                                                    <td>2.0e-3
+<tr><td>qi_gen            <td>gfdl_cloud_microphys_mod   <td>maximum value of cloud ice generated from deposition of water vapor (water vapor->cloud ice) or freezing(cloud water -> cloud ice). Increasing(decreasing) \p qi_gen can increas(decrease) cloud ice                                           <td>1.82e-6
+<tr><td>ql_mlt            <td>gfdl_cloud_microphys_mod   <td>maximum value of cloud water allowed from melted cloud ice (cloud ice -> cloud water or rain). Exceedance of which will become rain. Increasing(decreasing) \p ql_mlt can increase(decrease) cloud water and decrease(increase) rain           <td>2.0e-3
+<tr><td>qs_mlt            <td>gfdl_cloud_microphys_mod   <td>maximum value of cloud water allowed from melted snow (snow -> cloud water or rain). Exceedance of which will become rain. Increasing(decreasing) \p qs_mlt can increas(decrease) cloud water and decrease (increase) rain                     <td>1.0e-6
+<tr><td>ql0_max           <td>gfdl_cloud_microphys_mod   <td>threshold of cloud water to rain autoconversion (cloud water -> rain). Increasing(decreasing) \p ql0_max can increase(decrease) rain and decrease(increase) cloud water                                                                        <td>2.0e-3
+<tr><td>qi0_max           <td>gfdl_cloud_microphys_mod   <td>maximum value of cloud ice generated from other sources like convection. Exceedance of which will become snow. Increasing(decreasing) \p qi0_max can increase(decrease) cloud ice and decrease(increase) snow                                  <td>1.0e-4
+<tr><td>qi0_crt           <td>gfdl_cloud_microphys_mod   <td>threshold of cloud ice to snow autoconversion (cloud ice -> snow). Increasing(decreasing) \p qi0_crt can increase(decrease) cloud ice and decrease(increase) snow                          <td>1.0e-4
+<tr><td>qs0_crt           <td>gfdl_cloud_microphys_mod   <td>threshold of snow to graupel autoconversion (snow -> graupel). Increasing(decreasing) \p qs0_crt can increase(decrease) snow and decrease(increase) graupel                              <td>1.0e-3
+<tr><td>qc_crt            <td>gfdl_cloud_microphys_mod   <td>minimum value of cloud condensate to allow partial cloudiness. Partial cloud can only exist when total cloud condensate exceeds \p qc_crt        <td>5.0e-8
+<tr><td>c_psaci           <td>gfdl_cloud_microphys_mod   <td>accretion efficiency of cloud ice to snow (cloud ice -> snow). Increasing(decreasing) of \p c_psaci can boost(decrease) the accretion of cloud ice to snow              <td>0.02
+<tr><td>c_pgacs           <td>gfdl_cloud_microphys_mod   <td>accretion efficiency of snow to graupel (snow -> graupel). Increasing(decreasing) of \p c_pgacs can boost(decrease) the accretion of snow to graupel             <td>2.0e-3
 <tr><td>rh_inc            <td>gfdl_cloud_microphys_mod   <td>relative humidity increment for complete evaporation of cloud water and cloud ice          <td>0.25
 <tr><td>rh_inr            <td>gfdl_cloud_microphys_mod   <td>relative humidity increment for sublimation of snow                                        <td>0.25
 <tr><td>rh_ins            <td>gfdl_cloud_microphys_mod   <td>relative humidity increment for minimum evaporation of rain                                <td>0.25
-<tr><td>ccn_l             <td>gfdl_cloud_microphys_mod   <td>base CCN over land \f$cm^{-3}\f$                                                           <td>270.
-<tr><td>ccn_o             <td>gfdl_cloud_microphys_mod   <td>base CCN over ocean \f$cm^{-3}\f$                                                          <td>90.
-<tr><td>c_paut            <td>gfdl_cloud_microphys_mod   <td>autoconversion efficiency of cloud water to rain                                           <td>0.55
-<tr><td>c_cracw           <td>gfdl_cloud_microphys_mod   <td>accretion efficiency of cloud water to rain                                                <td>0.9
+<tr><td>rthresh           <td>gfdl_cloud_microphys_mod   <td>critical cloud water radius for autoconversion(cloud water->rain). Increasing(decreasing) of \p rthresh makes the autoconversion harder(easier)     <td>1.0e-5
+<tr><td>ccn_l             <td>gfdl_cloud_microphys_mod   <td>base CCN over land. Increasing(decreasing) \p ccn_l can on the one hand boost(decrease) the autoconversion of cloud water to rain, on the other hand make the autoconversion harder(easier). The unit is \f$cm^{-3}\f$           <td>270.
+<tr><td>ccn_o             <td>gfdl_cloud_microphys_mod   <td>base CCN over ocean. Increasing(decreasing) \p ccn_o can on the one hand boost(decrease) the autoconversion of cloud water to rain, on the other hand make the autoconversion harder(easier). The unit is \f$cm^{-3}\f$          <td>90.
+<tr><td>c_paut            <td>gfdl_cloud_microphys_mod   <td>autoconversion efficiency of cloud water to rain (cloud water -> rain). Increasing(decreasing) of \p c_paut can boost(decrease) the autoconversion of cloud water to rain        <td>0.55
+<tr><td>c_cracw           <td>gfdl_cloud_microphys_mod   <td>accretion efficiency of cloud water to rain (cloud water -> rain). Increasing(decreasing) of \p c_cracw can boost(decrease) the accretion of cloud water to rain     <td>0.9
+<tr><td>sat_adj0          <td>gfdl_cloud_microphys_mod   <td>adjust factor for condensation of water vapor to cloud water (water vapor->cloud water) and deposition of water vapor to cloud ice         <td>0.9
 <tr><td>use_ppm           <td>gfdl_cloud_microphys_mod   <td>\e true to use PPM fall scheme; \e false to use time-implicit monotonic fall scheme        <td>.false.
 <tr><td>use_ccn           <td>gfdl_cloud_microphys_mod   <td>\e true to compute prescribed CCN. It should be .true. when \p prog_ccn = .false.          <td>.false.
 <tr><td>mono_prof         <td>gfdl_cloud_microphys_mod   <td>\e true to turn on terminal fall with monotonic PPM scheme. This is used together with \p use_ppm=.true.     <td>.true. 
@@ -433,6 +452,68 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>de_ice            <td>gfdl_cloud_microphys_mod   <td>\e true to convert excessive cloud ice to snow to prevent ice over-built from other sources like convection scheme (not supported in GFS physics)      <td>.false.
 <tr><td>fix_negative      <td>gfdl_cloud_microphys_mod   <td>\e true to fix negative water species using nearby points                                                                                              <td>.false.
 <tr><td>icloud_f          <td>gfdl_cloud_microphys_mod   <td>flag (0,1,or 2) for cloud fraction diagnostic scheme                                       <td>0
-<tr><td>mp_time           <td>gfdl_cloud_microphys_mod   <td>time step of GFDL cloud microphysics                                                       <td>150.
+<tr><td>irain_f           <td>gfdl_cloud_microphys_mod   <td>flag (0 or 1) for cloud water autoconversion to rain scheme. 0: with subgrid variability; 1: no subgrid variability        <td>0
+<tr><td>mp_time           <td>gfdl_cloud_microphys_mod   <td>time step of GFDL cloud microphysics (MP). If \p mp_time isn't divisible by physics time step or is larger than physics time step, the actual MP time step becomes \p dt/NINT[dt/MIN(dt,mp_time)]                                                       <td>150.
+<tr><td>alin              <td>gfdl_cloud_microphys_mod   <td>parameter \a a in Lin et al.(1983). Constant in empirical formula for \f$U_R\f$. Increasing(decreasing) \p alin can boost(decrease) accretion of cloud water by rain and rain evaporation     <tb>842.
+<tr><td>clin              <td>gfdl_cloud_microphys_mod   <td>parameter \a c in Lin et al.(1983). Constant in empirical formula for \f$U_S\f$. Increasing(decreasing) \p clin can boost(decrease) accretion of cloud water by snow, accretion of cloud ice by snow, snow sublimation and deposition, and snow melting        <td>4.8
+<tr><td>t_min             <td>gfdl_cloud_microphys_mod   <td>temperature threshold for instant deposition. Deposit all water vapor to cloud ice when temperature is lower than \p t_min      <td>178.
+<tr><td>t_sub             <td>gfdl_cloud_microphys_mod   <td>temperature threshold for sublimation. Cloud ice, snow or graupel stops(starts) sublimation when temperature is lower(higher) then \p t_sub         <td>184.
+<tr><td>mp_print          <td>gfdl_cloud_microphys_mod   <td>\a .true. to turn on GFDL cloud microphysics debugging print out. (not supported in GFS physics)       <td>.false.
+<tr><td colspan="4" align= center>\b &cires_ugwp_nml
+<tr><td>knob_ugwp_version <td>cires_ugwp_module          <td>parameter selects a version of the UGWP implementation in FV3GFS-127L  \n       
+                                                         <ul>
+                                                         <li> 0: default version delivered to EMC in Jan 2019 for implementation
+                                                         <li> 1: version of UGWP under development that plans to consider the physics-based sources of NGWs (\b knob_ugwp_wvspec [2:4]), options for stochastic and deterministic excitation of waves (\b knob_ugwp_stoch), and switches between different UGWP schemes (\b knob_ugwp_solver)
+                                                         </ul>
+                                                         <td>0
+<tr><td>knob_ugwp_doaxyz  <td>cires_ugwp_module          <td>parameter controls application of the momentum deposition for NGW-schemes \n
+                                                         <ul>
+                                                         <li> 0: the momentum tendencies due to NGWs are calculated, but tendencies do not change the horizontal winds
+                                                         <li> 1: default value; it changes the horizontal momentum tendencies and horizontal winds
+                                                         </ul>
+                                                         <td>1
+<tr><td>knob_ugwp_doheat  <td>cires_ugwp_module          <td>parameter controls application of the heat deposition for NGW-schemes \n
+                                                         <ul>
+                                                         <li> 0: the temperature tendencies due to NGWs are calculated but tendencies do not change the temperature state
+                                                         <li> 1: default value; it changes the temperature tendencies and kinetic temperature
+                                                         </ul>
+                                                         <td>1
+<tr><td>knob_ugwp_dokdis  <td>cires_ugwp_module          <td>parameter controls application of the eddy diffusion due to instability of NGWs \n
+                                                         <ul>
+                                                         <li> 0: the eddy diffusion tendencies due to NGWs are calculated but tendencies do not change the model state vector
+                                                         <li> 1: it computes eddy diffusion coefficient due to instability of NGWs; in UGWP v0, eddy viscosity, heat conductivity and tracer diffusion are not activated
+                                                         </ul>
+                                                         <td>0
+<tr><td>knob_ugwp_solver  <td>cires_ugwp_module          <td>parameter controls the selection of UGWP-solvers(wave propagation, dissipation and wave breaking) for NGWs  \n
+                                                         <ul>
+                                                         <li> 1: represents the discrete multi-wave solver with background dissipation and linear wave saturation
+                                                         <li> 2: represents the spectral deterministic solver with background dissipation and spectral saturation
+                                                         <li> 3: represents the discrete multi-wave solver with the background dissipation, extension of Alexander sand Dunkerton (1999)
+                                                         <li> 4: represents the spectral solver with background dissipation, extension of Doppler Spread Theory of Hines (1997)
+                                                         </ul>
+                                                         <td>1
+<tr><td>knob_ugwp_ndx4lh  <td>cires_ugwp_module          <td>parameter controls the selection of the horizontal wavenumber(wavelength) for NGW schemes \n
+                                                         <ul>
+                                                         <li> 1: selects the \f$4xdx\f$ sub-grid wavelength, where dx is the horizontal resolution of the model configuration (C96-400km; C768-52km)
+                                                         </ul>
+                                                         <td>2
+<tr><td>knob_ugwp_wvspec  <td>cires_ugwp_module          <td>four-dimensional array defines number of waves in each arimuthal propagation (as defined by knob_ugwp_azdir) for GWs excited due to the following four sources: \n
+                                                             (1) sub-grid orography (\b knob_ugwp_wvspec[1]=1), \n
+                                                             (2) convective (\b knob_ugwp_wvspec[2]=25), \n
+                                                             (3) frontal (\b knob_ugwp_wvspec[3]=25) activity, \n
+                                                             (4) \b knob_ugwp_wvspec[4] represents number of wave excited by dynamical imbalances that may mimic both convective and front-jet mechanisms of GW triggering. \n
+                                                             In UGWP v0, first two elements of the array, \b knob_ugwp_wvspec(1:2), control number of waves for stationary (OGW) and nonstationary waves (NGWs).
+                                                         <td>1,32,32,32
+<tr><td>knob_ugwp_azdir   <td>cires_ugwp_module          <td>four-dimensional array that defines number of azimuths for propagation of GWs triggered by four types of physics-based sources (orography, convection, front-jets, and dynamical imbalance). In UGWP v0, first two elements of the array, \b knob_ugwp_azdir(1:2), control number of azimuths for OGW and NGWs respectively.                                                      
+                                                         <td>2,4,4,4
+<tr><td>knob_ugwp_stoch   <td>cires_ugwp_module          <td>four-dimensional array that control stochastic selection of GWs triggered by four types of physics-based sources. \n
+                                                             Default values:0,0,0,0 - reflect determinstic selection of GW parameters without stochastic selection                                                       
+                                                         <td>0,0,0,0
+<tr><td>knob_ugwp_effac   <td>cires_ugwp_module          <td>four-dimensional array that control efficiency of GWs triggerd by four types of physics-based sources. \n
+                                                             Default values: 1.,1.,1.,1. - reflect that calculated GW-tendencies will be applied for the model state.
+                                                         <td>1.,1.,1.,1.
+<tr><td>launch_level      <td>cires_ugwp_module          <td>parameter has been introduced by EMC during implementation. It defines the interface model level from the surface at which NGWs are launched. \n
+                                                             Default value for FV3GFS-64L, launch_level=25 and for FV3GFS-128L, launch_level=52.
+                                                         <td>55 
 </table>
 */
