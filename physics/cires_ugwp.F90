@@ -187,7 +187,7 @@ contains
 !! \section arg_table_cires_ugwp_run Argument Table
 !! \htmlinclude cires_ugwp_run.html
 !!
-!>\section gen_cires_ugwp_run General Algorithm
+!>\section gen_cires_ugwp CIRES UGWP General Algorithm
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
          oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
          do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat, area,             &

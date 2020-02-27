@@ -29,19 +29,16 @@
 !! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
-!  ---  inputs:
-     &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &
+     &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &  ! --- inputs:
      &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
      &       prsl1, prslki, prsik1, prslk1, wet, xlon, sinlat,          &
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
      &       nstf_name5, lprnt, ipr,                                    &
-!  ---  input/output:
-     &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
+     &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &  ! --- input/output:
      &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
-!  ---  outputs:
-     &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &
+     &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &  ! --- outputs:
      &      )
 !
 ! ===================================================================== !

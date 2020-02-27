@@ -103,7 +103,11 @@ WARN_LOGFILE           =
 INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/all_shemes_list.txt     \
                           pdftxt/GFSv15p2_suite.txt \
+                          pdftxt/suite_FV3_GFS_v15p2.xml.txt \
+                          pdftxt/suite_FV3_GFS_v15p2_no_nsst.xml.txt \
                           pdftxt/GFSv16beta_suite.txt \
+                          pdftxt/suite_FV3_GFS_v16beta.xml.txt   \
+                          pdftxt/suite_FV3_GFS_v16beta_no_nsst.xml.txt   \
                           pdftxt/GSD_adv_suite.txt \
                           pdftxt/CPT_adv_suite.txt   \
                           pdftxt/GFS_RRTMG.txt    \
@@ -171,6 +175,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Land Surface
                         ../sfc_diff.f \
                         ../sfc_nst.f \
+                        ../sfc_ocean.F  \
                         ../module_nst_model.f90 \
                         ../module_nst_parameters.f90 \
                         ../module_nst_water_prop.f90  \
