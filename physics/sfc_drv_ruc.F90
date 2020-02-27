@@ -35,7 +35,18 @@ module lsm_ruc
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0 
-
+      
+      if (ivegsrc /= 1) then
+        errmsg = 'The RUC LSM expects that the ivegsrc physics namelist parameter is 1. Exiting...'
+        errflg = 1
+        return
+      end if
+      if (isot > 1) then
+        errmsg = 'The RUC LSM expects that the isot physics namelist parameter is 0, or 1. Exiting...'
+        errflg = 1
+        return
+      end if
+      
       !--- initialize soil vegetation
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
 
