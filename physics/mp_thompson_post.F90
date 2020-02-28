@@ -12,15 +12,11 @@ module mp_thompson_post
 
    logical :: apply_limiter
 
-   real(kind_phys), dimension(:), allocatable :: mp_tend_lim
-
 contains
 
-#if 0
 !! \section arg_table_mp_thompson_post_init Argument Table
 !! \htmlinclude mp_thompson_post_init.html
 !!
-#endif
    subroutine mp_thompson_post_init(ncol, ttendlim, errmsg, errflg)
 
       implicit none
@@ -45,28 +41,18 @@ contains
 
       if (ttendlim < 0) then
           apply_limiter = .false.
-          is_initialized = .true.
-          return
+      else
+          apply_limiter = .true.
       end if
-
-      allocate(mp_tend_lim(1:ncol))
-
-      do i=1,ncol
-         mp_tend_lim(i) = ttendlim
-      end do
-
-      apply_limiter = .true.
 
       is_initialized = .true.
 
    end subroutine mp_thompson_post_init
 
-#if 0
 !! \section arg_table_mp_thompson_post_run Argument Table
 !! \htmlinclude mp_thompson_post_run.html
 !!
-#endif
-   subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, &
+   subroutine mp_thompson_post_run(ncol, nlev, tgrs_save, tgrs, prslk, dtp, ttendlim, &
                                    kdt, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
       implicit none
@@ -78,6 +64,7 @@ contains
       real(kind_phys), dimension(1:ncol,1:nlev), intent(inout) :: tgrs
       real(kind_phys), dimension(1:ncol,1:nlev), intent(in)    :: prslk
       real(kind_phys),                           intent(in)    :: dtp
+      real(kind_phys),                           intent(in)    :: ttendlim
       integer,                                   intent(in)    :: kdt
       ! MPI information
       integer,          intent(in   ) :: mpicomm
@@ -106,13 +93,13 @@ contains
       ! If limiter is deactivated, return immediately
       if (.not.apply_limiter) return
 
-      ! mp_tend and mp_tend_lim are expressed in potential temperature
+      ! mp_tend and ttendlim are expressed in potential temperature
       mp_tend = (tgrs - tgrs_save)/prslk
 
       events = 0
       do k=1,nlev
          do i=1,ncol
-            mp_tend(i,k) = max( -mp_tend_lim(i)*dtp, min( mp_tend_lim(i)*dtp, mp_tend(i,k) ) )
+            mp_tend(i,k) = max( -ttendlim*dtp, min( ttendlim*dtp, mp_tend(i,k) ) )
 
             if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
 #ifdef DEBUG
@@ -126,17 +113,15 @@ contains
       end do
 
       if (events > 0) then
-        write(0,'(a,i0,a,i0,a,i0)') "mp_thompson_post_run: mp_tend_lim applied ", events, "/", nlev*ncol, &
+        write(0,'(a,i0,a,i0,a,i0)') "mp_thompson_post_run: ttendlim applied ", events, "/", nlev*ncol, &
                                   & " times at timestep ", kdt
       end if
 
    end subroutine mp_thompson_post_run
 
-#if 0
 !! \section arg_table_mp_thompson_post_finalize Argument Table
 !! \htmlinclude mp_thompson_post_finalize.html
 !!
-#endif
    subroutine mp_thompson_post_finalize(errmsg, errflg)
 
       implicit none
@@ -148,11 +133,9 @@ contains
       ! initialize ccpp error handling variables
       errmsg = ''
       errflg = 0
-      
+
       ! Check initialization state
       if (.not. is_initialized) return
-
-      if (allocated(mp_tend_lim)) deallocate(mp_tend_lim)
 
       is_initialized = .false.
 
