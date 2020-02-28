@@ -137,7 +137,7 @@ CONTAINS
               PSFCPA,PBLH,MAVAIL,XLAND,DX,           & !in
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
-              ISFFLX,isftcflx,iz0tlnd,itimestep,     & !in
+              ISFFLX,isftcflx,iz0tlnd,itimestep,iter,& !in
                     wet,       dry,       icy,       & !intent(in)
               tskin_ocn, tskin_lnd, tskin_ice,       & !intent(in)
               tsurf_ocn, tsurf_lnd, tsurf_ice,       & !intent(in)
@@ -156,7 +156,7 @@ CONTAINS
               CH,CHS,CHS2,CQS2,CPM,                  &
               ZNT,USTM,ZOL,MOL,RMOL,                 &
               PSIM,PSIH,                             &
-              HFLX,HFX,QFX,LH,FLHC,FLQC,             &
+              HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,        &
               QGH,QSFC,                              &
               U10,V10,TH2,T2,Q2,                     &
               GZ1OZ0,WSPD,WSTAR,                     &
@@ -194,8 +194,11 @@ CONTAINS
 !-- PSIH        similarity stability function for heat
 !-- XLAND       land mask (1 for land, 2 for water)
 !-- HFX         upward heat flux at the surface (W/m^2)
+!                  HFX = HFLX * rho * cp
 !-- HFLX        upward temperature flux at the surface (K m s^-1) 
 !-- QFX         upward moisture flux at the surface (kg/m^2/s)
+!                  QFX = QFLX * rho
+!-- QFLX        upward moisture flux at the surface (kg kg-1 m s-1)
 !-- LH          net upward latent heat flux at surface (W/m^2)
 !-- TSK         surface temperature (K)
 !-- FLHC        exchange coefficient for heat (W/m^2/K)
@@ -260,7 +263,7 @@ CONTAINS
       INTEGER,  INTENT(IN)   ::        ids,ide, jds,jde, kds,kde, &
                                        ims,ime, jms,jme, kms,kme, &
                                        its,ite, jts,jte, kts,kte
-      INTEGER,  INTENT(IN)   ::        itimestep
+      INTEGER,  INTENT(IN)   ::        itimestep,iter
       REAL,     INTENT(IN)   ::        SVP1,SVP2,SVP3,SVPT0
       REAL,     INTENT(IN)   ::        EP1,EP2,KARMAN
       REAL,     INTENT(IN)   ::        CP,G,ROVCP,R,XLV !,DX
@@ -300,7 +303,7 @@ CONTAINS
 
       REAL,     DIMENSION( ims:ime, jms:jme )                    , &
                 INTENT(INOUT)               ::           HFLX,HFX, &
-                                                              QFX, &
+                                                         QFLX,QFX, &
                                                                LH, &
                                                          MOL,RMOL, &
                                                         QSFC, QGH, &
@@ -391,7 +394,7 @@ CONTAINS
            endif
         ENDDO
 
-        IF (itimestep==1) THEN
+        IF (itimestep==1 .AND. iter==1) THEN
            DO i=its,ite
               !Everything here is used before calculated
               UST_OCN(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
@@ -412,7 +415,7 @@ CONTAINS
              XLAND(ims,j),DX(ims,j),                              &
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
              EP1,EP2,KARMAN,                                      &
-             ISFFLX,isftcflx,iz0tlnd,itimestep,                   &
+             ISFFLX,isftcflx,iz0tlnd,itimestep,iter,              &
                     wet,          dry,          icy,              &  !intent(in)
               tskin_ocn,    tskin_lnd,    tskin_ice,              &  !intent(in)
               tsurf_ocn,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
@@ -433,8 +436,8 @@ CONTAINS
              ZNT(ims,j),USTM(ims,j),ZOL(ims,j),                   &
              MOL(ims,j),RMOL(ims,j),                              &
              PSIM(ims,j),PSIH(ims,j),                             &
-             HFLX(ims,j),HFX(ims,j),QFX(ims,j),LH(ims,j),         &
-             FLHC(ims,j),FLQC(ims,j),                             &
+             HFLX(ims,j),HFX(ims,j),QFLX(ims,j),QFX(ims,j),       &
+             LH(ims,j),FLHC(ims,j),FLQC(ims,j),                   &
              QGH(ims,j),QSFC(ims,j),                              &
              U10(ims,j),V10(ims,j),TH2(ims,j),T2(ims,j),Q2(ims,j),&
              GZ1OZ0(ims,j),WSPD(ims,j),wstar(ims,j),              &
@@ -456,7 +459,7 @@ CONTAINS
              PSFCPA,PBLH,MAVAIL,XLAND,DX,                         &
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
              EP1,EP2,KARMAN,                                      &
-             ISFFLX,isftcflx,iz0tlnd,itimestep,                   &
+             ISFFLX,isftcflx,iz0tlnd,itimestep,iter,              &
                     wet,          dry,          icy,              &  !intent(in)
               tskin_ocn,    tskin_lnd,    tskin_ice,              &  !intent(in)
               tsurf_ocn,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
@@ -475,7 +478,7 @@ CONTAINS
              ch,CHS,CHS2,CQS2,CPM,                                &
              ZNT,USTM,ZOL,MOL,RMOL,                               &
              PSIM,PSIH,                                           &
-             HFLX,HFX,QFX,LH,FLHC,FLQC,                           &
+             HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,                      &
              QGH,QSFC,                                            &
              U10,V10,TH2,T2,Q2,                                   &
              GZ1OZ0,WSPD,wstar,                                   &
@@ -493,7 +496,7 @@ CONTAINS
       INTEGER,  INTENT(IN) ::        ids,ide, jds,jde, kds,kde, &
                                      ims,ime, jms,jme, kms,kme, &
                                      its,ite, jts,jte, kts,kte, &
-                                     J, itimestep
+                                     J, itimestep, iter
 
       REAL,     PARAMETER  :: XKA=2.4E-5   !molecular diffusivity
       REAL,     PARAMETER  :: PRT=1.       !prandlt number
@@ -524,7 +527,7 @@ CONTAINS
                                                            dz2w1d
 
       REAL,     DIMENSION( ims:ime ), INTENT(INOUT) ::   HFLX,HFX, &
-                                                           QFX,LH, &
+                                                      QFLX,QFX,LH, &
                                                          MOL,RMOL, &
                                                          QGH,QSFC, &
                                                               ZNT, &
@@ -618,10 +621,10 @@ CONTAINS
 
 !-------------------------------------------------------------------
       IF (debug_code >= 1) THEN
-        write(*,*)"ITIMESTEP=",ITIMESTEP
+        write(*,*)"ITIMESTEP=",ITIMESTEP," iter=",iter
         DO I=its,ite
           write(*,*)"=== input to mynnsfclayer, i:", i
-          write(*,*)" land,      ice,      water"
+          !write(*,*)" land,      ice,      water"
           write(*,*)"dry=",dry(i)," icy=",icy(i)," wet=",wet(i)
           write(*,*)"tsk=", tskin_lnd(i),tskin_ice(i),tskin_ocn(i)
           write(*,*)"tsurf=", tsurf_lnd(i),tsurf_ice(i),tsurf_ocn(i)
@@ -629,7 +632,9 @@ CONTAINS
           write(*,*)"znt=", znt_lnd(i),znt_ice(i),znt_ocn(i)   
           write(*,*)"ust=", ust_lnd(i),ust_ice(i),ust_ocn(i)
           write(*,*)"snowh=", snowh_lnd(i),snowh_ice(i),snowh_ocn(i)
-          write(*,*)" psfcpa=",PSFCPA(i)," dz=",dz8w1d(i)
+          write(*,*)"psfcpa=",PSFCPA(i)," dz=",dz8w1d(i)
+          write(*,'(A5,F0.8,A6,F0.6,A6,F5.0)') &
+                "qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
         ENDDO
       ENDIF
 
@@ -671,14 +676,19 @@ CONTAINS
       ENDDO
 
       DO I=its,ite
-         RHO1D(I)=PSFCPA(I)/(R*TV1D(I)) !now using value calculated in sfc driver
+         RHO1D(I)=PSFCPA(I)/(R*TV1D(I))  !now using value calculated in sfc driver
          ZA(I)=0.5*dz8w1d(I)             !height of first half-sigma level 
          ZA2(I)=dz8w1d(I) + 0.5*dz2w1d(I)    !height of 2nd half-sigma level
          GOVRTH(I)=G/TH1D(I)
       ENDDO
 
+      DO I=its,ite
+         QFX(i)=QFLX(i)*RHO1D(I)
+         HFX(i)=HFLX(i)*RHO1D(I)*cp
+      ENDDO
+
       IF (debug_code ==2) THEN
-        write(*,*)"ITIMESTEP=",ITIMESTEP
+        !write(*,*)"ITIMESTEP=",ITIMESTEP
         DO I=its,ite
           write(*,*)"=== derived quantities in mynn sfc layer, i:", i
           write(*,*)" land,      ice,      water"
@@ -745,7 +755,7 @@ CONTAINS
          ! Q2SAT = QGH IN LSM
          IF (T1D(I) .LT. 273.15) THEN
             !SATURATION VAPOR PRESSURE WRT ICE
-            E1=SVP1*EXP(4648*(1./273.15 - 1./T1D(I)) - &
+            E1=SVP1*EXP(4648.*(1./273.15 - 1./T1D(I)) - &
             &  11.64*LOG(273.15/T1D(I)) + 0.02265*(273.15 - T1D(I)))
          ELSE
             !SATURATION VAPOR PRESSURE WRT WATER (Bolton 1980)
@@ -1642,7 +1652,8 @@ CONTAINS
          !----------------------------------
          QFX(I)=FLQC(I)*(QSFCMR_lnd(I)-QV1D(I))
          QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
-         LH(I)=XLV*QFX(I)
+         LH(i)=XLV*QFX(i)
+         QFLX(i)=QFX(i)/RHO1D(i)
 
          !----------------------------------
          ! COMPUTE SURFACE HEAT FLUX:
@@ -1660,6 +1671,8 @@ CONTAINS
          CQS2(I)=UST_lnd(I)*KARMAN/PSIQ2_lnd(i)
          CHS2(I)=UST_lnd(I)*KARMAN/PSIT2_lnd(I)
 
+         QSFC(I)=QSFC_lnd(I)
+
       ELSEIF (wet(i)) THEN
 
          !------------------------------------------
@@ -1675,6 +1688,7 @@ CONTAINS
          QFX(I)=FLQC(I)*(QSFCMR_ocn(I)-QV1D(I))
          QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
          LH(I)=XLV*QFX(I)
+         QFLX(i)=QFX(i)/RHO1D(i)
 
          !----------------------------------
          ! COMPUTE SURFACE HEAT FLUX:       
@@ -1697,6 +1711,8 @@ CONTAINS
          CQS2(I)=UST_ocn(I)*KARMAN/PSIQ2_ocn(i)
          CHS2(I)=UST_ocn(I)*KARMAN/PSIT2_ocn(I)
 
+         QSFC(I)=QSFC_ocn(I)
+
       ELSEIF (icy(i)) THEN
 
          !------------------------------------------
@@ -1711,7 +1727,8 @@ CONTAINS
          !----------------------------------
          QFX(I)=FLQC(I)*(QSFCMR_ice(I)-QV1D(I))
          QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
-         LH(I)=XLV*QFX(I)
+         LH(I)=XLF*QFX(I)
+         QFLX(i)=QFX(i)/RHO1D(i)
 
          !----------------------------------
          ! COMPUTE SURFACE HEAT FLUX:
@@ -1729,6 +1746,8 @@ CONTAINS
          CQS2(I)=UST_ice(I)*KARMAN/PSIQ2_ice(i)
          CHS2(I)=UST_ice(I)*KARMAN/PSIT2_ice(I)
 
+         QSFC(I)=QSFC_ice(I)
+
       ENDIF
 
       IF (debug_code >= 1) THEN
@@ -1738,12 +1757,12 @@ CONTAINS
          if(wet(i))write(*,*)"ocn, MAVAIL:",MAVAIL(I)," u*=",UST_ocn(I)," psiq=",PSIQ_ocn(i)
       ENDIF
 
-      ! The exchange coefficient for cloud water is assumed to be the 
+      ! The exchange coefficient for cloud water is assumed to be the
       ! same as that for heat. CH is multiplied by WSPD.
       ch(i)=flhc(i)/( cpm(i)*RHO1D(i) )
 
       !-----------------------------------------
-      !--- COMPUTE EXCHANGE COEFFICIENTS FOR FV3 
+      !--- COMPUTE EXCHANGE COEFFICIENTS FOR FV3
       !-----------------------------------------
       IF (wet(i)) THEN
          ch_ocn(I)=(karman/psix_ocn(I))*(karman/psit_ocn(i))
@@ -1838,8 +1857,6 @@ IF (compute_diag) then
          Q2(I)=QSFCMR_lnd(I)+(QV1D(I)-QSFCMR_lnd(I))*PSIQ2_lnd(i)/PSIQ_lnd(i)
          Q2(I)= MAX(Q2(I), MIN(QSFCMR_lnd(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
-
-         QSFC(I)=QSFC_lnd(I)
       ELSEIF (wet(i)) THEN
          DTG=TH1D(I)-THSK_ocn(I)
          TH2(I)=THSK_ocn(I)+DTG*PSIT2_ocn(I)/PSIT_ocn(I)
@@ -1854,7 +1871,6 @@ IF (compute_diag) then
          Q2(I)=QSFCMR_ocn(I)+(QV1D(I)-QSFCMR_ocn(I))*PSIQ2_ocn(i)/PSIQ_ocn(i)
          Q2(I)= MAX(Q2(I), MIN(QSFCMR_ocn(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
-         QSFC(I)=QSFC_ocn(I)
       ELSEIF (icy(i)) THEN
          DTG=TH1D(I)-THSK_ice(I)
          TH2(I)=THSK_ice(I)+DTG*PSIT2_ice(I)/PSIT_ice(I)
@@ -1869,7 +1885,6 @@ IF (compute_diag) then
          Q2(I)=QSFCMR_ice(I)+(QV1D(I)-QSFCMR_ice(I))*PSIQ2_ice(i)/PSIQ_ice(i)
          Q2(I)= MAX(Q2(I), MIN(QSFCMR_ice(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
-         QSFC(I)=QSFC_ice(I)
       ENDIF
    ENDDO
 ENDIF ! end compute_diag

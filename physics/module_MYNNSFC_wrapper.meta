@@ -25,6 +25,14 @@
   type = integer
   intent = in
   optional = F
+[itimestep]
+  standard_name = index_of_time_step
+  long_name = current number of time steps
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [iter]
   standard_name = ccpp_loop_counter
   long_name = loop counter for subcycling loops in CCPP
@@ -575,7 +583,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [ustm]
   standard_name = surface_friction_velocity_drag
@@ -640,16 +648,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux_over_ocean
-  long_name = kinematic surface upward latent heat flux over ocean
-  units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[QFX]
+[qflx]
   standard_name = kinematic_surface_upward_latent_heat_flux
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1

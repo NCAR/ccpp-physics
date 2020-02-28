@@ -27,7 +27,8 @@
 !###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  ix,im,levs,                        &
-     &  iter,flag_init,flag_restart,       &
+     &  itimestep,iter,                    &
+     &  flag_init,flag_restart,            &
      &  delt,dx,                           &
      &  u, v, t3d, qvsh, qc, prsl, phii,   &
      &  exner, ps, PBLH, slmsk,            &
@@ -47,7 +48,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &    fm10_ocn,  fm10_lnd,  fm10_ice,  &  !intent(inout)
      &     fh2_ocn,   fh2_lnd,   fh2_ice,  &  !intent(inout)
      &  QSFC, USTM, ZOL, MOL, RMOL,        &
-     &  WSPD, ch, HFLX, evap, QFX, LH,     &
+     &  WSPD, ch, HFLX, QFLX, LH,          &
      &  FLHC, FLQC,                        &
      &  U10, V10, TH2, T2, Q2,             &
      &  wstar, CHS2, CQS2,                 &
@@ -111,14 +112,14 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
 
-      real(kind=kind_phys), dimension(im,levs+1) :: phii
-      real(kind=kind_phys), dimension(im,levs) ::           &
-     &        exner, PRSL,                                  &
-     &        u, v, t3d, qvsh, qc
+      real(kind=kind_phys), dimension(im,levs+1),           &
+     &      intent(in)  ::                  phii
+      real(kind=kind_phys), dimension(im,levs),             &
+     &      intent(in)  ::         exner, PRSL,             &
+     &                     u, v, t3d, qvsh, qc
 
       real(kind=kind_phys), dimension(im,levs) ::           &
-     &        dz, th, qv,                                   &
-     &        pattern_spp_pbl
+     &        pattern_spp_pbl, dz, th, qv
 
       logical, dimension(im), intent(in) :: wet, dry, icy
 
@@ -141,9 +142,11 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
 
 !MYNN-2D
-      real(kind=kind_phys), dimension(im) ::                &
-     &        dx, pblh, slmsk, evap, qsfc, ps,              &
-     &        ustm, hflx, qfx, wspd,                        &
+      real(kind=kind_phys), dimension(im), intent(in)    :: &
+     &        dx, pblh, slmsk, ps
+
+      real(kind=kind_phys), dimension(im), intent(inout) :: &
+     &        ustm, hflx, qflx, wspd, qsfc,                 &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &
      &        lh, wstar
@@ -151,7 +154,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       real, dimension(im) ::                                &
      &        hfx, znt, ts, psim, psih,                     &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
-     &        cpm, qgh
+     &        cpm, qgh, qfx
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -165,19 +168,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !         write(0,*)"iter=",iter
 !      endif
 
-      ! If initialization is needed and mynnsfc_wrapper is called
-      ! in a subcycling loop, then test for (flag_init==.T. .and. iter==1);
-      ! initialization in sfclay_mynn is triggered by itimestep == 1
-      ! DH* TODO: Use flag_restart to distinguish which fields need
-      ! to be initialized and which are read from restart files
-      if (flag_init.and.iter==1) then
-          itimestep = 1
-      else
-          itimestep = 2
-      endif
-
       !prep MYNN-only variables
-            do k=1,levs
+            do k=1,2 !levs
               do i=1,im
                  dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
                  th(i,k)=t3d(i,k)/exner(i,k)
@@ -202,33 +194,33 @@ SUBROUTINE mynnsfc_wrapper_run(            &
                 cpm(i)=cp
             enddo
 
-      if (lprnt) then
-          write(0,*)"CALLING SFCLAY_mynn; input:"
-          write(0,*)"T:",t3d(1,1),t3d(1,2),t3d(1,3)
-          write(0,*)"TH:",th(1,1),th(1,2),th(1,3)
-          write(0,*)"u:",u(1,1:3)
-          write(0,*)"v:",v(1,1:3)
-          !write(0,*)"qv:",qv(1,1:3,1)
-          write(0,*)"p:",prsl(1,1)
-          write(0,*)"dz:",dz(1,1)," qsfc=",qsfc(1)," rmol:",rmol(1)
-          write(0,*)"         land      water    ice"
-          write(0,*)dry(1),wet(1),icy(1)
-          write(0,*)"ust:",ust_lnd(1),ust_ocn(1),ust_ice(1)
-          write(0,*)"Tsk:",tskin_lnd(1),tskin_ocn(1),tskin_ice(1)
-          write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_ocn(1),tsurf_ice(1)
-          write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_ocn(1),qsfc_ice(1)
-          write(0,*)"sno:",snowh_lnd(1),snowh_ocn(1),snowh_ice(1)
-          write(0,*)"znt:",znt_lnd(1),znt_ocn(1),znt_ice(1)
-          !write(0,*)"HFX:",hfx(1)," qfx",qfx(1)
-          write(0,*)"qsfc:",qsfc(1)," ps:",ps(1)
-          write(0,*)"wspd:",wspd(1),"rb=",rb_ocn(1)
-          write(0,*)"delt=",delt," im=",im," levs=",levs
-          write(0,*)"flag_init=",flag_init 
-          write(0,*)"flag_restart=",flag_restart 
-          write(0,*)"iter=",iter
-          write(0,*)"zlvl(1)=",dz(1,1)*0.5
-          write(0,*)"PBLH=",pblh(1)," xland=",xland(1)
-       endif
+!      if (lprnt) then
+!          write(0,*)"CALLING SFCLAY_mynn; input:"
+!          write(0,*)"T:",t3d(1,1),t3d(1,2),t3d(1,3)
+!          write(0,*)"TH:",th(1,1),th(1,2),th(1,3)
+!          write(0,*)"u:",u(1,1:3)
+!          write(0,*)"v:",v(1,1:3)
+!          !write(0,*)"qv:",qv(1,1:3,1)
+!          write(0,*)"p:",prsl(1,1)
+!          write(0,*)"dz:",dz(1,1)," qsfc=",qsfc(1)," rmol:",rmol(1)
+!          write(0,*)"         land      water    ice"
+!          write(0,*)dry(1),wet(1),icy(1)
+!          write(0,*)"ust:",ust_lnd(1),ust_ocn(1),ust_ice(1)
+!          write(0,*)"Tsk:",tskin_lnd(1),tskin_ocn(1),tskin_ice(1)
+!          write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_ocn(1),tsurf_ice(1)
+!          write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_ocn(1),qsfc_ice(1)
+!          write(0,*)"sno:",snowh_lnd(1),snowh_ocn(1),snowh_ice(1)
+!          write(0,*)"znt:",znt_lnd(1),znt_ocn(1),znt_ice(1)
+!          !write(0,*)"HFX:",hfx(1)," qfx",qfx(1)
+!          write(0,*)"qsfc:",qsfc(1)," ps:",ps(1)
+!          write(0,*)"wspd:",wspd(1),"rb=",rb_ocn(1)
+!          write(0,*)"delt=",delt," im=",im," levs=",levs
+!          write(0,*)"flag_init=",flag_init 
+!          write(0,*)"flag_restart=",flag_restart 
+!          write(0,*)"iter=",iter
+!          write(0,*)"zlvl(1)=",dz(1,1)*0.5
+!          write(0,*)"PBLH=",pblh(1)," xland=",xland(1)
+!       endif
 
 
         CALL SFCLAY_mynn(                                                     &
@@ -239,7 +231,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
              ISFFLX=isfflx,isftcflx=isftcflx,                                 &
-             iz0tlnd=iz0tlnd,itimestep=itimestep,                             &
+             iz0tlnd=iz0tlnd,itimestep=itimestep,iter=iter,                   &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_ocn=tskin_ocn,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
              tsurf_ocn=tsurf_ocn,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
@@ -258,7 +250,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              ch=ch,CHS=chs,CHS2=chs2,CQS2=cqs2,CPM=cpm,                       &
              ZNT=znt,USTM=ustm,ZOL=zol,MOL=mol,RMOL=rmol,                     &
              psim=psim,psih=psih,                                             &
-             HFLX=hflx,HFX=hfx,QFX=qfx,LH=lh,FLHC=flhc,FLQC=flqc,             &
+             HFLX=hflx,HFX=hfx,QFLX=qflx,QFX=qfx,LH=lh,FLHC=flhc,FLQC=flqc,   &
              QGH=qgh,QSFC=qsfc,                                               &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
@@ -277,38 +269,40 @@ SUBROUTINE mynnsfc_wrapper_run(            &
            !* hflx(i)=hfx(i)/(rho(i,1)*cp) - now calculated inside module_sf_mynn.F90
            !* Taken from sfc_nst.f
            !* evap(i)    = elocp * rch(i) * (qss(i) - q0(i)) !kg kg-1 m s-1
-           evap(i)=QFX(i)
+           !NOTE: evap & qflx will be solved for later
+           !qflx(i)=QFX(i)/
+           !evap(i)=QFX(i)   !or /rho ??
            znt_lnd(i)=znt_lnd(i)*100.   !m -> cm
            znt_ocn(i)=znt_ocn(i)*100.
            znt_ice(i)=znt_ice(i)*100.
         enddo
 
 
-      if (lprnt) then
-         write(0,*)
-         write(0,*)"finished with mynn_surface layer; output:"
-         write(0,*)"         land      water    ice"
-         write(0,*)dry(1),wet(1),icy(1)
-         write(0,*)"ust:",ust_lnd(1),ust_ocn(1),ust_ice(1)
-         write(0,*)"Tsk:",tskin_lnd(1),tskin_ocn(1),tskin_ice(1)
-         write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_ocn(1),tsurf_ice(1)
-         write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_ocn(1),qsfc_ice(1)
-         write(0,*)"sno:",snowh_lnd(1),snowh_ocn(1),snowh_ice(1)
-         write(0,*)"znt (cm):",znt_lnd(1),znt_ocn(1),znt_ice(1)
-         write(0,*)"cm:",cm_lnd(1),cm_ocn(1),cm_ice(1)
-         write(0,*)"ch:",ch_lnd(1),ch_ocn(1),ch_ice(1)
-         write(0,*)"fm:",fm_lnd(1),fm_ocn(1),fm_ice(1)
-         write(0,*)"fh:",fh_lnd(1),fh_ocn(1),fh_ice(1) 
-         write(0,*)"rb:",rb_lnd(1),rb_ocn(1),rb_ice(1)
-         write(0,*)"xland=",xland(1)," wstar:",wstar(1)
-         write(0,*)"HFX:",hfx(1)," qfx:",qfx(1)
-         write(0,*)"HFLX:",hflx(1)," evap:",evap(1)
-         write(0,*)"qsfc:",qsfc(1)," ps:",ps(1)," wspd:",wspd(1)
-         write(0,*)"ZOL:",ZOL(1)," rmol=",rmol(1)
-         write(0,*)"psim:",psim(1)," psih=",psih(1)," pblh:",pblh(1)
-         write(0,*)"FLHC=",FLHC(1)," CHS=",CHS(1)
-         write(0,*)
-      endif
+!      if (lprnt) then
+!         write(0,*)
+!         write(0,*)"finished with mynn_surface layer; output:"
+!         write(0,*)"         land      water    ice"
+!         write(0,*)dry(1),wet(1),icy(1)
+!         write(0,*)"ust:",ust_lnd(1),ust_ocn(1),ust_ice(1)
+!         write(0,*)"Tsk:",tskin_lnd(1),tskin_ocn(1),tskin_ice(1)
+!         write(0,*)"Tsurf:",tsurf_lnd(1),tsurf_ocn(1),tsurf_ice(1)
+!         write(0,*)"Qsfc:",qsfc_lnd(1),qsfc_ocn(1),qsfc_ice(1)
+!         write(0,*)"sno:",snowh_lnd(1),snowh_ocn(1),snowh_ice(1)
+!         write(0,*)"znt (cm):",znt_lnd(1),znt_ocn(1),znt_ice(1)
+!         write(0,*)"cm:",cm_lnd(1),cm_ocn(1),cm_ice(1)
+!         write(0,*)"ch:",ch_lnd(1),ch_ocn(1),ch_ice(1)
+!         write(0,*)"fm:",fm_lnd(1),fm_ocn(1),fm_ice(1)
+!         write(0,*)"fh:",fh_lnd(1),fh_ocn(1),fh_ice(1) 
+!         write(0,*)"rb:",rb_lnd(1),rb_ocn(1),rb_ice(1)
+!         write(0,*)"xland=",xland(1)," wstar:",wstar(1)
+!         write(0,*)"HFX:",hfx(1)," qfx:",qfx(1)
+!         write(0,*)"HFLX:",hflx(1)," evap:",evap(1)
+!         write(0,*)"qsfc:",qsfc(1)," ps:",ps(1)," wspd:",wspd(1)
+!         write(0,*)"ZOL:",ZOL(1)," rmol=",rmol(1)
+!         write(0,*)"psim:",psim(1)," psih=",psih(1)," pblh:",pblh(1)
+!         write(0,*)"FLHC=",FLHC(1)," CHS=",CHS(1)
+!         write(0,*)
+!      endif
 
 
   END SUBROUTINE mynnsfc_wrapper_run
