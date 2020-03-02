@@ -9,13 +9,17 @@ applications for weather through seasonal prediction timescales, encompassing op
 developmental schemes under consideration for upcoming 
 operational implementations. This version contains all parameterizations of the current operational GFS,
 plus additional developmental schemes. There are four suites supported for use with the Single Column Model (SCM) 
-developed by the Development Testbed Center (GFS_v15p2, GFS_v16beta, GSD_v1, and csawmg), and two suites
-supported for use with the atmospheric component of the UFS (i.e., GFS_v15p2 and GFS_v16beta).
+developed by the Development Testbed Center (GFS_v15p2, GFS_v16beta, GSD_v1, and csawmg), and four suites
+supported for use with the atmospheric component of the UFS (i.e., GFS_v15p2, GFS_v15p2_no_nsst, GFS_v16beta and 
+GFS_v16beta_no_nsst). The variants labelled as \a no_nsst are a simplification that uses constant sea surface 
+temperature (SST). This simplification is needed when the UFS is initialized with files in GRIdded Binary Edition 2 (GRIB2) 
+format instead of files in NOAA Environmental Modeling System (NEMS) Input/Output (NEMSIO) format because the 
+fields necessary to predict (SST) are not available in the GRIB2 files.
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 4.0 (January 2019), and more details on it may be found on the
+The latest CCPP public release is Version 4.0 (March 2020), and more details on it may be found on the
 <a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP website </a> hosted by
 the Developmental Testbed Center (DTC).
 
