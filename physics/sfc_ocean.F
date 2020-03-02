@@ -21,14 +21,12 @@
       subroutine sfc_ocean_finalize()
       end subroutine sfc_ocean_finalize
 
-!>\defgroup gfs_ocean_main GFS Ocean scheme Module
+!>\defgroup gfs_ocean_main GFS Simple Ocean Scheme Module
 !! This subroutine calculates thermodynamical properties over
 !! open water.
-#if 0
 !! \section arg_table_sfc_ocean_run Argument Table
 !! \htmlinclude sfc_ocean_run.html
 !!
-#endif
       subroutine sfc_ocean_run                                          &
      &     ( im, cp, rd, eps, epsm1, hvap, rvrdm1, ps, t1, q1,          &   ! --- inputs
      &       tskin, cm, ch, prsl1, prslki, wet, wind,                   &

@@ -1,15 +1,13 @@
 /**
-\page GFS_v15p2_page GFS_v15p2 Suite 
+\page GFS_v15p2_no_nsst_page GFS_v15p2_no_nsst Suite 
 
-\section gfs1_suite_overview Overview
+\section gfsv15_no_nsst_suite_overview Overview
 
-Suite GFS_v15p2 has the parameterizations used in the GFS v15 implemented operationally
-in June 2019.
+Suite GFS_v15p2_no_nsst is a companion suite of GFS_v15p2 with GRIB2 data initialization.
 
-The GFS_v15p2 physics suite uses the parameterizations in the following order:
+The GFS_v15p2_no_nsst physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
- - \ref GFS_NSST
  - \ref GFS_OCEAN
  - \ref GFS_NOAH
  - \ref GFS_SFCSICE
@@ -23,10 +21,10 @@ The GFS_v15p2 physics suite uses the parameterizations in the following order:
  - \ref GFDL_cloud
  - \ref GFS_CALPRECIPTYPE
 
-\section sdf_gfsv15p2 Suite Definition File 
-- For NEMSIO initialization data: \subpage suite_FV3_GFS_v15p2_xml
+\section sdf_gfsv15p2_no_nsst Suite Definition File 
+- For GRIB2  initialization data: \subpage suite_FV3_GFS_v15p2_no_nsst_xml
 
-\section gfs15p2_nml_opt_des Namelist 
+\section gfs15p2nonsst_nml_opt_des Namelist 
 
 - \b &gfs_physics_nml
 \n \c fhzero         = 6
@@ -67,7 +65,7 @@ The GFS_v15p2 physics suite uses the parameterizations in the following order:
 \n \c debug          = .false.
 \n \c oz_phys        = .F.
 \n \c oz_phys_2015   = .T.
-\n \c nstf_name      = @[NSTF_NAME]
+\n \c nstf_name      = 0,0,0,0,0
 \n \c nst_anl        = .true.
 \n \c psautco        = 0.0008,0.0005
 \n \c prautco        = 0.00015,0.00015
@@ -125,9 +123,5 @@ The GFS_v15p2 physics suite uses the parameterizations in the following order:
 \n \c fix_negative   = .true.
 \n \c icloud_f       = 1
 \n \c mp_time        = 150.
-
-\note nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2 \f$ 
-- \f$^1\f$  NSST is on and coupled with spin up off
-- \f$^2\f$  NSST is on and coupled with spin up on
 
 */

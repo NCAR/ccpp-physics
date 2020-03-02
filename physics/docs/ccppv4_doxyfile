@@ -103,9 +103,11 @@ WARN_LOGFILE           =
 INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/all_shemes_list.txt     \
                           pdftxt/GFSv15p2_suite.txt \
+                          pdftxt/GFSv15p2_no_nsst_suite.txt    \              
                           pdftxt/suite_FV3_GFS_v15p2.xml.txt \
                           pdftxt/suite_FV3_GFS_v15p2_no_nsst.xml.txt \
                           pdftxt/GFSv16beta_suite.txt \
+                          pdftxt/GFSv16beta_no_nsst_suite.txt \
                           pdftxt/suite_FV3_GFS_v16beta.xml.txt   \
                           pdftxt/suite_FV3_GFS_v16beta_no_nsst.xml.txt   \
                           pdftxt/GSD_adv_suite.txt \
@@ -113,6 +115,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_RRTMG.txt    \
                           pdftxt/GFS_SFCLYR.txt   \
                           pdftxt/GFS_NSST.txt     \
+                          pdftxt/GFS_OCEAN.txt    \
                           pdftxt/GFS_NOAH.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
                           pdftxt/GFS_HEDMF.txt    \

@@ -51,6 +51,7 @@ parameterizations in suites.
 - \b Surface \b Layer \b and \b Simplified \b Ocean \b and \b Sea \b Ice \b Representation
  - \subpage GFS_SFCLYR
  - \subpage GFS_NSST
+ - \subpage GFS_OCEAN
  - \subpage GFS_SFCSICE
 
 - \b Others

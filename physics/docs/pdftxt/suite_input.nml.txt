@@ -221,14 +221,14 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>debug           <td>gfs_control_type          <td>flag for debug printout                             <td>.false.
 <tr><td>nstf_name(5)    <td>gfs_control_type          <td>NSST related paramters:\n 
                                                       <ul>
-                                                      <li> nstf_name(1): 0=NSSTM off, 1= NSSTM on but uncoupled, 2= NSSTM on and coupled 
-                                                      <li> nstf_name(2): 1=NSSTM spin up on, 0=NSSTM spin up off 
-                                                      <li> nstf_name(3): 1=NSST analysis on, 0=NSSTM analysis off 
+                                                      <li> nstf_name(1): 0=NSST off, 1= NSST on but uncoupled, 2= NSST on and coupled 
+                                                      <li> nstf_name(2): 1=NSST spin up on, 0=NSST spin up off 
+                                                      <li> nstf_name(3): 1=NSST analysis on, 0=NSST analysis off 
                                                       <li> nstf_name(4): zsea1 in mm 
                                                       <li> nstf_name(5): zesa2 in mm 
                                                       </ul>
                                                       <td>/0,0,1,0,5/
-<tr><td>nst_anl         <td>gfs_control_type          <td>flag for NSSTM analysis in gcycle/sfcsub            <td>.false.
+<tr><td>nst_anl         <td>gfs_control_type          <td>flag for NSST analysis in gcycle/sfcsub            <td>.false.
 <tr><td>effr_in         <td>gfs_control_type          <td>logical flag for using input cloud effective radii calculation    <td>.false.
 <tr><td>aero_in         <td>gfs_control_type          <td>logical flag for using aerosols in Morrison-Gettelman microphysics   <td>.false.
 <tr><td>iau_delthrs     <td>gfs_control_type          <td>incremental analysis update (IAU) time interval in hours          <td>6

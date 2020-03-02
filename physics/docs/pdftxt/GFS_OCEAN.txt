@@ -1,0 +1,16 @@
+/**
+\page GFS_OCEAN GFS Simple Ocean Scheme
+\section des_sfcocean  Description
+
+The Sea Surface Temperature (SST) is a required filed in Numerical Weather Prediciton (NWP) systems because it 
+functions as the lower foundary condition for the calculation of air-sea heat fluxes. When the GFS Simple Ocean
+Scheme is evoked, the SST is kept constant throughout the forecast.
+
+\section intra_sfcocean Intraphysics Communication
+\ref arg_table_sfc_ocean_run
+
+
+
+
+
+*/
