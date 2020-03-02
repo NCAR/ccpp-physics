@@ -145,7 +145,6 @@ contains
 !> \section arg_table_cires_ugwp_run Argument Table
 !! \htmlinclude cires_ugwp_run.html
 !!
-
 !> \section gen_cires_ugwp CIRES UGWP Scheme General Algorithm
 !! @{
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
@@ -367,7 +366,6 @@ contains
     gw_dudt = gw_dudt*(1.-pked) +  ed_dudt*pked
 
     end subroutine cires_ugwp_run
-
 !! @}
 !>@}
 end module cires_ugwp
