@@ -1,18 +1,13 @@
 /**
-\page GFS_v16beta_page GFS_v16beta Suite 
+\page GFS_v16beta_no_nsst_page GFS_v16beta_no_nsst Suite 
 
-\section gfsv16beta_suite_overview Overview
+\section gfsv16beta_no_nsst_suite_overview Overview
 
-Version 16 of the Global Forecast System (GFS) will be implemented operationally by the NOAA
-National Centers for Environmental Prediction (NCEP) in 2021. GFS_v16beta is a prototype of 
-the GFS_v16 suite. The main difference between the GFS_v15p2 and GFS_v16beta suites is the 
-replacement of the K-based EDMF PBL scheme with a moist TKE based one.
+Suite GFS_v16beta_no_nsst is a companion suite of GFS_v16beta with GRIB2 data initialization.
 
-
-The GFS_v16beta physics suite uses the parameterizations in the following order:
+The GFS_v16beta_no_nsst physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
- - \ref GFS_NSST
  - \ref GFS_OCEAN
  - \ref GFS_NOAH
  - \ref GFS_SFCSICE
@@ -26,10 +21,10 @@ The GFS_v16beta physics suite uses the parameterizations in the following order:
  - \ref GFDL_cloud
  - \ref GFS_CALPRECIPTYPE
 
-\section sdf_gfsv16b Suite Definition File 
-- For NEMSIO initialization data: \subpage suite_FV3_GFS_v16beta_xml
+\section sdf_gfsv16bnonsst Suite Definition File 
+- For GRIB2  initialization data: \subpage suite_FV3_GFS_v16beta_no_nsst_xml
 
-\section gfs16beta_nml_opt_des Namelist 
+\section gfs16betanonsst_nml_opt_des Namelist 
 
 - \b &gfs_physics_nml
 \n \c  fhzero            = 6
@@ -90,7 +85,7 @@ The GFS_v16beta physics suite uses the parameterizations in the following order:
 \n \c  debug             = .false.
 \n \c  oz_phys           = .F.
 \n \c  oz_phys_2015      = .T.
-\n \c  nstf_name         = @[NSTF_NAME]
+\n \c  nstf_name         = 0,0,0,0,0
 \n \c  nst_anl           = .true.
 \n \c  psautco           = 0.0008,0.0005
 \n \c  prautco           = 0.00015,0.00015
@@ -168,9 +163,5 @@ The GFS_v16beta physics suite uses the parameterizations in the following order:
 \n \c  knob_ugwp_ndx4lh  = 1
 \n \c  knob_ugwp_version = 0
 \n \c  launch_level      = 27
-
-\note nstf_name = \f$[2,0,0,0,0]^1 [2,1,0,0,0]^2\f$
-- \f$^1\f$ NSST is on and coupled with spin up off
-- \f$^2\f$ NSST is on and coupled with spin up on
 
 */
