@@ -84,7 +84,8 @@
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,                   &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, hybedmf, do_shoc,      &
-        satmedmf, qgrs, vdftra, errmsg, errflg)
+        satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q, ldiag3d, qdiag3d, lssav, &
+        ugrs, vgrs, tgrs, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -94,13 +95,16 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
-      logical, intent(in) :: trans_aero
+      logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(im, levs), intent(in) :: ugrs, vgrs, tgrs
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
+      real(kind=kind_phys), dimension(im, levs), intent(out) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(out) :: save_q
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -258,6 +262,24 @@
 !
       endif
 
+      if(ldiag3d .and. lssav) then
+        do k=1,levs
+          do i=1,im
+            save_t(i,k) = tgrs(i,k)
+            save_u(i,k) = ugrs(i,k)
+            save_v(i,k) = vgrs(i,k)
+          enddo
+        enddo
+        if(qdiag3d) then
+          do k=1,levs
+            do i=1,im
+              save_q(i,k,ntqv) = qgrs(i,k,ntqv)
+              save_q(i,k,ntoz) = qgrs(i,k,ntoz)
+            enddo
+          enddo
+        endif
+      endif
+
     end subroutine GFS_PBL_generic_pre_run
 
     end module GFS_PBL_generic_pre
@@ -285,9 +307,10 @@
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
-        dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
+        dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,&
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
+        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, &
+        ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -302,6 +325,9 @@
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
       logical, intent(in) :: flag_for_pbl_generic_tend
+      
+      real(kind=kind_phys), dimension(im, levs), intent(in) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: save_q
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
@@ -309,6 +335,10 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
           wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1
+
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(im, levs), intent(in) :: ugrs, vgrs, tgrs
+
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
       real(kind=kind_phys), dimension(im), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
       real(kind=kind_phys), dimension(im, levs), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
@@ -553,39 +583,29 @@
   !    &     dtf,' kdt=',kdt,' lat=',lat
   !       endif
 
-        if (ldiag3d .and. flag_for_pbl_generic_tend) then
+        if (ldiag3d .and. flag_for_pbl_generic_tend .and. lssav) then
           if (lsidea) then
             dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
           else
             do k=1,levs
               do i=1,im
-                tem  = dtdt(i,k) - (htrlw(i,k)+htrsw(i,k)*xmu(i))
-                dt3dt(i,k) = dt3dt(i,k) + tem*dtf
+                dt3dt(i,k) = dt3dt(i,k) + (tgrs(i,k) - save_t(i,k))
               enddo
             enddo
           endif
           do k=1,levs
             do i=1,im
-              du3dt_PBL(i,k) = du3dt_PBL(i,k) + dudt(i,k) * dtf
-              du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
-              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + dvdt(i,k) * dtf
-              dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
+              du3dt_PBL(i,k) = du3dt_PBL(i,k) + (ugrs(i,k) - save_u(i,k))
+              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + (vgrs(i,k) - save_v(i,k))
             enddo
           enddo
-          if (qdiag3d) then
-             do k=1,levs
-                do i=1,im
-                   tem  = dqdt(i,k,ntqv) * dtf
-                   dq3dt(i,k) = dq3dt(i,k) + tem
-                enddo
-             enddo
-             if (ntoz > 0) then
-                do k=1,levs
-                   do i=1,im
-                      dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + dqdt(i,k,ntoz) * dtf
-                   enddo
-                enddo
-             endif
+          if(qdiag3d) then
+            do k=1,levs
+              do i=1,im
+                dq3dt(i,k)   = dq3dt(i,k) + (qgrs(i,k,ntqv)-save_q(i,k,ntqv))
+                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + (qgrs(i,k,ntoz)-save_q(i,k,ntoz))
+              enddo
+            enddo
           endif
         endif
 

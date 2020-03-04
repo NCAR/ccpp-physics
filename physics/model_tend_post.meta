@@ -143,6 +143,38 @@
   type = real
   kind = kind_phys
   intent = inout
+[dt3dt_total]
+  standard_name = cumulative_change_in_temperature
+  long_name = cumulative change in temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du3dt_total]
+  standard_name = cumulative_change_in_x_wind
+  long_name = cumulative change in x wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3dt_total]
+  standard_name = cumulative_change_in_y_wind
+  long_name = cumulative change in y wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dq3dt_total]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity
+  long_name = cumulative change in water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent

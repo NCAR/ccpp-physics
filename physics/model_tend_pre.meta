@@ -60,6 +60,38 @@
   type = real
   kind = kind_phys
   intent = in
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = zonal wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = meridional wind updated by physics
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+[gq0_water_vapor]
+  standard_name = water_vapor_specific_humidity_updated_by_physics
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
 [t_start]
   standard_name = temperature_at_start_of_ccpp
   long_name = temperature at start of ccpp
@@ -119,6 +151,38 @@
 [dq3dt_model]
   standard_name = cumulative_change_in_water_vapor_specific_humidity_from_model
   long_name = cumulative change in water vapor specific humidity from model
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dt3dt_total]
+  standard_name = cumulative_change_in_temperature
+  long_name = cumulative change in temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du3dt_total]
+  standard_name = cumulative_change_in_x_wind
+  long_name = cumulative change in x wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3dt_total]
+  standard_name = cumulative_change_in_y_wind
+  long_name = cumulative change in y wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dq3dt_total]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity
+  long_name = cumulative change in water vapor specific humidity
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
