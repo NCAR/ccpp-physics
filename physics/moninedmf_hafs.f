@@ -64,7 +64,7 @@
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
-     &   xkzminv,moninq_fac,islimsk,errmsg,errflg)
+     &   xkzminv,moninq_fac,islimsk,dkudiagnostic,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -144,7 +144,7 @@
      &                     ti(im,km-1),  shr2(im,km-1),                 &
      &                     al(im,km-1),  ad(im,km),                     &
      &                     au(im,km-1),  a1(im,km),                     &
-     &                     a2(im,km*ntrac)
+     &                     a2(im,km*ntrac),  dkudiagnostic(im,km-1)
 !
       real(kind=kind_phys) tcko(im,km),  qcko(im,km,ntrac),             &
      &                     ucko(im,km),  vcko(im,km),  xmf(im,km)
@@ -1395,6 +1395,13 @@ c
 !
         enddo
       enddo
+      
+      do k = 1,km1
+        do i=1,im
+           dkudiagnostic(i,k) = dku(i,k)
+        enddo
+      enddo
+
 !
 !     solve tridiagonal problem for momentum
 !
