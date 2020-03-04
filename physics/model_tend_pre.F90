@@ -15,52 +15,6 @@ end subroutine model_tend_pre_init
 subroutine model_tend_pre_finalize()
 end subroutine model_tend_pre_finalize
 
-! subroutine model_tend_pre_run(diag, statein, stateout, control, &
-!                               errmsg, errflg)
-!   implicit none
-!   use GFS_typedefs, only: GFS_statein_type, GFS_stateout_type, GFS_diag_type, GFS_control_type
-
-!   type(GFS_diag_type), intent(inout) :: diag
-!   type(GFS_statein_type), intent(in) :: statein
-!   type(GFS_stateout_type), intent(in) :: stateout
-!   type(GFS_control_type), intent(in) :: control
-
-!   character(len=*),     intent(out) :: errmsg
-!   integer,              intent(out) :: errflg
-
-!   integer :: i, k
-
-!   ! Initialize CCPP error handling variables
-!   errmsg = ''
-!   errflg = 0
-
-!   print *,'in model_tend_pre_run'
-
-!   if(control%Lssav .and. control%ldiag3d) then
-!     do k=1,control%levs
-!       do i=1,control%im
-!         diag%t_start(i,k) = statein%tgrs(i,k)
-!         diag%u_start(i,k) = statein%ugrs(i,k)
-!         v_start(i,k) = vgrs(i,k)
-!         if(qdiag3d) then
-!           q_start(i,k) = qvgrs(i,k)
-!         endif
-!         if(t_start(i,k)>1e-3 .and. t_end(i,k)>1e-3) then
-!           dt3dt_model(i,k) = dt3dt_model(i,k) + (t_start(i,k)-t_end(i,k))
-!           du3dt_model(i,k) = du3dt_model(i,k) + (u_start(i,k)-u_end(i,k))
-!           dv3dt_model(i,k) = dv3dt_model(i,k) + (v_start(i,k)-v_end(i,k))
-!           if(qdiag3d) then
-!             dq3dt_model(i,k) = dq3dt_model(i,k) + (q_start(i,k)-q_end(i,k))
-!           endif
-!         endif
-!       enddo
-!     enddo
-!   endif
-
-! end subroutine model_tend_pre_run
-
-
-
 !> \section arg_table_model_tend_pre_run Argument Table
 !! \htmlinclude model_tend_pre_run.html
 !!

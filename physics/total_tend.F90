@@ -51,10 +51,7 @@ subroutine total_tend_run(dtp, kdt,                     &
 
   good=0
 
-  print *,'entered total_tend_run'
-
   if(Lssav .and. ldiag3d) then
-    print *,'if = TRUE in total_tend_run'
     do k=1,levs
       do i=1,im
         if(t_start(i,k)>1e-3 .and. gt0(i,k)>1e-3) then
@@ -72,6 +69,7 @@ subroutine total_tend_run(dtp, kdt,                     &
         if(qdiag3d) then
           q_start(i,k)=gq0_water_vapor(i,k)
         endif
+        ! Alternative is to use the state in:
         ! if(t_start(i,k)>1e-3 .and. tgrs(i,k)>1e-3) then
         !   good=good+1
         !   dt3dt_total(i,k) = dt3dt_total(i,k) + (tgrs(i,k)-t_start(i,k))
@@ -89,7 +87,6 @@ subroutine total_tend_run(dtp, kdt,                     &
         ! endif
       enddo
     enddo
-    print *,'total tend valid points: ',good
   endif
 end subroutine total_tend_run
 

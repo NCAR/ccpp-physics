@@ -49,29 +49,7 @@ contains
     errmsg = ''
     errflg = 0
 
-    print *, 'in model_tend_post_run'
-
     diag_enabled: if(lssav .and. ldiag3d) then
-      if(any(gt0(1:im,1:levs)<1e-3)) then
-        print *,'error: temperatures less than 1e-3'
-      endif
-      if(all(abs(gu0(1:im,1:levs))<1e-3)) then
-        print *,'error: all u wind is near zero'
-      endif
-      if(all(abs(gv0(1:im,1:levs))<1e-3)) then
-        print *,'error: all v wind is near zero'
-      endif
-
-      if(any(t_start(1:im,1:levs)<1e-3)) then
-        print *,'error: start temperatures less than 1e-3'
-      endif
-      if(all(abs(u_start(1:im,1:levs))<1e-3)) then
-        print *,'error: all start u wind is near zero'
-      endif
-      if(all(abs(v_start(1:im,1:levs))<1e-3)) then
-        print *,'error: all start v wind is near zero'
-      endif
-
       do k=1,levs
         do i=1,im
           t_end(i,k) = gt0(i,k)

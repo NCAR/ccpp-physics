@@ -36,7 +36,6 @@
         errflg = 0
 
         save_fields: if (ldiag3d .and. flag_for_scnv_generic_tend) then
-          print *,'save fields in GFS_SCNV_generic_pre_run'
           do k=1,levs
             do i=1,im
               save_u(i,k)   = gu0(i,k)
@@ -137,10 +136,6 @@
       endif update_cnvw_cnvc
 
       diagtend: if (lssav .and. flag_for_scnv_generic_tend) then
-        print *,'diagtend in GFS_SCNV_generic.F90'
-        if(frain<1e-5) then
-          print *,'bad frain: ',frain
-        endif
         if (ldiag3d) then
           do k=1,levs
             do i=1,im
