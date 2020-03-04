@@ -62,6 +62,8 @@
         STCFC1 (Model%nx*Model%ny*Model%lsoil), &
         SLCFC1 (Model%nx*Model%ny*Model%lsoil)
 
+    logical          :: lake(Model%nx*Model%ny)
+
     character(len=6) :: tile_num_ch
     real(kind=kind_phys), parameter :: pifac=180.0/pi
     real(kind=kind_phys)            :: sig1t, dt_warm
@@ -151,6 +153,11 @@
           ELSE
             AISFCS(len) = 0.
           ENDIF
+          if (Sfcprop(nb)%lakefrac(ix) > 0.0) then
+            lake(len) = .true.
+          else
+            lake(len) = .false.
+          endif
 
 !     if (Model%me .eq. 0)
 !    &   print *,' len=',len,' rla=',rla(len),' rlo=',rlo(len)
@@ -185,6 +192,7 @@
                      CVBFCS, CVTFCS, Model%me, Model%nlunit,      &
                      size(Model%input_nml_file),                  &
                      Model%input_nml_file,                        &
+                     lake, Model%min_lakeice, Model%min_seaice,   &
                      Model%ialb, Model%isot, Model%ivegsrc,       &
                      trim(tile_num_ch), i_index, j_index)
 #ifndef INTERNAL_FILE_NML
