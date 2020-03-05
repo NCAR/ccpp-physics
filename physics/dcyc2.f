@@ -313,17 +313,17 @@
         if (dry(i)) then
           tem2 = tsfc_lnd(i) * tsfc_lnd(i)
           adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
-     &                   + (one - sfcemis_lnd(i)) * adjsfcdlw(i)
+     &                     + (one - sfcemis_lnd(i)) * adjsfcdlw(i)
         endif
         if (icy(i)) then
           tem2 = tsfc_ice(i) * tsfc_ice(i)
           adjsfculw_ice(i) =  sfcemis_ice(i) * con_sbc * tem2 * tem2
-     &                   + (one - sfcemis_ice(i)) * adjsfcdlw(i)
+     &                     + (one - sfcemis_ice(i)) * adjsfcdlw(i)
         endif
         if (wet(i)) then
           tem2 = tsfc_ocn(i) * tsfc_ocn(i)
           adjsfculw_ocn(i) =  sfcemis_ocn(i) * con_sbc * tem2 * tem2
-     &                   + (one - sfcemis_ocn(i)) * adjsfcdlw(i)
+     &                     + (one - sfcemis_ocn(i)) * adjsfcdlw(i)
         endif
 !     if (lprnt .and. i == ipr) write(0,*)' in dcyc3: dry==',dry(i)
 !    &,' wet=',wet(i),' icy=',icy(i),' tsfc3=',tsfc3(i,:)
@@ -370,60 +370,3 @@
 !> @}
 !-----------------------------------
       end module dcyc2t3
-
-
-
-      module dcyc2t3_post
-
-      implicit none
-
-      private
-
-      public :: dcyc2t3_post_init,dcyc2t3_post_run,dcyc2t3_post_finalize
-
-      contains
-
-!! \section arg_table_dcyc2t3_post_init Argument Table
-!!
-      subroutine dcyc2t3_post_init()
-      end subroutine dcyc2t3_post_init
-
-!! \section arg_table_dcyc2t3_post_finalize Argument Table
-!!
-      subroutine dcyc2t3_post_finalize()
-      end subroutine dcyc2t3_post_finalize
-
-
-!> This subroutine contains CCPP-compliant dcyc2t3 that calulates
-!! surface upwelling shortwave flux at current time.
-!!
-!! \section arg_table_dcyc2t3_post_run Argument Table
-!! \htmlinclude dcyc2t3_post_run.html
-!!
-      subroutine dcyc2t3_post_run(                                      &
-     &           im, adjsfcdsw, adjsfcnsw, adjsfcusw,                   &
-     &           errmsg, errflg)
-
-      use GFS_typedefs, only: GFS_diag_type
-      use machine,      only: kind_phys
-
-      implicit none
-
-      integer, intent(in) :: im
-      real(kind=kind_phys), dimension(im), intent(in)  :: adjsfcdsw
-      real(kind=kind_phys), dimension(im), intent(in)  :: adjsfcnsw
-      real(kind=kind_phys), dimension(im), intent(out) :: adjsfcusw
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      adjsfcusw(:) = adjsfcdsw(:) - adjsfcnsw(:)
-
-      return
-      end subroutine dcyc2t3_post_run
-
-      end module dcyc2t3_post
-

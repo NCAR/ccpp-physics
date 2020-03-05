@@ -20,7 +20,7 @@ contains
 !! \htmlinclude m_micro_init.html
 !!
 subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, cpair,&
-                        tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,      &
+                        eps, tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,  &
                         mg_rhmini, microp_uniform, do_cldice, hetfrz_classnuc,        &
                         mg_precip_frac_method, mg_berg_eff_factor, sed_supersat,      &
                         do_sb_physics, mg_do_hail,  mg_do_graupel, mg_nccons,         &
@@ -38,7 +38,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                                         sed_supersat, do_sb_physics, mg_do_hail,        &
                                         mg_do_graupel, mg_nccons, mg_nicons, mg_ngcons, &
                                         mg_do_ice_gmao, mg_do_liq_liu
-    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, tmelt, latvap, latice
+    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, eps, tmelt, latvap, latice
     real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(2), mg_rhmini, &
                                         mg_berg_eff_factor, mg_ncnst, mg_ninst, mg_ngnst
     character(len=16),    intent(in) :: mg_precip_frac_method
@@ -50,7 +50,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
 
     if (is_initialized) return
 
-    if (imp_physics/=imp_physics_mg) then
+    if (imp_physics /= imp_physics_mg) then
        write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Morrison-Gettelman MP"
        errflg = 1
        return
@@ -60,20 +60,20 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
       call ini_micro (mg_dcs, mg_qcvar, mg_ts_auto_ice(1))
     elseif (fprcp == 1) then
       call micro_mg_init2_0(kind_phys, gravit, rair, rh2o, cpair, &
-                            tmelt, latvap, latice, mg_rhmini,     &
+                            eps, tmelt, latvap, latice, mg_rhmini,&
                             mg_dcs, mg_ts_auto_ice,               &
                             mg_qcvar,                             &
                             microp_uniform, do_cldice,            &
                             hetfrz_classnuc,                      &
                             mg_precip_frac_method,                &
                             mg_berg_eff_factor,                   &
-                            sed_supersat, do_sb_physics,          &
+                            sed_supersat,   do_sb_physics,        &
                             mg_do_ice_gmao, mg_do_liq_liu,        &
-                            mg_nccons, mg_nicons,                 &
-                            mg_ncnst, mg_ninst)
+                            mg_nccons,      mg_nicons,            &
+                            mg_ncnst,       mg_ninst)
     elseif (fprcp == 2) then
       call micro_mg_init3_0(kind_phys, gravit, rair, rh2o, cpair, &
-                            tmelt, latvap, latice, mg_rhmini,     &
+                            eps, tmelt, latvap, latice, mg_rhmini,&
                             mg_dcs, mg_ts_auto_ice,               &
                             mg_qcvar,                             &
                             mg_do_hail,       mg_do_graupel,      &
@@ -81,11 +81,11 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                             hetfrz_classnuc,                      &
                             mg_precip_frac_method,                &
                             mg_berg_eff_factor,                   &
-                            sed_supersat, do_sb_physics,          &
+                            sed_supersat,   do_sb_physics,        &
                             mg_do_ice_gmao, mg_do_liq_liu,        &
-                            mg_nccons,    mg_nicons,              &
-                            mg_ncnst,     mg_ninst,               &
-                            mg_ngcons,    mg_ngnst)
+                            mg_nccons,      mg_nicons,            &
+                            mg_ncnst,       mg_ninst,             &
+                            mg_ngcons,      mg_ngnst)
     else
       write(0,*)' fprcp = ',fprcp,' is not a valid option - aborting'
       stop
@@ -136,8 +136,8 @@ end subroutine m_micro_init
      &,                         CLDREFFG, aerfld_i                      &
      &,                         aero_in,  naai_i, npccn_i, iccn         &
      &,                         skip_macro                              &
-     &,                         lprnt, alf_fac, qc_min, pdfflag         &
-     &,                         ipr, kdt, xlat, xlon, rhc_i,            &
+     &,                         alf_fac, qc_min, pdfflag                &
+     &,                         kdt, xlat, xlon, rhc_i,                 &
      &                          errmsg, errflg)
 
        use machine ,      only: kind_phys
@@ -182,8 +182,8 @@ end subroutine m_micro_init
      &                       fourb3=4.0/3.0, RL_cub=1.0e-15, nmin=1.0
 
        integer, parameter :: ncolmicro = 1
-       integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag
-       logical,intent(in) :: flipv, aero_in, skip_macro, lprnt, iccn
+       integer,intent(in) :: im, ix,lm, kdt, fprcp, pdfflag
+       logical,intent(in) :: flipv, aero_in, skip_macro, iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
        real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
@@ -234,7 +234,7 @@ end subroutine m_micro_init
        integer kcldtopcvn,i,k,ll, kbmin, NAUX, nbincontactdust,l
        integer, dimension(im) :: kct
        real (kind=kind_phys) T_ICE_ALL, USE_AV_V,BKGTAU,LCCIRRUS,       &
-     &    NPRE_FRAC, Nct, Wct, fcn, ksa1, tauxr8, DT_Moist, dt_r8,      &
+     &    NPRE_FRAC, Nct, Wct, fcn, ksa1, tauxr8, DT_Moist, dt_r8, tem, &
      &    TMAXLL, USURF,LTS_UP, LTS_LOW, MIN_EXP, fracover, c2_gw, est3
 
        real(kind=kind_phys), allocatable, dimension(:,:) ::             &
@@ -379,7 +379,8 @@ end subroutine m_micro_init
        type (AerProps)                     :: AeroAux, AeroAux_b
        real, allocatable, dimension(:,:,:) :: AERMASSMIX
 
-       logical :: use_average_v, ltrue, lprint
+       logical :: use_average_v, ltrue, lprint, lprnt
+       integer :: ipr
 
 !==================================
 !====2-moment Microhysics=
@@ -406,6 +407,9 @@ end subroutine m_micro_init
 ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
+
+       lprnt = .false.
+       ipr   = 1
 
 !      rhr8 = 1.0
        if(flipv) then
@@ -528,6 +532,12 @@ end subroutine m_micro_init
            enddo
          endif
        endif
+!      if (lprnt) then
+!        write(0,*)' inmic qlcn=',qlcn(ipr,:)
+!        write(0,*)' inmic qlls=',qlls(ipr,:)
+!        write(0,*)' inmic qicn=',qicn(ipr,:)
+!        write(0,*)' inmic qils=',qils(ipr,:)
+!      endif
 !
        DT_MOIST = dt_i
        dt_r8    = dt_i
@@ -540,12 +550,12 @@ end subroutine m_micro_init
      &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
      &                            NCPI(I,K), qc_min)
              if (rnw(i,k) <= qc_min(1)) then
-               ncpl(i,k) = 0.0
-             elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
-               ncpl(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+               ncpr(i,k) = 0.0
+             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
              endif
              if (snw(i,k) <= qc_min(2)) then
-               ncpl(i,k) = 0.0
+               ncps(i,k) = 0.0
              elseif (ncps(i,k) <= nmin) then
                ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
              endif
@@ -558,6 +568,7 @@ end subroutine m_micro_init
            enddo
          enddo
        endif
+
        do i=1,im
          KCBL(i)     = max(LM-KCBL(i),10)
          KCT(i)      = 10
@@ -642,7 +653,6 @@ end subroutine m_micro_init
 !        END DO
 !        deallocate (vmip)
 !      endif
-
 
        do l=lm-1,1,-1
          do i=1,im
@@ -1541,7 +1551,9 @@ end subroutine m_micro_init
 !           if(lprint) then
 !             write(0,*)' calling micro_mg_tend3_0 qcvar3=',qcvar3,' i=',i
 !             write(0,*)' qcr8=',qcr8(:)
+!             write(0,*)' qir8=',qir8(:)
 !             write(0,*)' ncr8=',ncr8(:)
+!             write(0,*)' nir8=',nir8(:)
 !             write(0,*)' npccninr8=',npccninr8(:)
 !             write(0,*)' plevr8=',plevr8(:)
 !             write(0,*)' ter8=',ter8(:)
@@ -1674,14 +1686,21 @@ end subroutine m_micro_init
 
 !TVQX1    = SUM( (  Q1 +  QL_TOT + QI_TOT(1:im,:,:))*DM, 3) &
 
-
       if (skip_macro) then
         do k=1,lm
           do i=1,im
+            QLCN(i,k) = QL_TOT(i,k) * FQA(i,k)
+            QLLS(i,k) = QL_TOT(i,k) - QLCN(i,k)
+            QICN(i,k) = QI_TOT(i,k) * FQA(i,k)
+            QILS(i,k) = QI_TOT(i,k) - QICN(i,k)
+
             CALL fix_up_clouds_2M(Q1(I,K),   TEMP(i,k), QLLS(I,K),      &
      &                            QILS(I,K), CLLS(I,K), QLCN(I,K),      &
      &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
      &                            NCPI(I,K), qc_min)
+
+            QL_TOT(I,K) = QLLS(I,K) + QLCN(I,K)
+            QI_TOT(I,K) = QILS(I,K) + QICN(I,K)
             if (rnw(i,k) <= qc_min(1)) then
               ncpl(i,k) = 0.0
             elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
@@ -1839,7 +1858,7 @@ end subroutine m_micro_init
        if (allocated(ALPHT_X)) deallocate (ALPHT_X)
 
 !     if (lprnt) then
-!       write(0,*)' rn_o=',rn_o(ipr),' ls_prc2=',ls_prc2(ipr),' ls_snr=',ls_snr(ipr)
+!       write(0,*)' rn_o=',rn_o(ipr),' ls_prc2=',ls_prc2(ipr),' ls_snr=',ls_snr(ipr),' kdt=',kdt
 !       write(0,*)' end micro_mg_tend t_io= ', t_io(ipr,:)
 !       write(0,*)' end micro_mg_tend clls_io= ', clls_io(ipr,:)
 !     endif
