@@ -41,23 +41,7 @@
       end subroutine GFS_diagtoscreen_finalize
 
 !> \section arg_table_GFS_diagtoscreen_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type in FV3        | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | Statein        | GFS_statein_type_instance                              | instance of derived type GFS_statein_type in FV3        | DDT           |    0 | GFS_statein_type      |           | in     | F        |
-!! | Stateout       | GFS_stateout_type_instance                             | instance of derived type GFS_stateout_type              | DDT           |    0 | GFS_stateout_type     |           | in     | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                              | instance of type GFS_sfcprop_type in FV3                | DDT           |    0 | GFS_sfcprop_type      |           | in     | F        |
-!! | Coupling       | GFS_coupling_type_instance                             | instance of type GFS_coupling_type in FV3               | DDT           |    0 | GFS_coupling_type     |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                                 | instance of type GFS_grid_type in FV3                   | DDT           |    0 | GFS_grid_type         |           | in     | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | instance of type GFS_tbd_type in FV3                    | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | Cldprop        | GFS_cldprop_type_instance                              | instance of type GFS_cldprop_type in FV3                | DDT           |    0 | GFS_cldprop_type      |           | in     | F        |
-!! | Radtend        | GFS_radtend_type_instance                              | instance of type GFS_radtend_type in FV3                | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
-!! | Diag           | GFS_diag_type_instance                                 | instance of type GFS_diag_type in FV3                   | DDT           |    0 | GFS_diag_type         |           | in     | F        |
-!! | Interstitial   | GFS_interstitial_type_instance                         | instance of type GFS_interstitial_type in FV3           | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
-!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_diagtoscreen_run.html
 !!
       subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,     &
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
@@ -765,23 +749,7 @@
       end subroutine GFS_interstitialtoscreen_finalize
 
 !> \section arg_table_GFS_interstitialtoscreen_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | Statein        | GFS_statein_type_instance                              | instance of derived type GFS_statein_type               | DDT           |    0 | GFS_statein_type      |           | in     | F        |
-!! | Stateout       | GFS_stateout_type_instance                             | instance of derived type GFS_stateout_type              | DDT           |    0 | GFS_stateout_type     |           | in     | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                              | instance of derived type GFS_sfcprop_type               | DDT           |    0 | GFS_sfcprop_type      |           | in     | F        |
-!! | Coupling       | GFS_coupling_type_instance                             | instance of derived type GFS_coupling_type              | DDT           |    0 | GFS_coupling_type     |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                                 | instance of derived type GFS_grid_type                  | DDT           |    0 | GFS_grid_type         |           | in     | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | instance of derived type GFS_tbd_type                   | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | Cldprop        | GFS_cldprop_type_instance                              | instance of derived type GFS_cldprop_type               | DDT           |    0 | GFS_cldprop_type      |           | in     | F        |
-!! | Radtend        | GFS_radtend_type_instance                              | instance of derived type GFS_radtend_type               | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
-!! | Diag           | GFS_diag_type_instance                                 | instance of derived type GFS_diag_type                  | DDT           |    0 | GFS_diag_type         |           | in     | F        |
-!! | Interstitial   | GFS_interstitial_type_instance                         | instance of derived type GFS_interstitial_type          | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
-!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_interstitialtoscreen_run.html
 !!
       subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
@@ -893,12 +861,7 @@
       end subroutine GFS_abort_finalize
 
 !> \section arg_table_GFS_abort_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_abort_run.html
 !!
       subroutine GFS_abort_run (Model, blkno, errmsg, errflg)
 
