@@ -11,8 +11,8 @@ operational implementations. This version contains all parameterizations of the 
 plus additional developmental schemes. There are four suites supported for use with the Single Column Model (SCM) 
 developed by the Development Testbed Center (GFS_v15p2, GFS_v16beta, GSD_v1, and csawmg), and four suites
 supported for use with the atmospheric component of the UFS (i.e., GFS_v15p2, GFS_v15p2_no_nsst, GFS_v16beta and 
-GFS_v16beta_no_nsst). The variants labelled as \a no_nsst are a simplification that uses constant sea surface 
-temperature (SST). This simplification is needed when the UFS is initialized with files in GRIdded Binary Edition 2 (GRIB2) 
+GFS_v16beta_no_nsst). The variants labelled as \a no_nsst are simplification of GFS_v15p2 and GFS_v16beta 
+. This simplification is needed when the UFS is initialized with files in GRIdded Binary Edition 2 (GRIB2) 
 format instead of files in NOAA Environmental Modeling System (NEMS) Input/Output (NEMSIO) format because the 
 fields necessary to predict (SST) are not available in the GRIB2 files.
 
