@@ -183,37 +183,37 @@
   intent = in
   optional = F
 [swh]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
-  long_name = total sky shortwave heating rate on radiation time step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  long_name = total sky sw heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [swhc]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step
-  long_name = clear sky shortwave heating rate on radiation time step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_timestep
+  long_name = clear sky sw heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [hlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
-  long_name = total sky longwave heating rate on radiation time step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  long_name = total sky lw heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [hlwc]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
-  long_name = clear sky longwave heating rate on radiation time step
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_timestep
+  long_name = clear sky lw heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in

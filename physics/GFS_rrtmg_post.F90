@@ -44,12 +44,12 @@
       integer,              intent(in) :: im, lm, ltp, kt, kb, kd, nday
       real(kind=kind_phys), intent(in) :: raddt
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),          intent(in) :: aerodp
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),5),              intent(in) :: cldsa
-      integer,              dimension(size(Grid%xlon,1),3),              intent(in) :: mbota, mtopa
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: clouds1
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: cldtausw
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP), intent(in) :: cldtaulw
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),  intent(in) :: aerodp
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),5),      intent(in) :: cldsa
+      integer,              dimension(size(Grid%xlon,1),3),      intent(in) :: mbota, mtopa
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: clouds1
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: cldtausw
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: cldtaulw
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
