@@ -260,7 +260,7 @@
          do j = 1,Model%ny
            do i = 1,Model%nx
              ix = ix + 1
-             if (ix .gt. Model%blksz(nb)) then
+             if (ix > Model%blksz(nb)) then
                ix = 1
                nb = nb + 1
              endif

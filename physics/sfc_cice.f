@@ -41,7 +41,7 @@
 !-----------------------------------
       subroutine sfc_cice_run                                           &
 !  ---  inputs:
-     &     ( im, cplflx, cplchm, hvap, cp, rvrdm1, rd,                  &
+     &     ( im, cplflx, hvap, cp, rvrdm1, rd,                          &
      &       t1, q1, cm, ch, prsl1,                                     &
      &       wind, flag_cice, flag_iter, dqsfc, dtsfc,                  &
      &       dusfc, dvsfc,                                              &
@@ -58,7 +58,7 @@
 !                                                                       !
 !    call sfc_cice                                                      !
 !       inputs:                                                         !
-!          ( im, cplflx, cplchm, hvap, cp, rvrdm1, rd,                  !
+!          ( im, cplflx, hvap, cp, rvrdm1, rd,                          !
 !            t1, q1, cm, ch, prsl1,                                     !
 !            wind, flag_cice, flag_iter, dqsfc, dtsfc,                  !
 !            dusfc, dvsfc,                                              !
@@ -99,7 +99,6 @@
 !  ---  inputs:
       integer, intent(in) :: im
       logical, intent(in) :: cplflx
-      logical, intent(in) :: cplchm
 
 !     real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,       &
       real (kind=kind_phys), dimension(im), intent(in) ::               &
@@ -126,9 +125,7 @@
       errmsg = ''
       errflg = 0
 !
-      if ((.not. cplflx) .and. (.not.cplchm)) then
-         return
-      endif
+      if (.not. cplflx) return
 !
       cpinv = 1.0/cp
       hvapi = 1.0/hvap
