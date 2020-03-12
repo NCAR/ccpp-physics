@@ -407,8 +407,8 @@
   intent = out
   optional = F
 [reset]
-  standard_name = flag_reset_maximum_hourly_fields
-  long_name = flag for resetting maximum hourly fields
+  standard_name = flag_for_resetting_radar_reflectivity_calculation
+  long_name = flag for resetting radar reflectivity calculation
   units = flag
   dimensions = ()
   type = logical
