@@ -377,24 +377,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[clw_ice]
-  standard_name = ice_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[clw_liquid]
-  standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [npdf3d]
   standard_name = number_of_3d_arrays_associated_with_pdf_based_clouds
   long_name = number of 3d arrays associated with pdf based clouds/mp
