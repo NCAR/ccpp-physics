@@ -11,8 +11,7 @@ module GFS_surface_composites_pre
 
    public GFS_surface_composites_pre_init, GFS_surface_composites_pre_finalize, GFS_surface_composites_pre_run
 
-   real(kind=kind_phys), parameter :: one = 1.0d0
-   real(kind=kind_phys), parameter :: zero = 0.0d0
+   real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0, epsln = 1.0d-10
 
 contains
 
@@ -25,7 +24,8 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, landfrac, lakefrac, oceanfrac,  &
+   subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, cplwav2atm,                     &
+                                 landfrac, lakefrac, oceanfrac,                                                 &
                                  frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorl_ocn, &
                                  zorl_lnd, zorl_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn,  &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_ocn,        &
@@ -38,7 +38,7 @@ contains
 
       ! Interface variables
       integer,                             intent(in   ) :: im
-      logical,                             intent(in   ) :: frac_grid, cplflx
+      logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
       logical, dimension(im),              intent(in   ) :: flag_cice
       logical,              dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
       real(kind=kind_phys),                intent(in   ) :: cimin
@@ -116,6 +116,7 @@ contains
               wet(i) = .true.
   !           tsfco(i) = tgice
               if (.not. cplflx) tsfco(i) = max(tisfc(i), tgice)
+  !           if (.not. cplflx .or. lakefrac(i) > zero) tsfco(i) = max(tsfco(i), tisfc(i), tgice)
   !           tsfco(i) = max((tsfc(i) - cice(i)*tisfc(i)) &
   !                                     / (one - cice(i)), tgice)
             endif
@@ -125,11 +126,16 @@ contains
       endif
 
       if (.not. cplflx .or. .not. frac_grid) then
-        do i=1,im
-          zorll(i) = zorl(i)
-          zorlo(i) = zorl(i)
-          !tisfc(i) = tsfc(i)
-        enddo
+        if (cplwav2atm) then
+          do i=1,im
+            zorll(i) = zorl(i)
+          enddo
+        else
+          do i=1,im
+            zorll(i) = zorl(i)
+            zorlo(i) = zorl(i)
+          enddo
+        endif
       endif
 
       do i=1,im
@@ -140,8 +146,8 @@ contains
             zorl_ocn(i) = zorlo(i)
             tsfc_ocn(i) = tsfco(i)
            tsurf_ocn(i) = tsfco(i)
-!           weasd_ocn(i) = weasd(i)
-!           snowd_ocn(i) = snowd(i)
+!          weasd_ocn(i) = weasd(i)
+!          snowd_ocn(i) = snowd(i)
            weasd_ocn(i) = zero
            snowd_ocn(i) = zero
            semis_ocn(i) = 0.984d0
@@ -165,13 +171,13 @@ contains
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
            semis_ice(i) = 0.95d0
-        end if
+        endif
       enddo
 
      ! Assign sea ice temperature to interstitial variable
       do i = 1, im
         tice(i) = tisfc(i)
-      end do
+      enddo
 
    end subroutine GFS_surface_composites_pre_run
 
@@ -200,15 +206,18 @@ contains
 !! \htmlinclude GFS_surface_composites_inter_run.html
 !!
    subroutine GFS_surface_composites_inter_run (im, dry, icy, wet, semis_ocn, semis_lnd, semis_ice, adjsfcdlw, &
-                                                gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_ocn, errmsg, errflg)
+                                                gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_ocn,                      &
+                                                adjsfcusw, adjsfcdsw, adjsfcnsw, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
       integer,                             intent(in   ) :: im
       logical,              dimension(im), intent(in   ) :: dry, icy, wet
-      real(kind=kind_phys), dimension(im), intent(in   ) :: semis_ocn, semis_lnd, semis_ice, adjsfcdlw
+      real(kind=kind_phys), dimension(im), intent(in   ) :: semis_ocn, semis_lnd, semis_ice, adjsfcdlw, &
+                                                            adjsfcdsw, adjsfcnsw
       real(kind=kind_phys), dimension(im), intent(inout) :: gabsbdlw_lnd, gabsbdlw_ice, gabsbdlw_ocn
+      real(kind=kind_phys), dimension(im), intent(out)   :: adjsfcusw
 
       ! CCPP error handling
       character(len=*), intent(out) :: errmsg
@@ -236,12 +245,14 @@ contains
       !   - flux below the interface used by lnd/oc/ice models:
       !        down: sfcemis*adjsfcdlw;  up: sfcemis*sigma*T**4
       !        net = up - down = sfcemis * (sigma*T**4 - adjsfcdlw)
+      ! surface upwelling shortwave flux at current time is in adjsfcusw
 
       !  --- ...  define the downward lw flux absorbed by ground
       do i=1,im
         if (dry(i)) gabsbdlw_lnd(i) = semis_lnd(i) * adjsfcdlw(i)
         if (icy(i)) gabsbdlw_ice(i) = semis_ice(i) * adjsfcdlw(i)
         if (wet(i)) gabsbdlw_ocn(i) = semis_ocn(i) * adjsfcdlw(i)
+        adjsfcusw(i) = adjsfcdsw(i) - adjsfcnsw(i)
       enddo
 
    end subroutine GFS_surface_composites_inter_run
@@ -259,8 +270,7 @@ module GFS_surface_composites_post
 
    public GFS_surface_composites_post_init, GFS_surface_composites_post_finalize, GFS_surface_composites_post_run
 
-   real(kind=kind_phys), parameter :: one = 1.0d0
-   real(kind=kind_phys), parameter :: zero = 0.0d0
+   real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0
 
 contains
 
@@ -276,7 +286,7 @@ contains
 !!
 #endif
    subroutine GFS_surface_composites_post_run (                                                                                   &
-      im, cplflx, frac_grid, flag_cice, islmsk, dry, wet, icy, landfrac, lakefrac, oceanfrac,                                     &
+      im, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, landfrac, lakefrac, oceanfrac,                          &
       zorl, zorlo, zorll, zorl_ocn, zorl_lnd, zorl_ice,                                                                           &
       cd, cd_ocn, cd_lnd, cd_ice, cdq, cdq_ocn, cdq_lnd, cdq_ice, rb, rb_ocn, rb_lnd, rb_ice, stress, stress_ocn, stress_lnd,     &
       stress_ice, ffmm, ffmm_ocn, ffmm_lnd, ffmm_ice, ffhh, ffhh_ocn, ffhh_lnd, ffhh_ice, uustar, uustar_ocn, uustar_lnd,         &
@@ -289,7 +299,7 @@ contains
       implicit none
 
       integer,                              intent(in) :: im
-      logical,                              intent(in) :: cplflx, frac_grid
+      logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
       logical, dimension(im),               intent(in) :: flag_cice, dry, wet, icy
       integer, dimension(im),               intent(in) :: islmsk
       real(kind=kind_phys), dimension(im),  intent(in) :: landfrac, lakefrac, oceanfrac,                                        &
@@ -312,8 +322,6 @@ contains
       ! Local variables
       integer :: i
       real(kind=kind_phys) :: txl, txi, txo, tem
-      real(kind=kind_phys), parameter :: one = 1.0d0
-      real(kind=kind_phys), parameter :: zero = 0.0d0
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -340,17 +348,17 @@ contains
           uustar(i) = txl*uustar_lnd(i) + txi*uustar_ice(i) + txo*uustar_ocn(i)
           fm10(i)   = txl*fm10_lnd(i)   + txi*fm10_ice(i)   + txo*fm10_ocn(i)
           fh2(i)    = txl*fh2_lnd(i)    + txi*fh2_ice(i)    + txo*fh2_ocn(i)
-          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)      + txo*tsurf_ocn(i)
-          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_ocn(i) ! not used again! Moorthi
+         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)      + txo*tsurf_ocn(i)
+         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_ocn(i) ! not used again! Moorthi
           cmm(i)    = txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_ocn(i)
           chh(i)    = txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_ocn(i)
-          !gflx(i)   = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_ocn(i)
+         !gflx(i)   = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_ocn(i)
           ep1d(i)   = txl*ep1d_lnd(i)   + txi*ep1d_ice(i)   + txo*ep1d_ocn(i)
-          !weasd(i)  = txl*weasd_lnd(i)  + txi*weasd_ice(i)  + txo*weasd_ocn(i)
-          !snowd(i)  = txl*snowd_lnd(i)  + txi*snowd_ice(i)  + txo*snowd_ocn(i)
+         !weasd(i)  = txl*weasd_lnd(i)  + txi*weasd_ice(i)  + txo*weasd_ocn(i)
+         !snowd(i)  = txl*snowd_lnd(i)  + txi*snowd_ice(i)  + txo*snowd_ocn(i)
           weasd(i)  = txl*weasd_lnd(i)  + txi*weasd_ice(i)
           snowd(i)  = txl*snowd_lnd(i)  + txi*snowd_ice(i)
-          !tprcp(i)  = txl*tprcp_lnd(i)  + txi*tprcp_ice(i)  + txo*tprcp_ocn(i)
+         !tprcp(i)  = txl*tprcp_lnd(i)  + txi*tprcp_ice(i)  + txo*tprcp_ocn(i)
 
           if (.not. flag_cice(i) .and. islmsk(i) == 2) then
             tem     = one - txl
@@ -365,10 +373,6 @@ contains
             gflx(i) = txl*gflx_lnd(i)   + tem*gflx_ice(i)   + txo*gflx_ocn(i)
           endif
           tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_ocn(i)
-          !tsfc(i)   = txl*tsfc_lnd(i)   + txi*tsfc_ice(i)   + txo*tsfc_ocn(i)
-
-          ! DH* NOTE THIS IS UNNECESSARY BECAUSE DONE BEFORE? Diag%cmm(i)       = txl*cmm3(i,1)    + txi*cmm3(i,2)    + txo*cmm3(i,3)
-          ! DH* NOTE THIS IS UNNECESSARY BECAUSE DONE BEFORE? Diag%chh(i)       = txl*chh3(i,1)    + txi*chh3(i,2)    + txo*chh3(i,3)
 
           zorll(i) = zorl_lnd(i)
           zorlo(i) = zorl_ocn(i)
@@ -409,7 +413,7 @@ contains
             uustar(i) = uustar_lnd(i)
             fm10(i)   = fm10_lnd(i)
             fh2(i)    = fh2_lnd(i)
-            !tsurf(i) = tsurf_lnd(i)
+           !tsurf(i)  = tsurf_lnd(i)
             tsfcl(i)  = tsfc_lnd(i)
             cmm(i)    = cmm_lnd(i)
             chh(i)    = chh_lnd(i)
@@ -417,13 +421,14 @@ contains
             ep1d(i)   = ep1d_lnd(i)
             weasd(i)  = weasd_lnd(i)
             snowd(i)  = snowd_lnd(i)
-            !tprcp(i)  = tprcp_lnd(i)
+           !tprcp(i)  = tprcp_lnd(i)
             evap(i)   = evap_lnd(i)
             hflx(i)   = hflx_lnd(i)
             qss(i)    = qss_lnd(i)
             tsfc(i)   = tsfc_lnd(i)
-            cmm(i)    = cmm_lnd(i)
-            chh(i)    = chh_lnd(i)
+            hice(i)   = zero
+            cice(i)   = zero
+            tisfc(i)  = tsfc(i)
           elseif (islmsk(i) == 0) then
             zorl(i)   = zorl_ocn(i)
             cd(i)     = cd_ocn(i)
@@ -435,7 +440,7 @@ contains
             uustar(i) = uustar_ocn(i)
             fm10(i)   = fm10_ocn(i)
             fh2(i)    = fh2_ocn(i)
-            !tsurf(i) = tsurf_ocn(i)
+           !tsurf(i)  = tsurf_ocn(i)
             tsfco(i)  = tsfc_ocn(i)
             cmm(i)    = cmm_ocn(i)
             chh(i)    = chh_ocn(i)
@@ -443,13 +448,14 @@ contains
             ep1d(i)   = ep1d_ocn(i)
             weasd(i)  = weasd_ocn(i)
             snowd(i)  = snowd_ocn(i)
-            !tprcp(i)  = tprcp_ocn(i)
+           !tprcp(i)  = tprcp_ocn(i)
             evap(i)   = evap_ocn(i)
             hflx(i)   = hflx_ocn(i)
             qss(i)    = qss_ocn(i)
             tsfc(i)   = tsfc_ocn(i)
-            cmm(i)    = cmm_ocn(i)
-            chh(i)    = chh_ocn(i)
+            hice(i)   = zero
+            cice(i)   = zero
+            tisfc(i)  = tsfc(i)
           else
             zorl(i)   = zorl_ice(i)
             cd(i)     = cd_ice(i)
@@ -461,49 +467,34 @@ contains
             uustar(i) = uustar_ice(i)
             fm10(i)   = fm10_ice(i)
             fh2(i)    = fh2_ice(i)
-            !tsurf(i) = tsurf_ice(i)
-            if (.not. flag_cice(i)) then
-              tisfc(i)  = tice(i)
-            endif
+           !tsurf(i)  = tsurf_ice(i)
             cmm(i)    = cmm_ice(i)
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
             ep1d(i)   = ep1d_ice(i)
             weasd(i)  = weasd_ice(i)
             snowd(i)  = snowd_ice(i)
-            !tprcp(i)  = cice(i)*tprcp_ice(i) + (one-cice(i))*tprcp_ocn(i)
-            evap(i)   = evap_ice(i)
-            hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
-            tsfc(i)   = tsfc_ice(i)
-            cmm(i)    = cmm_ice(i)
-            chh(i)    = chh_ice(i)
+            if (flag_cice(i)) then    ! this was already done for lake ice in sfc_sice
+              txi = cice(i)
+              txo = one - txi
+              evap(i) = txi * evap_ice(i) + txo * evap_ocn(i)
+              hflx(i) = txi * hflx_ice(i) + txo * hflx_ocn(i)
+              tsfc(i) = txi * tsfc_ice(i) + txo * tsfc_ocn(i)
+            else
+              evap(i)  = evap_ice(i)
+              hflx(i)  = hflx_ice(i)
+              tsfc(i)  = tsfc_ice(i)
+              tisfc(i) = tice(i)
+            endif
           endif
 
           zorll(i) = zorl_lnd(i)
           zorlo(i) = zorl_ocn(i)
 
-          if (flag_cice(i)) then    ! this was already done for lake ice in sfc_sice
-            txi = cice(i)
-            txo = one - txi
-            evap(i) = txi * evap_ice(i) + txo * evap_ocn(i)
-            hflx(i) = txi * hflx_ice(i) + txo * hflx_ocn(i)
-!           tsfc(i) = txi * tice(i)     + txo * tsfc_ocn(i)
-            tsfc(i) = txi * tsfc_ice(i) + txo * tsfc_ocn(i)
-          else                            ! return updated lake ice thickness & concentration to global array
-            if (islmsk(i) == 2) then
-              ! DH* NOT NEEDED ???? Sfcprop%hice(i)  = zice(i)
-              ! DH* NOT NEEDED ???? cice(i)  = fice(i)  ! fice is fraction of lake area that is frozen
-              tisfc(i) = tice(i)
-            else                          ! this would be over open ocean or land (no ice fraction)
-              hice(i)  = zero
-              cice(i)  = zero
-              tisfc(i) = tsfc(i)
-            endif
-          endif
-        end do
+        enddo
 
-      end if ! if (frac_grid)
+      endif ! if (frac_grid)
 
       ! --- compositing done
 
