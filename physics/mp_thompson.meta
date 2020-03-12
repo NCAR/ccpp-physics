@@ -147,6 +147,14 @@
   type = integer
   intent = in
   optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -397,6 +405,14 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = F
+[reset]
+  standard_name = flag_reset_maximum_hourly_fields
+  long_name = flag for resetting maximum hourly fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
   optional = F
 [do_radar_ref]
   standard_name = flag_for_radar_reflectivity
