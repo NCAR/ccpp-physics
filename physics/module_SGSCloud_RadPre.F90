@@ -61,13 +61,13 @@
       logical,          intent(in)  :: flag_init, flag_restart, do_mynnedmf
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qr, qs
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qci_conv
+      ! qci_conv only allocated if GF is used
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: qci_conv
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: T3D,delp
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: &
            &         clouds1,clouds2,clouds3,clouds4,clouds5
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc_save, qi_save
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: qc_bl, cldfra_bl
-      ! DH* TODO add intent() information for delp,clouds1,clouds2,clouds3,clouds4,clouds5
       real(kind=kind_phys), dimension(im),      intent(in)    :: slmsk, xlat, de_lgth
       real(kind=kind_phys), dimension(im,nlay), intent(in)    :: plyr, dz      
       real(kind=kind_phys), dimension(im,5),    intent(inout) :: cldsa

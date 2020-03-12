@@ -729,6 +729,10 @@
               end do
               ! Call Thompson's subroutine to compute effective radii
               do i=1,im
+                ! Initialize to default in units m as in module_mp_thompson.F90
+                re_cloud(i,:) = 2.49E-6
+                re_ice(i,:)   = 4.99E-6
+                re_snow(i,:)  = 9.99E-6
                 call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),   &
                                      nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                                      re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
