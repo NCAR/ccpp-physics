@@ -70,37 +70,30 @@ contains
       errmsg = ''
       errflg = 0
 
-      if (frac_grid) then  ! here cice is fraction of the whole grid that is ice
+      if (frac_grid) then  ! cice is ice fraction wrt water area
         do i=1,im
           frland(i) = landfrac(i)
           if (frland(i) > zero) dry(i) = .true.
-          tem = one - frland(i)
-          if (tem > epsln) then
+          if (frland(i) < one) then
             if (flag_cice(i)) then
-              if (cice(i) >= min_seaice*tem) then
+              if (cice(i) >= min_seaice) then
                 icy(i)  = .true.
               else
                 cice(i) = zero
               endif
             else
-              if (cice(i) >= min_lakeice*tem) then
+              if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
-                cice(i) = cice(i)/tem  ! cice is fraction of ocean/lake
               else
                 cice(i) = zero
               endif
             endif
-!           if (icy(i)) tsfco(i) = max(tsfco(i), tisfc(i), tgice)
+            if (cice(i) < one ) then
+              wet(i)=.true. !there is some open ocean/lake water!
+              if (.not. cplflx) tsfco(i) = max(tsfco(i), tisfc(i), tgice)
+            end if
           else
             cice(i) = zero
-          endif
-
-                                       ! ocean/lake area that is not frozen
-
-          if (tem-cice(i) > epsln) then
-            wet(i) = .true.            ! there is some open water!
-!           if (icy(i)) tsfco(i) = max(tsfco(i), tgice)
-!           if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
           endif
         enddo  
 
@@ -342,8 +335,8 @@ contains
 
           ! Three-way composites (fields from sfc_diff)
           txl = landfrac(i)
-          txi = cice(i)                 ! here cice is grid fraction that is ice
-          txo = one - txl - txi
+          txi = cice(i)*(one - txl) ! txi = ice fraction wrt whole cell
+          txo = max(zero, one - txl - txi)
 
           zorl(i)   = txl*zorl_lnd(i)   + txi*zorl_ice(i)   + txo*zorl_ocn(i)
           cd(i)     = txl*cd_lnd(i)     + txi*cd_ice(i)     + txo*cd_ocn(i)
@@ -397,12 +390,6 @@ contains
 
           if (.not. flag_cice(i)) then
             if (islmsk(i) == 2) then                           ! return updated lake ice thickness & concentration to global array
-              ! DH* NOT NEEDED? Sfcprop%hice(i)  = zice(i)
-! DH* is this correct? can we update cice in place or do we need separate variables as for IPD?
-!!             Sfcprop%fice(i)  = fice(i) * Sfcprop%lakefrac(i) ! fice is fraction of lake area that is frozen
-!              Sfcprop%fice(i)  = fice(i) * (one-Sfcprop%landfrac(i)) ! fice is fraction of wet area that is frozen
-              cice(i)  = cice(i) * (1.0-landfrac(i))           ! cice is fraction of wet area that is frozen
-! *DH
               tisfc(i) = tice(i)
             else                                               ! this would be over open ocean or land (no ice fraction)
               hice(i)  = zero
