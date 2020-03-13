@@ -67,6 +67,40 @@
   kind = kind_phys
   intent = inout
   optional = F
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_global]
+  standard_name = flag_for_global_cellular_automata
+  long_name = switch for global ca
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca1]
+  standard_name = cellular_automata_global_pattern
+  long_name = cellular automata global pattern
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[si]
+  standard_name = vertical_sigma_coordinate_for_radiation_initialization
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (number_of_vertical_layers_for_radiation_calculations_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [skebu_wts]
   standard_name = weights_for_stochastic_skeb_perturbation_of_x_wind
   long_name = weights for stochastic skeb perturbation of x wind

@@ -27,7 +27,7 @@
 !!
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
                           prsik_1, prslk_1, tsfc, phil, con_g,                                             &
-                          sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
+                          sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, ca_global,dtdtr,&
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
                           cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
@@ -53,7 +53,7 @@
         real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, tsurf, zlvl
 
         ! Stochastic physics / surface perturbations
-        logical, intent(in) :: do_sppt
+        logical, intent(in) :: do_sppt, ca_global
         real(kind=kind_phys), dimension(im,levs),     intent(out) :: dtdtr
         real(kind=kind_phys), dimension(im),          intent(out) :: drain_cpl
         real(kind=kind_phys), dimension(im),          intent(out) :: dsnow_cpl
@@ -105,7 +105,7 @@
         errflg = 0
 
         ! Set initial quantities for stochastic physics deltas
-        if (do_sppt) then
+        if (do_sppt .or. ca_global) then
           dtdtr     = 0.0
           do i=1,im
             drain_cpl(i) = rain_cpl (i)

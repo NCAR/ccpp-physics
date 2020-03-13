@@ -72,11 +72,12 @@
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
      &    prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                         &
-     &    do_ca,ca_deep,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,         &
+     &    cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                       &
      &    dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                       &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,         &
+     &    do_ca, ca_sgs, ca_deep, rainevap,                             &
      &    errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -93,7 +94,8 @@
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       real(kind=kind_phys), intent(in) :: ca_deep(ix)
-      logical, intent(in)  :: do_ca
+      real(kind=kind_phys), intent(out) :: rainevap(ix)
+      logical, intent(in)  :: do_ca,ca_sgs
 
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
@@ -156,7 +158,7 @@
      &                     xdby,    xpw,     xpwd,
 !    &                     xqrch,   mbdt,    tem,
      &                     xqrch,   tem,     tem1,    tem2,
-     &                     ptem,    ptem1,   ptem2
+     &                     ptem,    ptem1,   ptem2,   nplumes
 !
       integer              kb(im), kbcon(im), kbcon1(im),
      &                     ktcon(im), ktcon1(im), ktconn(im),
@@ -222,6 +224,7 @@ c  physical parameters
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3)
+      parameter(nplumes=4.)
 !
 !  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
@@ -327,6 +330,7 @@ c
         xpwav(i)= 0.
         xpwev(i)= 0.
         vshear(i) = 0.
+        rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
       enddo
 !
@@ -755,11 +759,23 @@ c
 !
       else
 !
-        do i= 1, im
-          if(cnvflg(i)) then
-            clamt(i)  = clam
-          endif
-        enddo
+         if(do_ca .and. ca_sgs)then
+            do i=1,im
+               if(cnvflg(i)) then
+                  if(ca_deep(i) > nplumes)then
+                     clamt(i) = clam - clamd
+                  else
+                     clamt(i) = clam
+                  endif
+               endif
+            enddo
+         else
+            do i=1,im
+               if(cnvflg(i))then
+                  clamt(i)  = clam
+               endif
+            enddo
+         endif
 !
       endif
 !
@@ -2404,14 +2420,6 @@ c
         endif
       enddo
 
-!> - If stochastic physics using cellular automata is .true. then perturb the mass-flux here:
-
-      if(do_ca)then
-        do i=1,im
-         xmb(i) = xmb(i)*(1.0 + ca_deep(i)*5.)
-        enddo
-      endif
-
 !> - Transport aerosols if present
 
       if (do_aerosols)
@@ -2589,6 +2597,13 @@ c             if(islimsk(i) == 1) evef = 0.
           endif
         enddo
       enddo
+
+!LB:                                                                                                                                                                                                                                                  
+      if(do_ca .and. ca_sgs)then
+         do i = 1,im
+            rainevap(i)=delqev(i)
+         enddo
+      endif
 cj
 !     do i = 1, im
 !     if(me == 31 .and. cnvflg(i)) then
