@@ -137,15 +137,15 @@ module mp_thompson
 !>\ingroup aathompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
-      subroutine mp_thompson_run(ncol, nlev, kdt, con_g, con_rd,         &
-                              spechum, qc, qr, qi, qs, qg, ni, nr,       &
-                              is_aerosol_aware, nc, nwfa, nifa,          &
-                              nwfa2d, nifa2d,                            &
-                              tgrs, prsl, phii, omega, dtp,              &
-                              prcp, rain, graupel, ice, snow, sr,        &
-                              refl_10cm, reset, do_radar_ref,            &
-                              re_cloud, re_ice, re_snow,                 &
-                              mpicomm, mpirank, mpiroot,                 &
+      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,        &
+                              spechum, qc, qr, qi, qs, qg, ni, nr, &
+                              is_aerosol_aware, nc, nwfa, nifa,    &
+                              nwfa2d, nifa2d,                      &
+                              tgrs, prsl, phii, omega, dtp,        &
+                              prcp, rain, graupel, ice, snow, sr,  &
+                              refl_10cm, reset, do_radar_ref,      &
+                              re_cloud, re_ice, re_snow,           &
+                              mpicomm, mpirank, mpiroot,           &
                               errmsg, errflg)
 
          implicit none
@@ -155,7 +155,6 @@ module mp_thompson
          ! Dimensions and constants
          integer,                   intent(in   ) :: ncol
          integer,                   intent(in   ) :: nlev
-         integer,                   intent(in   ) :: kdt
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
          ! Hydrometeors
@@ -359,7 +358,7 @@ module mp_thompson
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg, reset=reset, kdt=kdt)
+                              errmsg=errmsg, errflg=errflg, reset=reset)
 
          else
             call mp_gt_driver(qv=qv_mp, qc=qc_mp, qr=qr_mp, qi=qi_mp, qs=qs_mp, qg=qg_mp,    &
@@ -376,7 +375,7 @@ module mp_thompson
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg, reset=reset, kdt=kdt)
+                              errmsg=errmsg, errflg=errflg, reset=reset)
          end if
          if (errflg/=0) return
 

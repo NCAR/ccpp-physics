@@ -1007,15 +1007,14 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg, reset, kdt)
+                              errmsg, errflg, reset)
 
       implicit none
 
 !..Subroutine arguments
       INTEGER, INTENT(IN):: ids,ide, jds,jde, kds,kde, &
                             ims,ime, jms,jme, kms,kme, &
-                            its,ite, jts,jte, kts,kte, &
-                            kdt
+                            its,ite, jts,jte, kts,kte
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
                           qv, qc, qr, qi, qs, qg, ni, nr
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
@@ -1380,11 +1379,12 @@ MODULE module_mp_thompson
           if (present(vt_dbz_wt) .and. present(first_time_step)) then
             call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
                                 t1d, p1d, dBZ, kts, kte, i, j,      & 
-                                melti, kdt,vt_dbz_wt(i,:,j),            &
+                                melti, vt_dbz_wt(i,:,j),            &
                                 first_time_step)
           else
-             call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                 t1d, p1d, dBZ, kts, kte, i, j,melti,kdt)
+            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
+                                t1d, p1d, dBZ, kts, kte, i, j,      &
+                                melti)
           end if
           do k = kts, kte
              refl_10cm(i,k,j) = MAX(-35., dBZ(k))
@@ -5217,14 +5217,14 @@ MODULE module_mp_thompson
 !! library of routines.  The meltwater fraction is simply the amount
 !! of frozen species remaining from what initially existed at the
 !! melting level interface.
-      subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,     &
-               t1d, p1d, dBZ, kts, kte, ii, jj, melti,kdt,vt_dBZ,       &
+      subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
+               t1d, p1d, dBZ, kts, kte, ii, jj, melti, vt_dBZ,      &
                first_time_step)
 
       IMPLICIT NONE
 
 !..Sub arguments
-      INTEGER, INTENT(IN):: kts, kte, ii, jj, kdt
+      INTEGER, INTENT(IN):: kts, kte, ii, jj
       REAL, DIMENSION(kts:kte), INTENT(IN)::                            &
                           qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, t1d, p1d
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: dBZ
