@@ -265,23 +265,23 @@
         endif
 
         do i=1,im
-          dlwsfc(i) = dlwsfc(i) +   adjsfcdlw(i)*dtf
-          ulwsfc(i) = ulwsfc(i) +   adjsfculw(i)*dtf
-          psmean(i) = psmean(i) +   pgr(i)*dtf        ! mean surface pressure
+          dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf
+          ulwsfc(i) = ulwsfc(i) + adjsfculw(i)*dtf
+          psmean(i) = psmean(i) + pgr(i)*dtf        ! mean surface pressure
         end do
 
         if (ldiag3d) then
           if (lsidea) then
             do k=1,levs
               do i=1,im
-                dt3dt_lw(i,k) = dt3dt_lw(i,k) + lwhd(i,k,1)*dtf
-                dt3dt_sw(i,k) = dt3dt_sw(i,k) + lwhd(i,k,2)*dtf
-                dt3dt_pbl(i,k) = dt3dt_pbl(i,k) + lwhd(i,k,3)*dtf
+                dt3dt_lw(i,k)   = dt3dt_lw(i,k)   + lwhd(i,k,1)*dtf
+                dt3dt_sw(i,k)   = dt3dt_sw(i,k)   + lwhd(i,k,2)*dtf
+                dt3dt_pbl(i,k)  = dt3dt_pbl(i,k)  + lwhd(i,k,3)*dtf
                 dt3dt_dcnv(i,k) = dt3dt_dcnv(i,k) + lwhd(i,k,4)*dtf
                 dt3dt_scnv(i,k) = dt3dt_scnv(i,k) + lwhd(i,k,5)*dtf
-                dt3dt_mp(i,k) = dt3dt_mp(i,k) + lwhd(i,k,6)*dtf
-              end do
-            end do
+                dt3dt_mp(i,k)   = dt3dt_mp(i,k)   + lwhd(i,k,6)*dtf
+              enddo
+            enddo
           else
             do k=1,levs
               do i=1,im
@@ -298,7 +298,7 @@
         tx1(i)    = 0.0
         tx2(i)    = 10.0
         ctei_r(i) = 10.0
-      end do
+      enddo
 
       if ((((imfshalcnv == 0 .and. shal_cnv) .or. old_monin) .and. mstrat) &
          .or. do_shoc) then
@@ -476,33 +476,33 @@
 !! \htmlinclude GFS_suite_interstitial_3_run.html
 !!
 #endif
-    subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv,       &
-               satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
-               ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
-               xlat, gq0, imp_physics, imp_physics_mg,                  &
-               imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
-               imp_physics_gfdl, imp_physics_thompson,                  &
-               imp_physics_wsm6, imp_physics_fer_hires, prsi,           &
-               prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,      &
-               work1, work2, kpbl, kinver,clw, rhc, save_qc, save_qi,   &
-               errmsg, errflg)
+    subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv,         &
+               satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,     &
+               ntiw, ntlnc, ntinc, ntclamt, ntrw, ntsw, ntrnc, ntsnc,     &
+               ntgl, ntgnc, xlon, xlat, gq0, imp_physics, imp_physics_mg, &
+               imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,          &
+               imp_physics_gfdl, imp_physics_thompson,                    &
+               imp_physics_wsm6, imp_physics_fer_hires, prsi,             &
+               prsl, prslk, rhcbot,rhcpbl, rhctop, rhcmax, islmsk,        &
+               work1, work2, kpbl, kinver, ras, me,                       &
+               clw, rhc, save_qc, save_qi, errmsg, errflg)
 
       use machine, only: kind_phys
 
       implicit none
 
       ! interface variables
-      integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw,     &
-        ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,   &
-        imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires
+      integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntlnc, ntinc, &
+        ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr,          &
+        imp_physics_zhao_carr_pdf, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires, me
       integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
-      logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol
+      logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
       real(kind=kind_phys),                             intent(in) :: rhcbot, rhcmax, rhcpbl, rhctop
       real(kind=kind_phys), dimension(im),              intent(in) :: work1, work2
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: prsl, prslk
       real(kind=kind_phys), dimension(im, levs+1),      intent(in) :: prsi
-      real(kind=kind_phys), dimension(im),              intent(in) :: xlat
+      real(kind=kind_phys), dimension(im),              intent(in) :: xlon, xlat
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
       real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
@@ -511,7 +511,7 @@
       real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
 
       character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      integer,          intent(out) :: errflg
 
       ! local variables
       integer :: i,k,n,tracers,kk
@@ -528,38 +528,40 @@
       errmsg = ''
       errflg = 0
 
-      !GF* The following section (initializing convective variables) is already executed in GFS_typedefs%interstitial_phys_reset
-      ! do k=1,levs
-      !   do i=1,im
-      !     clw(i,k,1) = 0.0
-      !     clw(i,k,2) = -999.9
-      !   enddo
-      ! enddo
-      ! if (Model%imfdeepcnv >= 0 .or.  Model%imfshalcnv > 0  .or. &
-      !     (Model%npdf3d == 3     .and. Model%num_p3d   == 4) .or. &
-      !     (Model%npdf3d == 0     .and. Model%ncnvcld3d == 1) ) then
-      !   do k=1,levs
-      !     do i=1,im
-      !       cnvc(i,k)  = 0.0
-      !       cnvw(i,k)  = 0.0
-      !     enddo
-      !   enddo
-      ! endif
-      ! if(imp_physics == 8) then
-      !   if(Model%ltaerosol) then
-      !     ice00 (:,:) = 0.0
-      !     liq0  (:,:) = 0.0
-      !   else
-      !     ice00 (:,:) = 0.0
-      !   endif
-      ! endif
-      !*GF
+!
+!GF* The following section (initializing convective variables) is already executed in GFS_typedefs%interstitial_phys_reset
+!       do k=1,levs
+!         do i=1,im
+!           clw(i,k,1) = 0.0
+!           clw(i,k,2) = -999.9
+!         enddo
+!       enddo
+!       if (Model%imfdeepcnv >= 0 .or.  Model%imfshalcnv > 0  .or. &
+!           (Model%npdf3d == 3     .and. Model%num_p3d   == 4) .or. &
+!           (Model%npdf3d == 0     .and. Model%ncnvcld3d == 1) ) then
+!         do k=1,levs
+!           do i=1,im
+!             cnvc(i,k)  = 0.0
+!             cnvw(i,k)  = 0.0
+!           enddo
+!         enddo
+!       endif
+!       if(imp_physics == Model%imp_physics_thompson) then
+!         if(Model%ltaerosol) then
+!           ice00 (:,:) = 0.0
+!           liq0  (:,:) = 0.0
+!         else
+!           ice00 (:,:) = 0.0
+!         endif
+!       endif
+!*GF
 
-      if (cscnv .or. satmedmf .or. trans_trac ) then
+      if (cscnv .or. satmedmf .or. trans_trac .or. ras) then
         tracers = 2
         do n=2,ntrac
           if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
                n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
+!              n /= ntlnc .and. n /= ntinc .and.                    &
                n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc) then
             tracers = tracers + 1
             do k=1,levs
@@ -637,7 +639,7 @@
         enddo
         if(ltaerosol) then
           save_qi(:,:) = clw(:,:,1)
-          save_qc(:,:)  = clw(:,:,2)
+          save_qc(:,:) = clw(:,:,2)
         else
           save_qi(:,:) = clw(:,:,1)
         endif
@@ -678,7 +680,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, dqdti, imfdeepcnv, imfdeepcnv_gf, errmsg, errflg)
+      gq0, clw, gt0, dqdti, imfdeepcnv, imfdeepcnv_gf, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -693,7 +695,7 @@
       logical,                                  intent(in) :: ltaerosol, cplchm
 
       real(kind=kind_phys),                     intent(in) :: con_pi, dtf
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc, gt0
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),    intent(in) :: save_qi
 
@@ -727,6 +729,7 @@
 !         if ( n /= ntcw .and. n /= ntiw .and. n /= ntclamt) then
           if ( n /= ntcw  .and. n /= ntiw  .and. n /= ntclamt .and. &
                n /= ntrw  .and. n /= ntsw  .and. n /= ntrnc   .and. &
+!              n /= ntlnc .and. n /= ntinc .and.                    &
                n /= ntsnc .and. n /= ntgl  .and. n /= ntgnc ) then
               tracers = tracers + 1
             do k=1,levs
@@ -758,16 +761,16 @@
               do k=1,levs
                 do i=1,im
                   gq0(i,k,ntlnc) = gq0(i,k,ntlnc)  &
-                           +  max(0.0, (clw(i,k,2)-save_qc(i,k))) / liqm
+                                 +  max(0.0, (clw(i,k,2)-save_qc(i,k))) / liqm
                   gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
-                           +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
+                                 +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
                 enddo
               enddo
             else
               do k=1,levs
                 do i=1,im
                   gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
-                           +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
+                                 +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
                 enddo
               enddo
             endif
@@ -800,3 +803,53 @@
     end subroutine GFS_suite_interstitial_4_run
 
   end module GFS_suite_interstitial_4
+
+  module GFS_suite_interstitial_5
+
+  contains
+
+    subroutine GFS_suite_interstitial_5_init ()
+    end subroutine GFS_suite_interstitial_5_init
+
+    subroutine GFS_suite_interstitial_5_finalize()
+    end subroutine GFS_suite_interstitial_5_finalize
+
+#if 0
+!> \section arg_table_GFS_suite_interstitial_5_run Argument Table
+!! \htmlinclude GFS_suite_interstitial_5_run.html
+!!
+#endif
+    subroutine GFS_suite_interstitial_5_run (im, levs, ntrac, ntcw, ntiw, nn, gq0, clw, errmsg, errflg)
+
+      use machine, only: kind_phys
+
+      implicit none
+
+      ! interface variables
+      integer,                                          intent(in)  :: im, levs, ntrac, ntcw, ntiw, nn
+
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in)  :: gq0
+
+      real(kind=kind_phys), dimension(im, levs, nn),    intent(out) :: clw
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! local variables
+      integer :: i,k
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      do k=1,levs
+        do i=1,im
+          clw(i,k,1) = gq0(i,k,ntiw)                    ! ice
+          clw(i,k,2) = gq0(i,k,ntcw)                    ! water
+        enddo
+      enddo
+
+    end subroutine GFS_suite_interstitial_5_run
+
+  end module GFS_suite_interstitial_5
+

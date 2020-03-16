@@ -137,7 +137,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [ntke]
   standard_name = index_for_turbulent_kinetic_energy_vertical_diffusion_tracer
@@ -422,30 +422,6 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[lprnt]
-  standard_name = flag_print
-  long_name = flag for printing diagnostics to output
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ipr]
-  standard_name = horizontal_index_of_printed_column
-  long_name = horizontal index of printed column
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[me]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [grav]
