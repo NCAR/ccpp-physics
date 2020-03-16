@@ -409,7 +409,8 @@
 !!
     subroutine GFS_suite_stateout_update_run (im, levs, ntrac, dtp,  &
                      tgrs, ugrs, vgrs, qgrs, dudt, dvdt, dtdt, dqdt, &
-                     gt0, gu0, gv0, gq0, ntiw, nqrimef, epsq, errmsg, errflg)
+                     gt0, gu0, gv0, gq0, ntiw, nqrimef, imp_physics, &
+                     imp_physics_fer_hires, epsq, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -419,7 +420,8 @@
       integer,              intent(in) :: im
       integer,              intent(in) :: levs
       integer,              intent(in) :: ntrac
-      integer, optional,    intent(in) :: ntiw, nqrimef
+      integer,              intent(in) :: imp_physics,imp_physics_fer_hires
+      integer,              intent(in) :: ntiw, nqrimef
       real(kind=kind_phys), intent(in) :: dtp, epsq
 
       real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
@@ -442,7 +444,7 @@
       gv0(:,:)   = vgrs(:,:)   + dvdt(:,:)   * dtp
       gq0(:,:,:) = qgrs(:,:,:) + dqdt(:,:,:) * dtp
       
-      if(present(ntiw) .and. present(nqrimef))then
+      if (imp_physics == imp_physics_fer_hires) then
        do k=1,levs
          do i=1,im
            if(gq0(i,k,ntiw) > epsq) then
