@@ -252,9 +252,9 @@ cc
       errmsg = ''
       errflg = 0
 
-      cpinv=1.0/cp
-      hvapi=1.0/hvap
-      elocp=hvap/cp
+      cpinv = 1.0/cp
+      hvapi = 1.0/hvap
+      elocp = hvap/cp
 
       sss = 34.0             ! temporarily, when sea surface salinity data is not ready
 !
