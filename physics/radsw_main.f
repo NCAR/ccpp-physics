@@ -268,7 +268,7 @@
 !! code from aer inc.     
       module rrtmg_sw 
 !
-      use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
+      use physparam,        only : iswrate, iswrgas, iswcice,           & !mz: iswcliq-NML option 
      &                             isubcsw, icldflg, iovrsw,  ivflip,   &
      &                             iswmode, kind_phys
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
@@ -1542,7 +1542,7 @@
 !-----------------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &   !  ---  inputs
-     &       cf1, nlay, ipseed, dz, delgth,                             &
+     &       cf1, nlay, ipseed, dz, delgth, iswcliq,                    &
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &   !  ---  output
      &     )
 
@@ -1557,7 +1557,7 @@
 !                                                                       !
 !  inputs:                                                        size  !
 !    cfrac - real, layer cloud fraction                            nlay !
-!        .....  for  iswcliq > 0 (prognostic cloud sckeme)  - - -       !
+!        .....  for  iswcliq > 0 (prognostic cloud scheme)  - - -       !
 !    cliqp - real, layer in-cloud liq water path (g/m**2)          nlay !
 !    reliq - real, mean eff radius for liq cloud (micron)          nlay !
 !    cicep - real, layer in-cloud ice water path (g/m**2)          nlay !
@@ -1566,7 +1566,7 @@
 !    cdat2 - real, effective radius for rain drop (micron)         nlay !
 !    cdat3 - real, layer snow flake water path(g/m**2)             nlay !
 !    cdat4 - real, mean eff radius for snow flake(micron)          nlay !
-!        .....  for iswcliq = 0  (diagnostic cloud sckeme)  - - -       !
+!        .....  for iswcliq = 0  (diagnostic cloud scheme)  - - -       !
 !    cdat1 - real, layer cloud optical depth                       nlay !
 !    cdat2 - real, layer cloud single scattering albedo            nlay !
 !    cdat3 - real, layer cloud asymmetry factor                    nlay !
@@ -1628,7 +1628,7 @@
       use module_radsw_cldprtb
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed
+      integer, intent(in) :: nlay, ipseed, iswcliq
       real (kind=kind_phys), intent(in) :: cf1, delgth
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cliqp,      &

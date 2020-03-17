@@ -81,7 +81,7 @@
       type(GFS_sfcprop_type),              intent(in)    :: Sfcprop
       type(GFS_statein_type),              intent(in)    :: Statein
       type(GFS_radtend_type),              intent(inout) :: Radtend
-      type(GFS_tbd_type),                  intent(in)    :: Tbd
+      type(GFS_tbd_type),                  intent(inout) :: Tbd
       type(GFS_cldprop_type),              intent(in)    :: Cldprop
       type(GFS_coupling_type),             intent(in)    :: Coupling
 
@@ -724,10 +724,6 @@
 
       
       gridkm = 1.414*SQRT(dx(1)*0.001*dx(1)*0.001 )
-         !  if(mpirank == mpiroot) then
-         !    write(0,*)'cldfra3: max/min(plyrpa) = ', maxval(plyrpa),  minval(plyrpa)
-         !    write(0,*)'cldfra3: max/min(rho) = ', maxval(rho),  minval(rho)
-         !  endif
 
 
        if(Model%icloud == 3) then

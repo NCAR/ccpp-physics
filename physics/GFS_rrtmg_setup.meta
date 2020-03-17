@@ -107,32 +107,32 @@
   intent = in
   optional = F
 [iovr_sw]
-  standard_name = flag_for_max_random_overlap_clouds_for_shortwave_radiation
-  long_name = sw: max-random overlap clouds
+  standard_name = flag_for_cloud_overlapping_method_for_shortwave_radiation
+  long_name = control flag for cloud overlapping method for SW
   units = flag
   dimensions = ()
   type = integer
-  intent = in
+  intent = inout
   optional = F
 [iovr_lw]
-  standard_name = flag_for_max_random_overlap_clouds_for_longwave_radiation
-  long_name = lw: max-random overlap clouds
+  standard_name = flag_for_cloud_overlapping_method_for_longwave_radiation
+  long_name = control flag for cloud overlapping method for LW
   units = flag
   dimensions = ()
   type = integer
-  intent = in
+  intent = inout
   optional = F
 [isubc_sw]
-  standard_name = flag_for_sw_clouds_without_sub_grid_approximation
-  long_name = flag for sw clouds without sub-grid approximation
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
   units = flag
   dimensions = ()
   type = integer
   intent = in
   optional = F
 [isubc_lw]
-  standard_name = flag_for_lw_clouds_without_sub_grid_approximation
-  long_name = flag for lw clouds without sub-grid approximation
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
   units = flag
   dimensions = ()
   type = integer

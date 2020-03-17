@@ -5,9 +5,9 @@ module GFS_rrtmg_setup
    use physparam, only : isolar , ictmflg, ico2flg, ioznflg, iaerflg,&
 !  &             iaermdl, laswflg, lalwflg, lavoflg, icldflg,         &
    &             iaermdl,                            icldflg,         &
-   &             iovrsw , iovrlw , lcrick , lcnorm , lnoprec,         &
-   &             ialbflg, iemsflg, isubcsw, isubclw, ivflip , ipsd0,  &
-   &             iswcliq,                                             &
+   &             lcrick , lcnorm , lnoprec,                           &
+   &             ialbflg, iemsflg, ivflip , ipsd0,                    &
+!   &             iswcliq,                                             &
    &             kind_phys
 
    use radcons, only: ltp, lextop
@@ -136,6 +136,7 @@ module GFS_rrtmg_setup
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
 !                     =3: decorrelation-length overlap (mcica only)     !
+!                     =4: exponential overlap clouds
 !   isubc_sw/isubc_lw: sub-column cloud approx control flag (sw/lw rad) !
 !                     =0: with out sub-column cloud approximation       !
 !                     =1: mcica sub-col approx. prescribed random seed  !
@@ -177,8 +178,8 @@ module GFS_rrtmg_setup
       integer, intent(in) :: num_p3d
       integer, intent(in) :: npdf3d
       integer, intent(in) :: ntoz
-      integer, intent(in) :: iovr_sw
-      integer, intent(in) :: iovr_lw
+      integer, intent(inout) :: iovr_sw
+      integer, intent(inout) :: iovr_lw
       integer, intent(in) :: isubc_sw
       integer, intent(in) :: isubc_lw
       integer, intent(in) :: icliq_sw
@@ -203,6 +204,8 @@ module GFS_rrtmg_setup
       real(kind_phys), dimension(im,levr+ltp,NBDSW,NF_AESW) :: faersw_check
       real(kind_phys), dimension(im,NSPC1)                  :: aerodp_check
       ! End for consistency checks
+
+      integer :: iswcliq 
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -268,14 +271,14 @@ module GFS_rrtmg_setup
 
       iswcliq = icliq_sw                ! optical property for liquid clouds for sw
 
-      iovrsw = iovr_sw                  ! cloud overlapping control flag for sw
-      iovrlw = iovr_lw                  ! cloud overlapping control flag for lw
+ !     iovrsw = iovr_sw                  ! cloud overlapping control flag for sw
+ !     iovrlw = iovr_lw                  ! cloud overlapping control flag for lw
 
       lcrick  = crick_proof             ! control flag for eliminating CRICK 
       lcnorm  = ccnorm                  ! control flag for in-cld condensate 
       lnoprec = norad_precip            ! precip effect on radiation flag (ferrier microphysics)
-      isubcsw = isubc_sw                ! sub-column cloud approx flag in sw radiation
-      isubclw = isubc_lw                ! sub-column cloud approx flag in lw radiation
+!      isubcsw = isubc_sw                ! sub-column cloud approx flag in sw radiation
+!      isubclw = isubc_lw                ! sub-column cloud approx flag in lw radiation
 
       ialbflg= ialb                     ! surface albedo control flag
       iemsflg= iems                     ! surface emissivity control flag
@@ -303,7 +306,7 @@ module GFS_rrtmg_setup
 
       call radinit                                                      &
 !  ---  inputs:
-     &     ( si, levr, imp_physics,  me )
+     &     ( si, levr, imp_physics,iswcliq, iovr_lw, iovr_sw, isubc_lw, isubc_sw, me )
 !  ---  outputs:
 !          ( none )
 
@@ -384,7 +387,7 @@ module GFS_rrtmg_setup
 ! Private functions
 
 
-   subroutine radinit( si, NLAY, imp_physics, me )
+   subroutine radinit( si, NLAY, imp_physics,iswcliq, iovrlw,iovrsw,isubclw,isubcsw, me )
 !...................................
 
 !  ---  inputs:
@@ -509,8 +512,10 @@ module GFS_rrtmg_setup
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics 
+      integer, intent(in) :: NLAY, me, imp_physics,                     &
+     &                       isubclw,isubcsw,iswcliq 
 
+      integer, intent(inout) :: iovrlw,iovrsw
       real (kind=kind_phys), intent(in) :: si(:)
 
 !  ---  outputs: (none, to module variables)
@@ -619,9 +624,9 @@ module GFS_rrtmg_setup
 
       call cld_init ( si, NLAY, imp_physics, me) !  --- ...  cloud initialization routine
 
-      call rlwinit ( me )           !  --- ...  lw radiation initialization routine
+      call rlwinit (iovrlw,isubclw, me )           !  --- ...  lw radiation initialization routine
 
-      call rswinit ( me )           !  --- ...  sw radiation initialization routine
+      call rswinit (iswcliq, iovrsw,isubcsw, me )           !  --- ...  sw radiation initialization routine
 !
       return
 !...................................

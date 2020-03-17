@@ -2436,8 +2436,12 @@
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
-     &       tlyr, tvly, qlyr, qstl, rhly, cldcov, delp, dz,            &
-     &       re_cloud, re_ice, re_snow 
+     &       tlyr, tvly, qlyr, qstl, rhly, cldcov, delp, dz
+!     &       re_cloud, re_ice, re_snow 
+
+!mz: for diagnostics purpose
+      real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
+     &      re_cloud, re_ice, re_snow
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: clw
 
@@ -2689,9 +2693,11 @@
               else
                 rei(i,k) = (1250.0/9.387) * tem3 ** 0.031
               endif
+!              if (icloud == 3 ) then
               rei(i,k) = max(25.,rei(i,k))       !mz* HWRF
-!mz  GFDL
+!              else                               !mz  GFDL
 !              rei(i,k)   = max(10.0, min(rei(i,k), 150.0))
+!              endif
             endif
             rei(i,k) = min(rei(i,k), 135.72)      !- 1.0315*rei<= 140 microns
           enddo      
@@ -2699,7 +2705,7 @@
 
 !mz 
 !> -# Compute effective snow cloud droplet radius
-        do k = 1, NLAY                                                                                               
+        do k = 1, NLAY                  
           do i = 1, IX       
            res(i,k) = 10.0
           enddo
@@ -2717,8 +2723,14 @@
           clouds(i,k,5) = rei(i,k)
           clouds(i,k,6) = crp(i,k)  ! added for Thompson 
           clouds(i,k,7) = rer(i,k)
-          clouds(i,k,8) = csp(i,k)  ! added for Thompson
-          clouds(i,k,9) = res(i,k)
+          !mz   inflg .ne.5
+          clouds(i,k,8) = 0. 
+          clouds(i,k,9) = 10.
+!mz for diagnostics?
+          re_cloud(i,k) =rew(i,k)
+          re_ice(i,k)   =rei(i,k) 
+          re_snow(i,k)  = 10.
+
         enddo
       enddo
 
