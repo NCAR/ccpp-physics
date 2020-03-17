@@ -234,6 +234,30 @@
   kind = kind_phys
   intent = in
   optional = F
+[iswcliq]
+  standard_name = flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation
+  long_name = sw optical property for liquid clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovrsw]
+  standard_name = flag_for_cloud_overlapping_method_for_shortwave_radiation
+  long_name = control flag for cloud overlapping method for SW
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isubcsw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cosz]
   standard_name = cosine_of_zenith_angle
   long_name = cosine of the solar zenit angle
@@ -304,7 +328,7 @@
   standard_name = total_cloud_fraction
   long_name = total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -372,7 +396,7 @@
   standard_name = cloud_liquid_water_path
   long_name = cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -381,7 +405,7 @@
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -390,7 +414,7 @@
   standard_name = cloud_ice_water_path
   long_name = cloud ice water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -399,7 +423,7 @@
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -408,7 +432,7 @@
   standard_name = cloud_rain_water_path
   long_name = cloud rain water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -417,7 +441,7 @@
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain drop
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -426,7 +450,7 @@
   standard_name = cloud_snow_water_path
   long_name = cloud snow water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -435,11 +459,27 @@
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow flake
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
   optional = T
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
