@@ -310,6 +310,7 @@
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomzr      ',    Diag%tdomzr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomip      ',    Diag%tdomip)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdoms       ',    Diag%tdoms)
+                     ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
                        call print_var(mpirank,omprank, blkno, 'Diag%wet1        ',  Sfcprop%wetness)
                      else
@@ -345,6 +346,7 @@
                      if(Model%lradar) then
                        call print_var(mpirank,omprank, blkno, 'Diag%refl_10cm   ',  Diag%refl_10cm)
                      end if
+                     ! CCPP/MYNNPBL only
                      if (Model%do_mynnedmf) then
                        call print_var(mpirank,omprank, blkno, 'Diag%edmf_a      ',  Diag%edmf_a)
                        call print_var(mpirank,omprank, blkno, 'Diag%edmf_w      ',  Diag%edmf_w)
