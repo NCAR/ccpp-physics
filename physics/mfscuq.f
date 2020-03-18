@@ -2,7 +2,7 @@
 !! This file contains the mass flux and downdraft parcel preperties
 !! parameterization for stratocumulus-top-driven turbulence (updated version).
 
-!>\ingroup satmedmfq
+!>\ingroup satmedmfvdifq
 !! This subroutine computes mass flux and downdraft parcel properties
 !! for stratocumulus-top-driven turbulence.
 !! \section mfscuq GFS mfscu General Algorithm
