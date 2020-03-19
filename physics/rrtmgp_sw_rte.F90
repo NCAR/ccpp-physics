@@ -10,6 +10,8 @@ module rrtmgp_sw_rte
   use module_radsw_parameters, only: cmpfsw_type
   use rrtmgp_aux,              only: check_error_msg
 
+  implicit none
+
   public rrtmgp_sw_rte_init, rrtmgp_sw_rte_run, rrtmgp_sw_rte_finalize
 
 contains

@@ -8,7 +8,10 @@ module rrtmgp_lw_cloud_optics
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
 
+  implicit none
+
   public rrtmgp_lw_cloud_optics_init, rrtmgp_lw_cloud_optics_run, rrtmgp_lw_cloud_optics_finalize
+
 contains
 
   ! #########################################################################################
@@ -268,7 +271,7 @@ contains
     
     ! Inputs
     logical, intent(in) :: &
-         doLWrad            ! Logical flag for longwave radiation call
+         doLWrad             ! Logical flag for longwave radiation call
     integer, intent(in) :: &
          nCol,             & ! Number of horizontal gridpoints
          nLev,             & ! Number of vertical levels
@@ -327,7 +330,7 @@ contains
     lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
 
     ! Compute cloud-optics for RTE.
-    if (rrtmgp_cld_optics .gt. 0) then
+    if (cld_optics_scheme .gt. 0) then
        ! i) RRTMGP cloud-optics.
        call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_cloud_props%cloud_optics(&
             !ncol,                          & ! IN  - Number of horizontal gridpoints 

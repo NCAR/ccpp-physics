@@ -9,7 +9,10 @@ module rrtmgp_sw_cloud_optics
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
 
+  implicit none
+
   public rrtmgp_sw_cloud_optics_init, rrtmgp_sw_cloud_optics_run, rrtmgp_sw_cloud_optics_finalize
+
 contains
   ! #########################################################################################
   ! SUBROUTINE sw_cloud_optics_init

@@ -9,6 +9,8 @@ module rrtmgp_sw_gas_optics
   use mo_compute_bc,          only: compute_bc
   use netcdf
 
+  implicit none
+
 contains
 
   ! #########################################################################################

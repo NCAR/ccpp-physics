@@ -11,7 +11,10 @@ module rrtmgp_lw_rte
   use mo_source_functions,    only: ty_source_func_lw
   use rrtmgp_aux,             only: check_error_msg
 
+  implicit none
+
   public rrtmgp_lw_rte_init, rrtmgp_lw_rte_run, rrtmgp_lw_rte_finalize
+
 contains
 
   ! #########################################################################################

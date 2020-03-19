@@ -8,6 +8,8 @@ module rrtmgp_sw_cloud_sampling
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
 
+  implicit none
+
 contains
 
   ! #########################################################################################

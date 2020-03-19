@@ -9,6 +9,8 @@ module rrtmgp_lw_gas_optics
   use rrtmgp_aux,            only: check_error_msg
   use netcdf
 
+  implicit none
+
 contains
 
   ! #########################################################################################

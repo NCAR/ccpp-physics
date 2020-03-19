@@ -10,7 +10,10 @@ module rrtmgp_lw_aerosol_optics
        NSPC1                       ! Number of species for vertically integrated aerosol optical-depth
   use netcdf
 
+  implicit none
+
   public rrtmgp_lw_aerosol_optics_init, rrtmgp_lw_aerosol_optics_run, rrtmgp_lw_aerosol_optics_finalize
+
 contains
 
   ! #########################################################################################

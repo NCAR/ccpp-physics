@@ -13,8 +13,10 @@ module rrtmgp_lw_pre
   use mo_gas_optics_rrtmgp,  only: &
        ty_gas_optics_rrtmgp
 
+  implicit none
+
   public rrtmgp_lw_pre_run,rrtmgp_lw_pre_init,rrtmgp_lw_pre_finalize
-  
+
 contains
 
   ! #########################################################################################
@@ -58,6 +60,9 @@ contains
          errflg           ! Error flag
     real(kind_phys), dimension(nCol), intent(out) :: &
          semis
+
+    ! Local variables
+    integer :: iBand
 
     ! Initialize CCPP error handling variables
     errmsg = ''
