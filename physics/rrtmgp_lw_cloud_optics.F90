@@ -17,7 +17,7 @@ contains
 !! \section arg_table_rrtmgp_lw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_lw_cloud_optics_init(cld_optics_scheme, nrghice, rrtmgp_root_dir,       &
+  subroutine rrtmgp_lw_cloud_optics_init(cld_optics_scheme, nrghice, rrtmgp_root_dir, &
        rrtmgp_lw_file_clouds, mpicomm, mpirank, mpiroot, lw_cloud_props, errmsg, errflg)
 
     ! Inputs
@@ -363,12 +363,7 @@ contains
 !! \section arg_table_rrtmgp_lw_cloud_optics_finalize
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_lw_cloud_optics_finalize(mpicomm, mpirank, mpiroot)
-    ! Inputs
-    integer, intent(in) :: &
-         mpicomm,            & ! MPI communicator
-         mpirank,            & ! Current MPI rank
-         mpiroot               ! Master MPI rank
-
+  subroutine rrtmgp_lw_cloud_optics_finalize()
   end subroutine rrtmgp_lw_cloud_optics_finalize
+
 end module rrtmgp_lw_cloud_optics

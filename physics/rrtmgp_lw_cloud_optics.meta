@@ -283,27 +283,3 @@
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_optics_finalize
   type = scheme
-[mpirank]
-  standard_name = mpi_rank
-  long_name = current MPI rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[mpicomm]
-  standard_name = mpi_comm
-  long_name = MPI communicator
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
