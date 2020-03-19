@@ -25,7 +25,7 @@
 !! \htmlinclude ysuvdif_run.html
 !!
 !-------------------------------------------------------------------------------
-   subroutine ysuvdif_run(ix,im,km,ux,vx,tx,qx,p2d,p2di,pi2d,                        &
+   subroutine ysuvdif_run(ix,im,km,ux,vx,tx,qx,p2d,p2di,pi2d,                  &
                     utnp,vtnp,ttnp,qtnp,                                       &
                     swh,hlw,xmu,ntrac,ndiff,ntcw,ntiw,                         &
                     phii,phil,psfcpa,                                          &
