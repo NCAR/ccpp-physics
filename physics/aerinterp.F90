@@ -179,7 +179,13 @@ contains
           endif 
           do i = 1, hmx
           aerin(i+hmx,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
+          if(aerin(i+hmx,j,k,ii,imon)<0.or.aerin(i+hmx,j,k,ii,imon)>1.)  then
+            aerin(i+hmx,j,k,ii,imon) = 0.
+          end if
           aerin(i,j,k,ii,imon) = 1.d0*buffx(i+hmx,j,klev,1)
+          if(aerin(i,j,k,ii,imon)<0.or.aerin(i,j,k,ii,imon)>1.)  then
+            aerin(i,j,k,ii,imon) = 0.
+          end if
           enddo    !i-loop (lon)
          enddo     !k-loop (lev)
          enddo     !j-loop (lat)
