@@ -186,9 +186,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
                 endif
                 qgh(i)=0.0
                 !snowh(i)=snowd(i)*800. !mm -> m
+                ! DH* note - this could be automated (CCPP knows how to convert cm to m)
                 znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
                 znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
-                znt_ice(i)=znt_ice(i)*0.01  !cm -> m          
+                znt_ice(i)=znt_ice(i)*0.01  !cm -> m
                 ts(i)=tskin_ocn(i)/exner(i,1)  !theta
                 mavail(i)=1.0  !????
                 cpm(i)=cp
@@ -272,6 +273,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
            !NOTE: evap & qflx will be solved for later
            !qflx(i)=QFX(i)/
            !evap(i)=QFX(i)   !or /rho ??
+           ! DH* note - this could be automated (CCPP knows how to convert m to cm)
            znt_lnd(i)=znt_lnd(i)*100.   !m -> cm
            znt_ocn(i)=znt_ocn(i)*100.
            znt_ice(i)=znt_ice(i)*100.
