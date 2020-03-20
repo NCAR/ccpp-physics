@@ -53,11 +53,11 @@ module mp_thompson_pre
          real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
          ! Aerosols
          logical,                   intent(in   ) :: is_aerosol_aware
-         real(kind_phys), optional, intent(inout) :: nc(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(inout) :: nwfa(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(inout) :: nifa(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(inout) :: nwfa2d(1:ncol)
-         real(kind_phys), optional, intent(inout) :: nifa2d(1:ncol)
+         real(kind_phys), optional, intent(inout) :: nc(:,:)
+         real(kind_phys), optional, intent(inout) :: nwfa(:,:)
+         real(kind_phys), optional, intent(inout) :: nifa(:,:)
+         real(kind_phys), optional, intent(inout) :: nwfa2d(:)
+         real(kind_phys), optional, intent(inout) :: nifa2d(:)
          ! State variables and timestep information
          real(kind_phys),           intent(in   ) :: tgrs(1:ncol,1:nlev)
          real(kind_phys),           intent(  out) :: tgrs_save(1:ncol,1:nlev)

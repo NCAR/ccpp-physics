@@ -924,11 +924,6 @@ MODULE module_mp_thompson
 
       call cpu_time(stime)
 
-!$OMP parallel num_threads(threads)
-
-!$OMP sections
-
-!$OMP section
 !>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table
       if (mpirank==mpiroot) write(0,*) '  creating rain collecting graupel table'
       call cpu_time(stime)
@@ -936,17 +931,12 @@ MODULE module_mp_thompson
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing rain collecting graupel table took ",f10.3," seconds.")', etime-stime
 
-!$OMP section
 !>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table
       if (mpirank==mpiroot) write (*,*) '  creating rain collecting snow table'
       call cpu_time(stime)
       call qr_acr_qs
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing rain collecting snow table took ",f10.3," seconds.")', etime-stime
-
-!$OMP end sections
-
-!$OMP end parallel
 
 !>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table
       if (mpirank==mpiroot) write(0,*) '  creating freezing of water drops table'
@@ -1017,7 +1007,7 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg)
+                              errmsg, errflg, reset)
 
       implicit none
 
@@ -1055,6 +1045,7 @@ MODULE module_mp_thompson
                           vt_dbz_wt
       LOGICAL, OPTIONAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in
+      LOGICAL, INTENT (IN) :: reset
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
@@ -1077,6 +1068,8 @@ MODULE module_mp_thompson
       INTEGER:: i_start, j_start, i_end, j_end
       LOGICAL, OPTIONAL, INTENT(IN) :: diagflag
       INTEGER, OPTIONAL, INTENT(IN) :: do_radar_ref
+      logical :: melti = .false.
+
       ! CCPP error handling
       character(len=*), optional, intent(  out) :: errmsg
       integer,          optional, intent(  out) :: errflg
@@ -1302,7 +1295,7 @@ MODULE module_mp_thompson
              kmax_qc = k
              qc_max = qc1d(k)
             elseif (qc1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qc ', qc1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qc ', qc1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qr1d(k) .gt. qr_max) then
@@ -1311,7 +1304,7 @@ MODULE module_mp_thompson
              kmax_qr = k
              qr_max = qr1d(k)
             elseif (qr1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qr ', qr1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qr ', qr1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (nr1d(k) .gt. nr_max) then
@@ -1320,7 +1313,7 @@ MODULE module_mp_thompson
              kmax_nr = k
              nr_max = nr1d(k)
             elseif (nr1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative nr ', nr1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative nr ', nr1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qs1d(k) .gt. qs_max) then
@@ -1329,7 +1322,7 @@ MODULE module_mp_thompson
              kmax_qs = k
              qs_max = qs1d(k)
             elseif (qs1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qs ', qs1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qs ', qs1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qi1d(k) .gt. qi_max) then
@@ -1338,7 +1331,7 @@ MODULE module_mp_thompson
              kmax_qi = k
              qi_max = qi1d(k)
             elseif (qi1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qi ', qi1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qi ', qi1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qg1d(k) .gt. qg_max) then
@@ -1347,7 +1340,7 @@ MODULE module_mp_thompson
              kmax_qg = k
              qg_max = qg1d(k)
             elseif (qg1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qg ', qg1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qg ', qg1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (ni1d(k) .gt. ni_max) then
@@ -1356,11 +1349,11 @@ MODULE module_mp_thompson
              kmax_ni = k
              ni_max = ni1d(k)
             elseif (ni1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative ni ', ni1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative ni ', ni1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qv1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qv ', qv1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qv ', qv1d(k),        &
                         ' at i,j,k=', i,j,k
              if (k.lt.kte-2 .and. k.gt.kts+1) then
                 write(*,*) '   below and above are: ', qv(i,k-1,j), qv(i,k+1,j)
@@ -1372,15 +1365,26 @@ MODULE module_mp_thompson
          enddo
 
 !> - Call calc_refl10cm()
+
          IF ( PRESENT (diagflag) ) THEN
          if (diagflag .and. do_radar_ref == 1) then
+!
+         ! Only set melti to true at the output times
+            if (reset) then
+               melti=.true.
+            else
+               melti=.false.
+            endif
+!
           if (present(vt_dbz_wt) .and. present(first_time_step)) then
             call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                t1d, p1d, dBZ, kts, kte, i, j,      &
-                                vt_dbz_wt(i,:,j), first_time_step)
+                                t1d, p1d, dBZ, kts, kte, i, j,      & 
+                                melti, vt_dbz_wt(i,:,j),            &
+                                first_time_step)
           else
-             call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                 t1d, p1d, dBZ, kts, kte, i, j)
+            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
+                                t1d, p1d, dBZ, kts, kte, i, j,      &
+                                melti)
           end if
           do k = kts, kte
              refl_10cm(i,k,j) = MAX(-35., dBZ(k))
@@ -1587,7 +1591,7 @@ MODULE module_mp_thompson
       INTEGER:: idx_tc, idx_t, idx_s, idx_g1, idx_g, idx_r1, idx_r,     &
                 idx_i1, idx_i, idx_c, idx, idx_d, idx_n, idx_in
 
-      LOGICAL:: melti, no_micro
+      LOGICAL:: no_micro
       LOGICAL, DIMENSION(kts:kte):: L_qc, L_qi, L_qr, L_qs, L_qg
       LOGICAL:: debug_flag
       INTEGER:: nu_c
@@ -5213,8 +5217,9 @@ MODULE module_mp_thompson
 !! library of routines.  The meltwater fraction is simply the amount
 !! of frozen species remaining from what initially existed at the
 !! melting level interface.
-      subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,     &
-               t1d, p1d, dBZ, kts, kte, ii, jj, vt_dBZ, first_time_step)
+      subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
+               t1d, p1d, dBZ, kts, kte, ii, jj, melti, vt_dBZ,      &
+               first_time_step)
 
       IMPLICIT NONE
 
@@ -5247,7 +5252,7 @@ MODULE module_mp_thompson
       DOUBLE PRECISION:: fmelt_s, fmelt_g
 
       INTEGER:: i, k, k_0, kbot, n
-      LOGICAL:: melti
+      LOGICAL, INTENT(IN):: melti
       LOGICAL, DIMENSION(kts:kte):: L_qr, L_qs, L_qg
 
       DOUBLE PRECISION:: cback, x, eta, f_d
@@ -5400,18 +5405,16 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !..Locate K-level of start of melting (k_0 is level above).
 !+---+-----------------------------------------------------------------+
-      melti = .false.
       k_0 = kts
-      do k = kte-1, kts, -1
-         if ( (temp(k).gt.273.15) .and. L_qr(k)                         &
+      if ( melti ) then
+        K_LOOP:do k = kte-1, kts, -1
+          if ((temp(k).gt.273.15) .and. L_qr(k)                         &
      &                            .and. (L_qs(k+1).or.L_qg(k+1)) ) then
-            k_0 = MAX(k+1, k_0)
-            melti=.true.
-            goto 195
-         endif
-      enddo
- 195  continue
-
+             k_0 = MAX(k+1, k_0)
+             EXIT K_LOOP
+          endif
+        enddo K_LOOP
+      endif
 !+---+-----------------------------------------------------------------+
 !..Assume Rayleigh approximation at 10 cm wavelength. Rain (all temps)
 !.. and non-water-coated snow and graupel when below freezing are

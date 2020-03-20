@@ -1,0 +1,426 @@
+[ccpp-arg-table]
+  name = mp_fer_hires_init
+  type = scheme
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nlev]
+  standard_name = vertical_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[dtp]
+  standard_name = time_step_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[imp_physics]
+  standard_name = flag_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[f_ice]
+  standard_name = fraction_of_ice_water_cloud
+  long_name = fraction of ice water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = T
+[f_rain]
+  standard_name = fraction_of_rain_water_cloud
+  long_name = fraction of rain water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = T
+[f_rimef]
+  standard_name = rime_factor
+  long_name = rime factor
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = T
+[mpicomm]
+  standard_name = mpi_comm
+  long_name = MPI communicator
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[threads]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available to scheme
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+########################################################################
+[ccpp-arg-table]
+  name = mp_fer_hires_finalize
+  type = scheme
+########################################################################
+[ccpp-arg-table]
+  name = mp_fer_hires_run
+  type = scheme
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nlev]
+  standard_name = vertical_dimension
+  long_name = vertical layer dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[dt]
+  standard_name = time_step_for_physics
+  long_name = physics time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[spec_adv]
+  standard_name = flag_for_individual_cloud_species_advected
+  long_name = flag for individual cloud species advected
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[slmsk]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind= kind_phys
+  intent = in
+  optional = F
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_phy]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[t]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[q]
+  standard_name = water_vapor_specific_humidity_updated_by_physics
+  long_name = water vapor specific humidity updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cwm]
+  standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
+  long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[train]
+  standard_name = accumulated_change_of_air_temperature_due_to_FA_scheme
+  long_name = accumulated change of air temperature due to FA MP scheme
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sr]
+  standard_name = ratio_of_snowfall_to_rainfall
+  long_name = snow ratio: ratio of snow to total precipitation (explicit only)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[f_ice]
+  standard_name = fraction_of_ice_water_cloud
+  long_name = fraction of ice water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[f_rain]
+  standard_name = fraction_of_rain_water_cloud
+  long_name = fraction of rain water cloud
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[f_rimef]
+  standard_name = rime_factor
+  long_name = rime factor
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[qc]
+  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qi]
+  standard_name = ice_water_mixing_ratio_updated_by_physics
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qr]
+  standard_name = rain_water_mixing_ratio_updated_by_physics
+  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qg]
+  standard_name = mass_weighted_rime_factor_updated_by_physics
+  long_name = mass weighted rime factor updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[prec]
+  standard_name = lwe_thickness_of_explicit_precipitation_amount
+  long_name = explicit precipitation ( rain, ice, snow, graupel, ...) on physics timestep
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[mpirank]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[mpiroot]
+  standard_name = mpi_root
+  long_name = master MPI-rank
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[threads]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available to scheme
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[refl_10cm]
+  standard_name = radar_reflectivity_10cm
+  long_name = instantaneous refl_10cm
+  units = dBZ
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[rhgrd]
+  standard_name = fa_threshold_relative_humidity_for_onset_of_condensation
+  long_name = relative humidity threshold parameter for condensation for FA scheme
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dx]
+  standard_name = cell_size
+  long_name = relative dx for the grid cell
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[EPSQ]
+  standard_name = minimum_value_of_specific_humidity
+  long_name = floor value for specific humidity
+  units = kg kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[R_D]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[P608]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[CP]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[G]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

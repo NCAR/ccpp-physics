@@ -10,8 +10,25 @@
 ! \brief Brief description of the subroutine
 !
 !> \section arg_table_ozphys_init Argument Table
+!! \htmlinclude ozphys_init.html
 !!
-      subroutine ozphys_init()
+      subroutine ozphys_init(oz_phys, errmsg, errflg)
+
+      implicit none
+      logical,          intent(in)  :: oz_phys
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not.oz_phys) then
+        write (errmsg,'(*(a))') 'Logic error: oz_phys == .false.'
+        errflg = 1
+        return
+      endif
+
       end subroutine ozphys_init
 
 ! \brief Brief description of the subroutine

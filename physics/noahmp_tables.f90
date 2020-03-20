@@ -1,3 +1,12 @@
+!>  \file noahmp_tables.f90
+!!  This file contains Fortran versions of the data tables included with NoahMP in mptable.tbl, soilparm.tbl, and genparm.tbl. 
+
+!> \ingroup NoahMP_LSM
+!! \brief Data from MPTABLE.TBL, SOILPARM.TBL, GENPARM.TBL for NoahMP
+!!
+!! Note that a subset of the data in the *.TBL files is represented in this file. For example,
+!! only the data in the noah_mp_modis_parameters section of MPTABLE.TBL and the STAS section of
+!! SOILPARM.TBL are included in this module.
 module noahmp_tables
 
     implicit none

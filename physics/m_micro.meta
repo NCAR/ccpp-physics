@@ -61,6 +61,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tmelt]
   standard_name = triple_point_temperature_of_water
   long_name = triple point temperature of water
@@ -380,7 +389,7 @@
   optional = F
 [qlls_i]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -398,7 +407,7 @@
   optional = F
 [qils_i]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -587,7 +596,7 @@
   optional = F
 [lwm_o]
   standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -596,7 +605,7 @@
   optional = F
 [qi_o]
   standard_name = ice_water_mixing_ratio_updated_by_physics
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -658,7 +667,7 @@
   optional = F
 [rnw_io]
   standard_name = local_rain_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water local to physics
+  long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) local to physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -667,7 +676,7 @@
   optional = F
 [snw_io]
   standard_name = local_snow_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of snow water local to physics
+  long_name = ratio of mass of snow water to mass of dry air plus vapor (without condensates) local to physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -676,7 +685,7 @@
   optional = F
 [qgl_io]
   standard_name = local_graupel_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of graupel local to physics
+  long_name = ratio of mass of graupel to mass of dry air plus vapor (without condensates) local to physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -815,14 +824,6 @@
   type = logical
   intent = in
   optional = F
-[lprnt]
-  standard_name = flag_print
-  long_name = control flag for diagnostic print out
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [alf_fac]
   standard_name = mg_tuning_factor_for_alphas
   long_name = tuning factor for alphas (alpha = 1 - critical relative humidity)
@@ -845,14 +846,6 @@
   standard_name = flag_for_pdf_for_morrison_gettelman_microphysics_scheme
   long_name = pdf flag for MG macrophysics
   units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ipr]
-  standard_name = horizontal_index_of_printed_column
-  long_name = horizontal index of printed column
-  units = index
   dimensions = ()
   type = integer
   intent = in

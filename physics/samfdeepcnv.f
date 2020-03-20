@@ -1554,22 +1554,22 @@ c
       enddo
       enddo
       do i = 1, im
-        betamn = betas
-        if(islimsk(i) == 1) betamn = betal
-        if(ntk > 0) then
-          betamx = betamn + dbeta
-          if(tkemean(i) > tkemx) then
-            beta = betamn
-          else if(tkemean(i) < tkemn) then
-            beta = betamx
-          else
-            tem = (betamx - betamn) * (tkemean(i) - tkemn)
-            beta = betamx - tem  / dtke
-          endif
-        else
-          beta = betamn
-        endif
         if(cnvflg(i)) then
+          betamn = betas
+          if(islimsk(i) == 1) betamn = betal
+          if(ntk > 0) then
+            betamx = betamn + dbeta
+            if(tkemean(i) > tkemx) then
+              beta = betamn
+            else if(tkemean(i) < tkemn) then
+              beta = betamx
+            else
+              tem = (betamx - betamn) * (tkemean(i) - tkemn)
+              beta = betamx - tem  / dtke
+            endif
+          else
+            beta = betamn
+          endif
           dz  = (sumx(i)+zi(i,1))/float(kbcon(i))
           tem = 1./float(kbcon(i))
           xlamd(i) = (1.-beta**tem)/dz

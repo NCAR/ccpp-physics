@@ -157,7 +157,7 @@
   optional = F
 [qgrs_liquid_cloud]
   standard_name = cloud_condensed_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -166,7 +166,7 @@
   optional = F
 [qgrs_ice_cloud]
   standard_name = ice_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -583,15 +583,6 @@
   dimensions = (horizontal_dimension)
   type = integer
   intent = inout
-  optional = F
-[RTHRATEN]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
-  long_name = total sky longwave heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [dudt]
   standard_name = tendency_of_x_wind_due_to_model_physics
