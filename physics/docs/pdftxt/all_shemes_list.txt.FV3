@@ -1,0 +1,110 @@
+/**
+\page allscheme_page  Parameterizations and Suites Overview
+
+\section allscheme_overview Physics Parameterizations 
+
+In the CCPP-Physics v3.0 release, each parameterization is in its own modern Fortran module,
+ which facilitates model development and
+code maintenance. While some individual parameterization can be invoked for the GMTB SCM, most users will assemble the 
+parameterizations in suites. 
+
+- Radiation
+ - \subpage GFS_RRTMG
+
+- PBL and Turbulence
+ - \subpage GFS_HEDMF
+ - \subpage GFS_SATMEDMF
+ - \subpage GSD_MYNNEDMF
+
+- Land Surface Model
+ - \subpage GFS_NOAH
+  - \subpage surf_pert
+ - \subpage GSD_RUCLSM
+
+- Cumulus Parameterizations
+ - GFS Scale-Aware Arakawa Schubert (SAS) Scheme
+  - \subpage GFS_SAMFdeep
+  - \subpage GFS_SAMFshal
+ - \subpage CSAW_scheme
+ - \subpage GSD_CU_GF
+  - \ref cu_gf_deep_group
+  - \ref cu_gf_sh_group
+
+- Microphysics
+ - \subpage GFDL_cloud
+ - \subpage fast_sat_adj (not available for the GMTB SCM)
+ - \subpage CPT_MG3
+ - \subpage GSD_THOMPSON
+
+- Stochastic (not available for the GMTB SCM)
+ - \subpage STOCHY_PHYS
+ - \subpage surf_pert (only applicable to \ref GFS_NOAH )
+
+- Ozone
+ - \subpage GFS_OZPHYS
+  - \ref GFS_ozphys_2015
+
+- Water Vapor Photochemical Production and Loss
+ - \subpage GFS_H2OPHYS
+
+- Gravity Wave Drag
+ - \subpage GFS_GWDPS 
+ - \subpage GFS_GWDC
+
+- Surface Layer and Simplified Ocean and Sea Ice Representation
+ - \subpage GFS_SFCLYR
+ - \subpage GFS_NSST
+ - \subpage GFS_SFCSICE
+
+- Others
+ - \subpage GFS_RAYLEIGH
+ - \subpage GFS_CALPRECIPTYPE
+
+In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
+ - \ref func_phys
+ - \ref phy_sparam
+ - \ref physcons
+ - \ref radcons
+
+The input information for the physics include the values of the gridbox mean prognostic variables (wind components, temperature,
+specific humidity, cloud fraction, water contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
+ dynamical tendencies for the same variables and various surface fields, both fixed and variable.
+
+The time integration of the physics suites is based on the following:
+- The tendencies from the different physical processes are computed by the parameterizations or derived in separate interstitial routines
+- The first part of the suite, comprised of the parameterizations for radiation, surface layer, surface (land, ocean, and sea ice), boundary layer,
+orographic gravity wave drag, and Rayleigh damping, is computed using a hybrid of parallel and sequential splitting described in Donahue and Caldwell(2018)
+\cite donahue_and_caldwell_2018, a method in which the various parameterizations use the same model state as input but are impacted by the preceding
+parameterizations. The tendencies from the various parameterizations are then added together and used to update the model state.
+- The surface parameterizations (land, ocean and sea ice) are invoked twice in a loop, with the first time to create a guess, and the second time to
+produce the tendencies.
+- The second part of the physics suite, comprised of the parameterizations of ozone, stratospheric water vapor, deep convection, convective gravity wave drag,
+shallow convection, and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
+to the parameterization.
+- If the in-core saturation adjustment is used (\p do_sat_adj=.true.), it is invoked at shorter timesteps along with the dynamical solver.
+
+\section allsuite_overview Physics Suites
+
+The CCPP v3 includes the suite used in the GFS v15 implemented operationally in June 2019 (suite GFS_v15). Additionally, it includes three
+developmental suites which are undergoing testing for possible future implementation in the UFS. Suite GFS_v15plus is identical to suite
+GFS_v15 except for a replacement in the PBL parameterization (Han et al. 2019 \cite Han_2019 ). Suite MGCSAW differs from GFS_v15 as it 
+contains different convection and microphysics schemes made available through a NOAA Climate Process Team (CPT) with components developed 
+at multiple research centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Suite GSD_v0 differs from GFS_v15 as it 
+uses the convection, microphysics, and boundary layer schemes employed in the Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR \cite Benjamin_2016 )
+operational models and was assembled by NOAA/GSD. An assessment of an earlier version of these suites can be found in 
+<a href="https://ufscommunity.org/#/science/physics"> the UFS portal </a>
+and in <a href="https://dtcenter.org/eval/gmtb/phytest2019/"> the GMTB website </a> .
+
+Table 1.  Physics suite options included in this documentation. 
+\tableofcontents
+|   Phys suites    |      GFS_v15         |      GFS_v15plus     |       MGCSAW        |        GSD_v0        |
+|------------------|----------------------|----------------------|---------------------|----------------------|
+| Deep Cu          | \ref GFS_SAMFdeep    |  \ref GFS_SAMFdeep   |  \ref CSAW_scheme   | \ref GSD_CU_GF       |
+| Shallow Cu       | \ref GFS_SAMFshal    |  \ref GFS_SAMFshal   |  \ref GFS_SAMFshal  | \ref GSD_MYNNEDMF and \ref cu_gf_sh_group   |
+| Microphysics     | \ref GFDL_cloud      |  \ref GFDL_cloud     |  \ref CPT_MG3       | \ref GSD_THOMPSON    |
+| PBL/TURB         | \ref GFS_HEDMF       |  \ref GFS_SATMEDMF   |  \ref GFS_HEDMF     | \ref GSD_MYNNEDMF    |
+| Land             | \ref GFS_NOAH        |  \ref GFS_NOAH       |  \ref GFS_NOAH      | \ref GSD_RUCLSM      |
+\tableofcontents
+
+
+*/

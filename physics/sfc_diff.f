@@ -24,7 +24,7 @@
       subroutine sfc_diff_finalize
       end subroutine sfc_diff_finalize
 
-!> \defgroup GFS_diff_main GFS sfc_diff Main
+!> \defgroup GFS_diff_main GFS Surface Layer Scheme Module
 !> @{
 !> \brief This subroutine calculates surface roughness length.
 !!
@@ -32,76 +32,7 @@
 !! based on the surface sublayer scheme in
 !! Zeng and Dickinson (1998) \cite zeng_and_dickinson_1998.
 !> \section arg_table_sfc_diff_run Argument Table
-!! | local_name     | standard_name                                                                | long_name                                                        | units      | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                           | count      |    0 | integer   |           | in     | F        |
-!! | rvrdm1         | ratio_of_vapor_to_dry_air_gas_constants_minus_one                            | (rv/rd) - 1 (rv = ideal gas constant for water vapor)            | none       |    0 | real      | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                                | rd/rv                                                            | none       |    0 | real      | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                      | (rd/rv) - 1                                                      | none       |    0 | real      | kind_phys | in     | F        |
-!! | grav           | gravitational_acceleration                                                   | gravitational acceleration                                       | m s-2      |    0 | real      | kind_phys | in     | F        |
-!! | ps             | surface_air_pressure                                                         | surface pressure                                                 | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | u1             | x_wind_at_lowest_model_layer                                                 | x component of 1st model layer wind                              | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | y component of 1st model layer wind                              | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | 1st model layer air temperature                                  | K          |    1 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | 1st model layer specific humidity                                | kg kg-1    |    1 | real      | kind_phys | in     | F        |
-!! | z1             | height_above_ground_at_lowest_model_layer                                    | height above ground at 1st model layer                           | m          |    1 | real      | kind_phys | in     | F        |
-!! | prsl1          | air_pressure_at_lowest_model_layer                                           | Model layer 1 mean pressure                                      | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer      | ratio      |    1 | real      | kind_phys | in     | F        |
-!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | surface wind enhancement due to convection                       | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | sigmaf         | bounded_vegetation_area_fraction                                             | areal fractional cover of green vegetation bounded on the bottom | frac       |    1 | real      | kind_phys | in     | F        |
-!! | vegtype        | vegetation_type_classification                                               | vegetation type at each grid cell                                | index      |    1 | integer   |           | in     | F        |
-!! | shdmax         | maximum_vegetation_area_fraction                                             | max fractnl cover of green veg                                   | frac       |    1 | real      | kind_phys | in     | F        |
-!! | ivegsrc        | vegetation_type_dataset_choice                                               | land use dataset choice                                          | index      |    0 | integer   |           | in     | F        |
-!! | z0pert         | perturbation_of_momentum_roughness_length                                    | perturbation of momentum roughness length                        | frac       |    1 | real      | kind_phys | in     | F        |
-!! | ztpert         | perturbation_of_heat_to_momentum_roughness_length_ratio                      | perturbation of heat to momentum roughness length ratio          | frac       |    1 | real      | kind_phys | in     | F        |
-!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                               | flag       |    1 | logical   |           | in     | F        |
-!! | redrag         | flag_for_reduced_drag_coefficient_over_sea                                   | flag for reduced drag coefficient over sea                       | flag       |    0 | logical   |           | in     | F        |
-!! | wet            | flag_nonzero_wet_surface_fraction                                            | flag indicating presence of some ocean or lake surface area fraction | flag   |    1 | logical   |           | in     | F        |
-!! | dry            | flag_nonzero_land_surface_fraction                                           | flag indicating presence of some land surface area fraction      | flag       |    1 | logical   |           | in     | F        |
-!! | icy            | flag_nonzero_sea_ice_surface_fraction                                        | flag indicating presence of some sea ice surface area fraction   | flag       |    1 | logical   |           | in     | F        |
-!! | fice           | sea_ice_concentration                                                        | ice fraction over open water                                     | frac       |    1 | real      | kind_phys | in     | F        |
-!! | tskin_ocn      | surface_skin_temperature_over_ocean_interstitial                             | surface skin temperature over ocean (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
-!! | tskin_lnd      | surface_skin_temperature_over_land_interstitial                              | surface skin temperature over land  (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
-!! | tskin_ice      | surface_skin_temperature_over_ice_interstitial                               | surface skin temperature over ice   (temporary use as interstitial) | K       |    1 | real      | kind_phys | in     | F        |
-!! | tsurf_ocn      | surface_skin_temperature_after_iteration_over_ocean                          | surface skin temperature after iteration over ocean              | K          |    1 | real      | kind_phys | in     | F        |
-!! | tsurf_lnd      | surface_skin_temperature_after_iteration_over_land                           | surface skin temperature after iteration over land               | K          |    1 | real      | kind_phys | in     | F        |
-!! | tsurf_ice      | surface_skin_temperature_after_iteration_over_ice                            | surface skin temperature after iteration over ice                | K          |    1 | real      | kind_phys | in     | F        |
-!! | snwdph_ocn     | surface_snow_thickness_water_equivalent_over_ocean                           | water equivalent snow depth over ocean                           | mm         |    1 | real      | kind_phys | in     | F        |
-!! | snwdph_lnd     | surface_snow_thickness_water_equivalent_over_land                            | water equivalent snow depth over land                            | mm         |    1 | real      | kind_phys | in     | F        |
-!! | snwdph_ice     | surface_snow_thickness_water_equivalent_over_ice                             | water equivalent snow depth over ice                             | mm         |    1 | real      | kind_phys | in     | F        |
-!! | z0rl_ocn       | surface_roughness_length_over_ocean_interstitial                             | surface roughness length over ocean (temporary use as interstitial) | cm      |    1 | real      | kind_phys | inout  | F        |
-!! | z0rl_lnd       | surface_roughness_length_over_land_interstitial                              | surface roughness length over land  (temporary use as interstitial) | cm      |    1 | real      | kind_phys | inout  | F        |
-!! | z0rl_ice       | surface_roughness_length_over_ice_interstitial                               | surface roughness length over ice   (temporary use as interstitial) | cm      |    1 | real      | kind_phys | inout  | F        |
-!! | ustar_ocn      | surface_friction_velocity_over_ocean                                         | surface friction velocity over ocean                             | m s-1      |    1 | real      | kind_phys | inout  | F        |
-!! | ustar_lnd      | surface_friction_velocity_over_land                                          | surface friction velocity over land                              | m s-1      |    1 | real      | kind_phys | inout  | F        |
-!! | ustar_ice      | surface_friction_velocity_over_ice                                           | surface friction velocity over ice                               | m s-1      |    1 | real      | kind_phys | inout  | F        |
-!! | cm_ocn         | surface_drag_coefficient_for_momentum_in_air_over_ocean                      | surface exchange coeff for momentum over ocean                   | none       |    1 | real      | kind_phys | inout  | F        |
-!! | cm_lnd         | surface_drag_coefficient_for_momentum_in_air_over_land                       | surface exchange coeff for momentum over land                    | none       |    1 | real      | kind_phys | inout  | F        |
-!! | cm_ice         | surface_drag_coefficient_for_momentum_in_air_over_ice                        | surface exchange coeff for momentum over ice                     | none       |    1 | real      | kind_phys | inout  | F        |
-!! | ch_ocn         | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean             | surface exchange coeff heat & moisture over ocean                | none       |    1 | real      | kind_phys | inout  | F        |
-!! | ch_lnd         | surface_drag_coefficient_for_heat_and_moisture_in_air_over_land              | surface exchange coeff heat & moisture over land                 | none       |    1 | real      | kind_phys | inout  | F        |
-!! | ch_ice         | surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice               | surface exchange coeff heat & moisture over ice                  | none       |    1 | real      | kind_phys | inout  | F        |
-!! | rb_ocn         | bulk_richardson_number_at_lowest_model_level_over_ocean                      | bulk Richardson number at the surface over ocean                 | none       |    1 | real      | kind_phys | inout  | F        |
-!! | rb_lnd         | bulk_richardson_number_at_lowest_model_level_over_land                       | bulk Richardson number at the surface over land                  | none       |    1 | real      | kind_phys | inout  | F        |
-!! | rb_ice         | bulk_richardson_number_at_lowest_model_level_over_ice                        | bulk Richardson number at the surface over ice                   | none       |    1 | real      | kind_phys | inout  | F        |
-!! | stress_ocn     | surface_wind_stress_over_ocean                                               | surface wind stress over ocean                                   | m2 s-2     |    1 | real      | kind_phys | inout  | F        |
-!! | stress_lnd     | surface_wind_stress_over_land                                                | surface wind stress over land                                    | m2 s-2     |    1 | real      | kind_phys | inout  | F        |
-!! | stress_ice     | surface_wind_stress_over_ice                                                 | surface wind stress over ice                                     | m2 s-2     |    1 | real      | kind_phys | inout  | F        |
-!! | fm_ocn         | Monin-Obukhov_similarity_function_for_momentum_over_ocean                    | Monin-Obukhov similarity function for momentum over ocean        | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fm_lnd         | Monin-Obukhov_similarity_function_for_momentum_over_land                     | Monin-Obukhov similarity function for momentum over land         | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fm_ice         | Monin-Obukhov_similarity_function_for_momentum_over_ice                      | Monin-Obukhov similarity function for momentum over ice          | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fh_ocn         | Monin-Obukhov_similarity_function_for_heat_over_ocean                        | Monin-Obukhov similarity function for heat over ocean            | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fh_lnd         | Monin-Obukhov_similarity_function_for_heat_over_land                         | Monin-Obukhov similarity function for heat over land             | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fh_ice         | Monin-Obukhov_similarity_function_for_heat_over_ice                          | Monin-Obukhov similarity function for heat over ice              | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fm10_ocn       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_ocean             | Monin-Obukhov similarity parameter for momentum at 10m over ocean | none      |    1 | real      | kind_phys | inout  | F        |
-!! | fm10_lnd       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_land              | Monin-Obukhov similarity parameter for momentum at 10m over land | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fm10_ice       | Monin-Obukhov_similarity_function_for_momentum_at_10m_over_ice               | Monin-Obukhov similarity parameter for momentum at 10m over ice  | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fh2_ocn        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_ocean                  | Monin-Obukhov similarity parameter for heat at 2m over ocean     | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fh2_lnd        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_land                   | Monin-Obukhov similarity parameter for heat at 2m over land      | none       |    1 | real      | kind_phys | inout  | F        |
-!! | fh2_ice        | Monin-Obukhov_similarity_function_for_heat_at_2m_over_ice                    | Monin-Obukhov similarity parameter for heat at 2m over ice       | none       |    1 | real      | kind_phys | inout  | F        |
-!! | wind           | wind_speed_at_lowest_model_layer                                             | wind speed at lowest model level                                 | m s-1      |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                         | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                            | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_diff_run.html
 !!
 !>  \section general_diff GFS Surface Layer Scheme General Algorithm
 !! - Calculate the thermal roughness length formulation over the ocean (see eq. (25) and (26)
@@ -130,12 +61,13 @@
 !! - Calculate the exchange coefficients:\f$cm\f$, \f$ch\f$, and \f$stress\f$ as inputs of other \a sfc schemes.
 !!
       subroutine sfc_diff_run (im,rvrdm1,eps,epsm1,grav,                &  !intent(in)
-     &                    ps,u1,v1,t1,q1,z1,                            &  !intent(in)
-     &                    prsl1,prslki,ddvel,                           &  !intent(in)
+     &                    ps,t1,q1,z1,wind,                             &  !intent(in)
+     &                    prsl1,prslki,prsik1,prslk1,                   &  !intent(in)
      &                    sigmaf,vegtype,shdmax,ivegsrc,                &  !intent(in)
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
-     &                    wet,dry,icy,fice,                             &  !intent(in)
+     &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
+     &                    wet,dry,icy,                                  &  !intent(in)
      &                    tskin_ocn, tskin_lnd, tskin_ice,              &  !intent(in)
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &  !intent(in)
      &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &  !intent(in)
@@ -149,29 +81,28 @@
      &                       fh_ocn,    fh_lnd,    fh_ice,              &  !intent(inout)
      &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &  !intent(inout)
      &                      fh2_ocn,   fh2_lnd,   fh2_ice,              &  !intent(inout)
-     &                    wind                           ,              &  !intent(inout)
      &                    errmsg, errflg)                                  !intent(out)
 !
-      use funcphys, only : fpvs
-
       implicit none
 !
       integer, intent(in) :: im, ivegsrc
-      integer, dimension(im), intent(in) :: vegtype 
+      integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
+
+      integer, dimension(im), intent(in) :: vegtype
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
-      logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy ! added by s.lu
+      logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
 
+      real(kind=kind_phys), dimension(im), intent(in)    :: u10m,v10m
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
       real(kind=kind_phys), dimension(im), intent(in)    ::             &
-     &                    ps,u1,v1,t1,q1,z1,prsl1,prslki,ddvel,         &
-     &                    sigmaf,shdmax,                                &
+     &                    ps,t1,q1,z1,prsl1,prslki,prsik1,prslk1,       &
+     &                    wind,sigmaf,shdmax,                           &
      &                    z0pert,ztpert ! mg, sfc-perts
       real(kind=kind_phys), dimension(im), intent(in)    ::             &
      &                    tskin_ocn, tskin_lnd, tskin_ice,              &
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &
-     &                    fice
+     &                   snwdph_ocn,snwdph_lnd,snwdph_ice
 
       real(kind=kind_phys), dimension(im), intent(inout) ::             &
      &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &
@@ -183,8 +114,7 @@
      &                       fm_ocn,    fm_lnd,    fm_ice,              &
      &                       fh_ocn,    fh_lnd,    fh_ice,              &
      &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice,              &
-     &                      wind
+     &                      fh2_ocn,   fh2_lnd,   fh2_ice
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -192,13 +122,10 @@
 !
       integer   i
 !
-      real(kind=kind_phys) :: qs1,  rat, thv1, restar,
-     &                      czilc, tem1, tem2
+      real(kind=kind_phys) :: rat,   thv1, restar, wind10m,
+     &                        czilc, tem1, tem2, virtfac
 
-      real(kind=kind_phys) :: tvs_ocn,  tvs_lnd,  tvs_ice,              &
-     &                         z0_ocn,   z0_lnd,   z0_ice,              &
-     &                      z0max_ocn,z0max_lnd,z0max_ice,              &
-     &                      ztmax_ocn,ztmax_lnd,ztmax_ice
+      real(kind=kind_phys) :: tvs, z0, z0max, ztmax
 !
       real(kind=kind_phys), parameter ::
      &              charnock=.014, z0s_max=.317e-2                      &! a limiting value at high winds over sea
@@ -229,39 +156,142 @@
 !  ps is in pascals, wind is wind speed,
 !  surface roughness length is converted to m from cm
 !
+
+!       write(0,*)'in sfc_diff, sfc_z0_type=',sfc_z0_type
+
       do i=1,im
-
-        ztmax_ocn = 0.; ztmax_lnd = 0.; ztmax_ice = 0.
         if(flag_iter(i)) then
-          wind(i) = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))
-     &                + max(0.0, min(ddvel(i), 30.0)), 1.0)
-          tem1    = 1.0 + rvrdm1 * max(q1(i),1.e-8)
-          thv1    = t1(i) * prslki(i) * tem1
-          tvs_ocn = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * tem1
-          tvs_lnd = 0.5 * (tsurf_lnd(i)+tskin_lnd(i)) * tem1
-          tvs_ice = 0.5 * (tsurf_ice(i)+tskin_ice(i)) * tem1
-          qs1     = fpvs(t1(i))
-          qs1     = max(1.0e-8, eps * qs1 / (prsl1(i) + epsm1 * qs1))
-
-          z0_ocn      = 0.01 * z0rl_ocn(i)
-          z0max_ocn   = max(1.0e-6, min(z0_ocn,z1(i)))
-          z0_lnd      = 0.01 * z0rl_lnd(i)
-          z0max_lnd   = max(1.0e-6, min(z0_lnd,z1(i)))
-          z0_ice      = 0.01 * z0rl_ice(i)
-          z0max_ice   = max(1.0e-6, min(z0_ice,z1(i)))
+          virtfac = 1.0 + rvrdm1 * max(q1(i),1.e-8)
+          thv1    = t1(i) * prslki(i) * virtfac
 
 !  compute stability dependent exchange coefficients
 !  this portion of the code is presently suppressed
 !
+          if (dry(i)) then ! Some land
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+            tvs   = 0.5 * (tsurf_lnd(i)+tskin_lnd(i))/prsik1(i) * virtfac
+#else
+            tvs   = 0.5 * (tsurf_lnd(i)+tskin_lnd(i)) * virtfac
+#endif
+            z0max = max(1.0e-6, min(0.01 * z0rl_lnd(i), z1(i)))
+!** xubin's new z0  over land
+            tem1  = 1.0 - shdmax(i)
+            tem2  = tem1 * tem1
+            tem1  = 1.0  - tem2
 
-          if (wet(i) .and. fice(i) < 1.) then ! some open ocean
-            ustar_ocn(i) = sqrt(grav * z0_ocn / charnock)
+            if( ivegsrc == 1 ) then
+
+              if (vegtype(i) == 10) then
+                z0max = exp( tem2*log01 + tem1*log07 )
+              elseif (vegtype(i) == 6) then
+                z0max = exp( tem2*log01 + tem1*log05 )
+              elseif (vegtype(i) == 7) then
+!               z0max = exp( tem2*log01 + tem1*log01 )
+                z0max = 0.01
+              elseif (vegtype(i) == 16) then
+!               z0max = exp( tem2*log01 + tem1*log01 )
+                z0max = 0.01
+              else
+                z0max = exp( tem2*log01 + tem1*log(z0max) )
+              endif
+
+            elseif (ivegsrc == 2 ) then
+
+              if (vegtype(i) == 7) then
+                z0max = exp( tem2*log01 + tem1*log07 )
+              elseif (vegtype(i) == 8) then
+                z0max = exp( tem2*log01 + tem1*log05 )
+              elseif (vegtype(i) == 9) then
+!               z0max = exp( tem2*log01 + tem1*log01 )
+                z0max = 0.01
+              elseif (vegtype(i) == 11) then
+!               z0max = exp( tem2*log01 + tem1*log01 )
+                z0max = 0.01
+              else
+                z0max = exp( tem2*log01 + tem1*log(z0max) )
+              endif
+
+            endif
+! mg, sfc-perts: add surface perturbations to z0max over land
+            if (z0pert(i) /= 0.0 ) then
+              z0max = z0max * (10.**z0pert(i))
+            endif
+
+            z0max = max(z0max, 1.0e-6)
+
+!           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
+            czilc = 0.8
+
+            tem1  = 1.0 - sigmaf(i)
+            ztmax = z0max*exp( - tem1*tem1
+     &                     * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
+
+
+! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
+            if (ztpert(i) /= 0.0) then
+              ztmax = ztmax * (10.**ztpert(i))
+            endif
+            ztmax = max(ztmax, 1.0e-6)
+!
+            call stability
+!  ---  inputs:
+     &       (z1(i), snwdph_lnd(i), thv1, wind(i),
+     &        z0max, ztmax, tvs, grav,
+!  ---  outputs:
+     &        rb_lnd(i), fm_lnd(i), fh_lnd(i), fm10_lnd(i), fh2_lnd(i),
+     &        cm_lnd(i), ch_lnd(i), stress_lnd(i), ustar_lnd(i))
+          endif ! Dry points
+
+          if (icy(i)) then ! Some ice
+            tvs   = 0.5 * (tsurf_ice(i)+tskin_ice(i)) * virtfac
+            z0max = max(1.0e-6, min(0.01 * z0rl_ice(i), z1(i)))
+!** xubin's new z0  over land and sea ice
+            tem1  = 1.0 - shdmax(i)
+            tem2  = tem1 * tem1
+            tem1  = 1.0  - tem2
+
+            if( ivegsrc == 1 ) then
+
+              z0max = exp( tem2*log01 + tem1*log(z0max) )
+            elseif (ivegsrc == 2 ) then
+              z0max = exp( tem2*log01 + tem1*log(z0max) )
+            endif
+
+            z0max = max(z0max, 1.0e-6)
+
+!           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height
+!           dependance of czil
+            czilc = 0.8
+
+            tem1  = 1.0 - sigmaf(i)
+            ztmax = z0max*exp( - tem1*tem1
+     &                     * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
+            ztmax = max(ztmax, 1.0e-6)
+!
+            call stability
+!  ---  inputs:
+     &     (z1(i), snwdph_ice(i), thv1, wind(i),
+     &      z0max, ztmax, tvs, grav,
+!  ---  outputs:
+     &      rb_ice(i), fm_ice(i), fh_ice(i), fm10_ice(i), fh2_ice(i),
+     &      cm_ice(i), ch_ice(i), stress_ice(i), ustar_ice(i))
+      endif ! Icy points
+
+! BWG: Everything from here to end of subroutine was after
+!      the stuff now put into "stability"
+
+          if (wet(i)) then ! Some open ocean
+            tvs          = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * virtfac
+            z0           = 0.01 * z0rl_ocn(i)
+            z0max        = max(1.0e-6, min(z0,z1(i)))
+            ustar_ocn(i) = sqrt(grav * z0 / charnock)
+            wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
 
 !**  test xubin's new z0
 
 !           ztmax  = z0max
 
-            restar = max(ustar_ocn(i)*z0max_ocn*visi, 0.000001)
+            restar = max(ustar_ocn(i)*z0max*visi, 0.000001)
 
 !           restar = log(restar)
 !           restar = min(restar,5.)
@@ -270,135 +300,59 @@
 !           rat    = rat    / (1. + (bb2 + cc2*restar) * restar))
 !  rat taken from zeng, zhao and dickinson 1997
 
-            rat    = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
-            ztmax_ocn  = z0max_ocn * exp(-rat)
-          endif ! Open ocean
-          if (dry(i) .or. icy(i)) then ! over land or sea ice
-!** xubin's new z0  over land and sea ice
-            tem1 = 1.0 - shdmax(i)
-            tem2 = tem1 * tem1
-            tem1 = 1.0  - tem2
-
-            if( ivegsrc == 1 ) then
-
-              if (vegtype(i) == 10) then
-                z0max_lnd = exp( tem2*log01 + tem1*log07 )
-              elseif (vegtype(i) == 6) then
-                z0max_lnd = exp( tem2*log01 + tem1*log05 )
-              elseif (vegtype(i) == 7) then
-!               z0max = exp( tem2*log01 + tem1*log01 )
-                z0max_lnd = 0.01
-              elseif (vegtype(i) == 16) then
-!               z0max = exp( tem2*log01 + tem1*log01 )
-                z0max_lnd = 0.01
-              else
-                z0max_lnd = exp( tem2*log01 + tem1*log(z0max_lnd) )
-              endif
-
-            elseif (ivegsrc == 2 ) then
-
-                if (vegtype(i) == 7) then
-                  z0max_lnd = exp( tem2*log01 + tem1*log07 )
-                elseif (vegtype(i) == 8) then
-                  z0max_lnd = exp( tem2*log01 + tem1*log05 )
-                elseif (vegtype(i) == 9) then
-!                 z0max = exp( tem2*log01 + tem1*log01 )
-                  z0max_lnd = 0.01
-                elseif (vegtype(i) == 11) then
-!                 z0max = exp( tem2*log01 + tem1*log01 )
-                  z0max_lnd = 0.01
-                else
-                  z0max_lnd = exp( tem2*log01 + tem1*log(z0max_lnd) )
-                endif
-
-            endif ! over land or sea ice
-
-            z0max_ice = z0max_lnd
-
-! mg, sfc-perts: add surface perturbations to z0max over land
-            if (dry(i) .and. z0pert(i) /= 0.0 ) then
-              z0max_lnd = z0max_lnd * (10.**z0pert(i))
+            rat   = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
+            ztmax = max(z0max * exp(-rat), 1.0e-6)
+!
+            if (sfc_z0_type == 6) then
+              call znot_t_v6(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+            else if (sfc_z0_type == 7) then
+              call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+            else if (sfc_z0_type > 0) then
+              write(0,*)'no option for sfc_z0_type=',sfc_z0_type
+              stop
             endif
-
-            z0max_lnd = max(z0max_lnd,1.0e-6)
-            z0max_ice = max(z0max_ice,1.0e-6)
-
-!           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
-            czilc = 0.8
-
-            tem1 = 1.0 - sigmaf(i)
-            ztmax_lnd = z0max_lnd*exp( - tem1*tem1
-     &                     * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
-            ztmax_ice = z0max_ice*exp( - tem1*tem1
-     &                     * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
-
-
-! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
-            if (dry(i) .and. ztpert(i) /= 0.0) then
-              ztmax_lnd = ztmax_lnd * (10.**ztpert(i))
-            endif
-
-
-          endif       ! end of if(sfctype flags) then
-
-          ztmax_ocn  = max(ztmax_ocn,1.0e-6)
-          ztmax_lnd  = max(ztmax_lnd,1.0e-6)
-          ztmax_ice  = max(ztmax_ice,1.0e-6)
-
-! BWG begin "stability" block, 2019-03-23
-      if (wet(i) .and. fice(i) < 1.) then ! Some open ocean
-          call stability
+!
+            call stability
 !  ---  inputs:
-     &     (z1(i),snwdph_ocn(i),thv1,wind(i),
-     &      z0max_ocn,ztmax_ocn,tvs_ocn,grav,
+     &       (z1(i), snwdph_ocn(i), thv1, wind(i),
+     &        z0max, ztmax, tvs, grav,
 !  ---  outputs:
-     &      rb_ocn(i),fm_ocn(i),fh_ocn(i),fm10_ocn(i),fh2_ocn(i),
-     &      cm_ocn(i),ch_ocn(i),stress_ocn(i),ustar_ocn(i))
-      endif ! Open ocean points
-
-      if (dry(i)) then ! Some land
-          call stability
-!  ---  inputs:
-     &     (z1(i),snwdph_lnd(i),thv1,wind(i),
-     &      z0max_lnd,ztmax_lnd,tvs_lnd,grav,
-!  ---  outputs:
-     &      rb_lnd(i),fm_lnd(i),fh_lnd(i),fm10_lnd(i),fh2_lnd(i),
-     &      cm_lnd(i),ch_lnd(i),stress_lnd(i),ustar_lnd(i))
-      endif ! Dry points
-
-      if (icy(i)) then ! Some ice
-          call stability
-!  ---  inputs:
-     &     (z1(i),snwdph_ice(i),thv1,wind(i),
-     &      z0max_ice,ztmax_ice,tvs_ice,grav,
-!  ---  outputs:
-     &      rb_ice(i),fm_ice(i),fh_ice(i),fm10_ice(i),fh2_ice(i),
-     &      cm_ice(i),ch_ice(i),stress_ice(i),ustar_ice(i))
-      endif ! Icy points
-
-! BWG: Everything from here to end of subroutine was after
-!      the stuff now put into "stability"
-
+     &        rb_ocn(i), fm_ocn(i), fh_ocn(i), fm10_ocn(i), fh2_ocn(i),
+     &        cm_ocn(i), ch_ocn(i), stress_ocn(i), ustar_ocn(i))
 !
 !  update z0 over ocean
 !
-          if (wet(i) .and. fice(i) < 1.) then
-            z0_ocn = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
+            if (sfc_z0_type >= 0) then
+              if (sfc_z0_type == 0) then
+                z0 = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
 
 ! mbek -- toga-coare flux algorithm
-!           z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
+!               z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
 !  new implementation of z0
-!           cc = ustar(i) * z0 / rnu
-!           pp = cc / (1. + cc)
-!           ff = grav * arnu / (charnock * ustar(i) ** 3)
-!           z0 = arnu / (ustar(i) * ff ** pp)
+!               cc = ustar(i) * z0 / rnu
+!               pp = cc / (1. + cc)
+!               ff = grav * arnu / (charnock * ustar(i) ** 3)
+!               z0 = arnu / (ustar(i) * ff ** pp)
 
-            if (redrag) then
-              z0rl_ocn(i) = 100.0 * max(min(z0_ocn, z0s_max), 1.e-7)
-            else
-              z0rl_ocn(i) = 100.0 * max(min(z0_ocn,.1), 1.e-7)
+                if (redrag) then
+                  z0rl_ocn(i) = 100.0 * max(min(z0, z0s_max), 1.e-7)
+                else
+                  z0rl_ocn(i) = 100.0 * max(min(z0,.1), 1.e-7)
+                endif
+
+              elseif (sfc_z0_type == 6) then   ! wang
+                 call znot_m_v6(wind10m, z0)  ! wind, m/s, z0, m
+                 z0rl_ocn(i) = 100.0 * z0          ! cm
+              elseif (sfc_z0_type == 7) then   ! wang
+                 call znot_m_v7(wind10m, z0)  ! wind, m/s, z0, m
+                 z0rl_ocn(i) = 100.0 * z0          ! cm
+              else
+                 z0rl_ocn(i) = 1.0e-4
+              endif
+
             endif
           endif              ! end of if(open ocean)
+!
         endif                ! end of if(flagiter) loop
       enddo
 
@@ -409,8 +363,11 @@
 !----------------------------------------
 !>\ingroup GFS_diff_main
       subroutine stability                                              &
-     &     ( z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav,           & !  ---  inputs:
-     &       rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)                !  ---  outputs:
+!  ---  inputs:
+     &     ( z1, snwdph, thv1, wind, z0max, ztmax, tvs, grav,           &
+!  ---  outputs:
+     &       rb, fm, fh, fm10, fh2, cm, ch, stress, ustar)
+!-----
 
 !  ---  inputs:
       real(kind=kind_phys), intent(in) ::                               &
@@ -449,14 +406,19 @@
           dtv     = thv1 - tvs
           adtv    = max(abs(dtv),0.001)
           dtv     = sign(1.,dtv) * adtv
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          rb      = max(-5000.0, grav * dtv * z1
+     &            / (thv1 * wind * wind))
+#else
           rb      = max(-5000.0, (grav+grav) * dtv * z1
      &            / ((thv1 + tvs) * wind * wind))
+#endif
           tem1    = 1.0 / z0max
           tem2    = 1.0 / ztmax
-          fm      = log((z0max+z1) * tem1)
-          fh      = log((ztmax+z1) * tem2)
-          fm10    = log((z0max+10.)   * tem1)
-          fh2     = log((ztmax+2.)    * tem2)
+          fm      = log((z0max+z1)  * tem1)
+          fh      = log((ztmax+z1)  * tem2)
+          fm10    = log((z0max+10.) * tem1)
+          fh2     = log((ztmax+2.)  * tem2)
           hlinf   = rb * fm * fm / fh
           hlinf   = min(max(hlinf,ztmin1),ztmax1)
 !
@@ -560,6 +522,233 @@
 !.................................
       end subroutine stability
 !---------------------------------
+
+
+!! add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
+!! Weiguo Wang, 2019-0425
+
+      SUBROUTINE znot_m_v6(uref, znotm)
+      use machine , only : kind_phys
+      IMPLICIT NONE
+! Calculate areodynamical roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
+! For high winds, try to fit available observational data
+!
+! Bin Liu, NOAA/NCEP/EMC 2017
+! 
+! uref(m/s)   :   wind speed at 10-m height
+! znotm(meter):   areodynamical roughness scale over water
+!
+
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znotm
+      real(kind=kind_phys), parameter  :: p13 = -1.296521881682694e-02,
+     &      p12 =  2.855780863283819e-01, p11 = -1.597898515251717e+00,
+     &      p10 = -8.396975715683501e+00,
+
+     &      p25 =  3.790846746036765e-10, p24 =  3.281964357650687e-09,
+     &      p23 =  1.962282433562894e-07, p22 = -1.240239171056262e-06,
+     &      p21 =  1.739759082358234e-07, p20 =  2.147264020369413e-05,
+
+     &      p35 =  1.840430200185075e-07, p34 = -2.793849676757154e-05,
+     &      p33 =  1.735308193700643e-03, p32 = -6.139315534216305e-02,
+     &      p31 =  1.255457892775006e+00, p30 = -1.663993561652530e+01,
+
+     &      p40 =  4.579369142033410e-04
+  
+
+       if (uref >= 0.0 .and.  uref <= 6.5 ) then
+        znotm = exp(p10 + uref * (p11 + uref * (p12 + uref*p13))) 
+       elseif (uref > 6.5 .and. uref <= 15.7) then
+        znotm = p20 + uref * (p21 + uref * (p22 + uref * (p23
+     &              + uref * (p24 + uref * p25))))
+       elseif (uref > 15.7 .and. uref <= 53.0) then
+        znotm = exp( p30 + uref * (p31 + uref * (p32 + uref * (p33
+     &                   + uref * (p34 + uref * p35)))))
+       elseif ( uref > 53.0) then
+         znotm = p40
+       else
+        print*, 'Wrong input uref value:',uref
+       endif
+
+      END SUBROUTINE znot_m_v6
+
+      SUBROUTINE znot_t_v6(uref, znott)
+      use machine , only : kind_phys
+      IMPLICIT NONE
+! Calculate scalar roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+!
+! Bin Liu, NOAA/NCEP/EMC 2017
+!
+! uref(m/s)   :   wind speed at 10-m height
+! znott(meter):   scalar roughness scale over water
+!
+
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znott
+      real(kind=kind_phys), parameter  :: p00 =  1.100000000000000e-04,
+     &      p15 = -9.144581627678278e-10, p14 =  7.020346616456421e-08,
+     &      p13 = -2.155602086883837e-06, p12 =  3.333848806567684e-05,
+     &      p11 = -2.628501274963990e-04, p10 =  8.634221567969181e-04,
+
+     &      p25 = -8.654513012535990e-12, p24 =  1.232380050058077e-09,
+     &      p23 = -6.837922749505057e-08, p22 =  1.871407733439947e-06,
+     &      p21 = -2.552246987137160e-05, p20 =  1.428968311457630e-04,
+
+     &      p35 =  3.207515102100162e-12, p34 = -2.945761895342535e-10,
+     &      p33 =  8.788972147364181e-09, p32 = -3.814457439412957e-08,
+     &      p31 = -2.448983648874671e-06, p30 =  3.436721779020359e-05,
+
+     &      p45 = -3.530687797132211e-11, p44 =  3.939867958963747e-09,
+     &      p43 = -1.227668406985956e-08, p42 = -1.367469811838390e-05,
+     &      p41 =  5.988240863928883e-04, p40 = -7.746288511324971e-03,
+
+     &      p56 = -1.187982453329086e-13, p55 =  4.801984186231693e-11,
+     &      p54 = -8.049200462388188e-09, p53 =  7.169872601310186e-07,
+     &      p52 = -3.581694433758150e-05, p51 =  9.503919224192534e-04,
+     &      p50 = -1.036679430885215e-02,
+
+     &      p60 =  4.751256171799112e-05
+
+      if (uref >= 0.0 .and. uref < 5.9 ) then
+         znott = p00
+      elseif (uref >= 5.9 .and. uref <= 15.4) then
+         znott = p10 + uref * (p11 + uref * (p12 + uref * (p13
+     &               + uref * (p14 + uref * p15))))
+      elseif (uref > 15.4 .and. uref <= 21.6) then
+         znott = p20 + uref * (p21 + uref * (p22 + uref * (p23 
+     &               + uref * (p24 + uref * p25))))
+      elseif (uref > 21.6 .and. uref <= 42.2) then
+         znott = p30 + uref * (p31 + uref * (p32 + uref * (p33 
+     &               + uref * (p34 + uref * p35))))
+      elseif ( uref > 42.2 .and. uref <= 53.3) then
+         znott = p40 + uref * (p41 + uref * (p42 + uref * (p43 
+     &               + uref * (p44 + uref * p45))))
+      elseif ( uref > 53.3 .and. uref <= 80.0) then
+         znott = p50 + uref * (p51 + uref * (p52 + uref * (p53 
+     &               + uref * (p54 + uref * (p55 + uref * p56)))))
+      elseif ( uref > 80.0) then
+         znott = p60
+      else
+         print*, 'Wrong input uref value:',uref
+      endif
+
+      END SUBROUTINE znot_t_v6
+
+
+      SUBROUTINE znot_m_v7(uref, znotm)
+      use machine , only : kind_phys
+      IMPLICIT NONE
+! Calculate areodynamical roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
+! For high winds, try to fit available observational data
+! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
+!
+! Bin Liu, NOAA/NCEP/EMC 2018
+!
+! uref(m/s)   :   wind speed at 10-m height
+! znotm(meter):   areodynamical roughness scale over water
+!
+
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znotm
+
+      real(kind=kind_phys), parameter  :: p13 = -1.296521881682694e-02,
+     &      p12 =  2.855780863283819e-01, p11 = -1.597898515251717e+00,
+     &      p10 = -8.396975715683501e+00,
+
+     &      p25 =  3.790846746036765e-10, p24 =  3.281964357650687e-09,
+     &      p23 =  1.962282433562894e-07, p22 = -1.240239171056262e-06,
+     &      p21 =  1.739759082358234e-07, p20 =  2.147264020369413e-05,
+
+     &      p35 =  1.897534489606422e-07, p34 = -3.019495980684978e-05,
+     &      p33 =  1.931392924987349e-03, p32 = -6.797293095862357e-02,
+     &      p31 =  1.346757797103756e+00, p30 = -1.707846930193362e+01,
+
+     &      p40 =  3.371427455376717e-04
+
+      if (uref >= 0.0 .and.  uref <= 6.5 ) then
+        znotm = exp( p10 + uref * (p11 + uref * (p12 + uref * p13)))
+      elseif (uref > 6.5 .and. uref <= 15.7) then
+        znotm = p20 + uref * (p21 + uref * (p22 + uref * (p23
+     &              + uref * (p24 + uref * p25))))
+      elseif (uref > 15.7 .and. uref <= 53.0) then
+        znotm = exp( p30 + uref * (p31 + uref * (p32 + uref * (p33
+     &                   + uref * (p34 + uref * p35)))))
+      elseif ( uref > 53.0) then
+        znotm = p40
+      else
+        print*, 'Wrong input uref value:',uref
+      endif
+
+      END SUBROUTINE znot_m_v7
+      SUBROUTINE znot_t_v7(uref, znott)
+      use machine , only : kind_phys
+      IMPLICIT NONE
+! Calculate scalar roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+! To be compatible with the slightly decreased Cd for higher wind speed
+!
+! Bin Liu, NOAA/NCEP/EMC 2018
+!
+! uref(m/s)   :   wind speed at 10-m height
+! znott(meter):   scalar roughness scale over water
+!
+
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znott
+
+      real(kind=kind_phys), parameter  :: p00 =  1.100000000000000e-04,
+
+     &      p15 = -9.193764479895316e-10, p14 =  7.052217518653943e-08,
+     &      p13 = -2.163419217747114e-06, p12 =  3.342963077911962e-05,
+     &      p11 = -2.633566691328004e-04, p10 =  8.644979973037803e-04,
+
+     &      p25 = -9.402722450219142e-12, p24 =  1.325396583616614e-09,
+     &      p23 = -7.299148051141852e-08, p22 =  1.982901461144764e-06,
+     &      p21 = -2.680293455916390e-05, p20 =  1.484341646128200e-04,
+
+     &      p35 =  7.921446674311864e-12, p34 = -1.019028029546602e-09,
+     &      p33 =  5.251986927351103e-08, p32 = -1.337841892062716e-06,
+     &      p31 =  1.659454106237737e-05, p30 = -7.558911792344770e-05,
+
+     &      p45 = -2.694370426850801e-10, p44 =  5.817362913967911e-08,
+     &      p43 = -5.000813324746342e-06, p42 =  2.143803523428029e-04,
+     &      p41 = -4.588070983722060e-03, p40 =  3.924356617245624e-02,
+
+     &      p56 = -1.663918773476178e-13, p55 =  6.724854483077447e-11,
+     &      p54 = -1.127030176632823e-08, p53 =  1.003683177025925e-06,
+     &      p52 = -5.012618091180904e-05, p51 =  1.329762020689302e-03,
+     &      p50 = -1.450062148367566e-02, p60 =  6.840803042788488e-05
+
+        if (uref >= 0.0 .and. uref < 5.9 ) then
+           znott = p00
+        elseif (uref >= 5.9 .and. uref <= 15.4) then
+           znott = p10 + uref * (p11 + uref * (p12 + uref * (p13
+     &                 + uref * (p14 + uref * p15))))
+        elseif (uref > 15.4 .and. uref <= 21.6) then
+           znott = p20 + uref * (p21 + uref * (p22 + uref * (p23
+     &                 + uref * (p24 + uref * p25))))
+        elseif (uref > 21.6 .and. uref <= 42.6) then
+           znott = p30 + uref * (p31 + uref * (p32 + uref * (p33
+     &                 + uref * (p34 + uref * p35))))
+        elseif ( uref > 42.6 .and. uref <= 53.0) then
+           znott = p40 + uref * (p41 + uref * (p42 + uref * (p43
+     &                 + uref * (p44 + uref * p45))))
+        elseif ( uref > 53.0 .and. uref <= 80.0) then
+           znott = p50 + uref * (p51 + uref * (p52 + uref * (p53
+     &                 + uref * (p54 + uref * (p55 + uref * p56)))))
+        elseif ( uref > 80.0) then
+           znott = p60
+        else
+           print*, 'Wrong input uref value:',uref
+        endif
+
+        END SUBROUTINE znot_t_v7
+
 
 !---------------------------------
       end module sfc_diff

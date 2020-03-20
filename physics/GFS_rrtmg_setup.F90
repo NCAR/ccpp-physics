@@ -41,39 +41,7 @@ module GFS_rrtmg_setup
 !> \defgroup GFS_rrtmg_setup GFS RRTMG Scheme Setup
 !! @{
 !! \section arg_table_GFS_rrtmg_setup_init Argument Table
-!! | local_name               | standard_name                                                                 | long_name                                                     | units         | rank | type      |   kind    | intent | optional |
-!! |--------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | si                       | vertical_sigma_coordinate_for_radiation_initialization                        | vertical sigma coordinate for radiation initialization        | none          |    1 | real      | kind_phys | in     | F        |
-!! | levr                     | number_of_vertical_layers_for_radiation_calculations                          | number of vertical levels for radiation calculations          | count         |    0 | integer   |           | in     | F        |
-!! | ictm                     | flag_for_initial_time-date_control                                            | flag for initial conditions and forcing                       | flag          |    0 | integer   |           | in     | F        |
-!! | isol                     | flag_for_solar_constant                                                       | use prescribed solar constant                                 | flag          |    0 | integer   |           | in     | F        |
-!! | ico2                     | flag_for_using_prescribed_global_mean_co2_value                               | prescribed global mean value (old opernl)                     | flag          |    0 | integer   |           | in     | F        |
-!! | iaer                     | flag_for_default_aerosol_effect_in_shortwave_radiation                        | default aerosol effect in sw only                             | flag          |    0 | integer   |           | in     | F        |
-!! | ialb                     | flag_for_using_climatology_albedo                                             | flag for using climatology alb, based on sfc type             | flag          |    0 | integer   |           | in     | F        |
-!! | iems                     | flag_for_surface_emissivity_control                                           | surface emissivity control flag, use fixed value of 1         | flag          |    0 | integer   |           | in     | F        |
-!! | ntcw                     | index_for_liquid_cloud_condensate                                             | tracer index for cloud condensate (or liquid water)           | index         |    0 | integer   |           | in     | F        |
-!! | num_p2d                  | array_dimension_of_2d_arrays_for_microphysics                                 | number of 2D arrays needed for microphysics                   | count         |    0 | integer   |           | in     | F        |
-!! | num_p3d                  | array_dimension_of_3d_arrays_for_microphysics                                 | number of 3D arrays needed for microphysics                   | count         |    0 | integer   |           | in     | F        |
-!! | npdf3d                   | number_of_3d_arrays_associated_with_pdf-based_clouds                          | number of 3d arrays associated with pdf based clouds/mp       | count         |    0 | integer   |           | in     | F        |
-!! | ntoz                     | index_for_ozone                                                               | tracer index for ozone mixing ratio                           | index         |    0 | integer   |           | in     | F        |
-!! | iovr_sw                  | flag_for_max-random_overlap_clouds_for_shortwave_radiation                    | sw: max-random overlap clouds                                 | flag          |    0 | integer   |           | in     | F        |
-!! | iovr_lw                  | flag_for_max-random_overlap_clouds_for_longwave_radiation                     | lw: max-random overlap clouds                                 | flag          |    0 | integer   |           | in     | F        |
-!! | isubc_sw                 | flag_for_sw_clouds_without_sub-grid_approximation                             | flag for sw clouds without sub-grid approximation             | flag          |    0 | integer   |           | in     | F        |
-!! | isubc_lw                 | flag_for_lw_clouds_without_sub-grid_approximation                             | flag for lw clouds without sub-grid approximation             | flag          |    0 | integer   |           | in     | F        |
-!! | icliq_sw                 | flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation           | sw optical property for liquid clouds                         | flag          |    0 | integer   |           | in     | F        |
-!! | crick_proof              | flag_for_CRICK-proof_cloud_water                                              | flag for CRICK-Proof cloud water                              | flag          |    0 | logical   |           | in     | F        |
-!! | ccnorm                   | flag_for_cloud_condensate_normalized_by_cloud_cover                           | flag for cloud condensate normalized by cloud cover           | flag          |    0 | logical   |           | in     | F        |
-!! | imp_physics              | flag_for_microphysics_scheme                                                  | choice of microphysics scheme                                 | flag          |    0 | integer   |           | in     | F        |
-!! | norad_precip             | flag_for_precipitation_effect_on_radiation                                    | radiation precip flag for Ferrier/Moorthi                     | flag          |    0 | logical   |           | in     | F        |
-!! | idate                    | date_and_time_at_model_initialization_reordered                               | initialization date and time                                  | none          |    1 | integer   |           | in     | F        |
-!! | iflip                    | flag_for_vertical_index_direction_control                                     | flag for vertical index direction control                     | flag          |    0 | integer   |           | in     | F        |
-!! | im                       | horizontal_loop_extent                                                        | horizontal loop extent                                        | count         |    0 | integer   |           | in     | F        |
-!! | faerlw                   | aerosol_optical_properties_for_longwave_bands_01-16                           | optical properties for longwave bands 01-16                   | various       |    4 | real      | kind_phys | in     | F        |
-!! | faersw                   | aerosol_optical_properties_for_shortwave_bands_01-16                          | aerosol optical properties for shortwave bands 01-16          | various       |    4 | real      | kind_phys | in     | F        |
-!! | aerodp                   | atmosphere_optical_thickness_due_to_ambient_aerosol_particles                 | vertical integrated optical depth for various aerosol species | none          |    2 | real      | kind_phys | in     | F        |
-!! | me                       | mpi_rank                                                                      | current MPI-rank                                              | index         |    0 | integer   |           | in     | F        |
-!! | errmsg                   | ccpp_error_message                                                            | error message for error handling in CCPP                      | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                   | ccpp_error_flag                                                               | error flag for error handling in CCPP                         | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_rrtmg_setup_init.html
 !!
    subroutine GFS_rrtmg_setup_init (                                    &
           si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw,  num_p2d, &
@@ -352,20 +320,7 @@ module GFS_rrtmg_setup
    end subroutine GFS_rrtmg_setup_init
 
 !> \section arg_table_GFS_rrtmg_setup_run Argument Table
-!! | local_name               | standard_name                                                                 | long_name                                               | units         | rank | type      |   kind    | intent | optional |
-!! |--------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | idate                    | date_and_time_at_model_initialization                                         | initialization date and time                            | none          |    1 | integer   |           | in     | F        |
-!! | jdate                    | forecast_date_and_time                                                        | current forecast date and time                          | none          |    1 | integer   |           | in     | F        |
-!! | deltsw                   | frequency_for_shortwave_radiation                                             | frequency for shortwave radiation                       | s             |    0 | real      | kind_phys | in     | F        |
-!! | deltim                   | time_step_for_dynamics                                                        | dynamics timestep                                       | s             |    0 | real      | kind_phys | in     | F        |
-!! | lsswr                    | flag_to_calc_sw                                                               | logical flags for sw radiation calls                    | flag          |    0 | logical   |           | in     | F        |
-!! | me                       | mpi_rank                                                                      | current MPI-rank                                        | index         |    0 | integer   |           | in     | F        |
-!! | slag                     | equation_of_time                                                              | equation of time (radian)                               | radians       |    0 | real      | kind_phys | out    | F        |
-!! | sdec                     | sine_of_solar_declination_angle                                               | sin of the solar declination angle                      | none          |    0 | real      | kind_phys | out    | F        |
-!! | cdec                     | cosine_of_solar_declination_angle                                             | cos of the solar declination angle                      | none          |    0 | real      | kind_phys | out    | F        |
-!! | solcon                   | solar_constant                                                                | solar constant (sun-earth distant adjusted)             | W m-2         |    0 | real      | kind_phys | out    | F        |
-!! | errmsg                   | ccpp_error_message                                                            | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                   | ccpp_error_flag                                                               | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_rrtmg_setup_run.html
 !!
    subroutine GFS_rrtmg_setup_run (                &
           idate, jdate, deltsw, deltim, lsswr, me, &
@@ -404,10 +359,7 @@ module GFS_rrtmg_setup
    end subroutine GFS_rrtmg_setup_run
 
 !> \section arg_table_GFS_rrtmg_setup_finalize Argument Table
-!! | local_name               | standard_name                                                                 | long_name                                               | units         | rank | type      |   kind    | intent | optional |
-!! |--------------------------|-------------------------------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | errmsg                   | ccpp_error_message                                                            | error message for error handling in CCPP                | none          |    0 | character | len=*     | out    | F        |
-!! | errflg                   | ccpp_error_flag                                                               | error flag for error handling in CCPP                   | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude GFS_rrtmg_setup_finalize.html
 !!
    subroutine GFS_rrtmg_setup_finalize (errmsg, errflg)
 

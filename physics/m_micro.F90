@@ -17,44 +17,10 @@ contains
 !>\ingroup mg_driver
 !! This subroutine is the MG initialization.
 !> \section arg_table_m_micro_init  Argument Table
-!! | local_name             | standard_name                                   | long_name                                                                                   | units       | rank |  type      |   kind    | intent | optional |
-!! |------------------------|-------------------------------------------------|---------------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
-!! | imp_physics            | flag_for_microphysics_scheme                    | choice of microphysics scheme                                                               | flag        |    0 | integer    |           | in     | F        |
-!! | imp_physics_mg         | flag_for_morrison_gettelman_microphysics_scheme | choice of Morrison-Gettelman rmicrophysics scheme                                           | flag        |    0 | integer    |           | in     | F        |
-!! | fprcp                  | number_of_frozen_precipitation_species          | number of frozen precipitation species                                                      | count       |    0 | integer    |           | in     | F        |
-!! | gravit                 | gravitational_acceleration                      | gravitational acceleration                                                                  | m s-2       |    0 | real       | kind_phys | in     | F        |
-!! | rair                   | gas_constant_dry_air                            | ideal gas constant for dry air                                                              | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
-!! | rh2o                   | gas_constant_water_vapor                        | ideal gas constant for water vapor                                                          | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
-!! | cpair                  | specific_heat_of_dry_air_at_constant_pressure   | specific heat of dry air at constant pressure                                               | J kg-1 K-1  |    0 | real       | kind_phys | in     | F        |
-!! | tmelt                  | triple_point_temperature_of_water               | triple point temperature of water                                                           | K           |    0 | real       | kind_phys | in     | F        |
-!! | latvap                 | latent_heat_of_vaporization_of_water_at_0C      | latent heat of evaporation/sublimation                                                      | J kg-1      |    0 | real       | kind_phys | in     | F        |
-!! | latice                 | latent_heat_of_fusion_of_water_at_0C            | latent heat of fusion                                                                       | J kg-1      |    0 | real       | kind_phys | in     | F        |
-!! | mg_dcs                 | mg_autoconversion_size_threshold_ice_snow       | autoconversion size threshold for cloud ice to snow for MG microphysics                     | um          |    0 | real       | kind_phys | in     | F        |
-!! | mg_qcvar               | mg_cloud_water_variance                         | cloud water relative variance for MG microphysics                                           |             |    0 | real       | kind_phys | in     | F        |
-!! | mg_ts_auto_ice         | mg_time_scale_for_autoconversion_of_ice         | autoconversion time scale for ice for MG microphysics                                       | s           |    1 | real       | kind_phys | in     | F        |
-!! | mg_rhmini              | mg_minimum_rh_for_ice                           | relative humidity threshold parameter for nucleating ice for MG microphysics                | none        |    0 | real       | kind_phys | in     | F        |
-!! | microp_uniform         | mg_flag_for_uniform_subcolumns                  | flag for uniform subcolumns for MG microphysics                                             | flag        |    0 | logical    |           | in     | F        |
-!! | do_cldice              | mg_flag_for_cloud_ice_processes                 | flag for cloud ice processes for MG microphysics                                            | flag        |    0 | logical    |           | in     | F        |
-!! | hetfrz_classnuc        | mg_flag_for_heterogeneous_freezing              | flag for heterogeneous freezing for MG microphysics                                         | flag        |    0 | logical    |           | in     | F        |
-!! | mg_precip_frac_method  | mg_type_of_precip_fraction_method               | type of precip fraction method for MG microphysics (in_cloud or max_overlap)                | none        |    0 | character  | len=16    | in     | F        |
-!! | mg_berg_eff_factor     | mg_bergeron_efficiency_factor                   | bergeron efficiency factor for MG microphysics                                              | frac        |    0 | real       | kind_phys | in     | F        |
-!! | sed_supersat           | mg_allow_supersat_after_sed                     | allow supersaturation after sedimentation for MG microphysics                               | flag        |    0 | logical    |           | in     | F        |
-!! | do_sb_physics          | mg_flag_for_sb2001_autoconversion               | flag for SB 2001 autoconversion or accretion for MG microphysics                            | flag        |    0 | logical    |           | in     | F        |
-!! | mg_do_hail             | mg_flag_for_hail                                | flag for hail for MG microphysics (graupel possible if false)                               | flag        |    0 | logical    |           | in     | F        |
-!! | mg_do_graupel          | mg_flag_for_graupel                             | flag for graupel for MG microphysics (hail possible if false)                               | flag        |    0 | logical    |           | in     | F        |
-!! | mg_nccons              | mg_flag_drop_concentration_constant             | flag for constant droplet concentration for MG microphysics                                 | flag        |    0 | logical    |           | in     | F        |
-!! | mg_nicons              | mg_flag_ice_concentration_constant              | flag for constant ice concentration for MG microphysics                                     | flag        |    0 | logical    |           | in     | F        |
-!! | mg_ngcons              | mg_flag_graupel_concentration_constant          | flag for constant graupel concentration for MG microphysics                                 | flag        |    0 | logical    |           | in     | F        |
-!! | mg_ncnst               | mg_drop_concentration_constant                  | droplet concentration constant for MG microphysics                                          | m-3         |    0 | real       | kind_phys | in     | F        |
-!! | mg_ninst               | mg_ice_concentration_constant                   | ice concentration constant for MG microphysics                                              | m-3         |    0 | real       | kind_phys | in     | F        |
-!! | mg_ngnst               | mg_graupel_concentration_constant               | graupel concentration constant for MG microphysics                                          | m-3         |    0 | real       | kind_phys | in     | F        |
-!! | mg_do_ice_gmao         | mg_flag_for_gmao_ice_formulation                | flag for gmao ice formulation                                                               | flag        |    0 | logical    |           | in     | F        |
-!! | mg_do_liq_liu          | mg_flag_for_liu_liquid_treatment                | flag for liu liquid treatment                                                               | flag        |    0 | logical    |           | in     | F        |
-!! | errmsg                 | ccpp_error_message                              | error message for error handling in CCPP                                                    | none        |    0 | character  | len=*     | out    | F        |
-!! | errflg                 | ccpp_error_flag                                 | error flag for error handling in CCPP                                                       | flag        |    0 | integer    |           | out    | F        |
+!! \htmlinclude m_micro_init.html
 !!
 subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, cpair,&
-                        tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,      &
+                        eps, tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,  &
                         mg_rhmini, microp_uniform, do_cldice, hetfrz_classnuc,        &
                         mg_precip_frac_method, mg_berg_eff_factor, sed_supersat,      &
                         do_sb_physics, mg_do_hail,  mg_do_graupel, mg_nccons,         &
@@ -72,7 +38,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                                         sed_supersat, do_sb_physics, mg_do_hail,        &
                                         mg_do_graupel, mg_nccons, mg_nicons, mg_ngcons, &
                                         mg_do_ice_gmao, mg_do_liq_liu
-    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, tmelt, latvap, latice
+    real(kind=kind_phys), intent(in) :: gravit, rair, rh2o, cpair, eps, tmelt, latvap, latice
     real(kind=kind_phys), intent(in) :: mg_dcs, mg_qcvar, mg_ts_auto_ice(2), mg_rhmini, &
                                         mg_berg_eff_factor, mg_ncnst, mg_ninst, mg_ngnst
     character(len=16),    intent(in) :: mg_precip_frac_method
@@ -84,7 +50,7 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
 
     if (is_initialized) return
 
-    if (imp_physics/=imp_physics_mg) then
+    if (imp_physics /= imp_physics_mg) then
        write(errmsg,'(*(a))') "Logic error: namelist choice of microphysics is different from Morrison-Gettelman MP"
        errflg = 1
        return
@@ -94,20 +60,20 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
       call ini_micro (mg_dcs, mg_qcvar, mg_ts_auto_ice(1))
     elseif (fprcp == 1) then
       call micro_mg_init2_0(kind_phys, gravit, rair, rh2o, cpair, &
-                            tmelt, latvap, latice, mg_rhmini,     &
+                            eps, tmelt, latvap, latice, mg_rhmini,&
                             mg_dcs, mg_ts_auto_ice,               &
                             mg_qcvar,                             &
                             microp_uniform, do_cldice,            &
                             hetfrz_classnuc,                      &
                             mg_precip_frac_method,                &
                             mg_berg_eff_factor,                   &
-                            sed_supersat, do_sb_physics,          &
+                            sed_supersat,   do_sb_physics,        &
                             mg_do_ice_gmao, mg_do_liq_liu,        &
-                            mg_nccons, mg_nicons,                 &
-                            mg_ncnst, mg_ninst)
+                            mg_nccons,      mg_nicons,            &
+                            mg_ncnst,       mg_ninst)
     elseif (fprcp == 2) then
       call micro_mg_init3_0(kind_phys, gravit, rair, rh2o, cpair, &
-                            tmelt, latvap, latice, mg_rhmini,     &
+                            eps, tmelt, latvap, latice, mg_rhmini,&
                             mg_dcs, mg_ts_auto_ice,               &
                             mg_qcvar,                             &
                             mg_do_hail,       mg_do_graupel,      &
@@ -115,11 +81,11 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
                             hetfrz_classnuc,                      &
                             mg_precip_frac_method,                &
                             mg_berg_eff_factor,                   &
-                            sed_supersat, do_sb_physics,          &
+                            sed_supersat,   do_sb_physics,        &
                             mg_do_ice_gmao, mg_do_liq_liu,        &
-                            mg_nccons,    mg_nicons,              &
-                            mg_ncnst,     mg_ninst,               &
-                            mg_ngcons,    mg_ngnst)
+                            mg_nccons,      mg_nicons,            &
+                            mg_ncnst,       mg_ninst,             &
+                            mg_ngcons,      mg_ngnst)
     else
       write(0,*)' fprcp = ',fprcp,' is not a valid option - aborting'
       stop
@@ -137,7 +103,7 @@ end subroutine m_micro_init
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 
-!> \defgroup mg2mg3 CPT Morrison-Gettelman MP scheme Module
+!> \defgroup mg2mg3 Morrison-Gettelman MP scheme Module
 !! This module contains the the entity of MG2 and MG3 schemes. 
 !> @{
 !> \defgroup mg_driver Morrison-Gettelman MP Driver Module
@@ -147,79 +113,7 @@ end subroutine m_micro_init
 #if 0
 
 !> \section arg_table_m_micro_run Argument Table
-!! | local_name     | standard_name                                                               | long_name                                                                                   | units       | rank |  type      |   kind    | intent | optional |
-!! |----------------|-----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                                                      | count       |    0 | integer    |           | in     | F        |
-!! | ix             | horizontal_dimension                                                        | horizontal dimension                                                                        | count       |    0 | integer    |           | in     | F        |
-!! | lm             | vertical_dimension                                                          | vertical layer dimension                                                                    | count       |    0 | integer    |           | in     | F        |
-!! | flipv          | flag_flip                                                                   | vertical flip logical                                                                       | flag        |    0 | logical    |           | in     | F        |
-!! | dt_i           | time_step_for_physics                                                       | physics time step                                                                           | s           |    0 | real       | kind_phys | in     | F        |
-!! | prsl_i         | air_pressure                                                                | layer mean pressure                                                                         | Pa          |    2 | real       | kind_phys | in     | F        |
-!! | prsi_i         | air_pressure_at_interface                                                   | air pressure at model layer interfaces                                                      | Pa          |    2 | real       | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                | geopotential at model layer centers                                                         | m2 s-2      |    2 | real       | kind_phys | in     | F        |
-!! | phii           | geopotential_at_interface                                                   | geopotential at model layer interfaces                                                      | m2 s-2      |    2 | real       | kind_phys | in     | F        |
-!! | omega_i        | omega                                                                       | layer mean vertical velocity                                                                | Pa s-1      |    2 | real       | kind_phys | in     | F        |
-!! | qlls_i         | cloud_condensed_water_mixing_ratio_convective_transport_tracer | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array | kg kg-1 | 2 | real | kind_phys | in   | F        |
-!! | qlcn_i         | mass_fraction_of_convective_cloud_liquid_water                              | mass fraction of convective cloud liquid water                                              | kg kg-1     |    2 | real       | kind_phys | in     | F        |
-!! | qils_i         | ice_water_mixing_ratio_convective_transport_tracer             | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array                | kg kg-1 | 2 | real | kind_phys | in   | F        |
-!! | qicn_i         | mass_fraction_of_convective_cloud_ice                                       | mass fraction of convective cloud ice water                                                 | kg kg-1     |    2 | real       | kind_phys | in     | F        |
-!! | lwheat_i       | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep   | total sky lw heating rate                                                                   | K s-1       |    2 | real       | kind_phys | in     | F        |
-!! | swheat_i       | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep  | total sky sw heating rate                                                                   | K s-1       |    2 | real       | kind_phys | in     | F        |
-!! | w_upi          | vertical_velocity_for_updraft                                               | vertical velocity for updraft                                                               | m s-1       |    2 | real       | kind_phys | in     | F        |
-!! | cf_upi         | convective_cloud_fraction_for_microphysics                                  | convective cloud fraction for microphysics                                                  | frac        |    2 | real       | kind_phys | in     | F        |
-!! | frland         | land_area_fraction_for_microphysics                                         | land area fraction used in microphysics schemes                                             | frac        |    1 | real       | kind_phys | in     | F        |
-!! | zpbl           | atmosphere_boundary_layer_thickness                                         | pbl height                                                                                  | m           |    1 | real       | kind_phys | in     | F        |
-!! | cnv_mfd_i      | detrained_mass_flux                                                         | detrained mass flux                                                                         | kg m-2 s-1  |    2 | real       | kind_phys | in     | F        |
-!! | cnv_dqldt_i    | tendency_of_cloud_water_due_to_convective_microphysics                      | tendency of cloud water due to convective microphysics                                      | kg m-2 s-1  |    2 | real       | kind_phys | in     | F        |
-!! | clcn_i         | convective_cloud_volume_fraction                                            | convective cloud volume fraction                                                            | frac        |    2 | real       | kind_phys | in     | F        |
-!! | u_i            | x_wind_updated_by_physics                                                   | zonal wind updated by physics                                                               | m s-1       |    2 | real       | kind_phys | in     | F        |
-!! | v_i            | y_wind_updated_by_physics                                                   | meridional wind updated by physics                                                          | m s-1       |    2 | real       | kind_phys | in     | F        |
-!! | taugwx         | cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep          | cumulative sfc x momentum flux multiplied by timestep                                       | Pa s        |    1 | real       | kind_phys | in     | F        |
-!! | taugwy         | cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep          | cumulative sfc y momentum flux multiplied by timestep                                       | Pa s        |    1 | real       | kind_phys | in     | F        |
-!! | tauorox        | instantaneous_surface_x_momentum_flux                                       | x momentum flux                                                                             | Pa          |    1 | real       | kind_phys | in     | F        |
-!! | tauoroy        | instantaneous_surface_y_momentum_flux                                       | y momentum flux                                                                             | Pa          |    1 | real       | kind_phys | in     | F        |
-!! | cnv_fice_i     | ice_fraction_in_convective_tower                                            | ice fraction in convective tower                                                            | frac        |    2 | real       | kind_phys | in     | F        |
-!! | cnv_ndrop_i    | number_concentration_of_cloud_liquid_water_particles_for_detrainment        | droplet number concentration in convective detrainment                                      | m-3         |    2 | real       | kind_phys | in     | F        |
-!! | cnv_nice_i     | number_concentration_of_ice_crystals_for_detrainment                        | crystal number concentration in convective detrainment                                      | m-3         |    2 | real       | kind_phys | in     | F        |
-!! | q_io           | water_vapor_specific_humidity_updated_by_physics                            | water vapor specific humidity updated by physics                                            | kg kg-1     |    2 | real       | kind_phys | inout  | F        |
-!! | lwm_o          | cloud_condensed_water_mixing_ratio_updated_by_physics                       | moist (dry+vapor, no condensates) mixing ratio of cloud condensed water updated by physics  | kg kg-1     |    2 | real       | kind_phys | out    | F        |
-!! | qi_o           | ice_water_mixing_ratio_updated_by_physics                                   | moist (dry+vapor, no condensates) mixing ratio of ice water updated by physics              | kg kg-1     |    2 | real       | kind_phys | out    | F        |
-!! | t_io           | air_temperature_updated_by_physics                                          | temperature updated by physics                                                              | K           |    2 | real       | kind_phys | inout  | F        |
-!! | rn_o           | lwe_thickness_of_explicit_precipitation_amount                              | explicit precipitation (rain, ice, snow, graupel, ...) on physics timestep                  | m           |    1 | real       | kind_phys | out    | F        |
-!! | sr_o           | ratio_of_snowfall_to_rainfall                                               | snow ratio: ratio of snow to total precipitation                                            | frac        |    1 | real       | kind_phys | out    | F        |
-!! | ncpl_io        | cloud_droplet_number_concentration_updated_by_physics                       | number concentration of cloud droplets updated by physics                                   | kg-1        |    2 | real       | kind_phys | inout  | F        |
-!! | ncpi_io        | ice_number_concentration_updated_by_physics                                 | number concentration of ice updated by physics                                              | kg-1        |    2 | real       | kind_phys | inout  | F        |
-!! | fprcp          | number_of_frozen_precipitation_species                                      | number of frozen precipitation species                                                      | count       |    0 | integer    |           | in     | F        |
-!! | rnw_io         | local_rain_water_mixing_ratio                                               | moist (dry+vapor, no condensates) mixing ratio of rain water local to physics               | kg kg-1     |    2 | real       | kind_phys | inout  | F        |
-!! | snw_io         | local_snow_water_mixing_ratio                                               | moist (dry+vapor, no condensates) mixing ratio of snow water local to physics               | kg kg-1     |    2 | real       | kind_phys | inout  | F        |
-!! | qgl_io         | local_graupel_mixing_ratio                                                  | moist (dry+vapor, no condensates) mixing ratio of graupel local to physics                  | kg kg-1     |    2 | real       | kind_phys | inout  | F        |
-!! | ncpr_io        | local_rain_number_concentration                                             | number concentration of rain local to physics                                               | kg-1        |    2 | real       | kind_phys | inout  | F        |
-!! | ncps_io        | local_snow_number_concentration                                             | number concentration of snow local to physics                                               | kg-1        |    2 | real       | kind_phys | inout  | F        |
-!! | ncgl_io        | local_graupel_number_concentration                                          | number concentration of graupel local to physics                                            | kg-1        |    2 | real       | kind_phys | inout  | F        |
-!! | clls_io        | cloud_fraction_for_MG                                                       | cloud fraction used by Morrison-Gettelman MP                                                | frac        |    2 | real       | kind_phys | inout  | F        |
-!! | kcbl           | vertical_index_at_cloud_base                                                | vertical index at cloud base                                                                | index       |    1 | integer    |           | inout  | F        |
-!! | cldreffl       | effective_radius_of_stratiform_cloud_liquid_water_particle_in_um            | effective radius of cloud liquid water particle in micrometer                               | um          |    2 | real       | kind_phys | out    | F        |
-!! | cldreffi       | effective_radius_of_stratiform_cloud_ice_particle_in_um                     | effective radius of cloud ice water particle in micrometers                                 | um          |    2 | real       | kind_phys | out    | F        |
-!! | cldreffr       | effective_radius_of_stratiform_cloud_rain_particle_in_um                    | effective radius of cloud rain particle in micrometers                                      | um          |    2 | real       | kind_phys | out    | F        |
-!! | cldreffs       | effective_radius_of_stratiform_cloud_snow_particle_in_um                    | effective radius of cloud snow particle in micrometers                                      | um          |    2 | real       | kind_phys | out    | F        |
-!! | cldreffg       | effective_radius_of_stratiform_cloud_graupel_particle_in_um                 | effective radius of cloud graupel particle in micrometers                                   | um          |    2 | real       | kind_phys | out    | F        |
-!! | aerfld_i       | aerosol_number_concentration_from_gocart_aerosol_climatology                | GOCART aerosol climatology number concentration                                             | kg-1?       |    3 | real       | kind_phys | in     | F        |
-!! | aero_in        | flag_for_aerosol_input_MG                                                   | flag for using aerosols in Morrison-Gettelman microphysics                                  | flag        |    0 | logical    |           | in     | F        |
-!! | naai_i         | in_number_concentration                                                     | IN number concentration                                                                     | kg-1?       |    2 | real       | kind_phys | in     | F        |
-!! | npccn_i        | ccn_number_concentration                                                    | CCN number concentration                                                                    | kg-1?       |    2 | real       | kind_phys | in     | F        |
-!! | iccn           | flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics                 | flag for IN and CCN forcing for morrison gettelman microphysics                             | flag        |    0 | logical    |           | in     | F        |
-!! | skip_macro     | flag_skip_macro                                                             | flag to skip cloud macrophysics in Morrison scheme                                          | flag        |    0 | logical    |           | in     | F        |
-!! | lprnt          | flag_print                                                                  | control flag for diagnostic print out                                                       | flag        |    0 | logical    |           | in     | F        |
-!! | alf_fac        | mg_tuning_factor_for_alphas                                                 | tuning factor for alphas (alpha = 1 - critical relative humidity)                           | none        |    0 | real       | kind_phys | in     | F        |
-!! | qc_min         | mg_minimum_cloud_condensed_water_and_ice_mixing_ratio                       | minimum cloud condensed water and ice mixing ratio in MG macro clouds                       | kg kg-1     |    1 | real       | kind_phys | in     | F        |
-!! | pdfflag        | flag_for_pdf_for_morrison_gettelman_microphysics_scheme                     | pdf flag for MG macrophysics                                                                | flag        |    0 | integer    |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                          | horizontal index of printed column                                                          | index       |    0 | integer    |           | in     | F        |
-!! | kdt            | index_of_time_step                                                          | current forecast iteration                                                                  | index       |    0 | integer    |           | in     | F        |
-!! | xlat           | latitude                                                                    | latitude                                                                                    | radians     |    1 | real       | kind_phys | in     | F        |
-!! | xlon           | longitude                                                                   | longitude                                                                                   | radians     |    1 | real       | kind_phys | in     | F        |
-!! | rhc_i          | critical_relative_humidity                                                  | critical relative humidity                                                                  | frac        |    2 | real       | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP                                                    | none    |    0 | character  | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                                                       | flag    |    0 | integer    |           | out    | F        |
+!! \htmlinclude m_micro_run.html
 !!
 #endif
 !>\ingroup mg_driver
@@ -242,8 +136,8 @@ end subroutine m_micro_init
      &,                         CLDREFFG, aerfld_i                      &
      &,                         aero_in,  naai_i, npccn_i, iccn         &
      &,                         skip_macro                              &
-     &,                         lprnt, alf_fac, qc_min, pdfflag         &
-     &,                         ipr, kdt, xlat, xlon, rhc_i,            &
+     &,                         alf_fac, qc_min, pdfflag                &
+     &,                         kdt, xlat, xlon, rhc_i,                 &
      &                          errmsg, errflg)
 
        use machine ,      only: kind_phys
@@ -260,7 +154,7 @@ end subroutine m_micro_init
        use aer_cloud,     only: AerProps, getINsubset,init_aer,         &
      &                          aerosol_activate,AerConversion1
        use cldmacro,      only: macro_cloud,meltfrz_inst,update_cld,    &
-     &                          meltfrz_inst
+     &                          meltfrz_inst, fix_up_clouds_2M
        use cldwat2m_micro,only: mmicro_pcond
        use micro_mg2_0,   only: micro_mg_tend2_0 => micro_mg_tend, qcvar2 => qcvar
        use micro_mg3_0,   only: micro_mg_tend3_0 => micro_mg_tend, qcvar3 => qcvar
@@ -284,11 +178,12 @@ end subroutine m_micro_init
        real,   parameter  :: one=1.0, oneb3=one/3.0, onebcp=one/cp,      &
      &                       kapa=rgas*onebcp,  cpbg=cp/grav,            &
      &                       lvbcp=hvap*onebcp, lsbcp=(hvap+hfus)*onebcp,&
-                             qsmall=1.e-14, rainmin = 1.0e-13
+     &                       qsmall=1.e-14, rainmin = 1.0e-13,           &
+     &                       fourb3=4.0/3.0, RL_cub=1.0e-15, nmin=1.0
 
        integer, parameter :: ncolmicro = 1
-       integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag
-       logical,intent(in) :: flipv, aero_in, skip_macro, lprnt, iccn
+       integer,intent(in) :: im, ix,lm, kdt, fprcp, pdfflag
+       logical,intent(in) :: flipv, aero_in, skip_macro, iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
        real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
@@ -296,10 +191,16 @@ end subroutine m_micro_init
      &                                       lwheat_i,swheat_i
        real (kind=kind_phys), dimension(ix,0:lm),intent(in):: prsi_i,   &
      &                                                        phii
-       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+! GJF* These variables are conditionally allocated depending on whether the
+!     Morrison-Gettelman microphysics is used, so they must be declared 
+!     using assumed shape.
+       real (kind=kind_phys), dimension(:,:),  intent(in)  ::           &
      &       CNV_DQLDT_i, CLCN_i,     QLCN_i, QICN_i,                   &
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
-     &       CNV_NICE_i,  w_upi, rhc_i, naai_i, npccn_i
+     &       CNV_NICE_i,  w_upi
+! *GJF
+       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+     &       rhc_i, naai_i, npccn_i
        real (kind=kind_phys), dimension(im,lm,ntrcaer),intent(in) ::    &
      &       aerfld_i
        real (kind=kind_phys),dimension(im),intent(in):: TAUGWX,         &
@@ -319,9 +220,13 @@ end subroutine m_micro_init
        integer, dimension(IM), intent(inout):: KCBL
        real (kind=kind_phys),dimension(ix,lm),intent(inout):: q_io, t_io,   &
      &                                             ncpl_io,ncpi_io,CLLS_io
-       real (kind=kind_phys),dimension(im,lm),intent(inout):: rnw_io,snw_io,&
+! GJF* These variables are conditionally allocated depending on whether the
+!     Morrison-Gettelman microphysics is used, so they must be declared 
+!     using assumed shape.
+       real (kind=kind_phys),dimension(:,:),intent(inout):: rnw_io,snw_io,&
      &                                             ncpr_io, ncps_io,        &
      &                                             qgl_io,  ncgl_io
+! *GJF
 !Moo   real (kind=kind_phys),dimension(im,lm),intent(inout):: CLLS_io
 
 
@@ -329,7 +234,7 @@ end subroutine m_micro_init
        integer kcldtopcvn,i,k,ll, kbmin, NAUX, nbincontactdust,l
        integer, dimension(im) :: kct
        real (kind=kind_phys) T_ICE_ALL, USE_AV_V,BKGTAU,LCCIRRUS,       &
-     &    NPRE_FRAC, Nct, Wct, fcn, ksa1, tauxr8, DT_Moist, dt_r8,      &
+     &    NPRE_FRAC, Nct, Wct, fcn, ksa1, tauxr8, DT_Moist, dt_r8, tem, &
      &    TMAXLL, USURF,LTS_UP, LTS_LOW, MIN_EXP, fracover, c2_gw, est3
 
        real(kind=kind_phys), allocatable, dimension(:,:) ::             &
@@ -474,7 +379,8 @@ end subroutine m_micro_init
        type (AerProps)                     :: AeroAux, AeroAux_b
        real, allocatable, dimension(:,:,:) :: AERMASSMIX
 
-       logical :: use_average_v, ltrue, lprint
+       logical :: use_average_v, ltrue, lprint, lprnt
+       integer :: ipr
 
 !==================================
 !====2-moment Microhysics=
@@ -501,6 +407,9 @@ end subroutine m_micro_init
 ! Initialize CCPP error handling variables
        errmsg = ''
        errflg = 0
+
+       lprnt = .false.
+       ipr   = 1
 
 !      rhr8 = 1.0
        if(flipv) then
@@ -623,9 +532,42 @@ end subroutine m_micro_init
            enddo
          endif
        endif
+!      if (lprnt) then
+!        write(0,*)' inmic qlcn=',qlcn(ipr,:)
+!        write(0,*)' inmic qlls=',qlls(ipr,:)
+!        write(0,*)' inmic qicn=',qicn(ipr,:)
+!        write(0,*)' inmic qils=',qils(ipr,:)
+!      endif
 !
        DT_MOIST = dt_i
        dt_r8    = dt_i
+
+       if (kdt == 1) then
+         DO K=1, LM
+           DO I = 1,IM
+             CALL fix_up_clouds_2M(Q1(I,K),   TEMP(i,k), QLLS(I,K),     &
+     &                            QILS(I,K), CLLS(I,K), QLCN(I,K),      &
+     &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
+     &                            NCPI(I,K), qc_min)
+             if (rnw(i,k) <= qc_min(1)) then
+               ncpr(i,k) = 0.0
+             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+             endif
+             if (snw(i,k) <= qc_min(2)) then
+               ncps(i,k) = 0.0
+             elseif (ncps(i,k) <= nmin) then
+               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+             endif
+             if (qgl(i,k) <= qc_min(2)) then
+               ncgl(i,k) = 0.0
+             elseif (ncgl(i,k) <= nmin) then
+               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+             endif
+
+           enddo
+         enddo
+       endif
 
        do i=1,im
          KCBL(i)     = max(LM-KCBL(i),10)
@@ -712,7 +654,6 @@ end subroutine m_micro_init
 !        deallocate (vmip)
 !      endif
 
-
        do l=lm-1,1,-1
          do i=1,im
            tx1     = 0.5 * (temp(i,l+1) + temp(i,l))
@@ -764,7 +705,7 @@ end subroutine m_micro_init
 !=======================================================================================================================
 !=======================================================================================================================
 !> -# Nucleation of cloud droplets and ice crystals 
-!! Aerosol cloud interactions. Calculate maxCCN tendency using Fountoukis and nenes (2005) or Abdul Razzak and Ghan (2002)
+!! Aerosol cloud interactions. Calculate maxCCN tendency using Fountoukis and Nenes (2005) or Abdul Razzak and Ghan (2002)
 !! liquid Activation Parameterization
 !! Ice activation follows the Barahona & Nenes ice activation scheme, ACP, (2008, 2009).
 !! Written by Donifan Barahona and described in Barahona et al. (2013)
@@ -794,7 +735,7 @@ end subroutine m_micro_init
          AERMASSMIX(:,:,1:5) = 1.e-6
          AERMASSMIX(:,:,6:15) = 2.e-14
        end if
-!>  - Call aerConversion1()
+!>  - Call aerconversion1()
        call AerConversion1 (AERMASSMIX,  AeroProps)
        deallocate(AERMASSMIX)
 
@@ -866,7 +807,7 @@ end subroutine m_micro_init
 
 
 ! ====================================================================
-!> -# Call gw_prof() to Calculate subgrid scale distribution in vertical velocity
+!> -# Call gw_prof() to calculate subgrid scale distribution in vertical velocity
 ! ====================================================================
 
 
@@ -885,7 +826,7 @@ end subroutine m_micro_init
            wparc_cgw(k) = 0.0
          end do
 
-!>  - Subgrid variability from Convective Sources According to Barahona et al. 2014 in prep
+!>  - Subgrid variability from convective sources according to Barahona et al. 2014 (in preparation)
 
          if (kcldtopcvn > 20) then
 
@@ -946,7 +887,7 @@ end subroutine m_micro_init
 
 
 
-!>  - Compute Total variance
+!>  - Compute total variance
 
          do K = 1, LM
            swparc(k) = sqrt(wparc_gw(k)   * wparc_gw(k)                 &
@@ -986,7 +927,7 @@ end subroutine m_micro_init
 !    &,' ccn_param=',ccn_param,' in_param=',in_param                    &
 !    &,' AeroAux%kap=',AeroAux%kap
 
-!> -# Call aerosol_activate() to activate the aerosols.
+!> -# Call aerosol_activate() to activate the aerosols
              call aerosol_activate(tauxr8, plevr8(K), swparc(K),        &
      &            wparc_ls(K), AeroAux, npre8(k), dpre8(k), ccn_diag,   &
      &            ndropr8(k),          npccninr8(K), smaxliq(K),        &
@@ -1081,7 +1022,7 @@ end subroutine m_micro_init
 !===========================End cloud particle nucleation=======================
 !                           -----------------------------
 !
-!> -# Begin Cloud Macrophysics
+!> -# Begin cloud macrophysics
 
 !     do k=1,lm
 !       do i=1,im
@@ -1145,7 +1086,7 @@ end subroutine m_micro_init
 
 !       call macro_cloud (IM, LM, DT_MOIST, PLO, PLE, PK, FRLAND,       &
 !       call macro_cloud (IM, LM, DT_MOIST, PLO, PLE,     FRLAND,       &
-!>  - Call macro_cloud() for cloud macrophysics.
+!>  - Call macro_cloud() for cloud macrophysics
         call macro_cloud (IM, LM, DT_MOIST, alf_fac, PLO, PLE,          &
      &                             CNV_DQLDT,                           &
 !    &                    CNV_MFD, CNV_DQLDT,                           &
@@ -1215,7 +1156,7 @@ end subroutine m_micro_init
 !============ Put cloud fraction back in contact with the PDF (Barahona et al., GMD, 2014)============
 
 !make sure QI , NI stay within T limits
-!>  - Call meltfrz_inst() to calculate instantaneous freezing or condensate.
+!>  - Call meltfrz_inst() to calculate instantaneous freezing or condensate
          call meltfrz_inst(IM, LM, TEMP, QLLS, QLCN, QILS, QICN, NCPL, NCPI)
 
 
@@ -1345,6 +1286,7 @@ end subroutine m_micro_init
 !         else
 !           call init_Aer(AeroAux)
 !         end if
+!>  - Call getinsubset() to extract dust properties 
           call getINsubset(1, AeroAux, AeroAux_b)
           naux = AeroAux_b%nmods
           if (nbincontactdust < naux) then
@@ -1609,7 +1551,9 @@ end subroutine m_micro_init
 !           if(lprint) then
 !             write(0,*)' calling micro_mg_tend3_0 qcvar3=',qcvar3,' i=',i
 !             write(0,*)' qcr8=',qcr8(:)
+!             write(0,*)' qir8=',qir8(:)
 !             write(0,*)' ncr8=',ncr8(:)
+!             write(0,*)' nir8=',nir8(:)
 !             write(0,*)' npccninr8=',npccninr8(:)
 !             write(0,*)' plevr8=',plevr8(:)
 !             write(0,*)' ter8=',ter8(:)
@@ -1742,16 +1686,47 @@ end subroutine m_micro_init
 
 !TVQX1    = SUM( (  Q1 +  QL_TOT + QI_TOT(1:im,:,:))*DM, 3) &
 
-
-      if (.not. skip_macro) then
+      if (skip_macro) then
         do k=1,lm
           do i=1,im
             QLCN(i,k) = QL_TOT(i,k) * FQA(i,k)
             QLLS(i,k) = QL_TOT(i,k) - QLCN(i,k)
             QICN(i,k) = QI_TOT(i,k) * FQA(i,k)
             QILS(i,k) = QI_TOT(i,k) - QICN(i,k)
-          end do
-        end do
+
+            CALL fix_up_clouds_2M(Q1(I,K),   TEMP(i,k), QLLS(I,K),      &
+     &                            QILS(I,K), CLLS(I,K), QLCN(I,K),      &
+     &                            QICN(I,K), CLCN(I,K), NCPL(I,K),      &
+     &                            NCPI(I,K), qc_min)
+
+            QL_TOT(I,K) = QLLS(I,K) + QLCN(I,K)
+            QI_TOT(I,K) = QILS(I,K) + QICN(I,K)
+            if (rnw(i,k) <= qc_min(1)) then
+              ncpl(i,k) = 0.0
+            elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+              ncpl(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+            endif
+            if (snw(i,k) <= qc_min(2)) then
+              ncpl(i,k) = 0.0
+            elseif (ncps(i,k) <= nmin) then
+              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+            if (qgl(i,k) <= qc_min(2)) then
+              ncgl(i,k) = 0.0
+            elseif (ncgl(i,k) <= nmin) then
+              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+          enddo
+        enddo
+      else
+        do k=1,lm
+          do i=1,im
+            QLCN(i,k) = QL_TOT(i,k) * FQA(i,k)
+            QLLS(i,k) = QL_TOT(i,k) - QLCN(i,k)
+            QICN(i,k) = QI_TOT(i,k) * FQA(i,k)
+            QILS(i,k) = QI_TOT(i,k) - QICN(i,k)
+          enddo
+        enddo
 
 !>  - Call update_cld()
         call update_cld(im, lm,  DT_MOIST,   ALPHT_X, qc_min            &
@@ -1765,8 +1740,24 @@ end subroutine m_micro_init
           do i=1,im
             QL_TOT(I,K) = QLLS(I,K) + QLCN(I,K)
             QI_TOT(I,K) = QILS(I,K) + QICN(I,K)
-          end do
-        end do
+!
+            if (rnw(i,k) <= qc_min(1)) then
+              ncpl(i,k) = 0.0
+            elseif (ncpl(i,k) <= nmin) then ! make sure NL > 0 if Q >0
+              ncpl(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0), nmin)
+            endif
+            if (snw(i,k) <= qc_min(2)) then
+              ncpl(i,k) = 0.0
+            elseif (ncps(i,k) <= nmin) then
+              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+            if (qgl(i,k) <= qc_min(2)) then
+              ncgl(i,k) = 0.0
+            elseif (ncgl(i,k) <= nmin) then
+              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0), nmin)
+            endif
+          enddo
+        enddo
         deallocate(CNV_MFD,CNV_FICE,CNV_NDROP,CNV_NICE)
 !       deallocate(CNV_MFD,CNV_PRC3,CNV_FICE,CNV_NDROP,CNV_NICE)
       endif
@@ -1806,11 +1797,17 @@ end subroutine m_micro_init
              qi_o(i,k)    = QI_TOT(i,ll)
            END DO
          END DO
-         if (.not. skip_macro) then
+         if (skip_macro) then
            DO K=1, LM
              ll = lm-k+1
              DO I = 1,IM
-!              CLLS_io(i,k) = max(0.0, min(CLLS(i,ll)+CLCN(i,ll),1.0))
+               CLLS_io(i,k) = max(0.0, min(CLLS(i,ll)+CLCN(i,ll),1.0))
+             enddo
+           enddo
+         else
+           DO K=1, LM
+             ll = lm-k+1
+             DO I = 1,IM
                CLLS_io(i,k) = CLLS(i,ll)
              enddo
            enddo
@@ -1832,15 +1829,21 @@ end subroutine m_micro_init
              qi_o(i,k)    = QI_TOT(i,k)
            END DO
          END DO
-         if (.not. skip_macro) then
+         if (skip_macro) then
            DO K=1, LM
              DO I = 1,IM
-!              CLLS_io(i,k) = max(0.0, min(CLLS(i,k)+CLCN(i,k),1.0))
+               CLLS_io(i,k) = max(0.0, min(CLLS(i,k)+CLCN(i,k),1.0))
+             enddo
+           enddo
+         else
+           DO K=1, LM
+             DO I = 1,IM
                CLLS_io(i,k) = CLLS(i,k)
              enddo
            enddo
          endif
-       endif
+       endif       ! end of flipv if
+
        DO I = 1,IM
          tx1     = LS_PRC2(i) + LS_SNR(i)
          rn_o(i) = tx1 * dt_i * 0.001
@@ -1855,7 +1858,7 @@ end subroutine m_micro_init
        if (allocated(ALPHT_X)) deallocate (ALPHT_X)
 
 !     if (lprnt) then
-!       write(0,*)' rn_o=',rn_o(ipr),' ls_prc2=',ls_prc2(ipr),' ls_snr=',ls_snr(ipr)
+!       write(0,*)' rn_o=',rn_o(ipr),' ls_prc2=',ls_prc2(ipr),' ls_snr=',ls_snr(ipr),' kdt=',kdt
 !       write(0,*)' end micro_mg_tend t_io= ', t_io(ipr,:)
 !       write(0,*)' end micro_mg_tend clls_io= ', clls_io(ipr,:)
 !     endif

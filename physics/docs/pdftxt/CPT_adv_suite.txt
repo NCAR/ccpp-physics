@@ -1,10 +1,9 @@
 /**
-\page suite3_page FV3_CPT_v0 
+\page csawmg_page csawmg Suite
 
-\section CPT_suite_overview Overview
+\section csawmg_suite_overview Overview
 
-The advanced CPT physics suite uses the parameterizations in the following order:
- - \ref fast_sat_adj
+The advanced csawmg physics suite uses the parameterizations in the following order:
  - \ref GFS_RRTMG
  - \ref GFS_SFCLYR
  - \ref GFS_NSST
@@ -21,29 +20,21 @@ The advanced CPT physics suite uses the parameterizations in the following order
  - \ref CPT_MG3
  - \ref mod_cs_conv_aw_adj
  - \ref GFS_CALPRECIPTYPE
- - \ref STOCHY_PHYS
 
 \section sdf_cpt_suite Suite Definition File 
 
-The advanced CPT physics suite uses the parameterizations in the following order, as defined in  \c FV3_CPT :
+The advanced csawmg physics suite uses the parameterizations in the following order, as defined in  \c SCM_csawmg :
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="FV3_CPT" lib="ccppphys" ver="3">
+<suite name="SCM_csawmg" lib="ccppphys" ver="3.0.0">
   <!-- <init></init> -->
-  <group name="fast_physics">
-    <subcycle loop="1">
-      <scheme>fv_sat_adj</scheme>
-    </subcycle>
-  </group>
   <group name="time_vary">
     <subcycle loop="1">
       <scheme>GFS_time_vary_pre</scheme>
       <scheme>GFS_rrtmg_setup</scheme>
       <scheme>GFS_rad_time_vary</scheme>
       <scheme>GFS_phys_time_vary</scheme>
-      <scheme>stochastic_physics</scheme>
-      <scheme>stochastic_physics_sfc</scheme>
     </subcycle>
   </group>
   <group name="radiation">
@@ -67,11 +58,12 @@ The advanced CPT physics suite uses the parameterizations in the following order
       <scheme>GFS_suite_interstitial_1</scheme>
       <scheme>dcyc2t3</scheme>
       <scheme>GFS_surface_generic_pre</scheme>
+      <scheme>GFS_surface_composites_pre</scheme>
       <scheme>GFS_suite_interstitial_2</scheme>
     </subcycle>
     <!-- Surface iteration loop -->
     <subcycle loop="2">
-      <scheme>sfc_ex_coef</scheme>
+      <scheme>sfc_diff</scheme>
       <scheme>GFS_surface_loop_control_part1</scheme>
       <scheme>sfc_nst_pre</scheme>
       <scheme>sfc_nst</scheme>
@@ -82,6 +74,7 @@ The advanced CPT physics suite uses the parameterizations in the following order
     </subcycle>
     <!-- End of surface iteration loop -->
     <subcycle loop="1">
+      <scheme>GFS_surface_composites_post</scheme>
       <scheme>dcyc2t3_post</scheme>
       <scheme>sfc_diag</scheme>
       <scheme>sfc_diag_post</scheme>
@@ -89,7 +82,7 @@ The advanced CPT physics suite uses the parameterizations in the following order
       <scheme>GFS_PBL_generic_pre</scheme>
       <scheme>hedmf</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
-      <scheme>gwdps_pre</scheme>
+      <scheme>GFS_GWD_generic_pre</scheme>
       <scheme>gwdps</scheme>
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
@@ -119,98 +112,99 @@ The advanced CPT physics suite uses the parameterizations in the following order
       <scheme>cs_conv_aw_adj</scheme>
       <scheme>GFS_MP_generic_post</scheme>
       <scheme>sfc_sice_post</scheme>
-    </subcycle>
-  </group>
-  <group name="stochastics">
-    <subcycle loop="1">
-      <scheme>GFS_stochastics</scheme>
+      <scheme>maximum_hourly_diagnostics</scheme>
     </subcycle>
   </group>
   <!-- <finalize></finalize> -->
 </suite>
+
 \endcode
 
 \section cpt_nml_option Namelist Option 
 \code
-  fhzero         = 6
-  h2o_phys       = .true.
-  oz_phys      = .false.
-  oz_phys_2015 = .true.
-  ldiag3d        = .false.
-  fhcyc          = 24
-  use_ufo        = .true.
-  pre_rad        = .false.
-  crtrh          = 0.95,0.95,0.90
-  ncld           = 2
-  imp_physics    = 10
-  pdfcld         = .false.
-  fhswr          = 3600.
-  fhlwr          = 3600.
-  ialb           = 1
-  iems           = 1
-  iaer           = 111
-  ico2           = 2
-  isubc_sw       = 2
-  isubc_lw       = 2
-  isol           = 2
-  lwhtr          = .true.
-  swhtr          = .true.
-  cnvgwd         = .true.
-  shal_cnv       = .true.
-  cal_pre        = .false.
-  redrag         = .true.
-  dspheat        = .true.
-  hybedmf        = .true.
-  random_clds    = .false.
-  trans_trac     = .true.
-  cnvcld         = .true.
-  imfshalcnv     = 2
-  imfdeepcnv     = -1
-  cdmbgwd        = 3.5,0.25
-  prslrd0        = 0.
-  ivegsrc        = 1
-  isot           = 1
-  debug          = .false.
-  ras            = .false.
-  cscnv          = .true.
-  do_shoc        = .false.
-  do_aw          = .true.
-  shoc_cld       = .false.
-  h2o_phys       = .true.
-  shcnvcw        = .false.
-  xkzm_h         = 0.5
-  xkzm_m         = 0.5
-  xkzm_s         = 1.0
-  nstf_name      = 2,1,0,0
-  nst_anl        = .true.
-  psautco        = 0.0008,0.0005
-  prautco        = 0.00015,0.00015
-  microp_uniform = .false.
-  mg_do_ice_gmao = .true.
-  mg_do_liq_liu  = .true.
-  mg_dcs         = 100.00
-  mg_alf         = 1.2
-  mg_ts_auto_ice = 500.,2000.
-  mg_qcvar       = 0.5
-  fprcp          = 2
-  cs_parm        = 2.6,1.0,0.05e3,2.0e3,50.0,1.0,-999.,1.,0.6,0.
-  shoc_parm      = 7000.0,1.0,4.2857143,0.7,-999.0
-  iccn           = .false.
-  aero_in        = .false.
-  ctei_rm        = 10.0,10.0
-  max_lon        = 8000
-  max_lat        = 4000
-  rhcmax         = 0.9999999
-  effr_in        = .true.
-  ltaerosol      = .false.
-  lradar         = .false.
-  cplflx         = .false.
-  iau_delthrs    = 6
-  iaufhrs        = 30
-  iau_inc_files  = ''
-  
+&gfs_physics_nml
+       fhzero         = 6.
+       ldiag3d        = .true.
+       fhcyc          = 24.
+       use_ufo        = .true.
+       pre_rad        = .false.
+       crtrh          = 0.93,0.90,0.95
+       ncld           = 2
+       imp_physics    = 10
+       pdfcld         = .false.
+       fhswr          = 3600.
+       fhlwr          = 3600.
+       ialb           = 1
+       iems           = 1
+       IAER           = 111
+       ico2           = 2
+       isubc_sw       = 2
+       isubc_lw       = 2
+       isol           = 2
+       lwhtr          = .true.
+       swhtr          = .true.
+       cnvgwd         = .true.
+       shal_cnv       = .true.
+       cal_pre        = .false.
+       redrag         = .true.
+       dspheat        = .true.
+       hybedmf        = .true.
+       satmedmf       = .false.
+       lheatstrg      = .true.
+       random_clds    = .true.
+       trans_trac     = .true.
+       cnvcld         = .true.
+       imfshalcnv     = 2
+       imfdeepcnv     = -1
+       cdmbgwd        = 3.5,0.25
+       prslrd0        = 0.
+       ivegsrc        = 1
+       isot           = 1
+       oz_phys        = .false.
+       oz_phys_2015   = .true.
+       debug          = .false.
+       ras            = .false.
+       cscnv          = .true.
+       do_shoc        = .false.
+       do_aw          = .true.
+       shoc_cld       = .false.
+       h2o_phys       = .true.
+       shcnvcw        = .false.
+       xkzm_h         = 0.5
+       xkzm_m         = 0.5
+       xkzm_s         = 1.0
+       nstf_name      = 2,1,1,0,5
+       nst_anl        = .true.
+       ccwf           = 1.0,1.0
+       dlqf           = 0.25,0.05
+       mg_dcs         = 200.0
+       mg_ts_auto_ice = 180.0,900.0
+       mg_qcvar       = 1.0
+       fprcp          = 2
+       pdfflag        = 4
+       iccn           = .false.
+       aero_in        = .false.
+       mg_do_graupel  = .true.
+       mg_do_hail     = .false.
+       do_sb_physics  = .true.
+       mg_do_ice_gmao = .false.
+       mg_do_liq_liu  = .true.
+       cs_parm        = 8.0,4.0,1.0e3,3.5e3,20.0,1.0,0.0,1.0,0.6,0.0
+       shoc_parm      = 7000.0,1.0,2.0,0.7,-999.0
+       ctei_rm        = 0.60,0.23
+       max_lon        = 8000
+       max_lat        = 4000
+       rhcmax         = 0.9999999
+       effr_in        = .true.
+       ltaerosol      = .false.
+       lradar         = .false.
+       cplflx         = .false.
+       iau_delthrs    = 6
+       iaufhrs        = 30
+       iau_inc_files  = "''"
+/
 \endcode
-- \ref gfs_physics_nml
-- \ref cpt_physics_nml
+
+
 
 */

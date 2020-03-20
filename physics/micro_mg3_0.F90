@@ -1,12 +1,14 @@
 !>\file micro_mg3_0.F90
 !! This file contains Morrison-Gettelman MP version 3.0 -
-!! Update of MG microphysics with prognostic hai OR graupel.
+!! Update of MG microphysics with prognostic hail OR graupel.
 
 !>\ingroup mg2mg3
 !>\defgroup mg3_mp Morrison-Gettelman MP version 3.0
 !> @{
-!! This module contains  MG microphysics version 3.0 - Update of MG microphysics with
-!!  prognostic hail OR graupel.
+!!---------------------------------------------------------------------------------
+!! Purpose:
+!!   MG microphysics version 3.0 - Update of MG microphysics with
+!!                                 prognostic hail OR graupel.
 !!
 !! \authors Andrew Gettelman, Hugh Morrison
 !!
@@ -46,6 +48,7 @@
 !!
 !! for questions contact Hugh Morrison, Andrew Gettelman
 !! e-mail: morrison@ucar.edu, andrew@ucar.edu
+!!---------------------------------------------------------------------------------
 !!
 !! NOTE: Modified to allow other microphysics packages (e.g. CARMA) to do ice
 !! microphysics in cooperation with the MG liquid microphysics. This is
@@ -124,7 +127,6 @@
 module micro_mg3_0
 
 use machine,        only : r8    => kind_phys
-use physcons,       only : epsqs => con_eps, fv => con_fvirt
 use funcphys,       only : fpvsl, fpvsi
 
 !use wv_sat_methods, only: &
@@ -232,7 +234,7 @@ real(r8) :: bgtmp       !< tmp fall speed parameter
 real(r8) :: gamma_br_plus1, gamma_bs_plus1, gamma_bi_plus1, gamma_bj_plus1, gamma_bg_plus1
 real(r8) :: gamma_br_plus4, gamma_bs_plus4, gamma_bi_plus4, gamma_bj_plus4, gamma_bg_plus4
 real(r8) :: xxlv_squared,   xxls_squared
-real(r8) :: omeps
+real(r8) :: omeps, epsqs
 
 character(len=16)  :: micro_mg_precip_frac_method  !< type of precipitation fraction method
 real(r8)           :: micro_mg_berg_eff_factor     !< berg efficiency factor
@@ -247,14 +249,16 @@ contains
 !===============================================================================
 
 !>\ingroup mg3_mp
-!! This subroutine initializes microphysics routine, should be called
-!! once at start of simulation.
+!! This subroutine initializes the microphysics
+!! and needs to be called once at start of simulation.
 !!\author Andrew Gettelman, Dec 2005
 subroutine micro_mg_init(                                         &
-     kind, gravit, rair, rh2o, cpair,                             &
+     kind, gravit, rair, rh2o, cpair, eps,                        &
      tmelt_in, latvap, latice,                                    &
-     rhmini_in, micro_mg_dcs,ts_auto, mg_qcvar,                   & !++ag
-     micro_mg_do_hail_in, micro_mg_do_graupel_in,                 &!--ag
+     rhmini_in, micro_mg_dcs,ts_auto, mg_qcvar,                   &
+!++ag
+     micro_mg_do_hail_in, micro_mg_do_graupel_in,                 &
+!--ag
      microp_uniform_in, do_cldice_in, use_hetfrz_classnuc_in,     &
      micro_mg_precip_frac_method_in, micro_mg_berg_eff_factor_in, &
      allow_sed_supersat_in, do_sb_physics_in,                     &
@@ -274,37 +278,39 @@ subroutine micro_mg_init(                                         &
   !
   !-----------------------------------------------------------------------
 
-  integer,  intent(in)  :: kind         !< Kind used for reals
+  integer,  intent(in)  :: kind         ! Kind used for reals
   real(r8), intent(in)  :: gravit
   real(r8), intent(in)  :: rair
   real(r8), intent(in)  :: rh2o
   real(r8), intent(in)  :: cpair
-  real(r8), intent(in)  :: tmelt_in     !< Freezing point of water (K)
+  real(r8), intent(in)  :: eps
+! real(r8), intent(in)  :: fv
+  real(r8), intent(in)  :: tmelt_in     ! Freezing point of water (K)
   real(r8), intent(in)  :: latvap
   real(r8), intent(in)  :: latice
-  real(r8), intent(in)  :: rhmini_in    !< Minimum rh for ice cloud fraction > 0.
+  real(r8), intent(in)  :: rhmini_in    ! Minimum rh for ice cloud fraction > 0.
   real(r8), intent(in)  :: micro_mg_dcs
   real(r8), intent(in)  :: ts_auto(2)
   real(r8), intent(in)  :: mg_qcvar
 
 !++ag
 !MG3 dense precipitating ice. Note, only 1 can be true, or both false.
-  logical,  intent(in)  :: micro_mg_do_graupel_in  !< .true.  = configure with graupel
-                                                   !< .false. = no graupel (hail possible)
-  logical,  intent(in)  :: micro_mg_do_hail_in     !< .true.  = configure with hail
-                                                   !< .false. = no hail (graupel possible)
+  logical,  intent(in)  :: micro_mg_do_graupel_in  ! .true.  = configure with graupel
+                                                   ! .false. = no graupel (hail possible)
+  logical,  intent(in)  :: micro_mg_do_hail_in     ! .true.  = configure with hail
+                                                   ! .false. = no hail (graupel possible)
 !--ag
 
-  logical,  intent(in)  :: microp_uniform_in !< .true.  = configure uniform for sub-columns
-                                             !< .false. = use w/o sub-columns (standard)
-  logical,  intent(in)  :: do_cldice_in      !< .true.  = do all processes (standard)
-                                             !< .false. = skip all processes affecting cloud ice
-  logical,  intent(in)  :: use_hetfrz_classnuc_in !< use heterogeneous freezing
+  logical,  intent(in)  :: microp_uniform_in ! .true.  = configure uniform for sub-columns
+                                             ! .false. = use w/o sub-columns (standard)
+  logical,  intent(in)  :: do_cldice_in      ! .true.  = do all processes (standard)
+                                             ! .false. = skip all processes affecting cloud ice
+  logical,  intent(in)  :: use_hetfrz_classnuc_in ! use heterogeneous freezing
 
-  character(len=16),intent(in)  :: micro_mg_precip_frac_method_in  !< type of precipitation fraction method
-  real(r8),         intent(in)  :: micro_mg_berg_eff_factor_in     !< berg efficiency factor
-  logical,  intent(in)  ::  allow_sed_supersat_in !< allow supersaturated conditions after sedimentation loop
-  logical,  intent(in)  ::  do_sb_physics_in !< do SB autoconversion and accretion physics
+  character(len=16),intent(in)  :: micro_mg_precip_frac_method_in  ! type of precipitation fraction method
+  real(r8),         intent(in)  :: micro_mg_berg_eff_factor_in     ! berg efficiency factor
+  logical,  intent(in)  ::  allow_sed_supersat_in ! allow supersaturated conditions after sedimentation loop
+  logical,  intent(in)  ::  do_sb_physics_in ! do SB autoconversion and accretion physics
   logical,  intent(in)  ::  do_ice_gmao_in
   logical,  intent(in)  ::  do_liq_liu_in
 
@@ -410,6 +416,7 @@ subroutine micro_mg_init(                                         &
 
   xxlv_squared = xxlv * xxlv
   xxls_squared = xxls * xxls
+  epsqs = eps
   omeps = one - epsqs
   tmn   = 173.16_r8
   tmx   = 375.16_r8
@@ -427,8 +434,7 @@ end subroutine micro_mg_init
 !microphysics routine for each timestep goes here...
 
 !>\ingroup mg3_mp
-!! This subroutine calculates calculate
-!! MG3 microphysical processes and other utilities.
+!! This subroutine calculates the MG3 microphysical processes.
 !>\authors Hugh Morrison, Andrew Gettelman, NCAR, Peter Caldwell, LLNL
 !! e-mail: morrison@ucar.edu, andrew@ucar.edu
 !!\section mg3_micro_mg_tend MG3 micro_mg_tend General Algorithm
@@ -439,8 +445,10 @@ subroutine micro_mg_tend (                                       &
      qcn,                          qin,                          &
      ncn,                          nin,                          &
      qrn,                          qsn,                          &
-     nrn,                          nsn,                          &!++ag
-     qgr,                          ngr,                          &!--ag
+     nrn,                          nsn,                          &
+!++ag
+     qgr,                          ngr,                          &
+!--ag
      relvar,                       accre_enhan_i,                &
      p,                            pdel,                         &
      cldn,    liqcldf,        icecldf,       qsatfac,            &
@@ -451,8 +459,10 @@ subroutine micro_mg_tend (                                       &
      qctend,                       qitend,                       &
      nctend,                       nitend,                       &
      qrtend,                       qstend,                       &
-     nrtend,                       nstend,                       &!++ag
-     qgtend,                       ngtend,                       &!--ag
+     nrtend,                       nstend,                       &
+!++ag
+     qgtend,                       ngtend,                       &
+!--ag
      effc,               effc_fn,            effi,               &
      sadice,                       sadsnow,                      &
      prect,                        preci,                        &
@@ -461,30 +471,43 @@ subroutine micro_mg_tend (                                       &
      prain,                        prodsnow,                     &
      cmeout,                       deffi,                        &
      pgamrad,                      lamcrad,                      &
-     qsout,                        dsout,                        &!++ag
-     qgout,     ngout,             dgout,                        &!--ag
-     lflx,               iflx,                                   &!++ag
-     gflx,                                                       &!--ag
-     rflx,               sflx,               qrout,              &!++ag
-     reff_rain,          reff_snow,          reff_grau,          &!--ag
+     qsout,                        dsout,                        &
+!++ag
+     qgout,     ngout,             dgout,                        &
+!--ag
+     lflx,               iflx,                                   &
+!++ag
+     gflx,                                                       &
+!--ag
+     rflx,               sflx,               qrout,              &
+!++ag
+     reff_rain,          reff_snow,          reff_grau,          &
+!--ag
+
      qcsevap,            qisevap,            qvres,              &
      cmeitot,            vtrmc,              vtrmi,              &
-     umr,                          ums,                          &!++ag
-     umg,                qgsedten,                               &!--ag
+     umr,                          ums,                          &
+!++ag
+     umg,                qgsedten,                               &
+!--ag
      qcsedten,                     qisedten,                     &
      qrsedten,                     qssedten,                     &
      pratot,                       prctot,                       &
      mnuccctot,          mnuccttot,          msacwitot,          &
      psacwstot,          bergstot,           bergtot,            &
      melttot,                      homotot,                      &
-     qcrestot,           prcitot,            praitot,            &!++ag
-     qirestot,           mnuccrtot, mnuccritot, pracstot,        &!--ag
-     meltsdttot,         frzrdttot,          mnuccdtot,          &!++ag
+     qcrestot,           prcitot,            praitot,            &
+!++ag
+     qirestot,           mnuccrtot, mnuccritot, pracstot,        &
+!--ag
+     meltsdttot,         frzrdttot,          mnuccdtot,          &
+!++ag
      pracgtot,           psacwgtot,          pgsacwtot,          &
      pgracstot,          prdgtot,                                &
      qmultgtot,          qmultrgtot,         psacrtot,           &
      npracgtot,          nscngtot,           ngracstot,          &
-     nmultgtot,          nmultrgtot,         npsacwgtot,         &!--ag
+     nmultgtot,          nmultrgtot,         npsacwgtot,         &
+!--ag
      nrout,                        nsout,                        &
      refl,               arefl,              areflz,             &
      frefl,              csrfl,              acsrfl,             &
@@ -492,8 +515,10 @@ subroutine micro_mg_tend (                                       &
      ncai,                         ncal,                         &
      qrout2,                       qsout2,                       &
      nrout2,                       nsout2,                       &
-     drout2,                       dsout2,                       &!++ag
-     qgout2,             ngout2,   dgout2,   freqg,              &!--ag
+     drout2,                       dsout2,                       &
+!++ag
+     qgout2,             ngout2,   dgout2,   freqg,              &
+!--ag
      freqs,                        freqr,                        &
      nfice,                        qcrat,                        &
      prer_evap, xlat, xlon, lprnt, iccn, aero_in, nlball)
@@ -584,7 +609,9 @@ subroutine micro_mg_tend (                                       &
   real(r8), intent(in) :: liqcldf(mgncol,nlev)    !< liquid cloud fraction (no units)
   real(r8), intent(in) :: icecldf(mgncol,nlev)    !< ice cloud fraction (no units)
   real(r8), intent(in) :: qsatfac(mgncol,nlev)    !< subgrid cloud water saturation scaling factor (no units)
-  logical, intent(in)  :: lprnt, iccn, aero_in
+  logical, intent(in)  :: lprnt                   !< control flag for diagnostic print out 
+  logical, intent(in)  :: iccn                    !< flag for IN and CCN forcing for Morrison-Gettelman microphysics 
+  logical, intent(in)  :: aero_in                 !< flag for using aerosols in Morrison-Gettelman microphysics 
 
 
   ! used for scavenging
@@ -1592,7 +1619,7 @@ subroutine micro_mg_tend (                                       &
               tlat(i,k)       = tlat(i,k)       + dum1
               meltsdttot(i,k) = meltsdttot(i,k) + dum1
 
-!     if (lprnt .and. k >=100) write(0,*)' tlats=',tlat(i,k),' dum1=',dum1,&
+!     if (lprnt .and. k >=40) write(0,*)' tlats=',tlat(i,k),' dum1=',dum1,&
 !    ' minstsm=',minstsm(i,k),' qs=',qs(i,k),' xlf=',xlf,' oneodt=',oneodt, &
 !    ' snowmelt=',snowmelt,' t=',t(i,k),' dum=',dum,' k=',k
 
@@ -1634,7 +1661,7 @@ subroutine micro_mg_tend (                                       &
             tlat(i,k)       = dum1 + tlat(i,k)
             meltsdttot(i,k) = dum1 + meltsdttot(i,k)
 
-!     if (lprnt .and. k >=100) write(0,*)' tlatg=',tlat(i,k),' dum1=',dum1,&
+!     if (lprnt .and. k >=40) write(0,*)' tlatg=',tlat(i,k),' dum1=',dum1,&
 !    ' minstgm=',minstgm(i,k),' qg=',qg(i,k),' xlf=',xlf,' oneodt=',oneodt, &
 !    ' snowmelt=',snowmelt,' t=',t(i,k),' k=',k,' cpp=',cpp
 
@@ -2162,6 +2189,10 @@ subroutine micro_mg_tend (                                       &
      call bergeron_process_snow(t(:,k), rho(:,k), dv(:,k), mu(:,k), sc(:,k),       &
           qvl(:,k), qvi(:,k), asn(:,k), qcic(:,k), qsic(:,k), lams(:,k), n0s(:,k), &
           bergs(:,k), mgncol)
+!     if(lprnt) write(0,*)' bergs1=',bergs(1,k),' k=',k,' micro_mg_berg_eff_factor=',micro_mg_berg_eff_factor
+!     if(lprnt) write(0,*)' t=',t(1,k),' rho=',rho(1,k),' dv=',dv(1,k),' mu=',mu(1,k),&
+!        'qcic=',qcic(1,k),' qsic=',qsic(1,k),' qvl=',qvl(1,k),' qvi=',qvi(1,k),      &
+!        ' mu=',mu(1,k),' sc=',sc(1,k),' asn=',asn(1,k),' lams=',lams(1,k),' n0s=',n0s(1,k),' ni=',ni(1,k)
 
      bergs(:,k) = bergs(:,k) * micro_mg_berg_eff_factor
 
@@ -2172,6 +2203,11 @@ subroutine micro_mg_tend (                                       &
              icldm(:,k), rho(:,k), dv(:,k), qvl(:,k), qvi(:,k),           &
              berg(:,k), vap_dep(:,k), ice_sublim(:,k), mgncol)
 
+!     if(lprnt) write(0,*)' t=',t(1,k),' k=',k,' q=',q(1,k),' qi=',qi(1,k),&
+!       ' ni=',ni(1,k),' icldm=',icldm(1,k),' rho=',rho(1,k),' dv=',dv(1,k),&
+!       ' qvl=',qvl(1,k),' qvi=',qvi(1,k),' berg=',berg(1,k),' vap_dep=',&
+!       vap_dep(1,k),' ice_sublim=',ice_sublim(1,k)
+!     if(lprnt) write(0,*)' berg1=',berg(1,k),' k=',k,' micro_mg_berg_eff_factor=',micro_mg_berg_eff_factor
         do i=1,mgncol
 ! sublimation should not exceed available ice
           ice_sublim(i,k) = max(ice_sublim(i,k), -qi(i,k)*oneodt)
@@ -2347,6 +2383,8 @@ subroutine micro_mg_tend (                                       &
            qcrat(i,k) = one
         end if
 
+!     if(lprnt) write(0,*)' bergs2=',bergs(1,k),' k=',k,' ratio=',ratio
+
         !PMC 12/3/12: ratio is also frac of step w/ liquid.
         !thus we apply berg for "ratio" of timestep and vapor
         !deposition for the remaining frac of the timestep.
@@ -2417,13 +2455,11 @@ subroutine micro_mg_tend (                                       &
         if (do_cldice) then
 
            ! freezing of rain to produce ice if mean rain size is smaller than Dcs
-           if (lamr(i,k) > qsmall) then
-             if(one/lamr(i,k) < Dcs) then
-                mnuccri(i,k) = mnuccr(i,k)
-                nnuccri(i,k) = nnuccr(i,k)
-                mnuccr(i,k)  = zero 
-                nnuccr(i,k)  = zero
-             end if
+           if (lamr(i,k) > qsmall .and. one/lamr(i,k) < Dcs) then
+              mnuccri(i,k) = mnuccr(i,k)
+              nnuccri(i,k) = nnuccr(i,k)
+              mnuccr(i,k)  = zero 
+              nnuccr(i,k)  = zero
            end if
         end if
 
@@ -2820,11 +2856,11 @@ subroutine micro_mg_tend (                                       &
 !     if (lprnt)  write(0,*)' k=',k,' tlat=',tlat(i,k)
 !     if (lprnt .and. k >= 60) write(0,*)' k=',k,' tlat=',tlat(i,k)
 
-!       qctend(i,k) = qctend(i,k) + (-pra(i,k)-prc(i,k)-mnuccc(i,k)-mnucct(i,k)-msacwi(i,k)- &
-!                                     psacws(i,k)-bergs(i,k))*l!ldm(i,k)-berg(i,k)
+!      qctend(i,k) = qctend(i,k) + (-pra(i,k)-prc(i,k)-mnuccc(i,k)-mnucct(i,k)-msacwi(i,k)- &
+!                                    psacws(i,k)-bergs(i,k))*lcldm(i,k)-berg(i,k)
 
-       qctend(i,k) = qctend(i,k)+ &
-             (-pra(i,k)-prc(i,k)-mnuccc(i,k)-mnucct(i,k)-msacwi(i,k)- &
+       qctend(i,k) = qctend(i,k) +                                     &
+             (-pra(i,k)-prc(i,k)-mnuccc(i,k)-mnucct(i,k)-msacwi(i,k) - &
              psacws(i,k)-bergs(i,k)-qmultg(i,k)-psacwg(i,k)-pgsacw(i,k))*lcldm(i,k)-berg(i,k)
 
         if (do_cldice) then
@@ -3662,7 +3698,7 @@ subroutine micro_mg_tend (                                       &
      end do   !! nstep loop
 
 !    if (lprnt) write(0,*)' prectaftssno=',prect(i),' preci=',preci(i)
-!  if (lprnt) write(0,*)' qgtnd1=',qgtend(1,:)
+!    if (lprnt) write(0,*)' qgtnd1=',qgtend(1,:)
 
      if (do_graupel .or. do_hail) then
 !++ag Graupel Sedimentation
@@ -4446,18 +4482,18 @@ end subroutine micro_mg_tend
 !========================================================================
 
 !>\ingroup mg3_mp
-!! This subroutine calculates effective radius for rain + cloud.
+!! This subroutine calculates effective radii for rain and cloud.
 subroutine calc_rercld(lamr, n0r, lamc, pgam, qric, qcic, ncic, rercld, mgncol,nlev)
-  integer, intent(in) :: mgncol, nlev
-  real(r8), dimension(mgncol,nlev), intent(in) :: lamr          !< rain size parameter (slope)
-  real(r8), dimension(mgncol,nlev), intent(in) :: n0r           !< rain size parameter (intercept)
-  real(r8), dimension(mgncol,nlev), intent(in) :: lamc          !< size distribution parameter (slope)
-  real(r8), dimension(mgncol,nlev), intent(in) :: pgam          !< droplet size parameter
-  real(r8), dimension(mgncol,nlev), intent(in) :: qric          !< in-cloud rain mass mixing ratio
-  real(r8), dimension(mgncol,nlev), intent(in) :: qcic          !< in-cloud cloud liquid
-  real(r8), dimension(mgncol,nlev), intent(in) :: ncic          !< in-cloud droplet number concentration
+  integer, intent(in) :: mgncol, nlev                           ! horizontal and vertical dimension
+  real(r8), dimension(mgncol,nlev), intent(in) :: lamr          ! rain size parameter (slope)
+  real(r8), dimension(mgncol,nlev), intent(in) :: n0r           ! rain size parameter (intercept)
+  real(r8), dimension(mgncol,nlev), intent(in) :: lamc          ! size distribution parameter (slope)
+  real(r8), dimension(mgncol,nlev), intent(in) :: pgam          ! droplet size parameter
+  real(r8), dimension(mgncol,nlev), intent(in) :: qric          ! in-cloud rain mass mixing ratio
+  real(r8), dimension(mgncol,nlev), intent(in) :: qcic          ! in-cloud cloud liquid
+  real(r8), dimension(mgncol,nlev), intent(in) :: ncic          ! in-cloud droplet number concentration
 
-  real(r8), dimension(mgncol,nlev), intent(inout) :: rercld     !< effective radius calculation for rain + cloud
+  real(r8), dimension(mgncol,nlev), intent(inout) :: rercld     ! effective radius calculation for rain + cloud
 
   ! combined size of precip & cloud drops
   real(r8) :: Atmp

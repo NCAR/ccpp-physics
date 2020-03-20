@@ -82,7 +82,7 @@ The GFS v14 suite uses the parameterizations in the following order, as defined 
       <scheme>GFS_PBL_generic_pre</scheme>
       <scheme>hedmf</scheme>
       <scheme>GFS_PBL_generic_post</scheme>
-      <scheme>gwdps_pre</scheme>
+      <scheme>GFS_GWD_generic_pre</scheme>
       <scheme>gwdps</scheme>
       <scheme>gwdps_post</scheme>
       <scheme>rayleigh_damp</scheme>
@@ -106,7 +106,6 @@ The GFS v14 suite uses the parameterizations in the following order, as defined 
       <scheme>zhaocarr_gscond</scheme>
       <scheme>zhaocarr_precpd</scheme>
       <scheme>GFS_MP_generic_post</scheme>
-      <scheme>sfc_sice_post</scheme>
       <scheme>maximum_hourly_diagnostics</scheme>
     </subcycle>
   </group>

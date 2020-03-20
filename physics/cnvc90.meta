@@ -1,0 +1,151 @@
+[ccpp-arg-table]
+  name = cnvc90_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = cnvc90_run
+  type = scheme
+[clstp]
+  standard_name = convective_cloud_switch
+  long_name = switch for saving convective clouds
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ix]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[rn]
+  standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
+  long_name = convective rainfall amount on dynamics timestep
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[kbot]
+  standard_name = vertical_index_at_cloud_base
+  long_name = vertical index at cloud base
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[ktop]
+  standard_name = vertical_index_at_cloud_top
+  long_name = vertical index at cloud top
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[km]
+  standard_name = vertical_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = interface pressure
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[acv]
+  standard_name = accumulated_lwe_thickness_of_convective_precipitation_amount_cnvc90
+  long_name = accumulated convective rainfall amount for cnvc90 only
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[acvb]
+  standard_name = smallest_cloud_base_vertical_index_encountered_thus_far
+  long_name = smallest cloud base vertical index encountered thus far
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[acvt]
+  standard_name = largest_cloud_top_vertical_index_encountered_thus_far
+  long_name = largest cloud top vertical index encountered thus far
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cv]
+  standard_name = fraction_of_convective_cloud
+  long_name = fraction of convective cloud
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cvb]
+  standard_name = pressure_at_bottom_of_convective_cloud
+  long_name = pressure at bottom of convective cloud
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[cvt]
+  standard_name = pressure_at_top_of_convective_cloud
+  long_name = pressure at top of convective cloud
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = cnvc90_finalize
+  type = scheme

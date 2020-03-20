@@ -16,27 +16,7 @@ module cs_conv_pre
 
 #if 0
 !! \section arg_table_cs_conv_pre_run Argument Table
-!! | local_name      | standard_name                                                 | long_name                                                                                                               | units   | rank | type      |    kind   | intent | optional |
-!! |-----------------|---------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im              | horizontal_dimension                                          | horizontal dimension                                                                                                    | count   |    0 | integer   |           | in     | F        |
-!! | levs            | vertical_dimension                                            | number of veritcal levels                                                                                               | count   |    0 | integer   |           | in     | F        |
-!! | ntrac           | number_of_tracers                                             | number of tracers                                                                                                       | count   |    0 | integer   |           | in     | F        |
-!! | ncld            | number_of_hydrometeors                                        | number of hydrometeors                                                                                                  | count   |    0 | integer   |           | in     | F        |
-!! | q               | water_vapor_specific_humidity_updated_by_physics              | water vapor specific humidity updated by physics                                                                        | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | clw1            | ice_water_mixing_ratio_convective_transport_tracer            | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array                | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | clw2            | cloud_condensed_water_mixing_ratio_convective_transport_tracer| moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | work1           | grid_size_related_coefficient_used_in_scale-sensitive_schemes | grid size related coefficient used in scale-sensitive schemes                                                           | none    |    1 | real      | kind_phys | in     | F        |
-!! | work2           | grid_size_related_coefficient_used_in_scale-sensitive_schemes_complement | complement to work1                                                                                          | none    |    1 | real      | kind_phys | in     | F        |
-!! | cs_parm1        | updraft_velocity_tunable_parameter_1_CS                       | tunable parameter 1 for Chikira-Sugiyama convection                                                                     | m s-1   |    0 | real      | kind_phys | in     | F        |
-!! | cs_parm2        | updraft_velocity_tunable_parameter_2_CS                       | tunable parameter 2 for Chikira-Sugiyama convection                                                                     | m s-1   |    0 | real      | kind_phys | in     | F        |
-!! | wcbmax          | maximum_updraft_velocity_at_cloud_base                        | maximum updraft velocity at cloud base                                                                                  | m s-1   |    1 | real      | kind_phys | out    | F        |
-!! | fswtr           | fraction_of_cloud_top_water_scavenged                         | fraction of the tracer (cloud top water) that is scavenged by convection                                                | km-1    |    1 | real      | kind_phys | out    | F        |
-!! | fscav           | fraction_of_tracer_scavenged                                  | fraction of the tracer (aerosols) that is scavenged by convection                                                       | km-1    |    1 | real      | kind_phys | out    | F        |
-!! | save_q1         | water_vapor_specific_humidity_save                            | water vapor specific humidity before entering a physics scheme                                                          | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | save_q2         | cloud_condensed_water_mixing_ratio_save                       | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme             | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | save_q3         | ice_water_mixing_ratio_save                                   | cloud ice water mixing ratio before entering a physics scheme                                                           | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | errmsg          | ccpp_error_message                                            | error message for error handling in CCPP                                                                                | none    |    0 | character | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                               | error flag for error handling in CCPP                                                                                   | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude cs_conv_pre_run.html
 !!
 #endif
   subroutine cs_conv_pre_run(im, levs, ntrac, ncld, q, clw1, clw2,      &
@@ -110,15 +90,7 @@ module cs_conv_post
 
 !!
 !! \section arg_table_cs_conv_post_run Argument Table
-!! | local_name | standard_name                                                   | long_name                                                                | units      | rank | type      |    kind   | intent | optional |
-!! |------------|-----------------------------------------------------------------|--------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im         | horizontal_dimension                                            | horizontal dimension                                                     | count      |    0 | integer   |           | in     | F        |
-!! | kmax       | vertical_dimension                                              | number of veritcal levels                                                | count      |    0 | integer   |           | in     | F        |
-!! | do_aw      | flag_for_Arakawa_Wu_adjustment                                  | flag for Arakawa Wu scale-aware adjustment                               | flag       |    0 | logical   |           | in     | F        |
-!! | sigmatot   | convective_updraft_area_fraction_at_model_interfaces            | convective updraft area fraction at model interfaces                     | frac       |    2 | real      | kind_phys | in     | F        |
-!! | sigmafrac  | convective_updraft_area_fraction                                | convective updraft area fraction                                         | frac       |    2 | real      | kind_phys | out    | F        |
-!! | errmsg     | ccpp_error_message                                              | error message for error handling in CCPP                                 | none       |    0 | character | len=*     | out    | F        |
-!! | errflg     | ccpp_error_flag                                                 | error flag for error handling in CCPP                                    | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude cs_conv_post_run.html
 !!
   subroutine cs_conv_post_run(im, kmax, do_aw, sigmatot, sigmafrac, errmsg, errflg)
 
@@ -209,9 +181,9 @@ module cs_conv
 !                                 spblcrit=0.03, & !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.035,& !< minimum cloudbase height in p/ps
 !                                 spblcrit=0.025,& !< minimum cloudbase height in p/ps
-                                  cincrit=-150.0
-!                                 cincrit=-120.0
-!                                 cincrit=-100.0
+                                  cincrit= -150.0
+!                                 cincrit= -120.0
+!                                 cincrit= -100.0
 
 !DD precz0 and  preczh control partitioning of water between detrainment
 !DD   and precipitation. Decrease for more precip
@@ -256,7 +228,7 @@ module cs_conv
    subroutine cs_conv_finalize()
    end subroutine cs_conv_finalize
 
-!>\defgroup cs_scheme CPT Chikira-Sugiyama Cumulus Scheme Module
+!>\defgroup cs_scheme Chikira-Sugiyama Cumulus Scheme Module
 !> \brief The subroutine contains the main driver for Chikira-Sugiyama convective scheme.
 !!
 !! \author Minoru Chikira
@@ -313,61 +285,7 @@ module cs_conv
 !!            and long_name as the other convective schemes, where the units are in kg/m2. (Aug 2018)
 !!
 !! \section arg_table_cs_conv_run Argument Table
-!! | local_name | standard_name                                             | long_name                                                                                             | units      | rank | type      |    kind   | intent | optional |
-!! |------------|-----------------------------------------------------------|-------------------------------------------------------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | im         | horizontal_dimension                                      | horizontal dimension                                                                                  | count      |    0 | integer   |           | in     | F        |
-!! | ijsdim     | horizontal_loop_extent                                    | horizontal loop extent                                                                                | count      |    0 | integer   |           | in     | F        |
-!! | kmax       | vertical_dimension                                        | number of veritcal levels                                                                             | count      |    0 | integer   |           | in     | F        |
-!! | ntracp1    | number_of_tracers_plus_one                                | number of tracers plus one                                                                            | count      |    0 | integer   |           | in     | F        |
-!! | nn         | number_of_tracers_for_convective_transport                | number of tracers for convective transport (used to dimension clw)                                    | count      |    0 | integer   |           | in     | F        |
-!! | ntr        | number_of_tracers_for_CS                                  | number of convectively transported tracers in Chikira-Sugiyama deep conv. scheme                      | count      |    0 | integer   |           | in     | F        |
-!! | nctp       | number_of_cloud_types_CS                                  | number of cloud types in Chikira-Sugiyama scheme                                                      | count      |    0 | integer   |           | in     | F        |
-!! | otspt      | flag_convective_tracer_transport                          | flag to enable tracer transport by updrafts/downdrafts[(:,1)] or subsidence [(:,2)]                   | flag       |    2 | logical   |           | in     | F        |
-!! | lat        | latitude_index_in_debug_printouts                         | latitude index in debug printouts                                                                     | index      |    0 | integer   |           | in     | F        |
-!! | kdt        | index_of_time_step                                        | current forecast iteration                                                                            | index      |    0 | integer   |           | in     | F        |
-!! | t          | air_temperature_updated_by_physics                        | mid-layer temperature                                                                                 | K          |    2 | real      | kind_phys | inout  | F        |
-!! | q          | water_vapor_specific_humidity_updated_by_physics          | mid-layer specific humidity of water vapor                                                            | kg kg-1    |    2 | real      | kind_phys | inout  | F        |
-!! | rain1      | lwe_thickness_of_deep_convective_precipitation_amount     | deep convective rainfall amount on physics timestep                                                   | m          |    1 | real      | kind_phys | out    | F        |
-!! | clw        | convective_transportable_tracers                          | array to contain cloud water and other convective trans. tracers                                      | kg kg-1    |    3 | real      | kind_phys | inout  | F        |
-!! | zm         | geopotential                                              | mid-layer geopotential                                                                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | zi         | geopotential_at_interface                                 | interface geopotential                                                                                | m2 s-2     |    2 | real      | kind_phys | in     | F        |
-!! | pap        | air_pressure                                              | mid-layer pressure                                                                                    | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | paph       | air_pressure_at_interface                                 | interface pressure                                                                                    | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | delta      | time_step_for_physics                                     | physics time step                                                                                     | s          |    0 | real      | kind_phys | in     | F        |
-!! | delti      | time_step_for_dynamics                                    | dynamics time step                                                                                    | s          |    0 | real      | kind_phys | in     | F        |
-!! | ud_mf      | instantaneous_atmosphere_updraft_convective_mass_flux     | (updraft mass flux) * delt                                                                            | kg m-2     |    2 | real      | kind_phys | inout  | F        |
-!! | dd_mf      | instantaneous_atmosphere_downdraft_convective_mass_flux   | (downdraft mass flux) * delt                                                                          | kg m-2     |    2 | real      | kind_phys | inout  | F        |
-!! | dt_mf      | instantaneous_atmosphere_detrainment_convective_mass_flux | (detrainment mass flux) * delt                                                                        | kg m-2     |    2 | real      | kind_phys | inout  | F        |
-!! | u          | x_wind_updated_by_physics                                 | mid-layer zonal wind                                                                                  | m s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | v          | y_wind_updated_by_physics                                 | mid-layer meridional wind                                                                             | m s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | fscav      | fraction_of_tracer_scavenged                              | fraction of the tracer (aerosols) that is scavenged by convection                                     | km-1       |    1 | real      | kind_phys | in     | F        |
-!! | fswtr      | fraction_of_cloud_top_water_scavenged                     | fraction of the tracer (cloud top water) that is scavenged by convection                              | km-1       |    1 | real      | kind_phys | in     | F        |
-!! | cbmfx      | cloud_base_mass_flux                                      | cloud base mass flux                                                                                  | kg m-2 s-1 |    2 | real      | kind_phys | inout  | F        |
-!! | mype       | mpi_rank                                                  | current MPI rank                                                                                      | index      |    0 | integer   |           | in     | F        |
-!! | wcbmaxm    | maximum_updraft_velocity_at_cloud_base                    | maximum updraft velocity at cloud base                                                                | m s-1      |    1 | real      | kind_phys | in     | F        |
-!! | precz0in   | detrainment_and_precipitation_tunable_parameter_3_CS      | partition water between detrainment and precipitation (decrease for more precipitation)               | m          |    0 | real      | kind_phys | in     | F        |
-!! | preczhin   | detrainment_and_precipitation_tunable_parameter_4_CS      | partition water between detrainment and precipitation (decrease for more precipitation)               | m          |    0 | real      | kind_phys | in     | F        |
-!! | clmdin     | entrainment_efficiency_tunable_parameter_9_CS             | entrainment efficiency                                                                                | none       |    0 | real      | kind_phys | in     | F        |
-!! | sigma      | convective_updraft_area_fraction_at_model_interfaces      | convective updraft area fraction at model interfaces                                                  | frac       |    2 | real      | kind_phys | out    | F        |
-!! | do_aw      | flag_for_Arakawa_Wu_adjustment                            | flag for Arakawa Wu scale-aware adjustment                                                            | flag       |    0 | logical   |           | in     | F        |
-!! | do_awdd    | flag_arakawa_wu_downdraft                                 | flag to enable treating convective tendencies following Arakwaw-Wu for downdrafts (2013)              | flag       |    0 | logical   |           | in     | F        |
-!! | flx_form   | flag_flux_form_CS                                         | flag to enable using the flux form of the equations in CS scheme                                      | flag       |    0 | logical   |           | in     | F        |
-!! | lprnt      | flag_print                                                | control flag for diagnostic print out                                                                 | flag       |    0 | logical   |           | in     | F        |
-!! | ipr        | horizontal_index_of_printed_column                        | horizontal index of printed column                                                                    | index      |    0 | integer   |           | in     | F        |
-!! | kcnv       | flag_deep_convection                                      | flag indicating whether convection occurs in column                                                   | flag       |    1 | integer   |           | inout  | F        |
-!! | qlcn       | mass_fraction_of_convective_cloud_liquid_water            | mass fraction of convective cloud liquid water                                                        | kg kg-1    |    2 | real      | kind_phys | out    | F        |
-!! | qicn       | mass_fraction_of_convective_cloud_ice                     | mass fraction of convective cloud ice water                                                           | kg kg-1    |    2 | real      | kind_phys | out    | F        |
-!! | w_upi      | vertical_velocity_for_updraft                             | vertical velocity for updraft                                                                         | m s-1      |    2 | real      | kind_phys | out    | F        |
-!! | cf_upi     | convective_cloud_fraction_for_microphysics                | convective cloud fraction for microphysics                                                            | frac       |    2 | real      | kind_phys | out    | F        |
-!! | cnv_mfd    | detrained_mass_flux                                       | detrained mass flux                                                                                   | kg m-2 s-1 |    2 | real      | kind_phys | out    | F        |
-!! | cnv_dqldt  | tendency_of_cloud_water_due_to_convective_microphysics    | tendency of cloud water due to convective microphysics                                                | kg m-2 s-1 |    2 | real      | kind_phys | out    | F        |
-!! | clcn       | convective_cloud_volume_fraction                          | convective cloud volume fraction                                                                      | frac       |    2 | real      | kind_phys | out    | F        |
-!! | cnv_fice   | ice_fraction_in_convective_tower                          | ice fraction in convective tower                                                                      | frac       |    2 | real      | kind_phys | out    | F        |
-!! | cnv_ndrop  | number_concentration_of_cloud_liquid_water_particles_for_detrainment | droplet number concentration in convective detrainment                                     | m-3        |    2 | real      | kind_phys | out    | F        |
-!! | cnv_nice   | number_concentration_of_ice_crystals_for_detrainment      | crystal number concentration in convective detrainment                                                | m-3        |    2 | real      | kind_phys | out    | F        |
-!! | mp_phys    | flag_for_microphysics_scheme                              | flag for microphysics scheme                                                                          | flag       |    0 | integer   |           | in     | F        |
-!! | errmsg     | ccpp_error_message                                        | error message for error handling in CCPP                                                              | none       |    0 | character | len=*     | out    | F        |
-!! | errflg     | ccpp_error_flag                                           | error flag for error handling in CCPP                                                                 | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude cs_conv_run.html
 !!
 !!  \section general_cs_conv CS Convection Scheme General Algorithm
 !> @{
@@ -390,15 +308,15 @@ module cs_conv
 !
 ! input arguments
 !
-   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, NN, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
-   logical, intent(in)     :: otspt(ntracp1,2)   ! otspt(:,1) - on/off switch for tracer transport by updraft and
-                                                 !              downdraft. should not include subgrid PDF and turbulence
-                                                 ! otspt(:,2) - on/off switch for tracer transport by subsidence
-                                                 !              should include subgrid PDF and turbulence
+   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, nn, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
+   logical, intent(in)     :: otspt(1:ntracp1,1:2)! otspt(:,1) - on/off switch for tracer transport by updraft and
+                                                  !              downdraft. should not include subgrid PDF and turbulence
+                                                  ! otspt(:,2) - on/off switch for tracer transport by subsidence
+                                                  !              should include subgrid PDF and turbulence
 
    real(r8), intent(inout) :: t(IM,KMAX)          ! temperature at mid-layer (K)
    real(r8), intent(inout) :: q(IM,KMAX)          ! water vapor array including moisture (kg/kg)
-   real(r8), intent(inout) :: clw(IM,KMAX,NN)     ! tracer array including cloud condensate (kg/kg)
+   real(r8), intent(inout) :: clw(IM,KMAX,nn)     ! tracer array including cloud condensate (kg/kg)
    real(r8), intent(in)    :: pap(IM,KMAX)        ! pressure at mid-layer (Pa)
    real(r8), intent(in)    :: paph(IM,KMAX+1)     ! pressure at boundaries (Pa)
    real(r8), intent(in)    :: zm(IM,KMAX)         ! geopotential at mid-layer (m)
@@ -408,7 +326,7 @@ module cs_conv
 ! added for cs_convr
    real(r8), intent(inout) :: u(IM,KMAX)          ! zonal wind at mid-layer (m/s)
    real(r8), intent(inout) :: v(IM,KMAX)          ! meridional wind at mid-layer (m/s)
-   
+
    real(r8), intent(in)    :: DELTA               ! physics time step
    real(r8), intent(in)    :: DELTI               ! dynamics time step (model time increment in seconds)
    logical,  intent(in)    :: do_aw, do_awdd, flx_form
@@ -423,9 +341,13 @@ module cs_conv
    real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
    
    real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
-   real(r8), intent(out), dimension(ijsdim,kmax) :: qlcn, qicn, w_upi,cnv_mfd,          &
+! GJF* These variables are conditionally allocated depending on whether the
+!     Morrison-Gettelman microphysics is used, so they must be declared 
+!     using assumed shape.
+   real(r8), intent(out), dimension(:,:) :: qlcn, qicn, w_upi,cnv_mfd,                  &
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
+! *GJF
    integer, intent(inout) :: kcnv(im)             ! zero if no deep convection and 1 otherwise
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -531,13 +453,15 @@ module cs_conv
    enddo
 
 !DD following adapted from ras
-!> -# Following RAS, separate total condensate to ice/water separately
-!!  - The ratio of ice cloud to cloud water is determined by a linear function
+!> -# Following the Relaxed Arakawa Schubert Scheme (RAS;  
+!! Moorthi and Suarez 1992 \cite moorthi_and_suarez_1992 ), 
+!! separate total condensate between ice and water.
+!! The ratio of cloud ice to cloud water is determined by a linear function
 !! of temperature:
 !!\f[
 !! F_i(T)= (T_2-T)/(T_2-T_1)
 !!\f]
-!! where T is temperature; \f$T_1\f$ and \f$T_2\f$ are set as tcf=263.16
+!! where T is temperature, and\f$T_1\f$ and \f$T_2\f$ are set as tcf=263.16
 !! and tf= 233.16 
    if (clw(1,1,2) <= -999.0) then  ! input ice/water are together
      do k=1,kmax
@@ -572,7 +496,7 @@ module cs_conv
 !
 !***************************************************************************************
 !
-!> -# Calculate temperature at interfaces.
+!> -# Calculate temperature at interfaces
 !
 
    DO K=2,KMAX
@@ -589,7 +513,7 @@ module cs_conv
      GDTM(I,1)      = GDT(I,1)        ! Is this a good approximation ? - Moorthi
    ENDDO
 
-!> -# Initialize the sigma diagnostics.
+!> -# Initialize the sigma diagnostics
    do n=1,nctp
      do k=1,kmax
        do i=ists,iens
@@ -603,7 +527,7 @@ module cs_conv
      enddo
    enddo
 !
-!> -# Call cs_cumlus() for CS cumulus parameterization.
+!> -# Call cs_cumlus() for the main CS cumulus parameterization
    call CS_CUMLUS (im    , IJSDIM, KMAX  , NTR   ,    &  !DD dimensions
                    otspt(1:ntr,1), otspt(1:ntr,2),    &
                    lprnt , ipr   ,                    &
@@ -736,7 +660,7 @@ module cs_conv
      endif
    enddo
 
-!> -# Multiplying mass fluxes by the time step
+!> -# Multiply mass fluxes by the time step
 
    do k=1,kmax
      do i=1,ijsdim
@@ -768,7 +692,7 @@ module cs_conv
 
 !************************************************************************
 !>\ingroup cs_scheme
-!! This subroutine includes cumulus parameterization with
+!! Main subroutine for the cumulus parameterization with
 !! state-dependent entrainment rate developed by Minoru Chikira.
 !!
 !! - This routine works as the prognostic Arakawa-Schubert scheme
@@ -777,7 +701,7 @@ module cs_conv
 !! - Specify OPT_CUMBGT to check water and energy budget.
 !! - Specify OPT_CUMCHK to check range of output values.
 !!
-!! History:
+!! History(yy/mm/dd):
 !! - 08/09/19(chikira)   MIROC4.1
 !! - 08/10/30(hiro)      CMT modified
 !! - 08/11/11(chikira)   Neggers et al. (2002)
@@ -1102,8 +1026,8 @@ module cs_conv
      enddo
    enddo
 !> -# Compute layer saturate moisture \f$Q_i\f$(GDQS) and 
-!! saturate moist static energy GDHS (see appendix B in
-!! Chirika and Sugiyama (2010) \cite Chikira_2010)
+!! saturate moist static energy (GDHS; see Appendix B in
+!! Chikira and Sugiyama (2010) \cite Chikira_2010)
    DO K=1,KMAX
      DO I=ISTS,IENS
        esat      = min(gdp(i,k), fpvs(gdt(i,k)))
@@ -1137,7 +1061,7 @@ module cs_conv
 !DDsigma - arguments added to get subcloud profiles in updraft
 !          so AW eddy flux tendencies can be computed
 
-!> -# Call cumbas() to compute cloud base properties.
+!> -# Call cumbas() to compute cloud base properties
    CALL CUMBAS(IJSDIM, KMAX  ,                           & !DD dimensions
                KB    , GCYM(1,1,1)  , KBMX  ,            & ! output
                ntr   , ntrq  ,                           &
@@ -1150,7 +1074,7 @@ module cs_conv
                ISTS  , IENS                  ,           & !)   ! input
                gctbl, gcqbl,gdq,gcwbl, gcqlbl, gcqibl, gctrbl) ! sub cloud tendencies
 !
-!> -# Compute CAPE and CIN.
+!> -# Compute CAPE and CIN
 !
      DO I=ISTS,IENS
        CAPE(i)  = zero
@@ -1165,12 +1089,12 @@ module cs_conv
            ELSE
               BUOY = (GDS(I,1)-GDS(I,K)) / (CP*GDT(I,K))
            END IF
-           IF (BUOY > zero .AND. JBUOY(I) /=  0) THEN
+           IF (BUOY > zero .AND. JBUOY(I) >=  -1) THEN
               CAPE(I) = CAPE(I) + BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
               JBUOY(I) = 2
            ELSEIF (BUOY < zero .AND. JBUOY(I) /= 2) THEN
               CIN(I) = CIN(I) - BUOY * GRAV * (GDZM(I,K+1) - GDZM(I,K))
-              JBUOY(I) = 1
+              JBUOY(I) = -1
            ENDIF
          endif
        ENDDO
@@ -1181,7 +1105,7 @@ module cs_conv
      ENDDO
 
 !DDsigma some initialization  before summing over cloud type
-!> -# Initialization  before summing over cloud type
+!> -# Initialize variables before summing over cloud types
    do k=1,kmax    ! Moorthi
      do i=1,ijsdim
        lamdaprod(i,k)   = one
@@ -1221,7 +1145,7 @@ module cs_conv
 ! before and after CUMUP (i.e. here), and inside the routine, in
 ! particular: gctm, gcqm, gcwm, gchm, gcwt, gclm, gcim,gctrm
 ! also, inside, check that no reads/writes out of bounds occur *DH
-!> -# Call cumup() to compute in-cloud properties.
+!> -# Call cumup() to compute in-cloud properties
      CALL CUMUP(IJSDIM, KMAX, NTR,   ntrq,                          & !DD dimensions
                 ACWF        ,                                       & ! output
                 GCLZ        , GCIZ        , GPRCIZ      , GSNWIZ,   & ! output
@@ -1242,7 +1166,7 @@ module cs_conv
                 gctm  , gcqm, gcwm, gchm, gcwt, gclm, gcim, gctrm,  & ! additional incloud profiles and cloud top total water
                 lprnt , ipr )
 !
-!> -# Call cumbmx() to compute cloud base mass flux.
+!> -# Call cumbmx() to compute cloud base mass flux
      CALL CUMBMX(IJSDIM, KMAX,                                      & !DD dimensions
                  CBMFX(1,CTP),                                      & ! modified
                  ACWF        , GCYT(1,CTP), GDZM     ,              & ! input
@@ -1255,7 +1179,7 @@ module cs_conv
 
      do i=ISTS,IENS
        if (flx_form) then
-!> -# Initialize eddy fluxes for cloud type ctp
+!> -# Initialize eddy fluxes for cloud types
          do k=1,kmax+1
            sfluxtem(k)  = zero
            qvfluxtem(k) = zero
@@ -1278,7 +1202,7 @@ module cs_conv
            km1 = k - 1
            rhs_h = zero
            rhs_q = zero
-!> -# Get environment variables interpolated to layer interface
+!> -# Interpolate environment variables to layer interface
            GDQM   = half * (GDQ(I,K,1) + GDQ(I,KM1,1))  ! as computed in cumup
 !          GDwM   = half * (GDw(I,K)   + GDw(I,KM1 ))
            GDlM   = half * (GDQ(I,K,3) + GDQ(I,KM1,3))
@@ -1290,9 +1214,9 @@ module cs_conv
 
            if (do_aw) then
 
-!> -# Compute lamda for a cloud type (eqn 23 of Arakawa and Wu (2013)), 
-!! and then updraft area fraction
-!! (sigmai, eqn 12 of Arakawa and We (2013))
+!> -# Compute lamda for a cloud type and then updraft area fraction
+!! (sigmai) following Equations 23 and 12 of 
+!! Arakawa and Wu (2013) \cite arakawa_and_wu_2013 , respectively
 
              lamdai = mflx_e * rair * gdtm(i,k)*(one+epsvt*gdqm)         &
                     / (gdpm(i,k)*wcv(i,k))
@@ -1314,7 +1238,7 @@ module cs_conv
 !            fsigma     = 1.0   ! no aw effect, comment following lines to undo AW
              fsigma     = one - sigma(i,k)
 
-!> -# Compute tendencies based on mass flux, and tendencies based on condensation
+!> -# Compute tendencies based on mass flux and condensation
 ! fsigma is the AW reduction of flux tendencies
 
              if(k == kbi) then
@@ -1424,8 +1348,8 @@ module cs_conv
 !                  rhs_q = cbmfl*((gcwt(i)-gcqt(i,ctp)) - (gcym(i,k-1)*(gcwm(i,k-1)-gcqm(i,k-1)) + (GDw( I,K-1 )-gdq(i,k-1,1))*(gcyt(i,ctp)-gcym(i,k-1))) )
 !                endif
 
-!> -# Compute condesation, total precip production, frozen precip production,
-!! heating due to freezing and total temperature tendency due to in cloud microphysics
+!> -# Compute condensation, total precipitation production, frozen precipitation production,
+!! heating due to freezing, and total temperature tendency due to in-cloud microphysics
                  dqcondtem(i,km1)   = -rhs_q                             ! condensation
 !                dqprectem(i,km1)   = cbmfl * (GPRCIZ(i,k) + GSNWIZ(i,k))
                  dqprectem(i,km1)   = tem * (GPRCIZ(i,k) + GSNWIZ(i,k))  ! total precip production
@@ -1453,7 +1377,7 @@ module cs_conv
            prectermfrz(i,k) = prectermfrz(i,k) + dfrzprectem(i,k) * delpinv
            frzterm(i,k)     = frzterm(i,k)     + dtfrztem(i,k)    * delpinv
 
-!> -# Compute flux tendencies - compute the vertical flux divergence
+!> -# Compute flux tendencies and vertical flux divergence
            sfluxterm(i,k)  = sfluxterm(i,k)  - (sfluxtem(k+1)  - sfluxtem(k))  * delpinv
            qvfluxterm(i,k) = qvfluxterm(i,k) - (qvfluxtem(k+1) - qvfluxtem(k)) * delpinv
            qlfluxterm(i,k) = qlfluxterm(i,k) - (qlfluxtem(k+1) - qlfluxtem(k)) * delpinv
@@ -1501,7 +1425,7 @@ module cs_conv
      enddo
 
 !
-!> -# Call cumflx() to compute Cloud Mass Flux & Precip.
+!> -# Call cumflx() to compute cloud mass flux and precipitation
      CALL CUMFLX(IM    , IJSDIM, KMAX  ,                               & !DD dimensions
                  GMFX0 , GPRCI , GSNWI , CMDET,                        & ! output
                  QLIQ  , QICE  , GTPRC0,                               & ! output
@@ -1561,7 +1485,8 @@ module cs_conv
      enddo
    enddo
 
-!> -# Call cumdwn() to compute cumulus downdraft - Melt & Freeze & Evaporation.
+!> -# Call cumdwn() to compute cumulus downdraft and assocated melt, freeze 
+!! and evaporation
    CALL CUMDWN(IM    , IJSDIM, KMAX  , NTR   , ntrq  ,   & ! DD dimensions
                GTT   , GTQ   , GTU   , GTV   ,           & ! modified
                        GMFLX ,                           & ! modified updraft+downdraft flux
@@ -1585,7 +1510,7 @@ module cs_conv
 !      enddo
 !    enddo
 
-!> -# Call cumsbw() to compute cloud subsidence heating.
+!> -# Call cumsbw() to compute cloud subsidence heating
    if (.not. flx_form) then
 !  Cloud Subsidence Heating
 !  -----------------------=
@@ -1655,7 +1580,7 @@ module cs_conv
    ENDDO
      
 !  if(do_aw .and. flx_form) then ! compute AW tendencies
-!> -# Compute AW tendencies of T/ql/qi
+!> -# Compute AW tendencies of T, ql and qi
    if(flx_form) then ! compute AW tendencies
                                  ! AW lump all heating together, compute qv term
      do k=1,kmax
@@ -1733,7 +1658,7 @@ module cs_conv
 !    enddo
 !  enddo
 !
-!> -# Call cumfxr() for tracer mass fixer without detrainment.
+!> -# Call cumfxr() for tracer mass fixer without detrainment
    CALL CUMFXR(IM    , IJSDIM, KMAX  , NTR   ,           & !DD dimensions
                GTQ   ,                                   & ! modified
                GDQ   , DELP  , DELTA , KTMXT , IMFXR,    & ! input
@@ -1856,7 +1781,7 @@ module cs_conv
 !***********************************************************************
 !>\ingroup cs_scheme
 !! This subroutine calculates cloud base properties.
-      SUBROUTINE CUMBAS                            & !< cloud base
+      SUBROUTINE CUMBAS                            & ! cloud base
                ( IJSDIM, KMAX  ,                   & !DD dimensions
                  KB    , GCYM  , KBMX  ,           & ! output
                  ntr   , ntrq  ,                   &
@@ -1878,15 +1803,15 @@ module cs_conv
       logical  lprnt
 !
 !   [OUTPUT]
-      INTEGER    KB    (IJSDIM)         !< cloud base
-      REAL(r8)   GCYM  (IJSDIM, KMAX)   !< norm. mass flux (half lev)
+      INTEGER    KB    (IJSDIM)         ! cloud base
+      REAL(r8)   GCYM  (IJSDIM, KMAX)   ! norm. mass flux (half lev)
       INTEGER    KBMX
-      REAL(r8)   GCHB  (IJSDIM)         !< cloud base MSE
-      REAL(r8)   GCWB  (IJSDIM)         !< cloud base total water
-      REAL(r8)   GCUB  (IJSDIM)         !< cloud base U
-      REAL(r8)   GCVB  (IJSDIM)         !< cloud base V
-      REAL(r8)   GCIB  (IJSDIM)         !< cloud base ice
-      REAL(r8)   GCtrB (IJSDIM,ntrq:ntr)     !< cloud base tracer
+      REAL(r8)   GCHB  (IJSDIM)         ! cloud base MSE
+      REAL(r8)   GCWB  (IJSDIM)         ! cloud base total water
+      REAL(r8)   GCUB  (IJSDIM)         ! cloud base U
+      REAL(r8)   GCVB  (IJSDIM)         ! cloud base V
+      REAL(r8)   GCIB  (IJSDIM)         ! cloud base ice
+      REAL(r8)   GCtrB (IJSDIM,ntrq:ntr)     ! cloud base tracer
 
 !DDsigma added to arglist for AW, subcloud updraft profiles: temperature, water vapor
 !                               total water, cloud water, and cloud ice respectively
@@ -1894,22 +1819,22 @@ module cs_conv
       REAL(r8), dimension(ijsdim,kmax,ntrq:ntr) :: gctrbl   !DDsigmadiag
 !
 !   [INPUT]
-      REAL(r8)   GDH   (IJSDIM, KMAX)        !< moist static energy
-      REAL(r8)   GDW   (IJSDIM, KMAX)        !< total water
-      REAL(r8)   GDq   (IJSDIM, KMAX, ntr)   !< water vapor  and tracer
-      REAL(r8)   GDHS  (IJSDIM, KMAX)        !< saturate MSE
-      REAL(r8)   GDQS  (IJSDIM, KMAX)        !< saturate humidity
-      REAL(r8)   GDQI  (IJSDIM, KMAX)        !< cloud ice
-      REAL(r8)   GDU   (IJSDIM, KMAX)        !< u-velocity
-      REAL(r8)   GDV   (IJSDIM, KMAX)        !< v-velocity
-      REAL(r8)   GDZM  (IJSDIM, KMAX+1)      !< Altitude (half lev)
-      REAL(r8)   GDPM  (IJSDIM, KMAX+1)      !< pressure (half lev)
+      REAL(r8)   GDH   (IJSDIM, KMAX)        ! moist static energy
+      REAL(r8)   GDW   (IJSDIM, KMAX)        ! total water
+      REAL(r8)   GDq   (IJSDIM, KMAX, ntr)   ! water vapor  and tracer
+      REAL(r8)   GDHS  (IJSDIM, KMAX)        ! saturate MSE
+      REAL(r8)   GDQS  (IJSDIM, KMAX)        ! saturate humidity
+      REAL(r8)   GDQI  (IJSDIM, KMAX)        ! cloud ice
+      REAL(r8)   GDU   (IJSDIM, KMAX)        ! u-velocity
+      REAL(r8)   GDV   (IJSDIM, KMAX)        ! v-velocity
+      REAL(r8)   GDZM  (IJSDIM, KMAX+1)      ! Altitude (half lev)
+      REAL(r8)   GDPM  (IJSDIM, KMAX+1)      ! pressure (half lev)
       REAL(r8)   FDQS  (IJSDIM, KMAX)
       REAL(r8)   GAM   (IJSDIM, KMAX)
       INTEGER    ISTS, IENS
 !
 !   [INTERNAL WORK]
-      REAL(r8)   CBASE (IJSDIM)              !< one over cloud base height
+      REAL(r8)   CBASE (IJSDIM)              ! one over cloud base height
 !     REAL(r8)   CBASEP(IJSDIM)              ! cloud base pressure
       REAL(r8)   DELZ, GAMX, wrk
 !     REAL(r8)   DELZ, QSL, GAMX, wrk
@@ -3932,7 +3857,7 @@ contains
       END SUBROUTINE CUMSBR
 !*********************************************************************
 !>\ingroup cs_scheme
-!! This subroutine calculates tracer mass fixer without deterainment
+!! This subroutine calculates tracer mass fixer without detrainment.
       SUBROUTINE CUMFXR                                           & ! Tracer mass fixer
                       ( IM    , IJSDIM, KMAX  , NTR   ,           & !DD dimensions
                         GTR   ,                                   & ! modified

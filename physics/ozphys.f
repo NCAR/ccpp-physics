@@ -10,8 +10,25 @@
 ! \brief Brief description of the subroutine
 !
 !> \section arg_table_ozphys_init Argument Table
+!! \htmlinclude ozphys_init.html
 !!
-      subroutine ozphys_init()
+      subroutine ozphys_init(oz_phys, errmsg, errflg)
+
+      implicit none
+      logical,          intent(in)  :: oz_phys
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not.oz_phys) then
+        write (errmsg,'(*(a))') 'Logic error: oz_phys == .false.'
+        errflg = 1
+        return
+      endif
+
       end subroutine ozphys_init
 
 ! \brief Brief description of the subroutine
@@ -28,29 +45,7 @@
 !! Research Laboratory through CHEM2D chemistry model
 !! (McCormack et al. (2006) \cite mccormack_et_al_2006).
 !! \section arg_table_ozphys_run Argument Table
-!! | local_name     | standard_name                                                             | long_name                                                                  | units   | rank | type      | kind      | intent | optional |
-!! |----------------|---------------------------------------------------------------------------|----------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                                                      | horizontal dimension                                                       | count   |    0 | integer   |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                    | horizontal loop extent                                                     | count   |    0 | integer   |           | in     | F        |
-!! | levs           | vertical_dimension                                                        | number of vertical layers                                                  | count   |    0 | integer   |           | in     | F        |
-!! | ko3            | vertical_dimension_of_ozone_forcing_data                                  | number of vertical layers in ozone forcing data                            | count   |    0 | integer   |           | in     | F        |
-!! | dt             | time_step_for_physics                                                     | physics time step                                                          | s       |    0 | real      | kind_phys | in     | F        |
-!! | oz             | ozone_concentration_updated_by_physics                                    | ozone concentration updated by physics                                     | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | tin            | air_temperature_updated_by_physics                                        | updated air temperature                                                    | K       |    2 | real      | kind_phys | in     | F        |
-!! | po3            | natural_log_of_ozone_forcing_data_pressure_levels                         | natural log of ozone forcing data pressure levels                          | log(Pa) |    1 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                              | mid-layer pressure                                                         | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | prdout         | ozone_forcing                                                             | ozone forcing coefficients                                                 | various |    3 | real      | kind_phys | in     | F        |
-!! | oz_coeff       | number_of_coefficients_in_ozone_forcing_data                              | number of coefficients in ozone forcing data                               | index   |    0 | integer   |           | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers                                 | difference between mid-layer pressures                                     | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                                       | flag for calculating 3-D diagnostic fields                                 | flag    |    0 | logical   |           | in     | F        |
-!! | ozp1           | cumulative_change_in_ozone_concentration_due_to_production_and_loss_rate  | cumulative change in ozone concentration due to production and loss rate   | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ozp2           | cumulative_change_in_ozone_concentration_due_to_ozone_mixing_ratio        | cumulative change in ozone concentration due to ozone mixing ratio         | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ozp3           | cumulative_change_in_ozone_concentration_due_to_temperature               | cumulative change in ozone concentration due to temperature                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ozp4           | cumulative_change_in_ozone_concentration_due_to_overhead_ozone_column     | cumulative change in ozone concentration due to overhead ozone column      | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | con_g          | gravitational_acceleration                                                | gravitational acceleration                                                 | m s-2   |    0 | real      | kind_phys | in     | F        | 
-!! | me             | mpi_rank                                                                  | rank of the current MPI task                                               | index   |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                                        | error message for error handling in CCPP                                   | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                           | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude ozphys_run.html
 !!
 !> \section genal_ozphys GFS ozphys_run General Algorithm
 !> @{

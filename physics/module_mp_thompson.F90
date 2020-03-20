@@ -408,13 +408,14 @@ MODULE module_mp_thompson
 !>\ingroup aathompson
 !! This subroutine calculates simplified cloud species equations and create
 !! lookup tables in Thomspson scheme.
-!>\section gen_thompson_init GSD thompson_init General Algorithm
+!>\section gen_thompson_init thompson_init General Algorithm
 !> @{
       SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
                           ids, ide, jds, jde, kds, kde,     &
                           ims, ime, jms, jme, kms, kme,     &
                           its, ite, jts, jte, kts, kte,     &
-                          mpicomm, mpirank, mpiroot, threads)
+                          mpicomm, mpirank, mpiroot,        &
+                          threads, errmsg, errflg)
 
       IMPLICIT NONE
 
@@ -428,6 +429,8 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime,jms:jme),         OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
+      CHARACTER(len=*), INTENT(INOUT) :: errmsg
+      INTEGER,          INTENT(INOUT) :: errflg
 
 
       INTEGER:: i, j, k, l, m, n
@@ -501,22 +504,22 @@ MODULE module_mp_thompson
 
 !> - From Martin et al. (1994), assign gamma shape parameter mu for cloud
 !! drops according to general dispersion characteristics (disp=~0.25
-!! for Maritime and 0.45 for Continental).
+!! for maritime and 0.45 for continental)
 !.. disp=SQRT((mu+2)/(mu+1) - 1) so mu varies from 15 for Maritime
 !.. to 2 for really dirty air.  This not used in 2-moment cloud water
 !.. scheme and nu_c used instead and varies from 2 to 15 (integer-only).
       mu_c = MIN(15., (1000.E6/Nt_c + 2.))
 
-!> - Compute Schmidt number to one-third used numerous times.
+!> - Compute Schmidt number to one-third used numerous times
       Sc3 = Sc**(1./3.)
 
-!> - Compute min ice diam from mass, min snow/graupel mass from diam.
+!> - Compute minimum ice diam from mass, min snow/graupel mass from diam
       D0i = (xm0i/am_i)**(1./bm_i)
       xm0s = am_s * D0s**bm_s
       xm0g = am_g * D0g**bm_g
 
-!> - Compute constants various exponents and gamma() assoc with cloud,
-!! rain, snow, and graupel.
+!> - Compute constants various exponents and gamma() associated with cloud,
+!! rain, snow, and graupel
       do n = 1, 15
          cce(1,n) = n + 1.
          cce(2,n) = bm_r + n + 1.
@@ -621,7 +624,7 @@ MODULE module_mp_thompson
       ogg3 = 1./cgg(3)
 
 !+---+-----------------------------------------------------------------+
-!> - Simplify various rate eqns the best we can now.
+!> - Simplify various rate equations
 !+---+-----------------------------------------------------------------+
 
 !>  - Compute rain collecting cloud water and cloud ice
@@ -629,36 +632,36 @@ MODULE module_mp_thompson
       t1_qr_qi = PI*.25*av_r * crg(9)
       t2_qr_qi = PI*.25*am_r*av_r * crg(8)
 
-!>  - Compute Graupel collecting cloud water
+!>  - Compute graupel collecting cloud water
       t1_qg_qc = PI*.25*av_g * cgg(9)
 
-!>  - Compute Snow collecting cloud water
+!>  - Compute snow collecting cloud water
       t1_qs_qc = PI*.25*av_s
 
-!>  - Compute Snow collecting cloud ice
+!>  - Compute snow collecting cloud ice
       t1_qs_qi = PI*.25*av_s
 
-!>  - Compute Evaporation of rain; ignore depositional growth of rain.
+!>  - Compute evaporation of rain; ignore depositional growth of rain
       t1_qr_ev = 0.78 * crg(10)
       t2_qr_ev = 0.308*Sc3*SQRT(av_r) * crg(11)
 
-!>  - Compute Sublimation/depositional growth of snow
+!>  - Compute sublimation/depositional growth of snow
       t1_qs_sd = 0.86
       t2_qs_sd = 0.28*Sc3*SQRT(av_s)
 
-!>  - Compute Melting of snow
+!>  - Compute melting of snow
       t1_qs_me = PI*4.*C_sqrd*olfus * 0.86
       t2_qs_me = PI*4.*C_sqrd*olfus * 0.28*Sc3*SQRT(av_s)
 
-!>  - Compute Sublimation/depositional growth of graupel
+!>  - Compute sublimation/depositional growth of graupel
       t1_qg_sd = 0.86 * cgg(10)
       t2_qg_sd = 0.28*Sc3*SQRT(av_g) * cgg(11)
 
-!>  - Compute Melting of graupel
+!>  - Compute melting of graupel
       t1_qg_me = PI*4.*C_cube*olfus * 0.86 * cgg(10)
       t2_qg_me = PI*4.*C_cube*olfus * 0.28*Sc3*SQRT(av_g) * cgg(11)
 
-!>  - Compute Constants for helping find lookup table indexes.
+!>  - Compute constants for helping find lookup table indexes
       nic2 = NINT(ALOG10(r_c(1)))
       nii2 = NINT(ALOG10(r_i(1)))
       nii3 = NINT(ALOG10(Nt_i(1)))
@@ -669,7 +672,7 @@ MODULE module_mp_thompson
       nig3 = NINT(ALOG10(N0g_exp(1)))
       niIN2 = NINT(ALOG10(Nt_IN(1)))
 
-!>  - Create bins of cloud water (from min diameter up to 100 microns).
+!>  - Create bins of cloud water (from min diameter up to 100 microns)
       Dc(1) = D0c*1.0d0
       dtc(1) = D0c*1.0d0
       do n = 2, nbc
@@ -677,7 +680,7 @@ MODULE module_mp_thompson
          dtc(n) = (Dc(n) - Dc(n-1))
       enddo
 
-!>  - Create bins of cloud ice (from min diameter up to 5x min snow size).
+!>  - Create bins of cloud ice (from min diameter up to 5x min snow size)
       xDx(1) = D0i*1.0d0
       xDx(nbi+1) = 5.0d0*D0s
       do n = 2, nbi
@@ -689,7 +692,7 @@ MODULE module_mp_thompson
          dti(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of rain (from min diameter up to 5 mm).
+!>  - Create bins of rain (from min diameter up to 5 mm)
       xDx(1) = D0r*1.0d0
       xDx(nbr+1) = 0.005d0
       do n = 2, nbr
@@ -701,7 +704,7 @@ MODULE module_mp_thompson
          dtr(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of snow (from min diameter up to 2 cm).
+!>  - Create bins of snow (from min diameter up to 2 cm)
       xDx(1) = D0s*1.0d0
       xDx(nbs+1) = 0.02d0
       do n = 2, nbs
@@ -713,7 +716,7 @@ MODULE module_mp_thompson
          dts(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of graupel (from min diameter up to 5 cm).
+!>  - Create bins of graupel (from min diameter up to 5 cm)
       xDx(1) = D0g*1.0d0
       xDx(nbg+1) = 0.05d0
       do n = 2, nbg
@@ -725,7 +728,7 @@ MODULE module_mp_thompson
          dtg(n) = xDx(n+1) - xDx(n)
       enddo
 
-!>  - Create bins of cloud droplet number concentration (1 to 3000 per cc).
+!>  - Create bins of cloud droplet number concentration (1 to 3000 per cc)
       xDx(1) = 1.0d0
       xDx(nbc+1) = 3000.0d0
       do n = 2, nbc
@@ -738,7 +741,7 @@ MODULE module_mp_thompson
       nic1 = DLOG(t_Nc(nbc)/t_Nc(1))
 
 !+---+-----------------------------------------------------------------+
-!> - Create lookup tables for most costly calculations.
+!> - Create lookup tables for most costly calculations
 !+---+-----------------------------------------------------------------+
 
       ! Assign mpicomm to module variable
@@ -870,27 +873,28 @@ MODULE module_mp_thompson
          enddo
       enddo
 
-      if (mpirank==mpiroot) WRITE (*,*)'CREATING MICROPHYSICS LOOKUP TABLES ... '
-      if (mpirank==mpiroot) WRITE (*,'(a, f5.2, a, f5.2, a, f5.2, a, f5.2)') &
+      if (mpirank==mpiroot) write (*,*)'creating microphysics lookup tables ... '
+      if (mpirank==mpiroot) write (*,'(a, f5.2, a, f5.2, a, f5.2, a, f5.2)') &
           ' using: mu_c=',mu_c,' mu_i=',mu_i,' mu_r=',mu_r,' mu_g=',mu_g
 
 !>  - Call table_ccnact() to read a static file containing CCN activation of aerosols. The
 !! data were created from a parcel model by Feingold & Heymsfield with
-!! further changes by Eidhammer and Kriedenweis.
+!! further changes by Eidhammer and Kriedenweis
       ! This computation is cheap compared to the others below, and
       ! doing it always ensures that the correct data is in the SIONlib
       ! file containing the precomputed tables *DH
-      WRITE (*,*) '  calling table_ccnAct routine'
-      call table_ccnAct
+      if (mpirank==mpiroot) write(0,*) '  calling table_ccnAct routine'
+      call table_ccnAct(errmsg,errflg)
+      if (.not. errflg==0) return
 
-!>  - Call table_efrw() and table_Efsw() to creat collision efficiency table 
-!! between rain/snow and cloud water.
-      WRITE (*,*)'  creating qc collision eff tables'
+!>  - Call table_efrw() and table_efsw() to creat collision efficiency table 
+!! between rain/snow and cloud water
+      if (mpirank==mpiroot) write(0,*) '  creating qc collision eff tables'
       call table_Efrw
       call table_Efsw
 
-!>  - Call table_dropevap() to creat rain drop evaporation table.
-      WRITE(*,*) '  creating rain evap table'
+!>  - Call table_dropevap() to creat rain drop evaporation table
+      if (mpirank==mpiroot) write(0,*) '  creating rain evap table'
       call table_dropEvap
 
       call cpu_time(etime)
@@ -898,7 +902,7 @@ MODULE module_mp_thompson
 
       end if precomputed_tables_1
 
-!>  - Call radar_init() to initialize various constants for computing radar reflectivity.
+!>  - Call radar_init() to initialize various constants for computing radar reflectivity
       call cpu_time(stime)
       xam_r = am_r
       xbm_r = bm_r
@@ -920,39 +924,29 @@ MODULE module_mp_thompson
 
       call cpu_time(stime)
 
-!$OMP parallel num_threads(threads)
-
-!$OMP sections
-
-!$OMP section
-!>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table.
-      WRITE (*,*) '  creating rain collecting graupel table'
+!>  - Call qr_acr_qg() to create rain collecting graupel & graupel collecting rain table
+      if (mpirank==mpiroot) write(0,*) '  creating rain collecting graupel table'
       call cpu_time(stime)
       call qr_acr_qg
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing rain collecting graupel table took ",f10.3," seconds.")', etime-stime
 
-!$OMP section
-!>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table.
-      WRITE (*,*) '  creating rain collecting snow table'
+!>  - Call qr_acr_qs() to create rain collecting snow & snow collecting rain table
+      if (mpirank==mpiroot) write (*,*) '  creating rain collecting snow table'
       call cpu_time(stime)
       call qr_acr_qs
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing rain collecting snow table took ",f10.3," seconds.")', etime-stime
 
-!$OMP end sections
-
-!$OMP end parallel
-
-!>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table.
-      WRITE (*,*)  '  creating freezing of water drops table'
+!>  - Call freezeh2o() to create cloud water and rain freezing (Bigg, 1953) table
+      if (mpirank==mpiroot) write(0,*) '  creating freezing of water drops table'
       call cpu_time(stime)
       call freezeH2O(threads)
       call cpu_time(etime)
       if (mpirank==mpiroot) print '("Computing freezing of water drops table took ",f10.3," seconds.")', etime-stime
 
-!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category.
-      WRITE (*,*) '  creating ice converting to snow table'
+!>  - Call qi_aut_qs() to create conversion of some ice mass into snow category
+      if (mpirank==mpiroot) write(0,*) '  creating ice converting to snow table'
       call cpu_time(stime)
       call qi_aut_qs
       call cpu_time(etime)
@@ -984,17 +978,16 @@ MODULE module_mp_thompson
 
       endif if_not_iiwarm
 
-      WRITE (*,*) ' ... DONE microphysical lookup tables'
+      if (mpirank==mpiroot) write(0,*) ' ... DONE microphysical lookup tables'
 
       endif if_micro_init
 
       END SUBROUTINE thompson_init
-
 !> @}
 
 !>\ingroup aathompson
 !!This is a wrapper routine designed to transfer values from 3D to 1D.
-!!\section gen_mpgtdriver GSD Thompson mp_gt_driver General Algorithm
+!!\section gen_mpgtdriver Thompson mp_gt_driver General Algorithm
 !> @{
       SUBROUTINE mp_gt_driver(qv, qc, qr, qi, qs, qg, ni, nr, nc,     &
                               nwfa, nifa, nwfa2d, nifa2d,             &
@@ -1014,7 +1007,7 @@ MODULE module_mp_thompson
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
-                              errmsg, errflg)
+                              errmsg, errflg, reset)
 
       implicit none
 
@@ -1031,7 +1024,7 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(INOUT):: &
                           nc, nwfa, nifa
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
-      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(OUT):: &
+      REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(OUT):: &
                           re_cloud, re_ice, re_snow
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
@@ -1052,6 +1045,7 @@ MODULE module_mp_thompson
                           vt_dbz_wt
       LOGICAL, OPTIONAL, INTENT(IN) :: first_time_step
       REAL, INTENT(IN):: dt_in
+      LOGICAL, INTENT (IN) :: reset
 
 !..Local variables
       REAL, DIMENSION(kts:kte):: &
@@ -1074,6 +1068,8 @@ MODULE module_mp_thompson
       INTEGER:: i_start, j_start, i_end, j_end
       LOGICAL, OPTIONAL, INTENT(IN) :: diagflag
       INTEGER, OPTIONAL, INTENT(IN) :: do_radar_ref
+      logical :: melti = .false.
+
       ! CCPP error handling
       character(len=*), optional, intent(  out) :: errmsg
       integer,          optional, intent(  out) :: errflg
@@ -1299,7 +1295,7 @@ MODULE module_mp_thompson
              kmax_qc = k
              qc_max = qc1d(k)
             elseif (qc1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qc ', qc1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qc ', qc1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qr1d(k) .gt. qr_max) then
@@ -1308,7 +1304,7 @@ MODULE module_mp_thompson
              kmax_qr = k
              qr_max = qr1d(k)
             elseif (qr1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qr ', qr1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qr ', qr1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (nr1d(k) .gt. nr_max) then
@@ -1317,7 +1313,7 @@ MODULE module_mp_thompson
              kmax_nr = k
              nr_max = nr1d(k)
             elseif (nr1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative nr ', nr1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative nr ', nr1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qs1d(k) .gt. qs_max) then
@@ -1326,7 +1322,7 @@ MODULE module_mp_thompson
              kmax_qs = k
              qs_max = qs1d(k)
             elseif (qs1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qs ', qs1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qs ', qs1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qi1d(k) .gt. qi_max) then
@@ -1335,7 +1331,7 @@ MODULE module_mp_thompson
              kmax_qi = k
              qi_max = qi1d(k)
             elseif (qi1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qi ', qi1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qi ', qi1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qg1d(k) .gt. qg_max) then
@@ -1344,7 +1340,7 @@ MODULE module_mp_thompson
              kmax_qg = k
              qg_max = qg1d(k)
             elseif (qg1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qg ', qg1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qg ', qg1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (ni1d(k) .gt. ni_max) then
@@ -1353,11 +1349,11 @@ MODULE module_mp_thompson
              kmax_ni = k
              ni_max = ni1d(k)
             elseif (ni1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative ni ', ni1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative ni ', ni1d(k),        &
                         ' at i,j,k=', i,j,k
             endif
             if (qv1d(k) .lt. 0.0) then
-             write(*,*) 'WARNING, negative qv ', qv1d(k),        &
+             write(*,'(a,e16.7,a,3i8)') 'WARNING, negative qv ', qv1d(k),        &
                         ' at i,j,k=', i,j,k
              if (k.lt.kte-2 .and. k.gt.kts+1) then
                 write(*,*) '   below and above are: ', qv(i,k-1,j), qv(i,k+1,j)
@@ -1369,15 +1365,26 @@ MODULE module_mp_thompson
          enddo
 
 !> - Call calc_refl10cm()
+
          IF ( PRESENT (diagflag) ) THEN
          if (diagflag .and. do_radar_ref == 1) then
+!
+         ! Only set melti to true at the output times
+            if (reset) then
+               melti=.true.
+            else
+               melti=.false.
+            endif
+!
           if (present(vt_dbz_wt) .and. present(first_time_step)) then
             call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                t1d, p1d, dBZ, kts, kte, i, j,      &
-                                vt_dbz_wt(i,:,j), first_time_step)
+                                t1d, p1d, dBZ, kts, kte, i, j,      & 
+                                melti, vt_dbz_wt(i,:,j),            &
+                                first_time_step)
           else
-             call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                 t1d, p1d, dBZ, kts, kte, i, j)
+            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
+                                t1d, p1d, dBZ, kts, kte, i, j,      &
+                                melti)
           end if
           do k = kts, kte
              refl_10cm(i,k,j) = MAX(-35., dBZ(k))
@@ -1477,7 +1484,7 @@ MODULE module_mp_thompson
 !! Previously this code was based on Reisner et al (1998), but few of
 !! those pieces remain.  A complete description is now found in
 !! Thompson et al. (2004, 2008)\cite Thompson_2004 \cite Thompson_2008.
-!>\section gen_mp_thompson  GSD mp_thompson General Algorithm
+!>\section gen_mp_thompson  mp_thompson General Algorithm
 !> @{
       subroutine mp_thompson (qv1d, qc1d, qi1d, qr1d, qs1d, qg1d, ni1d, &
                           nr1d, nc1d, nwfa1d, nifa1d, t1d, p1d, w1d, dzq, &
@@ -1486,11 +1493,9 @@ MODULE module_mp_thompson
                           rainprod, evapprod, &
 #endif
                           kts, kte, dt, ii, jj)
-      ! DH*
 #ifdef MPI
       use mpi
 #endif
-      ! *DH
       implicit none
 
 !..Sub arguments
@@ -1586,7 +1591,7 @@ MODULE module_mp_thompson
       INTEGER:: idx_tc, idx_t, idx_s, idx_g1, idx_g, idx_r1, idx_r,     &
                 idx_i1, idx_i, idx_c, idx, idx_d, idx_n, idx_in
 
-      LOGICAL:: melti, no_micro
+      LOGICAL:: no_micro
       LOGICAL, DIMENSION(kts:kte):: L_qc, L_qi, L_qr, L_qs, L_qg
       LOGICAL:: debug_flag
       INTEGER:: nu_c
@@ -3697,7 +3702,8 @@ MODULE module_mp_thompson
       enddo
 
       end subroutine mp_thompson
-! >@}
+!>@}
+
 !+---+-----------------------------------------------------------------+
 !ctrlL
 !+---+-----------------------------------------------------------------+
@@ -3731,7 +3737,7 @@ MODULE module_mp_thompson
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read qr_acr_qg.dat instead of computing"
+          !write(0,*) "ThompMP: read qr_acr_qg.dat instead of computing"
           OPEN(63,file="qr_acr_qg.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234) tcg_racg
@@ -3907,7 +3913,7 @@ MODULE module_mp_thompson
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read qr_acr_qs.dat instead of computing"
+          !write(0,*) "ThompMP: read qr_acr_qs.dat instead of computing"
           OPEN(63,file="qr_acr_qs.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234)tcs_racs1
@@ -4168,7 +4174,7 @@ MODULE module_mp_thompson
         call MPI_BARRIER(mpi_communicator,ierr)
 #endif
         IF ( lexist ) THEN
-          write(0,*) "ThompMP: read freezeH2O.dat instead of computing"
+          !write(0,*) "ThompMP: read freezeH2O.dat instead of computing"
           OPEN(63,file="freezeH2O.dat",form="unformatted",err=1234)
 !sms$serial begin
           READ(63,err=1234)tpi_qrfz
@@ -4615,15 +4621,17 @@ MODULE module_mp_thompson
 !! vertical velocity, temperature, lognormal mean aerosol radius, and
 !! hygroscopicity, kappa.  The data are read from external file and
 !! contain activated fraction of CCN for given conditions.
-      subroutine table_ccnAct
+      subroutine table_ccnAct(errmess,errflag)
 
       implicit none
 
+!..Error handling variables
+      CHARACTER(len=*), INTENT(INOUT) :: errmess
+      INTEGER,          INTENT(INOUT) :: errflag
 
 !..Local variables
       INTEGER:: iunit_mp_th1, i
       LOGICAL:: opened
-      CHARACTER*64 errmess
 
       iunit_mp_th1 = -1
         DO i = 20,99
@@ -4651,19 +4659,11 @@ MODULE module_mp_thompson
       RETURN
  9009 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error opening CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
-      write(0,*) errmess
-      ! DH* TEMPORARY FIX 20181203
-      call sleep(5)
-      stop
-      ! *DH
+      errflag = 1
       RETURN
  9010 CONTINUE
       WRITE( errmess , '(A,I2)' ) 'module_mp_thompson: error reading CCN_ACTIVATE.BIN on unit ',iunit_mp_th1
-      write(0,*) errmess
-      ! DH* TEMPORARY FIX 20181203
-      call sleep(5)
-      stop
-      ! *DH
+      errflag = 1
       RETURN
 
       end subroutine table_ccnAct
@@ -4757,9 +4757,11 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !+---+-----------------------------------------------------------------+
 !>\ingroup aathompson
+!! Returns the incomplete gamma function q(a,x) evaluated by its
+!! continued fraction representation as gammcf.
       SUBROUTINE GCF(GAMMCF,A,X,GLN)
-!> RETURNS THE INCOMPLETE GAMMA FUNCTION Q(A,X) EVALUATED BY ITS
-!! CONTINUED FRACTION REPRESENTATION AS GAMMCF.  ALSO RETURNS
+! RETURNS THE INCOMPLETE GAMMA FUNCTION Q(A,X) EVALUATED BY ITS
+! CONTINUED FRACTION REPRESENTATION AS GAMMCF.  ALSO RETURNS
 !     --- LN(GAMMA(A)) AS GLN.  THE CONTINUED FRACTION IS EVALUATED BY
 !     --- A MODIFIED LENTZ METHOD.
 !     --- USES GAMMLN
@@ -4794,6 +4796,8 @@ MODULE module_mp_thompson
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 
 !>\ingroup aathompson
+!! Returns the incomplete gamma function p(a,x) evaluated by
+!! its series representation as gamser.
       SUBROUTINE GSER(GAMSER,A,X,GLN)
 !     --- RETURNS THE INCOMPLETE GAMMA FUNCTION P(A,X) EVALUATED BY ITS
 !     --- ITS SERIES REPRESENTATION AS GAMSER.  ALSO RETURNS LN(GAMMA(A))
@@ -4827,6 +4831,7 @@ MODULE module_mp_thompson
 !  (C) Copr. 1986-92 Numerical Recipes Software 2.02
 
 !>\ingroup aathompson
+!! Returns the value ln(gamma(xx)) for xx > 0.
       REAL FUNCTION GAMMLN(XX)
 !     --- RETURNS THE VALUE LN(GAMMA(XX)) FOR XX > 0.
       IMPLICIT NONE
@@ -5212,8 +5217,9 @@ MODULE module_mp_thompson
 !! library of routines.  The meltwater fraction is simply the amount
 !! of frozen species remaining from what initially existed at the
 !! melting level interface.
-      subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,     &
-               t1d, p1d, dBZ, kts, kte, ii, jj, vt_dBZ, first_time_step)
+      subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
+               t1d, p1d, dBZ, kts, kte, ii, jj, melti, vt_dBZ,      &
+               first_time_step)
 
       IMPLICIT NONE
 
@@ -5246,7 +5252,7 @@ MODULE module_mp_thompson
       DOUBLE PRECISION:: fmelt_s, fmelt_g
 
       INTEGER:: i, k, k_0, kbot, n
-      LOGICAL:: melti
+      LOGICAL, INTENT(IN):: melti
       LOGICAL, DIMENSION(kts:kte):: L_qr, L_qs, L_qg
 
       DOUBLE PRECISION:: cback, x, eta, f_d
@@ -5399,18 +5405,16 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+
 !..Locate K-level of start of melting (k_0 is level above).
 !+---+-----------------------------------------------------------------+
-      melti = .false.
       k_0 = kts
-      do k = kte-1, kts, -1
-         if ( (temp(k).gt.273.15) .and. L_qr(k)                         &
+      if ( melti ) then
+        K_LOOP:do k = kte-1, kts, -1
+          if ((temp(k).gt.273.15) .and. L_qr(k)                         &
      &                            .and. (L_qs(k+1).or.L_qg(k+1)) ) then
-            k_0 = MAX(k+1, k_0)
-            melti=.true.
-            goto 195
-         endif
-      enddo
- 195  continue
-
+             k_0 = MAX(k+1, k_0)
+             EXIT K_LOOP
+          endif
+        enddo K_LOOP
+      endif
 !+---+-----------------------------------------------------------------+
 !..Assume Rayleigh approximation at 10 cm wavelength. Rain (all temps)
 !.. and non-water-coated snow and graupel when below freezing are

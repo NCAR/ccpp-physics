@@ -262,6 +262,7 @@
 !!\n                     =8:  Thompson microphysics
 !!\n                     =6:  WSM6 microphysics
 !!\n                     =10: MG microphysics
+!!\n                     =15: Ferrier-Aligo microphysics
 !!\param me              print control flag
 !>\section gen_cld_init cld_init General Algorithm
 !! @{
@@ -350,6 +351,8 @@
             print *,'   --- WSM6 cloud microphysics'
           elseif (imp_physics == 10) then
             print *,'   --- MG cloud microphysics'
+          elseif (imp_physics == 15) then
+            print *,'   --- Ferrier-Aligo cloud microphysics'
           else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics
@@ -845,6 +848,8 @@
 !!\param delp    (IX,NLAY), model layer pressure thickness in mb (100Pa)
 !!\param IX          horizontal dimention
 !!\param NLAY,NLP1    vertical layer/level dimensions
+!!\param lmfshal     flag for mass-flux shallow convection scheme in the cloud fraction calculation    
+!!\param lmfdeep2    flag for mass-flux deep convection scheme in the cloud fraction calculation
 !!\param clouds      (IX,NLAY,NF_CLDS), cloud profiles
 !!\n                 (:,:,1) - layer total cloud fraction
 !!\n                 (:,:,2) - layer cloud liq water path  \f$(g/m^2)\f$
@@ -860,7 +865,7 @@
 !!\param mbot        (IX,3), vertical indices for low, mid, hi cloud bases
 !!\param de_lgth   (IX),   clouds decorrelation length (km)
 !>\section gen_progcld2 progcld2 General Algorithm
-!! @{
+!> @{
       subroutine progcld2                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, f_ice,f_rain,r_rime,flgmin,       &
@@ -1265,7 +1270,7 @@
       return
 !...................................
       end subroutine progcld2
-!! @}
+!> @}
 !-----------------------------------
 
 !> \ingroup module_radiation_clouds
@@ -1279,6 +1284,8 @@
 !!\param qstl       (ix,nlay), layer saturate humidity in gm/gm
 !!\param rhly       (ix,nlay), layer relative humidity (=qlyr/qstl)
 !!\param clw        (ix,nlay), layer cloud condensate amount
+!!\param cnvw       (ix,nlay), layer convective cloud condensate
+!!\param cnvc       (ix,nlay), layer convective cloud cover
 !!\param xlat       (ix), grid latitude in radians, default to pi/2 ->
 !!                   -pi/2 range, otherwise see in-line comment
 !!\param xlon       (ix), grid longitude in radians  (not used)
@@ -1684,6 +1691,8 @@
 !!\param  xlon    (ix), grid longitude in radians (not used)
 !!\param  slmsk   (ix), sea/land mask array (sea:0, land:1, sea-ice:2)
 !!\param  cldtot  (ix,nlay), layer total cloud fraction
+!!\param  dz      (ix,nlay), layer thickness (km)
+!!\param  delp    (ix,nlay), model layer pressure thickness in mb (100Pa)
 !!\param  ix      horizontal dimension
 !!\param  nlay    vertical layer dimension
 !!\param  nlp1    vertical level dimension
@@ -1700,6 +1709,7 @@
 !!\param  clds    fraction of clouds for low, mid, hi cloud tops
 !!\param  mtop    vertical indices for low, mid, hi cloud tops
 !!\param  mbot    vertical indices for low, mid, hi cloud bases
+!!\param  de_lgth clouds decorrelation length (km)
 !>\section gen_progcld4  progcld4 General Algorithm
 !! @{
       subroutine progcld4                                               & 
@@ -2014,6 +2024,8 @@
 !!                 range, otherwise see in-line comment
 !>\param xlon      (ix), grid longitude in radians (not used)
 !>\param slmsk     (ix), sea/land mask array (sea:0, land:1, sea-ice:2)
+!>\param dz        layer thickness (km)
+!>\param delp      model layer pressure thickness in mb (100Pa)
 !>\param ntrac     number of tracers minus one (Model%ntrac-1)
 !>\param ntcw      tracer index for cloud liquid water minus one (Model%ntcw-1)
 !>\param ntiw      tracer index for cloud ice water minus one (Model%ntiw-1)
@@ -2037,6 +2049,7 @@
 !>\param clds      (ix,5), fraction of clouds for low, mid, hi, tot, bl
 !>\param mtop      (ix,3), vertical indices for low, mid, hi cloud tops 
 !>\param mbot      (ix,3), vertical indices for low, mid, hi cloud bases
+!>\param de_lgth   clouds decorrelation length (km)  
 !>\section gen_progcld4o progcld4o General Algorithm
 !! @{
       subroutine progcld4o                                              &
@@ -2677,9 +2690,8 @@
 !!\param plvl    (IX,NLP1), model level pressure in mb (100Pa)
 !!\param tlyr    (IX,NLAY), model layer mean temperature in K
 !!\param tvly    (IX,NLAY), model layer virtual temperature in K
-!!\param qlyr    (IX,NLAY), layer specific humidity in gm/gm
-!!\param clw     (IX,NLAY), layer cloud liquid water amount
-!!\param ciw     (IX,NLAY), layer cloud ice water amount
+!!\param ccnd    (IX,NLAY), layer cloud condensate amount
+!!\param ncnd    number of layer cloud condensate types
 !!\param xlat    (IX), grid latitude in radians, default to pi/2 ->
 !!               -pi/2 range, otherwise see in-line comment
 !!\param xlon    (IX), grid longitude in radians  (not used)
@@ -2741,26 +2753,27 @@
 !  ====================  definition of variables  ====================  !
 !                                                                       !
 ! input variables:                                                      !
-!   plyr  (IX,NLAY) : model layer mean pressure in mb (100Pa)           !
-!   plvl  (IX,NLP1) : model level pressure in mb (100Pa)                !
-!   tlyr  (IX,NLAY) : model layer mean temperature in k                 !
-!   tvly  (IX,NLAY) : model layer virtual temperature in k              !
-!   ccnd  (IX,NLAY) : layer cloud condensate amount                     !
-!   ncnd            : number of layer cloud condensate types            !
-!   xlat  (IX)      : grid latitude in radians, default to pi/2 -> -pi/2!
-!                     range, otherwise see in-line comment              !
-!   xlon  (IX)      : grid longitude in radians  (not used)             !
-!   slmsk (IX)      : sea/land mask array (sea:0,land:1,sea-ice:2)      !
-!   IX              : horizontal dimention                              !
-!   NLAY,NLP1       : vertical layer/level dimensions                   !
-!   cldtot          : unified cloud fracrion from moist physics         !
-!   effrl (ix,nlay) : effective radius for liquid water                 !
-!   effri (ix,nlay) : effective radius for ice water                    !
-!   effrr (ix,nlay) : effective radius for rain water                   !
-!   effrs (ix,nlay) : effective radius for snow water                   !
-!   effr_in         : logical - if .true. use input effective radii     !
-!   dz    (ix,nlay) : layer thickness (km)                              !
-!   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !
+!   plyr  (IX,NLAY)      : model layer mean pressure in mb (100Pa)           !
+!   plvl  (IX,NLP1)      : model level pressure in mb (100Pa)                !
+!   tlyr  (IX,NLAY)      : model layer mean temperature in k                 !
+!   tvly  (IX,NLAY)      : model layer virtual temperature in k              !
+!   ccnd  (IX,NLAY,ncnd) : layer cloud condensate amount                     !
+!                          water, ice, rain, snow (+ graupel)                !
+!   ncnd                 : number of layer cloud condensate types (max of 4) !
+!   xlat  (IX)           : grid latitude in radians, default to pi/2 -> -pi/2!
+!                          range, otherwise see in-line comment              !
+!   xlon  (IX)           : grid longitude in radians  (not used)             !
+!   slmsk (IX)           : sea/land mask array (sea:0,land:1,sea-ice:2)      !
+!   IX                   : horizontal dimention                              !
+!   NLAY,NLP1            : vertical layer/level dimensions                   !
+!   cldtot               : unified cloud fracrion from moist physics         !
+!   effrl (ix,nlay)      : effective radius for liquid water                 !
+!   effri (ix,nlay)      : effective radius for ice water                    !
+!   effrr (ix,nlay)      : effective radius for rain water                   !
+!   effrs (ix,nlay)      : effective radius for snow water                   !
+!   effr_in              : logical - if .true. use input effective radii     !
+!   dz    (ix,nlay)      : layer thickness (km)                              !
+!   delp  (ix,nlay)      : model layer pressure thickness in mb (100Pa)      !
 !                                                                       !
 ! output variables:                                                     !
 !   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !
@@ -2818,7 +2831,7 @@
 
 !  ---  local variables:
       real (kind=kind_phys), dimension(IX,NLAY) :: cldcnv, cwp, cip,    &
-     &       crp, csp, rew, rei, res, rer, tem2d
+     &       crp, csp, rew, rei, res, rer
       real (kind=kind_phys), dimension(IX,NLAY,ncnd) :: cndf
 
       real (kind=kind_phys) :: ptop1(IX,NK_CLDS+1), rxlat(ix)
@@ -2830,47 +2843,23 @@
 !
 !===> ... begin here
 !
-      do nf=1,nf_clds
-        do k=1,nlay
-          do i=1,ix
-            clouds(i,k,nf) = 0.0
-          enddo
+!     do nf=1,nf_clds
+!       do k=1,nlay
+!         do i=1,ix
+!           clouds(i,k,nf) = 0.0
+!         enddo
+!       enddo
+!     enddo
+!
+      do k = 1, NLAY
+        do i = 1, IX
+          cldcnv(i,k) = 0.0
+          cwp(i,k)    = 0.0
+          cip(i,k)    = 0.0
+          crp(i,k)    = 0.0
+          csp(i,k)    = 0.0
         enddo
       enddo
-!     clouds(:,:,:) = 0.0
-
-      if (effr_in) then
-        do k = 1, NLAY
-          do i = 1, IX
-            cldcnv(i,k) = 0.0
-            cwp   (i,k) = 0.0
-            cip   (i,k) = 0.0
-            crp   (i,k) = 0.0
-            csp   (i,k) = 0.0
-            rew   (i,k) = effrl (i,k)
-            rei   (i,k) = max(10.0, min(150.0,effri (i,k)))
-            rer   (i,k) = effrr (i,k)
-            res   (i,k) = effrs (i,k)
-            tem2d (i,k) = min( 1.0, max( 0.0,(con_ttp-tlyr(i,k))*0.05))
-          enddo
-        enddo
-      else
-        do k = 1, NLAY
-          do i = 1, IX
-            cldcnv(i,k) = 0.0
-            cwp   (i,k) = 0.0
-            cip   (i,k) = 0.0
-            crp   (i,k) = 0.0
-            csp   (i,k) = 0.0
-            rew   (i,k) = reliq_def            ! default liq radius to 10 micron
-            rei   (i,k) = reice_def            ! default ice radius to 50 micron
-            rer   (i,k) = rrain_def            ! default rain radius to 1000 micron
-            res   (i,k) = rsnow_def            ! default snow radius to 250 micron
-            tem2d (i,k) = min(1.0, max(0.0, (con_ttp-tlyr(i,k))*0.05))
-          enddo
-        enddo
-      endif
-!
       do n=1,ncnd
         do k = 1, NLAY
           do i = 1, IX
@@ -2878,7 +2867,7 @@
           enddo
         enddo
       enddo
-      if ( lcrick ) then
+      if ( lcrick ) then   ! vertical smoorthing
         do n=1,ncnd
           do i = 1, IX
             cndf(i,1,n)    = 0.75*ccnd(i,1,n)    + 0.25*ccnd(i,2,n)
@@ -2893,54 +2882,25 @@
         enddo
       endif
 
-!> - Find top pressure for each cloud domain for given latitude.
-!     ptopc(k,i): top presure of each cld domain (k=1-4 are sfc,L,m,h;
-!  ---  i=1,2 are low-lat (<45 degree) and pole regions)
-
-      do i =1, IX
-        rxlat(i) = abs( xlat(i) / con_pi )     ! if xlat in pi/2 -> -pi/2 range
-!       rxlat(i) = abs(0.5 - xlat(i)/con_pi)   ! if xlat in 0 -> pi range
-      enddo
-
-      do id = 1, 4
-        tem1 = ptopc(id,2) - ptopc(id,1)
-
-        do i =1, IX
-          ptop1(i,id) = ptopc(id,1) + tem1*max( 0.0, 4.0*rxlat(i)-1.0 )
-        enddo
-      enddo
-
 !> -# Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .
 
-        if (ncnd == 2) then
-          do k = 1, NLAY
-            do i = 1, IX
-              tem1      = gfac * delp(i,k)
-              cwp(i,k)  = cndf(i,k,1) * tem1
-              cip(i,k)  = cndf(i,k,2) * tem1
-            enddo
+      if (ncnd == 2) then
+        do k = 1, NLAY
+          do i = 1, IX
+            tem1      = gfac * delp(i,k)
+            cwp(i,k)  = cndf(i,k,1) * tem1
+            cip(i,k)  = cndf(i,k,2) * tem1
           enddo
-        elseif (ncnd == 4 .or. ncnd == 5) then
-          do k = 1, NLAY
-            do i = 1, IX
-              tem1      = gfac * delp(i,k)
-              cwp(i,k)  = cndf(i,k,1) * tem1
-              cip(i,k)  = cndf(i,k,2) * tem1
-              crp(i,k)  = cndf(i,k,3) * tem1
-              csp(i,k)  = cndf(i,k,4) * tem1
-            enddo
+        enddo
+      elseif (ncnd == 4) then
+        do k = 1, NLAY
+          do i = 1, IX
+            tem1      = gfac * delp(i,k)
+            cwp(i,k)  = cndf(i,k,1) * tem1
+            cip(i,k)  = cndf(i,k,2) * tem1
+            crp(i,k)  = cndf(i,k,3) * tem1
+            csp(i,k)  = cndf(i,k,4) * tem1
           enddo
-        endif
-
-!> -# Compute effective liquid cloud droplet radius over land.
-
-      if(.not. effr_in) then
-        do i = 1, IX
-          if (nint(slmsk(i)) == 1) then
-            do k = 1, NLAY
-              rew(i,k) = 5.0 + 5.0 * tem2d(i,k)
-            enddo
-          endif
         enddo
       endif
 
@@ -2969,10 +2929,39 @@
         enddo
       endif
 
-!> - Compute effective ice cloud droplet radius following 
-!! Heymsfield and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
+!     assign/calculate efective radii for cloud water, ice, rain, snow
 
-      if(.not. effr_in) then
+      if (effr_in) then
+        do k = 1, NLAY
+          do i = 1, IX
+            rew(i,k) = effrl (i,k)
+            rei(i,k) = max(10.0, min(150.0,effri (i,k)))
+            rer(i,k) = effrr (i,k)
+            res(i,k) = effrs (i,k)
+          enddo
+        enddo
+      else
+        do k = 1, NLAY
+          do i = 1, IX
+            rew(i,k) = reliq_def            ! default liq  radius to 10   micron
+            rei(i,k) = reice_def            ! default ice  radius to 50   micron
+            rer(i,k) = rrain_def            ! default rain radius to 1000 micron
+            res(i,k) = rsnow_def            ! default snow radius to 250  micron
+          enddo
+        enddo
+!> -# Compute effective liquid cloud droplet radius over land.
+        do i = 1, IX
+          if (nint(slmsk(i)) == 1) then
+            do k = 1, NLAY
+              tem1     = min(1.0, max(0.0, (con_ttp-tlyr(i,k))*0.05))
+              rew(i,k) = 5.0 + 5.0 * tem1
+            enddo
+          endif
+        enddo
+
+!> -# Compute effective ice cloud droplet radius following Heymsfield 
+!!    and McFarquhar (1996) \cite heymsfield_and_mcfarquhar_1996.
+
         do k = 1, NLAY
           do i = 1, IX
             tem2 = tlyr(i,k) - con_ttp
@@ -2997,7 +2986,6 @@
           enddo
         enddo
       endif
-
 !
       do k = 1, NLAY
         do i = 1, IX
@@ -3013,8 +3001,24 @@
         enddo
       enddo
 
-!  --- ...  estimate clouds decorrelation length in km
-!           this is only a tentative test, need to consider change later
+!> -# Find top pressure for each cloud domain for given latitude.
+!     ptopc(k,i): top presure of each cld domain (k=1-4 are sfc,L,m,h;
+!  ---  i=1,2 are low-lat (<45 degree) and pole regions)
+
+      do i =1, IX
+        rxlat(i) = abs( xlat(i) / con_pi )     ! if xlat in pi/2 -> -pi/2 range
+!       rxlat(i) = abs(0.5 - xlat(i)/con_pi)   ! if xlat in 0    ->  pi   range
+      enddo
+
+      do id = 1, 4
+        tem1 = ptopc(id,2) - ptopc(id,1)
+        do i =1, IX
+          ptop1(i,id) = ptopc(id,1) + tem1*max( 0.0, 4.0*rxlat(i)-1.0 )
+        enddo
+      enddo
+
+!> -# Estimate clouds decorrelation length in km
+!     this is only a tentative test, need to consider change later
 
       if ( iovr == 3 ) then
         do i = 1, ix
