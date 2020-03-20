@@ -204,9 +204,9 @@ contains
        fluxswUP_allsky(idxday(1:nday),:)   = sum(flux_allsky%bnd_flux_up,dim=3)
        fluxswDOWN_allsky(idxday(1:nday),:) = sum(flux_allsky%bnd_flux_dn,dim=3)
        if ( l_scmpsw ) then
-          scmpsw(idxday(1:nday))%nirbm = sum(flux_allsky%bnd_flux_dn_dir(idxday(1:nday),iSFC,:),dim=2)
-          scmpsw(idxday(1:nday))%nirdf = sum(flux_allsky%bnd_flux_dn(idxday(1:nday),iSFC,:),dim=2)  - &
-               sum(flux_allsky%bnd_flux_dn_dir(idxday(1:nday),iSFC,:),dim=2)
+          scmpsw(idxday(1:nday))%nirbm = sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
+          scmpsw(idxday(1:nday))%nirdf = sum(flux_allsky%bnd_flux_dn(1:nday,iSFC,:),dim=2)  - &
+               sum(flux_allsky%bnd_flux_dn_dir(1:nday,iSFC,:),dim=2)
        endif
     endif
   end subroutine rrtmgp_sw_rte_run
