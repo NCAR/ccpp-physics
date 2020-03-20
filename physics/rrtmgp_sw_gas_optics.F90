@@ -107,8 +107,6 @@ contains
     errmsg = ''
     errflg = 0
 
-    write(*,"(a52,3i20)") 'rrtmgp_sw_gas_optics.F90:_init(): RRTMGP MPI ranks: ',mpirank,mpiroot,mpicomm
-
     ! Filenames are set in the gphysics_nml
     sw_gas_props_file   = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_gas)
 
@@ -181,7 +179,7 @@ contains
        allocate(temp4(nminor_absorber_intervals_upper))
 
        ! Read in fields from file
-       write (*,*) 'Reading RRTMGP shortwave k-distribution data ... '
+       if (mpirank==mpiroot) write (*,*) 'Reading RRTMGP shortwave k-distribution data ... '
        status = nf90_inq_varid(ncid, 'gas_names', varID)
        status = nf90_get_var(  ncid, varID, gas_names)       
        status = nf90_inq_varid(ncid, 'scaling_gas_lower', varID)

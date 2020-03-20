@@ -109,8 +109,6 @@ contains
     errmsg = ''
     errflg = 0
 
-    write(*,"(a52,3i20)") 'rrtmgp_lw_gas_optics.F90:_init(): RRTMGP MPI ranks: ',mpirank,mpiroot,mpicomm
-
     ! Filenames are set in the physics_nml
     lw_gas_props_file  = trim(rrtmgp_root_dir)//trim(rrtmgp_lw_file_gas)
 
@@ -184,7 +182,7 @@ contains
        allocate(planck_frac(ngpts, nmixingfracs, npress+1, ntemps))
 
        ! Read in fields from file
-       write (*,*) 'Reading RRTMGP longwave k-distribution data ... '
+       if (mpirank==mpiroot) write (*,*) 'Reading RRTMGP longwave k-distribution data ... '
        status = nf90_inq_varid(ncid, 'gas_names', varID)
        status = nf90_get_var(  ncid, varID, gas_names)
        status = nf90_inq_varid(ncid, 'scaling_gas_lower', varID)
