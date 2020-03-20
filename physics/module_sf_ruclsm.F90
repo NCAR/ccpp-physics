@@ -67,7 +67,7 @@ CONTAINS
                    Z3D,P8W,T3D,QV3D,QC3D,RHO3D,                  &
                    GLW,GSW,EMISS,CHKLOWQ, CHS,                   &
                    FLQC,FLHC,MAVAIL,CANWAT,VEGFRA,ALB,ZNT,       &
-                   Z0,SNOALB,ALBBCK,                             & !Z0,SNOALB,ALBBCK,LAI, &
+                   Z0,SNOALB,ALBBCK,LAI,                         & 
                    landusef, nlcat,                              & ! mosaic_lu, mosaic_soil, &
                    soilctop, nscat,                              &
                    QSFC,QSG,QVG,QCG,DEW,SOILT1,TSNAV,            &
@@ -218,6 +218,7 @@ CONTAINS
                                                          CANWAT, & ! new
                                                          SNOALB, &
                                                             ALB, &
+                                                            LAI, &
                                                           EMISS, &
                                                          MAVAIL, & 
                                                          SFCEXC, &
@@ -269,7 +270,6 @@ CONTAINS
                                                              PC, &
                                                       SFCRUNOFF, &
                                                        UDRUNOFF, &
-                                                            LAI, &
                                                          EMISSL, &
                                                            ZNTL, &
                                                         LMAVAIL, &
@@ -431,8 +431,8 @@ CONTAINS
 !!    or ~100 mm of snow height
 !
 !           snowc(i,j) = min(1.,snow(i,j)/32.)
-           soilt1(i,j)=soilt(i,j)
-          if(snow(i,j).le.32.) soilt1(i,j)=tso(i,1,j)
+!           soilt1(i,j)=soilt(i,j)
+!          if(snow(i,j).le.32.) soilt1(i,j)=tso(i,1,j)
 !>  - Initializing inside snow temp if it is not defined
         IF((soilt1(i,j) .LT. 170.) .or. (soilt1(i,j) .GT.400.)) THEN
             IF(snow(i,j).gt.32.) THEN
@@ -450,7 +450,9 @@ CONTAINS
            patmb=P8w(i,kms,j)*1.e-2
            QSG  (i,j) = QSN(SOILT(i,j),TBQ)/PATMB
         IF((qvg(i,j) .LE. 0.) .or. (qvg(i,j) .GT.0.1)) THEN
-           qvg  (i,j) = QSG(i,j)*mavail(i,j)
+           !17sept19 - bad approximation with very low mavail.
+           !qvg(i,j) = QSG(i,j)*mavail(i,j)
+           qvg  (i,j) = qv3d(i,1,j)
           IF (debug_print ) THEN
            print *, &
           'QVG is initialized in RUCLSM ', qvg(i,j),mavail(i,j),qsg(i,j),i,j
@@ -751,7 +753,7 @@ CONTAINS
          meltfactor = 0.85
 
          do k=2,nzs
-         if(zsmain(k).ge.1.0) then
+         if(zsmain(k).ge.1.1) then
             NROOT=K
             goto  111
          endif

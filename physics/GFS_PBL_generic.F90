@@ -81,10 +81,10 @@
 !!
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
-        ntwa, ntia, ntgl, ntoz, ntke, ntkev, trans_aero, ntchs, ntchm,                   &
+        ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, cplchm, ltaerosol, hybedmf, do_shoc,      &
-        satmedmf, qgrs, vdftra, errmsg, errflg)
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
+        hybedmf, do_shoc, satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -93,17 +93,17 @@
 
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
-      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, ntchs, ntchm
+      integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(im, levs, ntrac),  intent(in)    :: qgrs
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
 
       character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      integer,          intent(out) :: errflg
 
       !local variables
       integer :: i, k, kk, k1, n
@@ -126,6 +126,20 @@
               vdftra(i,k,4) = qgrs(i,k,ntoz)
             enddo
           enddo
+
+  ! Ferrier-Aligo
+        elseif (imp_physics == imp_physics_fer_hires) then
+          do k=1,levs
+            do i=1,im
+              vdftra(i,k,1) = qgrs(i,k,ntqv)
+              vdftra(i,k,2) = qgrs(i,k,ntcw)
+              vdftra(i,k,3) = qgrs(i,k,ntiw)
+              vdftra(i,k,4) = qgrs(i,k,ntrw)
+              vdftra(i,k,5) = qgrs(i,k,nqrimef)
+              vdftra(i,k,6) = qgrs(i,k,ntoz)
+            enddo
+          enddo
+        
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
           if(ltaerosol) then
@@ -263,9 +277,10 @@
 !! \htmlinclude GFS_PBL_generic_post_run.html
 !!
       subroutine GFS_PBL_generic_post_run (im, levs, nvdiff, ntrac,                                                            &
-        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,                  &
+        ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev,nqrimef,          &
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
+        imp_physics_fer_hires,                                                                                                 &
         ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
         dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
@@ -280,10 +295,10 @@
       implicit none
 
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
-      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev
+      integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
-      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg
+      integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
 
@@ -316,6 +331,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
+      real(kind=kind_phys), parameter :: huge=1.0d30, epsln = 1.0d-10
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
@@ -365,6 +381,20 @@
               dqdt(i,k,ntoz)  = dvdftra(i,k,4)
             enddo
           enddo
+
+        elseif (imp_physics == imp_physics_fer_hires) then
+  ! Ferrier-Aligo 
+          do k=1,levs
+            do i=1,im
+              dqdt(i,k,ntqv)  = dvdftra(i,k,1)
+              dqdt(i,k,ntcw)  = dvdftra(i,k,2)
+              dqdt(i,k,ntiw)  = dvdftra(i,k,3)
+              dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+              dqdt(i,k,nqrimef) = dvdftra(i,k,5)
+              dqdt(i,k,ntoz)  = dvdftra(i,k,6)
+            enddo
+          enddo
+
         elseif (imp_physics == imp_physics_thompson) then
   ! Thompson
           if(ltaerosol) then
@@ -463,48 +493,47 @@
         dkt_cpl(1:im,1:levs-1) = dkt(1:im,1:levs-1)
       endif
 
-      if(cplflx)then
-        write(*,*)'Fatal error: CCPP is not ready for cplflx=true!!'
-        stop 
-      endif
 
 !  --- ...  coupling insertion
 
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
-!            if (fice(i) == ceanfrac(i)) then ! use results from CICE
-!              dusfci_cpl(i) = dusfc_cice(i)
-!              dvsfci_cpl(i) = dvsfc_cice(i)
-!              dtsfci_cpl(i) = dtsfc_cice(i)
-!              dqsfci_cpl(i) = dqsfc_cice(i)
-!            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
-            if (wet(i)) then                   ! use stress_ocean from sfc_diff for opw component at mixed point
-              if (icy(i) .or. dry(i)) then
-                tem1 = max(q1(i), 1.e-8)
-                rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
-                if (wind(i) > 0.0) then
-                  tem = - rho * stress_ocn(i) / wind(i)
-                  dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
-                  dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
-                else
-                  dusfci_cpl(i) = 0.0
-                  dvsfci_cpl(i) = 0.0
-                endif
-                dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
-                dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
-              else                                                    ! use results from PBL scheme for 100% open ocean
-                dusfci_cpl(i) = dusfc1(i)
-                dvsfci_cpl(i) = dvsfc1(i)
-                dtsfci_cpl(i) = dtsfc1(i)
-                dqsfci_cpl(i) = dqsfc1(i)
+            if (fice(i) > 1.-epsln) then ! no open water, use results from CICE
+              dusfci_cpl(i) = dusfc_cice(i)
+              dvsfci_cpl(i) = dvsfc_cice(i)
+              dtsfci_cpl(i) = dtsfc_cice(i)
+              dqsfci_cpl(i) = dqsfc_cice(i)
+            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
+              tem1 = max(q1(i), 1.e-8)
+              rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
+              if (wind(i) > 0.0) then
+                tem = - rho * stress_ocn(i) / wind(i)
+                dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
+                dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
+              else
+                dusfci_cpl(i) = 0.0
+                dvsfci_cpl(i) = 0.0
               endif
+              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+            else                                       ! use results from PBL scheme for 100% open ocean
+              dusfci_cpl(i) = dusfc1(i)
+              dvsfci_cpl(i) = dvsfc1(i)
+              dtsfci_cpl(i) = dtsfc1(i)
+              dqsfci_cpl(i) = dqsfc1(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
             dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfci_cpl(i) * dtf
             dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfci_cpl(i) * dtf
             dqsfc_cpl (i) = dqsfc_cpl(i) + dqsfci_cpl(i) * dtf
+!
+          else
+            dusfc_cpl(i) = huge
+            dvsfc_cpl(i) = huge
+            dtsfc_cpl(i) = huge
+            dqsfc_cpl(i) = huge
 !!
           endif ! Ocean only, NO LAKES
         enddo
@@ -522,10 +551,6 @@
           dtsfci_diag(i) = dtsfc1(i)
           dqsfci_diag(i) = dqsfc1(i)
         enddo
-  !       if (lprnt) then
-  !         write(0,*)' dusfc=',dusfc(ipr),' dusfc1=',dusfc1(ipr),' dtf=',
-  !    &     dtf,' kdt=',kdt,' lat=',lat
-  !       endif
 
         if (ldiag3d) then
           if (lsidea) then
@@ -540,9 +565,9 @@
           endif
           do k=1,levs
             do i=1,im
-              du3dt_PBL(i,k) = du3dt_PBL(i,k) + dudt(i,k) * dtf
+              du3dt_PBL(i,k)  = du3dt_PBL(i,k)  + dudt(i,k) * dtf
               du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
-              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + dvdt(i,k) * dtf
+              dv3dt_PBL(i,k)  = dv3dt_PBL(i,k)  + dvdt(i,k) * dtf
               dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
             enddo
           enddo

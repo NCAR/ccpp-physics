@@ -198,6 +198,12 @@
   type = integer
   intent = in
   optional = F
+[rdlai]
+  standard_name = flag_for_reading_leaf_area_index_from_input
+  long_name = flag for reading leaf area index from initial conditions for RUC LSM
+  units = flag
+  dimensions = ()
+  type = logical
 [zs]
   standard_name = depth_of_soil_levels_for_land_surface_model
   long_name = depth of soil levels for land surface model
@@ -423,7 +429,7 @@
   optional = F
 [qc]
   standard_name = cloud_condensed_water_mixing_ratio_at_lowest_model_layer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water at lowest model layer
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) at lowest model layer
   units = kg kg-1
   dimensions = (horizontal_dimension)
   type = real
@@ -528,6 +534,14 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[laixy]
+  standard_name = leaf_area_index
+  long_name = leaf area index
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
   optional = F
 [sfalb]
   standard_name = surface_diffused_shortwave_albedo
