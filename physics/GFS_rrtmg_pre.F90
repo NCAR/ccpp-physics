@@ -36,41 +36,42 @@
           mpirank, mpiroot)
 
       use machine,                   only: kind_phys
-      use GFS_typedefs,              only: GFS_statein_type,   &
-                                           GFS_stateout_type,  &
-                                           GFS_sfcprop_type,   &
-                                           GFS_coupling_type,  &
-                                           GFS_control_type,   &
-                                           GFS_grid_type,      &
-                                           GFS_tbd_type,       &
-                                           GFS_cldprop_type,   &
-                                           GFS_radtend_type,   &
+      use GFS_typedefs,              only: GFS_statein_type,            &
+                                           GFS_stateout_type,           &
+                                           GFS_sfcprop_type,            &
+                                           GFS_coupling_type,           &
+                                           GFS_control_type,            &
+                                           GFS_grid_type,               &
+                                           GFS_tbd_type,                &
+                                           GFS_cldprop_type,            &
+                                           GFS_radtend_type,            &
                                            GFS_diag_type
       use physparam
-      use physcons,                  only: eps   => con_eps,         &
-     &                                     epsm1 => con_epsm1,       &
-     &                                     fvirt => con_fvirt        &
-     &,                                    rog   => con_rog          &
+      use physcons,                  only: eps   => con_eps,            &
+     &                                     epsm1 => con_epsm1,          &
+     &                                     fvirt => con_fvirt           &
+     &,                                    rog   => con_rog             &
      &,                                    rocp  => con_rocp
-      use radcons,                   only: itsfc,ltp, lextop, qmin,  &
+      use radcons,                   only: itsfc,ltp, lextop, qmin,     &
                                            qme5, qme6, epsq, prsmin
       use funcphys,                  only: fpvs
 
-      use module_radiation_astronomy,only: coszmn                         ! sol_init, sol_update
-      use module_radiation_gases,    only: NF_VGAS, getgases, getozn      ! gas_init, gas_update,
-      use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer,   &  ! aer_init, aer_update,
+      use module_radiation_astronomy,only: coszmn                          ! sol_init, sol_update
+      use module_radiation_gases,    only: NF_VGAS, getgases, getozn       ! gas_init, gas_update,
+      use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer,    &  ! aer_init, aer_update,
      &                                     NSPC1
-      use module_radiation_clouds,   only: NF_CLDS,                    &  ! cld_init
-     &                                     progcld1, progcld3,         &
-     &                                     progcld2,                   &
-     &                                     progcld4, progcld5,         &
+      use module_radiation_clouds,   only: NF_CLDS,                     &  ! cld_init
+     &                                     progcld1, progcld3,          &
+     &                                     progcld2,                    &
+     &                                     progcld4, progcld5,          &
+     &                                     progcld6,                    & !F-A 
      &                                     progclduni,                  &
      &  cal_cldfra3, find_cloudLayers,adjust_cloudIce,adjust_cloudH2O,  &
      & adjust_cloudFinal
      
-      use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
+      use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,    &
      &                                     profsw_type, NBDSW
-      use module_radlw_parameters,   only: topflw_type, sfcflw_type,   &
+      use module_radlw_parameters,   only: topflw_type, sfcflw_type,    &
      &                                     proflw_type, NBDLW
       use surface_perturbation,      only: cdfnor
 
@@ -835,8 +836,26 @@
 !                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6 .or.  &
-               Model%imp_physics == 15) then
+        elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6 ) then
+          if (Model%kdt == 1) then
+            Tbd%phy_f3d(:,:,Model%nleffr) = 10.
+            Tbd%phy_f3d(:,:,Model%nieffr) = 50.
+            Tbd%phy_f3d(:,:,Model%nseffr) = 250.
+          endif
+
+          !mz* this is original progcld5 - temporary
+          call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
+                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+                         ntsw-1,ntgl-1,                             &
+                         im, lmk, lmp, Model%uni_cld,               &
+                         Model%lmfshal,Model%lmfdeep2,              &
+                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
+                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
+                         clouds,cldsa,mtopa,mbota, de_lgth)            !    --- outputs
+
+
+        elseif(Model%imp_physics == 15) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.

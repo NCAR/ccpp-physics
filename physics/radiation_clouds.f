@@ -244,6 +244,7 @@
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
      &                 cld_init, progcld5, progcld4o,                   &
+     &       progcld6,                                                  & !mz- for GSL suite
      &  cal_cldfra3, find_cloudLayers,adjust_cloudIce,adjust_cloudH2O,  &
      & adjust_cloudFinal
 
@@ -2767,6 +2768,358 @@
       end subroutine progcld5
 !...................................
 
+
+!mz: progcld5 benchmark
+      subroutine progcld6                                               &
+     &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
+     &       xlat,xlon,slmsk,dz,delp,                                   & 
+     &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &            
+     &       IX, NLAY, NLP1,                                            &
+     &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &    
+     &       re_cloud,re_ice,re_snow,                                   & 
+     &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
+     &      )
+
+! =================   subprogram documentation block   ================ !
+!                                                                       !
+! subprogram:    progcld5    computes cloud related quantities using    !
+!   Thompson/WSM6 cloud microphysics scheme.                !
+!                                                                       !
+! abstract:  this program computes cloud fractions from cloud           !
+!   condensates,                                                        !
+!   and computes the low, mid, high, total and boundary layer cloud     !
+!   fractions and the vertical indices of low, mid, and high cloud      !
+!   top and base.  the three vertical cloud domains are set up in the   !
+!   initial subroutine "cld_init".                                      !
+!                                                                       !
+! usage:         call progcld5                                          !
+!                                                                       !
+! subprograms called:   gethml                                          !
+!                                                                       !
+! attributes:                                                           !
+!   language:   fortran 90                                              !         
+!   machine:    ibm-sp, sgi                                             !         
+!                                                                       !         
+!                                                                       !         
+!  ====================  definition of variables  ====================  !         
+!                                                                       !         
+!                                                                       !         
+! input variables:                                                      !         
+!   plyr  (IX,NLAY) : model layer mean pressure in mb (100Pa)           !         
+!   plvl  (IX,NLP1) : model level pressure in mb (100Pa)                !         
+!   tlyr  (IX,NLAY) : model layer mean temperature in k                 !         
+!   tvly  (IX,NLAY) : model layer virtual temperature in k              !         
+!   qlyr  (IX,NLAY) : layer specific humidity in gm/gm                  !         
+!   qstl  (IX,NLAY) : layer saturate humidity in gm/gm                  !         
+!   rhly  (IX,NLAY) : layer relative humidity (=qlyr/qstl)              !         
+!   clw   (IX,NLAY,ntrac) : layer cloud condensate amount               !         
+!   xlat  (IX)      : grid latitude in radians, default to pi/2 -> -pi/2!         
+!                     range, otherwise see in-line comment              !         
+!   xlon  (IX)      : grid longitude in radians  (not used)             !         
+!   slmsk (IX)      : sea/land mask array (sea:0,land:1,sea-ice:2)      !         
+!   dz    (ix,nlay) : layer thickness (km)                              !         
+!   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !         
+!   IX              : horizontal dimention                              !         
+!   NLAY,NLP1       : vertical layer/level dimensions                   !         
+!   uni_cld         : logical - true for cloud fraction from shoc       !         
+!   lmfshal         : logical - true for mass flux shallow convection   !         
+!   lmfdeep2        : logical - true for mass flux deep convection      !         
+!   cldcov          : layer cloud fraction (used when uni_cld=.true.    !         
+!                                                                       !         
+! output variables:                                                     !         
+!   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !         
+!      clouds(:,:,1) - layer total cloud fraction                       !         
+!      clouds(:,:,2) - layer cloud liq water path         (g/m**2)      !         
+!      clouds(:,:,3) - mean eff radius for liq cloud      (micron)      !         
+!      clouds(:,:,4) - layer cloud ice water path         (g/m**2)      !         
+!      clouds(:,:,5) - mean eff radius for ice cloud      (micron)      !         
+!      clouds(:,:,6) - layer rain drop water path         not assigned  !         
+!      clouds(:,:,7) - mean eff radius for rain drop      (micron)      !         
+!  *** clouds(:,:,8) - layer snow flake water path        not assigned  !         
+!      clouds(:,:,9) - mean eff radius for snow flake     (micron)      !         
+!  *** fu's scheme need to be normalized by snow density (g/m**3/1.0e6) !         
+!   clds  (IX,5)    : fraction of clouds for low, mid, hi, tot, bl      !         
+!   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !         
+!   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !         
+!   de_lgth(ix)     : clouds decorrelation length (km)                  !         
+!                                                                       !   
+! module variables:                                                     !         
+!   ivflip          : control flag of vertical index direction          !         
+!                     =0: index from toa to surface                     !         
+!                     =1: index from surface to toa                     !         
+!   lmfshal         : mass-flux shallow conv scheme flag                !         
+!   lmfdeep2        : scale-aware mass-flux deep conv scheme flag       !         
+!   lcrick          : control flag for eliminating CRICK                !         
+!                     =t: apply layer smoothing to eliminate CRICK      !         
+!                     =f: do not apply layer smoothing                  !         
+!   lcnorm          : control flag for in-cld condensate                !         
+!                     =t: normalize cloud condensate                    !         
+!                     =f: not normalize cloud condensate                !         
+!                                                                       !         
+!  ====================    end of description    =====================  !         
+!                                                                                 
+      implicit none                                                               
+                                                                                  
+!  ---  inputs                                                                    
+      integer,  intent(in) :: IX, NLAY, NLP1                                      
+      integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl                 
+                                                                                  
+      logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2                          
+                                                                                  
+      real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &         
+     &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz,                  &         
+     &       re_cloud, re_ice, re_snow                                            
+                                                                                  
+      real (kind=kind_phys), dimension(:,:,:), intent(in) :: clw                  
+                                                                                  
+      real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &         
+     &       slmsk                                                                
+                                                                                  
+!  ---  outputs                                                                   
+      real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds              
+                                                                                  
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: clds                
+      real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth             
+                                                                                  
+      integer,               dimension(:,:),   intent(out) :: mtop,mbot           
+                                                                                  
+!  ---  local variables:                                                          
+      real (kind=kind_phys), dimension(IX,NLAY) :: cldtot, cldcnv,      &         
+     &       cwp, cip, crp, csp, rew, rei, res, rer, tem2d, clwf                  
+                                                                                  
+      real (kind=kind_phys) :: ptop1(IX,NK_CLDS+1), rxlat(ix)                     
+                                                                                  
+      real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &         
+     &       tem1, tem2, tem3                                                     
+                                                                                  
+      integer :: i, k, id, nf                                                     
+                                                                                  
+!  ---  constant values                                                           
+!     real (kind=kind_phys), parameter :: xrc3 = 200.                             
+      real (kind=kind_phys), parameter :: xrc3 = 100.                             
+                                                                                  
+!                                                                                 
+!===> ... begin here                                                              
+!                                                                                 
+      do nf=1,nf_clds                                                             
+        do k=1,nlay                                                               
+          do i=1,ix                                                               
+            clouds(i,k,nf) = 0.0                                                  
+          enddo                                                                   
+        enddo                                                                     
+      enddo                                                                       
+!     clouds(:,:,:) = 0.0                                                         
+                                                                                  
+      do k = 1, NLAY                                                              
+        do i = 1, IX                                                              
+          cldtot(i,k) = 0.0                                                       
+          cldcnv(i,k) = 0.0                                                       
+          cwp   (i,k) = 0.0                                                       
+          cip   (i,k) = 0.0                                                       
+          crp   (i,k) = 0.0                                                       
+          csp   (i,k) = 0.0                                                       
+          rew   (i,k) = re_cloud(i,k)                                             
+          rei   (i,k) = re_ice(i,k)                                               
+          rer   (i,k) = rrain_def            ! default rain radius to 1000 micron 
+          res   (i,k) = re_snow(i,K)                                              
+!         tem2d (i,k) = min( 1.0, max( 0.0, (con_ttp-tlyr(i,k))*0.05 ) )          
+          clwf(i,k)   = 0.0                                                       
+        enddo                                                                     
+      enddo                                                                       
+!                                                                                 
+!                                                                                 
+!      if ( lcrick ) then                                                         
+!        do i = 1, IX                                                             
+!          clwf(i,1)    = 0.75*clw(i,1)    + 0.25*clw(i,2)                        
+!          clwf(i,nlay) = 0.75*clw(i,nlay) + 0.25*clw(i,nlay-1)                   
+!        enddo                                                                    
+!        do k = 2, NLAY-1                                                         
+!          do i = 1, IX                                                           
+!            clwf(i,K) = 0.25*clw(i,k-1) + 0.5*clw(i,k) + 0.25*clw(i,k+1)         
+!          enddo                                                                  
+!        enddo                                                                    
+!      else                                                                       
+!        do k = 1, NLAY                                                           
+!          do i = 1, IX                                                           
+!            clwf(i,k) = clw(i,k)                                                 
+!          enddo                                                                  
+!        enddo                                                                    
+!      endif                                                                      
+                                                                                  
+        do k = 1, NLAY                                                            
+          do i = 1, IX                                                            
+            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)            
+          enddo                                                                   
+        enddo                                                                     
+!> - Find top pressure for each cloud domain for given latitude.                  
+!! ptopc(k,i): top presure of each cld domain (k=1-4 are sfc,L,m,h;               
+!! i=1,2 are low-lat (<45 degree) and pole regions)                               
+                                                                                  
+      do i =1, IX                                                                 
+        rxlat(i) = abs( xlat(i) / con_pi )      ! if xlat in pi/2 -> -pi/2 range  
+!       rxlat(i) = abs(0.5 - xlat(i)/con_pi)    ! if xlat in 0 -> pi range        
+      enddo                                                                       
+                                                                                  
+      do id = 1, 4                                                                
+        tem1 = ptopc(id,2) - ptopc(id,1)                                          
+                                                                                  
+        do i =1, IX                                                               
+          ptop1(i,id) = ptopc(id,1) + tem1*max( 0.0, 4.0*rxlat(i)-1.0 )           
+        enddo                                                                     
+      enddo                                                                       
+                                                                                  
+!> - Compute cloud liquid/ice condensate path in \f$ g/m^2 \f$ .                  
+                                                                                  
+        do k = 1, NLAY                                                            
+          do i = 1, IX                                                            
+            cwp(i,k) = max(0.0, clw(i,k,ntcw) * gfac * delp(i,k))                 
+            cip(i,k) = max(0.0, clw(i,k,ntiw) * gfac * delp(i,k))                 
+            crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))                 
+            csp(i,k) = max(0.0, (clw(i,k,ntsw)+clw(i,k,ntgl)) *         &         
+     &                  gfac * delp(i,k))                                         
+          enddo                                                                   
+        enddo                                                                     
+                                                                                  
+      if (uni_cld) then     ! use unified sgs clouds generated outside            
+        do k = 1, NLAY                                                            
+          do i = 1, IX                                                            
+            cldtot(i,k) = cldcov(i,k)                                             
+          enddo                                                                   
+        enddo                                                                     
+                                                                                  
+      else                                                                        
+                                                       
+!> - Calculate layer cloud fraction.
+
+        clwmin = 0.0                                                              
+        if (.not. lmfshal) then                                                   
+          do k = 1, NLAY                                                          
+          do i = 1, IX                                                            
+            clwt = 1.0e-6 * (plyr(i,k)*0.001)                                     
+!           clwt = 2.0e-6 * (plyr(i,k)*0.001)                                     
+                                                                                  
+            if (clwf(i,k) > clwt) then                                            
+                                                                                  
+              onemrh= max( 1.e-10, 1.0-rhly(i,k) )                                
+              clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )                       
+                                                                                  
+              tem1  = min(max(sqrt(sqrt(onemrh*qstl(i,k))),0.0001),1.0)           
+              tem1  = 2000.0 / tem1                                               
+                                                                                  
+!             tem1  = 1000.0 / tem1                                               
+                                                                                  
+              value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )              
+              tem2  = sqrt( sqrt(rhly(i,k)) )                                     
+                                                                                  
+              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )                    
+            endif                                                                 
+          enddo                                                                   
+          enddo                                                                   
+        else                                                                      
+          do k = 1, NLAY                                                          
+          do i = 1, IX                                                            
+            clwt = 1.0e-6 * (plyr(i,k)*0.001)                                     
+!           clwt = 2.0e-6 * (plyr(i,k)*0.001)                                     
+                                                                                  
+            if (clwf(i,k) > clwt) then                                            
+              onemrh= max( 1.e-10, 1.0-rhly(i,k) )                                
+              clwm  = clwmin / max( 0.01, plyr(i,k)*0.001 )                       
+!                                                                                 
+              tem1  = min(max((onemrh*qstl(i,k))**0.49,0.0001),1.0)  !jhan        
+              if (lmfdeep2) then                                                  
+                tem1  = xrc3 / tem1                                               
+              else                                                                
+                tem1  = 100.0 / tem1                                              
+              endif                                                               
+!                                                                                 
+              value = max( min( tem1*(clwf(i,k)-clwm), 50.0 ), 0.0 )              
+              tem2  = sqrt( sqrt(rhly(i,k)) )                                     
+                                                                                  
+              cldtot(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )                    
+            endif                                                                 
+          enddo                                                                   
+          enddo                                                                   
+        endif                                                                     
+
+      endif                                ! if (uni_cld) then                    
+                                                                                  
+      do k = 1, NLAY                                                              
+        do i = 1, IX                                                              
+          if (cldtot(i,k) < climit) then                                          
+            cldtot(i,k) = 0.0                                                     
+            cwp(i,k)    = 0.0                                                     
+            cip(i,k)    = 0.0                                                     
+            crp(i,k)    = 0.0                                                     
+            csp(i,k)    = 0.0                                                     
+          endif                                                                   
+        enddo                                                                     
+      enddo                                                                       
+                                                                                  
+      if ( lcnorm ) then                                                          
+        do k = 1, NLAY                                                            
+          do i = 1, IX                                                            
+            if (cldtot(i,k) >= climit) then                                       
+              tem1 = 1.0 / max(climit2, cldtot(i,k))                              
+              cwp(i,k) = cwp(i,k) * tem1                                          
+              cip(i,k) = cip(i,k) * tem1                                          
+              crp(i,k) = crp(i,k) * tem1                                          
+              csp(i,k) = csp(i,k) * tem1                                          
+            endif                                                                 
+          enddo                                                                   
+        enddo                                                                     
+      endif                                                                       
+                                                                                  
+!                                                                                 
+      do k = 1, NLAY                                                              
+        do i = 1, IX                                                              
+          clouds(i,k,1) = cldtot(i,k)                                             
+          clouds(i,k,2) = cwp(i,k)                                                
+          clouds(i,k,3) = rew(i,k)                                                
+          clouds(i,k,4) = cip(i,k)                                                
+          clouds(i,k,5) = rei(i,k)                                                
+          clouds(i,k,6) = crp(i,k)  ! added for Thompson                          
+          clouds(i,k,7) = rer(i,k)                                                
+          clouds(i,k,8) = csp(i,k)  ! added for Thompson                          
+          clouds(i,k,9) = res(i,k)                                                
+        enddo                                                                     
+      enddo                                                                       
+                                                                                  
+!  --- ...  estimate clouds decorrelation length in km                            
+!           this is only a tentative test, need to consider change later          
+
+      if ( iovr == 3 ) then
+        do i = 1, ix
+          de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
+        enddo
+      endif
+
+!> - Call gethml() to compute low,mid,high,total, and boundary layer
+!! cloud fractions and clouds top/bottom layer indices for low, mid,
+!! and high clouds.
+!  ---  compute low, mid, high, total, and boundary layer cloud fractions
+!       and clouds top/bottom layer indices for low, mid, and high clouds.
+!       The three cloud domain boundaries are defined by ptopc.  The cloud
+!       overlapping method is defined by control flag 'iovr', which may
+!       be different for lw and sw radiation programs.
+
+      call gethml                                                       &
+!  ---  inputs:
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &       IX,NLAY,                                                   &
+!  ---  outputs:
+     &       clds, mtop, mbot                                           &
+     &     )
+
+
+!
+      return                                         
+
+!............................................
+      end subroutine progcld6
+!............................................
+!mz
+
+
 !> \ingroup module_radiation_clouds
 !> This subroutine computes cloud related quantities using
 !! for unified cloud microphysics scheme.
@@ -3715,91 +4068,90 @@
 
       k_m12C = 0
       k_m40C = 0
-      DO k = kte, kts, -1                                                                                  
-         theta(k) = T1d(k)*((100000.0/P1d(k))**(287.05/1004.))                                             
+      DO k = kte, kts, -1
+         theta(k) = T1d(k)*((100000.0/P1d(k))**(287.05/1004.))
          if (T1d(k)-273.16 .gt. -40.0 .and. P1d(k).gt.7000.0) k_m40C =  &
-     &       MAX(k_m40C, k)                      
+     &       MAX(k_m40C, k)
          if (T1d(k)-273.16 .gt. -12.0 .and. P1d(k).gt.10000.0) k_m12C = &
-     &        MAX(k_m12C, k)                     
-      ENDDO                                                                                                
-      if (k_m40C .le. kts) k_m40C = kts                                                                    
-      if (k_m12C .le. kts) k_m12C = kts                                                                    
-                                                                                                           
-      Z2 = 44307.692 * (1.0 - (P1d(kte)/101325.)**0.190)                                                   
-      DO k = kte-1, kts, -1                                                                                
-         Z1 = 44307.692 * (1.0 - (P1d(k)/101325.)**0.190)                                                  
-         dz(k+1) = Z2 - Z1                                                                                 
-         Z2 = Z1                                                                                           
-      ENDDO                                                                                                
-      dz(kts) = dz(kts+1)                                                                                  
-                                                                                                           
-!..Find tropopause height, best surrogate, because we would not really                                     
-!.. wish to put fake clouds into the stratosphere.  The 10/1500 ratio                                      
-!.. d(Theta)/d(Z) approximates a vertical line on typical SkewT chart                                      
-!.. near typical (mid-latitude) tropopause height.  Since messy data                                       
-!.. could give us a false signal of such a transition, do the check over                                   
-!.. three K-level change, not just a level-to-level check.  This method                                    
-!.. has potential failure in arctic-like conditions with extremely low                                     
-!.. tropopause height, as would any other diagnostic, so ensure resulting                                  
-!.. k_tropo level is above 4km.                                                                            
+     &        MAX(k_m12C, k)
+      ENDDO
+      if (k_m40C .le. kts) k_m40C = kts
+      if (k_m12C .le. kts) k_m12C = kts
 
-      DO k = kte-3, kts, -1                                                         
-         theta1 = theta(k)                                                                                 
-         theta2 = theta(k+2)                           
-         ht1 = 44307.692 * (1.0 - (P1d(k)/101325.)**0.190)    
-         ht2 = 44307.692 * (1.0 - (P1d(k+2)/101325.)**0.190)    
+      Z2 = 44307.692 * (1.0 - (P1d(kte)/101325.)**0.190)
+      DO k = kte-1, kts, -1
+         Z1 = 44307.692 * (1.0 - (P1d(k)/101325.)**0.190)
+         dz(k+1) = Z2 - Z1
+         Z2 = Z1
+      ENDDO
+      dz(kts) = dz(kts+1)
+
+!..Find tropopause height, best surrogate, because we would not really
+!.. wish to put fake clouds into the stratosphere.  The 10/1500 ratio 
+!.. d(Theta)/d(Z) approximates a vertical line on typical SkewT chart 
+!.. near typical (mid-latitude) tropopause height.  Since messy data
+!.. could give us a false signal of such a transition, do the check over
+!.. three K-level change, not just a level-to-level check.  This method
+!.. has potential failure in arctic-like conditions with extremely low
+!.. tropopause height, as would any other diagnostic, so ensure resulting
+!.. k_tropo level is above 4km.
+
+      DO k = kte-3, kts, -1
+         theta1 = theta(k)
+         theta2 = theta(k+2)
+         ht1 = 44307.692 * (1.0 - (P1d(k)/101325.)**0.190)
+         ht2 = 44307.692 * (1.0 - (P1d(k+2)/101325.)**0.190)
          if ( (((theta2-theta1)/(ht2-ht1)) .lt. 10./1500. ) .AND.       &
      &                       (ht1.lt.19000.) .and. (ht1.gt.4000.) ) then
-            goto 86                                       
-         endif                                                                                             
-      ENDDO                                                                                                
- 86   continue                                                                                             
-      k_tropo = MAX(kts+2, k+2)                                                                            
-                                                                                                           
-!     if (debugfl) then                                                                                    
-!     print*, ' FOUND TROPOPAUSE ', k_tropo, ' near ', ht2, ' m'                                           
-!       WRITE (dbg_msg,*) 'DEBUG-GT: FOUND TROPOPAUSE ', k_tropo, ' near   ', ht2, ' m'                      
-!       CALL wrf_debug (150, dbg_msg)                                                                      
-!     endif                                                                                                
-                                                                                                           
-!..Eliminate possible fractional clouds above supposed tropopause.                                         
-      DO k = k_tropo+1, kte                                                                                
-         if (cfr1d(k).gt.0.0 .and. cfr1d(k).lt.0.999) then                                                 
-            cfr1d(k) = 0.                                                                                  
-         endif                                                                                             
-      ENDDO                                                                                                
-                                                                                                           
-!..We would like to prevent fractional clouds below LCL in idealized                                       
-!.. situation with deep well-mixed convective PBL, that otherwise is                                       
-!.. likely to get clouds in more realistic capping inversion layer.                                        
-                                                                                                           
-      kbot = kts+2                                                                                         
-      DO k = kbot, k_m12C                                                                                  
-         if ( (theta(k)-theta(k-1)) .gt. 0.05E-3*dz(k)) EXIT                                               
-      ENDDO                                                                                                
-      kbot = MAX(kts+1, k-2)                                                                               
-      DO k = kts, kbot                                                                                     
-         if (cfr1d(k).gt.0.0 .and. cfr1d(k).lt.0.999) cfr1d(k) = 0.                                        
-      ENDDO                                                                                                
-                                                                                                           
-                                                                                                           
-!..Starting below tropo height, if cloud fraction greater than 1
-!percent,                                  
-!.. compute an approximate total layer depth of cloud, determine a total                                   
-!.. liquid water/ice path (LWP/IWP), then reduce that amount with tuning                                   
-!.. parameter to represent entrainment factor, then divide up LWP/IWP                                      
-!.. into delta-Z weighted amounts for individual levels per cloud layer.                                   
-                                                                                                     
-                                                                                                           
-      k_cldb = k_tropo                                                                                     
-      in_cloud = .false.                                                                                   
-      k = k_tropo                                                                                          
-      DO WHILE (.not. in_cloud .AND. k.gt.k_m12C)                                                          
-         k_cldt = 0                                                                                        
-         if (cfr1d(k).ge.0.01) then                                                                        
-            in_cloud = .true.                                                                              
-            k_cldt = MAX(k_cldt, k)                                                                        
-         endif                                                                                             
+            goto 86
+         endif
+      ENDDO
+ 86   continue
+      k_tropo = MAX(kts+2, k+2)
+
+!     if (debugfl) then
+!     print*, ' FOUND TROPOPAUSE ', k_tropo, ' near ', ht2, ' m'
+!       WRITE (dbg_msg,*) 'DEBUG-GT: FOUND TROPOPAUSE ', k_tropo, ' near   ', ht2, ' m'
+!       CALL wrf_debug (150, dbg_msg)
+!     endif
+
+!..Eliminate possible fractional clouds above supposed tropopause.
+      DO k = k_tropo+1, kte
+         if (cfr1d(k).gt.0.0 .and. cfr1d(k).lt.0.999) then
+            cfr1d(k) = 0.
+         endif
+      ENDDO
+
+!..We would like to prevent fractional clouds below LCL in idealized
+!.. situation with deep well-mixed convective PBL, that otherwise is
+!.. likely to get clouds in more realistic capping inversion layer.
+
+      kbot = kts+2
+      DO k = kbot, k_m12C
+         if ( (theta(k)-theta(k-1)) .gt. 0.05E-3*dz(k)) EXIT
+      ENDDO
+      kbot = MAX(kts+1, k-2)
+      DO k = kts, kbot
+         if (cfr1d(k).gt.0.0 .and. cfr1d(k).lt.0.999) cfr1d(k) = 0.
+      ENDDO
+
+
+!..Starting below tropo height, if cloud fraction greater than 1 percent,
+!.. compute an approximate total layer depth of cloud, determine a total
+!.. liquid water/ice path (LWP/IWP), then reduce that amount with tuning
+!.. parameter to represent entrainment factor, then divide up LWP/IWP
+!.. into delta-Z weighted amounts for individual levels per cloud layer.
+
+
+      k_cldb = k_tropo
+      in_cloud = .false.
+      k = k_tropo
+      DO WHILE (.not. in_cloud .AND. k.gt.k_m12C)
+         k_cldt = 0
+         if (cfr1d(k).ge.0.01) then
+            in_cloud = .true.
+            k_cldt = MAX(k_cldt, k)
+         endif
          if (in_cloud) then                                                                                
             DO k2 = k_cldt-1, k_m12C, -1                                                                   
                if (cfr1d(k2).lt.0.01 .or. k2.eq.k_m12C) then                                               
@@ -3898,149 +4250,149 @@
       END SUBROUTINE find_cloudLayers                                                                      
                                                                                                            
 !+---+-----------------------------------------------------------------+
-                                                                                                           
+
       SUBROUTINE adjust_cloudIce(cfr,qi,qs,qvs, T,Rho,dz, entr, k1,k2,  &
-     &           kts,kte)                             
-!                                                                                                          
-      IMPLICIT NONE                                                                                        
-!                                                                                                          
-      INTEGER, INTENT(IN):: k1,k2, kts,kte                                                                 
-      REAL, INTENT(IN):: entr                                                                              
-      REAL, DIMENSION(kts:kte), INTENT(IN):: cfr, qvs, T, Rho, dz                                          
-      REAL, DIMENSION(kts:kte), INTENT(INOUT):: qi, qs                                                     
-      REAL:: iwc, max_iwc, tdz, this_iwc, this_dz, iwp_exists                                              
-      INTEGER:: k, kmid                                                                                    
-                                                                                                           
-      tdz = 0.                                                                                             
-      do k = k1, k2                                                                                        
-         tdz = tdz + dz(k)                                                                                 
-      enddo                                                                                                
-      kmid = NINT(0.5*(k1+k2))                                                                             
-      max_iwc = ABS(qvs(k2-1)-qvs(k1))                                                                     
-!     print*, ' max_iwc = ', max_iwc, ' over DZ=',tdz                                                      
-                                                                                                           
-      iwp_exists = 0.                                                                                      
-      do k = k1, k2                                                                                        
-         iwp_exists = iwp_exists + (qi(k)+qs(k))*Rho(k)*dz(k)                                              
-      enddo                                                                                                
-      if (iwp_exists .gt. 1.0) RETURN                                                                      
-                                                                                                           
-      this_dz = 0.0                                                                                        
-      do k = k1, k2                                                                                        
-         if (k.eq.k1) then                                                                                 
-            this_dz = this_dz + 0.5*dz(k)                                                                  
-         else                                                                                              
-            this_dz = this_dz + dz(k)                                                                      
-         endif                                                                                             
-         this_iwc = max_iwc*this_dz/tdz                                                                    
-         iwc = MAX(1.E-6, this_iwc*(1.-entr))                                                              
-         if (cfr(k).gt.0.01.and.cfr(k).lt.0.99.and.T(k).ge.203.16) then                                    
-            qi(k) = qi(k) + 0.1*cfr(k)*iwc                                                                 
+     &           kts,kte)
+!
+      IMPLICIT NONE
+!
+      INTEGER, INTENT(IN):: k1,k2, kts,kte
+      REAL, INTENT(IN):: entr
+      REAL, DIMENSION(kts:kte), INTENT(IN):: cfr, qvs, T, Rho, dz
+      REAL, DIMENSION(kts:kte), INTENT(INOUT):: qi, qs
+      REAL:: iwc, max_iwc, tdz, this_iwc, this_dz, iwp_exists
+      INTEGER:: k, kmid
+
+      tdz = 0.
+      do k = k1, k2
+         tdz = tdz + dz(k)
+      enddo
+      kmid = NINT(0.5*(k1+k2))
+      max_iwc = ABS(qvs(k2-1)-qvs(k1))
+!     print*, ' max_iwc = ', max_iwc, ' over DZ=',tdz
+
+      iwp_exists = 0.
+      do k = k1, k2
+         iwp_exists = iwp_exists + (qi(k)+qs(k))*Rho(k)*dz(k)
+      enddo
+      if (iwp_exists .gt. 1.0) RETURN
+
+      this_dz = 0.0
+      do k = k1, k2
+         if (k.eq.k1) then
+            this_dz = this_dz + 0.5*dz(k)
+         else
+            this_dz = this_dz + dz(k)
+         endif
+         this_iwc = max_iwc*this_dz/tdz
+         iwc = MAX(1.E-6, this_iwc*(1.-entr))
+         if (cfr(k).gt.0.01.and.cfr(k).lt.0.99.and.T(k).ge.203.16) then
+            qi(k) = qi(k) + 0.1*cfr(k)*iwc
          elseif (qi(k).lt.1.E-5.and.cfr(k).ge.0.99.and.T(k).ge.203.16)  &
-     &       then                                
+     &       then
             qi(k) = qi(k) + 0.01*iwc
-         endif                                                                                             
-      enddo                                                                                                
-                                                                                                           
-      END SUBROUTINE adjust_cloudIce                                                                       
-                                                                                                           
-!+---+-----------------------------------------------------------------+                                   
-                                                                                                           
+         endif
+      enddo
+
+      END SUBROUTINE adjust_cloudIce
+
+!+---+-----------------------------------------------------------------+
+
       SUBROUTINE adjust_cloudH2O(cfr, qc, qvs, T,Rho,dz, entr, k1,k2,   &
-     &            kts,kte)                              
-!                                                                                                          
-      IMPLICIT NONE                                                                                        
-!                                                                                                          
-      INTEGER, INTENT(IN):: k1,k2, kts,kte                                                                 
-      REAL, INTENT(IN):: entr                                                                              
-      REAL, DIMENSION(kts:kte):: cfr, qc, qvs, T, Rho, dz                                                  
-      REAL:: lwc, max_lwc, tdz, this_lwc, this_dz, lwp_exists                                              
-      INTEGER:: k, kmid                                                                                    
-                                                                                                           
-      tdz = 0.                                                                                             
-      do k = k1, k2                                                                                        
-         tdz = tdz + dz(k)                                                                                 
-      enddo                                                                                                
-      kmid = NINT(0.5*(k1+k2))                                                                             
-      max_lwc = ABS(qvs(k2-1)-qvs(k1))                                                                     
-!     print*, ' max_lwc = ', max_lwc, ' over DZ=',tdz                                                      
-                                                                                                           
-      lwp_exists = 0.                                                                                      
-      do k = k1, k2                                                                                        
-         lwp_exists = lwp_exists + qc(k)*Rho(k)*dz(k)                                                      
-      enddo                                                                                                
-      if (lwp_exists .gt. 1.0) RETURN                                                                      
-                                                                                                           
-      this_dz = 0.0                                                                                        
-      do k = k1, k2                                                                                        
-         if (k.eq.k1) then                                                                                 
-            this_dz = this_dz + 0.5*dz(k)                                                                  
-         else                                                                                              
-            this_dz = this_dz + dz(k)                                                                      
-         endif                                                                                             
-         this_lwc = max_lwc*this_dz/tdz                                                                    
-         lwc = MAX(1.E-6, this_lwc*(1.-entr))                                                              
+     &            kts,kte)
+!
+      IMPLICIT NONE
+!
+      INTEGER, INTENT(IN):: k1,k2, kts,kte
+      REAL, INTENT(IN):: entr
+      REAL, DIMENSION(kts:kte):: cfr, qc, qvs, T, Rho, dz
+      REAL:: lwc, max_lwc, tdz, this_lwc, this_dz, lwp_exists
+      INTEGER:: k, kmid
+
+      tdz = 0.
+      do k = k1, k2
+         tdz = tdz + dz(k)
+      enddo
+      kmid = NINT(0.5*(k1+k2))
+      max_lwc = ABS(qvs(k2-1)-qvs(k1))
+!     print*, ' max_lwc = ', max_lwc, ' over DZ=',tdz
+
+      lwp_exists = 0.
+      do k = k1, k2
+         lwp_exists = lwp_exists + qc(k)*Rho(k)*dz(k)
+      enddo
+      if (lwp_exists .gt. 1.0) RETURN
+
+      this_dz = 0.0
+      do k = k1, k2
+         if (k.eq.k1) then
+            this_dz = this_dz + 0.5*dz(k)
+         else
+            this_dz = this_dz + dz(k)
+         endif
+         this_lwc = max_lwc*this_dz/tdz
+         lwc = MAX(1.E-6, this_lwc*(1.-entr))
          if (cfr(k).gt.0.01.and.cfr(k).lt.0.99.and.T(k).lt.298.16.and.  &
-     &      T(k).ge.253.16) then 
-            qc(k) = qc(k) + cfr(k)*cfr(k)*lwc                                                              
+     &      T(k).ge.253.16) then
+            qc(k) = qc(k) + cfr(k)*cfr(k)*lwc
          elseif (cfr(k).ge.0.99.and.qc(k).lt.1.E-5.and.T(k).lt.298.16   &
-     &       .and.T(k).ge.253.16) then             
-            qc(k) = qc(k) + 0.1*lwc                                                                        
-         endif                                                                                             
-      enddo                                                                                                
-                                                                                                           
-      END SUBROUTINE adjust_cloudH2O                                                                       
-                                                                                                    
-                                                                                                           
-!+---+-----------------------------------------------------------------+                                   
-                                                                                                           
-!..Do not alter any grid-explicitly resolved hydrometeors, rather only                                     
-!.. the supposed amounts due to the cloud fraction scheme.                                                 
-                                                                                                           
-      SUBROUTINE adjust_cloudFinal(cfr, qc, qi, Rho,dz, kts,kte,k_tropo)                                   
-!                                                                                                          
-      IMPLICIT NONE                                                                                        
-!                                                                                                          
-      INTEGER, INTENT(IN):: kts,kte,k_tropo                                                                
-      REAL, DIMENSION(kts:kte), INTENT(IN):: cfr, Rho, dz                                                  
-      REAL, DIMENSION(kts:kte), INTENT(INOUT):: qc, qi                                                     
-      REAL:: lwp, iwp, xfac                                                                                
-      INTEGER:: k                                                                                          
-                                                                                                           
-      lwp = 0.                                                                                             
-      do k = kts, k_tropo                                                                                  
-         if (cfr(k).gt.0.0) then                                                                           
-            lwp = lwp + qc(k)*Rho(k)*dz(k)                                                                 
-         endif                                                                                             
-      enddo                                                                                                
-                                                                                                           
-      iwp = 0.                                                                                             
-      do k = kts, k_tropo                                                                                  
-         if (cfr(k).gt.0.01 .and. cfr(k).lt.0.99) then                                                     
-            iwp = iwp + qi(k)*Rho(k)*dz(k)                                                                 
-         endif                                                                                             
-      enddo                                                                                                
-                                                                                                           
-      if (lwp .gt. 1.5) then                                                                               
-         xfac = 1./lwp                                                                                     
-         do k = kts, k_tropo                                                                               
-            if (cfr(k).gt.0.01 .and. cfr(k).lt.0.99) then                                                  
-               qc(k) = qc(k)*xfac                                                                          
-            endif                                                                                          
-         enddo                                                                                             
-      endif                                                                                                
-                                                                                                           
-      if (iwp .gt. 1.5) then                                                                               
-         xfac = 1./iwp                                                                                     
-         do k = kts, k_tropo                                                                               
-            if (cfr(k).gt.0.01 .and. cfr(k).lt.0.99) then                                                  
-               qi(k) = qi(k)*xfac                                                                          
-            endif                                                                                          
-         enddo                                                                                             
-      endif                                                                                                
-                                                                                                           
-      END SUBROUTINE adjust_cloudFinal                                                                     
-                                                                                                           
+     &       .and.T(k).ge.253.16) then
+            qc(k) = qc(k) + 0.1*lwc
+         endif
+      enddo
+
+      END SUBROUTINE adjust_cloudH2O
+
+
+!+---+-----------------------------------------------------------------+
+
+!..Do not alter any grid-explicitly resolved hydrometeors, rather only
+!.. the supposed amounts due to the cloud fraction scheme.
+
+      SUBROUTINE adjust_cloudFinal(cfr, qc, qi, Rho,dz, kts,kte,k_tropo)
+!
+      IMPLICIT NONE
+!
+      INTEGER, INTENT(IN):: kts,kte,k_tropo
+      REAL, DIMENSION(kts:kte), INTENT(IN):: cfr, Rho, dz
+      REAL, DIMENSION(kts:kte), INTENT(INOUT):: qc, qi
+      REAL:: lwp, iwp, xfac
+      INTEGER:: k
+
+      lwp = 0.
+      do k = kts, k_tropo
+         if (cfr(k).gt.0.0) then
+            lwp = lwp + qc(k)*Rho(k)*dz(k)
+         endif
+      enddo
+
+      iwp = 0.
+      do k = kts, k_tropo
+         if (cfr(k).gt.0.01 .and. cfr(k).lt.0.99) then
+            iwp = iwp + qi(k)*Rho(k)*dz(k)
+         endif
+      enddo
+
+      if (lwp .gt. 1.5) then
+         xfac = 1./lwp
+         do k = kts, k_tropo
+            if (cfr(k).gt.0.01 .and. cfr(k).lt.0.99) then
+               qc(k) = qc(k)*xfac
+            endif
+         enddo
+      endif
+
+      if (iwp .gt. 1.5) then
+         xfac = 1./iwp
+         do k = kts, k_tropo
+            if (cfr(k).gt.0.01 .and. cfr(k).lt.0.99) then
+               qi(k) = qi(k)*xfac
+            endif
+         enddo
+      endif
+
+      END SUBROUTINE adjust_cloudFinal
+
 !
 !........................................!
       end module module_radiation_clouds !
