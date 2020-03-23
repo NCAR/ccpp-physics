@@ -118,15 +118,6 @@
   type = ty_source_func_lw
   intent = in
   optional = F
-[hlw0]
-  standard_name = RRTMGP_lw_heating_rate_clear_sky
-  long_name = RRTMGP longwave clear sky heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = T
 [hlwb]
   standard_name = RRTMGP_lw_heating_rate_spectral
   long_name = RRTMGP longwave total sky heating rate (spectral)

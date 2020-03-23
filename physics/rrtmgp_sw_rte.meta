@@ -215,15 +215,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[hsw0]
-  standard_name = RRTMGP_sw_heating_rate_clear_sky
-  long_name = shortwave clear sky heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = T
 [hswb]
   standard_name = RRTMGP_sw_heating_rate_spectral
   long_name = shortwave total sky heating rate (spectral)

@@ -32,7 +32,7 @@ contains
   subroutine rrtmgp_lw_rte_run(doLWrad, nCol, nLev, p_lay, t_lay, p_lev, skt, lw_gas_props, &
        sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
        lw_optical_props_aerosol, secdiff, nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky,&
-       fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlw0, hlwb, errmsg, errflg)
+       fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlwb, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -75,8 +75,6 @@ contains
     ! Outputs (optional)
     real(kind_phys), dimension(ncol,nLev,lw_gas_props%get_nband()), optional, intent(inout) :: &
          hlwb                        ! All-sky heating rate, by band (K/sec)
-    real(kind_phys), dimension(ncol,nLev), optional, intent(inout) :: &
-         hlw0                        ! Clear-sky heating rate (K/sec)
 
     ! Local variables
     integer :: &
@@ -86,7 +84,7 @@ contains
     real(kind_phys), dimension(ncol,nLev+1,lw_gas_props%get_nband()),target :: &
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
     logical :: &
-         l_ClrSky_HR, l_AllSky_HR_byband, top_at_1
+         l_AllSky_HR_byband, top_at_1
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -98,7 +96,6 @@ contains
     top_at_1 = (p_lev(1,1) .lt. p_lev(1, nLev))
 
     ! Are any optional outputs requested? Need to know now to compute correct fluxes.
-    l_ClrSky_HR        = present(hlw0)
     l_AllSky_HR_byband = present(hlwb)
 
     ! Initialize RRTMGP DDT containing 2D(3D) fluxes
@@ -121,18 +118,16 @@ contains
     enddo
 
     ! Call RTE solver
-    if (l_ClrSky_HR) then
-       call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-            lw_optical_props_clrsky,         & ! IN  - optical-properties
-            top_at_1,                        & ! IN  - veritcal ordering flag
-            sources,                         & ! IN  - source function
-            sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
-            flux_clrsky,                     & ! OUT - Fluxes
-            n_gauss_angles = nGauss_angles))
-       ! Store fluxes
-       fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
-       fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
-    endif
+    call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+         lw_optical_props_clrsky,         & ! IN  - optical-properties
+         top_at_1,                        & ! IN  - veritcal ordering flag
+         sources,                         & ! IN  - source function
+         sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+         flux_clrsky,                     & ! OUT - Fluxes
+         n_gauss_angles = nGauss_angles))
+    ! Store fluxes
+    fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
+    fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
 
     !
     ! All-sky fluxes

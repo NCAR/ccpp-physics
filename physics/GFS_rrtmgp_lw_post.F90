@@ -33,7 +33,7 @@ contains
   subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend, Coupling, Diag,  Statein, im,   &
        p_lev, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky,&
        raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw,                             &
-       flxprf_lw, hlw0, errmsg, errflg)
+       flxprf_lw, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -66,7 +66,8 @@ contains
          cld_frac,          & ! Total cloud fraction in each layer
          cldtaulw             ! approx 10.mu band layer cloud optical depth  
     real(kind_phys),dimension(size(Grid%xlon,1), Model%levs)  :: &
-         hlwc                 ! Longwave all-sky heating-rate (K/sec)  
+         hlwc,              & ! Longwave all-sky heating-rate (K/sec)  
+         hlw0                 ! Longwave clear-sky heating-rate (K/sec)
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
@@ -81,8 +82,6 @@ contains
          Diag                 ! Fortran DDT: FV3-GFS diagnotics data 
 
     ! Outputs (optional)
-    real(kind_phys), dimension(size(Grid%xlon,1), Model%levs), optional, intent(inout) :: &
-         hlw0                 ! Longwave clear-sky heating rate (K/sec)
     type(proflw_type), dimension(size(Grid%xlon,1), Model%levs+1), optional, intent(inout) :: &
          flxprf_lw            ! 2D radiative fluxes, components:
                               ! upfxc - total sky upward flux (W/m2)
@@ -92,7 +91,7 @@ contains
 
     ! Local variables
     integer :: i, j, k, iSFC, iTOA, itop, ibtc
-    logical :: l_clrskylw_hr, l_fluxeslw2d, top_at_1
+    logical :: l_fluxeslw2d, top_at_1
     real(kind_phys) :: tem0d, tem1, tem2
 
     ! Initialize CCPP error handling variables
@@ -102,7 +101,6 @@ contains
     if (.not. Model%lslwr) return
 
     ! Are any optional outputs requested?
-    l_clrskylw_hr   = present(hlw0)
     l_fluxeslw2d    = present(flxprf_lw)
 
     ! #######################################################################################
@@ -122,7 +120,7 @@ contains
     ! #######################################################################################
     if (Model%lslwr) then
        ! Clear-sky heating-rate (optional)
-       if (l_clrskylw_hr) then
+       if (Model%lwhtr) then
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(  &
                fluxlwUP_clrsky,   & ! IN  - RRTMGP upward longwave clear-sky flux profiles (W/m2)
                fluxlwDOWN_clrsky, & ! IN  - RRTMGP downward longwave clear-sky flux profiles (W/m2)

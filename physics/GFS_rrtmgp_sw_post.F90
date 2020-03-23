@@ -30,7 +30,7 @@ contains
        nCol, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, &
        sw_gas_props, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,     &
        fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota, mtopa, cld_frac, cldtausw, flxprf_sw,&
-       hsw0, errmsg, errflg)
+       errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -77,7 +77,8 @@ contains
          cld_frac,          & ! Total cloud fraction in each layer
          cldtausw             ! approx .55mu band layer cloud optical depth  
     real(kind_phys),dimension(nCol, Model%levs) :: & 
-         hswc                 ! All-sky heating rates (K/s)
+         hswc,              & ! All-sky heating rate (K/s)
+         hsw0                 ! Clear-sky heating rate (K/s)
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
@@ -86,8 +87,6 @@ contains
          errflg
 
     ! Outputs (optional)
-    real(kind_phys), dimension(nCol, Model%levs), optional, intent(inout) :: &
-         hsw0             ! Shortwave clear-sky heating-rate         (K/sec)
     type(profsw_type), dimension(nCol, Model%levs+1), intent(inout), optional :: &
          flxprf_sw        ! 2D radiative fluxes, components:
                           ! upfxc - total sky upward flux            (W/m2)
@@ -106,7 +105,7 @@ contains
     integer :: i, j, k, iSFC, iTOA, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys), dimension(nDay, Model%levs) :: thetaTendClrSky, thetaTendAllSky
-    logical :: l_clrskysw_hr, l_fluxessw2d, top_at_1, l_sfcFluxessw1D
+    logical :: l_fluxessw2d, top_at_1, l_sfcFluxessw1D
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -116,7 +115,6 @@ contains
     if (nDay .gt. 0) then
 
        ! Are any optional outputs requested?
-       l_clrskysw_hr   = present(hsw0)
        l_fluxessw2d    = present(flxprf_sw)
        l_sfcfluxessw1D = present(scmpsw)
 
@@ -136,7 +134,7 @@ contains
        ! Compute SW heating-rates
        ! #######################################################################################
        ! Clear-sky heating-rate (optional)
-       if (l_clrskysw_HR) then
+       if (Model%swhtr) then
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
                fluxswUP_clrsky(idxday(1:nDay),:),   & ! IN  - Shortwave upward clear-sky flux profiles (W/m2)
                fluxswDOWN_clrsky(idxday(1:nDay),:), & ! IN  - Shortwave downward clear-sky flux profiles (W/m2)

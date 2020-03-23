@@ -239,15 +239,6 @@
   type = profsw_type
   intent = inout
   optional = T
-[hsw0]
-  standard_name = RRTMGP_sw_heating_rate_clear_sky
-  long_name = RRTMGP shortwave clear sky heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = T
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
