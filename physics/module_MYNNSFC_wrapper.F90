@@ -168,32 +168,38 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !         write(0,*)"iter=",iter
 !      endif
 
-      !prep MYNN-only variables
-            do k=1,2 !levs
-              do i=1,im
-                 dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
-                 th(i,k)=t3d(i,k)/exner(i,k)
-                 !qc(i,k)=MAX(qgrs(i,k,ntcw),0.0)
-                 qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
-                 pattern_spp_pbl(i,k)=0.0
-              enddo
-            enddo
-            do i=1,im
-                if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
-                  xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
-                else
-                  xland(i)=2.0
-                endif
-                qgh(i)=0.0
-                !snowh(i)=snowd(i)*800. !mm -> m
-                ! DH* note - this could be automated (CCPP knows how to convert cm to m)
-                znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
-                znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
-                znt_ice(i)=znt_ice(i)*0.01  !cm -> m
-                ts(i)=tskin_ocn(i)/exner(i,1)  !theta
-                mavail(i)=1.0  !????
-                cpm(i)=cp
-            enddo
+      ! prep MYNN-only variables
+      do k=1,2 !levs
+        do i=1,im
+           dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
+           th(i,k)=t3d(i,k)/exner(i,k)
+           !qc(i,k)=MAX(qgrs(i,k,ntcw),0.0)
+           qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
+           pattern_spp_pbl(i,k)=0.0
+        enddo
+      enddo
+      do i=1,im
+          if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
+            xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
+          else
+            xland(i)=2.0
+          endif
+          qgh(i)=0.0
+          !snowh(i)=snowd(i)*800. !mm -> m
+          !znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
+          !znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
+          !znt_ice(i)=znt_ice(i)*0.01  !cm -> m
+          ! DH* do the following line only if wet(i)?
+          ts(i)=tskin_ocn(i)/exner(i,1)  !theta
+          ! *DH
+          mavail(i)=1.0  !????
+          cpm(i)=cp
+      enddo
+
+      ! cm -> m
+      where (dry) znt_lnd=znt_lnd*0.01
+      where (wet) znt_ocn=znt_ocn*0.01
+      where (icy) znt_ice=znt_ice*0.01
 
 !      if (lprnt) then
 !          write(0,*)"CALLING SFCLAY_mynn; input:"
@@ -261,24 +267,28 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              its=1,ite=im, jts=1,jte=1, kts=1,kte=levs                        )
 
 
-     ! POST MYNN SURFACE LAYER (INTERSTITIAL) WORK:
-        do i = 1, im
-           !* Taken from sfc_nst.f
-           !* ch         = surface exchange coeff heat & moisture(m/s) im
-           !* rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
-           !* hflx(i)    = rch(i) * (tsurf(i) - theta1(i))  !K m s-1
-           !* hflx(i)=hfx(i)/(rho(i,1)*cp) - now calculated inside module_sf_mynn.F90
-           !* Taken from sfc_nst.f
-           !* evap(i)    = elocp * rch(i) * (qss(i) - q0(i)) !kg kg-1 m s-1
-           !NOTE: evap & qflx will be solved for later
-           !qflx(i)=QFX(i)/
-           !evap(i)=QFX(i)   !or /rho ??
-           ! DH* note - this could be automated (CCPP knows how to convert m to cm)
-           znt_lnd(i)=znt_lnd(i)*100.   !m -> cm
-           znt_ocn(i)=znt_ocn(i)*100.
-           znt_ice(i)=znt_ice(i)*100.
-        enddo
+        !! POST MYNN SURFACE LAYER (INTERSTITIAL) WORK:
+        !do i = 1, im
+        !   !* Taken from sfc_nst.f
+        !   !* ch         = surface exchange coeff heat & moisture(m/s) im
+        !   !* rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
+        !   !* hflx(i)    = rch(i) * (tsurf(i) - theta1(i))  !K m s-1
+        !   !* hflx(i)=hfx(i)/(rho(i,1)*cp) - now calculated inside module_sf_mynn.F90
+        !   !* Taken from sfc_nst.f
+        !   !* evap(i)    = elocp * rch(i) * (qss(i) - q0(i)) !kg kg-1 m s-1
+        !   !NOTE: evap & qflx will be solved for later
+        !   !qflx(i)=QFX(i)/
+        !   !evap(i)=QFX(i)   !or /rho ??
+        !   ! DH* note - this could be automated (CCPP knows how to convert m to cm)
+        !   znt_lnd(i)=znt_lnd(i)*100.   !m -> cm
+        !   znt_ocn(i)=znt_ocn(i)*100.
+        !   znt_ice(i)=znt_ice(i)*100.
+        !enddo
 
+        ! m -> cm
+        where (dry) znt_lnd=znt_lnd*100.
+        where (wet) znt_ocn=znt_ocn*100.
+        where (icy) znt_ice=znt_ice*100.
 
 !      if (lprnt) then
 !         write(0,*)
