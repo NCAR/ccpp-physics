@@ -359,6 +359,7 @@
       runoff2 = 0.0
       runoff3 = 0.0
       snomlt  = 0.0
+      rc      = 0.0
 
 !  --- ...  define local variable ice to achieve:
 !             sea-ice case,          ice =  1
