@@ -62,7 +62,7 @@
      &                                     NSPC1
       use module_radiation_clouds,   only: NF_CLDS,                     &  ! cld_init
      &                                     progcld1, progcld3,          &
-     &                                     progcld2,                    &
+!    &                                     progcld2,                    &
      &                                     progcld4, progcld5,          &
      &                                     progcld6,                    & !F-A 
      &                                     progclduni,                  &
@@ -787,11 +787,12 @@
                                          ! or unified cloud and/or with MG microphysics
 
           if (Model%uni_cld .and. Model%ncld >= 2) then
-            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         & !  ---  inputs
-                             Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp, &
-                             IM, LMK, LMP, cldcov,                        &
-                             effrl, effri, effrr, effrs, Model%effr_in,   &
-                             clouds, cldsa, mtopa, mbota, de_lgth)          !  ---  outputs
+          call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         & !  ---  inputs
+                           Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp, &
+                           IM, LMK, LMP, cldcov,                        &
+                           effrl, effri, effrr, effrs, Model%effr_in,   &
+                           Model%iovr_lw, Model%iovr_sw,                & ! mz* for iovr=3 should come from 
+                           clouds, cldsa, mtopa, mbota, de_lgth)          !  ---  outputs
           else
             call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl, rhly,    & !  ---  inputs
                            ccnd(1:IM,1:LMK,1), Grid%xlat,Grid%xlon,     &
@@ -799,6 +800,7 @@
                            Model%uni_cld, Model%lmfshal,                &
                            Model%lmfdeep2, cldcov,                      &
                            effrl, effri, effrr, effrs, Model%effr_in,   &
+                           Model%iovr_lw, Model%iovr_sw,                &
                            clouds, cldsa, mtopa, mbota, de_lgth)          !  ---  outputs
           endif
 
@@ -809,23 +811,26 @@
                          cnvw, cnvc, Grid%xlat, Grid%xlon,              &
                          Sfcprop%slmsk, dz, delp, im, lmk, lmp, deltaq, &
                          Model%sup, Model%kdt, me,                      &
+                         Model%iovr_lw, Model%iovr_sw,                  &
                          clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
 
 
         elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
 
           if (.not.Model%lgfdlmprad) then
-            call progcld4 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,      &    !  ---  inputs
-                           ccnd(1:IM,1:LMK,1), cnvw, cnvc,                &
-                           Grid%xlat, Grid%xlon, Sfcprop%slmsk,           &
-                           cldcov, dz, delp, im, lmk, lmp,                &
+            call progcld4 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,    &    !  ---  inputs
+                           ccnd(1:IM,1:LMK,1), cnvw, cnvc,              &
+                           Grid%xlat, Grid%xlon, Sfcprop%slmsk,         &
+                           cldcov, dz, delp, im, lmk, lmp,              &
+                           Model%iovr_lw, Model%iovr_sw,                &
                            clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
           else
 
-            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         &    !  ---  inputs
-                            Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp, &
-                            IM, LMK, LMP, cldcov,                         &
-                            effrl, effri, effrr, effrs, Model%effr_in,    &
+            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,       &    !  ---  inputs
+                          Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp, &
+                            IM, LMK, LMP, cldcov,                       &
+                            effrl, effri, effrr, effrs, Model%effr_in,  &
+                            Model%iovr_lw, Model%iovr_sw,               &
                             clouds, cldsa, mtopa, mbota, de_lgth)              !  ---  outputs
 !           call progcld4o (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,       &   !  ---  inputs
 !                           tracer1, Grid%xlat, Grid%xlon, Sfcprop%slmsk,   &
@@ -844,14 +849,15 @@
           endif
 
           !mz* this is original progcld5 - temporary
-          call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
-                         ntsw-1,ntgl-1,                             &
-                         im, lmk, lmp, Model%uni_cld,               &
-                         Model%lmfshal,Model%lmfdeep2,              &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
-                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
+          call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,         &  !  --- inputs
+                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
+                         ntsw-1,ntgl-1,                                 &
+                         im, lmk, lmp, Model%uni_cld,                   &
+                         Model%lmfshal,Model%lmfdeep2,                  &
+                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),            &
+                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),        &
+                         Model%iovr_lw, Model%iovr_sw,                  &
                          clouds,cldsa,mtopa,mbota, de_lgth)            !    --- outputs
 
 
@@ -862,14 +868,15 @@
             Tbd%phy_f3d(:,:,Model%nseffr) = 250.
           endif
 
-          call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,&  !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
-                         ntsw-1,ntgl-1,                             &
-                         im, lmk, lmp, Model%icloud,Model%uni_cld,  &
-                         Model%lmfshal,Model%lmfdeep2,              &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
-                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
+          call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,    &  !  --- inputs
+                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
+                         ntsw-1,ntgl-1,                                 &
+                         im, lmk, lmp, Model%icloud,Model%uni_cld,      &
+                         Model%lmfshal,Model%lmfdeep2,                  &
+                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),            &
+                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),        &
+                         Model%iovr_lw, Model%iovr_sw,                  &
                          clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs
 
         endif                            ! end if_imp_physics
