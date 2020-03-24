@@ -105,7 +105,7 @@
   optional = F
 [qc]
   standard_name = cloud_condensed_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
