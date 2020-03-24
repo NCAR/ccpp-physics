@@ -125,7 +125,7 @@
                if (use_zmtnblck)then
                   sppt_wts(i,k)=(sppt_wts(i,k)-1)*sppt_vwt+1.0
                endif
-               sppt_wts_inv(i,km-k+1)=sppt_wts(i,k)
+               sppt_wts_inv(i,k)=sppt_wts(i,k)
 
                upert = (gu0(i,k) - ugrs(i,k))   * sppt_wts(i,k)
                vpert = (gv0(i,k) - vgrs(i,k))   * sppt_wts(i,k)
@@ -232,7 +232,7 @@
          if (do_shum) then
            do k=1,km
              gq0(:,k) = gq0(:,k)*(1.0 + shum_wts(:,k))
-             shum_wts_inv(:,km-k+1) = shum_wts(:,k)
+             shum_wts_inv(:,k) = shum_wts(:,k)
            end do
          endif
          
@@ -240,8 +240,8 @@
            do k=1,km
              gu0(:,k) = gu0(:,k)+skebu_wts(:,k)*(diss_est(:,k))
              gv0(:,k) = gv0(:,k)+skebv_wts(:,k)*(diss_est(:,k))
-             skebu_wts_inv(:,km-k+1) = skebu_wts(:,k)
-             skebv_wts_inv(:,km-k+1) = skebv_wts(:,k)
+             skebu_wts_inv(:,k) = skebu_wts(:,k)
+             skebv_wts_inv(:,k) = skebv_wts(:,k)
            enddo
          endif
 
