@@ -341,8 +341,10 @@
 
       if (cplflx .or. cplchm) then
         do i = 1, im
-          rain_cpl(i) = rain_cpl(i) + rain(i) * (one-srflag(i))
-          snow_cpl(i) = snow_cpl(i) + rain(i) * srflag(i)
+          drain_cpl(i) = rain(i) * (one-srflag(i))
+          dsnow_cpl(i) = rain(i) * srflag(i)
+          rain_cpl(i) = rain_cpl(i) + drain_cpl(i)
+          snow_cpl(i) = snow_cpl(i) + dsnow_cpl(i)
         enddo
       endif
 
@@ -376,15 +378,6 @@
       if (do_sppt) then
 !--- radiation heating rate
         dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
-        do i = 1, im
-          if (t850(i) > 273.16) then
-!--- change in change in rain precip
-             drain_cpl(i) = rain(i) - drain_cpl(i)
-          else
-!--- change in change in snow precip
-             dsnow_cpl(i) = rain(i) - dsnow_cpl(i)
-          endif
-        enddo
       endif
 
     end subroutine GFS_MP_generic_post_run
