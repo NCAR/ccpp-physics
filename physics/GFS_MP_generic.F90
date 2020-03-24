@@ -191,11 +191,11 @@
       end if
       
       if (lsm==lsm_ruc .or. lsm==lsm_noahmp) then
-            raincprv(:)   = rainc(:)
-            rainncprv(:)  = frain * rain1(:)
-            iceprv(:)     = ice(:)
-            snowprv(:)    = snow(:)
-            graupelprv(:) = graupel(:)
+        raincprv(:)   = rainc(:)
+        rainncprv(:)  = frain * rain1(:)
+        iceprv(:)     = ice(:)
+        snowprv(:)    = snow(:)
+        graupelprv(:) = graupel(:)
         !for NoahMP, calculate precipitation rates from liquid water equivalent thickness for use in next time step
         !Note (GJF): Precipitation LWE thicknesses are multiplied by the frain factor, and are thus on the dynamics time step, but the conversion as written
         !            (with dtp in the denominator) assumes the rate is calculated on the physics time step. This only works as expected when dtf=dtp (i.e. when frain=1).

@@ -545,6 +545,24 @@
   kind = kind_phys
   intent = inout
   optional = F
+[smcwlt2]
+  standard_name = volume_fraction_of_condensed_water_in_soil_at_wilting_point
+  long_name = wilting point (volumetric)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[smcref2]
+  standard_name = threshold_volume_fraction_of_condensed_water_in_soil
+  long_name = soil moisture threshold (volumetric)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -33,7 +33,7 @@
                           cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
                           dtsfcin_cpl, dqsfcin_cpl, ulwsfcin_cpl, ulwsfc_cice, dusfc_cice, dvsfc_cice,     &
                           dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice,                                &
-                          wind, u1, v1, cnvwind, errmsg, errflg)
+                          wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
 
@@ -87,6 +87,8 @@
         real(kind=kind_phys), dimension(im), intent(in ) :: u1, v1
         ! surface wind enhancement due to convection
         real(kind=kind_phys), dimension(im), intent(inout ) :: cnvwind
+        !
+        real(kind=kind_phys), dimension(im), intent(out) :: smcwlt2, smcref2
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -173,7 +175,10 @@
           work3(i)   = prsik_1(i) / prslk_1(i)
 
           !tsurf(i) = tsfc(i)
-          zlvl(i)  = phil(i,1) * onebg
+          zlvl(i)    = phil(i,1) * onebg
+          smcwlt2(i) = zero
+          smcref2(i) = zero
+
           wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
                          + max(zero, min(cnvwind(i), 30.0)), one)
           !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
@@ -303,8 +308,8 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-!            tsfci_cpl   (i) = tsfc(i)
-            tsfci_cpl   (i) = tsfc_ocn(i)
+            tsfci_cpl   (i) = tsfc(i)
+!           tsfci_cpl   (i) = tsfc_ocn(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
 
