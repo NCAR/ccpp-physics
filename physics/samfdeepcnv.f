@@ -77,7 +77,7 @@
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,         &
-     &    do_ca, ca_sgs, ca_deep, rainevap,                             &
+     &    do_ca, ca_sgs, nthresh, ca_deep, rainevap,                    &
      &    errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -158,7 +158,7 @@
      &                     xdby,    xpw,     xpwd,
 !    &                     xqrch,   mbdt,    tem,
      &                     xqrch,   tem,     tem1,    tem2,
-     &                     ptem,    ptem1,   ptem2,   nplumes
+     &                     ptem,    ptem1,   ptem2
 !
       integer              kb(im), kbcon(im), kbcon1(im),
      &                     ktcon(im), ktcon1(im), ktconn(im),
@@ -224,7 +224,7 @@ c  physical parameters
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3)
-      parameter(nplumes=4.)
+
 !
 !  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
@@ -762,7 +762,7 @@ c
          if(do_ca .and. ca_sgs)then
             do i=1,im
                if(cnvflg(i)) then
-                  if(ca_deep(i) > nplumes)then
+                  if(ca_deep(i) > nthresh)then
                      clamt(i) = clam - clamd
                   else
                      clamt(i) = clam
