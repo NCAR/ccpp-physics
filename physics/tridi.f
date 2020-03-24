@@ -42,6 +42,7 @@
 
 c-----------------------------------------------------------------------
 !>\ingroup satmedmf
+!>\ingroup satmedmfvdifq
 !> This subroutine ..
       subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
 cc
@@ -84,6 +85,7 @@ c-----------------------------------------------------------------------
 
 c-----------------------------------------------------------------------
 !>\ingroup satmedmf
+!>\ingroup satmedmfvdifq
 !>  Routine to solve the tridiagonal system to calculate u- and
 !!  v-momentum at \f$ t + \Delta t \f$; part of two-part process to
 !!  calculate time tendencies due to vertical diffusion.
@@ -154,6 +156,7 @@ c-----------------------------------------------------------------------
 
 c-----------------------------------------------------------------------
 !>\ingroup satmedmf
+!>\ingroup satmedmfvdifq
 !! This subroutine solves tridiagonal problem for TKE.
       subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
 !-----------------------------------------------------------------------

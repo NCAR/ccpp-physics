@@ -81,10 +81,10 @@
 !!
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
-        ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,                   &
+        ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
-        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, hybedmf, do_shoc,      &
-        satmedmf, qgrs, vdftra, errmsg, errflg)
+        imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
+        hybedmf, do_shoc, satmedmf, qgrs, vdftra, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -99,11 +99,11 @@
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(im, levs, ntrac),  intent(in)    :: qgrs
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
 
       character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      integer,          intent(out) :: errflg
 
       !local variables
       integer :: i, k, kk, k1, n
@@ -331,6 +331,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
+      real(kind=kind_phys), parameter :: huge=1.0d30, epsln = 1.0d-10
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
@@ -498,38 +499,41 @@
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
-!            if (fice(i) == ceanfrac(i)) then ! use results from CICE
-!              dusfci_cpl(i) = dusfc_cice(i)
-!              dvsfci_cpl(i) = dvsfc_cice(i)
-!              dtsfci_cpl(i) = dtsfc_cice(i)
-!              dqsfci_cpl(i) = dqsfc_cice(i)
-!            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
-            if (wet(i)) then                   ! use stress_ocean from sfc_diff for opw component at mixed point
-              if (icy(i) .or. dry(i)) then
-                tem1 = max(q1(i), 1.e-8)
-                rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
-                if (wind(i) > 0.0) then
-                  tem = - rho * stress_ocn(i) / wind(i)
-                  dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
-                  dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
-                else
-                  dusfci_cpl(i) = 0.0
-                  dvsfci_cpl(i) = 0.0
-                endif
-                dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
-                dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
-              else                                                    ! use results from PBL scheme for 100% open ocean
-                dusfci_cpl(i) = dusfc1(i)
-                dvsfci_cpl(i) = dvsfc1(i)
-                dtsfci_cpl(i) = dtsfc1(i)
-                dqsfci_cpl(i) = dqsfc1(i)
+            if (fice(i) > 1.-epsln) then ! no open water, use results from CICE
+              dusfci_cpl(i) = dusfc_cice(i)
+              dvsfci_cpl(i) = dvsfc_cice(i)
+              dtsfci_cpl(i) = dtsfc_cice(i)
+              dqsfci_cpl(i) = dqsfc_cice(i)
+            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
+              tem1 = max(q1(i), 1.e-8)
+              rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
+              if (wind(i) > 0.0) then
+                tem = - rho * stress_ocn(i) / wind(i)
+                dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
+                dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
+              else
+                dusfci_cpl(i) = 0.0
+                dvsfci_cpl(i) = 0.0
               endif
+              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+            else                                       ! use results from PBL scheme for 100% open ocean
+              dusfci_cpl(i) = dusfc1(i)
+              dvsfci_cpl(i) = dvsfc1(i)
+              dtsfci_cpl(i) = dtsfc1(i)
+              dqsfci_cpl(i) = dqsfc1(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
             dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfci_cpl(i) * dtf
             dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfci_cpl(i) * dtf
             dqsfc_cpl (i) = dqsfc_cpl(i) + dqsfci_cpl(i) * dtf
+!
+          else
+            dusfc_cpl(i) = huge
+            dvsfc_cpl(i) = huge
+            dtsfc_cpl(i) = huge
+            dqsfc_cpl(i) = huge
 !!
           endif ! Ocean only, NO LAKES
         enddo
@@ -547,10 +551,6 @@
           dtsfci_diag(i) = dtsfc1(i)
           dqsfci_diag(i) = dqsfc1(i)
         enddo
-  !       if (lprnt) then
-  !         write(0,*)' dusfc=',dusfc(ipr),' dusfc1=',dusfc1(ipr),' dtf=',
-  !    &     dtf,' kdt=',kdt,' lat=',lat
-  !       endif
 
         if (ldiag3d) then
           if (lsidea) then
@@ -565,9 +565,9 @@
           endif
           do k=1,levs
             do i=1,im
-              du3dt_PBL(i,k) = du3dt_PBL(i,k) + dudt(i,k) * dtf
+              du3dt_PBL(i,k)  = du3dt_PBL(i,k)  + dudt(i,k) * dtf
               du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
-              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + dvdt(i,k) * dtf
+              dv3dt_PBL(i,k)  = dv3dt_PBL(i,k)  + dvdt(i,k) * dtf
               dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
             enddo
           enddo

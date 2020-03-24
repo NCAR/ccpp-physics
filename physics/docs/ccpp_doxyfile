@@ -113,6 +113,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
                           pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_SATMEDMF.txt    \
+                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
                           pdftxt/GFS_GWDPS.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
@@ -188,6 +189,11 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../satmedmfvdif.F \
                         ../mfpblt.f         \
                         ../mfscu.f          \
+                        ../tridi.f          \
+### satmedmfvdifq
+                        ../satmedmfvdifq.F \
+                        ../mfpbltq.f         \
+                        ../mfscuq.f          \
                         ../tridi.f          \
 ### Orographic Gravity Wave
                         ../gwdps.f \
