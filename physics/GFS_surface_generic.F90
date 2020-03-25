@@ -104,10 +104,6 @@
         ! Set initial quantities for stochastic physics deltas
         if (do_sppt) then
           dtdtr     = 0.0
-          do i=1,im
-            drain_cpl(i) = rain_cpl (i)
-            dsnow_cpl(i) = snow_cpl (i)
-          enddo
         endif
 
         ! Scale random patterns for surface perturbations with perturbation size
