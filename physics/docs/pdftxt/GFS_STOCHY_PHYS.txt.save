@@ -1,0 +1,75 @@
+/**
+\page STOCHY_PHYS GFS Stochastic Physics
+\section des_stochy Description
+Traditionally, physical parameterization schemes were assumed to be deterministic, producing representations of small-scale
+processes unique to the resolved-scale atmospheric state. This assumption becomes increasingly problematic as computational 
+advances permit more accurate simulations at finer resolutions where small-scale processes exhibit more stochastic qualities.
+Small-scale convective fluctuations often interact strongly with the nonlinear flow dynamics, with substantial repercussions
+for large-scale model evolution. Producing accurate and reliable probabilistic predictions therefore depends critically on
+representations of parameterization uncertainties.
+
+In the 2015 GFS implemmentaion, new stochastic physics schemes were employed to represent model error to replace
+the artificial additive inflation. The upgraded stochastic physics suite has three components, including
+- Stochastically Perturbed Physics Tendencies (\b SPPT; Buizza et al.(1999) \cite buizza_et_al_1999 ; Palmer (1997)
+\cite palmer_1997 ; Palmer (2001) \cite palmer_2001)
+- Specific HUMidity perturbations (\b SHUM; Tompkins and Berner (2008) \cite tompkins_and_berner_2008)
+- Stochastic Kinetic Energy Backscatter (\b SKEB; Berner et al.(2009) \cite berner_et_al_2009; Shutts (2005) \cite shutts_2005)
+
+All three of these schemes use a first-order auto-regrassive  (AR(1)) random pattern generator to produce spatially and temporally
+correlated perturbations with three different horizontal length/time scales 500 km/0.25 days, 1000 km/3 days and 2000 km/30 days, 
+and standard deviations of 0.8, 0.4 and 0.2 respectively. Zhu et al.(2018) \cite zhu_et_al_2018 show an example of a realization 
+of the three components. The above nine numbers are meant to span the uncertainty at mesoscale, synoptic scale and planetary space
+and time scales with pattern 1 (500 km decorrelation scale) being the starting point and most important component for the medium-range 
+ensemble prediction system.
+
+Condering the delicate balance between model dynamics and vertical momentum transport which is established in the lowest model 
+levels on timescales of the order of minutes, the tendency perturbations were reduced towards zero close to the surface. A tapering
+fucntion \f$\mu\f$ is applied in SPPT, so there are no tendency perturbation in the mountain blocked flow (i.e., on or below the level
+of dividing streamline that is diagnosed by the gwdps_run, mountain blocking scheme). It is done to avoid numerical instability in the 
+boundary layer.
+
+
+
+\section sppt_des The SPPT Scheme in FV3GFS
+ECMWF first introduced a stochastic representation of parameterization uncertainties in the medium-range ensemble in October
+1998 using scheme that multiplies the total parameterized physics tendencies with a random number (Buizza et al., 1999
+\cite buizza_et_al_1999). The scheme was originally referred to as 'stochastic physics'. It is now commonly referred to as the
+Stochastically Perturbed Parameterization Tendency scheme (SPPT). 
+
+The SPPT scheme in FV3GFS uses perturbations collinear to the unperturbed tendencies. For all variables \f$X\in\left\{u,v,T,q\right\}\f$,
+the perturbed tendency is obtained with the same random number \f$r\f$
+\f[
+X_{p}=(1+r\mu)X_{c}
+\f]
+The distribution from which \f$r\f$ is drawn is close to a Gaussian distribution. The random field \f$r\f$ is obtained through first-order
+auto-regressive processes in spectral space. At ECMWF, a multi-scale approach is implemented in IFS with 
+\f[
+r=\sum_{j=1}^Jr_{j}
+\f]
+where the component random fields \f$r_{j}\f$ are independent and represent different scales. The total physical parameterization tendency
+is multiplied by a randomly-evolving global pattern field whose average value at any point is unity and whose standard deviation is prescribed.
+The pattern field is composed of three independent patterns, each generated from triangularly-truncated spherical harmonic expansions which
+have the property that their spatial auto-correlation function is independent of position on the sphere. Each spherical harmonic mode in each
+expansion is evolved in time using first-order autogressive process with fixed decorrelation time and wavenumber-dependent noise term:
+\f[
+\widehat{r}_{mn}(t)=\phi\widehat{r}_{mn}(t-\Delta t)+\sigma_{n}\sqrt{1-\phi^{2}}\eta_{mn}(t)
+\f]
+where \f$\widehat{r}_{mn}\f$ is the spherical harmonic for zonal wave number \f$m\f$ and total wavenumber \f$n\f$,
+\n \f$\sigma_{n}\f$ is the standard deviation of the time-series and is a function of \f$n\f$, decorrelation length scale, and desired
+amplitude of the pattern.
+\n \f$\phi\f$: temporal decorrelation
+\n \f$\eta_{mn}\f$: random Gaussian number E(0,1)
+
+\section skeb_des The Stochastic Kinetic Energy Backscatter (SKEB) scheme in FV3GFS
+As with SPPT, the SKEB scheme is based on the product of a spectrally-generated pattern field and a derived model field. However,
+instead of using model tendencies, the backscatter scheme uses a horizontally-smoothed dissipation rate field to modulate the pattern
+field and defined this to be a streamfunction forcing function. The pattern uses a noise term with a different wavenumber dependence
+to that used in SPPT and one that gives a power law spectrum
+
+\section shum_des The SHUM Scheme in FV3GFS
+
+\section sfcpert_des The Land Surface Perturbations in FV3GFS 
+
+
+
+*/

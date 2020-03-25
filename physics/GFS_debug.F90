@@ -3,10 +3,10 @@
     module GFS_diagtoscreen
 
       private
- 
+
       public GFS_diagtoscreen_init, GFS_diagtoscreen_run, GFS_diagtoscreen_finalize
 
-      public print_my_stuff, chksum_int, chksum_real
+      public print_my_stuff, chksum_int, chksum_real, print_var
 
 ! Calculating the checksum leads to segmentation faults with gfortran (bug in malloc?),
 ! thus print the sum of the array instead of the checksum.
@@ -41,23 +41,7 @@
       end subroutine GFS_diagtoscreen_finalize
 
 !> \section arg_table_GFS_diagtoscreen_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type in FV3        | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | Statein        | GFS_statein_type_instance                              | instance of derived type GFS_statein_type in FV3        | DDT           |    0 | GFS_statein_type      |           | in     | F        |
-!! | Stateout       | GFS_stateout_type_instance                             | instance of derived type GFS_stateout_type              | DDT           |    0 | GFS_stateout_type     |           | in     | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                              | instance of type GFS_sfcprop_type in FV3                | DDT           |    0 | GFS_sfcprop_type      |           | in     | F        |
-!! | Coupling       | GFS_coupling_type_instance                             | instance of type GFS_coupling_type in FV3               | DDT           |    0 | GFS_coupling_type     |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                                 | instance of type GFS_grid_type in FV3                   | DDT           |    0 | GFS_grid_type         |           | in     | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | instance of type GFS_tbd_type in FV3                    | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | Cldprop        | GFS_cldprop_type_instance                              | instance of type GFS_cldprop_type in FV3                | DDT           |    0 | GFS_cldprop_type      |           | in     | F        |
-!! | Radtend        | GFS_radtend_type_instance                              | instance of type GFS_radtend_type in FV3                | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
-!! | Diag           | GFS_diag_type_instance                                 | instance of type GFS_diag_type in FV3                   | DDT           |    0 | GFS_diag_type         |           | in     | F        |
-!! | Interstitial   | GFS_interstitial_type_instance                         | instance of type GFS_interstitial_type in FV3           | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
-!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_diagtoscreen_run.html
 !!
       subroutine GFS_diagtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling,     &
                                        Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
@@ -134,13 +118,18 @@
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Sfcprop
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slmsk'    , Sfcprop%slmsk)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakemsk'  , Sfcprop%lakemsk)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%oceanfrac', Sfcprop%oceanfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%landfrac' , Sfcprop%landfrac)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%lakefrac' , Sfcprop%lakefrac)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfc'     , Sfcprop%tsfc)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfco'    , Sfcprop%tsfco)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%tsfcl'    , Sfcprop%tsfcl)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tisfc'    , Sfcprop%tisfc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%snowd'    , Sfcprop%snowd)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%zorl'     , Sfcprop%zorl)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorlo'    , Sfcprop%zorlo)
+                     call print_var(mpirank,omprank, blkno, 'Sfcprop%zorll'    , Sfcprop%zorll)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%fice'     , Sfcprop%fice)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%hprim'    , Sfcprop%hprim)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%hprime'   , Sfcprop%hprime)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%sncovr'   , Sfcprop%sncovr)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%snoalb'   , Sfcprop%snoalb)
@@ -168,7 +157,6 @@
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%f10m'     , Sfcprop%f10m)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%tprcp'    , Sfcprop%tprcp)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%srflag'   , Sfcprop%srflag)
-                     call print_var(mpirank,omprank, blkno, 'Sfcprop%sr'       , Sfcprop%sr)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slc'      , Sfcprop%slc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%smc'      , Sfcprop%smc)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%stc'      , Sfcprop%stc)
@@ -196,16 +184,18 @@
                      end if
                      ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%sh2o',        Sfcprop%sh2o)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%smois',       Sfcprop%smois)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tslb',        Sfcprop%tslb)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%zs',          Sfcprop%zs)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%clw_surf',    Sfcprop%clw_surf)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%qwv_surf',    Sfcprop%qwv_surf)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%cndm_surf',   Sfcprop%cndm_surf)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%flag_frsoil', Sfcprop%flag_frsoil)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%rhofr',       Sfcprop%rhofr)
-                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tsnow',       Sfcprop%tsnow)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%sh2o',         Sfcprop%sh2o)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%smois',        Sfcprop%smois)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tslb',         Sfcprop%tslb)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%zs',           Sfcprop%zs)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%clw_surf',     Sfcprop%clw_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%qwv_surf',     Sfcprop%qwv_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%cndm_surf',    Sfcprop%cndm_surf)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%flag_frsoil',  Sfcprop%flag_frsoil)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%rhofr',        Sfcprop%rhofr)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%tsnow',        Sfcprop%tsnow)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%snowfallac  ', Sfcprop%snowfallac)
+                        call print_var(mpirank,omprank, blkno, 'Sfcprop%acsnow      ', Sfcprop%acsnow)
                      end if
                      ! Radtend
                      call print_var(mpirank,omprank, blkno, 'Radtend%sfcfsw%upfxc', Radtend%sfcfsw(:)%upfxc)
@@ -242,7 +232,9 @@
                        call print_var(mpirank,omprank, blkno, 'Tbd%drain_cpl'     , Tbd%drain_cpl)
                        call print_var(mpirank,omprank, blkno, 'Tbd%dsnow_cpl'     , Tbd%dsnow_cpl)
                      end if
-                     call print_var(mpirank,omprank, blkno, 'Tbd%phy_fctd'        , Tbd%phy_fctd)
+                     if (Model%nctp > 0 .and. Model%cscnv) then
+                       call print_var(mpirank,omprank, blkno, 'Tbd%phy_fctd'      , Tbd%phy_fctd)
+                     end if
                      call print_var(mpirank,omprank, blkno, 'Tbd%phy_f2d'         , Tbd%phy_f2d)
                      call print_var(mpirank,omprank, blkno, 'Tbd%phy_f3d'         , Tbd%phy_f3d)
                      do n=1,size(Tbd%phy_f3d(1,1,:))
@@ -252,10 +244,10 @@
                      call print_var(mpirank,omprank, blkno, 'Tbd%ccn_nm'          , Tbd%ccn_nm)
                      call print_var(mpirank,omprank, blkno, 'Tbd%aer_nm'          , Tbd%aer_nm)
                      ! Diag
-                     call print_var(mpirank,omprank, blkno, 'Diag%fluxr       ',    Diag%fluxr)
-                     do n=1,size(Diag%fluxr(1,:))
-                         call print_var(mpirank,omprank, blkno, 'Diag%fluxr_n ',    Diag%fluxr(:,n))
-                     end do
+                     !call print_var(mpirank,omprank, blkno, 'Diag%fluxr       ',    Diag%fluxr)
+                     !do n=1,size(Diag%fluxr(1,:))
+                     !    call print_var(mpirank,omprank, blkno, 'Diag%fluxr_n ',    Diag%fluxr(:,n))
+                     !end do
                      call print_var(mpirank,omprank, blkno, 'Diag%srunoff     ',    Diag%srunoff)
                      call print_var(mpirank,omprank, blkno, 'Diag%evbsa       ',    Diag%evbsa)
                      call print_var(mpirank,omprank, blkno, 'Diag%evcwa       ',    Diag%evcwa)
@@ -313,15 +305,16 @@
                      call print_var(mpirank,omprank, blkno, 'Diag%epi         ',    Diag%epi)
                      call print_var(mpirank,omprank, blkno, 'Diag%smcwlt2     ',    Diag%smcwlt2)
                      call print_var(mpirank,omprank, blkno, 'Diag%smcref2     ',    Diag%smcref2)
+                     call print_var(mpirank,omprank, blkno, 'Diag%sr          ',    Diag%sr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomr       ',    Diag%tdomr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomzr      ',    Diag%tdomzr)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdomip      ',    Diag%tdomip)
                      call print_var(mpirank,omprank, blkno, 'Diag%tdoms       ',    Diag%tdoms)
-                     ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
-                       call print_var(mpirank,omprank, blkno, 'Diag%snowfallac  ',    Diag%snowfallac)
-                       call print_var(mpirank,omprank, blkno, 'Diag%acsnow      ',    Diag%acsnow)
-                     endif
+                       call print_var(mpirank,omprank, blkno, 'Diag%wet1        ',  Sfcprop%wetness)
+                     else
+                       call print_var(mpirank,omprank, blkno, 'Diag%wet1        ',  Diag%wet1)
+                     end if
                      call print_var(mpirank,omprank, blkno, 'Diag%skebu_wts   ',    Diag%skebu_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%skebv_wts   ',    Diag%skebv_wts)
                      call print_var(mpirank,omprank, blkno, 'Diag%sppt_wts    ',    Diag%sppt_wts)
@@ -405,7 +398,7 @@
                      call print_var(mpirank,omprank, blkno, 'Coupling%sfcdsw ', Coupling%sfcdsw )
                      call print_var(mpirank,omprank, blkno, 'Coupling%sfcnsw ', Coupling%sfcnsw )
                      call print_var(mpirank,omprank, blkno, 'Coupling%sfcdlw ', Coupling%sfcdlw )
-                     if (Model%cplflx .or. Model%do_sppt) then
+                     if (Model%cplflx .or. Model%do_sppt .or. Model%cplchm) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%rain_cpl', Coupling%rain_cpl)
                         call print_var(mpirank,omprank, blkno, 'Coupling%snow_cpl', Coupling%snow_cpl)
                      end if
@@ -461,10 +454,10 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%psurfi_cpl  ', Coupling%psurfi_cpl   )
                      end if
                      if (Model%cplchm) then
-                        call print_var(mpirank,omprank, blkno, 'Coupling%rain_cpl ', Coupling%rain_cpl )
                         call print_var(mpirank,omprank, blkno, 'Coupling%rainc_cpl', Coupling%rainc_cpl)
                         call print_var(mpirank,omprank, blkno, 'Coupling%ushfsfci ', Coupling%ushfsfci )
                         call print_var(mpirank,omprank, blkno, 'Coupling%dkt      ', Coupling%dkt      )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%dqdti    ', Coupling%dqdti    )
                      end if
                      if (Model%do_sppt) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%sppt_wts', Coupling%sppt_wts)
@@ -478,14 +471,6 @@
                      end if
                      if (Model%do_sfcperts) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%sfc_wts', Coupling%sfc_wts)
-                     end if
-                     if (Model%lgocart .or. Model%ldiag3d) then
-                        call print_var(mpirank,omprank, blkno, 'Coupling%dqdti  ', Coupling%dqdti  )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%cnvqci ', Coupling%cnvqci )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%upd_mfi', Coupling%upd_mfi)
-                        call print_var(mpirank,omprank, blkno, 'Coupling%dwn_mfi', Coupling%dwn_mfi)
-                        call print_var(mpirank,omprank, blkno, 'Coupling%det_mfi', Coupling%det_mfi)
-                        call print_var(mpirank,omprank, blkno, 'Coupling%cldcovi', Coupling%cldcovi)
                      end if
                      if(Model%imp_physics == Model%imp_physics_thompson .and. Model%ltaerosol) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%nwfa2d', Coupling%nwfa2d)
@@ -625,7 +610,7 @@
           integer, intent(in) :: mpirank, omprank, blkno
           character(len=*), intent(in) :: name
           real(kind_phys), intent(in) :: var(:,:)
-          
+
           integer :: k, i
 
 #ifdef PRINT_SUM
@@ -752,7 +737,7 @@
     module GFS_interstitialtoscreen
 
       private
- 
+
       public GFS_interstitialtoscreen_init, GFS_interstitialtoscreen_run, GFS_interstitialtoscreen_finalize
 
       contains
@@ -764,23 +749,7 @@
       end subroutine GFS_interstitialtoscreen_finalize
 
 !> \section arg_table_GFS_interstitialtoscreen_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | Statein        | GFS_statein_type_instance                              | instance of derived type GFS_statein_type               | DDT           |    0 | GFS_statein_type      |           | in     | F        |
-!! | Stateout       | GFS_stateout_type_instance                             | instance of derived type GFS_stateout_type              | DDT           |    0 | GFS_stateout_type     |           | in     | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                              | instance of derived type GFS_sfcprop_type               | DDT           |    0 | GFS_sfcprop_type      |           | in     | F        |
-!! | Coupling       | GFS_coupling_type_instance                             | instance of derived type GFS_coupling_type              | DDT           |    0 | GFS_coupling_type     |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                                 | instance of derived type GFS_grid_type                  | DDT           |    0 | GFS_grid_type         |           | in     | F        |
-!! | Tbd            | GFS_tbd_type_instance                                  | instance of derived type GFS_tbd_type                   | DDT           |    0 | GFS_tbd_type          |           | in     | F        |
-!! | Cldprop        | GFS_cldprop_type_instance                              | instance of derived type GFS_cldprop_type               | DDT           |    0 | GFS_cldprop_type      |           | in     | F        |
-!! | Radtend        | GFS_radtend_type_instance                              | instance of derived type GFS_radtend_type               | DDT           |    0 | GFS_radtend_type      |           | in     | F        |
-!! | Diag           | GFS_diag_type_instance                                 | instance of derived type GFS_diag_type                  | DDT           |    0 | GFS_diag_type         |           | in     | F        |
-!! | Interstitial   | GFS_interstitial_type_instance                         | instance of derived type GFS_interstitial_type          | DDT           |    0 | GFS_interstitial_type |           | in     | F        |
-!! | nthreads       | omp_threads                                            | number of OpenMP threads or fast physics schemes        | count         |    0 | integer               |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_interstitialtoscreen_run.html
 !!
       subroutine GFS_interstitialtoscreen_run (Model, Statein, Stateout, Sfcprop, Coupling, &
                                            Grid, Tbd, Cldprop, Radtend, Diag, Interstitial, &
@@ -880,7 +849,7 @@
     module GFS_abort
 
       private
- 
+
       public GFS_abort_init, GFS_abort_run, GFS_abort_finalize
 
       contains
@@ -892,12 +861,7 @@
       end subroutine GFS_abort_finalize
 
 !> \section arg_table_GFS_abort_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                               | units         | rank | type                  |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|---------------------------------------------------------|---------------|------|-----------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                              | instance of derived type GFS_control_type               | DDT           |    0 | GFS_control_type      |           | in     | F        |
-!! | blkno          | ccpp_block_number                                      | number of block for explicit data blocking in CCPP      | index         |    0 | integer               |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP                | none          |    0 | character             | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP                   | flag          |    0 | integer               |           | out    | F        |
+!! \htmlinclude GFS_abort_run.html
 !!
       subroutine GFS_abort_run (Model, blkno, errmsg, errflg)
 
@@ -925,3 +889,107 @@
       end subroutine GFS_abort_run
 
     end module GFS_abort
+
+    module GFS_checkland
+
+        private
+
+        public GFS_checkland_init, GFS_checkland_run, GFS_checkland_finalize
+
+        contains
+
+        subroutine GFS_checkland_init ()
+        end subroutine GFS_checkland_init
+
+        subroutine GFS_checkland_finalize ()
+        end subroutine GFS_checkland_finalize
+
+!> \section arg_table_GFS_checkland_run Argument Table
+!! \htmlinclude GFS_checkland_run.html
+!!
+        subroutine GFS_checkland_run (me, master, blkno, im, kdt, iter, flag_iter, flag_guess, &
+                flag_init, flag_restart, frac_grid, isot, ivegsrc, stype, vtype, slope,        &
+                soiltyp, vegtype, slopetyp, dry, icy, wet, lake, ocean,                        &
+                oceanfrac, landfrac, lakefrac, slmsk, islmsk, errmsg, errflg )
+
+           use machine, only: kind_phys
+
+           implicit none
+
+           ! Interface variables
+           integer,          intent(in   ) :: me
+           integer,          intent(in   ) :: master
+           integer,          intent(in   ) :: blkno
+           integer,          intent(in   ) :: im
+           integer,          intent(in   ) :: kdt
+           integer,          intent(in   ) :: iter
+           logical,          intent(in   ) :: flag_iter(im)
+           logical,          intent(in   ) :: flag_guess(im)
+           logical,          intent(in   ) :: flag_init
+           logical,          intent(in   ) :: flag_restart
+           logical,          intent(in   ) :: frac_grid
+           integer,          intent(in   ) :: isot
+           integer,          intent(in   ) :: ivegsrc
+           real(kind_phys),  intent(in   ) :: stype(im)
+           real(kind_phys),  intent(in   ) :: vtype(im)
+           real(kind_phys),  intent(in   ) :: slope(im)
+           integer,          intent(in   ) :: soiltyp(im)
+           integer,          intent(in   ) :: vegtype(im)
+           integer,          intent(in   ) :: slopetyp(im)
+           logical,          intent(in   ) :: dry(im)
+           logical,          intent(in   ) :: icy(im)
+           logical,          intent(in   ) :: wet(im)
+           logical,          intent(in   ) :: lake(im)
+           logical,          intent(in   ) :: ocean(im)
+           real(kind_phys),  intent(in   ) :: oceanfrac(im)
+           real(kind_phys),  intent(in   ) :: landfrac(im)
+           real(kind_phys),  intent(in   ) :: lakefrac(im)
+           real(kind_phys),  intent(in   ) :: slmsk(im)
+           integer,          intent(in   ) :: islmsk(im)
+           character(len=*), intent(  out) :: errmsg
+           integer,          intent(  out) :: errflg
+
+           ! Local variables
+           integer :: i
+
+           errflg = 0
+           errmsg = ''
+
+           write(0,'(a,i5)')   'YYY: me           :', me
+           write(0,'(a,i5)')   'YYY: master       :', master
+           write(0,'(a,i5)')   'YYY: blkno        :', blkno
+           write(0,'(a,i5)')   'YYY: im           :', im
+           write(0,'(a,i5)')   'YYY: kdt          :', kdt
+           write(0,'(a,i5)')   'YYY: iter         :', iter
+           write(0,'(a,1x,l)') 'YYY: flag_init    :', flag_init
+           write(0,'(a,1x,l)') 'YYY: flag_restart :', flag_restart
+           write(0,'(a,1x,l)') 'YYY: frac_grid    :', frac_grid
+           write(0,'(a,i5)')   'YYY: isot         :', isot
+           write(0,'(a,i5)')   'YYY: ivegsrc      :', ivegsrc
+
+           do i=1,im
+             !if (vegtype(i)==15) then
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_iter(i)  :', i, blkno, flag_iter(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, flag_guess(i) :', i, blkno, flag_guess(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, stype(i)      :', i, blkno, stype(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, vtype(i)      :', i, blkno, vtype(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slope(i)      :', i, blkno, slope(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, soiltyp(i)    :', i, blkno, soiltyp(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, vegtype(i)    :', i, blkno, vegtype(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, slopetyp(i)   :', i, blkno, slopetyp(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, dry(i)        :', i, blkno, dry(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, icy(i)        :', i, blkno, icy(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, wet(i)        :', i, blkno, wet(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, lake(i)       :', i, blkno, lake(i)
+               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, ocean(i)      :', i, blkno, ocean(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, oceanfrac(i)  :', i, blkno, oceanfrac(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, landfrac(i)   :', i, blkno, landfrac(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, lakefrac(i)   :', i, blkno, lakefrac(i)
+               write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, slmsk(i)      :', i, blkno, slmsk(i)
+               write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, islmsk(i)     :', i, blkno, islmsk(i)
+             !end if
+           end do
+
+        end subroutine GFS_checkland_run
+
+    end module GFS_checkland

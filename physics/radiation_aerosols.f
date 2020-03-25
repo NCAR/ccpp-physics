@@ -123,20 +123,6 @@
 !! \brief This module contains climatological atmospheric aerosol schemes for
 !!  radiation computations.
 !!
-!! GFS selection for Aerosol distribution (namelist control paramter - \b IAER = 111
-!! and \b IAERMDL =0; not available for the current operational GFS)
-!! \n IAERMDL=0: OPAC-climatology tropospheric model (monthly mean, \f$15^o\f$ horizontal resolution)
-!! \n IAERMDL=1: GOCART-climatology tropospheric aerosol model
-!! \n IAERMDL=2: GOCART-climatology prognostic aerosol model
-!!
-!!\n \b Stratosphere: historical recorded volcanic forcing in four zonal mean bands (1850-2000)
-!!\n \b IAER = abc of 3-digit integer flags: a-volcanic; b-LW; c-SW
-!!\n a=0: include background stratospheric volcanic aerosol effect (if both b&c /=0)
-!!\n a=1: include recorded stratospheric volcanic aerosol effect
-!!\n b=0: no LW tropospheric aerosol effect
-!!\n b=1: include LW tropospheric aerosol effect
-!!\n c=0: no SW tropospheric aerosol effect
-!!\n c=1: include SW tropospheric aerosol effect
 !!
 !!\version NCEP-Radiation_aerosols  v5.2  Jan 2013
 !!
@@ -2885,7 +2871,6 @@
 !!\param laersw,laerlw  logical flag for sw/lw aerosol calculations
 !!\param IMAX           horizontal dimension of arrays
 !!\param NLAY,NLP1      vertical dimensions of arrays
-!!\param NSPC           num of species for optional aod output fields
 !!\param aerosw        (IMAX,NLAY,NBDSW,NF_AESW), aeros opt properties for sw
 !!\n                              (:,:,:,1): optical depth
 !!\n                              (:,:,:,2): single scattering albedo

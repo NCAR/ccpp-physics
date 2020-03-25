@@ -1,0 +1,128 @@
+[ccpp-arg-table]
+  name = GFS_phys_time_vary_init
+  type = scheme
+[Data]
+  standard_name = GFS_data_type_instance_all_blocks
+  long_name = Fortran DDT containing FV3-GFS data
+  units = DDT
+  dimensions = (ccpp_block_number)
+  type = GFS_data_type
+  intent = inout
+  optional = F
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = inout
+  optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance_all_threads
+  long_name = Fortran DDT containing FV3-GFS interstitial data
+  units = DDT
+  dimensions = (ccpp_thread_number)
+  type = GFS_interstitial_type
+  intent = inout
+  optional = F
+[nthrds]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_phys_time_vary_finalize
+  type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_phys_time_vary_run
+  type = scheme
+[Data]
+  standard_name = GFS_data_type_instance_all_blocks
+  long_name = Fortran DDT containing FV3-GFS data
+  units = DDT
+  dimensions = (ccpp_block_number)
+  type = GFS_data_type
+  intent = inout
+  optional = F
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = inout
+  optional = F
+[nthrds]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

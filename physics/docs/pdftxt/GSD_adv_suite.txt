@@ -1,0 +1,200 @@
+/**
+\page GSD_v0_page GSD_v0 Suite 
+
+\section gsd_suite_overview Overview
+
+The original Rapid Update Cycle (RUC), implemented in 1994, was designed to provide accurate short-range (0 to 12-hr)
+numerical forecast guidance for weather-sensitive users, including those in the U.S. aviation community. 
+The RUC started to run every hour starting in 1998. Significant weather forecasting problems that occur in the 0- to 
+12-hr range include severe weather in all seasons (for example, tornadoes, severe thunderstorms, crippling snow, and 
+ice storms) and hazards to aviation (for example, clear air turbulence, icing, and downbursts). The RUC soon became a
+key model for short-range convectiion forecasts and for the pre-convective environments.
+
+The RAP, which replaced the RUC in 2012, runs hourly at the National Centers for Environmental Prediction (NCEP), providing
+high frequency updates of current conditions and short-range forecasts over North America at 13km resolution. A CONUS-nested 
+version at 3-km resolution called the High Resolution Rapid Refresh (HRRR), was implemented in the fall of 2014.
+
+Additional Model Information Links: 
+- https://rapidrefresh.noaa.gov
+- https://rapidrefresh.noaa.gov/hrrr/
+
+The advanced GSD RAP/HRRR physics suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMG
+ - \ref GFS_SFCLYR
+ - \ref GFS_NSST
+ - \ref GSD_RUCLSM
+ - \ref GSD_MYNNEDMF
+ - \ref GFS_GWDPS
+ - \ref GFS_RAYLEIGH
+ - \ref GFS_OZPHYS
+ - \ref GFS_H2OPHYS
+ - \ref GSD_CU_GF
+   - \ref cu_gf_deep_group
+   - \ref cu_gf_sh_group
+ - \ref GFS_GWDC
+ - \ref GSD_THOMPSON
+ - \ref GFS_CALPRECIPTYPE
+
+\section sdf_gsdsuite Suite Definition File 
+
+The GSD RAP/HRRR physics suite uses the parameterizations in the following order, as defined in  \c SCM_GSD_v0:
+\code
+<?xml version="1.0" encoding="UTF-8"?>
+
+<suite name="SCM_GSD_v0" lib="ccppphys" ver="3.0.0">
+  <!-- <init></init> -->
+  <group name="time_vary">
+    <subcycle loop="1">
+      <scheme>GFS_time_vary_pre</scheme>
+      <scheme>GFS_rrtmg_setup</scheme>
+      <scheme>GFS_rad_time_vary</scheme>
+      <scheme>GFS_phys_time_vary</scheme>
+    </subcycle>
+  </group>
+  <group name="radiation">
+    <subcycle loop="1">
+      <scheme>GFS_suite_interstitial_rad_reset</scheme>
+      <scheme>GFS_rrtmg_pre</scheme>
+      <scheme>rrtmg_sw_pre</scheme>
+      <scheme>mynnrad_pre</scheme>
+      <scheme>rrtmg_sw</scheme>
+      <scheme>rrtmg_sw_post</scheme>
+      <scheme>rrtmg_lw_pre</scheme>
+      <scheme>rrtmg_lw</scheme>
+      <scheme>mynnrad_post</scheme>
+      <scheme>rrtmg_lw_post</scheme>
+      <scheme>GFS_rrtmg_post</scheme>
+    </subcycle>
+  </group>
+  <group name="physics">
+    <subcycle loop="1">
+      <scheme>GFS_suite_interstitial_phys_reset</scheme>
+      <scheme>GFS_suite_stateout_reset</scheme>
+      <scheme>get_prs_fv3</scheme>
+      <scheme>GFS_suite_interstitial_1</scheme>
+      <scheme>dcyc2t3</scheme>
+      <scheme>GFS_surface_generic_pre</scheme>
+      <scheme>GFS_surface_composites_pre</scheme>
+      <scheme>GFS_suite_interstitial_2</scheme>
+    </subcycle>
+    <!-- Surface iteration loop -->
+    <subcycle loop="2">
+      <scheme>sfc_diff</scheme>
+      <scheme>GFS_surface_loop_control_part1</scheme>
+      <scheme>sfc_nst_pre</scheme>
+      <scheme>sfc_nst</scheme>
+      <scheme>sfc_nst_post</scheme>
+      <scheme>lsm_ruc</scheme>
+      <scheme>GFS_surface_loop_control_part2</scheme>
+    </subcycle>
+    <!-- End of surface iteration loop -->
+    <subcycle loop="1">
+      <scheme>GFS_surface_composites_post</scheme>
+      <scheme>dcyc2t3_post</scheme>
+      <scheme>sfc_diag</scheme>
+      <scheme>sfc_diag_post</scheme>
+      <scheme>GFS_surface_generic_post</scheme>
+      <scheme>mynnedmf_wrapper</scheme>
+      <scheme>GFS_GWD_generic_pre</scheme>
+      <scheme>gwdps</scheme>
+      <scheme>gwdps_post</scheme>
+      <scheme>rayleigh_damp</scheme>
+      <scheme>GFS_suite_stateout_update</scheme>
+      <scheme>ozphys_2015</scheme>
+      <scheme>h2ophys</scheme>
+      <scheme>GFS_DCNV_generic_pre</scheme>
+      <scheme>get_phi_fv3</scheme>
+      <scheme>GFS_suite_interstitial_3</scheme>
+      <scheme>cu_gf_driver_pre</scheme>
+      <scheme>cu_gf_driver</scheme>
+      <scheme>GFS_DCNV_generic_post</scheme>
+      <scheme>gwdc_pre</scheme>
+      <scheme>gwdc</scheme>
+      <scheme>gwdc_post</scheme>
+      <scheme>GFS_SCNV_generic_pre</scheme>
+      <scheme>GFS_SCNV_generic_post</scheme>
+      <scheme>GFS_suite_interstitial_4</scheme>
+      <scheme>cnvc90</scheme>
+      <scheme>GFS_MP_generic_pre</scheme>
+      <scheme>mp_thompson_pre</scheme>
+      <scheme>mp_thompson</scheme>
+      <scheme>mp_thompson_post</scheme>
+      <scheme>GFS_MP_generic_post</scheme>
+      <scheme>cu_gf_driver_post</scheme>
+      <scheme>maximum_hourly_diagnostics</scheme>
+    </subcycle>
+  </group>
+  <!-- <finalize></finalize> -->
+</suite>
+
+\endcode
+
+\section gsd_nml_option Namelist Option
+\code
+&gfs_physics_nml
+       fhzero         = 6.
+       h2o_phys       = .true.
+       ldiag3d        = .true.
+       fhcyc          = 0.
+       nst_anl        = .true.
+       use_ufo        = .true.
+       pre_rad        = .false.
+       ncld           = 5
+       imp_physics    = 8
+       ltaerosol      = .true.
+       lradar         = .true.
+       ttendlim       = -999.
+       pdfcld         = .false.
+       fhswr          = 3600.
+       fhlwr          = 3600.
+       ialb           = 1
+       iems           = 1
+       iaer           = 111
+       ico2           = 2
+       isubc_sw       = 2
+       isubc_lw       = 2
+       isol           = 2
+       lwhtr          = .true.
+       swhtr          = .true.
+       cnvgwd         = .true.
+       shal_cnv       = .true.
+       cal_pre        = .false.
+       redrag         = .true.
+       dspheat        = .true.
+       hybedmf        = .false.
+       satmedmf       = .false.
+       lheatstrg      = .false.
+       do_mynnedmf    = .true.
+       do_mynnsfclay  = .false.
+       random_clds    = .false.
+       trans_trac     = .true.
+       cnvcld         = .true.
+       imfshalcnv     = 3
+       imfdeepcnv     = 3
+       cdmbgwd        = 3.5,0.25
+       prslrd0        = 0.
+       ivegsrc        = 1
+       isot           = 1
+       debug          = .false.
+       oz_phys        = .false.
+       oz_phys_2015   = .true.
+       nstf_name      = 2,1,1,0,5
+       cplflx         = .false.
+       iau_delthrs    = 6
+       iaufhrs        = 30
+       iau_inc_files  = "''"
+       do_sppt        = .false.
+       do_shum        = .false.
+       do_skeb        = .false.
+       do_sfcperts    = .false.
+       lsm            = 2
+       lsoil_lsm      = 9
+       icloud_bl         = 1
+       bl_mynn_tkeadvect = .true.
+       bl_mynn_edmf      = 1
+       bl_mynn_edmf_mom  = 1
+/
+\endcode
+
+
+*/

@@ -356,7 +356,7 @@
          subroutine rrtmg_lw_init ()
          end subroutine rrtmg_lw_init
 
-!> \defgroup module_radlw_main GFS radlw Main
+!> \defgroup module_radlw_main GFS RRTMG Longwave Module 
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
@@ -380,55 +380,7 @@
 !!  This model is provided as is without any express or implied warranties.
 !!  (http://www.rtweb.aer.com/)
 !! \section arg_table_rrtmg_lw_run Argument Table
-!! | local_name      | standard_name                                                                                 | long_name                                                 | units   | rank | type        |    kind   | intent | optional |
-!! |-----------------|-----------------------------------------------------------------------------------------------|-----------------------------------------------------------|---------|------|-------------|-----------|--------|----------|
-!! | plyr            | air_pressure_at_layer_for_radiation_in_hPa                                                    | air pressure layer                                        | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | plvl            | air_pressure_at_interface_for_radiation_in_hPa                                                | air pressure level                                        | hPa     |    2 | real        | kind_phys | in     | F        |
-!! | tlyr            | air_temperature_at_layer_for_radiation                                                        | air temperature layer                                     | K       |    2 | real        | kind_phys | in     | F        |
-!! | tlvl            | air_temperature_at_interface_for_radiation                                                    | air temperature level                                     | K       |    2 | real        | kind_phys | in     | F        |
-!! | qlyr            | water_vapor_specific_humidity_at_layer_for_radiation                                          | specific humidity layer                                   | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | olyr            | ozone_concentration_at_layer_for_radiation                                                    | ozone concentration layer                                 | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_co2      | volume_mixing_ratio_co2                                                                       | volume mixing ratio co2                                   | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_n2o      | volume_mixing_ratio_n2o                                                                       | volume mixing ratio no2                                   | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_ch4      | volume_mixing_ratio_ch4                                                                       | volume mixing ratio ch4                                   | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_o2       | volume_mixing_ratio_o2                                                                        | volume mixing ratio o2                                    | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_co       | volume_mixing_ratio_co                                                                        | volume mixing ratio co                                    | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_cfc11    | volume_mixing_ratio_cfc11                                                                     | volume mixing ratio cfc11                                 | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_cfc12    | volume_mixing_ratio_cfc12                                                                     | volume mixing ratio cfc12                                 | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_cfc22    | volume_mixing_ratio_cfc22                                                                     | volume mixing ratio cfc22                                 | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | gasvmr_ccl4     | volume_mixing_ratio_ccl4                                                                      | volume mixing ratio ccl4                                  | kg kg-1 |    2 | real        | kind_phys | in     | F        |
-!! | icseed          | seed_random_numbers_lw                                                                        | seed for random number generation for longwave radiation  | none    |    1 | integer     |           | in     | F        |
-!! | aeraod          | aerosol_optical_depth_for_longwave_bands_01-16                                                | aerosol optical depth for longwave bands 01-16            | none    |    3 | real        | kind_phys | in     | F        |
-!! | aerssa          | aerosol_single_scattering_albedo_for_longwave_bands_01-16                                     | aerosol single scattering albedo for longwave bands 01-16 | frac    |    3 | real        | kind_phys | in     | F        |
-!! | sfemis          | surface_longwave_emissivity                                                                   | surface emissivity                                        | frac    |    1 | real        | kind_phys | in     | F        |
-!! | sfgtmp          | surface_ground_temperature_for_radiation                                                      | surface ground temperature for radiation                  | K       |    1 | real        | kind_phys | in     | F        |
-!! | dzlyr           | layer_thickness_for_radiation                                                                 | layer thickness                                           | km      |    2 | real        | kind_phys | in     | F        |
-!! | delpin          | layer_pressure_thickness_for_radiation                                                        | layer pressure thickness                                  | hPa     |    2 | real        | kind_phys | in     | F        | 
-!! | de_lgth         | cloud_decorrelation_length                                                                    | cloud decorrelation length                                | km      |    1 | real        | kind_phys | in     | F        | 
-!! | npts            | horizontal_loop_extent                                                                        | horizontal dimension                                      | count   |    0 | integer     |           | in     | F        |
-!! | nlay            | adjusted_vertical_layer_dimension_for_radiation                                               | number of vertical layers for radiation                   | count   |    0 | integer     |           | in     | F        |
-!! | nlp1            | adjusted_vertical_level_dimension_for_radiation                                               | number of vertical levels for radiation                   | count   |    0 | integer     |           | in     | F        |
-!! | lprnt           | flag_print                                                                                    | flag to print                                             | flag    |    0 | logical     |           | in     | F        |
-!! | cld_cf          | total_cloud_fraction                                                                          | total cloud fraction                                      | frac    |    2 | real        | kind_phys | in     | F        |
-!! | lslwr           | flag_to_calc_lw                                                                               | flag to calculate LW irradiances                          | flag    |    0 | logical     |           | in     | F        |
-!! | hlwc            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step                    | longwave total sky heating rate                           | K s-1   |    2 | real        | kind_phys | inout  | F        |
-!! | topflx          | lw_fluxes_top_atmosphere                                                                      | longwave total sky fluxes at the top of the atm           | W m-2   |    1 | topflw_type |           | inout  | F        |
-!! | sfcflx          | lw_fluxes_sfc                                                                                 | longwave total sky fluxes at the Earth surface            | W m-2   |    1 | sfcflw_type |           | inout  | F        |
-!! | cldtau          | cloud_optical_depth_layers_at_10mu_band                                                       | approx 10mu band layer cloud optical depth                | none    |    2 | real        | kind_phys | inout  | F        |
-!! | hlw0            | tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step | longwave clear sky heating rate                           | K s-1   |    2 | real        | kind_phys | inout  | T        |
-!! | hlwb            | lw_heating_rate_spectral                                                                      | longwave total sky heating rate (spectral)                | K s-1   |    3 | real        | kind_phys | inout  | T        |
-!! | flxprf          | lw_fluxes                                                                                     | lw fluxes total sky / csk and up / down at levels         | W m-2   |    2 | proflw_type |           | inout  | T        |
-!! | cld_lwp         | cloud_liquid_water_path                                                                       | cloud liquid water path                                   | g m-2   |    2 | real        | kind_phys | in     | T        |
-!! | cld_ref_liq     | mean_effective_radius_for_liquid_cloud                                                        | mean effective radius for liquid cloud                    | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_iwp         | cloud_ice_water_path                                                                          | cloud ice water path                                      | g m-2   |    2 | real        | kind_phys | in     | T        |
-!! | cld_ref_ice     | mean_effective_radius_for_ice_cloud                                                           | mean effective radius for ice cloud                       | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_rwp         | cloud_rain_water_path                                                                         | cloud ice water path                                      | g m-2   |    2 | real        | kind_phys | in     | T        |
-!! | cld_ref_rain    | mean_effective_radius_for_rain_drop                                                           | mean effective radius for rain drop                       | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_swp         | cloud_snow_water_path                                                                         | cloud snow water path                                     | g m-2   |    2 | real        | kind_phys | in     | T        |
-!! | cld_ref_snow    | mean_effective_radius_for_snow_flake                                                          | mean effective radius for snow flake                      | micron  |    2 | real        | kind_phys | in     | T        |
-!! | cld_od          | cloud_optical_depth                                                                           | cloud optical depth                                       | none    |    2 | real        | kind_phys | in     | T        |
-!! | errmsg          | ccpp_error_message                                                                            | error message for error handling in CCPP                  | none    |    0 | character   | len=*     | out    | F        |
-!! | errflg          | ccpp_error_flag                                                                               | error flag for error handling in CCPP                     | flag    |    0 | integer     |           | out    | F        |
+!! \htmlinclude rrtmg_lw_run.html
 !!
 !> \section gen_lwrad RRTMG Longwave Radiation Scheme General Algorithm
 !> @{
@@ -1532,6 +1484,8 @@
 !!\param nlay            number of layer number
 !!\param nlp1            number of veritcal levels
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
+!!\param dz              layer thickness (km) 
+!!\param de_lgth         layer cloud decorrelation length (km)  
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
 !!\section gen_cldprop cldprop General Algorithm
@@ -1846,6 +1800,8 @@
 !!\param cldf        layer cloud fraction
 !!\param nlay        number of model vertical layers
 !!\param ipseed      permute seed for random num generator
+!!\param dz          layer thickness
+!!\param de_lgth     layer cloud decorrelation length (km)
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
 !! @{
@@ -2084,7 +2040,7 @@
 !!                                4-h2o/ch4,5-n2o/co2,6-o3/co2
 !!\n                     (:,:,n)n=1,2: the rates of ref press at
 !!                                the 2 sides of the layer
-!!\param facij           factors multiply the reference ks, i,j=0/1 for
+!!\param fac00,fac01,fac10,fac11           factors multiply the reference ks, i,j=0/1 for
 !!                       lower/higher of the 2 appropriate temperatures
 !!                       and altitudes.
 !!\param selffac         scale factor for w. v. self-continuum equals
@@ -2100,8 +2056,7 @@
 !!\param scaleminor,scaleminorn2         scale factors for minor gases
 !!\param indminor        index of lower ref temp for minor gases
 !>\section setcoef_gen setcoef General Algorithm
-!! 
-! ----------------------------------
+!> @{
       subroutine setcoef                                                &
      &     ( pavel,tavel,tz,stemp,h2ovmr,colamt,coldry,colbrd,          & !  ---  inputs:
      &       nlay, nlp1,                                                &
@@ -2358,6 +2313,7 @@
       return
 ! ..................................
       end subroutine setcoef
+!> @}
 ! ----------------------------------
 
 !>\ingroup module_radlw_main
@@ -3766,7 +3722,7 @@
 !!                                 5-n2o/co2,6-o3/co2
 !!\n                      (:,:,n)n=1,2: the rates of ref press at the 2
 !!                                 sides of the layer
-!!\param facij            factors multiply the reference ks, i,j of 0/1
+!!\param fac00,fac01,fac10,fac11            factors multiply the reference ks, i,j of 0/1
 !!                        for lower/higher of the 2 appropriate
 !!                        temperatures and altitudes
 !!\param jp               index of lower reference pressure

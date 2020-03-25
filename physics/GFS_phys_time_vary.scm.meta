@@ -1,0 +1,160 @@
+[ccpp-arg-table]
+  name = GFS_phys_time_vary_init
+  type = scheme
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = inout
+  optional = F
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance
+  long_name = Fortran DDT containing FV3-GFS interstitial data
+  units = DDT
+  dimensions = ()
+  type = GFS_interstitial_type
+  intent = inout
+  optional = F
+[Tbd]
+  standard_name = GFS_tbd_type_instance
+  long_name = Fortran DDT containing FV3-GFS miscellaneous data
+  units = DDT
+  dimensions = ()
+  type = GFS_tbd_type
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_phys_time_vary_finalize
+  type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_phys_time_vary_run
+  type = scheme
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = in
+  optional = F
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = instance of derived type GFS_statein_type
+  units = DDT
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+  optional = F
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = Fortran DDT containing FV3-GFS model control parameters
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = inout
+  optional = F
+[Tbd]
+  standard_name = GFS_tbd_type_instance
+  long_name = Fortran DDT containing FV3-GFS miscellaneous data
+  units = DDT
+  dimensions = ()
+  type = GFS_tbd_type
+  intent = inout
+  optional = F
+[Sfcprop]
+  standard_name = GFS_sfcprop_type_instance
+  long_name = Fortran DDT containing FV3-GFS surface fields
+  units = DDT
+  dimensions = ()
+  type = GFS_sfcprop_type
+  intent = inout
+  optional = F
+[Cldprop]
+  standard_name = GFS_cldprop_type_instance
+  long_name = Fortran DDT containing FV3-GFS cloud fields
+  units = DDT
+  dimensions = ()
+  type = GFS_cldprop_type
+  intent = inout
+  optional = F
+[Diag]
+  standard_name = GFS_diag_type_instance
+  long_name = Fortran DDT containing FV3-GFS fields targeted for diagnostic output
+  units = DDT
+  dimensions = ()
+  type = GFS_diag_type
+  intent = inout
+  optional = F
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

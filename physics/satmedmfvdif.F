@@ -1,108 +1,65 @@
 !> \file satmedmfvdif.F
 !! This file  contains the CCPP-compliant SATMEDMF scheme which computes
 !! subgrid vertical turbulence mixing using scale-aware TKE-based moist
-!! eddy-diffusion mass-flux (EDMF) parameterization (by Jongil Han).
-!!
-!! Subroutine 'satmedmfvdif_run' computes subgrid vertical turbulence mixing
-!! using scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization
-!! (by Jongil Han).
-!!
-!! - For the convective boundary layer, the scheme adopts
-!! EDMF parameterization (Siebesma et al., 2007) to take
-!! into account nonlocal transport by large eddies (mfpblt.f).
-!!
-!! - A new mass-flux parameterization for stratocumulus-top-induced turbulence
-!! mixing has been introduced (previously, it was eddy diffusion form)
-!! [mfscu.f].
-!!
-!! - For local turbulence mixing, a TKE closure model is used.
-!
-!----------------------------------------------------------------------
+!! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
 
       module satmedmfvdif
+
       contains
 
-      subroutine satmedmfvdif_init ()
+!> \section arg_table_satmedmfvdif_init Argument Table
+!! \htmlinclude satmedmfvdif_init.html
+!!
+      subroutine satmedmfvdif_init (isatmedmf,isatmedmf_vdif,
+     &                              errmsg,errflg)
+
+      integer, intent(in) :: isatmedmf,isatmedmf_vdif
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not. isatmedmf==isatmedmf_vdif) then
+        write(errmsg,fmt='(*(a))') 'Logic error: satmedmfvdif is ',
+     &                    'called, but isatmedmf/=isatmedmf_vdif.'
+        errflg = 1
+        return
+      end if
+
       end subroutine satmedmfvdif_init
 
       subroutine satmedmfvdif_finalize ()
       end subroutine satmedmfvdif_finalize
 
-!> \defgroup SATMEDMF FV3GFS satmedmfvdif_run Main
-!! \brief This subroutine contains all of the logic for the 
-!! scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) scheme.
+!> \defgroup satmedmf GFS Scale-aware TKE-based Moist Eddy-Diffusivity Mass-flux (TKE-EDMF) Scheme Module 
+!! @{
+!! \brief This subroutine contains all of the logic for the
+!! scale-aware TKE-based moist eddy-diffusion mass-flux (TKE-EDMF) scheme.
 !!
 !> \section arg_table_satmedmfvdif_run Argument Table
-!! | local_name     | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | ntrac          | number_of_vertical_diffusion_tracers                                        | number of tracers to diffuse vertically               | count         |    0 | integer   |           | in     | F        |
-!! | ntcw           | index_for_liquid_cloud_condensate                                           | tracer index for cloud condensate (or liquid water)   | index         |    0 | integer   |           | in     | F        |
-!! | ntiw           | index_for_ice_cloud_condensate_vertical_diffusion_tracer             | tracer index for ice water in the vertically diffused tracer array | index         |    0 | integer   |           | in     | F        |
-!! | ntke           | index_for_turbulent_kinetic_energy_vertical_diffusion_tracer | index for turbulent kinetic energy in the vertically diffused tracer array | index   |    0 | integer   |           | in     | F        |
-!! | grav           | gravitational_acceleration                                                  | gravitational acceleration                            | m s-2         |    0 | real      | kind_phys | in     | F        |
-!! | rd             | gas_constant_dry_air                                                        | ideal gas constant for dry air                        | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure                               | specific heat of dry air at constant pressure         | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | rv             | gas_constant_water_vapor                                                    | ideal gas constant for water vapor                    | J kg-1 K-1    |    0 | real      | kind_phys | in     | F        |
-!! | hvap           | latent_heat_of_vaporization_of_water_at_0C                                  | latent heat of evaporation/sublimation                | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | hfus           | latent_heat_of_fusion_of_water_at_0C                                        | latent heat of fusion                                 | J kg-1        |    0 | real      | kind_phys | in     | F        |
-!! | fv             | ratio_of_vapor_to_dry_air_gas_constants_minus_one                           | (rv/rd) - 1 (rv = ideal gas constant for water vapor) | none          |    0 | real      | kind_phys | in     | F        |
-!! | eps            | ratio_of_dry_air_to_water_vapor_gas_constants                               | rd/rv                                                 | none          |    0 | real      | kind_phys | in     | F        |
-!! | epsm1          | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                     | (rd/rv) - 1                                           | none          |    0 | real      | kind_phys | in     | F        |
-!! | dv             | tendency_of_y_wind_due_to_model_physics                                     | updated tendency of the y wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | du             | tendency_of_x_wind_due_to_model_physics                                     | updated tendency of the x wind                        | m s-2         |    2 | real      | kind_phys | inout  | F        |
-!! | tdt            | tendency_of_air_temperature_due_to_model_physics                            | updated tendency of the temperature                   | K s-1         |    2 | real      | kind_phys | inout  | F        |
-!! | rtg            | tendency_of_vertically_diffused_tracer_concentration                        | updated tendency of the tracers due to vertical diffusion in PBL scheme | kg kg-1 s-1 | 3 | real | kind_phys | inout | F |
-!! | u1             | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | q1             | vertically_diffused_tracer_concentration                                    | tracer concentration diffused by PBL scheme           | kg kg-1       |    3 | real      | kind_phys | in     | F        |
-!! | swh            | tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step | total sky shortwave heating rate                      | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | hlw            | tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step  | total sky longwave heating rate                       | K s-1         |    2 | real      | kind_phys | in     | F        |
-!! | xmu            | zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes                | zenith angle temporal adjustment factor for shortwave | none          |    1 | real      | kind_phys | in     | F        |
-!! | garea          | cell_area                                                                   | area of the grid cell                                 | m2            |    1 | real      | kind_phys | in     | F        |
-!! | psk            | dimensionless_exner_function_at_lowest_model_interface                      | dimensionless Exner function at the surface interface | none          |    1 | real      | kind_phys | in     | F        |
-!! | rbsoil         | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | in     | F        |
-!! | zorl           | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | in     | F        |
-!! | u10m           | x_wind_at_10m                                                               | x component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v10m           | y_wind_at_10m                                                               | y component of wind at 10 m                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | fm             | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity function for momentum        | none          |    1 | real      | kind_phys | in     | F        |
-!! | fh             | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity function for heat            | none          |    1 | real      | kind_phys | in     | F        |
-!! | tsea           | surface_skin_temperature                                                    | surface skin temperature                              | K             |    1 | real      | kind_phys | in     | F        |
-!! | heat           | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | in     | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | in     | F        |
-!! | stress         | surface_wind_stress                                                         | surface wind stress                                   | m2 s-2        |    1 | real      | kind_phys | in     | F        |
-!! | spd1           | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | kpbl           | vertical_index_at_top_of_atmosphere_boundary_layer                          | PBL top model level index                             | index         |    1 | integer   |           | out    | F        |
-!! | prsi           | air_pressure_at_interface                                                   | air pressure at model layer interfaces                | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers                                   | pres(k) - pres(k+1)                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | prslk          | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
-!! | phii           | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | phil           | geopotential                                                                | geopotential at model layer centers                   | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | delt           | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
-!! | dspheat        | flag_TKE_dissipation_heating                                                | flag for using TKE dissipation heating                | flag          |    0 | logical   |           | in     | F        |
-!! | dusfc          | instantaneous_surface_x_momentum_flux                                       | x momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dvsfc          | instantaneous_surface_y_momentum_flux                                       | y momentum flux                                       | Pa            |    1 | real      | kind_phys | out    | F        |
-!! | dtsfc          | instantaneous_surface_upward_sensible_heat_flux                             | surface upward sensible heat flux                     | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | dqsfc          | instantaneous_surface_upward_latent_heat_flux                               | surface upward latent heat flux                       | W m-2         |    1 | real      | kind_phys | out    | F        |
-!! | hpbl           | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | out    | F        |
-!! | kinver         | index_of_highest_temperature_inversion                                      | index of highest temperature inversion                | index         |    1 | integer   |           | in     | F        |
-!! | xkzm_m         | atmosphere_momentum_diffusivity_background                                  | background value of momentum diffusivity              | m2 s-1        |    0 | real      | kind_phys | in     | F        |
-!! | xkzm_h         | atmosphere_heat_diffusivity_background                                      | background value of heat diffusivity                  | m2 s-1        |    0 | real      | kind_phys | in     | F        |
-!! | xkzm_s         | diffusivity_background_sigma_level                                          | sigma level threshold for background diffusivity      | none          |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude satmedmfvdif_run.html
 !!
-      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,
-     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,
-     &     tsea,heat,evap,stress,spd1,kpbl,
-     &     prsi,del,prsl,prslk,phii,phil,delt,
-     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,
+!!\section gen_satmedmfvdif GFS satmedmfvdif General Algorithm
+!! satmedmfvdif_run() computes subgrid vertical turbulence mixing
+!! using the scale-aware TKE-based moist eddy-diffusion mass-flux (EDMF) parameterization of
+!! Han and Bretherton (2019) \cite Han_2019 .
+!! -# The local turbulent mixing is represented by an eddy-diffusivity scheme which 
+!! is a function of a prognostic TKE.
+!! -# For the convective boundary layer, nonlocal transport by large eddies 
+!! (mfpblt.f), is represented using a mass flux approach (Siebesma et al.(2007) \cite Siebesma_2007 ).
+!! -# A mass-flux approach is also used to represent the stratocumulus-top-induced turbulence
+!! (mfscu.f).
+!! \section detail_satmedmfvidf GFS satmedmfvdif Detailed Algorithm 
+!> @{
+      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
+     &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
+     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
+     &     tsea,heat,evap,stress,spd1,kpbl,                             &
+     &     prsi,del,prsl,prslk,phii,phil,delt,                          &
+     &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -115,31 +72,31 @@
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
 !
-      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,
+      real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),
+      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
-      real(kind=kind_phys), intent(in) ::
-     &                     u1(ix,km),     v1(ix,km),
-     &                     t1(ix,km),     q1(ix,km,ntrac),
-     &                     swh(ix,km),    hlw(ix,km),
-     &                     xmu(im),       garea(im),
-     &                     psk(ix),       rbsoil(im),
-     &                     zorl(im),      tsea(im),
-     &                     u10m(im),      v10m(im),
-     &                     fm(im),        fh(im),
-     &                     evap(im),      heat(im),
-     &                     stress(im),    spd1(im),
-     &                     prsi(ix,km+1), del(ix,km),
-     &                     prsl(ix,km),   prslk(ix,km),
+      real(kind=kind_phys), intent(in) ::                               &
+     &                     u1(ix,km),     v1(ix,km),                    &
+     &                     t1(ix,km),     q1(ix,km,ntrac),              &
+     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     xmu(im),       garea(im),                    &
+     &                     psk(ix),       rbsoil(im),                   &
+     &                     zorl(im),      tsea(im),                     &
+     &                     u10m(im),      v10m(im),                     &
+     &                     fm(im),        fh(im),                       &
+     &                     evap(im),      heat(im),                     &
+     &                     stress(im),    spd1(im),                     &
+     &                     prsi(ix,km+1), del(ix,km),                   &
+     &                     prsl(ix,km),   prslk(ix,km),                 &
      &                     phii(ix,km+1), phil(ix,km)
-      real(kind=kind_phys), intent(out) ::
-     &                     dusfc(im),     dvsfc(im),
-     &                     dtsfc(im),     dqsfc(im),
-     &                     hpbl(im) 
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dusfc(im),     dvsfc(im),                    &
+     &                     dtsfc(im),     dqsfc(im),                    &
+     &                     hpbl(im)
 !
-      logical, intent(out)  :: dspheat
+      logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -277,6 +234,7 @@
       errmsg = ''
       errflg = 0
 
+!> -# Compute preliminary variables from input arguments
       dt2  = delt
       rdt = 1. / dt2
 !
@@ -287,7 +245,8 @@
       km1 = km - 1
       kmpbl = km / 2
       kmscu = km / 2
-!
+!>  - Compute physical height of the layer centers and interfaces from 
+!! the geopotential height (\p zi and \p zl)
       do k=1,km
         do i=1,im
           zi(i,k) = phii(i,k) * gravi
@@ -308,11 +267,12 @@
           zm(i,k) = zi(i,k+1)
         enddo
       enddo
-! horizontal grid size
+!>  - Compute horizontal grid size (\p gdx)
       do i=1,im
         gdx(i) = sqrt(garea(i))
       enddo
-!
+!>  - Initialize tke value at vertical layer centers and interfaces 
+!! from tracer (\p tke and \p tkeh)
       do k=1,km
         do i=1,im
           tke(i,k) = max(q1(i,k,ntke), tkmin)
@@ -323,7 +283,7 @@
           tkeh(i,k) = 0.5 * (tke(i,k) + tke(i,k+1))
         enddo
       enddo
-!
+!>  - Compute reciprocal of \f$ \Delta z \f$ (rdzt)
       do k = 1,km1
         do i=1,im
           rdzt(i,k) = 1.0 / (zl(i,k+1) - zl(i,k))
@@ -331,12 +291,14 @@
         enddo
       enddo
 !
-! set background diffusivities as a function of
-!  horizontal grid size with xkzm_h & xkzm_m for gdx >= 25km
-!  and 0.01 for gdx=5m, i.e.,
-!  xkzm_hx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
-!  xkzm_mx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
-!
+!>  - Compute reciprocal of pressure (tx1, tx2)
+!>  - Compute background vertical diffusivities for scalars and momentum (xkzo and xkzmo)
+!!   -  set background diffusivities as a function of
+!!  horizontal grid size with xkzm_h & xkzm_m for gdx >= 25km
+!!  and 0.01 for gdx=5m, i.e.,
+!!\n  xkzm_hx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
+!!\n  xkzm_mx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
+
       do i=1,im
         kx1(i) = 1
         tx1(i) = 1.0 / prsi(i,1)
@@ -377,6 +339,7 @@
         enddo
       enddo
 !
+!>  - Some output variables and logical flags are initialized
       do i = 1,im
          z0(i)    = 0.01 * zorl(i)
          dusfc(i) = 0.
@@ -401,6 +364,8 @@
          endif
       enddo
 !
+!>  - Compute \f$\theta\f$(theta), and \f$q_l\f$(qlx), \f$\theta_e\f$(thetae),
+!! \f$\theta_v\f$(thvx),\f$\theta_{l,v}\f$ (thlvx) including ice water 
       do k=1,km
         do i=1,im
           pix(i,k)   = psk(i) / prslk(i,k)
@@ -428,8 +393,8 @@
         enddo
       enddo
 !
-! The background vertical diffusivities in the inversion layers are limited 
-!    to be less than or equal to xkzminv
+!>  - The background vertical diffusivities in the inversion layers are limited 
+!! to be less than or equal to xkzinv
 !
       do k = 1,km1
         do i=1,im
@@ -441,9 +406,8 @@
         enddo
       enddo
 !
-! compute an empirical cloud fraction based on 
-!    Xu & Randall's (1996,JAS) study
-!
+!>  - Compute an empirical cloud fraction based on 
+!! Xu and Randall (1996) \cite xu_and_randall_1996
       do k = 1, km
         do i = 1, im
           plyr(i,k)   = 0.01 * prsl(i,k)   ! pa to mb (hpa)
@@ -470,7 +434,7 @@
         enddo
       enddo
 !
-!  compute buoyancy modified by clouds
+!>  - Compute buoyancy modified by clouds
 !
       do k = 1, km1
         do i = 1, im
@@ -493,6 +457,8 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !
+!>  - Initialize diffusion coefficients to 0 and calculate the total 
+!! radiative heating rate (dku, dkt, radx)
       do k=1,km1
         do i=1,im
           dku(i,k)  = 0.
@@ -504,13 +470,28 @@
           radx(i,k) = tem*(swh(i,k)*xmu(i)+hlw(i,k))
         enddo
       enddo
-!
+!>  - Compute stable/unstable PBL flag (pblflg) based on the total
+!! surface energy flux (\e false if the total surface energy flux
+!! is into the surface) 
       do i = 1,im
          sflux(i)  = heat(i) + evap(i)*fv*theta(i,1)
          if(.not.sfcflg(i) .or. sflux(i) <= 0.) pblflg(i)=.false.
       enddo
 !
-!  compute critical bulk richardson number 
+!>  - Compute critical bulk Richardson number (\f$Rb_{cr}\f$) (crb)
+!!   - For the unstable PBL, crb is a constant (0.25)
+!!   - For the stable boundary layer (SBL), \f$Rb_{cr}\f$ varies
+!!     with the surface Rossby number, \f$R_{0}\f$, as given by 
+!!     Vickers and Mahrt (2004) \cite Vickers_2004
+!!\f[
+!!      Rb_{cr}=0.16(10^{-7}R_{0})^{-0.18},  
+!!
+!!      R_{0}=\frac{U_{10}}{f_{0}z_{0}}
+!!\f]
+!!     where \f$U_{10}\f$ is the wind speed at 10m above the ground surface,
+!!     \f$f_0\f$ the Coriolis parameter, and \f$z_{0}\f$ the surface roughness
+!!     length. To avoid too much variation, we restrict \f$Rb_{cr}\f$ to vary
+!!     within the range of 0.15~0.35
 !
       do i = 1,im
         if(pblflg(i)) then
@@ -528,6 +509,7 @@
         endif
       enddo
 !
+!>  - Compute \f$\frac{\Delta t}{\Delta z}\f$ , \f$u_*\f$
       do i=1,im
          dtdz1(i)  = dt2 / (zi(i,2)-zi(i,1))
       enddo
@@ -536,7 +518,8 @@
          ustar(i) = sqrt(stress(i))
       enddo
 !
-!  compute buoyancy (bf) and winshear square
+!>  - Compute buoyancy \f$\frac{\partial \theta_v}{\partial z}\f$ (bf) 
+!! and the wind shear squared (shr2)
 !
       do k = 1, km1
       do i = 1, im
@@ -548,14 +531,19 @@
       enddo
       enddo
 !
-! find pbl height based on bulk richardson number (mrf pbl scheme)
+! Find pbl height based on bulk Richardson number (mrf pbl scheme)
 !   and also for diagnostic purpose
+!
 !
       do i=1,im
          flg(i) = .false.
          rbup(i) = rbsoil(i)
       enddo
-!
+!>  - Given the thermal's properties and the critical Richardson number, 
+!! a loop is executed to find the first level above the surface (kpblx) where 
+!! the modified Richardson number is greater than the critical Richardson
+!! number, using equation 10a from Troen and Mahrt (1996) \cite troen_and_mahrt_1986 
+!! (also equation 8 from Hong and Pan (1996) \cite hong_and_pan_1996):
       do k = 1, kmpbl
       do i = 1, im
         if(.not.flg(i)) then
@@ -570,6 +558,9 @@
         endif
       enddo
       enddo
+!>  - Once the level is found, some linear interpolation is performed to find
+!! the exact height of the boundary layer top (where \f$R_{i} > Rb_{cr}\f$)
+!! and the PBL height (hpbl and kpbl) and the PBL top index are saved.
       do i = 1,im
         if(kpblx(i) > 1) then
           k = kpblx(i)
@@ -591,8 +582,15 @@
         if(kpbl(i) <= 1) pblflg(i)=.false.
       enddo
 !
-!     compute similarity parameters
-!
+!> -# Compute Monin-Obukhov similarity parameters
+!!  - Calculate the Monin-Obukhov nondimensional stability paramter, commonly
+!! referred to as \f$\zeta\f$ using the following equation from Businger et al.(1971) \cite businger_et_al_1971
+!! (eqn 28):
+!!  \f[
+!!  \zeta = Ri_{sfc}\frac{F_m^2}{F_h} = \frac{z}{L}
+!!  \f]
+!!  where \f$F_m\f$ and \f$F_h\f$ are surface Monin-Obukhov stability functions calculated in sfc_diff.f and 
+!! \f$L\f$ is the Obukhov length.
       do i=1,im
          zol(i) = max(rbsoil(i)*fm(i)*fm(i)/fh(i),rimin)
          if(sfcflg(i)) then
@@ -600,7 +598,18 @@
          else
            zol(i) = max(zol(i),zfmin)
          endif
-!
+!>  - Calculate the nondimensional gradients of momentum and temperature (\f$\phi_m\f$ (phim) and \f$\phi_h\f$(phih)) are calculated using
+!! eqns 5 and 6 from Hong and Pan (1996) \cite hong_and_pan_1996 depending on the surface layer stability:
+!!   - For the unstable and neutral conditions:
+!!\f[
+!!     \phi_m=(1-16\frac{0.1h}{L})^{-1/4}
+!!
+!!     \phi_h=(1-16\frac{0.1h}{L})^{-1/2}
+!!\f]
+!!   - For the stable regime
+!!\f[
+!!     \phi_m=\phi_t=(1+5\frac{0.1h}{L})
+!!\f]
          zol1 = zol(i)*sfcfrac*hpbl(i)/zl(i,1)
          if(sfcflg(i)) then
            tem     = 1.0 / (1. - aphi16*zol1)
@@ -612,6 +621,21 @@
          endif
       enddo
 !
+!>  - The \f$z/L\f$ (zol) is used as the stability criterion for the PBL.Currently,
+!! strong unstable (convective) PBL for \f$z/L < -0.02\f$ and weakly and moderately
+!! unstable PBL for \f$0>z/L>-0.02\f$ 
+!>  - Compute the velocity scale \f$w_s\f$ (wscale) (eqn 22 of Han et al. 2019). It
+!! is represented by the value scaled at the top of the surface layer:
+!!\f[
+!!  w_s=(u_*^3+7\alpha\kappa w_*^3)^{1/3}
+!!\f]
+!!  where \f$u_*\f$ (ustar) is the surface friction velocity,\f$\alpha\f$ is the ratio
+!! of the surface layer height to the PBL height (specified as sfcfrac =0.1), 
+!! \f$\kappa =0.4\f$ is the von Karman constant, and \f$w_*\f$ is the convective velocity
+!! scale defined as eqn23 of Han et al.(2019):
+!!\f[
+!!  w_{*}=[(g/T)\overline{(w'\theta_v^{'})}_0h]^{1/3}
+!!\f]
       do i=1,im
         if(pblflg(i)) then
           if(zol(i) < zolcru) then
@@ -626,7 +650,7 @@
         endif
       enddo
 !
-! compute a thermal excess
+!>  - Compute a thermal excess. 
 !
       do i = 1,im
          if(pcnvflg(i)) then
@@ -639,7 +663,9 @@
          endif
       enddo
 !
-!  enhance the pbl height by considering the thermal excess
+!>  - Compute enhance the pbl height by considering the thermal excess.
+!! The PBL height calculation follows the same procedure above, except 
+!! that is uses an updated virtual potential temperature for the thermal.
 !     (overshoot pbl top)
 !
       do i=1,im
@@ -684,7 +710,10 @@
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  look for stratocumulus
-!
+!> -# Determine whether stratocumulus layers exist and compute quantities
+!!  - Starting at the PBL top and going downward, if the level is less than 2.5 km
+!! and \f$q_l\geq q_{lcr}\f$ then set kcld = k (find the cloud top index in the PBL.
+!! If no cloud water above the threshold is hound, \e scuflg is set to F. 
       do i=1,im
          flg(i)  = scuflg(i)
       enddo
@@ -712,7 +741,11 @@
       do i = 1, im
         if(scuflg(i) .and. kcld(i)==km1) scuflg(i)=.false.
       enddo
-!
+!>  - Starting at the PBL top and going downward, if the level is less 
+!! than the cloud top, find the level of the minimum radiative heating
+!! rate wihin the cloud. If the level of the minimum is the lowest model 
+!! level or the minimum radiative heating rate is positive, then set
+!! scuflg to F. 
       do i = 1, im
         flg(i)=scuflg(i)
       enddo
@@ -736,9 +769,10 @@
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute components for mass flux mixing by large thermals
+!> -# Compute components for mass flux mixing by large thermals
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!
+!>  - If the PBL is convective, the updraft properties are initialized 
+!! to be the same as the state variables.
       do k = 1, km
         do i = 1, im
           if(pcnvflg(i)) then
@@ -765,12 +799,14 @@
         enddo
       enddo
       enddo
-!
+!>  - Call mfpblt(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
+!! to take into account nonlocal transport by large eddies. 
       call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue)
-!
+!>  - Call mfscu(), which is a new mass-flux parameterization for 
+!! stratocumulus-top-induced turbulence mixing.
       call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,radj,
@@ -778,8 +814,15 @@
      &    tcdo,qcdo,ucdo,vcdo,xlamde)
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!   compute prandtl number and exchange coefficient varying with height
-!
+!> -# Compute Prandtl number \f$P_r\f$ (prn) and exchange coefficient varying with height
+!!  - Within PBL,\f$P_r\f$ is given as \f$P_r=\phi_h/\phi_m\f$, where 
+!! \f$\phi_h\f$ and \f$\phi_m\f$ are the surface layer (\f$z\leq0.1h\f$, where \f$h\f$
+!! is the PBL height) non-dimensional gradient functions for heat and momentum, 
+!! respectively. 
+!!   - We assume that \f$P_r=0.67\f$ in the stratocumulus and the unstable 
+!! layers above PBL (prscu).
+!!   - For the stable layers above PBL, \f$P_r\f$ is given as \f$P_r=1+2.1R_i\f$ 
+!! (prnum) (Kennedy and Shapiro (1980)\cite kennedy_and_shapiro_1980 )
       do k = 1, kmpbl
         do i = 1, im
           if(k < kpbl(i)) then
@@ -806,7 +849,7 @@
 
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute an asymtotic mixing length
+!> -# Compute an asymtotic mixing length
 !
       do k = 1, km1
         do i = 1, im
@@ -866,7 +909,18 @@
 !
           tem = 0.5 * (zi(i,k+1)-zi(i,k))
           tem1 = min(tem, rlmn)
-!
+!>  - Following Bougeault and Lacarrere(1989), the characteristic length
+!! scale (\f$l_2\f$) (eqn 10 in Han et al.(2019) \cite Han_2019) is given by:
+!!\f[
+!!   l_2=min(l_{up},l_{down})
+!!\f]
+!! and dissipation length scale \f$l_d\f$ is given by:
+!!\f[ 
+!!   l_d=(l_{up}l_{down})^{1/2}
+!!\f]
+!!    where \f$l_{up}\f$ and \f$l_{down}\f$ are the distances that a parcel
+!! having an initial TKE can travel upward and downward before being stopped
+!! by buoyancy effects.
           ptem2 = min(zlup,zldn)
           rlam(i,k) = elmfac * ptem2
           rlam(i,k) = max(rlam(i,k), tem1)
@@ -879,7 +933,8 @@
 !
         enddo
       enddo
-!
+!>  - Compute the surface layer length scale (\f$l_1\f$) following 
+!! Nakanishi (2001) \cite Nakanish_2001 (eqn 9 of Han et al.(2019) \cite Han_2019)
       do k = 1, km1
         do i = 1, im
           tem = vk * zl(i,k)
@@ -907,9 +962,7 @@
         ele(i,km) = ele(i,km1)
       enddo
 !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute eddy diffusivities
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!> -# Compute eddy diffusivities
 !
       do k = 1, km1
         do i = 1, im
@@ -970,8 +1023,7 @@
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  compute buoyancy and shear productions of tke 
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!> -# Compute buoyancy and shear productions of TKE 
 !
       do k = 1, km1
         do i = 1, im
@@ -1094,7 +1146,7 @@
       enddo
 !
 !----------------------------------------------------------------------
-!     first predict tke due to tke production & dissipation(diss) 
+!> -# First predict tke due to tke production & dissipation(diss) 
 !
       do k = 1,km1
         do i=1,im
@@ -1116,7 +1168,7 @@
       enddo
       enddo
 !
-!     compute updraft & downdraft properties for tke
+!> -# Compute updraft & downdraft properties for TKE
 !
       do k = 1, km
         do i = 1, im
@@ -1154,7 +1206,7 @@
       enddo
 !
 !----------------------------------------------------------------------
-!     compute tridiagonal matrix elements for turbulent kinetic energy
+!> -# Compute tridiagonal matrix elements for turbulent kinetic energy
 !
       do i=1,im
          ad(i,1) = 1.0
@@ -1202,7 +1254,7 @@
         enddo
       enddo
 !
-!     solve tridiagonal problem for tke
+!> -# Call tridit() to solve tridiagonal problem for TKE
 !
       call tridit(im,km,1,al,ad,au,f1,au,f1)
 !
@@ -1216,7 +1268,7 @@
          enddo
       enddo
 !
-!     compute tridiagonal matrix elements for heat and moisture
+!> -# Compute tridiagonal matrix elements for heat and moisture
 !
       do i=1,im
          ad(i,1) = 1.
@@ -1325,7 +1377,7 @@
         enddo
       endif
 !
-!     solve tridiagonal problem for heat and moisture
+!> -# Call tridin() to solve tridiagonal problem for heat and moisture
 !
       call tridin(im,km,ntrac1,al,ad,au,f1,f2,au,f1,f2)
 !
@@ -1354,7 +1406,7 @@
         enddo
       endif
 !
-!     add tke dissipative heating to temperature tendency
+!> -# Add TKE dissipative heating to temperature tendency
 !
       if(dspheat) then
       do k = 1,km1
@@ -1367,7 +1419,7 @@
       enddo
       endif
 !
-!     compute tridiagonal matrix elements for momentum
+!> -# Compute tridiagonal matrix elements for momentum
 !
       do i=1,im
          ad(i,1) = 1.0 + dtdz1(i) * stress(i) / spd1(i)
@@ -1425,7 +1477,7 @@
         enddo
       enddo
 !
-!     solve tridiagonal problem for momentum
+!> -# Call tridi2() to solve tridiagonal problem for momentum
 !
       call tridi2(im,km,al,ad,au,f1,f2,au,f1,f2)
 !
@@ -1443,7 +1495,7 @@
       enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!  pbl height for diagnostic purpose
+!> -# Save PBL height for diagnostic purpose
 !
       do i = 1, im
          hpbl(i) = hpblx(i)
@@ -1453,65 +1505,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
       end subroutine satmedmfvdif_run
-!
-!-----------------------------------------------------------------------
-!-----------------------------------------------------------------------
-      subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
-!-----------------------------------------------------------------------
-!!
-      use machine     , only : kind_phys
-      implicit none
-      integer             is,k,kk,n,nt,l,i
-      real(kind=kind_phys) fk(l)
-!!
-      real(kind=kind_phys) cl(l,2:n), cm(l,n), cu(l,n-1),               &
-     &                     rt(l,n*nt),                                  &
-     &                     au(l,n-1), at(l,n*nt),                       &
-     &                     fkk(l,2:n-1)
-!-----------------------------------------------------------------------
-      do i=1,l
-        fk(i)   = 1./cm(i,1)
-        au(i,1) = fk(i)*cu(i,1)
-      enddo
-      do k = 1, nt
-        is = (k-1) * n
-        do i = 1, l
-          at(i,1+is) = fk(i) * rt(i,1+is)
-        enddo
-      enddo
-      do k=2,n-1
-        do i=1,l
-          fkk(i,k) = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
-          au(i,k)  = fkk(i,k)*cu(i,k)
-        enddo
-      enddo
-      do kk = 1, nt
-        is = (kk-1) * n
-        do k=2,n-1
-          do i=1,l
-            at(i,k+is) = fkk(i,k)*(rt(i,k+is)-cl(i,k)*at(i,k+is-1))
-          enddo
-        enddo
-      enddo
-      do i=1,l
-        fk(i)   = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
-      enddo
-      do k = 1, nt
-        is = (k-1) * n
-        do i = 1, l
-          at(i,n+is) = fk(i)*(rt(i,n+is)-cl(i,n)*at(i,n+is-1))
-        enddo
-      enddo
-      do kk = 1, nt
-        is = (kk-1) * n
-        do k=n-1,1,-1
-          do i=1,l
-            at(i,k+is) = at(i,k+is) - au(i,k)*at(i,k+is+1)
-          enddo
-        enddo
-      enddo
-!-----------------------------------------------------------------------
-      return
-      end subroutine tridit
+!> @}
 
       end module satmedmfvdif

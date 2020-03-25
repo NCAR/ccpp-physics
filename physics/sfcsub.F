@@ -1,3 +1,12 @@
+!>\file sfcsub.F
+!! This file contains gribcode for each parameter.
+
+
+!>\defgroup mod_sfcsub GFS sfcsub Module
+!!\ingroup Noah_LSM
+!> @{
+!! This module contains grib code for each parameter-used in subroutines sfccycle()
+!! and setrmsk().
       module sfccyc_module
       implicit none
       save
@@ -28,17 +37,38 @@
       integer            :: soil_type_landice
 !
       end module sfccyc_module
-      subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc
-     &,                   iy,im,id,ih,fh
-     &,                   rla, rlo, slmask,orog,orog_uf,use_ufo,nst_anl
-     &,                   sihfcs,sicfcs,sitfcs                 
-     &,                   swdfcs,slcfcs      
-     &,                   vmnfcs,vmxfcs,slpfcs,absfcs
-     &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs
-     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs
-     &,                   vegfcs,vetfcs,sotfcs,alffcs
-     &,                   cvfcs,cvbfcs,cvtfcs,me,nlunit
-     &,                   sz_nml,input_nml_file
+
+!>\ingroup mod_GFS_phys_time_vary
+!! This subroutine reads or interpolates surface climatology data in analysis 
+!! and forecast mode.
+!!\param lugb   the unit number used in this subprogram
+!!\param len    number of points on which sfccyc operates
+!!\param lsoil  number of soil layers 
+!!\param sig1t  sigma level 1 temperature for dead start. it should be on gaussian
+!!              grid. If not dead start, no need for dimension but set to zero as
+!!              in the example below.
+!!\param deltsfc       = fhcyc, frequcy for surface data cycling in hours
+!!\param iy,im,id,ih    year, month, day, and hour of initial state
+!!\param fh     forecast hour
+!!\param rla, rlo   latitude and longitudes of the len points
+!!\param slmsk
+!!\param orog
+!!\param orog_uf
+!!\param use_ufo
+!!\param nst_anl
+!!
+
+      subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc                  &
+     &,                   iy,im,id,ih,fh                                &
+     &,                   rla, rlo, slmask,orog,orog_uf,use_ufo,nst_anl &
+     &,                   sihfcs,sicfcs,sitfcs                          &
+     &,                   swdfcs,slcfcs                                 &
+     &,                   vmnfcs,vmxfcs,slpfcs,absfcs                   &
+     &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs            &
+     &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs            &
+     &,                   vegfcs,vetfcs,sotfcs,alffcs                   &
+     &,                   cvfcs,cvbfcs,cvtfcs,me,nlunit                 & 
+     &,                   sz_nml,input_nml_file                         &
      &,                   ialb,isot,ivegsrc,tile_num_ch,i_index,j_index)
 !
       use machine , only : kind_io8,kind_io4
@@ -47,134 +77,123 @@
       character(len=*), intent(in) :: tile_num_ch
       integer,intent(in)           :: i_index(len), j_index(len)
       logical use_ufo, nst_anl
-      real (kind=kind_io8) sllnd,slsea,aicice,aicsea,tgice,rlapse,
-     &                     orolmx,orolmn,oroomx,oroomn,orosmx,
-     &                     orosmn,oroimx,oroimn,orojmx,orojmn,
-     &                     alblmx,alblmn,albomx,albomn,albsmx,
-     &                     albsmn,albimx,albimn,albjmx,albjmn,
-     &                     wetlmx,wetlmn,wetomx,wetomn,wetsmx,
-     &                     wetsmn,wetimx,wetimn,wetjmx,wetjmn,
-     &                     snolmx,snolmn,snoomx,snoomn,snosmx,
-     &                     snosmn,snoimx,snoimn,snojmx,snojmn,
-     &                     zorlmx,zorlmn,zoromx,zoromn,zorsmx,
-     &                     zorsmn,zorimx,zorimn,zorjmx, zorjmn,
-     &                     plrlmx,plrlmn,plromx,plromn,plrsmx,
-     &                     plrsmn,plrimx,plrimn,plrjmx,plrjmn,
-     &                     tsflmx,tsflmn,tsfomx,tsfomn,tsfsmx,
-     &                     tsfsmn,tsfimx,tsfimn,tsfjmx,tsfjmn,
-     &                     tg3lmx,tg3lmn,tg3omx,tg3omn,tg3smx,
-     &                     tg3smn,tg3imx,tg3imn,tg3jmx,tg3jmn,
-     &                     stclmx,stclmn,stcomx,stcomn,stcsmx,
-     &                     stcsmn,stcimx,stcimn,stcjmx,stcjmn,
-     &                     smclmx,smclmn,smcomx,smcomn,smcsmx,
-     &                     smcsmn,smcimx,smcimn,smcjmx,smcjmn,
-     &                     scvlmx,scvlmn,scvomx,scvomn,scvsmx,
-     &                     scvsmn,scvimx,scvimn,scvjmx,scvjmn,
-     &                     veglmx,veglmn,vegomx,vegomn,vegsmx,
-     &                     vegsmn,vegimx,vegimn,vegjmx,vegjmn,
-     &                     vetlmx,vetlmn,vetomx,vetomn,vetsmx,
-     &                     vetsmn,vetimx,vetimn,vetjmx,vetjmn,
-     &                     sotlmx,sotlmn,sotomx,sotomn,sotsmx,
-     &                     sotsmn,sotimx,sotimn,sotjmx,sotjmn,
-     &                     alslmx,alslmn,alsomx,alsomn,alssmx,
-     &                     alssmn,alsimx,alsimn,alsjmx,alsjmn,
-     &                     epstsf,epsalb,epssno,epswet,epszor,
-     &                     epsplr,epsoro,epssmc,epsscv,eptsfc,
-     &                     epstg3,epsais,epsacn,epsveg,epsvet,
-     &                     epssot,epsalf,qctsfs,qcsnos,qctsfi,
-     &                     aislim,snwmin,snwmax,cplrl,cplrs,
-     &                     cvegl,czors,csnol,csnos,czorl,csots,
-     &                     csotl,cvwgs,cvetl,cvets,calfs,
-     &                     fcalfl,fcalfs,ccvt,ccnp,ccv,ccvb,
-     &                     calbl,calfl,calbs,ctsfs,grboro,
-     &                     grbmsk,ctsfl,deltf,caisl,caiss,
-     &                     fsalfl,fsalfs,flalfs,falbl,ftsfl,
-     &                     ftsfs,fzorl,fzors,fplrl,fsnos,faisl,
-     &                     faiss,fsnol,bltmsk,falbs,cvegs,percrit,
-     &                     deltsfc,critp2,critp3,blnmsk,critp1,
-     &                     fcplrl,fcplrs,fczors,fvets,fsotl,fsots,
-     &                     fvetl,fplrs,fvegl,fvegs,fcsnol,fcsnos,
-     &                     fczorl,fcalbs,fctsfl,fctsfs,fcalbl,
-     &                     falfs,falfl,fh,crit,zsca,ztsfc,tem1,tem2
-     &,                    fsihl,fsihs,fsicl,fsics,
-     &                     csihl,csihs,csicl,csics,epssih,epssic
-     &,                    fvmnl,fvmns,fvmxl,fvmxs,fslpl,fslps,
-     &                     fabsl,fabss,cvmnl,cvmns,cvmxl,cvmxs,
-     &                     cslpl,cslps,cabsl,cabss,epsvmn,epsvmx,
-     &                     epsslp,epsabs
-     &,                    sihlmx,sihlmn,sihomx,sihomn,sihsmx,
-     &                     sihsmn,sihimx,sihimn,sihjmx,sihjmn,
-     &                     siclmx,siclmn,sicomx,sicomn,sicsmx,
-     &                     sicsmn,sicimx,sicimn,sicjmx,sicjmn
-     &,                    glacir_hice
-     &,                    vmnlmx,vmnlmn,vmnomx,vmnomn,vmnsmx,
-     &                     vmnsmn,vmnimx,vmnimn,vmnjmx,vmnjmn,
-     &                     vmxlmx,vmxlmn,vmxomx,vmxomn,vmxsmx,
-     &                     vmxsmn,vmximx,vmximn,vmxjmx,vmxjmn,
-     &                     slplmx,slplmn,slpomx,slpomn,slpsmx,
-     &                     slpsmn,slpimx,slpimn,slpjmx,slpjmn,
-     &                     abslmx,abslmn,absomx,absomn,abssmx,
-     &                     abssmn,absimx,absimn,absjmx,absjmn
+      real (kind=kind_io8) sllnd,slsea,aicice,aicsea,tgice,rlapse,      &
+     &                     orolmx,orolmn,oroomx,oroomn,orosmx,          &
+     &                     orosmn,oroimx,oroimn,orojmx,orojmn,          &
+     &                     alblmx,alblmn,albomx,albomn,albsmx,          &
+     &                     albsmn,albimx,albimn,albjmx,albjmn,          &
+     &                     wetlmx,wetlmn,wetomx,wetomn,wetsmx,          &
+     &                     wetsmn,wetimx,wetimn,wetjmx,wetjmn,          &
+     &                     snolmx,snolmn,snoomx,snoomn,snosmx,          &
+     &                     snosmn,snoimx,snoimn,snojmx,snojmn,          &
+     &                     zorlmx,zorlmn,zoromx,zoromn,zorsmx,          &
+     &                     zorsmn,zorimx,zorimn,zorjmx, zorjmn,         &
+     &                     plrlmx,plrlmn,plromx,plromn,plrsmx,          &
+     &                     plrsmn,plrimx,plrimn,plrjmx,plrjmn,          &
+     &                     tsflmx,tsflmn,tsfomx,tsfomn,tsfsmx,          &
+     &                     tsfsmn,tsfimx,tsfimn,tsfjmx,tsfjmn,          &
+     &                     tg3lmx,tg3lmn,tg3omx,tg3omn,tg3smx,          &
+     &                     tg3smn,tg3imx,tg3imn,tg3jmx,tg3jmn,          &
+     &                     stclmx,stclmn,stcomx,stcomn,stcsmx,          &
+     &                     stcsmn,stcimx,stcimn,stcjmx,stcjmn,          &
+     &                     smclmx,smclmn,smcomx,smcomn,smcsmx,          &
+     &                     smcsmn,smcimx,smcimn,smcjmx,smcjmn,          &
+     &                     scvlmx,scvlmn,scvomx,scvomn,scvsmx,          &
+     &                     scvsmn,scvimx,scvimn,scvjmx,scvjmn,          &
+     &                     veglmx,veglmn,vegomx,vegomn,vegsmx,          &
+     &                     vegsmn,vegimx,vegimn,vegjmx,vegjmn,          &
+     &                     vetlmx,vetlmn,vetomx,vetomn,vetsmx,          &
+     &                     vetsmn,vetimx,vetimn,vetjmx,vetjmn,          &
+     &                     sotlmx,sotlmn,sotomx,sotomn,sotsmx,          &
+     &                     sotsmn,sotimx,sotimn,sotjmx,sotjmn,          &
+     &                     alslmx,alslmn,alsomx,alsomn,alssmx,          &
+     &                     alssmn,alsimx,alsimn,alsjmx,alsjmn,          &
+     &                     epstsf,epsalb,epssno,epswet,epszor,          &
+     &                     epsplr,epsoro,epssmc,epsscv,eptsfc,          &
+     &                     epstg3,epsais,epsacn,epsveg,epsvet,          &
+     &                     epssot,epsalf,qctsfs,qcsnos,qctsfi,          &
+     &                     aislim,snwmin,snwmax,cplrl,cplrs,            &
+     &                     cvegl,czors,csnol,csnos,czorl,csots,         &
+     &                     csotl,cvwgs,cvetl,cvets,calfs,               &
+     &                     fcalfl,fcalfs,ccvt,ccnp,ccv,ccvb,            &
+     &                     calbl,calfl,calbs,ctsfs,grboro,              &
+     &                     grbmsk,ctsfl,deltf,caisl,caiss,              &
+     &                     fsalfl,fsalfs,flalfs,falbl,ftsfl,            &
+     &                     ftsfs,fzorl,fzors,fplrl,fsnos,faisl,         &
+     &                     faiss,fsnol,bltmsk,falbs,cvegs,percrit,      &
+     &                     deltsfc,critp2,critp3,blnmsk,critp1,         &
+     &                     fcplrl,fcplrs,fczors,fvets,fsotl,fsots,      &
+     &                     fvetl,fplrs,fvegl,fvegs,fcsnol,fcsnos,       &
+     &                     fczorl,fcalbs,fctsfl,fctsfs,fcalbl,          &
+     &                     falfs,falfl,fh,crit,zsca,ztsfc,tem1,tem2     &
+     &,                    fsihl,fsihs,fsicl,fsics,                     &
+     &                     csihl,csihs,csicl,csics,epssih,epssic        &
+     &,                    fvmnl,fvmns,fvmxl,fvmxs,fslpl,fslps,         &
+     &                     fabsl,fabss,cvmnl,cvmns,cvmxl,cvmxs,         &
+     &                     cslpl,cslps,cabsl,cabss,epsvmn,epsvmx,       &
+     &                     epsslp,epsabs                                &
+     &,                    sihlmx,sihlmn,sihomx,sihomn,sihsmx,          &
+     &                     sihsmn,sihimx,sihimn,sihjmx,sihjmn,          &
+     &                     siclmx,siclmn,sicomx,sicomn,sicsmx,          &
+     &                     sicsmn,sicimx,sicimn,sicjmx,sicjmn           &
+     &,                    glacir_hice                                  &
+     &,                    vmnlmx,vmnlmn,vmnomx,vmnomn,vmnsmx,          &
+     &                     vmnsmn,vmnimx,vmnimn,vmnjmx,vmnjmn,          &
+     &                     vmxlmx,vmxlmn,vmxomx,vmxomn,vmxsmx,          &
+     &                     vmxsmn,vmximx,vmximn,vmxjmx,vmxjmn,          &
+     &                     slplmx,slplmn,slpomx,slpomn,slpsmx,          &
+     &                     slpsmn,slpimx,slpimn,slpjmx,slpjmn,          &
+     &                     abslmx,abslmn,absomx,absomn,abssmx,          &
+     &                     abssmn,absimx,absimn,absjmx,absjmn           &
      &,                    sihnew
 
-      integer imsk,jmsk,ifp,irtscv,irtacn,irtais,irtsno,irtzor,
-     &        irtalb,irtsot,irtalf,j,irtvet,irtsmc,irtstc,irtveg,
-     &        irtwet,k,iprnt,kk,irttsf,iret,i,igrdbg,iy,im,id,
-     &        icalbl,icalbs,icalfl,ictsfs,lugb,len,lsoil,ih,
-     &        ictsfl,iczors,icplrl,icplrs,iczorl,icalfs,icsnol,
-     &        icsnos,irttg3,me,kqcm,nlunit,sz_nml,ialb
+      integer imsk,jmsk,ifp,irtscv,irtacn,irtais,irtsno,irtzor,         &
+     &        irtalb,irtsot,irtalf,j,irtvet,irtsmc,irtstc,irtveg,       & 
+     &        irtwet,k,iprnt,kk,irttsf,iret,i,igrdbg,iy,im,id,          &
+     &        icalbl,icalbs,icalfl,ictsfs,lugb,len,lsoil,ih,            &
+     &        ictsfl,iczors,icplrl,icplrs,iczorl,icalfs,icsnol,         &
+     &        icsnos,irttg3,me,kqcm,nlunit,sz_nml,ialb                  &
      &,       irtvmn, irtvmx, irtslp, irtabs, isot, ivegsrc
-      logical gausm, deads, qcmsk, znlst, monclm, monanl,
+      logical gausm, deads, qcmsk, znlst, monclm, monanl,               &
      &        monfcs, monmer, mondif, landice
       character(len=*), intent(in) :: input_nml_file(sz_nml)
 
       integer num_parthds
 !
-!  this is a limited point version of surface program.
+!>  This is a limited point version of surface program.
+!!
+!!  this program runs in two different modes:
+!!
+!!  1.  analysis mode (fh=0.)
+!!
+!!      this program merges climatology, analysis and forecast guess to create
+!!      new surface fields.  if analysis file is given, the program
+!!      uses it if date of the analysis matches with iy,im,id,ih (see note
+!!      below).
+!!
+!!  2.  forecast mode (fh.gt.0.)
+!!
+!!      this program interpolates climatology to the date corresponding to the
+!!      forecast hour.  if surface analysis file is given, for the corresponding
+!!      dates, the program will use it.
+!!
+!!\note if the date of the analysis does not match given iy,im,id,ih, (and fh),
+!!      the program searches an old analysis by going back 6 hours, then 12 hours,
+!!      then one day upto nrepmx days (parameter statement in the subrotine fixrd.
+!!      now defined as 8).  this allows the user to provide non-daily analysis to
+!!      be used.  if matching field is not found, the forecast guess will be used.
+!!
+!!      use of a combined earlier surface analyses and current analysis is
+!!      not allowed (as was done in the old version for snow analysis in which
+!!      old snow analysis is used in combination with initial guess), except
+!!      for sea surface temperature.  for sst anolmaly interpolation, you need to
+!!      set lanom=.true. and must provide sst analysis at initial time.
+!!
+!!      if you want to do complex merging of past and present surface field analysis,
+!!      you need to create a separate file that contains daily surface field.
+!!
+!!      for a dead start, do not supply fnbgsi or set fnbgsi='        '
 !
-!  this program runs in two different modes:
-!
-!  1.  analysis mode (fh=0.)
-!
-!      this program merges climatology, analysis and forecast guess to create
-!      new surface fields.  if analysis file is given, the program
-!      uses it if date of the analysis matches with iy,im,id,ih (see note
-!      below).
-!
-!  2.  forecast mode (fh.gt.0.)
-!
-!      this program interpolates climatology to the date corresponding to the
-!      forecast hour.  if surface analysis file is given, for the corresponding
-!      dates, the program will use it.
-!
-!   note:
-!
-!      if the date of the analysis does not match given iy,im,id,ih, (and fh),
-!      the program searches an old analysis by going back 6 hours, then 12 hours,
-!      then one day upto nrepmx days (parameter statement in the subrotine fixrd.
-!      now defined as 8).  this allows the user to provide non-daily analysis to
-!      be used.  if matching field is not found, the forecast guess will be used.
-!
-!      use of a combined earlier surface analyses and current analysis is
-!      not allowed (as was done in the old version for snow analysis in which
-!      old snow analysis is used in combination with initial guess), except
-!      for sea surface temperature.  for sst anolmaly interpolation, you need to
-!      set lanom=.true. and must provide sst analysis at initial time.
-!
-!      if you want to do complex merging of past and present surface field analysis,
-!      you need to create a separate file that contains daily surface field.
-!
-!      for a dead start, do not supply fnbgsi or set fnbgsi='        '
-!
-!  lugb           is the unit number used in this subprogram
-!  len ...        number of points on which sfccyc operates
-!  lsoil .. 	  number of soil layers (2 as of april, 1994)
-!  iy,im,id,ih .. year, month, day, and hour of initial state.
-!  fh ..          forecast hour
-!  rla, rlo --    latitude and longitudes of the len points
-!  sig1t .. sigma level 1 temperature for dead start.  should be on gaussian
-!           grid.  if not dead start, no need for dimension but set to zero
-!           as in the example below.
 !
 !  variable naming conventions:
 !
@@ -415,7 +434,7 @@
 !
 !  mask orography and variance on gaussian grid
 !
-      real (kind=kind_io8) slmask(len),orog(len), orog_uf(len)
+      real (kind=kind_io8) slmask(len),orog(len), orog_uf(len)          &
      &,                    orogd(len)
       real (kind=kind_io8) rla(len), rlo(len)
 !
@@ -428,50 +447,50 @@
 !
 !  climatology surface fields (last character 'c' or 'clm' indicate climatology)
 !
-      character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
-     &              fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,
-     &              fnvegc,fnvetc,fnsotc
+      character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,          &
+     &              fnplrc,fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,          &
+     &              fnvegc,fnvetc,fnsotc                                &
      &,             fnvmnc,fnvmxc,fnslpc,fnabsc, fnalbc2 
-      real (kind=kind_io8) tsfclm(len), wetclm(len),   snoclm(len),
-     &     zorclm(len), albclm(len,4), aisclm(len),
-     &     tg3clm(len), acnclm(len),   cnpclm(len),
-     &     cvclm (len), cvbclm(len),   cvtclm(len),
-     &     scvclm(len), tsfcl2(len),   vegclm(len),
-     &     vetclm(len), sotclm(len),   alfclm(len,2), sliclm(len),
-     &     smcclm(len,lsoil), stcclm(len,lsoil)
-     &,    sihclm(len), sicclm(len)
+      real (kind=kind_io8) tsfclm(len), wetclm(len),   snoclm(len),     &
+     &     zorclm(len), albclm(len,4), aisclm(len),                     &
+     &     tg3clm(len), acnclm(len),   cnpclm(len),                     &
+     &     cvclm (len), cvbclm(len),   cvtclm(len),                     &
+     &     scvclm(len), tsfcl2(len),   vegclm(len),                     &
+     &     vetclm(len), sotclm(len),   alfclm(len,2), sliclm(len),      &
+     &     smcclm(len,lsoil), stcclm(len,lsoil)                         &
+     &,    sihclm(len), sicclm(len)                                     &
      &,    vmnclm(len), vmxclm(len), slpclm(len), absclm(len)
 !
 !  analyzed surface fields (last character 'a' or 'anl' indicate analysis)
 !
-      character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
-     &             fnplra,fntg3a,fnscva,fnsmca,fnstca,fnacna,
-     &             fnvega,fnveta,fnsota
+      character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,          &
+     &             fnplra,fntg3a,fnscva,fnsmca,fnstca,fnacna,           &
+     &             fnvega,fnveta,fnsota                                 &
      &,            fnvmna,fnvmxa,fnslpa,fnabsa       
 !
-      real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len),
-     &     zoranl(len), albanl(len,4), aisanl(len),
-     &     tg3anl(len), acnanl(len),   cnpanl(len),
-     &     cvanl (len), cvbanl(len),   cvtanl(len),
-     &     scvanl(len), tsfan2(len),   veganl(len),
-     &     vetanl(len), sotanl(len),   alfanl(len,2), slianl(len),
-     &     smcanl(len,lsoil), stcanl(len,lsoil)
-     &,    sihanl(len), sicanl(len)
+      real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len),     &
+     &     zoranl(len), albanl(len,4), aisanl(len),                     &
+     &     tg3anl(len), acnanl(len),   cnpanl(len),                     &
+     &     cvanl (len), cvbanl(len),   cvtanl(len),                     &
+     &     scvanl(len), tsfan2(len),   veganl(len),                     &
+     &     vetanl(len), sotanl(len),   alfanl(len,2), slianl(len),      &
+     &     smcanl(len,lsoil), stcanl(len,lsoil)                         &
+     &,    sihanl(len), sicanl(len)                                     &
      &,    vmnanl(len), vmxanl(len), slpanl(len), absanl(len)
 !
       real (kind=kind_io8) tsfan0(len) !  sea surface temperature analysis at ft=0.
 !
 !  predicted surface fields (last characters 'fcs' indicates forecast)
 !
-      real (kind=kind_io8) tsffcs(len), wetfcs(len),   snofcs(len),
-     &     zorfcs(len), albfcs(len,4), aisfcs(len),
-     &     tg3fcs(len), acnfcs(len),   cnpfcs(len),
-     &     cvfcs (len), cvbfcs(len),   cvtfcs(len),
-     &     slifcs(len), vegfcs(len),
-     &     vetfcs(len), sotfcs(len),   alffcs(len,2),
-     &     smcfcs(len,lsoil), stcfcs(len,lsoil)
-     &,    sihfcs(len), sicfcs(len), sitfcs(len)
-     &,    vmnfcs(len), vmxfcs(len), slpfcs(len), absfcs(len)
+      real (kind=kind_io8) tsffcs(len), wetfcs(len),   snofcs(len),     &
+     &     zorfcs(len), albfcs(len,4), aisfcs(len),                     &
+     &     tg3fcs(len), acnfcs(len),   cnpfcs(len),                     &
+     &     cvfcs (len), cvbfcs(len),   cvtfcs(len),                     &
+     &     slifcs(len), vegfcs(len),                                    &
+     &     vetfcs(len), sotfcs(len),   alffcs(len,2),                   &
+     &     smcfcs(len,lsoil), stcfcs(len,lsoil)                         &
+     &,    sihfcs(len), sicfcs(len), sitfcs(len)                        &
+     &,    vmnfcs(len), vmxfcs(len), slpfcs(len), absfcs(len)           &
      &,    swdfcs(len), slcfcs(len,lsoil)
 !
 ! ratio of sigma level 1 wind and 10m wind (diagnozed by model and not touched
@@ -977,7 +996,7 @@
         if((fabss.gt.0.).and.(fabss.lt.99999))  cabss=exp(-deltf/fabss)
 !clu ----------------------------------------------------------------------
 !
-!     read a high resolution mask field for use in grib interpolation
+!> - Call hmskrd() to read a high resolution mask field for use in grib interpolation
 !
         call hmskrd(lugb,imsk,jmsk,fnmskh,
      &              kpdmsk,slmskh,gausm,blnmsk,bltmsk,me)
@@ -2517,6 +2536,10 @@
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
       return
       end subroutine sfccycle 
+
+!>\ingroup mod_sfcsub
+!! This subroutine counts number of points for the four surface
+!! conditions.
       subroutine count(slimsk,sno,ijmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2569,6 +2592,8 @@
 !     if(lprnt) print *,' tsffcsf=',tsffcs(iprnt)
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine monitr(lfld,fld,slimsk,sno,ijmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2633,6 +2658,9 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine figures out the day of the year given imo and idy.
       subroutine dayoyr(iyr,imo,idy,ldy)
       implicit none
       integer ldy,i,idy,iyr,imo
@@ -2648,7 +2676,10 @@
       enddo
       return
       end
-      subroutine hmskrd(lugb,imsk,jmsk,fnmskh,
+
+!>\ingroup mod_sfcsub
+!! reads a high resolution mask field for use in grib interpolation
+      subroutine hmskrd(lugb,imsk,jmsk,fnmskh,                          &
      &                  kpds5,slmskh,gausm,blnmsk,bltmsk,me)
       use machine , only : kind_io8,kind_io4
       use sfccyc_module, only : mdata, xdata, ydata
@@ -2681,7 +2712,9 @@
 !
       return
       end
-      subroutine fixrdg(lugb,idim,jdim,fngrib,
+
+!>\ingroup mod_sfcsub
+      subroutine fixrdg(lugb,idim,jdim,fngrib,                          &
      &                  kpds5,gdata,gaus,blno,blto,me)
       use machine      , only : kind_io8,kind_io4
       use sfccyc_module, only : mdata
@@ -2697,7 +2730,7 @@
       real (kind=kind_io8), allocatable :: data8(:)
       real (kind=kind_io4), allocatable :: data4(:)
 !
-      logical, allocatable :: lbms(:)
+      logical*1, allocatable :: lbms(:)
 !
       integer kpds(200),kgds(200)
       integer jpds(200),jgds(200), kpds0(200)
@@ -2796,7 +2829,10 @@
       deallocate(lbms)
       return
       end
-      subroutine getarea(kgds,dlat,dlon,rslat,rnlat,wlon,elon,ijordr
+
+!>\ingroup mod_sfcsub
+!! This subroutine get area of the grib record.
+      subroutine getarea(kgds,dlat,dlon,rslat,rnlat,wlon,elon,ijordr    &
      &,                  me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -2946,6 +2982,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine subst(data,imax,jmax,dlon,dlat,ijordr)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -3006,24 +3044,26 @@
       endif
       return
       end
-      subroutine la2ga(regin,imxin,jmxin,rinlon,rinlat,rlon,rlat,inttyp,
-     &                 gauout,len,lmask,rslmsk,slmask
+
+!>\ingroup mod_sfcsub
+!! This subroutine conducts interpolation from lat/lon to Gaussian
+!! grid to other lat/lon grid.
+      subroutine la2ga(regin,imxin,jmxin,rinlon,rinlat,rlon,rlat,inttyp,&
+     &                 gauout,len,lmask,rslmsk,slmask                   &
      &,                outlat, outlon,me)
       use machine , only : kind_io8,kind_io4
       implicit none
-      real (kind=kind_io8) wei4,wei3,wei2,sum2,sum1,sum3,wei1,sum4,
-     &                     wsum,tem,wsumiv,sums,sumn,wi2j2,x,y,wi1j1,
-     &                     wi1j2,wi2j1,rlat,rlon,aphi,
+      real (kind=kind_io8) wei4,wei3,wei2,sum2,sum1,sum3,wei1,sum4,     &
+     &                     wsum,tem,wsumiv,sums,sumn,wi2j2,x,y,wi1j1,   &
+     &                     wi1j2,wi2j1,rlat,rlon,aphi,                  &
      &                     rnume,alamd,denom
-      integer jy,ifills,ix,len,inttyp,me,i,j,jmxin,imxin,jq,jx,j1,j2,
+      integer jy,ifills,ix,len,inttyp,me,i,j,jmxin,imxin,jq,jx,j1,j2,   &
      &        ii,i1,i2,kmami,it
       integer nx,kxs,kxt
       integer, allocatable, save :: imxnx(:)
       integer, allocatable       :: ifill(:)
 !
-!  interpolation from lat/lon or gaussian grid to other lat/lon grid
-!
-      real (kind=kind_io8) outlon(len),outlat(len),gauout(len),
+      real (kind=kind_io8) outlon(len),outlat(len),gauout(len),         &
      &                     slmask(len)
       real (kind=kind_io8) regin (imxin,jmxin),rslmsk(imxin,jmxin)
 !
@@ -3543,6 +3583,8 @@
 !
       return
       end subroutine la2ga
+
+!>\ingroup mod_sfcsub
       subroutine maxmin(f,imax,kmax)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -3575,54 +3617,48 @@
 !
       return
       end
-      subroutine filanl(tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,
-     &                  aisanl,
-     &                  tg3anl,cvanl ,cvbanl,cvtanl,
-     &                  cnpanl,smcanl,stcanl,slianl,scvanl,veganl,
-     &                  vetanl,sotanl,alfanl,
-!cwu [+1l] add ()anl for sih, sic
-     &                  sihanl,sicanl,
-!clu [+1l] add ()anl for vmn, vmx, slp, abs
-     &                  vmnanl,vmxanl,slpanl,absanl,
-     &                  tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,
-     &                  aisclm,
-     &                  tg3clm,cvclm ,cvbclm,cvtclm,
-     &                  cnpclm,smcclm,stcclm,sliclm,scvclm,vegclm,
-     &                  vetclm,sotclm,alfclm,
-!cwu [+1l] add ()clm for sih, sic
-     &                  sihclm,sicclm,
-!clu [+1l] add ()clm for vmn, vmx, slp, abs
-     &                  vmnclm,vmxclm,slpclm,absclm,
+
+!>\ingroup mod_sfcsub
+      subroutine filanl(tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,      &
+     &                  aisanl,                                         &
+     &                  tg3anl,cvanl ,cvbanl,cvtanl,                    &
+     &                  cnpanl,smcanl,stcanl,slianl,scvanl,veganl,      &
+     &                  vetanl,sotanl,alfanl,                           &
+     &                  sihanl,sicanl,                                  & !cwu [+1l] add ()anl for sih, sic
+     &                  vmnanl,vmxanl,slpanl,absanl,                    & !clu [+1l] add ()anl for vmn, vmx, slp, abs 
+     &                  tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,      &
+     &                  aisclm,                                         &
+     &                  tg3clm,cvclm ,cvbclm,cvtclm,                    &
+     &                  cnpclm,smcclm,stcclm,sliclm,scvclm,vegclm,      &
+     &                  vetclm,sotclm,alfclm,                           &
+     &                  sihclm,sicclm,                                  & !cwu [+1l] add ()clm for sih, sic
+     &                  vmnclm,vmxclm,slpclm,absclm,                    & !clu [+1l] add ()clm for vmn, vmx, slp, abs
      &                  len,lsoil)
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,j,len,lsoil
 !
-      real (kind=kind_io8) tsfanl(len),tsfan2(len),wetanl(len),
-     &     snoanl(len),
-     &     zoranl(len),albanl(len,4),aisanl(len),
-     &     tg3anl(len),
-     &     cvanl (len),cvbanl(len),cvtanl(len),
-     &     cnpanl(len),
-     &     smcanl(len,lsoil),stcanl(len,lsoil),
-     &     slianl(len),scvanl(len),veganl(len),
-     &     vetanl(len),sotanl(len),alfanl(len,2)
-!cwu [+1l] add ()anl for sih, sic
-     &,    sihanl(len),sicanl(len)
-!clu [+1l] add ()anl for vmn, vmx, slp, abs
-     &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
-      real (kind=kind_io8) tsfclm(len),tsfcl2(len),wetclm(len),
-     &     snoclm(len),
-     &     zorclm(len),albclm(len,4),aisclm(len),
-     &     tg3clm(len),
-     &     cvclm (len),cvbclm(len),cvtclm(len),
-     &     cnpclm(len),
-     &     smcclm(len,lsoil),stcclm(len,lsoil),
-     &     sliclm(len),scvclm(len),vegclm(len),
-     &     vetclm(len),sotclm(len),alfclm(len,2)
-!cwu [+1l] add ()clm for sih, sic
-     &,    sihclm(len),sicclm(len)
-!clu [+1l] add ()clm for vmn, vmx, slp, abs
+      real (kind=kind_io8) tsfanl(len),tsfan2(len),wetanl(len),         &
+     &     snoanl(len),                                                 &
+     &     zoranl(len),albanl(len,4),aisanl(len),                       &
+     &     tg3anl(len),                                                 &
+     &     cvanl (len),cvbanl(len),cvtanl(len),                         &
+     &     cnpanl(len),                                                 &
+     &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
+     &     slianl(len),scvanl(len),veganl(len),                         &
+     &     vetanl(len),sotanl(len),alfanl(len,2)                        &
+     &,    sihanl(len),sicanl(len)                                      &
+     &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)         
+      real (kind=kind_io8) tsfclm(len),tsfcl2(len),wetclm(len),         &
+     &     snoclm(len),                                                 &
+     &     zorclm(len),albclm(len,4),aisclm(len),                       &
+     &     tg3clm(len),                                                 &
+     &     cvclm (len),cvbclm(len),cvtclm(len),                         &
+     &     cnpclm(len),                                                 &
+     &     smcclm(len,lsoil),stcclm(len,lsoil),                         &
+     &     sliclm(len),scvclm(len),vegclm(len),                         &
+     &     vetclm(len),sotclm(len),alfclm(len,2)                        &
+     &,    sihclm(len),sicclm(len)                                      &
      &,    vmnclm(len),vmxclm(len),slpclm(len),absclm(len)
 !
       do i=1,len
@@ -3672,43 +3708,36 @@
 !
       return
       end
-      subroutine analy(lugb,iy,im,id,ih,fh,len,lsoil,
-     &                 slmask,fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
-     &                 fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,
-     &                 fnveta,fnsota,
-!clu [+1l] add fn()a for vmn, vmx, slp, abs
-     &                 fnvmna,fnvmxa,fnslpa,fnabsa,
-     &                 tsfanl,wetanl,snoanl,zoranl,albanl,aisanl,
-     &                 tg3anl,cvanl ,cvbanl,cvtanl,
-     &                 smcanl,stcanl,slianl,scvanl,acnanl,veganl,
-     &                 vetanl,sotanl,alfanl,tsfan0,
-!clu [+1l] add ()anl for vmn, vmx, slp, abs
-     &                 vmnanl,vmxanl,slpanl,absanl,
-!cggg snow mods start    &        kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,
-     &                 kpdtsf,kpdwet,kpdsno,kpdsnd,kpdzor,kpdalb,kpdais,
-!cggg snow mods end
-     &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
-     &                 kprvet,kpdsot,kpdalf,
-!clu [+1l] add kpd() for vmn, vmx, slp, abs
-     &                 kpdvmn,kpdvmx,kpdslp,kpdabs,
-     &                 irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
-     &                 irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
-     &                 irtvet,irtsot,irtalf
-!clu [+1l] add irt() for vmn, vmx, slp, abs
-     &,                irtvmn,irtvmx,irtslp,irtabs
-     &,                imsk, jmsk, slmskh, outlat, outlon
+
+!>\ingroup mod_sfcsub
+      subroutine analy(lugb,iy,im,id,ih,fh,len,lsoil,                   &
+     &                 slmask,fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,&
+     &                 fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,       &
+     &                 fnveta,fnsota,                                   &
+     &                 fnvmna,fnvmxa,fnslpa,fnabsa,                     & !clu [+1l] add fn()a for vmn, vmx, slp, abs
+     &                 tsfanl,wetanl,snoanl,zoranl,albanl,aisanl,       &
+     &                 tg3anl,cvanl ,cvbanl,cvtanl,                     &
+     &                 smcanl,stcanl,slianl,scvanl,acnanl,veganl,       &
+     &                 vetanl,sotanl,alfanl,tsfan0,                     &
+     &                 vmnanl,vmxanl,slpanl,absanl,                     & !clu [+1l] add ()anl for vmn, vmx, slp, abs
+     &                 kpdtsf,kpdwet,kpdsno,kpdsnd,kpdzor,kpdalb,kpdais,&
+     &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,       &
+     &                 kprvet,kpdsot,kpdalf,                            &
+     &                 kpdvmn,kpdvmx,kpdslp,kpdabs,                     & !clu [+1l] add kpd() for vmn, vmx, slp, abs
+     &                 irttsf,irtwet,irtsno,irtzor,irtalb,irtais,       &
+     &                 irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,       &
+     &                 irtvet,irtsot,irtalf                             &
+     &,                irtvmn,irtvmx,irtslp,irtabs                      & !clu [+1l] add irt() for vmn, vmx, slp, abs
+     &,                imsk, jmsk, slmskh, outlat, outlon               &
      &,                gaus, blno, blto, me, lanom)
       use machine , only : kind_io8,kind_io4
       implicit none
       logical  lanom
-      integer irtsmc,irtacn,irtstc,irtvet,irtveg,irtscv,irtzor,irtsno,
-     &        irtalb,irttg3,irtais,iret,me,kk,kpdvet,i,irtalf,irtsot,
-!cggg snow mods start     & imsk,jmsk,irtwet,lsoil,len, kpdtsf,kpdsno,kpdwet,iy,
-     &        imsk,jmsk,irtwet,lsoil,len,kpdtsf,kpdsno,kpdsnd,kpdwet,iy,
-!cggg snow mods end
-     &        lugb,im,ih,id,kpdveg,kpdstc,kprvet,irttsf,kpdsot,kpdsmc,
-     &        kpdais,kpdzor,kpdtg3,kpdacn,kpdscv,j
-!clu [+1l] add kpd() and irt() for vmn, vmx, slp, abs
+      integer irtsmc,irtacn,irtstc,irtvet,irtveg,irtscv,irtzor,irtsno,  &
+     &        irtalb,irttg3,irtais,iret,me,kk,kpdvet,i,irtalf,irtsot,   &
+     &        imsk,jmsk,irtwet,lsoil,len,kpdtsf,kpdsno,kpdsnd,kpdwet,iy,&
+     &        lugb,im,ih,id,kpdveg,kpdstc,kprvet,irttsf,kpdsot,kpdsmc,  &
+     &        kpdais,kpdzor,kpdtg3,kpdacn,kpdscv,j                      &
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs,irtvmn,irtvmx,irtslp,irtabs
       real (kind=kind_io8) blto,blno,fh
 !
@@ -3721,21 +3750,19 @@
       integer lugi, lskip, lgrib, ndata
 !cggg snow mods end
 !
-      character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,
-     &             fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,
+      character*500 fntsfa,fnweta,fnsnoa,fnzora,fnalba,fnaisa,          &
+     &             fntg3a,fnscva,fnsmca,fnstca,fnacna,fnvega,           &
      &             fnveta,fnsota
-!clu [+1l] add fn()a for vmn, vmx, slp, abs
      &,            fnvmna,fnvmxa,fnslpa,fnabsa
 
-      real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len),
-     &     zoranl(len), albanl(len,4), aisanl(len),
-     &     tg3anl(len), acnanl(len),
-     &     cvanl (len), cvbanl(len),   cvtanl(len),
-     &     slianl(len), scvanl(len),   veganl(len),
-     &     vetanl(len), sotanl(len),   alfanl(len,2),
-     &     smcanl(len,lsoil), stcanl(len,lsoil),
-     &     tsfan0(len)
-!clu [+1l] add ()anl for vmn, vmx, slp, abs
+      real (kind=kind_io8) tsfanl(len), wetanl(len),   snoanl(len),     &
+     &     zoranl(len), albanl(len,4), aisanl(len),                     &
+     &     tg3anl(len), acnanl(len),                                    &
+     &     cvanl (len), cvbanl(len),   cvtanl(len),                     &
+     &     slianl(len), scvanl(len),   veganl(len),                     &
+     &     vetanl(len), sotanl(len),   alfanl(len,2),                   &
+     &     smcanl(len,lsoil), stcanl(len,lsoil),                        &
+     &     tsfan0(len)                                                  &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
 !
       logical gaus
@@ -4336,53 +4363,47 @@
 !
       return
       end
-      subroutine filfcs(tsffcs,wetfcs,snofcs,zorfcs,albfcs,
-     &                  tg3fcs,cvfcs ,cvbfcs,cvtfcs,
-     &                  cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,
-     &                  vegfcs, vetfcs, sotfcs, alffcs,
-!cwu [+1l] add ()fcs for sih, sic
-     &                  sihfcs,sicfcs,
-!clu [+1l] add ()fcs for vmn, vmx, slp, abs
-     &                  vmnfcs,vmxfcs,slpfcs,absfcs,
-     &                  tsfanl,wetanl,snoanl,zoranl,albanl,
-     &                  tg3anl,cvanl ,cvbanl,cvtanl,
-     &                  cnpanl,smcanl,stcanl,slianl,aisanl,
-     &                  veganl, vetanl, sotanl, alfanl,
-!cwu [+1l] add ()anl for sih, sic
-     &                  sihanl,sicanl,
-!clu [+1l] add ()anl for vmn, vmx, slp, abs
-     &                  vmnanl,vmxanl,slpanl,absanl,
+
+!>\ingroup mod_sfcsub
+      subroutine filfcs(tsffcs,wetfcs,snofcs,zorfcs,albfcs,             &
+     &                  tg3fcs,cvfcs ,cvbfcs,cvtfcs,                    &
+     &                  cnpfcs,smcfcs,stcfcs,slifcs,aisfcs,             &
+     &                  vegfcs, vetfcs, sotfcs, alffcs,                 &
+     &                  sihfcs,sicfcs,                                  & !cwu [+1l] add ()fcs for sih, sic
+     &                  vmnfcs,vmxfcs,slpfcs,absfcs,                    & !clu [+1l] add ()fcs for vmn, vmx, slp, abs
+     &                  tsfanl,wetanl,snoanl,zoranl,albanl,             &
+     &                  tg3anl,cvanl ,cvbanl,cvtanl,                    &
+     &                  cnpanl,smcanl,stcanl,slianl,aisanl,             &
+     &                  veganl, vetanl, sotanl, alfanl,                 &
+     &                  sihanl,sicanl,                                  & !cwu [+1l] add ()anl for sih, sic
+     &                  vmnanl,vmxanl,slpanl,absanl,                    & !clu [+1l] add ()anl for vmn, vmx, slp, abs
      &                  len,lsoil)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,j,len,lsoil
-      real (kind=kind_io8) tsffcs(len),wetfcs(len),snofcs(len),
-     &     zorfcs(len),albfcs(len,4),aisfcs(len),
-     &     tg3fcs(len),
-     &     cvfcs (len),cvbfcs(len),cvtfcs(len),
-     &     cnpfcs(len),
-     &     smcfcs(len,lsoil),stcfcs(len,lsoil),
-     &     slifcs(len),vegfcs(len),
-     &     vetfcs(len),sotfcs(len),alffcs(len,2)
-!cwu [+1l] add ()fcs for sih, sic
-     &,    sihfcs(len),sicfcs(len)
-!clu [+1l] add ()fcs for vmn, vmx, slp, abs
-     &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)
-      real (kind=kind_io8) tsfanl(len),wetanl(len),snoanl(len),
-     &     zoranl(len),albanl(len,4),aisanl(len),
-     &     tg3anl(len),
-     &     cvanl (len),cvbanl(len),cvtanl(len),
-     &     cnpanl(len),
-     &     smcanl(len,lsoil),stcanl(len,lsoil),
-     &     slianl(len),veganl(len),
-     &     vetanl(len),sotanl(len),alfanl(len,2)
-!cwu [+1l] add ()anl for sih, sic
-     &,    sihanl(len),sicanl(len)
-!clu [+1l] add ()anl for vmn, vmx, slp, abs
+      real (kind=kind_io8) tsffcs(len),wetfcs(len),snofcs(len),         &
+     &     zorfcs(len),albfcs(len,4),aisfcs(len),                       &
+     &     tg3fcs(len),                                                 &
+     &     cvfcs (len),cvbfcs(len),cvtfcs(len),                         &
+     &     cnpfcs(len),                                                 &
+     &     smcfcs(len,lsoil),stcfcs(len,lsoil),                         &
+     &     slifcs(len),vegfcs(len),                                     &
+     &     vetfcs(len),sotfcs(len),alffcs(len,2)                        &
+     &,    sihfcs(len),sicfcs(len)                                      &
+     &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)      
+      real (kind=kind_io8) tsfanl(len),wetanl(len),snoanl(len),         &
+     &     zoranl(len),albanl(len,4),aisanl(len),                       &
+     &     tg3anl(len),                                                 &
+     &     cvanl (len),cvbanl(len),cvtanl(len),                         &
+     &     cnpanl(len),                                                 &
+     &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
+     &     slianl(len),veganl(len),                                     &
+     &     vetanl(len),sotanl(len),alfanl(len,2)                        &
+     &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
 !
-      write(6,*) '  this is a dead start run, tsfc over land is',
+      write(6,*) '  this is a dead start run, tsfc over land is',       &
      &           ' set as lowest sigma level temperture if given.'
       write(6,*) '  if not, set to climatological tsf over land is used'
 !
@@ -4428,12 +4449,14 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine bktges(smcfcs,slianl,stcfcs,len,lsoil)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,j,len,lsoil,k
-      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil),
+      real (kind=kind_io8) smcfcs(len,lsoil), stcfcs(len,lsoil),        &
      &                     slianl(len)
 !
 !  note that smfcs comes in with the original unit (cm?) (not grib file)
@@ -4456,6 +4479,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine rof01(aisfld,len,op,crit)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -4502,6 +4527,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine tsfcor(tsfc,orog,slmask,umask,len,rlapse)
 !
       use machine , only : kind_io8,kind_io4
@@ -4517,7 +4544,10 @@
       enddo
       return
       end
-      subroutine snodpth(scvanl,slianl,tsfanl,snoclm,
+
+!>\ingroup mod_sfcsub
+!! This subroutine uses surface temperature to get snow depth estimate.
+      subroutine snodpth(scvanl,slianl,tsfanl,snoclm,                   &
      &                   glacir,snwmax,snwmin,landice,len,snoanl, me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -4525,7 +4555,7 @@
       logical, intent(in) :: landice
       real (kind=kind_io8) sno,snwmax,snwmin
 !
-      real (kind=kind_io8) scvanl(len), slianl(len), tsfanl(len),
+      real (kind=kind_io8) scvanl(len), slianl(len), tsfanl(len),       &
      &     snoclm(len), snoanl(len), glacir(len)
 !
       if (me .eq. 0) write(6,*) 'snodpth'
@@ -4571,80 +4601,83 @@
       enddo
       return
       end subroutine snodpth
-      subroutine merge(len,lsoil,iy,im,id,ih,fh,deltsfc,
-     &                 sihfcs,sicfcs,
-     &                 vmnfcs,vmxfcs,slpfcs,absfcs,
-     &                 tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,
-     &                 cvfcs ,cvbfcs,cvtfcs,
-     &                 cnpfcs,smcfcs,stcfcs,slifcs,vegfcs,
-     &                 vetfcs,sotfcs,alffcs,
-     &                 sihanl,sicanl,                 
-     &                 vmnanl,vmxanl,slpanl,absanl,
-     &                 tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,
-     &                 cvanl ,cvbanl,cvtanl,
-     &                 cnpanl,smcanl,stcanl,slianl,veganl,
-     &                 vetanl,sotanl,alfanl,
-     &                 ctsfl,calbl,caisl,csnol,csmcl,czorl,cstcl,cvegl,
-     &                 ctsfs,calbs,caiss,csnos,csmcs,czors,cstcs,cvegs,
-     &                 ccv,ccvb,ccvt,ccnp,cvetl,cvets,csotl,csots,
-     &                 calfl,calfs,
-     &                 csihl,csihs,csicl,csics,
-     &                 cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps,cabsl,cabss,
-     &                 irttsf,irtwet,irtsno,irtzor,irtalb,irtais,
-     &                 irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,
-     &                 irtvmn,irtvmx,irtslp,irtabs,
+
+!>\ingroup mod_sfcsub
+!! This subroutine merges analysis and forecast.
+      subroutine merge(len,lsoil,iy,im,id,ih,fh,deltsfc,                &
+     &                 sihfcs,sicfcs,                                   &
+     &                 vmnfcs,vmxfcs,slpfcs,absfcs,                     &
+     &                 tsffcs,wetfcs,snofcs,zorfcs,albfcs,aisfcs,       &
+     &                 cvfcs ,cvbfcs,cvtfcs,                            &
+     &                 cnpfcs,smcfcs,stcfcs,slifcs,vegfcs,              &
+     &                 vetfcs,sotfcs,alffcs,                            &
+     &                 sihanl,sicanl,                                   &
+     &                 vmnanl,vmxanl,slpanl,absanl,                     &
+     &                 tsfanl,tsfan2,wetanl,snoanl,zoranl,albanl,aisanl,&
+     &                 cvanl ,cvbanl,cvtanl,                            &
+     &                 cnpanl,smcanl,stcanl,slianl,veganl,              &
+     &                 vetanl,sotanl,alfanl,                            &
+     &                 ctsfl,calbl,caisl,csnol,csmcl,czorl,cstcl,cvegl, &
+     &                 ctsfs,calbs,caiss,csnos,csmcs,czors,cstcs,cvegs, &
+     &                 ccv,ccvb,ccvt,ccnp,cvetl,cvets,csotl,csots,      &
+     &                 calfl,calfs,                                     &
+     &                 csihl,csihs,csicl,csics,                         &
+     &                 cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps,cabsl,cabss, &
+     &                 irttsf,irtwet,irtsno,irtzor,irtalb,irtais,       &
+     &                 irttg3,irtscv,irtacn,irtsmc,irtstc,irtveg,       &
+     &                 irtvmn,irtvmx,irtslp,irtabs,                     &
      &                 irtvet,irtsot,irtalf, landice, me)
       use machine , only : kind_io8,kind_io4
       use sfccyc_module, only : veg_type_landice, soil_type_landice
       implicit none
-      integer k,i,im,id,iy,len,lsoil,ih,irtacn,irtsmc,irtscv,irtais,
-     &        irttg3,irtstc,irtalf,me,irtsot,irtveg,irtvet, irtzor,
-     &        irtalb,irtsno,irttsf,irtwet,j
+      integer k,i,im,id,iy,len,lsoil,ih,irtacn,irtsmc,irtscv,irtais,    &
+     &        irttg3,irtstc,irtalf,me,irtsot,irtveg,irtvet, irtzor,     &
+     &        irtalb,irtsno,irttsf,irtwet,j                             &
      &,       irtvmn,irtvmx,irtslp,irtabs
       logical, intent(in)  :: landice
-      real (kind=kind_io8) rvegs,rvets,rzors,raiss,rsnos,rsots,rcnp,
-     &                     rcvt,rcv,rcvb,rsnol,rzorl,raisl,ralbl,
-     &                     ralfl,rvegl,ralbs,ralfs,rtsfs,rvetl,rsotl,
-     &                     qzors,qvegs,qsnos,qalfs,qaiss,qvets,qcvt,
-     &                     qcnp,qcvb,qsots,qcv,qaisl,qsnol,qalfl,
-     &                     qtsfl,qalbl,qzorl,qtsfs,qalbs,qsotl,qvegl,
-     &                     qvetl,rtsfl,calbs,caiss,ctsfs,czorl,cvegl,
-     &                     csnos,ccvb,ccvt,ccv,czors,cvegs,caisl,csnol,
-     &                     calbl,fh,ctsfl,ccnp,csots,calfl,csotl,cvetl,
-     &                     cvets,calfs,deltsfc,
-     &                     csihl,csihs,csicl,csics,
-     &                     rsihl,rsihs,rsicl,rsics,
-     &                     qsihl,qsihs,qsicl,qsics
-     &,                    cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps
-     &,                    cabsl,cabss,rvmnl,rvmns,rvmxl,rvmxs
-     &,                    rslpl,rslps,rabsl,rabss,qvmnl,qvmns
+      real (kind=kind_io8) rvegs,rvets,rzors,raiss,rsnos,rsots,rcnp,    &
+     &                     rcvt,rcv,rcvb,rsnol,rzorl,raisl,ralbl,       &
+     &                     ralfl,rvegl,ralbs,ralfs,rtsfs,rvetl,rsotl,   &
+     &                     qzors,qvegs,qsnos,qalfs,qaiss,qvets,qcvt,    &
+     &                     qcnp,qcvb,qsots,qcv,qaisl,qsnol,qalfl,       &
+     &                     qtsfl,qalbl,qzorl,qtsfs,qalbs,qsotl,qvegl,   &
+     &                     qvetl,rtsfl,calbs,caiss,ctsfs,czorl,cvegl,   &
+     &                     csnos,ccvb,ccvt,ccv,czors,cvegs,caisl,csnol, &
+     &                     calbl,fh,ctsfl,ccnp,csots,calfl,csotl,cvetl, &
+     &                     cvets,calfs,deltsfc,                         &
+     &                     csihl,csihs,csicl,csics,                     &
+     &                     rsihl,rsihs,rsicl,rsics,                     &
+     &                     qsihl,qsihs,qsicl,qsics                      &
+     &,                    cvmnl,cvmns,cvmxl,cvmxs,cslpl,cslps          &
+     &,                    cabsl,cabss,rvmnl,rvmns,rvmxl,rvmxs          &
+     &,                    rslpl,rslps,rabsl,rabss,qvmnl,qvmns          &
      &,                    qvmxl,qvmxs,qslpl,qslps,qabsl,qabss
 !
-      real (kind=kind_io8) tsffcs(len), wetfcs(len),   snofcs(len),
-     &     zorfcs(len), albfcs(len,4), aisfcs(len),
-     &     cvfcs (len), cvbfcs(len),   cvtfcs(len),
-     &     cnpfcs(len),
-     &     smcfcs(len,lsoil),stcfcs(len,lsoil),
-     &     slifcs(len), vegfcs(len),
-     &     vetfcs(len), sotfcs(len),   alffcs(len,2)
-     &,    sihfcs(len), sicfcs(len)
+      real (kind=kind_io8) tsffcs(len), wetfcs(len),   snofcs(len),     &
+     &     zorfcs(len), albfcs(len,4), aisfcs(len),                     &
+     &     cvfcs (len), cvbfcs(len),   cvtfcs(len),                     &
+     &     cnpfcs(len),                                                 &
+     &     smcfcs(len,lsoil),stcfcs(len,lsoil),                         &
+     &     slifcs(len), vegfcs(len),                                    &
+     &     vetfcs(len), sotfcs(len),   alffcs(len,2)                    &
+     &,    sihfcs(len), sicfcs(len)                                     &
      &,    vmnfcs(len),vmxfcs(len),slpfcs(len),absfcs(len)
-      real (kind=kind_io8) tsfanl(len),tsfan2(len),
-     &     wetanl(len),snoanl(len),
-     &     zoranl(len), albanl(len,4), aisanl(len),
-     &     cvanl (len), cvbanl(len),   cvtanl(len),
-     &     cnpanl(len),
-     &     smcanl(len,lsoil),stcanl(len,lsoil),
-     &     slianl(len), veganl(len),
-     &     vetanl(len), sotanl(len),   alfanl(len,2)
-     &,    sihanl(len),sicanl(len)           
+      real (kind=kind_io8) tsfanl(len),tsfan2(len),                     &
+     &     wetanl(len),snoanl(len),                                     &
+     &     zoranl(len), albanl(len,4), aisanl(len),                     &
+     &     cvanl (len), cvbanl(len),   cvtanl(len),                     &
+     &     cnpanl(len),                                                 &
+     &     smcanl(len,lsoil),stcanl(len,lsoil),                         &
+     &     slianl(len), veganl(len),                                    &
+     &     vetanl(len), sotanl(len),   alfanl(len,2)                    &
+     &,    sihanl(len),sicanl(len)                                      &
      &,    vmnanl(len),vmxanl(len),slpanl(len),absanl(len)
 !
-      real (kind=kind_io8) csmcl(lsoil), csmcs(lsoil),
+      real (kind=kind_io8) csmcl(lsoil), csmcs(lsoil),                  &
      &                     cstcl(lsoil), cstcs(lsoil)
-      real (kind=kind_io8) rsmcl(lsoil), rsmcs(lsoil),
+      real (kind=kind_io8) rsmcl(lsoil), rsmcs(lsoil),                  &
      &                     rstcl(lsoil), rstcs(lsoil)
-      real (kind=kind_io8) qsmcl(lsoil), qsmcs(lsoil),
+      real (kind=kind_io8) qsmcl(lsoil), qsmcs(lsoil),                  &
      &                     qstcl(lsoil), qstcs(lsoil)
       logical first
       integer   num_threads
@@ -5022,18 +5055,19 @@
 !$omp end parallel do
       return
       end subroutine merge
-      subroutine newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,
-!cwu [+1l] add sihnew,sicnew,sihanl,sicanl
-     &                   sihnew,sicnew,sihanl,sicanl,      
-     &                   albanl,snoanl,zoranl,smcanl,stcanl,
-     &                   albsea,snosea,zorsea,smcsea,smcice,
-     &                   tsfmin,tsfice,albice,zorice,tgice,
+
+!>\ingroup mod_sfcsub
+      subroutine newice(slianl,slifcs,tsfanl,tsffcs,len,lsoil,          &
+     &                   sihnew,sicnew,sihanl,sicanl,                   & !cwu [+1l] add sihnew,sicnew,sihanl,sicanl      
+     &                   albanl,snoanl,zoranl,smcanl,stcanl,            &
+     &                   albsea,snosea,zorsea,smcsea,smcice,            &
+     &                   tsfmin,tsfice,albice,zorice,tgice,             &
      &                   rla,rlo,me)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       real (kind=kind_io8), parameter :: one=1.0
-      real (kind=kind_io8) tgice,albice,zorice,tsfice,albsea,snosea,
+      real (kind=kind_io8) tgice,albice,zorice,tsfice,albsea,snosea,    &
      &                     smcice,tsfmin,zorsea,smcsea
 !cwu [+1l] add sicnew,sihnew
      &,                    sicnew,sihnew   
@@ -5118,7 +5152,9 @@
 !
       return
       end
-      subroutine qcsnow(snoanl,slmask,aisanl,glacir,len,snoval,
+
+!>\ingroup mod_sfcsub
+      subroutine qcsnow(snoanl,slmask,aisanl,glacir,len,snoval,         &
      &                  landice,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5164,14 +5200,16 @@
       endif
       return
       end subroutine qcsnow
-      subroutine qcsice(ais,glacir,amxice,aicice,aicsea,sllnd,slmask,
+
+!>\ingroup mod_sfcsub
+      subroutine qcsice(ais,glacir,amxice,aicice,aicsea,sllnd,slmask,   &
      &                  rla,rlo,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
       integer kount1,kount,i,me,len
       real (kind=kind_io8) per,aicsea,aicice,sllnd
 !
-      real (kind=kind_io8) ais(len), glacir(len),
+      real (kind=kind_io8) ais(len), glacir(len),                       &
      &                     amxice(len), slmask(len)
       real (kind=kind_io8) rla(len), rlo(len)
 !
@@ -5263,6 +5301,8 @@
 !     enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setlsi(slmask,aisfld,len,aicice,slifld)
 !
       use machine , only : kind_io8,kind_io4
@@ -5281,6 +5321,7 @@
       enddo
       return
       end
+!>\ingroup mod_sfcsub
       subroutine scale(fld,len,scl)
 !
       use machine , only : kind_io8,kind_io4
@@ -5292,23 +5333,25 @@
       enddo
       return
       end
-      subroutine qcmxmn(ttl,fld,slimsk,sno,iceflg,
-     &                  fldlmx,fldlmn,fldomx,fldomn,fldimx,fldimn,
-     &                  fldjmx,fldjmn,fldsmx,fldsmn,epsfld,
+
+!>\ingroup mod_sfcsub
+      subroutine qcmxmn(ttl,fld,slimsk,sno,iceflg,                      &
+     &                  fldlmx,fldlmn,fldomx,fldomn,fldimx,fldimn,      &
+     &                  fldjmx,fldjmn,fldsmx,fldsmn,epsfld,             &
      &                  rla,rlo,len,mode,percrit,lgchek,me)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
-      real (kind=kind_io8) permax,per,fldimx,fldimn,fldjmx,fldomn,
-     &                     fldlmx,fldlmn,fldomx,fldjmn,percrit,
+      real (kind=kind_io8) permax,per,fldimx,fldimn,fldjmx,fldomn,      &
+     &                     fldlmx,fldlmn,fldomx,fldjmn,percrit,         &
      &                     fldsmx,fldsmn,epsfld
-      integer kmaxi,kmini,kmaxj,kmino,kmaxl,kminl,kmaxo,mmprt,kminj,
+      integer kmaxi,kmini,kmaxj,kmino,kmaxl,kminl,kmaxo,mmprt,kminj,    &
      &        ij,nprt,kmaxs,kmins,i,me,len,mode
       parameter(mmprt=2)
 !
       character*8 ttl
       logical iceflg(len)
-      real (kind=kind_io8) fld(len),slimsk(len),sno(len),
+      real (kind=kind_io8) fld(len),slimsk(len),sno(len),               &
      &                     rla(len), rlo(len)
       integer iwk(len)
       logical lgchek
@@ -5709,6 +5752,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine setzro(fld,eps,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -5720,6 +5765,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine getscv(snofld,scvfld,len)
 !
       use machine , only : kind_io8,kind_io4
@@ -5733,6 +5780,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine getstc(tsffld,tg3fld,slifld,len,lsoil,stcfld,tsfimx)
 !
       use machine , only : kind_io8,kind_io4
@@ -5766,6 +5815,9 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
+!! This subroutine calculates layer soil wetness.
       subroutine getsmc(wetfld,len,lsoil,smcfld,me)
 !
       use machine , only : kind_io8,kind_io4
@@ -5784,7 +5836,9 @@
       enddo
       return
       end
-      subroutine usesgt(sig1t,slianl,tg3anl,len,lsoil,tsfanl,stcanl,
+
+!>\ingroup mod_sfcsub
+      subroutine usesgt(sig1t,slianl,tg3anl,len,lsoil,tsfanl,stcanl,    &
      &                  tsfimx)
 !
       use machine , only : kind_io8,kind_io4
@@ -5807,6 +5861,8 @@
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine snosfc(snoanl,tsfanl,tsfsmx,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5831,6 +5887,8 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine albocn(albclm,slmask,albomx,len)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5847,6 +5905,8 @@
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcmxice(glacir,amxice,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5867,6 +5927,8 @@
       endif
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine qcsli(slianl,slifcs,len,me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -5930,9 +5992,11 @@
 !1111 format(80i1)
 !     return
 !     end
-      subroutine qcbyfc(tsffcs,snofcs,qctsfs,qcsnos,qctsfi,
-     &                  len,lsoil,snoanl,aisanl,slianl,tsfanl,albanl,
-     &                  zoranl,smcanl,
+
+!>\ingroup mod_sfcsub
+      subroutine qcbyfc(tsffcs,snofcs,qctsfs,qcsnos,qctsfi,             &
+     &                  len,lsoil,snoanl,aisanl,slianl,tsfanl,albanl,   &
+     &                  zoranl,smcanl,                                  &
      &                  smcclm,tsfsmx,albomx,zoromx, me)
 !
       use machine , only : kind_io8,kind_io4
@@ -6026,8 +6090,10 @@
 !
       return
       end
-      subroutine setrmsk(kpds5,slmask,igaul,jgaul,wlon,rnlat,
-     &                   data,imax,jmax,rlnout,rltout,lmask,rslmsk
+
+!>\ingroup mod_sfcsub
+      subroutine setrmsk(kpds5,slmask,igaul,jgaul,wlon,rnlat,           &
+     &                   data,imax,jmax,rlnout,rltout,lmask,rslmsk      &
      &,                  gaus,blno, blto, kgds1, kpds4, lbms)
       use machine , only : kind_io8,kind_io4
       use sfccyc_module
@@ -6080,17 +6146,24 @@
 !
       ijmax  = imax*jmax
       rslmsk = 0.
+! TG3 MODS BEGIN
+      if(kpds5 == kpdtsf .and. imax == 138 .and. jmax == 116
+     &   .and. kpds4 == 128) then
+!        print*,'turn off setrmsk for tg3'
+         lmask = .false.
+
+      elseif(kpds5 == kpdtsf) then
+! TG3 MODS END
 !
 !  surface temperature
 !
-      if(kpds5.eq.kpdtsf) then
-!       lmask=.false.
+        lmask = .false.
         call ga2la(slmask,igaul,jgaul,rslmsk,imax,jmax,wlon,rnlat
      &,            rlnout, rltout, gaus, blno, blto)
 !    &,            dlon, dlat, gaus, blno, blto)
-        crit=0.5
+        crit = 0.5
         call rof01(rslmsk,ijmax,'ge',crit)
-        lmask=.true.
+        lmask = .true.
 !
 !  bucket soil wetness
 !
@@ -6098,16 +6171,16 @@
         call ga2la(slmask,igaul,jgaul,rslmsk,imax,jmax,wlon,rnlat
      &,            rlnout, rltout, gaus, blno, blto)
 !    &,            dlon, dlat, gaus, blno, blto)
-        crit=0.5
+        crit = 0.5
         call rof01(rslmsk,ijmax,'ge',crit)
-        lmask=.true.
+        lmask = .true.
 !       write(6,*) 'wet rslmsk'
 !       znnt=1.
 !       call nntprt(rslmsk,ijmax,znnt)
 !
 !  snow depth
 !
-      elseif(kpds5.eq.kpdsnd) then
+      elseif(kpds5 == kpdsnd) then
         if(kpds4 == 192) then  ! use the bitmap
           rslmsk = 0.
           do j = 1, jmax
@@ -6500,25 +6573,28 @@
 !
       return
       end
-      subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,
+
+!>\ingroup mod_sfcsub
+!! This subroutine interpolates from lat/lon grid to other lat/lon grid.
+      subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,          &
      &                 wlon,rnlat,rlnout,rltout,gaus,blno, blto)
       use machine , only : kind_io8,kind_io4
       implicit none
-      integer i1,i2,j2,ishft,i,jj,j1,jtem,jmxout,imxin,jmxin,imxout,
+      integer i1,i2,j2,ishft,i,jj,j1,jtem,jmxout,imxin,jmxin,imxout,    &
      &        j,iret
-      real (kind=kind_io8) alamd,dxin,aphi,x,sum1,sum2,y,dlati,wlon,
-     &                     rnlat,dxout,dphi,dlat,facns,tem,blno,
+      real (kind=kind_io8) alamd,dxin,aphi,x,sum1,sum2,y,dlati,wlon,    &
+     &                     rnlat,dxout,dphi,dlat,facns,tem,blno,        &
      &                     blto
 !
 !  interpolation from lat/lon grid to other lat/lon grid
 !
-      real (kind=kind_io8) gauin (imxin,jmxin), regout(imxout,jmxout)
+      real (kind=kind_io8) gauin (imxin,jmxin), regout(imxout,jmxout)   &
      &,                    rlnout(imxout), rltout(jmxout)
       logical gaus
 !
       real, allocatable :: gaul(:)
       real (kind=kind_io8) ddx(imxout),ddy(jmxout)
-      integer iindx1(imxout), iindx2(imxout),
+      integer iindx1(imxout), iindx2(imxout),                           &
      &        jindx1(jmxout), jindx2(jmxout)
       integer jmxsav,n,kspla
       data    jmxsav/0/
@@ -6746,12 +6822,14 @@ cjfe
 !
       return
       end
+
+!>\ingroup mod_sfcsub
       subroutine landtyp(vegtype,soiltype,slptype,slmask,len)
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,len
-      real (kind=kind_io8) vegtype(len),soiltype(len),slmask(len)
-     +,                    slptype(len)  
+      real (kind=kind_io8) vegtype(len),soiltype(len),slmask(len)       &
+     &,                    slptype(len)  
 !
 !  make sure that the soil type and veg type are non-zero over land
 !
@@ -6763,7 +6841,10 @@ cjfe
         endif
       enddo
       return
+
       end subroutine landtyp
+
+!>\ingroup mod_sfcsub
       subroutine gaulat(gaul,k)
 !
       use machine , only : kind_io8,kind_io4
@@ -6788,12 +6869,15 @@ cjfe
       stop
       end
 !-----------------------------------------------------------------------
+!>\ingroup mod_sfcsub
+!! The subroutine conducts time interpolation of anomalies,
+!! and add initial anomaly to date interpolated climatology.
       subroutine anomint(tsfan0,tsfclm,tsfcl0,tsfanl,len)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       integer i,len
-      real (kind=kind_io8) tsfanl(len), tsfan0(len),
+      real (kind=kind_io8) tsfanl(len), tsfan0(len),                    &
      &                     tsfclm(len), tsfcl0(len)
 !
 !  time interpolation of anomalies
@@ -6805,53 +6889,55 @@ cjfe
       enddo
       return
       end
-      subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,
-     &                 slmask,fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
-     &                 fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
-     &                 fnvetc,fnsotc,
-     &                 fnvmnc,fnvmxc,fnslpc,fnabsc,
-     &                 tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,
-     &                 tg3clm,cvclm ,cvbclm,cvtclm,
-     &                 cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm,
-     &                 vetclm,sotclm,alfclm,
-     &                 vmnclm,vmxclm,slpclm,absclm,
-     &                 kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,
-     &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,
-     &                 kpdvet,kpdsot,kpdalf,tsfcl0,
-     &                 kpdvmn,kpdvmx,kpdslp,kpdabs,
-     &                 deltsfc, lanom
-     &,                imsk, jmsk, slmskh, outlat, outlon
-     &,                gaus, blno, blto, me,lprnt,iprnt, fnalbc2, ialb
+
+!>\ingroup mod_sfcsub
+      subroutine clima(lugb,iy,im,id,ih,fh,len,lsoil,                   &
+     &                 slmask,fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,&
+     &                 fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,       &
+     &                 fnvetc,fnsotc,                                   &
+     &                 fnvmnc,fnvmxc,fnslpc,fnabsc,                     &
+     &                 tsfclm,tsfcl2,wetclm,snoclm,zorclm,albclm,aisclm,&
+     &                 tg3clm,cvclm ,cvbclm,cvtclm,                     &
+     &                 cnpclm,smcclm,stcclm,sliclm,scvclm,acnclm,vegclm,&
+     &                 vetclm,sotclm,alfclm,                            &
+     &                 vmnclm,vmxclm,slpclm,absclm,                     &
+     &                 kpdtsf,kpdwet,kpdsno,kpdzor,kpdalb,kpdais,       &
+     &                 kpdtg3,kpdscv,kpdacn,kpdsmc,kpdstc,kpdveg,       &
+     &                 kpdvet,kpdsot,kpdalf,tsfcl0,                     &
+     &                 kpdvmn,kpdvmx,kpdslp,kpdabs,                     &
+     &                 deltsfc, lanom                                   &
+     &,                imsk, jmsk, slmskh, outlat, outlon               &
+     &,                gaus, blno, blto, me,lprnt,iprnt, fnalbc2, ialb  &
      &,                tile_num_ch, i_index, j_index)
 !
       use machine , only : kind_io8,kind_io4
       implicit none
       character(len=*), intent(in) :: tile_num_ch
       integer, intent(in) :: i_index(len), j_index(len)
-      real (kind=kind_io8) rjday,wei1x,wei2x,rjdayh,wei2m,wei1m,wei1s,
+      real (kind=kind_io8) rjday,wei1x,wei2x,rjdayh,wei2m,wei1m,wei1s,  &
      &                     wei2s,fh,stcmon1s,blto,blno,deltsfc,rjdayh2
       real (kind=kind_io8) wei1y,wei2y
-      integer jdoy,jday,jh,jdow,mmm,mmp,mm,iret,monend,i,k,jm,jd,iy4,
-     &        jy,mon1,is2,isx,kpd9,is1,l,nn,mon2,mon,is,kpdsno,
-     &        kpdzor,kpdtsf,kpdwet,kpdscv,kpdacn,kpdais,kpdtg3,im,id,
-     &        lugb,iy,len,lsoil,ih,kpdsmc,iprnt,me,m1,m2,k1,k2,
-     &        kpdvet,kpdsot,kpdstc,kpdveg,jmsk,imsk,j,ialb
+      integer jdoy,jday,jh,jdow,mmm,mmp,mm,iret,monend,i,k,jm,jd,iy4,   &
+     &        jy,mon1,is2,isx,kpd9,is1,l,nn,mon2,mon,is,kpdsno,         &
+     &        kpdzor,kpdtsf,kpdwet,kpdscv,kpdacn,kpdais,kpdtg3,im,id,   &
+     &        lugb,iy,len,lsoil,ih,kpdsmc,iprnt,me,m1,m2,k1,k2,         &
+     &        kpdvet,kpdsot,kpdstc,kpdveg,jmsk,imsk,j,ialb              &
      &,       kpdvmn,kpdvmx,kpdslp,kpdabs,landice_cat
       integer kpdalb(4), kpdalf(2)
 !
-      character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,
-     &             fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,
-     &             fnvetc,fnsotc,fnalbc2
+      character*500 fntsfc,fnwetc,fnsnoc,fnzorc,fnalbc,fnaisc,          &
+     &             fntg3c,fnscvc,fnsmcc,fnstcc,fnacnc,fnvegc,           &
+     &             fnvetc,fnsotc,fnalbc2                                &
      &,            fnvmnc,fnvmxc,fnslpc,fnabsc
-      real (kind=kind_io8) tsfclm(len),tsfcl2(len),
-     &     wetclm(len),snoclm(len),
-     &     zorclm(len),albclm(len,4),aisclm(len),
-     &     tg3clm(len),acnclm(len),
-     &     cvclm (len),cvbclm(len),cvtclm(len),
-     &     cnpclm(len),
-     &     smcclm(len,lsoil),stcclm(len,lsoil),
-     &     sliclm(len),scvclm(len),vegclm(len),
-     &     vetclm(len),sotclm(len),alfclm(len,2)
+      real (kind=kind_io8) tsfclm(len),tsfcl2(len),                     &
+     &     wetclm(len),snoclm(len),                                     &
+     &     zorclm(len),albclm(len,4),aisclm(len),                       &
+     &     tg3clm(len),acnclm(len),                                     &
+     &     cvclm (len),cvbclm(len),cvtclm(len),                         &
+     &     cnpclm(len),                                                 &
+     &     smcclm(len,lsoil),stcclm(len,lsoil),                         &
+     &     sliclm(len),scvclm(len),vegclm(len),                         &
+     &     vetclm(len),sotclm(len),alfclm(len,2)                        &
      &,    vmnclm(len),vmxclm(len),slpclm(len),absclm(len)
       real (kind=kind_io8) slmskh(imsk,jmsk)
       real (kind=kind_io8) outlat(len), outlon(len)
@@ -6964,51 +7050,51 @@ cjfe
 !
 !     get tsf climatology for the begining of the forecast
 !
-        if (fh .gt. 0.0) then
+        if (fh > 0.0) then
 !cbosu
           if (me == 0) print*,'bosu fh gt 0'
 
-          iy4=iy
-          if(iy.lt.101) iy4=1900+iy4
-          fha=0
-          ida=0
-          jda=0
-!         fha(2)=nint(fh)
-          ida(1)=iy
-          ida(2)=im
-          ida(3)=id
-          ida(5)=ih
+          iy4 = iy
+          if (iy < 101) iy4 = 1900 + iy4
+          fha = 0
+          ida = 0
+          jda = 0
+!         fha(2) = nint(fh)
+          ida(1) = iy
+          ida(2) = im
+          ida(3) = id
+          ida(5) = ih
           call w3kind(w3kindreal,w3kindint)
           if(w3kindreal == 4) then
-            fha4=fha
+            fha4 = fha
             call w3movdat(fha4,ida,jda)
           else
             call w3movdat(fha,ida,jda)
           endif
-          jy=jda(1)
-          jm=jda(2)
-          jd=jda(3)
-          jh=jda(5)
-          if (me .eq. 0) write(6,*) ' forecast jy,jm,jd,jh',
-     &                   jy,jm,jd,jh
+          jy = jda(1)
+          jm = jda(2)
+          jd = jda(3)
+          jh = jda(5)
+          if (me == 0) write(6,*) ' forecast jy,jm,jd,jh',
+     &                              jy,jm,jd,jh
           jdow = 0
           jdoy = 0
           jday = 0
           call w3doxdat(jda,jdow,jdoy,jday)
-          rjday=jdoy+jda(5)/24.
-          if(rjday.lt.dayhf(1)) rjday=rjday+365.
+          rjday = jdoy + jda(5) / 24.
+          if(rjday < dayhf(1)) rjday = rjday + 365.
 !
-          if (me .eq. 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
+          if (me == 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
 !
 !         for monthly mean climatology
 !
           monend = 12
           do mm=1,monend
-            mmm=mm
-            mmp=mm+1
-            if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
-               mon1=mmm
-               mon2=mmp
+            mmm = mm
+            mmp = mm + 1
+            if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
+               mon1 = mmm
+               mon2 = mmp
                go to 10
             endif
           enddo
@@ -7016,17 +7102,18 @@ cjfe
           call abort
    10     continue
           wei1m = (dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
-          wei2m = (rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
-          if(mon2.eq.13) mon2=1
-          if (me .eq. 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
-     &                   rjday,mon1,mon2,wei1m,wei2m
+          wei2m = 1.0 - wei1m
+!         wei2m = (rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
+          if (mon2 == 13) mon2 = 1
+          if (me == 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
+     &                          rjday,mon1,mon2,wei1m,wei2m
 !
 !       read monthly mean climatology of tsf
 !
           kpd7 = -1
           do nn=1,2
             mon = mon1
-            if (nn .eq. 2) mon = mon2
+            if (nn == 2) mon = mon2
             call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
      &                 tsf(1,nn),len,iret
      &,                imsk, jmsk, slmskh, gaus,blno, blto
@@ -7043,8 +7130,8 @@ cjfe
 !
 !  compute current jy,jm,jd,jh of forecast and the day of the year
 !
-      iy4=iy
-      if(iy.lt.101) iy4=1900+iy4
+      iy4 = iy
+      if (iy < 101) iy4=1900+iy4
       fha    = 0
       ida    = 0
       jda    = 0
@@ -7054,8 +7141,8 @@ cjfe
       ida(3) = id
       ida(5) = ih
       call w3kind(w3kindreal,w3kindint)
-      if(w3kindreal==4) then
-        fha4=fha
+      if(w3kindreal == 4) then
+        fha4 = fha
         call w3movdat(fha4,ida,jda)
       else
         call w3movdat(fha,ida,jda)
@@ -7070,44 +7157,45 @@ cjfe
       jdoy   = 0
       jday   = 0
       call w3doxdat(jda,jdow,jdoy,jday)
-      rjday  = jdoy+jda(5)/24.
-      if(rjday.lt.dayhf(1)) rjday=rjday+365.
+      rjday = jdoy + jda(5) / 24.
+      if(rjday < dayhf(1)) rjday = rjday + 365.
 
-      if (me .eq. 0) write(6,*) ' forecast jy,jm,jd,jh,rjday=',
-     &               jy,jm,jd,jh,rjday
+      if (me == 0) write(6,*) ' forecast jy,jm,jd,jh,rjday=',
+     &                          jy,jm,jd,jh,rjday
 !
-      if (me .eq. 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
+      if (me == 0) write(6,*) 'forecast jy,jm,jd,jh=',jy,jm,jd,jh
 !
 !     for monthly mean climatology
 !
       monend = 12
       do mm=1,monend
-         mmm=mm
-         mmp=mm+1
-         if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
-            mon1=mmm
-            mon2=mmp
+         mmm = mm
+         mmp = mm + 1
+         if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
+            mon1 = mmm
+            mon2 = mmp
             go to 20
          endif
       enddo
       print *,'wrong rjday',rjday
       call abort
    20 continue
-      wei1m=(dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
-      wei2m=(rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
-      if(mon2.eq.13) mon2=1
-      if (me .eq. 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
-     &               rjday,mon1,mon2,wei1m,wei2m
+      wei1m = (dayhf(mon2)-rjday)/(dayhf(mon2)-dayhf(mon1))
+      wei2m = 1.0 - wei1m
+!     wei2m = (rjday-dayhf(mon1))/(dayhf(mon2)-dayhf(mon1))
+      if (mon2 == 13) mon2 = 1
+      if (me == 0) print *,'rjday,mon1,mon2,wei1m,wei2m=',
+     &                      rjday,mon1,mon2,wei1m,wei2m
 !
 !     for seasonal mean climatology
 !
       monend = 4
       is     = im/3 + 1
-      if (is.eq.5) is = 1
+      if (is == 5) is = 1
       do mm=1,monend
         mmm = mm*3 - 2
         mmp = (mm+1)*3 - 2
-        if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
+        if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
           sea1 = mmm
           sea2 = mmp
           go to 30
@@ -7117,20 +7205,21 @@ cjfe
       call abort
    30 continue
       wei1s = (dayhf(sea2)-rjday)/(dayhf(sea2)-dayhf(sea1))
-      wei2s = (rjday-dayhf(sea1))/(dayhf(sea2)-dayhf(sea1))
-      if(sea2.eq.13) sea2=1
-      if (me .eq. 0) print *,'rjday,sea1,sea2,wei1s,wei2s=',
-     &               rjday,sea1,sea2,wei1s,wei2s
+      wei2s = 1.0 - wei1s
+!     wei2s = (rjday-dayhf(sea1))/(dayhf(sea2)-dayhf(sea1))
+      if (sea2 == 13) sea2 = 1
+      if (me == 0) print *,'rjday,sea1,sea2,wei1s,wei2s=',
+     &                      rjday,sea1,sea2,wei1s,wei2s
 !
 !     for summer and winter values (maximum and minimum).
 !
       monend = 2
       is     = im/6 + 1
-      if (is.eq.3) is = 1
+      if (is == 3) is = 1
       do mm=1,monend
         mmm = mm*6 - 5
         mmp = (mm+1)*6 - 5
-        if(rjday.ge.dayhf(mmm).and.rjday.lt.dayhf(mmp)) then
+        if(rjday >= dayhf(mmm) .and. rjday < dayhf(mmp)) then
           hyr1 = mmm
           hyr2 = mmp
           go to 31
@@ -7140,10 +7229,11 @@ cjfe
       call abort
    31 continue
       wei1y = (dayhf(hyr2)-rjday)/(dayhf(hyr2)-dayhf(hyr1))
-      wei2y = (rjday-dayhf(hyr1))/(dayhf(hyr2)-dayhf(hyr1))
-      if(hyr2.eq.13) hyr2=1
-      if (me .eq. 0) print *,'rjday,hyr1,hyr2,wei1y,wei2y=',
-     &               rjday,hyr1,hyr2,wei1y,wei2y
+      wei2y = 1.0 - wei1y
+!     wei2y = (rjday-dayhf(hyr1))/(dayhf(hyr2)-dayhf(hyr1))
+      if (hyr2 == 13) hyr2 = 1
+      if (me == 0) print *,'rjday,hyr1,hyr2,wei1y,wei2y=',
+     &                      rjday,hyr1,hyr2,wei1y,wei2y
 !
 !  start reading in climatology and interpolate to the date
 !
@@ -7543,7 +7633,7 @@ cjfe
 !
       mon1s = mon1 ; mon2s = mon2 ; sea1s = sea1 ; sea2s = sea2
 !
-      if (me .eq. 0) print *,' mon1s=',mon1s,' mon2s=',mon2s
+      if (me == 0) print *,' mon1s=',mon1s,' mon2s=',mon2s
      &,' sea1s=',sea1s,' sea2s=',sea2s
 !
         k1  = 1 ; k2 = 2
@@ -7601,11 +7691,11 @@ cjfe
 !     seasonal mean climatology
 !
          isx   = sea2/3 + 1
-         if (isx .eq. 5) isx = 1
-         if(isx.eq.1) kpd9 = 12
-         if(isx.eq.2) kpd9 = 3
-         if(isx.eq.3) kpd9 = 6
-         if(isx.eq.4) kpd9 = 9
+         if (isx == 5) isx  = 1
+         if (isx == 1) kpd9 = 12
+         if (isx == 2) kpd9 = 3
+         if (isx == 3) kpd9 = 6
+         if (isx == 4) kpd9 = 9
 !
 !  albedo
 !  there are four albedo fields in this version:
@@ -7641,7 +7731,7 @@ cjfe
             if (me == 0) print*,'bosu 2nd time in clima for month ',
      &                   mon, k1,k2
             if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
-              kpd7=-1
+              kpd7 = -1
               do k = 1, 4
                 call fixrdc(lugb,fnalbc,kpdalb(k),kpd7,mon,slmask,
      &                      alb(1,k,nn),len,iret
@@ -7658,7 +7748,7 @@ cjfe
 !
 !  tsf at the current time t
 !
-          kpd7=-1
+          kpd7 = -1
           call fixrdc(lugb,fntsfc,kpdtsf,kpd7,mon,slmask,
      &               tsf(1,nn),len,iret
      &,              imsk, jmsk, slmskh, gaus,blno, blto
@@ -7666,13 +7756,13 @@ cjfe
 !
 !  soil wetness
 !
-          if(fnwetc(1:8).ne.'        ') then
+          if (fnwetc(1:8).ne.'        ') then
             kpd7=-1
             call fixrdc(lugb,fnwetc,kpdwet,kpd7,mon,slmask,
      &                  wet(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
-          elseif(fnsmcc(1:8).ne.'        ') then
+          elseif (fnsmcc(1:8).ne.'        ') then
             if (index(fnsmcc,'global_soilmcpc.1x1.grb') /= 0) then ! the old climo data
               kpd7=-1
               call fixrdc(lugb,fnsmcc,kpdsmc,kpd7,mon,slmask,
@@ -7714,13 +7804,13 @@ cjfe
 !
 !  sea ice
 !
-          kpd7=-1
-          if(fnacnc(1:8).ne.'        ') then
+          kpd7 = -1
+          if (fnacnc(1:8).ne.'        ') then
             call fixrdc(lugb,fnacnc,kpdacn,kpd7,mon,slmask,
      &                  acn(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
      &,                 outlat, outlon, me)
-          elseif(fnaisc(1:8).ne.'        ') then
+          elseif (fnaisc(1:8).ne.'        ') then
             call fixrdc(lugb,fnaisc,kpdais,kpd7,mon,slmask,
      &                  ais(1,nn),len,iret
      &,                 imsk, jmsk, slmskh, gaus,blno, blto
@@ -7740,7 +7830,7 @@ cjfe
 !
 !  snow cover
 !
-          if(fnscvc(1:8).ne.'        ') then
+          if (fnscvc(1:8).ne.'        ') then
             kpd7=-1
             call fixrdc(lugb,fnscvc,kpdscv,kpd7,mon,slmask,
      &                  scv(1,nn),len,iret
@@ -7751,7 +7841,7 @@ cjfe
 !
 !  surface roughness
 !
-      if(fnzorc(1:3) == 'sib') then
+      if (fnzorc(1:3) == 'sib') then
         if (me == 0) then
           write(6,*) 'roughness length to be set from sib veg type'
         endif
@@ -7769,7 +7859,7 @@ cjfe
 !
 !  vegetation cover
 !
-          if(fnvegc(1:8).ne.'        ') then
+          if (fnvegc(1:8) .ne. '        ') then
             if ( index(fnvegc, "tileX.nc") == 0) then ! grib file
               kpd7=-1
               call fixrdc(lugb,fnvegc,kpdveg,kpd7,mon,slmask,
@@ -7791,35 +7881,35 @@ cjfe
 ! when chosen, set the z0 based on the vegetation type.
 ! for this option to work, namelist variable fnvetc must be
 ! set to point at the proper vegetation type file.
-      if(fnzorc(1:3) == 'sib') then
-        if(fnvetc(1:4) == '   ') then
+      if (fnzorc(1:3) == 'sib') then
+        if (fnvetc(1:4) == '   ') then
           if (me==0) write(6,*) "must choose sib veg type climo file"
           call abort
         endif
         zorclm = 0.0
         do i=1,len
-          ivtyp=nint(vet(i))
+          ivtyp = nint(vet(i))
           if (ivtyp >= 1 .and. ivtyp <= 13) then
             zorclm(i) = z0_sib(ivtyp)
           endif
         enddo
       elseif(fnzorc(1:4) == 'igbp') then
-        if(fnvetc(1:4) == '   ') then
-          if (me==0) write(6,*) "must choose igbp veg type climo file"
+        if (fnvetc(1:4) == '   ') then
+          if (me == 0) write(6,*) "must choose igbp veg type climo file"
           call abort
         endif
         zorclm = 0.0
         do i=1,len
-          ivtyp=nint(vet(i))
+          ivtyp = nint(vet(i))
           if (ivtyp >= 1 .and. ivtyp <= 20) then
             z0_season(1) = z0_igbp_min(ivtyp)
             z0_season(7) = z0_igbp_max(ivtyp)
-            if(outlat(i) < 0.0)then
+            if (outlat(i) < 0.0) then
               zorclm(i) = wei1y * z0_season(hyr2) + 
-     &                    wei2y *z0_season(hyr1)
+     &                    wei2y * z0_season(hyr1)
              else
               zorclm(i) = wei1y * z0_season(hyr1) + 
-     &                    wei2y *z0_season(hyr2)
+     &                    wei2y * z0_season(hyr2)
            endif
           endif
         enddo
@@ -7971,8 +8061,10 @@ cjfe
 !
       return
       end subroutine clima
-      subroutine fixrdc_tile(filename_raw, tile_num_ch,
-     &                       i_index, j_index, kpds,
+
+!>\ingroup mod_sfcsub
+      subroutine fixrdc_tile(filename_raw, tile_num_ch,                 &
+     &                       i_index, j_index, kpds,                    &
      &                       var, mon, npts, me)
       use netcdf
       use machine ,      only : kind_io8
@@ -8108,6 +8200,8 @@ cjfe
       return
 
       end subroutine fixrdc_tile
+
+!>\ingroup mod_sfcsub
       subroutine netcdf_err(error)
 
       use netcdf
@@ -8121,21 +8215,22 @@ cjfe
       call abort
 
       end subroutine netcdf_err
-      subroutine fixrdc(lugb,fngrib,kpds5,kpds7,mon,slmask,
-     &                 gdata,len,iret
-     &,                imsk, jmsk, slmskh, gaus,blno, blto
+
+!>\ingroup mod_sfcsub
+!! reads in grib climatology files and interpolate to the input
+!! grid.  grib files should allow all the necessary parameters
+!! to be extracted from the description records.
+      subroutine fixrdc(lugb,fngrib,kpds5,kpds7,mon,slmask,             &
+     &                 gdata,len,iret                                   &
+     &,                imsk, jmsk, slmskh, gaus,blno, blto              &
      &,                outlat, outlon, me)
       use machine ,      only : kind_io8,kind_io4
       use sfccyc_module, only : mdata
       implicit none
-      integer imax,jmax,ijmax,i,j,n,jret,inttyp,iret,imsk,
-     &        jmsk,len,lugb,kpds5,mon,lskip,lgrib,ndata,lugi,me,kmami
+      integer imax,jmax,ijmax,i,j,n,jret,inttyp,iret,imsk,              &
+     &        jmsk,len,lugb,kpds5,mon,lskip,lgrib,ndata,lugi,me,kmami   &
      &,       jj,w3kindreal,w3kindint
       real (kind=kind_io8) wlon,elon,rnlat,dlat,dlon,rslat,blno,blto
-!
-!   read in grib climatology files and interpolate to the input
-!   grid.  grib files should allow all the necessary parameters
-!   to be extracted from the description records.
 !
 !
       character*500 fngrib
@@ -8150,7 +8245,7 @@ cjfe
       real (kind=kind_io8), allocatable :: rlngrb(:), rltgrb(:)
 !
       logical lmask, yr2kc, gaus, ijordr
-      logical, allocatable :: lbms(:)
+      logical*1, allocatable :: lbms(:)
 !
       integer, intent(in) :: kpds7
       integer kpds(1000),kgds(1000)
@@ -8297,18 +8392,20 @@ cjfe
       deallocate(lbms)
       return
       end subroutine fixrdc
-      subroutine fixrda(lugb,fngrib,kpds5,slmask,
-     &                  iy,im,id,ih,fh,gdata,len,iret
-     &,                 imsk, jmsk, slmskh, gaus,blno, blto
+
+!>\ingroup mod_sfcsub
+      subroutine fixrda(lugb,fngrib,kpds5,slmask,                       &
+     &                  iy,im,id,ih,fh,gdata,len,iret                   &
+     &,                 imsk, jmsk, slmskh, gaus,blno, blto             &
      &,                 outlat, outlon, me)
       use machine      , only : kind_io8,kind_io4
       use sfccyc_module, only : mdata
       implicit none
-      integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,
-     &        lgrib,j,ndata,i,inttyp,jmax,imax,ijmax,ij,jday,len,iret,
-     &        jmsk,imsk,ih,kpds5,lugb,iy,id,im,jh,jd,jdoy,jdow,jm,me,
-     &        monend,jy,iy4,kmami,iret2,jj,w3kindreal,w3kindint
-      real (kind=kind_io8) rnlat,rslat,wlon,elon,dlon,dlat,fh,blno,
+      integer nrepmx,nvalid,imo,iyr,idy,jret,ihr,nrept,lskip,lugi,      &
+     &        lgrib,j,ndata,i,inttyp,jmax,imax,ijmax,ij,jday,len,iret,  &
+     &        jmsk,imsk,ih,kpds5,lugb,iy,id,im,jh,jd,jdoy,jdow,jm,me,   &
+     &        monend,jy,iy4,kmami,iret2,jj,w3kindreal,w3kindint      
+      real (kind=kind_io8) rnlat,rslat,wlon,elon,dlon,dlat,fh,blno,     &
      &                     rjday,blto
 !
 !   read in grib climatology/analysis files and interpolate to the input
@@ -8616,6 +8713,8 @@ cjfe
       deallocate(data8)
       return
       end subroutine fixrda
+
+!>\ingroup mod_sfcsub
       subroutine snodpth2(glacir,snwmax,snoanl, len, me)
       use machine , only : kind_io8,kind_io4
       implicit none
@@ -8637,3 +8736,4 @@ cjfe
       enddo
       return
       end
+!>@}

@@ -21,84 +21,29 @@
       subroutine sfc_nst_finalize
       end subroutine sfc_nst_finalize
 
-!>\defgroup gfs_nst_main GFS sfc_nst Main
+!>\defgroup gfs_nst_main GFS Near-Surface Sea Temperature Scheme Module
 !> \brief This subroutine calls the Thermal Skin-layer and Diurnal Thermocline models to update the NSST profile.
 !! \section arg_table_sfc_nst_run Argument Table
-!! | local_name     | standard_name                                                                | long_name                                                   | units         | rank | type      |    kind   | intent | optional |
-!! |----------------|------------------------------------------------------------------------------|-------------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                       | horizontal loop extent                                      | count         |    0 | integer   |           | in     | F        |
-!! | ps             | surface_air_pressure                                                         | surface pressure                                            | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | u1             | x_wind_at_lowest_model_layer                                                 | x component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind_at_lowest_model_layer                                                 | y component of surface layer wind                           | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | t1             | air_temperature_at_lowest_model_layer                                        | surface layer mean temperature                              | K             |    1 | real      | kind_phys | in     | F        |
-!! | q1             | water_vapor_specific_humidity_at_lowest_model_layer                          | surface layer mean specific humidity                        | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | tref           | sea_surface_reference_temperature                                            | reference/foundation temperature                            | K             |    1 | real      | kind_phys | in     | F        |
-!! | cm             | surface_drag_coefficient_for_momentum_in_air                                 | surface exchange coeff for momentum                         | none          |    1 | real      | kind_phys | in     | F        |
-!! | ch             | surface_drag_coefficient_for_heat_and_moisture_in_air                        | surface exchange coeff heat & moisture                      | none          |    1 | real      | kind_phys | in     | F        |
-!! | prsl1          | air_pressure_at_lowest_model_layer                                           | surface layer mean pressure                                 | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | prslki         | ratio_of_exner_function_between_midlayer_and_interface_at_lowest_model_layer | Exner function ratio bt midlayer and interface at 1st layer | ratio         |    1 | real      | kind_phys | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                                            | landmask: sea/land/ice=0/1/2                                | flag          |    1 | integer   |           | in     | F        |
-!! | xlon           | longitude                                                                    | longitude                                                   | radians       |    1 | real      | kind_phys | in     | F        |
-!! | sinlat         | sine_of_latitude                                                             | sine of latitude                                            | none          |    1 | real      | kind_phys | in     | F        |
-!! | stress         | surface_wind_stress                                                          | wind stress                                                 | m2 s-2        |    1 | real      | kind_phys | in     | F        |
-!! | sfcemis        | surface_longwave_emissivity                                                  | surface longwave emissivity                                 | frac          |    1 | real      | kind_phys | in     | F        |
-!! | dlwflx         | surface_downwelling_longwave_flux_absorbed_by_ground                         | total sky sfc downward lw flux absorbed by the ocean        | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | sfcnsw         | surface_net_downwelling_shortwave_flux                                       | total sky sfc net sw flx into ocean                         | W m-2         |    1 | real      | kind_phys | in     | F        |
-!! | rain           | nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep       | nonnegative precipitation amount on dyn time step           | m             |    1 | real      | kind_phys | in     | F        |
-!! | timestep       | time_step_for_dynamics                                                       | timestep interval                                           | s             |    0 | real      | kind_phys | in     | F        |
-!! | kdt            | index_of_time_step                                                           | current time step index                                     | index         |    0 | integer   |           | in     | F        |
-!! | solhr          | forecast_hour                                                                | fcst hour at the end of prev time step                      | h             |    0 | real      | kind_phys | in     | F        |
-!! | xcosz          | instantaneous_cosine_of_zenith_angle                                         | cosine of solar zenith angle                                | none          |    1 | real      | kind_phys | in     | F        |
-!! | ddvel          | surface_wind_enhancement_due_to_convection                                   | wind enhancement due to convection                          | m s-1         |    1 | real      | kind_phys | in     | F        |
-!! | flag_iter      | flag_for_iteration                                                           | flag for iteration                                          | flag          |    1 | logical   |           | in     | F        |
-!! | flag_guess     | flag_for_guess_run                                                           | flag for guess run                                          | flag          |    1 | logical   |           | in     | F        |
-!! | nstf_name1     | flag_for_nsstm_run                                                           | NSSTM flag: off/uncoupled/coupled=0/1/2                     | flag          |    0 | integer   |           | in     | F        |
-!! | nstf_name4     | vertical_temperature_average_range_lower_bound                               | zsea1                                                       | mm            |    0 | integer   |           | in     | F        |
-!! | nstf_name5     | vertical_temperature_average_range_upper_bound                               | zsea2                                                       | mm            |    0 | integer   |           | in     | F        |
-!! | lprnt          | flag_print                                                                   | flag for printing diagnostics to output                     | flag          |    0 | logical   |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                                           | horizontal index of printed column                          | index         |    0 | integer   |           | in     | F        |
-!! | tskin          | surface_skin_temperature_for_nsst                                            | ocean surface skin temperature                              | K             |    1 | real      | kind_phys | inout  | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration                                     | ocean surface skin temperature for guess run                | K             |    1 | real      | kind_phys | inout  | F        |
-!! | xt             | diurnal_thermocline_layer_heat_content                                       | heat content in diurnal thermocline layer                   | K m           |    1 | real      | kind_phys | inout  | F        |
-!! | xs             | sea_water_salinity                                                           | salinity  content in diurnal thermocline layer              | ppt m         |    1 | real      | kind_phys | inout  | F        |
-!! | xu             | diurnal_thermocline_layer_x_current                                          | u-current content in diurnal thermocline layer              | m2 s-1        |    1 | real      | kind_phys | inout  | F        |
-!! | xv             | diurnal_thermocline_layer_y_current                                          | v-current content in diurnal thermocline layer              | m2 s-1        |    1 | real      | kind_phys | inout  | F        |
-!! | xz             | diurnal_thermocline_layer_thickness                                          | diurnal thermocline layer thickness                         | m             |    1 | real      | kind_phys | inout  | F        |
-!! | zm             | ocean_mixed_layer_thickness                                                  | mixed layer thickness                                       | m             |    1 | real      | kind_phys | inout  | F        |
-!! | xtts           | sensitivity_of_dtl_heat_content_to_surface_temperature                       | d(xt)/d(ts)                                                 | m             |    1 | real      | kind_phys | inout  | F        |
-!! | xzts           | sensitivity_of_dtl_thickness_to_surface_temperature                          | d(xz)/d(ts)                                                 | m K-1         |    1 | real      | kind_phys | inout  | F        |
-!! | dt_cool        | sub-layer_cooling_amount                                                     | sub-layer cooling amount                                    | K             |    1 | real      | kind_phys | inout  | F        |
-!! | z_c            | sub-layer_cooling_thickness                                                  | sub-layer cooling thickness                                 | m             |    1 | real      | kind_phys | inout  | F        |
-!! | c_0            | coefficient_c_0                                                              | coefficient1 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | c_d            | coefficient_c_d                                                              | coefficient2 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | w_0            | coefficient_w_0                                                              | coefficient3 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | w_d            | coefficient_w_d                                                              | coefficient4 to calculate d(tz)/d(ts)                       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | d_conv         | free_convection_layer_thickness                                              | thickness of free convection layer                          | m             |    1 | real      | kind_phys | inout  | F        |
-!! | ifd            | index_of_dtlm_start                                                          | index to start dtlm run or not                              | index         |    1 | real      | kind_phys | inout  | F        |
-!! | qrain          | sensible_heat_flux_due_to_rainfall                                           | sensible heat flux due to rainfall                          | W             |    1 | real      | kind_phys | inout  | F        |
-!! | qsurf          | surface_specific_humidity                                                    | surface air saturation specific humidity                    | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | gflux          | upward_heat_flux_in_soil                                                     | soil heat flux                                              | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | cmm            | surface_drag_wind_speed_for_momentum_in_air                                  | surf mom exch coef time mean surf wind                      | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chh            | surface_drag_mass_flux_for_heat_and_moisture_in_air                          | surf h&m exch coef time surf wind & density                 | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | evap           | kinematic_surface_upward_latent_heat_flux                                    | kinematic from latent heat flux                             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | hflx           | kinematic_surface_upward_sensible_heat_flux                                  | kinematic sensible heat flux                                | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | ep             | surface_upward_potential_latent_heat_flux                                    | potential evaporation                                       | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                           | error message for error handling in CCPP                    | none          |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                              | error flag for error handling in CCPP                       | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_nst_run.html
 !!
 !! \section NSST_general_algorithm GFS Near-Surface Sea Temperature Scheme General Algorithm
 !> @{
       subroutine sfc_nst_run                                            &
-     &     ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      &
-     &       prsl1, prslki, islimsk, xlon, sinlat, stress,              &
+!  ---  inputs:
+     &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &
+     &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
+     &       prsl1, prslki, prsik1, prslk1, wet, xlon, sinlat,          &
+     &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
-     &       ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      &
-     &       nstf_name5, lprnt, ipr,                                    &  ! inputs from here and above
+     &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
+     &       nstf_name5, lprnt, ipr,                                    &
+!  ---  input/output:
      &       tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, &
-     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &  ! in/outs from here and above
-     &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &  ! outputs
+     &       z_c,   c_0,   c_d,   w_0, w_d, d_conv, ifd, qrain,         &
+!  ---  outputs:
+     &       qsurf, gflux, cmm, chh, evap, hflx, ep, errmsg, errflg     &
      &      )
-
+!
 ! ===================================================================== !
 !  description:                                                         !
 !                                                                       !
@@ -108,9 +53,9 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, islimsk, xlon, sinlat, stress,              !
+!            prsl1, prslki, wet, xlon, sinlat, stress,                  !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
-!            ddvel, flag_iter, flag_guess, nstf_name1, nstf_name4,      !
+!            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
 !       input/outputs:                                                  !
 !            tskin, tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool, !
@@ -152,24 +97,22 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure (pa)            im   !
 !     prslki   - real,                                             im   !
-!     islimsk  - integer, sea/land/ice mask (=0/1/2)               im   !
+!     prsik1   - real,                                             im   !
+!     prslk1   - real,                                             im   !
+!     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
+!     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
 !     stress   - real, wind stress       (n/m**2)                  im   !
 !     sfcemis  - real, sfc lw emissivity (fraction)                im   !
 !     dlwflx   - real, total sky sfc downward lw flux (w/m**2)     im   !
 !     sfcnsw   - real, total sky sfc netsw flx into ocean (w/m**2) im   !
-! DH*
-! The actual unit of rain passed in is m ! see below line 438, qrain(i) = ...
-! where 1000*rain in the nominator converts m to kg m^2; there is still a
-! time unit 's' missing. Need to double-check what is going on.
-! *DH
 !     rain     - real, rainfall rate     (kg/m**2/s)               im   !
 !     timestep - real, timestep interval (second)                  1    !
 !     kdt      - integer, time step counter                        1    !
 !     solhr    - real, fcst hour at the end of prev time step      1    !
 !     xcosz    - real, consine of solar zenith angle               1    !
-!     ddvel    - real, wind enhancement due to convection (m/s)    im   !
+!     wind     - real, wind speed (m/s)                            im   !
 !     flag_iter- logical, execution or not                         im   !
 !                when iter = 1, flag_iter = .true. for all grids   im   !
 !                when iter = 2, flag_iter = .true. when wind < 2   im   !
@@ -221,11 +164,6 @@
 ! ===================================================================== !
       use machine , only : kind_phys
       use funcphys, only : fpvs
-      use physcons, hvap => con_hvap                                    &
-     &,             cp => con_cp, hfus => con_hfus, jcal => con_jcal    &
-     &,             eps => con_eps, epsm1 => con_epsm1                  &
-     &,             rvrdm1 => con_fvirt, rd => con_rd                   &
-     &,             rhw0 => con_rhw0,sbc => con_sbc,pi => con_pi
       use date_def, only: idate
       use module_nst_water_prop, only: get_dtzm_point
       use module_nst_parameters, only : t0k,cp_w,omg_m,omg_sh,          &
@@ -242,7 +180,6 @@
       implicit none
 !
 !  ---  constant parameters:
-      real (kind=kind_phys), parameter :: cpinv=1.0/cp, hvapi=1.0/hvap
       real (kind=kind_phys), parameter :: f24   = 24.0     ! hours/day
       real (kind=kind_phys), parameter :: f1440 = 1440.0   ! minutes/day
       real (kind=kind_phys), parameter :: czmin = 0.0001   ! cos(89.994)
@@ -251,14 +188,18 @@
 !  ---  inputs:
       integer, intent(in) :: im, kdt, ipr, nstf_name1, nstf_name4,      &
      &       nstf_name5
+      real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
+     &       epsm1, rvrdm1, rd, rhw0, sbc, pi
       real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
-     &       t1, q1, tref, cm, ch, prsl1, prslki, xlon,xcosz,           &
-     &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, ddvel
-      integer, intent(in), dimension(im):: islimsk
+     &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
+     &       xlon,xcosz,                                                &
+     &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, intent(in) :: flag_iter(im), flag_guess(im), lprnt
+      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet
+!    &,      icy
+      logical,                intent(in) :: lprnt
 
 !  ---  input/outputs:
 ! control variables of dtl system (5+2) and sl (2) and coefficients for d(tz)/d(ts) calculation
@@ -279,9 +220,9 @@
       integer :: k,i
 !
       real (kind=kind_phys), dimension(im) ::  q0, qss, rch,
-     &                     rho_a, theta1, tv1, wind, wndmag
+     &                     rho_a, theta1, tv1, wndmag
 
-      real(kind=kind_phys) elocp,tem
+      real(kind=kind_phys) elocp,tem,cpinv,hvapi
 !
 !    nstm related prognostic fields
 !
@@ -307,24 +248,28 @@
       integer :: iw3jdn
 !======================================================================================================
 cc
-      parameter (elocp=hvap/cp)
-
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      cpinv = 1.0/cp
+      hvapi = 1.0/hvap
+      elocp = hvap/cp
 
       sss = 34.0             ! temporarily, when sea surface salinity data is not ready
 !
 ! flag for open water and where the iteration is on
 !
       do i = 1, im
-         flag(i) = islimsk(i) == 0 .and. flag_iter(i)
+!       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
+        flag(i) = wet(i) .and. flag_iter(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
-        if((islimsk(i) == 0) .and. flag_guess(i)) then
+!       if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
+        if(wet(i) .and. flag_guess(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -351,11 +296,13 @@ cc
 
           nswsfc(i) = sfcnsw(i) ! net solar radiation at the air-sea surface (positive downward)
           wndmag(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
-          wind(i)   = wndmag(i) + max( 0.0, min( ddvel(i), 30.0 ) )
-          wind(i)   = max( wind(i), 1.0 )
 
           q0(i)     = max(q1(i), 1.0e-8)
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          theta1(i) = t1(i) / prslk1(i) ! potential temperature at the middle of lowest model layer
+#else
           theta1(i) = t1(i) * prslki(i)
+#endif
           tv1(i)    = t1(i) * (1.0 + rvrdm1*q0(i))
           rho_a(i)  = prsl1(i) / (rd*tv1(i))
           qss(i)    = fpvs(tsurf(i))                          ! pa
@@ -376,7 +323,11 @@ cc
 !           at previous time step
           evap(i)    = elocp * rch(i) * (qss(i) - q0(i))
           qsurf(i)   = qss(i)
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+          hflx(i)    = rch(i) * (tsurf(i)/prsik1(i) - theta1(i))
+#else
           hflx(i)    = rch(i) * (tsurf(i) - theta1(i))
+#endif
 
 !     if (lprnt .and. i == ipr) print *,' tskin=',tskin(i),' theta1=',
 !    & theta1(i),' hflx=',hflx(i),' t1=',t1(i),'prslki=',prslki(i)
@@ -434,7 +385,7 @@ cc
           rf_ts  = (1000.*rain(i)/rho_w)*alfac*cp_w*(1.0+rch(i)*hl_ts)
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
-!> - Call cool_skin(), which is the sub-layer cooling parameterization 
+!> - Call cool_skin(), which is the sub-layer cooling parameterization
 !! (Fairfall et al. (1996) \cite fairall_et_al_1996).
 ! & calculate c_0, c_d
 !
@@ -607,8 +558,8 @@ cc
      &                        zsea1,zsea2,dtz)
           tsurf(i) = max(271.2, tref(i) + dtz )
 
-      if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
-     &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
+!     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
+!    &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
 
 !>  - Call cal_w() to calculate \a w_0 and \a w_d.
           if ( xt(i) > 0.0 ) then
@@ -633,8 +584,9 @@ cc
 
 ! restore nst-related prognostic fields for guess run
       do i=1, im
-        if((islimsk(i) == 0) ) then
-          if(flag_guess(i)) then    ! when it is guess of
+!       if (wet(i) .and. .not.icy(i)) then
+        if (wet(i)) then
+          if (flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
             xu(i)      = xu_old(i)
@@ -654,9 +606,9 @@ cc
 !
             if ( nstf_name1 > 1 ) then
               tskin(i) = tsurf(i)
-            endif               ! if ( nstf_name1 > 1  then
-          endif                 ! if(flag_guess(i)) then
-        endif                   ! if((islimsk(i).eq. 0.) ) then
+            endif               ! if nstf_name1 > 1 then
+          endif                 ! if flag_guess(i) then
+        endif                   ! if wet(i) .and. .not.icy(i) then
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
@@ -670,7 +622,11 @@ cc
             qss(i)   = eps*qss(i) / (ps(i) + epsm1*qss(i))
             qsurf(i) = qss(i)
             evap(i)  = elocp*rch(i) * (qss(i) - q0(i))
+#ifdef GSD_SURFACE_FLUXES_BUGFIX
+            hflx(i)  = rch(i) * (tskin(i)/prsik1(i) - theta1(i))
+#else
             hflx(i)  = rch(i) * (tskin(i) - theta1(i))
+#endif
           endif
         enddo
       endif                   ! if ( nstf_name1 > 1 ) then
@@ -714,61 +670,76 @@ cc
       end subroutine sfc_nst_pre_finalize
 
 !! \section arg_table_sfc_nst_pre_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                      | units | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|----------------------------------------------- |-------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                         | count |    0 | integer   |           | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                      | landmask: sea/land/ice=0/1/2                   | flag  |    1 | integer   |           | in     | F        |
-!! | oro            | orography                                              | orography                                      | m     |    1 | real      | kind_phys | in     | F        |
-!! | oro_uf         | orography_unfiltered                                   | unfiltered orographyo                          | m     |    1 | real      | kind_phys | in     | F        |
-!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K     |    1 | real      | kind_phys | in     | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K     |    1 | real      | kind_phys | inout  | F        |
-!! | tskin          | surface_skin_temperature_for_nsst                      | ocean surface skin temperature                 | K     |    1 | real      | kind_phys | out    | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag  |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_nst_pre_run.html
 !!
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
-      subroutine sfc_nst_pre_run                                        &
-     &    (im, islimsk, oro, oro_uf, tsfc, tsurf, tskin, errmsg, errflg)
+      subroutine sfc_nst_pre_run
+     &    (im, wet, tsfc_ocn, tsurf_ocn, tseal, xt, xz, dt_cool,
+     &     z_c, tref, cplflx, errmsg, errflg)
 
       use machine , only : kind_phys
-      use physcons, only: rlapse
 
       implicit none
 
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, dimension(im), intent(in) :: islimsk
-      real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
-      real (kind=kind_phys), dimension(im), intent(in) :: tsfc
+      logical, dimension(im), intent(in) :: wet
+      real (kind=kind_phys), dimension(im), intent(in) ::
+     &      tsfc_ocn, xt, xz, dt_cool, z_c
+      logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+      real (kind=kind_phys), dimension(im), intent(inout) ::
+     &    tsurf_ocn, tseal, tref
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(out) :: tskin
-
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !  ---  locals
       integer :: i
-      real(kind=kind_phys) :: tem
+      real(kind=kind_phys), parameter :: zero = 0.0d0,
+     &                                   one  = 1.0d0,
+     &                                   half = 0.5d0,
+     &                                   omz1 = 10.0d0
+      real(kind=kind_phys) :: tem1, tem2, dt_warm
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
-      ! Initialize intent(out) variables
-      tskin = 0.0
-
-      do i = 1, im
-        if ( islimsk(i) == 0 ) then
-          tem      = (oro(i)-oro_uf(i)) * rlapse
-          tskin(i) = tsfc(i)  + tem
-          tsurf(i) = tsurf(i) + tem
+      do i=1,im
+        if (wet(i)) then
+!          tem         = (oro(i)-oro_uf(i)) * rlapse
+          ! DH* 20190927 simplyfing this code because tem is zero
+          !tem          = zero
+          !tseal(i)     = tsfc_ocn(i)  + tem
+          tseal(i)     = tsfc_ocn(i)
+          !tsurf_ocn(i) = tsurf_ocn(i) + tem
+          ! *DH
         endif
       enddo
+
+      if (cplflx) then
+        tem1 = half / omz1
+        do i=1,im
+          if (wet(i)) then
+            tem2 = one / xz(i)
+            dt_warm = (xt(i)+xt(i)) * tem2
+            if ( xz(i) > omz1) then
+              tref(i) = tseal(i) - (one-half*omz1*tem2) * dt_warm       &
+     &                  + z_c(i)*dt_cool(i)*tem1
+            else
+              tref(i) = tseal(i) - (xz(i)*dt_warm                       &
+     &                  -  z_c(i)*dt_cool(i))*tem1
+            endif
+            tseal(i) = tref(i) + dt_warm - dt_cool(i)
+!                  - (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
+            tsurf_ocn(i) = tseal(i)
+          endif
+        enddo
+      endif
 
       return
       end subroutine sfc_nst_pre_run
@@ -799,59 +770,39 @@ cc
 !> \brief Brief description of the subroutine
 !!
 !! \section arg_table_sfc_nst_post_run Argument Table
-!! | local_name     | standard_name                                          | long_name                                      | units   | rank | type      |    kind   | intent | optional |
-!! |----------------|--------------------------------------------------------|----------------------------------------------- |---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                 | horizontal loop extent                         | count   |    0 | integer   |           | in     | F        |
-!! | islimsk        | sea_land_ice_mask                                      | landmask: sea/land/ice=0/1/2                   | flag    |    1 | integer   |           | in     | F        |
-!! | oro            | orography                                              | orography                                      | m       |    1 | real      | kind_phys | in     | F        |
-!! | oro_uf         | orography_unfiltered                                   | unfiltered orography                           | m       |    1 | real      | kind_phys | in     | F        |
-!! | nstf_name1     | flag_for_nsstm_run                                     | NSSTM flag: off/uncoupled/coupled=0/1/2        | flag    |    0 | integer   |           | in     | F        |
-!! | nstf_name4     | vertical_temperature_average_range_lower_bound         | zsea1                                          | mm      |    0 | integer   |           | in     | F        |
-!! | nstf_name5     | vertical_temperature_average_range_upper_bound         | zsea2                                          | mm      |    0 | integer   |           | in     | F        |
-!! | xt             | diurnal_thermocline_layer_heat_content                 | heat content in diurnal thermocline layer      | K m     |    1 | real      | kind_phys | in     | F        |
-!! | xz             | diurnal_thermocline_layer_thickness                    | diurnal thermocline layer thickness            | m       |    1 | real      | kind_phys | in     | F        |
-!! | dt_cool        | sub-layer_cooling_amount                               | sub-layer cooling amount                       | K       |    1 | real      | kind_phys | in     | F        |
-!! | z_c            | sub-layer_cooling_thickness                            | sub-layer cooling thickness                    | m       |    1 | real      | kind_phys | in     | F        |
-!! | rslimsk        | sea_land_ice_mask_real                                 | landmask: sea/land/ice=0/1/2                   | flag    |    1 | real      | kind_phys | in     | F        |
-!! | tref           | sea_surface_reference_temperature                      | reference/foundation temperature               | K       |    1 | real      | kind_phys | in     | F        |
-!! | xlon           | longitude                                              | longitude                                      | radians |    1 | real      | kind_phys | in     | F        |
-!! | tsurf          | surface_skin_temperature_after_iteration               | ocean surface skin temperature for guess run   | K       |    1 | real      | kind_phys | inout  | F        |
-!! | dtzm           | mean_change_over_depth_in_sea_water_temperature        | mean of dT(z)  (zsea1 to zsea2)                | K       |    1 | real      | kind_phys | out    | F        |
-!! | tsfc           | surface_skin_temperature                               | surface skin temperature                       | K       |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                     | error message for error handling in CCPP       | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                        | error flag for error handling in CCPP          | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude sfc_nst_post_run.html
 !!
 ! \section NSST_general_post_algorithm General Algorithm
 !
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, islimsk, oro, oro_uf, nstf_name1, nstf_name4,          &
-     &       nstf_name5, xt, xz, dt_cool, z_c, rslimsk, tref, xlon,     &
-     &       tsurf, dtzm, tsfc, errmsg, errflg                          &
+     &     ( im, rlapse, wet, icy, oro, oro_uf, nstf_name1,             &
+     &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
+     &       tsurf_ocn, tsfc_ocn, dtzm, errmsg, errflg                  &
      &     )
 
       use machine , only : kind_phys
-      use physcons, only: rlapse
       use module_nst_water_prop, only: get_dtzm_2d
 
       implicit none
 
 !  ---  inputs:
       integer, intent(in) :: im
-      integer, dimension(im), intent(in) :: islimsk
+      logical, dimension(im), intent(in) :: wet, icy
+      real (kind=kind_phys), intent(in) :: rlapse
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
       real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
-     &      dt_cool, z_c, rslimsk, tref, xlon
+     &      dt_cool, z_c, tref, xlon
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_ocn, &
+     &      tsfc_ocn
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
      &      dtzm
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsfc
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -868,11 +819,11 @@ cc
 !    &     ' dt_cool=',dt_cool(ipr),' dt_warm=',2.0*xt(ipr)/xz(ipr),
 !    &     ' kdt=',kdt
 
-      do i = 1, im
-        if ( islimsk(i) == 0 ) then
-          tsurf(i) = tsurf(i) - (oro(i)-oro_uf(i)) * rlapse
-        endif
-      enddo
+!      do i = 1, im
+!        if (wet(i) .and. .not. icy(i)) then
+!          tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
+!        endif
+!      enddo
 
 !  --- ...  run nsst model  ... ---
 
@@ -881,12 +832,15 @@ cc
         zsea1 = 0.001*real(nstf_name4)
         zsea2 = 0.001*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool,                              &
-     &                    z_c, rslimsk, zsea1, zsea2,                   &
+     &                    z_c, wet, zsea1, zsea2,                       &
      &                    im, 1, dtzm)
         do i = 1, im
-          if ( islimsk(i) == 0 ) then
-            tsfc(i) = max(271.2,tref(i) + dtzm(i)) -                    &
-     &                    (oro(i)-oro_uf(i))*rlapse
+!          if (wet(i) .and. .not.icy(i)) then
+!          if (wet(i) .and. (Model%frac_grid .or. .not. icy(i))) then
+          if (wet(i)) then
+            tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i))
+!           tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i)) -  &
+!                           (oro(i)-oro_uf(i))*rlapse
           endif
         enddo
       endif

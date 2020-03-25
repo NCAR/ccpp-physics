@@ -1,0 +1,380 @@
+[ccpp-arg-table]
+  name = gwdps_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = gwdps_run
+  type = scheme
+[im]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ix]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[km]
+  standard_name = vertical_dimension
+  long_name = number of vertical layers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[A]
+  standard_name = tendency_of_y_wind_due_to_model_physics
+  long_name = meridional wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[B]
+  standard_name = tendency_of_x_wind_due_to_model_physics
+  long_name = zonal wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[C]
+  standard_name = tendency_of_air_temperature_due_to_model_physics
+  long_name = air temperature tendency due to model physics
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[u1]
+  standard_name = x_wind
+  long_name = zonal wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[v1]
+  standard_name = y_wind
+  long_name = meridional wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[t1]
+  standard_name = air_temperature
+  long_name = mid-layer temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[q1]
+  standard_name = water_vapor_specific_humidity
+  long_name = mid-layer specific humidity of water vapor
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[kpbl]
+  standard_name = vertical_index_at_top_of_atmosphere_boundary_layer
+  long_name = vertical index at top atmospheric boundary layer
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = interface pressure
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[del]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = difference between mid-layer pressures
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsl]
+  standard_name = air_pressure
+  long_name = mid-layer pressure
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prslk]
+  standard_name = dimensionless_exner_function_at_model_layers
+  long_name = mid-layer Exner function
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[phii]
+  standard_name = geopotential_at_interface
+  long_name = interface geopotential
+  units = m2 s-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[phil]
+  standard_name = geopotential
+  long_name = mid-layer geopotential
+  units = m2 s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[deltim]
+  standard_name = time_step_for_physics
+  long_name = physics time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current time step index
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[hprime]
+  standard_name = standard_deviation_of_subgrid_orography
+  long_name = standard deviation of subgrid orography
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oc]
+  standard_name = convexity_of_subgrid_orography
+  long_name = convexity of subgrid orography
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oa4]
+  standard_name = asymmetry_of_subgrid_orography
+  long_name = asymmetry of subgrid orography
+  units = none
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[clx4]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
+  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
+  units = frac
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[theta]
+  standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
+  long_name = angle with respect to east of maximum subgrid orographic variations
+  units = degrees
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sigma]
+  standard_name = slope_of_subgrid_orography
+  long_name = slope of subgrid orography
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gamma]
+  standard_name = anisotropy_of_subgrid_orography
+  long_name = anisotropy of subgrid orography
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[elvmax]
+  standard_name = maximum_subgrid_orography
+  long_name = maximum of subgrid orography
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dusfc]
+  standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
+  long_name = zonal surface stress due to orographic gravity wave drag
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc]
+  standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
+  long_name = meridional surface stress due to orographic gravity wave drag
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[g]
+  standard_name = gravitational_acceleration
+  long_name = gravitational acceleration
+  units = m s-2
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cp]
+  standard_name = specific_heat_of_dry_air_at_constant_pressure
+  long_name = specific heat of dry air at constant pressure
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rv]
+  standard_name = gas_constant_water_vapor
+  long_name = ideal gas constant for water vapor
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[imx]
+  standard_name = number_of_equatorial_longitude_points
+  long_name = number of longitude points along the equator
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nmtvr]
+  standard_name = number_of_statistical_measures_of_subgrid_orography
+  long_name = number of statistical measures of subgrid orography
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[cdmbgwd]
+  standard_name = multiplication_factors_for_mountain_blocking_and_orographic_gravity_wave_drag
+  long_name = multiplic. factors for (1) mountain blocking drag coeff. and (2) ref. level orographic gravity wave drag
+  units = none
+  dimensions = (4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[me]
+  standard_name = mpi_rank
+  long_name = rank of the current MPI task
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lprnt]
+  standard_name = flag_print
+  long_name = flag for debugging printouts
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ipr]
+  standard_name = horizontal_index_of_printed_column
+  long_name = horizontal index of column used in debugging printouts
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[rdxzb]
+  standard_name = level_of_dividing_streamline
+  long_name = level of the dividing streamline
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = gwdps_finalize
+  type = scheme

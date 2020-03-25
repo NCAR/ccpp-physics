@@ -1,0 +1,159 @@
+/**
+\page ccppphys_nml Namelist Option Description
+
+\section gfs_physics_nml  GFS Physics Namelist Option
+
+\param fhzero   
+\param h2o_phys          logical, 
+\param ldiag3d           logical,
+\param fhcyc                     
+\param use_ufo           logical, 
+\param pre_rad           logical,
+\param ncld              integer,
+\param imp_physics       integer, 
+\param pdfcld            logical,
+\param fhswr
+\param fhlwr
+\param ialb              gfs_control_type::ialb
+\n                       SW surface albedo control flag
+\n                       0: using climatology surface albedo scheme for SW
+\n                       1: using MODIS based land surface albedo for SW
+\param iems              LW global surface emissivity control flag
+\n                       0: black-body emissivity 
+\n                       1: surface type based climatology in \f$1^o\f$ horizontal resolution
+\param iaer              aerosol effect control flag (physparam::iaerflg)
+\n                       3-digit flag "abc" (volcanic, LW, SW):
+\n                       a: stratospheric volcanic aerosols
+\n                       b: tropospheric aerosols for LW
+\n                       c: tropospheric aerosols for SW
+\n                       =0: aerosol effect is not included; =1: aerosol effect is included
+\param ico2              \f$CO_2\f$ data source control flag (physparam::ico2flg)     
+\n                       0: prescribed value (380 ppmv)
+\n                       1: yearly global averaged annual mean from observations
+\n                       2: monthly 15 degree horizontal resolution from observations
+\param isubc_sw          subgrid cloud approximation control flag in SW radiation
+\n                       0: no McICA approximation in SW radiation
+\n                       1: use McICA with prescribed permutation seeds (test mode)
+\n                       2: use McICA with randomly generated permutation seeds
+\param isubc_lw          subgrid cloud approximation control flag in LW radiation
+\n                       0: no McICA approximation in LW radiation
+\n                       1: use McICA with prescribed permutation seeds (test mode)
+\n                       2: use McICA with randomly generated permutation seeds
+\param isol              solar constant scheme control flag
+\n                       0: fixed value = 1366.0 \f$W m^{-2}\f$ (old standard)
+\n                       10: fixed value = 1360.8 \f$W m^{-2}\f$ (new standard) 
+\n                       1: NOAA ABS-scale TSI table (yearly) with 11-yr cycle approximation
+\n                       2: NOAA TIM-scale TSI table (yearly) with 11-yr cycle approximation
+\n                       3: CMIP5 TIM-scale TSI table (yearly) with 11-yr cycle approximation
+\n                       4: CMIP5 TIM-scale TSI table (monthly) with 11-yr cycle approximation
+\param lwhtr             logical flag for output of longwave heating rate
+\param swhtr             logical flag for output of shortwave heating rate
+\param cnvgwd            logical flag for convective gravity wave drag
+\param shal_cnv          logical flag for shallow convection
+\param cal_pre           logical flag for precipitation type algorithm
+\param redrag            logical flag for reduced drag coefficient for high wind over sea
+\param dspheat           logical flag for TKE dissipation heating
+\param hybedmf           logical flag for hybrid EDMF PBL scheme
+\param random_clds
+\param trans_trac
+\param cnvcld
+\param imfshalcnv
+\param imfdeepcnv
+\param cdmbgwd
+\param prslrd0
+\param ivegsrc
+\param isot
+\param debug
+\param nstf_name
+\param nst_anl
+\param psautco
+\param prautco
+
+
+\section gfdl_cloud_microphysics_nml  GFDL Cloud Microphysics Namelist Option
+
+\param sedi_transport    logical, \e true to turn on horizontal momentum transport during sedimentation      
+\param do_sedi_heat      logical, \e true to turn on horizontal heat transport during sedimentation         
+\param rad_snow          logical, \e true to consider snow in cloud fraction calculation                    
+\param rad_graupel       logical, \e true to consider graupel in cloud fraction calculation      
+\param rad_rain          logical, \e true to consider rain in cloud fraction calculation 
+\param const_vi          logical, \e true to use constant cloud ice fall speed                          
+\param const_vs          logical, \e true to use constant snow fall speed 
+\param const_vg          logical, \e true to use constant graupel fall speed 
+\param const_vr          logical, \e true to use constant rain fall speed
+\param vi_max            real, maximum fall speed for cloud ice 
+\param vs_max            real, maximum fall speed for snow 
+\param vg_max            real, maximum fall speed for graupel 
+\param vr_max            real, maximum fall speed for rain 
+\param qi_lim            real, cloud ice limiter to prevent large ice built up in cloud ice freezing and deposition
+\param prog_ccn          logical, \e true to activate prognostic CCN (not supported in GFS Physics)  
+\param do_qa             logical, \e true to activate inline cloud fraction diagnosis in fast saturation adjustment 
+\param fast_sat_adj      logical, \e true to adjust cloud water evaporation/freezing, cloud ice deposition when fast saturation adjustment is activated (do_sat_adj=.true. in \b fv_core_nml block) 
+\param tau_l2v           real, time scale for evaporation of cloud water to water vapor. Increasing/decreasing \p tau_l2v can decrease/boost deposition of cloud water to water vapor 
+\param tau_v2l           real, time scale for condensation of water vapor to cloud water. Increasing/decreasing \p tau_v2l can decrease/boost condensation of water vapor to cloud water
+\param tau_g2v           real, time scale for sublimation of graupel to water vapor. Increasing/decreasing \p tau_g2v can decrease/boost sublimation of graupel to water vapor
+\param rthresh           real, critical cloud water radius for autoconversion (cloud water -> rain). Increasing/decreasing of \p rthresh makes the autoconversion harder/easier
+\param dw_land           real, base value for subgrid deviation/variability over land  
+\param dw_ocean          real, base value for subgrid deviation/variability over ocean
+\param ql_gen            real, maximum value for cloud water generated from condensation of water vapor (water vapor -> cloud water). Increasing/decreasing \b ql_gen can increase/decrease cloud water 
+\param ql_mlt            real, maximum value of cloud water allowed from melted cloud ice (cloud ice -> cloud water or rain). Exceedance of which will become rain. Increasing/decreasing \p ql_mlt can increase/decrease cloud water and decrease/increase rain
+\param qi0_crt           real, threshold of cloud ice to snow autoconversion (cloud ice -> snow). Increasing/decreasing \p qi0_crt can increase/decrease cloud ice and decrease/increase snow    
+\param qs0_crt           real, threshold of snow to graupel autoconversion (snow -> graupel). Increasing/decreasing \p qs0_crt can increase/decrease snow and decrease/increase graupel 
+\param tau_i2s           real, time scale for autoconversion of cloud ice to snow. Increasing/decreasing \p tau_i2s can decrease/boost autoconversion of cloud ice to snow (cloud ice -> snow) 
+\param c_psaci           real, accretion efficiency of cloud ice to snow (cloud ice -> snow). Increasing/decreasing of \p c_psaci can boost/decrease the accretion of cloud ice to snow      
+\param c_pgacs           real, accretion efficiency of snow to graupel (snow-> graupel). Increasing/decreasing of \p c_pgacs can boost/decrease the accretion of snow to graupel
+\param rh_inc            real, relative humidity increment for complete evaporation of cloud water and cloud ice         
+\param rh_inr            real, relative humidity increment for sublimation of snow          
+\param rh_ins            real, relative humidity increment for minimum evaporation of rain        
+\param ccn_l             real, base CCN over land. Increasing/decreasing \b ccn_l can on the one hand boost/decrease the autoconversion of cloud water to rain (cloud water -> rain), on the other hand make the autoconversion harder/easier 
+\param ccn_o             real, base CCN over ocean. Increasing/decreasing \b ccn_o can on the one hand boost/decrease the autoconversion of cloud water to rain (cloud water -> rain), on the other hand make the autoconversion harder/easier 
+\param c_paut            real, uutoconversion efficiency of cloud water to rain (cloud water -> rain). Increasing/decreasing of \p c_paut can boost/decrease the autoconversion of cloud water to rain 
+\param c_cracw           real, accretion efficiency of cloud water to rain (cloud water -> rain) 
+\param use_ppm           logical, \e true to use PPM fall scheme; .false. to use time-implicit monotonic fall scheme 
+\param use_ccn           logical, \e true to compute prescribed CCN. It should be .true. when \p prog_ccn = .false. 
+\param mono_prof         logical, \e true to turn on terminal fall with monotonic PPM scheme. This is used together with \p use_ppm =.true.
+\param z_slope_liq       logical, \e true to turn on vertically subgrid linear monotonic slope for autoconversion of cloud water to rain
+\param z_slope_ice       logical, \e true to turn on vertically subgrid linear monotonic slope for autoconversion of cloud ice to snow 
+\param de_ice            logical, \e true to convert excessive cloud ice to snow to prevent ice over-built from other sources like convection scheme (not supported in GFS physics) 
+\param fix_negative      logical, \e true to fix negative water species using nearby points 
+\param icloud_f          integer, flag (0,1,or 2) for cloud fraction diagnostic scheme
+\param mp_time           real, time step of GFDL cloud microphysics 
+
+
+\section gsd_mynn_edmf_nml  GSD MYNN-EDMF Namelist Option 
+
+\param bl_mynn_mixlength  0: Original form from Nakanishi and Niino (2009) \cite NAKANISHI_2009. No scale-wareness is applied to the master mixing length, regardless of "scaleware" setting.
+\n                        1: HRRR operational form 201609-201807. Designed to work without the mass-flux scheme.Uses BouLac mixing length in free atmosphere. This helps remove excessively large mixing in unstable layers aloft. Scale-awareness in dx is available via "scaleaware" setting.
+\n                        2: HRRR operational form 201807-present. Designed to be compatible with mass-flux scheme activated (default). as in (1), but \e elb is lengthened using separate cloud mixing length functions for statistically stable and unstable regimes. This 
+\e elb adjustment is only possible for nonzero cloud fractions, such that cloud-free cells are treated as in (1), but BouLac calculation is used more sparingly when \e elb > 500 m. This is to reduce the computational expense that comes with the BouLac calculation. Also,
+This option is scale-aware in dx if "scaleaware" =1. (Following Ito et al. 2015 \cite Ito_2015)
+
+\param bl_mynn_cloudpdf   0: Use Sommeria-Deardorff \cite Sommeria_1977  subgrid cloud PDF
+\n                        1: Use Kuwano-Yoshida \cite Kuwano_Yoshida_2010 subgrid cloud PDF
+\n                        2: Use modified Chaboureau-Bechtold \cite Chaboureau_2002 \cite Chaboureau_2005 subgrid cloud PDF (default)
+
+\param bl_mynn_edmf       0: Deactivate mass-flux scheme
+\n                        1: Activate dynamic multiplume mass-flux scheme (default)
+
+\param bl_mynn_edmf_mom   0: Deactivate momentum transport in mass-flux scheme (default)
+\n                        1: Activate  momentum tranport in dynamic multiplume mass-flux scheme. \c bl_mynn_edmf must be set to 1.
+
+\param bl_mynn_edmf_tke   0: Deactivate TKE transport in mass-flux scheme (default)
+\n                        1: Activate TKE transport in dynamic multiplume mass-flux scheme. \c bl_mynn_edmf must be set to 1.
+
+\param bl_mynn_cloudmix   0: Deactivate the mixing of any water species mixing ratios
+\n                        1: Activate the mixing of all water species mixing ratios (default)
+
+\param bl_mynn_mixqt      0: Mix individual water species separately (default)
+\n                        1: DO NOT USE
+
+\param bl_mynn_tkeadvect  False: Deactivate TKE advection (default)
+\n                        True: Activate TKE advection
+
+\param grav_settling      0: Deactivate gravitational settling of fog (default)
+\n                        1: Activate gravitational settling of fog. Do not use this option if cloud-droplet settling is handled within the microphysics scheme
+
+\param icloud_bl          0: Deactivate coupling of subgrid clouds to radiation
+\n                        1: Activate subgrid cloud coupling to radiation (highly suggested)
+
+*/

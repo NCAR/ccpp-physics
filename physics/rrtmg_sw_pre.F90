@@ -12,24 +12,7 @@
       end subroutine rrtmg_sw_pre_init
 
 !> \section arg_table_rrtmg_sw_pre_run Argument Table
-!! | local_name     | standard_name                             | long_name                                                          | units    | rank |  type            |   kind    | intent | optional |
-!! |----------------|-------------------------------------------|--------------------------------------------------------------------|----------|------|------------------|-----------|--------|----------|
-!! | Model          | GFS_control_type_instance                 | Fortran DDT containing FV3-GFS model control parameters            | DDT      |    0 | GFS_control_type |           | in     | F        |
-!! | Grid           | GFS_grid_type_instance                    | Fortran DDT containing FV3-GFS grid and interpolation related data | DDT      |    0 | GFS_grid_type    |           | in     | F        |
-!! | Sfcprop        | GFS_sfcprop_type_instance                 | Fortran DDT containing FV3-GFS surface fields                      | DDT      |    0 | GFS_sfcprop_type |           | in     | F        |
-!! | Radtend        | GFS_radtend_type_instance                 | Fortran DDT containing FV3-GFS radiation tendencies                | DDT      |    0 | GFS_radtend_type |           | inout  | F        |
-!! | im             | horizontal_loop_extent                    | horizontal loop extent                                             | count    |    0 | integer          |           | in     | F        |
-!! | nday           | daytime_points_dimension                  | daytime points dimension                                           | count    |    0 | integer          |           | out    | F        |
-!! | idxday         | daytime_points                            | daytime points                                                     | index    |    1 | integer          |           | out    | F        |
-!! | tsfg           | surface_ground_temperature_for_radiation  | surface ground temperature for radiation                           | K        |    1 | real             | kind_phys | in     | F        |
-!! | tsfa           | surface_air_temperature_for_radiation     | lowest model layer air temperature for radiation                   | K        |    1 | real             | kind_phys | in     | F        |
-!! | sfcalb1        | surface_albedo_due_to_near_IR_direct      | surface albedo due to near IR direct beam                          | frac     |    1 | real             | kind_phys | out    | F        |
-!! | sfcalb2        | surface_albedo_due_to_near_IR_diffused    | surface albedo due to near IR diffused beam                        | frac     |    1 | real             | kind_phys | out    | F        |
-!! | sfcalb3        | surface_albedo_due_to_UV_and_VIS_direct   | surface albedo due to UV+VIS direct beam                           | frac     |    1 | real             | kind_phys | out    | F        |
-!! | sfcalb4        | surface_albedo_due_to_UV_and_VIS_diffused | surface albedo due to UV+VIS diffused beam                         | frac     |    1 | real             | kind_phys | out    | F        |
-!! | alb1d          | surface_albedo_perturbation               | surface albedo perturbation                                        | frac     |    1 | real             | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                        | error message for error handling in CCPP                           | none     |    0 | character        | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                           | error flag for error handling in CCPP                              | flag     |    0 | integer          |           | out    | F        |
+!! \htmlinclude rrtmg_sw_pre_run.html
 !!
       subroutine rrtmg_sw_pre_run (Model, Grid, Sfcprop, Radtend, im, &
         nday, idxday, tsfg, tsfa, sfcalb1, sfcalb2, sfcalb3, sfcalb4, &
@@ -83,13 +66,13 @@
 !>  - Call module_radiation_surface::setalb() to setup surface albedo.
 !!  for SW radiation.
 
-        call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,&    !  ---  inputs:
-                     Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,&
-                     tsfg, tsfa, Sfcprop%hprim, Sfcprop%alvsf,    &
-                     Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, &
-                     Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,  &
-                     Sfcprop%tisfc, IM,                           &
-                     alb1d, Model%pertalb,                        &    !  mg, sfc-perts
+        call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr,   &  !  ---  inputs:
+                     Sfcprop%snoalb, Sfcprop%zorl, Radtend%coszen,   &
+                     tsfg, tsfa, Sfcprop%hprime(:,1), Sfcprop%alvsf, &
+                     Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf,    &
+                     Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,     &
+                     Sfcprop%tisfc, IM,                              &
+                     alb1d, Model%pertalb,                           &  !  mg, sfc-perts
                      sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.

@@ -23,36 +23,13 @@
        end subroutine zhaocarr_gscond_finalize
 
 !> \defgroup condense GFS gscond Main
-!! \brief This subroutine computes grid-scale condensation and evaporation of
+!> @{
+!!  This subroutine computes grid-scale condensation and evaporation of
 !! cloud condensate.
 !!
 #if 0
-!! \section arg_table_zhaocarr_gscond_run Argument Table
-!! | local_name     | standard_name                                                  | long_name                                                                                                               | units   | rank |  type     |   kind    | intent | optional |
-!! |----------------|----------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                         | horizontal loop extent                                                                                                  | count   |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                           | horizontal dimension                                                                                                    | count   |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                             | vertical layer dimension                                                                                                | count   |    0 | integer   |           | in     | F        |
-!! | dt             | time_step_for_physics                                          | physics time step                                                                                                       | s       |    0 | real      | kind_phys | in     | F        |
-!! | dtf            | time_step_for_dynamics                                         | dynamics time step                                                                                                      | s       |    0 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                   | layer mean air pressure                                                                                                 | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | ps             | surface_air_pressure                                           | surface pressure                                                                                                        | Pa      |    1 | real      | kind_phys | in     | F        |
-!! | q              | water_vapor_specific_humidity_updated_by_physics               | water vapor specific humidity                                                                                           | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | clw1           | ice_water_mixing_ratio_convective_transport_tracer             | moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array                | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | clw2           | cloud_condensed_water_mixing_ratio_convective_transport_tracer | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) in the convectively transported tracer array | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics          | moist cloud condensed water mixing ratio                                                                                | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | t              | air_temperature_updated_by_physics                             | layer mean air temperature                                                                                              | K       |    2 | real      | kind_phys | inout  | F        |
-!! | tp             | air_temperature_two_time_steps_back                            | air temperature two time steps back                                                                                     | K       |    2 | real      | kind_phys | inout  | F        |
-!! | qp             | water_vapor_specific_humidity_two_time_steps_back              | water vapor specific humidity two time steps back                                                                       | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | psp            | surface_air_pressure_two_time_steps_back                       | surface air pressure two time steps back                                                                                | Pa      |    1 | real      | kind_phys | inout  | F        |
-!! | tp1            | air_temperature_at_previous_time_step                          | air temperature at previous time step                                                                                   | K       |    2 | real      | kind_phys | inout  | F        |
-!! | qp1            | water_vapor_specific_humidity_at_previous_time_step            | water vapor specific humidity at previous time step                                                                     | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | psp1           | surface_air_pressure_at_previous_time_step                     | surface air surface pressure at previous time step                                                                      | Pa      |    1 | real      | kind_phys | inout  | F        |
-!! | u              | critical_relative_humidity                                     | critical relative humidity                                                                                              | frac    |    2 | real      | kind_phys | in     | F        |
-!! | lprnt          | flag_print                                                     | flag for printing diagnostics to output                                                                                 | flag    |    0 | logical   |           | in     | F        |
-!! | ipr            | horizontal_index_of_printed_column                             | horizontal index of printed column                                                                                      | index   |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                             | error message for error handling in CCPP                                                                                | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                | error flag for error handling in CCPP                                                                                   | flag    |    0 | integer   |           | out    | F        |
+!> \section arg_table_zhaocarr_gscond_run Argument Table
+!! \htmlinclude zhaocarr_gscond_run.html
 !!
 #endif
 !> \section general_gscond GFS gscond Scheme General Algorithm
@@ -521,6 +498,5 @@
       return
       end subroutine zhaocarr_gscond_run
 !> @}
-! @}
-! @}
+!> @}
       end module zhaocarr_gscond

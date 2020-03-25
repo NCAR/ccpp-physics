@@ -1,6 +1,9 @@
 !> \file gfdl_cloud_microphys.F90
-!! This file contains the column GFDL cloud microphysics ( Chen and Lin (2013)
-!! \cite chen_and_lin_2013 ).
+!! This file contains the full GFDL cloud microphysics (Chen and Lin (2013)
+!! \cite chen_and_lin_2013 and Zhou et al. 2019 \cite zhou2019toward).
+!! The module is paired with 'gfdl_fv_sat_adj', which performs the "fast"
+!! processes
+!>author Shian-Jiann Lin, Linjiong Zhou
 !***********************************************************************
 !*                   GNU Lesser General Public License
 !*
@@ -22,7 +25,9 @@
 !* If not, see <http://www.gnu.org/licenses/>.
 !***********************************************************************
 ! =======================================================================
-!> This module contains the CCPP-compliant GFDL Cloud microphysics scheme.
+!>\defgroup mod_gfdl_cloud_mp GFDL Cloud MP modules
+!!\ingroup gfdlmp
+!! This module contains the column GFDL Cloud microphysics scheme.
 module gfdl_cloud_microphys_mod
 
     ! use mpp_mod, only: stdlog, mpp_pe, mpp_root_pe, mpp_clock_id, &
@@ -283,6 +288,18 @@ module gfdl_cloud_microphys_mod
 
    real :: log_10, tice0, t_wfr
 
+    integer :: reiflag = 1
+    ! 1: Heymsfield and Mcfarquhar, 1996
+    ! 2: Wyser, 1998
+     
+    logical :: tintqs = .false. !< use temperature in the saturation mixing in PDF 
+
+    real :: rewmin = 5.0, rewmax = 10.0
+    real :: reimin = 10.0, reimax = 150.0
+    real :: rermin = 10.0, rermax = 10000.0
+    real :: resmin = 150.0, resmax = 10000.0
+    real :: regmin = 300.0, regmax = 10000.0
+    
    ! -----------------------------------------------------------------------
    ! namelist
    ! -----------------------------------------------------------------------
@@ -297,7 +314,9 @@ module gfdl_cloud_microphys_mod
        tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
        z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
        rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f, mp_print
+       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
+       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
+       resmin, resmax, regmin, regmax, tintqs
 
    public                                                                    &
        mp_time, t_min, t_sub, tau_r2g, tau_smlt, tau_g2r, dw_land, dw_ocean, &
@@ -309,7 +328,9 @@ module gfdl_cloud_microphys_mod
        tau_i2s, tau_l2r, qi_lim, ql_gen, c_paut, c_psaci, c_pgacs,           &
        z_slope_liq, z_slope_ice, prog_ccn, c_cracw, alin, clin, tice,        &
        rad_snow, rad_graupel, rad_rain, cld_min, use_ppm, mono_prof,         &
-       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f, mp_print
+       do_sedi_heat, sedi_transport, do_sedi_w, de_ice, icloud_f, irain_f,   &
+       mp_print, reiflag, rewmin, rewmax, reimin, reimax, rermin, rermax,    &
+       resmin, resmax, regmin, regmax, tintqs 
 
 contains
 
@@ -317,14 +338,15 @@ contains
 ! the driver of the gfdl cloud microphysics
 ! -----------------------------------------------------------------------
 
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
+!! This subroutine is the driver of the GFDL cloud microphysics
 subroutine gfdl_cloud_microphys_mod_driver (                                    &
             iis, iie, jjs, jje, kks, kke, ktop, kbot,                           &
             qv, ql, qr, qi, qs, qg, qa, qn,                                     &
             qv_dt, ql_dt, qr_dt, qi_dt, qs_dt, qg_dt, qa_dt, pt_dt, pt, w,      &
             uin, vin, udt, vdt, dz, delp, area, dt_in, land,                    &
             rain, snow, ice, graupel, hydrostatic, phys_hydrostatic,            &
-            p, lradar, refl_10cm, kdt, nsteps_per_reset)
+            p, lradar, refl_10cm,reset)
 
    implicit none
 
@@ -354,7 +376,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
    real, intent (in), dimension (iis:iie, jjs:jje, kks:kke) :: p
    logical, intent (in) :: lradar
    real, intent (out), dimension (iis:iie, jjs:jje, kks:kke) :: refl_10cm
-   integer, intent (in) :: kdt, nsteps_per_reset
+   logical, intent (in) :: reset
 
    ! Local variables
    logical :: melti = .false.
@@ -592,7 +614,7 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
    ! call mpp_clock_end (gfdl_mp_clock)
     if(lradar) then
        ! Only set melti to true at the output times
-       if(mod(kdt,nsteps_per_reset)==0)then
+       if (reset) then
          melti=.true.
        else
          melti=.false.
@@ -621,13 +643,13 @@ subroutine gfdl_cloud_microphys_mod_driver (                                    
 end subroutine gfdl_cloud_microphys_mod_driver
 
 ! -----------------------------------------------------------------------
-!>@brief GFDL cloud microphysics, major program, and is based on
+!>\ingroup mod_gfdl_cloud_mp
+!>\brief GFDL cloud microphysics, major program, and is based on
 !!  Lin et al.(1983) \cite lin_et_al_1983 and
 !! Rutledge and Hobbs (1984) \cite rutledge_and_hobbs_1984.
 !!
 !>\section detmpdrv GFDL Cloud mpdrv General Algorithm
-!! @{
-!>\ingroup gfdlmp
+!> @{
 subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         qg, qa, qn, dz, is, ie, js, je, ks, ke, ktop, kbot, j, dt_in, ntimes, &
         rain, snow, graupel, ice, m2_rain, m2_sol, cond, area1, land,         &
@@ -684,7 +706,16 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     ! -----------------------------------------------------------------------
     ! use local variables
     ! -----------------------------------------------------------------------
-
+    
+    !GJF: assign values to intent(out) variables that are commented out
+    w_var = 0.0
+    vt_r = 0.0
+    vt_s = 0.0
+    vt_g = 0.0
+    vt_i = 0.0
+    qn2 = 0.0
+    !GJF
+    
     do i = is, ie
 
         do k = ktop, kbot
@@ -855,8 +886,8 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
         if (fix_negative) &
             call neg_adj (ktop, kbot, tz, dp1, qvz, qlz, qrz, qiz, qsz, qgz)
 
-        m2_rain (:, :) = 0.
-        m2_sol (:, :) = 0.
+        m2_rain (i, :) = 0.
+        m2_sol (i, :) = 0.
 
         !> - Do loop on cloud microphysics sub time step.
         do n = 1, ntimes
@@ -941,6 +972,10 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
                 denfac, vtsz, vtgz, vtrz, qaz, rh_adj, rh_rain, dts, h_var)
 
         enddo
+
+        ! convert units from Pa*kg/kg to kg/m^2/s
+        m2_rain (i, :) = m2_rain (i, :) * rdt * rgrav
+        m2_sol (i, :) = m2_sol (i, :) * rdt * rgrav
 
         ! -----------------------------------------------------------------------
         !> - Calculate momentum transportation during sedimentation.
@@ -1034,10 +1069,10 @@ subroutine mpdrv (hydrostatic, uin, vin, w, delp, pt, qv, ql, qr, qi, qs,     &
     enddo
 
 end subroutine mpdrv
-!! @}
+!> @}
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>\brief This subroutine calculates sedimentation of heat.
 subroutine sedi_heat (ktop, kbot, dm, m1, dz, tz, qv, ql, qr, qi, qs, qg, cw)
 
@@ -1091,12 +1126,10 @@ subroutine sedi_heat (ktop, kbot, dm, m1, dz, tz, qv, ql, qr, qi, qs, qg, cw)
 end subroutine sedi_heat
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !> This subroutine includes warm rain cloud microphysics.
 !>\section warm_gen GFDL Cloud warm_rain General Algorithm
-!! @{
-! -----------------------------------------------------------------------
-
+!> @{
 subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
         den, denfac, ccn, c_praut, rh_rain, vtr, r1, m1_rain, w1, h_var)
 
@@ -1312,15 +1345,13 @@ subroutine warm_rain (dt, ktop, kbot, dp, dz, tz, qv, ql, qr, qi, qs, qg, &
     endif
 
 end subroutine warm_rain
-!! @}
+!> @}
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !> This subroutine calculates evaporation of rain and accretion of rain.
 !!\section gen_ravap GFDL Cloud revap_racc General Algorithm
-!! @{
-! -----------------------------------------------------------------------
-
+!> @{
 subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, rh_rain, h_var)
 
     implicit none
@@ -1416,18 +1447,16 @@ subroutine revap_racc (ktop, kbot, dt, tz, qv, ql, qr, qi, qs, qg, den, denfac, 
     enddo
 
 end subroutine revap_racc
-!! @}
+!> @}
 
 ! -----------------------------------------------------------------------
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !> Definition of vertical subgrid variability
 !! used for cloud ice and cloud water autoconversion.
 ! qi -- > ql & ql -- > qr
 ! edges: qe == qbar + / - dm
 !>\section gen_linear GFDL cloud linear_prof General Algorithm
-!! @{
-! -----------------------------------------------------------------------
-
+!> @{
 subroutine linear_prof (km, q, dm, z_var, h_var)
 
     implicit none
@@ -1482,10 +1511,10 @@ subroutine linear_prof (km, q, dm, z_var, h_var)
     endif
 
 end subroutine linear_prof
-!! @}
+!> @}
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !> This subroutine includes cloud ice microphysics processes.
 !>\author Shian-Jiann Lin, GFDL
 !!
@@ -1494,9 +1523,7 @@ end subroutine linear_prof
 !! - processes splitting with some un-split sub-grouping
 !! - time implicit (when possible) accretion and autoconversion
 !>\section det_icloud GFDL icloud Detailed Algorithm
-!! @{
-! =======================================================================
-
+!> @{
 subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         den, denfac, vts, vtg, vtr, qak, rh_adj, rh_rain, dts, h_var)
 
@@ -1977,15 +2004,13 @@ subroutine icloud (ktop, kbot, tzk, p1, qvk, qlk, qrk, qik, qsk, qgk, dp1, &
         qlk, qrk, qik, qsk, qgk, qak, h_var, rh_rain)
 
 end subroutine icloud
-!! @}
+!> @}
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !> This subroutine calculates temperature sentive high vertical resolution processes.
 !>\section gen_subz GFDL Cloud subgrid_z_proc General Algorithm
 !! @{
-! =======================================================================
-
 subroutine subgrid_z_proc (ktop, kbot, p1, den, denfac, dts, rh_adj, tz, qv, &
     ql, qr, qi, qs, qg, qa, h_var, rh_rain)
 
@@ -2405,10 +2430,8 @@ end subroutine subgrid_z_proc
 !! @}
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !> This subroutine calculates rain evaporation.
-! =======================================================================
-
 subroutine revap_rac1 (hydrostatic, is, ie, dt, tz, qv, ql, qr, qi, qs, qg, den, hvar)
 
     implicit none
@@ -2499,11 +2522,9 @@ subroutine revap_rac1 (hydrostatic, is, ie, dt, tz, qv, ql, qr, qi, qs, qg, den,
 end subroutine revap_rac1
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>@brief The subroutine 'terminal_fall' computes terminal fall speed.
 !>@details It considers cloud ice, snow, and graupel's melting during fall.
-! =======================================================================
-
 subroutine terminal_fall (dtm, ktop, kbot, tz, qv, ql, qr, qg, qs, qi, dz, dp, &
         den, vtg, vts, vti, r1, g1, s1, i1, m1_sol, w1)
 
@@ -2813,11 +2834,9 @@ subroutine terminal_fall (dtm, ktop, kbot, tz, qv, ql, qr, qg, qs, qi, dz, dp, &
 end subroutine terminal_fall
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>@brief The subroutine 'check_column' checks
 !! if the water species is large enough to fall.
-! =======================================================================
-
 subroutine check_column (ktop, kbot, q, no_fall)
 
     implicit none
@@ -2842,12 +2861,10 @@ subroutine check_column (ktop, kbot, q, no_fall)
 end subroutine check_column
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>@brief The subroutine computes the time-implicit monotonic
 !! fall scheme.
 !>@author Shian-Jiann Lin, 2016
-! =======================================================================
-
 subroutine implicit_fall (dt, ktop, kbot, ze, vt, dp, q, precip, m1)
 
     implicit none
@@ -2914,11 +2931,9 @@ subroutine implicit_fall (dt, ktop, kbot, ze, vt, dp, q, precip, m1)
 end subroutine implicit_fall
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !! Lagrangian scheme
 !>  \author  S.J. Lin
-! =======================================================================
-
 subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
 
     implicit none
@@ -3018,7 +3033,7 @@ subroutine lagrangian_fall_ppm (ktop, kbot, zs, ze, zt, dp, q, precip, m1, mono)
 
 end subroutine lagrangian_fall_ppm
 
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 subroutine cs_profile (a4, del, km, do_mono)
 
     implicit none
@@ -3196,7 +3211,7 @@ subroutine cs_profile (a4, del, km, do_mono)
 
 end subroutine cs_profile
 
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !! This subroutine perform positive definite constraint.
 subroutine cs_limiters (km, a4)
 
@@ -3235,10 +3250,8 @@ subroutine cs_limiters (km, a4)
 end subroutine cs_limiters
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!> The subroutine calculates vertical fall speed of snow/ice/graupel.
-! =======================================================================
-
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine calculates vertical fall speed of snow/ice/graupel.
 subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
 
     implicit none
@@ -3307,7 +3320,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
             else
                 tc (k) = tk (k) - tice
                 vti (k) = (3. + log10 (qi (k) * den (k))) * (tc (k) * (aa * tc (k) + bb) + cc) + dd * tc (k) + ee
-                vti (k) = vi0 * exp (log_10 * vti (k))
+                vti (k) = vi0 * exp (log_10 * vti (k)) * 0.9
                 vti (k) = min (vi_max, max (vf_min, vti (k)))
             endif
         enddo
@@ -3350,10 +3363,8 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
 end subroutine fall_speed
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!>@brief The subroutine sets up gfdl cloud microphysics parameters.
-! =======================================================================
-
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine sets up gfdl cloud microphysics parameters.
 subroutine setupm
 
     implicit none
@@ -3500,10 +3511,9 @@ end subroutine setupm
 
 ! =======================================================================
 ! initialization of gfdl cloud microphysics
-!>@brief The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine 'gfdl_cloud_microphys_init' initializes the GFDL
 !! cloud microphysics.
-! =======================================================================
-
 subroutine gfdl_cloud_microphys_mod_init (me, master, nlunit, input_nml_file, logunit, fn_nml)
 
     implicit none
@@ -3636,10 +3646,9 @@ end subroutine gfdl_cloud_microphys_mod_init
 
 ! =======================================================================
 ! end of gfdl cloud microphysics
-!>@brief The subroutine 'gfdl_cloud_microphys_init' terminates the GFDL
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine 'gfdl_cloud_microphys_init' terminates the GFDL
 !! cloud microphysics.
-! =======================================================================
-
 subroutine gfdl_cloud_microphys_mod_end()
 
     implicit none
@@ -3659,9 +3668,8 @@ end subroutine gfdl_cloud_microphys_mod_end
 
 ! =======================================================================
 ! qsmith table initialization
-!>@brief The subroutine 'setup_con' sets up constants and calls 'qsmith_init'.
-! =======================================================================
-
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine 'setup_con' sets up constants and calls 'qsmith_init'.
 subroutine setup_con
 
     implicit none
@@ -3748,7 +3756,7 @@ end function gmlt
 ! initialization
 ! prepare saturation water vapor pressure tables
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>@brief The subroutine 'qsmith_init' initializes lookup tables for saturation
 !! water vapor pressure for the following utility routines that are designed
 !! to return qs consistent with the assumptions in FV3.
@@ -3809,11 +3817,9 @@ end subroutine qsmith_init
 
 ! =======================================================================
 ! compute the saturated specific humidity for table ii
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>@brief The function 'wqs1' returns the saturation vapor pressure over pure
 !! liquid water for a given temperature and air density.
-! =======================================================================
-
 real function wqs1 (ta, den)
 
     implicit none
@@ -4139,11 +4145,9 @@ real function es2_table (ta)
 end function es2_table
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!>@brief The subroutine 'esw_table1d' computes the saturated water vapor
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine 'esw_table1d' computes the saturated water vapor
 !! pressure for table ii.
-! =======================================================================
-
 subroutine esw_table1d (ta, es, n)
 
     implicit none
@@ -4170,11 +4174,9 @@ subroutine esw_table1d (ta, es, n)
 end subroutine esw_table1d
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!>@brief The subroutine 'es3_table1d' computes the saturated water vapor
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine 'es3_table1d' computes the saturated water vapor
 !! pressure for table iii.
-! =======================================================================
-
 subroutine es2_table1d (ta, es, n)
 
     implicit none
@@ -4201,11 +4203,9 @@ subroutine es2_table1d (ta, es, n)
 end subroutine es2_table1d
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!>@brief The subroutine 'es3_table1d' computes the saturated water vapor
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine 'es3_table1d' computes the saturated water vapor
 !! pressure for table iv.
-! =======================================================================
-
 subroutine es3_table1d (ta, es, n)
 
     implicit none
@@ -4232,11 +4232,9 @@ subroutine es3_table1d (ta, es, n)
 end subroutine es3_table1d
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!>@brief saturation water vapor pressure table ii
+!>\ingroup mod_gfdl_cloud_mp
+!! saturation water vapor pressure table ii
 ! 1 - phase table
-! =======================================================================
-
 subroutine qs_tablew (n)
 
     implicit none
@@ -4265,11 +4263,9 @@ subroutine qs_tablew (n)
 end subroutine qs_tablew
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>@brief saturation water vapor pressure table iii
 ! 2 - phase table
-! =======================================================================
-
 subroutine qs_table2 (n)
 
     implicit none
@@ -4316,11 +4312,9 @@ subroutine qs_table2 (n)
 end subroutine qs_table2
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!>@brief saturation water vapor pressure table iv
+!>\ingroup mod_gfdl_cloud_mp
+!! saturation water vapor pressure table iv
 ! 2 - phase table with " - 2 c" as the transition point
-! =======================================================================
-
 subroutine qs_table3 (n)
 
     implicit none
@@ -4381,11 +4375,9 @@ end subroutine qs_table3
 ! =======================================================================
 ! compute the saturated specific humidity for table
 ! note: this routine is based on "moist" mixing ratio
-!>\ingroup gfdlmp
-!>@brief The function 'qs_blend' computes the saturated specific humidity
+!>\ingroup mod_gfdl_cloud_mp
+!! The function 'qs_blend' computes the saturated specific humidity
 !! with a blend of water and ice depending on the temperature.
-! =======================================================================
-
 real function qs_blend (t, p, q)
 
     implicit none
@@ -4406,11 +4398,9 @@ real function qs_blend (t, p, q)
 end function qs_blend
 
 ! =======================================================================
-!>\ingroup gfdlmp
-!>@brief saturation water vapor pressure table i
+!>\ingroup mod_gfdl_cloud_mp
+!! saturation water vapor pressure table i
 ! 3 - phase table
-! =======================================================================
-
 subroutine qs_table (n)
 
     implicit none
@@ -4471,12 +4461,10 @@ end subroutine qs_table
 ! =======================================================================
 ! compute the saturated specific humidity and the gradient of saturated specific humidity
 ! input t in deg k, p in pa; p = rho rdry tv, moist pressure
-!>\ingroup gfdlmp
-!>@brief The function 'qsmith' computes the saturated specific humidity
+!>\ingroup mod_gfdl_cloud_mp
+!! The function 'qsmith' computes the saturated specific humidity
 !! with a blend of water and ice depending on the temperature in 3D.
 !@details It als oincludes the option for computing des/dT.
-! =======================================================================
-
 subroutine qsmith (im, km, ks, t, p, q, qs, dqdt)
 
     implicit none
@@ -4526,11 +4514,9 @@ subroutine qsmith (im, km, ks, t, p, q, qs, dqdt)
 end subroutine qsmith
 
 ! =======================================================================
-!>\ingroup gfdlmp
+!>\ingroup mod_gfdl_cloud_mp
 !>@brief The subroutine 'neg_adj' fixes negative water species.
 !>@details This is designed for 6-class micro-physics schemes.
-! =======================================================================
-
 subroutine neg_adj (ktop, kbot, pt, dp, qv, ql, qr, qi, qs, qg)
 
     implicit none
@@ -4668,10 +4654,8 @@ end subroutine neg_adj
 !end function g_sum
 
 ! ==========================================================================
-!>\ingroup gfdlmp
-!>@brief The subroutine 'interpolate_z' interpolates to a prescribed height.
-! ==========================================================================
-
+!>\ingroup mod_gfdl_cloud_mp
+!! The subroutine 'interpolate_z' interpolates to a prescribed height.
 subroutine interpolate_z (is, ie, js, je, km, zl, hgt, a3, a2)
 
     implicit none
@@ -4715,132 +4699,144 @@ subroutine interpolate_z (is, ie, js, je, km, zl, hgt, a3, a2)
 end subroutine interpolate_z
 
 ! =======================================================================
-!> \ingroup gfdlmp
-!>@brief The subroutine 'cloud_diagnosis' diagnoses the radius of cloud
+!> \ingroup mod_gfdl_cloud_mp
+!! The subroutine 'cloud_diagnosis' diagnoses the radius of cloud
 !! species.
+!>author Linjiong Zhoum, Shian-Jiann Lin
 ! =======================================================================
-
-subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
+subroutine cloud_diagnosis (is, ie, ks, ke, den, delp, lsm, qmw, qmi, qmr, qms, qmg, t, &
         rew, rei, rer, res, reg)
-!       qcw, qci, qcr, qcs, qcg, rew, rei, rer, res, reg)
 
     implicit none
 
-    integer, intent (in) :: is, ie, js, je
+    integer, intent (in) :: is, ie, ks, ke
+    integer, intent (in), dimension (is:ie) :: lsm ! land sea mask, 0: ocean, 1: land, 2: sea ice
 
-    real, intent (in), dimension (is:ie, js:je) :: den, t
-    real, intent (in), dimension (is:ie, js:je) :: qw, qi, qr, qs, qg       ! units: kg / kg
+    real, intent (in), dimension (is:ie, ks:ke) :: den, delp, t
+    real, intent (in), dimension (is:ie, ks:ke) :: qmw, qmi, qmr, qms, qmg !< units: kg / kg
 
-!   real, intent (out), dimension (is:ie, js:je) :: qcw, qci, qcr, qcs, qcg ! units: kg / m^3
-    real, dimension (is:ie, js:je) :: qcw, qci, qcr, qcs, qcg               ! units: kg / m^3
-    real, intent (out), dimension (is:ie, js:je) :: rew, rei, rer, res, reg ! units: micron
+    real, intent (out), dimension (is:ie, ks:ke) :: rew, rei, rer, res, reg !< units: micron
 
-    integer :: i, j
+    real, dimension (is:ie, ks:ke) :: qcw, qci, qcr, qcs, qcg !< units: g / m^2
+    
+    integer :: i, k
 
     real :: lambdar, lambdas, lambdag
+    real :: dpg, rei_fac, mask, ccn, bw
+    real, parameter :: rho_0 = 50.e-3
 
     real :: rhow = 1.0e3, rhor = 1.0e3, rhos = 1.0e2, rhog = 4.0e2
     real :: n0r = 8.0e6, n0s = 3.0e6, n0g = 4.0e6
     real :: alphar = 0.8, alphas = 0.25, alphag = 0.5
     real :: gammar = 17.837789, gammas = 8.2850630, gammag = 11.631769
-!   real :: qmin = 1.0e-5, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 5.0e-6, ccn = 1.0e8, beta = 1.22
-    real :: qmin = 9.0e-6, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 1.0e-6, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 1.0e-8, ccn = 1.0e8, beta = 1.22
-!   real :: qmin = 1.0e-12, ccn = 1.0e8, beta = 1.22
+    real :: qmin = 1.0e-12, beta = 1.22, qmin1 = 9.e-6
 
-    ! real :: rewmin = 1.0, rewmax = 25.0
-    ! real :: reimin = 10.0, reimax = 300.0
-    ! real :: rermin = 25.0, rermax = 225.0
-    ! real :: resmin = 300, resmax = 1000.0
-    ! real :: regmin = 1000.0, regmax = 1.0e5
-    real :: rewmin = 5.0, rewmax = 10.0
-    real :: reimin = 10.0, reimax = 150.0
-!   real :: rermin = 0.0, rermax = 10000.0
-!   real :: resmin = 0.0, resmax = 10000.0
-!   real :: regmin = 0.0, regmax = 10000.0
-    real :: rermin = 50.0, rermax = 10000.0
-    real :: resmin = 100.0, resmax = 10000.0
-    real :: regmin = 300.0, regmax = 10000.0
-
-    do j = js, je
+    do k = ks, ke
         do i = is, ie
+            
+            dpg = abs (delp (i, k)) / grav
+            mask = min (max (real(lsm (i)), 0.0), 2.0)
 
             ! -----------------------------------------------------------------------
-            ! cloud water (martin et al., 1994)
+            ! cloud water (Martin et al., 1994)
             ! -----------------------------------------------------------------------
 
-            if (qw (i, j) .gt. qmin) then
-                qcw (i, j) = den (i, j) * qw (i, j)
-                rew (i, j) = exp (1.0 / 3.0 * log ((3 * qcw (i, j)) / (4 * pi * rhow * ccn))) * 1.0e6
-                rew (i, j) = max (rewmin, min (rewmax, rew (i, j)))
+            ccn = 0.80 * (- 1.15e-3 * (ccn_o ** 2) + 0.963 * ccn_o + 5.30) * abs (mask - 1.0) + &
+                0.67 * (- 2.10e-4 * (ccn_l ** 2) + 0.568 * ccn_l - 27.9) * (1.0 - abs (mask - 1.0))
+
+            if (qmw (i, k) .gt. qmin) then
+                qcw (i, k) = dpg * qmw (i, k) * 1.0e3
+                rew (i, k) = exp (1.0 / 3.0 * log ((3.0 * den (i, k) * qmw (i, k)) / (4.0 * pi * rhow * ccn))) * 1.0e4
+                rew (i, k) = max (rewmin, min (rewmax, rew (i, k)))
             else
-                qcw (i, j) = 0.0
-                rew (i, j) = rewmin
+                qcw (i, k) = 0.0
+                rew (i, k) = rewmin
             endif
+            
+            if (reiflag .eq. 1) then
 
             ! -----------------------------------------------------------------------
-            ! cloud ice (heymsfield and mcfarquhar, 1996)
+                ! cloud ice (Heymsfield and Mcfarquhar, 1996)
             ! -----------------------------------------------------------------------
 
-            if (qi (i, j) .gt. qmin) then
-                qci (i, j) = den (i, j) * qi (i, j)
-                if (t (i, j) - tice .lt. - 50) then
-                    rei (i, j) = beta / 9.917 * exp ((1 - 0.891) * log (1.0e3 * qci (i, j))) * 1.0e3
-                elseif (t (i, j) - tice .lt. - 40) then
-                    rei (i, j) = beta / 9.337 * exp ((1 - 0.920) * log (1.0e3 * qci (i, j))) * 1.0e3
-                elseif (t (i, j) - tice .lt. - 30) then
-                    rei (i, j) = beta / 9.208 * exp ((1 - 0.945) * log (1.0e3 * qci (i, j))) * 1.0e3
+                if (qmi (i, k) .gt. qmin1) then
+                    qci (i, k) = dpg * qmi (i, k) * 1.0e3
+                    rei_fac = log (1.0e3 * qmi (i, k) * den (i, k))
+                    if (t (i, k) - tice .lt. - 50) then
+                        rei (i, k) = beta / 9.917 * exp (0.109 * rei_fac) * 1.0e3
+                    elseif (t (i, k) - tice .lt. - 40) then
+                        rei (i, k) = beta / 9.337 * exp (0.080 * rei_fac) * 1.0e3
+                    elseif (t (i, k) - tice .lt. - 30) then
+                        rei (i, k) = beta / 9.208 * exp (0.055 * rei_fac) * 1.0e3
                 else
-                    rei (i, j) = beta / 9.387 * exp ((1 - 0.969) * log (1.0e3 * qci (i, j))) * 1.0e3
+                        rei (i, k) = beta / 9.387 * exp (0.031 * rei_fac) * 1.0e3
                 endif
-                rei (i, j) = max (reimin, min (reimax, rei (i, j)))
+                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
             else
-                qci (i, j) = 0.0
-                rei (i, j) = reimin
+                    qci (i, k) = 0.0
+                    rei (i, k) = reimin
+            endif
+
+            endif
+            
+            if (reiflag .eq. 2) then
+
+            ! -----------------------------------------------------------------------
+                ! cloud ice (Wyser, 1998)
+            ! -----------------------------------------------------------------------
+
+                if (qmi (i, k) .gt. qmin1) then
+                    qci (i, k) = dpg * qmi (i, k) * 1.0e3
+                    bw = - 2. + 1.e-3 * log10 (den (i, k) * qmi (i, k) / rho_0) * max (0.0, tice - t (i, k)) ** 1.5
+                    rei (i, k) = 377.4 + bw * (203.3 + bw * (37.91 + 2.3696 * bw))
+                    rei (i, k) = max (reimin, min (reimax, rei (i, k)))
+            else
+                    qci (i, k) = 0.0
+                    rei (i, k) = reimin
+                endif
+
             endif
 
             ! -----------------------------------------------------------------------
-            ! rain (lin et al., 1983)
+            ! rain (Lin et al., 1983)
             ! -----------------------------------------------------------------------
 
-            if (qr (i, j) .gt. qmin) then
-                qcr (i, j) = den (i, j) * qr (i, j)
-                lambdar = exp (0.25 * log (pi * rhor * n0r / qcr (i, j)))
-                rer (i, j) = 0.5 * exp (log (gammar / 6) / alphar) / lambdar * 1.0e6
-                rer (i, j) = max (rermin, min (rermax, rer (i, j)))
+            if (qmr (i, k) .gt. qmin) then
+                qcr (i, k) = dpg * qmr (i, k) * 1.0e3
+                lambdar = exp (0.25 * log (pi * rhor * n0r / qmr (i, k) / den (i, k)))
+                rer (i, k) = 0.5 * exp (log (gammar / 6) / alphar) / lambdar * 1.0e6
+                rer (i, k) = max (rermin, min (rermax, rer (i, k)))
             else
-                qcr (i, j) = 0.0
-                rer (i, j) = rermin
+                qcr (i, k) = 0.0
+                rer (i, k) = rermin
             endif
 
             ! -----------------------------------------------------------------------
-            ! snow (lin et al., 1983)
+            ! snow (Lin et al., 1983)
             ! -----------------------------------------------------------------------
 
-            if (qs (i, j) .gt. qmin) then
-                qcs (i, j) = den (i, j) * qs (i, j)
-                lambdas = exp (0.25 * log (pi * rhos * n0s / qcs (i, j)))
-                res (i, j) = 0.5 * exp (log (gammas / 6) / alphas) / lambdas * 1.0e6
-                res (i, j) = max (resmin, min (resmax, res (i, j)))
+            if (qms (i, k) .gt. qmin1) then
+                qcs (i, k) = dpg * qms (i, k) * 1.0e3
+                lambdas = exp (0.25 * log (pi * rhos * n0s / qms (i, k) / den (i, k)))
+                res (i, k) = 0.5 * exp (log (gammas / 6) / alphas) / lambdas * 1.0e6
+                res (i, k) = max (resmin, min (resmax, res (i, k)))
             else
-                qcs (i, j) = 0.0
-                res (i, j) = resmin
+                qcs (i, k) = 0.0
+                res (i, k) = resmin
             endif
-
+            
             ! -----------------------------------------------------------------------
-            ! graupel (lin et al., 1983)
+            ! graupel (Lin et al., 1983)
             ! -----------------------------------------------------------------------
-
-            if (qg (i, j) .gt. qmin) then
-                qcg (i, j) = den (i, j) * qg (i, j)
-                lambdag = exp (0.25 * log (pi * rhog * n0g / qcg (i, j)))
-                reg (i, j) = 0.5 * exp (log (gammag / 6) / alphag) / lambdag * 1.0e6
-                reg (i, j) = max (regmin, min (regmax, reg (i, j)))
+            
+            if (qmg (i, k) .gt. qmin) then
+                qcg (i, k) = dpg * qmg (i, k) * 1.0e3
+                lambdag = exp (0.25 * log (pi * rhog * n0g / qmg (i, k) / den (i, k)))
+                reg (i, k) = 0.5 * exp (log (gammag / 6) / alphag) / lambdag * 1.0e6
+                reg (i, k) = max (regmin, min (regmax, reg (i, k)))
             else
-                qcg (i, j) = 0.0
-                reg (i, j) = regmin
+                qcg (i, k) = 0.0
+                reg (i, k) = regmin
             endif
 
         enddo
@@ -4849,7 +4845,8 @@ subroutine cloud_diagnosis (is, ie, js, je, den, qw, qi, qr, qs, qg, t, &
 end subroutine cloud_diagnosis
 
 !+---+-----------------------------------------------------------------+
-
+!>\ingroup mod_gfdl_cloud_mp
+!! This subroutine calculates radar reflectivity.
       subroutine refl10cm_gfdl (qv1d, qr1d, qs1d, qg1d,                 &
                        t1d, p1d, dBZ, kts, kte, ii, jj, melti)
 
@@ -5020,4 +5017,3 @@ end subroutine cloud_diagnosis
 !! @}
 
 end module gfdl_cloud_microphys_mod
-!!@}

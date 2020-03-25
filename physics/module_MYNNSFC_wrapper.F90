@@ -11,75 +11,11 @@
       subroutine mynnsfc_wrapper_finalize ()
       end subroutine mynnsfc_wrapper_finalize
 
-!!
-!> \brief This scheme (1) performs pre-mynnsfc work, (20 runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
+!>\defgroup gsd_mynn_sfc GSD MYNN Surface Layer Scheme Module
+!> \brief This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
 #if 0
 !! \section arg_table_mynnsfc_wrapper_run Argument Table
-!! | local_name          | standard_name                                                               | long_name                                             | units         | rank | type      |    kind   | intent | optional |
-!! |---------------------|-----------------------------------------------------------------------------|-------------------------------------------------------|---------------|------|-----------|-----------|--------|----------|
-!! | ix                  | horizontal_dimension                                                        | horizontal dimension                                  | count         |    0 | integer   |           | in     | F        |
-!! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                | count         |    0 | integer   |           | in     | F        |
-!! | levs                | vertical_dimension                                                          | vertical layer dimension                              | count         |    0 | integer   |           | in     | F        |
-!! | iter                | ccpp_loop_counter                                                           | loop counter for subcycling loops in CCPP             | index         |    0 | integer   |           | in     | F        |
-!! | flag_init           | flag_for_first_time_step                                                 | flag signaling first time step for time integration loop | flag          |    0 | logical   |           | in     | F        |
-!! | flag_restart        | flag_for_restart                                                            | flag for restart (warmstart) or coldstart             | flag          |    0 | logical   |           | in     | F        |
-!! | delt                | time_step_for_physics                                                       | time step for physics                                 | s             |    0 | real      | kind_phys | in     | F        |
-!! | dx                  | cell_size                                                                   | size of the grid cell                                 | m             |    1 | real      | kind_phys | in     | F        |
-!! | u                   | x_wind                                                                      | x component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | v                   | y_wind                                                                      | y component of layer wind                             | m s-1         |    2 | real      | kind_phys | in     | F        |
-!! | t3d                 | air_temperature                                                             | layer mean air temperature                            | K             |    2 | real      | kind_phys | in     | F        |
-!! | qvsh                | water_vapor_specific_humidity                                               | water vapor specific humidity                         | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | qc                  | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)   | kg kg-1   |    2 | real   | kind_phys | in     | F        |
-!! | prsl                | air_pressure                                                                | mean layer pressure                                   | Pa            |    2 | real      | kind_phys | in     | F        |
-!! | phii                | geopotential_at_interface                                                   | geopotential at model layer interfaces                | m2 s-2        |    2 | real      | kind_phys | in     | F        |
-!! | exner               | dimensionless_exner_function_at_model_layers                                | Exner function at layers                              | none          |    2 | real      | kind_phys | in     | F        |
-!! | tsq                 | t_prime_squared                                                             | temperature fluctuation squared                       | K2            |    2 | real      | kind_phys | in     | F        |
-!! | qsq                 | q_prime_squared                                                             | water vapor fluctuation squared                       | kg2 kg-2      |    2 | real      | kind_phys | in     | F        |
-!! | cov                 | t_prime_q_prime                                                             | covariance of temperature and moisture                | K kg kg-1     |    2 | real      | kind_phys | in     | F        |
-!! | el_pbl              | mixing_length                                                               | mixing length in meters                               | m             |    2 | real      | kind_phys | in     | F        |
-!! | Sh3D                | stability_function_for_heat                                                 | stability function for heat                           | none          |    2 | real      | kind_phys | in     | F        |
-!! | QC_BL               | subgrid_cloud_mixing_ratio_pbl                                              | subgrid cloud cloud mixing ratio from PBL scheme      | kg kg-1       |    2 | real      | kind_phys | in     | F        |
-!! | CLDFRA_BL           | subgrid_cloud_fraction_pbl                                                  | subgrid cloud fraction from PBL scheme                | frac          |    2 | real      | kind_phys | in     | F        |
-!! | ps                  | surface_air_pressure                                                        | surface pressure                                      | Pa            |    1 | real      | kind_phys | in     | F        |
-!! | PBLH                | atmosphere_boundary_layer_thickness                                         | PBL thickness                                         | m             |    1 | real      | kind_phys | in     | F        |
-!! | slmsk               | sea_land_ice_mask_real                                                      | landmask: sea/land/ice=0/1/2                          | flag          |    1 | real      | kind_phys | in     | F        |
-!! | tsk                 | surface_skin_temperature                                                    | surface temperature                                   | K             |    1 | real      | kind_phys | in     | F        |
-!! | qsfc                | surface_specific_humidity                                                   | surface air saturation specific humidity              | kg kg-1       |    1 | real      | kind_phys | in     | F        |
-!! | snowd               | surface_snow_thickness_water_equivalent                                     | water equivalent snow depth over land                 | mm            |    1 | real      | kind_phys | in     | F        |
-!! | zorl                | surface_roughness_length                                                    | surface roughness length in cm                        | cm            |    1 | real      | kind_phys | inout  | F        |
-!! | ust                 | surface_friction_velocity                                                   | boundary layer parameter                              | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | ustm                | surface_friction_velocity_drag                                              | friction velocity isolated for momentum only          | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | zol                 | surface_stability_parameter                                                 | monin obukhov surface stability parameter             | none          |    1 | real      | kind_phys | inout  | F        |
-!! | mol                 | theta_star                                                                  | temperature flux divided by ustar (temperature scale) | K             |    1 | real      | kind_phys | inout  | F        |
-!! | rmol                | reciprocal_of_obukhov_length                                                | one over obukhov length                               | m-1           |    1 | real      | kind_phys | inout  | F        |
-!! | fm                  | Monin-Obukhov_similarity_function_for_momentum                              | Monin-Obukhov similarity parameter for momentum       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | fh                  | Monin-Obukhov_similarity_function_for_heat                                  | Monin-Obukhov similarity parameter for heat           | none          |    1 | real      | kind_phys | inout  | F        |
-!! | fm10                | Monin-Obukhov_similarity_function_for_momentum_at_10m                       | Monin-Obukhov similarity parameter for momentum       | none          |    1 | real      | kind_phys | inout  | F        |
-!! | fh2                 | Monin-Obukhov_similarity_function_for_heat_at_2m                            | Monin-Obukhov similarity parameter for heat           | none          |    1 | real      | kind_phys | inout  | F        |
-!! | wspd                | wind_speed_at_lowest_model_layer                                            | wind speed at lowest model level                      | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | br                  | bulk_richardson_number_at_lowest_model_level                                | bulk Richardson number at the surface                 | none          |    1 | real      | kind_phys | inout  | F        |
-!! | ch                  | surface_drag_wind_speed_for_momentum_in_air                                 | momentum exchange coefficient                         | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | hflx                | kinematic_surface_upward_sensible_heat_flux                                 | kinematic surface upward sensible heat flux           | K m s-1       |    1 | real      | kind_phys | inout  | F        |
-!! | QFX                 | kinematic_surface_upward_latent_heat_flux                                   | kinematic surface upward latent heat flux             | kg kg-1 m s-1 |    1 | real      | kind_phys | inout  | F        |
-!! | lh                  | surface_latent_heat                                                         | latent heating at the surface (pos = up)              | W m-2         |    1 | real      | kind_phys | inout  | F        |
-!! | flhc                | surface_exchange_coefficient_for_heat                                       | surface exchange coefficient for heat                 | W m-2 K-1     |    1 | real      | kind_phys | inout  | F        |
-!! | flqc                | surface_exchange_coefficient_for_moisture                                   | surface exchange coefficient for moisture             | kg m-2 s-1    |    1 | real      | kind_phys | inout  | F        |
-!! | u10                 | x_wind_at_10m                                                               | 10 meter u wind speed                                 | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | v10                 | y_wind_at_10m                                                               | 10 meter v wind speed                                 | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | th2                 | potential_temperature_at_2m                                                 | 2 meter potential temperature                         | K             |    1 | real      | kind_phys | inout  | F        |
-!! | t2                  | temperature_at_2m                                                           | 2 meter temperature                                   | K             |    1 | real      | kind_phys | inout  | F        |
-!! | q2                  | specific_humidity_at_2m                                                     | 2 meter specific humidity                             | kg kg-1       |    1 | real      | kind_phys | inout  | F        |
-!! | wstar               | surface_wind_enhancement_due_to_convection                                  | surface wind enhancement due to convection            | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | chs2                | surface_exchange_coefficient_for_heat_at_2m                                 | exchange coefficient for heat at 2 meters             | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | cqs2                | surface_exchange_coefficient_for_moisture_at_2m                             | exchange coefficient for moisture at 2 meters         | m s-1         |    1 | real      | kind_phys | inout  | F        |
-!! | cda                 | surface_drag_coefficient_for_momentum_in_air                                | surface exchange coeff for momentum                   | none          |    1 | real      | kind_phys | inout  | F        |
-!! | cka                 | surface_drag_coefficient_for_heat_and_moisture_in_air                       | surface exchange coeff heat & moisture                | none          |    1 | real      | kind_phys | inout  | F        |
-!! | stress              | surface_wind_stress                                                         | surface wind stress                                   | m2 s-2        |    1 | real      | kind_phys | inout  | F        |
-!! | bl_mynn_cloudpdf    | cloudpdf                                                                    | flag to determine which cloud PDF to use              | flag          |    0 | integer   |           | in     | F        |
-!! | icloud_bl           | couple_sgs_clouds_to_radiation_flag                                         | flag for coupling sgs clouds to radiation             | flag          |    0 | integer   |           | in     | F        |
-!! | lprnt               | flag_print                                                                  | control flag for diagnostic print out                 | flag          |    0 | logical   |           | none   | F        |
-!! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP              | none          |    0 | character | len=*     | out    | F        |
-!! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                 | flag          |    0 | integer   |           | out    | F        |
+!! \htmlinclude mynnsfc_wrapper_run.html
 !!
 #endif
 !###===================================================================

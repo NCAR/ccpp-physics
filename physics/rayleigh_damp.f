@@ -11,8 +11,7 @@
       subroutine rayleigh_damp_init ()
       end subroutine rayleigh_damp_init
 
-!>\defgroup rayleigh_main GFS Rayleigh Damping Main
-!! @{
+!>\defgroup rayleigh_main GFS Rayleigh Damping Module
 !!\brief This is the Rayleigh friction calculation with total energy conservation.
 !!
 !! Role of Rayleigh friction, it attempts to resolve two issues:
@@ -20,27 +19,10 @@
 !! - The winter-summer zonal wind drag in the strato-mesosphere
 !!
 !! \section arg_table_rayleigh_damp_run Argument Table
-!! | local_name     | standard_name                                        | long_name                                            | units      | rank | type      | kind      | intent | optional |
-!! |----------------|------------------------------------------------------|------------------------------------------------------|------------|------|-----------|-----------|--------|----------|
-!! | lsidea         | flag_idealized_physics                               | flag for idealized physics                           | flag       |    0 | logical   |           | in     | F        |
-!! | im             | horizontal_loop_extent                               | horizontal loop extent                               | count      |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                 | horizontal dimension                                 | count      |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                   | number of vertical layers                            | count      |    0 | integer   |           | in     | F        |
-!! | A              | tendency_of_y_wind_due_to_model_physics              | meridional wind tendency due to model physics        | m s-2      |    2 | real      | kind_phys | inout  | F        |
-!! | B              | tendency_of_x_wind_due_to_model_physics              | zonal wind tendency due to model physics             | m s-2      |    2 | real      | kind_phys | inout  | F        |
-!! | C              | tendency_of_air_temperature_due_to_model_physics     | air temperature tendency due to model physics        | K s-1      |    2 | real      | kind_phys | inout  | F        |
-!! | u1             | x_wind                                               | zonal wind                                           | m s-1      |    2 | real      | kind_phys | in     | F        |
-!! | v1             | y_wind                                               | meridional wind                                      | m s-1      |    2 | real      | kind_phys | in     | F        |
-!! | dt             | time_step_for_physics                                | physics time step                                    | s          |    0 | real      | kind_phys | in     | F        |
-!! | cp             | specific_heat_of_dry_air_at_constant_pressure        | specific heat of dry air at constant pressure        | J kg-1 K-1 |    0 | real      | kind_phys | in     | F        |
-!! | levr           | number_of_vertical_layers_for_radiation_calculations | number of vertical layers for radiation calculations | count      |    0 | integer   |           | in     | F        |
-!! | pgr            | surface_air_pressure                                 | surface pressure                                     | Pa         |    1 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                         | mid-layer pressure                                   | Pa         |    2 | real      | kind_phys | in     | F        |
-!! | prslrd0        | pressure_cutoff_for_rayleigh_damping                 | pressure level above which to apply Rayleigh damping | Pa         |    0 | real      | kind_phys | in     | F        |
-!! | ral_ts         | time_scale_for_rayleigh_damping                      | time scale for Rayleigh damping                      | d          |    0 | real      | kind_phys | in     | F        |
-!! | errmsg         | ccpp_error_message                                   | error message for error handling in CCPP             | none       |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                      | error flag for error handling in CCPP                | flag       |    0 | integer   |           | out    | F        |
+!! \htmlinclude rayleigh_damp_run.html
 !!
+!>\section gen_ray_damp_run GFS rayleigh_damp_runGeneral Algorithm
+!> @{
       subroutine rayleigh_damp_run (                                    &
      &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,                     &
      &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,errmsg,errflg)
@@ -138,7 +120,7 @@
 
       RETURN
       end subroutine rayleigh_damp_run
-!! @}
+!> @}
 
 
 !! \section arg_table_rayleigh_damp_finalize Argument Table

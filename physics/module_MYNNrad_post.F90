@@ -12,26 +12,17 @@
       subroutine mynnrad_post_finalize ()
       end subroutine mynnrad_post_finalize
 
-!!
-!> \brief This interstitial code restores the original resolved-scale clouds (qc and qi).
+!>\defgroup gsd_mynnrad_post GSD mynnrad_post_run Module
+!>\ingroup gsd_mynn_edmf
+!!  This interstitial code restores the original resolved-scale clouds (qc and qi).
 #if 0
 !! \section arg_table_mynnrad_post_run Argument Table
-!! | local_name          | standard_name                                                               | long_name                                                                  | units   | rank | type      |    kind   | intent | optional |
-!! |---------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | ix                  | horizontal_dimension                                                        | horizontal dimension                                                       | count   |    0 | integer   |           | in     | F        |
-!! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                                     | count   |    0 | integer   |           | in     | F        |
-!! | levs                | vertical_dimension                                                          | vertical layer dimension                                                   | count   |    0 | integer   |           | in     | F        |
-!! | qc                  | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | qi                  | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | qc_save             | cloud_condensed_water_mixing_ratio_save    | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | qi_save             | ice_water_mixing_ratio_save                | moist (dry+vapor, no condensates) mixing ratio of ice water before entering a physics scheme                | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP                                   | none    |    0 | character | len=*     | out    | F        |
-!! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude mynnrad_post_run.html
 !!
 #endif
-!###===================================================================
 SUBROUTINE mynnrad_post_run(               &
      &     ix,im,levs,                     &
+     &     flag_init,flag_restart,         &
      &     qc,qi,                          &
      &     qc_save, qi_save,               &
      &     errmsg, errflg                  )
@@ -44,6 +35,7 @@ SUBROUTINE mynnrad_post_run(               &
 !------------------------------------------------------------------- 
 
       integer, intent(in)  :: ix, im, levs
+      logical,          intent(in)  :: flag_init, flag_restart
       real(kind=kind_phys), dimension(im,levs), intent(out) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(in)  :: qc_save, qi_save
       character(len=*), intent(out) :: errmsg
@@ -57,6 +49,11 @@ SUBROUTINE mynnrad_post_run(               &
 
       !write(0,*)"=============================================="
       !write(0,*)"in mynn rad post"
+
+      if (flag_init .and. (.not. flag_restart)) then
+        !write (0,*) 'Skip MYNNrad_post flag_init = ', flag_init
+        return
+      endif
 
      ! Add subgrid cloud information:
         do k = 1, levs

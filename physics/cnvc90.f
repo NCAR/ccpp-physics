@@ -1,3 +1,7 @@
+!>\file cnvc90.f
+!! This file contains the calculation of fraction of convective cloud,
+!! pressure at bottom of convective cloud and at top of convective
+!! cloud.
       module cnvc90
 
       contains
@@ -8,26 +12,15 @@
       subroutine cnvc90_init()
       end subroutine cnvc90_init
 
-!! \section arg_table_cnvc90_run Argument Table
-!! | local_name     | standard_name                                                         | long_name                                               | units | rank | type      | kind      | intent | optional |
-!! |----------------|-----------------------------------------------------------------------|---------------------------------------------------------|-------|------|-----------|-----------|--------|----------|
-!! | clstp          | convective_cloud_switch                                               | switch for saving convective clouds                     | none  |    0 | real      | kind_phys | in     | F        |
-!! | im             | horizontal_loop_extent                                                | horizontal loop extent                                  | count |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                                  | horizontal dimension                                    | count |    0 | integer   |           | in     | F        |
-!! | rn             | lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep | convective rainfall amount on dynamics timestep         | m     |    1 | real      | kind_phys | in     | F        |
-!! | kbot           | vertical_index_at_cloud_base                                          | vertical index at cloud base                            | index |    1 | integer   |           | in     | F        |
-!! | ktop           | vertical_index_at_cloud_top                                           | vertical index at cloud top                             | index |    1 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                                    | number of vertical layers                               | count |    0 | integer   |           | in     | F        |
-!! | prsi           | air_pressure_at_interface                                             | interface pressure                                      | Pa    |    2 | real      | kind_phys | in     | F        |
-!! | acv            | accumulated_lwe_thickness_of_convective_precipitation_amount_cnvc90   | accumulated convective rainfall amount for cnvc90 only  | m     |    1 | real      | kind_phys | inout  | F        |
-!! | acvb           | smallest_cloud_base_vertical_index_encountered_thus_far               | smallest cloud base vertical index encountered thus far | index |    1 | real      | kind_phys | inout  | F        |
-!! | acvt           | largest_cloud_top_vertical_index_encountered_thus_far                 | largest cloud top vertical index encountered thus far   | index |    1 | real      | kind_phys | inout  | F        |
-!! | cv             | fraction_of_convective_cloud                                          | fraction of convective cloud                            | frac  |    1 | real      | kind_phys | inout  | F        |
-!! | cvb            | pressure_at_bottom_of_convective_cloud                                | pressure at bottom of convective cloud                  | Pa    |    1 | real      | kind_phys | inout  | F        |
-!! | cvt            | pressure_at_top_of_convective_cloud                                   | pressure at top of convective cloud                     | Pa    |    1 | real      | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                    | error message for error handling in CCPP                | none  |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                       | error flag for error handling in CCPP                   | flag  |    0 | integer   |           | out    | F        |
+!>\defgroup GFS_cnvc90 GFS Convective Cloud Diagnostics Module
+!> @{
+!! This module contains the calculation of fraction of convective cloud,
+!! pressure at bottom of convective cloud and at top of convective
+!! cloud.
+!> \section arg_table_cnvc90_run Argument Table
+!! \htmlinclude cnvc90_run.html
 !!
+! \section gen_cnvc_run GFS cnvc90_run General Algorithm
       SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)
 
@@ -135,6 +128,7 @@
       ENDIF
       RETURN
       END SUBROUTINE cnvc90_run
+!> @}
 
 
 !! \section arg_table_cnvc90_finalize Argument Table
@@ -144,3 +138,4 @@
 
 
       end module cnvc90
+

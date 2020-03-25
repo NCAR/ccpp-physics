@@ -1,14 +1,8 @@
       module machine
 
-#if 0
 !! \section arg_table_machine
-!! | local_name                        | standard_name             | long_name                                             | units   | rank | type      |   kind   | intent | optional |
-!! |-----------------------------------|-------------------------- |-------------------------------------------------------|---------|------|-----------|----------|--------|----------|
-!! | kind_dyn                          | kind_dyn                  | definition of kind_dyn                                | none    |    0 | integer   |          | none   | F        |
-!! | kind_grid                         | kind_grid                 | definition of kind_grid                               | none    |    0 | integer   |          | none   | F        |
-!! | kind_phys                         | kind_phys                 | definition of kind_phys                               | none    |    0 | integer   |          | none   | F        |
+!! \htmlinclude machine.html
 !!
-#endif
 
       implicit none
       
@@ -24,6 +18,7 @@
      &,                     kind_phys = 8     ,kind_taum=8              &
      &,                     kind_grid = 8                               &
      &,                     kind_REAL = 8                               &! used in cmp_comm
+     &,                     kind_LOGICAL = 4                            &
      &,                     kind_INTEGER = 4                             ! -,,-
 
 #else
@@ -38,6 +33,7 @@
      &,                     kind_phys = 4     ,kind_taum=4              &
      &,                     kind_grid = 4                               &
      &,                     kind_REAL = 4                               &! used in cmp_comm
+     &,                     kind_LOGICAL = 4                            &
      &,                     kind_INTEGER = 4                             ! -,,-
 
 #endif

@@ -8,8 +8,25 @@
       contains
 
 !> \section arg_table_ozphys_2015_init Argument Table
+!! \htmlinclude ozphys_2015_init.html
 !!
-      subroutine ozphys_2015_init()
+      subroutine ozphys_2015_init(oz_phys_2015, errmsg, errflg)
+
+      implicit none
+      logical,          intent(in)  :: oz_phys_2015
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not.oz_phys_2015) then
+        write (errmsg,'(*(a))') 'Logic error: oz_phys_2015 == .false.'
+        errflg = 1
+        return
+      endif
+
       end subroutine ozphys_2015_init
 
 ! \brief Brief description of the subroutine
@@ -20,52 +37,28 @@
       end subroutine ozphys_2015_finalize
 
 
-!>\defgroup GFS_ozphys_2015 GFS ozphys_2015 Main
-!! @{
-!! \brief The operational GFS currently parameterizes ozone production
-!and
+!>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Scheme Module
+!! \brief The operational GFS currently parameterizes ozone production and
 !! destruction based on monthly mean coefficients (
 !! \c ozprdlos_2015_new_sbuvO3_tclm15_nuchem.f77) provided by Naval
 !! Research Laboratory through CHEM2D chemistry model
 !! (McCormack et al. (2006) \cite mccormack_et_al_2006).
 !! \section arg_table_ozphys_2015_run Argument Table
-!! | local_name     | standard_name                                                            | long_name                                                                  | units   | rank | type      | kind      | intent | optional |
-!! |----------------|--------------------------------------------------------------------------|----------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                                                     | horizontal dimension                                                       | count   |    0 | integer   |           | in     | F        |
-!! | im             | horizontal_loop_extent                                                   | horizontal loop extent                                                     | count   |    0 | integer   |           | in     | F        |
-!! | levs           | vertical_dimension                                                       | number of vertical layers                                                  | count   |    0 | integer   |           | in     | F        |
-!! | ko3            | vertical_dimension_of_ozone_forcing_data                                 | number of vertical layers in ozone forcing data                            | count   |    0 | integer   |           | in     | F        |
-!! | dt             | time_step_for_physics                                                    | physics time step                                                          | s       |    0 | real      | kind_phys | in     | F        |
-!! | oz             | ozone_concentration_updated_by_physics                                   | ozone concentration updated by physics                                     | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | tin            | air_temperature_updated_by_physics                                       | updated air temperature                                                    | K       |    2 | real      | kind_phys | in     | F        |
-!! | po3            | natural_log_of_ozone_forcing_data_pressure_levels                        | natural log of ozone forcing data pressure levels                          | log(Pa) |    1 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                             | mid-layer pressure                                                         | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | prdout         | ozone_forcing                                                            | ozone forcing data                                                         | various |    3 | real      | kind_phys | in     | F        |
-!! | pl_coeff       | number_of_coefficients_in_ozone_forcing_data                             | number of coefficients in ozone forcing data                               | index   |    0 | integer   |           | in     | F        |
-!! | delp           | air_pressure_difference_between_midlayers                                | difference between mid-layer pressures                                     | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                                                      | flag for calculating 3-D diagnostic fields                                 | flag    |    0 | logical   |           | in     | F        |
-!! | ozp1           | cumulative_change_in_ozone_concentration_due_to_production_and_loss_rate | cumulative change in ozone concentration due to production and loss rate   | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ozp2           | cumulative_change_in_ozone_concentration_due_to_ozone_mixing_ratio       | cumulative change in ozone concentration due to ozone mixing ratio         | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ozp3           | cumulative_change_in_ozone_concentration_due_to_temperature              | cumulative change in ozone concentration due to temperature                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ozp4           | cumulative_change_in_ozone_concentration_due_to_overhead_ozone_column    | cumulative change in ozone concentration due to overhead ozone column      | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | con_g          | gravitational_acceleration                                               | gravitational acceleration                                                 | m s-2   |    0 | real      | kind_phys | in     | F        |
-!! | me             | mpi_rank                                                                 | rank of the current MPI task                                               | index   |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                                       | error message for error handling in CCPP                                   | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                          | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude ozphys_2015_run.html
 !!
 !> \section genal_ozphys_2015 GFS ozphys_2015_run General Algorithm
-!! @{
+!> @{
+!> -  This code assumes that both prsl and po3 are from bottom to top
+!!     as are all other variables.
+!> -  This code is specifically for NRL parameterization and
+!!     climatological T and O3 are in location 5 and 6 of prdout array
+!!\author June 2015 - Shrinivas Moorthi
       subroutine ozphys_2015_run (                                      &
      &                        ix, im, levs, ko3, dt, oz, tin, po3,      &
      &                        prsl, prdout, pl_coeff, delp, ldiag3d,    &
      &                        ozp1,ozp2,ozp3,ozp4,con_g,                &
      &                        me, errmsg, errflg)
 !
-!     this code assumes that both prsl and po3 are from bottom to top
-!     as are all other variables
-!     This code is specifically for NRL parameterization and
-!     climatological T and O3 are in location 5 and 6 of prdout array
-! June 2015 - Shrinivas Moorthi
 !
       use machine , only : kind_phys
       implicit none
@@ -185,7 +178,6 @@
       return
       end subroutine ozphys_2015_run
 
-!! @}
-!! @}
+!> @}
 
       end module ozphys_2015

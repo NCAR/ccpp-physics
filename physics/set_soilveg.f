@@ -1,3 +1,6 @@
+!> \file set_soilveg.f
+
+!> This module contains set_soilveg subroutine.
       module set_soilveg_mod
 
       implicit none
@@ -8,6 +11,8 @@
 
       contains
 
+!> \ingroup Noah_LSM
+!! This subroutine initializes soil and vegetation.
       subroutine set_soilveg(me,isot,ivet,nlunit)
       use namelist_soilveg
       implicit none
@@ -131,8 +136,9 @@ c-----------------------------
 ! ----------------------------------------------------------------------
       defined_veg=20
 
-      NROOT_DATA =(/4,4,4,4,4,3,3,3,3,3,3,3,1,3,2,
-     &                 3,0,3,3,2,0,0,0,0,0,0,0,0,0,0/)
+      NROOT_DATA =(/4, 4, 4, 4, 4, 3, 3, 3, 3, 3, 3, 3, 1, 3, 2,
+     &              3, 1, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0/)
+!    &              3, 0, 3, 3, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0/)   ! Moorthi
 ! ----------------------------------------------------------------------
 ! VEGETATION CLASS-RELATED ARRAYS
 ! ----------------------------------------------------------------------

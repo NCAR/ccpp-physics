@@ -1,5 +1,9 @@
+!>\file module_sf_mynn.F90
+!! This file contains 
 !WRF:MODEL_LAYER:PHYSICS
 !
+!>\ingroup gsd_mynn_sfc
+!>\defgroup module_sf_mynn_mod GSD MYNN SFC Module
 MODULE module_sf_mynn
 
 !-------------------------------------------------------------------
@@ -98,19 +102,21 @@ MODULE module_sf_mynn
 CONTAINS
 
 !-------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> Fill the PSIM and PSIH tables. The subroutine "sfclayinit".
+!! can be found in module_sf_sfclay.F. This subroutine returns
+!! the forms from Dyer and Hicks (1974).
   SUBROUTINE mynn_sf_init_driver(allowed_to_read)
 
     LOGICAL, INTENT(in) :: allowed_to_read
 
-    !Fill the PSIM and PSIH tables. The subroutine "sfclayinit" 
-    !can be found in module_sf_sfclay.F. This subroutine returns
-    !the forms from Dyer and Hicks (1974).
-       
 !    CALL sfclayinit(allowed_to_read)
 
   END SUBROUTINE mynn_sf_init_driver
 
 !-------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!! This subroutine
    SUBROUTINE SFCLAY_mynn(                                         &
                      U3D,V3D,T3D,QV3D,P3D,dz8w,                    &
                      CP,G,ROVCP,R,XLV,PSFCPA,CHS,CHS2,CQS2,        &
@@ -479,6 +485,8 @@ CONTAINS
     END SUBROUTINE SFCLAY_MYNN
 
 !-------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!! This subroutine calculates
    SUBROUTINE SFCLAY1D_mynn(                                       &
                      J,U1D,V1D,T1D,QV1D,P1D,dz8w1d,rho1d,          &
                      U1D2,V1D2,dz2w1d,                             &
@@ -1354,17 +1362,17 @@ CONTAINS
 
 END SUBROUTINE SFCLAY1D_mynn
 !-------------------------------------------------------------------          
-   SUBROUTINE zilitinkevich_1995(Z_0,Zt,Zq,restar,ustar,KARMAN,&
-       & landsea,IZ0TLND2,spp_pbl,rstoch)
-
-       ! This subroutine returns the thermal and moisture roughness lengths
-       ! from Zilitinkevich (1995) and Zilitinkevich et al. (2001) over
-       ! land and water, respectively. 
-       !
-       ! MODS:
-       ! 20120705 : added IZ0TLND option. Note: This option was designed
-       !            to work with the Noah LSM and may be specific for that
-       !            LSM only. Tests with RUC LSM showed no improvements. 
+!>\ingroup module_sf_mynn_mod
+!> This subroutine returns the thermal and moisture roughness lengths
+!! from Zilitinkevich (1995) and Zilitinkevich et al. (2001) over
+!! land and water, respectively. 
+!!
+!! MODS:
+!! 20120705 : added IZ0TLND option. Note: This option was designed
+!!            to work with the Noah LSM and may be specific for that
+!!            LSM only. Tests with RUC LSM showed no improvements. 
+  SUBROUTINE zilitinkevich_1995(Z_0,Zt,Zq,restar,ustar,KARMAN,&
+        & landsea,IZ0TLND2,spp_pbl,rstoch)
 
        IMPLICIT NONE
        REAL, INTENT(IN) :: Z_0,restar,ustar,KARMAN,landsea
@@ -1429,14 +1437,14 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE zilitinkevich_1995
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!! This subroutine returns the resistance (PSIQ) for moisture
+!! exchange. This is a modified form originating from Pan et al..
+!! (1994) but modified according to tests in both the RUC model.
+!! and WRF-ARW. Note that it is very similar to Carlson and
+!! Boland (1978) model (include below in comments) but has an
+!! extra molecular layer (a third layer) instead of two layers.
    SUBROUTINE Pan_etal_1994(PSIQ,PSIQ2,ustar,psih,psih2,KARMAN,Z1)
-
-       ! This subroutine returns the resistance (PSIQ) for moisture
-       ! exchange. This is a modified form originating from Pan et al. 
-       ! (1994) but modified according to tests in both the RUC model 
-       ! and WRF-ARW. Note that it is very similar to Carlson and
-       ! Boland (1978) model (include below in comments) but has an
-       ! extra molecular layer (a third layer) instead of two layers. 
 
        IMPLICIT NONE
        REAL, INTENT(IN) :: Z1,ustar,KARMAN,psih,psih2
@@ -1464,13 +1472,12 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE Pan_etal_1994
 !--------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!! This formulation for roughness length was designed to match.
+!! the labratory experiments of Donelan et al. (2004).
+!! This is an update version from Davis et al. 2008, which
+!! corrects a small-bias in Z_0 (AHW real-time 2012).
    SUBROUTINE davis_etal_2008(Z_0,ustar)
-
-    !a.k.a. : Donelan et al. (2004)
-    !This formulation for roughness length was designed to match 
-    !the labratory experiments of Donelan et al. (2004).
-    !This is an update version from Davis et al. 2008, which
-    !corrects a small-bias in Z_0 (AHW real-time 2012).
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: ustar
@@ -1494,10 +1501,10 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE davis_etal_2008
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!>This formulation for roughness length was designed account for.
+!!wave steepness.
    SUBROUTINE Taylor_Yelland_2001(Z_0,ustar,wsp10)
-
-    !This formulation for roughness length was designed account for 
-    !wave steepness.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: ustar,wsp10
@@ -1520,12 +1527,12 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE Taylor_Yelland_2001
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!>This version of Charnock's relation employs a varying
+!! Charnock parameter, similar to COARE3.0 [Fairall et al. (2003)].
+!! The Charnock parameter CZC is varied from .011 to .018.
+!! between 10-m wsp = 10 and 18..
    SUBROUTINE charnock_1955(Z_0,ustar,wsp10,visc,zu)
- 
-    !This version of Charnock's relation employs a varying
-    !Charnock parameter, similar to COARE3.0 [Fairall et al. (2003)].
-    !The Charnock parameter CZC is varied from .011 to .018 
-    !between 10-m wsp = 10 and 18. 
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: ustar, visc, wsp10, zu
@@ -1545,12 +1552,12 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE charnock_1955
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This version of Charnock's relation employs a varying
+!!Charnock parameter, taken from COARE 3.5 [Edson et al. (2001, JPO)].
+!!The Charnock parameter CZC is varied from about .005 to .028
+!!between 10-m wind speeds of 6 and 19 m/s.
    SUBROUTINE edson_etal_2013(Z_0,ustar,wsp10,visc,zu)
-
-     !This version of Charnock's relation employs a varying
-     !Charnock parameter, taken from COARE 3.5 [Edson et al. (2001, JPO)].
-     !The Charnock parameter CZC is varied from about .005 to .028
-     !between 10-m wind speeds of 6 and 19 m/s.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: ustar, visc, wsp10, zu
@@ -1573,14 +1580,14 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE edson_etal_2013
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This formulation for the thermal and moisture roughness lengths
+!! (Zt and Zq) relates them to Z0 via the roughness Reynolds number (Ren).
+!!This formula comes from Fairall et al. (2003). It is modified from
+!!the original Garratt-Brutsaert model to better fit the COARE/HEXMAX
+!!data. The formula for land uses a constant ratio (Z_0/7.4) taken
+!!from Garratt (1992).
    SUBROUTINE garratt_1992(Zt,Zq,Z_0,Ren,landsea)
-
-    !This formulation for the thermal and moisture roughness lengths
-    !(Zt and Zq) relates them to Z0 via the roughness Reynolds number (Ren).
-    !This formula comes from Fairall et al. (2003). It is modified from
-    !the original Garratt-Brutsaert model to better fit the COARE/HEXMAX
-    !data. The formula for land uses a constant ratio (Z_0/7.4) taken
-    !from Garratt (1992).
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: Ren, Z_0,landsea
@@ -1606,17 +1613,17 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE garratt_1992
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!>This formulation for thermal and moisture roughness length (Zt and Zq)
+!! as a function of the roughness Reynolds number (Ren) comes from the
+!! COARE3.0 formulation, empirically derived from COARE and HEXMAX data
+!! [Fairall et al. (2003)]. Edson et al. (2004; JGR) suspected that this
+!!relationship overestimated the scalar roughness lengths for low Reynolds
+!!number flows, so an optional smooth flow relationship, taken from Garratt
+!!(1992, p. 102), is available for flows with Ren < 2.
+!!
+!!This is for use over water only.
     SUBROUTINE fairall_etal_2003(Zt,Zq,Ren,ustar,visc)
-
-    !This formulation for thermal and moisture roughness length (Zt and Zq)
-    !as a function of the roughness Reynolds number (Ren) comes from the
-    !COARE3.0 formulation, empirically derived from COARE and HEXMAX data
-    ![Fairall et al. (2003)]. Edson et al. (2004; JGR) suspected that this
-    !relationship overestimated the scalar roughness lengths for low Reynolds
-    !number flows, so an optional smooth flow relationship, taken from Garratt
-    !(1992, p. 102), is available for flows with Ren < 2.
-    !
-    !This is for use over water only.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: Ren,ustar,visc
@@ -1648,13 +1655,13 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE fairall_etal_2003
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This formulation for thermal and moisture roughness length (Zt and Zq)
+!! as a function of the roughness Reynolds number (Ren) comes from the
+!! COARE 3.5/4.0 formulation, empirically derived from COARE and HEXMAX data
+!! [Fairall et al. (2014? coming soon, not yet published as of July 2014)].
+!! This is for use over water only.
     SUBROUTINE fairall_etal_2014(Zt,Zq,Ren,ustar,visc,rstoch,spp_pbl)
-
-    !This formulation for thermal and moisture roughness length (Zt and Zq)
-    !as a function of the roughness Reynolds number (Ren) comes from the
-    !COARE 3.5/4.0 formulation, empirically derived from COARE and HEXMAX data
-    ![Fairall et al. (2014? coming soon, not yet published as of July 2014)].
-    !This is for use over water only.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: Ren,ustar,visc,rstoch
@@ -1677,31 +1684,31 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE fairall_etal_2014
 !--------------------------------------------------------------------
-    SUBROUTINE Yang_2008(Z_0,Zt,Zq,ustar,tstar,qst,Ren,visc,landsea)
-
-    !This is a modified version of Yang et al (2002 QJRMS, 2008 JAMC) 
-    !and Chen et al (2010, J of Hydromet). Although it was originally 
-    !designed for arid regions with bare soil, it is modified 
-    !here to perform over a broader spectrum of vegetation.
-    !
-    !The original formulation relates the thermal roughness length (Zt) 
-    !to u* and T*:
-    !  
-    ! Zt = ht * EXP(-beta*(ustar**0.5)*(ABS(tstar)**0.25))
-    !
-    !where ht = Renc*visc/ustar and the critical Reynolds number 
-    !(Renc) = 70. Beta was originally = 10 (2002 paper) but was revised 
-    !to 7.2 (in 2008 paper). Their form typically varies the
-    !ratio Z0/Zt by a few orders of magnitude (1-1E4).
-    !
-    !This modified form uses beta = 1.5 and a variable Renc (function of Z_0),
-    !so zt generally varies similarly to the Zilitinkevich form (with Czil = 0.1)
-    !for very small or negative surface heat fluxes but can become close to the
-    !Zilitinkevich with Czil = 0.2 for very large HFX (large negative T*).
-    !Also, the exponent (0.25) on tstar was changed to 1.0, since we found
-    !Zt was reduced too much for low-moderate positive heat fluxes.
-    !
-    !This should only be used over land!
+!>\ingroup module_sf_mynn_mod
+!> This is a modified version of Yang et al (2002 QJRMS, 2008 JAMC) 
+!! and Chen et al (2010, J of Hydromet). Although it was originally 
+!! designed for arid regions with bare soil, it is modified 
+!! here to perform over a broader spectrum of vegetation.
+!!
+!!The original formulation relates the thermal roughness length (Zt) 
+!!to u* and T*:
+!!  
+!! Zt = ht * EXP(-beta*(ustar**0.5)*(ABS(tstar)**0.25))
+!!
+!!where ht = Renc*visc/ustar and the critical Reynolds number 
+!!(Renc) = 70. Beta was originally = 10 (2002 paper) but was revised 
+!!to 7.2 (in 2008 paper). Their form typically varies the
+!!ratio Z0/Zt by a few orders of magnitude (1-1E4).
+!!
+!!This modified form uses beta = 1.5 and a variable Renc (function of Z_0),
+!!so zt generally varies similarly to the Zilitinkevich form (with Czil = 0.1)
+!!for very small or negative surface heat fluxes but can become close to the
+!!Zilitinkevich with Czil = 0.2 for very large HFX (large negative T*).
+!!Also, the exponent (0.25) on tstar was changed to 1.0, since we found
+!!Zt was reduced too much for low-moderate positive heat fluxes.
+!!
+!!This should only be used over land!
+       SUBROUTINE Yang_2008(Z_0,Zt,Zq,ustar,tstar,qst,Ren,visc,landsea)
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: Z_0, Ren, ustar, tstar, qst, visc, landsea
@@ -1734,12 +1741,12 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE Yang_2008
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This is taken from Andreas (2002; J. of Hydromet) and 
+!! Andreas et al. (2005; BLM).
+!!
+!! This should only be used over snow/ice!
     SUBROUTINE Andreas_2002(Z_0,bvisc,ustar,Zt,Zq)
-
-    ! This is taken from Andreas (2002; J. of Hydromet) and 
-    ! Andreas et al. (2005; BLM).
-    !
-    ! This should only be used over snow/ice!
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: Z_0, bvisc, ustar
@@ -1785,10 +1792,10 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE Andreas_2002
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This subroutine returns the stability functions based off
+!! of Hogstrom (1996).
     SUBROUTINE PSI_Hogstrom_1996(psi_m, psi_h, zL, Zt, Z_0, Za)
-
-    ! This subroutine returns the stability functions based off
-    ! of Hogstrom (1996).
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: zL, Zt, Z_0, Za
@@ -1821,12 +1828,12 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Hogstrom_1996
 !--------------------------------------------------------------------
+!> \ingroup module_sf_mynn_mod
+!> This subroutine returns the stability functions based off
+!! of Hogstrom (1996), but with different constants compatible
+!! with Dyer and Hicks (1970/74?). This formulation is used for
+!! testing/development by Nakanishi (personal communication).
     SUBROUTINE PSI_DyerHicks(psi_m, psi_h, zL, Zt, Z_0, Za)
-
-    ! This subroutine returns the stability functions based off
-    ! of Hogstrom (1996), but with different constants compatible
-    ! with Dyer and Hicks (1970/74?). This formulation is used for
-    ! testing/development by Nakanishi (personal communication).
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: zL, Zt, Z_0, Za
@@ -1860,11 +1867,11 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_DyerHicks
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This subroutine returns the stability functions based off
+!! of Beljaar and Holtslag 1991, which is an extension of Holtslag
+!! and Debruin 1989.
     SUBROUTINE PSI_Beljaars_Holtslag_1991(psi_m, psi_h, zL)
-
-    ! This subroutine returns the stability functions based off
-    ! of Beljaar and Holtslag 1991, which is an extension of Holtslag
-    ! and Debruin 1989.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: zL
@@ -1891,12 +1898,12 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Beljaars_Holtslag_1991
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This subroutine returns the stability functions come from
+!! Zilitinkevich and Esau (2007, BM), which are formulatioed from the
+!! "generalized similarity theory" and tuned to the LES DATABASE64
+!! to determine their dependence on z/L.
     SUBROUTINE PSI_Zilitinkevich_Esau_2007(psi_m, psi_h, zL)
-
-    ! This subroutine returns the stability functions come from
-    ! Zilitinkevich and Esau (2007, BM), which are formulatioed from the
-    ! "generalized similarity theory" and tuned to the LES DATABASE64
-    ! to determine their dependence on z/L.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: zL
@@ -1922,10 +1929,10 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Zilitinkevich_Esau_2007
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This subroutine returns the flux-profile relationships
+!! of Businger el al. 1971.
     SUBROUTINE PSI_Businger_1971(psi_m, psi_h, zL)
-
-    ! This subroutine returns the flux-profile relationships
-    ! of Businger el al. 1971.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: zL
@@ -1954,14 +1961,14 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Businger_1971
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!> This subroutine returns flux-profile relatioships based off
+!!of Lobocki (1993), which is derived from the MY-level 2 model.
+!!Suselj and Sood (2010) applied the surface layer length scales
+!!from Nakanishi (2001) to get this new relationship. These functions
+!!are more agressive (larger magnitude) than most formulations. They
+!!showed improvement over water, but untested over land.
     SUBROUTINE PSI_Suselj_Sood_2010(psi_m, psi_h, zL)
-
-    !This subroutine returns flux-profile relatioships based off
-    !of Lobocki (1993), which is derived from the MY-level 2 model.
-    !Suselj and Sood (2010) applied the surface layer length scales
-    !from Nakanishi (2001) to get this new relationship. These functions
-    !are more agressive (larger magnitude) than most formulations. They
-    !showed improvement over water, but untested over land.
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: zL
@@ -1987,11 +1994,11 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Suselj_Sood_2010
 !--------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!>This subroutine returns a more robust z/L that best matches
+!! the z/L from Hogstrom (1996) for unstable conditions and Beljaars
+!! and Holtslag (1991) for stable conditions.
     SUBROUTINE Li_etal_2010(zL, Rib, zaz0, z0zt)
-
-    !This subroutine returns a more robust z/L that best matches
-    !the z/L from Hogstrom (1996) for unstable conditions and Beljaars
-    !and Holtslag (1991) for stable conditions.
 
        IMPLICIT NONE
        REAL, INTENT(OUT)  :: zL
@@ -2049,8 +2056,8 @@ END SUBROUTINE SFCLAY1D_mynn
     END SUBROUTINE Li_etal_2010
 
 !-------------------------------------------------------------------
-!---- add pbl modules so they can be optimized in pbl code
-!-------------------------------------------------------------------
+!>\ingroup module_sf_mynn_mod
+!! This subroutine adds pbl modules so they can be optimized in pbl code
   SUBROUTINE  mym_condensation (kts,kte,  &
     &            dx, dz,                  &
     &            thl, qw,                 &

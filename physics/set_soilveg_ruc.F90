@@ -1,3 +1,7 @@
+!>\file set_soilveg_ruc.F90
+!! This file contains subroutine to specify vegetation and soil
+!! parameters for a given soild and land-use classification. 
+
       module set_soilveg_ruc_mod
 
       use namelist_soilveg_ruc
@@ -10,6 +14,9 @@
 
       contains
 
+!>\ingroup lsm_ruc_group
+!! This subroutine specifies vegetation and soil parameters for a given
+!! soil and land-use classification.
       subroutine set_soilveg_ruc(me,isot,ivet,nlunit)
 
       integer, intent(in) :: isot,ivet,nlunit

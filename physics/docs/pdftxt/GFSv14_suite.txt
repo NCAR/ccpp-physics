@@ -1,0 +1,169 @@
+/**
+\page suite0_page  FV3_GFS_v14
+
+\section gfsv14_suite_overview Overview
+
+This is the operational physics suite in a spectral dynamical core until June of 2019.
+The GFSv14 physics suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMG
+ - \ref GFS_SFCLYR
+ - \ref GFS_NSST
+ - \ref GFS_NOAH
+ - \ref GFS_SFCSICE
+ - \ref GFS_HEDMF
+ - \ref GFS_GWDPS
+ - \ref GFS_RAYLEIGH
+ - \ref GFS_OZPHYS
+ - \ref GFS_SAMFdeep
+ - \ref GFS_GWDC
+ - \ref GFS_SAMFshal
+ - \ref GFS_ZHAOC
+ - \ref GFS_CALPRECIPTYPE
+ - \ref STOCHY_PHYS
+
+\section sdf_gfsv14 Suite Definition File 
+
+The GFS v14 suite uses the parameterizations in the following order, as defined in  \c FV3_GFS_v14 :
+\code
+<?xml version="1.0" encoding="UTF-8"?>
+
+<suite name="FV3_GFS_v14" lib="ccppphys" ver="3">
+  <!-- <init></init> -->
+  <group name="time_vary">
+    <subcycle loop="1">
+      <scheme>GFS_time_vary_pre</scheme>
+      <scheme>GFS_rrtmg_setup</scheme>
+      <scheme>GFS_rad_time_vary</scheme>
+      <scheme>GFS_phys_time_vary</scheme>
+      <scheme>stochastic_physics</scheme>
+      <scheme>stochastic_physics_sfc</scheme>
+    </subcycle>
+  </group>
+  <group name="radiation">
+    <subcycle loop="1">
+      <scheme>GFS_suite_interstitial_rad_reset</scheme>
+      <scheme>GFS_rrtmg_pre</scheme>
+      <scheme>rrtmg_sw_pre</scheme>
+      <scheme>rrtmg_sw</scheme>
+      <scheme>rrtmg_sw_post</scheme>
+      <scheme>rrtmg_lw_pre</scheme>
+      <scheme>rrtmg_lw</scheme>
+      <scheme>rrtmg_lw_post</scheme>
+      <scheme>GFS_rrtmg_post</scheme>
+    </subcycle>
+  </group>
+  <group name="physics">
+    <subcycle loop="1">
+      <scheme>GFS_suite_interstitial_phys_reset</scheme>
+      <scheme>GFS_suite_stateout_reset</scheme>
+      <scheme>get_prs_fv3</scheme>
+      <scheme>GFS_suite_interstitial_1</scheme>
+      <scheme>dcyc2t3</scheme>
+      <scheme>GFS_surface_generic_pre</scheme>
+      <scheme>GFS_suite_interstitial_2</scheme>
+    </subcycle>
+    <!-- Surface iteration loop -->
+    <subcycle loop="2">
+      <scheme>sfc_ex_coef</scheme>
+      <scheme>GFS_surface_loop_control_part1</scheme>
+      <scheme>sfc_nst_pre</scheme>
+      <scheme>sfc_nst</scheme>
+      <scheme>sfc_nst_post</scheme>
+      <scheme>lsm_noah</scheme>
+      <scheme>sfc_sice</scheme>
+      <scheme>GFS_surface_loop_control_part2</scheme>
+    </subcycle>
+    <!-- End of surface iteration loop -->
+    <subcycle loop="1">
+      <scheme>dcyc2t3_post</scheme>
+      <scheme>sfc_diag</scheme>
+      <scheme>sfc_diag_post</scheme>
+      <scheme>GFS_surface_generic_post</scheme>
+      <scheme>GFS_PBL_generic_pre</scheme>
+      <scheme>hedmf</scheme>
+      <scheme>GFS_PBL_generic_post</scheme>
+      <scheme>GFS_GWD_generic_pre</scheme>
+      <scheme>gwdps</scheme>
+      <scheme>gwdps_post</scheme>
+      <scheme>rayleigh_damp</scheme>
+      <scheme>GFS_suite_stateout_update</scheme>
+      <scheme>ozphys</scheme>
+      <scheme>GFS_DCNV_generic_pre</scheme>
+      <scheme>get_phi_fv3</scheme>
+      <scheme>GFS_suite_interstitial_3</scheme>
+      <scheme>samfdeepcnv</scheme>
+      <scheme>GFS_DCNV_generic_post</scheme>
+      <scheme>gwdc_pre</scheme>
+      <scheme>gwdc</scheme>
+      <scheme>gwdc_post</scheme>
+      <scheme>GFS_SCNV_generic_pre</scheme>
+      <scheme>samfshalcnv</scheme>
+      <scheme>samfshalcnv_post</scheme>
+      <scheme>GFS_SCNV_generic_post</scheme>
+      <scheme>GFS_suite_interstitial_4</scheme>
+      <scheme>cnvc90</scheme>
+      <scheme>GFS_MP_generic_pre</scheme>
+      <scheme>zhaocarr_gscond</scheme>
+      <scheme>zhaocarr_precpd</scheme>
+      <scheme>GFS_MP_generic_post</scheme>
+      <scheme>maximum_hourly_diagnostics</scheme>
+    </subcycle>
+  </group>
+  <group name="stochastics">
+    <subcycle loop="1">
+      <scheme>GFS_stochastics</scheme>
+    </subcycle>
+  </group>
+  <!-- <finalize></finalize> -->
+</suite>
+\endcode
+
+\section gfs14_nml_opt_des Namelist Option 
+\code
+  fhzero       = 6
+  h2o_phys     = .false.
+  oz_phys      = .true.
+  oz_phys_2015 = .false.
+  ldiag3d      = .false.
+  fhcyc        = 24
+  use_ufo      = .true.
+  pre_rad      = .false.
+  ncld         = 5
+  imp_physics  = 11
+  pdfcld       = .false.
+  fhswr        = 3600.
+  fhlwr        = 3600.
+  ialb         = 1
+  iems         = 1
+  iaer         = 111
+  ico2         = 2
+  isubc_sw     = 2
+  isubc_lw     = 2
+  isol         = 2
+  lwhtr        = .true.
+  swhtr        = .true.
+  cnvgwd       = .true.
+  shal_cnv     = .true.
+  cal_pre      = .false.
+  redrag       = .true.
+  dspheat      = .true.
+  hybedmf      = .true.
+  random_clds  = .false.
+  trans_trac   = .true.
+  cnvcld       = .true.
+  imfshalcnv   = 2
+  imfdeepcnv   = 2
+  cdmbgwd      = 3.5,0.25
+  prslrd0      = 0.
+  ivegsrc      = 1
+  isot         = 1
+  debug        = .false.
+  nstf_name    = 2,0,0,0,0
+  nst_anl      = .true.
+  psautco      = 0.0008,0.0005
+  prautco      = 0.00015,0.00015
+\endcode
+
+check \ref gfs_physics_nml for description
+
+*/

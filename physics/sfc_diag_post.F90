@@ -12,43 +12,24 @@
       end subroutine sfc_diag_post_finalize
 #if 0
 !> \section arg_table_sfc_diag_post_run Argument Table
-!! | local_name     | standard_name                                                                                                       | long_name                                                                           | units       | rank | type       |    kind   | intent | optional |
-!! |----------------|---------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|-------------|------|------------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                                                                              | horizontal loop extent                                                              | count       |    0 | integer    |           | in     | F        |
-!! | lssav          | flag_diagnostics                                                                                                    | logical flag for storing diagnostics                                                | flag        |    0 | logical    |           | in     | F        |
-!! | dtf            | time_step_for_dynamics                                                                                              | dynamics timestep                                                                   | s           |    0 | real       | kind_phys | in     | F        |
-!! | con_eps        | ratio_of_dry_air_to_water_vapor_gas_constants                                                                       | rd/rv                                                                               | none        |    0 | real       | kind_phys | in     | F        |
-!! | con_epsm1      | ratio_of_dry_air_to_water_vapor_gas_constants_minus_one                                                             | (rd/rv) - 1                                                                         | none        |    0 | real       | kind_phys | in     | F        |
-!! | pgr            | surface_air_pressure                                                                                                | surface pressure                                                                    | Pa          |    1 | real       | kind_phys | in     | F        |
-!! | t2m            | temperature_at_2m                                                                                                   | 2 meter temperature                                                                 | K           |    1 | real       | kind_phys | in     | F        |
-!! | q2m            | specific_humidity_at_2m                                                                                             | 2 meter specific humidity                                                           | kg kg-1     |    1 | real       | kind_phys | in     | F        |
-!! | u10m           | x_wind_at_10m                                                                                                       | 10 meter u wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | v10m           | y_wind_at_10m                                                                                                       | 10 meter v wind speed                                                               | m s-1       |    1 | real       | kind_phys | in     | F        |
-!! | tmpmin         | minimum_temperature_at_2m                                                                                           | min temperature at 2m height                                                        | K           |    1 | real       | kind_phys | inout  | F        |
-!! | tmpmax         | maximum_temperature_at_2m                                                                                           | max temperature at 2m height                                                        | K           |    1 | real       | kind_phys | inout  | F        |
-!! | spfhmin        | minimum_specific_humidity_at_2m                                                                                     | minimum specific humidity at 2m height                                              | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
-!! | spfhmax        | maximum_specific_humidity_at_2m                                                                                     | maximum specific humidity at 2m height                                              | kg kg-1     |    1 | real       | kind_phys | inout  | F        |
-!! | wind10mmax     | maximum_wind_at_10m                                                                                                 | maximum wind speed at 10 m                                                          | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | u10mmax        | maximum_x_wind_at_10m                                                                                               | maximum x wind at 10 m                                                              | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | v10mmax        | maximum_y_wind_at_10m                                                                                               | maximum y wind at 10 m                                                              | m s-1       |    1 | real       | kind_phys | inout  | F        |
-!! | dpt2m          | dewpoint_temperature_at_2m                                                                                          | 2 meter dewpoint temperature                                                        | K           |    1 | real       | kind_phys | inout  | F        |
-!! | errmsg         | ccpp_error_message                                                                                                  | error message for error handling in CCPP                                            | none        |    0 | character  | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                                                                                     | error flag for error handling in CCPP                                               | flag        |    0 | integer    |           | out    | F        |
+!! \htmlinclude sfc_diag_post_run.html
 !!
 #endif
-      subroutine sfc_diag_post_run (im, lssav, dtf, con_eps, con_epsm1, pgr,    &
-                         t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,&
+      subroutine sfc_diag_post_run (im, lsm, lsm_noahmp, dry, lssav, dtf, con_eps, con_epsm1, pgr,&
+                         t2mmp, q2mp, t2m, q2m, u10m, v10m, tmpmin, tmpmax, spfhmin, spfhmax,&
                          wind10mmax, u10mmax, v10mmax, dpt2m, errmsg, errflg)
 
         use machine,               only: kind_phys
 
         implicit none
 
-        integer,                              intent(in) :: im
+        integer,                              intent(in) :: im, lsm, lsm_noahmp
         logical,                              intent(in) :: lssav
         real(kind=kind_phys),                 intent(in) :: dtf, con_eps, con_epsm1
-        real(kind=kind_phys), dimension(im),  intent(in) :: pgr, t2m, q2m, u10m, v10m
-        real(kind=kind_phys), dimension(im),  intent(inout) :: tmpmin, tmpmax, spfhmin, spfhmax
+        logical             , dimension(im),  intent(in) :: dry
+        real(kind=kind_phys), dimension(im),  intent(in) :: pgr, u10m, v10m
+        real(kind=kind_phys), dimension(:) ,  intent(in) :: t2mmp, q2mp
+        real(kind=kind_phys), dimension(im),  intent(inout) :: t2m, q2m, tmpmin, tmpmax, spfhmin, spfhmax
         real(kind=kind_phys), dimension(im),  intent(inout) :: wind10mmax, u10mmax, v10mmax, dpt2m
 
         character(len=*),                     intent(out) :: errmsg
@@ -60,6 +41,15 @@
         ! Initialize CCPP error handling variables
         errmsg = ''
         errflg = 0
+
+        if (lsm == lsm_noahmp) then
+          do i=1,im
+            if(dry(i)) then
+              t2m(i) = t2mmp(i)
+              q2m(i) = q2mp(i)
+            endif
+          enddo
+        endif
 
         if (lssav) then
           do i=1,im

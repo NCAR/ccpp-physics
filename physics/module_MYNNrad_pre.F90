@@ -13,31 +13,12 @@
       subroutine mynnrad_pre_finalize ()
       end subroutine mynnrad_pre_finalize
 
-!!
-!> \brief This interstitial code adds the subgrid clouds to the resolved-scale clouds if there is no resolved-scale clouds in that particular grid box.
+!>\defgroup gsd_mynnrad_pre GSD mynnrad_pre_run Module
+!>\ingroup gsd_mynn_edmf
+!! This interstitial code adds the subgrid clouds to the resolved-scale clouds if there is no resolved-scale clouds in that particular grid box.
 #if 0
-!! \section arg_table_mynnrad_pre_run Argument Table
-!! | local_name          | standard_name                                                               | long_name                                                                  | units   | rank | type      |    kind   | intent | optional |
-!! |---------------------|-----------------------------------------------------------------------------|----------------------------------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | ix                  | horizontal_dimension                                                        | horizontal dimension                                                       | count   |    0 | integer   |           | in     | F        |
-!! | im                  | horizontal_loop_extent                                                      | horizontal loop extent                                                     | count   |    0 | integer   |           | in     | F        |
-!! | levs                | vertical_dimension                                                          | vertical layer dimension                                                   | count   |    0 | integer   |           | in     | F        |
-!! | qc                  | cloud_condensed_water_mixing_ratio                                          | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | qi                  | ice_water_mixing_ratio                                                      | moist (dry+vapor, no condensates) mixing ratio of ice water                | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | T3D                 | air_temperature                                                             | layer mean air temperature                                                 | K       |    2 | real      | kind_phys | in     | F        |
-!! | qc_save             | cloud_condensed_water_mixing_ratio_save    | moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | qi_save             | ice_water_mixing_ratio_save                | moist (dry+vapor, no condensates) mixing ratio of ice water before entering a physics scheme                | kg kg-1 |    2 | real      | kind_phys | out    | F        |
-!! | QC_BL               | subgrid_cloud_mixing_ratio_pbl                                              | subgrid cloud cloud mixing ratio from PBL scheme                           | kg kg-1 |    2 | real      | kind_phys | in     | F        |
-!! | CLDFRA_BL           | subgrid_cloud_fraction_pbl                                                  | subgrid cloud fraction from PBL scheme                                     | frac    |    2 | real      | kind_phys | in     | F        |
-!! | delp                | layer_pressure_thickness_for_radiation                                      | layer pressure thickness on radiation levels                               | hPa     |    2 | real      | kind_phys | out    | F        |
-!! | clouds1             | total_cloud_fraction                                                        | layer total cloud fraction                                                 | frac    |    2 | real      | kind_phys | inout  | F        |
-!! | clouds2             | cloud_liquid_water_path                                                     | layer cloud liquid water path                                              | g m-2   |    2 | real      | kind_phys | inout  | F        |
-!! | clouds3             | mean_effective_radius_for_liquid_cloud                                      | mean effective radius for liquid cloud                                     | micron  |    2 | real      | kind_phys | inout  | F        |
-!! | clouds4             | cloud_ice_water_path                                                        | layer cloud ice water path                                                 | g m-2   |    2 | real      | kind_phys | inout  | F        |
-!! | clouds5             | mean_effective_radius_for_ice_cloud                                         | mean effective radius for ice cloud                                        | micron  |    2 | real      | kind_phys | inout  | F        |
-!! | slmsk               | sea_land_ice_mask_real                                                      | landmask: sea/land/ice=0/1/2                                               | flag    |    1 | real      | kind_phys | in     | F        |
-!! | errmsg              | ccpp_error_message                                                          | error message for error handling in CCPP                                   | none    |    0 | character | len=*     | out    | F        |
-!! | errflg              | ccpp_error_flag                                                             | error flag for error handling in CCPP                                      | flag    |    0 | integer   |           | out    | F        |
+!> \section arg_table_mynnrad_pre_run Argument Table
+!! \htmlinclude mynnrad_pre_run.html
 !!
 #endif
 !
@@ -51,6 +32,7 @@
 !###===================================================================
 SUBROUTINE mynnrad_pre_run(                &
      &     ix,im,levs,                     &
+     &     flag_init,flag_restart,         &
      &     qc, qi, T3D,                    &
      &     qc_save, qi_save,               &
      &     qc_bl,cldfra_bl,                &
@@ -69,6 +51,7 @@ SUBROUTINE mynnrad_pre_run(                &
       ! Interface variables
       real (kind=kind_phys), parameter :: gfac=1.0e5/con_g
       integer, intent(in)  :: ix, im, levs
+      logical,          intent(in)  :: flag_init, flag_restart
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: T3D,delp
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: &
@@ -90,12 +73,17 @@ SUBROUTINE mynnrad_pre_run(                &
       !write(0,*)"=============================================="
       !write(0,*)"in mynn rad pre"
 
+      if (flag_init .and. (.not. flag_restart)) then
+       !write (0,*) 'Skip MYNNrad_pre flag_init = ', flag_init
+        return
+      endif
      ! Add subgrid cloud information:
         do k = 1, levs
            do i = 1, im
 
               qc_save(i,k) = qc(i,k)
               qi_save(i,k) = qi(i,k)
+              clouds1(i,k) = CLDFRA_BL(i,k)
 
               IF (qc(i,k) < 1.E-6 .AND. qi(i,k) < 1.E-8 .AND. CLDFRA_BL(i,k)>0.001) THEN
                 !Partition the BL clouds into water & ice according to a linear
@@ -103,8 +91,8 @@ SUBROUTINE mynnrad_pre_run(                &
                 !one 3D array for both cloud water & ice.
 !               Wice = 1. - MIN(1., MAX(0., (t(i,k)-254.)/15.))
 !               Wh2o = 1. - Wice
-                clouds1(i,k)=MAX(clouds1(i,k),CLDFRA_BL(i,k))
-                clouds1(i,k)=MAX(0.0,MIN(1.0,clouds1(i,k)))
+                !clouds1(i,k)=MAX(clouds1(i,k),CLDFRA_BL(i,k))
+                !clouds1(i,k)=MAX(0.0,MIN(1.0,clouds1(i,k)))
                 qc(i,k) = QC_BL(i,k)*(MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
                 qi(i,k) = QC_BL(i,k)*(1. - MIN(1., MAX(0., (T3D(i,k)-254.)/15.)))*CLDFRA_BL(i,k)
 

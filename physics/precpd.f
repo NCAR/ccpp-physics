@@ -14,35 +14,11 @@
       end subroutine zhaocarr_precpd_init
 
 !> \defgroup precip GFS precpd Main
-!! @{
 !! \brief This subroutine computes the conversion from condensation to
 !! precipitation (snow or rain) or evaporation of rain.
 !!
 !! \section arg_table_zhaocarr_precpd_run Argument Table
-!! | local_name     | standard_name                                                 | long_name                                                         | units       | rank |  type     |   kind    | intent | optional |
-!! |----------------|---------------------------------------------------------------|-------------------------------------------------------------------|-------------|------|-----------|-----------|--------|----------|
-!! | im             | horizontal_loop_extent                                        | horizontal loop extent                                            | count       |    0 | integer   |           | in     | F        |
-!! | ix             | horizontal_dimension                                          | horizontal dimension                                              | count       |    0 | integer   |           | in     | F        |
-!! | km             | vertical_dimension                                            | vertical layer dimension                                          | count       |    0 | integer   |           | in     | F        |
-!! | dt             | time_step_for_physics                                         | physics time step                                                 | s           |    0 | real      | kind_phys | in     | F        |
-!! | del            | air_pressure_difference_between_midlayers                     | pressure level thickness                                          | Pa          |    2 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                                  | layer mean pressure                                               | Pa          |    2 | real      | kind_phys | in     | F        |
-!! | q              | water_vapor_specific_humidity_updated_by_physics              | water vapor specific humidity                                     | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
-!! | cwm            | cloud_condensed_water_mixing_ratio_updated_by_physics         | moist cloud condensed water mixing ratio                          | kg kg-1     |    2 | real      | kind_phys | inout  | F        |
-!! | t              | air_temperature_updated_by_physics                            | layer mean air temperature                                        | K           |    2 | real      | kind_phys | inout  | F        |
-!! | rn             | lwe_thickness_of_explicit_precipitation_amount                | explicit precipitation amount on physics timestep                 | m           |    1 | real      | kind_phys | out    | F        |
-!! | sr             | ratio_of_snowfall_to_rainfall                                 | ratio of snowfall to large-scale rainfall                         | frac        |    1 | real      | kind_phys | out    | F        |
-!! | rainp          | tendency_of_rain_water_mixing_ratio_due_to_microphysics       | tendency of rain water mixing ratio due to microphysics           | kg kg-1 s-1 |    2 | real      | kind_phys | out    | F        |
-!! | u00k           | critical_relative_humidity                                    | critical relative humidity                                        | frac        |    2 | real      | kind_phys | in     | F        |
-!! | psautco        | coefficient_from_cloud_ice_to_snow                            | conversion coefficient from cloud ice to snow                     | none        |    1 | real      | kind_phys | in     | F        |
-!! | prautco        | coefficient_from_cloud_water_to_rain                          | conversion coefficient from cloud water to rain                   | none        |    1 | real      | kind_phys | in     | F        |
-!! | evpco          | coefficient_for_evaporation_of_rainfall                       | coefficient for evaporation of rainfall                           | none        |    0 | real      | kind_phys | in     | F        |
-!! | wminco         | cloud_condensed_water_conversion_threshold                    | conversion coefficient from cloud liquid and ice to precipitation | none        |    1 | real      | kind_phys | in     | F        |
-!! | wk1            | grid_size_related_coefficient_used_in_scale-sensitive_schemes | grid size related coefficient used in scale-sensitive schemes     | none        |    1 | real      | kind_phys | in     | F        |
-!! | lprnt          | flag_print                                                    | flag for printing diagnostics to output                           | flag        |    0 | logical   |           | in     | F        |
-!! | jpr            | horizontal_index_of_printed_column                            | horizontal index of printed column                                | index       |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                            | error message for error handling in CCPP                          | none        |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                               | error flag for error handling in CCPP                             | flag        |    0 | integer   |           | out    | F        |
+!! \htmlinclude zhaocarr_precpd_run.html
 !!
 !> \section general_precpd GFS precpd Scheme General Algorithm
 !! The following two equations can be used to calculate the
@@ -68,7 +44,7 @@
 !! -# Update t and q due to precipitation (snow or rain) production.
 !! -# Calculate precipitation at surface (\f$rn\f$) and fraction of frozen precipitation (\f$sr\f$).
 !! \section Zhao-Carr_precip_detailed GFS precpd Scheme Detailed Algorithm
-!! @{
+!> @{
        subroutine zhaocarr_precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn  &
      &,                   sr,rainp,u00k,psautco,prautco,evpco,wminco    &
      &,                   wk1,lprnt,jpr,errmsg,errflg)
@@ -725,11 +701,8 @@
 !
       return
       end subroutine zhaocarr_precpd_run
-!! @}
-!! @}
+!> @}
 
-!! \brief Brief description of the subroutine
-!!
 !! \section arg_table_zhaocarr_precpd_finalize  Argument Table
 !!
       subroutine zhaocarr_precpd_finalize

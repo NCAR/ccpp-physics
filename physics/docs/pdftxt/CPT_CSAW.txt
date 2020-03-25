@@ -1,0 +1,25 @@
+/**
+\page CSAW_scheme Chikira-Sugiyama Scale-Aware Convection Scheme with Arakawa-Wu Extension 
+\section cs_descrip  Description
+
+The Chikira-Sugiyama cumulus scheme (Chikira and Sugiyama (2010) \cite Chikira_2010) with prognostic closure and
+Arakawa-Wu Scale-Aware extension \cite Arakawa_2013 is an offshoot of the prognostic Arakawa-Schubert scheme. 
+It is characterized by a spectral representation of cloud types according to updraft velocity at cloud base, a level
+at which the mass flux is determined by a convective kinetic energy closure. The
+lateral entrainment rate vertically varies depending on the buoyancy and vertical 
+velocity of the updraft air parcel following Gregory (2001) \cite Gregory_2001 . 
+ The entrainment rate tends to be large near cloud base because of the small updraft
+velocity near that level. Deep convection tends to be suppressed when convective available potential energy 
+is small because of upward reduction of in-cloud moist static energy. Dry environment air significantly reduces
+in-cloud humidity mainly because of the large entrainment rate in the lower troposphere, which leads to suppression
+of deep convection, consistent with observations and previous of cloud-resolving models. 
+
+
+
+\section intra_csaw Intraphysics Communication
+\ref arg_table_cs_conv_run
+
+\section gen_cs_conv General Algorithm
+\ref gen_cs_cumlus
+
+*/

@@ -1,0 +1,33 @@
+[ccpp-arg-table]
+  name = machine
+  type = module
+[kind_dyn]
+  standard_name = kind_dyn
+  long_name = definition of kind_dyn
+  units = none
+  dimensions = ()
+  type = integer
+[kind_grid]
+  standard_name = kind_grid
+  long_name = definition of kind_grid
+  units = none
+  dimensions = ()
+  type = integer
+[kind_phys]
+  standard_name = kind_phys
+  long_name = definition of kind_phys
+  units = none
+  dimensions = ()
+  type = integer
+[kind_LOGICAL]
+  standard_name = kind_LOGICAL
+  long_name = definition of kind_LOGICAL
+  units = none
+  dimensions = ()
+  type = integer
+[kind_INTEGER]
+  standard_name = kind_INTEGER
+  long_name = definition of kind_INTEGER
+  units = none
+  dimensions = ()
+  type = integer

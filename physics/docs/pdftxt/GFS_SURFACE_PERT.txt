@@ -1,0 +1,40 @@
+/**
+\page surf_pert GFS Surface Parameter Perturbation
+\section des_sfcpert Description
+
+Land surface perturbation (Gehne et al. (2019) \cite Gehne_2019) has been recently introduced 
+into FV3GFS. This treatment is based on the hypothesis that one of the major
+causes of the insufficient spread in current global NWP model,especially near the surface, is a lack of treatment of 
+uncertainty in the soil state and in the associated model parameters. It allows for land surface parameters such as surface albedo,
+vegetation fraction, soil hydraulic conductivity, leaf area index (LAI), surface roughness lengths for heat and momentom to vary in space.
+These parameters and variables have been shown to impact forecasts of 2m temperature, 10m wind and precipitation. Based on the parameter
+or variable,different strategies to perturb are necessary.
+
+Table 1 presents a summary of the uncertainty or range of values associated with the parameters and variables that are considered.
+
+\section table Uncertainty or range of values identified for the perturbed parameters (Gehne et al. (2019))
+|     Parameter or variable         |  Estimated uncertainty or range       |   Reference                        |
+|-----------------------------------|---------------------------------------|------------------------------------|
+|      Albedo                       |  2\%-12\% of Albedo                   | Grant et al. (2000) \cite grant_et_al_2000 ; Qu and Hall (2005) \cite qu_and_hall_2005 |
+| Vegetation fraction               |  20\%-30\% of Vegetation fraction     | Computed from MODIS vegetation fraction data                                           |
+| Momentum roughness length        
+
+
+
+
+
+Momentum roughness length (\f$Z_{0}\f$),heat/momentum roughness length ratio (\f$Z_{t}/Z_{0}\f$),
+
+Albedo and vegetation fraction perturbation are applied by percentile matching of the normal distribution with the beta distribution
+(i.e. cdfnor() and ppfbet()). This is to ensure that the perturbed values are contained within the interval [0,1]. The size of the 
+perturbations is based on observational estimates of the uncertainty in albedo and vegetation.
+
+- Another possible reason for current GEFS under-spread near the surface is that initial conditions do not reflect the un
+
+
+\section intra_sfcpert Intraphysics Communication
+
+\section gen_sfcpert  General Algorithm
+
+
+*/

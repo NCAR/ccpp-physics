@@ -19,29 +19,13 @@
       subroutine h2ophys_init()
       end subroutine h2ophys_init
 
-!>\defgroup GFS_h2ophys GFS h2ophys Main
-!! @{
+!>\defgroup GFS_h2ophys GFS Water Vapor Photochemical Production and Loss Module
 !> This subroutine is NRL H2O physics for stratosphere and mesosphere.
 !! \section arg_table_h2ophys_run Argument Table
-!! | local_name     | standard_name                                     | long_name                                         | units   | rank | type      | kind      | intent | optional |
-!! |----------------|---------------------------------------------------|---------------------------------------------------|---------|------|-----------|-----------|--------|----------|
-!! | ix             | horizontal_dimension                              | horizontal dimension                              | count   |    0 | integer   |           | in     | F        |
-!! | im             | horizontal_loop_extent                            | horizontal loop extent                            | count   |    0 | integer   |           | in     | F        |
-!! | levs           | vertical_dimension                                | number of vertical layers                         | count   |    0 | integer   |           | in     | F        |
-!! | kh2o           | vertical_dimension_of_h2o_forcing_data            | number of vertical layers in h2o forcing data     | count   |    0 | integer   |           | in     | F        |
-!! | dt             | time_step_for_physics                             | physics time step                                 | s       |    0 | real      | kind_phys | in     | F        |
-!! | h2o            | water_vapor_specific_humidity_updated_by_physics  | water vapor specific humidity updated by physics  | kg kg-1 |    2 | real      | kind_phys | inout  | F        |
-!! | ph2o           | natural_log_of_h2o_forcing_data_pressure_levels   | natural log of h2o forcing data pressure levels   | log(Pa) |    1 | real      | kind_phys | in     | F        |
-!! | prsl           | air_pressure                                      | mid-layer pressure                                | Pa      |    2 | real      | kind_phys | in     | F        |
-!! | h2opltc        | h2o_forcing                                       | water forcing data                                | various |    3 | real      | kind_phys | in     | F        |
-!! | h2o_coeff      | number_of_coefficients_in_h2o_forcing_data        | number of coefficients in h2o forcing data        | index   |    0 | integer   |           | in     | F        |
-!! | ldiag3d        | flag_diagnostics_3D                               | flag for calculating 3-D diagnostic fields        | flag    |    0 | logical   |           | in     | F        |
-!! | me             | mpi_rank                                          | rank of the current MPI task                      | index   |    0 | integer   |           | in     | F        |
-!! | errmsg         | ccpp_error_message                                | error message for error handling in CCPP          | none    |    0 | character | len=*     | out    | F        |
-!! | errflg         | ccpp_error_flag                                   | error flag for error handling in CCPP             | flag    |    0 | integer   |           | out    | F        |
+!! \htmlinclude h2ophys_run.html
 !!
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
-!! @{
+!> @{
       subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,   &
      &                     h2opltc, h2o_coeff, ldiag3d, me,             &
      &                     errmsg, errflg)
@@ -150,8 +134,7 @@
 !
       return
       end subroutine h2ophys_run
-!! @}
-!! @}
+!> @}
 
 ! \brief Brief description of the subroutine
 !
