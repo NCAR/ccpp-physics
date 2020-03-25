@@ -135,6 +135,7 @@ contains
        ! #######################################################################################
        ! Clear-sky heating-rate (optional)
        if (Model%swhtr) then
+          hsw0(:,:) = 0._kind_phys
           call check_error_msg('GFS_rrtmgp_post',compute_heating_rate( &
                fluxswUP_clrsky(idxday(1:nDay),:),   & ! IN  - Shortwave upward clear-sky flux profiles (W/m2)
                fluxswDOWN_clrsky(idxday(1:nDay),:), & ! IN  - Shortwave downward clear-sky flux profiles (W/m2)
@@ -144,6 +145,7 @@ contains
        endif
 
        ! All-sky heating-rate (mandatory)
+       hswc(:,:) = 0._kind_phys
        call check_error_msg('GFS_rrtmgp_post',compute_heating_rate(    &
             fluxswUP_allsky(idxday(1:nDay),:),      & ! IN  - Shortwave upward all-sky flux profiles (W/m2)
             fluxswDOWN_allsky(idxday(1:nDay),:),    & ! IN  - Shortwave downward all-sky flux profiles (W/m2)
