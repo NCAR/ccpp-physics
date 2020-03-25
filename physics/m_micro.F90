@@ -182,8 +182,8 @@ end subroutine m_micro_init
      &                       fourb3=4.0/3.0, RL_cub=1.0e-15, nmin=1.0
 
        integer, parameter :: ncolmicro = 1
-       integer,intent(in) :: im, ix,lm, ipr, kdt, fprcp, pdfflag
-       logical,intent(in) :: flipv, skip_macro, lprnt
+       integer,intent(in) :: im, ix,lm, kdt, fprcp, pdfflag
+       logical,intent(in) :: flipv, skip_macro
        integer,intent(in) :: iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
