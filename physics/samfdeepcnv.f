@@ -93,6 +93,7 @@
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
+      real(kind=kind_phys), intent(in) :: nthresh
       real(kind=kind_phys), intent(in) :: ca_deep(ix)
       real(kind=kind_phys), intent(out) :: rainevap(ix)
       logical, intent(in)  :: do_ca,ca_sgs
