@@ -30,9 +30,7 @@
                           sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
-                          cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
-                          dtsfcin_cpl, dqsfcin_cpl, ulwsfcin_cpl, ulwsfc_cice, dusfc_cice, dvsfc_cice,     &
-                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice,                                &
+                          cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
                           wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
@@ -76,12 +74,9 @@
         logical, intent(in) :: cplflx
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
         logical, dimension(im), intent(inout) :: flag_cice
-              integer, dimension(im), intent(out) :: islmsk_cice
-        real(kind=kind_phys), dimension(im), intent(in) ::ulwsfcin_cpl, &
-             dusfcin_cpl, dvsfcin_cpl, dtsfcin_cpl, dqsfcin_cpl, &
+        integer, dimension(im), intent(out) :: islmsk_cice
+        real(kind=kind_phys), dimension(im), intent(in) :: &
              tisfc, tsfco, fice, hice
-        real(kind=kind_phys), dimension(im), intent(out) ::ulwsfc_cice, &
-             dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice
 
         real(kind=kind_phys), dimension(im), intent(out) :: wind
         real(kind=kind_phys), dimension(im), intent(in ) :: u1, v1
@@ -191,14 +186,7 @@
       if (cplflx) then
         do i=1,im
           islmsk_cice(i) = nint(slimskin_cpl(i))
-          if(islmsk_cice(i) == 4)then
-            flag_cice(i)   = .true.
-            ulwsfc_cice(i) = ulwsfcin_cpl(i)
-            dusfc_cice(i)  = dusfcin_cpl(i)
-            dvsfc_cice(i)  = dvsfcin_cpl(i)
-            dtsfc_cice(i)  = dtsfcin_cpl(i)
-            dqsfc_cice(i)  = dqsfcin_cpl(i)
-          endif
+          flag_cice(i)   = (islmsk_cice(i) == 4)
         enddo
       endif
 
