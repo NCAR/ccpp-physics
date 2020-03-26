@@ -28,7 +28,7 @@
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  ix,im,levs,                        &
      &  itimestep,iter,                    &
-     &  flag_init,flag_restart,            &
+     &  flag_init,flag_restart,lsm,        &
      &  delt,dx,                           &
      &  u, v, t3d, qvsh, qc, prsl, phii,   &
      &  exner, ps, PBLH, slmsk,            &
@@ -47,8 +47,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &      fh_ocn,    fh_lnd,    fh_ice,  &  !intent(inout)
      &    fm10_ocn,  fm10_lnd,  fm10_ice,  &  !intent(inout)
      &     fh2_ocn,   fh2_lnd,   fh2_ice,  &  !intent(inout)
-     &  QSFC, USTM, ZOL, MOL, RMOL,        &
-     &  WSPD, ch, HFLX, QFLX, LH,          &
+     &  QSFC, qsfc_ruc, USTM, ZOL, MOL,    &
+     &  RMOL, WSPD, ch, HFLX, QFLX, LH,    &
      &  FLHC, FLQC,                        &
      &  U10, V10, TH2, T2, Q2,             &
      &  wstar, CHS2, CQS2,                 &
@@ -106,7 +106,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !MYNN-1D
       REAL    :: delt
       INTEGER :: im, ix, levs
-      INTEGER :: iter, k, i, itimestep
+      INTEGER :: iter, k, i, itimestep, lsm
       LOGICAL :: flag_init,flag_restart,lprnt
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
@@ -146,7 +146,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &        dx, pblh, slmsk, ps
 
       real(kind=kind_phys), dimension(im), intent(inout) :: &
-     &        ustm, hflx, qflx, wspd, qsfc,                 &
+     &        ustm, hflx, qflx, wspd, qsfc, qsfc_ruc,       &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &
      &        lh, wstar
@@ -237,7 +237,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                               &
              SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
-             ISFFLX=isfflx,isftcflx=isftcflx,                                 &
+             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,                         &
              iz0tlnd=iz0tlnd,itimestep=itimestep,iter=iter,                   &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_ocn=tskin_ocn,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
@@ -258,7 +258,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              ZNT=znt,USTM=ustm,ZOL=zol,MOL=mol,RMOL=rmol,                     &
              psim=psim,psih=psih,                                             &
              HFLX=hflx,HFX=hfx,QFLX=qflx,QFX=qfx,LH=lh,FLHC=flhc,FLQC=flqc,   &
-             QGH=qgh,QSFC=qsfc,                                               &
+             QGH=qgh,QSFC=qsfc,QSFC_RUC=qsfc_ruc,                             &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
              spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl,                 &
