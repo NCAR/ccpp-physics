@@ -96,22 +96,38 @@ link_directories(${CCPP_LIB_DIRS})
 list(APPEND LIBS "ccpp")
 
 #------------------------------------------------------------------------------
+# Set the sources: physics type definitions
+set(TYPEDEFS $ENV{CCPP_TYPEDEFS})
+if(TYPEDEFS)
+  message(STATUS "Got CCPP TYPEDEFS from environment variable: ${TYPEDEFS}")
+else(TYPEDEFS)
+  include(./CCPP_TYPEDEFS.cmake)
+  message(STATUS "Got CCPP TYPEDEFS from cmakefile include file: ${TYPEDEFS}")
+endif(TYPEDEFS)
+
+# Generate list of Fortran modules from the CCPP type
+# definitions that need need to be installed
+foreach(typedef_module ${TYPEDEFS})
+    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${typedef_module})
+endforeach()
+
+#------------------------------------------------------------------------------
 # Set the sources: physics schemes
 set(SCHEMES $ENV{CCPP_SCHEMES})
 if(SCHEMES)
-  message(INFO "Got CCPP_SCHEMES from environment variable: ${SCHEMES}")
+  message(STATUS "Got CCPP SCHEMES from environment variable: ${SCHEMES}")
 else(SCHEMES)
   include(./CCPP_SCHEMES.cmake)
-  message(INFO "Got SCHEMES from cmakefile include file: ${SCHEMES}")
+  message(STATUS "Got CCPP SCHEMES from cmakefile include file: ${SCHEMES}")
 endif(SCHEMES)
 
 # Set the sources: physics scheme caps
 set(CAPS $ENV{CCPP_CAPS})
 if(CAPS)
-  message(INFO "Got CAPS from environment variable: ${CAPS}")
+  message(STATUS "Got CCPP CAPS from environment variable: ${CAPS}")
 else(CAPS)
   include(./CCPP_CAPS.cmake)
-  message(INFO "Got CAPS from cmakefile include file: ${CAPS}")
+  message(STATUS "Got CCPP CAPS from cmakefile include file: ${CAPS}")
 endif(CAPS)
 
 # Create empty lists for schemes with special compiler optimization flags
@@ -398,9 +414,7 @@ if (PROJECT STREQUAL "CCPP-FV3")
           FILE ccppphys-config.cmake
           DESTINATION lib/cmake
   )
-  if(STATIC)
-    # Define where to install the C headers and Fortran modules
-    #install(FILES ${HEADERS_C} DESTINATION include)
-    install(FILES ${MODULES_F90} DESTINATION include)
-  endif(STATIC)
+  # Define where to install the C headers and Fortran modules
+  #install(FILES ${HEADERS_C} DESTINATION include)
+  install(FILES ${MODULES_F90} DESTINATION include)
 endif (PROJECT STREQUAL "CCPP-FV3")
