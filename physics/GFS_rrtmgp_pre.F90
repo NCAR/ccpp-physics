@@ -182,7 +182,7 @@ contains
   ! SUBROUTINE GFS_rrtmgp_pre_run
   ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_pre_run
-!! \htmlinclude GFS_rrtmgp_pre.html
+!! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
   subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Coupling, Radtend, Sfcprop, Tbd,  & ! IN
        ncol, lw_gas_props, active_gases_array,                                           & ! IN

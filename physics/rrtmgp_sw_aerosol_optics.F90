@@ -26,7 +26,7 @@ contains
   ! SUBROUTINE rrtmgp_sw_aerosol_optics_run()
   ! #########################################################################################
 !! \section arg_table_rrtmgp_sw_aerosol_optics_run
-!! \htmlinclude rrtmgp_sw_aerosol_optics.html
+!! \htmlinclude rrtmgp_sw_aerosol_optics_run.html
 !!
   subroutine rrtmgp_sw_aerosol_optics_run(doSWrad, nCol, nLev, nTracer, nDay, idxday, p_lev,&
        p_lay, p_lk, tv_lay, relhum, lsmask, tracer, lon, lat, lw_gas_props, sw_gas_props,   &

@@ -16,7 +16,7 @@ contains
   ! SUBROUTINE mcica_init
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_cloud_sampling_init
-!! \htmlinclude rrtmgp_lw_cloud_sampling.html
+!! \htmlinclude rrtmgp_lw_cloud_sampling_init.html
 !!
   subroutine rrtmgp_lw_cloud_sampling_init(lw_gas_props, ipsdlw0)
     ! Inputs
@@ -35,7 +35,7 @@ contains
   ! SUBROTUINE rrtmgp_lw_cloud_sampling_run()
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_cloud_sampling_run
-!! \htmlinclude rrtmgp_lw_cloud_sampling.html
+!! \htmlinclude rrtmgp_lw_cloud_sampling_run.html
 !!
   subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, ipsdlw0, icseed_lw, cld_frac,&
        lw_gas_props, lw_optical_props_cloudsByBand, lw_optical_props_clouds, errmsg, errflg)

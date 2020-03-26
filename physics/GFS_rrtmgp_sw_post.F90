@@ -24,7 +24,7 @@ contains
   ! SUBROUTINE GFS_rrtmgp_sw_post_run
   ! #########################################################################################
 !> \section arg_table_GFS_rrtmgp_sw_post_run
-!! \htmlinclude GFS_rrtmgp_sw_post.html
+!! \htmlinclude GFS_rrtmgp_sw_post_run.html
 !!
   subroutine GFS_rrtmgp_sw_post_run (Model, Grid, Diag, Radtend, Coupling, Statein, scmpsw, &
        nCol, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, &

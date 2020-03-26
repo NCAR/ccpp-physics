@@ -29,7 +29,7 @@ contains
   ! SUBROUTINE rrtmgp_lw_pre_run
   ! #########################################################################################
 !> \section arg_table_rrtmgp_lw_pre_run
-!! \htmlinclude rrtmgp_lw_pre.html
+!! \htmlinclude rrtmgp_lw_pre_run.html
 !!
   subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, tsfc, &
        hprime, lw_gas_props, sfc_emiss_byband, semis, errmsg, errflg)

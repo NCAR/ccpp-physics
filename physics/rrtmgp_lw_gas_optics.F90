@@ -17,7 +17,7 @@ contains
   ! SUBROUTINE rrtmgp_sw_gas_optics_init
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_gas_optics_init
-!! \htmlinclude rrtmgp_lw_gas_optics.html
+!! \htmlinclude rrtmgp_lw_gas_optics_init.html
 !!
   subroutine rrtmgp_lw_gas_optics_init(rrtmgp_root_dir, rrtmgp_lw_file_gas, rrtmgp_nGases,  &
        active_gases_array, mpicomm, mpirank, mpiroot, lw_gas_props, errmsg, errflg)
@@ -272,7 +272,7 @@ contains
   ! SUBROUTINE rrtmgp_lw_gas_optics_run
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_gas_optics_run
-!! \htmlinclude rrtmgp_lw_gas_optics.html
+!! \htmlinclude rrtmgp_lw_gas_optics_run.html
 !!
   subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, lw_gas_props, p_lay, p_lev, t_lay,&
        t_lev, skt, gas_concentrations, lw_optical_props_clrsky, sources,  errmsg, errflg)

@@ -37,7 +37,7 @@ module GFS_rrtmgp_setup
 !> \defgroup GFS_rrtmgp_setup GFS RRTMGP Scheme Setup
 !! @{
 !! \section arg_table_GFS_rrtmgp_setup_init
-!! \htmlinclude GFS_rrtmgp_setup.html
+!! \htmlinclude GFS_rrtmgp_setup_init.html
 !!
    subroutine GFS_rrtmgp_setup_init (Model, si, levr, ictm, isol, ico2,  &
         iaer, ialb, iems, ntcw,  num_p3d,  ntoz, iovr_sw, iovr_lw,       &
@@ -91,8 +91,9 @@ module GFS_rrtmgp_setup
      endif
      iaermdl = iaer/1000               ! control flag for aerosol scheme selection
      if ( iaermdl < 0 .or.  (iaermdl>2 .and. iaermdl/=5) ) then
-        print *, ' Error -- IAER flag is incorrect, Abort'
-        stop 7777
+        errmsg = trim(errmsg) // ' Error -- IAER flag is incorrect, Abort'
+        errflg = 1
+        return
      endif
      
      !if ( ntcw > 0 ) then
@@ -135,7 +136,7 @@ module GFS_rrtmgp_setup
    end subroutine GFS_rrtmgp_setup_init
 
 !> \section arg_table_GFS_rrtmgp_setup_run
-!! \htmlinclude GFS_rrtmgp_setup.html
+!! \htmlinclude GFS_rrtmgp_setup_run.html
 !!
    subroutine GFS_rrtmgp_setup_run (idate, jdate, deltsw, deltim, lsswr, me, &
         slag, sdec, cdec, solcon, errmsg, errflg)
@@ -171,10 +172,10 @@ module GFS_rrtmgp_setup
           slag,sdec,cdec,solcon)
      
    end subroutine GFS_rrtmgp_setup_run
-   
-   !> \section arg_table_GFS_rrtmgp_setup_finalize
-   !! \htmlinclude GFS_rrtmgp_setup.html
-   !!
+
+!> \section arg_table_GFS_rrtmgp_setup_finalize
+!! \htmlinclude GFS_rrtmgp_setup_finalize.html
+!!
    subroutine GFS_rrtmgp_setup_finalize (errmsg, errflg)
      
      implicit none

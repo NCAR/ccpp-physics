@@ -27,7 +27,7 @@ contains
   ! SUBROUTINE rrtmgp_lw_rte_run
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_rte_run
-!! \htmlinclude rrtmgp_lw_rte.html
+!! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, nCol, nLev, p_lay, t_lay, p_lev, skt, lw_gas_props, &
        sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
