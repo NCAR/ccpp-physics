@@ -103,11 +103,13 @@ end subroutine m_micro_init
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 
-!> \defgroup mg2mg3 Morrison-Gettelman MP scheme Module
-!! This module contains the the entity of MG2 and MG3 schemes. 
-!> @{
+!> \defgroup mg_driver Morrison-Gettelman MP Driver Module
+!! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 
+!! grid-scale condensation and evaporation of cloud condensate.
+!!
 !> \section arg_table_m_micro_run Argument Table
-!! \htmlinclude m_micro_run.html
+!> \htmlinclude m_micro_run.html
+!!
 !>\section detail_m_micro_run MG m_micro_run Detailed Algorithm
 !> @{
       subroutine m_micro_run(   im,       ix,     lm,     flipv, dt_i   &
@@ -1981,6 +1983,5 @@ end subroutine m_micro_init
 
 
       end subroutine find_cldtop
-!> @}
 
 end module m_micro
