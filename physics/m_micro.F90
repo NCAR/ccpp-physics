@@ -14,8 +14,7 @@ module m_micro
 
 contains
 
-!>\ingroup mg_driver
-!! This subroutine is the MG initialization.
+!> This subroutine is the MG initialization.
 !> \section arg_table_m_micro_init  Argument Table
 !! \htmlinclude m_micro_init.html
 !!
@@ -103,7 +102,7 @@ end subroutine m_micro_init
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 
-!> \defgroup mg_driver Morrison-Gettelman MP Driver Module
+!> \defgroup mg2mg3 Morrison-Gettelman MP Driver Module
 !! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 
 !! grid-scale condensation and evaporation of cloud condensate.
 !!
@@ -1884,7 +1883,7 @@ end subroutine m_micro_init
 !DONIF Calculate the Brunt_Vaisala frequency
 
 !===============================================================================
-!>\ingroup mg_driver
+!>\ingroup mg2mg3
 !> This subroutine computes profiles of background state quantities for 
 !! the multiple gravity wave drag parameterization.
 !!\section gw_prof_gen MG gw_prof General Algorithm
@@ -1971,7 +1970,7 @@ end subroutine m_micro_init
        end subroutine gw_prof
 !> @}
 
-!>\ingroup mg_driver
+!>\ingroup mg2mg3
 !! This subroutine is to find cloud top based on cloud fraction.
       subroutine find_cldtop(ncol, pver, cf, kcldtop)
        implicit none
