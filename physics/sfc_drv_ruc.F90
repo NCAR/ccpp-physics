@@ -130,11 +130,9 @@ module lsm_ruc
 !> \defgroup lsm_ruc_group GSD RUC LSM Model
 !! This module contains the RUC Land Surface Model developed by NOAA/GSD
 !! (Smirnova et al. 2016 \cite Smirnova_2016).
-#if 0
 !> \section arg_table_lsm_ruc_run Argument Table
 !! \htmlinclude lsm_ruc_run.html
 !!
-#endif
 !>\section gen_lsmruc GSD RUC LSM General Algorithm
 ! DH* TODO - make order of arguments the same as in the metadata table
       subroutine lsm_ruc_run                                            & ! inputs
