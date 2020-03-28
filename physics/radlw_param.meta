@@ -23,3 +23,9 @@
   units = DDT
   dimensions = ()
   type = sfcflw_type
+[proflw_type]
+  standard_name = proflw_type
+  long_name = definition of type proflw_type
+  units = DDT
+  dimensions = ()
+  type = proflw_type
