@@ -78,7 +78,7 @@ to the parameterization.
 
 The CCPP includes the suite GFS_v15p2, which has the same parameterizations used in the GFS v15 implemented operationally in June 2019, and suite
 GFS_v16beta, i.e., the beta version of the suite planned for GFS v16 to be implemented operationally in 2021. Suite GFS_v16beta is identical to 
-Suite GFS_v15p2 except for an update in the PBL parameterization (Han et al. 2019 \cite Han_2019 ) and RRTMG. Additionally, CCPP v4 includes two
+Suite GFS_v15p2 except for an update in the PBL parameterization (Han et al. 2019 \cite Han_2019 ). Additionally, CCPP v4 includes two
 developmental suites which are undergoing testing to inform future implementations of the UFS. Suite csawmg differs from GFS_v15p2 as it 
 contains different convection and microphysics schemes made available through a NOAA Climate Process Team (CPT) with components developed 
 at multiple research centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Suite GSD_v1 differs from GFS_v15p2 as it 
