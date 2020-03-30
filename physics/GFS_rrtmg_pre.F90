@@ -262,6 +262,11 @@
             plyr(i,k1)   = 0.5 * (plvl(i,k2+1) + plvl(i,k2))
             prslk1(i,k1) = (plyr(i,k1)*0.001) ** rocp
           enddo
+        else
+          k1 = 1 + kd
+          do i = 1, IM
+            plvl(i,k1) = Statein%prsi(i,1) * 0.01   ! pa to mb (hpa)
+          enddo
         endif
       else                                                 ! input data from sfc to top
         if (Model%levs > lm) then
@@ -270,6 +275,11 @@
             plvl(i,k1+1) = 0.01 * Statein%prsi(i,Model%levs+1)  ! pa to mb (hpa)
             plyr(i,k1)   = 0.5 * (plvl(i,k1+1) + plvl(i,k1))
             prslk1(i,k1) = (plyr(i,k1)*0.001) ** rocp
+          enddo
+        else
+          k1 = lp1 + kd
+          do i = 1, IM
+            plvl(i,k1) = Statein%prsi(i,lp1) * 0.01   ! pa to mb (hpa)
           enddo
         endif
       endif
