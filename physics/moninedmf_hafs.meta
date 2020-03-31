@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = hedmf_init
+  name = hedmf_hafs_init
   type = scheme
 [moninq_fac]
   standard_name = atmosphere_diffusivity_coefficient_factor
@@ -30,7 +30,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = hedmf_run
+  name = hedmf_hafs_run
   type = scheme
 [ix]
   standard_name = horizontal_dimension
@@ -497,6 +497,14 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[islimsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
   intent = in
   optional = F
 [errmsg]

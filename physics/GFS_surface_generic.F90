@@ -30,10 +30,8 @@
                           sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
-                          cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
-                          dtsfcin_cpl, dqsfcin_cpl, ulwsfcin_cpl, ulwsfc_cice, dusfc_cice, dvsfc_cice,     &
-                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice, dry, icy, wet,                 &
-                          wind, u1, v1, cnvwind, errmsg, errflg)
+                          cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
+                          wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
 
@@ -43,7 +41,6 @@
         integer, intent(in) :: im, levs, isot, ivegsrc
         integer, dimension(im), intent(in) :: islmsk
         integer, dimension(im), intent(inout) :: soiltyp, vegtype, slopetyp
-        logical, dimension(im), intent(in) :: dry, icy, wet
 
         real(kind=kind_phys), intent(in) :: con_g
         real(kind=kind_phys), dimension(im), intent(in) :: vfrac, stype, vtype, slope, prsik_1, prslk_1
@@ -77,17 +74,16 @@
         logical, intent(in) :: cplflx
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
         logical, dimension(im), intent(inout) :: flag_cice
-              integer, dimension(im), intent(out) :: islmsk_cice
-        real(kind=kind_phys), dimension(im), intent(in) ::ulwsfcin_cpl, &
-             dusfcin_cpl, dvsfcin_cpl, dtsfcin_cpl, dqsfcin_cpl, &
+        integer, dimension(im), intent(out) :: islmsk_cice
+        real(kind=kind_phys), dimension(im), intent(in) :: &
              tisfc, tsfco, fice, hice
-        real(kind=kind_phys), dimension(im), intent(out) ::ulwsfc_cice, &
-             dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice
 
         real(kind=kind_phys), dimension(im), intent(out) :: wind
         real(kind=kind_phys), dimension(im), intent(in ) :: u1, v1
         ! surface wind enhancement due to convection
-        real(kind=kind_phys), dimension(im), intent(in ) :: cnvwind
+        real(kind=kind_phys), dimension(im), intent(inout ) :: cnvwind
+        !
+        real(kind=kind_phys), dimension(im), intent(out) :: smcwlt2, smcref2
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -108,10 +104,6 @@
         ! Set initial quantities for stochastic physics deltas
         if (do_sppt) then
           dtdtr     = 0.0
-          do i=1,im
-            drain_cpl(i) = rain_cpl (i)
-            dsnow_cpl(i) = snow_cpl (i)
-          enddo
         endif
 
         ! Scale random patterns for surface perturbations with perturbation size
@@ -119,8 +111,8 @@
         if (do_sfcperts) then
           if (pertz0(1) > 0.) then
             z01d(:) = pertz0(1) * sfc_wts(:,1)
-  !          if (me == 0) print*,'sfc_wts(:,1) min and max',minval(sfc_wts(:,1)),maxval(sfc_wts(:,1))
-  !          if (me == 0) print*,'z01d min and max ',minval(z01d),maxval(z01d)
+!            if (me == 0) print*,'sfc_wts(:,1) min and max',minval(sfc_wts(:,1)),maxval(sfc_wts(:,1))
+!            if (me == 0) print*,'z01d min and max ',minval(z01d),maxval(z01d)
           endif
           if (pertzt(1) > 0.) then
             zt1d(:) = pertzt(1) * sfc_wts(:,2)
@@ -131,13 +123,13 @@
           if (pertlai(1) > 0.) then
             xlai1d(:) = pertlai(1) * sfc_wts(:,4)
           endif
-  ! --- do the albedo percentile calculation in GFS_radiation_driver instead --- !
-  !        if (pertalb(1) > 0.) then
-  !          do i=1,im
-  !            call cdfnor(sfc_wts(i,5),cdfz)
-  !            alb1d(i) = cdfz
-  !          enddo
-  !        endif
+!   --- do the albedo percentile calculation in GFS_radiation_driver instead --- !
+!          if (pertalb(1) > 0.) then
+!            do i=1,im
+!              call cdfnor(sfc_wts(i,5),cdfz)
+!              alb1d(i) = cdfz
+!            enddo
+!          endif
           if (pertvegf(1) > 0.) then
             do i=1,im
               call cdfnor(sfc_wts(i,6),cdfz)
@@ -172,31 +164,25 @@
           endif
 
           work3(i)   = prsik_1(i) / prslk_1(i)
-        end do
 
-        do i=1,im
           !tsurf(i) = tsfc(i)
-          zlvl(i)  = phil(i,1) * onebg
+          zlvl(i)    = phil(i,1) * onebg
+          smcwlt2(i) = zero
+          smcref2(i) = zero
+
           wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
                          + max(zero, min(cnvwind(i), 30.0)), one)
           !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
           !                         Statein%vgrs(i,1)*Statein%vgrs(i,1))  &
           !              + max(zero, min(Tbd%phy_f2d(i,Model%num_p2d), 30.0)), one)
-        end do
+          cnvwind(i) = zero
 
+        enddo
 
       if (cplflx) then
         do i=1,im
           islmsk_cice(i) = nint(slimskin_cpl(i))
           flag_cice(i)   = (islmsk_cice(i) == 4)
-
-          if (flag_cice(i)) then
-!           ulwsfc_cice(i) = ulwsfcin_cpl(i)
-            dusfc_cice(i)  = dusfcin_cpl(i)
-            dvsfc_cice(i)  = dvsfcin_cpl(i)
-            dtsfc_cice(i)  = dtsfcin_cpl(i)
-            dqsfc_cice(i)  = dqsfcin_cpl(i)
-          endif
         enddo
       endif
 
@@ -215,8 +201,7 @@
 
       public GFS_surface_generic_post_init, GFS_surface_generic_post_finalize, GFS_surface_generic_post_run
 
-      real(kind=kind_phys), parameter :: one = 1.0d0
-      real(kind=kind_phys), parameter :: zero = 0.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0, one = 1.0d0
 
       contains
 
@@ -271,18 +256,18 @@
         errflg = 0
 
         do i=1,im
-          epi(i)     = ep1d(i)
-          gfluxi(i)  = gflx(i)
-          t1(i)      = tgrs_1(i)
-          q1(i)      = qgrs_1(i)
-          u1(i)      = ugrs_1(i)
-          v1(i)      = vgrs_1(i)
+          epi(i)    = ep1d(i)
+          gfluxi(i) = gflx(i)
+          t1(i)     = tgrs_1(i)
+          q1(i)     = qgrs_1(i)
+          u1(i)     = ugrs_1(i)
+          v1(i)     = vgrs_1(i)
         enddo
 
         if (cplflx .or. cplwav) then
           do i=1,im
-            u10mi_cpl   (i) = u10m(i)
-            v10mi_cpl   (i) = v10m(i)
+            u10mi_cpl(i) = u10m(i)
+            v10mi_cpl(i) = v10m(i)
           enddo
         endif
 
@@ -307,8 +292,8 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-!            tsfci_cpl   (i) = tsfc(i)
-            tsfci_cpl   (i) = tsfc_ocn(i)
+            tsfci_cpl   (i) = tsfc(i)
+!           tsfci_cpl   (i) = tsfc_ocn(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
 

@@ -159,7 +159,7 @@
       onebg = one/con_g
       
       do i = 1, im
-          rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
+        rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
 
 !> - If requested (e.g. Zhao-Carr MP scheme), call calpreciptype() to calculate dominant 
@@ -191,11 +191,11 @@
       end if
       
       if (lsm==lsm_ruc .or. lsm==lsm_noahmp) then
-            raincprv(:)   = rainc(:)
-            rainncprv(:)  = frain * rain1(:)
-            iceprv(:)     = ice(:)
-            snowprv(:)    = snow(:)
-            graupelprv(:) = graupel(:)
+        raincprv(:)   = rainc(:)
+        rainncprv(:)  = frain * rain1(:)
+        iceprv(:)     = ice(:)
+        snowprv(:)    = snow(:)
+        graupelprv(:) = graupel(:)
         !for NoahMP, calculate precipitation rates from liquid water equivalent thickness for use in next time step
         !Note (GJF): Precipitation LWE thicknesses are multiplied by the frain factor, and are thus on the dynamics time step, but the conversion as written
         !            (with dtp in the denominator) assumes the rate is calculated on the physics time step. This only works as expected when dtf=dtp (i.e. when frain=1).
@@ -211,20 +211,12 @@
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !
-        call calpreciptype (kdt, nrcm, im, ix, levs, levs+1,           &
-                            rann, xlat, xlon, gt0,    &
-                            gq0(:,:,1), prsl, prsi,        &
-                            rain, phii, tsfc,           &  !input
-                            domr, domzr, domip, doms)                           ! output
+        call calpreciptype (kdt, nrcm, im, ix, levs, levs+1, &
+                            rann, xlat, xlon, gt0,           &
+                            gq0(:,:,1), prsl, prsi,          &
+                            rain, phii, tsfc,                &  ! input
+                            domr, domzr, domip, doms)           ! output
 !
-!        if (lprnt) print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS '
-!     &,DOMR(ipr),DOMZR(ipr),DOMIP(ipr),DOMS(ipr)
-!        do i=1,im
-!         if (abs(xlon(i)*57.29578-114.0) .lt. 0.2  .and.
-!     &    abs(xlat(i)*57.29578-40.0) .lt. 0.2)
-!     &    print*,'debug calpreciptype: DOMR,DOMZR,DOMIP,DOMS ',
-!     &    DOMR(i),DOMZR(i),DOMIP(i),DOMS(i)
-!       end do
 !       HCHUANG: use new precipitation type to decide snow flag for LSM snow accumulation
 
         if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_thompson) then
@@ -270,7 +262,7 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-!              dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
+!             dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
             enddo
           enddo
         endif
@@ -281,7 +273,7 @@
       do k = 1, levs-1
         do i = 1, im
           if (prsl(i,k) > p850 .and. prsl(i,k+1) <= p850) then
-            t850(i) = gt0(i,k) - (prsl(i,k)-p850) / &
+            t850(i) = gt0(i,k) - (prsl(i,k)-p850) /  &
                       (prsl(i,k)-prsl(i,k+1)) *      &
                       (gt0(i,k)-gt0(i,k+1))
           endif
@@ -299,7 +291,7 @@
 ! determine convective rain/snow by surface temperature
 ! determine large-scale rain/snow by rain/snow coming out directly from MP
        
-        if (lsm/=lsm_ruc) then
+        if (lsm /= lsm_ruc) then
           do i = 1, im
             !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
             srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
@@ -326,7 +318,8 @@
           enddo
         endif ! lsm==lsm_ruc
       elseif( .not. cal_pre) then
-        if (imp_physics == imp_physics_mg) then              ! MG microphysics
+        if (imp_physics == imp_physics_mg) then          ! MG microphysics
+          tem = con_day / (dtp * con_p001)               ! mm / day
           do i=1,im
             tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
             if (rain(i)*tem > rainmin) then
@@ -348,14 +341,16 @@
 
       if (cplflx .or. cplchm) then
         do i = 1, im
-          rain_cpl(i) = rain_cpl(i) + rain(i) * (one-srflag(i))
-          snow_cpl(i) = snow_cpl(i) + rain(i) * srflag(i)
+          drain_cpl(i) = rain(i) * (one-srflag(i))
+          dsnow_cpl(i) = rain(i) * srflag(i)
+          rain_cpl(i) = rain_cpl(i) + drain_cpl(i)
+          snow_cpl(i) = snow_cpl(i) + dsnow_cpl(i)
         enddo
       endif
 
       if (cplchm) then
         do i = 1, im
-             rainc_cpl(i) = rainc_cpl(i) + rainc(i)
+          rainc_cpl(i) = rainc_cpl(i) + rainc(i)
         enddo
       endif
 
@@ -374,8 +369,6 @@
         do i=1,im
           pwat(i) = pwat(i) + del(i,k)*(gq0(i,k,1)+work1(i))
         enddo
-!     if (lprnt .and. i == ipr) write(0,*)' gq0=',
-!    &gq0(i,k,1),' qgrs=',qgrs(i,k,1),' work2=',work2(i),' k=',k
       enddo
       do i=1,im
         pwat(i) = pwat(i) * onebg
@@ -385,15 +378,6 @@
       if (do_sppt) then
 !--- radiation heating rate
         dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
-        do i = 1, im
-          if (t850(i) > 273.16) then
-!--- change in change in rain precip
-             drain_cpl(i) = rain(i) - drain_cpl(i)
-          else
-!--- change in change in snow precip
-             dsnow_cpl(i) = rain(i) - dsnow_cpl(i)
-          endif
-        enddo
       endif
 
     end subroutine GFS_MP_generic_post_run
