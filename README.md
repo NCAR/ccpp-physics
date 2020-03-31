@@ -11,8 +11,8 @@ Please see more information about the CCPP at the locations below.
 - [CCPP Physics GutHub wiki](https://github.com/NCAR/ccpp-physics/wiki)
 - [CCPP Framework GitHub wiki](https://github.com/NCAR/ccpp-framework/wiki)
 
-For the use of CCPP with its Single Column Model, see the [Single Column Model User's Guide].
+For the use of CCPP with its Single Column Model, see the [Single Column Model User's Guide](https://dtcenter.org/GMTB/v4.0/scm-ccpp-guide-v4.0.pdf).
 
 For the use of CCPP with NOAA's Unified Forecast System (UFS), see the [UFS Medium-Range Application User's Guide](https://ufs-mrweather-app.readthedocs.io/en/latest/) and the [UFS Weather Model User's Guide](https://ufs-weather-model.readthedocs.io/en/latest/).
 
-Questions can be directed to the [CCPP Help Desk](mailto:gmtb-help@ucar.edu). When using the CCPP with NOAA's UFS, questions can be posted in the [UFS Weather Model](https://forums.ufscommunity.org/forum/ufs-weather-model) section of the [UFS Forum](https://forums.ufscommunity.org/) 
+Questions can be directed to the [CCPP Help Desk](mailto:gmtb-help@ucar.edu). When using the CCPP with NOAA's UFS, questions can be posted in the [UFS Weather Model](https://forums.ufscommunity.org/forum/ufs-weather-model) section of the [UFS Forum](https://forums.ufscommunity.org/)
