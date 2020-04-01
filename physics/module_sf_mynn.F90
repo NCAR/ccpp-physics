@@ -645,19 +645,19 @@ CONTAINS
         DO I=its,ite
            write(0,*)"=== imortant input to mynnsfclayer, i:", i
            IF (dry(i)) THEN
-             write(0,*)"dry=",dry(i)," tsk=", tskin_lnd(i),&
+             write(0,*)"dry=",dry(i)," pblh=",pblh(i)," tsk=", tskin_lnd(i),&
              " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
              " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i),  &
              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
            ENDIF
            IF (icy(i)) THEN
-             write(0,*)"icy=",icy(i)," tsk=", tskin_ice(i),&
+             write(0,*)"icy=",icy(i)," pblh=",pblh(i)," tsk=", tskin_ice(i),&
              " tsurf=", tsurf_ice(i)," qsfc=", qsfc_ice(i)," znt=", znt_ice(i),&
              " ust=", ust_ice(i)," snowh=", snowh_ice(i),"psfcpa=",PSFCPA(i),  &
              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
            ENDIF
            IF (wet(i)) THEN
-             write(0,*)"wet=",wet(i)," tsk=", tskin_ocn(i),&
+             write(0,*)"wet=",wet(i)," pblh=",pblh(i)," tsk=", tskin_ocn(i),&
              " tsurf=", tsurf_ocn(i)," qsfc=", qsfc_ocn(i)," znt=", znt_ocn(i),&
              " ust=", ust_ocn(i)," snowh=", snowh_ocn(i),"psfcpa=",PSFCPA(i),  &
              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
@@ -813,7 +813,11 @@ CONTAINS
       ENDIF
 
       DO I=its,ite
-         WSPD(I)=SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I))     
+         ! DH* 20200401 - note. A weird bug in Intel 18 on hera prevents using the
+         ! normal -O2 optimization in REPRO and PROD mode for this file. Not reproducible
+         ! by every user, the bug manifests itself in the resulting wind speed WSPD(I)
+         ! being -99.0 despite the assignments in lines 932 and 933. *DH
+         WSPD(I)=SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I))
          WSPD_ocn = -99.
          WSPD_ice = -99.
          WSPD_lnd = -99.
