@@ -265,6 +265,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[hwrf_samfdeep]
+  standard_name = flag_for_hwrf_samfdeepcnv_scheme
+  long_name = flag for hwrf samfdeepcnv scheme 
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_ca]
   standard_name = flag_for_cellular_automata
   long_name = cellular automata main switch
