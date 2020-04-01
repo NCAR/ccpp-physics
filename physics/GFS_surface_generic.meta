@@ -183,8 +183,8 @@
   intent = inout
   optional = F
 [do_sppt]
-  standard_name = flag_for_stochastic_surface_physics_perturbations
-  long_name = flag for stochastic surface physics perturbations
+  standard_name = flag_for_stochastic_physics_perturbations
+  long_name = flag for stochastic physics perturbations
   units = flag
   dimensions = ()
   type = logical
@@ -235,17 +235,17 @@
   kind = kind_phys
   intent = in
   optional = F
-[do_sfcperts]
-  standard_name = flag_for_stochastic_surface_perturbations
-  long_name = flag for stochastic surface perturbations option
-  units = flag
+[lndp_type]
+  standard_name = index_for_stochastic_land_surface_perturbation_type
+  long_name = index for stochastic land surface perturbations type
+  units = index
   dimensions = ()
-  type = logical
+  type = integer
   intent = in
   optional = F
-[nsfcpert]
-  standard_name = number_of_surface_perturbations
-  long_name = number of surface perturbations
+[n_var_lndp]
+  standard_name = number_of_land_surface_variables_perturbed
+  long_name = number of land surface perturbations
   units = count
   dimensions = ()
   type = integer
@@ -260,51 +260,20 @@
   kind = kind_phys
   intent = in
   optional = F
-[pertz0]
-  standard_name = magnitude_of_perturbation_of_momentum_roughness_length
-  long_name = magnitude of perturbation of momentum roughness length
-  units = frac
-  dimensions = (5)
+[lndp_prt_list]
+  standard_name =magnitude_of_perturbations_for_landperts
+  long_name = magnitude of perturbations for landperts
+  units = variable
+  dimensions = (max_n_var_lndp)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[pertzt]
-  standard_name = magnitude_of_perturbation_of_heat_to_momentum_roughness_length_ratio
-  long_name = magnitude of perturbation of heat to momentum roughness length r.
-  units = frac
-  dimensions = (5)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[pertshc]
-  standard_name = magnitude_of_perturbation_of_soil_type_b_parameter
-  long_name = magnitude of perturbation of soil type b parameter
-  units = frac
-  dimensions = (5)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[pertlai]
-  standard_name = magnitude_of_perturbation_of_leaf_area_index
-  long_name = magnitude of perturbation of leaf area index
-  units = frac
-  dimensions = (5)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[pertvegf]
-  standard_name = magnitude_of_perturbation_of_vegetation_fraction
-  long_name = magnitude of perturbation of vegetation fraction
-  units = frac
-  dimensions = (5)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
+[lndp_var_list]
+  standard_name = variables_to_be_perturbed_for_landperts
+  long_name = variables to be perturbed for landperts
+  units = none
+  dimensions =  (max_n_var_lndp)
+  type = character
+  kind = len=3
 [z01d]
   standard_name = perturbation_of_momentum_roughness_length
   long_name = perturbation of momentum roughness length

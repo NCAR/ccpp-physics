@@ -207,7 +207,7 @@
       integer, intent(in) :: im, km, isot, ivegsrc
       real (kind=kind_phys), intent(in) :: grav, cp, hvap, rd, eps,     &
      &       epsm1, rvrdm1
-      real (kind=kind_phys), dimension(5), intent(in) :: pertvegf
+      real (kind=kind_phys), intent(in) :: pertvegf
 
       integer, dimension(im), intent(in) :: soiltyp, vegtype, slopetyp
 
@@ -422,10 +422,10 @@
 !! 0.5 and the perturbations go to zero as vegetation fraction  approaches its upper
 !! or lower bound.
         vegfp  = vegfpert(i)                    ! sfc-perts, mgehne
-        if (pertvegf(1)>0.0) then
+        if (pertvegf>0.0) then
                 ! compute beta distribution parameters for vegetation fraction
                 mv = shdfac
-                sv = pertvegf(1)*mv*(1.-mv)
+                sv = pertvegf*mv*(1.-mv)
                 alphav = mv*mv*(1.0-mv)/(sv*sv)-mv
                 betav  = alphav*(1.0-mv)/mv
                 ! compute beta distribution value corresponding
