@@ -92,8 +92,9 @@
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
-      real(kind=kind_phys), intent(in) :: ca_deep(ix)
       logical, intent(in)  :: do_ca, hwrf_samfdeep
+      ! ca_deep only allocatedd when do_ca is true
+      real(kind=kind_phys), intent(in) :: ca_deep(:)
 
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
@@ -1640,6 +1641,7 @@ c
         endif
       enddo
       enddo
+
       if (hwrf_samfdeep) then
        do i = 1, im
         beta = betas
