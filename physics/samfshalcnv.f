@@ -966,8 +966,8 @@ c
           tem = 1. - tem
           tem1= .5*(cinacrmx-cinacrmn)
           cinacr = cinacrmx - tem * tem1
-         endif
           if(cina(i) < cinacr) cnvflg(i) = .false.
+         endif
        enddo
       endif
 !!
