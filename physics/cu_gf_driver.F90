@@ -9,7 +9,6 @@ module cu_gf_driver
    use machine   , only: kind_phys
    use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
-   use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
 
    implicit none
 
@@ -74,11 +73,10 @@ contains
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
-               nwfa,con_rd,gq0,ntinc,ntlnc,imp_physics,imp_physics_thompson,    &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
                du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
                du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
-               ldiag3d,qdiag3d,errmsg,errflg)
+               ldiag3d,qdiag3d,qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -103,8 +101,9 @@ contains
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    logical, intent(in   ) :: ldiag3d,qdiag3d
 
-   real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceqv_spechum,w,phil
-   real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( ix , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
+   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: qci_conv
    real(kind=kind_phys),  dimension( ix )   :: rand_mom,rand_vmas
    real(kind=kind_phys),  dimension( ix,4 ) :: rand_clos
    real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
@@ -134,12 +133,6 @@ contains
    !
    real(kind=kind_phys), dimension( im ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
-
-!  additional variables for number concentrations
-   real(kind=kind_phys), intent(in) :: nwfa(1:im,1:km)
-   real(kind=kind_phys), intent(in) :: con_rd
-   real(kind=kind_phys), dimension(im,km,ntracer), intent(inout) :: gq0
-   integer, intent(in) :: imp_physics,imp_physics_thompson,ntlnc,ntinc
 
    integer, intent(in   ) :: imfshalcnv
    character(len=*), intent(out) :: errmsg
@@ -760,6 +753,7 @@ contains
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
                gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
+               qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
                gdc(i,k,3)=(outtm(i,k))*86400. 
                gdc(i,k,4)=(outts(i,k))*86400.
@@ -835,25 +829,7 @@ contains
                 cliw(i,k) = max(0.,cliw(i,k) + tem)
                endif
 
-!
-!> calculate cloud water and cloud ice number concentrations
-!
-               rho_dryar(i,k) = p2di(i,k)/(con_rd*t(i,k)) ! Density of dry air in kg m-3
-               if (imp_physics == imp_physics_thompson) then
-                 if ((tem*tem1)>1.e-5) then
-                    gq0(i,k,ntinc) = max(0., gq0(i,k,ntinc) +           &
-                    make_IceNumber(tem*tem1*rho_dryar(i,k), t(i,k)) *   &
-                    (1/rho_dryar(i,k)))
-                 end if
-                 if ((tem*(1-tem1))>1.e-5) then
-                    gq0(i,k,ntlnc) = max(0., gq0(i,k,ntlnc) +           &
-                    make_DropletNumber(tem*(1-tem1)*rho_dryar(i,k), nwfa(i,k)) &
-                    * (1/rho_dryar(i,k)))
-                 end if
-               end if
-
              enddo
-
 
             gdc(i,1,10)=forcing(i,1)
             gdc(i,2,10)=forcing(i,2)

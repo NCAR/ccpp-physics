@@ -28,10 +28,11 @@ contains
    subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, landfrac, lakefrac, oceanfrac,  &
                                  frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorl_ocn, &
                                  zorl_lnd, zorl_ice, snowd, snowd_ocn, snowd_lnd, snowd_ice, tprcp, tprcp_ocn,  &
-                                 tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_ocn,        &
-                                 weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_ocn, tsfc_lnd,        &
-                                 tsfc_ice, tisfc, tice, tsurf, tsurf_ocn, tsurf_lnd, tsurf_ice, gflx_ice,       &
-                                 tgice, islmsk, semis_rad, semis_ocn, semis_lnd, semis_ice,                     &
+                                 tprcp_lnd, tprcp_ice, uustar, uustar_ocn, uustar_lnd, uustar_ice,              &
+                                 weasd, weasd_ocn, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_ocn,&
+                                 tsfc_lnd, tsfc_ice, tisfc, tice, tsurf, tsurf_ocn, tsurf_lnd, tsurf_ice,       &
+                                 gflx_ice, tgice, islmsk, semis_rad, semis_ocn, semis_lnd, semis_ice,           &
+                                 qss, qss_ocn, qss_lnd, qss_ice, hflx, hflx_ocn, hflx_lnd, hflx_ice,            &
                                  min_lakeice, min_seaice, errmsg, errflg)
 
       implicit none
@@ -45,12 +46,13 @@ contains
       real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, oceanfrac
       real(kind=kind_phys), dimension(im), intent(inout) :: cice
       real(kind=kind_phys), dimension(im), intent(  out) :: frland
-      real(kind=kind_phys), dimension(im), intent(in   ) :: zorl, snowd, tprcp, uustar, weasd
+      real(kind=kind_phys), dimension(im), intent(in   ) :: zorl, snowd, tprcp, uustar, weasd, qss, hflx
 
       real(kind=kind_phys), dimension(im), intent(inout) :: zorlo, zorll, tsfc, tsfco, tsfcl, tisfc, tsurf
       real(kind=kind_phys), dimension(im), intent(inout) :: snowd_ocn, snowd_lnd, snowd_ice, tprcp_ocn, &
         tprcp_lnd, tprcp_ice, zorl_ocn, zorl_lnd, zorl_ice, tsfc_ocn, tsfc_lnd, tsfc_ice, tsurf_ocn,    &
-        tsurf_lnd, tsurf_ice, uustar_lnd, uustar_ice, weasd_ocn, weasd_lnd, weasd_ice, ep1d_ice, gflx_ice
+        tsurf_lnd, tsurf_ice, uustar_ocn, uustar_lnd, uustar_ice, weasd_ocn, weasd_lnd, weasd_ice,      &
+        qss_ocn, qss_lnd, qss_ice, hflx_ocn, hflx_lnd, hflx_ice, ep1d_ice, gflx_ice
       real(kind=kind_phys), dimension(im), intent(  out) :: tice
       real(kind=kind_phys),                intent(in   ) :: tgice
       integer,              dimension(im), intent(in   ) :: islmsk
@@ -145,6 +147,7 @@ contains
         tprcp_lnd(i) = tprcp(i)
         tprcp_ice(i) = tprcp(i)
         if (wet(i)) then                   ! Water
+          uustar_ocn(i) = uustar(i)
             zorl_ocn(i) = zorlo(i)
             tsfc_ocn(i) = tsfco(i)
            tsurf_ocn(i) = tsfco(i)
@@ -153,6 +156,8 @@ contains
            weasd_ocn(i) = zero
            snowd_ocn(i) = zero
            semis_ocn(i) = 0.984d0
+             qss_ocn(i) = qss(i)
+            hflx_ocn(i) = hflx(i)
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
@@ -162,6 +167,8 @@ contains
            tsurf_lnd(i) = tsfcl(i)
            snowd_lnd(i) = snowd(i)
            semis_lnd(i) = semis_rad(i)
+             qss_lnd(i) = qss(i)
+            hflx_lnd(i) = hflx(i)
         end if
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
@@ -173,6 +180,8 @@ contains
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
            semis_ice(i) = 0.95d0
+             qss_ice(i) = qss(i)
+            hflx_ice(i) = hflx(i)
         end if
       enddo
 
