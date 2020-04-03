@@ -85,17 +85,6 @@ else(STATIC)
 endif(STATIC)
 
 #------------------------------------------------------------------------------
-# Add the CCPP include/module directory
-set(CCPP_INCLUDE_DIRS "" CACHE FILEPATH "Path to ccpp includes")
-set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES ${CCPP_INCLUDE_DIRS})
-
-#------------------------------------------------------------------------------
-# Add the CCPP library
-set(CCPP_LIB_DIRS "" CACHE FILEPATH "Path to ccpp library")
-link_directories(${CCPP_LIB_DIRS})
-list(APPEND LIBS "ccpp")
-
-#------------------------------------------------------------------------------
 # Set the sources: physics type definitions
 set(TYPEDEFS $ENV{CCPP_TYPEDEFS})
 if(TYPEDEFS)
@@ -357,6 +346,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 if (PROJECT STREQUAL "CCPP-SCM")
+    message(FATAL_ERROR "SHOULDN'T BE HERE!!!")
   INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
 endif (PROJECT STREQUAL "CCPP-SCM")
 
