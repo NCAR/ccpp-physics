@@ -33,13 +33,6 @@ set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
 # Enable Fortran
 enable_language(Fortran)
 
-if (PROJECT STREQUAL "CCPP-SCM")
-  #------------------------------------------------------------------------------
-  # CMake Modules
-  # Set the CMake module path
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../framework/cmake")
-endif (PROJECT STREQUAL "CCPP-SCM")
-
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
 if (OPENMP)
@@ -345,13 +338,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   set_property(SOURCE ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " -Mnobounds ")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-if (PROJECT STREQUAL "CCPP-SCM")
-    message(FATAL_ERROR "SHOULDN'T BE HERE!!!")
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
-endif (PROJECT STREQUAL "CCPP-SCM")
-
 #------------------------------------------------------------------------------
-
 if(STATIC)
   add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
   # Generate list of Fortran modules from defined sources
