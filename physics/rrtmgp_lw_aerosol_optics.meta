@@ -1,0 +1,166 @@
+[ccpp-arg-table]
+  name = rrtmgp_lw_aerosol_optics_run
+  type = scheme
+[doLWrad]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nTracer]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical interface for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical layer for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lk]
+  standard_name = dimensionless_exner_function_at_model_layers
+  long_name = dimensionless Exner function at model layer centers
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[relhum]
+  standard_name = relative_humidity
+  long_name = layer relative humidity
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lsmask]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tracer]
+  standard_name = chemical_tracers
+  long_name = chemical tracers
+  units = g g-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lon]
+  standard_name = longitude
+  long_name = longitude
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lat]
+  standard_name = latitude
+  long_name = latitude
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lw_gas_props]
+  standard_name = coefficients_for_lw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
+  units = DDT
+  dimensions = ()
+  intent = in
+  type = ty_gas_optics_rrtmgp
+  optional = F
+[sw_gas_props]
+  standard_name = coefficients_for_sw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[aerodp]
+  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
+  long_name = vertical integrated optical depth for various aerosol species
+  units = none
+  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[lw_optical_props_aerosol]
+  standard_name = longwave_optical_properties_for_aerosols
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

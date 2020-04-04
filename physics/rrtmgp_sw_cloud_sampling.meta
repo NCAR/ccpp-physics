@@ -1,0 +1,130 @@
+[ccpp-arg-table]
+  name = rrtmgp_sw_cloud_sampling_init
+  type = scheme
+[sw_gas_props]
+  standard_name = coefficients_for_sw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[ipsdsw0]
+  standard_name = initial_permutation_seed_sw
+  long_name = initial seed for McICA SW
+  units = none
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+######################################################
+[ccpp-arg-table]
+  name = rrtmgp_sw_cloud_sampling_run
+  type = scheme
+[doSWrad]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ipsdsw0]
+  standard_name = initial_permutation_seed_sw
+  long_name = initial seed for McICA SW
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[idxday]
+  standard_name = daytime_points
+  long_name = daytime points
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[icseed_sw]
+  standard_name = seed_random_numbers_sw
+  long_name = seed for random number generation for shortwave radiation
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[cld_frac]
+  standard_name = total_cloud_fraction
+  long_name = layer total cloud fraction
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sw_gas_props]
+  standard_name = coefficients_for_sw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[sw_optical_props_cloudsByBand]
+  standard_name = shortwave_optical_properties_for_cloudy_atmosphere_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = in
+  optional = F
+[sw_optical_props_clouds]
+  standard_name = shortwave_optical_properties_for_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
