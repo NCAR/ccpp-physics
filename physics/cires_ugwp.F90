@@ -51,7 +51,8 @@ contains
     integer,              intent (in) :: lonr
     integer,              intent (in) :: levs
     integer,              intent (in) :: latr
-    real(kind=kind_phys), intent (in) :: ak(:), bk(:)
+!SK real(kind=kind_phys), intent (in) :: ak(:), bk(:)
+    real(kind=kind_phys), intent (in) :: ak(levs+1), bk(levs+1)
     real(kind=kind_phys), intent (in) :: dtp
     real(kind=kind_phys), intent (in) :: cdmbgwd(4), cgwf(2) ! "scaling" controls for "old" GFS-GW schemes
     real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
