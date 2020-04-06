@@ -18,6 +18,7 @@
 
       interface print_var
         module procedure print_logic_0d
+        module procedure print_logic_1d
         module procedure print_int_0d
         module procedure print_int_1d
         module procedure print_real_0d
@@ -116,6 +117,7 @@
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
                  if (mpirank==impi .and. omprank==iomp) then
+                     call print_var(mpirank,omprank, blkno, 'Model%kdt'        , Model%kdt)
                      ! Sfcprop
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slmsk'    , Sfcprop%slmsk)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%oceanfrac', Sfcprop%oceanfrac)
@@ -556,6 +558,30 @@
           write(0,'(2a,3i6,i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
 
       end subroutine print_int_0d
+
+      subroutine print_logic_1d(mpirank,omprank,blkno,name,var)
+
+          use machine,               only: kind_phys
+
+          implicit none
+
+          integer, intent(in) :: mpirank, omprank, blkno
+          character(len=*), intent(in) :: name
+          logical, intent(in) :: var(:)
+
+          integer :: i
+
+#ifdef PRINT_SUM
+          write(0,'(2a,3i6,2i8)') 'XXX: ', trim(name), mpirank, omprank, blkno, size(var), count(var)
+#elif defined(PRINT_CHKSUM)
+          write(0,'(2a,3i6,2i8)') 'XXX: ', trim(name), mpirank, omprank, blkno, size(var), count(var)
+#else
+          do i=ISTART,min(IEND,size(var(:)))
+              write(0,'(2a,3i6,i6,1x,l)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, var(i)
+          end do
+#endif
+
+      end subroutine print_logic_1d
 
       subroutine print_int_1d(mpirank,omprank,blkno,name,var)
 
