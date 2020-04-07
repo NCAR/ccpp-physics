@@ -265,14 +265,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[ca_sgs]
-  standard_name = flag_for_sgs_cellular_automata
-  long_name = switch for sgs ca
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [nthresh]
   standard_name = threshold_for_perturbed_vertical_velocity
   long_name = threshold used for perturbed vertical velocity
@@ -285,6 +277,30 @@
 [do_ca]
   standard_name = flag_for_cellular_automata
   long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_closure]
+  standard_name = flag_for_global_cellular_automata_closure
+  long_name = switch for ca on closure
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_entr]
+  standard_name = flag_for_global_cellular_automata_entr
+  long_name = switch for ca on entr
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_trigger]
+  standard_name = flag_for_global_cellular_automata_trigger
+  long_name = switch for ca on trigger
   units = flag
   dimensions = ()
   type = logical

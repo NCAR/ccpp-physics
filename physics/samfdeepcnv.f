@@ -77,7 +77,8 @@
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,         &
-     &    do_ca, ca_sgs, nthresh, ca_deep, rainevap,                    &
+     &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh, ca_deep,     &
+     &    rainevap,                                                     &
      &    errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -96,7 +97,7 @@
       real(kind=kind_phys), intent(in) :: nthresh
       real(kind=kind_phys), intent(in) :: ca_deep(ix)
       real(kind=kind_phys), intent(out) :: rainevap(ix)
-      logical, intent(in)  :: do_ca,ca_sgs
+      logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
@@ -661,6 +662,14 @@ c
         if(kbcon(i) == kmax(i)) cnvflg(i) = .false.
       enddo
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -712,6 +721,14 @@ c
         endif
       enddo
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -760,7 +777,7 @@ c
 !
       else
 !
-         if(do_ca .and. ca_sgs)then
+         if(do_ca .and. ca_entr)then
             do i=1,im
                if(cnvflg(i)) then
                   if(ca_deep(i) > nthresh)then
@@ -1004,6 +1021,14 @@ c
         endif
       enddo
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i = 1, im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -1072,6 +1097,14 @@ c
         endif
       enddo
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -1106,6 +1139,14 @@ c
           if(tem < cthk) cnvflg(i) = .false.
         endif
       enddo
+!!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
 !!
       totflg = .true.
       do i = 1, im
@@ -2387,6 +2428,7 @@ c
         endif
       enddo
 !!
+
 !> - If the large scale destabilization is less than zero, or the stabilization by the convection is greater than zero, then the scheme returns to the calling routine without modifying the state variables.
       totflg = .true.
       do i=1,im
@@ -2420,6 +2462,16 @@ c
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
       enddo
+!
+      if (do_ca .and. ca_closure)then
+      do i = 1, im
+        if(cnvflg(i)) then
+           if (ca_deep(i) > nthresh) then
+              xmb(i) = xmb(i)*1.25
+           endif
+        endif
+      enddo
+      endif
 
 !> - Transport aerosols if present
 
@@ -2600,7 +2652,7 @@ c             if(islimsk(i) == 1) evef = 0.
       enddo
 
 !LB:                                                                                                                                                                                                                                                  
-      if(do_ca .and. ca_sgs)then
+      if(do_ca)then
          do i = 1,im
             rainevap(i)=delqev(i)
          enddo
