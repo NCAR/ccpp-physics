@@ -1,29 +1,33 @@
-!>  \file sfc_drv_hafs.f
-!!  This file contains the Noah land surface scheme driver.
+!>  \file sfc_noah_GFS_interstitial.F90
+!!  This file contains data preparation for the Noah LSM as part of the GFS suite.
 
-!> This module contains the CCPP-compliant Noah land surface scheme driver for the hurricane application.
-      module lsm_noah_hafs
+!> This module contains the CCPP-compliant data preparation for the Noah LSM for the hurricane application.
+      module sfc_noah_GFS_pre
 
       implicit none
 
       private
 
-      public :: lsm_noah_hafs_init, lsm_noah_hafs_run, lsm_noah_hafs_finalize
+      public :: sfc_noah_GFS_pre_init, sfc_noah_GFS_pre_run, sfc_noah_GFS_pre_finalize
 
       contains
 
-!>\ingroup Noah_LSM_hafs
-!! \section arg_table_lsm_noah_hafs_init Argument Table
-!! \htmlinclude lsm_noah_hafs_init.html
+!> \ingroup Noah_LSM_hafs
+!! \section arg_table_sfc_noah_GFS_pre_init Argument Table
+!! \htmlinclude sfc_noah_GFS_pre_init.html
 !!
-      subroutine lsm_noah_hafs_init(lsm, lsm_noah_hafs, restart, veg_data_choice, soil_data_choice, ialb, ncol, nsoil, vtype, snoalb, isurban, sthick, errmsg, errflg)
+      subroutine sfc_noah_GFS_pre_init(lsm, lsm_noah_hafs, restart, veg_data_choice, &
+          soil_data_choice, ialb, ncol, nsoil, vtype, snoalb, isurban, sthick, &
+          errmsg, errflg)
 
       use machine, only : kind_phys
       use module_sf_noahlsm,  only: maxalb
       
       implicit none
       
-      integer,              intent(in)  :: lsm, lsm_noah_hafs, veg_data_choice, soil_data_choice, ialb, ncol, nsoil
+      integer,              intent(in)  :: lsm, lsm_noah_hafs, &
+                                           veg_data_choice, soil_data_choice, &
+                                           ialb, ncol, nsoil
       real(kind=kind_phys), dimension(ncol), intent(in)  :: vtype
       logical,              intent(in)  :: restart
       
@@ -39,10 +43,6 @@
       character(len=256)                  :: mminlu, mminsl
       
       integer :: i, k
-      !integer :: ite, ide, itf
-      !integer               :: ids,ide, jds,jde, kds,kde, &
-      !                         ims,ime, jms,jme, kms,kme, &
-      !                         its,ite, jts,jte, kts,kte
       
       real(kind=kind_phys), parameter, dimension(4) :: zsoil = (/ -0.1,-0.4,-1.0,-2.0/) !what if nsoil /= 4?  
       
@@ -91,26 +91,6 @@
       
       call soil_veg_gen_parm(trim(mminlu), trim(mminsl), errmsg, errflg)
       
-      ! Set internal dimensions
-      ! ids = 1
-      ! ims = 1
-      ! its = 1
-      ! ide = ncol
-      ! ime = ncol
-      ! ite = ncol
-      ! jds = 1
-      ! jms = 1
-      ! jts = 1
-      ! jde = 1
-      ! jme = 1
-      ! jte = 1
-      ! kds = 1
-      ! kms = 1
-      ! kts = 1
-      ! kde = nlev
-      ! kme = nlev
-      ! kte = nlev
-      
       if (.not. restart) then
         do i = 1, ncol      
           if(ialb == 0) then
@@ -124,13 +104,13 @@
         sthick(k) = zsoil(k-1) - zsoil(k)
       enddo
       
-      end subroutine lsm_noah_hafs_init
+      end subroutine sfc_noah_GFS_pre_init
 
 
-!! \section arg_table_lsm_noah_hafs_finalize Argument Table
-!! \htmlinclude lsm_noah_hafs_finalize.html
+!! \section arg_table_sfc_noah_GFS_pre_finalize Argument Table
+!! \htmlinclude sfc_noah_GFS_pre_finalize.html
 !!
-      subroutine lsm_noah_hafs_finalize(errmsg, errflg)
+      subroutine sfc_noah_GFS_pre_finalize(errmsg, errflg)
 
       implicit none
 
@@ -141,100 +121,51 @@
       errmsg = ''
       errflg = 0
 
-      end subroutine lsm_noah_hafs_finalize
+      end subroutine sfc_noah_GFS_pre_finalize
 
 
-!>\defgroup Noah_LSM_hafs Noah LSM Model for the hurricane application
-!! \section arg_table_lsm_noah_hafs_run Argument Table
-!! \htmlinclude lsm_noah_hafs_run.html
+!> \defgroup Noah_LSM_hafs Noah LSM Model for the hurricane application
+!! \section arg_table_sfc_noah_GFS_pre_run Argument Table
+!! \htmlinclude sfc_noah_GFS_pre_run.html
 !!
 !> \section general_noah_hafs_drv GFS sfc_drv General Algorithm
 !>  @{
-      subroutine lsm_noah_hafs_run                                      &
-     &     (im, land, flag_iter, srflag, isurban, opt_thcnd, dt, rhowater, &
-            eps, epsm1, cp, rd, rvrdm1, sigma, cph2o, cpice, lsubf, zlvl, nsoil, &
-            sthick, lwdn, soldn, solnet, sfcprs, tprcp, sfctmp, q1, prslki, &
-            vegtyp, soiltyp, slopetyp, shmin, shmax, snoalb, tbot, wind, shdfac, &
-            albbrd, z0brd, z0k, emissi, canopy, t1, stc, smc, swc, snwdph, sneqv, &
-            ch, ribb, eta_kinematic, shflx, embrd, ec, edir, ett, esnow, etp, &
-            ssoil, snohf, sncovr, snowc, runoff, drain, stm, qsurf, smcwlt, smcref, errmsg, errflg &
-     &     )
-!
+      subroutine sfc_noah_GFS_pre_run (im, nsoil, land, flag_guess, flag_iter, flag_lsm, &
+        dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, sfctmp,  &
+        q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, smc, stc, slc, prcp, q2k, rho1, qs1,&
+        th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, canopy_save, smc_save, stc_save, slc_save, errmsg, errflg)
+
       use machine , only : kind_phys
-      use module_sf_noahlsm, only: sflx, lutype, sltype
       use funcphys, only : fpvs
 
       implicit none
-      
-      integer,                             intent(in) :: im, isurban, opt_thcnd, nsoil
-      real(kind=kind_phys),                intent(in) :: dt, rhowater, eps, epsm1, cp, rd, rvrdm1, sigma, cph2o, cpice, lsubf
 
-      integer, dimension(im),              intent(in) :: vegtyp, soiltyp, slopetyp
-      logical, dimension(im),              intent(in) :: flag_iter, land
-      real(kind=kind_phys), dimension(im), intent(in) :: srflag, zlvl, lwdn, soldn, solnet, sfcprs, tprcp, sfctmp, q1, prslki, shmin, shmax, snoalb, tbot, wind
-      real(kind=kind_phys), dimension(nsoil), intent(in) :: sthick
-
-      real(kind=kind_phys), dimension(im), intent(inout) :: shdfac, albbrd, z0brd, z0k, emissi, canopy, t1, snwdph, sneqv, ch, ribb
-      real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: stc, smc, swc
+      !GJF: Data preparation and output preparation from SFLX follows the GFS physics code (sfc_drv.F)
+      ! rather than the WRF code (module_sf_noahdrv.F) in order to "fit in" with other GFS physics-based
+      ! suites. Another version of this scheme (and the associated post) could potentially be
+      ! created from the WRF version. No attempt was made to test sensitivities to either approach. 
+      ! Note that the version of NOAH LSM expected here is "generic" - there are no urban, fasdas, or
+      ! or University of Arizona(?) additions.
       
-      real(kind=kind_phys), dimension(im), intent(out) :: embrd, eta_kinematic, shflx, ec, edir, ett, esnow, etp, ssoil, snohf, sncovr, snowc, runoff, drain, stm, qsurf, smcwlt, smcref
+      integer,                             intent(in) :: im, nsoil
+      real(kind=kind_phys),                intent(in) :: dt, rhowater, rd, rvrdm1, eps, epsm1
+
+      logical, dimension(im),              intent(in) :: flag_guess, flag_iter, land
+      real(kind=kind_phys), dimension(im), intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, t1, snwdph
+      real(kind=kind_phys), dimension(im), intent(in) :: weasd, tsfc
+      real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc, stc, slc
+
+      logical, dimension(im), intent(inout) :: flag_lsm
+      real(kind=kind_phys), dimension(im), intent(inout) :: prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh
+      real(kind=kind_phys), dimension(im), intent(inout) :: weasd_save, snwdph_save, tsfc_save, canopy_save
+      real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: smc_save, stc_save, slc_save
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
 !     local Variables
       integer :: i, k
-      logical, parameter :: local = .false.
-      logical, parameter :: ua_phys = .false.
-      logical, parameter :: rdlai2d = .false.
-      logical, parameter :: usemonalb = .true. !Biswas says true for HWRF
-      real(kind=kind_phys), parameter :: aoasis = 1.0 !hard-coded to 1 in module_sf_noahdrv or set to value from urban module?
-      integer, parameter :: fasdas = 0 ! = 1 if using "flux-adjusting surface data assimilation system"
-      real(kind=kind_phys) :: prcp, rho, qs1, q2k, th2, dqsdt2, dummy, cmc, snowhk, chk, sheat, flx1, flx2, flx3, runoff1, runoff2, soilm, smcmax 
-      
-      
-      integer :: nroot
-      real(kind=kind_phys) :: albedok, eta, fdown, drip, dew, beta, snomlt, runoff3, rc, pc, rsmin, xlai, rcs, rct, rcq, rcsoil, soilw, snotime1, smcdry
-      real (kind=kind_phys), dimension(nsoil) :: et, smav
-      real(kind=kind_phys) :: sfcheadrt, infxsrt, etpnd1 !doesn't appear to be used unless WRF_HYDRO preprocessor directive is defined and no documentation
-      real(kind=kind_phys) :: xsda_qfx, hfx_phy, qfx_phy, xqnorm, hcpct_fasdas !only used if fasdas = 1 ("flux-adjusting surface data assimilation system")
-      
-      !GJF: 
-      ! albedok is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     SURFACE ALBEDO INCLUDING SNOW EFFECT (UNITLESS FRACTION)
-      !                =SNOW-FREE ALBEDO (ALB) WHEN SNEQV=0, OR
-      !                =FCT(MSNOALB,ALB,VEGTYP,SHDFAC,SHDMIN) WHEN SNEQV>0
-      !     if needed by other schemes or diagnostics, one needs to add it to the host model and CCPP metadata; could also just pass in dummy argument
-      ! eta is an output from sflx, but eta_kinematic is what is passed out
-      ! fdown is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     Radiation forcing at the surface (W m-2) = SOLDN*(1-alb)+LWDN
-      ! et is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     plant transpiration from a particular root (soil) layer (W m-2)
-      ! drip is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     through-fall of precip and/or dew in excess of canopy water-holding capacity (m)
-      ! dew is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     dewfall (or frostfall for t<273.15) (m)
-      ! beta is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     ratio of actual/potential evap (dimensionless)
-      ! snomlt is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     snow melt (m) (water equivalent)
-      ! rc is an output from sflx (but is not sent outside of the scheme in GFS) and is defined as:
-      !     canopy resistance (s m-1)
-      ! pc : plant coefficient (unitless fraction, 0-1) where pc*etp = actual transp
-      ! rsmin : minimum canopy resistance (s m-1)
-      ! xlai: leaf area index (dimensionless)
-      ! rcs: incoming solar rc factor (dimensionless)
-      ! rct: air temperature rc factor (dimensionless)
-      ! rcq: atmos vapor pressure deficit rc factor (dimensionless)
-      ! rcsoil: soil moisture rc factor (dimensionless)
-      ! soilw: available soil moisture in root zone (unitless fraction between smcwlt and smcmax)
-      ! smav: soil moisture availability for each layer, as a fraction between smcwlt and smcmax.
-      ! snotime1: no documentation in module_sf_noahlsm.F, but described as "initial number of timesteps since last snowfall" in module_sf_noahdrv.F; related to CCPP nondimensional_snow_age for NoahMP? Since inout, need to initialize here?
-      ! smcdry: dry soil moisture threshold where direct evap frm top layer ends (volumetric)
-      ! nroot: number of root layers, a function of veg type, determined in subroutine redprm.
-      
-      !variables associated with UA_PHYS (not used for now)
-      real(kind=kind_phys) :: flx4, fvb, fbur, fgsn
+      real(kind=kind_phys) :: sneqv, snwd
       
       REAL, PARAMETER  :: A2=17.67,A3=273.15,A4=29.65,   &
                           A23M4=A2*(A3-A4)
@@ -245,95 +176,96 @@
       errflg = 0
       
       do i=1, im
+        if (land(i) .and. flag_guess(i)) then
+          weasd_save(i) = weasd(i)
+          snwdph_save(i) = snwdph(i)
+          tsfc_save(i) = tsfc(i)
+          canopy_save(i) = canopy(i)
+        end if
+        
+        do k=1,nsoil
+          smc_save(i,k) = smc(i,k)
+          stc_save(i,k) = stc(i,k)
+          slc_save(i,k) = slc(i,k)
+        end do
+      end do
+      
+      flag_lsm(:) = .false.
+      do i=1, im
         if (flag_iter(i) .and. land(i)) then
+          flag_lsm(i) = .true.
           !GJF: module_sf_noahdrv.F from WRF has hardcoded slopetyp = 1; why? replicate here?
           !GJF: shdfac is zeroed out for particular combinations of vegetation table source and vegetation types; replicate here?
           
           !GJF: could potentially pass in pre-calculated rates instead of calculating here
-          prcp = rhowater * tprcp(i) / dt
+          prcp(i) = rhowater * tprcp(i) / dt
           
           !GJF: The GFS version of NOAH prepares the specific humidity in sfc_drv.f as follows:
-          q2k   = max(q1(i), 1.e-8)
-          rho   = sfcprs(i) / (rd*t1(i)*(1.0+rvrdm1*q2k))
-          qs1   = fpvs( sfctmp(i) )
-          qs1   = max(eps*qs1 / (sfcprs(i)+epsm1*qs1), 1.e-8)
-          q2k   = min(qs1, q2k)
+          q2k(i)   = max(q1(i), 1.e-8)
+          rho1(i)  = sfcprs(i) / (rd*t1(i)*(1.0+rvrdm1*q2k(i)))
+          qs1(i)   = fpvs( sfctmp(i) )
+          qs1(i)   = max(eps*qs1(i) / (sfcprs(i)+epsm1*qs1(i)), 1.e-8)
+          q2k(i)   = min(qs1(i), q2k(i))
           
           !GJF: could potentially pass in pre-calcualted potential temperature if other schemes also need it (to avoid redundant calculation)
-          th2 = t1(i) * prslki(i)
+          th1(i) = t1(i) * prslki(i)
           
           !GJF: module_sf_noahdrv.F from WRF modifies dqsdt2 if the surface has snow.
-          dqsdt2=qs1*a23m4/(sfctmp(i)-a4)**2
+          dqsdt2(i)=qs1(i)*a23m4/(sfctmp(i)-a4)**2
           
           !GJF: convert canopy moisture from kg m-2 to m
           canopy(i) = max(canopy(i), 0.0) !check for positive values in sfc_drv.f
-          cmc = canopy(i)/rhowater
+          cmc(i) = canopy(i)/rhowater
           
           !GJF: snow depth passed in to NOAH is conditionally modified differently in GFS and WRF:
-          if ( (sneqv(i) /= 0.0 .and. snwdph(i) == 0.) .or. (snwdph(i) <= sneqv(i)) ) then
-            snowhk = 5.*sneqv(i)
-          endif
+          sneqv = weasd(i) * 0.001
+          snwd = snwdph(i) * 0.001
+          if ( (sneqv /= 0.0 .and. snwd == 0.) .or. (snwd <= sneqv) ) then
+            snowhk(i) = 5.*sneqv
+          end if
           !GJF: GFS version:
           ! if (sneqv(i) /= 0.0 .and. snwdph(i) == 0.0) then
-          !   snowhk = 10.0 * sneqv(i)
+          !   snowhk(i) = 10.0 * sneqv(i)
           ! endif
           
           !GJF: calculate conductance from surface exchange coefficient
-          chk = ch(i)  * wind(i)
+          chk(i) = ch(i)  * wind(i)
           
-          call sflx (i, 1, srflag(i), &
-                   isurban, dt, zlvl(i), nsoil, sthick,              &    !c
-                   local,                                            &    !L
-                   lutype, sltype,                                   &    !CL
-                   lwdn(i),soldn(i),solnet(i),sfcprs(i),prcp,sfctmp(i),q2k,dummy,&    !F
-                   dummy,dummy, dummy,                               &    !F
-                   th2,qs1,dqsdt2,                                   &    !I
-                   vegtyp(i),soiltyp(i),slopetyp(i),shdfac(i),shmin(i),shmax(i),       &    !I
-                   albbrd(i), snoalb(i), tbot(i), z0brd(i), z0k(i), emissi(i), embrd(i),  &    !S
-                   cmc,t1(i),stc(i,:),smc(i,:),swc(i,:),snowhk,sneqv(i),albedok,chk,dummy,&    !H
-                   cp, rd, sigma, cph2o, cpice, lsubf,&
-                   eta,sheat,eta_kinematic(i),fdown,                   &    !O
-                   ec(i),edir(i),et,ett(i),esnow(i),drip,dew,                    &    !O
-                   beta,etp(i),ssoil(i),                                   &    !O
-                   flx1,flx2,flx3,                                   &    !O
-                   flx4,fvb,fbur,fgsn,ua_phys,                       &    !UA 
-                   snomlt,sncovr(i),                                    &    !O
-                   runoff1,runoff2,runoff3,                          &    !O
-                   rc,pc,rsmin,xlai,rcs,rct,rcq,rcsoil,              &    !O
-                   soilw,soilm,qsurf(i),smav,                              &    !D
-                   rdlai2d,usemonalb,                                &
-                   snotime1,                                         &
-                   ribb(i),                                             &
-                   smcwlt(i),smcdry,smcref(i),smcmax,nroot,                &
-                   sfcheadrt,                                   &    !I
-                   infxsrt,etpnd1,opt_thcnd,aoasis,              &    !O
-                   xsda_qfx, hfx_phy, qfx_phy, xqnorm, fasdas, hcpct_fasdas,     &   ! fasdas
-                   errflg, errmsg)
-          if (errflg > 0) return
-          !set fasdas = 0; all other vars can be dummy, I think
+          chh(i) = chk(i) * rho1(i)
+          cmm(i) = cm(i) * wind(i)
           
-          canopy(i) = cmc*rhowater
-          snwdph(i) = snowhk
-           
-          shflx(i) = sheat / (cp*rho)
+
+!GJF: If the perturbations of vegetation fraction is desired, one could uncomment this code
+! and add appropriate arguments to make this work. This is from the GFS version of NOAH LSM
+! in sfc_drv.f.
           
-          !aggregating several outputs into one like GFS sfc_drv.F
-          snohf(i) = flx1 + flx2 + flx3
-          
-          snowc(i) = sncovr(i) !GJF: redundant?
-          
-          !convert from m s-1 to kg m-2 s-1 by multiplying by rhowater
-          runoff(i) = runoff1 * rhowater
-          drain(i) = runoff2 * rhowater
-          stm(i) = soilm * rhowater
-          
-          !wet1(i) = smc(i,1) / smcmax !Sarah Lu added 09/09/2010 (for GOCART)
-          
+!>  - Call surface_perturbation::ppfbet() to perturb vegetation fraction that goes into gsflx().
+!  perturb vegetation fraction that goes into sflx, use the same
+!  perturbation strategy as for albedo (percentile matching)
+!! Following Gehne et al. (2018) \cite gehne_et_al_2018, a perturbation of vegetation
+!! fraction is added to account for the uncertainty. A percentile matching technique
+!! is applied to guarantee the perturbed vegetation fraction is bounded between 0 and
+!! 1. The standard deviation of the perturbations is 0.25 for vegetation fraction of
+!! 0.5 and the perturbations go to zero as vegetation fraction  approaches its upper
+!! or lower bound.
+          ! vegfp  = vegfpert(i)                    ! sfc-perts, mgehne
+          ! if (pertvegf(1)>0.0) then
+          !         ! compute beta distribution parameters for vegetation fraction
+          !         mv = shdfac
+          !         sv = pertvegf(1)*mv*(1.-mv)
+          !         alphav = mv*mv*(1.0-mv)/(sv*sv)-mv
+          !         betav  = alphav*(1.0-mv)/mv
+          !         ! compute beta distribution value corresponding
+          !         ! to the given percentile albPpert to use as new albedo
+          !         call ppfbet(vegfp,alphav,betav,iflag,vegftmp)
+          !         shdfac = vegftmp
+          ! endif
+! *** sfc-perts, mgehne
         endif
       end do
       
       
-      end subroutine lsm_noah_hafs_run
+      end subroutine sfc_noah_GFS_pre_run
       
       subroutine soil_veg_gen_parm( mminlu, mminsl, errmsg, errflg)
         !use namelist_soilveg_hafs
@@ -691,4 +623,99 @@
 !-----------------------------
 !> @}
 
-end module lsm_noah_hafs
+      end module sfc_noah_GFS_pre
+
+      module sfc_noah_GFS_post
+        
+      implicit none
+
+      private
+
+      public :: sfc_noah_GFS_post_init, sfc_noah_GFS_post_run, sfc_noah_GFS_post_finalize
+
+      contains
+        
+      subroutine sfc_noah_GFS_post_init ()
+      end subroutine sfc_noah_GFS_post_init
+      
+      subroutine sfc_noah_GFS_post_finalize ()
+      end subroutine sfc_noah_GFS_post_finalize
+      
+!! \section arg_table_sfc_noah_GFS_post_run Argument Table
+!! \htmlinclude sfc_noah_GFS_post_run.html
+!!
+      subroutine sfc_noah_GFS_post_run (im, nsoil, land, flag_guess, flag_lsm, rhowater, cp, cmc, &
+        rho1, sheat, flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, snowhk, weasd_save, snwdph_save, tsfc_save, t1, canopy_save, smc_save, stc_save, slc_save, smcmax, canopy, shflx, snohf, snowc, runoff, drain, stm, weasd, snwdph, tsfc, smc, stc, slc, wet1, errmsg, errflg)
+      
+      use machine, only : kind_phys
+      
+      implicit none
+      
+      integer, intent(in) :: im, nsoil
+      logical, dimension(im), intent(in) :: land, flag_guess, flag_lsm
+      real(kind=kind_phys),   intent(in) :: rhowater, cp
+      real(kind=kind_phys), dimension(im), intent(in) :: cmc, rho1, sheat, &
+        flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, snowhk
+      real(kind=kind_phys), dimension(im), intent(in) :: weasd_save, snwdph_save, tsfc_save, t1, canopy_save, smcmax
+      real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc_save, stc_save, slc_save
+      
+      real(kind=kind_phys), dimension(im), intent(inout) :: canopy, shflx, &
+        snohf, snowc, runoff, drain, stm, wet1
+      real(kind=kind_phys), dimension(im), intent(inout) :: weasd, snwdph, tsfc
+      real(kind=kind_phys), dimension(im, nsoil), intent(inout) :: smc, stc, slc
+      
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+      
+      !local variables
+      integer :: i, k
+      
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+      
+      do i=1, im
+        if (flag_lsm(i)) then
+          canopy(i) = cmc(i)*rhowater
+          snwdph(i) = 1000.0*snowhk(i)
+          
+          shflx(i) = sheat(i) / (cp*rho1(i))
+          
+          !aggregating several outputs into one like GFS sfc_drv.F
+          snohf(i) = flx1(i) + flx2(i) + flx3(i)
+           
+          snowc(i) = sncovr(i) !GJF: redundant?
+       
+          !convert from m s-1 to kg m-2 s-1 by multiplying by rhowater
+          runoff(i) = runoff1(i) * rhowater
+          drain(i) = runoff2(i) * rhowater
+          
+          stm(i) = soilm(i) * rhowater
+      
+          wet1(i) = smc(i,1) / smcmax(i) !Sarah Lu added 09/09/2010 (for GOCART)
+        end if
+      end do
+      
+      do i=1, im
+        if (land(i)) then 
+          if (flag_guess(i)) then
+            weasd(i) = weasd_save(i)
+            snwdph(i) = snwdph_save(i)
+            tsfc(i) = tsfc_save(i)
+            canopy(i) = canopy_save(i)
+            
+            do k=1,nsoil
+              smc(i,k) = smc_save(i,k)
+              stc(i,k) = stc_save(i,k)
+              slc(i,k) = slc_save(i,k)
+            end do
+            
+          else
+            tsfc(i) = t1(i)
+          end if
+        end if
+      end do
+
+      end subroutine sfc_noah_GFS_post_run
+  
+      end module sfc_noah_GFS_post
