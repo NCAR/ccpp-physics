@@ -268,8 +268,8 @@
 !! code from aer inc.     
       module rrtmg_sw 
 !
-      use physparam,        only : iswrate, iswrgas, iswcice,           &   !mz: iswcliq
-     &                             icldflg, ivflip,                     &
+      use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
+     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
      &                             iswmode
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
@@ -369,7 +369,7 @@
 !  ---  public accessable subprograms
 
       public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit,   &
-     &        kissvec, generate_stochastic_clouds_sw,mcica_subcol_sw  
+     &        kissvec, generate_stochastic_clouds_sw, mcica_subcol_sw  
 
 
 ! =================
@@ -470,7 +470,7 @@
      &       icseed, aeraod, aerssa, aerasy,                            &
      &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
      &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
-     &       dzlyr,delpin,de_lgth, iswcliq, iovrsw, isubcsw,            &
+     &       dzlyr,delpin,de_lgth,                                      &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
      &       cld_cf, lsswr,                                             &
@@ -478,7 +478,8 @@
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, cld_ssa, cld_asy,mpirank,mpiroot, errmsg, errflg )
+     &       cld_od, cld_ssa, cld_asy, errmsg, errflg                   &
+     &     )
 
 !  ====================  defination of variables  ====================  !
 !                                                                       !
@@ -597,7 +598,7 @@
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
 !           =3: decorrelation-length overlap clouds                     !
-!           =4: exponential overlapping clouds
+!           =4: exponential overlapping clouds                          !
 !   ivflip  - control flg for direction of vertical index               !
 !           =0: index from toa to surface                               !
 !           =1: index from surface to toa                               !
@@ -657,7 +658,6 @@
 
 !  ---  inputs:
       integer, intent(in) :: npts, nlay, nlp1, NDAY
-      integer, intent(in) :: iswcliq,iovrsw,isubcsw
 
       integer, dimension(:), intent(in) :: idxday, icseed
 
@@ -696,7 +696,6 @@
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon,          &
      &       de_lgth(npts)
 
-      integer,          intent(in) :: mpirank,mpiroot
 !  ---  outputs:
       real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hswc
       real (kind=kind_phys), dimension(npts,nlay), intent(inout) ::     &
@@ -822,7 +821,7 @@
       integer, dimension(npts) :: ipseed
       integer, dimension(nlay) :: indfor, indself, jp, jt, jt1
 
-      integer :: i, ib, ipt, j1, k, kk, laytrop, mb,ig
+      integer :: i, ib, ipt, j1, k, kk, laytrop, mb, ig
       integer :: inflgsw, iceflgsw, liqflgsw
       integer :: irng, permuteseed
 !
@@ -834,13 +833,13 @@
 
 ! Select cloud liquid and ice optics parameterization options
 ! For passing in cloud optical properties directly:
-!         inflgsw = 0
-!         iceflgsw = 0
-!         liqflgsw = 0
+!     inflgsw  = 0
+!     iceflgsw = 0
+!     liqflgsw = 0
 ! For passing in cloud physical properties; cloud optics parameterized in RRTMG:
-         inflgsw = 2
-         iceflgsw = 3
-         liqflgsw = 1
+      inflgsw  = 2
+      iceflgsw = 3
+      liqflgsw = 1
 !
       if (.not. lsswr) return
       if (nday <= 0) return
@@ -942,7 +941,7 @@
         albdf(2) = sfcalb_uvis_dif(j1)
 
 
-! mz*: HWRF practice
+! mz*: HWRF
         if (iovrsw == 4 ) then
 
 
@@ -973,25 +972,6 @@
                enddo
             enddo
 
-!mz
-!         if(mpirank==mpiroot) then
-!               write(0,*) 'mcica_subcol_sw: max/min(cld_cf)=',          &
-!     &                     maxval(cld_cf),minval(cld_cf)
-!               write(0,*) 'mcica_subcol_sw: max/min(cld_iwp)=',         &
-!     &                     maxval(cld_iwp),minval(cld_iwp)
-!               write(0,*) 'mcica_subcol_sw: max/min(cld_lwp)=',         &
-!     &                     maxval(cld_lwp),minval(cld_lwp)
-!               write(0,*) 'mcica_subcol_sw: max/min(cld_swp)=',         &
-!     &                     maxval(cld_swp),minval(cld_swp)
-!               write(0,*) 'mcica_subcol_sw: max/min(cld_ref_ice)=',     &
-!     &                     maxval(cld_ref_ice),minval(cld_ref_ice)
-!               write(0,*) 'mcica_subcol_sw: max/min(cld_ref_snow)=',    &
-!     &                     maxval(cld_ref_snow),minval(cld_ref_snow)
-!               write(0,*) 'mcica_subcol_sw: max/min(cld_ref_liq)=',     &
-!     &                     maxval(cld_ref_liq),minval(cld_ref_liq)
-!         endif
-
-
           call mcica_subcol_sw (1, j1, nlay, iovrsw, permuteseed,    &
      &                 irng, plyr, hgt,                                 &
      &                 cld_cf, cld_iwp, cld_lwp,cld_swp,                &
@@ -999,25 +979,7 @@
      &                 cld_ref_snow, taucld3,ssacld3,asmcld3,fsfcld3,   &
      &                 cldfmcl, ciwpmcl, clwpmcl, cswpmcl,              &  !--output
      &                 reicmcl, relqmcl, resnmcl,                       &
-     &                 taucmcl, ssacmcl, asmcmcl, fsfcmcl) 
-
-!mz      
-!           if(mpirank==mpiroot) then
-!               write(0,*) 'mcica_subcol_sw: max/min(cldfmcl)=',         &
-!     &                     maxval(cldfmcl),minval(cldfmcl) 
-!               write(0,*) 'mcica_subcol_sw: max/min(ciwpmcl)=',         &
-!     &                     maxval(ciwpmcl),minval(ciwpmcl)
-!               write(0,*) 'mcica_subcol_sw: max/min(clwpmcl)=',         &
-!     &                     maxval(clwpmcl),minval(clwpmcl)
-!               write(0,*) 'mcica_subcol_sw: max/min(cswpmcl)=',         &
-!     &                     maxval(cswpmcl),minval(cswpmcl)
-!               write(0,*) 'mcica_subcol_sw: max/min(reicmcl)=',         &
-!     &                     maxval(reicmcl),minval(reicmcl)
-!               write(0,*) 'mcica_subcol_sw: max/min(relqmcl)=',         &
-!     &                     maxval(relqmcl),minval(relqmcl)
-!               write(0,*) 'mcica_subcol_sw: max/min(resnmcl)=',         &
-!     &                     maxval(resnmcl),minval(resnmcl)
-!           endif                    
+     &                 taucmcl, ssacmcl, asmcmcl, fsfcmcl)                 
 
        endif
 !mz* end
@@ -1093,8 +1055,6 @@
 
 !> -# Read cloud optical properties from 'clouds'.
           if (iswcliq > 0) then    ! use prognostic cloud method
-!mz:GFS operational
-            !if (iovrsw .eq. 1) then
             do k = 1, nlay
               kk = nlp1 - k
               cfrac(k) = cld_cf(j1,kk)        ! cloud fraction
@@ -1107,7 +1067,7 @@
               cdat3(k) = cld_swp(j1,kk)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,kk)  ! snow partical effctive radius
             enddo
-           if (iovrsw .eq. 4) then !mz* HWRF
+            if (iovrsw == 4) then !mz* HWRF
                do k = 1, nlay
                   kk = nlp1 - k
                do ig = 1, ngptsw
@@ -1128,7 +1088,7 @@
                         resnmc(k) = resnmcl(j1,kk)
                    endif
                enddo
-           endif
+            endif
           else                     ! use diagnostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
@@ -1210,7 +1170,6 @@
           enddo
 
           if (iswcliq > 0) then    ! use prognostic cloud method
-            !if (iovrsw .eq. 1) then    !mz* GFS operational
             do k = 1, nlay
               cfrac(k) = cld_cf(j1,k)        ! cloud fraction
               cliqp(k) = cld_lwp(j1,k)       ! cloud liq path
@@ -1222,7 +1181,7 @@
               cdat3(k) = cld_swp(j1,k)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,k)  ! snow partical effctive radius
             enddo
-            if (iovrsw .eq. 4) then     !mz* HWRF
+            if (iovrsw == 4) then     !mz* HWRF
 !mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
 !For GCM input, incoming reicmcl is defined based on selected 
 !ice parameterization (inflglw)
@@ -1269,8 +1228,7 @@
           do k = 1, nlay
             zcf0 = zcf0 * (f_one - cfrac(k))
           enddo
-!mz        else if (iovrsw == 1) then               ! max/ran overlapping
-        else if (iovrsw == 1.or. iovrsw == 4) then   ! mz* also exponential overlapping
+        else if (iovrsw == 1 .or. iovrsw == 4) then ! max/ra/exp overlapping
           do k = 1, nlay
             if (cfrac(k) > ftiny) then                ! cloudy layer
               zcf1 = min ( zcf1, f_one-cfrac(k) )
@@ -1280,7 +1238,7 @@
             endif
           enddo
           zcf0 = zcf0 * zcf1
-        else if (iovrsw >= 2 .and. iovrsw .ne. 4) then
+        else if (iovrsw >= 2 .and. iovrsw /= 4) then
           do k = 1, nlay
             zcf0 = min ( zcf0, f_one-cfrac(k) )  ! used only as clear/cloudy indicator
           enddo
@@ -1292,13 +1250,11 @@
 
 !> -# For cloudy sky column, call cldprop() to compute the cloud
 !!    optical properties for each cloudy layer.
-     
-       !if (iovrsw .eq. 1 ) then
 
         if (zcf1 > f_zero) then     ! cloudy sky column
 
           !mz* for HWRF, save cldfmc with mcica
-          if (iovrsw .eq.4) then
+          if (iovrsw == 4) then
                do k = 1, nlay
                do ig = 1, ngptsw
                   cldfmc_save(k,ig)=cldfmc (k,ig)
@@ -1306,16 +1262,15 @@
                enddo
           endif
 
-
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &
-     &       zcf1, nlay, ipseed(j1), dz, delgth,iswcliq,iovrsw,isubcsw, &
+     &       zcf1, nlay, ipseed(j1), dz, delgth,                        &
 !  ---  outputs:
-     &       taucw, ssacw, asycw, cldfrc, cldfmc                        & !mz: cldfmc(k,ig)
+     &       taucw, ssacw, asycw, cldfrc, cldfmc                        &
      &     )
 
-          if (iovrsw .eq.4) then                                                  
+          if (iovrsw == 4) then                                                  
           !mz for HWRF, still using mcica cldfmc                                  
                do k = 1, nlay                                                     
                do ig = 1, ngptsw                                                  
@@ -1350,20 +1305,6 @@
           enddo
         endif   ! end if_zcf1_block
 
-!        if (iovrsw .eq. 4) then       !mz* HWRF
-!!  For cloudy atmosphere, use cldprop to set cloud optical properties based on
-!!  input cloud physical properties.  Select method based on choices described
-!!  in cldprop.  Cloud fraction, water path, liquid droplet and ice particle
-!!  effective radius must be passed in cldprop.  Cloud fraction and cloud
-!!  optical properties are transferred to rrtmg_sw arrays in cldprop.  
-
-!         call cldprmc_sw(nlayers, inflg, iceflg, liqflg, cldfmc, &
-!                         ciwpmc, clwpmc, cswpmc, reicmc, relqmc, resnmc, &
-!                         taormc, taucmc, ssacmc, asmcmc, fsfcmc)
-!         icpr = 1
-
-!        endif
-
 !> -# Call setcoef() to compute various coefficients needed in
 !!    radiative transfer calculations.
         call setcoef                                                    &
@@ -1373,33 +1314,6 @@
      &       laytrop,jp,jt,jt1,fac00,fac01,fac10,fac11,                 &
      &       selffac,selffrac,indself,forfac,forfrac,indfor             &
      &     )
-
-!mz* HWRF clouds
-!      if(iovrsw .eq.0) then
-!            zcldfmc(:,:) = 0._rb
-!            ztaucmc(:,:) = 0._rb
-!            ztaormc(:,:) = 0._rb
-!            zasycmc(:,:) = 0._rb
-!            zomgcmc(:,:) = 1._rb
-
-!      elseif (iovrsw.eq.4) then
-!            do i=1,nlayers
-!               do ig=1,ngptsw
-!                  zcldfmc(i,ig) = cldfmc(ig,i)
-!                  ztaucmc(i,ig) = taucmc(ig,i)
-!                  ztaormc(i,ig) = taormc(ig,i)
-!                  zasycmc(i,ig) = asmcmc(ig,i)
-!                  zomgcmc(i,ig) = ssacmc(ig,i)
-!               enddo
-!            enddo
-!Aerosol
-!mz* no aerosol at this moment (iaer .eq.0)
-!            ztaua(:,:) = 0._rb
-!            zasya(:,:) = 0._rb
-!            zomga(:,:) = 1._rb
-
-!      endif
-!mz*
 
 !> -# Call taumol() to calculate optical depths for gaseous absorption
 !!    and rayleigh scattering
@@ -1431,8 +1345,6 @@
      &     )
 
         else                         ! use mcica cloud scheme
-        
-!mz        if(iovrsw .eq. 1 )   then   ! mz*:GFS operational
 
           call spcvrtm                                                  &
 !  ---  inputs:
@@ -1444,19 +1356,6 @@
      &       ftoauc,ftoau0,ftoadc,fsfcuc,fsfcu0,fsfcdc,fsfcd0,          &
      &       sfbmc,sfdfc,sfbm0,sfdf0,suvbfc,suvbf0                      &
      &     )
-
-!mz       else if (iovrsw .eq.4 ) then
-!         call spcvmc_sw &
-!             (nlayers, istart, iend, icpr, iout, &
-!              pavel, tavel, pz, tz, tbound, albdif, albdir, &
-!              zcldfmc, ztaucmc, zasycmc, zomgcmc, ztaormc, &
-!              ztaua, zasya, zomga, cossza, coldry, wkl, adjflux, &      
-!              laytrop, layswtch, laylow, jp, jt, jt1, &
-!              co2mult, colch4, colco2, colh2o, colmol, coln2o, colo2, colo3, &
-!              fac00, fac01, fac10, fac11, &
-!              selffac, selffrac, indself, forfac, forfrac, indfor, &
-!              zbbfd, zbbfu, zbbcd, zbbcu, zuvfd, zuvcd, znifd, znicd, &
-!              zbbfddir, zbbcddir, zuvfddir, zuvcddir, znifddir, znicddir)
 
         endif
 
@@ -1634,7 +1533,7 @@
 !! @{
 !-----------------------------------
       subroutine rswinit                                                &
-     &     (iswcliq,iovrsw,isubcsw, me ) !  ---  inputs:
+     &     ( me ) !  ---  inputs:
 !  ---  outputs: (none)
 
 !  ===================  program usage description  ===================  !
@@ -1690,8 +1589,7 @@
 !  ======================  end of description block  =================  !
 
 !  ---  inputs:
-      integer, intent(in) :: me,isubcsw,iswcliq
-      integer, intent(inout) :: iovrsw
+      integer, intent(in) :: me
 
 !  ---  outputs: none
 
@@ -1838,7 +1736,7 @@
 !-----------------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &   !  ---  inputs
-     &       cf1, nlay, ipseed, dz, delgth,iswcliq,iovrsw, isubcsw,     &
+     &       cf1, nlay, ipseed, dz, delgth,                             &
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &   !  ---  output
      &     )
 
@@ -1853,7 +1751,7 @@
 !                                                                       !
 !  inputs:                                                        size  !
 !    cfrac - real, layer cloud fraction                            nlay !
-!        .....  for  iswcliq > 0 (prognostic cloud sckeme)  - - -       !
+!        .....  for  iswcliq > 0 (prognostic cloud scheme)  - - -       !
 !    cliqp - real, layer in-cloud liq water path (g/m**2)          nlay !
 !    reliq - real, mean eff radius for liq cloud (micron)          nlay !
 !    cicep - real, layer in-cloud ice water path (g/m**2)          nlay !
@@ -1862,7 +1760,7 @@
 !    cdat2 - real, effective radius for rain drop (micron)         nlay !
 !    cdat3 - real, layer snow flake water path(g/m**2)             nlay !
 !    cdat4 - real, mean eff radius for snow flake(micron)          nlay !
-!        .....  for iswcliq = 0  (diagnostic cloud sckeme)  - - -       !
+!        .....  for iswcliq = 0  (diagnostic cloud scheme)  - - -       !
 !    cdat1 - real, layer cloud optical depth                       nlay !
 !    cdat2 - real, layer cloud single scattering albedo            nlay !
 !    cdat3 - real, layer cloud asymmetry factor                    nlay !
@@ -1924,7 +1822,7 @@
       use module_radsw_cldprtb
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed,iswcliq,iovrsw,isubcsw
+      integer, intent(in) :: nlay, ipseed
       real (kind=kind_phys), intent(in) :: cf1, delgth
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cliqp,      &
@@ -2170,8 +2068,7 @@
 !> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
-!mz      if ( isubcsw > 0 ) then      ! mcica sub-col clouds approx
-      if  ( isubcsw > 0 .and. iovrsw .ne. 4 ) then      ! mcica sub-col clouds approx 
+      if ( isubcsw > 0 .and. iovrsw /= 4 ) then      ! mcica sub-col clouds approx 
 
         cldf(:) = cfrac(:)
         where (cldf(:) < ftiny)
@@ -2182,7 +2079,7 @@
 
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, delgth, iovrsw,                    &
+     &     ( cldf, nlay, ipseed, dz, delgth,                            &
 !  ---  outputs:
      &       lcloudy                                                    &
      &     )
@@ -2222,7 +2119,7 @@
 !> @{
 ! ----------------------------------
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth,iovrsw,                     &       !  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth,                            &       !  ---  inputs
      &      lcloudy                                                     &       !  ---  outputs
      &    )
 
@@ -2253,7 +2150,7 @@
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed, iovrsw
+      integer, intent(in) :: nlay, ipseed
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys), intent(in) :: de_lgth
@@ -2268,7 +2165,7 @@
 
       type (random_stat) :: stat          ! for thread safe random generator
 
-      integer :: k, n, k1, ig
+      integer :: k, n, k1
 !
 !===> ...  begin here
 !

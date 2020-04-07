@@ -112,7 +112,7 @@
   units = flag
   dimensions = ()
   type = integer
-  intent = inout
+  intent = in
   optional = F
 [iovr_lw]
   standard_name = flag_for_cloud_overlapping_method_for_longwave_radiation
@@ -120,7 +120,7 @@
   units = flag
   dimensions = ()
   type = integer
-  intent = inout
+  intent = in
   optional = F
 [isubc_sw]
   standard_name = flag_for_sw_clouds_grid_approximation

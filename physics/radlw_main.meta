@@ -207,22 +207,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[iovrlw]
-  standard_name = flag_for_cloud_overlapping_method_for_longwave_radiation
-  long_name = control flag for cloud overlapping method for LW
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[isubclw]
-  standard_name = flag_for_lw_clouds_sub_grid_approximation
-  long_name = flag for lw clouds sub-grid approximation
-  units = flag
-  dimensions = ()
-  type = integer   
-  intent = in
-  optional = F
 [npts]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -387,22 +371,6 @@
   kind = kind_phys
   intent = in
   optional = T
-[mpirank]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

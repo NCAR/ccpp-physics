@@ -573,23 +573,6 @@
   type = integer
   intent = out
   optional = F
-[mpirank]
-  standard_name = mpi_rank
-  long_name = current MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[mpiroot]
-  standard_name = mpi_root
-  long_name = master MPI-rank
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-
 
 ########################################################################
 [ccpp-arg-table]

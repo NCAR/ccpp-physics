@@ -243,14 +243,15 @@
       module rrtmg_lw 
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
-     &                            icldflg,  ivflip
+     &                             isubclw, icldflg, iovrlw,  ivflip,   &
+     &                             kind_phys
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
      &                             random_stat
 !mz
       use machine,          only : kind_phys,                           &
-     &                    im => kind_io4, rb => kind_phys
+     &                             im => kind_io4, rb => kind_phys
 
       use module_radlw_parameters
 !
@@ -391,13 +392,13 @@
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
-     &       dzlyr,delpin,de_lgth, iovrlw, isubclw,                     &
+     &       dzlyr,delpin,de_lgth,                                      &
      &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
      &       hlwc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, mpirank,mpiroot,errmsg, errflg                     &
+     &       cld_od, errmsg, errflg                                     &
      &     )
 
 !  ====================  defination of variables  ====================  !
@@ -494,7 +495,7 @@
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (used for isubclw>0 only)         !
 !           =3: decorrelation-length overlap (for isubclw>0 only)       !
-!           =4: exponential overlap cloud
+!           =4: exponential overlapping cloud                           !
 !   ivflip  - control flag for vertical index direction                 !
 !           =0: vertical index from toa to surface                      !
 !           =1: vertical index from surface to toa                      !
@@ -574,9 +575,6 @@
       integer, intent(in) :: icseed(npts)
 
       logical,  intent(in) :: lprnt
-      integer,                        intent(in)    :: mpiroot
-      integer,                        intent(in)    :: mpirank
-      integer,                        intent(in)    :: iovrlw,isubclw
 
       real (kind=kind_phys), dimension(npts,nlp1), intent(in) :: plvl,  &
      &       tlvl
@@ -648,7 +646,7 @@
 ! mz* - Add height of each layer for exponential-random cloud overlap
 ! This will be derived below from the dzlyr in each layer
       real (kind=kind_phys), dimension( npts,nlay )  ::   hgt
-      real (kind=kind_phys)::                     dzsum
+      real (kind=kind_phys) :: dzsum
 
       real (kind=kind_phys), dimension(0:nlp1) :: cldfrc
 
@@ -678,8 +676,8 @@
 !mz rtrnmc_mcica
       real (kind=kind_phys), dimension(nlay,ngptlw) :: taut 
 !mz* Atmosphere/clouds - cldprop
-      real(kind=kind_phys), dimension(ngptlw,nlay) :: cldfmc,           &
-     &                                                cldfmc_save       ! cloud fraction [mcica]
+      real(kind=kind_phys), dimension(ngptlw,nlay) :: cldfmc,    &
+     &                                                cldfmc_save  ! cloud fraction [mcica]
                                                                    !    Dimensions: (ngptlw,nlay)
       real(kind=kind_phys), dimension(ngptlw,nlay) :: ciwpmc       ! in-cloud ice water path [mcica]
                                                                    !    Dimensions: (ngptlw,nlay)
@@ -734,10 +732,9 @@
 !mz*
 ! For passing in cloud physical properties; cloud optics parameterized
 ! in RRTMG:
-         inflglw = 2
-         iceflglw = 3
-         liqflglw = 1
-
+      inflglw = 2
+      iceflglw = 3
+      liqflglw = 1
       istart = 1
       iend = 16
       iout = 0
@@ -814,7 +811,7 @@
         stemp = sfgtmp(iplon)          ! surface ground temp
         if (iovrlw == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
 
-! mz*: HWRF practice
+! mz*: HWRF
         if (iovrlw == 4 ) then
 
 !Add layer height needed for exponential (icld=4) and
@@ -839,25 +836,6 @@
                enddo
             enddo
 
-     
-!           if(mpirank==mpiroot) then
-!               write(0,*) 'mcica_subcol_lw: max/min(cld_cf)=',          &
-!     &                     maxval(cld_cf),minval(cld_cf)
-!               write(0,*) 'mcica_subcol_lw: max/min(cld_iwp)=',         &
-!     &                     maxval(cld_iwp),minval(cld_iwp)
-!               write(0,*) 'mcica_subcol_lw: max/min(cld_lwp)=',         &
-!     &                     maxval(cld_lwp),minval(cld_lwp)
-!               write(0,*) 'mcica_subcol_lw: max/min(cld_swp)=',         &
-!     &                     maxval(cld_swp),minval(cld_swp)
-!               write(0,*) 'mcica_subcol_lw: max/min(cld_ref_ice)=',     &
-!     &                     maxval(cld_ref_ice),minval(cld_ref_ice)
-!               write(0,*) 'mcica_subcol_lw: max/min(cld_ref_snow)=',    &
-!     &                     maxval(cld_ref_snow),minval(cld_ref_snow)
-!               write(0,*) 'mcica_subcol_lw: max/min(cld_ref_liq)=',     &
-!     &                     maxval(cld_ref_liq),minval(cld_ref_liq)
-
-!           endif
-
           call mcica_subcol_lw(1, iplon, nlay, iovrlw, permuteseed,     &
      &                 irng, plyr, hgt,                                 &
      &                 cld_cf, cld_iwp, cld_lwp,cld_swp,                &
@@ -867,26 +845,6 @@
      &                 ciwpmcl, clwpmcl, cswpmcl, reicmcl, relqmcl,     &
      &                 resnmcl, taucmcl)     
 
-!mz      
-!           if(mpirank==mpiroot) then
-!               write(0,*) 'mcica_subcol_lw: max/min(cldfmcl)=',         &
-!     &                     maxval(cldfmcl),minval(cldfmcl)
-!               write(0,*) 'mcica_subcol_lw: max/min(ciwpmcl)=',         &
-!     &                     maxval(ciwpmcl),minval(ciwpmcl)
-!               write(0,*) 'mcica_subcol_lw: max/min(clwpmcl)=',         &
-!     &                     maxval(clwpmcl),minval(clwpmcl)
-!               write(0,*) 'mcica_subcol_lw: max/min(cswpmcl)=',         &
-!     &                     maxval(cswpmcl),minval(cswpmcl)
-!               write(0,*) 'mcica_subcol_lw: max/min(reicmcl)=',         &
-!     &                     maxval(reicmcl),minval(reicmcl)
-!               write(0,*) 'mcica_subcol_lw: max/min(relqmcl)=',         &
-!     &                     maxval(relqmcl),minval(relqmcl)
-!               write(0,*) 'mcica_subcol_lw: max/min(resnmcl)=',         &
-!     &                     maxval(resnmcl),minval(resnmcl)
-!               write(0,*) 'mcica_subcol_lw: max/min(taucmcl)=',         & 
-!     &                     maxval(taucmcl),minval(taucmcl)    
-
-!           endif
        endif
 !mz* end
 
@@ -977,7 +935,6 @@
 
 !> -# Read cloud optical properties.
           if (ilwcliq > 0) then    ! use prognostic cloud method
-!mz: GFS operational
             do k = 1, nlay
               k1 = nlp1 - k
               cldfrc(k)= cld_cf(iplon,k1)
@@ -990,8 +947,8 @@
               cda3(k)  = cld_swp(iplon,k1)
               cda4(k)  = cld_ref_snow(iplon,k1)
             enddo
-            ! transfer 
-            if (iovrlw .eq. 4) then   !mz  HWRF 
+            ! HWRF RRMTG
+            if (iovrlw == 4) then   !mz  HWRF 
                do k = 1, nlay
                   k1 = nlp1 - k
                do ig = 1, ngptlw
@@ -1102,8 +1059,6 @@
           enddo
 
           if (ilwcliq > 0) then    ! use prognostic cloud method
-!mz*        
-            !mz calculate input for cldprop
             do k = 1, nlay
               cldfrc(k)= cld_cf(iplon,k)
               clwp(k)  = cld_lwp(iplon,k)
@@ -1115,7 +1070,7 @@
               cda3(k)  = cld_swp(iplon,k)
               cda4(k)  = cld_ref_snow(iplon,k)
             enddo
-            if (iovrlw .eq. 4) then
+            if (iovrlw == 4) then
 !mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
 !For GCM input, incoming reicmcl is defined based on selected 
 !ice parameterization (inflglw)
@@ -1209,7 +1164,7 @@
         if ( lcf1 ) then
 
           !mz* for HWRF, save cldfmc with mcica
-          if (iovrlw .eq.4) then
+          if (iovrlw == 4) then
                do k = 1, nlay
                do ig = 1, ngptlw
                   cldfmc_save(ig,k)=cldfmc (ig,k)
@@ -1220,12 +1175,12 @@
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
-     &       nlay, nlp1, ipseed(iplon), dz, delgth,iovrlw, isubclw,     &
+     &       nlay, nlp1, ipseed(iplon), dz, delgth,                     &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
 
-          if (iovrlw .eq.4) then
+          if (iovrlw == 4) then
           !mz for HWRF, still using mcica cldfmc
                do k = 1, nlay
                do ig = 1, ngptlw
@@ -1253,30 +1208,13 @@
           taucld = f_zero
         endif
 
-!!mz* HWRF practice, calculate taucmc  with mcica
-         if (iovrlw .eq.4) then 
-         !mz* HWRF practice, calculate taucmc
-!           if(mpirank==mpiroot) then
-!               write(0,*) 'bfe cldprmc: nlay,inflglw,iceflglw,liqflglw',& 
-!     &                     nlay,inflglw,iceflglw,liqflglw
-!               write(0,*) 'bfe cldprmc: max/min(taucmc)=',              &
-!     &                     maxval(taucmc),minval(taucmc)
-!           endif
-
-         call cldprmc(nlay, inflglw, iceflglw, liqflglw,                &
-     &                cldfmc, ciwpmc,                                   &
-     &                clwpmc, cswpmc, reicmc, relqmc, resnmc,           &
-     &               ncbands, taucmc)
-          endif              
-!           if(mpirank==mpiroot) then
-!               write(0,*) 'aft cldprmc: ncbands',   ncbands
-!               write(0,*) 'aft cldprmc: max/min(taucmc)=',              &
-!     &                     maxval(taucmc),minval(taucmc)
-!           endif
-
-
-!mz* end
-
+!mz* HWRF: calculate taucmc with mcica
+        if (iovrlw == 4) then 
+          call cldprmc(nlay, inflglw, iceflglw, liqflglw,               &
+     &                 cldfmc, ciwpmc,                                  &
+     &                 clwpmc, cswpmc, reicmc, relqmc, resnmc,          &
+     &                 ncbands, taucmc)
+        endif              
 
 !     if (lprnt) then
 !      print *,' after cldprop'
@@ -1382,51 +1320,10 @@
      &       totuflux,totdflux,htr, totuclfl,totdclfl,htrcl, htrb       &
      &     )
 
-          endif    ! end if_iovrlw_block
+          endif   ! end if_iovrlw_block
 
-         else
+        else
 
-!        if(iovrlw == 4) then
-
-!mz*HWRF practice
-!
-!        pz(0)=plyr(iplon,1)
-!        do k= 1,nlay
-!            pz(k)=plvl(iplon,k+1)
-!        enddo
-
-!        do k = 0, nlay
-!        do j = 1, nbands          
-!       !  taut (k,j) = tautot(j,k)
-!         planklay(k,j) = pklay(j,k)
-!         planklev(k,j) = pklev(j,k)
-!         enddo
-!         enddo
-
-!        do k = 1, nlay
-!        do ig = 1, ngptlw
-!             fracs_r(k,ig) = fracs (ig,k)
-!             taut(k,ig)=  tautot(ig,k)
-!        enddo 
-!        enddo
-
-!         call rtrnmc_mcica(nlay, istart, iend, iout, pz,                &
-!     &                semiss,  ncbands,                                 &
-!     &                 cldfmc, taucmc, planklay, planklev,              & !plankbnd,      &
-!     &                 pwvcm, fracs_r, taut,                            &
-!     &                totuflux, totdflux,  htr,                         &
-!     &                totuclfl, totdclfl,  htrcl )
-     
-!           if(mpirank==mpiroot) then
-!               write(0,*) 'rtrnmc_mcica: max/min(htr)=',                &
-!     &                     maxval(htr),minval(htr)
-!           endif
-
-
-!        else
-!mz*end
-
-!mz*taucld(non-mcica)
           call rtrnmc                                                   &
 !  ---  inputs:
      &     ( semiss,delp,cldfmc,taucld,tautot,pklay,pklev,              &
@@ -1434,12 +1331,6 @@
 !  ---  outputs:
      &       totuflux,totdflux,htr, totuclfl,totdclfl,htrcl, htrb       &
      &     )
-!           if(mpirank==mpiroot) then
-!               write(0,*) 'rtrnmc: max/min(htr)=',                      &
-!     &                     maxval(htr),minval(htr)
-!           endif
-
-!        endif       !end if_iovrlw block
 
         endif   ! end if_isubclw_block
 
@@ -1546,7 +1437,7 @@
 !!\section rlwinit_gen rlwinit General Algorithm
 !! @{
       subroutine rlwinit                                                &
-     &     (iovrlw,isubclw, me ) !  ---  inputs
+     &     ( me ) !  ---  inputs
 !  ---  outputs: (none)
 
 !  ===================  program usage description  ===================  !
@@ -1615,8 +1506,7 @@
 !  ======================  end of description block  =================  !
 
 !  ---  inputs:
-      integer, intent(in) :: me,isubclw
-      integer, intent(inout) :: iovrlw
+      integer, intent(in) :: me
 
 !  ---  outputs: none
 
@@ -1634,9 +1524,7 @@
         print *,'  *** Error in specification of cloud overlap flag',   &
      &          ' IOVRLW=',iovrlw,' in RLWINIT !!'
         stop
-!mz
-!      elseif ( iovrlw>=2 .and. isubclw==0 ) then
-       elseif ( (iovrlw.eq.2 .or. iovrlw.eq.3).and. isubclw==0 ) then
+      elseif ( (iovrlw==2 .or. iovrlw==3) .and. isubclw==0 ) then
         if (me == 0) then
           print *,'  *** IOVRLW=',iovrlw,' is not available for',       &
      &          ' ISUBCLW=0 setting!!'
@@ -1780,7 +1668,7 @@
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth,iovrlw,isubclw,            &
+     &       nlay, nlp1, ipseed, dz, de_lgth,                           &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 
@@ -1880,7 +1768,7 @@
       use module_radlw_cldprlw
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1, ipseed,iovrlw,isubclw
+      integer, intent(in) :: nlay, nlp1, ipseed
 
       real (kind=kind_phys), dimension(0:nlp1), intent(in) :: cfrac
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
@@ -2044,7 +1932,7 @@
 
       endif  lab_if_ilwcliq
 
-!> -# if isubclw > 0, call mcica_subcol() to distribute
+!> -# if physparam::isubclw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
       if ( isubclw > 0 ) then      ! mcica sub-col clouds approx
@@ -2060,7 +1948,7 @@
 
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, de_lgth, iovrlw,                   &
+     &     ( cldf, nlay, ipseed, dz, de_lgth,                           &
 !  ---  output:
      &       lcloudy                                                    &
      &     )
@@ -2094,7 +1982,7 @@
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
 !! @{
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth, iovrlw,                    & !  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth,                            & !  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
      &    )
 
@@ -2122,7 +2010,7 @@
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, ipseed, iovrlw
+      integer, intent(in) :: nlay, ipseed
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys),                  intent(in) :: de_lgth
@@ -2473,11 +2361,6 @@
 !  --- ...  begin spectral band loop
 
         do i = 1, nbands
-!mz*
-!          plankbnd(iband) = semiss(iband) * &
-!                 (totplnk(indbound,iband) + tbndfrac * dbdtlev)
-!mz
-
           pklay(i,k) = delwave(i) * (totplnk(indlay,i) + tlyrfr         &
      &               * (totplnk(indlay+1,i) - totplnk(indlay,i)) )
           pklev(i,k) = delwave(i) * (totplnk(indlev,i) + tlvlfr         &

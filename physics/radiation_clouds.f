@@ -194,8 +194,7 @@
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds     
 !
-!mz* iovrsw, iovrlw need to come from NML
-      use physparam,           only : icldflg,                          &!mz:iovrsw, iovrlw,&
+      use physparam,           only : icldflg, iovrsw, iovrlw,          &
      &                                lcrick, lcnorm, lnoprec,          &
      &                                ivflip
       use physcons,            only : con_fvirt, con_ttp, con_rocp,     &
@@ -242,13 +241,13 @@
       real (kind=kind_phys), parameter :: cldasy_def = 0.84       !< default cld asymmetry factor
 
       integer  :: llyr   = 2                              !< upper limit of boundary layer clouds
-!mz      integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
+! DH* TODO - HOW TO GET/SET THIS CORRECTLY?
+      integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
-     &                 cld_init, progcld5, progcld4o,                   &
-     &       progcld6,                                                  & !mz- for GSL suite
-     &  cal_cldfra3, find_cloudLayers,adjust_cloudIce,adjust_cloudH2O,  &
-     & adjust_cloudFinal
+     &       cld_init, progcld5, progcld6, progcld4o, cal_cldfra3,      &
+     &       find_cloudLayers, adjust_cloudIce, adjust_cloudH2O,        &
+     &       adjust_cloudFinal
 
 
 ! =================
@@ -307,6 +306,7 @@
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
 !                     =3: decorrelation-length overlap (mcica only)     !
+!                     =4: exponential overlapping cloud                 !
 !   ivflip          : control flag for direction of vertical index      !
 !                     =0: index from toa to surface                     !
 !                     =1: index from surface to toa                     !
@@ -333,7 +333,7 @@
 !
 !  ---  set up module variables
 
-!mz      iovr    = max( iovrsw, iovrlw )    !cld ovlp used for diag HML cld output
+      iovr    = max( iovrsw, iovrlw )    !cld ovlp used for diag HML cld output
 
       if (me == 0) print *, VTAGCLD      !print out version tag
 
@@ -443,7 +443,6 @@
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1,                   &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       effrl,effri,effrr,effrs,effr_in,                           &
-     &       iovr_lw, iovr_sw,                                          &
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
      &      )
 
@@ -527,7 +526,7 @@
       implicit none
 
 !  ---  inputs
-      integer,  intent(in) :: IX, NLAY, NLP1,iovr_lw,iovr_sw
+      integer,  intent(in) :: IX, NLAY, NLP1
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2, effr_in
 
@@ -555,7 +554,7 @@
       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &
      &       tem1, tem2, tem3
 
-      integer :: i, k, id, nf,iovrw
+      integer :: i, k, id, nf
 
 !  ---  constant values
 !     real (kind=kind_phys), parameter :: xrc3 = 200.
@@ -563,8 +562,6 @@
 
 !
 !===> ... begin here
-!mz
-      iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output
 !
       do nf=1,nf_clds
         do k=1,nlay
@@ -806,7 +803,7 @@
 !  --- ...  estimate clouds decorrelation length in km
 !           this is only a tentative test, need to consider change later
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -820,7 +817,7 @@
       call gethml                                                       &
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
-     &       IX,NLAY, iovr_lw, iovr_sw,                                 &
+     &       IX,NLAY,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -878,7 +875,6 @@
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, f_ice,f_rain,r_rime,flgmin,       &
      &       IX, NLAY, NLP1, lmfshal, lmfdeep2,                         &
-     &       iovr_lw, iovr_sw,                                          &
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
      &      )
 
@@ -967,7 +963,7 @@
 !  ---  constants
 
 !  ---  inputs
-      integer,  intent(in) :: IX, NLAY, NLP1, iovr_lw,iovr_sw
+      integer,  intent(in) :: IX, NLAY, NLP1
 
       logical, intent(in)  :: lmfshal, lmfdeep2
 
@@ -997,7 +993,7 @@
       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &
      &       tem1, tem2, tem3
 
-      integer :: i, k, id, iovrw
+      integer :: i, k, id
 
 !  ---  constant values
 !     real (kind=kind_phys), parameter :: xrc3 = 200.
@@ -1007,10 +1003,6 @@
 !===> ... begin here
 !
 !     clouds(:,:,:) = 0.0
-!zm
-!mz$
-      iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output$
-
 
 !> - Assign water/ice/rain/snow cloud properties for Ferrier scheme.
       do k = 1, NLAY
@@ -1257,7 +1249,7 @@
 !  --- ...  estimate clouds decorrelation length in km
 !           this is only a tentative test, need to consider change later
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -1274,7 +1266,6 @@
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
      &       IX,NLAY,                                                   &
-     &       iovr_lw,iovr_sw,                                           &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -1333,7 +1324,6 @@
      &       xlat,xlon,slmsk, dz, delp,                                 &
      &       ix, nlay, nlp1,                                            &
      &       deltaq,sup,kdt,me,                                         &
-     &       iovr_lw, iovr_sw,                                          &
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
      &      )
 
@@ -1416,7 +1406,7 @@
       implicit none
 
 !  ---  inputs
-      integer,  intent(in) :: ix, nlay, nlp1,kdt,iovr_lw,iovr_sw
+      integer,  intent(in) :: ix, nlay, nlp1,kdt
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,    &
      &       tlyr, tvly, qlyr, qstl, rhly, clw, dz, delp
@@ -1448,14 +1438,11 @@
       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &
      &       tem1, tem2, tem3
 
-      integer :: i, k, id, nf, iovrw
+      integer :: i, k, id, nf
 
 !
 !===> ... begin here
 !
-!mz
-      iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output
-
       do nf=1,nf_clds
         do k=1,nlay
           do i=1,ix
@@ -1659,7 +1646,7 @@
 !  --- ...  estimate clouds decorrelation length in km
 !           this is only a tentative test, need to consider change later
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -1677,7 +1664,6 @@
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
      &       ix,nlay,                                                   &
-     &       iovr_lw,iovr_sw,                                           &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -1734,8 +1720,7 @@
       subroutine progcld4                                               & 
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          & !  ---  inputs:
      &       xlat,xlon,slmsk,cldtot, dz, delp,                          &
-     &       IX, NLAY, NLP1,                                            &
-     &       iovr_lw, iovr_sw,                                          &
+     &       IX, NLAY, NLP1,                                            & 
      &       clouds,clds,mtop,mbot,de_lgth                              & !  ---  outputs:
      &      )
 
@@ -1816,7 +1801,7 @@
       implicit none
 
 !  ---  inputs
-      integer,  intent(in) :: IX, NLAY, NLP1,iovr_lw,iovr_sw
+      integer,  intent(in) :: IX, NLAY, NLP1
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, tvly, qlyr, qstl, rhly, clw, cldtot, cnvw, cnvc,     &
@@ -1842,14 +1827,11 @@
       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &
      &       tem1, tem2, tem3
 
-      integer :: i, k, id, nf,iovrw
+      integer :: i, k, id, nf
 
 !
 !===> ... begin here
 !
-!mz
-      iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output
-
       do nf=1,nf_clds
         do k=1,nlay
           do i=1,ix
@@ -2001,7 +1983,7 @@
 !  --- ...  estimate clouds decorrelation length in km
 !           this is only a tentative test, need to consider change later
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -2017,7 +1999,6 @@
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
      &       IX,NLAY,                                                   &
-     &       iovr_lw, iovr_sw,                                          &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -2081,7 +2062,6 @@
      &       xlat,xlon,slmsk, dz, delp,                                 &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,ntclamt,                    &
      &       IX, NLAY, NLP1,                                            &
-     &       iovr_lw, iovr_sw,                                          &
      &       clouds,clds,mtop,mbot,de_lgth                              & !  ---  outputs:
      &      )
 
@@ -2161,7 +2141,7 @@
       implicit none
 
 !  ---  inputs
-      integer,  intent(in) :: IX, NLAY, NLP1, iovr_lw, iovr_sw
+      integer,  intent(in) :: IX, NLAY, NLP1
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl,      &
      &		 		ntclamt
 
@@ -2191,12 +2171,10 @@
      &       tem1, tem2, tem3
       real (kind=kind_phys), dimension(IX,NLAY) :: cldtot
 
-      integer :: i, k, id, nf, iovrw
+      integer :: i, k, id, nf
 
 !
 !===> ... begin here
-!mz
-      iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output
 !
       do nf=1,nf_clds
         do k=1,nlay
@@ -2333,7 +2311,7 @@
 !  --- ...  estimate clouds decorrelation length in km
 !           this is only a tentative test, need to consider change later
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -2349,7 +2327,6 @@
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
      &       IX,NLAY,                                                   &
-     &       iovr_lw, iovr_sw,                                          &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -2373,7 +2350,6 @@
      &       IX, NLAY, NLP1,icloud,                                     &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       re_cloud,re_ice,re_snow,                                   &
-     &       iovr_lw,iovr_sw,                                           &
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
      &      )
 
@@ -2457,16 +2433,15 @@
       implicit none
 
 !  ---  inputs
-      integer,  intent(in) :: IX, NLAY, NLP1,ICLOUD,iovr_lw,iovr_sw
+      integer,  intent(in) :: IX, NLAY, NLP1, ICLOUD
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, tvly, qlyr, qstl, rhly, cldcov, delp, dz
-!     &       re_cloud, re_ice, re_snow 
 
-!mz: for diagnostics purpose
+!mz: for diagnostics
       real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
      &      re_cloud, re_ice, re_snow
 
@@ -2492,7 +2467,7 @@
       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &
      &       tem1, tem2, tem3
 
-      integer :: i, k, id, nf, iovrw
+      integer :: i, k, id, nf
 
 !  ---  constant values
 !     real (kind=kind_phys), parameter :: xrc3 = 200.
@@ -2500,8 +2475,6 @@
 
 !
 !===> ... begin here
-!mz
-      iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output
 !
       do nf=1,nf_clds
         do k=1,nlay
@@ -2672,19 +2645,9 @@
         enddo
       endif
 !mz   
-      if (icloud .ne.0) then
+      if (icloud .ne. 0) then
 !     assign/calculate efective radii for cloud water, ice, rain, snow
 
-!      if (effr_in) then
-!        do k = 1, NLAY
-!          do i = 1, IX
-!            rew(i,k) = effrl (i,k)
-!            rei(i,k) = max(10.0, min(150.0,effri (i,k)))
-!            rer(i,k) = effrr (i,k)
-!            res(i,k) = effrs (i,k)
-!          enddo
-!        enddo
-!      else
         do k = 1, NLAY
           do i = 1, IX
             rew(i,k) = reliq_def            ! default liq  radius to 10  micron
@@ -2722,11 +2685,7 @@
               else
                 rei(i,k) = (1250.0/9.387) * tem3 ** 0.031
               endif
-!              if (icloud == 3 ) then
               rei(i,k) = max(25.,rei(i,k))       !mz* HWRF
-!              else                               !mz  GFDL
-!              rei(i,k)   = max(10.0, min(rei(i,k), 150.0))
-!              endif
             endif
             rei(i,k) = min(rei(i,k), 135.72)      !- 1.0315*rei<= 140 microns
           enddo      
@@ -2739,8 +2698,7 @@
            res(i,k) = 10.0
           enddo
         enddo
-!      endif                    
-!                                                                             
+
       endif ! end icloud
 !mz end
       do k = 1, NLAY
@@ -2756,8 +2714,8 @@
           clouds(i,k,8) = 0. 
           clouds(i,k,9) = 10.
 !mz for diagnostics?
-          re_cloud(i,k) =rew(i,k)
-          re_ice(i,k)   =rei(i,k) 
+          re_cloud(i,k) = rew(i,k)
+          re_ice(i,k)   = rei(i,k) 
           re_snow(i,k)  = 10.
 
         enddo
@@ -2766,7 +2724,7 @@
 !  --- ...  estimate clouds decorrelation length in km
 !           this is only a tentative test, need to consider change later
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -2785,7 +2743,6 @@
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
      &       IX,NLAY,                                                   &
-     &       iovr_lw,iovr_sw,                                           &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -2806,7 +2763,6 @@
      &       IX, NLAY, NLP1,                                            &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       re_cloud,re_ice,re_snow,                                   &
-     &       iovr_lw,iovr_sw,                                           &
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
      &      )
 
@@ -2891,7 +2847,7 @@
       implicit none
 
 !  ---  inputs
-      integer,  intent(in) :: IX, NLAY, NLP1,iovr_lw,iovr_sw
+      integer,  intent(in) :: IX, NLAY, NLP1
       integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2                          
@@ -2922,7 +2878,7 @@
       real (kind=kind_phys) :: clwmin, clwm, clwt, onemrh, value,       &
      &       tem1, tem2, tem3
 
-      integer :: i, k, id, nf, iovrw
+      integer :: i, k, id, nf
                                                                                   
 !  ---  constant values                                                           
 !     real (kind=kind_phys), parameter :: xrc3 = 200.                             
@@ -2930,8 +2886,6 @@
                                                                                   
 !                                                                                 
 !===> ... begin here                                                              
-!!mz$
-      iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output$
 
 !                                                                 
       do nf=1,nf_clds                                                             
@@ -3120,7 +3074,7 @@
 !  --- ...  estimate clouds decorrelation length in km                            
 !           this is only a tentative test, need to consider change later          
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -3139,7 +3093,6 @@
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
      &       IX,NLAY,                                                   &
-     &       iovr_lw, iovr_sw,                                          &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -3197,7 +3150,6 @@
      &     ( plyr,plvl,tlyr,tvly,ccnd,ncnd,                             &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1, cldtot,           &
      &       effrl,effri,effrr,effrs,effr_in,                           &
-     &       iovr_lw,iovr_sw,                                           & !mz*  $    
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
      &      )
 
@@ -3292,9 +3244,6 @@
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
 
-      !mz* for GFSv16
-      integer,  intent(in) :: iovr_lw, iovr_sw
-
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
 
@@ -3305,7 +3254,6 @@
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
 !  ---  local variables:
-      integer  :: iovrw
       real (kind=kind_phys), dimension(IX,NLAY) :: cldcnv, cwp, cip,    &
      &       crp, csp, rew, rei, res, rer
       real (kind=kind_phys), dimension(IX,NLAY,ncnd) :: cndf
@@ -3327,9 +3275,6 @@
 !       enddo
 !     enddo
 !
-!mz*
-       iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output
-
       do k = 1, NLAY
         do i = 1, IX
           cldcnv(i,k) = 0.0
@@ -3499,7 +3444,7 @@
 !> -# Estimate clouds decorrelation length in km
 !     this is only a tentative test, need to consider change later
 
-      if ( iovrw == 3 ) then
+      if ( iovr == 3 ) then
         do i = 1, ix
           de_lgth(i) = max( 0.6, 2.78-4.6*rxlat(i) )
         enddo
@@ -3518,7 +3463,6 @@
 !  ---  inputs:
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
      &       IX,NLAY,                                                   &
-     &       iovr_lw, iovr_sw,                                          &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
      &     )
@@ -3554,7 +3498,7 @@
 !! @{
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &       !  ---  inputs:
-     &       IX, NLAY,iovr_lw,iovr_sw,                                  &
+     &       IX, NLAY,                                                  &
      &       clds, mtop, mbot                                           &       !  ---  outputs:
      &     )
 
@@ -3610,7 +3554,7 @@
       implicit none!
 
 !  ---  inputs:
-      integer, intent(in) :: IX, NLAY,iovr_sw,iovr_lw
+      integer, intent(in) :: IX, NLAY
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, ptop1, &
      &       cldtot, cldcnv, dz
@@ -3626,14 +3570,11 @@
       real (kind=kind_phys) :: pcur, pnxt, ccur, cnxt, alfa
 
       integer, dimension(IX):: idom, kbt1, kth1, kbt2, kth2
-      integer :: i, k, id, id1, kstr, kend, kinc,iovrw
+      integer :: i, k, id, id1, kstr, kend, kinc
 
 !
 !===> ... begin here
 !
-!mz*
-       iovrw    = max( iovr_sw, iovr_lw )    !cld ovlp used for diag HML cld output
-
       clds(:,:) = 0.0
 
       do i = 1, IX
@@ -3657,7 +3598,7 @@
         kinc = 1
       endif                                     ! end_if_ivflip
 
-      if ( iovrw == 0 ) then                     ! random overlap
+      if ( iovr == 0 ) then                     ! random overlap
 
         do k = kstr, kend, kinc
           do i = 1, IX
@@ -3676,7 +3617,7 @@
           clds(i,4) = 1.0 - cl1(i)              ! save total cloud
         enddo
 
-      elseif ( iovrw == 1 ) then                 ! max/ran overlap
+      elseif ( iovr == 1 ) then                 ! max/ran overlap
 
         do k = kstr, kend, kinc
           do i = 1, IX
@@ -3700,7 +3641,7 @@
           clds(i,4) = 1.0 - cl1(i) * cl2(i)     ! save total cloud
         enddo
 
-      elseif ( iovrw == 2 ) then                 ! maximum overlap all levels
+      elseif ( iovr == 2 ) then                 ! maximum overlap all levels
 
         cl1(:) = 0.0
 
@@ -3721,7 +3662,7 @@
           clds(i,4) = cl1(i)        ! save total cloud
         enddo
 
-      elseif ( iovrw == 3 ) then                 ! random if clear-layer divided,
+      elseif ( iovr == 3 ) then                 ! random if clear-layer divided,
                                                 ! otherwise de-corrlength method
         do i = 1, ix
           dz1(i) = - dz(i,kstr)
@@ -3807,7 +3748,7 @@
               if (kth2(i) == 0) kbt2(i) = k
               kth2(i) = kth2(i) + 1
 
-              if ( iovrw == 0 ) then
+              if ( iovr == 0 ) then
                 cl2(i) = cl2(i) + ccur - cl2(i)*ccur
               else
                 cl2(i) = max( cl2(i), ccur )
@@ -3889,7 +3830,7 @@
               if (kth2(i) == 0) kbt2(i) = k
               kth2(i) = kth2(i) + 1
 
-              if ( iovrw == 0 ) then
+              if ( iovr == 0 ) then
                 cl2(i) = cl2(i) + ccur - cl2(i)*ccur
               else
                 cl2(i) = max( cl2(i), ccur )
