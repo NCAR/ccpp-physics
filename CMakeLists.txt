@@ -145,6 +145,8 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
   SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
                               ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
                               PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8")
+  SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_noahlsm.F
+                              PROPERTIES COMPILE_FLAGS "-fdefault-real-8 -fdefault-double-8 -ffree-form")
   if (PROJECT STREQUAL "CCPP-FV3")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
