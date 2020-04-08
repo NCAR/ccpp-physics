@@ -319,6 +319,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[lndp_vgf]
+  standard_name = magnitude_of_perturbation_of_vegetation_fraction
+  long_name = magnitude of perturbation of vegetation fraction
+  units = frac
+  dimensions = () 
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [cplflx]
   standard_name = flag_for_flux_coupling
   long_name = flag controlling cplflx collection (default off)

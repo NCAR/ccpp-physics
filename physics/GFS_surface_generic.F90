@@ -30,7 +30,7 @@
                           sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
                           lndp_var_list, lndp_prt_list,                                                    &
-                          z01d, zt1d, bexp1d, xlai1d, vegf1d,                                              &
+                          z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf,                                    &
                           cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
                           wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
@@ -68,6 +68,7 @@
         real(kind=kind_phys), dimension(im),          intent(out) :: bexp1d
         real(kind=kind_phys), dimension(im),          intent(out) :: xlai1d
         real(kind=kind_phys), dimension(im),          intent(out) :: vegf1d
+        real(kind=kind_phys),                         intent(out) :: lndp_vgf
 
         logical, intent(in) :: cplflx
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
@@ -90,7 +91,7 @@
         ! Local variables
         integer              :: i, k
         real(kind=kind_phys) :: onebg
-        real(kind=kind_phys) :: cdfz, lndp_vgf
+        real(kind=kind_phys) :: cdfz
 
         ! Set constants
         onebg  = 1.0/con_g
@@ -125,7 +126,7 @@
                 call cdfnor(sfc_wts(i,k),cdfz)
                 vegf1d(i) = cdfz
               enddo
-              lndp_vgf = Model%lndp_prt_list(k)
+              lndp_vgf = lndp_prt_list(k)
            end select
         enddo
         endif
