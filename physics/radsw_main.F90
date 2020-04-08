@@ -1228,7 +1228,7 @@
           do k = 1, nlay
             zcf0 = zcf0 * (f_one - cfrac(k))
           enddo
-        else if (iovrsw == 1 .or. iovrsw == 4) then ! max/ra/exp overlapping
+        else if (iovrsw == 1 .or. iovrsw == 4) then ! max/ran/exp overlapping
           do k = 1, nlay
             if (cfrac(k) > ftiny) then                ! cloudy layer
               zcf1 = min ( zcf1, f_one-cfrac(k) )
@@ -2068,7 +2068,7 @@
 !> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
-      if ( isubcsw > 0 .and. iovrsw /= 4 ) then      ! mcica sub-col clouds approx 
+      if ( isubcsw > 0 .and. iovrsw /= 4 ) then      ! mcica sub-col clouds approx
 
         cldf(:) = cfrac(:)
         where (cldf(:) < ftiny)

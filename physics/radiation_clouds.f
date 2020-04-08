@@ -241,7 +241,6 @@
       real (kind=kind_phys), parameter :: cldasy_def = 0.84       !< default cld asymmetry factor
 
       integer  :: llyr   = 2                              !< upper limit of boundary layer clouds
-! DH* TODO - HOW TO GET/SET THIS CORRECTLY?
       integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
@@ -2341,13 +2340,13 @@
 
 !-----------------------------------
 !> \ingroup module_radiation_clouds
-!! This subroutine computes cloud related quantities using Thompson/WSM6 cloud
-!! microphysics scheme.
+!! This subroutine computes cloud related quantities using
+!! Ferrier-Aligo cloud microphysics scheme.
       subroutine progcld5                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &
-     &       IX, NLAY, NLP1,icloud,                                     &
+     &       IX, NLAY, NLP1, icloud,                                    &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       re_cloud,re_ice,re_snow,                                   &
      &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
@@ -2356,7 +2355,7 @@
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
 ! subprogram:    progcld5    computes cloud related quantities using    !
-!   Thompson/WSM6 cloud microphysics scheme.                !
+!   Ferrier-Aligo cloud microphysics scheme.                            !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
 !   condensates,                                                        !
@@ -2393,6 +2392,7 @@
 !   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !
 !   IX              : horizontal dimention                              !
 !   NLAY,NLP1       : vertical layer/level dimensions                   !
+!   icloud          : cloud effect to the optical depth in radiation    !
 !   uni_cld         : logical - true for cloud fraction from shoc       !
 !   lmfshal         : logical - true for mass flux shallow convection   !
 !   lmfdeep2        : logical - true for mass flux deep convection      !
@@ -2755,7 +2755,8 @@
 !...................................
 
 
-!mz: progcld5 benchmark
+!mz: this is the original progcld5 for Thompson MP (and WSM6),
+! to be replaced by the GSL version of progcld6 for Thompson MP
       subroutine progcld6                                               &
      &     ( plyr,plvl,tlyr,qlyr,qstl,rhly,clw,                         &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
@@ -2768,8 +2769,8 @@
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
-! subprogram:    progcld5    computes cloud related quantities using    !
-!   Thompson/WSM6 cloud microphysics scheme.                !
+! subprogram:    progcld6    computes cloud related quantities using    !
+!   Thompson/WSM6 cloud microphysics scheme.                            !
 !                                                                       !
 ! abstract:  this program computes cloud fractions from cloud           !
 !   condensates,                                                        !
@@ -2778,7 +2779,7 @@
 !   top and base.  the three vertical cloud domains are set up in the   !
 !   initial subroutine "cld_init".                                      !
 !                                                                       !
-! usage:         call progcld5                                          !
+! usage:         call progcld6                                          !
 !                                                                       !
 ! subprograms called:   gethml                                          !
 !                                                                       !
@@ -3883,7 +3884,7 @@
 !.. cloud fraction and is relatively good at getting widespread stratus
 !.. and stratoCu without caring whether any deep/shallow Cu param schemes
 !.. is making sub-grid-spacing clouds/precip.  Under the hood, this
-!.. scheme follows Mocko and Cotton (1995) in applicaiton of the
+!.. scheme follows Mocko and Cotton (1995) in application of the
 !.. Sundqvist et al (1989) scheme but using a grid-scale dependent
 !.. RH threshold, one each for land v. ocean points based on
 !.. experiences with HWRF testing.
