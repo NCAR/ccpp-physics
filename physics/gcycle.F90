@@ -200,7 +200,7 @@
              Sfcprop(nb)%tref(ix) = TSFFCS  (len)
 !           if ( Model%nstf_name(2) == 0 ) then
 !             dt_warm = (Sfcprop(nb)%xt(ix) + Sfcprop(nb)%xt(ix) ) &
-!                     / Sfcprop(nb)%xz(ix) 
+!                     / Sfcprop(nb)%xz(ix)
 !             Sfcprop(nb)%tsfco(ix) = Sfcprop(nb)%tref(ix)         &
 !                                   + dt_warm - Sfcprop(nb)%dt_cool(ix)
 !           endif
