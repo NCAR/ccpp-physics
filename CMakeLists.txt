@@ -201,6 +201,8 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 -ftz")
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_noahlsm.F
+                                PROPERTIES COMPILE_FLAGS "-r8 -free")
 
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
     set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
