@@ -3,7 +3,7 @@
 !! aerosol data for MG microphysics.
 
 !>\ingroup mod_GFS_phys_time_vary
-!! This module contain subroutines of reading and interpolating 
+!! This module contain subroutines of reading and interpolating
 !! aerosol data for MG microphysics.
 module aerinterp
 
@@ -15,13 +15,16 @@ module aerinterp
 
 contains
 
-      SUBROUTINE read_aerdata (me, master, iflip, idate )
+      SUBROUTINE read_aerdata (me, master, iflip, idate, errmsg, errflg)
       use machine, only: kind_phys, kind_io4, kind_io8
       use aerclm_def
       use netcdf
 
 !--- in/out
       integer, intent(in) :: me, master, iflip, idate(4)
+      character(len=*), intent(inout) :: errmsg
+      integer, intent(inout) :: errflg
+
 !--- locals
       integer      :: ncid, varid, ndims, dim1, dim2, dim3, hmx
       integer      :: i, j, k, n, ii, imon, klev
@@ -49,9 +52,10 @@ contains
 !! ===================================================================
       fname=trim("aeroclim.m"//'01'//".nc")
       inquire (file = fname, exist = file_exist)
-      if (.not. file_exist ) then
-         print *, 'fname not found, abort'
-         stop 8888
+      if (.not. file_exist) then
+         errmsg = errmsg // ' error in read_aerdata: file ' // trim(fname) // ' not found'
+         errflg = 1
+         return
       endif
       call nf_open(fname , nf90_NOWRITE, ncid)
 
@@ -95,12 +99,12 @@ contains
 
       do i = 1, hmx     ! flip from (-180,180) to (0,360)
         if(aer_loni(i)<0.)  aer_loni(i)=aer_loni(i)+360.
-        aer_lon(i+hmx) = aer_loni(i) 
-        aer_lon(i)     = aer_loni(i+hmx) 
+        aer_lon(i+hmx) = aer_loni(i)
+        aer_lon(i)     = aer_loni(i+hmx)
       enddo
 
       do i = 1, latsaer
-        aer_lat(i)     = aer_lati(i) 
+        aer_lat(i)     = aer_lati(i)
       enddo
 
       call nf_close(ncid)
@@ -120,23 +124,18 @@ contains
       do imon = 1, timeaer
        write(mn,'(i2.2)') imon
        fname=trim("aeroclim.m"//mn//".nc")
-       if (me == master) print *, "aerosol climo:", fname, &
-                         "for imon:",imon,idate
-
        inquire (file = fname, exist = file_exist)
-       if ( file_exist ) then
-        if (me == master) print *,     &
-                         "aerosol climo found; proceed the run" 
-       else
-        print *,"Error! aerosol climo not found; abort the run"
-        stop 555
+       if (.not. file_exist) then
+         errmsg = errmsg // ' error in read_aerdata: file ' // trim(fname) // ' not found'
+         errflg = 1
+         return
        endif
 
        call nf_open(fname , nf90_NOWRITE, ncid)
 
 ! ====> construct 3-d pressure array (Pa)
        call nf_inq_varid(ncid, "DELP", varid)
-       call nf_get_var(ncid, varid, buff) 
+       call nf_get_var(ncid, varid, buff)
 
        do j = 1, latsaer
         do i = 1, lonsaer
@@ -144,7 +143,7 @@ contains
          pres_tmp(i,1) = 0.
          do k=2, dim3
           pres_tmp(i,k) = pres_tmp(i,k-1)+buff(i,j,k)
-         enddo    !k-loop 
+         enddo    !k-loop
         enddo     !i-loop (lon)
 
 ! extract pres_tmp to fill aer_pres (in  Pa)
@@ -153,7 +152,7 @@ contains
            klev = k
          else                                ! data from sfc to top
            klev = ( dim3 - k ) + 1
-         endif 
+         endif
          do i = 1, hmx
          aer_pres(i+hmx,j,k,imon)= 1.d0*pres_tmp(i,klev)
          aer_pres(i,j,k,imon)    = 1.d0*pres_tmp(i+hmx,klev)
@@ -170,13 +169,13 @@ contains
          call nf_get_var(ncid, varid, buffx)
 
          do j = 1, latsaer
-         do k = 1, levsaer 
+         do k = 1, levsaer
 ! input is from toa to sfc
           if ( iflip == 0 )  then             ! data from toa to sfc
             klev = k
           else                                ! data from sfc to top
             klev = ( dim3 - k ) + 1
-          endif 
+          endif
           do i = 1, hmx
           aerin(i+hmx,j,k,ii,imon) = 1.d0*buffx(i,j,klev,1)
           if(aerin(i+hmx,j,k,ii,imon)<0.or.aerin(i+hmx,j,k,ii,imon)>1.)  then
@@ -200,7 +199,7 @@ contains
       deallocate (buff, pres_tmp)
       deallocate (buffx)
 
-      END SUBROUTINE read_aerdata 
+      END SUBROUTINE read_aerdata
 !
 !**********************************************************************
 !
@@ -235,7 +234,7 @@ contains
         else
           ddy(j) = 1.0
         endif
- 
+
       ENDDO
 
       DO J=1,npts
@@ -255,7 +254,7 @@ contains
           ddx(j) = 1.0
         endif
       ENDDO
- 
+
       RETURN
       END SUBROUTINE setindxaer
 !
@@ -271,7 +270,7 @@ contains
       integer   i1,i2, iday,j,j1,j2,l,npts,nc,n1,n2,lev,k,i,ii
       real(kind=kind_phys) fhour,temj, tx1, tx2,temi
 !
- 
+
       integer  JINDX1(npts), JINDX2(npts),iINDX1(npts),iINDX2(npts)
       integer  me,idate(4), master
       integer  IDAT(8),JDAT(8)
@@ -318,7 +317,7 @@ contains
 !
       tx1 = (aer_time(n2) - rjday) / (aer_time(n2) - aer_time(n1))
       tx2 = 1.0 - tx1
-      if (n2 > 12) n2 = n2 -12 
+      if (n2 > 12) n2 = n2 -12
 
 !
       DO L=1,levsaer
@@ -330,18 +329,18 @@ contains
           I2  = IINDX2(J)
           TEMI = 1.0 - DDX(J)
           DO ii=1,ntrcaer
-           aerpm(j,L,ii) =                                                        & 
+           aerpm(j,L,ii) =                                                        &
            tx1*(TEMI*TEMJ*aerin(I1,J1,L,ii,n1)+DDX(j)*DDY(J)*aerin(I2,J2,L,ii,n1)&
-               +TEMI*DDY(j)*aerin(I1,J2,L,ii,n1)+DDX(j)*TEMJ*aerin(I2,J1,L,ii,n1))& 
+               +TEMI*DDY(j)*aerin(I1,J2,L,ii,n1)+DDX(j)*TEMJ*aerin(I2,J1,L,ii,n1))&
           +tx2*(TEMI*TEMJ*aerin(I1,J1,L,ii,n2)+DDX(j)*DDY(J)*aerin(I2,J2,L,ii,n2) &
-               +TEMI*DDY(j)*aerin(I1,J2,L,ii,n2)+DDX(j)*TEMJ*aerin(I2,J1,L,ii,n2)) 
+               +TEMI*DDY(j)*aerin(I1,J2,L,ii,n2)+DDX(j)*TEMJ*aerin(I2,J1,L,ii,n2))
           ENDDO
 
-          aerpres(j,L) =                                                         & 
+          aerpres(j,L) =                                                         &
            tx1*(TEMI*TEMJ*aer_pres(I1,J1,L,n1)+DDX(j)*DDY(J)*aer_pres(I2,J2,L,n1)&
-               +TEMI*DDY(j)*aer_pres(I1,J2,L,n1)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n1))& 
+               +TEMI*DDY(j)*aer_pres(I1,J2,L,n1)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n1))&
           +tx2*(TEMI*TEMJ*aer_pres(I1,J1,L,n2)+DDX(j)*DDY(J)*aer_pres(I2,J2,L,n2) &
-               +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2)) 
+               +TEMI*DDY(j)*aer_pres(I1,J2,L,n2)+DDX(j)*TEMJ*aer_pres(I2,J1,L,n2))
 
         ENDDO
       ENDDO
@@ -349,11 +348,11 @@ contains
 ! don't flip, input is the same direction as GFS  (bottom-up)
       DO J=1,npts
         DO L=1,lev
-           if(prsl(j,L).ge.aerpres(j,1)) then 
+           if(prsl(j,L).ge.aerpres(j,1)) then
               DO ii=1, ntrcaer
                aerout(j,L,ii)=aerpm(j,1,ii)        !! sfc level
               ENDDO
-           else if(prsl(j,L).le.aerpres(j,levsaer)) then 
+           else if(prsl(j,L).le.aerpres(j,levsaer)) then
               DO ii=1, ntrcaer
                aerout(j,L,ii)=aerpm(j,levsaer,ii)  !! toa top
               ENDDO
@@ -372,11 +371,11 @@ contains
              DO ii = 1, ntrcaer
            aerout(j,L,ii)= aerpm(j,i1,ii)*tx1 + aerpm(j,i2,ii)*tx2
              ENDDO
-           endif 
+           endif
         ENDDO   !L-loop
       ENDDO     !J-loop
 !
-      RETURN 
+      RETURN
       END SUBROUTINE aerinterpol
 
 end module aerinterp
