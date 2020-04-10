@@ -250,7 +250,7 @@
   optional = F
 [swh]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
-  long_name = total sky sw heating rate
+  long_name = total sky shortwave heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -259,7 +259,7 @@
   optional = F
 [hlw]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
-  long_name = total sky lw heating rate
+  long_name = total sky longwave heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

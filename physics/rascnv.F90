@@ -34,7 +34,7 @@
      &,                                   cmb2pa = 100.0                  ! Conversion from hPa to Pa
 !
       real(kind=kind_phys), parameter :: frac=0.5,    crtmsf=0.0        &
-     &,                                  rhfacs=0.70, rhfacl=0.70       &
+     &,                                  rhfacs=0.75, rhfacl=0.75       &
      &,                                  face=5.0,    delx=10000.0      &
      &,                                  ddfac=face*delx*0.001          &
      &,                                  max_neg_bouy=0.15              &
@@ -1265,18 +1265,18 @@
       PRL(KP1) = PRS(KP1)
 !
       DO L=KD,K
-        RNN(L) = zero
-        ZET(L) = zero
-        XI(L)  = zero
+        RNN(L)   = zero
+        ZET(L)   = zero
+        XI(L)    = zero
 !
-        TOL(L) = TOI(L)
-        QOL(L) = QOI(L)
-        PRL(L) = PRS(L)
-        CLL(L) = QLI(L)
-        CIL(L) = QII(L)
-        BUY(L) = zero
+        TOL(L)   = TOI(L)
+        QOL(L)   = QOI(L)
+        PRL(L)   = PRS(L)
+        CLL(L)   = QLI(L)
+        CIL(L)   = QII(L)
+        BUY(L)   = zero
 
-        wvl(l) = zero
+        wvl(l)   = zero
       ENDDO
       wvl(kp1) = zero
 !
@@ -2523,6 +2523,7 @@
          tem1 = sqrt(max(one, min(100.0,(6.25E10/max(area,one))))) ! 20110530
 
          clfrac = max(ZERO, min(half, rknob*clf(tem)*tem1))
+         cldfrd = clfrac
 
          DO L=KD,KBL         ! Testing on 20070926
 !                                                 for L=KD,K
