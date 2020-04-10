@@ -124,8 +124,8 @@
   intent = in
   optional = F
 [dqsfc]
-  standard_name = surface_upward_latent_heat_flux_for_coupling_interstitial
-  long_name = sfc latent heat flux for coupling interstitial
+  standard_name = surface_upward_latent_heat_flux_for_coupling
+  long_name = sfc latent heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -133,8 +133,8 @@
   intent = in
   optional = F
 [dtsfc]
-  standard_name = surface_upward_sensible_heat_flux_for_coupling_interstitial
-  long_name = sfc sensible heat flux for coupling interstitial
+  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  long_name = sfc sensible heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -142,8 +142,8 @@
   intent = in
   optional = F
 [dusfc]
-  standard_name = surface_x_momentum_flux_for_coupling_interstitial
-  long_name = sfc x momentum flux for coupling interstitial
+  standard_name = surface_x_momentum_flux_for_coupling
+  long_name = sfc x momentum flux for coupling
   units = Pa 
   dimensions = (horizontal_dimension)
   type = real
@@ -151,8 +151,8 @@
   intent = in
   optional = F
 [dvsfc]
-  standard_name = surface_y_momentum_flux_for_coupling_interstitial
-  long_name = sfc y momentum flux for coupling interstitial
+  standard_name = surface_y_momentum_flux_for_coupling
+  long_name = sfc y momentum flux for coupling
   units = Pa 
   dimensions = (horizontal_dimension)
   type = real

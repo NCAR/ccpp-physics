@@ -228,15 +228,15 @@
 
         if (frac_grid) then
           do i=1,im
-            tem = one - cice(i) - frland(i)
+            tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
             if (flag_cice(i)) then
-              adjsfculw(i) = adjsfculw_lnd(i) * frland(i) &
-                           + ulwsfc_cice(i)   * cice(i)   &
-                           + adjsfculw_ocn(i) * tem
+              adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                           + ulwsfc_cice(i)   * tem                     &
+                           + adjsfculw_ocn(i) * (one - frland(i) - tem)
             else
-              adjsfculw(i) = adjsfculw_lnd(i) * frland(i) &
-                           + adjsfculw_ice(i) * cice(i)   &
-                           + adjsfculw_ocn(i) * tem
+              adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                           + adjsfculw_ice(i) * tem                     &
+                           + adjsfculw_ocn(i) * (one - frland(i) - tem)
             endif
           enddo
         else
