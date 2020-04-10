@@ -136,6 +136,7 @@ module GFS_rrtmg_setup
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
 !                     =3: decorrelation-length overlap (mcica only)     !
+!                     =4: exponential overlap clouds
 !   isubc_sw/isubc_lw: sub-column cloud approx control flag (sw/lw rad) !
 !                     =0: with out sub-column cloud approximation       !
 !                     =1: mcica sub-col approx. prescribed random seed  !
@@ -303,7 +304,7 @@ module GFS_rrtmg_setup
 
       call radinit                                                      &
 !  ---  inputs:
-     &     ( si, levr, imp_physics,  me )
+     &     ( si, levr, imp_physics, me )
 !  ---  outputs:
 !          ( none )
 
