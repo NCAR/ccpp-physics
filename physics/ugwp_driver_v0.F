@@ -1839,16 +1839,16 @@
 !
 !--------------------------------------------------------------------------- 
 !
-       if (kdt == 1 .and. mpi_id == master) then
-         print *, 'vgw done  '
-!
-         print *, maxval(pdudt)*86400.,  minval(pdudt)*86400, 'vgw ax'
-         print *, maxval(pdvdt)*86400.,  minval(pdvdt)*86400, 'vgw ay'
-         print *, maxval(dked)*1.,  minval(dked)*1,  'vgw keddy m2/sec'
-         print *, maxval(pdtdt)*86400.,  minval(pdtdt)*86400,'vgw eps'
-!
-!        print *, ' ugwp -heating rates '
-       endif
+!       if (kdt == 1 .and. mpi_id == master) then
+!         print *, 'vgw done  '
+!!
+!         print *, maxval(pdudt)*86400.,  minval(pdudt)*86400, 'vgw ax'
+!         print *, maxval(pdvdt)*86400.,  minval(pdvdt)*86400, 'vgw ay'
+!         print *, maxval(dked)*1.,  minval(dked)*1,  'vgw keddy m2/sec'
+!         print *, maxval(pdtdt)*86400.,  minval(pdtdt)*86400,'vgw eps'
+!!
+!!        print *, ' ugwp -heating rates '
+!       endif
 
        return
        end subroutine fv3_ugwp_solv2_v0
