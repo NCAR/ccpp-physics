@@ -1574,7 +1574,7 @@
 ! APPLY PHYSICAL BOUNDS TO FLERCHINGER SOLUTION
 ! ----------------------------------------------------------------------
          IF (KCOUNT == 0) THEN
-             PRINT *,'Flerchinger USEd in NEW version. Iterations=',NLOG
+!             PRINT *,'Flerchinger USEd in NEW version. Iterations=',NLOG
                   FK = ( ( (HLICE / (GS * ( - PSIS)))*                    &
                        ( (TKELV - T0)/ TKELV))** ( -1/ BX))* SMCMAX
 !            FRH2O = MIN (FK, SMC)
