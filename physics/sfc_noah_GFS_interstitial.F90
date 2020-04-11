@@ -165,7 +165,7 @@
 
 !     local Variables
       integer :: i, k
-      real(kind=kind_phys) :: sneqv, snwd
+      real(kind=kind_phys) :: sneqv
       
       REAL, PARAMETER  :: A2=17.67,A3=273.15,A4=29.65,   &
                           A23M4=A2*(A3-A4)
@@ -219,8 +219,8 @@
           
           !GJF: snow depth passed in to NOAH is conditionally modified differently in GFS and WRF:
           sneqv = weasd(i) * 0.001
-          snwd = snwdph(i) * 0.001
-          if ( (sneqv /= 0.0 .and. snwd == 0.) .or. (snwd <= sneqv) ) then
+          snowhk(i) = snwdph(i) * 0.001
+          if ( (sneqv /= 0.0 .and. snowhk(i) == 0.) .or. (snowhk(i) <= sneqv) ) then
             snowhk(i) = 5.*sneqv
           end if
           !GJF: GFS version:
