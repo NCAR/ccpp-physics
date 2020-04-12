@@ -287,7 +287,7 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
+        dqsfc_cice, ocean, lake, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -322,7 +322,7 @@
       real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
 
-      logical, dimension(:),intent(in) :: wet, dry, icy
+      logical, dimension(:),intent(in) :: ocean, lake, dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
 
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dkt_cpl
@@ -331,10 +331,7 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      real(kind=kind_phys), parameter :: zero  = 0.0d0
-      real(kind=kind_phys), parameter :: one   = 1.0d0
-      real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
-      real(kind=kind_phys), parameter :: epsln = 1.0d-10 ! same as in GFS_physics_driver.F90
+      real(kind=kind_phys), parameter :: huge=1.0d30, epsln = 1.0d-10
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
@@ -489,7 +486,7 @@
       if (cplchm) then
         do i = 1, im
           tem1 = max(q1(i), 1.e-8)
-          tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
+          tem  = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
           ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
         enddo
         ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
@@ -501,25 +498,25 @@
 
       if (cplflx) then
         do i=1,im
-          if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
-            if (fice(i) > one - epsln) then ! no open water, use results from CICE
+          if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
+            if (fice(i) > 1.-epsln) then ! no open water, use results from CICE
               dusfci_cpl(i) = dusfc_cice(i)
               dvsfci_cpl(i) = dvsfc_cice(i)
               dtsfci_cpl(i) = dtsfc_cice(i)
               dqsfci_cpl(i) = dqsfc_cice(i)
-            elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
+            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
               tem1 = max(q1(i), 1.e-8)
-              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
-              if (wind(i) > zero) then
-                tem = - rho * stress_ocn(i) / wind(i)
+              rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
+              if (wind(i) > 0.0) then
+                tem = - rho * stress_ocn(i) / wind(i)              !if dry or icy is true, stress_ocn(i) may be undefined. 
                 dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
                 dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
               else
-                dusfci_cpl(i) = zero
-                dvsfci_cpl(i) = zero
+                dusfci_cpl(i) = 0.0
+                dvsfci_cpl(i) = 0.0
               endif
-              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
-              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean  may be huge or undefined                           
+              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean  may be huge or undefined
             else                                       ! use results from PBL scheme for 100% open ocean
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)

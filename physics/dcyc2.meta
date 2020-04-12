@@ -101,6 +101,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[tsfc_lke]
+  standard_name = surface_skin_temperature_over_lake_interstitial
+  long_name = surface skin temperature over lake (temporary use as interstitial)
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tsfc_ice]
   standard_name = surface_skin_temperature_over_ice_interstitial
   long_name = surface skin temperature over ice   (temporary use as interstitial)
@@ -149,6 +158,15 @@
 [sfcemis_ocn]
   standard_name = surface_longwave_emissivity_over_ocean_interstitial
   long_name = surface lw emissivity in fraction over ocean (temporary use as interstitial)
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfcemis_lke]
+ standard_name = surface_longwave_emissivity_over_lake_interstitial
+  long_name = surface lw emissivity in fraction over lake (temporary use as interstitial)
   units = frac
   dimensions = (horizontal_dimension)
   type = real
@@ -348,9 +366,17 @@
   type = logical
   intent = in
   optional = F
-[wet]
-  standard_name = flag_nonzero_wet_surface_fraction
-  long_name = flag indicating presence of some ocean or lake surface area fraction
+[ocean]
+  standard_name = flag_nonzero_ocean_surface_fraction
+  long_name = flag indicating presence of some ocean surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[lake]
+  standard_name = flag_nonzero_lake_surface_fraction
+  long_name = flag indicating presence of some lake surface area fraction
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
@@ -422,6 +448,15 @@
 [adjsfculw_ocn]
   standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
   long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[adjsfculw_lke]
+  standard_name = surface_upwelling_longwave_flux_over_lake_interstitial
+  long_name = surface upwelling longwave flux at current time over lake (temporary use as interstitial)
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real

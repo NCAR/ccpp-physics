@@ -67,20 +67,20 @@
      &                    z0pert,ztpert,                                &  ! mg, sfc-perts !intent(in)
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
-     &                    wet,dry,icy,                                  &  !intent(in)
-     &                    tskin_ocn, tskin_lnd, tskin_ice,              &  !intent(in)
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &  !intent(in)
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &  !intent(in)
-     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
-     &                    ustar_ocn, ustar_lnd, ustar_ice,              &  !intent(inout)
-     &                       cm_ocn,    cm_lnd,    cm_ice,              &  !intent(inout)
-     &                       ch_ocn,    ch_lnd,    ch_ice,              &  !intent(inout)
-     &                       rb_ocn,    rb_lnd,    rb_ice,              &  !intent(inout)
-     &                   stress_ocn,stress_lnd,stress_ice,              &  !intent(inout)
-     &                       fm_ocn,    fm_lnd,    fm_ice,              &  !intent(inout)
-     &                       fh_ocn,    fh_lnd,    fh_ice,              &  !intent(inout)
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &  !intent(inout)
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice,              &  !intent(inout)
+     &                    ocean,lake,dry,icy,                           &  !intent(in)
+     &                    tskin_ocn, tskin_lke, tskin_lnd, tskin_ice,   &  !intent(in)
+     &                    tsurf_ocn, tsurf_lke, tsurf_lnd, tsurf_ice,   &  !intent(in)
+     &                   snwdph_ocn,snwdph_lke, snwdph_lnd,snwdph_ice,  &  !intent(in)
+     &                     z0rl_ocn, z0rl_lke,  z0rl_lnd,  z0rl_ice,    &  !intent(inout)
+     &                    ustar_ocn, ustar_lke,  ustar_lnd, ustar_ice,  &  !intent(inout)
+     &                       cm_ocn,  cm_lke,   cm_lnd,    cm_ice,      &  !intent(inout)
+     &                       ch_ocn,  ch_lke,   ch_lnd,    ch_ice,      &  !intent(inout)
+     &                       rb_ocn,  rb_lke,   rb_lnd,    rb_ice,      &  !intent(inout)
+     &                   stress_ocn,stress_lke, stress_lnd,stress_ice,  &  !intent(inout)
+     &                       fm_ocn,  fm_lke,   fm_lnd,    fm_ice,      &  !intent(inout)
+     &                       fh_ocn,  fh_lke,   fh_lnd,    fh_ice,      &  !intent(inout)
+     &                     fm10_ocn,  fm10_lke, fm10_lnd,  fm10_ice,    &  !intent(inout)
+     &                      fh2_ocn,  fh2_lke,  fh2_lnd,   fh2_ice,     &  !intent(inout)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -91,7 +91,8 @@
       integer, dimension(im), intent(in) :: vegtype
 
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
-      logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
+      logical, dimension(im), intent(in) :: flag_iter, ocean, lake, dry,&
+     &                                      icy
 
       real(kind=kind_phys), dimension(im), intent(in)    :: u10m,v10m
       real(kind=kind_phys), intent(in) :: rvrdm1, eps, epsm1, grav
@@ -100,21 +101,21 @@
      &                    wind,sigmaf,shdmax,                           &
      &                    z0pert,ztpert ! mg, sfc-perts
       real(kind=kind_phys), dimension(im), intent(in)    ::             &
-     &                    tskin_ocn, tskin_lnd, tskin_ice,              &
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice
+     &                    tskin_ocn,  tskin_lke, tskin_lnd, tskin_ice,  &
+     &                    tsurf_ocn,  tsurf_lke, tsurf_lnd, tsurf_ice,  &
+     &                   snwdph_ocn,snwdph_lke, snwdph_lnd,snwdph_ice
 
       real(kind=kind_phys), dimension(im), intent(inout) ::             &
-     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &
-     &                    ustar_ocn, ustar_lnd, ustar_ice,              &
-     &                       cm_ocn,    cm_lnd,    cm_ice,              &
-     &                       ch_ocn,    ch_lnd,    ch_ice,              &
-     &                       rb_ocn,    rb_lnd,    rb_ice,              &
-     &                   stress_ocn,stress_lnd,stress_ice,              &
-     &                       fm_ocn,    fm_lnd,    fm_ice,              &
-     &                       fh_ocn,    fh_lnd,    fh_ice,              &
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice
+     &                     z0rl_ocn, z0rl_lke,  z0rl_lnd,  z0rl_ice,    &
+     &                    ustar_ocn, ustar_lke, ustar_lnd, ustar_ice,   &
+     &                       cm_ocn, cm_lke,    cm_lnd,    cm_ice,      &
+     &                       ch_ocn,  ch_lke,   ch_lnd,    ch_ice,      &
+     &                       rb_ocn,  rb_lke,   rb_lnd,    rb_ice,      &
+     &                   stress_ocn,stress_lke, stress_lnd,stress_ice,  &
+     &                       fm_ocn,  fm_lke,   fm_lnd,    fm_ice,      &
+     &                       fh_ocn,  fh_lke,   fh_lnd,    fh_ice,      &
+     &                     fm10_ocn,  fm10_lke, fm10_lnd,  fm10_ice,    &
+     &                      fh2_ocn,  fh2_lke,  fh2_lnd,   fh2_ice
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -280,7 +281,7 @@
 ! BWG: Everything from here to end of subroutine was after
 !      the stuff now put into "stability"
 
-          if (wet(i)) then ! Some open ocean
+          if (ocean(i)) then ! Some open ocean
             tvs          = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * virtfac
             z0           = 0.01 * z0rl_ocn(i)
             z0max        = max(1.0e-6, min(z0,z1(i)))
@@ -352,6 +353,43 @@
 
             endif
           endif              ! end of if(open ocean)
+!
+          if (lake(i)) then ! Some lakes
+            tvs          = 0.5 * (tsurf_lke(i)+tskin_lke(i)) * virtfac
+            z0           = 0.01 * z0rl_lke(i)
+            z0max        = max(1.0e-6, min(z0,z1(i)))
+            ustar_lke(i) = sqrt(grav * z0 / charnock)
+            wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
+
+!**  test xubin's new z0
+
+!           ztmax  = z0max
+
+            restar = max(ustar_lke(i)*z0max*visi, 0.000001)
+
+!  rat taken from zeng, zhao and dickinson 1997
+
+            rat   = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
+            ztmax = max(z0max * exp(-rat), 1.0e-6)
+!
+            if (sfc_z0_type == 6) then
+              call znot_t_v6(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+            else if (sfc_z0_type == 7) then
+              call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+            else if (sfc_z0_type > 0) then
+              write(0,*)'no option for sfc_z0_type=',sfc_z0_type
+              stop
+            endif
+!
+            call stability
+!  ---  inputs:
+     &       (z1(i), snwdph_lke(i), thv1, wind(i),
+     &        z0max, ztmax, tvs, grav,
+!  ---  outputs:
+     &        rb_lke(i), fm_lke(i), fh_lke(i), fm10_lke(i), fh2_lke(i),
+     &        cm_lke(i), ch_lke(i), stress_lke(i), ustar_lke(i))
+
+        endif   !end of if lake
 !
         endif                ! end of if(flagiter) loop
       enddo

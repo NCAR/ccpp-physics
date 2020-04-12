@@ -32,7 +32,7 @@
 !  ---  inputs:
      &     ( im, hvap, cp, hfus, jcal, eps, epsm1, rvrdm1, rd, rhw0,    &
      &       pi, sbc, ps, u1, v1, t1, q1, tref, cm, ch,                 &
-     &       prsl1, prslki, prsik1, prslk1, wet, xlon, sinlat,          &
+     &       prsl1, prslki, prsik1, prslk1, ocean, xlon, sinlat,        &
      &       stress,                                                    &
      &       sfcemis, dlwflx, sfcnsw, rain, timestep, kdt, solhr,xcosz, &
      &       wind, flag_iter, flag_guess, nstf_name1, nstf_name4,       &
@@ -53,7 +53,7 @@
 !    call sfc_nst                                                       !
 !       inputs:                                                         !
 !          ( im, ps, u1, v1, t1, q1, tref, cm, ch,                      !
-!            prsl1, prslki, wet, xlon, sinlat, stress,                  !
+!            prsl1, prslki, ocean, xlon, sinlat, stress,                  !
 !            sfcemis, dlwflx, sfcnsw, rain, timestep, kdt,solhr,xcosz,  !
 !            wind,  flag_iter, flag_guess, nstf_name1, nstf_name4,      !
 !            nstf_name5, lprnt, ipr,                                    !
@@ -99,7 +99,7 @@
 !     prslki   - real,                                             im   !
 !     prsik1   - real,                                             im   !
 !     prslk1   - real,                                             im   !
-!     wet      - logical, =T if any ocn/lake water (F otherwise)   im   !
+!     ocean      - logical, =T if any ocn/lake water (F otherwise)   im   !
 !     icy      - logical, =T if any ice                            im   !
 !     xlon     - real, longitude         (radians)                 im   !
 !     sinlat   - real, sin of latitude                             im   !
@@ -197,7 +197,7 @@
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet
+      logical, dimension(im), intent(in) :: flag_iter, flag_guess, ocean
 !    &,      icy
       logical,                intent(in) :: lprnt
 
@@ -261,15 +261,15 @@ cc
 ! flag for open water and where the iteration is on
 !
       do i = 1, im
-!       flag(i) = wet(i) .and. .not.icy(i) .and. flag_iter(i)
-        flag(i) = wet(i) .and. flag_iter(i)
+!       flag(i) = ocean(i) .and. .not.icy(i) .and. flag_iter(i)
+        flag(i) = ocean(i) .and. flag_iter(i)
       enddo
 !
 !  save nst-related prognostic fields for guess run
 !
       do i=1, im
-!       if(wet(i) .and. .not.icy(i) .and. flag_guess(i)) then
-        if(wet(i) .and. flag_guess(i)) then
+!       if(ocean(i) .and. .not.icy(i) .and. flag_guess(i)) then
+        if(ocean(i) .and. flag_guess(i)) then
           xt_old(i)      = xt(i)
           xs_old(i)      = xs(i)
           xu_old(i)      = xu(i)
@@ -584,8 +584,8 @@ cc
 
 ! restore nst-related prognostic fields for guess run
       do i=1, im
-!       if (wet(i) .and. .not.icy(i)) then
-        if (wet(i)) then
+!       if (ocean(i) .and. .not.icy(i)) then
+        if (ocean(i)) then
           if (flag_guess(i)) then    ! when it is guess of
             xt(i)      = xt_old(i)
             xs(i)      = xs_old(i)
@@ -608,7 +608,7 @@ cc
               tskin(i) = tsurf(i)
             endif               ! if nstf_name1 > 1 then
           endif                 ! if flag_guess(i) then
-        endif                   ! if wet(i) .and. .not.icy(i) then
+        endif                   ! if ocean(i) .and. .not.icy(i) then
       enddo
 
 !     if (lprnt .and. i == ipr) print *,' beg xz8=',xz(i)
@@ -675,8 +675,8 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, tsfc_ocn, tsurf_ocn, tseal, xt, xz, dt_cool,
-     &     z_c, tref, cplflx, oceanfrac, errmsg, errflg)
+     &    (im, ocean, tsfc_ocn, tsurf_ocn, tseal, xt, xz, dt_cool,
+     &     z_c, tref, cplflx, errmsg, errflg)
 
       use machine , only : kind_phys
 
@@ -684,9 +684,9 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im
-      logical, dimension(im), intent(in) :: wet
+      logical, dimension(im), intent(in) :: ocean
       real (kind=kind_phys), dimension(im), intent(in) ::
-     &      tsfc_ocn, xt, xz, dt_cool, z_c, oceanfrac
+     &      tsfc_ocn, xt, xz, dt_cool, z_c
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -710,7 +710,7 @@ cc
       errflg = 0
 
       do i=1,im
-        if (wet(i)) then
+        if (ocean(i)) then
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
@@ -724,7 +724,7 @@ cc
       if (cplflx) then
         tem1 = half / omz1
         do i=1,im
-          if (wet(i) .and. oceanfrac(i) > zero) then
+          if (ocean(i)) then
             tem2 = one / xz(i)
             dt_warm = (xt(i)+xt(i)) * tem2
             if ( xz(i) > omz1) then
@@ -777,7 +777,7 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, rlapse, tgice, wet, icy, oro, oro_uf, nstf_name1,      &
+     &     ( im, rlapse, ocean, icy, oro, oro_uf, nstf_name1,             &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_ocn, tsfc_ocn, dtzm, errmsg, errflg                  &
      &     )
@@ -789,8 +789,8 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im
-      logical, dimension(im), intent(in) :: wet, icy
-      real (kind=kind_phys), intent(in) :: rlapse, tgice
+      logical, dimension(im), intent(in) :: ocean, icy
+      real (kind=kind_phys), intent(in) :: rlapse
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
       real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
@@ -820,7 +820,7 @@ cc
 !    &     ' kdt=',kdt
 
 !      do i = 1, im
-!        if (wet(i) .and. .not. icy(i)) then
+!        if (ocean(i) .and. .not. icy(i)) then
 !          tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
 !        endif
 !      enddo
@@ -832,13 +832,13 @@ cc
         zsea1 = 0.001*real(nstf_name4)
         zsea2 = 0.001*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool,                              &
-     &                    z_c, wet, zsea1, zsea2,                       &
+     &                    z_c, ocean, zsea1, zsea2,                       &
      &                    im, 1, dtzm)
         do i = 1, im
-!          if (wet(i) .and. .not.icy(i)) then
-!          if (wet(i) .and. (Model%frac_grid .or. .not. icy(i))) then
-          if (wet(i)) then
-            tsfc_ocn(i) = max(tgice, tref(i) + dtzm(i))
+!          if (ocean(i) .and. .not.icy(i)) then
+!          if (ocean(i) .and. (Model%frac_grid .or. .not. icy(i))) then
+          if (ocean(i)) then
+            tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i))
 !           tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i)) -  &
 !                           (oro(i)-oro_uf(i))*rlapse
           endif

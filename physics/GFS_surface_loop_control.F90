@@ -81,7 +81,7 @@
 !!  @{
 
       subroutine GFS_surface_loop_control_part2_run (im, iter,  wind, &
-             flag_guess, flag_iter, dry, wet, icy, nstf_name1, errmsg, errflg)
+             flag_guess, flag_iter, dry, ocean, lake, icy, nstf_name1, errmsg, errflg)
 
       use machine,           only: kind_phys
 
@@ -93,7 +93,7 @@
       real(kind=kind_phys), dimension(im), intent(in)    :: wind
       logical,              dimension(im), intent(inout) :: flag_guess
       logical,              dimension(im), intent(inout) :: flag_iter
-      logical,              dimension(im), intent(in)    :: dry, wet, icy
+      logical,              dimension(im), intent(in)    :: dry, ocean, lake, icy
       integer,                             intent(in)    :: nstf_name1
 
       character(len=*), intent(out) :: errmsg
@@ -111,8 +111,8 @@
         flag_guess(i) = .false.
 
         if (iter == 1 .and. wind(i) < 2.0) then
-          !if (dry(i) .or. (wet(i) .and. .not.icy(i) .and. nstf_name1 > 0)) then
-          if (dry(i) .or. (wet(i) .and. nstf_name1 > 0)) then
+          !if (dry(i) .or. (ocean(i) .and. .not.icy(i) .and. nstf_name1 > 0)) then
+          if (dry(i) .or. (ocean(i) .and. nstf_name1 > 0)) then
             flag_iter(i) = .true.
           endif
         endif

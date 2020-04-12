@@ -160,8 +160,8 @@
     subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,       &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm,    &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,         &
-      adjsfculw_ice, adjsfculw_ocn, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,         &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, errmsg, errflg)
+      adjsfculw_ice, adjsfculw_ocn, adjsfculw_lke, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv,    &
+      dt3dt_mp, ctei_rml, ctei_r, kinver, dry, icy, ocean, lake, frland, frlake, huge, errmsg, errflg)
 
       implicit none
 
@@ -181,14 +181,14 @@
 
       integer,              intent(inout), dimension(im) :: kinver
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
-      real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_ocn
+      real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_ocn, adjsfculw_lke              
       real(kind=kind_phys), intent(  out), dimension(im) :: adjsfculw
 
       ! These arrays are only allocated if ldiag3d is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
 
-      logical,              intent(in   ), dimension(im) :: dry, icy, wet
-      real(kind=kind_phys), intent(in   ), dimension(im) :: frland
+      logical,              intent(in   ), dimension(im) :: dry, icy, ocean, lake
+      real(kind=kind_phys), intent(in   ), dimension(im) :: frland, frlake
       real(kind=kind_phys), intent(in   ) :: huge
 
       character(len=*),     intent(out) :: errmsg
@@ -228,15 +228,17 @@
 
         if (frac_grid) then
           do i=1,im
-            tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
+            tem = one - cice(i) - frland(i) - frlake(i)
             if (flag_cice(i)) then
-              adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                           + ulwsfc_cice(i)   * tem                     &
-                           + adjsfculw_ocn(i) * (one - frland(i) - tem)
+              adjsfculw(i) = adjsfculw_lnd(i) * frland(i) &
+                           + ulwsfc_cice(i)   * cice(i)   &
+                           + adjsfculw_lke(i) * frlake(i) &
+                           + adjsfculw_ocn(i) * tem
             else
-              adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                           + adjsfculw_ice(i) * tem                     &
-                           + adjsfculw_ocn(i) * (one - frland(i) - tem)
+              adjsfculw(i) = adjsfculw_lnd(i) * frland(i) &
+                           + adjsfculw_ice(i) * cice(i)   &
+                           + adjsfculw_lke(i) * frlake(i) &
+                           + adjsfculw_ocn(i) * tem
             endif
           enddo
         else
@@ -246,20 +248,26 @@
             elseif (icy(i)) then                 ! ice (and water)
               tem = one - cice(i)
               if (flag_cice(i)) then
-                if (wet(i) .and. adjsfculw_ocn(i) /= huge) then
+                if (ocean(i) .and. adjsfculw_ocn(i) /= huge) then
                   adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_ocn(i)*tem
-                else
+                elseif(lake(i) .and. adjsfculw_lke(i) /= huge) then
+                  adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_lke(i)*tem
+                else 
                   adjsfculw(i) = ulwsfc_cice(i)
                 endif
               else
-                if (wet(i) .and. adjsfculw_ocn(i) /= huge) then
+                if (ocean(i) .and. adjsfculw_ocn(i) /= huge) then
                   adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_ocn(i)*tem
+                elseif(lake(i) .and. adjsfculw_lke(i) /= huge) then
+                  adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_lke(i)*tem
                 else
                   adjsfculw(i) = adjsfculw_ice(i)
                 endif
               endif
-            else                                 ! all water
+            elseif(ocean(i)) then                                 ! ocean
               adjsfculw(i) = adjsfculw_ocn(i)
+            else
+              adjsfculw(i) = adjsfculw_lke(i)                !lake
             endif
           enddo
         endif

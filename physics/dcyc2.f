@@ -179,19 +179,21 @@
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
      &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
-     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_ocn,tf,tsflw,           &
-     &       sfcemis_lnd, sfcemis_ice, sfcemis_ocn,                     &
+     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_ocn, tsfc_lke, tf,tsflw,           &
+     &       sfcemis_lnd, sfcemis_ice, sfcemis_ocn, sfcemis_lke,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       ix, im, levs, deltim, fhswr,                               &
-     &       dry, icy, wet,                                             &
+!     &       dry, icy, wet,                                             &
+     &       dry, icy, ocean, lake,                                      &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtc,                                                &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,                             &
-     &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_ocn,xmu,xcosz,       &
+     &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_ocn,adjsfculw_lke,   &
+     &       xmu,xcosz,                                                 &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
      &       errmsg,errflg                                              &
@@ -216,7 +218,7 @@
 
 !     integer, intent(in) :: ipr
 !     logical lprnt
-      logical, dimension(im), intent(in) :: dry, icy, wet
+      logical, dimension(im), intent(in) :: dry, icy, ocean, lake
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &                                      deltim, fhswr
 
@@ -225,8 +227,9 @@
      &      sfcdsw, sfcnsw
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
-     &                         tsfc_lnd, tsfc_ice, tsfc_ocn,            &
-     &                         sfcemis_lnd, sfcemis_ice, sfcemis_ocn
+     &                         tsfc_lnd, tsfc_ice, tsfc_ocn, tsfc_lke,  &
+     &                         sfcemis_lnd, sfcemis_ice, sfcemis_ocn,   &
+     &                         sfcemis_lke
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &      sfcnirbmu, sfcnirdfu, sfcvisbmu, sfcvisdfu,                 &
@@ -246,7 +249,7 @@
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
       real(kind=kind_phys), dimension(im), intent(out) ::               &
-     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_ocn
+     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_ocn, adjsfculw_lke
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -320,7 +323,7 @@
           adjsfculw_ice(i) =  sfcemis_ice(i) * con_sbc * tem2 * tem2
      &                     + (one - sfcemis_ice(i)) * adjsfcdlw(i)
         endif
-        if (wet(i)) then
+        if (ocean(i)) then
           tem2 = tsfc_ocn(i) * tsfc_ocn(i)
           adjsfculw_ocn(i) =  sfcemis_ocn(i) * con_sbc * tem2 * tem2
      &                     + (one - sfcemis_ocn(i)) * adjsfcdlw(i)
@@ -329,6 +332,11 @@
 !    &,' wet=',wet(i),' icy=',icy(i),' tsfc3=',tsfc3(i,:)
 !    &,' sfcemis=',sfcemis(i,:),' adjsfculw=',adjsfculw(i,:)
 !
+       if (lake(i)) then
+         tem2 = tsfc_lke(i) * tsfc_lke(i)
+         adjsfculw_lke(i) = sfcemis_lke(i) * con_sbc * tem2 * tem2
+     &                    + (one - sfcemis_lke(i)) * adjsfcdlw(i)
+       endif
 
 !>  - normalize by average value over radiation period for daytime.
         if ( xcosz(i) > f_eps .and. coszen(i) > f_eps ) then

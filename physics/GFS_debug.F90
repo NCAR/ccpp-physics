@@ -927,7 +927,7 @@
 !!
         subroutine GFS_checkland_run (me, master, blkno, im, kdt, iter, flag_iter, flag_guess, &
                 flag_init, flag_restart, frac_grid, isot, ivegsrc, stype, vtype, slope,        &
-                soiltyp, vegtype, slopetyp, dry, icy, wet, lake, ocean,                        &
+                soiltyp, vegtype, slopetyp, dry, icy,  lake, ocean,                            &
                 oceanfrac, landfrac, lakefrac, slmsk, islmsk, errmsg, errflg )
 
            use machine, only: kind_phys
@@ -956,7 +956,7 @@
            integer,          intent(in   ) :: slopetyp(im)
            logical,          intent(in   ) :: dry(im)
            logical,          intent(in   ) :: icy(im)
-           logical,          intent(in   ) :: wet(im)
+!           logical,          intent(in   ) :: wet(im)
            logical,          intent(in   ) :: lake(im)
            logical,          intent(in   ) :: ocean(im)
            real(kind_phys),  intent(in   ) :: oceanfrac(im)
@@ -997,7 +997,7 @@
                write(0,'(a,2i5,1x,i5)')   'YYY: i, blk, slopetyp(i)   :', i, blkno, slopetyp(i)
                write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, dry(i)        :', i, blkno, dry(i)
                write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, icy(i)        :', i, blkno, icy(i)
-               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, wet(i)        :', i, blkno, wet(i)
+!               write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, wet(i)        :', i, blkno, wet(i)
                write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, lake(i)       :', i, blkno, lake(i)
                write(0,'(a,2i5,1x,1x,l)') 'YYY: i, blk, ocean(i)      :', i, blkno, ocean(i)
                write(0,'(a,2i5,1x,e16.7)')'YYY: i, blk, oceanfrac(i)  :', i, blkno, oceanfrac(i)

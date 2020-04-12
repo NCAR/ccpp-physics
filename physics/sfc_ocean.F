@@ -24,7 +24,7 @@
 !...................................
 !  ---  inputs:
      &     ( im, cp, rd, eps, epsm1, hvap, rvrdm1, ps, t1, q1,          &
-     &       tskin, cm, ch, prsl1, prslki, wet, wind,                   &
+     &       tskin, cm, ch, prsl1, prslki, ocean, wind,                   &
      &       flag_iter,                                                 &
 !  ---  outputs:
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &
@@ -40,7 +40,7 @@
 !       inputs:                                                         !
 !          ( im, ps, t1, q1, tskin, cm, ch,                             !
 !!         ( im, ps, u1, v1, t1, q1, tskin, cm, ch,                     !
-!            prsl1, prslki, wet, wind, flag_iter,                       !
+!            prsl1, prslki, ocean, wind, flag_iter,                       !
 !       outputs:                                                        !
 !            qsurf, cmm, chh, gflux, evap, hflx, ep )                   !
 !                                                                       !
@@ -70,7 +70,7 @@
 !     ch       - real, surface exchange coeff heat & moisture(m/s) im   !
 !     prsl1    - real, surface layer mean pressure                 im   !
 !     prslki   - real,                                             im   !
-!     wet      - logical, =T if any ocean/lak, =F otherwise        im   !
+!     ocean      - logical, =T if any ocean/lak, =F otherwise        im   !
 !     wind     - real, wind speed (m/s)                            im   !
 !     flag_iter- logical,                                          im   !
 !                                                                       !
@@ -98,7 +98,7 @@
       real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &      t1, q1, tskin, cm, ch, prsl1, prslki, wind
 
-      logical, dimension(im), intent(in) :: flag_iter, wet
+      logical, dimension(im), intent(in) :: flag_iter, ocean
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: qsurf,     &
@@ -127,7 +127,7 @@
 !
 !  --- ...  flag for open water
       do i = 1, im
-        flag(i) = (wet(i) .and. flag_iter(i))
+        flag(i) = (ocean(i) .and. flag_iter(i))
 
 !  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,
