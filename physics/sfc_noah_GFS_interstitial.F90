@@ -181,13 +181,13 @@
           snwdph_save(i) = snwdph(i)
           tsfc_save(i) = tsfc(i)
           canopy_save(i) = canopy(i)
-        end if
         
-        do k=1,nsoil
-          smc_save(i,k) = smc(i,k)
-          stc_save(i,k) = stc(i,k)
-          slc_save(i,k) = slc(i,k)
-        end do
+          do k=1,nsoil
+            smc_save(i,k) = smc(i,k)
+            stc_save(i,k) = stc(i,k)
+            slc_save(i,k) = slc(i,k)
+          end do
+        end if
       end do
       
       flag_lsm(:) = .false.
