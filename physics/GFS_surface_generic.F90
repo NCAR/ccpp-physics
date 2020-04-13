@@ -30,10 +30,8 @@
                           sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
-                          cplflx, flag_cice, islmsk_cice,slimskin_cpl, dusfcin_cpl, dvsfcin_cpl,           &
-                          dtsfcin_cpl, dqsfcin_cpl, ulwsfcin_cpl, ulwsfc_cice, dusfc_cice, dvsfc_cice,     &
-                          dtsfc_cice, dqsfc_cice, tisfc, tsfco, fice, hice,                                &
-                          wind, u1, v1, cnvwind, errmsg, errflg)
+                          cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
+                          wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
 
@@ -76,17 +74,16 @@
         logical, intent(in) :: cplflx
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
         logical, dimension(im), intent(inout) :: flag_cice
-              integer, dimension(im), intent(out) :: islmsk_cice
-        real(kind=kind_phys), dimension(im), intent(in) ::ulwsfcin_cpl, &
-             dusfcin_cpl, dvsfcin_cpl, dtsfcin_cpl, dqsfcin_cpl, &
+        integer, dimension(im), intent(out) :: islmsk_cice
+        real(kind=kind_phys), dimension(im), intent(in) :: &
              tisfc, tsfco, fice, hice
-        real(kind=kind_phys), dimension(im), intent(out) ::ulwsfc_cice, &
-             dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice
 
         real(kind=kind_phys), dimension(im), intent(out) :: wind
         real(kind=kind_phys), dimension(im), intent(in ) :: u1, v1
         ! surface wind enhancement due to convection
         real(kind=kind_phys), dimension(im), intent(inout ) :: cnvwind
+        !
+        real(kind=kind_phys), dimension(im), intent(out) :: smcwlt2, smcref2
 
         ! CCPP error handling
         character(len=*), intent(out) :: errmsg
@@ -107,10 +104,6 @@
         ! Set initial quantities for stochastic physics deltas
         if (do_sppt) then
           dtdtr     = 0.0
-          do i=1,im
-            drain_cpl(i) = rain_cpl (i)
-            dsnow_cpl(i) = snow_cpl (i)
-          enddo
         endif
 
         ! Scale random patterns for surface perturbations with perturbation size
@@ -173,7 +166,10 @@
           work3(i)   = prsik_1(i) / prslk_1(i)
 
           !tsurf(i) = tsfc(i)
-          zlvl(i)  = phil(i,1) * onebg
+          zlvl(i)    = phil(i,1) * onebg
+          smcwlt2(i) = zero
+          smcref2(i) = zero
+
           wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
                          + max(zero, min(cnvwind(i), 30.0)), one)
           !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
@@ -186,14 +182,7 @@
       if (cplflx) then
         do i=1,im
           islmsk_cice(i) = nint(slimskin_cpl(i))
-          if(islmsk_cice(i) == 4)then
-            flag_cice(i)   = .true.
-            ulwsfc_cice(i) = ulwsfcin_cpl(i)
-            dusfc_cice(i)  = dusfcin_cpl(i)
-            dvsfc_cice(i)  = dvsfcin_cpl(i)
-            dtsfc_cice(i)  = dtsfcin_cpl(i)
-            dqsfc_cice(i)  = dqsfcin_cpl(i)
-          endif
+          flag_cice(i)   = (islmsk_cice(i) == 4)
         enddo
       endif
 
@@ -303,8 +292,8 @@
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
-!            tsfci_cpl   (i) = tsfc(i)
-            tsfci_cpl   (i) = tsfc_ocn(i)
+            tsfci_cpl   (i) = tsfc(i)
+!           tsfci_cpl   (i) = tsfc_ocn(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
 

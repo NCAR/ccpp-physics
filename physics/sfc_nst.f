@@ -676,7 +676,7 @@ cc
 !! @{
       subroutine sfc_nst_pre_run
      &    (im, wet, tsfc_ocn, tsurf_ocn, tseal, xt, xz, dt_cool,
-     &     z_c, tref, cplflx, errmsg, errflg)
+     &     z_c, tref, cplflx, oceanfrac, errmsg, errflg)
 
       use machine , only : kind_phys
 
@@ -686,7 +686,7 @@ cc
       integer, intent(in) :: im
       logical, dimension(im), intent(in) :: wet
       real (kind=kind_phys), dimension(im), intent(in) ::
-     &      tsfc_ocn, xt, xz, dt_cool, z_c
+     &      tsfc_ocn, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -724,7 +724,7 @@ cc
       if (cplflx) then
         tem1 = half / omz1
         do i=1,im
-          if (wet(i)) then
+          if (wet(i) .and. oceanfrac(i) > zero) then
             tem2 = one / xz(i)
             dt_warm = (xt(i)+xt(i)) * tem2
             if ( xz(i) > omz1) then
@@ -777,7 +777,7 @@ cc
 ! \section NSST_detailed_post_algorithm Detailed Algorithm
 ! @{
       subroutine sfc_nst_post_run                                       &
-     &     ( im, rlapse, wet, icy, oro, oro_uf, nstf_name1,             &
+     &     ( im, rlapse, tgice, wet, icy, oro, oro_uf, nstf_name1,      &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
      &       tsurf_ocn, tsfc_ocn, dtzm, errmsg, errflg                  &
      &     )
@@ -790,7 +790,7 @@ cc
 !  ---  inputs:
       integer, intent(in) :: im
       logical, dimension(im), intent(in) :: wet, icy
-      real (kind=kind_phys), intent(in) :: rlapse
+      real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
       integer, intent(in) :: nstf_name1, nstf_name4, nstf_name5
       real (kind=kind_phys), dimension(im), intent(in) :: xt, xz,       &
@@ -838,7 +838,7 @@ cc
 !          if (wet(i) .and. .not.icy(i)) then
 !          if (wet(i) .and. (Model%frac_grid .or. .not. icy(i))) then
           if (wet(i)) then
-            tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i))
+            tsfc_ocn(i) = max(tgice, tref(i) + dtzm(i))
 !           tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i)) -  &
 !                           (oro(i)-oro_uf(i))*rlapse
           endif
