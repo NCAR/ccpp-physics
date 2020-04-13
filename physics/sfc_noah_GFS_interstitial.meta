@@ -552,6 +552,105 @@
   kind = kind_phys
   intent = inout
   optional = F
+[ep]
+  standard_name = surface_upward_potential_latent_heat_flux_over_land
+  long_name = surface upward potential latent heat flux over land
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[evap]
+  standard_name = kinematic_surface_upward_latent_heat_flux_over_land
+  long_name = kinematic surface upward latent heat flux over land
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[hflx]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
+  long_name = kinematic surface upward sensible heat flux over land
+  units = K m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[gflux]
+  standard_name = upward_heat_flux_in_soil_over_land
+  long_name = soil heat flux over land
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[drain]
+  standard_name = subsurface_runoff_flux
+  long_name = subsurface runoff flux
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[evbs]
+  standard_name = soil_upward_latent_heat_flux
+  long_name = soil upward latent heat flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[evcw]
+  standard_name = canopy_upward_latent_heat_flux
+  long_name = canopy upward latent heat flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[trans]
+  standard_name = transpiration_flux
+  long_name = total plant transpiration rate
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sbsno]
+  standard_name = snow_deposition_sublimation_upward_latent_heat_flux
+  long_name = latent heat flux from snow depo/subl
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snowc]
+  standard_name = surface_snow_area_fraction
+  long_name = surface snow area fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snohf]
+  standard_name = snow_freezing_rain_upward_latent_heat_flux
+  long_name = latent heat flux due to snow and frz rain
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

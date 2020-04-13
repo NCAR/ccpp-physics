@@ -133,7 +133,9 @@
       subroutine sfc_noah_GFS_pre_run (im, nsoil, land, flag_guess, flag_iter, flag_lsm, &
         dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, sfctmp,  &
         q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, smc, stc, slc, prcp, q2k, rho1, qs1,&
-        th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, canopy_save, smc_save, stc_save, slc_save, errmsg, errflg)
+        th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, &
+        canopy_save, smc_save, stc_save, slc_save, ep, evap, hflx, gflux, drain, evbs, evcw, &
+        trans, sbsno, snowc, snohf, errmsg, errflg)
 
       use machine , only : kind_phys
       use funcphys, only : fpvs
@@ -159,6 +161,7 @@
       real(kind=kind_phys), dimension(im), intent(inout) :: prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh
       real(kind=kind_phys), dimension(im), intent(inout) :: weasd_save, snwdph_save, tsfc_save, canopy_save
       real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: smc_save, stc_save, slc_save
+      real(kind=kind_phys), dimension(im), intent(inout) :: ep, evap, hflx, gflux, drain, evbs, evcw, trans, sbsno, snowc, snohf
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -196,6 +199,19 @@
           flag_lsm(i) = .true.
           !GJF: module_sf_noahdrv.F from WRF has hardcoded slopetyp = 1; why? replicate here?
           !GJF: shdfac is zeroed out for particular combinations of vegetation table source and vegetation types; replicate here?
+          
+          ep(i)     = 0.0
+          evap (i)  = 0.0
+          hflx (i)  = 0.0
+          gflux(i)  = 0.0
+          drain(i)  = 0.0
+
+          evbs (i)  = 0.0
+          evcw (i)  = 0.0
+          trans(i)  = 0.0
+          sbsno(i)  = 0.0
+          snowc(i)  = 0.0
+          snohf(i)  = 0.0
           
           !GJF: could potentially pass in pre-calculated rates instead of calculating here
           prcp(i) = rhowater * tprcp(i) / dt
