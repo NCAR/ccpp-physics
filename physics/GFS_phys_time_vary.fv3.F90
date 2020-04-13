@@ -61,14 +61,9 @@
          integer :: nb, nblks, nt
          integer :: i, j, ix
          logical :: non_uniform_blocks
-         character(len=len(errmsg)) :: errmsg2
-         integer :: errflg2
-
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
-         errmsg2 = ''
-         errflg2 = 0
 
          if (is_initialized) return
 
@@ -101,7 +96,7 @@
          end if
 
 !$OMP parallel num_threads(nthrds) default(none)              &
-!$OMP          private (nt,nb,errmsg2,errflg2)                &
+!$OMP          private (nt,nb)                                &
 !$OMP          shared (Model,Data,Interstitial,errmsg,errflg) &
 !$OMP          shared (levozp,oz_coeff,oz_pres)               &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres)             &
@@ -171,11 +166,7 @@
                ! If Model%iaerclm is .true., then ntrcaer == ntrcaerm
                ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
                ! Read aerosol climatology
-               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate,errmsg2,errflg2)
-               if (errflg2/=0) then
-                  errflg = max(errflg,errflg2)
-                  errmsg = trim(errmsg) // ' ' // trim(errmsg2)
-               end if
+               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate,errmsg,errflg)
             endif
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
