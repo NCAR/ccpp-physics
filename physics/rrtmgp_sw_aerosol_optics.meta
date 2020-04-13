@@ -33,6 +33,14 @@
   type = integer
   intent = in
   optional = F
+[nTracerAer]
+  standard_name = number_of_aerosol_tracers_MG
+  long_name = number of aerosol tracers for Morrison Gettelman MP
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [nday]
   standard_name = daytime_points_dimension
   long_name = daytime points dimension
@@ -108,6 +116,15 @@
   long_name = chemical tracers
   units = g g-1
   dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[aerfld]
+  standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
+  long_name = GOCART aerosol climatology number concentration
+  units = kg-1?
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
   intent = in

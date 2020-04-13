@@ -111,7 +111,7 @@
               ntrcaer = size(Tbd%aer_nm, dim=3)
               ! Read aerosol climatology
               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate,errmsg,errflg)
-               if (errflg/=0) return
+              if (errflg/=0) return
            endif
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined

@@ -28,9 +28,9 @@ contains
 !! \section arg_table_rrtmgp_lw_aerosol_optics_run
 !! \htmlinclude rrtmgp_lw_aerosol_optics.html
 !!
-  subroutine rrtmgp_lw_aerosol_optics_run(doLWrad, nCol, nLev, nTracer, p_lev, p_lay, p_lk, &
-       tv_lay, relhum, lsmask, tracer, lon, lat, lw_gas_props, sw_gas_props,                &
-       aerodp, lw_optical_props_aerosol, errmsg, errflg)
+  subroutine rrtmgp_lw_aerosol_optics_run(doLWrad, nCol, nLev, nTracer, nTracerAer,&
+       p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat,       &
+       lw_gas_props, sw_gas_props, aerodp, lw_optical_props_aerosol, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -38,7 +38,8 @@ contains
     integer, intent(in) :: &
          nCol,                  & ! Number of horizontal grid points
          nLev,                  & ! Number of vertical layers
-         nTracer                  ! Number of tracers
+         nTracer,               & ! Number of tracers
+         nTracerAer               ! Number of aerosol tracers
     real(kind_phys), dimension(nCol), intent(in) :: &
          lon,                   & ! Longitude
          lat,                   & ! Latitude
@@ -50,6 +51,8 @@ contains
          p_lk                     ! Exner function @ layer-centers (1)
     real(kind_phys), dimension(nCol, nLev, nTracer),intent(in) :: &
          tracer                   ! trace gas concentrations
+    real(kind_phys), dimension(nCol, nLev, nTracerAer),intent(in) :: &
+         aerfld                   ! aerosol input concentrations
     real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
          p_lev                    ! Pressure @ layer-interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
@@ -80,7 +83,7 @@ contains
     if (.not. doLWrad) return
 
     ! Call module_radiation_aerosols::setaer(),to setup aerosols property profile
-    call setaer(p_lev, p_lay, p_lk, tv_lay, relhum, lsmask,  tracer, lon, lat, ncol, nLev,  &
+    call setaer(p_lev, p_lay, p_lk, tv_lay, relhum, lsmask, tracer, aerfld, lon, lat, ncol, nLev, &
          nLev+1, .true., .true., aerosolssw, aerosolslw, aerodp)
 
     ! Allocate RRTMGP DDT: Aerosol optics [nCol,nlev,nBands]

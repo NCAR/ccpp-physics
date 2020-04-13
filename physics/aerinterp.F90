@@ -22,8 +22,8 @@ contains
 
 !--- in/out
       integer, intent(in) :: me, master, iflip, idate(4)
-      character(len=*), intent(inout) :: errmsg
-      integer, intent(inout) :: errflg
+      character(len=*), intent(out) :: errmsg
+      integer, intent(out) :: errflg
 
 !--- locals
       integer      :: ncid, varid, ndims, dim1, dim2, dim3, hmx
@@ -38,6 +38,9 @@ contains
       real(kind=kind_io8),allocatable,dimension(:)     :: aer_lati
       real(kind=kind_io8),allocatable,dimension(:)     :: aer_loni
 !
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
 !! ===================================================================
       if (me == master) then
          if ( iflip == 0 )  then             ! data from toa to sfc
@@ -53,7 +56,7 @@ contains
       fname=trim("aeroclim.m"//'01'//".nc")
       inquire (file = fname, exist = file_exist)
       if (.not. file_exist) then
-         errmsg = errmsg // ' error in read_aerdata: file ' // trim(fname) // ' not found'
+         errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
          errflg = 1
          return
       endif
@@ -126,7 +129,7 @@ contains
        fname=trim("aeroclim.m"//mn//".nc")
        inquire (file = fname, exist = file_exist)
        if (.not. file_exist) then
-         errmsg = errmsg // ' error in read_aerdata: file ' // trim(fname) // ' not found'
+         errmsg = 'Error in read_aerdata: file ' // trim(fname) // ' not found'
          errflg = 1
          return
        endif
