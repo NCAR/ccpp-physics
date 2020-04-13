@@ -41,6 +41,14 @@
   type = integer
   intent = in
   optional = F
+[restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -699,7 +707,7 @@
   standard_name = soil_porosity
   long_name = volumetric soil porosity
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -710,6 +718,15 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[snotime]
+  standard_name = time_since_last_snowfall
+  long_name = elapsed time since last snowfall
+  units = s
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [errmsg]

@@ -17,14 +17,14 @@
 !! \section arg_table_sfc_noah_init Argument Table
 !! \htmlinclude sfc_noah_init.html
 !!
-      subroutine sfc_noah_init(lsm, lsm_noah_hafs, nsoil, ua_phys, fasdas, errmsg, errflg)
+      subroutine sfc_noah_init(lsm, lsm_noah_hafs, nsoil, ua_phys, fasdas, restart, errmsg, errflg)
 
       use machine, only : kind_phys
       
       implicit none
       
       integer,              intent(in)  :: lsm, lsm_noah_hafs, nsoil, fasdas
-      logical,              intent(in)  :: ua_phys
+      logical,              intent(in)  :: ua_phys, restart
 
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
@@ -54,6 +54,13 @@
       
       if (fasdas > 0) then
         write(errmsg,'(*(a))') "The NOAH HAFS scheme has not been tested with fasdas > 0"
+        errflg = 1
+        return
+      end if
+      
+      if (restart) then
+        !GJF: for restart functionality, the host model will need to write/read snotime (time_since_last_snowfall (s))
+        write(errmsg,'(*(a))') "The NOAH HAFS scheme has not been configured for restarts."
         errflg = 1
         return
       end if
@@ -95,7 +102,7 @@
         stc, smc, swc, snowhk, sneqv, chk, cp, rd, sigma, cph2o, cpice, &
         lsubf, sheat, eta_kinematic, ec, edir, ett, esnow, etp, ssoil,  &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, qsurf, ribb, &
-        smcwlt, smcref, smcmax, opt_thcnd, errmsg, errflg)
+        smcwlt, smcref, smcmax, opt_thcnd, snotime, errmsg, errflg)
         
       use machine , only : kind_phys
       use module_sf_noahlsm, only: sflx, lutype, sltype
@@ -119,7 +126,7 @@
 
       real(kind=kind_phys), dimension(im), intent(inout) :: shdfac, albbrd, z0brd, z0k, emissi, &
                                                             cmc, t1, snowhk, sneqv, chk, flx1, &
-                                                            flx2, flx3, ribb
+                                                            flx2, flx3, ribb, snotime
       real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: stc, smc, swc
       
       !variables that are intent(out) in module_sf_noahlsm, but are inout here due to being set within an IF statement
@@ -176,7 +183,6 @@
       ! rcsoil (output from SFLX): soil moisture rc factor (dimensionless)
       ! soilw (output from SFLX): available soil moisture in root zone (unitless fraction between smcwlt and smcmax)
       ! smav (output from SFLX): soil moisture availability for each layer, as a fraction between smcwlt and smcmax.
-      ! snotime1 (input/output from SFLX): no documentation in module_sf_noahlsm.F, but described as "initial number of timesteps since last snowfall" in module_sf_noahdrv.F; related to CCPP nondimensional_snow_age for NoahMP? Since inout, need to initialize here?
       ! smcdry (output from SFLX): dry soil moisture threshold where direct evap frm top layer ends (volumetric)
       ! smcmax (output from SFLX): porosity, i.e. saturated value of soil moisture (volumetric)
       ! nroot (output from SFLX): number of root layers, a function of veg type, determined in subroutine redprm.
@@ -184,7 +190,7 @@
       integer :: nroot
       real(kind=kind_phys) :: albedok, eta, fdown, drip, dew, beta, snomlt, &
                               runoff3, rc, pc, rsmin, xlai, rcs, rct, rcq,  &
-                              rcsoil, soilw, snotime1, smcdry
+                              rcsoil, soilw, smcdry
       real (kind=kind_phys), dimension(nsoil) :: et, smav
       real(kind=kind_phys) :: sfcheadrt, infxsrt, etpnd1 !don't appear to be used unless WRF_HYDRO preprocessor directive is defined and no documentation
       real(kind=kind_phys) :: xsda_qfx, hfx_phy, qfx_phy, xqnorm, hcpct_fasdas !only used if fasdas = 1
@@ -219,7 +225,7 @@
                    snomlt, sncovr(i), runoff1(i), runoff2(i),runoff3,&    !O
                    rc, pc, rsmin, xlai, rcs, rct, rcq, rcsoil,       &    !O
                    soilw, soilm(i), qsurf(i), smav,                  &    !D
-                   rdlai, usemonalb, snotime1, ribb(i),              &
+                   rdlai, usemonalb, snotime(i), ribb(i),            &
                    smcwlt(i), smcdry, smcref(i), smcmax(i), nroot,   &
                    sfcheadrt, infxsrt, etpnd1, opt_thcnd, aoasis,    &
                    xsda_qfx, hfx_phy, qfx_phy, xqnorm, fasdas,       &    !fasdas
