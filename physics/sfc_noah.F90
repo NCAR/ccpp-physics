@@ -17,14 +17,14 @@
 !! \section arg_table_sfc_noah_init Argument Table
 !! \htmlinclude sfc_noah_init.html
 !!
-      subroutine sfc_noah_init(lsm, lsm_noah_hafs, nsoil, ua_phys, fasdas, errmsg, errflg)
+      subroutine sfc_noah_init(lsm, lsm_noah_hafs, nsoil, ua_phys, fasdas, restart, errmsg, errflg)
 
       use machine, only : kind_phys
       
       implicit none
       
       integer,              intent(in)  :: lsm, lsm_noah_hafs, nsoil, fasdas
-      logical,              intent(in)  :: ua_phys
+      logical,              intent(in)  :: ua_phys, restart
 
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
@@ -54,6 +54,13 @@
       
       if (fasdas > 0) then
         write(errmsg,'(*(a))') "The NOAH HAFS scheme has not been tested with fasdas > 0"
+        errflg = 1
+        return
+      end if
+      
+      if (restart) then
+        !GJF: for restart functionality, the host model will need to write/read snotime (time_since_last_snowfall (s))
+        write(errmsg,'(*(a))') "The NOAH HAFS scheme has not been configured for restarts."
         errflg = 1
         return
       end if
@@ -95,7 +102,7 @@
         stc, smc, swc, snowhk, sneqv, chk, cp, rd, sigma, cph2o, cpice, &
         lsubf, sheat, eta_kinematic, ec, edir, ett, esnow, etp, ssoil,  &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, qsurf, ribb, &
-        smcwlt, smcref, smcmax, opt_thcnd, errmsg, errflg)
+        smcwlt, smcref, smcmax, opt_thcnd, snotime, errmsg, errflg)
         
       use machine , only : kind_phys
       use module_sf_noahlsm, only: sflx, lutype, sltype
@@ -119,7 +126,7 @@
 
       real(kind=kind_phys), dimension(im), intent(inout) :: shdfac, albbrd, z0brd, z0k, emissi, &
                                                             cmc, t1, snowhk, sneqv, chk, flx1, &
-                                                            flx2, flx3, ribb
+                                                            flx2, flx3, ribb, snotime
       real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: stc, smc, swc
       
       !variables that are intent(out) in module_sf_noahlsm, but are inout here due to being set within an IF statement
@@ -176,7 +183,6 @@
       ! rcsoil (output from SFLX): soil moisture rc factor (dimensionless)
       ! soilw (output from SFLX): available soil moisture in root zone (unitless fraction between smcwlt and smcmax)
       ! smav (output from SFLX): soil moisture availability for each layer, as a fraction between smcwlt and smcmax.
-      ! snotime1 (input/output from SFLX): no documentation in module_sf_noahlsm.F, but described as "initial number of timesteps since last snowfall" in module_sf_noahdrv.F; related to CCPP nondimensional_snow_age for NoahMP? Since inout, need to initialize here?
       ! smcdry (output from SFLX): dry soil moisture threshold where direct evap frm top layer ends (volumetric)
       ! smcmax (output from SFLX): porosity, i.e. saturated value of soil moisture (volumetric)
       ! nroot (output from SFLX): number of root layers, a function of veg type, determined in subroutine redprm.
@@ -184,7 +190,7 @@
       integer :: nroot
       real(kind=kind_phys) :: albedok, eta, fdown, drip, dew, beta, snomlt, &
                               runoff3, rc, pc, rsmin, xlai, rcs, rct, rcq,  &
-                              rcsoil, soilw, snotime1, smcdry
+                              rcsoil, soilw, smcdry
       real (kind=kind_phys), dimension(nsoil) :: et, smav
       real(kind=kind_phys) :: sfcheadrt, infxsrt, etpnd1 !don't appear to be used unless WRF_HYDRO preprocessor directive is defined and no documentation
       real(kind=kind_phys) :: xsda_qfx, hfx_phy, qfx_phy, xqnorm, hcpct_fasdas !only used if fasdas = 1
@@ -198,6 +204,44 @@
       do i=1, im
         if (flag_lsm(i)) then  
           !GJF: Why do LSMs want the dynamics time step instead of the physics time step?
+          ! write(*,*) i,'in albbrd = ',albbrd(i)
+          ! write(*,*) i,'in z0brd = ',z0brd(i)
+          ! write(*,*) i,'in z0k = ',z0k(i)
+          ! write(*,*) i,'in emissi = ',emissi(i)
+          ! write(*,*) i,'in embrd = ',embrd(i)
+          ! write(*,*) i,'in cmc = ',cmc(i)
+          write(*,*) i,'in shdfac = ',shdfac(i)
+          write(*,*) i,'in vegtyp = ',vegtyp(i)
+          write(*,*) i,'in soiltyp = ',soiltyp(i)
+          write(*,*) i,'in slopetyp = ',slopetyp(i)
+          write(*,*) i,'in t1 = ',t1(i)
+          write(*,*) i,'in stc = ',stc(i,:)
+          ! write(*,*) i,'in smc = ',smc(i,:)
+          ! write(*,*) i,'in swc = ',swc(i,:)
+          ! write(*,*) i,'in snowhk = ',snowhk(i)
+          ! write(*,*) i,'in sneqv = ',sneqv(i)
+          write(*,*) i,'in chk = ',chk(i)
+          write(*,*) i,'in eta = ',eta
+          write(*,*) i,'in sheat = ',sheat(i)
+          ! write(*,*) i,'in eta_k = ',eta_kinematic(i)
+          ! write(*,*) i,'in ec = ',ec(i)
+          ! write(*,*) i,'in edir = ',edir(i)
+          ! write(*,*) i,'in ett = ',ett(i)
+          ! write(*,*) i,'in esnow = ',esnow(i)
+          ! write(*,*) i,'in etp = ',etp(i)
+          ! write(*,*) i,'in ssoil = ',ssoil(i)
+          ! write(*,*) i,'in flx1 = ',flx1(i)
+          ! write(*,*) i,'in flx2 = ',flx2(i)
+          ! write(*,*) i,'in flx3 = ',flx3(i)
+          ! write(*,*) i,'in sncovr = ',sncovr(i)
+          ! write(*,*) i,'in runoff1 = ',runoff1(i)
+          ! write(*,*) i,'in runoff2 = ',runoff2(i)
+          ! write(*,*) i,'in soilm = ',soilm(i)
+          write(*,*) i,'in qsurf = ',qsurf(i)
+          ! write(*,*) i,'in snotime = ',snotime(i)
+          ! write(*,*) i,'in smcwlt = ',smcwlt(i)
+          ! write(*,*) i,'in smcref = ',smcref(i)
+          ! write(*,*) i,'in smcmax = ',smcmax(i)
           call sflx (i, 1, srflag(i), &
                    isurban, dt, zlvl(i), nsoil, sthick,              &    !c
                    local,                                            &    !L
@@ -219,12 +263,51 @@
                    snomlt, sncovr(i), runoff1(i), runoff2(i),runoff3,&    !O
                    rc, pc, rsmin, xlai, rcs, rct, rcq, rcsoil,       &    !O
                    soilw, soilm(i), qsurf(i), smav,                  &    !D
-                   rdlai, usemonalb, snotime1, ribb(i),              &
+                   rdlai, usemonalb, snotime(i), ribb(i),            &
                    smcwlt(i), smcdry, smcref(i), smcmax(i), nroot,   &
                    sfcheadrt, infxsrt, etpnd1, opt_thcnd, aoasis,    &
                    xsda_qfx, hfx_phy, qfx_phy, xqnorm, fasdas,       &    !fasdas
                    hcpct_fasdas,                                     &    !fasdas
                    errflg, errmsg)
+          
+          ! write(*,*) i,'out albbrd = ',albbrd(i)
+          ! write(*,*) i,'out z0brd = ',z0brd(i)
+          ! write(*,*) i,'out z0k = ',z0k(i)
+          ! write(*,*) i,'out emissi = ',emissi(i)
+          ! write(*,*) i,'out embrd = ',embrd(i)
+          ! write(*,*) i,'out cmc = ',cmc(i)
+          write(*,*) i,'out shdfac = ',shdfac(i)
+          write(*,*) i,'out vegtyp = ',vegtyp(i)
+          write(*,*) i,'out soiltyp = ',soiltyp(i)
+          write(*,*) i,'out slopetyp = ',slopetyp(i)
+          write(*,*) i,'out t1 = ',t1(i)
+          write(*,*) i,'out stc = ',stc(i,:)
+          ! write(*,*) i,'out smc = ',smc(i,:)
+          ! write(*,*) i,'out swc = ',swc(i,:)
+          ! write(*,*) i,'out snowhk = ',snowhk(i)
+          ! write(*,*) i,'out sneqv = ',sneqv(i)
+          ! write(*,*) i,'out chk = ',chk(i)
+          write(*,*) i,'out eta = ',eta
+          write(*,*) i,'out sheat = ',sheat(i)
+          ! write(*,*) i,'out eta_k = ',eta_kinematic(i)
+          ! write(*,*) i,'out ec = ',ec(i)
+          ! write(*,*) i,'out edir = ',edir(i)
+          ! write(*,*) i,'out ett = ',ett(i)
+          ! write(*,*) i,'out esnow = ',esnow(i)
+          ! write(*,*) i,'out etp = ',etp(i)
+          ! write(*,*) i,'out ssoil = ',ssoil(i)
+          ! write(*,*) i,'out flx1 = ',flx1(i)
+          ! write(*,*) i,'out flx2 = ',flx2(i)
+          ! write(*,*) i,'out flx3 = ',flx3(i)
+          ! write(*,*) i,'out sncovr = ',sncovr(i)
+          ! write(*,*) i,'out runoff1 = ',runoff1(i)
+          ! write(*,*) i,'out runoff2 = ',runoff2(i)
+          ! write(*,*) i,'out soilm = ',soilm(i)
+          write(*,*) i,'out qsurf = ',qsurf(i)
+          ! write(*,*) i,'out snotime = ',snotime(i)
+          ! write(*,*) i,'out smcwlt = ',smcwlt(i)
+          ! write(*,*) i,'out smcref = ',smcref(i)
+          ! write(*,*) i,'out smcmax = ',smcmax(i)
           if (errflg > 0) return
         endif
       end do
