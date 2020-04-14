@@ -308,7 +308,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !-----------------------------------------------------------------------
 !
 
-! mz*: HWRF practice start 
+! MZ: HWRF start
 !----------
 !2015-03-30, recalculate some constants which may depend on phy time step
         CALL MY_GROWTH_RATES_NMM_hr  (DT)
@@ -335,6 +335,8 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 
 !! END OF adding, 2015-03-30
 !-----------
+! MZ: HWRF end
+!
 
        DO i = ims,ime
          ACPREC(i)=0.

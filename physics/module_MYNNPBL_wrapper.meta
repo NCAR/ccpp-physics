@@ -584,15 +584,6 @@
   type = integer
   intent = inout
   optional = F
-[RTHRATEN]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
-  long_name = total sky longwave heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [dudt]
   standard_name = tendency_of_x_wind_due_to_model_physics
   long_name = updated tendency of the x wind
