@@ -62,7 +62,7 @@
         integer, intent(in) :: n_var_lndp
         character(len=3), dimension(n_var_lndp),      intent(in)  :: lndp_var_list
         real(kind=kind_phys), dimension(n_var_lndp),  intent(in)  :: lndp_prt_list
-        real(kind=kind_phys), dimension(im,nsfcpert), intent(in)  :: sfc_wts
+        real(kind=kind_phys), dimension(im,n_var_lndp), intent(in)  :: sfc_wts
         real(kind=kind_phys), dimension(im),          intent(out) :: z01d
         real(kind=kind_phys), dimension(im),          intent(out) :: zt1d
         real(kind=kind_phys), dimension(im),          intent(out) :: bexp1d
