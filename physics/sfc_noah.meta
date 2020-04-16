@@ -101,6 +101,14 @@
   type = integer
   intent = in
   optional = F
+[isice]
+  standard_name = ice_vegetation_category
+  long_name = index of the permanent snow/ice category in the chosen vegetation dataset
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [flag_lsm]
   standard_name = flag_for_calling_land_surface_model
   long_name = flag for calling land surface model
@@ -108,7 +116,15 @@
   dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
-  optional = F  
+  optional = F
+[flag_lsm_glacier]
+  standard_name = flag_for_calling_land_surface_model_glacier
+  long_name = flag for calling land surface model over glacier
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = in
+  optional = F
 [srflag]
   standard_name = flag_for_precipitation_type
   long_name = flag for snow or rain precipitation

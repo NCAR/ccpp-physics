@@ -64,7 +64,7 @@
         errflg = 1
         return
       end if
-      
+
       !GJF: check for rdlai != F?
       !GJF: check for usemonalb != T?
       
@@ -94,7 +94,7 @@
 !!
 !> \section general_noah_hafs_drv GFS sfc_drv General Algorithm
 !>  @{
-      subroutine sfc_noah_run (im, flag_lsm, srflag, isurban, rdlai,    &
+      subroutine sfc_noah_run (im, isice, flag_lsm, flag_lsm_glacier, srflag, isurban, rdlai,    &
         ua_phys, usemonalb, aoasis, fasdas, dt, zlvl,                   &
         nsoil, sthick, lwdn, soldn, solnet, sfcprs, prcp, sfctmp, q1k,  &
         th1, qs1, dqsdt2, vegtyp, soiltyp, slopetyp, shdfac, shmin,     &
@@ -106,10 +106,11 @@
         
       use machine , only : kind_phys
       use module_sf_noahlsm, only: sflx, lutype, sltype
+      use module_sf_noahlsm_glacial_only, only: sflx_glacial
 
       implicit none
       
-      integer,                             intent(in) :: im, isurban, nsoil, opt_thcnd, fasdas
+      integer,                             intent(in) :: im, isice, isurban, nsoil, opt_thcnd, fasdas
       logical,                             intent(in) :: rdlai, ua_phys, usemonalb
       !GJF: usemonalb = True if the surface diffused shortwave albedo is EITHER read from input OR
       !  provided by a previous scheme (like radiation: as is done in GFS_rrtmgp_sw_pre)
@@ -118,7 +119,7 @@
       real(kind=kind_phys),                intent(in) :: dt, cp, rd, sigma, cph2o, cpice, lsubf
 
       integer, dimension(im),              intent(in) :: vegtyp, soiltyp, slopetyp
-      logical, dimension(im),              intent(in) :: flag_lsm
+      logical, dimension(im),              intent(in) :: flag_lsm, flag_lsm_glacier
       real(kind=kind_phys), dimension(im), intent(in) :: srflag, zlvl, lwdn, soldn, solnet, &
                                                          sfcprs, prcp, sfctmp, q1k, th1, qs1, &
                                                          dqsdt2, shmin, shmax, snoalb, tbot
@@ -308,6 +309,29 @@
           ! write(*,*) i,'out smcwlt = ',smcwlt(i)
           ! write(*,*) i,'out smcref = ',smcref(i)
           ! write(*,*) i,'out smcmax = ',smcmax(i)
+          if (errflg > 0) return
+        elseif (flag_lsm_glacier(i)) then
+          !set values that sflx updates, but sflx_glacial does not
+          soilm(i) = 0.0
+          runoff2(i) = 0.0
+          swc(i,:) = 1.0
+          smc(i,:) = 1.0
+          
+          call sflx_glacial(i,1,isice,srflag(i),dt,zlvl(i),nsoil,sthick,   &    !C
+               &    lwdn(i),solnet(i),sfcprs(i),prcp(i),sfctmp(i),q1k(i),              &    !F
+               &    th1(i),qs1(i),dqsdt2(i),                                &    !I
+               &    albbrd(i), snoalb(i),tbot(i), z0brd(i), z0k(i), emissi(i), embrd(i), &    !S
+               &    t1(i),stc(i,:),snowhk(i),sneqv(i),albedok,chk(i),        &    !H
+               &    cp, rd, sigma, cph2o, cpice, lsubf, &
+               &    eta,sheat(i),eta_kinematic(i),fdown,                   &    !O
+               &    esnow(i),dew,                                       &    !O
+               &    etp(i),ssoil(i),                                       &    !O
+               &    flx1(i),flx2(i),flx3(i),                                  &    !O
+               &    snomlt,sncovr(i),                                   &    !O
+               &    runoff1(i),                                         &    !O
+               &    qsurf(i),                                              &    !D
+               &    snotime(i),                                        &
+               &    ribb(i),errflg, errmsg)
           if (errflg > 0) return
         endif
       end do

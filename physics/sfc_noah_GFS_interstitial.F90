@@ -6,34 +6,31 @@
 
       implicit none
 
+      public :: sfc_noah_GFS_pre_init, sfc_noah_GFS_pre_run, sfc_noah_GFS_pre_finalize
+      
       private
 
-      public :: sfc_noah_GFS_pre_init, sfc_noah_GFS_pre_run, sfc_noah_GFS_pre_finalize
-
+      logical :: is_initialized = .False.
+      
       contains
 
 !> \ingroup Noah_LSM_hafs
 !! \section arg_table_sfc_noah_GFS_pre_init Argument Table
 !! \htmlinclude sfc_noah_GFS_pre_init.html
 !!
-      subroutine sfc_noah_GFS_pre_init(lsm, lsm_noah_hafs, restart, veg_data_choice, &
-          soil_data_choice, ialb, ncol, nsoil, vtype, snoalb, isurban, sthick, &
+      subroutine sfc_noah_GFS_pre_init(lsm, lsm_noah_hafs, veg_data_choice, &
+          soil_data_choice, nsoil, isurban, isice, iswater, &
           errmsg, errflg)
 
       use machine, only : kind_phys
-      use module_sf_noahlsm,  only: maxalb
       
       implicit none
       
       integer,              intent(in)  :: lsm, lsm_noah_hafs, &
                                            veg_data_choice, soil_data_choice, &
-                                           ialb, ncol, nsoil
-      real(kind=kind_phys), dimension(ncol), intent(in)  :: vtype
-      logical,              intent(in)  :: restart
+                                           nsoil
       
-      integer, intent(inout) :: isurban
-      real(kind=kind_phys), dimension(ncol), intent(inout) :: snoalb
-      real(kind=kind_phys), dimension(nsoil), intent(inout) :: sthick
+      integer, intent(inout) :: isurban, isice, iswater
       
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
@@ -42,13 +39,11 @@
       
       character(len=256)                  :: mminlu, mminsl
       
-      integer :: i, k
-      
-      real(kind=kind_phys), parameter, dimension(4) :: zsoil = (/ -0.1,-0.4,-1.0,-2.0/) !what if nsoil /= 4?  
-      
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+      
+      if (is_initialized) return
       
       if (lsm/=lsm_noah_hafs) then
         write(errmsg,'(*(a))') "Logic error: namelist choice of LSM is different from NOAH HAFS"
@@ -60,18 +55,28 @@
        case (0)
          mminlu = 'USGS'
          isurban = 1
+         isice = 24
+         iswater = 16
        case (1)
          mminlu = 'MODIFIED_IGBP_MODIS_NOAH'
          isurban = 13
+         isice = 15
+         iswater = 17
        case (3)
          mminlu = 'NLCD40'
          isurban = 13
+         isice = 15 !or 22?
+         iswater = 17 !or 21?
        case (4)
          mminlu = 'USGS-RUC'
          isurban = 1
+         isice = 24
+         iswater = 16
        case (5)
          mminlu = 'MODI-RUC'
          isurban = 13
+         isice = 15
+         iswater = 17
        case default
          errmsg = 'The value of the ivegsrc physics namelist parameter is incompatible with this version of NOAH LSM'
          errflg = 1
@@ -91,18 +96,7 @@
       
       call soil_veg_gen_parm(trim(mminlu), trim(mminsl), errmsg, errflg)
       
-      if (.not. restart) then
-        do i = 1, ncol      
-          if(ialb == 0) then
-             snoalb(i) = maxalb(int(0.5 + vtype(i)))*0.01
-          endif
-        end do
-      end if
-      
-      sthick(1) = - zsoil(1)
-      do k = 2, nsoil
-        sthick(k) = zsoil(k-1) - zsoil(k)
-      enddo
+      is_initialized = .True.
       
       end subroutine sfc_noah_GFS_pre_init
 
@@ -130,15 +124,16 @@
 !!
 !> \section general_noah_hafs_drv GFS sfc_drv General Algorithm
 !>  @{
-      subroutine sfc_noah_GFS_pre_run (im, nsoil, land, flag_guess, flag_iter, flag_lsm, &
+      subroutine sfc_noah_GFS_pre_run (im, nsoil, ialb, isice, land, flag_guess, flag_iter, restart, first_time_step, flag_lsm, flag_lsm_glacier, &
         dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, sfctmp,  &
-        q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, smc, stc, slc, prcp, q2k, rho1, qs1,&
+        q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, vtype, smc, stc, slc, snoalb, prcp, q2k, rho1, qs1,&
         th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, &
         canopy_save, smc_save, stc_save, slc_save, ep, evap, hflx, gflux, drain, evbs, evcw, &
-        trans, sbsno, snowc, snohf, errmsg, errflg)
+        trans, sbsno, snowc, snohf, sthick, errmsg, errflg)
 
       use machine , only : kind_phys
       use funcphys, only : fpvs
+      use module_sf_noahlsm,  only: maxalb
 
       implicit none
 
@@ -149,19 +144,21 @@
       ! Note that the version of NOAH LSM expected here is "generic" - there are no urban, fasdas, or
       ! or University of Arizona(?) additions.
       
-      integer,                             intent(in) :: im, nsoil
+      integer,                             intent(in) :: im, nsoil, ialb, isice
+      logical,                             intent(in) :: restart, first_time_step
       real(kind=kind_phys),                intent(in) :: dt, rhowater, rd, rvrdm1, eps, epsm1
 
       logical, dimension(im),              intent(in) :: flag_guess, flag_iter, land
       real(kind=kind_phys), dimension(im), intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, t1, snwdph
-      real(kind=kind_phys), dimension(im), intent(in) :: weasd, tsfc
+      real(kind=kind_phys), dimension(im), intent(in) :: weasd, tsfc, vtype
       real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc, stc, slc
 
-      logical, dimension(im), intent(inout) :: flag_lsm
-      real(kind=kind_phys), dimension(im), intent(inout) :: prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh
+      logical, dimension(im), intent(inout) :: flag_lsm, flag_lsm_glacier
+      real(kind=kind_phys), dimension(im), intent(inout) :: snoalb, prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh
       real(kind=kind_phys), dimension(im), intent(inout) :: weasd_save, snwdph_save, tsfc_save, canopy_save
       real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: smc_save, stc_save, slc_save
       real(kind=kind_phys), dimension(im), intent(inout) :: ep, evap, hflx, gflux, drain, evbs, evcw, trans, sbsno, snowc, snohf
+      real(kind=kind_phys), dimension(nsoil), intent(inout) :: sthick
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -172,11 +169,19 @@
       
       REAL, PARAMETER  :: A2=17.67,A3=273.15,A4=29.65,   &
                           A23M4=A2*(A3-A4)
+      real(kind=kind_phys), parameter, dimension(4) :: zsoil = (/ -0.1,-0.4,-1.0,-2.0/) !what if nsoil /= 4?  
       
 !> - Initialize CCPP error handling variables
 
       errmsg = ''
       errflg = 0
+      
+      !from module_sf_noahdrv.F/lsminit
+      if (.not. restart .and. first_time_step .and. ialb == 0) then
+        do i = 1, im      
+             snoalb(i) = maxalb(int(0.5 + vtype(i)))*0.01
+        end do
+      end if
       
       do i=1, im
         if (land(i) .and. flag_guess(i)) then
@@ -193,10 +198,20 @@
         end if
       end do
       
+      sthick(1) = - zsoil(1)
+      do k = 2, nsoil
+        sthick(k) = zsoil(k-1) - zsoil(k)
+      enddo
+      
       flag_lsm(:) = .false.
+      flag_lsm_glacier(:) = .false.
       do i=1, im
         if (flag_iter(i) .and. land(i)) then
-          flag_lsm(i) = .true.
+          if (vtype(i) == isice) then
+            flag_lsm_glacier(i) = .true.
+          else
+            flag_lsm(i) = .true.
+          end if
           !GJF: module_sf_noahdrv.F from WRF has hardcoded slopetyp = 1; why? replicate here?
           !GJF: shdfac is zeroed out for particular combinations of vegetation table source and vegetation types; replicate here?
           

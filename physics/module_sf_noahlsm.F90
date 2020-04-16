@@ -413,7 +413,6 @@
       DO KZ = 2,NSOIL
          ZSOIL (KZ) = - SLDPTH (KZ) + ZSOIL (KZ -1)
       END DO
-
 ! ----------------------------------------------------------------------
 ! NEXT IS CRUCIAL CALL TO SET THE LAND-SURFACE PARAMETERS, INCLUDING
 ! SOIL-TYPE AND VEG-TYPE DEPENDENT PARAMETERS.
@@ -2176,7 +2175,6 @@
       YY = SFCTMP + (YYNUM / RCH + TH2- SFCTMP - BETA * EPSCA) / RR
 
       ZZ1 = DF1 / ( -0.5 * ZSOIL (1) * RCH * RR ) + 1.0
-      write(*,*) 'in nopac',YY,ZZ1,ZSOIL(1),BETA,EPSCA,TH2,YYNUM,SFCTMP
 !urban
       CALL SHFLX (SSOIL,STC,SMC,SMCMAX,NSOIL,T1,DT,YY,ZZ1,ZSOIL,       &
                   TBOT,ZBOT,SMCWLT,PSISAT,SH2O,BEXP,F1,DF1,            &
@@ -2679,7 +2677,6 @@
 ! CALCULATE SURFACE SOIL HEAT FLUX
 ! ----------------------------------------------------------------------
       T1 = (YY + (ZZ1- 1.0) * STC (1)) / ZZ1
-      WRITE(*,*) 'in shflux',T1, YY, ZZ1, STC(1)
       SSOIL = DF1 * (STC (1) - T1) / (0.5 * ZSOIL (1))
 
 ! ----------------------------------------------------------------------
