@@ -1,5 +1,5 @@
 !>\file  mp_fer_hires.F90
-!! This file contains 
+!! This file contains the Ferrier-Aligo microphysics scheme driver. 
 
 !
 module mp_fer_hires
@@ -113,7 +113,7 @@ module mp_fer_hires
  
      end subroutine mp_fer_hires_init
 
-!>\defgroup hafs_famp HAFS Ferrier-Aligo Cloud Microphysics Scheme
+!>\defgroup hafs_famp HWRF Ferrier-Aligo Microphysics Scheme
 !> This is the CCPP-compliant FER_HIRES driver module.
 !> \section arg_table_mp_fer_hires_run Argument Table
 !! \htmlinclude mp_fer_hires_run.html
@@ -124,9 +124,8 @@ module mp_fer_hires
                          ,T,Q,CWM                                       &
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
-                         ,QC,QR,QI,QG                                   & ! wet mixing ratio
-                         !,qc_m,qi_m,qr_m                               & 
-                         ,PREC                                          &!,ACPREC  -MZ:not used 
+                         ,QC,QR,QI,QG                                   & 
+                         ,PREC                                          & 
                          ,mpirank, mpiroot, threads                     &
                          ,refl_10cm                                     &
                          ,RHGRD,dx                                      &
@@ -171,7 +170,6 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: qg(1:ncol,1:nlev) ! QRIMEF
 
       real(kind_phys),   intent(inout) :: prec(1:ncol)
-!      real(kind_phys)                  :: acprec(1:ncol)   !MZ: change to local
       real(kind_phys),   intent(inout) :: refl_10cm(1:ncol,1:nlev)
       real(kind_phys),   intent(in   ) :: rhgrd
       real(kind_phys),   intent(in   ) :: dx(1:ncol)
@@ -185,27 +183,19 @@ module mp_fer_hires
       integer            :: I,J,K,N
       integer            :: lowlyr(1:ncol)
       integer            :: dx1
-      !real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
-      real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW  
+      real(kind_phys)    :: PCPCOL
       real(kind_phys)    :: ql(1:nlev),tl(1:nlev)
       real(kind_phys)    :: rainnc(1:ncol),rainncv(1:ncol)
       real(kind_phys)    :: snownc(1:ncol),snowncv(1:ncol)
       real(kind_phys)    :: graupelncv(1:ncol)
-      real(kind_phys)    :: dz(1:ncol,1:nlev)
-      real(kind_phys)    :: pi_phy(1:ncol,1:nlev)
-      real(kind_phys)    :: rr(1:ncol,1:nlev)
-      real(kind_phys)    :: th_phy(1:ncol,1:nlev)
-      real(kind_phys)    :: R_G, CAPPA
+      real(kind_phys)    :: train_phy(1:ncol,1:nlev)
 
 ! Dimension
-      integer            :: ims, ime, jms, jme, lm
+      integer            :: ims, ime, lm
 
 !-----------------------------------------------------------------------
 !***********************************************************************
 !-----------------------------------------------------------------------
-      R_G=1./G
-      CAPPA=R_D/CP
-
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -217,18 +207,9 @@ module mp_fer_hires
          return
       end if 
 
-   
-!ZM      NTSD=ITIMESTEP
-!ZM presume nphs=1     DTPHS=NPHS*DT
-      DTPHS=DT
-      RDTPHS=1./DTPHS
-!ZM      AVRAIN=AVRAIN+1.
-
 ! Set internal dimensions
       ims = 1
       ime = ncol
-      jms = 1
-      jme = 1
       lm  = nlev
 
 ! Use the dx of the 1st i point to set an integer value of dx to be used for
@@ -266,18 +247,8 @@ module mp_fer_hires
 !***  FILL THE SINGLE-COLUMN INPUT
 !-----------------------------------------------------------------------
 !
-        DO K=LM,1,-1   ! We are moving down from the top in the flipped arrays
+        DO K=LM,1,-1   !mz* We are moving down from the top in the flipped arrays
          
-!
-!          TL(K)=T(I,K)
-!          QL(K)=AMAX1(Q(I,K),EPSQ)
-!
-          RR(I,K)=P_PHY(I,K)/(R_D*T(I,K)*(P608*AMAX1(Q(I,K),EPSQ)+1.))
-          PI_PHY(I,K)=(P_PHY(I,K)*1.E-5)**CAPPA
-          TH_PHY(I,K)=T(I,K)/PI_PHY(I,K)
-          DZ(I,K)=(PRSI(I,K)-PRSI(I,K+1))*R_G/RR(I,K)
-
-!
 !***  CALL MICROPHYSICS
 
 !MZ* in HWRF
@@ -289,7 +260,7 @@ module mp_fer_hires
             IF (T(I,K) < T_ICEK) F_ICE(I,K)=1.
          ELSE
             F_ICE(I,K)=MAX( 0., MIN(1., QI(I,K)/cwm(I,K) ) )
-            F_RIMEF(I,K)=QG(I,K)/QI(I,K)
+            F_RIMEF(I,K)=QG(I,K)!/QI(I,K)
          ENDIF
          IF (QR(I,K) <= EPSQ) THEN
             F_RAIN(I,K)=0.
@@ -297,38 +268,30 @@ module mp_fer_hires
             F_RAIN(I,K)=QR(I,K)/(QR(I,K)+QC(I,K))
          ENDIF
 
-        end do
-      enddo
+        ENDDO
+
+      ENDDO
 
 !---------------------------------------------------------------------
-!*** Update the rime factor array after 3d advection
-!---------------------------------------------------------------------
-!MZ* in namphysics
-!              DO K=1,LM
-!              DO I=IMS,IME
-!                IF (QG(I,K)>EPSQ .AND. QI(I,K)>EPSQ) THEN
-!                  F_RIMEF(I,K)=MIN(50.,MAX(1.,QG(I,K)/QI(I,K)))
-!                ELSE
-!                  F_RIMEF(I,K)=1.
-!                ENDIF
-!              ENDDO
-!              ENDDO
-
-
+!aligo
+         cwm(i,k) = cwm(i,k)/(1.0_kind_phys-q(i,k))
+         qr(i,k) = qr(i,k)/(1.0_kind_phys-q(i,k))
+         qi(i,k) = qi(i,k)/(1.0_kind_phys-q(i,k))
+         qc(i,k) = qc(i,k)/(1.0_kind_phys-q(i,k))
+!aligo
 !---------------------------------------------------------------------
         
             CALL FER_HIRES(                                             &
-                   DT=dtphs,RHgrd=RHGRD                                 &
-                  ,DZ8W=dz,RHO_PHY=rr,P_PHY=p_phy,PI_PHY=pi_phy         &
-                  ,TH_PHY=th_phy,T_PHY=t                                &
+                   DT=DT,RHgrd=RHGRD                                    &
+                  ,PRSI=prsi,P_PHY=p_phy,T_PHY=t                        &
                   ,Q=Q,QT=cwm                                           &
-                  ,LOWLYR=LOWLYR,SR=SR                                  &
+                  ,LOWLYR=LOWLYR,SR=SR,TRAIN_PHY=train_phy              &
                   ,F_ICE_PHY=F_ICE,F_RAIN_PHY=F_RAIN                    &
                   ,F_RIMEF_PHY=F_RIMEF                                  &
                   ,QC=QC,QR=QR,QS=QI                                    &
                   ,RAINNC=rainnc,RAINNCV=rainncv                        &
                   ,threads=threads                                      &
-                  ,IMS=IMS,IME=IME,JMS=JMS,JME=JME,LM=LM                &
+                  ,IMS=IMS,IME=IME,LM=LM                                &
                   ,D_SS=d_ss                                            &
                   ,refl_10cm=refl_10cm,DX1=DX1)
 
@@ -336,17 +299,15 @@ module mp_fer_hires
 !.......................................................................
 
 !MZ*
-!Aligo Oct-23-2019 
+!Aligo Oct-23-2019
 ! - Convert dry qc,qr,qi back to wet mixing ratio
-!    DO K = 1, LM
-!     DO I= IMS, IME
-!       qc_m(i,k) = qc(i,k)/(1.0_kind_phys+q(i,k))
-!       qi_m(i,k) = qi(i,k)/(1.0_kind_phys+q(i,k))
-!       qr_m(i,k) = qr(i,k)/(1.0_kind_phys+q(i,k))
-!     ENDDO
-!    ENDDO
-    
-
+    DO K = 1, LM
+     DO I= IMS, IME
+        qc(i,k) = qc(i,k)/(1.0_kind_phys+q(i,k))
+        qi(i,k) = qi(i,k)/(1.0_kind_phys+q(i,k))
+        qr(i,k) = qr(i,k)/(1.0_kind_phys+q(i,k))
+     ENDDO
+    ENDDO 
 
 !-----------------------------------------------------------
       DO K=1,LM
@@ -366,9 +327,7 @@ module mp_fer_hires
 !***  UPDATE TEMPERATURE, SPECIFIC HUMIDITY, CLOUD WATER, AND HEATING.
 !-----------------------------------------------------------------------
 !
-          TNEW=TH_PHY(I,K)*PI_PHY(I,K)
-          TRAIN(I,K)=TRAIN(I,K)+(TNEW-T(I,K))*RDTPHS
-          T(I,K)=TNEW
+          TRAIN(I,K)=TRAIN(I,K)+TRAIN_PHY(I,K)
         ENDDO
       ENDDO
 

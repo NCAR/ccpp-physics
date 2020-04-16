@@ -133,6 +133,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GSD_CU_GF_deep.txt      \
                           pdftxt/GSD_RUCLSM.txt          \
                           pdftxt/GSD_THOMPSON.txt        \
+                          pdftxt/HWRF_FAMP.txt          \
 ###                          pdftxt/GFSphys_namelist.txt    \
 ###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
@@ -262,9 +263,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_mp_radar.F90 \
                         ../mp_thompson_post.F90  \
 ### HAFS
-                        ../module_MP_FER_HIRES.F90 \
                         ../mp_fer_hires.F90   \
-                        ../module_mp_fer_hires_pre.F90 \
+                        ../module_MP_FER_HIRES.F90 \
 ### utils
                         ../funcphys.f90     \
                         ../physparam.f      \
