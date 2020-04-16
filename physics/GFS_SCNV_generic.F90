@@ -35,7 +35,7 @@
         errmsg = ''
         errflg = 0
 
-        save_fields: if (ldiag3d .and. flag_for_scnv_generic_tend) then
+        if (ldiag3d .and. flag_for_scnv_generic_tend) then
           do k=1,levs
             do i=1,im
               save_u(i,k)   = gu0(i,k)
@@ -50,7 +50,7 @@
                 enddo
              enddo
           endif
-       endif save_fields
+       endif
 
     end subroutine GFS_SCNV_generic_pre_run
 
@@ -114,7 +114,7 @@
       errmsg = ''
       errflg = 0
 
-      update_cnvw_cnvc: if (imfshalcnv==imfshalcnv_sas .or. imfshalcnv==imfshalcnv_samf) then
+      if (imfshalcnv==imfshalcnv_sas .or. imfshalcnv==imfshalcnv_samf) then
         do i=1,im
           rainc(i) = rainc(i) + frain * rain1(i)
         enddo
@@ -133,9 +133,9 @@
             enddo
           enddo
         endif
-      endif update_cnvw_cnvc
+      endif
 
-      diagtend: if (lssav .and. flag_for_scnv_generic_tend) then
+      if (lssav .and. flag_for_scnv_generic_tend) then
         if (ldiag3d) then
           do k=1,levs
             do i=1,im
@@ -152,7 +152,7 @@
              enddo
           endif
         endif
-      endif diagtend
+      endif
 !
       if (cplchm) then
         do k=1,levs

@@ -87,7 +87,8 @@
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tau(im,km),    rtg(im,km,ntrac)
-      real(kind=kind_phys), intent(inout), dimension(ix,km) ::          &
+      ! Only allocated if ldiag3d or qdiag3d are true
+      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
      &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(ix,km),     v1(ix,km),                    &

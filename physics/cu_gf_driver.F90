@@ -867,7 +867,7 @@ contains
 ! Diagnostic tendency updates
 !
         if(ldiag3d) then
-          if(.not.flag_for_scnv_generic_tend) then
+          if(ishallow_g3.eq.1 .and. .not.flag_for_scnv_generic_tend) then
             do k=kts,ktf
               do i=its,itf
                 du3dt_SCNV(i,k) = du3dt_SCNV(i,k) + outus(i,k) * dt
@@ -879,7 +879,7 @@ contains
               enddo
             enddo
           endif
-          if(.not.flag_for_dcnv_generic_tend) then
+          if((ideep.eq.1. .or. imid_gf.eq.1) .and. .not.flag_for_dcnv_generic_tend) then
             do k=kts,ktf
               do i=its,itf
                 du3dt_DCNV(i,k) = du3dt_DCNV(i,k) + (outu(i,k)+outum(i,k)) * dt

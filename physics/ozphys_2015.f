@@ -167,7 +167,6 @@
         if (ldiag3d .and. qdiag3d) then     !     ozone change diagnostics
           do i=1,im
             ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
-!!ccpp            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
             ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
             ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
             ozp4(i,l) = ozp4(i,l) + prod(i,4)

@@ -1509,7 +1509,6 @@
             endif
          enddo
       enddo
-
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> -# Save PBL height for diagnostic purpose
