@@ -17,14 +17,6 @@
   type = integer
   intent = in
   optional = F
-[restart]
-  standard_name = flag_for_restart
-  long_name = flag for restart (warmstart) or coldstart
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [veg_data_choice]
   standard_name = vegetation_type_dataset_choice
   long_name = land use dataset choice
@@ -41,22 +33,6 @@
   type = integer
   intent = in
   optional = F
-[ialb]
-  standard_name = flag_for_using_climatology_albedo
-  long_name = flag for using climatology alb, based on sfc type
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ncol]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [nsoil]
   standard_name = soil_vertical_dimension
   long_name = soil vertical layer dimension
@@ -65,27 +41,25 @@
   type = integer
   intent = in
   optional = F
-[vtype]
-  standard_name = vegetation_type_classification_real
-  long_name = vegetation type for lsm
-  units = index
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[snoalb]
-  standard_name = upper_bound_on_max_albedo_over_deep_snow
-  long_name = maximum snow albedo
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [isurban]
   standard_name = urban_vegetation_category
   long_name = index of the urban vegetation category in the chosen vegetation dataset
+  units = index
+  dimensions = ()
+  type = integer
+  intent = inout
+  optional = F
+[isice]
+  standard_name = ice_vegetation_category
+  long_name = index of the permanent snow/ice category in the chosen vegetation dataset
+  units = index
+  dimensions = ()
+  type = integer
+  intent = inout
+  optional = F
+[iswater]
+  standard_name = water_vegetation_category
+  long_name = index of the water body vegetation category in the chosen vegetation dataset
   units = index
   dimensions = ()
   type = integer
@@ -160,6 +134,22 @@
   type = integer
   intent = in
   optional = F
+[ialb]
+  standard_name = flag_for_using_climatology_albedo
+  long_name = flag for using climatology alb, based on sfc type
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isice]
+  standard_name = ice_vegetation_category
+  long_name = index of the permanent snow/ice category in the chosen vegetation dataset
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [land]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -184,9 +174,33 @@
   type = logical
   intent = in
   optional = F
+[restart]
+  standard_name = flag_for_restart
+  long_name = flag for restart (warmstart) or coldstart
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[first_time_step]
+  standard_name = flag_for_first_time_step
+  long_name = flag for first time step for time integration loop (cold/warmstart)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [flag_lsm]
   standard_name = flag_for_calling_land_surface_model
   long_name = flag for calling land surface model
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = logical
+  intent = inout
+  optional = F
+[flag_lsm_glacier]
+  standard_name = flag_for_calling_land_surface_model_glacier
+  long_name = flag for calling land surface model over glacier
   units = flag
   dimensions = (horizontal_loop_extent)
   type = logical
@@ -354,6 +368,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[vtype]
+  standard_name = vegetation_type_classification_real
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [smc]
   standard_name = volume_fraction_of_soil_moisture
   long_name = volumetric fraction of soil moisture
@@ -380,6 +403,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[snoalb]
+  standard_name = upper_bound_on_max_albedo_over_deep_snow
+  long_name = maximum snow albedo
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [prcp]
   standard_name = total_precipitation_rate_on_dynamics_timestep_over_land
@@ -646,7 +678,7 @@
   standard_name = snow_freezing_rain_upward_latent_heat_flux
   long_name = latent heat flux due to snow and frz rain
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -906,7 +938,7 @@
   standard_name = soil_porosity
   long_name = volumetric soil porosity
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
