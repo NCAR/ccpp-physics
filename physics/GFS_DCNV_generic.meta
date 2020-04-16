@@ -562,7 +562,7 @@
   intent = inout
   optional = F
 [flag_for_dcnv_generic_tend]
-  standard_name = true_if_GFS_DCNV_generic_should_calculate_tendencies
+  standard_name = flag_for_generic_deep_convection_tendency
   long_name = true if GFS_DCNV_generic should calculate tendencies
   units = flag
   dimensions = ()

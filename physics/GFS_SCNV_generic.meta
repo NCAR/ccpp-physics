@@ -104,7 +104,7 @@
   intent = inout
   optional = F
 [flag_for_scnv_generic_tend]
-  standard_name = true_if_GFS_SCNV_generic_should_calculate_tendencies
+  standard_name = flag_for_generic_shallow_convection_tendency
   long_name = true if GFS_SCNV_generic should calculate tendencies
   units = flag
   dimensions = ()
@@ -277,7 +277,7 @@
   intent = inout
   optional = F
 [du3dt]
-  standard_name = cumulative_change_in_x_wind_due_to_shal_convection
+  standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
   long_name = cumulative change in x wind due to shallow convection
   units = m s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -285,7 +285,7 @@
   kind = kind_phys
   intent = inout
 [dv3dt]
-  standard_name = cumulative_change_in_y_wind_due_to_shal_convection
+  standard_name = cumulative_change_in_y_wind_due_to_shallow_convection
   long_name = cumulative change in y wind due to shallow convection
   units = m s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -293,7 +293,7 @@
   kind = kind_phys
   intent = inout
 [dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_shal_convection
+  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
   long_name = cumulative change in temperature due to shal conv.
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -302,7 +302,7 @@
   intent = inout
   optional = F
 [dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shal_convection
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shallow_convection
   long_name = cumulative change in water vapor specific humidity due to shal conv.
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -424,7 +424,7 @@
   intent = inout
   optional = F
 [flag_for_scnv_generic_tend]
-  standard_name = true_if_GFS_SCNV_generic_should_calculate_tendencies
+  standard_name = flag_for_generic_shallow_convection_tendency
   long_name = true if GFS_SCNV_generic should calculate tendencies
   units = flag
   dimensions = ()
