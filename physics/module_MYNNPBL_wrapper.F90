@@ -800,7 +800,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"ktop_shallow:",ktop_shallow(1)," maxmf:",maxmf(1)
           print*,"nup:",nupdraft(1)
           print*
-s       endif
+       endif
 
 
   END SUBROUTINE mynnedmf_wrapper_run
