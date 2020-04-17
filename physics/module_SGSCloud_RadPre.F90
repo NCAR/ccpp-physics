@@ -40,7 +40,7 @@
            qci_conv,                     &
            imfdeepcnv, imfdeepcnv_gf,    &
            qc_save, qi_save,             &
-           qc_bl,cldfra_bl,              &
+           qc_bl,qi_bl,cldfra_bl,        &
            delp,clouds1,clouds2,clouds3, &
            clouds4,clouds5,slmsk,        &
            nlay, plyr, xlat, dz,de_lgth, &
@@ -67,7 +67,7 @@
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: &
            &         clouds1,clouds2,clouds3,clouds4,clouds5
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc_save, qi_save
-      real(kind=kind_phys), dimension(im,levs), intent(in)    :: qc_bl, cldfra_bl
+      real(kind=kind_phys), dimension(im,levs), intent(in)    :: qc_bl, qi_bl, cldfra_bl
       real(kind=kind_phys), dimension(im),      intent(in)    :: slmsk, xlat, de_lgth
       real(kind=kind_phys), dimension(im,nlay), intent(in)    :: plyr, dz      
       real(kind=kind_phys), dimension(im,5),    intent(inout) :: cldsa
@@ -104,7 +104,8 @@
         end do
       end do
  
-      ! add boundary layer clouds
+      ! add boundary layer clouds - Note: now the temperature-dependent sorting of 
+      ! ice and water subgrid-scale clouds is done inside the MYNN-EDMF
       if (do_mynnedmf) then
         do k = 1, levs
           do i = 1, im
@@ -116,33 +117,30 @@
             !    clouds1(i,k) = cldfra_bl(i,k)
             !endif
 
-            if (qc(i,k) < 1.e-6 .and. qi(i,k) < 1.e-8 .and. cldfra_bl(i,k)>0.001) then
-              !Partition the BL clouds into water & ice according to a linear
-              !approximation of Hobbs et al. (1974). This allows us to only use
-              !one 3D array for both cloud water & ice.
-              !Wice = 1. - MIN(1., MAX(0., (t(i,k)-254.)/15.))
-              !Wh2o = 1. - Wice
-              !clouds1(i,k)=MAX(clouds1(i,k),CLDFRA_BL(i,k))
-              !clouds1(i,k)=MAX(0.0,MIN(1.0,clouds1(i,k)))
-              qc(i,k) = qc_bl(i,k)*(min(1., max(0., (T3D(i,k)-244.)/25.)))*cldfra_bl(i,k)
-              qi(i,k) = qc_bl(i,k)*(1. - min(1., max(0., (T3D(i,k)-244.)/25.)))*cldfra_bl(i,k)
+            if (qc(i,k) < 1.e-6 .and. cldfra_bl(i,k)>0.001) then
+              qc(i,k) = qc_bl(i,k)*cldfra_bl(i,k)
+              if (nint(slmsk(i)) == 1) then !land
+                 if(qc(i,k)>1.E-8)clouds3(i,k)=5.4                !eff radius cloud water (microns)
+              else
+                !eff radius cloud water (microns), from Miles et al.
+                if(qc(i,k)>1.E-8)clouds3(i,k)=9.6
+              endif
+              !calculate the liquid water path using additional BL clouds
+              clouds2(i,k) = max(0.0, qc(i,k) * gfac * delp(i,k))
+            endif
+            if (qi(i,k) < 1.e-8 .and. cldfra_bl(i,k)>0.001) then
+              qi(i,k) = qi_bl(i,k)*cldfra_bl(i,k)
               Tc = T3D(i,k) - 273.15
               !iwc = qi(i,k)*1.0e6*rho(i,k)
-
               if (nint(slmsk(i)) == 1) then !land
-                if(qc(i,k)>1.e-8)clouds3(i,k)=5.4                !eff radius cloud water (microns)
-                !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos)
+                !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b)
                 if(qi(i,k)>1.E-8)clouds5(i,k)=max(173.45 + 2.14*Tc, 20.)
               else
-                !eff radius cloud water (microns), from Miles et al. 
-                if(qc(i,k)>1.E-8)clouds3(i,k)=9.6
-                !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 6b)
                 if(qi(i,k)>1.E-8)clouds5(i,k)=max(173.45 + 2.14*Tc, 20.)
                 !eff radius cloud ice (microns), from Mishra et al. (2014, JGR Atmos, fig 8b)
                 !IF(qi(i,k)>1.E-8)clouds5(i,k)=MAX(139.7 + 1.76*Tc + 13.49*LOG(iwc), 20.)
               endif
-              !calculate water and ice paths for additional BL clouds
-              clouds2(i,k) = max(0.0, qc(i,k) * gfac * delp(i,k))
+              !calculate the ice water path using additional BL clouds
               clouds4(i,k) = max(0.0, qi(i,k) * gfac * delp(i,k))
             endif
 

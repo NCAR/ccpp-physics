@@ -24,7 +24,7 @@
 #endif
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  ix,im,levs,                     &
-     &  flag_init,flag_restart,         &
+     &  flag_init,flag_restart,cycling, &
      &  lssav, ldiag3d, lsidea,         & 
      &  delt,dtf,dx,zorl,               &
      &  phii,u,v,omega,t3d,             &
@@ -46,10 +46,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qke,qke_adv,Tsq,Qsq,Cov,        &
      &  el_pbl,sh3d,exch_h,exch_m,      &
      &  Pblh,kpbl,                      &
-     &  qc_bl,cldfra_bl,                &
+     &  qc_bl,qi_bl,cldfra_bl,          &
      &  edmf_a,edmf_w,edmf_qt,          &
      &  edmf_thl,edmf_ent,edmf_qc,      &
-     &  nupdraft,maxMF,ktop_shallow,    &
+     &  sub_thl,sub_sqv,det_thl,det_sqv,&
+     &  nupdraft,maxMF,ktop_plume,      &
      &  RTHRATEN,                       &
      &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor, dqdt_liquid_cloud,               &
@@ -62,6 +63,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
      &  bl_mynn_edmf_part, bl_mynn_cloudmix, bl_mynn_mixqt,&
+     &  bl_mynn_output,                                    &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
@@ -157,7 +159,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
-                             lprnt, do_mynnsfclay
+                             lprnt, do_mynnsfclay, cycling
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
      &       bl_mynn_mixlength,                             &
@@ -169,6 +171,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_cloudmix,                              &
      &       bl_mynn_mixqt,                                 &
      &       bl_mynn_tkebudget,                             &
+     &       bl_mynn_output,                                &
      &       grav_settling,                                 &
      &       imp_physics, imp_physics_wsm6,                 &
      &       imp_physics_thompson, imp_physics_gfdl
@@ -206,10 +209,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        dqdt_ozone, dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc
       real(kind=kind_phys), dimension(im,levs), intent(inout) ::         &
      &        qke, qke_adv, EL_PBL, Sh3D,                                &
-     &        qc_bl, cldfra_bl
-      real(kind=kind_phys), dimension(im,levs), intent(inout) ::         &
+     &        qc_bl, qi_bl, cldfra_bl
+!These 10 arrays are only allocated when bl_mynn_output > 0
+      real(kind=kind_phys), dimension(:,:), intent(inout) ::             &
      &        edmf_a,edmf_w,edmf_qt,                                     &
-     &        edmf_thl,edmf_ent,edmf_qc
+     &        edmf_thl,edmf_ent,edmf_qc,                                 &
+     &        sub_thl,sub_sqv,det_thl,det_sqv
      real(kind=kind_phys), dimension(im,levs), intent(in) ::             &
     &        u,v,omega,t3d,                                              &
     &        exner,prsl,                                                 &
@@ -230,8 +235,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
      !LOCAL
       real(kind=kind_phys), dimension(im,levs) ::                        &
-     &        qvsh,qc,qi,qnc,qni,ozone,qnwfa,qnifa,                      &
-     &        dz, w, p, rho, th, qv, tke_pbl,                            &
+     &        sqv,sqc,sqi,qnc,qni,ozone,qnwfa,qnifa,                     &
+     &        dz, w, p, rho, th, qv,                                     &
      &        RUBLTEN, RVBLTEN, RTHBLTEN, RQVBLTEN,                      &
      &        RQCBLTEN, RQNCBLTEN, RQIBLTEN, RQNIBLTEN,                  &
      &        RQNWFABLTEN, RQNIFABLTEN,                                  &
@@ -256,7 +261,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag,             &
      &        maxMF
      integer, dimension(im), intent(inout) ::                           &
-    &        kpbl,nupdraft,ktop_shallow
+    &        kpbl,nupdraft,ktop_plume
 
      !LOCAL
       real, dimension(im) ::                                             &
@@ -302,9 +307,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          p_qni= 0 
          do k=1,levs
             do i=1,im
-              qvsh(i,k)  = qgrs_water_vapor(i,k)
-              qc(i,k)    = qgrs_liquid_cloud(i,k)
-              qi(i,k)    = qgrs_ice_cloud(i,k)
+              sqv(i,k)   = qgrs_water_vapor(i,k)
+              sqc(i,k)   = qgrs_liquid_cloud(i,k)
+              sqi(i,k)   = qgrs_ice_cloud(i,k)
               ozone(i,k) = qgrs_ozone(i,k)
               qnc(i,k)   = 0.
               qni(i,k)   = 0.
@@ -330,9 +335,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             p_qni= 0
             do k=1,levs
               do i=1,im
-                qvsh(i,k)  = qgrs_water_vapor(i,k)
-                qc(i,k)    = qgrs_liquid_cloud(i,k)
-                qi(i,k)    = qgrs_ice_cloud(i,k)
+                sqv(i,k)   = qgrs_water_vapor(i,k)
+                sqc(i,k)   = qgrs_liquid_cloud(i,k)
+                sqi(i,k)   = qgrs_ice_cloud(i,k)
                 qnc(i,k)   = qgrs_cloud_droplet_num_conc(i,k)
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -356,9 +361,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             p_qni= 0
             do k=1,levs
               do i=1,im
-                qvsh(i,k)  = qgrs_water_vapor(i,k)
-                qc(i,k)    = qgrs_liquid_cloud(i,k)
-                qi(i,k)    = qgrs_ice_cloud(i,k)
+                sqv(i,k)   = qgrs_water_vapor(i,k)
+                sqc(i,k)   = qgrs_liquid_cloud(i,k)
+                sqi(i,k)   = qgrs_ice_cloud(i,k)
                 qnc(i,k)   = 0.
                 qni(i,k)   = qgrs_cloud_ice_num_conc(i,k)
                 ozone(i,k) = qgrs_ozone(i,k)
@@ -384,9 +389,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           p_qni= 0
           do k=1,levs
             do i=1,im
-                qvsh(i,k)  = qgrs_water_vapor(i,k)
-                qc(i,k)    = qgrs_liquid_cloud(i,k)
-                qi(i,k)    = qgrs_ice_cloud(i,k)
+                sqv(i,k)   = qgrs_water_vapor(i,k)
+                sqc(i,k)   = qgrs_liquid_cloud(i,k)
+                sqi(i,k)   = qgrs_ice_cloud(i,k)
                 qnc(i,k)   = 0.
                 qni(i,k)   = 0.
                 qnwfa(i,k) = 0.
@@ -411,9 +416,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           p_qni= 0
           do k=1,levs
             do i=1,im
-                qvsh(i,k)  = qgrs_water_vapor(i,k)
-                qc(i,k)    = qgrs_liquid_cloud(i,k)
-                qi(i,k)    = 0.
+                sqv(i,k)   = qgrs_water_vapor(i,k)
+                sqc(i,k)   = qgrs_liquid_cloud(i,k)
+                sqi(i,k)   = 0.
                 qnc(i,k)   = 0.
                 qni(i,k)   = 0.
                 qnwfa(i,k) = 0.
@@ -428,9 +433,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           do i=1,im
              dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
              th(i,k)=t3d(i,k)/exner(i,k)
-             qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
-             qc(i,k)=qc(i,k)/(1.0 - qvsh(i,k))
-             qi(i,k)=qi(i,k)/(1.0 - qvsh(i,k))
+          ! keep as specific humidity
+          !   qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
+          !   qc(i,k)=qc(i,k)/(1.0 - qvsh(i,k))
+          !   qi(i,k)=qi(i,k)/(1.0 - qvsh(i,k))
              rho(i,k)=prsl(i,k)/(r_d*t3d(i,k))
              w(i,k) = -omega(i,k)/(rho(i,k)*g)
              pattern_spp_pbl(i,k)=0.0
@@ -498,9 +504,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          print*,"dz:",dz(1,1),dz(1,2),dz(1,levs)
          print*,"u:",u(1,1),u(1,2),u(1,levs)
          print*,"v:",v(1,1),v(1,2),v(1,levs)
-         print*,"qv:",qv(1,1),qv(1,2),qv(1,levs)
-         print*,"qc:",qc(1,1),qc(1,2),qc(1,levs)
-         print*,"qi:",qi(1,1),qi(1,2),qi(1,levs)
+         print*,"sqv:",sqv(1,1),sqv(1,2),sqv(1,levs)
+         print*,"sqc:",sqc(1,1),sqc(1,2),sqc(1,levs)
+         print*,"sqi:",sqi(1,1),sqi(1,2),sqi(1,levs)
          print*,"rmol:",rmol(1)," ust:",ust(1)
          print*," dx=",dx(1),"initflag=",initflag
          print*,"Tsurf:",tsurf(1)," Thetasurf:",ts(1)
@@ -511,7 +517,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          print*,"im=",im," levs=",levs
          print*,"PBLH=",pblh(1)," KPBL=",KPBL(1)," xland=",xland(1)
          print*,"vdfg=",vdfg(1)," ch=",ch(1)
-         print*,"TKE:",TKE_PBL(1,1),TKE_PBL(1,2),TKE_PBL(1,levs)
+         !print*,"TKE:",TKE_PBL(1,1),TKE_PBL(1,2),TKE_PBL(1,levs)
          print*,"qke:",qke(1,1),qke(1,2),qke(1,levs)
          print*,"el_pbl:",el_pbl(1,1),el_pbl(1,2),el_pbl(1,levs)
          print*,"Sh3d:",Sh3d(1,1),sh3d(1,2),sh3d(1,levs)
@@ -523,17 +529,17 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
               CALL  mynn_bl_driver(                                    &
      &             initflag=initflag,restart=flag_restart,             &
+     &             cycling=cycling,                                    &
      &             grav_settling=grav_settling,                        &
      &             delt=delt,dz=dz,dx=dx,znt=znt,                      &
-     &             u=u,v=v,w=w,th=th,qv=qv,qc=qc,                      &
-     &             qi=qi,qni=qni,qnc=qnc,                              &
-     &             qnwfa=qnwfa,qnifa=qnifa,                            &
+     &             u=u,v=v,w=w,th=th,sqv3D=sqv,sqc3D=sqc,              &
+     &             sqi3D=sqi,qni=qni,qnc=qnc,                          &
+     &             qnwfa=qnwfa,qnifa=qnifa,ozone=ozone,                &
      &             p=prsl,exner=exner,rho=rho,T3D=t3d,                 &
      &             xland=xland,ts=ts,qsfc=qsfc,qcg=qcg,ps=ps,          &
      &             ust=ust,ch=ch,hfx=hfx,qfx=qfx,rmol=rmol,            &
      &             wspd=wspd,uoce=uoce,voce=voce,vdfg=vdfg,            & !input
-     &             qke=QKE,TKE_PBL=TKE_PBL,                            &
-     &             sh3d=Sh3d,                                          & !output
+     &             qke=QKE,sh3d=Sh3d,                                  & !output
      &             qke_adv=qke_adv,bl_mynn_tkeadvect=bl_mynn_tkeadvect,&
 #if (WRF_CHEM == 1)
      &             chem3d=chem,vd3d=vd,nchem=nchem,kdvel=kdvel,        &
@@ -544,7 +550,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             RQVBLTEN=RQVBLTEN,RQCBLTEN=rqcblten,                &
      &             RQIBLTEN=rqiblten,RQNCBLTEN=rqncblten,              & !output
      &             RQNIBLTEN=rqniblten,RQNWFABLTEN=RQNWFABLTEN,        & !output
-     &             RQNIFABLTEN=RQNIFABLTEN,                            & !output
+     &             RQNIFABLTEN=RQNIFABLTEN,dozone=dqdt_ozone,          & !output
      &             EXCH_H=exch_h,EXCH_M=exch_m,                        & !output
      &             pblh=pblh,KPBL=KPBL                                 & !output
      &             ,el_pbl=el_pbl                                      & !output
@@ -555,17 +561,20 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,bl_mynn_cloudpdf=bl_mynn_cloudpdf                  & !input parameter
      &             ,bl_mynn_mixlength=bl_mynn_mixlength                & !input parameter
      &             ,icloud_bl=icloud_bl                                & !input parameter
-     &             ,qc_bl=qc_bl,cldfra_bl=cldfra_bl                    & !output
+     &             ,qc_bl=qc_bl,qi_bl=qi_bl,cldfra_bl=cldfra_bl        & !output
      &             ,levflag=levflag,bl_mynn_edmf=bl_mynn_edmf          & !input parameter
      &             ,bl_mynn_edmf_mom=bl_mynn_edmf_mom                  & !input parameter
      &             ,bl_mynn_edmf_tke=bl_mynn_edmf_tke                  & !input parameter
      &             ,bl_mynn_mixscalars=bl_mynn_mixscalars              & !input parameter
+     &             ,bl_mynn_output=bl_mynn_output                      & !input parameter
      &             ,bl_mynn_cloudmix=bl_mynn_cloudmix                  & !input parameter
      &             ,bl_mynn_mixqt=bl_mynn_mixqt                        & !input parameter
      &             ,edmf_a=edmf_a,edmf_w=edmf_w,edmf_qt=edmf_qt        & !output
      &             ,edmf_thl=edmf_thl,edmf_ent=edmf_ent,edmf_qc=edmf_qc &!output
+     &             ,sub_thl3D=sub_thl,sub_sqv3D=sub_sqv                &
+     &             ,det_thl3D=det_thl,det_sqv3D=det_sqv                &
      &             ,nupdraft=nupdraft,maxMF=maxMF                      & !output
-     &             ,ktop_shallow=ktop_shallow                          & !output
+     &             ,ktop_plume=ktop_plume                              & !output
      &             ,spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl    & !input
      &             ,RTHRATEN=RTHRATEN                                  & !input
      &             ,FLAG_QI=flag_qi,FLAG_QNI=flag_qni                  & !input
@@ -605,9 +614,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            ! WSM6
            do k=1,levs
              do i=1,im
-               dqdt_water_vapor(i,k)  = RQVBLTEN(i,k)/(1.0 + qv(i,k))
-               dqdt_liquid_cloud(i,k) = RQCBLTEN(i,k)/(1.0 + qv(i,k))
-               dqdt_ice_cloud(i,k)    = RQIBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_water_vapor(i,k)  = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_liquid_cloud(i,k) = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_ice_cloud(i,k)    = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                !dqdt_ozone(i,k)        = 0.0
              enddo
            enddo
@@ -625,10 +634,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            if(ltaerosol) then
              do k=1,levs
                do i=1,im
-                 dqdt_water_vapor(i,k)             = RQVBLTEN(i,k)/(1.0 + qv(i,k))
-                 dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k)/(1.0 + qv(i,k))
+                 dqdt_water_vapor(i,k)             = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_liquid_cloud(i,k)            = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_cloud_droplet_num_conc(i,k)  = RQNCBLTEN(i,k)
-                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k)/(1.0 + qv(i,k))
+                 dqdt_ice_cloud(i,k)               = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)            = RQNIBLTEN(i,k)
                  !dqdt_ozone(i,k)                   = 0.0
                  dqdt_water_aer_num_conc(i,k)      = RQNWFABLTEN(i,k)
@@ -651,9 +660,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              !Thompson (2008)
              do k=1,levs
                do i=1,im
-                 dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
-                 dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
-                 dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)/(1.0 + qv(i,k))
+                 dqdt_water_vapor(i,k)   = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
+                 dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                  dqdt_ice_num_conc(i,k)  = RQNIBLTEN(i,k)
                  !dqdt_ozone(i,k)         = 0.0
                enddo
@@ -672,9 +681,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            ! GFDL MP
            do k=1,levs
              do i=1,im
-               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
-               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
-               dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_ice_cloud(i,k)     = RQIBLTEN(i,k) !/(1.0 + qv(i,k))
                !dqdt_rain(i,k)          = 0.0
                !dqdt_snow(i,k)          = 0.0
                !dqdt_graupel(i,k)       = 0.0
@@ -693,8 +702,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !          print*,"In MYNN wrapper. Unknown microphysics scheme, imp_physics=",imp_physics
            do k=1,levs
              do i=1,im
-               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k)/(1.0 + qv(i,k))
-               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k)/(1.0 + qv(i,k))
+               dqdt_water_vapor(i,k)   = RQVBLTEN(i,k) !/(1.0 + qv(i,k))
+               dqdt_liquid_cloud(i,k)  = RQCBLTEN(i,k) !/(1.0 + qv(i,k))
                dqdt_ice_cloud(i,k)     = 0.0
                !dqdt_rain(i,k)          = 0.0
                !dqdt_snow(i,k)          = 0.0
@@ -736,9 +745,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"dz:",dz(1,1),dz(1,2),dz(1,levs)
           print*,"u:",u(1,1),u(1,2),u(1,levs)
           print*,"v:",v(1,1),v(1,2),v(1,levs)
-          print*,"qv:",qv(1,1),qv(1,2),qv(1,levs)
-          print*,"qc:",qc(1,1),qc(1,2),qc(1,levs)
-          print*,"qi:",qi(1,1),qi(1,2),qi(1,levs)
+          print*,"sqv:",sqv(1,1),sqv(1,2),sqv(1,levs)
+          print*,"sqc:",sqc(1,1),sqc(1,2),sqc(1,levs)
+          print*,"sqi:",sqi(1,1),sqi(1,2),sqi(1,levs)
           print*,"rmol:",rmol(1)," ust:",ust(1)
           print*,"dx(1)=",dx(1),"initflag=",initflag
           print*,"Tsurf:",tsurf(1)," Thetasurf:",ts(1)
@@ -749,7 +758,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"im=",im," levs=",levs
           print*,"PBLH=",pblh(1)," KPBL=",KPBL(1)," xland=",xland(1)
           print*,"vdfg=",vdfg(1)," ch=",ch(1)
-          print*,"TKE:",TKE_PBL(1,1),TKE_PBL(1,2),TKE_PBL(1,levs)
+          !print*,"TKE:",TKE_PBL(1,1),TKE_PBL(1,2),TKE_PBL(1,levs)
           print*,"qke:",qke(1,1),qke(1,2),qke(1,levs)
           print*,"el_pbl:",el_pbl(1,1),el_pbl(1,2),el_pbl(1,levs)
           print*,"Sh3d:",Sh3d(1,1),sh3d(1,2),sh3d(1,levs)
@@ -761,7 +770,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*,"dudt:",dudt(1,1),dudt(1,2),dudt(1,levs)
           print*,"dvdt:",dvdt(1,1),dvdt(1,2),dvdt(1,levs)
           print*,"dqdt:",dqdt_water_vapor(1,1),dqdt_water_vapor(1,2),dqdt_water_vapor(1,levs)
-          print*,"ktop_shallow:",ktop_shallow(1)," maxmf:",maxmf(1)
+          print*,"ktop_plume:",ktop_plume(1)," maxmf:",maxmf(1)
           print*,"nup:",nupdraft(1)
           print*
        endif
