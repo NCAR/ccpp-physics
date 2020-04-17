@@ -1,29 +1,29 @@
-!>  \file sfc_noah.F90
-!!  This file contains the Noah land surface scheme driver.
+!>  \file sfc_noah_wrfv4.F90
+!!  This file contains the Noah land surface scheme driver for the version of the scheme found in WRF v4.0.
 
 !> This module contains the CCPP-compliant Noah land surface scheme driver for 
-!! the hurricane application.
-      module sfc_noah
+!! the version found in WRF v4.0.
+      module sfc_noah_wrfv4
 
       implicit none
 
       private
 
-      public :: sfc_noah_init, sfc_noah_run, sfc_noah_finalize
+      public :: sfc_noah_wrfv4_init, sfc_noah_wrfv4_run, sfc_noah_wrfv4_finalize
 
       contains
 
-!> \ingroup Noah_LSM_hafs
-!! \section arg_table_sfc_noah_init Argument Table
-!! \htmlinclude sfc_noah_init.html
+!> \ingroup NOAH_LSM_WRFv4
+!! \section arg_table_sfc_noah_wrfv4_init Argument Table
+!! \htmlinclude sfc_noah_wrfv4_init.html
 !!
-      subroutine sfc_noah_init(lsm, lsm_noah_hafs, nsoil, ua_phys, fasdas, restart, errmsg, errflg)
+      subroutine sfc_noah_wrfv4_init(lsm, lsm_noah_wrfv4, nsoil, ua_phys, fasdas, restart, errmsg, errflg)
 
       use machine, only : kind_phys
       
       implicit none
       
-      integer,              intent(in)  :: lsm, lsm_noah_hafs, nsoil, fasdas
+      integer,              intent(in)  :: lsm, lsm_noah_wrfv4, nsoil, fasdas
       logical,              intent(in)  :: ua_phys, restart
 
       character(len=*),     intent(out) :: errmsg
@@ -33,34 +33,34 @@
       errmsg = ''
       errflg = 0
       
-      if (lsm/=lsm_noah_hafs) then
-        write(errmsg,'(*(a))') "Logic error: namelist choice of LSM is different from NOAH HAFS"
+      if (lsm/=lsm_noah_wrfv4) then
+        write(errmsg,'(*(a))') "Logic error: namelist choice of LSM is different from NOAH WRFv4"
         errflg = 1
         return
       end if
       
       if (nsoil < 2) then
-        write(errmsg,'(*(a))') "The NOAH HAFS scheme expects at least 2 soil layers."
+        write(errmsg,'(*(a))') "The NOAH WRFv4 scheme expects at least 2 soil layers."
         errflg = 1
         return
       end if
       
       if (ua_phys) then
-        write(errmsg,'(*(a))') "The NOAH HAFS scheme has not been tested with ua_phys = T"
+        write(errmsg,'(*(a))') "The NOAH WRFv4 scheme has not been tested with ua_phys = T"
         errflg = 1
         return
       end if
       
       
       if (fasdas > 0) then
-        write(errmsg,'(*(a))') "The NOAH HAFS scheme has not been tested with fasdas > 0"
+        write(errmsg,'(*(a))') "The NOAH WRFv4 scheme has not been tested with fasdas > 0"
         errflg = 1
         return
       end if
       
       if (restart) then
         !GJF: for restart functionality, the host model will need to write/read snotime (time_since_last_snowfall (s))
-        write(errmsg,'(*(a))') "The NOAH HAFS scheme has not been configured for restarts."
+        write(errmsg,'(*(a))') "The NOAH WRFv4 scheme has not been configured for restarts."
         errflg = 1
         return
       end if
@@ -68,13 +68,13 @@
       !GJF: check for rdlai != F?
       !GJF: check for usemonalb != T?
       
-      end subroutine sfc_noah_init
+      end subroutine sfc_noah_wrfv4_init
 
 
-!! \section arg_table_sfc_noah_finalize Argument Table
-!! \htmlinclude sfc_noah_finalize.html
+!! \section arg_table_sfc_noah_wrfv4_finalize Argument Table
+!! \htmlinclude sfc_noah_wrfv4_finalize.html
 !!
-      subroutine sfc_noah_finalize(errmsg, errflg)
+      subroutine sfc_noah_wrfv4_finalize(errmsg, errflg)
 
       implicit none
 
@@ -85,22 +85,22 @@
       errmsg = ''
       errflg = 0
 
-      end subroutine sfc_noah_finalize
+      end subroutine sfc_noah_wrfv4_finalize
 
 
-!> \defgroup Noah_LSM_hafs Noah LSM Model for the hurricane application
-!! \section arg_table_sfc_noah_run Argument Table
-!! \htmlinclude sfc_noah_run.html
+!> \defgroup NOAH_LSM_WRFv4 Noah LSM Model from WRF v4.0
+!! \section arg_table_sfc_noah_wrfv4_run Argument Table
+!! \htmlinclude sfc_noah_wrfv4_run.html
 !!
-!> \section general_noah_hafs_drv GFS sfc_drv General Algorithm
+!> \section general_noah_wrfv4_drv NOAH LSM WRFv4 General Algorithm
 !>  @{
-      subroutine sfc_noah_run (im, isice, flag_lsm, flag_lsm_glacier, srflag, isurban, rdlai,    &
+      subroutine sfc_noah_wrfv4_run (im, isice, flag_lsm, flag_lsm_glacier, srflag, isurban, rdlai,    &
         ua_phys, usemonalb, aoasis, fasdas, dt, zlvl,                   &
         nsoil, sthick, lwdn, soldn, solnet, sfcprs, prcp, sfctmp, q1k,  &
         th1, qs1, dqsdt2, vegtyp, soiltyp, slopetyp, shdfac, shmin,     &
         shmax, albbrd, snoalb, tbot, z0brd, z0k, emissi, embrd, cmc, t1,&
         stc, smc, swc, snowhk, sneqv, chk, cp, rd, sigma, cph2o, cpice, &
-        lsubf, sheat, eta_kinematic, ec, edir, ett, esnow, etp, ssoil,  &
+        lsubf, sheat, eta, ec, edir, ett, esnow, etp, ssoil,            &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, qsurf, ribb, &
         smcwlt, smcref, smcmax, opt_thcnd, snotime, errmsg, errflg)
         
@@ -131,7 +131,7 @@
       real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: stc, smc, swc
       
       !variables that are intent(out) in module_sf_noahlsm, but are inout here due to being set within an IF statement
-      real(kind=kind_phys), dimension(im), intent(inout) :: embrd, sheat, eta_kinematic, ec, &
+      real(kind=kind_phys), dimension(im), intent(inout) :: embrd, sheat, eta, ec, &
                                                             edir, ett, esnow, etp, ssoil, sncovr, &
                                                             runoff1, runoff2, soilm, qsurf, smcwlt, &
                                                             smcref, smcmax
@@ -145,7 +145,7 @@
       ! ratio to specific humidity in preparation for calling SFLX, so I am assuming that
       ! all inputs/outputs into SFLX should be specific humidities, despite some comments in 
       ! module_sf_noahdrv.F describing arguments saying "mixing ratios". This applies to many
-      ! arguments into SFLX (q1k, qs1, dqsdt2, eta_kinematic, qsurf, etc.).
+      ! arguments into SFLX (q1k, qs1, dqsdt2, eta, qsurf, etc.).
       
 !     local Variables
       integer :: i, k
@@ -166,7 +166,7 @@
       ! albedok (output from SFLX): surface albedo including snow effect (unitless fraction)
       !                =snow-free albedo (alb) when sneqv=0, or
       !                =fct(msnoalb,alb,vegtyp,shdfac,shdmin) when sneqv>0
-      ! eta (output from SFLX), eta_kinematic is what is passed out instead of eta
+      ! eta_kinematic (output from SFLX), eta is what is passed out instead of eta_kinematic
       ! fdown (output from SFLX) : Radiation forcing at the surface (W m-2) = SOLDN*(1-alb)+LWDN
       ! et (output from SFLX): plant transpiration from a particular root (soil) layer (W m-2)
       ! drip (output from SFLX): through-fall of precip and/or dew in excess of canopy water-holding capacity (m)
@@ -189,7 +189,7 @@
       ! nroot (output from SFLX): number of root layers, a function of veg type, determined in subroutine redprm.
       
       integer :: nroot
-      real(kind=kind_phys) :: albedok, eta, fdown, drip, dew, beta, snomlt, &
+      real(kind=kind_phys) :: albedok, eta_kinematic, fdown, drip, dew, beta, snomlt, &
                               runoff3, rc, pc, rsmin, xlai, rcs, rct, rcq,  &
                               rcsoil, soilw, smcdry
       real (kind=kind_phys), dimension(nsoil) :: et, smav
@@ -219,7 +219,7 @@
                   cmc(i), t1(i), stc(i,:), smc(i,:), swc(i,:),      &    !H
                   snowhk(i), sneqv(i), albedok, chk(i), dummy,      &    !H
                   cp, rd, sigma, cph2o, cpice, lsubf,               &
-                  eta, sheat(i), eta_kinematic(i), fdown,           &    !O
+                  eta(i), sheat(i), eta_kinematic, fdown,           &    !O
                   ec(i), edir(i), et, ett(i), esnow(i), drip, dew,  &    !O
                   beta, etp(i), ssoil(i), flx1(i), flx2(i), flx3(i),&    !O
                   flx4, fvb, fbur, fgsn, ua_phys,                   &    !UA 
@@ -247,7 +247,7 @@
                   z0brd(i), z0k(i), emissi(i), embrd(i), t1(i),     &
                   stc(i,:), snowhk(i), sneqv(i), albedok, chk(i),   &
                   cp, rd, sigma, cph2o, cpice, lsubf,               &
-                  eta, sheat(i), eta_kinematic(i), fdown, esnow(i), &
+                  eta(i), sheat(i), eta_kinematic, fdown, esnow(i), &
                   dew, etp(i), ssoil(i), flx1(i), flx2(i), flx3(i), &
                   snomlt, sncovr(i), runoff1(i), qsurf(i),          &
                   snotime(i), ribb(i), errflg, errmsg)
@@ -255,7 +255,7 @@
         end if
       end do
       
-      end subroutine sfc_noah_run
+      end subroutine sfc_noah_wrfv4_run
 !> @}
 
-end module sfc_noah
+end module sfc_noah_wrfv4

@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = sfc_noah_init
+  name = sfc_noah_wrfv4_init
   type = scheme
 [lsm]
   standard_name = flag_for_land_surface_scheme
@@ -9,9 +9,9 @@
   type = integer
   intent = in
   optional = F
-[lsm_noah_hafs]
-  standard_name = flag_for_noah_hafs_land_surface_scheme
-  long_name = flag for NOAH HAFS land surface model
+[lsm_noah_wrfv4]
+  standard_name = flag_for_noah_wrfv4_land_surface_scheme
+  long_name = flag for NOAH WRFv4 land surface model
   units = flag
   dimensions = ()
   type = integer
@@ -35,7 +35,7 @@
   optional = F
 [fasdas]
   standard_name = flag_flux_adjusting_surface_data_assimilation_system
-  long_name = flag to use the flux adjusting surface data assimilation system for NOAH LSM HAFS (see module_sf_noahlsm.F)
+  long_name = flag to use the flux adjusting surface data assimilation system for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = flag
   dimensions = ()
   type = integer
@@ -69,7 +69,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = sfc_noah_finalize
+  name = sfc_noah_wrfv4_finalize
   type = scheme
 [errmsg]
   standard_name = ccpp_error_message
@@ -91,7 +91,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = sfc_noah_run
+  name = sfc_noah_wrfv4_run
   type = scheme
 [im]
   standard_name = horizontal_loop_extent
@@ -160,7 +160,7 @@
   optional = F
 [usemonalb]
   standard_name = flag_for_reading_surface_diffused_shortwave_albedo_from_input
-  long_name = flag for reading surface diffused shortwave albedo for NOAH LSM HAFS (see module_sf_noahlsm.F)
+  long_name = flag for reading surface diffused shortwave albedo for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = flag
   dimensions = ()
   type = logical
@@ -168,7 +168,7 @@
   optional = F
 [aoasis]
   standard_name = potential_evaporation_multiplicative_factor
-  long_name = potential evaporation multiplicative factor for NOAH LSM HAFS (see module_sf_noahlsm.F)
+  long_name = potential evaporation multiplicative factor for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = none
   dimensions = ()
   type = real
@@ -177,7 +177,7 @@
   optional = F
 [fasdas]
   standard_name = flag_flux_adjusting_surface_data_assimilation_system
-  long_name = flag to use the flux adjusting surface data assimilation system for NOAH LSM HAFS (see module_sf_noahlsm.F)
+  long_name = flag to use the flux adjusting surface data assimilation system for NOAH LSM WRFv4 (see module_sf_noahlsm.F)
   units = flag
   dimensions = ()
   type = integer
@@ -557,10 +557,10 @@
   kind = kind_phys
   intent = inout
   optional = F
-[eta_kinematic]
-  standard_name = kinematic_surface_upward_latent_heat_flux_over_land
-  long_name = kinematic surface upward latent heat flux over land
-  units = kg kg-1 m s-1
+[eta]
+  standard_name = instantaneous_surface_upward_latent_heat_flux
+  long_name = surface upward latent heat flux
+  units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

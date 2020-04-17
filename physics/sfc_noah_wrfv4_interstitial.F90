@@ -1,12 +1,12 @@
-!>  \file sfc_noah_GFS_interstitial.F90
-!!  This file contains data preparation for the Noah LSM as part of the GFS suite.
+!>  \file sfc_noah_wrfv4_interstitial.F90
+!!  This file contains data preparation for the WRFv4 version of Noah LSM as part of a GFS-based suite.
 
-!> This module contains the CCPP-compliant data preparation for the Noah LSM for the hurricane application.
-      module sfc_noah_GFS_pre
+!> This module contains the CCPP-compliant data preparation for the WRFv4 version of Noah LSM.
+      module sfc_noah_wrfv4_pre
 
       implicit none
 
-      public :: sfc_noah_GFS_pre_init, sfc_noah_GFS_pre_run, sfc_noah_GFS_pre_finalize
+      public :: sfc_noah_wrfv4_pre_init, sfc_noah_wrfv4_pre_run, sfc_noah_wrfv4_pre_finalize
       
       private
 
@@ -14,18 +14,18 @@
       
       contains
 
-!> \ingroup Noah_LSM_hafs
-!! \section arg_table_sfc_noah_GFS_pre_init Argument Table
-!! \htmlinclude sfc_noah_GFS_pre_init.html
+!> \ingroup NOAH_LSM_WRFv4
+!! \section arg_table_sfc_noah_wrfv4_pre_init Argument Table
+!! \htmlinclude sfc_noah_wrfv4_pre_init.html
 !!
-      subroutine sfc_noah_GFS_pre_init(lsm, lsm_noah_hafs, veg_data_choice, &
+      subroutine sfc_noah_wrfv4_pre_init(lsm, lsm_noah_wrfv4, veg_data_choice, &
           soil_data_choice, isurban, isice, iswater, errmsg, errflg)
 
       use machine, only : kind_phys
       
       implicit none
       
-      integer,          intent(in)  :: lsm, lsm_noah_hafs, &
+      integer,          intent(in)  :: lsm, lsm_noah_wrfv4, &
                                        veg_data_choice, soil_data_choice
       
       integer,          intent(inout) :: isurban, isice, iswater
@@ -40,11 +40,11 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-      
+
       if (is_initialized) return
       
-      if (lsm/=lsm_noah_hafs) then
-        write(errmsg,'(*(a))') "Logic error: namelist choice of LSM is different from NOAH HAFS"
+      if (lsm/=lsm_noah_wrfv4) then
+        write(errmsg,'(*(a))') "Logic error: namelist choice of LSM is different from NOAH WRFv4"
         errflg = 1
         return
       end if
@@ -96,13 +96,13 @@
       
       is_initialized = .true.
       
-      end subroutine sfc_noah_GFS_pre_init
+      end subroutine sfc_noah_wrfv4_pre_init
 
 
-!! \section arg_table_sfc_noah_GFS_pre_finalize Argument Table
-!! \htmlinclude sfc_noah_GFS_pre_finalize.html
+!! \section arg_table_sfc_noah_wrfv4_pre_finalize Argument Table
+!! \htmlinclude sfc_noah_wrfv4_pre_finalize.html
 !!
-      subroutine sfc_noah_GFS_pre_finalize(errmsg, errflg)
+      subroutine sfc_noah_wrfv4_pre_finalize(errmsg, errflg)
 
       implicit none
 
@@ -113,16 +113,16 @@
       errmsg = ''
       errflg = 0
 
-      end subroutine sfc_noah_GFS_pre_finalize
+      end subroutine sfc_noah_wrfv4_pre_finalize
 
 
-!> \defgroup Noah_LSM_hafs Noah LSM Model for the hurricane application
-!! \section arg_table_sfc_noah_GFS_pre_run Argument Table
-!! \htmlinclude sfc_noah_GFS_pre_run.html
+!> \ingroup NOAH_LSM_WRFv4 Noah LSM from WRFv4 pre-scheme data preparation
+!! \section arg_table_sfc_noah_wrfv4_pre_run Argument Table
+!! \htmlinclude sfc_noah_wrfv4_pre_run.html
 !!
-!> \section general_noah_hafs_drv GFS sfc_drv General Algorithm
+!> \section general_noah_wrfv4_pre NOAH LSM WRFv4 pre-scheme data preparation General Algorithm
 !>  @{
-      subroutine sfc_noah_GFS_pre_run (im, nsoil, ialb, isice, land,           &
+      subroutine sfc_noah_wrfv4_pre_run (im, nsoil, ialb, isice, land,         &
         flag_guess, flag_iter, restart, first_time_step, flag_lsm,             &
         flag_lsm_glacier, dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, &
         sfctmp, q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, vtype, smc, &
@@ -233,7 +233,10 @@
           
           !GJF: The GFS version of NOAH prepares the specific humidity in sfc_drv.f as follows:
           q2k(i)   = max(q1(i), 1.e-8)
+          write(*,*) sfcprs(i), rd, t1(i), rvrdm1, q2k(i)
+          write(*,*) rho1(i)
           rho1(i)  = sfcprs(i) / (rd*t1(i)*(1.0+rvrdm1*q2k(i)))
+          write(*,*) 'YO'
           qs1(i)   = fpvs( sfctmp(i) )
           qs1(i)   = max(eps*qs1(i) / (sfcprs(i)+epsm1*qs1(i)), 1.e-8)
           q2k(i)   = min(qs1(i), q2k(i))
@@ -296,7 +299,7 @@
       end do
       
       
-      end subroutine sfc_noah_GFS_pre_run
+      end subroutine sfc_noah_wrfv4_pre_run
       
       subroutine soil_veg_gen_parm( mminlu, mminsl, errmsg, errflg)
         !this routine is mostly taken from module_sf_noahdrv.F in WRF
@@ -363,7 +366,7 @@
 
       if ( iunit_noah < 0 ) then
         errflg = 1
-        errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: '//   &
+        errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: '//   &
                  'can not find unused fortran unit to read.'
         return
       endif
@@ -371,7 +374,7 @@
       open(iunit_noah, file='VEGPARM.TBL',form='formatted',status='old',iostat=ierr)
       if(ierr .ne. open_ok ) then
         errflg = 1
-        errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: failure opening VEGPARM.TBL'
+        errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: failure opening VEGPARM.TBL'
         return
       end if
       
@@ -395,7 +398,7 @@
                   exit find_vegetation_parameter_flag
                else if ( loop_count .ge. loop_max ) then
                   errflg = 1
-                  errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: too many loops in VEGPARM.TBL'
+                  errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: too many loops in VEGPARM.TBL'
                   return
                endif
             enddo find_vegetation_parameter_flag
@@ -421,7 +424,7 @@
            size(emissmintbl ) < lucats .or. &
            size(emissmaxtbl ) < lucats ) then
          errflg = 1
-         errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: table sizes too small for value of lucats'
+         errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: table sizes too small for value of lucats'
          return
       endif
 
@@ -453,7 +456,7 @@
         read (iunit_noah,fmt='(a)') a_string
         if ( a_string(1:21) .eq. 'Vegetation Parameters' ) then
            errflg = 1
-           errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: expected low and high density residential, and high density industrial information in VEGPARM.TBL'
+           errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: expected low and high density residential, and high density industrial information in VEGPARM.TBL'
            return
         endif
         read (iunit_noah,*)low_density_residential
@@ -468,7 +471,7 @@
       close (iunit_noah)
       if (lumatch == 0) then
          errflg = 1
-         errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: land use dataset '//mminlu//' not found in VEGPARM.TBL.'
+         errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: land use dataset '//mminlu//' not found in VEGPARM.TBL.'
          return
       endif
       
@@ -511,7 +514,7 @@
       open(iunit_noah, file='SOILPARM.TBL',form='formatted',status='old',iostat=ierr)
       if(ierr .ne. open_ok ) then
         errflg = 1
-        errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: failure opening SOILPARM.TBL'
+        errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: failure opening SOILPARM.TBL'
         return
       end if
 
@@ -542,7 +545,7 @@
            size(wltsmc) < slcats .or. &
            size(qtz   ) < slcats  ) then
          errflg = 1
-         errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: table sizes too small for value of slcats'
+         errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: table sizes too small for value of slcats'
          return
       endif
       if(sltype.eq.mminsl)then
@@ -576,7 +579,7 @@
 
       if(lumatch.eq.0)then
           errflg = 1
-          errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: soil texture dataset '//mminsl//' not found in SOILPARM.TBL.'
+          errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: soil texture dataset '//mminsl//' not found in SOILPARM.TBL.'
           return
       endif
 
@@ -587,7 +590,7 @@
       open(iunit_noah, file='GENPARM.TBL',form='formatted',status='old',iostat=ierr)
       if(ierr .ne. open_ok ) then
         errflg = 1
-        errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: failure opening GENPARM.TBL'
+        errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: failure opening GENPARM.TBL'
         return
       end if
 
@@ -599,7 +602,7 @@
 ! prevent possible array overwrite, bill bovermann, ibm, may 6, 2008
       if ( size(slope_data) < num_slope ) then
         errflg = 1
-        errmsg = 'module_lsm_noah_hafs: set_soil_veg_parm: num_slope too large for slope_data array'
+        errmsg = 'sfc_noah_wrfv4_interstitial: set_soil_veg_parm: num_slope too large for slope_data array'
         return
       endif
 
@@ -654,33 +657,33 @@
 !-----------------------------
 !> @}
 
-      end module sfc_noah_GFS_pre
+      end module sfc_noah_wrfv4_pre
 
-      module sfc_noah_GFS_post
+      module sfc_noah_wrfv4_post
         
       implicit none
 
       private
 
-      public :: sfc_noah_GFS_post_init, sfc_noah_GFS_post_run, sfc_noah_GFS_post_finalize
+      public :: sfc_noah_wrfv4_post_init, sfc_noah_wrfv4_post_run, sfc_noah_wrfv4_post_finalize
 
       contains
         
-      subroutine sfc_noah_GFS_post_init ()
-      end subroutine sfc_noah_GFS_post_init
+      subroutine sfc_noah_wrfv4_post_init ()
+      end subroutine sfc_noah_wrfv4_post_init
       
-      subroutine sfc_noah_GFS_post_finalize ()
-      end subroutine sfc_noah_GFS_post_finalize
+      subroutine sfc_noah_wrfv4_post_finalize ()
+      end subroutine sfc_noah_wrfv4_post_finalize
       
-!! \section arg_table_sfc_noah_GFS_post_run Argument Table
-!! \htmlinclude sfc_noah_GFS_post_run.html
+!! \section arg_table_sfc_noah_wrfv4_post_run Argument Table
+!! \htmlinclude sfc_noah_wrfv4_post_run.html
 !!
-      subroutine sfc_noah_GFS_post_run (im, nsoil, land, flag_guess, flag_lsm, &
-        rhowater, cp, cmc, rho1, sheat, flx1, flx2, flx3, sncovr, runoff1,     &
+      subroutine sfc_noah_wrfv4_post_run (im, nsoil, land, flag_guess, flag_lsm, &
+        rhowater, cp, hvap, cmc, rho1, sheat, eta, flx1, flx2, flx3, sncovr, runoff1,&
         runoff2, soilm, snowhk, weasd_save, snwdph_save, tsfc_save, t1,        &
         canopy_save, smc_save, stc_save, slc_save, smcmax, canopy, shflx,      &
-        snohf, snowc, runoff, drain, stm, weasd, snwdph, tsfc, smc, stc, slc,  &
-        wet1, errmsg, errflg)
+        lhflx, snohf, snowc, runoff, drain, stm, weasd, snwdph, tsfc, smc, stc,& 
+        slc, wet1, errmsg, errflg)
       
       use machine, only : kind_phys
       
@@ -688,13 +691,13 @@
       
       integer, intent(in) :: im, nsoil
       logical, dimension(im), intent(in) :: land, flag_guess, flag_lsm
-      real(kind=kind_phys),   intent(in) :: rhowater, cp
-      real(kind=kind_phys), dimension(im), intent(in) :: cmc, rho1, sheat, &
+      real(kind=kind_phys),   intent(in) :: rhowater, cp, hvap
+      real(kind=kind_phys), dimension(im), intent(in) :: cmc, rho1, sheat, eta, &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, snowhk
       real(kind=kind_phys), dimension(im), intent(in) :: weasd_save, snwdph_save, tsfc_save, t1, canopy_save, smcmax
       real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc_save, stc_save, slc_save
       
-      real(kind=kind_phys), dimension(im), intent(inout) :: canopy, shflx, &
+      real(kind=kind_phys), dimension(im), intent(inout) :: canopy, shflx, lhflx, &
         snohf, snowc, runoff, drain, stm, wet1
       real(kind=kind_phys), dimension(im), intent(inout) :: weasd, snwdph, tsfc
       real(kind=kind_phys), dimension(im, nsoil), intent(inout) :: smc, stc, slc
@@ -715,6 +718,7 @@
           snwdph(i) = 1000.0*snowhk(i)
           
           shflx(i) = sheat(i) / (cp*rho1(i))
+          lhflx(i) = eta(i) / (hvap*rho1(i))
           
           !aggregating several outputs into one like GFS sfc_drv.F
           snohf(i) = flx1(i) + flx2(i) + flx3(i)
@@ -751,6 +755,6 @@
         end if
       end do
 
-      end subroutine sfc_noah_GFS_post_run
+      end subroutine sfc_noah_wrfv4_post_run
   
-      end module sfc_noah_GFS_post
+      end module sfc_noah_wrfv4_post
