@@ -1,5 +1,15 @@
 [ccpp-arg-table]
-  name = mynnrad_pre_run
+  name = sgscloud_radpre_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = sgscloud_radpre_finalize
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = sgscloud_radpre_run
   type = scheme
 [ix]
   standard_name = horizontal_dimension
@@ -68,6 +78,49 @@
   kind = kind_phys
   intent = in
   optional = F
+[qr]
+  standard_name = rain_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of rain water
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qs]
+  standard_name = snow_water_mixing_ratio
+  long_name = moist (dry+vapor, no condensates) mixing ratio of snow water
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfdeepcnv_gf]
+  standard_name = flag_for_gf_deep_convection_scheme
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [qc_save]
   standard_name = cloud_condensed_water_mixing_ratio_save
   long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate) before entering a physics scheme
@@ -75,7 +128,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [qi_save]
   standard_name = ice_water_mixing_ratio_save
@@ -84,7 +137,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [QC_BL]
   standard_name = subgrid_cloud_mixing_ratio_pbl
@@ -111,7 +164,7 @@
   dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F
 [clouds1]
   standard_name = total_cloud_fraction
@@ -165,6 +218,83 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[nlay]
+  standard_name = adjusted_vertical_layer_dimension_for_radiation
+  long_name = number of vertical layers for radiation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[plyr]
+  standard_name = air_pressure_at_layer_for_radiation_in_hPa
+  long_name = air pressure at vertical layer for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in 
+  optional = F
+[xlat]
+  standard_name = latitude
+  long_name = grid latitude in radians
+  units = radians
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dz]
+  standard_name = layer_thickness_for_radiation
+  long_name = layer thickness on radiation levels
+  units = km
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[de_lgth]
+  standard_name = cloud_decorrelation_length
+  long_name = cloud decorrelation length
+  units = km
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cldsa]
+  standard_name = cloud_area_fraction_for_radiation
+  long_name = fraction of clouds for low, middle,high, total and BL
+  units = frac
+  dimensions = (horizontal_dimension,5)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[mtopa]
+  standard_name = model_layer_number_at_cloud_top
+  long_name = vertical indices for low, middle and high cloud tops
+  units = index
+  dimensions = (horizontal_dimension,3)
+  type = integer
+  intent = inout
+  optional = F
+[mbota]
+  standard_name = model_layer_number_at_cloud_base
+  long_name = vertical indices for low, middle and high cloud bases
+  units = index
+  dimensions = (horizontal_dimension,3)
+  type = integer
+  intent = inout
+  optional = F
+[do_mynnedmf]
+  standard_name = do_mynnedmf
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [errmsg]

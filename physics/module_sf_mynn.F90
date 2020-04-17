@@ -106,6 +106,9 @@ MODULE module_sf_mynn
                                         !1: some step-by-step output
                                         !2: everything - heavy I/O
   LOGICAL, PARAMETER :: compute_diag = .false.
+  LOGICAL, PARAMETER :: compute_flux = .false.  !shouldn't need compute 
+               ! these in FV3. They will be written over anyway.
+               ! Computing the fluxes here is leftover from the WRF world.
 
   REAL,   DIMENSION(0:1000 ),SAVE :: psim_stab,psim_unstab, &
                                      psih_stab,psih_unstab
@@ -137,7 +140,8 @@ CONTAINS
               PSFCPA,PBLH,MAVAIL,XLAND,DX,           & !in
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
-              ISFFLX,isftcflx,iz0tlnd,itimestep,iter,& !in
+              ISFFLX,isftcflx,lsm,iz0tlnd,           & !in
+              itimestep,iter,                        & !in
                     wet,       dry,       icy,       & !intent(in)
               tskin_ocn, tskin_lnd, tskin_ice,       & !intent(in)
               tsurf_ocn, tsurf_lnd, tsurf_ice,       & !intent(in)
@@ -157,7 +161,7 @@ CONTAINS
               ZNT,USTM,ZOL,MOL,RMOL,                 &
               PSIM,PSIH,                             &
               HFLX,HFX,QFLX,QFX,LH,FLHC,FLQC,        &
-              QGH,QSFC,                              &
+              QGH,QSFC,QSFC_RUC,                     &
               U10,V10,TH2,T2,Q2,                     &
               GZ1OZ0,WSPD,WSTAR,                     &
               spp_pbl,pattern_spp_pbl,               &
@@ -268,8 +272,8 @@ CONTAINS
       REAL,     INTENT(IN)   ::        EP1,EP2,KARMAN
       REAL,     INTENT(IN)   ::        CP,G,ROVCP,R,XLV !,DX
 !NAMELIST OPTIONS:
-      INTEGER,  INTENT(IN)   ::        ISFFLX
-      INTEGER,  OPTIONAL,  INTENT(IN)   ::     ISFTCFLX, IZ0TLND
+      INTEGER,  INTENT(IN)   ::        ISFFLX, LSM
+      INTEGER,  OPTIONAL,  INTENT(IN)   :: ISFTCFLX, IZ0TLND
       INTEGER,  OPTIONAL,  INTENT(IN)   ::     spp_pbl
 
 !===================================
@@ -306,7 +310,8 @@ CONTAINS
                                                          QFLX,QFX, &
                                                                LH, &
                                                          MOL,RMOL, &
-                                                        QSFC, QGH, &
+                                                             QSFC, &
+                                                              QGH, &
                                                               ZNT, &
                                                               ZOL, &
                                                              USTM, &
@@ -339,7 +344,8 @@ CONTAINS
      &                       fh_ocn,    fh_lnd,    fh_ice,         &
      &                     fm10_ocn,  fm10_lnd,  fm10_ice,         &
      &                      fh2_ocn,   fh2_lnd,   fh2_ice,         &
-     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
+     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice,         &
+     &                                qsfc_ruc
 
 !ADDITIONAL OUTPUT
 !JOE-begin
@@ -402,10 +408,21 @@ CONTAINS
               UST_ICE(i)=MAX(0.04*SQRT(U1D(i)*U1D(i) + V1D(i)*V1D(i)),0.001)
               MOL(i,j)=0.     ! Tstar
               QSFC(i,j)=QV3D(i,kts,j)/(1.+QV3D(i,kts,j))
+              QSFC_OCN(i)=QSFC(i,j)
+              QSFC_LND(i)=QSFC(i,j)
+              QSFC_ICE(i)=QSFC(i,j)
               qstar(i,j)=0.0
               QFX(i,j)=0.
               HFX(i,j)=0.
+              QFLX(i,j)=0.
+              HFLX(i,j)=0.
            ENDDO
+        ELSE
+           IF (LSM == 3) THEN
+              DO i=its,ite
+                 QSFC_LND(i)=QSFC_RUC(i)
+              ENDDO
+           ENDIF
         ENDIF
 
         CALL SFCLAY1D_mynn(                                       &
@@ -453,7 +470,10 @@ CONTAINS
 
 !-------------------------------------------------------------------
 !>\ingroup module_sf_mynn_mod
-!! This subroutine calculates
+!! This subroutine calculates u*, z/L, and the exchange coefficients
+!! which are passed to subsequent scheme to calculate the fluxes.
+!! This scheme has options to calculate the fluxes and near-surface
+!! diagnostics, as was needed in WRF, but these are skipped for FV3.
    SUBROUTINE SFCLAY1D_mynn(                                      &
              J,U1D,V1D,T1D,QV1D,P1D,dz8w1d,U1D2,V1D2,dz2w1d,      &
              PSFCPA,PBLH,MAVAIL,XLAND,DX,                         &
@@ -621,20 +641,27 @@ CONTAINS
 
 !-------------------------------------------------------------------
       IF (debug_code >= 1) THEN
-        write(*,*)"ITIMESTEP=",ITIMESTEP," iter=",iter
+        write(0,*)"ITIMESTEP=",ITIMESTEP," iter=",iter
         DO I=its,ite
-          write(*,*)"=== input to mynnsfclayer, i:", i
-          !write(*,*)" land,      ice,      water"
-          write(*,*)"dry=",dry(i)," icy=",icy(i)," wet=",wet(i)
-          write(*,*)"tsk=", tskin_lnd(i),tskin_ice(i),tskin_ocn(i)
-          write(*,*)"tsurf=", tsurf_lnd(i),tsurf_ice(i),tsurf_ocn(i)
-          write(*,*)"qsfc=", qsfc_lnd(i),qsfc_ice(i),qsfc_ocn(i)
-          write(*,*)"znt=", znt_lnd(i),znt_ice(i),znt_ocn(i)   
-          write(*,*)"ust=", ust_lnd(i),ust_ice(i),ust_ocn(i)
-          write(*,*)"snowh=", snowh_lnd(i),snowh_ice(i),snowh_ocn(i)
-          write(*,*)"psfcpa=",PSFCPA(i)," dz=",dz8w1d(i)
-          write(*,'(A5,F0.8,A6,F0.6,A6,F5.0)') &
-                "qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+           write(0,*)"=== imortant input to mynnsfclayer, i:", i
+           IF (dry(i)) THEN
+             write(0,*)"dry=",dry(i)," pblh=",pblh(i)," tsk=", tskin_lnd(i),&
+             " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
+             " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i),  &
+             " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+           ENDIF
+           IF (icy(i)) THEN
+             write(0,*)"icy=",icy(i)," pblh=",pblh(i)," tsk=", tskin_ice(i),&
+             " tsurf=", tsurf_ice(i)," qsfc=", qsfc_ice(i)," znt=", znt_ice(i),&
+             " ust=", ust_ice(i)," snowh=", snowh_ice(i),"psfcpa=",PSFCPA(i),  &
+             " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+           ENDIF
+           IF (wet(i)) THEN
+             write(0,*)"wet=",wet(i)," pblh=",pblh(i)," tsk=", tskin_ocn(i),&
+             " tsurf=", tsurf_ocn(i)," qsfc=", qsfc_ocn(i)," znt=", znt_ocn(i),&
+             " ust=", ust_ocn(i)," snowh=", snowh_ocn(i),"psfcpa=",PSFCPA(i),  &
+             " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+           ENDIF
         ENDDO
       ENDIF
 
@@ -786,7 +813,11 @@ CONTAINS
       ENDIF
 
       DO I=its,ite
-         WSPD(I)=SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I))     
+         ! DH* 20200401 - note. A weird bug in Intel 18 on hera prevents using the
+         ! normal -O2 optimization in REPRO and PROD mode for this file. Not reproducible
+         ! by every user, the bug manifests itself in the resulting wind speed WSPD(I)
+         ! being -99.0 despite the assignments in lines 932 and 933. *DH
+         WSPD(I)=SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I))
          WSPD_ocn = -99.
          WSPD_ice = -99.
          WSPD_lnd = -99.
@@ -1161,8 +1192,14 @@ CONTAINS
           ENDIF
 
           IF (debug_code >= 1) THEN
-            write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
-            write(0,*)"rb=", rb_ocn(I)," ZNT=", ZNTstoch_ocn(i)," ZT=",Zt_ocn(i)
+            IF (ZNTstoch_ocn(i) < 1E-8 .OR. Zt_ocn(i) < 1E-10) THEN
+              write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
+              write(0,*)"rb=", rb_ocn(I)," ZNT=", ZNTstoch_ocn(i)," ZT=",Zt_ocn(i)
+              write(0,*)" tsk=", tskin_ocn(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_ocn(i)," qsfc=", qsfc_ocn(i)," znt=", znt_ocn(i),&
+              " ust=", ust_ocn(i)," snowh=", snowh_ocn(i),"psfcpa=",PSFCPA(i),  &
+              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+            ENDIF
           ENDIF
           !Use Pedros iterative function to find z/L
           zol(I)=zolri(rb_ocn(I),ZA(I),ZNTstoch_ocn(I),ZT_ocn(I),ZOL(I))
@@ -1219,8 +1256,14 @@ CONTAINS
           ENDIF
 
           IF (debug_code >= 1) THEN
-            write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
-            write(0,*)"rb=", rb_ocn(I)," ZNT=", ZNTstoch_ocn(i)," ZT=",Zt_ocn(i)
+            IF (ZNTstoch_ocn(i) < 1E-8 .OR. Zt_ocn(i) < 1E-10) THEN
+              write(0,*)"===(wet) capture bad input in mynn sfc layer, i=:",i
+              write(0,*)"rb=", rb_ocn(I)," ZNT=", ZNTstoch_ocn(i)," ZT=",Zt_ocn(i)
+              write(0,*)" tsk=", tskin_ocn(i)," wstar=",wstar(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_ocn(i)," qsfc=", qsfc_ocn(i)," znt=", znt_ocn(i),&
+              " ust=", ust_ocn(i)," snowh=", snowh_ocn(i),"psfcpa=",PSFCPA(i),  &
+              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+            ENDIF
           ENDIF
           !Use Pedros iterative function to find z/L
           zol(I)=zolri(rb_ocn(I),ZA(I),ZNTstoch_ocn(I),ZT_ocn(I),ZOL(I))
@@ -1280,8 +1323,14 @@ CONTAINS
           ENDIF
 
           IF (debug_code >= 1) THEN
-            write(0,*)"===(dry) capture bad input in mynn sfc layer, i=:",i
-            write(0,*)"rb=", rb_lnd(I)," ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i)
+            IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
+              write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
+              write(0,*)"rb=", rb_lnd(I)," ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i)
+              write(0,*)" tsk=", tskin_lnd(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
+              " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i),  &
+              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+            ENDIF
           ENDIF
           !Use Pedros iterative function to find z/L
           zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I))
@@ -1337,8 +1386,14 @@ CONTAINS
           ENDIF
 
           IF (debug_code >= 1) THEN
-            write(0,*)"===(dry) capture bad input in mynn sfc layer, i=:",i
-            write(0,*)"rb=", rb_lnd(I)," ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i)
+            IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
+              write(0,*)"===(land) capture bad input in mynn sfc layer, i=:",i
+              write(0,*)"rb=", rb_lnd(I)," ZNT=", ZNTstoch_lnd(i)," ZT=",Zt_lnd(i)
+              write(0,*)" tsk=", tskin_lnd(i)," wstar=",wstar(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
+              " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i),  &
+              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+            ENDIF
           ENDIF
           !Use Pedros iterative function to find z/L
           zol(I)=zolri(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),ZT_lnd(I),ZOL(I))
@@ -1397,8 +1452,14 @@ CONTAINS
           ENDIF
 
           IF (debug_code >= 1) THEN
-            write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
-            write(0,*)"rb=", rb_ice(I)," ZNT=", ZNTstoch_ice(i)," ZT=",Zt_ice(i)
+            IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
+              write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
+              write(0,*)"rb=", rb_ice(I)," ZNT=", ZNTstoch_ice(i)," ZT=",Zt_ice(i)
+              write(0,*)" tsk=", tskin_ice(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_ice(i)," qsfc=", qsfc_ice(i)," znt=", znt_ice(i),&
+              " ust=", ust_ice(i)," snowh=", snowh_ice(i),"psfcpa=",PSFCPA(i),  &
+              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+            ENDIF
           ENDIF
           !Use Pedros iterative function to find z/L
           zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I))
@@ -1454,8 +1515,14 @@ CONTAINS
           ENDIF
 
           IF (debug_code >= 1) THEN
-            write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
-            write(0,*)"rb=", rb_ice(I)," ZNT=", ZNTstoch_ice(i)," ZT=",Zt_ice(i)
+            IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
+              write(0,*)"===(ice) capture bad input in mynn sfc layer, i=:",i
+              write(0,*)"rb=", rb_ice(I)," ZNT=", ZNTstoch_ice(i)," ZT=",Zt_ice(i)
+              write(0,*)" tsk=", tskin_ice(i)," wstar=",wstar(i)," prev z/L=",ZOL(I),&
+              " tsurf=", tsurf_ice(i)," qsfc=", qsfc_ice(i)," znt=", znt_ice(i),&
+              " ust=", ust_ice(i)," snowh=", snowh_ice(i),"psfcpa=",PSFCPA(i),  &
+              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
+            ENDIF
           ENDIF
           !Use Pedros iterative function to find z/L
           zol(I)=zolri(rb_ice(I),ZA(I),ZNTstoch_ice(I),ZT_ice(I),ZOL(I))
@@ -1593,9 +1660,9 @@ CONTAINS
 
  IF (debug_code == 2) THEN
     DO I=its,ite
-       IF(wet(i))write(*,*)"==== AT END OF ITER LOOP, i=",i, "(wet)"
-       IF(dry(i))write(*,*)"==== AT END OF ITER LOOP, i=",i, "(land)"
-       IF(icy(i))write(*,*)"==== AT END OF ITER LOOP, i=",i, "(ice)"
+       IF(wet(i))write(*,*)"==== AT END OF MAIN LOOP, i=",i, "(wet)"
+       IF(dry(i))write(*,*)"==== AT END OF MAIN LOOP, i=",i, "(land)"
+       IF(icy(i))write(*,*)"==== AT END OF MAIN LOOP, i=",i, "(ice)"
        write(*,*)"z/L:",ZOL(I)," wspd:",wspd(I)," Tstar:",MOL(I)
        IF(wet(i))write(*,*)"PSIM:",PSIM(I)," PSIH:",PSIH(I)," W*:",WSTAR(I),&
                            " DTHV:",THV1D(I)-THVSK_ocn(I)
@@ -1647,20 +1714,23 @@ CONTAINS
          FLQC(I)=RHO1D(I)*MAVAIL(I)*UST_lnd(I)*KARMAN/PSIQ_lnd(i)
          FLHC(I)=RHO1D(I)*CPM(I)*UST_lnd(I)*KARMAN/PSIT_lnd(I)
 
-         !----------------------------------
-         ! COMPUTE SURFACE MOISTURE FLUX:
-         !----------------------------------
-         QFX(I)=FLQC(I)*(QSFCMR_lnd(I)-QV1D(I))
-         QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
-         LH(i)=XLV*QFX(i)
-         QFLX(i)=QFX(i)/RHO1D(i)
+         IF (compute_flux) THEN
+            !----------------------------------
+            ! COMPUTE SURFACE MOISTURE FLUX:
+            !----------------------------------
+            !QFX(I)=FLQC(I)*(QSFCMR_lnd(I)-QV1D(I))
+            QFX(I)=FLQC(I)*(QSFC_lnd(I)-QV1D(I))
+            QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
+            LH(i)=XLV*QFX(i)
+            QFLX(i)=QFX(i)/RHO1D(i)
 
-         !----------------------------------
-         ! COMPUTE SURFACE HEAT FLUX:
-         !----------------------------------
-         HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
-         HFX(I)=MAX(HFX(I),-250.)
-         HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            !----------------------------------
+            ! COMPUTE SURFACE HEAT FLUX:
+            !----------------------------------
+            HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
+            HFX(I)=MAX(HFX(I),-250.)
+            HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
+         ENDIF
 
          !TRANSFER COEFF FOR SOME LSMs:
          !CHS(I)=UST(I)*KARMAN/(ALOG(KARMAN*UST(I)*ZA(I) &
@@ -1682,25 +1752,28 @@ CONTAINS
          FLQC(I)=RHO1D(I)*MAVAIL(I)*UST_ocn(I)*KARMAN/PSIQ_ocn(i)
          FLHC(I)=RHO1D(I)*CPM(I)*UST_ocn(I)*KARMAN/PSIT_ocn(I)
 
-         !----------------------------------
-         ! COMPUTE SURFACE MOISTURE FLUX:
-         !----------------------------------
-         QFX(I)=FLQC(I)*(QSFCMR_ocn(I)-QV1D(I))
-         QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
-         LH(I)=XLV*QFX(I)
-         QFLX(i)=QFX(i)/RHO1D(i)
+         IF (compute_flux) THEN
+            !----------------------------------
+            ! COMPUTE SURFACE MOISTURE FLUX:
+            !----------------------------------
+            !QFX(I)=FLQC(I)*(QSFCMR_ocn(I)-QV1D(I))
+            QFX(I)=FLQC(I)*(QSFC_ocn(I)-QV1D(I))
+            QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
+            LH(I)=XLV*QFX(I)
+            QFLX(i)=QFX(i)/RHO1D(i)
 
-         !----------------------------------
-         ! COMPUTE SURFACE HEAT FLUX:       
-         !----------------------------------
-         HFX(I)=FLHC(I)*(THSK_ocn(I)-TH1D(I))
-         IF ( PRESENT(ISFTCFLX) ) THEN
-            IF ( ISFTCFLX.NE.0 ) THEN
-               ! AHW: add dissipative heating term
-               HFX(I)=HFX(I)+RHO1D(I)*USTM(I)*USTM(I)*WSPDI(I)
+            !----------------------------------
+            ! COMPUTE SURFACE HEAT FLUX:       
+            !----------------------------------
+            HFX(I)=FLHC(I)*(THSK_ocn(I)-TH1D(I))
+            IF ( PRESENT(ISFTCFLX) ) THEN
+               IF ( ISFTCFLX.NE.0 ) THEN
+                  ! AHW: add dissipative heating term
+                  HFX(I)=HFX(I)+RHO1D(I)*USTM(I)*USTM(I)*WSPDI(I)
+               ENDIF
             ENDIF
+            HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
          ENDIF
-         HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
 
          !TRANSFER COEFF FOR SOME LSMs:
          !CHS(I)=UST(I)*KARMAN/(ALOG(KARMAN*UST(I)*ZA(I) &
@@ -1722,20 +1795,23 @@ CONTAINS
          FLQC(I)=RHO1D(I)*MAVAIL(I)*UST_ice(I)*KARMAN/PSIQ_ice(i)
          FLHC(I)=RHO1D(I)*CPM(I)*UST_ice(I)*KARMAN/PSIT_ice(I)
 
-         !----------------------------------
-         ! COMPUTE SURFACE MOISTURE FLUX:   
-         !----------------------------------
-         QFX(I)=FLQC(I)*(QSFCMR_ice(I)-QV1D(I))
-         QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
-         LH(I)=XLF*QFX(I)
-         QFLX(i)=QFX(i)/RHO1D(i)
+         IF (compute_flux) THEN
+            !----------------------------------
+            ! COMPUTE SURFACE MOISTURE FLUX:   
+            !----------------------------------
+            !QFX(I)=FLQC(I)*(QSFCMR_ice(I)-QV1D(I))
+            QFX(I)=FLQC(I)*(QSFC_ice(I)-QV1D(I))
+            QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
+            LH(I)=XLF*QFX(I)
+            QFLX(i)=QFX(i)/RHO1D(i)
 
-         !----------------------------------
-         ! COMPUTE SURFACE HEAT FLUX:
-         !----------------------------------
-         HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
-         HFX(I)=MAX(HFX(I),-250.)
-         HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            !----------------------------------
+            ! COMPUTE SURFACE HEAT FLUX:
+            !----------------------------------
+            HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
+            HFX(I)=MAX(HFX(I),-250.)
+            HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
+         ENDIF
 
          !TRANSFER COEFF FOR SOME LSMs:
          !CHS(I)=UST(I)*KARMAN/(ALOG(KARMAN*UST(I)*ZA(I) &
@@ -1854,8 +1930,8 @@ IF (compute_diag) then
          ENDIF
          T2(I)=TH2(I)*(PSFCPA(I)/100000.)**ROVCP
 
-         Q2(I)=QSFCMR_lnd(I)+(QV1D(I)-QSFCMR_lnd(I))*PSIQ2_lnd(i)/PSIQ_lnd(i)
-         Q2(I)= MAX(Q2(I), MIN(QSFCMR_lnd(I), QV1D(I)))
+         Q2(I)=QSFC_lnd(I)+(QV1D(I)-QSFC_lnd(I))*PSIQ2_lnd(i)/PSIQ_lnd(i)
+         Q2(I)= MAX(Q2(I), MIN(QSFC_lnd(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
       ELSEIF (wet(i)) THEN
          DTG=TH1D(I)-THSK_ocn(I)
@@ -1868,8 +1944,8 @@ IF (compute_diag) then
          ENDIF
          T2(I)=TH2(I)*(PSFCPA(I)/100000.)**ROVCP
 
-         Q2(I)=QSFCMR_ocn(I)+(QV1D(I)-QSFCMR_ocn(I))*PSIQ2_ocn(i)/PSIQ_ocn(i)
-         Q2(I)= MAX(Q2(I), MIN(QSFCMR_ocn(I), QV1D(I)))
+         Q2(I)=QSFC_ocn(I)+(QV1D(I)-QSFC_ocn(I))*PSIQ2_ocn(i)/PSIQ_ocn(i)
+         Q2(I)= MAX(Q2(I), MIN(QSFC_ocn(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
       ELSEIF (icy(i)) THEN
          DTG=TH1D(I)-THSK_ice(I)
@@ -1882,8 +1958,8 @@ IF (compute_diag) then
          ENDIF
          T2(I)=TH2(I)*(PSFCPA(I)/100000.)**ROVCP
 
-         Q2(I)=QSFCMR_ice(I)+(QV1D(I)-QSFCMR_ice(I))*PSIQ2_ice(i)/PSIQ_ice(i)
-         Q2(I)= MAX(Q2(I), MIN(QSFCMR_ice(I), QV1D(I)))
+         Q2(I)=QSFC_ice(I)+(QV1D(I)-QSFC_ice(I))*PSIQ2_ice(i)/PSIQ_ice(i)
+         Q2(I)= MAX(Q2(I), MIN(QSFC_ice(I), QV1D(I)))
          Q2(I)= MIN(Q2(I), 1.05*QV1D(I))
       ENDIF
    ENDDO
@@ -1895,15 +1971,17 @@ ENDIF ! end compute_diag
 IF ( debug_code == 2) THEN
    DO I=its,ite
       yesno = 0
-      IF (HFX(I) > 1200. .OR. HFX(I) < -700.)THEN
+      IF (compute_flux) THEN
+        IF (HFX(I) > 1200. .OR. HFX(I) < -700.)THEN
             print*,"SUSPICIOUS VALUES IN MYNN SFCLAYER",&
             I,J, "HFX: ",HFX(I)
             yesno = 1
-      ENDIF
-      IF (LH(I)  > 1200. .OR. LH(I)  < -700.)THEN
+        ENDIF
+        IF (LH(I)  > 1200. .OR. LH(I)  < -700.)THEN
             print*,"SUSPICIOUS VALUES IN MYNN SFCLAYER",&
             I,J, "LH: ",LH(I)
             yesno = 1
+        ENDIF
       ENDIF
       IF (wet(i)) THEN
          IF (UST_ocn(I) < 0.0 .OR. UST_ocn(I) > 4.0 )THEN
@@ -2608,9 +2686,9 @@ END SUBROUTINE SFCLAY1D_mynn
        REAL, INTENT(IN)  :: zL,z0L
        REAL, INTENT(OUT) :: psim1,psih1
 
-       psim1 = -6.1*LOG(zL + (1.+ zL**2.5)**0.4) - &
+       psim1 = -6.1*LOG(zL + (1.+ zL**2.5)**0.4)  &
                -6.1*LOG(z0L + (1.+ z0L**2.5)**0.4)
-       psih1 = -5.5*log(zL + (1.+ zL**1.1)**0.90909090909) - &
+       psih1 = -5.5*log(zL + (1.+ zL**1.1)**0.90909090909)  &
                -5.5*log(z0L + (1.+ z0L**1.1)**0.90909090909)
 
        return

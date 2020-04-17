@@ -28,7 +28,7 @@
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  ix,im,levs,                        &
      &  itimestep,iter,                    &
-     &  flag_init,flag_restart,            &
+     &  flag_init,flag_restart,lsm,        &
      &  delt,dx,                           &
      &  u, v, t3d, qvsh, qc, prsl, phii,   &
      &  exner, ps, PBLH, slmsk,            &
@@ -47,8 +47,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &      fh_ocn,    fh_lnd,    fh_ice,  &  !intent(inout)
      &    fm10_ocn,  fm10_lnd,  fm10_ice,  &  !intent(inout)
      &     fh2_ocn,   fh2_lnd,   fh2_ice,  &  !intent(inout)
-     &  QSFC, USTM, ZOL, MOL, RMOL,        &
-     &  WSPD, ch, HFLX, QFLX, LH,          &
+     &  QSFC, qsfc_ruc, USTM, ZOL, MOL,    &
+     &  RMOL, WSPD, ch, HFLX, QFLX, LH,    &
      &  FLHC, FLQC,                        &
      &  U10, V10, TH2, T2, Q2,             &
      &  wstar, CHS2, CQS2,                 &
@@ -106,7 +106,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !MYNN-1D
       REAL    :: delt
       INTEGER :: im, ix, levs
-      INTEGER :: iter, k, i, itimestep
+      INTEGER :: iter, k, i, itimestep, lsm
       LOGICAL :: flag_init,flag_restart,lprnt
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
@@ -146,7 +146,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &        dx, pblh, slmsk, ps
 
       real(kind=kind_phys), dimension(im), intent(inout) :: &
-     &        ustm, hflx, qflx, wspd, qsfc,                 &
+     &        ustm, hflx, qflx, wspd, qsfc, qsfc_ruc,       &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &
      &        lh, wstar
@@ -168,31 +168,38 @@ SUBROUTINE mynnsfc_wrapper_run(            &
 !         write(0,*)"iter=",iter
 !      endif
 
-      !prep MYNN-only variables
-            do k=1,2 !levs
-              do i=1,im
-                 dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
-                 th(i,k)=t3d(i,k)/exner(i,k)
-                 !qc(i,k)=MAX(qgrs(i,k,ntcw),0.0)
-                 qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
-                 pattern_spp_pbl(i,k)=0.0
-              enddo
-            enddo
-            do i=1,im
-                if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
-                  xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
-                else
-                  xland(i)=2.0
-                endif
-                qgh(i)=0.0
-                !snowh(i)=snowd(i)*800. !mm -> m
-                znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
-                znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
-                znt_ice(i)=znt_ice(i)*0.01  !cm -> m          
-                ts(i)=tskin_ocn(i)/exner(i,1)  !theta
-                mavail(i)=1.0  !????
-                cpm(i)=cp
-            enddo
+      ! prep MYNN-only variables
+      do k=1,2 !levs
+        do i=1,im
+           dz(i,k)=(phii(i,k+1) - phii(i,k))*g_inv
+           th(i,k)=t3d(i,k)/exner(i,k)
+           !qc(i,k)=MAX(qgrs(i,k,ntcw),0.0)
+           qv(i,k)=qvsh(i,k)/(1.0 - qvsh(i,k))
+           pattern_spp_pbl(i,k)=0.0
+        enddo
+      enddo
+      do i=1,im
+          if (slmsk(i)==1. .or. slmsk(i)==2.)then !sea/land/ice mask (=0/1/2) in FV3
+            xland(i)=1.0                          !but land/water = (1/2) in SFCLAY_mynn
+          else
+            xland(i)=2.0
+          endif
+          qgh(i)=0.0
+          !snowh(i)=snowd(i)*800. !mm -> m
+          !znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
+          !znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
+          !znt_ice(i)=znt_ice(i)*0.01  !cm -> m
+          ! DH* do the following line only if wet(i)?
+          ts(i)=tskin_ocn(i)/exner(i,1)  !theta
+          ! *DH
+          mavail(i)=1.0  !????
+          cpm(i)=cp
+      enddo
+
+      ! cm -> m
+      where (dry) znt_lnd=znt_lnd*0.01
+      where (wet) znt_ocn=znt_ocn*0.01
+      where (icy) znt_ice=znt_ice*0.01
 
 !      if (lprnt) then
 !          write(0,*)"CALLING SFCLAY_mynn; input:"
@@ -230,7 +237,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                               &
              SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
-             ISFFLX=isfflx,isftcflx=isftcflx,                                 &
+             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,                         &
              iz0tlnd=iz0tlnd,itimestep=itimestep,iter=iter,                   &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_ocn=tskin_ocn,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
@@ -251,7 +258,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              ZNT=znt,USTM=ustm,ZOL=zol,MOL=mol,RMOL=rmol,                     &
              psim=psim,psih=psih,                                             &
              HFLX=hflx,HFX=hfx,QFLX=qflx,QFX=qfx,LH=lh,FLHC=flhc,FLQC=flqc,   &
-             QGH=qgh,QSFC=qsfc,                                               &
+             QGH=qgh,QSFC=qsfc,QSFC_RUC=qsfc_ruc,                             &
              U10=u10,V10=v10,TH2=th2,T2=t2,Q2=q2,                             &
              GZ1OZ0=GZ1OZ0,WSPD=wspd,wstar=wstar,                             &
              spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl,                 &
@@ -260,23 +267,28 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              its=1,ite=im, jts=1,jte=1, kts=1,kte=levs                        )
 
 
-     ! POST MYNN SURFACE LAYER (INTERSTITIAL) WORK:
-        do i = 1, im
-           !* Taken from sfc_nst.f
-           !* ch         = surface exchange coeff heat & moisture(m/s) im
-           !* rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
-           !* hflx(i)    = rch(i) * (tsurf(i) - theta1(i))  !K m s-1
-           !* hflx(i)=hfx(i)/(rho(i,1)*cp) - now calculated inside module_sf_mynn.F90
-           !* Taken from sfc_nst.f
-           !* evap(i)    = elocp * rch(i) * (qss(i) - q0(i)) !kg kg-1 m s-1
-           !NOTE: evap & qflx will be solved for later
-           !qflx(i)=QFX(i)/
-           !evap(i)=QFX(i)   !or /rho ??
-           znt_lnd(i)=znt_lnd(i)*100.   !m -> cm
-           znt_ocn(i)=znt_ocn(i)*100.
-           znt_ice(i)=znt_ice(i)*100.
-        enddo
+        !! POST MYNN SURFACE LAYER (INTERSTITIAL) WORK:
+        !do i = 1, im
+        !   !* Taken from sfc_nst.f
+        !   !* ch         = surface exchange coeff heat & moisture(m/s) im
+        !   !* rch(i)     = rho_a(i) * cp * ch(i) * wind(i)
+        !   !* hflx(i)    = rch(i) * (tsurf(i) - theta1(i))  !K m s-1
+        !   !* hflx(i)=hfx(i)/(rho(i,1)*cp) - now calculated inside module_sf_mynn.F90
+        !   !* Taken from sfc_nst.f
+        !   !* evap(i)    = elocp * rch(i) * (qss(i) - q0(i)) !kg kg-1 m s-1
+        !   !NOTE: evap & qflx will be solved for later
+        !   !qflx(i)=QFX(i)/
+        !   !evap(i)=QFX(i)   !or /rho ??
+        !   ! DH* note - this could be automated (CCPP knows how to convert m to cm)
+        !   znt_lnd(i)=znt_lnd(i)*100.   !m -> cm
+        !   znt_ocn(i)=znt_ocn(i)*100.
+        !   znt_ice(i)=znt_ice(i)*100.
+        !enddo
 
+        ! m -> cm
+        where (dry) znt_lnd=znt_lnd*100.
+        where (wet) znt_ocn=znt_ocn*100.
+        where (icy) znt_ice=znt_ice*100.
 
 !      if (lprnt) then
 !         write(0,*)

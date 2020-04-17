@@ -262,6 +262,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[uustar_ocn]
+  standard_name = surface_friction_velocity_over_ocean
+  long_name = surface friction velocity over ocean
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [uustar_lnd]
   standard_name = surface_friction_velocity_over_land
   long_name = surface friction velocity over land
@@ -490,6 +499,78 @@
   standard_name = surface_longwave_emissivity_over_ice_interstitial
   long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
   units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qss]
+  standard_name = surface_specific_humidity
+  long_name = surface air saturation specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qss_ocn]
+  standard_name = surface_specific_humidity_over_ocean
+  long_name = surface air saturation specific humidity over ocean
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qss_lnd]
+  standard_name = surface_specific_humidity_over_land
+  long_name = surface air saturation specific humidity over land
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qss_ice]
+  standard_name = surface_specific_humidity_over_ice
+  long_name = surface air saturation specific humidity over ice
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[hflx]
+  standard_name = kinematic_surface_upward_sensible_heat_flux
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hflx_ocn]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_ocean
+  long_name = kinematic surface upward sensible heat flux over ocean
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[hflx_lnd]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
+  long_name = kinematic surface upward sensible heat flux over land
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[hflx_ice]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_ice
+  long_name = kinematic surface upward sensible heat flux over ice
+  units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
