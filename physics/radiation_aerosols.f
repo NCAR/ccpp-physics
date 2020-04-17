@@ -101,7 +101,7 @@
 !        internal variable lmap_new through namelist variable iaer.    !
 !      may     2019  --- sarah lu, restore the gocart option, allowing !
 !        aerosol ext, ssa, asy determined from MERRA2 monthly climo    !
-!        with new spectral band mapping method                         ! 
+!        with new spectral band mapping method                         !
 !                                                                      !
 !   references for opac climatological aerosols:                       !
 !     hou et al. 2002  (ncep office note 441)                          !
@@ -142,15 +142,15 @@
 !!
 !!\n References:
 !! - OPAC climatological aerosols:
-!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998 
+!! Hou et al. 2002 \cite hou_et_al_2002; Hess et al. 1998
 !! \cite hess_et_al_1998
 !! - GOCART interactive aerosols:
 !! Chin et al., 2000 \cite chin_et_al_2000
-!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010 
-!!                                                                      
-!! - MERRA2 aerosol reanalysis:                          
-!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017                     
-!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017    
+!! Colarco et al., 2010 - jgr, v115, D14207\cite colarco_et_al_2010
+!!
+!! - MERRA2 aerosol reanalysis:
+!! Randles et al., 2017 - jclim, v30, 6823-6850\cite randles_et_al_2017
+!! Buchard et al., 2017 - jclim, v30, 6851-6871\cite buchard_et_al_2017
 !!
 !! - Stratospheric volcanical aerosols:
 !! Sato et al. 1993 \cite sato_et_al_1993
@@ -200,12 +200,12 @@
 !  ---  module control parameters set in subroutine "aer_init"
 !> number of actual bands for sw aerosols; calculated according to
 !! laswflg setting
-      integer, save :: NSWBND  = NBDSW       
+      integer, save :: NSWBND  = NBDSW
 !> number of actual bands for lw aerosols; calculated according to
 !! lalwflg and lalw1bd settings
-      integer, save :: NLWBND  = NBDLW       
+      integer, save :: NLWBND  = NBDLW
 !> total number of bands for sw+lw aerosols
-      integer, save :: NSWLWBD = NBDSW+NBDLW 
+      integer, save :: NSWLWBD = NBDSW+NBDLW
 !  LW aerosols effect control flag
 !    =.true.:aerosol effect is included in LW radiation
 !    =.false.:aerosol effect is not included in LW radiation
@@ -415,11 +415,11 @@
       integer, parameter :: KAERBNDI=56
 !> num of rh levels for rh-dep components
       integer, parameter :: KRHLEV =36
-!> num of gocart rh indep aerosols 
+!> num of gocart rh indep aerosols
       integer, parameter :: KCM1 = 5
-!> num of gocart rh dep aerosols 
+!> num of gocart rh dep aerosols
       integer, parameter :: KCM2 = 10
-!> num of gocart aerosols 
+!> num of gocart aerosols
       integer, parameter :: KCM  = KCM1 + KCM2
 
       real (kind=kind_phys), dimension(KRHLEV) :: rhlev_grt             &
@@ -462,7 +462,7 @@
 
 ! =======================================================================
 ! --------------------------------------------------------------------- !
-!   section-5 : module variables for aod diagnostic                     !  
+!   section-5 : module variables for aod diagnostic                     !
 ! --------------------------------------------------------------------- !
 !! ---  the following are for diagnostic purpose to output aerosol optical depth
 !       aod from 10 components are grouped into 5 major different species:
@@ -783,11 +783,11 @@
 !                                                                      !
 !  ====================  defination of variables  ===================  !
 !                                                                      !
-!> -  inputs:  (module constants)                                 
-!!  -   NWVTOT:  total num of wave numbers used in sw spectrum   
-!!  -   NWVTIR:  total num of wave numbers used in the ir region 
-!!                                                                      
-!> -  outputs: (in-scope variables)                                       
+!> -  inputs:  (module constants)
+!!  -   NWVTOT:  total num of wave numbers used in sw spectrum
+!!  -   NWVTIR:  total num of wave numbers used in the ir region
+!!
+!> -  outputs: (in-scope variables)
 !!  -   solfwv(NWVTOT):   solar flux for each individual wavenumber
 !!                        (\f$W/m^2\f$)
 !!  -   eirfwv(NWVTIR):   ir flux(273k) for each individual wavenumber
@@ -905,7 +905,7 @@
 !!@}
 
 
-!> This subroutine is the opac-climatology aerosol initialization 
+!> This subroutine is the opac-climatology aerosol initialization
 !! program to set up necessary parameters and working arrays.
 !>\param solfwv     (NWVTOT), solar flux for each individual wavenumber
 !!                  \f$(w/m^2)\f$
@@ -1098,7 +1098,7 @@
 !
 !===>  ...  begin here
 !
-!> -# Reading climatological aerosols optical data from aeros_file, 
+!> -# Reading climatological aerosols optical data from aeros_file,
 !! including:
 
       inquire (file=aeros_file, exist=file_exist)
@@ -1143,56 +1143,56 @@
       endif
 
 !>  - ending wave num for 61 aerosol spectral bands
-      read(NIAERCM,21) cline   
+      read(NIAERCM,21) cline
   21  format(a80)
       read(NIAERCM,22) iendwv(:)
   22  format(13i6)
 
 !>  - atmos scale height for 5 domains, 7 profs
-      read(NIAERCM,21) cline  
+      read(NIAERCM,21) cline
       read(NIAERCM,24) haer(:,:)
   24  format(20f4.1)
 
 !>  - reference pressure for 5 domains, 7 profs
-      read(NIAERCM,21) cline  
+      read(NIAERCM,21) cline
       read(NIAERCM,26) prsref(:,:)
   26  format(10f7.2)
 
 !>  - rh independent ext coef for 61 bands, 6 species
-      read(NIAERCM,21) cline  
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhidext0(:,:)
   28  format(8e10.3)
 
 !>  - rh independent sca coef for 61 bands, 6 species
-      read(NIAERCM,21) cline   
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhidsca0(:,:)
 
 !>  - rh independent ssa coef for 61 bands, 6 species
-      read(NIAERCM,21) cline  
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhidssa0(:,:)
 
 !>  - rh independent asy coef for 61 bands, 6 species
-      read(NIAERCM,21) cline  
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhidasy0(:,:)
 
 !>  - rh dependent ext coef for 61 bands, 8 rh lev, 4 species
-      read(NIAERCM,21) cline  
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhdpext0(:,:,:)
 
 !>  - rh dependent sca coef for 61 bands, 8 rh lev, 4 species
-      read(NIAERCM,21) cline   
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhdpsca0(:,:,:)
 
 !>  - rh dependent ssa coef for 61 bands, 8 rh lev, 4 species
-      read(NIAERCM,21) cline   
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhdpssa0(:,:,:)
 
 !>  - rh dependent asy coef for 61 bands, 8 rh lev, 4 species
-      read(NIAERCM,21) cline   
+      read(NIAERCM,21) cline
       read(NIAERCM,28) rhdpasy0(:,:,:)
 
 !>  - stratospheric background aeros for 61 bands
-      read(NIAERCM,21) cline  
+      read(NIAERCM,21) cline
       read(NIAERCM,28) straext0(:)
 
       close (NIAERCM)
@@ -1759,16 +1759,16 @@
       endif
 
 !> -# Call trop_update() to update monthly tropospheric aerosol data.
-      if ( lalwflg .or. laswflg ) then 
+      if ( lalwflg .or. laswflg ) then
 
-        if ( iaermdl == 0 .or. iaermdl==5 ) then    ! opac-climatology scheme       
+        if ( iaermdl == 0 .or. iaermdl==5 ) then    ! opac-climatology scheme
         call trop_update
         endif
 
       endif
 
 !> -# Call volc_update() to update yearly stratospheric volcanic aerosol data.
-      if ( lavoflg ) then             
+      if ( lavoflg ) then
         call volc_update
       endif
 
@@ -2364,7 +2364,7 @@
 
 !> -# Compute stratosphere volcanic forcing:
 !!    - select data in 4 lat bands, interpolation at the boundaries
-!!    - Find lower boundary of stratosphere: polar, fixed at 25000pa 
+!!    - Find lower boundary of stratosphere: polar, fixed at 25000pa
 !!      (250mb); tropic, fixed at 15000pa (150mb); mid-lat, interpolation
 !!    - SW: add volcanic aerosol optical depth to the background value
 !!    - Smoothing profile at boundary if needed
@@ -2678,13 +2678,13 @@
 !!\n                              (:,:,:,2): single scattering albedo
 !!\n                              (:,:,:,3): asymmetry parameter
 !!\param aerodp        (IMAX,NSPC+1), vertically integrated aer-opt-depth
-!!\section gel_aer_pro General Algorithm 
+!!\section gel_aer_pro General Algorithm
 !> @{
 !-----------------------------------
-      subroutine aer_property                                           &    
+      subroutine aer_property                                           &
      &     ( prsi,prsl,prslk,tvly,rhlay,dz,hz,tracer,                   &     !  ---  inputs:
-     &       alon,alat,slmsk, laersw,laerlw,                            &    
-     &       IMAX,NLAY,NLP1,                                            &   
+     &       alon,alat,slmsk, laersw,laerlw,                            &
+     &       IMAX,NLAY,NLP1,                                            &
      &       aerosw,aerolw,aerodp                                       &     !  ---  outputs:
      &     )
 
@@ -3103,9 +3103,9 @@
       contains
 ! =================
 
-!> This subroutine computes aerosols optical properties in NSWLWBD 
+!> This subroutine computes aerosols optical properties in NSWLWBD
 !! bands. there are seven different vertical profile structures. in the
-!! troposphere, aerosol distribution at each grid point is composed 
+!! troposphere, aerosol distribution at each grid point is composed
 !! from up to six components out of ten different substances.
 !--------------------------------
       subroutine radclimaer
@@ -3415,7 +3415,7 @@
 !! program to set up necessary parameters and working arrays.
 !>\param solfwv     (NWVTOT), solar flux for each individual wavenumber
 !!                  \f$(w/m^2)\f$
-!!\param eirfwv     (NWVTIR), IR flux(273k) for each individual wavenumber                   
+!!\param eirfwv     (NWVTIR), IR flux(273k) for each individual wavenumber
 !!                  \f$(w/m^2)\f$
 !!\param me         print message control flag
 !!
@@ -3423,7 +3423,7 @@
 !! @{
 !-----------------------------------
       subroutine gocart_aerinit                                         &
-     &     ( solfwv, eirfwv, me                                         &            
+     &     ( solfwv, eirfwv, me                                         &
      &     )
 
 !  ==================================================================  !
@@ -3459,8 +3459,8 @@
       implicit none
 
 !  ---  inputs:
-      real (kind=kind_phys), dimension(:) :: solfwv        ! one wvn sol flux  
-      real (kind=kind_phys), dimension(:) :: eirfwv        ! one wvn ir flux     
+      real (kind=kind_phys), dimension(:) :: solfwv        ! one wvn sol flux
+      real (kind=kind_phys), dimension(:) :: eirfwv        ! one wvn ir flux
 
       integer,  intent(in) :: me
 
@@ -3489,7 +3489,7 @@
       integer, dimension(kaerbndi) :: iendwv_du
       real (kind=kind_phys), dimension(kaerbndd) :: wavelength
       real (kind=kind_phys), dimension(kaerbndi) :: wavelength_du
-      real (kind=kind_phys) :: sumsol, sumir, sumsol_du, sumir_du      
+      real (kind=kind_phys) :: sumsol, sumir, sumsol_du, sumir_du
 
       integer :: i, j, k, mb, ib, ii, iix, iw, iw1, iw2
 
@@ -3564,7 +3564,7 @@
           do while ( iw1 > iendwv(ii) )
             if ( ii == kaerbndd ) exit
             ii = ii + 1
-          enddo  
+          enddo
           sumsol = f_zero
           nv1(ib) = ii
 
@@ -3572,7 +3572,7 @@
           do while ( iw1 > iendwv_du(iix) )
             if ( iix == kaerbndi ) exit
             iix = iix + 1
-          enddo  
+          enddo
           sumsol_du = f_zero
           nv1_du(ib) = iix
 
@@ -3643,7 +3643,7 @@
 
 ! -- for rd-dependent
           do while ( iw1 > iendwv(ii) )
-            if ( ii == kaerbndd ) exit 
+            if ( ii == kaerbndd ) exit
             ii = ii + 1
           enddo
           sumir = f_zero
@@ -3651,7 +3651,7 @@
 
 ! -- for rd-independent
           do while ( iw1 > iendwv_du(iix) )
-            if ( iix == kaerbndi ) exit 
+            if ( iix == kaerbndi ) exit
             iix = iix + 1
           enddo
           sumir_du = f_zero
@@ -3723,8 +3723,8 @@
 !        print *, ssarhd_grt(i,:,ib)
 !        print *, '  asyrhd for rhlev:',i
 !        print *, asyrhd_grt(i,:,ib)
-!        enddo 
-!      enddo 
+!        enddo
+!      enddo
 !      print *, '  wvnlw1 :',wvnlw1
 !      print *, '  wvnlw2 :',wvnlw2
 !      do ib = 1, NLWBND
@@ -3768,7 +3768,7 @@
 !     iendwv    - ending wvnum (cm**-1) for each band    kaerbndd      !
 !     iendwv_du - ending wvnum (cm**-1) for each band    kaerbndi      !
 !   for handling optical properties of rh independent species (kcm1)   !
-!     1=du001, 2=du002, 3=du003, 4=du004, 5=du005                      !     
+!     1=du001, 2=du002, 3=du003, 4=du004, 5=du005                      !
 !     rhidext0_grt - extinction coefficient          kaerbndi*kcm1     !
 !     rhidsca0_grt - scattering coefficient          kaerbndi*kcm1     !
 !     rhidssa0_grt - single scattering albedo        kaerbndi*kcm1     !
@@ -3792,7 +3792,7 @@
 
 !  ---  locals:
        integer             :: iradius, ik, ibeg
-       integer, parameter  :: numspc = 5        ! # of aerosol species    
+       integer, parameter  :: numspc = 5        ! # of aerosol species
 
 ! - input tabulated aerosol optical spectral data from GSFC
        real, dimension(kaerbndd) :: lambda             ! wavelength (m) for non-dust
@@ -3920,7 +3920,7 @@
            wavelength(j) = 1.e6 * lambda(i)
         enddo
         do k = 1, iradius
-          ik = ibeg + k - 1 
+          ik = ibeg + k - 1
           do i = 1, kaerbndd
           ii = kaerbndd -i + 1
           do j = 1, krhlev
@@ -4008,7 +4008,7 @@
 !===> ...  begin here
 !
 !  --- ...  loop for each sw radiation spectral band
-        
+
       if ( laswflg ) then
         do nb = 1, nswbnd
           rsolbd = f_one / solbnd_du(nb)
@@ -4175,8 +4175,8 @@
 !!\param rhlay          (IMAX,NLAY), layer mean relative humidity
 !!\param dz             (IMAX,NLAY), layer thickness in m
 !!\param hz             (IMAX,NLP1), level high in m
-!!\param tracer         (IMAX,NLAY,NTRAC), aer tracer concentrations 
-!!\param aerfld         (IMAX,NLAY,NTRCAER), aer tracer concentrations 
+!!\param tracer         (IMAX,NLAY,NTRAC), aer tracer concentrations
+!!\param aerfld         (IMAX,NLAY,NTRCAER), aer tracer concentrations
 !!\param alon, alat     (IMAX), longitude and latitude of given points in degree
 !!\param slmsk          (IMAX), sea/land mask (sea:0,land:1,sea-ice:2)
 !!\param laersw,laerlw  logical flag for sw/lw aerosol calculations
@@ -4192,7 +4192,7 @@
 !!\n                              (:,:,:,2): single scattering albedo
 !!\n                              (:,:,:,3): asymmetry parameter
 !!\param aerodp        (IMAX,NSPC+1), vertically integrated aer-opt-depth
-!!\section gel_go_aer_pro General Algorithm 
+!!\section gel_go_aer_pro General Algorithm
 !! @{
 !-----------------------------------
       subroutine aer_property_gocart                                    &
@@ -4288,7 +4288,7 @@
       lab_do_IMAXg : do i = 1, IMAX
 
 ! --- initialize tauae, ssaae, asyae
-        do m = 1, NSWLWBD 
+        do m = 1, NSWLWBD
           do k = 1, NLAY
            tauae(k,m) = f_zero
            ssaae(k,m) = f_one
@@ -4307,17 +4307,17 @@
            spcodp(m) = f_zero
         enddo
 
-        do k = 1, NLAY  
-          rh1(k) = rhlay(i,k)          ! 
+        do k = 1, NLAY
+          rh1(k) = rhlay(i,k)          !
           dz1(k) = 1000.*dz (i,k)      ! thickness converted from km to m
           plv = 100.*prsl(i,k)         ! convert pressure from mb to Pa
           tv =  tvly(i,k)              ! virtual temp in K
           rho = plv / ( con_rd * tv)   ! air density in kg/m3
 
           do m = 1, KCM
-           aerms(k,m) = aerfld(i,k,m)*rho  ! dry mass (kg/m3)            
+           aerms(k,m) = aerfld(i,k,m)*rho  ! dry mass (kg/m3)
           enddo
-!      
+!
 ! --- calculate sw/lw aerosol optical properties for the
 !     corresponding frequency bands
 
@@ -4440,14 +4440,14 @@
            sum_tau = f_zero
            sum_ssa = f_zero
            sum_asy = f_zero
- 
+
 ! --- determine tau, ssa, asy for dust aerosols
            ext1 = f_zero
            asy1 = f_zero
            sca1 = f_zero
            ssa1 = f_zero
            do m = 1, kcm1
-            cm =  max(aerms(k,m),0.0) * dz1(k) 
+            cm =  max(aerms(k,m),0.0) * dz1(k)
             ext1 = ext1 + cm*extrhi_grt(m,ib)
             sca1 = sca1 + cm*scarhi_grt(m,ib)
             ssa1 = ssa1 + cm*extrhi_grt(m,ib) * ssarhi_grt(m,ib)
@@ -4457,7 +4457,7 @@
            if (ext1 > f_zero) ssa=min(f_one, ssa1/ext1)
            if (sca1 > f_zero) asy=min(f_one, asy1/sca1)
 
-! --- update aod from individual species   
+! --- update aod from individual species
            if ( ib==nv_aod ) then
              spcodp(1) = spcodp(1) + tau
            endif
@@ -4476,7 +4476,7 @@
             do nbin = 1, num_radius(ntrc)
              m1 =  radius_lower(ntrc) + nbin - 1
              m =   m1 - num_radius(1)                   ! exclude dust aerosols
-             cm =  max(aerms(k,m1),0.0) * dz1(k) 
+             cm =  max(aerms(k,m1),0.0) * dz1(k)
              ext01 = extrhd_grt(ih1,m,ib) +                             &
      &              rdrh * (extrhd_grt(ih2,m,ib)-extrhd_grt(ih1,m,ib))
              sca01 = scarhd_grt(ih1,m,ib) +                             &
@@ -4493,7 +4493,7 @@
             tau = ext1
             if (ext1 > f_zero) ssa=min(f_one, ssa1/ext1)
             if (sca1 > f_zero) asy=min(f_one, asy1/sca1)
-! --- update aod from individual species   
+! --- update aod from individual species
             if ( ib==nv_aod ) then
              spcodp(ktrc) = spcodp(ktrc) + tau
             endif

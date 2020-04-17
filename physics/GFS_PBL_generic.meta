@@ -747,7 +747,7 @@
   intent = in
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -756,7 +756,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)

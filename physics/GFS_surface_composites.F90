@@ -63,7 +63,6 @@ contains
       integer,          intent(out) :: errflg
 
       ! Local variables
-      real(kind=kind_phys) :: tem
       integer :: i
 
       ! Initialize CCPP error handling variables
@@ -367,10 +366,10 @@ contains
             qss(i)  = txl*qss_lnd(i)    + tem*qss_ice(i)
             gflx(i) = txl*gflx_lnd(i)   + tem*gflx_ice(i)
           else
-            evap(i) = txl*evap_lnd(i)   + tem*evap_ice(i)   + txo*evap_ocn(i)
-            hflx(i) = txl*hflx_lnd(i)   + tem*hflx_ice(i)   + txo*hflx_ocn(i)
-            qss(i)  = txl*qss_lnd(i)    + tem*qss_ice(i)    + txo*qss_ocn(i)
-            gflx(i) = txl*gflx_lnd(i)   + tem*gflx_ice(i)   + txo*gflx_ocn(i)
+            evap(i) = txl*evap_lnd(i)   + txi*evap_ice(i)   + txo*evap_ocn(i)
+            hflx(i) = txl*hflx_lnd(i)   + txi*hflx_ice(i)   + txo*hflx_ocn(i)
+            qss(i)  = txl*qss_lnd(i)    + txi*qss_ice(i)    + txo*qss_ocn(i)
+            gflx(i) = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_ocn(i)
           endif
           tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_ocn(i)
 
