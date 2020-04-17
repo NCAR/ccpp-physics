@@ -19,7 +19,7 @@
 !! \htmlinclude sfc_noah_GFS_pre_init.html
 !!
       subroutine sfc_noah_GFS_pre_init(lsm, lsm_noah_hafs, veg_data_choice, &
-          soil_data_choice, nsoil, isurban, isice, iswater, sthick, &
+          soil_data_choice, nsoil, isurban, isice, iswater, &
           errmsg, errflg)
 
       use machine, only : kind_phys
@@ -31,7 +31,6 @@
                                            nsoil
       
       integer, intent(inout) :: isurban, isice, iswater
-      real(kind=kind_phys), dimension(nsoil), intent(inout) :: sthick
       
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
@@ -39,10 +38,6 @@
       ! Local variables
       
       character(len=256)                  :: mminlu, mminsl
-      
-      integer :: i, k
-      
-      real(kind=kind_phys), parameter, dimension(4) :: zsoil = (/ -0.1,-0.4,-1.0,-2.0/) !what if nsoil /= 4?  
       
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -101,11 +96,6 @@
       
       call soil_veg_gen_parm(trim(mminlu), trim(mminsl), errmsg, errflg)
       
-      sthick(1) = - zsoil(1)
-      do k = 2, nsoil
-        sthick(k) = zsoil(k-1) - zsoil(k)
-      enddo
-      
       is_initialized = .True.
       
       end subroutine sfc_noah_GFS_pre_init
@@ -139,7 +129,7 @@
         q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, vtype, smc, stc, slc, snoalb, prcp, q2k, rho1, qs1,&
         th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, &
         canopy_save, smc_save, stc_save, slc_save, ep, evap, hflx, gflux, drain, evbs, evcw, &
-        trans, sbsno, snowc, snohf, errmsg, errflg)
+        trans, sbsno, snowc, snohf, sthick, errmsg, errflg)
 
       use machine , only : kind_phys
       use funcphys, only : fpvs
@@ -168,6 +158,7 @@
       real(kind=kind_phys), dimension(im), intent(inout) :: weasd_save, snwdph_save, tsfc_save, canopy_save
       real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: smc_save, stc_save, slc_save
       real(kind=kind_phys), dimension(im), intent(inout) :: ep, evap, hflx, gflux, drain, evbs, evcw, trans, sbsno, snowc, snohf
+      real(kind=kind_phys), dimension(nsoil), intent(inout) :: sthick
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -178,6 +169,7 @@
       
       REAL, PARAMETER  :: A2=17.67,A3=273.15,A4=29.65,   &
                           A23M4=A2*(A3-A4)
+      real(kind=kind_phys), parameter, dimension(4) :: zsoil = (/ -0.1,-0.4,-1.0,-2.0/) !what if nsoil /= 4?  
       
 !> - Initialize CCPP error handling variables
 
@@ -205,6 +197,11 @@
           end do
         end if
       end do
+      
+      sthick(1) = - zsoil(1)
+      do k = 2, nsoil
+        sthick(k) = zsoil(k-1) - zsoil(k)
+      enddo
       
       flag_lsm(:) = .false.
       flag_lsm_glacier(:) = .false.

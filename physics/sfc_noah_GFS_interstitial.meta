@@ -65,13 +65,20 @@
   type = integer
   intent = inout
   optional = F
-[sthick]
-  standard_name = soil_layer_thickness
-  long_name = soil layer thickness
-  units = m
-  dimensions = (soil_vertical_dimension)
-  type = real
-  kind = kind_phys
+[isice]
+  standard_name = ice_vegetation_category
+  long_name = index of the permanent snow/ice category in the chosen vegetation dataset
+  units = index
+  dimensions = ()
+  type = integer
+  intent = inout
+  optional = F
+[iswater]
+  standard_name = water_vegetation_category
+  long_name = index of the water body vegetation category in the chosen vegetation dataset
+  units = index
+  dimensions = ()
+  type = integer
   intent = inout
   optional = F
 [errmsg]
@@ -679,6 +686,15 @@
   long_name = latent heat flux due to snow and frz rain
   units = W m-2
   dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sthick]
+  standard_name = soil_layer_thickness
+  long_name = soil layer thickness
+  units = m
+  dimensions = (soil_vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
