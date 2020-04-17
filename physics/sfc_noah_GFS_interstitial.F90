@@ -10,7 +10,7 @@
       
       private
 
-      logical :: is_initialized = .False.
+      logical :: is_initialized = .false.
       
       contains
 
@@ -19,25 +19,23 @@
 !! \htmlinclude sfc_noah_GFS_pre_init.html
 !!
       subroutine sfc_noah_GFS_pre_init(lsm, lsm_noah_hafs, veg_data_choice, &
-          soil_data_choice, nsoil, isurban, isice, iswater, &
-          errmsg, errflg)
+          soil_data_choice, isurban, isice, iswater, errmsg, errflg)
 
       use machine, only : kind_phys
       
       implicit none
       
-      integer,              intent(in)  :: lsm, lsm_noah_hafs, &
-                                           veg_data_choice, soil_data_choice, &
-                                           nsoil
+      integer,          intent(in)  :: lsm, lsm_noah_hafs, &
+                                       veg_data_choice, soil_data_choice
       
-      integer, intent(inout) :: isurban, isice, iswater
+      integer,          intent(inout) :: isurban, isice, iswater
       
-      character(len=*),     intent(out) :: errmsg
-      integer,              intent(out) :: errflg
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
       
       ! Local variables
       
-      character(len=256)                  :: mminlu, mminsl
+      character(len=256) :: mminlu, mminsl
       
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -96,7 +94,7 @@
       
       call soil_veg_gen_parm(trim(mminlu), trim(mminsl), errmsg, errflg)
       
-      is_initialized = .True.
+      is_initialized = .true.
       
       end subroutine sfc_noah_GFS_pre_init
 
@@ -124,11 +122,13 @@
 !!
 !> \section general_noah_hafs_drv GFS sfc_drv General Algorithm
 !>  @{
-      subroutine sfc_noah_GFS_pre_run (im, nsoil, ialb, isice, land, flag_guess, flag_iter, restart, first_time_step, flag_lsm, flag_lsm_glacier, &
-        dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, sfctmp,  &
-        q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, vtype, smc, stc, slc, snoalb, prcp, q2k, rho1, qs1,&
-        th1, dqsdt2, canopy, cmc, snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, &
-        canopy_save, smc_save, stc_save, slc_save, ep, evap, hflx, gflux, drain, evbs, evcw, &
+      subroutine sfc_noah_GFS_pre_run (im, nsoil, ialb, isice, land,           &
+        flag_guess, flag_iter, restart, first_time_step, flag_lsm,             &
+        flag_lsm_glacier, dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, &
+        sfctmp, q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, vtype, smc, &
+        stc, slc, snoalb, prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc,      &
+        snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, canopy_save,&
+        smc_save, stc_save, slc_save, ep, evap, hflx, gflux, drain, evbs, evcw,&
         trans, sbsno, snowc, snohf, sthick, errmsg, errflg)
 
       use machine , only : kind_phys
@@ -299,7 +299,7 @@
       end subroutine sfc_noah_GFS_pre_run
       
       subroutine soil_veg_gen_parm( mminlu, mminsl, errmsg, errflg)
-        !use namelist_soilveg_hafs
+        !this routine is mostly taken from module_sf_noahdrv.F in WRF
         use module_sf_noahlsm,  only: shdtbl, nrotbl, rstbl, rgltbl, hstbl, snuptbl, & ! begin land use / vegetation variables
                                       maxalb, laimintbl, laimaxtbl, z0mintbl, z0maxtbl, &
                                       albedomintbl, albedomaxtbl, ztopvtbl,zbotvtbl, &
@@ -675,8 +675,12 @@
 !! \section arg_table_sfc_noah_GFS_post_run Argument Table
 !! \htmlinclude sfc_noah_GFS_post_run.html
 !!
-      subroutine sfc_noah_GFS_post_run (im, nsoil, land, flag_guess, flag_lsm, rhowater, cp, cmc, &
-        rho1, sheat, flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, snowhk, weasd_save, snwdph_save, tsfc_save, t1, canopy_save, smc_save, stc_save, slc_save, smcmax, canopy, shflx, snohf, snowc, runoff, drain, stm, weasd, snwdph, tsfc, smc, stc, slc, wet1, errmsg, errflg)
+      subroutine sfc_noah_GFS_post_run (im, nsoil, land, flag_guess, flag_lsm, &
+        rhowater, cp, cmc, rho1, sheat, flx1, flx2, flx3, sncovr, runoff1,     &
+        runoff2, soilm, snowhk, weasd_save, snwdph_save, tsfc_save, t1,        &
+        canopy_save, smc_save, stc_save, slc_save, smcmax, canopy, shflx,      &
+        snohf, snowc, runoff, drain, stm, weasd, snwdph, tsfc, smc, stc, slc,  &
+        wet1, errmsg, errflg)
       
       use machine, only : kind_phys
       

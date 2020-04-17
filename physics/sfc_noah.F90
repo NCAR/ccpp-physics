@@ -205,160 +205,55 @@
       do i=1, im
         if (flag_lsm(i)) then  
           !GJF: Why do LSMs want the dynamics time step instead of the physics time step?
-          ! write(*,*) i,'in albbrd = ',albbrd(i)
-          ! write(*,*) i,'in z0brd = ',z0brd(i)
-          ! write(*,*) i,'in z0k = ',z0k(i)
-          ! write(*,*) i,'in emissi = ',emissi(i)
-          ! write(*,*) i,'in embrd = ',embrd(i)
-          ! write(*,*) i,'in cmc = ',cmc(i)
-          write(*,*) i,'in shdfac = ',shdfac(i)
-          write(*,*) i,'in vegtyp = ',vegtyp(i)
-          write(*,*) i,'in soiltyp = ',soiltyp(i)
-          write(*,*) i,'in slopetyp = ',slopetyp(i)
-          write(*,*) i,'in t1 = ',t1(i)
-          write(*,*) i,'in stc = ',stc(i,:)
-          ! write(*,*) i,'in smc = ',smc(i,:)
-          ! write(*,*) i,'in swc = ',swc(i,:)
-          ! write(*,*) i,'in snowhk = ',snowhk(i)
-          ! write(*,*) i,'in sneqv = ',sneqv(i)
-          write(*,*) i,'in chk = ',chk(i)
-          write(*,*) i,'in eta = ',eta
-          write(*,*) i,'in sheat = ',sheat(i)
-          ! write(*,*) i,'in eta_k = ',eta_kinematic(i)
-          ! write(*,*) i,'in ec = ',ec(i)
-          ! write(*,*) i,'in edir = ',edir(i)
-          ! write(*,*) i,'in ett = ',ett(i)
-          ! write(*,*) i,'in esnow = ',esnow(i)
-          ! write(*,*) i,'in etp = ',etp(i)
-          ! write(*,*) i,'in ssoil = ',ssoil(i)
-          ! write(*,*) i,'in flx1 = ',flx1(i)
-          ! write(*,*) i,'in flx2 = ',flx2(i)
-          ! write(*,*) i,'in flx3 = ',flx3(i)
-          ! write(*,*) i,'in sncovr = ',sncovr(i)
-          ! write(*,*) i,'in runoff1 = ',runoff1(i)
-          ! write(*,*) i,'in runoff2 = ',runoff2(i)
-          ! write(*,*) i,'in soilm = ',soilm(i)
-          write(*,*) i,'in qsurf = ',qsurf(i)
-          ! write(*,*) i,'in snotime = ',snotime(i)
-          ! write(*,*) i,'in smcwlt = ',smcwlt(i)
-          ! write(*,*) i,'in smcref = ',smcref(i)
-          ! write(*,*) i,'in smcmax = ',smcmax(i)
           call sflx (i, 1, srflag(i), &
-                   isurban, dt, zlvl(i), nsoil, sthick,              &    !c
-                   local,                                            &    !L
-                   lutype, sltype,                                   &    !CL
-                   lwdn(i), soldn(i), solnet(i), sfcprs(i), prcp(i), &    !F
-                   sfctmp(i), q1k(i), dummy, dummy, dummy, dummy,    &    !F
-                   th1(i), qs1(i), dqsdt2(i),                        &    !I
-                   vegtyp(i), soiltyp(i), slopetyp(i), shdfac(i),    &    !I
-                   shmin(i), shmax(i),                               &    !I
-                   albbrd(i), snoalb(i), tbot(i), z0brd(i), z0k(i),  &    !S
-                   emissi(i), embrd(i),                              &    !S
-                   cmc(i), t1(i), stc(i,:), smc(i,:), swc(i,:),      &    !H
-                   snowhk(i), sneqv(i), albedok, chk(i), dummy,      &    !H
-                   cp, rd, sigma, cph2o, cpice, lsubf,               &
-                   eta, sheat(i), eta_kinematic(i), fdown,           &    !O
-                   ec(i), edir(i), et, ett(i), esnow(i), drip, dew,  &    !O
-                   beta, etp(i), ssoil(i), flx1(i), flx2(i), flx3(i),&    !O
-                   flx4, fvb, fbur, fgsn, ua_phys,                   &    !UA 
-                   snomlt, sncovr(i), runoff1(i), runoff2(i),runoff3,&    !O
-                   rc, pc, rsmin, xlai, rcs, rct, rcq, rcsoil,       &    !O
-                   soilw, soilm(i), qsurf(i), smav,                  &    !D
-                   rdlai, usemonalb, snotime(i), ribb(i),            &
-                   smcwlt(i), smcdry, smcref(i), smcmax(i), nroot,   &
-                   sfcheadrt, infxsrt, etpnd1, opt_thcnd, aoasis,    &
-                   xsda_qfx, hfx_phy, qfx_phy, xqnorm, fasdas,       &    !fasdas
-                   hcpct_fasdas,                                     &    !fasdas
-                   errflg, errmsg)
-          
-          ! write(*,*) i,'out albbrd = ',albbrd(i)
-          ! write(*,*) i,'out z0brd = ',z0brd(i)
-          ! write(*,*) i,'out z0k = ',z0k(i)
-          ! write(*,*) i,'out emissi = ',emissi(i)
-          ! write(*,*) i,'out embrd = ',embrd(i)
-          ! write(*,*) i,'out cmc = ',cmc(i)
-          write(*,*) i,'out shdfac = ',shdfac(i)
-          write(*,*) i,'out vegtyp = ',vegtyp(i)
-          write(*,*) i,'out soiltyp = ',soiltyp(i)
-          write(*,*) i,'out slopetyp = ',slopetyp(i)
-          write(*,*) i,'out t1 = ',t1(i)
-          write(*,*) i,'out stc = ',stc(i,:)
-          ! write(*,*) i,'out smc = ',smc(i,:)
-          ! write(*,*) i,'out swc = ',swc(i,:)
-          ! write(*,*) i,'out snowhk = ',snowhk(i)
-          ! write(*,*) i,'out sneqv = ',sneqv(i)
-          ! write(*,*) i,'out chk = ',chk(i)
-          write(*,*) i,'out eta = ',eta
-          write(*,*) i,'out sheat = ',sheat(i)
-          ! write(*,*) i,'out eta_k = ',eta_kinematic(i)
-          ! write(*,*) i,'out ec = ',ec(i)
-          ! write(*,*) i,'out edir = ',edir(i)
-          ! write(*,*) i,'out ett = ',ett(i)
-          ! write(*,*) i,'out esnow = ',esnow(i)
-          ! write(*,*) i,'out etp = ',etp(i)
-          ! write(*,*) i,'out ssoil = ',ssoil(i)
-          ! write(*,*) i,'out flx1 = ',flx1(i)
-          ! write(*,*) i,'out flx2 = ',flx2(i)
-          ! write(*,*) i,'out flx3 = ',flx3(i)
-          ! write(*,*) i,'out sncovr = ',sncovr(i)
-          ! write(*,*) i,'out runoff1 = ',runoff1(i)
-          ! write(*,*) i,'out runoff2 = ',runoff2(i)
-          ! write(*,*) i,'out soilm = ',soilm(i)
-          write(*,*) i,'out qsurf = ',qsurf(i)
-          ! write(*,*) i,'out snotime = ',snotime(i)
-          ! write(*,*) i,'out smcwlt = ',smcwlt(i)
-          ! write(*,*) i,'out smcref = ',smcref(i)
-          ! write(*,*) i,'out smcmax = ',smcmax(i)
+                  isurban, dt, zlvl(i), nsoil, sthick,              &    !c
+                  local,                                            &    !L
+                  lutype, sltype,                                   &    !CL
+                  lwdn(i), soldn(i), solnet(i), sfcprs(i), prcp(i), &    !F
+                  sfctmp(i), q1k(i), dummy, dummy, dummy, dummy,    &    !F
+                  th1(i), qs1(i), dqsdt2(i),                        &    !I
+                  vegtyp(i), soiltyp(i), slopetyp(i), shdfac(i),    &    !I
+                  shmin(i), shmax(i),                               &    !I
+                  albbrd(i), snoalb(i), tbot(i), z0brd(i), z0k(i),  &    !S
+                  emissi(i), embrd(i),                              &    !S
+                  cmc(i), t1(i), stc(i,:), smc(i,:), swc(i,:),      &    !H
+                  snowhk(i), sneqv(i), albedok, chk(i), dummy,      &    !H
+                  cp, rd, sigma, cph2o, cpice, lsubf,               &
+                  eta, sheat(i), eta_kinematic(i), fdown,           &    !O
+                  ec(i), edir(i), et, ett(i), esnow(i), drip, dew,  &    !O
+                  beta, etp(i), ssoil(i), flx1(i), flx2(i), flx3(i),&    !O
+                  flx4, fvb, fbur, fgsn, ua_phys,                   &    !UA 
+                  snomlt, sncovr(i), runoff1(i), runoff2(i),runoff3,&    !O
+                  rc, pc, rsmin, xlai, rcs, rct, rcq, rcsoil,       &    !O
+                  soilw, soilm(i), qsurf(i), smav,                  &    !D
+                  rdlai, usemonalb, snotime(i), ribb(i),            &
+                  smcwlt(i), smcdry, smcref(i), smcmax(i), nroot,   &
+                  sfcheadrt, infxsrt, etpnd1, opt_thcnd, aoasis,    &
+                  xsda_qfx, hfx_phy, qfx_phy, xqnorm, fasdas,       &    !fasdas
+                  hcpct_fasdas,                                     &    !fasdas
+                  errflg, errmsg)
           if (errflg > 0) return
-        elseif (flag_lsm_glacier(i)) then
+        else if (flag_lsm_glacier(i)) then
           !set values that sflx updates, but sflx_glacial does not
           soilm(i) = 0.0
           runoff2(i) = 0.0
           swc(i,:) = 1.0
           smc(i,:) = 1.0
           
-          call sflx_glacial(i,1,isice,srflag(i),dt,zlvl(i),nsoil,sthick,   &    !C
-               &    lwdn(i),solnet(i),sfcprs(i),prcp(i),sfctmp(i),q1k(i),              &    !F
-               &    th1(i),qs1(i),dqsdt2(i),                                &    !I
-               &    albbrd(i), snoalb(i),tbot(i), z0brd(i), z0k(i), emissi(i), embrd(i), &    !S
-               &    t1(i),stc(i,:),snowhk(i),sneqv(i),albedok,chk(i),        &    !H
-               &    cp, rd, sigma, cph2o, cpice, lsubf, &
-               &    eta,sheat(i),eta_kinematic(i),fdown,                   &    !O
-               &    esnow(i),dew,                                       &    !O
-               &    etp(i),ssoil(i),                                       &    !O
-               &    flx1(i),flx2(i),flx3(i),                                  &    !O
-               &    snomlt,sncovr(i),                                   &    !O
-               &    runoff1(i),                                         &    !O
-               &    qsurf(i),                                              &    !D
-               &    snotime(i),                                        &
-               &    ribb(i),errflg, errmsg)
+          call sflx_glacial (i, 1, isice, srflag(i), dt, zlvl(i),   &
+                  nsoil, sthick, lwdn(i), solnet(i), sfcprs(i),     &
+                  prcp(i), sfctmp(i), q1k(i), th1(i), qs1(i),       &
+                  dqsdt2(i), albbrd(i), snoalb(i), tbot(i),         &
+                  z0brd(i), z0k(i), emissi(i), embrd(i), t1(i),     &
+                  stc(i,:), snowhk(i), sneqv(i), albedok, chk(i),   &
+                  cp, rd, sigma, cph2o, cpice, lsubf,               &
+                  eta, sheat(i), eta_kinematic(i), fdown, esnow(i), &
+                  dew, etp(i), ssoil(i), flx1(i), flx2(i), flx3(i), &
+                  snomlt, sncovr(i), runoff1(i), qsurf(i),          &
+                  snotime(i), ribb(i), errflg, errmsg)
           if (errflg > 0) return
-        elseif (flag_lsm_glacier(i)) then
-          !set values that sflx updates, but sflx_glacial does not
-          soilm(i) = 0.0
-          runoff2(i) = 0.0
-          swc(i,:) = 1.0
-          smc(i,:) = 1.0
-          
-          call sflx_glacial(i,1,isice,srflag(i),dt,zlvl(i),nsoil,sthick,   &    !C
-               &    lwdn(i),solnet(i),sfcprs(i),prcp(i),sfctmp(i),q1k(i),              &    !F
-               &    th1(i),qs1(i),dqsdt2(i),                                &    !I
-               &    albbrd(i), snoalb(i),tbot(i), z0brd(i), z0k(i), emissi(i), embrd(i), &    !S
-               &    t1(i),stc(i,:),snowhk(i),sneqv(i),albedok,chk(i),        &    !H
-               &    cp, rd, sigma, cph2o, cpice, lsubf, &
-               &    eta,sheat(i),eta_kinematic(i),fdown,                   &    !O
-               &    esnow(i),dew,                                       &    !O
-               &    etp(i),ssoil(i),                                       &    !O
-               &    flx1(i),flx2(i),flx3(i),                                  &    !O
-               &    snomlt,sncovr(i),                                   &    !O
-               &    runoff1(i),                                         &    !O
-               &    qsurf(i),                                              &    !D
-               &    snotime(i),                                        &
-               &    ribb(i),errflg, errmsg)
-          if (errflg > 0) return
-        endif
+        end if
       end do
-      
       
       end subroutine sfc_noah_run
 !> @}
