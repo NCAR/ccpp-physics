@@ -125,7 +125,7 @@
       subroutine sfc_noah_wrfv4_pre_run (im, nsoil, ialb, isice, land,         &
         flag_guess, flag_iter, restart, first_time_step, flag_lsm,             &
         flag_lsm_glacier, dt, rhowater, rd, rvrdm1, eps, epsm1, sfcprs, tprcp, &
-        sfctmp, q1, prslki, wind, t1, snwdph, cm, ch, weasd, tsfc, vtype, smc, &
+        sfctmp, q1, prslki, wind, snwdph, cm, ch, weasd, tsfc, vtype, smc,     &
         stc, slc, snoalb, prcp, q2k, rho1, qs1, th1, dqsdt2, canopy, cmc,      &
         snowhk, chk, cmm, chh, weasd_save, snwdph_save, tsfc_save, canopy_save,&
         smc_save, stc_save, slc_save, ep, evap, hflx, gflux, drain, evbs, evcw,&
@@ -149,7 +149,7 @@
       real(kind=kind_phys),                intent(in) :: dt, rhowater, rd, rvrdm1, eps, epsm1
 
       logical, dimension(im),              intent(in) :: flag_guess, flag_iter, land
-      real(kind=kind_phys), dimension(im), intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, t1, snwdph
+      real(kind=kind_phys), dimension(im), intent(in) :: sfcprs, tprcp, sfctmp, q1, prslki, wind, cm, ch, snwdph
       real(kind=kind_phys), dimension(im), intent(in) :: weasd, tsfc, vtype
       real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc, stc, slc
 
@@ -233,16 +233,14 @@
           
           !GJF: The GFS version of NOAH prepares the specific humidity in sfc_drv.f as follows:
           q2k(i)   = max(q1(i), 1.e-8)
-          write(*,*) sfcprs(i), rd, t1(i), rvrdm1, q2k(i)
-          write(*,*) rho1(i)
-          rho1(i)  = sfcprs(i) / (rd*t1(i)*(1.0+rvrdm1*q2k(i)))
-          write(*,*) 'YO'
+          rho1(i)  = sfcprs(i) / (rd*sfctmp(i)*(1.0+rvrdm1*q2k(i)))
+          
           qs1(i)   = fpvs( sfctmp(i) )
           qs1(i)   = max(eps*qs1(i) / (sfcprs(i)+epsm1*qs1(i)), 1.e-8)
           q2k(i)   = min(qs1(i), q2k(i))
           
           !GJF: could potentially pass in pre-calcualted potential temperature if other schemes also need it (to avoid redundant calculation)
-          th1(i) = t1(i) * prslki(i)
+          th1(i) = sfctmp(i) * prslki(i)
           
           !GJF: module_sf_noahdrv.F from WRF modifies dqsdt2 if the surface has snow.
           dqsdt2(i)=qs1(i)*a23m4/(sfctmp(i)-a4)**2
@@ -680,7 +678,7 @@
 !!
       subroutine sfc_noah_wrfv4_post_run (im, nsoil, land, flag_guess, flag_lsm, &
         rhowater, cp, hvap, cmc, rho1, sheat, eta, flx1, flx2, flx3, sncovr, runoff1,&
-        runoff2, soilm, snowhk, weasd_save, snwdph_save, tsfc_save, t1,        &
+        runoff2, soilm, snowhk, weasd_save, snwdph_save, tsfc_save, tsurf,     &
         canopy_save, smc_save, stc_save, slc_save, smcmax, canopy, shflx,      &
         lhflx, snohf, snowc, runoff, drain, stm, weasd, snwdph, tsfc, smc, stc,& 
         slc, wet1, errmsg, errflg)
@@ -694,7 +692,7 @@
       real(kind=kind_phys),   intent(in) :: rhowater, cp, hvap
       real(kind=kind_phys), dimension(im), intent(in) :: cmc, rho1, sheat, eta, &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, snowhk
-      real(kind=kind_phys), dimension(im), intent(in) :: weasd_save, snwdph_save, tsfc_save, t1, canopy_save, smcmax
+      real(kind=kind_phys), dimension(im), intent(in) :: weasd_save, snwdph_save, tsfc_save, tsurf, canopy_save, smcmax
       real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smc_save, stc_save, slc_save
       
       real(kind=kind_phys), dimension(im), intent(inout) :: canopy, shflx, lhflx, &
@@ -750,7 +748,7 @@
             end do
             
           else
-            tsfc(i) = t1(i)
+            tsfc(i) = tsurf(i)
           end if
         end if
       end do
