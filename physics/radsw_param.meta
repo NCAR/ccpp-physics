@@ -34,3 +34,9 @@
   units = DDT
   dimensions = ()
   type = cmpfsw_type
+[profsw_type]
+  standard_name = profsw_type
+  long_name = definition of type profsw_type
+  units = DDT
+  dimensions = ()
+  type = profsw_type
