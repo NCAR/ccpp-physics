@@ -191,11 +191,11 @@
       end if
       
       if (lsm==lsm_ruc .or. lsm==lsm_noahmp) then
-            raincprv(:)   = rainc(:)
-            rainncprv(:)  = frain * rain1(:)
-            iceprv(:)     = ice(:)
-            snowprv(:)    = snow(:)
-            graupelprv(:) = graupel(:)
+        raincprv(:)   = rainc(:)
+        rainncprv(:)  = frain * rain1(:)
+        iceprv(:)     = ice(:)
+        snowprv(:)    = snow(:)
+        graupelprv(:) = graupel(:)
         !for NoahMP, calculate precipitation rates from liquid water equivalent thickness for use in next time step
         !Note (GJF): Precipitation LWE thicknesses are multiplied by the frain factor, and are thus on the dynamics time step, but the conversion as written
         !            (with dtp in the denominator) assumes the rate is calculated on the physics time step. This only works as expected when dtf=dtp (i.e. when frain=1).
@@ -341,8 +341,10 @@
 
       if (cplflx .or. cplchm) then
         do i = 1, im
-          rain_cpl(i) = rain_cpl(i) + rain(i) * (one-srflag(i))
-          snow_cpl(i) = snow_cpl(i) + rain(i) * srflag(i)
+          drain_cpl(i) = rain(i) * (one-srflag(i))
+          dsnow_cpl(i) = rain(i) * srflag(i)
+          rain_cpl(i) = rain_cpl(i) + drain_cpl(i)
+          snow_cpl(i) = snow_cpl(i) + dsnow_cpl(i)
         enddo
       endif
 
@@ -376,15 +378,6 @@
       if (do_sppt) then
 !--- radiation heating rate
         dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
-        do i = 1, im
-          if (t850(i) > 273.16) then
-!--- change in change in rain precip
-             drain_cpl(i) = rain(i) - drain_cpl(i)
-          else
-!--- change in change in snow precip
-             dsnow_cpl(i) = rain(i) - dsnow_cpl(i)
-          endif
-        enddo
       endif
 
     end subroutine GFS_MP_generic_post_run
