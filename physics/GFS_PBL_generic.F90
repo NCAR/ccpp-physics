@@ -335,8 +335,9 @@
       real(kind=kind_phys), parameter :: one   = 1.0d0
       real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
       real(kind=kind_phys), parameter :: epsln = 1.0d-10 ! same as in GFS_physics_driver.F90
+      real(kind=kind_phys), parameter :: qmin  = 1.0d-8
       integer :: i, k, kk, k1, n
-      real(kind=kind_phys) :: tem, tem1, rho
+      real(kind=kind_phys) :: tem, rho
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -488,8 +489,7 @@
 
       if (cplchm) then
         do i = 1, im
-          tem1 = max(q1(i), 1.e-8)
-          tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
+          tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
           ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
         enddo
         ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
@@ -508,8 +508,7 @@
               dtsfci_cpl(i) = dtsfc_cice(i)
               dqsfci_cpl(i) = dqsfc_cice(i)
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
-              tem1 = max(q1(i), 1.e-8)
-              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
+              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*max(q1(i), qmin)))
               if (wind(i) > zero) then
                 tem = - rho * stress_ocn(i) / wind(i)
                 dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux

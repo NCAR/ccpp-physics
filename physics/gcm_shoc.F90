@@ -46,7 +46,7 @@ subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, 
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
-   real(kind=kind_phys), parameter :: epsq = 1.d-20
+   real(kind=kind_phys), parameter :: epsq = 1.0d-20, zero=0.0d0, one=1.0d0
 
    integer :: i, k
 
@@ -69,15 +69,15 @@ subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, 
          do i=1,nx
            qc(i,k) = gq0(i,k,ntcw)
            if (abs(qc(i,k)) < epsq) then
-             qc(i,k) = 0.0
+             qc(i,k) = zero
            endif
-           tem = qc(i,k) * max(0.0, MIN(1.0, (tcr-gt0(i,k))*tcrf))
+           tem = qc(i,k) * max(zero, MIN(one, (tcr-gt0(i,k))*tcrf))
            qi(i,k) = tem                              ! ice
            qc(i,k) = qc(i,k) - tem         ! water
-           qrn(i,k)  = 0.0
-           qsnw(i,k) = 0.0
-           ncpl(i,k) = 0
-           ncpi(i,k) = 0
+           qrn(i,k)  = zero
+           qsnw(i,k) = zero
+           ncpl(i,k) = zero
+           ncpi(i,k) = zero
          enddo
        enddo
     else
@@ -617,7 +617,7 @@ contains
     call eddy_length()   ! Find turbulent mixing length
     call check_eddy()    ! Make sure it's reasonable
 
-    tkef2 = 1.0 - tkef1
+    tkef2 = one - tkef1
     do k=1,nzm
       ku = k+1
       kd = k
@@ -661,7 +661,7 @@ contains
 !Obtain Brunt-Vaisalla frequency from diagnosed SGS buoyancy flux
 !Presumably it is more precise than BV freq. calculated in  eddy_length()?
 
-        buoy_sgs = - (a_prod_bu+a_prod_bu) / (tkh(i,ku)+tkh(i,kd) + 0.0001)   ! tkh is eddy thermal diffussivity
+        buoy_sgs = - (a_prod_bu+a_prod_bu) / (tkh(i,ku)+tkh(i,kd) + 0.0001d0)   ! tkh is eddy thermal diffussivity
 
 
 !Compute $c_k$ (variable Cee) for the TKE dissipation term following Deardorff (1980)
@@ -849,7 +849,7 @@ contains
 
 ! Find the in-cloud Brunt-Vaisalla frequency
 
-           omn = qcl(i,k) / (wrk+1.e-20) ! Ratio of liquid water to total water
+           omn = qcl(i,k) / (wrk+1.0d-20) ! Ratio of liquid water to total water
 
 ! Latent heat of phase transformation based on relative water phase content
 ! fac_cond = lcond/cp, fac_fus = lfus/cp
@@ -993,7 +993,7 @@ contains
             enddo
             conv_var = conv_var ** oneb3
 
-            if (conv_var > 0) then ! If convective vertical velocity scale > 0
+            if (conv_var > zero) then ! If convective vertical velocity scale > 0
 
               depth = (zl(i,ku)-zl(i,kl)) + adzl(i,kl)
 
@@ -1053,7 +1053,7 @@ contains
 !**********************************************************************
 
         conv_vel2(i,k) = conv_vel2(i,k-1)                               &
-                       + 2.5*adzi(i,k)*bet(i,k)*wthv_sec(i,k)
+                       + 2.5d0*adzi(i,k)*bet(i,k)*wthv_sec(i,k)
       enddo
     enddo
 
@@ -1084,7 +1084,7 @@ contains
 
       do i=1,nx
 
-        wrk = 0.1*adzl(i,k)
+        wrk = 0.1d0*adzl(i,k)
                                                             ! Minimum 0.1 of local dz
         smixt(i,k) = max(wrk, min(max_eddy_length_scale,smixt(i,k)))
 
@@ -1092,7 +1092,7 @@ contains
 ! be not larger that that.
 !       if (sqrt(dx*dy) .le. 1000.) smixt(i,k)=min(sqrt(dx*dy),smixt(i,k))
 
-        if (qcl(i,kb) == 0 .and. qcl(i,k) > 0 .and. brunt(i,k) > 1.0d-4) then
+        if (qcl(i,kb) == zero .and. qcl(i,k) > zero .and. brunt(i,k) > 1.0d-4) then
 !If just above the cloud top and atmosphere is stable, set to  0.1 of local dz
           smixt(i,k) = wrk
         endif
@@ -1211,7 +1211,7 @@ contains
 
         omega0 = a4 / (one-a5*buoy_sgs2)
         omega1 = omega0 / (c+c)
-        omega2 = omega1*f3+(5./4.)*omega0*f4
+        omega2 = omega1*f3+(5.0d0/4.0d0)*omega0*f4
 
 ! Compute the X0, Y0, X1, Y1 terms,  see Eq. 5 a-b in C01  (B.5 in Pete's dissertation)
 
@@ -1234,7 +1234,7 @@ contains
 !<aab
 ! Move clipping of w3 to assumed_pdf()
 !       w3(i,k) = max(-cond_w, min(cond_w, (AA1-1.2*X1-1.5*f5)/(c-1.2*X0+AA0)))
-        w3(i,k) = (AA1-1.2*X1-1.5*f5)/(c-1.2*X0+AA0)
+        w3(i,k) = (AA1-1.2d0*X1-1.5d0*f5)/(c-1.2d0*X0+AA0)
 !>aab
 
 ! Implemetation of the C01 approach in this subroutine is nearly complete
@@ -1362,21 +1362,21 @@ contains
         ELSE
 !<aab
 ! Clip w3
-          cond_w = 1.2*sqrt2*max(w3_tol, sqrtw2*sqrtw2*sqrtw2)
+          cond_w = 1.2d0*sqrt2*max(w3_tol, sqrtw2*sqrtw2*sqrtw2)
           w3var  = max(-cond_w, min(cond_w, w3var))
 !>aab
 
           Skew_w = w3var / (sqrtw2*sqrtw2*sqrtw2)     ! Moorthi
 ! Proportionality coefficients between widths of each vertical velocity 
 ! gaussian and the sqrt of the second moment of w
-          w2_1 = 0.4
-          w2_2 = 0.4
+          w2_1 = 0.4d0
+          w2_2 = 0.4d0
 
 ! Compute realtive weight of the first PDF "plume" 
 ! See Eq A4 in Pete's dissertaion -  Ensure 0.01 < a < 0.99
 
           wrk   = one - w2_1
-          aterm = max(atmin,min(half*(one-Skew_w*sqrt(one/(4.*wrk*wrk*wrk+Skew_w*Skew_w))),atmax))
+          aterm = max(atmin,min(half*(one-Skew_w*sqrt(one/(4.0d0*wrk*wrk*wrk+Skew_w*Skew_w))),atmax))
           onema = one - aterm
 
           sqrtw2t = sqrt(wrk)
@@ -1450,12 +1450,12 @@ contains
 
 !         Skew_qw = skew_facw*Skew_w
 
-          IF (tsign > 0.4) THEN
+          IF (tsign > 0.4d0) THEN
             Skew_qw = skew_facw*Skew_w
-          ELSEIF (tsign <= 0.2) THEN
+          ELSEIF (tsign <= 0.2d0) THEN
             Skew_qw = zero
           ELSE
-            Skew_qw = (skew_facw/0.2) * Skew_w * (tsign-0.2)
+            Skew_qw = (skew_facw/0.2d0) * Skew_w * (tsign-0.2d0)
           ENDIF
 
           wrk1  = qw1_1 * qw1_1
@@ -1489,7 +1489,7 @@ contains
 
         testvar = aterm*sqrtqw2_1*sqrtthl2_1 + onema*sqrtqw2_2*sqrtthl2_2
 
-        IF (testvar == 0) THEN
+        IF (testvar == zero) THEN
           r_qwthl_1 = zero
         ELSE
           r_qwthl_1 = max(-one,min(one,(qwthlsec-aterm*(qw1_1-qw_first)*(thl1_1-thl_first) &
@@ -1648,8 +1648,7 @@ contains
 
         diag_qn = min(max(zero, aterm*qn1 + onema*qn2), total_water(i,k))
         diag_ql = min(max(zero, aterm*ql1 + onema*ql2), diag_qn)
-        diag_qi = diag_qn - diag_ql
-
+        diag_qi = max(zero, diag_qn - diag_ql)
 
 ! Update temperature variable based on diagnosed cloud properties
         om1         = max(zero, min(one, (tabs(i,k)-tbgmin)*a_bg))
@@ -1658,15 +1657,8 @@ contains
                                          + fac_sub *(diag_qi+qpi(i,k)) &
                   + tkesbdiss(i,k) * (dtn/cp)      ! tke dissipative heating
 
-! Update moisture fields
-
 ! Update ncpl and ncpi Anning Cheng 03/11/2016
 !       ncpl(i,k)    = diag_ql/max(qc(i,k),1.e-10)*ncpl(i,k)
-
-        qc(i,k)      = diag_ql
-        qi(i,k)      = diag_qi
-        qwv(i,k)     = total_water(i,k) - diag_qn
-        cld_sgs(i,k) = diag_frac
 
 ! Update ncpl and ncpi Moorthi  12/12/2018
         if (ntlnc > 0) then         ! liquid and ice number concentrations predicted
@@ -1681,6 +1673,12 @@ contains
             ncpi(i,k) = max(diag_qi/(fourb3*pi*RI_cub*500.0d0), nmin)
           endif
         endif
+
+! Update moisture fields
+        qc(i,k)      = diag_ql
+        qi(i,k)      = diag_qi
+        qwv(i,k)     = max(zero, total_water(i,k) - diag_qn)
+        cld_sgs(i,k) = diag_frac
 
 ! Compute the liquid water flux
         wqls = aterm * ((w1_1-w_first)*ql1) + onema * ((w1_2-w_first)*ql2)

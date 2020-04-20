@@ -246,7 +246,7 @@
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
-        real(kind=kind_phys), parameter :: albdf   = 0.06d0
+        real(kind=kind_phys), parameter :: albdf = 0.06d0
 
         integer :: i
         real(kind=kind_phys) :: xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
@@ -304,12 +304,12 @@
 !           if (Sfcprop%landfrac(i) < one) then ! Not 100% land
             if (wet(i)) then                    ! some open water 
 !  ---  compute open water albedo
-              xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
-              ocalnirdf_cpl = 0.06
-              ocalnirbm_cpl = max(albdf, 0.026/(xcosz_loc**1.7+0.065)  &
-       &                       + 0.15 * (xcosz_loc-0.1) * (xcosz_loc-0.5) &
-       &                       * (xcosz_loc-1.0))
-              ocalvisdf_cpl = 0.06
+              xcosz_loc = max( zero, min( one, xcosz(i) ))
+              ocalnirdf_cpl = 0.06d0
+              ocalnirbm_cpl = max(albdf, 0.026d0/(xcosz_loc**1.7d0+0.065d0)  &
+       &                       + 0.15d0 * (xcosz_loc-0.1d0) * (xcosz_loc-0.5d0) &
+       &                       * (xcosz_loc-one))
+              ocalvisdf_cpl = 0.06d0
               ocalvisbm_cpl = ocalnirbm_cpl
 
               nnirbmi_cpl(i) = adjnirbmd(i) * (one-ocalnirbm_cpl)

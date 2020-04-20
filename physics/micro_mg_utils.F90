@@ -480,15 +480,15 @@ elemental subroutine size_dist_param_liq_line(props, qcic, ncic, rho, pgam, lamc
      if (liq_gmao) then
        pgam = 0.0005714_r8*1.e-6_r8*ncic*rho + 0.2714_r8
        ! Anning modified lamc
-       if ((ncic > 1.0e-3) .and. (qcic > 1.0e-11)) then
+       if ((ncic > 1.0e-3_r8) .and. (qcic > 1.0e-11_r8)) then
          xs = 0.07_r8*(1000._r8*qcic/ncic) ** (-0.14_r8)
        else
-         xs = 1.2
+         xs = 1.2_r8
        end if
 
         xs = max(min(xs, 1.7_r8), 1.1_r8)
         xs = xs*xs*xs
-        xs = (xs + sqrt(xs+8.0_r8)*sqrt(xs) - 4.)/8.0_r8
+        xs = (xs + sqrt(xs+8.0_r8)*sqrt(xs) - 4.0_r8)/8.0_r8
         pgam = sqrt(xs)
      else
 
@@ -549,15 +549,15 @@ subroutine size_dist_param_liq_vect(props, qcic, ncic, rho, pgam, lamc, mgncol)
 
         if (liq_gmao) then
           pgam(i) = 0.0005714_r8*1.e-6_r8*ncic(i)*rho(i) + 0.2714_r8
-          if ((ncic(i) > 1.0e-3) .and. (qcic(i) > 1.0e-11)) then
+          if ((ncic(i) > 1.0e-3_r8) .and. (qcic(i) > 1.0e-11_r8)) then
             xs = 0.07_r8*(1000._r8*qcic(i)/ncic(i)) **(-0.14_r8)
           else
-            xs = 1.2
+            xs = 1.2_r8
           end if
 
           xs = max(min(xs, 1.7_r8), 1.1_r8)
           xs = xs*xs*xs
-          xs = (xs + sqrt(xs+8.0_r8)*sqrt(xs) - 4.)/8.0_r8
+          xs = (xs + sqrt(xs+8.0_r8)*sqrt(xs) - 4.0_r8)/8.0_r8
           pgam(i) = sqrt(xs)
         else
           pgam(i) = one - 0.7_r8 * exp(-0.008_r8*1.e-6_r8*ncic(i)*rho(i))
@@ -705,14 +705,14 @@ elemental subroutine size_dist_param_ice_line(props, qic, nic, lam, n0)
      lam = (props%shape_coef * nic/qic)**(1._r8/props%eff_dim)
      if (ice_sep) then
        miu_ice = max(min(0.008_r8*(lam*0.01)**0.87_r8, 10.0_r8), 0.1_r8)
-       tx1 = 1. + miu_ice
-       tx2 = 1. / gamma(tx1)
-       aux = (gamma(tx1+3.)*tx2) ** (1./3.)
+       tx1 = 1.0_r8 + miu_ice
+       tx2 = 1.0_r8 / gamma(tx1)
+       aux = (gamma(tx1+3.0_r8)*tx2) ** (1.0_r8/3.0_r8)
        lam = lam*aux
      else
-       aux = 1.
-       tx1 = 1.0
-       tx2 = 1.0
+       aux = 1.0_r8
+       tx1 = 1.0_r8
+       tx2 = 1.0_r8
      end if
      if (present(n0)) n0 = nic * lam**tx1*tx2
 
@@ -729,7 +729,7 @@ elemental subroutine size_dist_param_ice_line(props, qic, nic, lam, n0)
      end if
 
   else
-     lam = 0._r8
+     lam = 0.0_r8
   end if
 
 
@@ -762,14 +762,14 @@ subroutine size_dist_param_ice_vect(props, qic, nic, lam, mgncol, n0)
         lam(i) = (props%shape_coef * nic(i)/qic(i))**(1._r8/props%eff_dim)
         if (ice_sep) then
            miu_ice = max(min(0.008_r8*(lam(i)*0.01)**0.87_r8, 10.0_r8), 0.1_r8)
-           tx1    = 1. + miu_ice
-           tx2    = 1. / gamma(tx1)
-           aux    = (gamma(tx1+3.)*tx2) ** (1./3.)
+           tx1    = 1.0_r8 + miu_ice
+           tx2    = 1.0_r8 / gamma(tx1)
+           aux    = (gamma(tx1+3.0_r8)*tx2) ** (1.0_r8/3.0_r8)
            lam(i) = lam(i)*aux
         else
-           aux = 1.
-           tx1 = 1.0
-           tx2 = 1.0
+           aux = 1.0_r8
+           tx1 = 1.0_r8
+           tx2 = 1.0_r8
         end if
         if (present(n0)) n0(i) = nic(i) * lam(i)**tx1*tx2
 
@@ -786,7 +786,7 @@ subroutine size_dist_param_ice_vect(props, qic, nic, lam, mgncol, n0)
         end if
 
      else
-        lam(i) = 0._r8
+        lam(i) = 0.0_r8
      end if
 
   enddo
@@ -1094,12 +1094,12 @@ subroutine sb2001v2_liq_autoconversion(pgam,qc,nc,qr,rho,relvar,au,nprc,nprc1,mg
            beta6 = (one+three*xs)*(one+four*xs)*(one+five*xs)  &
                  / ((one+xs)*(one+xs+xs))
            LW    = 1.0e-3_r8 * qc(i) * rho(i)
-           NW    = nc(i) * rho(i)  * 1.e-6_r8
+           NW    = nc(i) * rho(i) * 1.e-6_r8
 
-           xs    = min(20.0, 1.03e16*(LW*LW)/(NW*SQRT(NW)))
-           au(i) = 1.1e10*beta6*LW*LW*LW                &
+           xs    = min(20.0_r8, 1.03e16_r8*(LW*LW)/(NW*SQRT(NW)))
+           au(i) = 1.1e10_r8*beta6*LW*LW*LW                &
                  * (one-exp(-(xs**miu_disp))) / NW
-           au(i) = au(i)*1.0e3/rho(i)
+           au(i) = au(i)*1.0e3_r8/rho(i)
            au(i) = au(i) * gamma(two+relvar(i))          &
                  / (gamma(relvar(i))*(relvar(i)*relvar(i)))
 
@@ -2149,7 +2149,7 @@ subroutine graupel_collecting_snow(qsic,qric,umr,ums,rho,lamr,n0r,lams,n0s, &
         tx5 = tx4 * tx4 * tx3
 
         psacr(i) = cons31 * tx1 * rho(i) * n0r(i) * n0s(i) * tx5    &
-                                * (5.0*tx4+tx3*(tx2+tx2+0.5*tx3))
+                                * (5.0_r8*tx4+tx3*(tx2+tx2+0.5_r8*tx3))
 
 !       psacr(i) = cons31*(((1.2_r8*umr(i)-0.95_r8*ums(i))**2+      &
 !            0.08_r8*ums(i)*umr(i))**0.5_r8*rho(i)*                 &
@@ -2201,7 +2201,7 @@ subroutine graupel_collecting_cld_water(qgic,qcic,ncic,rho,n0g,lamg,bg,agn, &
 
   do i=1,mgncol
 
-        if (qgic(i) >= 1.e-8 .and. qcic(i) >= qsmall) then
+        if (qgic(i) >= 1.e-8_r8 .and. qcic(i) >= qsmall) then
 
            tx1 = cons*agn(i)*rho(i)*n0g(i) / lamg(i)**(bg+three)
 
@@ -2346,8 +2346,8 @@ subroutine graupel_collecting_rain(qric,qgic,umg,umr,ung,unr,rho,n0r,lamr,n0g,la
 ! pracg is mixing ratio of rain per sec collected by graupel/hail
         tx1 = 1.2_r8*umr(i) - 0.95_r8*umg(i)
         tx1 = sqrt(tx1*tx1+0.08_r8*umg(i)*umr(i))
-        tx2 = 1.0 / lamr(i)
-        tx3 = 1.0 / lamg(i)
+        tx2 = 1.0_r8 / lamr(i)
+        tx3 = 1.0_r8 / lamg(i)
         tx4 = tx2 * tx2
         tx5 = tx4 * tx4 * tx3
         tx6 = rho(i) * n0r(i) * n0g(i)
@@ -2710,10 +2710,10 @@ FUNCTION gamma_incomp(muice, x)
   real(r8) :: gamma_incomp
   REAL(r8), intent(in) :: muice, x
   REAL(r8) :: xog, kg, alfa, auxx
-  alfa = min(max(muice+1., 1.), 20._r8)
+  alfa = min(max(muice+1._r8, 1._r8), 20._r8)
 
   xog  = log(alfa -0.3068_r8)
-  kg   = 1.44818*(alfa**0.5357_r8)
+  kg   = 1.44818_r8*(alfa**0.5357_r8)
   auxx = max(min(kg*(log(x)-xog), 30._r8), -30._r8)
   gamma_incomp = max(one/(one+exp(-auxx)), 1.0e-20) 
 

@@ -127,21 +127,21 @@
 !
       if (.not. cplflx) return
 !
-      cpinv = 1.0/cp
-      hvapi = 1.0/hvap
+      cpinv = 1.0d0/cp
+      hvapi = 1.0d0/hvap
       elocp = hvap/cp
 !
       do i = 1, im
         if (flag_cice(i) .and. flag_iter(i)) then
 
           rho    = prsl1(i)                                             &
-     &           / (rd * t1(i) * (1.0 + rvrdm1*max(q1(i), 1.0e-8)))
+     &           / (rd * t1(i) * (1.0d0 + rvrdm1*max(q1(i), 1.0d-8)))
 
           cmm(i) = wind(i) * cm(i)
           chh(i) = wind(i) * ch(i) * rho
 
           qsurf(i)  = q1(i) + dqsfc(i) / (hvap*chh(i))
-          tem       = 1.0 / rho
+          tem       = 1.0d0 / rho
           hflx(i)   = dtsfc(i) * tem * cpinv
           evap(i)   = dqsfc(i) * tem * hvapi
           stress(i) = sqrt(dusfc(i)*dusfc(i) + dvsfc(i)*dvsfc(i)) * tem

@@ -97,8 +97,8 @@
       logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm
 
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
-      real(kind=kind_phys), dimension(im),            intent(in)    :: rainc, rain1, xlat, xlon, tsfc
-      real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel
+      real(kind=kind_phys), dimension(im),            intent(in)    :: rain1, xlat, xlon, tsfc
+      real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel, rainc
       real(kind=kind_phys), dimension(im),            intent(in)    :: rain0, ice0, snow0, graupel0
       real(kind=kind_phys), dimension(ix,nrcm),       intent(in)    :: rann
       real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
@@ -149,7 +149,7 @@
       integer :: i, k, ic
 
       real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0
-      real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip
+      real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2
       real(kind=kind_phys), dimension(im) :: domr, domzr, domip, doms, t850, work1
 
       ! Initialize CCPP error handling variables
@@ -157,7 +157,7 @@
       errflg = 0
 
       onebg = one/con_g
-
+      
       do i = 1, im
         rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
@@ -171,7 +171,7 @@
       ! physics timestep, while Diag%{rain,rainc} and all totprecip etc
       ! are on the dynamics timestep. Confusing, but works if frain=1. *DH
       if (imp_physics == imp_physics_gfdl) then
-        tprcp   = max(0., rain)               ! clu: rain -> tprcp
+        tprcp   = max(zero, rain)               ! clu: rain -> tprcp
         !graupel = frain*graupel0
         !ice     = frain*ice0
         !snow    = frain*snow0
@@ -180,13 +180,13 @@
         snow    = snow0
       ! Do it right from the beginning for Thompson
       else if (imp_physics == imp_physics_thompson) then
-        tprcp   = max (0.,rainc + frain * rain1) ! time-step convective and explicit precip
+        tprcp   = max (zero, rainc + frain * rain1) ! time-step convective and explicit precip
         graupel = frain*graupel0              ! time-step graupel
         ice     = frain*ice0                  ! time-step ice
         snow    = frain*snow0                 ! time-step snow
 
       else if (imp_physics == imp_physics_fer_hires) then
-        tprcp   = max (0.,rain) ! time-step convective and explicit precip
+        tprcp   = max (zero, rain) ! time-step convective and explicit precip
         ice     = frain*rain1*sr                  ! time-step ice
       end if
       
@@ -200,7 +200,7 @@
         !Note (GJF): Precipitation LWE thicknesses are multiplied by the frain factor, and are thus on the dynamics time step, but the conversion as written
         !            (with dtp in the denominator) assumes the rate is calculated on the physics time step. This only works as expected when dtf=dtp (i.e. when frain=1).
         if (lsm == lsm_noahmp) then
-          tem = 1.0 / (dtp*con_p001) !GJF: This conversion was taken from GFS_physics_driver.F90, but should denominator also have the frain factor?
+          tem = one / (dtp*con_p001) !GJF: This conversion was taken from GFS_physics_driver.F90, but should denominator also have the frain factor?
           draincprv(:)   = tem * raincprv(:)
           drainncprv(:)  = tem * rainncprv(:)
           dsnowprv(:)    = tem * snowprv(:)
@@ -221,11 +221,11 @@
 
         if (imp_physics /= imp_physics_gfdl .and. imp_physics /= imp_physics_thompson) then
           do i=1,im
-            tprcp(i)  = max(0.0, rain(i) )
-            if(doms(i) > 0.0 .or. domip(i) > 0.0) then
-              srflag(i) = 1.
+            tprcp(i)  = max(zero, rain(i) )
+            if(doms(i) > zero .or. domip(i) > zero) then
+              srflag(i) = one
             else
-              srflag(i) = 0.
+              srflag(i) = zero
             end if
           enddo
         endif
@@ -238,34 +238,6 @@
           enddo
         endif
 
-      endif
-
-      if (lssav) then
-!        if (Model%me == 0) print *,'in phys drive, kdt=',Model%kdt, &
-!          'totprcpb=', Diag%totprcpb(1),'totprcp=',Diag%totprcp(1), &
-!          'rain=',Diag%rain(1)
-        do i=1,im
-          cnvprcp (i) = cnvprcp (i) + rainc(i)
-          totprcp (i) = totprcp (i) + rain(i)
-          totice  (i) = totice  (i) + ice(i)
-          totsnw  (i) = totsnw  (i) + snow(i)
-          totgrp  (i) = totgrp  (i) + graupel(i)
-
-          cnvprcpb(i) = cnvprcpb(i) + rainc(i)
-          totprcpb(i) = totprcpb(i) + rain(i)
-          toticeb (i) = toticeb (i) + ice(i)
-          totsnwb (i) = totsnwb (i) + snow(i)
-          totgrpb (i) = totgrpb (i) + graupel(i)
-        enddo
-
-        if (ldiag3d) then
-          do k=1,levs
-            do i=1,im
-              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-!             dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
-            enddo
-          enddo
-        endif
       endif
 
       t850(1:im) = gt0(1:im,1)
@@ -294,12 +266,12 @@
         if (lsm /= lsm_ruc) then
           do i = 1, im
             !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
-            srflag(i) = 0.                     ! clu: default srflag as 'rain' (i.e. 0)
-            if (tsfc(i) >= 273.15) then
+            srflag(i) = zero                     ! clu: default srflag as 'rain' (i.e. 0)
+            if (tsfc(i) >= 273.15d0) then
               crain = rainc(i)
-              csnow = 0.0
+              csnow = zero
             else
-              crain = 0.0
+              crain = zero
               csnow = rainc(i)
             endif
 !            if (snow0(i,1)+ice0(i,1)+graupel0(i,1)+csnow > rain0(i,1)+crain) then
@@ -319,30 +291,65 @@
         endif ! lsm==lsm_ruc
       elseif( .not. cal_pre) then
         if (imp_physics == imp_physics_mg) then          ! MG microphysics
-          tem = con_day / (dtp * con_p001)               ! mm / day
           do i=1,im
-            tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
-            if (rain(i)*tem > rainmin) then
-              srflag(i) = max(zero, min(one, (rain(i)-rainc(i))*sr(i)/rain(i)))
+            if (rain(i) > rainmin) then
+              tem1 = max(zero, (rain(i)-rainc(i))) * sr(i)
+              tem2 = one / rain(i)
+              if (t850(i) > 273.16d0) then
+                srflag(i) = max(zero, min(one, tem1*tem2))
+              else
+                srflag(i) = max(zero, min(one, (tem1+rainc(i))*tem2))
+              endif
             else
-              srflag(i) = 0.0
+              srflag(i) = zero
+              rain(i)   = zero
+              rainc(i)  = zero
             endif
+            tprcp(i)  = max(zero, rain(i) )     ! clu: rain -> tprcp
           enddo
         else
           do i = 1, im
-            tprcp(i)  = max(0.0, rain(i) )     ! clu: rain -> tprcp
-            srflag(i) = 0.0                    ! clu: default srflag as 'rain' (i.e. 0)
-            if (t850(i) <= 273.16) then
-              srflag(i) = 1.0                  ! clu: set srflag to 'snow' (i.e. 1)
+            tprcp(i)  = max(zero, rain(i) )     ! clu: rain -> tprcp
+            srflag(i) = zero                    ! clu: default srflag as 'rain' (i.e. 0)
+            if (t850(i) <= 273.16d0) then
+              srflag(i) = one                   ! clu: set srflag to 'snow' (i.e. 1)
             endif
+          enddo
+        endif
+      endif
+
+      if (lssav) then
+!        if (Model%me == 0) print *,'in phys drive, kdt=',kdt, &
+!          'totprcpb=', totprcpb(1),'totprcp=',totprcp(1),     &
+!          'rain=',rain(1)
+        do i=1,im
+          cnvprcp (i) = cnvprcp (i) + rainc(i)
+          totprcp (i) = totprcp (i) + rain(i)
+          totice  (i) = totice  (i) + ice(i)
+          totsnw  (i) = totsnw  (i) + snow(i)
+          totgrp  (i) = totgrp  (i) + graupel(i)
+
+          cnvprcpb(i) = cnvprcpb(i) + rainc(i)
+          totprcpb(i) = totprcpb(i) + rain(i)
+          toticeb (i) = toticeb (i) + ice(i)
+          totsnwb (i) = totsnwb (i) + snow(i)
+          totgrpb (i) = totgrpb (i) + graupel(i)
+        enddo
+
+        if (ldiag3d) then
+          do k=1,levs
+            do i=1,im
+              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
+!             dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
+            enddo
           enddo
         endif
       endif
 
       if (cplflx .or. cplchm) then
         do i = 1, im
-          drain_cpl(i) = rain(i) * (one-srflag(i))
-          dsnow_cpl(i) = rain(i) * srflag(i)
+          dsnow_cpl(i)= max(zero, rain(i) * srflag(i))
+          drain_cpl(i)= max(zero, rain(i) - dsnow_cpl(i))
           rain_cpl(i) = rain_cpl(i) + drain_cpl(i)
           snow_cpl(i) = snow_cpl(i) + dsnow_cpl(i)
         enddo
@@ -354,10 +361,10 @@
         enddo
       endif
 
-      pwat(:) = 0.0
+      pwat(:) = zero
       do k = 1, levs
         do i=1, im
-          work1(i) = 0.0
+          work1(i) = zero
         enddo
         if (ncld > 0) then
           do ic = ntcw, ntcw+nncl-1

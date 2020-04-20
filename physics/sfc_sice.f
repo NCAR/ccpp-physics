@@ -146,6 +146,7 @@
       real(kind=kind_phys), parameter :: timin = 173.0d0    !< minimum temperature allowed for snow/ice
       real(kind=kind_phys), parameter :: albfw = 0.06d0     !< albedo for lead
       real(kind=kind_phys), parameter :: dsi   = one/0.33d0
+      real(kind=kind_phys), parameter :: qmin  = 1.0d-8
 
 !  ---  inputs:
       integer, intent(in) :: im, km, ipr
@@ -231,7 +232,7 @@
         if (flag(i)) then
           if (srflag(i) > zero) then
             ep(i)    = ep(i)*(one-srflag(i))
-            weasd(i) = weasd(i) + 1.e3*tprcp(i)*srflag(i)
+            weasd(i) = weasd(i) + 1.0d3*tprcp(i)*srflag(i)
             tprcp(i) = tprcp(i)*(one-srflag(i))
           endif
         endif
@@ -260,7 +261,7 @@
 !         dlwflx has been given a negative sign for downward longwave
 !         sfcnsw is the net shortwave flux (direction: dn-up)
 
-          q0        = max(q1(i), 1.0e-8)
+          q0        = max(q1(i), qmin)
 !         tsurf(i)  = tskin(i)
 #ifdef GSD_SURFACE_FLUXES_BUGFIX
           theta1(i) = t1(i) / prslk1(i) ! potential temperature in middle of lowest atm. layer
@@ -269,7 +270,7 @@
 #endif
           rho(i)    = prsl1(i) / (rd*t1(i)*(one+rvrdm1*q0))
           qs1       = fpvs(t1(i))
-          qs1       = max(eps*qs1 / (prsl1(i) + epsm1*qs1), 1.e-8)
+          qs1       = max(eps*qs1 / (prsl1(i) + epsm1*qs1), qmin)
           q0        = min(qs1, q0)
 
           if (fice(i) < cimin) then
@@ -279,7 +280,7 @@
             tskin(i)= tgice
             print *,'fix ice fraction: reset it to:', fice(i)
           endif
-          ffw(i)    = 1.0 - fice(i)
+          ffw(i)    = one - fice(i)
 
           qssi = fpvs(tice(i))
           qssi = eps*qssi / (ps(i) + epsm1*qssi)
@@ -309,7 +310,7 @@
 !         evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
 
           snetw(i) = sfcdsw(i) * (one - albfw)
-          snetw(i) = min(3.0*sfcnsw(i)/(one+2.0d0*ffw(i)), snetw(i))
+          snetw(i) = min(3.0d0*sfcnsw(i)/(one+2.0d0*ffw(i)), snetw(i))
 !> - Calculate net solar incoming at top \a sneti.
           sneti(i) = (sfcnsw(i) - ffw(i)*snetw(i)) / fice(i)
 
@@ -416,10 +417,10 @@
 
 !  --- ...  convert snow depth back to mm of water equivalent
 
-          weasd(i)  = snowd(i) * 1000.0
+          weasd(i)  = snowd(i) * 1000.0d0
           snwdph(i) = weasd(i) * dsi             ! snow depth in mm
 
-          tem     = 1.0 / rho(i)
+          tem     = one / rho(i)
           hflx(i) = hflx(i) * tem * cpinv
           evap(i) = evap(i) * tem * hvapi
         endif
@@ -530,7 +531,7 @@
       real (kind=kind_phys), parameter :: didw = di/dw
       real (kind=kind_phys), parameter :: dsdi = ds/di
       real (kind=kind_phys), parameter :: ci   = 2054.0d0   !< heat capacity of fresh ice (j/kg/k)
-      real (kind=kind_phys), parameter :: li   = 3.34e5     !< latent heat of fusion (j/kg-ice)
+      real (kind=kind_phys), parameter :: li   = 3.34d5     !< latent heat of fusion (j/kg-ice)
       real (kind=kind_phys), parameter :: si   = 1.0d0      !< salinity of sea ice
       real (kind=kind_phys), parameter :: mu   = 0.054d0    !< relates freezing temp to salinity
       real (kind=kind_phys), parameter :: tfi  = -mu*si     !< sea ice freezing temp = -mu*salinity
@@ -573,9 +574,9 @@
 !
 !===> ...  begin here
 !
-      dt2  = 2.0d0 * delt
-      dt4  = 4.0d0 * delt
-      dt6  = 6.0d0 * delt
+      dt2  =  delt + delt
+      dt4  =  dt2  + dt2
+      dt6  =  dt2  + dt4
       dt2i = one / dt2
 
       do i = 1, im

@@ -201,7 +201,7 @@
       logical, dimension(im) :: invrsn
       real(kind=kind_phys), dimension(im) :: tx1, tx2
 
-      real(kind=kind_phys), parameter :: qmin = 1.0d-10
+      real(kind=kind_phys), parameter :: qmin = 1.0d-10, epsln=1.0d-10
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -246,13 +246,13 @@
             elseif (icy(i)) then                 ! ice (and water)
               tem = one - cice(i)
               if (flag_cice(i)) then
-                if (wet(i) .and. adjsfculw_ocn(i) /= huge) then
+                if (wet(i) .and. abs(adjsfculw_ocn(i)-huge) > epsln) then
                   adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_ocn(i)*tem
                 else
                   adjsfculw(i) = ulwsfc_cice(i)
                 endif
               else
-                if (wet(i) .and. adjsfculw_ocn(i) /= huge) then
+                if (wet(i) .and. abs(adjsfculw_ocn(i)-huge) > epsln) then
                   adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_ocn(i)*tem
                 else
                   adjsfculw(i) = adjsfculw_ice(i)
