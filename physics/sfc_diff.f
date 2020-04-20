@@ -228,7 +228,7 @@
 !
             czilc = 10.0 ** (- 4. * z0max) ! Trier et al. (2011, WAF)
             ztmax = z0max * exp( - czilc * ca
-     &            * 258.2 * sqrt(ustar(i,1)*z0max) )
+     &            * 258.2 * sqrt(ustar_lnd(i,1)*z0max) )
 
 
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
@@ -272,7 +272,7 @@
 !    &                     * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
             czilc = 10.0 ** (- 4. * z0max) ! Trier et al. (2011, WAF)
             ztmax = z0max * exp( - czilc * ca
-     &            * 258.2 * sqrt(ustar(i,1)*z0max) )
+     &            * 258.2 * sqrt(ustar_ice(i,1)*z0max) )
 
             ztmax = max(ztmax, 1.0e-6)
 !
