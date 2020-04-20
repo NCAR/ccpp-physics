@@ -6016,7 +6016,7 @@ ENDIF
           !Reminder: w is limited to be non-negative (above)
           aratio   = MIN(UPA(K-1,I)/(1.-UPA(K-1,I)), 0.5) !limit should never get hit
           detturb  = 0.00008
-          oow      = -0.064/MAX(1.0,(0.5*(Wn+UPW(K-1,I))))   !coef for dynamical detrainment rate
+          oow      = -0.060/MAX(1.0,(0.5*(Wn+UPW(K-1,I))))   !coef for dynamical detrainment rate
           detrate  = MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0004) ! dynamical detrainment rate (m^-1)
           detrateUV= MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0001) ! dynamical detrainment rate (m^-1) 
           envm_thl(k)=envm_thl(k) + (0.5*(thl_ent + UPTHL(K-1,I)) - thl(k))*detrate*aratio*dzp
@@ -6276,7 +6276,7 @@ ENDIF
           det_sqv(k)=Cdet*(envm_sqv(k)-qv(k))*envi_a(k)*Psig_w
           det_sqc(k)=Cdet*(envm_sqc(k)-qc(k))*envi_a(k)*Psig_w
        ENDDO
-       IF (momentum_opt > 1) THEN
+       IF (momentum_opt > 0) THEN
          sub_u(kts)=0.5*envi_w(kts)*envi_a(kts)*(u(kts+1)-u(kts))/dzi(kts)
          sub_v(kts)=0.5*envi_w(kts)*envi_a(kts)*(v(kts+1)-v(kts))/dzi(kts)
          DO k=KTS+1,KTE-1
