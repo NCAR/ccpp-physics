@@ -2770,9 +2770,9 @@ CONTAINS
            Q1(k)=MAX(Q1(k),-5.0)
            IF (Q1(k) .GE. 1.0) THEN
               Fng = 1.0
-           ELSEIF (Q1(k) .GE. -1.7 .AND. Q1(k) < 1.0) THEN
+           ELSEIF (Q1(k) .GE. -1.7 .AND. Q1(k) .LT. 1.0) THEN
               Fng = EXP(-0.4*(Q1(k)-1.0))
-           ELSEIF (Q1(k) .GE. -2.5 .AND. Q1(k) .LE. -1.7) THEN
+           ELSEIF (Q1(k) .GE. -2.5 .AND. Q1(k) .LT. -1.7) THEN
               Fng = 3.0 + EXP(-3.8*(Q1(k)+1.7))
            ELSE
               Fng = MIN(23.9 + EXP(-1.6*(Q1(k)+2.5)), 60.)
@@ -6017,21 +6017,21 @@ ENDIF
           aratio   = MIN(UPA(K-1,I)/(1.-UPA(K-1,I)), 0.5) !limit should never get hit
           detturb  = 0.00008
           oow      = -0.060/MAX(1.0,(0.5*(Wn+UPW(K-1,I))))   !coef for dynamical detrainment rate
-          detrate  = MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0004) ! dynamical detrainment rate (m^-1)
+          detrate  = MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0003) ! dynamical detrainment rate (m^-1)
           detrateUV= MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0001) ! dynamical detrainment rate (m^-1) 
-          envm_thl(k)=envm_thl(k) + (0.5*(thl_ent + UPTHL(K-1,I)) - thl(k))*detrate*aratio*dzp
+          envm_thl(k)=envm_thl(k) + (0.5*(thl_ent + UPTHL(K-1,I)) - thl(k))*detrate*aratio*MIN(dzp,300.)
           qv_ent = 0.5*(MAX(qt_ent-qc_ent,0.) + MAX(UPQT(K-1,I)-UPQC(K-1,I),0.))
-          envm_sqv(k)=envm_sqv(k) + (qv_ent-QV(K))*detrate*aratio*dzp
+          envm_sqv(k)=envm_sqv(k) + (qv_ent-QV(K))*detrate*aratio*MIN(dzp,300.)
           IF (UPQC(K-1,I) > 1E-8) THEN
              IF (QC(K) > 1E-6) THEN
                 qc_grid = QC(K)
              ELSE
                 qc_grid = cldfra_bl1d(k)*qc_bl1d(K)
              ENDIF
-             envm_sqc(k)=envm_sqc(k) + MAX(UPA(K-1,I)*0.5*(QCn + UPQC(K-1,I)) - qc_grid, 0.0)*detrate*aratio*dzp
+             envm_sqc(k)=envm_sqc(k) + MAX(UPA(K-1,I)*0.5*(QCn + UPQC(K-1,I)) - qc_grid, 0.0)*detrate*aratio*MIN(dzp,300.)
           ENDIF
-          envm_u(k)  =envm_u(k)   + (0.5*(Un + UPU(K-1,I)) - U(K))*detrateUV*aratio*dzp
-          envm_v(k)  =envm_v(k)   + (0.5*(Vn + UPV(K-1,I)) - V(K))*detrateUV*aratio*dzp
+          envm_u(k)  =envm_u(k)   + (0.5*(Un + UPU(K-1,I)) - U(K))*detrateUV*aratio*MIN(dzp,300.)
+          envm_v(k)  =envm_v(k)   + (0.5*(Vn + UPV(K-1,I)) - V(K))*detrateUV*aratio*MIN(dzp,300.)
 
           IF (Wn > 0.) THEN
              !Update plume variables at current k index
@@ -6419,9 +6419,9 @@ ENDIF
             Q1=MAX(Q1,-5.0)
             IF (Q1 .GE. 1.0) THEN
                Fng = 1.0
-            ELSEIF (Q1 .GE. -1.7 .AND. Q1 < 1.0) THEN
+            ELSEIF (Q1 .GE. -1.7 .AND. Q1 .LT. 1.0) THEN
                Fng = EXP(-0.4*(Q1-1.0))
-            ELSEIF (Q1 .GE. -2.5 .AND. Q1 .LE. -1.7) THEN
+            ELSEIF (Q1 .GE. -2.5 .AND. Q1 .LT. -1.7) THEN
                Fng = 3.0 + EXP(-3.8*(Q1+1.7))
             ELSE
                Fng = MIN(23.9 + EXP(-1.6*(Q1+2.5)), 60.)
