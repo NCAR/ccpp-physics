@@ -84,7 +84,8 @@
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
-        hybedmf, do_shoc, satmedmf, qgrs, vdftra, errmsg, errflg)
+        hybedmf, do_shoc, satmedmf, qgrs, vdftra, lheatstrg, z0fac, e0fac, zorl,         &
+        u10m, v10m, hflx, evap, hflxq, evapq, hffac, hefac, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -102,11 +103,25 @@
       real(kind=kind_phys), dimension(im, levs, ntrac),  intent(in)    :: qgrs
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
 
+      ! For canopy heat storage
+      logical, intent(in) :: lheatstrg
+      real(kind=kind_phys), intent(in) :: z0fac, e0fac
+      real(kind=kind_phys), dimension(im), intent(in)  :: zorl, u10m, v10m
+      real(kind=kind_phys), dimension(im), intent(in)  :: hflx, evap
+      real(kind=kind_phys), dimension(im), intent(out) :: hflxq, evapq
+      real(kind=kind_phys), dimension(im), intent(out) :: hffac, hefac
+
+      ! CCPP error handling variables
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      !local variables
+      ! Parameters for canopy heat storage parametrization
+      real (kind=kind_phys), parameter :: z0min=0.2, z0max=1.0
+      real (kind=kind_phys), parameter :: u10min=2.5, u10max=7.5
+
+      ! Local variables
       integer :: i, k, kk, k1, n
+      real(kind=kind_phys) :: tem, tem1, tem2
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -258,6 +273,35 @@
 !
       endif
 
+!  --- ...  Boundary Layer and Free atmospheic turbulence parameterization
+!
+!  in order to achieve heat storage within canopy layer, in the canopy heat
+!    storage parameterization the kinematic sensible and latent heat fluxes
+!    (hflx & evap) as surface boundary forcings to the pbl scheme are
+!    reduced as a function of surface roughness
+!
+      do i=1,im
+        hflxq(i) = hflx(i)
+        evapq(i) = evap(i)
+        hffac(i) = 1.0
+        hefac(i) = 1.0
+      enddo
+      if (lheatstrg) then
+        do i=1,im
+          tem = 0.01 * zorl(i)     ! change unit from cm to m
+          tem1 = (tem - z0min) / (z0max - z0min)
+          hffac(i) = z0fac * min(max(tem1, 0.0), 1.0)
+          tem = sqrt(u10m(i)**2+v10m(i)**2)
+          tem1 = (tem - u10min) / (u10max - u10min)
+          tem2 = 1.0 - min(max(tem1, 0.0), 1.0)
+          hffac(i) = tem2 * hffac(i)
+          hefac(i) = 1. + e0fac * hffac(i)
+          hffac(i) = 1. + hffac(i)
+          hflxq(i) = hflx(i) / hffac(i)
+          evapq(i) = evap(i) / hefac(i)
+        enddo
+      endif
+
     end subroutine GFS_PBL_generic_pre_run
 
     end module GFS_PBL_generic_pre
@@ -287,7 +331,8 @@
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
         dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, errmsg, errflg)
+        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac,             &
+        errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -327,6 +372,9 @@
 
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dkt_cpl
       real(kind=kind_phys), dimension(:,:), intent(in) :: dkt
+
+      ! From canopy heat storage - reduction factors in latent/sensible heat flux due to surface roughness
+      real(kind=kind_phys), dimension(im), intent(in) :: hffac, hefac
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
@@ -523,8 +571,8 @@
             else                                       ! use results from PBL scheme for 100% open ocean
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)
-              dtsfci_cpl(i) = dtsfc1(i)
-              dqsfci_cpl(i) = dqsfc1(i)
+              dtsfci_cpl(i) = dtsfc1(i)*hffac(i)
+              dqsfci_cpl(i) = dqsfc1(i)*hefac(i)
             endif
 !
             dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * dtf
@@ -547,12 +595,12 @@
         do i=1,im
           dusfc_diag (i) = dusfc_diag(i) + dusfc1(i)*dtf
           dvsfc_diag (i) = dvsfc_diag(i) + dvsfc1(i)*dtf
-          dtsfc_diag (i) = dtsfc_diag(i) + dtsfc1(i)*dtf
-          dqsfc_diag (i) = dqsfc_diag(i) + dqsfc1(i)*dtf
+          dtsfc_diag (i) = dtsfc_diag(i) + dtsfc1(i)*hffac(i)*dtf
+          dqsfc_diag (i) = dqsfc_diag(i) + dqsfc1(i)*hefac(i)*dtf
           dusfci_diag(i) = dusfc1(i)
           dvsfci_diag(i) = dvsfc1(i)
-          dtsfci_diag(i) = dtsfc1(i)
-          dqsfci_diag(i) = dqsfc1(i)
+          dtsfci_diag(i) = dtsfc1(i)*hffac(i)
+          dqsfci_diag(i) = dqsfc1(i)*hefac(i)
         enddo
 
         if (ldiag3d) then

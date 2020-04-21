@@ -2431,7 +2431,9 @@
 !    &       csoil, fxexp, flx2, zsoil(nsoil), rtdis(nsoil)
 
 !     logical, intent(in) :: snowng
+!
 !     logical, intent(in) :: lheatstrg
+!
 
 !  ---  input/outputs:
 !     real (kind=kind_phys), intent(inout) :: prcp1, t1, sncovr, sneqv, &
