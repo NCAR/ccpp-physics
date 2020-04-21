@@ -677,7 +677,7 @@
 !
 !jhan urban canopy heat storage effect is included in pbl scheme
 !
-        if((.not.lheatstrg) .and.                                      &
+        if((.not.lheatstrg) .and.                                       &
      &      (ivegsrc == 1 .and. vegtyp == 13)) then
           df1 = 3.24*(1.-shdfac) + shdfac*df1*exp(sbeta*shdfac)
         else
@@ -1337,6 +1337,7 @@
 !     fxexp    - real, bare soil evaporation exponent              1    !
 !     csoil    - real, soil heat capacity                          1    !
 !     lheatstrg- logical, flag for canopy heat storage             1    !
+!                         parameterization                              !
 !                                                                       !
 !  input/outputs from and to the calling program:                       !
 !     cmc      - real, canopy moisture content                     1    !
@@ -1505,7 +1506,11 @@
 !          sub sfc heat flux (see additional comments on veg effect
 !          sub-sfc heat flx in routine sflx)
 !wz only urban for igbp type
-        if(ivegsrc == 1 .and. vegtyp == 13) then
+!
+!jhan urban canopy heat storage effect is included in pbl scheme
+!
+        if((.not.lheatstrg) .and.                                       &
+     &      (ivegsrc == 1 .and. vegtyp == 13)) then
           df1 = 3.24*(1.-shdfac) + shdfac*df1*exp(sbeta*shdfac)
         else
           df1 = df1 * exp( sbeta*shdfac )
@@ -1522,6 +1527,7 @@
 !  ---  inputs:
      &     ( nsoil, smc, smcmax, dt, yy, zz1, zsoil, zbot,              &
      &       psisat, bexp, df1, ice, quartz, csoil, vegtyp,             &
+     &       shdfac, lheatstrg,                                         &
 !  ---  input/outputs:
      &       stc, t1, tbot, sh2o,                                       &
 !  ---  outputs:
@@ -1550,7 +1556,7 @@
 !...................................
 !  ---  inputs:
 !    &     ( sfctmp, sfcprs, sfcems, ch, t2v, th2, prcp, fdown,         &
-!    &       cpx, cpfac, ssoil, q2, q2sat, dqsdt2, snowng, frzgra,      &
+!    &       ssoil, q2, q2sat, dqsdt2, snowng, frzgra,                  &
 !  ---  outputs:
 !    &       t24, etp, rch, epsca, rr, flx2                             &
 !    &     )
@@ -1576,8 +1582,6 @@
 !     th2      - real, air potential temp at zlvl abv grnd         1    !
 !     prcp     - real, precip rate                                 1    !
 !     fdown    - real, net solar + downward lw flux at sfc         1    !
-!     cpx      - real, enhanced air heat capacity for heat storage 1    !
-!     cpfac    - real, ratio air heat capacity to enhanced one     1    !
 !     ssoil    - real, upward soil heat flux                       1    !
 !     q2       - real, mixing ratio at hght zlvl abv ground        1    !
 !     q2sat    - real, sat mixing ratio at zlvl abv ground         1    !
@@ -1619,7 +1623,7 @@
       t24 = sfctmp * sfctmp * sfctmp * sfctmp
       rr  = t24 * 6.48e-8 / (sfcprs*ch) + 1.0
       rho = sfcprs / (rd1*t2v)
-      rch = rho * cpx * ch
+      rch = rho * cp * ch
 
 !  --- ...  adjust the partial sums / products with the latent heat
 !           effects caused by falling precipitation.
@@ -2379,7 +2383,8 @@
 !     csoil    - real, soil heat capacity                          1    !
 !     flx2     - real, freezing rain latent heat flux              1    !
 !     snowng   - logical, snow flag                                1    !
-!     lheatstrg- logical,  flag for canopy heat storage            1    !
+!     lheatstrg- logical, flag for canopy heat storage             1    !
+!                         parameterization                              !
 !                                                                       !
 !  input/outputs from and to the calling program:                       !
 !     prcp1    - real, effective precip                            1    !
@@ -3301,6 +3306,7 @@
 !     vegtyp   - integer, vegtation type                           1    !
 !     shdfac   - real, aeral coverage of green vegetation          1    !
 !     lheatstrg- logical, flag for canopy heat storage             1    ! 
+!                         parameterization                              !
 !                                                                       !
 !  input/outputs:                                                       !
 !     stc      - real, soil temp                                 nsoil  !
@@ -4085,6 +4091,7 @@
 !     vegtyp   - integer, vegetation type                          1    !
 !     shdfac   - real, aeral coverage of green vegetation          1    !
 !     lheatstrg- logical, flag for canopy heat storage             1    !
+!                         parameterization                              !
 !                                                                       !
 !  input/outputs:                                                       !
 !     sh2o     - real, unfrozen soil moisture                    nsoil  !
