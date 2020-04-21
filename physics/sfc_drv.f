@@ -313,13 +313,9 @@
           sbsno(i)  = zero
           snowc(i)  = zero
           snohf(i)  = zero
-        endif   ! flag_iter & land
-      enddo
 
 !> - initialize variables wind, q, and rh at level 1.
 
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
           q0(i)   = max(q1(i), qmin)   !* q1=specific humidity at level 1 (kg/kg)
           theta1(i) = t1(i) * prslki(i) !* adiabatic temp at level 1 (k)
 
@@ -327,19 +323,10 @@
           qs1(i) = fpvs( t1(i) )        !* qs1=sat. humidity at level 1 (kg/kg)
           qs1(i) = max(eps*qs1(i) / (prsl1(i)+epsm1*qs1(i)), qmin)
           q0 (i) = min(qs1(i), q0(i))
-        endif   ! flag_iter & land
-      enddo
 
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
           do k = 1, km
             zsoil(i,k) = zsoil_noah(k)
           enddo
-        endif   ! flag_iter & land
-      enddo
-
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
 
 !> - Prepare variables to run Noah LSM:
 !!  -   1. configuration information (c):
@@ -592,25 +579,20 @@
 !!\n  nroot   - number of root layers, a function of veg type, determined
 !!              in subroutine redprm.
 
-        endif   ! end if flag_iter and flag
-      enddo   ! end do_i_loop
+!       endif   ! end if flag_iter and flag
+!     enddo   ! end do_i_loop
 
 !> - Compute specific humidity at surface (\a qsurf).
 
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
           rch(i)   = rho(i) * cp * ch(i) * wind(i)
           qsurf(i) = q1(i)  + evap(i) / (elocp * rch(i))
-        endif   ! flag_iter & land
-      enddo
 
 !> - Compute surface upward sensible heat flux (\a hflx) and evaporation
 !! flux (\a evap).
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
           tem     = one / rho(i)
           hflx(i) = hflx(i) * tem * cpinv
           evap(i) = evap(i) * tem * hvapi
+
         endif   ! flag_iter & land
       enddo
 
