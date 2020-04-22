@@ -331,7 +331,10 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      real(kind=kind_phys), parameter :: huge=1.0d30, epsln = 1.0d-10
+      real(kind=kind_phys), parameter :: zero  = 0.0d0
+      real(kind=kind_phys), parameter :: one   = 1.0d0
+      real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
+      real(kind=kind_phys), parameter :: epsln = 1.0d-10 ! same as in GFS_physics_driver.F90
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
@@ -486,7 +489,7 @@
       if (cplchm) then
         do i = 1, im
           tem1 = max(q1(i), 1.e-8)
-          tem  = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
+          tem  = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
           ushfsfci(i) = -cp * tem * hflx(i) ! upward sensible heat flux
         enddo
         ! dkt_cpl has dimensions (1:im,1:levs), but dkt has (1:im,1:levs-1)
@@ -498,22 +501,22 @@
 
       if (cplflx) then
         do i=1,im
-          if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
-            if (fice(i) > 1.-epsln) then ! no open water, use results from CICE
+          if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
+            if (fice(i) > one - epsln) then ! no open water, use results from CICE
               dusfci_cpl(i) = dusfc_cice(i)
               dvsfci_cpl(i) = dvsfc_cice(i)
               dtsfci_cpl(i) = dtsfc_cice(i)
               dqsfci_cpl(i) = dqsfc_cice(i)
-            elseif (dry(i) .or. icy(i)) then   ! use stress_ocean from sfc_diff for opw component at mixed point
+            elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
               tem1 = max(q1(i), 1.e-8)
-              rho = prsl(i,1) / (rd*t1(i)*(1.0+fvirt*tem1))
-              if (wind(i) > 0.0) then
+              rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
+              if (wind(i) > zero) then
                 tem = - rho * stress_ocn(i) / wind(i)
                 dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
                 dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
               else
-                dusfci_cpl(i) = 0.0
-                dvsfci_cpl(i) = 0.0
+                dusfci_cpl(i) = zero
+                dvsfci_cpl(i) = zero
               endif
               dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
               dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean

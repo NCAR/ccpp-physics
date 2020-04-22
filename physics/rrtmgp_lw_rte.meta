@@ -1,0 +1,191 @@
+[ccpp-arg-table]
+  name = rrtmgp_lw_rte_run
+  type = scheme
+[doLWrad]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nGauss_angles]
+  standard_name = number_of_angles_used_in_gaussian_quadrature
+  long_name = Number of angles used in Gaussian quadrature
+  units = count
+  dimensions =  ()
+  type = integer
+  intent = in
+  optional = F
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure layer
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
+  long_name = air pressure level
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[t_lay]
+  standard_name = air_temperature_at_layer_for_RRTMGP
+  long_name = air temperature layer
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[skt]
+  standard_name = surface_ground_temperature_for_radiation
+  long_name = surface ground temperature for radiation
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfc_emiss_byband]
+  standard_name = surface_emissivity_in_each_RRTMGP_LW_band
+  long_name = surface emissivity in each RRTMGP LW band
+  units = none
+  dimensions = (number_of_lw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lw_gas_props]
+  standard_name = coefficients_for_lw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[lw_optical_props_clrsky]
+  standard_name = longwave_optical_properties_for_clear_sky
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = inout
+  optional = F
+[lw_optical_props_clouds]
+  standard_name = longwave_optical_properties_for_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = in
+  optional = F
+[lw_optical_props_aerosol]
+  standard_name = longwave_optical_properties_for_aerosols
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = in
+  optional = F
+[sources]
+  standard_name = longwave_source_function
+  long_name = Fortran DDT containing RRTMGP source functions
+  units = DDT
+  dimensions = ()
+  type = ty_source_func_lw
+  intent = in
+  optional = F
+[hlwb]
+  standard_name = RRTMGP_lw_heating_rate_spectral
+  long_name = RRTMGP longwave total sky heating rate (spectral)
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_lw_spectral_points_rrtmgp)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T
+[secdiff]
+  standard_name = secant_of_diffusivity_angle_each_RRTMGP_LW_band
+  long_name = secant of diffusivity angle in each RRTMGP LW band
+  units = none
+  dimensions = (number_of_lw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fluxlwUP_allsky]
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky
+  long_name = RRTMGP upward longwave all-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[fluxlwDOWN_allsky]
+  standard_name = RRTMGP_lw_flux_profile_downward_allsky
+  long_name = RRTMGP downward longwave all-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[fluxlwUP_clrsky]
+  standard_name = RRTMGP_lw_flux_profile_upward_clrsky
+  long_name = RRTMGP upward longwave clr-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[fluxlwDOWN_clrsky]
+  standard_name = RRTMGP_lw_flux_profile_downward_clrsky
+  long_name = RRTMGP downward longwave clr-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

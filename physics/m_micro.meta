@@ -424,7 +424,7 @@
   intent = in
   optional = F
 [lwheat_i]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -433,7 +433,7 @@
   intent = in
   optional = F
 [swheat_i]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -790,14 +790,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[aero_in]
-  standard_name = flag_for_aerosol_input_MG
-  long_name = flag for using aerosols in Morrison-Gettelman microphysics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [naai_i]
   standard_name = in_number_concentration
   long_name = IN number concentration
@@ -819,9 +811,9 @@
 [iccn]
   standard_name = flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics
   long_name = flag for IN and CCN forcing for morrison gettelman microphysics
-  units = flag
+  units = none
   dimensions = ()
-  type = logical
+  type = integer
   intent = in
   optional = F
 [skip_macro]

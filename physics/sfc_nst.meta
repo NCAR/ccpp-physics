@@ -759,6 +759,15 @@
   type = logical
   intent = in
   optional = F
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -803,6 +812,15 @@
   standard_name = air_temperature_lapse_rate_constant
   long_name = environmental air temperature lapse rate constant
   units = K m-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tgice]
+  standard_name = freezing_point_temperature_of_seawater
+  long_name = freezing point temperature of seawater
+  units = K
   dimensions = ()
   type = real
   kind = kind_phys
