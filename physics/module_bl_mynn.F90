@@ -6017,7 +6017,7 @@ ENDIF
           aratio   = MIN(UPA(K-1,I)/(1.-UPA(K-1,I)), 0.5) !limit should never get hit
           detturb  = 0.00008
           oow      = -0.060/MAX(1.0,(0.5*(Wn+UPW(K-1,I))))   !coef for dynamical detrainment rate
-          detrate  = MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0003) ! dynamical detrainment rate (m^-1)
+          detrate  = MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0002) ! dynamical detrainment rate (m^-1)
           detrateUV= MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0001) ! dynamical detrainment rate (m^-1) 
           envm_thl(k)=envm_thl(k) + (0.5*(thl_ent + UPTHL(K-1,I)) - thl(k))*detrate*aratio*MIN(dzp,300.)
           qv_ent = 0.5*(MAX(qt_ent-qc_ent,0.) + MAX(UPQT(K-1,I)-UPQC(K-1,I),0.))
@@ -6403,10 +6403,13 @@ ENDIF
                   Ac_mf      = 0.5*(edmf_a(k)+edmf_a(k-1))
                   Ac_strat   = cldfra_bl1d(k)*(1.0-Ac_mf)
                   cldfra_bl1d(k)=Ac_mf + Ac_strat
+                  qc_mf      = QCp
                   !Ensure stratus clouds have mixing ratio similar to cumulus
                   QCs        = MIN(MAX(qc_bl1d(k), 0.5*qc_mf), 5E-4)
                   qc_bl1d(k) = (QCp*Ac_mf + QCs*Ac_strat)/cldfra_bl1d(k)
                ENDIF
+            ELSE
+               Ac_mf      = mf_cf
             ENDIF
 
             !Now recalculate the terms for the buoyancy flux for mass-flux clouds:
