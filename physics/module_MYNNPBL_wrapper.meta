@@ -57,6 +57,12 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
 [lsidea]
   standard_name = flag_idealized_physics
   long_name = flag for idealized physics
@@ -692,15 +698,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_PBL
-  long_name = cumulative change in temperature due to PBL
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [du3dt_PBL]
   standard_name = cumulative_change_in_x_wind_due_to_PBL
   long_name = cumulative change in x wind due to PBL
@@ -737,6 +734,29 @@
   kind = kind_phys
   intent = inout
   optional = F
+[do3dt_PBL]
+  standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
+  long_name = cumulative change in ozone mixing ratio due to PBL
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dq3dt_PBL]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
+  long_name = cumulative change in water vapor specific humidity due to PBL
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dt3dt_PBL]
+  standard_name = cumulative_change_in_temperature_due_to_PBL
+  long_name = cumulative change in temperature due to PBL
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
 [htrsw]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
   long_name = total sky sw heating rate

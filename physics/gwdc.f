@@ -1498,12 +1498,12 @@
       if (lssav) then
         dugwd(:) = dugwd(:) + tauctx(:)*dtf
         dvgwd(:) = dvgwd(:) + taucty(:)*dtf
-
-        if (ldiag3d) then
-          du3dt(:,:) = du3dt(:,:) + gwdcu(:,:)  * dtf
-          dv3dt(:,:) = dv3dt(:,:) + gwdcv(:,:)  * dtf
-        endif
       endif   ! end if_lssav
+
+      if (ldiag3d) then
+         du3dt(:,:) = du3dt(:,:) + gwdcu(:,:)  * dtf
+         dv3dt(:,:) = dv3dt(:,:) + gwdcv(:,:)  * dtf
+      endif
 
 !  --- ...  update the wind components with  gwdc tendencies
 

@@ -25,7 +25,7 @@
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  ix,im,levs,                     &
      &  flag_init,flag_restart,         &
-     &  lssav, ldiag3d, lsidea,         & 
+     &  lssav, ldiag3d, qdiag3d, lsidea,&
      &  delt,dtf,dx,zorl,               &
      &  phii,u,v,omega,t3d,             &
      &  qgrs_water_vapor,               &
@@ -56,7 +56,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_ice_cloud, dqdt_ozone,                        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    &
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    &
-     &  dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, &
+     &  du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,      &
+     &  do3dt_PBL, dq3dt_PBL, dt3dt_PBL,                   &
      &  htrsw, htrlw, xmu,                                 &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
@@ -154,7 +155,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
   
-  LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea
+  LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea, qdiag3d
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
                              lprnt, do_mynnsfclay
@@ -224,8 +225,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        RTHRATEN
      real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
     &        Tsq, Qsq, Cov, exch_h, exch_m
-     real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt,       &
-    &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD
+     real(kind=kind_phys), dimension(:,:), intent(inout) ::              &
+    &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,               &
+    &        do3dt_PBL, dq3dt_PBL, dt3dt_PBL
     real(kind=kind_phys), dimension(im), intent(in) :: xmu
     real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
      !LOCAL
@@ -591,6 +593,26 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               dvdt(i,k) = dvdt(i,k) + RVBLTEN(i,k)
            enddo
         enddo
+        accum_duvt3dt: if(lssav) then
+          if(ldiag3d) then
+            do k = 1, levs
+              do i = 1, im
+                du3dt_PBL(i,k) = du3dt_PBL(i,k) + RUBLTEN(i,k)*dtf
+                dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + RVBLTEN(i,k)*dtf
+              enddo
+            enddo
+          endif
+          if_lsidea: if (lsidea) then
+            dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + RTHBLTEN(i,k)*exner(i,k)*dtf
+          elseif(ldiag3d) then
+            do k=1,levs
+              do i=1,im
+                tem  = RTHBLTEN(i,k)*exner(i,k) - (htrlw(i,k)+htrsw(i,k)*xmu(i))
+                dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + tem*dtf
+              enddo
+            enddo
+          endif if_lsidea
+        endif accum_duvt3dt
         !Update T, U and V:
         !do k = 1, levs
         !   do i = 1, im
@@ -611,6 +633,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)        = 0.0
              enddo
            enddo
+           if(lssav .and. ldiag3d .and. qdiag3d) then
+             do k=1,levs
+               do i=1,im
+                 dq3dt_PBL(i,k)  = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+               enddo
+             enddo
+           endif
            !Update moist species:
            !do k=1,levs
            !  do i=1,im
@@ -635,6 +664,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_ice_aer_num_conc(i,k)        = RQNIFABLTEN(i,k)
                enddo
              enddo
+             if(lssav .and. ldiag3d .and. qdiag3d) then
+               do k=1,levs
+                 do i=1,im
+                   dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+                 enddo
+               enddo
+             endif
              !do k=1,levs
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -658,6 +694,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  !dqdt_ozone(i,k)         = 0.0
                enddo
              enddo
+             if(lssav .and. ldiag3d .and. qdiag3d) then
+               do k=1,levs
+                 do i=1,im
+                   dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+                 enddo
+               enddo
+             endif
              !do k=1,levs
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -681,6 +724,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)         = 0.0
              enddo
            enddo
+           if(lssav .and. ldiag3d .and. qdiag3d) then
+             do k=1,levs
+               do i=1,im
+                 dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+               enddo
+             enddo
+           endif
            !do k=1,levs
            !  do i=1,im
            !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -702,27 +752,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)         = 0.0
              enddo
            enddo
-       endif
-       
-       if (lssav .and. ldiag3d) then
-         if (lsidea) then
-           dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
-         else
-           do k=1,levs
-             do i=1,im
-               tem  = dtdt(i,k) - (htrlw(i,k)+htrsw(i,k)*xmu(i))
-               dt3dt(i,k) = dt3dt(i,k) + tem*dtf
+           if(lssav .and. ldiag3d .and. qdiag3d) then
+             do k=1,levs
+               do i=1,im
+                 dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
+               enddo
              enddo
-           enddo
-         endif
-         do k=1,levs
-           do i=1,im
-             du3dt_PBL(i,k) = du3dt_PBL(i,k) + dudt(i,k) * dtf
-             du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
-             dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + dvdt(i,k) * dtf
-             dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
-           enddo
-         enddo
+           endif
        endif
        
        if (lprnt) then

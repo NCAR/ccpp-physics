@@ -147,6 +147,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [ozp1]
   standard_name = cumulative_change_in_ozone_concentration_due_to_production_and_loss_rate
   long_name = cumulative change in ozone concentration due to production and loss rate

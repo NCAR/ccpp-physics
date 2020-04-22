@@ -677,7 +677,7 @@
   intent = inout
   optional = F
 [dt3dt_scnv]
-  standard_name = cumulative_change_in_temperature_due_to_shal_convection
+  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
   long_name = cumulative change in temperature due to shal conv.
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)

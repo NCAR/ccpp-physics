@@ -60,7 +60,9 @@
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
+     &     dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL,           &
+     &     ldiag3d,qdiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -71,6 +73,10 @@
       integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
+!
+      logical, intent(in)  :: ldiag3d, qdiag3d
+      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
+     &  dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -1391,6 +1397,12 @@
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
+            if(ldiag3d) then
+              dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
+              if(qdiag3d) then
+                dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
+              endif
+            endif
          enddo
       enddo
 !
@@ -1491,6 +1503,10 @@
             dv(i,k)  = dv(i,k)+vtend
             dusfc(i) = dusfc(i)+conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
+            if(ldiag3d) then
+              du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
+              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
+            endif
          enddo
       enddo
 !

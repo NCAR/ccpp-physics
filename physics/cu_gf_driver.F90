@@ -73,7 +73,10 @@ contains
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
-               qci_conv,errmsg,errflg)
+               flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
+               du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
+               du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
+               ldiag3d,qdiag3d,qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -95,6 +98,8 @@ contains
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
    integer, intent(in   ) :: im,ix,km,ntracer
+   logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
+   logical, intent(in   ) :: ldiag3d,qdiag3d
 
    real(kind=kind_phys),  dimension( ix , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: t,us,vs
@@ -104,6 +109,10 @@ contains
    real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
    real(kind=kind_phys),  dimension( ix , km ),     intent(out ) :: cnvw_moist,cnvc
    real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: cliw, clcw
+
+   real(kind=kind_phys),  dimension(  : ,  : ), intent(inout ) :: &
+               du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV, &
+               du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV
 
 !  change from ix to im
    integer, dimension (im), intent(inout) :: hbot,htop,kcnv
@@ -855,6 +864,34 @@ contains
         qv_spechum = qv/(1.0_kind_phys+qv)
         cnvw_moist = cnvw/(1.0_kind_phys+qv)
 !
+! Diagnostic tendency updates
+!
+        if(ldiag3d) then
+          if(ishallow_g3.eq.1 .and. .not.flag_for_scnv_generic_tend) then
+            do k=kts,ktf
+              do i=its,itf
+                du3dt_SCNV(i,k) = du3dt_SCNV(i,k) + outus(i,k) * dt
+                dv3dt_SCNV(i,k) = dv3dt_SCNV(i,k) + outvs(i,k) * dt
+                dt3dt_SCNV(i,k) = dt3dt_SCNV(i,k) + outts(i,k) * dt
+                if(qdiag3d) then
+                  dq3dt_SCNV(i,k) = dq3dt_SCNV(i,k) + outqs(i,k) * dt
+                endif
+              enddo
+            enddo
+          endif
+          if((ideep.eq.1. .or. imid_gf.eq.1) .and. .not.flag_for_dcnv_generic_tend) then
+            do k=kts,ktf
+              do i=its,itf
+                du3dt_DCNV(i,k) = du3dt_DCNV(i,k) + (outu(i,k)+outum(i,k)) * dt
+                dv3dt_DCNV(i,k) = dv3dt_DCNV(i,k) + (outv(i,k)+outvm(i,k)) * dt
+                dt3dt_DCNV(i,k) = dt3dt_DCNV(i,k) + (outt(i,k)+outtm(i,k)) * dt
+                if(qdiag3d) then
+                  dq3dt_DCNV(i,k) = dq3dt_DCNV(i,k) + (outq(i,k)+outqm(i,k)) * dt
+                endif
+              enddo
+            enddo
+          endif
+        endif
    end subroutine cu_gf_driver_run
 !> @}
 end module cu_gf_driver

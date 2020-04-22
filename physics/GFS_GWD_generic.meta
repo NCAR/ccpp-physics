@@ -118,6 +118,22 @@
   type = logical
   intent = in
   optional = F
+[dudt]
+  standard_name = tendency_of_x_wind_due_to_model_physics
+  long_name = zonal wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dvdt]
+  standard_name = tendency_of_y_wind_due_to_model_physics
+  long_name = meridional wind tendency due to model physics
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [dtdt]
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = updated tendency of the temperature
@@ -127,6 +143,22 @@
   kind = kind_phys
   intent = in
   optional = F
+[du3dt]
+  standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in x wind due to orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3dt]
+  standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in y wind due to orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
 [dt3dt]
   standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in temperature due to orographic gravity wave drag
@@ -145,6 +177,13 @@
   kind = kind_phys
   intent = in
   optional = F
+[flag_for_gwd_generic_tend]
+  standard_name = flag_for_generic_gravity_wave_drag_tendency
+  long_name = true if GFS_GWD_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -287,6 +326,12 @@
   kind = kind_phys
   intent = inout
   optional = F
+[flag_for_gwd_generic_tend]
+  standard_name = flag_for_generic_gravity_wave_drag_tendency
+  long_name = true if GFS_GWD_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
