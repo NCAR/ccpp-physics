@@ -91,8 +91,8 @@
       implicit none
 
 !  ---  constant parameters:
-      real (kind=kind_phys), parameter :: one  = 1.0d0, zero = 0.0d0    &
-     &,                                   qmin = 1.0d-8
+      real (kind=kind_phys), parameter :: one  = 1.0_kind_phys, zero = 0.0_kind_phys    &
+     &,                                   qmin = 1.0e-8_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im
       real (kind=kind_phys), intent(in) :: rd, eps, epsm1, rvrdm1

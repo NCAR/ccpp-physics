@@ -140,15 +140,15 @@
       integer, intent(out) :: errflg
 
       ! DH* TODO: CLEANUP, all of these should be coming in through the argument list
-      real(kind=kind_phys), parameter :: con_p001= 0.001d0
-      real(kind=kind_phys), parameter :: con_day = 86400.0d0
-      real(kind=kind_phys), parameter :: rainmin = 1.0d-13
-      real(kind=kind_phys), parameter :: p850    = 85000.0d0
+      real(kind=kind_phys), parameter :: con_p001= 0.001_kind_phys
+      real(kind=kind_phys), parameter :: con_day = 86400.0_kind_phys
+      real(kind=kind_phys), parameter :: rainmin = 1.0e-13_kind_phys
+      real(kind=kind_phys), parameter :: p850    = 85000.0_kind_phys
       ! *DH
 
       integer :: i, k, ic
 
-      real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       real(kind=kind_phys) :: crain, csnow, onebg, tem, total_precip, tem1, tem2
       real(kind=kind_phys), dimension(im) :: domr, domzr, domip, doms, t850, work1
 
@@ -267,7 +267,7 @@
           do i = 1, im
             !tprcp(i)  = max(0.0, rain(i) )! clu: rain -> tprcp ! DH now lines 245-250
             srflag(i) = zero                     ! clu: default srflag as 'rain' (i.e. 0)
-            if (tsfc(i) >= 273.15d0) then
+            if (tsfc(i) >= 273.15_kind_phys) then
               crain = rainc(i)
               csnow = zero
             else
@@ -295,7 +295,7 @@
             if (rain(i) > rainmin) then
               tem1 = max(zero, (rain(i)-rainc(i))) * sr(i)
               tem2 = one / rain(i)
-              if (t850(i) > 273.16d0) then
+              if (t850(i) > 273.16_kind_phys) then
                 srflag(i) = max(zero, min(one, tem1*tem2))
               else
                 srflag(i) = max(zero, min(one, (tem1+rainc(i))*tem2))
@@ -311,7 +311,7 @@
           do i = 1, im
             tprcp(i)  = max(zero, rain(i) )     ! clu: rain -> tprcp
             srflag(i) = zero                    ! clu: default srflag as 'rain' (i.e. 0)
-            if (t850(i) <= 273.16d0) then
+            if (t850(i) <= 273.16_kind_phys) then
               srflag(i) = one                   ! clu: set srflag to 'snow' (i.e. 1)
             endif
           enddo

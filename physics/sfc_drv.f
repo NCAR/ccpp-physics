@@ -194,16 +194,18 @@
       implicit none
 
 !  ---  constant parameters:
-      real(kind=kind_phys), parameter :: one     = 1.0d0, zero = 0.0d0
-      real(kind=kind_phys), parameter :: rhoh2o  = 1000.0d0
-      real(kind=kind_phys), parameter :: a2      = 17.2693882d0
-      real(kind=kind_phys), parameter :: a3      = 273.16d0
-      real(kind=kind_phys), parameter :: a4      = 35.86d0
+      real(kind=kind_phys), parameter :: zero    = 0.0_kind_phys
+      real(kind=kind_phys), parameter :: one     = 1.0_kind_phys
+      real(kind=kind_phys), parameter :: rhoh2o  = 1000.0_kind_phys
+      real(kind=kind_phys), parameter :: a2      = 17.2693882_kind_phys
+      real(kind=kind_phys), parameter :: a3      = 273.16_kind_phys
+      real(kind=kind_phys), parameter :: a4      = 35.86_kind_phys
       real(kind=kind_phys), parameter :: a23m4   = a2*(a3-a4)
-      real(kind=kind_phys), parameter :: qmin    = 1.0d-8
+      real(kind=kind_phys), parameter :: qmin    = 1.0e-8_kind_phys
 
       real(kind=kind_phys), save         :: zsoil_noah(4)
-      data zsoil_noah / -0.1d0, -0.4d0, -1.0d0, -2.0d0 /
+      data zsoil_noah / -0.1_kind_phys, -0.4_kind_phys,                 &
+     &                  -1.0_kind_phys, -2.0_kind_phys /
 
 !  ---  input:
       integer, intent(in) :: im, km, isot, ivegsrc
@@ -445,8 +447,8 @@
 ! cm         - surface exchange coefficient for momentum (\f$m s^{-1}\f$)          -> cmx
 ! z0         - surface roughness (\f$m\f$)     -> zorl(\f$cm\f$)
 
-          cmc = canopy(i) * 0.001d0          ! convert from mm to m
-          tsea = tsurf(i)                    ! clu_q2m_iter
+          cmc = canopy(i) * 0.001_kind_phys      ! convert from mm to m
+          tsea = tsurf(i)                        ! clu_q2m_iter
 
           do k = 1, km
             stsoil(k) = stc(i,k)
@@ -454,10 +456,10 @@
             slsoil(k) = slc(i,k)
           enddo
 
-          snowh = snwdph(i) * 0.001d0       ! convert from mm to m
-          sneqv = weasd(i)  * 0.001d0       ! convert from mm to m
+          snowh = snwdph(i) * 0.001_kind_phys    ! convert from mm to m
+          sneqv = weasd(i)  * 0.001_kind_phys    ! convert from mm to m
           if (sneqv /= zero .and. snowh == zero) then
-            snowh = 10.0d0 * sneqv
+            snowh = 10.0_kind_phys * sneqv
           endif
 
           chx    = ch(i)  * wind(i)              ! compute conductance
@@ -466,7 +468,7 @@
           cmm(i) = cmx
 
 !  ---- ... outside sflx, roughness uses cm as unit
-          z0 = zorl(i) * 0.01d0
+          z0 = zorl(i) * 0.01_kind_phys
 !  ---- mgehne, sfc-perts
 !  - Apply perturbation of soil type b parameter and leave area index.
           bexpp  = bexppert(i)                   ! sfc perts, mgehne
@@ -511,7 +513,7 @@
           trans(i) = ett
           sbsno(i) = esnow
           snowc(i) = sncovr
-          stm(i)   = soilm * 1000.0d0 ! unit conversion (from m to kg m-2)
+          stm(i)   = soilm * 1000.0_kind_phys ! unit conversion (from m to kg m-2)
           snohf(i) = flx1 + flx2 + flx3
 
           smcwlt2(i) = smcwlt
@@ -528,17 +530,17 @@
           wet1(i) = smsoil(1) / smcmax !Sarah Lu added 09/09/2010 (for GOCART)
 
 !  --- ...  unit conversion (from m s-1 to mm s-1 and kg m-2 s-1)
-          runoff(i)  = runoff1 * 1000.0d0
-          drain (i)  = runoff2 * 1000.0d0
+          runoff(i)  = runoff1 * 1000.0_kind_phys
+          drain (i)  = runoff2 * 1000.0_kind_phys
 
 !  --- ...  unit conversion (from m to mm)
-          canopy(i)  = cmc   * 1000.0d0
-          snwdph(i)  = snowh * 1000.0d0
-          weasd(i)   = sneqv * 1000.0d0
+          canopy(i)  = cmc   * 1000.0_kind_phys
+          snwdph(i)  = snowh * 1000.0_kind_phys
+          weasd(i)   = sneqv * 1000.0_kind_phys
           sncovr1(i) = sncovr
 !  ---- ... outside sflx, roughness uses cm as unit (update after snow's
 !  effect)
-          zorl(i) = z0*100.0d0
+          zorl(i) = z0*100.0_kind_phys
 
 !>  - Do not return the following output fields to parent model:
 !!\n  ec      - canopy water evaporation (m s-1)

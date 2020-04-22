@@ -71,6 +71,7 @@
 !
 !    locals
 !
+      integer, parameter :: r8 = kind_phys
       integer i,is,k,kk,km1,kmpbl,kp1, ntloc
 !
       logical  pblflg(im), sfcflg(im), flg(im)
@@ -91,15 +92,16 @@
      &,                    ttend,  utend, vtend,  qtend
      &,                    spdk2,  rbint, ri,     zol1, robn, bvf2
 !
-      real(kind=kind_phys), parameter ::  one=1.0d0, zero=0.0d0
-     &,                  zolcr=0.2d0,
-     &                   zolcru=-0.5d0, rimin=-100.0d0, sfcfrac=0.1d0,
-     &                   crbcon=0.25d0, crbmin=0.15d0,  crbmax=0.35d0,
-     &                   qmin=1.0d-8,   zfmin=1.0d-8,   qlmin=1.0d-12,
-     &                   aphi5=5.0d0,   aphi16=16.0d0,  f0=1.0d-4
-     &,                  dkmin=zero,    dkmax=1000.0d0
-!    &,                  dkmin=zero,    dkmax=1000.,    xkzminv=0.3
-     &,                  prmin=0.25d0,  prmax=4.0d0,    vk=0.4, cfac=6.5
+      real(kind=kind_phys), parameter ::  one=1.0_r8, zero=0.0_r8
+     &,              zolcr=0.2_r8,
+     &               zolcru=-0.5_r8, rimin=-100.0_r8, sfcfrac=0.1_r8,
+     &               crbcon=0.25_r8, crbmin=0.15_r8,  crbmax=0.35_r8,
+     &               qmin=1.0e-8_r8, zfmin=1.0d-8,    qlmin=1.0e-12_r8,
+     &               aphi5=5.0_r8,   aphi16=16.0_r8,  f0=1.0e-4_r8
+     &,              dkmin=zero,     dkmax=1000.0_r8
+!    &,              dkmin=zero,     dkmax=1000.,     xkzminv=0.3
+     &,              prmin=0.25_r8,  prmax=4.0_r8,    vk=0.4_r8,
+     &               cfac=6.5_r8
       real(kind=kind_phys) :: gravi, cont, conq, conw, gocp
 
       gravi = one/grav
@@ -155,7 +157,7 @@
           if (k <= kinver(i)) then
 !    vertical background diffusivity for heat and momentum
             tem1       = one - prsi(i,k+1) * tx1(i)
-            tem1       = min(one, exp(-tem1 * tem1 * 10.0d0))
+            tem1       = min(one, exp(-tem1 * tem1 * 10.0_r8))
             xkzo(i,k)  = xkzm_h * tem1
             xkzmo(i,k) = xkzm_m * tem1
           endif
@@ -166,9 +168,9 @@
 !
       do k = 1,kmpbl
         do i=1,im
-          if(zi(i,k+1) > 250.0d0) then
+          if(zi(i,k+1) > 250.0_r8) then
             tem1 = (t1(i,k+1)-t1(i,k)) * rdzt(i,k)
-            if(tem1 > 1.0d-5) then
+            if(tem1 > 1.0e-5_r8) then
                xkzo(i,k)  = min(xkzo(i,k),xkzminv)
             endif
           endif
@@ -177,7 +179,7 @@
 !
 !
       do i = 1,im
-         z0(i)     = 0.01d0 * zorl(i)
+         z0(i)     = 0.01_r8 * zorl(i)
          kpbl(i)   = 1
          hpbl(i)   = zi(i,1)
          pblflg(i) = .true.
@@ -224,9 +226,9 @@
            thermal(i) = tsea(i)*(one+fv*max(q1(i,1,1),qmin))
            tem   = max(one, sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i)))
            robn   = tem / (f0 * z0(i))
-           tem1   = 1.0d-7 * robn
-           crb(i) = max(min(0.16d0 * (tem1 ** (-0.18d0)), crbmax),
-     &                                                    crbmin)
+           tem1   = 1.0e-7_r8 * robn
+           crb(i) = max(min(0.16_r8 * (tem1 ** (-0.18_r8)), crbmax),
+     &                                                      crbmin)
          endif
       enddo
       do k = 1, kmpbl
@@ -272,7 +274,7 @@
          if(sfcflg(i)) then
 !          phim(i) = (1.-aphi16*zol1)**(-1./4.)
 !          phih(i) = (1.-aphi16*zol1)**(-1./2.)
-           tem     = one / max(one - aphi16*zol1, 1.0d-8)
+           tem     = one / max(one - aphi16*zol1, 1.0e-8_r8)
            phih(i) = sqrt(tem)
            phim(i) = sqrt(phih(i))
          else
@@ -346,13 +348,13 @@
             tem  = u1(i,k) - u1(i,kp1)
             tem1 = v1(i,k) - v1(i,kp1)
             tem  = (tem*tem + tem1*tem1) * rdz * rdz
-            bvf2 = (0.5d0*grav)*(thvx(i,kp1)-thvx(i,k))*rdz
+            bvf2 = (0.5_r8*grav)*(thvx(i,kp1)-thvx(i,k))*rdz
      &           / (t1(i,k)+t1(i,kp1))
             ri   = max(bvf2/tem,rimin)
             if(ri < zero) then ! unstable regime
               prnum(i,kp1) = one
             else
-              prnum(i,kp1) = min(one + 2.1d0*ri, prmax)
+              prnum(i,kp1) = min(one + 2.1_r8*ri, prmax)
             endif
           elseif (k > 1) then
             prnum(i,kp1) = prnum(i,1)

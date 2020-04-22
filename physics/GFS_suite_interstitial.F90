@@ -100,6 +100,7 @@
       real(kind=kind_phys), intent(out), dimension(im) :: work1, work2, psurf
       real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt, dtdtc
       real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
+      real(kind=kind_phys), parameter   :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 
@@ -114,23 +115,23 @@
         islmsk(i)   = nint(slmsk(i))
 
         work1(i) = (log(area(i)) - dxmin) * dxinv
-        work1(i) = max(0.0, min(1.0,work1(i)))
-        work2(i) = 1.0 - work1(i)
+        work1(i) = max(zero, min(one, work1(i)))
+        work2(i) = one - work1(i)
         psurf(i) = pgr(i)
       end do
 
       do k=1,levs
         do i=1,im
-          dudt(i,k)  = 0.
-          dvdt(i,k)  = 0.
-          dtdt(i,k)  = 0.
-          dtdtc(i,k) = 0.
+          dudt(i,k)  = zero
+          dvdt(i,k)  = zero
+          dtdt(i,k)  = zero
+          dtdtc(i,k) = zero
         enddo
       enddo
       do n=1,ntrac
         do k=1,levs
           do i=1,im
-            dqdt(i,k,n) = 0.
+            dqdt(i,k,n) = zero
           enddo
         enddo
       enddo
@@ -143,7 +144,6 @@
   module GFS_suite_interstitial_2
 
   use machine, only: kind_phys
-  real(kind=kind_phys), parameter :: one = 1.0d0
 
   contains
 
@@ -195,13 +195,14 @@
       integer,              intent(out) :: errflg
 
       ! local variables
-      real(kind=kind_phys), parameter :: czmin   = 0.0001      ! cos(89.994)
+      real(kind=kind_phys), parameter :: czmin   = 0.0001_kind_phys      ! cos(89.994)
       integer :: i, k
       real(kind=kind_phys) :: tem1, tem2, tem, hocp
       logical, dimension(im) :: invrsn
       real(kind=kind_phys), dimension(im) :: tx1, tx2
 
-      real(kind=kind_phys), parameter :: qmin = 1.0d-10, epsln=1.0d-10
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
+      real(kind=kind_phys), parameter :: qmin = 1.0e-10_kind_phys, epsln=1.0e-10_kind_phys
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -218,7 +219,7 @@
         do i = 1, im
           if ( xcosz(i) >= czmin ) then   ! zenth angle > 89.994 deg
             tem1 = adjsfcdsw(i) / xcosz(i)
-            if ( tem1 >= 120.0 ) then
+            if ( tem1 >= 120.0_kind_phys ) then
               suntim(i) = suntim(i) + dtf
             endif
           endif
@@ -295,9 +296,9 @@
 
       do i=1, im
         invrsn(i) = .false.
-        tx1(i)    = 0.0
-        tx2(i)    = 10.0
-        ctei_r(i) = 10.0
+        tx1(i)    = zero
+        tx2(i)    = 10.0_kind_phys
+        ctei_r(i) = 10.0_kind_phys
       enddo
 
       if ((((imfshalcnv == 0 .and. shal_cnv) .or. old_monin) .and. mstrat) &
@@ -305,13 +306,13 @@
         ctei_rml(:) = ctei_rm(1)*work1(:) + ctei_rm(2)*work2(:)
         do k=1,levs/2
           do i=1,im
-            if (prsi(i,1)-prsi(i,k+1) < 0.35*prsi(i,1)       &
+            if (prsi(i,1)-prsi(i,k+1) < 0.35_kind_phys*prsi(i,1)       &
                 .and. (.not. invrsn(i))) then
               tem = (tgrs(i,k+1) - tgrs(i,k))  &
                   / (prsl(i,k)   - prsl(i,k+1))
 
-              if (((tem > 0.00010) .and. (tx1(i) < 0.0)) .or.  &
-                  ((tem-abs(tx1(i)) > 0.0) .and. (tx2(i) < 0.0))) then
+              if (((tem > 0.0001_kind_phys) .and. (tx1(i) < zero)) .or.  &
+                  ((tem-abs(tx1(i)) > zero) .and. (tx2(i) < zero))) then
                 invrsn(i) = .true.
 
                 if (qgrs_water_vapor(i,k) > qgrs_water_vapor(i,k+1)) then
@@ -321,10 +322,10 @@
                   tem1 = tem1 / prslk(i,k+1) - tem2 / prslk(i,k)
 
 !  --- ...  (cp/l)(deltathetae)/(deltatwater) > ctei_rm -> conditon for CTEI
-                  ctei_r(i) = (1.0/hocp)*tem1/(qgrs_water_vapor(i,k+1)-qgrs_water_vapor(i,k)  &
+                  ctei_r(i) = (one/hocp)*tem1/(qgrs_water_vapor(i,k+1)-qgrs_water_vapor(i,k)  &
                             + qgrs_cloud_water(i,k+1)-qgrs_cloud_water(i,k))
                 else
-                  ctei_r(i) = 10
+                  ctei_r(i) = 10.0_kind_phys
                 endif
 
                 if ( ctei_rml(i) > ctei_r(i) ) then
@@ -505,8 +506,9 @@
       !real(kind=kind_phys),parameter :: slope_mg = 0.02, slope_upmg = 0.04,  &
       !                   turnrhcrit = 0.900, turnrhcrit_upper = 0.150
       ! in the following inverse of slope_mg and slope_upmg are specified
-      real(kind=kind_phys),parameter :: slope_mg   = 50.0_kind_phys,   &
-                                        slope_upmg = 25.0_kind_phys
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
+      real(kind=kind_phys), parameter :: slope_mg   = 50.0_kind_phys,   &
+                                         slope_upmg = 25.0_kind_phys
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -558,10 +560,10 @@
       endif ! end if_ras or cfscnv or samf
 
       if (ntcw > 0) then
-        if (imp_physics == imp_physics_mg .and. rhcpbl < 0.5) then ! compute rhc for GMAO macro physics cloud pdf
+        if (imp_physics == imp_physics_mg .and. rhcpbl < 0.5_kind_phys) then ! compute rhc for GMAO macro physics cloud pdf
           do i=1,im
-            tx1(i) = 1.0 / prsi(i,1)
-            tx2(i) = 1.0 - rhcmax*work1(i)-rhcbot*work2(i)
+            tx1(i) = one / prsi(i,1)
+            tx2(i) = one - rhcmax*work1(i)-rhcbot*work2(i)
 
             kk     = min(kinver(i), max(2,kpbl(i)))
             tx3(i) = prsi(i,kk)*tx1(i)
@@ -570,18 +572,18 @@
           do k = 1, levs
             do i = 1, im
               tem  = prsl(i,k) * tx1(i)
-              tem1 = min(max((tem-tx3(i))*slope_mg, -20.0), 20.0)
+              tem1 = min(max((tem-tx3(i))*slope_mg, -20.0_kind_phys), 20.0_kind_phys)
               ! Using rhcpbl and rhctop from the namelist instead of 0.3 and 0.2
               ! and rhcbot represents pbl top critical relative humidity
-              tem2 = min(max((tx4(i)-tem)*slope_upmg, -20.0), 20.0) ! Anning
+              tem2 = min(max((tx4(i)-tem)*slope_upmg, -20.0_kind_phys), 20.0_kind_phys) ! Anning
               if (islmsk(i) > 0) then
-                tem1 = 1.0 / (1.0+exp(tem1+tem1))
+                tem1 = one / (one+exp(tem1+tem1))
               else
-                tem1 = 2.0 / (1.0+exp(tem1+tem1))
+                tem1 = 2.0_kind_phys / (one+exp(tem1+tem1))
               endif
-              tem2 = 1.0 / (1.0+exp(tem2))
+              tem2 = one / (one+exp(tem2))
 
-              rhc(i,k) = min(rhcmax, max(0.7, 1.0-tx2(i)*tem1*tem2))
+              rhc(i,k) = min(rhcmax, max(0.7_kind_phys, one-tx2(i)*tem1*tem2))
             enddo
           enddo
         else
@@ -589,12 +591,12 @@
             do i=1,im
               kk = max(10,kpbl(i))
               if (k < kk) then
-                tem    = rhcbot - (rhcbot-rhcpbl) * (1.0-prslk(i,k)) / (1.0-prslk(i,kk))
+                tem    = rhcbot - (rhcbot-rhcpbl) * (one-prslk(i,k)) / (one-prslk(i,kk))
               else
                 tem    = rhcpbl - (rhcpbl-rhctop) * (prslk(i,kk)-prslk(i,k)) / prslk(i,kk)
               endif
               tem      = rhcmax * work1(i) + tem * work2(i)
-              rhc(i,k) = max(0.0, min(1.0,tem))
+              rhc(i,k) = max(zero, min(one,tem))
             enddo
           enddo
         endif
@@ -641,7 +643,7 @@
         !   prautco_l(i) = Model%prautco(1)*work1(i) + Model%prautco(2)*work2(i)
         ! enddo
         !*GF
-        rhc(:,:) = 1.0
+        rhc(:,:) = one
       endif   ! end if_ntcw
 
     end subroutine GFS_suite_interstitial_3_run
@@ -688,6 +690,7 @@
       ! dqdti may not be allocated
       real(kind=kind_phys), dimension(:,:),           intent(inout) :: dqdti
 
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -745,16 +748,16 @@
               do k=1,levs
                 do i=1,im
                   gq0(i,k,ntlnc) = gq0(i,k,ntlnc)  &
-                                 +  max(0.0, (clw(i,k,2)-save_qc(i,k))) / liqm
+                                 +  max(zero, (clw(i,k,2)-save_qc(i,k))) / liqm
                   gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
-                                 +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
+                                 +  max(zero, (clw(i,k,1)-save_qi(i,k))) / icem
                 enddo
               enddo
             else
               do k=1,levs
                 do i=1,im
                   gq0(i,k,ntinc) = gq0(i,k,ntinc)  &
-                                 +  max(0.0, (clw(i,k,1)-save_qi(i,k))) / icem
+                                 +  max(zero, (clw(i,k,1)-save_qi(i,k))) / icem
                 enddo
               enddo
             endif
@@ -779,7 +782,7 @@
       if (cplchm) then
         do k=1,levs
           do i=1,im
-            dqdti(i,k) = dqdti(i,k) * (1.0 / dtf)
+            dqdti(i,k) = dqdti(i,k) * (one / dtf)
           enddo
         enddo
       endif

@@ -11,8 +11,7 @@
 
       public GFS_surface_generic_pre_init, GFS_surface_generic_pre_finalize, GFS_surface_generic_pre_run
 
-      real(kind=kind_phys), parameter :: one = 1.0d0
-      real(kind=kind_phys), parameter :: zero = 0.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
 
       contains
 
@@ -103,24 +102,24 @@
 
         ! Set initial quantities for stochastic physics deltas
         if (do_sppt) then
-          dtdtr     = 0.0
+          dtdtr = zero
         endif
 
         ! Scale random patterns for surface perturbations with perturbation size
         ! Turn vegetation fraction pattern into percentile pattern
         if (do_sfcperts) then
-          if (pertz0(1) > 0.) then
+          if (pertz0(1) > zero) then
             z01d(:) = pertz0(1) * sfc_wts(:,1)
 !            if (me == 0) print*,'sfc_wts(:,1) min and max',minval(sfc_wts(:,1)),maxval(sfc_wts(:,1))
 !            if (me == 0) print*,'z01d min and max ',minval(z01d),maxval(z01d)
           endif
-          if (pertzt(1) > 0.) then
+          if (pertzt(1) > zero) then
             zt1d(:) = pertzt(1) * sfc_wts(:,2)
           endif
-          if (pertshc(1) > 0.) then
+          if (pertshc(1) > zero) then
             bexp1d(:) = pertshc(1) * sfc_wts(:,3)
           endif
-          if (pertlai(1) > 0.) then
+          if (pertlai(1) > zero) then
             xlai1d(:) = pertlai(1) * sfc_wts(:,4)
           endif
 !   --- do the albedo percentile calculation in GFS_radiation_driver instead --- !
@@ -130,7 +129,7 @@
 !              alb1d(i) = cdfz
 !            enddo
 !          endif
-          if (pertvegf(1) > 0.) then
+          if (pertvegf(1) > zero) then
             do i=1,im
               call cdfnor(sfc_wts(i,6),cdfz)
               vegf1d(i) = cdfz
@@ -141,7 +140,7 @@
         ! End of stochastic physics / surface perturbation
 
         do i=1,im
-          sigmaf(i) = max(vfrac(i),0.01 )
+          sigmaf(i) = max(vfrac(i), 0.01_kind_phys)
           if (islmsk(i) == 2) then
             if (isot == 1) then
               soiltyp(i)  = 16
@@ -155,9 +154,9 @@
             endif
             slopetyp(i) = 9
           else
-            soiltyp(i)  = int( stype(i)+0.5 )
-            vegtype(i)  = int( vtype(i)+0.5 )
-            slopetyp(i) = int( slope(i)+0.5 )    !! clu: slope -> slopetyp
+            soiltyp(i)  = int( stype(i)+0.5_kind_phys )
+            vegtype(i)  = int( vtype(i)+0.5_kind_phys )
+            slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
             if (soiltyp(i)  < 1) soiltyp(i)  = 14
             if (vegtype(i)  < 1) vegtype(i)  = 17
             if (slopetyp(i) < 1) slopetyp(i) = 1
@@ -171,7 +170,7 @@
           smcref2(i) = zero
 
           wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
-                         + max(zero, min(cnvwind(i), 30.0)), one)
+                         + max(zero, min(cnvwind(i), 30.0_kind_phys)), one)
           !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
           !                         Statein%vgrs(i,1)*Statein%vgrs(i,1))  &
           !              + max(zero, min(Tbd%phy_f2d(i,Model%num_p2d), 30.0)), one)
@@ -201,7 +200,7 @@
 
       public GFS_surface_generic_post_init, GFS_surface_generic_post_finalize, GFS_surface_generic_post_run
 
-      real(kind=kind_phys), parameter :: zero = 0.0, one = 1.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
 
       contains
 
@@ -246,7 +245,7 @@
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
-        real(kind=kind_phys), parameter :: albdf = 0.06d0
+        real(kind=kind_phys), parameter :: albdf = 0.06_kind_phys
 
         integer :: i
         real(kind=kind_phys) :: xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
@@ -305,11 +304,11 @@
             if (wet(i)) then                    ! some open water 
 !  ---  compute open water albedo
               xcosz_loc = max( zero, min( one, xcosz(i) ))
-              ocalnirdf_cpl = 0.06d0
-              ocalnirbm_cpl = max(albdf, 0.026d0/(xcosz_loc**1.7d0+0.065d0)  &
-       &                       + 0.15d0 * (xcosz_loc-0.1d0) * (xcosz_loc-0.5d0) &
+              ocalnirdf_cpl = 0.06_kind_phys
+              ocalnirbm_cpl = max(albdf, 0.026_kind_phys/(xcosz_loc**1.7_kind_phys+0.065_kind_phys)     &
+       &                       + 0.15_kind_phys * (xcosz_loc-0.1_kind_phys) * (xcosz_loc-0.5_kind_phys) &
        &                       * (xcosz_loc-one))
-              ocalvisdf_cpl = 0.06d0
+              ocalvisdf_cpl = 0.06_kind_phys
               ocalvisbm_cpl = ocalnirbm_cpl
 
               nnirbmi_cpl(i) = adjnirbmd(i) * (one-ocalnirbm_cpl)
@@ -323,7 +322,7 @@
               nvisdfi_cpl(i) = adjvisdfd(i) - adjvisdfu(i)
             endif
             nswsfci_cpl(i) = nnirbmi_cpl(i) + nnirdfi_cpl(i)   &
-                            + nvisbmi_cpl(i) + nvisdfi_cpl(i)
+                           + nvisbmi_cpl(i) + nvisdfi_cpl(i)
             nswsfc_cpl(i)  = nswsfc_cpl(i)  + nswsfci_cpl(i)*dtf
             nnirbm_cpl(i)  = nnirbm_cpl(i)  + nnirbmi_cpl(i)*dtf
             nnirdf_cpl(i)  = nnirdf_cpl(i)  + nnirdfi_cpl(i)*dtf

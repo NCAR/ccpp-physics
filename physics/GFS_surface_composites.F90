@@ -11,7 +11,7 @@ module GFS_surface_composites_pre
 
    public GFS_surface_composites_pre_init, GFS_surface_composites_pre_finalize, GFS_surface_composites_pre_run
 
-   real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0, epsln = 1.0d-10
+   real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys, epsln = 1.0e-10_kind_phys
 
 contains
 
@@ -158,7 +158,7 @@ contains
 !          snowd_ocn(i) = snowd(i)
            weasd_ocn(i) = zero
            snowd_ocn(i) = zero
-           semis_ocn(i) = 0.984d0
+           semis_ocn(i) = 0.984_kind_phys
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
@@ -178,7 +178,7 @@ contains
            snowd_ice(i) = snowd(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
-           semis_ice(i) = 0.95d0
+           semis_ice(i) = 0.95_kind_phys
         endif
       enddo
 
@@ -278,7 +278,7 @@ module GFS_surface_composites_post
 
    public GFS_surface_composites_post_init, GFS_surface_composites_post_finalize, GFS_surface_composites_post_run
 
-   real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0
+   real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
 
 contains
 
@@ -357,7 +357,7 @@ contains
           uustar(i) = txl*uustar_lnd(i) + txi*uustar_ice(i) + txo*uustar_ocn(i)
           fm10(i)   = txl*fm10_lnd(i)   + txi*fm10_ice(i)   + txo*fm10_ocn(i)
           fh2(i)    = txl*fh2_lnd(i)    + txi*fh2_ice(i)    + txo*fh2_ocn(i)
-         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)      + txo*tsurf_ocn(i)
+         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)       + txo*tsurf_ocn(i)
          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_ocn(i) ! not used again! Moorthi
           cmm(i)    = txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_ocn(i)
           chh(i)    = txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_ocn(i)
