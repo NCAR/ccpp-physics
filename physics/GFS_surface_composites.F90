@@ -285,7 +285,7 @@ contains
 !!
 #endif
    subroutine GFS_surface_composites_post_run (                                                                                   &
-      im, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, landfrac, lakefrac, oceanfrac,                          &
+      im, kice, km, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, landfrac, lakefrac, oceanfrac,               &
       zorl, zorlo, zorll, zorl_wat, zorl_lnd, zorl_ice,                                                                           &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
@@ -293,11 +293,11 @@ contains
       cmm, cmm_wat, cmm_lnd, cmm_ice, chh, chh_wat, chh_lnd, chh_ice, gflx, gflx_wat, gflx_lnd, gflx_ice, ep1d, ep1d_wat,         &
       ep1d_lnd, ep1d_ice, weasd, weasd_wat, weasd_lnd, weasd_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,       &
       tprcp_lnd, tprcp_ice, evap, evap_wat, evap_lnd, evap_ice, hflx, hflx_wat, hflx_lnd, hflx_ice, qss, qss_wat, qss_lnd,        &
-      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, errmsg, errflg)
+      qss_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd, tsfc_ice, tisfc, tice, hice, cice, tiice, stc, errmsg, errflg)
 
       implicit none
 
-      integer,                              intent(in) :: im
+      integer,                              intent(in) :: im, kice, km
       logical,                              intent(in) :: cplflx, frac_grid, cplwav2atm
       logical, dimension(im),               intent(in) :: flag_cice, dry, wet, icy
       integer, dimension(im),               intent(in) :: islmsk
@@ -315,11 +315,14 @@ contains
       real(kind=kind_phys), dimension(im),  intent(in   ) :: tice ! interstitial sea ice temperature
       real(kind=kind_phys), dimension(im),  intent(inout) :: hice, cice
 
+      real(kind=kind_phys), dimension(im, kice),  intent(in   ) :: tiice
+      real(kind=kind_phys), dimension(im, km),    intent(inout) :: stc
+
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
       ! Local variables
-      integer :: i
+      integer :: i, k
       real(kind=kind_phys) :: txl, txi, txo, tem
 
       ! Initialize CCPP error handling variables
@@ -482,6 +485,9 @@ contains
             hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
             tsfc(i)   = tsfc_ice(i)
+            do k=1,kice ! store tiice in stc to reduce output in the nonfrac grid case
+              stc(i,k)=tiice(i,k)
+            end do
           endif
 
           zorll(i) = zorl_lnd(i)
