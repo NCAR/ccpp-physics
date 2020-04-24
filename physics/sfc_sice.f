@@ -40,12 +40,12 @@
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
 !>  @{
       subroutine sfc_sice_run                                           &
-     &     ( im, km, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,    & !  ---  inputs:
+     &     ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,  & !  ---  inputs:
      &       t0c, rd, ps, t1, q1, delt,                                 &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
      &       cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      &
      &       flag_iter, lprnt, ipr, cimin,                              &
-     &       hice, fice, tice, weasd, tskin, tprcp, stc, ep,            & !  ---  input/outputs:
+     &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
      &       cplflx, cplchm, flag_cice, islmsk_cice,                    &
      &       errmsg, errflg
@@ -58,12 +58,12 @@
 !                                                                       !
 !    call sfc_sice                                                      !
 !       inputs:                                                         !
-!          ( im, km, ps, t1, q1, delt,                                  !
+!          ( im, kice, ps, t1, q1, delt,                                !
 !            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   !
 !            cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      !
 !            flag_iter,                                                 !
 !       input/outputs:                                                  !
-!            hice, fice, tice, weasd, tskin, tprcp, stc, ep,            !
+!            hice, fice, tice, weasd, tskin, tprcp, tiice, ep,            !
 !       outputs:                                                        !
 !            snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx )       !
 !                                                                       !
@@ -90,7 +90,7 @@
 !  ====================  defination of variables  ====================  !
 !                                                                       !
 !  inputs:                                                       size   !
-!     im, km   - integer, horiz dimension and num of soil layers   1    !
+!     im, kice - integer, horiz dimension and num of ice layers    1    !
 !     ps       - real, surface pressure                            im   !
 !     t1       - real, surface layer mean temperature ( k )        im   !
 !     q1       - real, surface layer mean specific humidity        im   !
@@ -117,7 +117,7 @@
 !     weasd    - real, water equivalent accumulated snow depth (mm)im   !
 !     tskin    - real, ground surface skin temperature ( k )       im   !
 !     tprcp    - real, total precipitation                         im   !
-!     stc      - real, soil temp (k)                              im,km !
+!     tiice    - real, temperature of ice internal (k)          im,kice !
 !     ep       - real, potential evaporation                       im   !
 !                                                                       !
 !  outputs:                                                             !
@@ -148,7 +148,7 @@
       real(kind=kind_phys), parameter :: dsi   = one/0.33d0
 
 !  ---  inputs:
-      integer, intent(in) :: im, km, ipr
+      integer, intent(in) :: im, kice, ipr
       logical, intent(in) :: lprnt
       logical, intent(in) :: cplflx
       logical, intent(in) :: cplchm
@@ -170,7 +170,7 @@
       real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
      &       fice, tice, weasd, tskin, tprcp, ep
 
-      real (kind=kind_phys), dimension(im,km), intent(inout) :: stc
+      real (kind=kind_phys), dimension(im,kice), intent(inout) :: tiice
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: snwdph,    &
@@ -236,12 +236,12 @@
           endif
         endif
       enddo
-!> - Update/read sea ice temperature from soil temperature and initialize variables.
+!  --- ...  update sea ice temperature
 
       do k = 1, kmi
         do i = 1, im
           if (flag(i)) then
-            stsice(i,k) = stc(i,k)
+            stsice(i,k) = tiice(i,k)
           endif
         enddo
       enddo
@@ -391,7 +391,7 @@
       do k = 1, kmi
         do i = 1, im
           if (flag(i)) then
-            stc(i,k) = min(stsice(i,k), t0c)
+            tiice(i,k) = min(stsice(i,k), t0c)
           endif
         enddo
       enddo
