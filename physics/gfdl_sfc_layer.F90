@@ -14,6 +14,9 @@
 
       contains
 
+!> \section arg_table_gfdl_sfc_layer_init Argument Table
+!! \htmlinclude gfdl_sfc_layer_init.html
+!!        
       subroutine gfdl_sfc_layer_init ()
         
         !GFDL SFC layer has hard-coded data for soil parameters and assumes a 16-type version of STAS; check for using STAS and abort if not?
@@ -40,9 +43,17 @@
       subroutine gfdl_sfc_layer_finalize ()
       end subroutine gfdl_sfc_layer_finalize
 
-      subroutine gfdl_sfc_layer_run (im, nsoil, km, dt, islmsk, isltyp, rd,    &
-        grav, ep1, ep2, smois, psfc, prsl1, q1, t1, u1, v1, gsw, glw, tskin,   &
-        ustar, znt, cdm, u10, v10, rib, wspd, fm, fh, fh2, ch, fm10, qgh, qss, errmsg, errflg)
+!> \section arg_table_gfdl_sfc_layer_run Argument Table
+!! \htmlinclude gfdl_sfc_layer_run.html
+!!
+      subroutine gfdl_sfc_layer_run (im, nsoil, km, flag_iter, dt, wet, dry,   &
+        icy, isltyp, rd, grav, ep1, ep2, smois, psfc, prsl1, q1, t1, u1, v1,   &
+        u10, v10, gsw, glw, tskin_ocn, tskin_lnd, tskin_ice, ustar_ocn,        &
+        ustar_lnd, ustar_ice, znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd,     &
+        cdm_ice, stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice,&
+        fm_ocn, fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd,      &
+        fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice, qss_ocn,&
+        qss_lnd, qss_ice, errmsg, errflg)
         
         use funcphys, only: fpvs
         
@@ -51,30 +62,38 @@
         integer, intent(in) :: im, nsoil, km
         real(kind=kind_phys), intent(in) :: dt
         integer :: icoef_sf, iwavecpl, ens_random_seed, ntsflg, issflx !turn these into intent(in) and namelist options
-        logical :: lcur_sf, pert_Cd !turn these into intent(in) and namelist options
+        logical :: lcur_sf, pert_Cd, diag_wind10m, diag_qss !turn these into intent(in) and namelist options
         real(kind=kind_phys) :: ens_Cdamp, sfenth !turn these into intent(in) and namelist options
-        integer, dimension(im), intent(in) :: islmsk, isltyp
+        logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
+        integer, dimension(im), intent(in) :: isltyp
         real(kind=kind_phys), intent(in) :: rd, grav, ep1, ep2
         real(kind=kind_phys), intent(in), dimension(im,nsoil) :: smois
         real(kind=kind_phys), intent(in), dimension(im) :: psfc, prsl1, q1, t1,&
-                                                           u1, v1, gsw, glw
+                                                           u1, v1, u10, v10, gsw, glw
         
-        real(kind=kind_phys), intent(inout), dimension(im) :: tskin, ustar,    &
-                         znt, cdm, u10, v10, rib, wspd, fm, fh, fh2, ch, fm10, &
-                         qgh, qss
+        real(kind=kind_phys), intent(inout), dimension(im) :: tskin_ocn,       &
+            tskin_lnd, tskin_ice, ustar_ocn, ustar_lnd, ustar_ice,             &
+            znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd, cdm_ice,              &
+            stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice,     &
+            fm_ocn, fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd,  &
+            fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice,     &
+            qss_ocn, qss_lnd, qss_ice
         
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
+        
+        !local variables
         
         integer :: i, its, ite, ims, ime
         
         real (kind=kind_phys), parameter :: karman = 0.4
         
         real(kind=kind_phys), dimension(im)   :: wetc, pspc, pkmax, tstrc, upc,&
-                     vpc, ustar_temp, mznt, slwdc, wind10, zkmax, qfx, chs, chs2
+                     vpc, mznt, slwdc, wspd, wind10, qfx, qgh
+        real(kind=kind_phys), dimension(im)   :: u10_lnd, u10_ocn, u10_ice, v10_lnd, v10_ocn, v10_ice
         real(kind=kind_phys), dimension(im)   :: charn, msang, scurx, scury
         real(kind=kind_phys), dimension(im)   :: fxh, fxe, fxmx, fxmy, xxfh,   &
-                                                 xxfh2, tzot, taux, tauy
+                                                 xxfh2, tzot
         real(kind=kind_phys), dimension(1:30) :: maxsmc, drysmc
         real(kind=kind_phys)                  :: smcmax, smcdry, zhalf, cd10, esat
         
@@ -111,6 +130,11 @@
         ntsflg = 0 !should this be 0 or 1? namphysics has this set to 0 unless GFDLSLABSCHEME is active?
         sfenth = 0.0 ! this is set to 0 in namelist.input.HWRF in WRF code
         issflx = 0 !1 = calculate surface fluxes, 0 = don't 
+        diag_wind10m = .false. !GJF: if one wants 10m wind speeds to come from this scheme, set this to True, 
+                              !put [u,v]10_[lnd/ocn/ice] in the scheme argument list (and metadata), and modify
+                              !GFS_surface_compsites to receive the individual components and calculate an all-grid value
+        diag_qss = .false. !GJF: saturation specific humidities are calculated by LSM, sea surface, and sea ice schemes in
+                           ! GFS-based suites
         
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -122,131 +146,279 @@
         ime = im
         
         do i=its, ite
-          wetc(i) = 1.0
-          if (islmsk(i) == 1) then
-          !land points
-            smcdry=drysmc(isltyp(i))
-            smcmax=maxsmc(isltyp(i))
-            wetc(i)=(smois(i,1)-smcdry)/(smcmax-smcdry)
-            wetc(i)=amin1(1.,amax1(wetc(i),0.))
-          end if
+          if (flag_iter(i)) then
+            
+            !perform data preparation that is the same for all surface types
+            
+            pspc(i) = psfc(i)*10. ! convert from Pa to cgs
+            pkmax(i) = prsl1(i)*10.
+            
+            upc(i) = u1(i)*100.
+            vpc(i) = v1(i)*100.
+            
+            !GJF: wind speed at the lowest model layer is calculated in a scheme prior to this (if this scheme
+            ! is part of a GFS-based suite), but it is recalculated here because this one DOES NOT include
+            ! a convective wind enhancement component (convective gustiness factor) to follow the original
+            ! GFDL surface layer scheme
+            wspd(i) = sqrt(upc(i)*upc(i) + vpc(i)*vpc(i))
+            wspd(i) = amax1(wspd(i),100.)/100.
+            
+            !Wang, calulate height of the first half level
+            !      use previous u10 v10 to compute wind10, input to MFLUX to compute z0
+            wind10(i)=sqrt(u10(i)*u10(i)+v10(i)*v10(i))
+            !first time step, u10 and v10 may be zero
+            if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
+              zhalf = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav
+            endif
+            
+            !zkmax(i) = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav
+            
+            !slwdc... GFDL downward net flux in units of cal/(cm**2/min)
+            !also divide by 10**4 to convert from /m**2 to /cm**2
+            slwdc(i)=gsw(i)+glw(i)
+            slwdc(i)=0.239*60.*slwdc(i)*1.e-4
+            
+            charn(i) = 0.0 !used with wave coupling (iwavecpl == 1)
+            msang(i) = 0.0 !used with wave coupling (iwavecpl == 1)
+            scurx(i) = 0.0 !used with ocean currents? (lcur_sf == T)
+            scury(i) = 0.0 !used with ocean currents? (lcur_sf == T)
+            
+            if (diag_qss) then
+              esat = fpvs(t1(i))
+              qgh(i) = ep2*esat/(psfc(i)-esat)
+            end if
+            
+            !rho1(i)=prsl1(i)/(rd*t1(i)*(1.+ep1*q1(i)))
+            !cpm(i)=cp*(1.+0.8*q1(i))
+            
+            !perform data preparation that depends on surface types and call the mflux2 subroutine for each surface type
+            if (dry(i)) then
+              smcdry=drysmc(isltyp(i))
+              smcmax=maxsmc(isltyp(i))
+              wetc(i)=(smois(i,1)-smcdry)/(smcmax-smcdry)
+              wetc(i)=amin1(1.,amax1(wetc(i),0.))
+              
+              tstrc(i) = tskin_lnd(i)
+              
+              if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_lnd(i))/alog(zhalf/znt_lnd(i))
+              end if
+              wind10(i)=wind10(i)*100.0   !! m/s to cm/s
+              
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_lnd(i), rib_lnd(i), &
+                xxfh(i), znt_lnd(i), mznt(i), tstrc(i),   &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcur_sf, charn(i), msang(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                errflg)
+                if (errflg /= 0) return
+                
+              if (ntsflg==1) then
+                tskin_lnd(i) = tstrc(i)      ! gopal's doing 
+              end if
+              
+              if (diag_wind10m) then
+                u10_lnd(i) = u1(i)*(wind10(i)/wspd(i))/100.
+                v10_lnd(i) = v1(i)*(wind10(i)/wspd(i))/100.
+              end if
+              
+              !gz1oz0(i) = alog(zkmax(i)/znt_lnd(i))
+              
+              ustar_lnd(i) = 0.01*sqrt(cdm_lnd(i)*   &
+                         (upc(i)*upc(i) + vpc(i)*vpc(i)))
+                         
+              !taux(i) = fxmx(i)/10.    ! gopal's doing for Ocean coupling
+              !tauy(i) = fxmy(i)/10.    ! gopal's doing for Ocean coupling
+              
+              stress_lnd(i) = cdm_lnd(i)*wspd(i)*wspd(i)
+              
+              fm_lnd(i) = karman/sqrt(cdm_lnd(i))
+              fh_lnd(i) = karman*xxfh(i)
+              
+              !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
+              !psim_lnd(i)=gz1oz0(i)-fm_lnd(i)
+              !psih_lnd(i)=gz1oz0(i)-fh_lnd(i)
+              
+              fh2_lnd(i) = karman*xxfh2(i)
+              ch_lnd(i)  = karman*karman/(fm_lnd(i) * fh_lnd(i))
+              
+              !!! convert cd, ch to values at 10m, for output
+              cd10 = cdm_lnd(i)
+              if ( wind10(i) .ge. 0.1 ) then
+                cd10=cdm_lnd(i)* (wspd(i)/(0.01*wind10(i)) )**2
+                !tmp9=0.01*abs(tzot(i))
+                !ch_out(i)=ch_lnd(i)*(wspd(i)/(0.01*wind10(i)) ) * &
+               !           (alog(zkmax(i)/tmp9)/alog(10.0/tmp9))
+              end if
+              fm10_lnd(i) = karman/sqrt(cd10)
+              
+              !chs_lnd(i)=ch_lnd(i)*wspd (i) !conductance
+              !chs2_lnd(i)=ustar_lnd(i)*karman/fh2_lnd(i) !2m conductance
+              
+              !!!2014-0922  cap CHS over land points
+              ! chs_lnd(i)=amin1(chs_lnd(i), 0.05)
+              ! chs2_lnd(i)=amin1(chs2_lnd(i), 0.05)
+              ! if (chs2_lnd(i) < 0) chs2_lnd(i)=1.0e-6
+              
+              if (diag_qss) then
+                esat = fpvs(tskin_lnd(i))
+                qss_lnd(i) = ep2*esat/(psfc(i)-esat)
+              end if
+              
+              !flhc_lnd(i)=cpm(i)*rho1(i)*chs_lnd(i)
+              !flqc_lnd(i)=rho1(i)*chs_lnd(i)
+              !cqs2_lnd(i)=chs2_lnd(i)
+            end if !dry
+            
+            if (icy(i)) then
+              smcdry=drysmc(isltyp(i))
+              smcmax=maxsmc(isltyp(i))
+              wetc(i)=(smois(i,1)-smcdry)/(smcmax-smcdry)
+              wetc(i)=amin1(1.,amax1(wetc(i),0.))
+              
+              tstrc(i) = tskin_ice(i)
+              
+              if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_ice(i))/alog(zhalf/znt_ice(i))
+              end if
+              wind10(i)=wind10(i)*100.0   !! m/s to cm/s
+              
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ice(i), rib_ice(i), &
+                xxfh(i), znt_ice(i), mznt(i), tstrc(i),   &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcur_sf, charn(i), msang(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                errflg)
+                if (errflg /= 0) return
+                
+              if (ntsflg==1) then
+                tskin_ice(i) = tstrc(i)      ! gopal's doing 
+              end if
+              
+              if (diag_wind10m) then
+                u10_ice(i) = u1(i)*(wind10(i)/wspd(i))/100.
+                v10_ice(i) = v1(i)*(wind10(i)/wspd(i))/100.
+              end if
+              
+              !gz1oz0(i) = alog(zkmax(i)/znt_ice(i))
+              
+              ustar_ice(i) = 0.01*sqrt(cdm_ice(i)*   &
+                         (upc(i)*upc(i) + vpc(i)*vpc(i)))
+              
+              !taux(i) = fxmx(i)/10.    ! gopal's doing for Ocean coupling
+              !tauy(i) = fxmy(i)/10.    ! gopal's doing for Ocean coupling
+              
+              stress_ice(i) = cdm_ice(i)*wspd(i)*wspd(i)
+              
+              fm_ice(i) = karman/sqrt(cdm_ice(i))
+              fh_ice(i) = karman*xxfh(i)
+              
+              !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
+              !psim_ice(i)=gz1oz0(i)-fm_ice(i)
+              !psih_ice(i)=gz1oz0(i)-fh_ice(i)
+              
+              fh2_ice(i) = karman*xxfh2(i)
+              ch_ice(i)  = karman*karman/(fm_ice(i) * fh_ice(i))
+              
+              !!! convert cd, ch to values at 10m, for output
+              cd10 = cdm_ice(i)
+              if ( wind10(i) .ge. 0.1 ) then
+                cd10=cdm_ice(i)* (wspd(i)/(0.01*wind10(i)) )**2
+                !tmp9=0.01*abs(tzot(i))
+                !ch_out(i)=ch_ice(i)*(wspd(i)/(0.01*wind10(i)) ) * &
+               !           (alog(zkmax(i)/tmp9)/alog(10.0/tmp9))
+              end if
+              fm10_ice(i) = karman/sqrt(cd10)
+              
+              !chs_ice(i)=ch_ice(i)*wspd (i) !conductance
+              !chs2_ice(i)=ustar_ice(i)*karman/fh2_ice(i) !2m conductance
+              
+              if (diag_qss) then
+                esat = fpvs(tskin_ice(i))
+                qss_ice(i) = ep2*esat/(psfc(i)-esat)
+              end if
+              
+              !flhc_ice(i)=cpm(i)*rho1(i)*chs_ice(i)
+              !flqc_ice(i)=rho1(i)*chs_ice(i)
+              !cqs2_ice(i)=chs2_ice(i)
+            end if !ice
+            
+            if (wet(i)) then
+              wetc(i) = 1.0
+              
+              tstrc(i) = tskin_ocn(i)
+              
+              if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_ocn(i))/alog(zhalf/znt_ocn(i))
+              end if
+              wind10(i)=wind10(i)*100.0   !! m/s to cm/s
+              
+              !mflux2 expects negative roughness length for ocean points
+              znt_ocn(i) = -znt_ocn(i)
+              
+              call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ocn(i), rib_ocn(i), &
+                xxfh(i), znt_ocn(i), mznt(i), tstrc(i),   &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcur_sf, charn(i), msang(i), &
+                scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
+                dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
+                errflg)
+                if (errflg /= 0) return
+              
+              if (ntsflg==1) then
+                tskin_ocn(i) = tstrc(i)      ! gopal's doing 
+              end if
+              
+              znt_ocn(i)= abs(znt_ocn(i))
+              mznt(i)= abs(mznt(i))
+              
+              if (diag_wind10m) then
+                u10_ocn(i) = u1(i)*(wind10(i)/wspd(i))/100.
+                v10_ocn(i) = v1(i)*(wind10(i)/wspd(i))/100.
+              end if
+              
+              !gz1oz0(i) = alog(zkmax(i)/znt_ocn(i))
+              
+              ustar_ocn(i) = 0.01*sqrt(cdm_ocn(i)*   &
+                         (upc(i)*upc(i) + vpc(i)*vpc(i)))
+              
+              !taux(i) = fxmx(i)/10.    ! gopal's doing for Ocean coupling
+              !tauy(i) = fxmy(i)/10.    ! gopal's doing for Ocean coupling
+              
+              stress_ocn(i) = cdm_ocn(i)*wspd(i)*wspd(i)
+              
+              fm_ocn(i) = karman/sqrt(cdm_ocn(i))
+              fh_ocn(i) = karman*xxfh(i)
+              
+              !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
+              !psim_ocn(i)=gz1oz0(i)-fm_ocn(i)
+              !psih_ocn(i)=gz1oz0(i)-fh_ocn(i)
+              
+              fh2_ocn(i) = karman*xxfh2(i)
+              ch_ocn(i)  = karman*karman/(fm_ocn(i) * fh_ocn(i))
+              
+              !!! convert cd, ch to values at 10m, for output
+              cd10 = cdm_ocn(i)
+              if ( wind10(i) .ge. 0.1 ) then
+                cd10=cdm_ocn(i)* (wspd(i)/(0.01*wind10(i)) )**2
+                !tmp9=0.01*abs(tzot(i))
+                !ch_out(i)=ch_lnd(i)*(wspd(i)/(0.01*wind10(i)) ) * &
+               !           (alog(zkmax(i)/tmp9)/alog(10.0/tmp9))
+              end if
+              fm10_ocn(i) = karman/sqrt(cd10)
+              
+              !chs_ocn(i)=ch_ocn(i)*wspd (i) !conductance
+              !chs2_ocn(i)=ustar_ocn(i)*karman/fh2_ocn(i) !2m conductance
+              
+              if (diag_qss) then
+                esat = fpvs(tskin_ocn(i))
+                qss_ocn(i) = ep2*esat/(psfc(i)-esat)
+              end if
+            end if !wet
           
-          pspc(i) = psfc(i)*10. ! convert from Pa to cgs
-          pkmax(i) = prsl1(i)*10.
-          
-          tstrc(i) = tskin(i)
-          
-          upc(i) = u1(i)*100.
-          ustar_temp(i) = ustar(i)
-          vpc(i) = v1(i)*100.
-          
-          if (islmsk(i) == 2) then
-            znt(i) = -znt(i)
-          end if
-          
-!       slwdc... GFDL downward net flux in units of cal/(cm**2/min)
-!       also divide by 10**4 to convert from /m**2 to /cm**2
-          slwdc(i)=gsw(i)+glw(i)
-          slwdc(i)=0.239*60.*slwdc(i)*1.e-4
-          
-          charn(i) = 0.0 !used with wave coupling (iwavecpl == 1)
-          msang(i) = 0.0 !used with wave coupling (iwavecpl == 1)
-          scurx(i) = 0.0 !used with ocean currents? (lcur_sf == T)
-          scury(i) = 0.0 !used with ocean currents? (lcur_sf == T)
-          
-          !Wang, calulate height of the first half level
-          !      use previous u10 v10 to compute wind10, input to MFLUX to compute z0
-          wind10(i)=sqrt(u10(i)*u10(i)+v10(i)*v10(i))
-          !first time step, u10 and v10 may be zero
-          if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-            zhalf = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav
-            wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt(i))/alog(zhalf/znt(i))
-          endif
-          wind10(i)=wind10(i)*100.0   !! m/s to cm/s
-        end do
-        
-        call mflux2 (fxh, fxe, fxmx, fxmy, cdm, rib, xxfh, znt, mznt, tstrc,   &
-          pspc, pkmax, wetc, slwdc, icoef_sf, iwavecpl, lcur_sf, charn, msang, &
-          scurx, scury, pert_Cd, ens_random_seed, ens_Cdamp, upc, vpc, t1, q1, &
-          dt, wind10, xxfh2, ntsflg, sfenth, tzot, ims, ime, its, ite, errmsg, &
-          errflg)
-        if (errflg /= 0) return
-        
-        do i=its,ite
-           IF(ntsflg==1)    then
-             tskin(i) = tstrc(i)      ! gopal's doing 
-   !bugfix 4
-   !       bob's doing patch tsk with neigboring values... are grid boundaries
-           ! if(j.eq.jde) then
-           !  tsk(i,j) = tsk(i,j-1)
-           !  endif
-           ! 
-           ! if(j.eq.jds) then
-           !  tsk(i,j) = tsk(i,j+1)
-           !  endif
-      
-           ! if(i.eq.ide) tsk(i,j) = tsk(i-1,j)
-           ! if(i.eq.ids) tsk(i,j) = tsk(i+1,j)
-           end if
-           
-           znt(i)= abs(znt(i))
-           mznt(i)= abs(mznt(i))
-           
-           wspd(i) = sqrt(upc(i)*upc(i) + vpc(i)*vpc(i))
-           wspd(i) = amax1(wspd(i),100.)/100.
-           
-           u10(i) = u1(i)*(wind10(i)/wspd(i))/100.
-           v10(i) = v1(i)*(wind10(i)/wspd(i))/100.
-           
-           zkmax(i) = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav
-           !gz1oz0(i) = alog(zkmax(i)/znt(i))
-           
-           ustar(i) = 0.01*sqrt(cdm(i)*   &
-                      (upc(i)*upc(i) + vpc(i)*vpc(i)))
-           
-           taux  (i)= fxmx(i)/10.    ! gopal's doing for Ocean coupling
-           tauy  (i)= fxmy(i)/10.    ! gopal's doing for Ocean coupling
-           
-           fm(i) = karman/sqrt(cdm(i))
-           fh(i) = karman*xxfh(i)
-           
-           !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
-           !psim(i)=gz1oz0(i)-fm(i)
-           !psih(i)=gz1oz0(i)-fh(i)
-           
-           fh2(i) = karman*xxfh2(i)
-           ch(i)  = karman*karman/(fm(i) * fh(i))
-
-!!! convert cd, ch to values at 10m, for output
-           cd10 = cdm(i)
-           if ( wind10(i) .ge. 0.1 ) then
-             cd10=cdm(i)* (wspd(i)/(0.01*wind10(i)) )**2
-             !tmp9=0.01*abs(tzot(i))
-             !ch_out(i)=ch(i)*(wspd(i)/(0.01*wind10(i)) ) * &
-            !           (alog(zkmax(i)/tmp9)/alog(10.0/tmp9))
-           end if
-           fm10(i) = karman/sqrt(cd10)
-           
-           chs(i)=ch(i)*wspd (i) !conductance (needed for HWRF NOAH LSM?)
-           chs2(i)=ustar(i)*karman/fh2(i) !2m conductance
-
-!!!2014-0922  cap CHS over land points
-           if (islmsk(i) == 1) then
-             chs(i)=amin1(chs(i), 0.05)
-             chs2(i)=amin1(chs2(i), 0.05)
-             if (chs2(i) < 0) chs2(i)=1.0e-6
-           endif
-           
-           esat = fpvs(t1(i))
-           qgh(i) = ep2*esat/(psfc(i)-esat)
-           esat = fpvs(tskin(i))
-           qss(i) = ep2*esat/(psfc(i)-esat)
-           
-           !rho1(i)=prsl1(i)/(rd*t1(i)*(1.+ep1*q1(i)))
-           !cpm(i)=cp*(1.+0.8*q1(i))
-           !flhc(i)=cpm(i)*rho1(i)*chs(i)
-           !flqc(i)=rho1(i)*chs(i)
-           !cqs2(i)=chs2(i)
+            !flhc_ocn(i)=cpm(i)*rho1(i)*chs_ocn(i)
+            !flqc_ocn(i)=rho1(i)*chs_ocn(i)
+            !cqs2_ocn(i)=chs2_ocn(i)
+          end if !flag_iter
         end do
         
         ! if (isfflx.eq.0) then
@@ -279,7 +451,7 @@
                          icoef_sf,iwavecpl,lcurr_sf,alpha,gamma,xcur,ycur,     &
                          pert_Cd, ens_random_seed, ens_Cdamp,                  &
                          upc,vpc,tpc,rpc,dt,wind10,xxfh2,ntsflg,sfenth,        &
-                         tzot, ims, ime, its, ite, errmsg, errflg)
+                         tzot, errmsg, errflg)
  
 !------------------------------------------------------------------------
 !
@@ -297,8 +469,12 @@
 !-----------------------------------------------------------------------
 !     user interface variables
 !-----------------------------------------------------------------------
-      integer,intent(in)  :: ims,ime
-      integer,intent(in)  :: its,ite
+      !integer,intent(in)  :: ims,ime
+      !integer,intent(in)  :: its,ite
+      integer, parameter :: ims = 1
+      integer, parameter :: ime = 1
+      integer, parameter :: its = 1
+      integer, parameter :: ite = 1
       integer,intent(in)  :: ntsflg
       integer,intent(in)  :: icoef_sf
       integer,intent(in)  :: iwavecpl
