@@ -8,7 +8,7 @@
        use machine,      only: kind_phys
        real(kind=kind_phys),parameter :: pgwd  = 1._kind_phys
        real(kind=kind_phys),parameter :: pgwd4 = 1._kind_phys
-       logical debugprint = .false.
+       logical,parameter              :: debugprint = .false.
        end module sso_coorde
 !
 !
@@ -34,7 +34,7 @@
        use physcons,         only : con_cp, con_g, con_rd, con_rv
 
        use ugwp_wmsdis_init, only : tamp_mpa, ilaunch
-       use sso_coorde,       only : pgwd, pgwd4
+       use sso_coorde,       only : pgwd, pgwd4, debugprint
        implicit none
 !input
 
@@ -298,7 +298,7 @@
      &,                         n_tofd, ze_tofd, ztop_tofd
 
       use cires_ugwp_module, only : kxw,  max_kdis, max_axyz
-      use sso_coorde,        only : pgwd, pgwd4
+      use sso_coorde,        only : pgwd, pgwd4, debugprint
 !----------------------------------------
       implicit none
       character(len=8)    :: strsolver='PSS-1986'  ! current operational solver or  'WAM-2017'
@@ -1287,6 +1287,8 @@
      &,                            zci,     zdci,    zci4, zci3, zci2
      &,                            zaz_fct, zcosang, zsinang
      &,                            nwav,    nazd,    zcimin, zcimax
+
+      use sso_coorde,       only : debugprint
 !
       implicit none
 !23456
