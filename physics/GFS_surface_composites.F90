@@ -435,9 +435,10 @@ contains
             hflx(i)   = hflx_lnd(i)
             qss(i)    = qss_lnd(i)
             tsfc(i)   = tsfc_lnd(i)
-            !hice(i)   = zero
-            !cice(i)   = zero
-            !tisfc(i)  = tsfc(i)
+            hice(i)   = zero
+            cice(i)   = zero
+            tisfc(i)  = tsfc(i)
+            tsfco(i)  = tsfc(i)
           elseif (islmsk(i) == 0) then
             zorl(i)   = zorl_ocn(i)
             cd(i)     = cd_ocn(i)
@@ -465,6 +466,7 @@ contains
             hice(i)   = zero
             cice(i)   = zero
             tisfc(i)  = tsfc(i)
+            tsfcl(i)  = tsfc(i)
           else ! islmsk(i) == 2
             zorl(i)   = zorl_ice(i)
             cd(i)     = cd_ice(i)
@@ -477,16 +479,6 @@ contains
             fh2(i)    = fh2_ice(i)
             stress(i) = stress_ice(i)
            !tsurf(i)  = tsurf_ice(i)
-            if (.not. flag_cice(i)) then
-              tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
-            elseif (wet(i) .and. cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
-              txi = cice(i)
-              txo = one - txi
-              evap(i)   = txi * evap_ice(i)   + txo * evap_ocn(i)
-              hflx(i)   = txi * hflx_ice(i)   + txo * hflx_ocn(i)
-              tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_ocn(i)
-              stress(i) = txi * stress_ice(i) + txo * stress_ocn(i)
-            endif
             cmm(i)    = cmm_ice(i)
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
@@ -499,6 +491,24 @@ contains
             hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
             tsfc(i)   = tsfc_ice(i)
+            tsfcl(i)  = tsfc(i)
+            if (.not. flag_cice(i)) then
+              tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
+            elseif (wet(i) .and. cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
+              txi = cice(i)
+              txo = one - txi
+              evap(i)   = txi * evap_ice(i)   + txo * evap_ocn(i)
+              hflx(i)   = txi * hflx_ice(i)   + txo * hflx_ocn(i)
+              tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_ocn(i)
+              stress(i) = txi * stress_ice(i) + txo * stress_ocn(i)
+              qss(i)    = txi * qss_ice(i)    + txo * qss_ocn(i)
+              ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_ocn(i)
+            endif
+            if (wet(i)) then
+              tsfco(i) = tsfc_ocn(i)
+            else
+              tsfco(i) = tsfc(i)
+            endif
           endif
 
           zorll(i) = zorl_lnd(i)
