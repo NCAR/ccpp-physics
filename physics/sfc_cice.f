@@ -61,9 +61,9 @@
 !          ( im, cplflx, hvap, cp, rvrdm1, rd,                          !
 !            t1, q1, cm, ch, prsl1,                                     !
 !            wind, flag_cice, flag_iter, dqsfc, dtsfc,                  !
-!            dusfc, dvsfc,                                              !
+!            dusfc, dvsfc, snowd,                                       !
 !       outputs:                                                        !
-!            qsurf, cmm, chh, evap, hflx, stress)                       !
+!            qsurf, cmm, chh, evap, hflx, stress, weasd, snwdph, ep)    !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
 !                                                                       !
@@ -81,6 +81,7 @@
 !     dtsfc    - real, sensible heat flux
 !     dusfc    - real, zonal momentum stress
 !     dvsfc    - real, meridional momentum stress
+!     snowd    - real, snow depth from cice
 !  outputs:
 !     qsurf    - real, specific humidity at sfc
 !     cmm      - real, ?
@@ -88,6 +89,9 @@
 !     evap     - real, evaperation from latent heat
 !     hflx     - real, sensible heat
 !     stress   - real, surface stress
+!     weasd    - real, water equivalent accumulated snow depth (mm)
+!     snwdph   - real, water equivalent snow depth (mm)
+!     ep       - real, potential evaporation
 !  ====================    end of description    =====================  !
 !
 !
