@@ -86,13 +86,14 @@ contains
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
               else
-                cice(i) = zero
-                islmsk  = 0
+                cice(i)   = zero
+                islmsk(i) = 0
               endif
             endif
             if (cice(i) < one ) then
               wet(i)=.true. ! some open ocean/lake water exists
-              if (.not. cplflx) tsfco(i) = max(tsfco(i), tisfc(i), tgice)
+              if (.not. cplflx .or. oceanfrac(i) == zero)      &
+                  tsfco(i) = max(tsfco(i), tisfc(i), tgice)
             end if
           else
             cice(i) = zero
