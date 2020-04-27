@@ -263,8 +263,6 @@ contains
 !    endif
 
     ! Initialize gas concentrations and gas optics class
-    print*,'nfit_coeffs:       ',nfit_coeffs
-    print*,'optimal_angle_fit: ',optimal_angle_fit   
     call check_error_msg('lw_gas_optics_init',gas_concentrations%init(active_gases_array))
     call check_error_msg('lw_gas_optics_init',lw_gas_props%load(gas_concentrations, gas_names, &
          key_species, band2gpt, band_lims, press_ref, press_ref_trop, temp_ref,  temp_ref_p,   &

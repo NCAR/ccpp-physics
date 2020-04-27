@@ -33,7 +33,7 @@ contains
   subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend, Coupling, Diag,  Statein, im,   &
        p_lev, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky,&
        raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw,                             &
-       flxprf_lw, errmsg, errflg)
+       flxprf_lw, hlwc, hlw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -65,9 +65,6 @@ contains
     real(kind_phys), dimension(im,Model%levs), intent(in) :: &
          cld_frac,          & ! Total cloud fraction in each layer
          cldtaulw             ! approx 10.mu band layer cloud optical depth  
-    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs)  :: &
-         hlwc,              & ! Longwave all-sky heating-rate (K/sec)  
-         hlw0                 ! Longwave clear-sky heating-rate (K/sec)
 
     ! Outputs (mandatory)
     character(len=*), intent(out) :: &
@@ -80,7 +77,8 @@ contains
          Radtend              ! Fortran DDT: FV3-GFS radiation tendencies 
     type(GFS_diag_type), intent(inout) :: &
          Diag                 ! Fortran DDT: FV3-GFS diagnotics data 
-
+    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs), intent(inout)  :: &
+         hlwc                 ! Longwave all-sky heating-rate (K/sec)
     ! Outputs (optional)
     type(proflw_type), dimension(size(Grid%xlon,1), Model%levs+1), optional, intent(inout) :: &
          flxprf_lw            ! 2D radiative fluxes, components:
@@ -88,7 +86,8 @@ contains
                               ! dnfxc - total sky dnward flux (W/m2)
                               ! upfx0 - clear sky upward flux (W/m2)
                               ! dnfx0 - clear sky dnward flux (W/m2)
-
+    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs),intent(inout),optional  :: &
+         hlw0                 ! Longwave clear-sky heating-rate (K/sec)
     ! Local variables
     integer :: i, j, k, iSFC, iTOA, itop, ibtc
     logical :: l_fluxeslw2d, top_at_1

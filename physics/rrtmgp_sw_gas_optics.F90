@@ -273,12 +273,6 @@ contains
 
 
     ! Initialize gas concentrations and gas optics class
-    print*,'tsi_default:   ',tsi_default
-    print*,'mg_default:    ',mg_default
-    print*,'sv_default:    ',sb_default
-    print*,'solar_quiet:   ',solar_quiet
-    print*,'solar_facular: ',solar_facular
-    print*,'solar_sunspot: ',solar_sunspot
     call check_error_msg('sw_gas_optics_init',gas_concentrations%init(active_gases_array))
     call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations, gas_names, &
          key_species, band2gpt, band_lims, press_ref, press_ref_trop, temp_ref, temp_ref_p,    &

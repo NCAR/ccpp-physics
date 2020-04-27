@@ -30,7 +30,7 @@ contains
        nCol, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, &
        sw_gas_props, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,     &
        fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota, mtopa, cld_frac, cldtausw, flxprf_sw,&
-       errmsg, errflg)
+       hswc, hsw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -76,11 +76,10 @@ contains
     real(kind_phys), dimension(nCol,Model%levs), intent(in) :: &
          cld_frac,          & ! Total cloud fraction in each layer
          cldtausw             ! approx .55mu band layer cloud optical depth  
-    real(kind_phys),dimension(nCol, Model%levs) :: & 
-         hswc,              & ! All-sky heating rate (K/s)
-         hsw0                 ! Clear-sky heating rate (K/s)
 
     ! Outputs (mandatory)
+    real(kind_phys),dimension(nCol, Model%levs), intent(inout) :: &
+         hswc                 ! All-sky heating rate (K/s)
     character(len=*), intent(out) :: &
          errmsg
     integer, intent(out) :: &
@@ -101,6 +100,9 @@ contains
                           ! nirdf - downward nir diffused flux       (W/m2)
                           ! visbm - downward uv+vis direct beam flux (W/m2)
                           ! visdf - downward uv+vis diffused flux    (W/m2)
+    real(kind_phys),dimension(nCol, Model%levs),intent(inout),optional :: &
+         hsw0                 ! Clear-sky heating rate (K/s)
+
     ! Local variables
     integer :: i, j, k, iSFC, iTOA, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
