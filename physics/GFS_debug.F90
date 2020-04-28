@@ -356,7 +356,7 @@
                        call print_var(mpirank,omprank, blkno, 'Diag%edmf_qc     ',  Diag%edmf_qc)
                        call print_var(mpirank,omprank, blkno, 'Diag%nupdraft    ',  Diag%nupdraft)
                        call print_var(mpirank,omprank, blkno, 'Diag%maxMF       ',  Diag%maxMF)
-                       call print_var(mpirank,omprank, blkno, 'Diag%ktop_shallow',  Diag%ktop_shallow)
+                       call print_var(mpirank,omprank, blkno, 'Diag%ktop_plume  ',  Diag%ktop_plume)
                        call print_var(mpirank,omprank, blkno, 'Diag%exch_h      ',  Diag%exch_h)
                        call print_var(mpirank,omprank, blkno, 'Diag%exch_m      ',  Diag%exch_m)
                      end if
