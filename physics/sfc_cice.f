@@ -155,6 +155,7 @@
           stress(i) = sqrt(dusfc(i)*dusfc(i) + dvsfc(i)*dvsfc(i)) * tem
 
           weasd(i)  = snowd(i) * 1000.0_kind_phys
+          snwdph(i) = weasd(i)                 ! snow depth in mm
           snwdph(i) = weasd(i) * dsi           ! snow depth in mm
           ep(i)     = evap(i)
         endif
