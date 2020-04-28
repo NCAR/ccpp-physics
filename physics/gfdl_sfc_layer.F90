@@ -17,16 +17,49 @@
 !> \section arg_table_gfdl_sfc_layer_init Argument Table
 !! \htmlinclude gfdl_sfc_layer_init.html
 !!        
-      subroutine gfdl_sfc_layer_init ()
+      subroutine gfdl_sfc_layer_init (icoef_sf, cplwav, cplwav2atm, lcurr_sf, pert_cd, errmsg, errflg)
         
-        !GFDL SFC layer has hard-coded data for soil parameters and assumes a 16-type version of STAS; check for using STAS and abort if not?
-        !  could also use soil properties from LSM scheme, but these are either in namelist_soilveg module, namelist_soilveg_ruc, or module_sf_noahlsm depending on the LSM used
+        implicit none
         
-        !check for soiltyp(:) <= 16?
+        integer, intent(in) :: icoef_sf
+        logical, intent(in) :: cplwav, cplwav2atm, lcurr_sf, pert_cd
         
-        !check for icoef_sf, iwavecpl, lcur_sf, pert_Cd, ens_Cdamp, ens_random_seed
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
         
-        !set ccpp_error and return if HWRF preprocessor is set?
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+        
+#if HWRF==1
+        write(errmsg,'(*(a))') 'The GFDL surface layer scheme does not support use of the HWRF preprocessor flag in gfdl_sfc_layer.F90'
+        errflg = 1
+        return
+#endif        
+        
+        if (icoef_sf < 0 .or. icoef_sf > 8) then
+          write(errmsg,'(*(a))') 'The value of icoef_sf is outside of the supported range (0-8) in gfdl_sfc_layer.F90'
+          errflg = 1
+          return
+        end if
+        
+        if (cplwav .or. cplwav2atm) then
+          write(errmsg,'(*(a))') 'The GFDL surface layer scheme is not set up to be coupled to waves in gfdl_sfc_layer.F90'
+          errflg = 1
+          return
+        end if
+        
+        if (lcurr_sf) then
+          write(errmsg,'(*(a))') 'The GFDL surface layer scheme is not set up to be used with the lcurr_sf option in gfdl_sfc_layer.F90'
+          errflg = 1
+          return
+        end if
+        
+        if (pert_cd) then
+          write(errmsg,'(*(a))') 'The GFDL surface layer scheme is not set up to be used with the pert_cd option in gfdl_sfc_layer.F90'
+          errflg = 1
+          return
+        end if
         
         !module_sf_myjsfc/myjsfcinit code (called for GFDL sfc layer scheme in WRF's module_physics_init)
         ! IF(.NOT.RESTART)THEN
@@ -46,7 +79,9 @@
 !> \section arg_table_gfdl_sfc_layer_run Argument Table
 !! \htmlinclude gfdl_sfc_layer_run.html
 !!
-      subroutine gfdl_sfc_layer_run (im, nsoil, km, flag_iter, dt, wet, dry,   &
+      subroutine gfdl_sfc_layer_run (im, nsoil, km, flag_iter, lsm, lsm_noah,  &
+        lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, cplwav, cplwav2atm,     &
+        lcurr_sf, pert_Cd, ntsflg, sfenth, dt, wet, dry,                       &
         icy, isltyp, rd, grav, ep1, ep2, smois, psfc, prsl1, q1, t1, u1, v1,   &
         u10, v10, gsw, glw, tskin_ocn, tskin_lnd, tskin_ice, ustar_ocn,        &
         ustar_lnd, ustar_ice, znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd,     &
@@ -56,14 +91,22 @@
         qss_lnd, qss_ice, errmsg, errflg)
         
         use funcphys, only: fpvs
+        !####  GJF: temporarily grab parameters from LSM-specific modules -- should go through CCPP ####
+        !           (fixing this involves replacing the functionality of set_soilveg and namelist_soilveg)
+        use namelist_soilveg, only: maxsmc_noah => maxsmc, drysmc_noah => drysmc
+        use namelist_soilveg_ruc, only: maxsmc_ruc => maxsmc, drysmc_ruc => drysmc
+        use noahmp_tables, only: maxsmc_noahmp => smcmax_table, drysmc_noahmp => smcdry_table
+        use module_sf_noahlsm, only: maxsmc_noah_wrfv4 => maxsmc, drysmc_noah_wrfv4 => drysmc
+        !################################################################################################
         
         implicit none
 
         integer, intent(in) :: im, nsoil, km
-        real(kind=kind_phys), intent(in) :: dt
-        integer :: icoef_sf, iwavecpl, ens_random_seed, ntsflg, issflx !turn these into intent(in) and namelist options
-        logical :: lcur_sf, pert_Cd, diag_wind10m, diag_qss !turn these into intent(in) and namelist options
-        real(kind=kind_phys) :: ens_Cdamp, sfenth !turn these into intent(in) and namelist options
+        integer, intent(in) :: lsm, lsm_noah, lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, ntsflg
+        logical, intent(in) :: cplwav, cplwav2atm !GJF: this scheme has not been tested with these on
+        logical, intent(in) :: lcurr_sf !GJF: this scheme has not been tested with this option turned on; the variables scurx and scury need to be input in order to use this
+        logical, intent(in) :: pert_Cd !GJF: this scheme has not been tested with this option turned on; the variables ens_random_seed and ens_Cdamp need to be input in order to use this
+        real(kind=kind_phys), intent(in) :: dt, sfenth
         logical, dimension(im), intent(in) :: flag_iter, wet, dry, icy
         integer, dimension(im), intent(in) :: isltyp
         real(kind=kind_phys), intent(in) :: rd, grav, ep1, ep2
@@ -86,7 +129,12 @@
         
         integer :: i, its, ite, ims, ime
         
+        !GJF: the vonKarman constant should come in through the CCPP and be defined by the host model
         real (kind=kind_phys), parameter :: karman = 0.4
+        
+        integer :: iwavecpl, ens_random_seed, issflx !turn these into intent(in) and namelist options
+        logical :: diag_wind10m, diag_qss !turn these into intent(in) and namelist options
+        real(kind=kind_phys) :: ens_Cdamp !turn this into intent(in) and namelist option
         
         real(kind=kind_phys), dimension(im)   :: wetc, pspc, pkmax, tstrc, upc,&
                      vpc, mznt, slwdc, wspd, wind10, qfx, qgh
@@ -105,31 +153,58 @@
         !GJF: These data should be made consistent with those used in the LSM (namelist_soilveg, namelist_soilveg_ruc, module_sf_noahlsm, etc.)
         ! intead of being hardcoded here; keeping as-is to be consistent with legacy; the data here also only has nonzero values for
         ! 16 soil types vs 19 for other STAS datasets
-        data maxsmc/0.339, 0.421, 0.434, 0.476, 0.476, 0.439,  &
-                    0.404, 0.464, 0.465, 0.406, 0.468, 0.468,  &
-                    0.439, 1.000, 0.200, 0.421, 0.000, 0.000,  &
-                    0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  &
-                    0.000, 0.000, 0.000, 0.000, 0.000, 0.000/
-
-        data drysmc/0.010, 0.028, 0.047, 0.084, 0.084, 0.066,     &
-                    0.067, 0.120, 0.103, 0.100, 0.126, 0.138,     &
-                    0.066, 0.000, 0.006, 0.028, 0.000, 0.000,     &
-                    0.000, 0.000, 0.000, 0.000, 0.000, 0.000,     &
-                    0.000, 0.000, 0.000, 0.000, 0.000, 0.000/
+        ! data maxsmc/0.339, 0.421, 0.434, 0.476, 0.476, 0.439,  &
+        !             0.404, 0.464, 0.465, 0.406, 0.468, 0.468,  &
+        !             0.439, 1.000, 0.200, 0.421, 0.000, 0.000,  &
+        !             0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  &
+        !             0.000, 0.000, 0.000, 0.000, 0.000, 0.000/
+        ! 
+        ! data drysmc/0.010, 0.028, 0.047, 0.084, 0.084, 0.066,     &
+        !             0.067, 0.120, 0.103, 0.100, 0.126, 0.138,     &
+        !             0.066, 0.000, 0.006, 0.028, 0.000, 0.000,     &
+        !             0.000, 0.000, 0.000, 0.000, 0.000, 0.000,     &
+        !             0.000, 0.000, 0.000, 0.000, 0.000, 0.000/
         
-        !temporary setting of variables that will be moved to namelist
-        icoef_sf = 4
-        !0- old cd, old ch, 1-new cd new ch, 2- new cd old ch
-        !3 ---  lower cd, than (2),  4-- lower cd for wind > 20 m/s,
-        !5- similar to (4), ch same as (2)
+        !#### This block will become unnecessary when maxsmc and drysmc come through the CCPP ####
+        if (lsm == lsm_noah) then
+          maxsmc = maxsmc_noah
+          drysmc = drysmc_noah
+        else if (lsm == lsm_noahmp) then
+          maxsmc = maxsmc_noahmp
+          drysmc = drysmc_noahmp
+        else if (lsm == lsm_ruc) then
+          maxsmc = maxsmc_ruc
+          drysmc = drysmc_ruc
+        else if (lsm == lsm_noah_wrfv4) then
+          maxsmc = maxsmc_noah_wrfv4
+          drysmc = drysmc_noah_wrfv4
+        else
+          data maxsmc/0.339, 0.421, 0.434, 0.476, 0.476, 0.439,  &
+                       0.404, 0.464, 0.465, 0.406, 0.468, 0.468,  &
+                       0.439, 1.000, 0.200, 0.421, 0.000, 0.000,  &
+                       0.000, 0.000, 0.000, 0.000, 0.000, 0.000,  &
+                       0.000, 0.000, 0.000, 0.000, 0.000, 0.000/
+          data drysmc/0.010, 0.028, 0.047, 0.084, 0.084, 0.066,     &
+                       0.067, 0.120, 0.103, 0.100, 0.126, 0.138,     &
+                       0.066, 0.000, 0.006, 0.028, 0.000, 0.000,     &
+                       0.000, 0.000, 0.000, 0.000, 0.000, 0.000,     &
+                       0.000, 0.000, 0.000, 0.000, 0.000, 0.000/
+        end if
+        !########################################################################
+        
+        !GJF: This code has not been tested with iwavecpl = 1; the variables 'charn' and 'msang' (and others?) need to be input in order to use this 
+        ! if (cplwav .or. cplwav2atm) then
+        !   iwavecpl = 1
+        ! else
+        !   iwavecpl = 0
+        ! end if
         iwavecpl = 0
-        lcur_sf = .false.
-        pert_Cd = .false.     !used for HWRF ensemble?
+        
+        !temporary setting of variables that should be moved to namelist is they are used
         ens_random_seed = 0   !used for HWRF ensemble?
         ens_Cdamp = 0.0       !used for HWRF ensemble?
-        ntsflg = 0 !should this be 0 or 1? namphysics has this set to 0 unless GFDLSLABSCHEME is active?
-        sfenth = 0.0 ! this is set to 0 in namelist.input.HWRF in WRF code
-        issflx = 0 !1 = calculate surface fluxes, 0 = don't 
+
+        issflx = 0 !1 = calculate surface fluxes, 0 = don't
         diag_wind10m = .false. !GJF: if one wants 10m wind speeds to come from this scheme, set this to True, 
                               !put [u,v]10_[lnd/ocn/ice] in the scheme argument list (and metadata), and modify
                               !GFS_surface_compsites to receive the individual components and calculate an all-grid value
@@ -178,10 +253,11 @@
             slwdc(i)=gsw(i)+glw(i)
             slwdc(i)=0.239*60.*slwdc(i)*1.e-4
             
+            !GJF: these variables should be passed in if these options are used
             charn(i) = 0.0 !used with wave coupling (iwavecpl == 1)
             msang(i) = 0.0 !used with wave coupling (iwavecpl == 1)
-            scurx(i) = 0.0 !used with ocean currents? (lcur_sf == T)
-            scury(i) = 0.0 !used with ocean currents? (lcur_sf == T)
+            scurx(i) = 0.0 !used with ocean currents? (lcurr_sf == T)
+            scury(i) = 0.0 !used with ocean currents? (lcurr_sf == T)
             
             if (diag_qss) then
               esat = fpvs(t1(i))
@@ -200,6 +276,13 @@
               
               tstrc(i) = tskin_lnd(i)
               
+              !GJF: GFS surface layer (sfc_diff) makes sure that the roughness length is nonzero with: z0max = max(1.0e-6, min(znt_lnd(i),zkmax))
+              if (znt_lnd(i) == 0.0) then
+                write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_land_interstitial) was encountered in gfdl_sfc_layer.F90'
+                errflg = 1
+                return
+              end if
+              
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
                  wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_lnd(i))/alog(zhalf/znt_lnd(i))
               end if
@@ -207,7 +290,7 @@
               
               call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_lnd(i), rib_lnd(i), &
                 xxfh(i), znt_lnd(i), mznt(i), tstrc(i),   &
-                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcur_sf, charn(i), msang(i), &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
                 errflg)
@@ -278,6 +361,13 @@
               
               tstrc(i) = tskin_ice(i)
               
+              !GJF: GFS surface layer (sfc_diff) makes sure that the roughness length is nonzero with: z0max = max(1.0e-6, min(znt_ice(i),zkmax))
+              if (znt_ice(i) == 0.0) then
+                write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_ice_interstitial) was encountered in gfdl_sfc_layer.F90'
+                errflg = 1
+                return
+              end if
+              
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
                  wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_ice(i))/alog(zhalf/znt_ice(i))
               end if
@@ -285,7 +375,7 @@
               
               call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ice(i), rib_ice(i), &
                 xxfh(i), znt_ice(i), mznt(i), tstrc(i),   &
-                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcur_sf, charn(i), msang(i), &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
                 errflg)
@@ -348,6 +438,13 @@
               
               tstrc(i) = tskin_ocn(i)
               
+              !GJF: GFS surface layer (sfc_diff) makes sure that the roughness length is nonzero with: z0max = max(1.0e-6, min(znt_ocn(i),zkmax))
+              if (znt_ocn(i) == 0.0) then
+                write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_ocean_interstitial) was encountered in gfdl_sfc_layer.F90'
+                errflg = 1
+                return
+              end if
+              
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
                  wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_ocn(i))/alog(zhalf/znt_ocn(i))
               end if
@@ -358,7 +455,7 @@
               
               call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ocn(i), rib_ocn(i), &
                 xxfh(i), znt_ocn(i), mznt(i), tstrc(i),   &
-                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcur_sf, charn(i), msang(i), &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
                 errflg)
@@ -421,6 +518,7 @@
           end if !flag_iter
         end do
         
+        !GJF: this code has not been updated since GFS suites don't require this; one would need to have different values of hfx, qfx, lh for each surface type
         ! if (isfflx.eq.0) then
         !   do i=its,ite
         !     hfx(i)=0.
@@ -469,6 +567,7 @@
 !-----------------------------------------------------------------------
 !     user interface variables
 !-----------------------------------------------------------------------
+      !GJF: This subroutine was converted to expect data from a single point instead of a horizontal array to accommodate a fractional landmask
       !integer,intent(in)  :: ims,ime
       !integer,intent(in)  :: its,ite
       integer, parameter :: ims = 1
