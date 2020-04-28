@@ -4265,7 +4265,7 @@ ENDIF
 !! If true, a three-dimensional initialization loop is entered. Within this loop,
 !! several arrays are initialized and k-oriented (vertical) subroutines are called 
 !! at every i and j point, corresponding to the x- and y- directions, respectively.  
-    IF (initflag > 0) THEN
+    IF (initflag > 0 .and. .not.restart) THEN
 
        !Test to see if we want to initialize qke
        IF ( (restart .or. cycling)) THEN
@@ -4290,6 +4290,10 @@ ENDIF
          cldfra_bl(its:ite,kts:kte,jts:jte)=0.
          qc_bl(its:ite,kts:kte,jts:jte)=0.
          qke(its:ite,kts:kte,jts:jte)=0.
+       else
+         qc_bl1D(kts:kte)=0.0
+         qi_bl1D(kts:kte)=0.0
+         cldfra_bl1D(kts:kte)=0.0
        end if
        dqc1(kts:kte)=0.0
        dqi1(kts:kte)=0.0
@@ -4298,9 +4302,6 @@ ENDIF
        dqnwfa1(kts:kte)=0.0
        dqnifa1(kts:kte)=0.0
        dozone1(kts:kte)=0.0
-       qc_bl1D(kts:kte)=0.0
-       qi_bl1D(kts:kte)=0.0
-       cldfra_bl1D(kts:kte)=0.0
        qc_bl1D_old(kts:kte)=0.0
        cldfra_bl1D_old(kts:kte)=0.0
        edmf_a1(kts:kte)=0.0
@@ -5575,6 +5576,7 @@ ENDIF
    REAL :: temp,sublim,qc_ent,qv_ent,qt_ent,thl_ent,detrate,  &
            detrateUV,oow,exc_fac,aratio,detturb,qc_grid
    REAL, PARAMETER :: Cdet = 1./45.
+   REAL, PARAMETER :: dzpmax = 300. !limit dz used in detrainment - can be excessing in thick layers
    !parameter "Csub" determines the propotion of upward vertical velocity that contributes to
    !environmenatal subsidence. Some portion is expected to be compensated by downdrafts instead of
    !gentle environmental subsidence. 1.0 assumes all upward vertical velocity in the mass-flux scheme
@@ -6019,19 +6021,19 @@ ENDIF
           oow      = -0.060/MAX(1.0,(0.5*(Wn+UPW(K-1,I))))   !coef for dynamical detrainment rate
           detrate  = MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0002) ! dynamical detrainment rate (m^-1)
           detrateUV= MIN(MAX(oow*(Wn-UPW(K-1,I))/dz(k), detturb), .0001) ! dynamical detrainment rate (m^-1) 
-          envm_thl(k)=envm_thl(k) + (0.5*(thl_ent + UPTHL(K-1,I)) - thl(k))*detrate*aratio*MIN(dzp,300.)
+          envm_thl(k)=envm_thl(k) + (0.5*(thl_ent + UPTHL(K-1,I)) - thl(k))*detrate*aratio*MIN(dzp,dzpmax)
           qv_ent = 0.5*(MAX(qt_ent-qc_ent,0.) + MAX(UPQT(K-1,I)-UPQC(K-1,I),0.))
-          envm_sqv(k)=envm_sqv(k) + (qv_ent-QV(K))*detrate*aratio*MIN(dzp,300.)
+          envm_sqv(k)=envm_sqv(k) + (qv_ent-QV(K))*detrate*aratio*MIN(dzp,dzpmax)
           IF (UPQC(K-1,I) > 1E-8) THEN
              IF (QC(K) > 1E-6) THEN
                 qc_grid = QC(K)
              ELSE
                 qc_grid = cldfra_bl1d(k)*qc_bl1d(K)
              ENDIF
-             envm_sqc(k)=envm_sqc(k) + MAX(UPA(K-1,I)*0.5*(QCn + UPQC(K-1,I)) - qc_grid, 0.0)*detrate*aratio*MIN(dzp,300.)
+             envm_sqc(k)=envm_sqc(k) + MAX(UPA(K-1,I)*0.5*(QCn + UPQC(K-1,I)) - qc_grid, 0.0)*detrate*aratio*MIN(dzp,dzpmax)
           ENDIF
-          envm_u(k)  =envm_u(k)   + (0.5*(Un + UPU(K-1,I)) - U(K))*detrateUV*aratio*MIN(dzp,300.)
-          envm_v(k)  =envm_v(k)   + (0.5*(Vn + UPV(K-1,I)) - V(K))*detrateUV*aratio*MIN(dzp,300.)
+          envm_u(k)  =envm_u(k)   + (0.5*(Un + UPU(K-1,I)) - U(K))*detrateUV*aratio*MIN(dzp,dzpmax)
+          envm_v(k)  =envm_v(k)   + (0.5*(Vn + UPV(K-1,I)) - V(K))*detrateUV*aratio*MIN(dzp,dzpmax)
 
           IF (Wn > 0.) THEN
              !Update plume variables at current k index
@@ -6362,6 +6364,7 @@ ENDIF
             else
                f = 1.0
             endif
+
             sigq = 9.E-3 * 0.5*(edmf_a(k)+edmf_a(k-1)) * &
                &           0.5*(edmf_w(k)+edmf_w(k-1)) * f       ! convective component of sigma (CB2005)
             !sigq = MAX(sigq, 1.0E-4)
@@ -6373,7 +6376,7 @@ ENDIF
             IF ( debug_code ) THEN
                print*,"In MYNN, StEM edmf"
                print*,"  CB: env qt=",qt(k)," qsat=",qsat_tl
-               print*,"      satdef=",QTp - qsat_tl
+               print*,"  k=",k," satdef=",QTp - qsat_tl," sgm=",sgm(k)
                print*,"  CB: sigq=",sigq," qmq=",qmq," tlk=",tlk
                print*,"  CB: mf_cf=",mf_cf," cldfra_bl=",cldfra_bl1d(k)," edmf_a=",edmf_a(k)
             ENDIF
