@@ -157,7 +157,7 @@
       errflg = 0
 
       onebg = one/con_g
-      
+
       do i = 1, im
         rain(i) = rainc(i) + frain * rain1(i) ! time-step convective plus explicit
       enddo
