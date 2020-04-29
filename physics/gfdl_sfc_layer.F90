@@ -137,7 +137,7 @@
         real(kind=kind_phys) :: ens_Cdamp !turn this into intent(in) and namelist option
         
         real(kind=kind_phys), dimension(im)   :: wetc, pspc, pkmax, tstrc, upc,&
-                     vpc, mznt, slwdc, wspd, wind10, qfx, qgh
+                     vpc, mznt, slwdc, wspd, wind10, qfx, qgh, zkmax
         real(kind=kind_phys), dimension(im)   :: u10_lnd, u10_ocn, u10_ice, v10_lnd, v10_ocn, v10_ice
         real(kind=kind_phys), dimension(im)   :: charn, msang, scurx, scury
         real(kind=kind_phys), dimension(im)   :: fxh, fxe, fxmx, fxmy, xxfh,   &
@@ -228,6 +228,7 @@
             pspc(i) = psfc(i)*10. ! convert from Pa to cgs
             pkmax(i) = prsl1(i)*10.
             
+            !upc, vpc in cm s-1
             upc(i) = u1(i)*100.
             vpc(i) = v1(i)*100.
             
@@ -235,18 +236,18 @@
             ! is part of a GFS-based suite), but it is recalculated here because this one DOES NOT include
             ! a convective wind enhancement component (convective gustiness factor) to follow the original
             ! GFDL surface layer scheme
-            wspd(i) = sqrt(upc(i)*upc(i) + vpc(i)*vpc(i))
-            wspd(i) = amax1(wspd(i),100.)/100.
+            wspd(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
+            wspd(i) = amax1(wspd(i),1.0)    !wspd in m s-1
             
             !Wang, calulate height of the first half level
             !      use previous u10 v10 to compute wind10, input to MFLUX to compute z0
-            wind10(i)=sqrt(u10(i)*u10(i)+v10(i)*v10(i))
+            wind10(i)=sqrt(u10(i)*u10(i)+v10(i)*v10(i)) !m s-1
             !first time step, u10 and v10 may be zero
             if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-              zhalf = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav
+              zhalf = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav !m
             endif
             
-            !zkmax(i) = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav
+            zkmax(i) = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav !m
             
             !slwdc... GFDL downward net flux in units of cal/(cm**2/min)
             !also divide by 10**4 to convert from /m**2 to /cm**2
@@ -277,14 +278,15 @@
               tstrc(i) = tskin_lnd(i)
               
               !GJF: GFS surface layer (sfc_diff) makes sure that the roughness length is nonzero with: z0max = max(1.0e-6, min(znt_lnd(i),zkmax))
-              if (znt_lnd(i) == 0.0) then
-                write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_land_interstitial) was encountered in gfdl_sfc_layer.F90'
-                errflg = 1
-                return
-              end if
+              !if (znt_lnd(i) == 0.0) then
+              !  write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_land_interstitial) was encountered in gfdl_sfc_layer.F90'
+              !  errflg = 1
+              !  return
+              !end if
+              !znt_lnd(i) = max(1.0e-4, min(znt_lnd(i),100.0*zkmax(i)))
               
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_lnd(i))/alog(zhalf/znt_lnd(i))
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_lnd(i)))/alog(zhalf/(0.01*znt_lnd(i))) !m s-1
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
@@ -301,11 +303,11 @@
               end if
               
               if (diag_wind10m) then
-                u10_lnd(i) = u1(i)*(wind10(i)/wspd(i))/100.
-                v10_lnd(i) = v1(i)*(wind10(i)/wspd(i))/100.
+                u10_lnd(i) = u1(i)*(0.01*wind10(i)/wspd(i))
+                v10_lnd(i) = v1(i)*(0.01*wind10(i)/wspd(i))
               end if
               
-              !gz1oz0(i) = alog(zkmax(i)/znt_lnd(i))
+              !gz1oz0(i) = alog(zkmax(i)/(0.01*znt_lnd(i)))
               
               ustar_lnd(i) = 0.01*sqrt(cdm_lnd(i)*   &
                          (upc(i)*upc(i) + vpc(i)*vpc(i)))
@@ -362,14 +364,15 @@
               tstrc(i) = tskin_ice(i)
               
               !GJF: GFS surface layer (sfc_diff) makes sure that the roughness length is nonzero with: z0max = max(1.0e-6, min(znt_ice(i),zkmax))
-              if (znt_ice(i) == 0.0) then
-                write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_ice_interstitial) was encountered in gfdl_sfc_layer.F90'
-                errflg = 1
-                return
-              end if
+              ! if (znt_ice(i) == 0.0) then
+              !   write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_ice_interstitial) was encountered in gfdl_sfc_layer.F90'
+              !   errflg = 1
+              !   return
+              ! end if
+              !znt_ice(i) = max(1.0e-4, min(znt_ice(i),100.0*zkmax(i)))
               
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_ice(i))/alog(zhalf/znt_ice(i))
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_ice(i)))/alog(zhalf/(0.01*znt_ice(i)))
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
@@ -386,8 +389,8 @@
               end if
               
               if (diag_wind10m) then
-                u10_ice(i) = u1(i)*(wind10(i)/wspd(i))/100.
-                v10_ice(i) = v1(i)*(wind10(i)/wspd(i))/100.
+                u10_ice(i) = u1(i)*(0.01*wind10(i)/wspd(i))
+                v10_ice(i) = v1(i)*(0.01*wind10(i)/wspd(i))
               end if
               
               !gz1oz0(i) = alog(zkmax(i)/znt_ice(i))
@@ -439,14 +442,15 @@
               tstrc(i) = tskin_ocn(i)
               
               !GJF: GFS surface layer (sfc_diff) makes sure that the roughness length is nonzero with: z0max = max(1.0e-6, min(znt_ocn(i),zkmax))
-              if (znt_ocn(i) == 0.0) then
-                write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_ocean_interstitial) was encountered in gfdl_sfc_layer.F90'
-                errflg = 1
-                return
-              end if
+              ! if (znt_ocn(i) == 0.0) then
+              !   write(errmsg,'(*(a))') 'A zero-valued roughness length (surface_roughness_length_over_ocean_interstitial) was encountered in gfdl_sfc_layer.F90'
+              !   errflg = 1
+              !   return
+              ! end if
+              !znt_ocn(i) = max(1.0e-4, min(znt_ocn(i),100.0*zkmax(i)))
               
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/znt_ocn(i))/alog(zhalf/znt_ocn(i))
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_ocn(i)))/alog(zhalf/(0.01*znt_ocn(i)))
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
@@ -469,8 +473,8 @@
               mznt(i)= abs(mznt(i))
               
               if (diag_wind10m) then
-                u10_ocn(i) = u1(i)*(wind10(i)/wspd(i))/100.
-                v10_ocn(i) = v1(i)*(wind10(i)/wspd(i))/100.
+                u10_ocn(i) = u1(i)*(0.01*wind10(i)/wspd(i))
+                v10_ocn(i) = v1(i)*(0.01*wind10(i)/wspd(i))
               end if
               
               !gz1oz0(i) = alog(zkmax(i)/znt_ocn(i))
