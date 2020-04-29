@@ -140,8 +140,17 @@
   intent = inout
   optional = F
 [QC_BL]
-  standard_name = subgrid_cloud_mixing_ratio_pbl
-  long_name = subgrid cloud cloud mixing ratio from PBL scheme
+  standard_name = subgrid_cloud_water_mixing_ratio_pbl
+  long_name = subgrid cloud water mixing ratio from PBL scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[QI_BL]
+  standard_name = subgrid_cloud_ice_mixing_ratio_pbl
+  long_name = subgrid cloud ice mixing ratio from PBL scheme
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
