@@ -81,7 +81,7 @@
 !!
       subroutine gfdl_sfc_layer_run (im, nsoil, km, flag_iter, lsm, lsm_noah,  &
         lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, cplwav, cplwav2atm,     &
-        lcurr_sf, pert_Cd, ntsflg, sfenth, dt, wet, dry,                       &
+        lcurr_sf, pert_Cd, ntsflg, sfenth, z1, dt, wet, dry,                   &
         icy, isltyp, rd, grav, ep1, ep2, smois, psfc, prsl1, q1, t1, u1, v1,   &
         u10, v10, gsw, glw, tskin_ocn, tskin_lnd, tskin_ice, ustar_ocn,        &
         ustar_lnd, ustar_ice, znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd,     &
@@ -112,7 +112,7 @@
         real(kind=kind_phys), intent(in) :: rd, grav, ep1, ep2
         real(kind=kind_phys), intent(in), dimension(im,nsoil) :: smois
         real(kind=kind_phys), intent(in), dimension(im) :: psfc, prsl1, q1, t1,&
-                                                           u1, v1, u10, v10, gsw, glw
+                                                           u1, v1, u10, v10, gsw, glw, z1
         
         real(kind=kind_phys), intent(inout), dimension(im) :: tskin_ocn,       &
             tskin_lnd, tskin_ice, ustar_ocn, ustar_lnd, ustar_ice,             &
@@ -287,6 +287,7 @@
               
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
                  wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_lnd(i)))/alog(zhalf/(0.01*znt_lnd(i))) !m s-1
+                 write(*,*) '######## GFDL_SFC_LAYER #######',znt_lnd(i),zhalf,t1(i),pkmax(i),pspc(i),z1(i)
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
