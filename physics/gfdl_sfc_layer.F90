@@ -243,11 +243,12 @@
             !      use previous u10 v10 to compute wind10, input to MFLUX to compute z0
             wind10(i)=sqrt(u10(i)*u10(i)+v10(i)*v10(i)) !m s-1
             !first time step, u10 and v10 may be zero
-            if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-              zhalf = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav !m
-            endif
+            ! if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
+            !   zhalf = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav !m
+            ! endif
             
-            zkmax(i) = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav !m
+            !zkmax(i) = -rd*t1(i)*alog(pkmax(i)/pspc(i))/grav !m
+            zkmax(i) = z1(i)
             
             !slwdc... GFDL downward net flux in units of cal/(cm**2/min)
             !also divide by 10**4 to convert from /m**2 to /cm**2
@@ -283,17 +284,17 @@
               !  errflg = 1
               !  return
               !end if
-              !znt_lnd(i) = max(1.0e-4, min(znt_lnd(i),100.0*zkmax(i)))
+              znt_lnd(i) = max(1.0e-4, min(znt_lnd(i),100.0*zkmax(i)))
               
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_lnd(i)))/alog(zhalf/(0.01*znt_lnd(i))) !m s-1
-                 write(*,*) '######## GFDL_SFC_LAYER #######',znt_lnd(i),zhalf,t1(i),pkmax(i),pspc(i),z1(i)
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_lnd(i)))/alog(z1(i)/(0.01*znt_lnd(i))) !m s-1
+                 write(*,*) '######## GFDL_SFC_LAYER #######',znt_lnd(i),t1(i),pkmax(i),pspc(i),z1(i)
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
               call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_lnd(i), rib_lnd(i), &
                 xxfh(i), znt_lnd(i), mznt(i), tstrc(i),   &
-                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), z1(i)*100.0, icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
                 errflg)
@@ -370,16 +371,16 @@
               !   errflg = 1
               !   return
               ! end if
-              !znt_ice(i) = max(1.0e-4, min(znt_ice(i),100.0*zkmax(i)))
+              znt_ice(i) = max(1.0e-4, min(znt_ice(i),100.0*zkmax(i)))
               
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_ice(i)))/alog(zhalf/(0.01*znt_ice(i)))
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_ice(i)))/alog(z1(i)/(0.01*znt_ice(i)))
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
               call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ice(i), rib_ice(i), &
                 xxfh(i), znt_ice(i), mznt(i), tstrc(i),   &
-                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), z1(i)*100.0, icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
                 errflg)
@@ -448,10 +449,10 @@
               !   errflg = 1
               !   return
               ! end if
-              !znt_ocn(i) = max(1.0e-4, min(znt_ocn(i),100.0*zkmax(i)))
+              znt_ocn(i) = max(1.0e-4, min(znt_ocn(i),100.0*zkmax(i)))
               
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_ocn(i)))/alog(zhalf/(0.01*znt_ocn(i)))
+                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_ocn(i)))/alog(z1(i)/(0.01*znt_ocn(i)))
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
@@ -460,7 +461,7 @@
               
               call mflux2 (fxh(i), fxe(i), fxmx(i), fxmy(i), cdm_ocn(i), rib_ocn(i), &
                 xxfh(i), znt_ocn(i), mznt(i), tstrc(i),   &
-                pspc(i), pkmax(i), wetc(i), slwdc(i), icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
+                pspc(i), pkmax(i), wetc(i), slwdc(i), z1(i)*100.0, icoef_sf, iwavecpl, lcurr_sf, charn(i), msang(i), &
                 scurx(i), scury(i), pert_Cd, ens_random_seed, ens_Cdamp, upc(i), vpc(i), t1(i), q1(i), &
                 dt, wind10(i), xxfh2(i), ntsflg, sfenth, tzot(i), errmsg, &
                 errflg)
@@ -550,7 +551,7 @@
 !---------------------------------
 !GJF (2020/04/21): The starting point for the MFLUX2 subroutine here was module_sf_gfdl.F in WRF
       SUBROUTINE MFLUX2( fxh,fxe,fxmx,fxmy,cdm,rib,xxfh,zoc,mzoc,tstrc,        &    !mzoc KWON
-                         pspc,pkmax,wetc,slwdc,                                &
+                         pspc,pkmax,wetc,slwdc,z1,                             &
                          icoef_sf,iwavecpl,lcurr_sf,alpha,gamma,xcur,ycur,     &
                          pert_Cd, ens_random_seed, ens_Cdamp,                  &
                          upc,vpc,tpc,rpc,dt,wind10,xxfh2,ntsflg,sfenth,        &
@@ -610,6 +611,7 @@
       real, intent ( in), dimension (ims :ime ) :: slwdc
       real, intent ( in), dimension (ims :ime ) :: alpha, gamma
       real, intent ( in), dimension (ims :ime ) :: xcur, ycur
+      real, intent ( in), dimension (ims :ime ) :: z1
 
       real, intent ( in), dimension (ims :ime ) :: upc
       real, intent ( in), dimension (ims :ime ) :: vpc
@@ -984,7 +986,8 @@
       do i = its,ite
         theta(i) = tkmax(i)/((pkmax(i)/pspc(i))**rovcp)
         vrtkx(i) = 1.0 + boycon*rkmax(i)
-        zkmax(i) = -rgas*tkmax(i)*alog(pkmax(i)/pspc(i))*og
+        !zkmax(i) = -rgas*tkmax(i)*alog(pkmax(i)/pspc(i))*og
+        zkmax(i) = z1(i) !use precalculated height of first model layer center
       enddo
 
 !------------------------------------------------------------------------
