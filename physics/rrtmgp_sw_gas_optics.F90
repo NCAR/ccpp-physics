@@ -117,7 +117,7 @@ contains
     ! Read dimensions for k-distribution fields (only on master processor(0))
 !    if (mpirank .eq. mpiroot) then
        ! Open file
-       status = nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid)
+       status = nf90_open(trim(sw_gas_props_file), NF90_NOWRITE, ncid)
 
        ! Read dimensions for k-distribution fields
        status = nf90_inq_dimid(ncid, 'temperature', dimid)
