@@ -717,32 +717,32 @@ contains
                mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
                de_lgth)                ! OUT - clouds decorrelation length (km)
        else
-          call progclduni(           &
-               p_lay/100.,           & ! IN  - Pressure at model layer centers                (mb)
-               p_lev/100.,           & ! IN  - Pressure at model interfaces                   (mb)
-               t_lay,                & ! IN  - Temperature at layer centers                   (K)
-               tv_lay,               & ! IN  - Virtual temperature at layer centers           (K)
-               cld_condensate,       & ! IN  - Cloud condensate amount (Model%ncnd types)     ()
-               ncndl,                & ! IN  - Number of cloud condensate types               ()
-               Grid%xlat,            & ! IN  - Latitude                                       (radians)
-               Grid%xlon,            & ! IN  - Longitude                                      (radians)
-               Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
-               deltaZ,               & ! IN  - Layer thickness                                (km)
-               deltaP/100.,          & ! IN  - Layer thickness                                (hPa)
-               NCOL,                 & ! IN  - Number of horizontal gridpoints
-               MODEL%LEVS,           & ! IN  - Number of model layers
-               MODEL%LEVS+1,         & ! IN  - Number of model levels
-               cldcov,               & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
-               effr_l,               & ! IN  - Liquid-water effective radius                  (microns)
-               effr_i,               & ! IN  - Ice-water effective radius                     (microns)
-               effr_r,               & ! IN  - Rain-water effective radius                    (microns)
-               effr_s,               & ! IN  - Snow-water effective radius                    (microns)
-               Model%effr_in,        & ! IN  - Logical, if .true. use input effective radii
-               clouds,               & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
-               cldsa,                & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
-               mtopa,                & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
-               mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
-               de_lgth)                ! OUT - clouds decorrelation length (km)
+          call progclduni(                   &
+               p_lay/100.,                   & ! IN  - Pressure at model layer centers                (mb)
+               p_lev/100.,                   & ! IN  - Pressure at model interfaces                   (mb)
+               t_lay,                        & ! IN  - Temperature at layer centers                   (K)
+               tv_lay,                       & ! IN  - Virtual temperature at layer centers           (K)
+               cld_condensate(:,:,1:ncndl),  & ! IN  - Cloud condensate amount (ncndl types)          ()
+               ncndl,                        & ! IN  - Number of cloud condensate types               ()
+               Grid%xlat,                    & ! IN  - Latitude                                       (radians)
+               Grid%xlon,                    & ! IN  - Longitude                                      (radians)
+               Sfcprop%slmsk,                & ! IN  - Land/Sea mask                                  ()
+               deltaZ,                       & ! IN  - Layer thickness                                (km)
+               deltaP/100.,                  & ! IN  - Layer thickness                                (hPa)
+               NCOL,                         & ! IN  - Number of horizontal gridpoints
+               MODEL%LEVS,                   & ! IN  - Number of model layers
+               MODEL%LEVS+1,                 & ! IN  - Number of model levels
+               cldcov,                       & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
+               effr_l,                       & ! IN  - Liquid-water effective radius                  (microns)
+               effr_i,                       & ! IN  - Ice-water effective radius                     (microns)
+               effr_r,                       & ! IN  - Rain-water effective radius                    (microns)
+               effr_s,                       & ! IN  - Snow-water effective radius                    (microns)
+               Model%effr_in,                & ! IN  - Logical, if .true. use input effective radii
+               clouds,                       & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+               cldsa,                        & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+               mtopa,                        & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+               mbota,                        & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+               de_lgth)                        ! OUT - clouds decorrelation length (km)
        endif
        ! *) Thompson / WSM6 cloud micrphysics scheme
     elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then
