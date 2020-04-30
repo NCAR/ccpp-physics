@@ -350,9 +350,12 @@ contains
                   cld_swp(idxday(1:nday),:), cld_resnow(idxday(1:nday),:),          &
                   cld_frac(idxday(1:nday),:), tau_cld, ssa_cld, asy_cld)
           endif
-          sw_optical_props_cloudsByBand%tau(:,:,:) = tau_cld
-          sw_optical_props_cloudsByBand%ssa(:,:,:) = ssa_cld
-          sw_optical_props_cloudsByBand%g(:,:,:)   = asy_cld
+          sw_optical_props_cloudsByBand%tau(:,:,1) = tau_cld(:,:,sw_gas_props%get_nband())
+          sw_optical_props_cloudsByBand%ssa(:,:,1) = ssa_cld(:,:,sw_gas_props%get_nband())
+          sw_optical_props_cloudsByBand%g(:,:,1)   = asy_cld(:,:,sw_gas_props%get_nband())
+	  sw_optical_props_cloudsByBand%tau(:,:,2:sw_gas_props%get_nband()) = tau_cld(:,:,1:sw_gas_props%get_nband()-1)
+	  sw_optical_props_cloudsByBand%ssa(:,:,2:sw_gas_props%get_nband()) = ssa_cld(:,:,1:sw_gas_props%get_nband()-1)
+	  sw_optical_props_cloudsByBand%g(:,:,2:sw_gas_props%get_nband())   = asy_cld(:,:,1:sw_gas_props%get_nband()-1)
        endif
 
        ! All-sky SW optical depth ~0.55microns
