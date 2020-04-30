@@ -482,7 +482,7 @@ contains
 
     ! Local variables
     real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
-    integer :: i,k
+    integer :: i,k,ncndl
     real(kind_phys), parameter :: xrc3 = 100.
     real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, &
          effr_i, effr_r, effr_s, cldcov
@@ -497,6 +497,10 @@ contains
     !      call module_radiation_clouds::progcld3()
     !      call module_radiation_clouds::progclduni() for unified cloud and ncld=2
     ! #######################################################################################
+
+    ! Note, snow and groupel are treated the same by radiation scheme.
+    ncndl = min(Model%ncnd,4)
+
     cld_condensate = 0.0_kind_phys
     if (Model%ncnd == 1) then                                                                    ! Zhao_Carr_Sundqvist
        cld_condensate(1:NCOL,1:Model%levs,1) = tracer(1:NCOL,1:Model%levs,Model%ntcw)            ! -liquid water/ice
@@ -719,7 +723,7 @@ contains
                t_lay,                & ! IN  - Temperature at layer centers                   (K)
                tv_lay,               & ! IN  - Virtual temperature at layer centers           (K)
                cld_condensate,       & ! IN  - Cloud condensate amount (Model%ncnd types)     ()
-               Model%ncnd,           & ! IN  - Number of cloud condensate types               ()
+               ncndl,                & ! IN  - Number of cloud condensate types               ()
                Grid%xlat,            & ! IN  - Latitude                                       (radians)
                Grid%xlon,            & ! IN  - Longitude                                      (radians)
                Sfcprop%slmsk,        & ! IN  - Land/Sea mask                                  ()
