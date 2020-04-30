@@ -182,14 +182,14 @@
 
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: ffw, evapi, evapw,        &
-     &       sneti, snetw, hfd, hfi,                                    &
+     &       sneti, hfd, hfi,                                           &
 !    &       hflxi, hflxw, sneti, snetw, qssi, qssw, hfd, hfi, hfw,     &
      &       focn, snof,                                   rch, rho,    &
      &       snowd, theta1
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kmi)
      &,                        hflxi, hflxw, q0, qs1, qssi, qssw
-      real (kind=kind_phys) :: cpinv, hvapi, elocp
+      real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw
 
       integer :: i, k
       integer, dimension(im) :: islmsk_local
@@ -309,11 +309,11 @@
           evapw(i) = elocp * rch(i) * (qssw - q0)
 !         evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
 
-          snetw(i) = sfcdsw(i) * (one - albfw)
-          snetw(i) = min(3.0_kind_phys*sfcnsw(i)                        &
-     &             / (one+2.0_kind_phys*ffw(i)), snetw(i))
+          snetw    = sfcdsw(i) * (one - albfw)
+          snetw    = min(3.0_kind_phys*sfcnsw(i)                        &
+     &                  / (one+2.0_kind_phys*ffw(i)), snetw)
 !> - Calculate net solar incoming at top \a sneti.
-          sneti(i) = (sfcnsw(i) - ffw(i)*snetw(i)) / fice(i)
+          sneti(i) = (sfcnsw(i) - ffw(i)*snetw) / fice(i)
 
           t12 = tice(i) * tice(i)
           t14 = t12 * t12
@@ -337,7 +337,7 @@
 !  --- ...  hfw = net heat flux @ water surface (within ice)
 
 !         hfw(i) = -dlwflx(i) + sfcemis(i)*sbc*t14 + evapw(i)           &
-!    &           + rch(i)*(tgice - theta1(i)) - snetw(i)
+!    &           + rch(i)*(tgice - theta1(i)) - snetw
 
 !> - Assigin heat flux from ocean \a focn and snowfall rate as constants, which
 !! should be from ocean model and other physics.
