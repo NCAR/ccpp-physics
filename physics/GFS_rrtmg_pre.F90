@@ -566,7 +566,11 @@
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
               ccnd(i,k,2) = tracer1(i,k,ntiw)                     ! ice water
               ccnd(i,k,3) = tracer1(i,k,ntrw)                     ! rain water
-              ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) ! snow + grapuel
+              if (Model%imp_physics == 15 ) then
+                  ccnd(i,k,4) = 0.0
+              else
+                  ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) ! snow + grapuel
+              endif
             enddo
           enddo
         endif
@@ -859,7 +863,7 @@
           call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,    &  !  --- inputs
                          Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-                         ntsw-1,ntgl-1,                                 &
+!mz                       ntsw-1,ntgl-1,                                 &
                          im, lmk, lmp, Model%icloud,Model%uni_cld,      &
                          Model%lmfshal,Model%lmfdeep2,                  &
                          cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),            &
