@@ -63,7 +63,6 @@ contains
       integer,          intent(out) :: errflg
 
       ! Local variables
-      real(kind=kind_phys) :: tem
       integer :: i
 
       ! Initialize CCPP error handling variables
@@ -89,7 +88,7 @@ contains
               endif
             endif
             if (cice(i) < one ) then
-              wet(i)=.true. !there is some open ocean/lake water!
+              wet(i)=.true. ! some open ocean/lake water exists
               if (.not. cplflx) tsfco(i) = max(tsfco(i), tisfc(i), tgice)
             end if
           else
@@ -367,10 +366,10 @@ contains
             qss(i)  = txl*qss_lnd(i)    + tem*qss_ice(i)
             gflx(i) = txl*gflx_lnd(i)   + tem*gflx_ice(i)
           else
-            evap(i) = txl*evap_lnd(i)   + tem*evap_ice(i)   + txo*evap_ocn(i)
-            hflx(i) = txl*hflx_lnd(i)   + tem*hflx_ice(i)   + txo*hflx_ocn(i)
-            qss(i)  = txl*qss_lnd(i)    + tem*qss_ice(i)    + txo*qss_ocn(i)
-            gflx(i) = txl*gflx_lnd(i)   + tem*gflx_ice(i)   + txo*gflx_ocn(i)
+            evap(i) = txl*evap_lnd(i)   + txi*evap_ice(i)   + txo*evap_ocn(i)
+            hflx(i) = txl*hflx_lnd(i)   + txi*hflx_ice(i)   + txo*hflx_ocn(i)
+            qss(i)  = txl*qss_lnd(i)    + txi*qss_ice(i)    + txo*qss_ocn(i)
+            gflx(i) = txl*gflx_lnd(i)   + txi*gflx_ice(i)   + txo*gflx_ocn(i)
           endif
           tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_ocn(i)
 
@@ -414,7 +413,7 @@ contains
             fm10(i)   = fm10_lnd(i)
             fh2(i)    = fh2_lnd(i)
            !tsurf(i)  = tsurf_lnd(i)
-            tsfcl(i)  = tsfc_lnd(i)
+            tsfcl(i)  = tsfc_lnd(i) ! over land
             cmm(i)    = cmm_lnd(i)
             chh(i)    = chh_lnd(i)
             gflx(i)   = gflx_lnd(i)
@@ -426,9 +425,9 @@ contains
             hflx(i)   = hflx_lnd(i)
             qss(i)    = qss_lnd(i)
             tsfc(i)   = tsfc_lnd(i)
-            hice(i)   = zero
-            cice(i)   = zero
-            tisfc(i)  = tsfc(i)
+            !hice(i)   = zero
+            !cice(i)   = zero
+            !tisfc(i)  = tsfc(i)
           elseif (islmsk(i) == 0) then
             zorl(i)   = zorl_ocn(i)
             cd(i)     = cd_ocn(i)
@@ -441,7 +440,8 @@ contains
             fm10(i)   = fm10_ocn(i)
             fh2(i)    = fh2_ocn(i)
            !tsurf(i)  = tsurf_ocn(i)
-            tsfco(i)  = tsfc_ocn(i)
+            tsfco(i)  = tsfc_ocn(i) ! over lake (and ocean when uncoupled)
+            if( cplflx ) tsfcl(i)  = tsfc_ocn(i) ! for restart repro comparisons
             cmm(i)    = cmm_ocn(i)
             chh(i)    = chh_ocn(i)
             gflx(i)   = gflx_ocn(i)
@@ -453,10 +453,10 @@ contains
             hflx(i)   = hflx_ocn(i)
             qss(i)    = qss_ocn(i)
             tsfc(i)   = tsfc_ocn(i)
-            hice(i)   = zero
-            cice(i)   = zero
-            tisfc(i)  = tsfc(i)
-          else
+            !hice(i)   = zero
+            !cice(i)   = zero
+            !tisfc(i)  = tsfc(i)
+          else ! islmsk(i) == 2
             zorl(i)   = zorl_ice(i)
             cd(i)     = cd_ice(i)
             cdq(i)    = cdq_ice(i)
@@ -468,29 +468,42 @@ contains
             fm10(i)   = fm10_ice(i)
             fh2(i)    = fh2_ice(i)
            !tsurf(i)  = tsurf_ice(i)
+            if (.not. flag_cice(i)) then
+              tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
+            endif
             cmm(i)    = cmm_ice(i)
             chh(i)    = chh_ice(i)
             gflx(i)   = gflx_ice(i)
             ep1d(i)   = ep1d_ice(i)
             weasd(i)  = weasd_ice(i)
             snowd(i)  = snowd_ice(i)
+           !tprcp(i)  = cice(i)*tprcp_ice(i) + (one-cice(i))*tprcp_ocn(i)
             qss(i)    = qss_ice(i)
-            if (flag_cice(i)) then    ! this was already done for lake ice in sfc_sice
-              txi = cice(i)
-              txo = one - txi
-              evap(i) = txi * evap_ice(i) + txo * evap_ocn(i)
-              hflx(i) = txi * hflx_ice(i) + txo * hflx_ocn(i)
-              tsfc(i) = txi * tsfc_ice(i) + txo * tsfc_ocn(i)
-            else
-              evap(i)  = evap_ice(i)
-              hflx(i)  = hflx_ice(i)
-              tsfc(i)  = tsfc_ice(i)
-              tisfc(i) = tice(i)
-            endif
+            evap(i)   = evap_ice(i)
+            hflx(i)   = hflx_ice(i)
+            qss(i)    = qss_ice(i)
+            tsfc(i)   = tsfc_ice(i)
+            if( cplflx ) tsfcl(i)  = tsfc_ice(i)
           endif
 
           zorll(i) = zorl_lnd(i)
           zorlo(i) = zorl_ocn(i)
+
+          if (flag_cice(i) .and. wet(i)) then ! this was already done for lake ice in sfc_sice
+            txi = cice(i)
+            txo = one - txi
+            evap(i) = txi * evap_ice(i) + txo * evap_ocn(i)
+            hflx(i) = txi * hflx_ice(i) + txo * hflx_ocn(i)
+            tsfc(i) = txi * tsfc_ice(i) + txo * tsfc_ocn(i)
+          else
+            if (islmsk(i) == 2) then
+              tisfc(i) = tice(i)
+            else ! over open ocean or land (no ice fraction)
+              hice(i)  = zero
+              cice(i)  = zero
+              tisfc(i) = tsfc(i)
+            endif
+          endif
 
         enddo
 

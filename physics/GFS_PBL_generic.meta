@@ -307,6 +307,113 @@
   kind = kind_phys
   intent = inout
   optional = F
+[lheatstrg]
+  standard_name = flag_for_canopy_heat_storage
+  long_name = flag for canopy heat storage parameterization
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[z0fac]
+  standard_name = surface_roughness_fraction_factor
+  long_name = surface roughness fraction factor for canopy heat storage parameterization
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[e0fac]
+  standard_name = latent_heat_flux_fraction_factor_relative_to_sensible_heat_flux
+  long_name = latent heat flux fraction factor relative to sensible heat flux for canopy heat storage parameterization
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zorl]
+  standard_name = surface_roughness_length
+  long_name = surface roughness length
+  units = cm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[u10m]
+  standard_name = x_wind_at_10m
+  long_name = 10 meter u wind speed
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[v10m]
+  standard_name = y_wind_at_10m
+  long_name = 10 meter v wind speed
+  units = m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hflx]
+  standard_name = kinematic_surface_upward_sensible_heat_flux
+  long_name = kinematic surface upward sensible heat flux
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[evap]
+  standard_name = kinematic_surface_upward_latent_heat_flux
+  long_name = kinematic surface upward latent heat flux
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hflxq]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[evapq]
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward latent heat flux reduced by surface roughness
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[hefac]
+  standard_name = surface_upward_latent_heat_flux_reduction_factor
+  long_name = surface upward latent heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[hffac]
+  standard_name = surface_upward_sensible_heat_flux_reduction_factor
+  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -747,7 +854,7 @@
   intent = in
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -756,7 +863,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -1089,8 +1196,8 @@
   intent = in
   optional = F
 [dusfc_cice]
-  standard_name = surface_x_momentum_flux_for_coupling_interstitial
-  long_name = sfc x momentum flux for coupling interstitial
+  standard_name = surface_x_momentum_flux_for_coupling
+  long_name = sfc x momentum flux for coupling
   units = Pa
   dimensions = (horizontal_dimension)
   type = real
@@ -1098,8 +1205,8 @@
   intent = in
   optional = F
 [dvsfc_cice]
-  standard_name = surface_y_momentum_flux_for_coupling_interstitial
-  long_name = sfc y momentum flux for coupling interstitial
+  standard_name = surface_y_momentum_flux_for_coupling
+  long_name = sfc y momentum flux for coupling
   units = Pa
   dimensions = (horizontal_dimension)
   type = real
@@ -1107,8 +1214,8 @@
   intent = in
   optional = F
 [dtsfc_cice]
-  standard_name = surface_upward_sensible_heat_flux_for_coupling_interstitial
-  long_name = sfc sensible heat flux for coupling interstitial
+  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  long_name = sfc sensible heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -1116,8 +1223,8 @@
   intent = in
   optional = F
 [dqsfc_cice]
-  standard_name = surface_upward_latent_heat_flux_for_coupling_interstitial
-  long_name = sfc latent heat flux for coupling interstitial
+  standard_name = surface_upward_latent_heat_flux_for_coupling
+  long_name = sfc latent heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -1216,6 +1323,24 @@
   long_name = diffusivity for heat
   units = m2 s-1
   dimensions = (horizontal_dimension,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hefac]
+  standard_name = surface_upward_latent_heat_flux_reduction_factor
+  long_name = surface upward latent heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hffac]
+  standard_name = surface_upward_sensible_heat_flux_reduction_factor
+  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in

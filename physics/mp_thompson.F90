@@ -39,10 +39,10 @@ module mp_thompson
          integer,                   intent(in)    :: ncol
          integer,                   intent(in)    :: nlev
          logical,                   intent(in)    :: is_aerosol_aware
-         real(kind_phys), optional, intent(inout) :: nwfa2d(1:ncol)
-         real(kind_phys), optional, intent(inout) :: nifa2d(1:ncol)
-         real(kind_phys), optional, intent(inout) :: nwfa(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(inout) :: nifa(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(inout) :: nwfa2d(:)
+         real(kind_phys), optional, intent(inout) :: nifa2d(:)
+         real(kind_phys), optional, intent(inout) :: nwfa(:,:)
+         real(kind_phys), optional, intent(inout) :: nifa(:,:)
          integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
