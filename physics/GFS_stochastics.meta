@@ -107,7 +107,7 @@
   dimensions = (vertical_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [si]
   standard_name = vertical_sigma_coordinate_for_radiation_initialization

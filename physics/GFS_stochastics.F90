@@ -43,6 +43,7 @@
 
          integer,                               intent(in)    :: im
          integer,                               intent(in)    :: km
+         integer,                               intent(in)    :: kdt
          logical,                               intent(in)    :: do_sppt
          logical,                               intent(in)    :: do_ca
          logical,                               intent(in)    :: ca_global
@@ -88,7 +89,7 @@
          real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
          real(kind_phys), dimension(1:km),      intent(in)    :: si
-         real(kind_phys), dimension(1:km),      intent(in)    :: vfact_ca
+         real(kind_phys), dimension(1:km),      intent(inout) :: vfact_ca
          real(kind_phys), dimension(1:im),      intent(in)    :: ca1
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
