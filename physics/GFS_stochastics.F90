@@ -27,7 +27,7 @@
 !! -# interpolates coefficients for prognostic ozone calculation
 !! -# performs surface data cycling via the GFS gcycle routine
       subroutine GFS_stochastics_run (im, km, do_sppt, use_zmtnblck, do_shum, do_skeb,   &
-                                      do_ca,ca_global,ca1,si,                            &
+                                      do_ca,ca_global,ca1,si,vfact_ca,                   &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
                                       sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
                                       shum_wts_inv, diss_est,                            &
@@ -88,6 +88,7 @@
          real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
          real(kind_phys), dimension(1:km),      intent(in)    :: si
+         real(kind_phys), dimension(1:km),      intent(in)    :: vfact_ca
          real(kind_phys), dimension(1:im),      intent(in)    :: ca1
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
@@ -95,7 +96,6 @@
          !--- local variables
          integer :: k, i
          real(kind=kind_phys) :: upert, vpert, tpert, qpert, qnew, sppt_vwt
-         real(kind=kind_phys), dimension(1:km) :: vfact_ca
          real(kind=kind_phys), dimension(1:im,1:km) :: ca
 
          ! Initialize CCPP error handling variables
@@ -162,6 +162,7 @@
 
          if (do_ca .and. ca_global) then
 
+          if(kdt == 1)then
             do k=1,km
                if (si(k) .lt. 0.1 .and. si(k) .gt. 0.025) then
                   vfact_ca(k) = (si(k)-0.025)/(0.1-0.025)
@@ -171,10 +172,10 @@
                   vfact_ca(k) = 1.0
                endif
             enddo
-            
             vfact_ca(2)=vfact_ca(3)*0.5
             vfact_ca(1)=0.0
-            
+          endif
+   
             do k = 1,km
                do i = 1,im
                   sppt_vwt=1.0
