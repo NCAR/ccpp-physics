@@ -26,8 +26,8 @@
 !! -# defines random seed indices for radiation (in a reproducible way)
 !! -# interpolates coefficients for prognostic ozone calculation
 !! -# performs surface data cycling via the GFS gcycle routine
-      subroutine GFS_stochastics_run (im, km, do_sppt, use_zmtnblck, do_shum, do_skeb,   &
-                                      do_ca,ca_global,ca1,si,vfact_ca,                   &
+      subroutine GFS_stochastics_run (im, km, kdt, do_sppt, use_zmtnblck, do_shum,       &
+                                      do_skeb, do_ca,ca_global,ca1,si,vfact_ca,          &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
                                       sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
                                       shum_wts_inv, diss_est,                            &
