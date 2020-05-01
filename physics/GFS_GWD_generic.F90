@@ -17,7 +17,8 @@ contains
 !!  @{
       subroutine GFS_GWD_generic_pre_run(                               &
      &           im, levs, nmtvr, mntvar,                               &
-     &           oc, oa4, clx, theta,                                   &
+     &           var, oc, oa4, clx, theta,                              &
+     &           varss, ocss, oa4ss, clxss,                             &
      &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
      &           dudt, dvdt, dtdt, du3dt, dv3dt, dt3dt, dtf,            &
      &           flag_for_gwd_generic_tend, errmsg, errflg)
@@ -29,7 +30,8 @@ contains
       real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
 
       real(kind=kind_phys), intent(out) ::                              &
-     &  oc(im), oa4(im,4), clx(im,4),                                   &
+     &  var(im), oc(im), oa4(im,4), clx(im,4),                          &
+     &  varss(im), ocss(im), oa4ss(im,4), clxss(im,4),                  &
      &  theta(im), sigma(im), gamma(im), elvmax(im)
 
       logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
@@ -81,6 +83,27 @@ contains
         clx(:,2)  = 0.0
         clx(:,3)  = 0.0
         clx(:,4)  = 0.0
+      elseif (nmtvr == 24) then   ! GSD_drag_suite
+        var(:)      = mntvar(:,1)
+        oc(:)       = mntvar(:,2)
+        oa4(:,1)    = mntvar(:,3)
+        oa4(:,2)    = mntvar(:,4)
+        oa4(:,3)    = mntvar(:,5)
+        oa4(:,4)    = mntvar(:,6)
+        clx(:,1)    = mntvar(:,7)
+        clx(:,2)    = mntvar(:,8)
+        clx(:,3)    = mntvar(:,9)
+        clx(:,4)    = mntvar(:,10)
+        varss(:)    = mntvar(:,15)
+        ocss(:)     = mntvar(:,16)
+        oa4ss(:,1)  = mntvar(:,17)
+        oa4ss(:,2)  = mntvar(:,18)
+        oa4ss(:,3)  = mntvar(:,19)
+        oa4ss(:,4)  = mntvar(:,20)
+        clxss(:,1)  = mntvar(:,21)
+        clxss(:,2)  = mntvar(:,22)
+        clxss(:,3)  = mntvar(:,23)
+        clxss(:,4)  = mntvar(:,24)
       else
         oc     = 0
         oa4    = 0
