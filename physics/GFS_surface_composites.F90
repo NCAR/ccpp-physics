@@ -80,7 +80,7 @@ contains
               else
                 cice(i)      = zero
                 flag_cice(i) = .false.
-                islmsk       = 0
+                islmsk(i)    = 0
               endif
             else
               if (cice(i) >= min_lakeice) then
@@ -91,10 +91,10 @@ contains
               endif
             endif
             if (cice(i) < one ) then
-              wet(i)=.true. ! some open ocean/lake water exists
-              if (.not. cplflx .or. oceanfrac(i) == zero)      &
-                  tsfco(i) = max(tsfco(i), tisfc(i), tgice)
-            end if
+              wet(i) = .true. ! some open ocean/lake water exists
+              if ((.not. cplflx .or. oceanfrac(i) == zero) .and. icy(i))      &
+                  tsfco(i) = max(tisfc(i), tgice)
+            endif
           else
             cice(i) = zero
           endif
@@ -127,8 +127,8 @@ contains
               endif
             endif
             if (cice(i) < one) then
-              wet(i)=.true. ! some open ocean/lake water exists
-              if (.not. cplflx) tsfco(i) = max(tsfco(i), tisfc(i), tgice)
+              wet(i) = .true. ! some open ocean/lake water exists
+              if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
             endif
           endif
         enddo

@@ -102,13 +102,13 @@
 !    &,              dkmin=zero,     dkmax=1000.,     xkzminv=0.3
      &,              prmin=0.25_r8,  prmax=4.0_r8,    vk=0.4_r8,
      &               cfac=6.5_r8
-      real(kind=kind_phys) :: gravi, cont, conq, conw, gocp
+      real(kind=kind_phys) :: gravi, cont, conq, gocp, go2
 
-      gravi = one/grav
-      cont = cp/grav
-      conq = hvap/grav
-      conw = one/grav
-      gocp = grav/cp
+      gravi = one  / grav
+      cont  = cp   * gravi
+      conq  = hvap * gravi
+      gocp  = grav / cp
+      go2   = grav * 0.5_r8
 
 ! Initialize CCPP error handling variables
       errmsg = ''
@@ -121,7 +121,7 @@
       if (ix < im) stop
 !
       dt2   = delt
-      rdt   = 1. / dt2
+      rdt   = one / dt2
       km1   = km - 1
       kmpbl = km / 2
 !
@@ -202,13 +202,13 @@
         enddo
         do i = 1,im
           theta(i,k) = t1(i,k) * psk(i) / prslk(i,k)
-          thvx(i,k)  = theta(i,k)*(1.+fv*max(q1(i,k,1),qmin)-tx1(i))
+          thvx(i,k)  = theta(i,k)*(one+fv*max(q1(i,k,1),qmin)-tx1(i))
         enddo
       enddo
 !
       do i = 1,im
          sflux(i)  = heat(i) + evap(i)*fv*theta(i,1)
-         if(.not.sfcflg(i) .or. sflux(i) <= zero) pblflg(i)=.false.
+         if (.not.sfcflg(i) .or. sflux(i) <= zero) pblflg(i)=.false.
          beta(i)  = dt2 / (zi(i,2)-zi(i,1))
       enddo
 !
@@ -219,7 +219,7 @@
          flg(i)  = .false.
          rbup(i) = rbsoil(i)
 !
-         if(pblflg(i)) then
+         if (pblflg(i)) then
            thermal(i) = thvx(i,1)
            crb(i) = crbcon
          else
@@ -233,9 +233,9 @@
       enddo
       do k = 1, kmpbl
         do i = 1, im
-          if(.not.flg(i)) then
+          if (.not.flg(i)) then
             rbdn(i) = rbup(i)
-            spdk2   = max((u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)), 1.)
+            spdk2   = max((u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)), one)
             rbup(i) = (thvx(i,k)-thermal(i))*phil(i,k)
      &              / (thvx(i,1)*spdk2)
             kpbl(i) = k
@@ -246,7 +246,7 @@
       do i = 1,im
         if(kpbl(i) > 1) then
           k = kpbl(i)
-          if(rbdn(i) >= crb(i)) then
+          if (rbdn(i) >= crb(i)) then
             rbint = zero
           elseif(rbup(i) <= crb(i)) then
             rbint = one
@@ -265,13 +265,13 @@
 !
       do i=1,im
          zol(i) = max(rbsoil(i)*fm(i)*fm(i)/fh(i),rimin)
-         if(sfcflg(i)) then
+         if (sfcflg(i)) then
            zol(i) = min(zol(i),-zfmin)
          else
            zol(i) = max(zol(i),zfmin)
          endif
          zol1 = zol(i)*sfcfrac*hpbl(i)/zl(i,1)
-         if(sfcflg(i)) then
+         if (sfcflg(i)) then
 !          phim(i) = (1.-aphi16*zol1)**(-1./4.)
 !          phih(i) = (1.-aphi16*zol1)**(-1./2.)
            tem     = one / max(one - aphi16*zol1, 1.0e-8_r8)
@@ -294,7 +294,7 @@
       enddo
       do k = 2, kmpbl
         do i = 1, im
-          if(.not.flg(i)) then
+          if (.not.flg(i)) then
             rbdn(i) = rbup(i)
             spdk2   = max((u1(i,k)*u1(i,k)+v1(i,k)*v1(i,k)), one)
             rbup(i) = (thvx(i,k)-thermal(i)) * phil(i,k)
@@ -348,8 +348,7 @@
             tem  = u1(i,k) - u1(i,kp1)
             tem1 = v1(i,k) - v1(i,kp1)
             tem  = (tem*tem + tem1*tem1) * rdz * rdz
-            bvf2 = (0.5_r8*grav)*(thvx(i,kp1)-thvx(i,k))*rdz
-     &           / (t1(i,k)+t1(i,kp1))
+            bvf2 = go2*(thvx(i,kp1)-thvx(i,k))*rdz / (t1(i,k)+t1(i,kp1))
             ri   = max(bvf2/tem,rimin)
             if(ri < zero) then ! unstable regime
               prnum(i,kp1) = one
@@ -427,7 +426,7 @@
         enddo
       endif
 !
-!     solve tridiagonal problem for heat and moisture
+!     solve tridiagonal problem for heat, moisture and tracers
 !
       call tridin(im,km,ntloc,al,ad,au,a1,a2,au,a1,a2)
 
@@ -435,14 +434,18 @@
 !     recover tendencies of heat and moisture
 !
       do  k = 1,km
-         do i = 1,im
-            ttend      = (a1(i,k)-t1(i,k))   * rdt
-            qtend      = (a2(i,k)-q1(i,k,1)) * rdt
-            tau(i,k)   = tau(i,k)   + ttend
-            rtg(i,k,1) = rtg(i,k,1) + qtend
-            dtsfc(i)   = dtsfc(i)   + cont*del(i,k)*ttend
-            dqsfc(i)   = dqsfc(i)   + conq*del(i,k)*qtend
-         enddo
+        do i = 1,im
+          ttend      = (a1(i,k)-t1(i,k))   * rdt
+          qtend      = (a2(i,k)-q1(i,k,1)) * rdt
+          tau(i,k)   = tau(i,k)   + ttend
+          rtg(i,k,1) = rtg(i,k,1) + qtend
+          dtsfc(i)   = dtsfc(i)   + del(i,k)*ttend
+          dqsfc(i)   = dqsfc(i)   + del(i,k)*qtend
+        enddo
+      enddo
+      do i = 1,im
+        dtsfc(i)   = dtsfc(i) * cont
+        dqsfc(i)   = dqsfc(i) * conq
       enddo
       if(ntrac > 1) then
         is = 0
@@ -497,8 +500,9 @@
           vtend    = (a2(i,k)-v1(i,k))*rdt
           du(i,k)  = du(i,k)  + utend
           dv(i,k)  = dv(i,k)  + vtend
-          dusfc(i) = dusfc(i) + conw*del(i,k)*utend
-          dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
+          tem      = del(i,k) * gravi
+          dusfc(i) = dusfc(i) + tem * utend
+          dvsfc(i) = dvsfc(i) + tem * vtend
         enddo
       enddo
 !

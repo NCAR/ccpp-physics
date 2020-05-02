@@ -175,13 +175,14 @@ end subroutine m_micro_init
 !------------------------------------
 !   input
 !      real,   parameter  :: r_air = 3.47d-3
-       real,   parameter  :: one=1.0_kind_phys, oneb3=one/3.0_kind_phys, onebcp=one/cp,    &
-                             zero=0.0_kind_phys, half=0.5_kind_phys, onebg=one/grav,       &
-     &                       kapa=rgas*onebcp,  cpbg=cp/grav,                              &
-     &                       lvbcp=hvap*onebcp, lsbcp=(hvap+hfus)*onebcp,                  &
-     &                       qsmall=1.0e-14_kind_phys, rainmin = 1.0e-13_kind_phys,        &
-     &                       fourb3=4.0_kind_phys/3.0_kind_phys, RL_cub=1.0e-15_kind_phys, &
-     &                       nmin=1.0_kind_phys
+       integer, parameter :: r8 = kind_phys
+       real,   parameter  :: one=1.0_r8, oneb3=one/3.0_r8, onebcp=one/cp,    &
+                             zero=0.0_r8, half=0.5_r8, onebg=one/grav,       &
+     &                       kapa=rgas*onebcp,  cpbg=cp/grav,                &
+     &                       lvbcp=hvap*onebcp, lsbcp=(hvap+hfus)*onebcp,    &
+     &                       qsmall=1.0e-14_r8, rainmin = 1.0e-13_r8,        &
+     &                       fourb3=4.0_r8/3.0_r8, RL_cub=1.0e-15_r8,        &
+     &                       nmin=1.0_r8
 
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, ix,lm, kdt, fprcp, pdfflag, iccn
@@ -355,27 +356,27 @@ end subroutine m_micro_init
 
 !      real (kind=kind_phys), parameter :: disp_liu=2., ui_scale=1.0    &
 !    &,                                    dcrit=20.0d-6                &
-       real (kind=kind_phys), parameter :: disp_liu=1.0_kind_phys       &
-     &,                                    ui_scale=1.0_kind_phys       &
-     &,                                    dcrit=1.0e-6_kind_phys       &
+       real (kind=kind_phys), parameter :: disp_liu=1.0_r8              &
+     &,                                    ui_scale=1.0_r8              &
+     &,                                    dcrit=1.0e-6_r8              &
 !    &,                                    ts_autice=1800.0             &
 !    &,                                    ts_autice=3600.0             & !time scale
-     &,                                    ninstr8 = 0.1e6_kind_phys    &
-     &,                                    ncnstr8 = 100.0e6_kind_phys
+     &,                                    ninstr8 = 0.1e6_r8           &
+     &,                                    ncnstr8 = 100.0e6_r8
 
        real(kind=kind_phys):: k_gw, maxkh, tausurf_gw, overscale, tx1, rh1_r8
        real(kind=kind_phys)::  t_ice_denom
 
        integer, dimension(1)           :: lev_sed_strt                ! sedimentation start level
-       real(kind=kind_phys), parameter :: sig_sed_strt=0.05_kind_phys ! normalized pressure at sedimentation start
+       real(kind=kind_phys), parameter :: sig_sed_strt=0.05_r8 ! normalized pressure at sedimentation start
 
        real(kind=kind_phys),dimension(3)  :: ccn_diag
        real(kind=kind_phys),dimension(58) :: cloudparams
 
        integer, parameter              :: CCN_PARAM=2, IN_PARAM=5
 
-       real(kind=kind_phys), parameter ::fdust_drop=1.0_kind_phys,   fsoot_drop=0.1_kind_phys &
-     &,                                  sigma_nuc_r8=0.28_kind_phys,SCLMFDFR=0.03_kind_phys
+       real(kind=kind_phys), parameter ::fdust_drop=1.0_r8,   fsoot_drop=0.1_r8 &
+     &,                                  sigma_nuc_r8=0.28_r8,SCLMFDFR=0.03_r8
 !    &,                                  sigma_nuc_r8=0.28,SCLMFDFR=0.1
 
        type (AerProps), dimension (IM,LM)  :: AeroProps
@@ -390,22 +391,22 @@ end subroutine m_micro_init
 !================== Start Stratiform cloud processes==========================================
 !set up initial values
 
-       data USE_AV_V/1./, BKGTAU/0.015/, LCCIRRUS/500./, NPRE_FRAC/1./, &
-     &      TMAXLL/296./, fracover/1./,  LTS_LOW/12./,   LTS_UP/24./,   &
-     &      MIN_EXP/0.5/
+       data USE_AV_V/1.0_r8/, BKGTAU/0.015_r8/, LCCIRRUS/500.0_r8/, NPRE_FRAC/1.0_r8/, &
+     &      TMAXLL/296.0_r8/, fracover/1.0_r8/, LTS_LOW/12.0_r8/,   LTS_UP/24.0_r8/,   &
+     &      MIN_EXP/0.5_r8/
 
-       data cloudparams/                                                &
-     &  10.0, 4.0  , 4.0   , 1.0   , 2.e-3, 8.e-4, 2.0  , 1.0   , -1.0  &
-     &, 0.0 , 1.3  , 1.0e-9, 3.3e-4, 20.0 , 4.8  , 4.8  , 230.0 ,  1.0  &
-     &, 1.0 , 230.0, 14400., 50.0  , 0.01 , 0.1  , 200.0, 0.0   ,  0.0  &
-     &, 0.5 , 0.5  , 2000.0, 0.8   , 0.5  , -40.0, 1.0  , 4.0   ,  0.0  &
-     &, 0.0 , 0.0  , 1.0e-3, 8.0e-4, 1.0  , 0.95 , 1.0  , 0.0   ,  900.0&
-!    &, 0.0 , 0.0  , 1.0e-3, 8.0e-4, 1.0  , 0.95 , 1.0  , 0.0   ,  880.0&
-!    &, 0.0 , 0.0  , 1.0e-3, 8.0e-4, 1.0  , 0.95 , 1.0  , 0.0   ,  980.0&
-     &, 1.0 , 1.0  , 1.0   , 0.0   , 0.0  , 1.e-5, 2.e-5, 2.1e-5,  4.e-5&
-!    &, 3e-5, 0.1  , 4.0   , 250./          ! Annings version
-     &, 3e-5, 0.1  , 4.0   , 150./          ! Annings version
-!    &, 3e-5, 0.1  , 1.0   , 150./
+       data cloudparams/                                                                           &
+     &  10.0_r8, 4.0_r8  , 4.0_r8   , 1.0_r8   , 2.e-3_r8, 8.e-4_r8, 2.0_r8  , 1.0_r8   , -1.0_r8  &
+     &, 0.0_r8 , 1.3_r8  , 1.0e-9_r8, 3.3e-4_r8, 20.0_r8 , 4.8_r8  , 4.8_r8  , 230.0_r8 ,  1.0_r8  &
+     &, 1.0_r8 , 230.0_r8, 14400._r8, 50.0_r8  , 0.01_r8 , 0.1_r8  , 200.0_r8, 0.0_r8   ,  0.0_r8  &
+     &, 0.5_r8 , 0.5_r8  , 2000.0_r8, 0.8_r8   , 0.5_r8  , -40.0_r8, 1.0_r8  , 4.0_r8   ,  0.0_r8  &
+     &, 0.0_r8 , 0.0_r8  , 1.0e-3_r8, 8.0e-4_r8, 1.0_r8  , 0.95_r8 , 1.0_r8  , 0.0_r8   ,  900.0_r8&
+!    &, 0.0_r8 , 0.0_r8  , 1.0e-3_r8, 8.0e-4_r8, 1.0_r8  , 0.95_r8 , 1.0_r8  , 0.0_r8   ,  880.0_r8&
+!    &, 0.0_r8 , 0.0_r8  , 1.0e-3_r8, 8.0e-4_r8, 1.0_r8  , 0.95_r8 , 1.0_r8  , 0.0_r8   ,  980.0_r8&
+     &, 1.0_r8 , 1.0_r8  , 1.0_r8   , 0.0_r8   , 0.0_r8  , 1.e-5_r8, 2.e-5_r8, 2.1e-5_r8,  4.e-5_r8&
+!    &, 3e-5_r8, 0.1_r8  , 4.0_r8   , 250.0_r8/          ! Annings version
+     &, 3e-5_r8, 0.1_r8  , 4.0_r8   , 150.0_r8/          ! Annings version
+!    &, 3e-5_r8, 0.1_r8  , 1.0_r8   , 150.0_r8/
 
 ! Initialize CCPP error handling variables
        errmsg = ''
@@ -441,7 +442,7 @@ end subroutine m_micro_init
              CNV_DQLDT(I,K) = CNV_DQLDT_i(I,ll)
              CLCN(I,k)      = CLCN_i(I,ll)
              CLLS(I,k)      = max(CLLS_io(I,ll)-CLCN_i(I,ll),zero)
-             PLO(i,k)       = prsl_i(i,ll)*0.01_kind_phys
+             PLO(i,k)       = prsl_i(i,ll)*0.01_r8
              zlo(i,k)       = phil(i,ll) * onebg
              temp(i,k)      = t_io(i,ll)
              radheat(i,k)   = lwheat_i(i,ll) + swheat_i(i,ll)
@@ -456,7 +457,7 @@ end subroutine m_micro_init
          DO K=0, LM
            ll = lm-k
            DO I = 1,IM
-             PLE(i,k)   = prsi_i(i,ll) * 0.01_kind_phys      ! interface pressure in hPa
+             PLE(i,k)   = prsi_i(i,ll) * 0.01_r8      ! interface pressure in hPa
              zet(i,k+1) = phii(i,ll) * onebg
            END DO
          END DO
@@ -501,7 +502,7 @@ end subroutine m_micro_init
              CNV_DQLDT(I,K) = CNV_DQLDT_i(I,k)
              CLCN(I,k)      = CLCN_i(I,k)
              CLLS(I,k)      = max(CLLS_io(I,k)-CLCN_i(I,k),zero)
-             PLO(i,k)       = prsl_i(i,k)*0.01_kind_phys
+             PLO(i,k)       = prsl_i(i,k)*0.01_r8
              zlo(i,k)       = phil(i,k) * onebg
              temp(i,k)      = t_io(i,k)
              radheat(i,k)   = lwheat_i(i,k) + swheat_i(i,k)
@@ -515,7 +516,7 @@ end subroutine m_micro_init
          END DO
          DO K=0, LM
            DO I = 1,IM
-             PLE(i,k)   = prsi_i(i,k) * 0.01_kind_phys      ! interface pressure in hPa
+             PLE(i,k)   = prsi_i(i,k) * 0.01_r8      ! interface pressure in hPa
              zet(i,k+1) = phii(i,k) * onebg
            END DO
          END DO
@@ -554,17 +555,17 @@ end subroutine m_micro_init
              if (rnw(i,k) <= qc_min(1)) then
                ncpr(i,k) = zero
              elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
-               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kind_phys), nmin)
+               ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_r8), nmin)
              endif
              if (snw(i,k) <= qc_min(2)) then
                ncps(i,k) = zero
              elseif (ncps(i,k) <= nmin) then
-               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kind_phys), nmin)
+               ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_r8), nmin)
              endif
              if (qgl(i,k) <= qc_min(2)) then
                ncgl(i,k) = zero
              elseif (ncgl(i,k) <= nmin) then
-               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kind_phys), nmin)
+               ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_r8), nmin)
              endif
 
            enddo
@@ -578,8 +579,8 @@ end subroutine m_micro_init
 
        DO I=1, IM
          DO K = LM-2, 10, -1
-           If ((CNV_DQLDT(I,K)  <= 1.0e-9_kind_phys) .and.           &
-     &         (CNV_DQLDT(I,K+1) > 1.0e-9_kind_phys)) then
+           If ((CNV_DQLDT(I,K)  <= 1.0e-9_r8) .and.           &
+     &         (CNV_DQLDT(I,K+1) > 1.0e-9_r8)) then
              KCT(I) = K+1
              exit
            end if
@@ -659,7 +660,7 @@ end subroutine m_micro_init
        do l=lm-1,1,-1
          do i=1,im
            tx1     = half * (temp(i,l+1) + temp(i,l))
-           kh(i,l) = 3.55e-7_kind_phys*tx1**2.5_kind_phys*(rgas*0.01_kind_phys) / ple(i,l)   !kh molecule diff only needing refinement
+           kh(i,l) = 3.55e-7_r8*tx1**2.5_r8*(rgas*0.01_r8) / ple(i,l)   !kh molecule diff only needing refinement
          enddo
        end do
        do i=1,im
@@ -668,8 +669,8 @@ end subroutine m_micro_init
        enddo
        do L=LM,1,-1
          do i=1,im
-           blk_l(i,l)  = one / ( one/max(0.15_kind_phys*ZPBL(i),0.4_kind_phys*zlo(i,lm-1))&
-     &                 + one/(zlo(i,l)*0.4_kind_phys) )
+           blk_l(i,l)  = one / ( one/max(0.15_r8*ZPBL(i),0.4_r8*zlo(i,lm-1))&
+     &                 + one/(zlo(i,l)*0.4_r8) )
 
            SC_ICE(i,l) = one
            NCPL(i,l)   = MAX( NCPL(i,l), zero)
@@ -688,8 +689,8 @@ end subroutine m_micro_init
 
 
        do l=1,lm
-         rhdfdar8(l)  = 1.e-8_kind_phys
-         rhu00r8(l)   = 0.95_kind_phys
+         rhdfdar8(l)  = 1.e-8_r8
+         rhu00r8(l)   = 0.95_r8
 
          ttendr8(l)   = zero
          qtendr8(l)   = zero
@@ -699,7 +700,7 @@ end subroutine m_micro_init
        enddo
        do k=1,10
          do l=1,lm
-           rndstr8(l,k) = 2.0d-7
+           rndstr8(l,k) = 2.0e-7_r8
          enddo
        enddo
 
@@ -734,8 +735,8 @@ end subroutine m_micro_init
        if ( iccn == 2) then
          AERMASSMIX(:,:,1:ntrcaer) = aerfld_i(:,:,1:ntrcaer)
        else
-         AERMASSMIX(:,:,1:5)  = 1.0e-6_kind_phys
-         AERMASSMIX(:,:,6:15) = 2.0e-14_kind_phys
+         AERMASSMIX(:,:,1:5)  = 1.0e-6_r8
+         AERMASSMIX(:,:,6:15) = 2.0e-14_r8
        end if
 !>  - Call aerconversion1()
        call AerConversion1 (AERMASSMIX,  AeroProps)
@@ -754,23 +755,23 @@ end subroutine m_micro_init
          kcldtopcvn = KCT(I)
 
          tausurf_gw = min(half*SQRT(TAUOROX(I)*TAUOROX(I)              &
-     &                            + TAUOROY(I)*TAUOROY(I)), 10.0_kind_phys)
+     &                            + TAUOROY(I)*TAUOROY(I)), 10.0_r8)
          do k=1,lm
 
            uwind_gw(k) = min(half*SQRT( U1(I,k)*U1(I,k)                &
-     &                                + V1(I,k)*V1(I,k)), 50.0_kind_phys)
+     &                                + V1(I,k)*V1(I,k)), 50.0_r8)
 
 !  tausurf_gw   =tausurf_gw  + max (tausurf_gw,  min(0.5*SQRT(TAUX(I , J)**2+TAUY(I , J)**2), 10.0)*BKGTAU) !adds a minimum value from unresolved sources
 
 
-           pm_gw(k)    = 100.0_kind_phys*PLO(I,k)
+           pm_gw(k)    = 100.0_r8*PLO(I,k)
            tm_gw(k)    = TEMP(I,k)
 
            nm_gw(k)    = zero
            rho_gw(k)   = pm_gw(k) /(RGAS*tm_gw(k))
 
            ter8(k)    = TEMP(I,k)
-           plevr8(k)  = 100.0_kind_phys*PLO(I,k)
+           plevr8(k)  = 100.0_r8*PLO(I,k)
            ndropr8(k) = NCPL(I,k)
            qir8(k)    = QILS(I,k) + QICN(I,k)
            qcr8(k)    = QLLS(I,k) + QLCN(I,k)
@@ -781,27 +782,27 @@ end subroutine m_micro_init
 
            npre8(k)     = zero
 
-           if (RAD_CF(I,k) > 0.01_kind_phys .and. qir8(k) > zero) then
+           if (RAD_CF(I,k) > 0.01_r8 .and. qir8(k) > zero) then
              npre8(k) = NPRE_FRAC*NCPI(I,k)
            else
              npre8(k) = zero
            endif
 
            omegr8(k)      = OMEGA(I,k)
-           lc_turb(k)     = max(blk_l(I,k), 50.0_kind_phys)
+           lc_turb(k)     = max(blk_l(I,k), 50.0_r8)
 !          rad_cooling(k) = RADheat(I,k)
 
            if (npre8(k) > zero .and. qir8(k) > zero) then
-             dpre8(k) = ( qir8(k)/(6.0_kind_phys*npre8(k)*900.0_kind_phys*PI))**(one/3.0_kind_phys)
+             dpre8(k) = ( qir8(k)/(6.0_r8*npre8(k)*900.0_r8*PI))**(one/3.0_r8)
            else
-             dpre8(k) = 1.0e-9_kind_phys
+             dpre8(k) = 1.0e-9_r8
            endif
            wparc_ls(k) = -omegr8(k) / (rho_gw(k)*GRAV)                  &
      &                 +  cpbg * radheat(i,k)
 !    &                 +  cpbg * rad_cooling(k)
          enddo
          do k=0,lm
-           pi_gw(k)   = 100.0_kind_phys*PLE(I,k)
+           pi_gw(k)   = 100.0_r8*PLE(I,k)
            rhoi_gw(k) = zero
            ni_gw(k)   = zero
            ti_gw(k)   = zero
@@ -817,13 +818,13 @@ end subroutine m_micro_init
      &                 ti_gw, nm_gw, q1(i,:))
 
          do k=1,lm
-           nm_gw(k)    = max(nm_gw(k), 0.005_kind_phys)
+           nm_gw(k)    = max(nm_gw(k), 0.005_r8)
            h_gw(k)     = k_gw*rho_gw(k)*uwind_gw(k)*nm_gw(k)
            if (h_gw(K) > zero) then
-             h_gw(K)    = sqrt(2.0_kind_phys*tausurf_gw/h_gw(K))
+             h_gw(K)    = sqrt(2.0_r8*tausurf_gw/h_gw(K))
            end if
 
-           wparc_gw(k)  = k_gw*uwind_gw(k)*h_gw(k)*0.133_kind_phys
+           wparc_gw(k)  = k_gw*uwind_gw(k)*h_gw(k)*0.133_r8
 
            wparc_cgw(k) = zero
          end do
@@ -840,14 +841,14 @@ end subroutine m_micro_init
 
            do k=1,kcldtopcvn
              c2_gw    = (nm_gw(k) + Nct) / Nct
-             wparc_cgw(k) = sqrt(ksa1*fcn*fcn*12.56_kind_phys*              &
-     &                      1.806_kind_phys*c2_gw*c2_gw)*Wct*0.133_kind_phys
+             wparc_cgw(k) = sqrt(ksa1*fcn*fcn*12.56_r8*              &
+     &                      1.806_r8*c2_gw*c2_gw)*Wct*0.133_r8
            enddo
 
          end if
 
          do k=1,lm
-           dummyW(k) = 0.133_kind_phys*k_gw*uwind_gw(k)/nm_gw(k)
+           dummyW(k) = 0.133_r8*k_gw*uwind_gw(k)/nm_gw(k)
          enddo
 
          do K=1, LM-5, 1
@@ -867,17 +868,17 @@ end subroutine m_micro_init
          kbmin = min(kbmin, LM-1) - 4
          do K = 1, LM
            wparc_turb(k) = KH(I,k) / lc_turb(k)
-           dummyW(k)     = 10.0_kind_phys
+           dummyW(k)     = 10.0_r8
          enddo
 
-         if (FRLAND(I)  < 0.1_kind_phys   .and. ZPBL(I)    < 800.0_kind_phys .and.          &
-     &       TEMP(I,LM) < 298.0_kind_phys .and. TEMP(I,LM) > 274.0_kind_phys) then
+         if (FRLAND(I)  < 0.1_r8   .and. ZPBL(I)    < 800.0_r8 .and.          &
+     &       TEMP(I,LM) < 298.0_r8 .and. TEMP(I,LM) > 274.0_r8) then
            do K = 1, LM
-             dummyW(k) = max(min((ZET(I,k+1)-ZPBL(I))*0.01_kind_phys, 10.0_kind_phys),-10.0_kind_phys)
+             dummyW(k) = max(min((ZET(I,k+1)-ZPBL(I))*0.01_r8, 10.0_r8),-10.0_r8)
              dummyW(k) = one / (one+exp(dummyW(k)))
            enddo
            maxkh = max(maxval(KH(I,kbmin:LM-1)*nm_gw(kbmin:LM-1)/       &
-     &                                                  0.17_kind_phys), 0.3_kind_phys)
+     &                                                  0.17_r8), 0.3_r8)
            do K = 1, LM
              wparc_turb(k) = (one-dummyW(k))*wparc_turb(k)              &
      &                     + dummyW(k)*maxkh
@@ -885,7 +886,7 @@ end subroutine m_micro_init
 
          end if
 
-         wparc_turb(kbmin:LM) = max(wparc_turb(kbmin:LM), 0.2_kind_phys)
+         wparc_turb(kbmin:LM) = max(wparc_turb(kbmin:LM), 0.2_r8)
 
 
 
@@ -903,11 +904,11 @@ end subroutine m_micro_init
 
          do K = 1, LM
 
-           if (plevr8(K) > 70.0_kind_phys) then
+           if (plevr8(K) > 70.0_r8) then
 
-             ccn_diag(1) = 0.001_kind_phys
-             ccn_diag(2) = 0.004_kind_phys
-             ccn_diag(3) = 0.01_kind_phys
+             ccn_diag(1) = 0.001_r8
+             ccn_diag(2) = 0.004_r8
+             ccn_diag(3) = 0.01_r8
 
              if (K > 2 .and. K <= LM-2) then
                tauxr8 = (ter8(K-1) + ter8(K+1) + ter8(K)) * oneb3
@@ -944,7 +945,7 @@ end subroutine m_micro_init
 !    &            size(ccn_diag), lprnt)
 !     if (lprnt) write(0,*)' aft aero npccninr8=',npccninr8(k),' k=',k
 
-             if (npccninr8(k) < 1.0d-12) npccninr8(k) = zero
+             if (npccninr8(k) < 1.0e-12_r8) npccninr8(k) = zero
 
 !            CCN01(I,K) = max(ccn_diag(1)*1e-6, 0.0)
 !            CCN04(I,K) = max(ccn_diag(2)*1e-6, 0.0)
@@ -958,7 +959,7 @@ end subroutine m_micro_init
              swparc(K)      = zero
              smaxicer8(K)   = zero
              nheticer8(K)   = zero
-             sc_icer8(K)    = 2.0_kind_phys
+             sc_icer8(K)    = 2.0_r8
 !            sc_icer8(K)    = 1.0d0
              naair8(K)      = zero
              npccninr8(K)   = zero
@@ -975,9 +976,9 @@ end subroutine m_micro_init
 
 !          SMAXL(I,k)      = smaxliq(k)   * 100.0
 !          SMAXI(I,k)      = smaxicer8(k) * 100.0
-           NHET_NUC(I,k)   = nheticer8(k) * 1.0e-6_kind_phys
-           NLIM_NUC(I,k)   = nlimicer8(k) * 1.0e-6_kind_phys
-           SC_ICE(I,k)     = min(max(sc_icer8(k),one),2.0_kind_phys)
+           NHET_NUC(I,k)   = nheticer8(k) * 1.0e-6_r8
+           NLIM_NUC(I,k)   = nlimicer8(k) * 1.0e-6_r8
+           SC_ICE(I,k)     = min(max(sc_icer8(k),one),2.0_r8)
 !          SC_ICE(I,k)     = min(max(sc_icer8(k),1.0),1.2)
 !          if(temp(i,k) < T_ICE_ALL) SC_ICE(i,k) = max(SC_ICE(I,k), 1.2)
 !          if(temp(i,k) < T_ICE_ALL) SC_ICE(i,k) = max(SC_ICE(I,k), 1.5)
@@ -987,13 +988,13 @@ end subroutine m_micro_init
            if (iccn == 0) then
              if(temp(i,k) < T_ICE_ALL) then
 !              SC_ICE(i,k) = max(SC_ICE(I,k), 1.2)
-               SC_ICE(i,k) = max(SC_ICE(I,k), 1.5_kind_phys)
+               SC_ICE(i,k) = max(SC_ICE(I,k), 1.5_r8)
              elseif(temp(i,k) > TICE) then
                SC_ICE(i,k) = rhc(i,k)
              else
 !              SC_ICE(i,k) = 1.0
 !              tx1 = max(SC_ICE(I,k), 1.2)
-               tx1 = max(SC_ICE(I,k), 1.5_kind_phys)
+               tx1 = max(SC_ICE(I,k), 1.5_r8)
                SC_ICE(i,k) = ((tice-temp(i,k))*tx1 + (temp(i,k)-t_ice_all)*rhc(i,k)) &
                          * t_ice_denom
              endif
@@ -1004,12 +1005,12 @@ end subroutine m_micro_init
            endif
            NHET_IMM(I,k)   = max(nhet_immr8(k), zero)
            DNHET_IMM(I,k)  = max(dnhet_immr8(k), zero)
-           NHET_DEP(I,k)   = nhet_depr8(k) * 1.0e-6_kind_phys
-           NHET_DHF(I,k)   = nhet_dhfr8(k) * 1.0e-6_kind_phys
-           DUST_IMM(I,k)   = max(dust_immr8(k), zero)*1.0e-6_kind_phys
-           DUST_DEP(I,k)   = max(dust_depr8(k), zero)*1.0e-6_kind_phys
-           DUST_DHF(I,k)   = max(dust_dhfr8(k), zero)*1.0e-6_kind_phys
-           WSUB (I,k)      = wparc_ls(k)   + swparc(k)*0.8_kind_phys
+           NHET_DEP(I,k)   = nhet_depr8(k) * 1.0e-6_r8
+           NHET_DHF(I,k)   = nhet_dhfr8(k) * 1.0e-6_r8
+           DUST_IMM(I,k)   = max(dust_immr8(k), zero)*1.0e-6_r8
+           DUST_DEP(I,k)   = max(dust_depr8(k), zero)*1.0e-6_r8
+           DUST_DHF(I,k)   = max(dust_dhfr8(k), zero)*1.0e-6_r8
+           WSUB (I,k)      = wparc_ls(k)   + swparc(k)*0.8_r8
            SIGW_GW (I,k)   = wparc_gw(k)   * wparc_gw(k)
            SIGW_CNV (I,k)  = wparc_cgw(k)  * wparc_cgw(k)
            SIGW_TURB (I,k) = wparc_turb(k) * wparc_turb(k)
@@ -1122,7 +1123,7 @@ end subroutine m_micro_init
 
         do k=1,lm
           do i=1,im
-            if (CNV_MFD(i,k) > 1.0e-6_kind_phys) then
+            if (CNV_MFD(i,k) > 1.0e-6_r8) then
               tx1 = one / CNV_MFD(i,k)
               CNV_NDROP(i,k) = CNV_NDROP(i,k) * tx1
               CNV_NICE(i,k)  = CNV_NICE(i,k)  * tx1
@@ -1231,7 +1232,7 @@ end subroutine m_micro_init
         do l=1,10
           do k=1,lm
             naconr8(k,l) = zero
-            rndstr8(k,l) = 2.0e-7_kind_phys
+            rndstr8(k,l) = 2.0e-7_r8
           enddo
         enddo
         do k=1,lm
@@ -1242,7 +1243,7 @@ end subroutine m_micro_init
 !         tx1 = MIN(CLLS(I,k) + CLCN(I,k), 0.99)
           tx1 = MIN(CLLS(I,k) + CLCN(I,k), one)
           if (tx1 > zero) then
-            cldfr8(k) = min(max(tx1, 0.00001_kind_phys), one)
+            cldfr8(k) = min(max(tx1, 0.00001_r8), one)
           else
             cldfr8(k) = zero
           endif
@@ -1278,7 +1279,7 @@ end subroutine m_micro_init
           naair8(k)    = INC_NUC(I,k)
           npccninr8(k) = CDNC_NUC(I,k)
 
-          if (cldfr8(k) >= 0.001_kind_phys) then
+          if (cldfr8(k) >= 0.001_r8) then
             nimmr8(k) = min(DNHET_IMM(I,k),ncr8(k)/(cldfr8(k)*DT_MOIST))
           else
             nimmr8(k) = zero
@@ -1306,11 +1307,11 @@ end subroutine m_micro_init
 !         naux         = AeroAux_b%nmods
 !         rnsootr8 (K) = sum(AeroAux_b%dpg(1:naux))/naux
 
-          pdelr8(k)  = (PLE(I,k) - PLE(I,k-1)) * 100.0_kind_phys
+          pdelr8(k)  = (PLE(I,k) - PLE(I,k-1)) * 100.0_r8
           rpdelr8(k) = one / pdelr8(k)
-          plevr8(k)  = 100.0_kind_phys * PLO(I,k)
+          plevr8(k)  = 100.0_r8 * PLO(I,k)
           zmr8(k)    = ZLO(I,k)
-          ficer8(k)  = qir8(k) / (qcr8(k)+qir8(k) + 1.0e-10_kind_phys)
+          ficer8(k)  = qir8(k) / (qcr8(k)+qir8(k) + 1.0e-10_r8)
           omegr8(k)  = WSUB(I,k)
 !         alphar8(k) = max(alpht_x(i,k)/maxval(alpht_x(i,:))*8.,0.5)
 !         alphar8(k) = qcvar2
@@ -1318,7 +1319,7 @@ end subroutine m_micro_init
 
         END DO
         do k=1,lm+1
-          pintr8(k)  = PLE(I,k-1) * 100.0_kind_phys
+          pintr8(k)  = PLE(I,k-1) * 100.0_r8
           kkvhr8(k)  = KH(I,k-1)
         END DO
 
@@ -1403,8 +1404,8 @@ end subroutine m_micro_init
 !         if (lprint) write(0,*)' prectr8=',prectr8(1), &
 !    &     ' precir8=',precir8(1)
 
-          LS_PRC2(I) = max(1000.0_kind_phys*(prectr8(1)-precir8(1)), zero)
-          LS_SNR(I)  = max(1000.0_kind_phys*precir8(1), zero)
+          LS_PRC2(I) = max(1000.0_r8*(prectr8(1)-precir8(1)), zero)
+          LS_SNR(I)  = max(1000.0_r8*precir8(1), zero)
 
 
           do k=1,lm
@@ -1422,10 +1423,10 @@ end subroutine m_micro_init
             NCPR(I,k)   = nrr8(k)
             NCPS(I,k)   = nsr8(k)
 
-            CLDREFFL(I,k) = min(max(effcr8(k), 10.0_kind_phys), 150.0_kind_phys)
-            CLDREFFI(I,k) = min(max(effir8(k), 20.0_kind_phys), 150.0_kind_phys)
-            CLDREFFR(I,k) = max(droutr8(k)*0.5_kind_phys*1.0e6_kind_phys, 150.0_kind_phys)
-            CLDREFFS(I,k) = max(0.192_kind_phys*dsoutr8(k)*0.5_kind_phys*1.0e6_kind_phys, 250.0_kind_phys)
+            CLDREFFL(I,k) = min(max(effcr8(k), 10.0_r8), 150.0_r8)
+            CLDREFFI(I,k) = min(max(effir8(k), 20.0_r8), 150.0_r8)
+            CLDREFFR(I,k) = max(droutr8(k)*0.5_r8*1.0e6_r8, 150.0_r8)
+            CLDREFFS(I,k) = max(0.192_r8*dsoutr8(k)*0.5_r8*1.0e6_r8, 250.0_r8)
 
           enddo       ! K loop
 
@@ -1507,8 +1508,8 @@ end subroutine m_micro_init
      &         prer_evap, xlat(i), xlon(i), lprint, iccn,               &
      &         lev_sed_strt)
 !
-            LS_PRC2(I) = max(1000.0_kind_phys*(prectr8(1)-precir8(1)), zero)
-            LS_SNR(I)  = max(1000.0_kind_phys*precir8(1), zero)
+            LS_PRC2(I) = max(1000.0_r8*(prectr8(1)-precir8(1)), zero)
+            LS_SNR(I)  = max(1000.0_r8*precir8(1), zero)
             do k=1,lm
               QL_TOT(I,k)   = QL_TOT(I,k) + qctendr8(k)*DT_R8
               QI_TOT(I,k)   = QI_TOT(I,k) + qitendr8(k)*DT_R8
@@ -1522,10 +1523,10 @@ end subroutine m_micro_init
               NCPR(I,k)     = max(NCPR(I,k) + nrtend(k)*dt_r8,   zero)
               NCPS(I,k)     = max(NCPS(I,k) + nstend(k)*dt_r8,   zero)
 
-              CLDREFFL(I,k) = min(max(effcr8(k), 10.0_kind_phys), 150.0_kind_phys)
-              CLDREFFI(I,k) = min(max(effir8(k), 20.0_kind_phys), 150.0_kind_phys)
-              CLDREFFR(I,k) = max(reff_rain(k), 150.0_kind_phys)
-              CLDREFFS(I,k) = max(reff_snow(k), 250.0_kind_phys)
+              CLDREFFL(I,k) = min(max(effcr8(k), 10.0_r8), 150.0_r8)
+              CLDREFFI(I,k) = min(max(effir8(k), 20.0_r8), 150.0_r8)
+              CLDREFFR(I,k) = max(reff_rain(k), 150.0_r8)
+              CLDREFFS(I,k) = max(reff_snow(k), 250.0_r8)
             enddo       ! K loop
 !     if (lprint) then
 !       write(0,*)' aft micro_mg_tend temp= ', temp(i,:)
@@ -1536,10 +1537,10 @@ end subroutine m_micro_init
             LS_PRC2(I) = zero
             LS_SNR(I)  = zero
             do k=1,lm
-              CLDREFFL(I,k) = 10.0_kind_phys
-              CLDREFFI(I,k) = 50.0_kind_phys
-              CLDREFFR(I,k) = 1000.0_kind_phys
-              CLDREFFS(I,k) = 250.0_kind_phys
+              CLDREFFL(I,k) = 10.0_r8
+              CLDREFFI(I,k) = 50.0_r8
+              CLDREFFR(I,k) = 1000.0_r8
+              CLDREFFS(I,k) = 250.0_r8
             enddo       ! K loop
           endif
 !
@@ -1644,8 +1645,8 @@ end subroutine m_micro_init
      &         prer_evap, xlat(i), xlon(i), lprint, iccn,               &
      &         lev_sed_strt)
 
-            LS_PRC2(I) = max(1000.0_kind_phys*(prectr8(1)-precir8(1)), zero)
-            LS_SNR(I)  = max(1000.0_kind_phys*precir8(1), zero)
+            LS_PRC2(I) = max(1000.0_r8*(prectr8(1)-precir8(1)), zero)
+            LS_SNR(I)  = max(1000.0_r8*precir8(1), zero)
             do k=1,lm
               QL_TOT(I,k)   = QL_TOT(I,k) + qctendr8(k)*DT_R8
               QI_TOT(I,k)   = QI_TOT(I,k) + qitendr8(k)*DT_R8
@@ -1661,11 +1662,11 @@ end subroutine m_micro_init
               NCPS(I,k)     = max(NCPS(I,k) + nstend(k)*dt_r8,   zero)
               NCGL(I,k)     = max(NCGL(I,k) + ngtend(k)*dt_r8,   zero)
 
-              CLDREFFL(I,k) = min(max(effcr8(k), 10.0_kind_phys), 150.0_kind_phys)
-              CLDREFFI(I,k) = min(max(effir8(k), 20.0_kind_phys), 150.0_kind_phys)
-              CLDREFFR(I,k) = max(reff_rain(k),150.0_kind_phys)
-              CLDREFFS(I,k) = max(reff_snow(k),250.0_kind_phys)
-              CLDREFFG(I,k) = max(reff_grau(k),250.0_kind_phys)
+              CLDREFFL(I,k) = min(max(effcr8(k), 10.0_r8), 150.0_r8)
+              CLDREFFI(I,k) = min(max(effir8(k), 20.0_r8), 150.0_r8)
+              CLDREFFR(I,k) = max(reff_rain(k), 150.0_r8)
+              CLDREFFS(I,k) = max(reff_snow(k), 250.0_r8)
+              CLDREFFG(I,k) = max(reff_grau(k), 250.0_r8)
             enddo       ! K loop
 !     if (lprint) then
 !       write(0,*)' aft micro_mg_tend temp= ', temp(i,:)
@@ -1676,11 +1677,11 @@ end subroutine m_micro_init
             LS_PRC2(I) = zero
             LS_SNR(I)  = zero
             do k=1,lm
-              CLDREFFL(I,k) = 10.0_kind_phys
-              CLDREFFI(I,k) = 50.0_kind_phys
-              CLDREFFR(I,k) = 1000.0_kind_phys
-              CLDREFFS(I,k) = 250.0_kind_phys
-              CLDREFFG(I,k) = 250.0_kind_phys
+              CLDREFFL(I,k) = 10.0_r8
+              CLDREFFI(I,k) = 50.0_r8
+              CLDREFFR(I,k) = 1000.0_r8
+              CLDREFFS(I,k) = 250.0_r8
+              CLDREFFG(I,k) = 250.0_r8
             enddo       ! K loop
           endif
         endif
@@ -1708,17 +1709,17 @@ end subroutine m_micro_init
             if (rnw(i,k) <= qc_min(1)) then
               ncpr(i,k) = zero
             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
-              ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kind_phys), nmin)
+              ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_r8), nmin)
             endif
             if (snw(i,k) <= qc_min(2)) then
               ncps(i,k) = zero
             elseif (ncps(i,k) <= nmin) then
-              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kind_phys), nmin)
+              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_r8), nmin)
             endif
             if (qgl(i,k) <= qc_min(2)) then
               ncgl(i,k) = zero
             elseif (ncgl(i,k) <= nmin) then
-              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kind_phys), nmin)
+              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_r8), nmin)
             endif
           enddo
         enddo
@@ -1748,17 +1749,17 @@ end subroutine m_micro_init
             if (rnw(i,k) <= qc_min(1)) then
               ncpr(i,k) = zero
             elseif (ncpr(i,k) <= nmin) then ! make sure NL > 0 if Q >0
-              ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_kind_phys), nmin)
+              ncpr(i,k) = max(rnw(i,k) / (fourb3 * PI *RL_cub*997.0_r8), nmin)
             endif
             if (snw(i,k) <= qc_min(2)) then
               ncps(i,k) = zero
             elseif (ncps(i,k) <= nmin) then
-              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_kind_phys), nmin)
+              ncps(i,k) = max(snw(i,k) / (fourb3 * PI *RL_cub*500.0_r8), nmin)
             endif
             if (qgl(i,k) <= qc_min(2)) then
               ncgl(i,k) = zero
             elseif (ncgl(i,k) <= nmin) then
-              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_kind_phys), nmin)
+              ncgl(i,k) = max(qgl(i,k) / (fourb3 * PI *RL_cub*500.0_r8), nmin)
             endif
           enddo
         enddo
@@ -1850,7 +1851,7 @@ end subroutine m_micro_init
 
        DO I = 1,IM
          tx1     = LS_PRC2(i) + LS_SNR(i)
-         rn_o(i) = tx1 * dt_i * 0.001_kind_phys
+         rn_o(i) = tx1 * dt_i * 0.001_r8
 
          if (rn_o(i) < rainmin) then
            sr_o(i) = zero
@@ -1903,6 +1904,7 @@ end subroutine m_micro_init
        use physcons, grav => con_g, cp => con_cp, rgas => con_rd,       &
                      fv   => con_fvirt
        implicit none
+       integer, parameter :: r8 = kind_phys
 !-----------------------------------------------------------------------
 ! Compute profiles of background state quantities for the multiple
 ! gravity wave drag parameterization.
@@ -1926,7 +1928,7 @@ end subroutine m_micro_init
        real(kind=kind_phys), intent(out) :: nm(pcols,pver)
 
        real(kind=kind_phys), parameter :: r=rgas, cpair=cp, g=grav, &
-                                          oneocp=1.0d0/cp, n2min=1.0d-8
+                                          oneocp=1.0_r8/cp, n2min=1.0e-8_r8
 
 !---------------------------Local storage-------------------------------
        integer :: ix,kx
@@ -1942,15 +1944,15 @@ end subroutine m_micro_init
        kx = 0
        do ix = 1, ncol
          ti(ix,kx)   = t(ix,kx+1)
-         rhoi(ix,kx) = pi(ix,kx) / (r*(ti(ix,kx)*(1.0d0+fv*sph(ix,kx+1))))
+         rhoi(ix,kx) = pi(ix,kx) / (r*(ti(ix,kx)*(1.0_r8+fv*sph(ix,kx+1))))
          ni(ix,kx)   = sqrt (g*g / (cpair*ti(ix,kx)))
        end do
 
 ! Interior points use centered differences
        do kx = 1, pver-1
          do ix = 1, ncol
-           ti(ix,kx)   = 0.5d0 * (t(ix,kx) + t(ix,kx+1))
-           rhoi(ix,kx) = pi(ix,kx) / (r*ti(ix,kx)*(1.0d0+0.5d0*fv*(sph(ix,kx)+sph(ix,kx+1))))
+           ti(ix,kx)   = 0.5_r8 * (t(ix,kx) + t(ix,kx+1))
+           rhoi(ix,kx) = pi(ix,kx) / (r*ti(ix,kx)*(1.0_r8+0.5_r8*fv*(sph(ix,kx)+sph(ix,kx+1))))
            dtdp = (t(ix,kx+1)-t(ix,kx)) / (pm(ix,kx+1)-pm(ix,kx))
            n2   = g*g/ti(ix,kx) * (oneocp - rhoi(ix,kx)*dtdp)
            ni(ix,kx) = sqrt (max (n2min, n2))
@@ -1962,7 +1964,7 @@ end subroutine m_micro_init
        kx = pver
        do ix = 1, ncol
          ti(ix,kx)   = t(ix,kx)
-         rhoi(ix,kx) = pi(ix,kx) / (r*ti(ix,kx)*(1.0d0+fv*sph(ix,kx)))
+         rhoi(ix,kx) = pi(ix,kx) / (r*ti(ix,kx)*(1.0_r8+fv*sph(ix,kx)))
          ni(ix,kx)   = ni(ix,kx-1)
        end do
 
@@ -1971,7 +1973,7 @@ end subroutine m_micro_init
 !-----------------------------------------------------------------------------
        do kx=1,pver
          do ix=1,ncol
-           nm(ix,kx) = 0.5d0 * (ni(ix,kx-1) + ni(ix,kx))
+           nm(ix,kx) = 0.5_r8 * (ni(ix,kx-1) + ni(ix,kx))
          end do
        end do
 
