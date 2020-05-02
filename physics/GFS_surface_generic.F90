@@ -341,13 +341,9 @@
             snowca(i)  = snowca(i) + snowc(i) * dtf
             snohfa(i)  = snohfa(i) + snohf(i) * dtf
             ep(i)      = ep(i)     + ep1d(i)  * dtf
-          enddo
-        endif
 
 !  --- ...  total runoff is composed of drainage into water table and
 !           runoff at the surface and is accumulated in unit of meters
-        if (lssav) then
-          do i=1,im
             runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * dtf
             srunoff(i) = srunoff(i) + runof(i) * dtf
           enddo

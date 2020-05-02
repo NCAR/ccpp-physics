@@ -9,6 +9,7 @@
       !
       use machine     , only : kind_phys
       implicit none
+      integer, parameter :: one = 1.0_kind_phys
       integer             k,n,l,i
       real(kind=kind_phys) fk
       !
@@ -16,19 +17,19 @@
      &                     au(l,n-1),a1(l,n)
       !
       do i=1,l
-        fk      = 1./cm(i,1)
+        fk      = one / cm(i,1)
         au(i,1) = fk*cu(i,1)
         a1(i,1) = fk*r1(i,1)
       enddo
       do k=2,n-1
         do i=1,l
-          fk      = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
+          fk      = one / (cm(i,k)-cl(i,k)*au(i,k-1))
           au(i,k) = fk*cu(i,k)
           a1(i,k) = fk*(r1(i,k)-cl(i,k)*a1(i,k-1))
         enddo
       enddo
       do i=1,l
-        fk      = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
+        fk      = one / (cm(i,n)-cl(i,n)*au(i,n-1))
         a1(i,n) = fk*(r1(i,n)-cl(i,n)*a1(i,n-1))
       enddo
       do k=n-1,1,-1
@@ -48,6 +49,7 @@ c-----------------------------------------------------------------------
 cc
       use machine     , only : kind_phys
       implicit none
+      integer, parameter :: one = 1.0_kind_phys
       integer             k,n,l,i
       real(kind=kind_phys) fk
 cc
@@ -55,21 +57,21 @@ cc
      &          au(l,n-1),a1(l,n),a2(l,n)
 c----------------------------------------------------------------------
       do i=1,l
-        fk      = 1./cm(i,1)
+        fk      = one / cm(i,1)
         au(i,1) = fk*cu(i,1)
         a1(i,1) = fk*r1(i,1)
         a2(i,1) = fk*r2(i,1)
       enddo
       do k=2,n-1
         do i=1,l
-          fk      = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
+          fk      = one / (cm(i,k)-cl(i,k)*au(i,k-1))
           au(i,k) = fk*cu(i,k)
           a1(i,k) = fk*(r1(i,k)-cl(i,k)*a1(i,k-1))
           a2(i,k) = fk*(r2(i,k)-cl(i,k)*a2(i,k-1))
         enddo
       enddo
       do i=1,l
-        fk      = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
+        fk      = one / (cm(i,n)-cl(i,n)*au(i,n-1))
         a1(i,n) = fk*(r1(i,n)-cl(i,n)*a1(i,n-1))
         a2(i,n) = fk*(r2(i,n)-cl(i,n)*a2(i,n-1))
       enddo
@@ -93,6 +95,7 @@ c-----------------------------------------------------------------------
 cc
       use machine     , only : kind_phys
       implicit none
+      integer, parameter :: one = 1.0_kind_phys
       integer             is,k,kk,n,nt,l,i
       real(kind=kind_phys) fk(l)
 cc
@@ -102,7 +105,7 @@ cc
      &                     fkk(l,2:n-1)
 c-----------------------------------------------------------------------
       do i=1,l
-        fk(i)   = 1./cm(i,1)
+        fk(i)   = one / cm(i,1)
         au(i,1) = fk(i)*cu(i,1)
         a1(i,1) = fk(i)*r1(i,1)
       enddo
@@ -114,7 +117,7 @@ c-----------------------------------------------------------------------
       enddo
       do k=2,n-1
         do i=1,l
-          fkk(i,k) = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
+          fkk(i,k) = one / (cm(i,k)-cl(i,k)*au(i,k-1))
           au(i,k)  = fkk(i,k)*cu(i,k)
           a1(i,k)  = fkk(i,k)*(r1(i,k)-cl(i,k)*a1(i,k-1))
         enddo
@@ -128,7 +131,7 @@ c-----------------------------------------------------------------------
         enddo
       enddo
       do i=1,l
-        fk(i)   = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
+        fk(i)   = one / (cm(i,n)-cl(i,n)*au(i,n-1))
         a1(i,n) = fk(i)*(r1(i,n)-cl(i,n)*a1(i,n-1))
       enddo
       do k = 1, nt
@@ -163,6 +166,7 @@ c-----------------------------------------------------------------------
 !!
       use machine     , only : kind_phys
       implicit none
+      integer, parameter :: one = 1.0_kind_phys
       integer             is,k,kk,n,nt,l,i
       real(kind=kind_phys) fk(l)
 !!
@@ -172,7 +176,7 @@ c-----------------------------------------------------------------------
      &                     fkk(l,2:n-1)
 !-----------------------------------------------------------------------
       do i=1,l
-        fk(i)   = 1./cm(i,1)
+        fk(i)   = one / cm(i,1)
         au(i,1) = fk(i)*cu(i,1)
       enddo
       do k = 1, nt
@@ -183,7 +187,7 @@ c-----------------------------------------------------------------------
       enddo
       do k=2,n-1
         do i=1,l
-          fkk(i,k) = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
+          fkk(i,k) = one / (cm(i,k)-cl(i,k)*au(i,k-1))
           au(i,k)  = fkk(i,k)*cu(i,k)
         enddo
       enddo
@@ -196,7 +200,7 @@ c-----------------------------------------------------------------------
         enddo
       enddo
       do i=1,l
-        fk(i)   = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
+        fk(i)   = one / (cm(i,n)-cl(i,n)*au(i,n-1))
       enddo
       do k = 1, nt
         is = (k-1) * n
