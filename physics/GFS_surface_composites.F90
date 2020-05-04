@@ -453,6 +453,7 @@ contains
             fh2(i)    = fh2_ocn(i)
            !tsurf(i)  = tsurf_ocn(i)
             tsfco(i)  = tsfc_ocn(i) ! over lake (and ocean when uncoupled)
+            if( cplflx ) tsfcl(i)  = tsfc_ocn(i) ! for restart repro comparisons
             cmm(i)    = cmm_ocn(i)
             chh(i)    = chh_ocn(i)
             gflx(i)   = gflx_ocn(i)
