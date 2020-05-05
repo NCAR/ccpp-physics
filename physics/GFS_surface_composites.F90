@@ -496,15 +496,24 @@ contains
             tsfcl(i)  = tsfc(i)
             if (.not. flag_cice(i)) then
               tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
-            elseif (wet(i) .and. cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
-              txi = cice(i)
-              txo = one - txi
-              evap(i)   = txi * evap_ice(i)   + txo * evap_ocn(i)
-              hflx(i)   = txi * hflx_ice(i)   + txo * hflx_ocn(i)
-              tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_ocn(i)
-              stress(i) = txi * stress_ice(i) + txo * stress_ocn(i)
-              qss(i)    = txi * qss_ice(i)    + txo * qss_ocn(i)
-              ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_ocn(i)
+            elseif (wet(i)) then
+              if (cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
+                txi = cice(i)
+                txo = one - txi
+                evap(i)   = txi * evap_ice(i)   + txo * evap_ocn(i)
+                hflx(i)   = txi * hflx_ice(i)   + txo * hflx_ocn(i)
+                tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_ocn(i)
+                stress(i) = txi * stress_ice(i) + txo * stress_ocn(i)
+                qss(i)    = txi * qss_ice(i)    + txo * qss_ocn(i)
+                ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_ocn(i)
+              else
+                evap(i)   = evap_ocn(i)
+                hflx(i)   = hflx_ocn(i)
+                tsfc(i)   = tsfc_ocn(i)
+                stress(i) = stress_ocn(i)
+                qss(i)    = qss_ocn(i)
+                ep1d(i)   = ep1d_ocn(i)
+              endif
             endif
             if (wet(i)) then
               tsfco(i) = tsfc_ocn(i)
