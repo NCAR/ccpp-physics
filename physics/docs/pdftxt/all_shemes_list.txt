@@ -1,11 +1,10 @@
 /**
 \page allscheme_page  Parameterizations and Suites Overview
 
-\section allscheme_overview Physics Parameterizations 
+\section allscheme_overview Physical Parameterizations 
 
-In the CCPP-Physics v3.0 release, each parameterization is in its own modern Fortran module,
- which facilitates model development and
-code maintenance. While some individual parameterization can be invoked for the GMTB SCM, most users will assemble the 
+In the CCPP, each parameterization is in its own modern Fortran module, which facilitates model development and
+code maintenance. While some individual parameterization can be invoked for the SCM, most users will assemble the 
 parameterizations in suites. 
 
 - \b Radiation
@@ -38,15 +37,13 @@ parameterizations in suites.
 
 - \b Ozone \b Photochemical \b Production \b and \b Loss
  - \subpage GFS_OZPHYS
-  - \ref GFS_ozphys_2015
 
 - \b Water \b Vapor \b Photochemical \b Production \b and \b Loss
  - \subpage GFS_H2OPHYS
 
 - \b Gravity \b Wave \b Drag
- - \subpage GFS_GWDPS 
- - \subpage GFS_GWDC
- - \subpage UGWPv0
+ - \subpage GFS_UGWP_v0
+  - \subpage GFS_GWDPS
 
 - \b Surface \b Layer \b and \b Simplified \b Ocean \b and \b Sea \b Ice \b Representation
  - \subpage GFS_SFCLYR
@@ -88,7 +85,7 @@ GFS_v16beta, i.e., the beta version of the suite planned for GFS v16 to be imple
 Suite GFS_v15p2 except for an update in the PBL parameterization (Han et al. 2019 \cite Han_2019 ). Additionally, CCPP v4 includes two
 developmental suites which are undergoing testing to inform future implementations of the UFS. Suite csawmg differs from GFS_v15p2 as it 
 contains different convection and microphysics schemes made available through a NOAA Climate Process Team (CPT) with components developed 
-at multiple research centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Suite GSD_v0 differs from GFS_v15 as it 
+at multiple research centers and universities, including Colorado State, Utah, NASA, NCAR, and EMC. Suite GSD_v1 differs from GFS_v15p2 as it 
 uses the convection, microphysics, and boundary layer schemes employed in the Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR \cite Benjamin_2016 )
 operational models and was assembled by NOAA/GSD. An assessment of an earlier version of these suites can be found in 
 <a href="https://ufscommunity.org/#/science/physics"> the UFS portal </a>
