@@ -2275,7 +2275,7 @@
       subroutine progcld5                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp,                                   &
-     &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,                            &
+     &       ntrac,ntcw,ntiw,ntrw,                                      &
      &       IX, NLAY, NLP1, icloud,                                    &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       re_cloud,re_ice,re_snow,                                   &
@@ -2364,7 +2364,7 @@
 
 !  ---  inputs
       integer,  intent(in) :: IX, NLAY, NLP1, ICLOUD
-      integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw, ntsw, ntgl
+      integer,  intent(in) :: ntrac, ntcw, ntiw, ntrw 
 
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2
 
@@ -2452,7 +2452,7 @@
 
         do k = 1, NLAY
           do i = 1, IX
-            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) + clw(i,k,ntsw)
+            clwf(i,k) = clw(i,k,ntcw) +  clw(i,k,ntiw) 
           enddo
         enddo
 !> - Find top pressure for each cloud domain for given latitude.
@@ -2479,8 +2479,7 @@
             cwp(i,k) = max(0.0, clw(i,k,ntcw) * gfac * delp(i,k))
             cip(i,k) = max(0.0, clw(i,k,ntiw) * gfac * delp(i,k))
             crp(i,k) = max(0.0, clw(i,k,ntrw) * gfac * delp(i,k))
-            csp(i,k) = max(0.0, (clw(i,k,ntsw)+clw(i,k,ntgl)) *         &
-     &                  gfac * delp(i,k))
+            csp(i,k) = 0.0
           enddo
         enddo
 

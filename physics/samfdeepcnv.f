@@ -201,7 +201,7 @@ cj
 c  physical parameters
 !      parameter(asolfac=0.89)   !HWRF 
 !     parameter(grav=grav)
-!     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
+!      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
 !     parameter(c0s=.002,c1=.002,d0=.01)
 !     parameter(d0=.01)
       parameter(d0=.001)
@@ -215,7 +215,7 @@ c  physical parameters
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
       parameter(cm=1.0)
-!     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
+!      parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.03,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dbeta=0.1)
@@ -276,13 +276,13 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       errflg = 0
 
 
-      if(.not. hwrf_samfdeep) then
         elocp = hvap/cp
         el2orc = hvap*hvap/(rv*cp)
 
         fact1 = (cvap-cliq)/rv
         fact2 = hvap/rv-fact1*t0c
 !
+      if(.not. hwrf_samfdeep) then
 c-----------------------------------------------------------------------
 !>  ## Determine whether to perform aerosol transport
         do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)

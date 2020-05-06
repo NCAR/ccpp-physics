@@ -720,9 +720,9 @@
 
 !  ---  locals:
 !mz* HWRF -- input of mcica_subcol_sw
-      real(kind=kind_phys),dimension(1,nlay) :: hgt
+      real(kind=kind_phys),dimension(npts,nlay) :: hgt
       real(kind=kind_phys) :: dzsum
-      real(kind=kind_phys),dimension( nbdsw, 1, nlay )  ::     taucld3, &
+      real(kind=kind_phys),dimension( nbdsw, npts, nlay )  ::  taucld3, &
                                                                ssacld3, &
                                                                asmcld3, &
                                                                fsfcld3

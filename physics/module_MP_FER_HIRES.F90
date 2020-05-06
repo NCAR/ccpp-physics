@@ -289,7 +289,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
       REAL,  DIMENSION(ims:ime):: APREC,PREC,ACPREC
 
       INTEGER :: I,K,KK
-      REAL :: wc
+      REAL :: wc, RDIS, BETA6
 !------------------------------------------------------------------------
 ! For subroutine EGCP01COLUMN_hr
 !-----------------------------------------------------------------------
@@ -331,6 +331,12 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !
 !-- See comments in subroutine etanewhr_init starting with variable RDIS=
 !
+!-- Relative dispersion == standard deviation of droplet spectrum / mean radius
+!   (see pp 1542-1543, Liu & Daum, JAS, 2004)
+        RDIS=0.5  !-- relative dispersion of droplet spectrum
+        BETA6=( (1.+3.*RDIS*RDIS)*(1.+4.*RDIS*RDIS)*(1.+5.*RDIS*RDIS)/  &
+     &         ((1.+RDIS*RDIS)*(1.+2.*RDIS*RDIS) ) )
+
         BRAUT=DT*1.1E10*BETA6/NCW
 
 !! END OF adding, 2015-03-30

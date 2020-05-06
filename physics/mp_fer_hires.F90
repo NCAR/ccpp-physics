@@ -274,10 +274,14 @@ module mp_fer_hires
 
 !---------------------------------------------------------------------
 !aligo
+       DO K = 1, LM                                                                                                    
+       DO I= IMS, IME  
          cwm(i,k) = cwm(i,k)/(1.0_kind_phys-q(i,k))
          qr(i,k) = qr(i,k)/(1.0_kind_phys-q(i,k))
          qi(i,k) = qi(i,k)/(1.0_kind_phys-q(i,k))
          qc(i,k) = qc(i,k)/(1.0_kind_phys-q(i,k))
+       ENDDO
+       ENDDO
 !aligo
 !---------------------------------------------------------------------
         

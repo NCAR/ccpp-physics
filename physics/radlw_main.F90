@@ -670,7 +670,7 @@
 
       real (kind=kind_phys), dimension(nlay,nbands) :: htrb
       real (kind=kind_phys), dimension(nbands,nlay) :: taucld, tauaer
-      real (kind=kind_phys), dimension(nbands,1,nlay) :: taucld3
+      real (kind=kind_phys), dimension(nbands,npts,nlay) :: taucld3
       real (kind=kind_phys), dimension(ngptlw,nlay) :: fracs, tautot
       real (kind=kind_phys), dimension(nlay,ngptlw) :: fracs_r
 !mz rtrnmc_mcica
@@ -1175,7 +1175,7 @@
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
-     &       nlay, nlp1, ipseed(iplon), dz, delgth,                     &
+     &       nlay, nlp1, ipseed(iplon), dz, delgth,iovrlw,              &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
@@ -1668,7 +1668,7 @@
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth,                           &
+     &       nlay, nlp1, ipseed, dz, de_lgth, iovrlw,                    &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 
@@ -1768,7 +1768,7 @@
       use module_radlw_cldprlw
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1, ipseed
+      integer, intent(in) :: nlay, nlp1, ipseed, iovrlw
 
       real (kind=kind_phys), dimension(0:nlp1), intent(in) :: cfrac
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
@@ -1946,6 +1946,8 @@
 
 !  --- ...  call sub-column cloud generator
 
+!mz*
+      if (iovrlw .ne. 4) then
         call mcica_subcol                                               &
 !  ---  inputs:
      &     ( cldf, nlay, ipseed, dz, de_lgth,                           &
@@ -1962,6 +1964,7 @@
             endif
           enddo
         enddo
+      endif  !iovrlw
 
       endif   ! end if_isubclw_block
 
