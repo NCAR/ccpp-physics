@@ -8,7 +8,7 @@ endif (NOT PROJECT)
 cmake_minimum_required(VERSION 3.0)
 
 project(ccppphys
-        VERSION 3.0.0
+        VERSION 4.0.0
         LANGUAGES C CXX Fortran)
 
 # Use rpaths on MacOSX
