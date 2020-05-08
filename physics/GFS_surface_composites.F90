@@ -64,7 +64,6 @@ contains
       integer,          intent(out) :: errflg
 
       ! Local variables
-      real(kind=kind_phys) :: tem
       integer :: i
 
       ! Initialize CCPP error handling variables
