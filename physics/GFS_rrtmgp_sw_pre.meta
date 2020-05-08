@@ -93,15 +93,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [sw_gas_props]
   standard_name = coefficients_for_sw_gas_optics
   long_name = DDT containing spectral information for RRTMGP SW radiation scheme

@@ -189,7 +189,7 @@ contains
        sec_diff_byband, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, cld_frac, cld_lwp,& ! OUT
        cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,          & ! OUT
        tv_lay, relhum, tracer, cldsa, mtopa, mbota, de_lgth,  gas_concentrations,        & ! OUT
-       errmsg, errflg)
+       overlap_param, errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -244,7 +244,7 @@ contains
     real(kind_phys), dimension(ncol,Model%levs),intent(out) :: &
          tv_lay,            & ! Virtual temperatue at model-layers 
          relhum               ! Relative-humidity at model-layers 
-    real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(out) :: &
+    real(kind_phys), dimension(ncol, Model%levs, Model%ntrac),intent(out) :: &
          tracer               ! Array containing trace gases
     integer,dimension(ncol,3),intent(out) :: &
          mbota,             & ! Vertical indices for cloud tops
@@ -253,6 +253,8 @@ contains
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
     real(kind_phys), dimension(ncol), intent(out)  :: &
          de_lgth              ! Decorrelation length
+    real(kind_phys), dimension(nCol,Model%levs), intent(out) :: &
+         overlap_param        ! Cloud-overlap parameter
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol),intent(out) :: &
          sec_diff_byband
 
@@ -419,6 +421,14 @@ contains
     call cloud_microphysics(Model, Tbd, Grid, Sfcprop, ncol, tracer, p_lay, t_lay,  p_lev,  &
          tv_lay, relhum, qs_lay, q_lay, deltaZ, deltaP, clouds, cldsa, mbota, mtopa, de_lgth)
 
+    ! Cloud-overlap parameter (only needed for iovr = 3)
+    overlap_param(:,1) = 0._kind_phys
+    do iCol=1,nCol
+       do iLay=Model%levs,2,-1
+          overlap_param(iCol,iLay) = exp( -0.5 * (deltaZ(iCol,iLay)+deltaZ(iCol,iLay-1)) / de_lgth(iCol) )
+       enddo
+    enddo
+
     ! Copy output cloud fields
     cld_frac   = clouds(:,:,1)
     cld_lwp    = clouds(:,:,2)
@@ -455,7 +465,7 @@ contains
          Sfcprop              ! DDT: FV3-GFS surface fields
     integer, intent(in) :: &
          ncol                 ! Number of horizontal gridpoints
-    real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(in) :: &
+    real(kind_phys), dimension(ncol, Model%levs, Model%ntrac),intent(in) :: &
          tracer               ! Cloud condensate amount in layer by type ()
     real(kind_phys), dimension(ncol,Model%levs), intent(in) :: &
          p_lay,             & ! Pressure @ model layer centers (Pa)
@@ -481,8 +491,8 @@ contains
          cldsa                ! Fraction of clouds for low, mid, hi, tot, bl (NCOL,5)
 
     ! Local variables
-    real(kind_phys), dimension(ncol, Model%levs, Model%ncnd) :: cld_condensate
-    integer :: i,k,ncndl
+    real(kind_phys), dimension(ncol, Model%levs, min(4,Model%ncnd)) :: cld_condensate
+    integer :: i,k,l,ncndl
     real(kind_phys), parameter :: xrc3 = 100.
     real(kind_phys), dimension(ncol, Model%levs) :: delta_q, cnv_w, cnv_c, effr_l, &
          effr_i, effr_r, effr_s, cldcov
@@ -519,8 +529,15 @@ contains
        cld_condensate(1:NCOL,1:Model%levs,4) = tracer(1:NCOL,1:Model%levs,Model%ntsw) + &        ! -snow + grapuel
                                                tracer(1:NCOL,1:Model%levs,Model%ntgl) 
     endif
-    where(cld_condensate < epsq) cld_condensate = 0.0
-    
+ 
+    do l=1,ncndl
+       do k=1,Model%levs
+          do i=1,NCOL    
+             if (cld_condensate(i,k,l) < epsq) cld_condensate(i,k,l) = 0.0
+	  enddo
+       enddo
+    enddo
+	  
     ! For GFDL microphysics scheme...
     if (Model%imp_physics == 11 ) then
        if (.not. Model%lgfdlmprad) then
@@ -587,11 +604,6 @@ contains
        cld_condensate(1:NCOL,1:Model%levs,1) = cld_condensate(1:NCOL,1:Model%levs,1) + cnv_w(1:NCOL,1:Model%levs)
     endif
     
-    ! For MG prognostic cloud scheme, add in convective cloud water to liquid-and-ice-cloud condensate
-    if (Model%imp_physics == 10) then
-       cld_condensate(1:NCOL,1:Model%levs,1) = cld_condensate(1:NCOL,1:Model%levs,1) + cnv_w(1:NCOL,1:Model%levs) + cld_condensate(1:NCOL,1:Model%levs,2)
-    endif
-
     ! #######################################################################################
     ! MICROPHYSICS
     ! #######################################################################################
@@ -722,7 +734,7 @@ contains
                p_lev/100.,                   & ! IN  - Pressure at model interfaces                   (mb)
                t_lay,                        & ! IN  - Temperature at layer centers                   (K)
                tv_lay,                       & ! IN  - Virtual temperature at layer centers           (K)
-               cld_condensate(:,:,1:ncndl),  & ! IN  - Cloud condensate amount (ncndl types)          ()
+               cld_condensate,               & ! IN  - Cloud condensate amount (ncndl types)          ()
                ncndl,                        & ! IN  - Number of cloud condensate types               ()
                Grid%xlat,                    & ! IN  - Latitude                                       (radians)
                Grid%xlon,                    & ! IN  - Longitude                                      (radians)

@@ -36,7 +36,7 @@ contains
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
   subroutine GFS_rrtmgp_sw_pre_run(Model, Grid, Sfcprop, Statein, ncol, p_lay,  p_lev,      &
-       tv_lay, relhum, tracer, sw_gas_props, nday, idxday, alb1d, sfc_alb_nir_dir,          &
+       tv_lay, relhum, sw_gas_props, nday, idxday, alb1d, sfc_alb_nir_dir,                  &
        sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, RadTend, Coupling,            &
        errmsg, errflg)
     
@@ -55,8 +55,6 @@ contains
          p_lay,             & ! Layer pressure
          tv_lay,            & ! Layer virtual-temperature
          relhum               ! Layer relative-humidity
-    real(kind_phys), dimension(ncol, Model%levs, 2:Model%ntrac),intent(in) :: &
-         tracer
     real(kind_phys), dimension(ncol,Model%levs+1),intent(in) :: &
          p_lev                ! Pressure @ layer interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
