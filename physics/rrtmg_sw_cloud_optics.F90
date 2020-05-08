@@ -8,7 +8,9 @@ module mo_rrtmg_sw_cloud_optics
   integer,parameter :: &
        nBandsSW_RRTMG = 14
   real(kind_phys),parameter :: &
-       a0r  = 3.07e-3
+       a0r = 3.07e-3, &
+       a0s = 0.0,     &!
+       a1s = 1.5       !
   real(kind_phys),dimension(nBandsSW_RRTMG),parameter :: &
        b0r = (/0.466, 0.437, 0.416, 0.391, 0.374, 0.352, 0.183,      &
                0.048, 0.012, 0.000, 0.000, 0.000, 0.000, 0.496/)
@@ -2025,8 +2027,6 @@ module mo_rrtmg_sw_cloud_optics
        9.727157e-03/),                                                       & ! 
        shape = (/46,nBandsSW_RRTMG/))
 
-
-
   real(kind_phys),dimension(5) :: &
        abari = (/ 3.448e-03,3.448e-03,3.448e-03,3.448e-03,3.448e-03 /), &
        bbari = (/ 2.431e+00,2.431e+00,2.431e+00,2.431e+00,2.431e+00 /), &
@@ -2116,7 +2116,7 @@ contains
                 ! ###########################################################################
                 ! Snow optical depth (No band dependence)
                 if (cld_swp(iCol,iLay) .gt. 0. .and. cld_ref_snow(iCol,iLay) .gt. 10._kind_phys) then
-                   tau_snow = cld_swp(iCol,iLay)
+                   tau_snow = cld_swp(iCol,iLay)*1.09087*(a0s + a1s/(1.0315*cld_ref_snow(iCol,iLay)))     ! fu's formula 
                 else
                    tau_snow = 0._kind_phys
                 endif
