@@ -164,7 +164,7 @@
 ! ===================================================================== !
       use machine , only : kind_phys
       use funcphys, only : fpvs
-      use date_def, only: idate
+      use date_def, only : idate
       use module_nst_water_prop, only: get_dtzm_point
       use module_nst_parameters, only : t0k,cp_w,omg_m,omg_sh,          &
      &    sigma_r,solar_time_6am,ri_c,z_w_max,delz,wd_max,              &
@@ -178,11 +178,14 @@
      &                       dtl_reset
 !
       implicit none
+
+      integer, parameter :: r8 = kind_phys
 !
 !  ---  constant parameters:
-      real (kind=kind_phys), parameter :: f24   = 24.0     ! hours/day
-      real (kind=kind_phys), parameter :: f1440 = 1440.0   ! minutes/day
-      real (kind=kind_phys), parameter :: czmin = 0.0001   ! cos(89.994)
+      real (kind=kind_phys), parameter :: f24   = 24.0_r8     ! hours/day
+      real (kind=kind_phys), parameter :: f1440 = 1440.0_r8   ! minutes/day
+      real (kind=kind_phys), parameter :: czmin = 0.0001_r8   ! cos(89.994)
+      real (kind=kind_phys), parameter :: zero  = 0.0_r8, one = 1.0_r8
 
 
 !  ---  inputs:
@@ -252,11 +255,11 @@ cc
       errmsg = ''
       errflg = 0
 
-      cpinv = 1.0/cp
-      hvapi = 1.0/hvap
+      cpinv = one/cp
+      hvapi = one/hvap
       elocp = hvap/cp
 
-      sss = 34.0             ! temporarily, when sea surface salinity data is not ready
+      sss = 34.0_r8             ! temporarily, when sea surface salinity data is not ready
 !
 ! flag for open water and where the iteration is on
 !
@@ -297,21 +300,21 @@ cc
           nswsfc(i) = sfcnsw(i) ! net solar radiation at the air-sea surface (positive downward)
           wndmag(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
 
-          q0(i)     = max(q1(i), 1.0e-8)
+          q0(i)     = max(q1(i), 1.0e-8_r8)
 #ifdef GSD_SURFACE_FLUXES_BUGFIX
           theta1(i) = t1(i) / prslk1(i) ! potential temperature at the middle of lowest model layer
 #else
           theta1(i) = t1(i) * prslki(i)
 #endif
-          tv1(i)    = t1(i) * (1.0 + rvrdm1*q0(i))
+          tv1(i)    = t1(i) * (one + rvrdm1*q0(i))
           rho_a(i)  = prsl1(i) / (rd*tv1(i))
           qss(i)    = fpvs(tsurf(i))                          ! pa
           qss(i)    = eps*qss(i) / (ps(i) + epsm1*qss(i))     ! pa
 !
-          evap(i)    = 0.0
-          hflx(i)    = 0.0
-          gflux(i)   = 0.0
-          ep(i)      = 0.0
+          evap(i)    = zero
+          hflx(i)    = zero
+          gflux(i)   = zero
+          ep(i)      = zero
 
 !  --- ...  rcp = rho cp ch v
 
@@ -337,8 +340,8 @@ cc
 
 ! run nst model: dtm + slm
 !
-      zsea1 = 0.001*real(nstf_name4)
-      zsea2 = 0.001*real(nstf_name5)
+      zsea1 = 0.001_r8*real(nstf_name4)
+      zsea2 = 0.001_r8*real(nstf_name5)
 
 !> - Call module_nst_water_prop::density() to compute sea water density.
 !> - Call module_nst_water_prop::rhocoef() to compute thermal expansion
@@ -350,20 +353,20 @@ cc
           ulwflx(i) = sfcemis(i) * sbc * t12 * t12
           alon      = xlon(i)*rad2deg
           grav      = grv(sinlat(i))
-          soltim  = mod(alon/15.0 + solhr, 24.0)*3600.0
+          soltim  = mod(alon/15.0_r8 + solhr, 24.0_r8)*3600.0_r8
           call density(tsea,sss,rho_w)                     ! sea water density
           call rhocoef(tsea,sss,rho_w,alpha,beta)          ! alpha & beta
 !
 !> - Calculate sensible heat flux (\a qrain) due to rainfall.
 !
-          le       = (2.501-.00237*tsea)*1e6
-          dwat     = 2.11e-5*(t1(i)/t0k)**1.94               ! water vapor diffusivity
-          dtmp     = (1.+3.309e-3*(t1(i)-t0k)-1.44e-6*(t1(i)-t0k)*
-     &              (t1(i)-t0k))*0.02411/(rho_a(i)*cp)       ! heat diffusivity
+          le       = (2.501_r8-0.00237_r8*tsea)*1e6_r8
+          dwat     = 2.11e-5_r8*(t1(i)/t0k)**1.94_r8               ! water vapor diffusivity
+          dtmp     = (one+3.309e-3_r8*(t1(i)-t0k)-1.44e-6_r8*(t1(i)-t0k)
+     &             * (t1(i)-t0k))*0.02411_r8/(rho_a(i)*cp)         ! heat diffusivity
           wetc     = 622.0*le*qss(i)/(rd*t1(i)*t1(i))
-          alfac    = 1/(1+(wetc*le*dwat)/(cp*dtmp))          ! wet bulb factor
-          qrain(i) =  (1000.*rain(i)/rho_w)*alfac*cp_w*
-     &                (tsea-t1(i)+(1000.*qss(i)-1000.*q0(i))*le/cp)
+          alfac    = one / (one + (wetc*le*dwat)/(cp*dtmp))        ! wet bulb factor
+          tem      = (1.0e3_r8 * rain(i) / rho_w) * alfac * cp_w
+          qrain(i) =  tem * (tsea-t1(i)+1.0e3_r8*(qss(i)-q0(i))*le/cp)
 
 !> - Calculate input non solar heat flux as upward = positive to models here
 
@@ -379,10 +382,10 @@ cc
 !
 !  sensitivities of heat flux components to ts
 !
-          rnl_ts = 4.0*sfcemis(i)*sbc*tsea*tsea*tsea     ! d(rnl)/d(ts)
+          rnl_ts = 4.0_r8*sfcemis(i)*sbc*tsea*tsea*tsea     ! d(rnl)/d(ts)
           hs_ts  = rch(i)
           hl_ts  = rch(i)*elocp*eps*hvap*qss(i)/(rd*t12)
-          rf_ts  = (1000.*rain(i)/rho_w)*alfac*cp_w*(1.0+rch(i)*hl_ts)
+          rf_ts  = tem * (one+rch(i)*hl_ts)
           q_ts   = rnl_ts + hs_ts + hl_ts + omg_sh*rf_ts
 !
 !> - Call cool_skin(), which is the sub-layer cooling parameterization
@@ -393,7 +396,7 @@ cc
      &,                  rho_w,rho_a(i),tsea,q_ts,hl_ts,grav,le
      &,                  dt_cool(i),z_c(i),c_0(i),c_d(i))
 
-          tem  = 1.0 / wndmag(i)
+          tem  = one / wndmag(i)
           cosa = u1(i)*tem
           sina = v1(i)*tem
           taux = max(stress(i),tau_min)*cosa
@@ -402,20 +405,20 @@ cc
 !
 !  Run DTM-1p system.
 !
-          if ( (soltim > solar_time_6am .and. ifd(i) == 0.0) ) then
+          if ( (soltim > solar_time_6am .and. ifd(i) == zero) ) then
           else
-            ifd(i) = 1.0
+            ifd(i) = one
 !
 !     calculate fcl thickness with current forcing and previous time's profile
 !
 !     if (lprnt .and. i == ipr) print *,' beg xz=',xz(i)
 
 !> - Call convdepth() to calculate depth for convective adjustments.
-            if ( f_nsol > 0.0 .and. xt(i) > 0.0 ) then
+            if ( f_nsol > zero .and. xt(i) > zero ) then
               call convdepth(kdt,timestep,nswsfc(i),f_nsol,sss,sep,rho_w
      &,                      alpha,beta,xt(i),xs(i),xz(i),d_conv(i))
             else
-              d_conv(i) = 0.0
+              d_conv(i) = zero
             endif
 
 !     if (lprnt .and. i == ipr) print *,' beg xz1=',xz(i)
@@ -443,7 +446,7 @@ cc
 !     if (lprnt .and. i == ipr) print *,' beg xz2=',xz(i)
 
 !  apply mda
-            if ( xt(i) > 0.0 ) then
+            if ( xt(i) > zero ) then
 !>  - If \a dtl heat content \a xt > 0.0, call dtm_1p_mda() to apply
 !!  minimum depth adjustment (mda).
               call dtm_1p_mda(xt(i),xtts(i),xz(i),xzts(i))
@@ -458,7 +461,7 @@ cc
               endif
 
 !  apply fca
-              if ( d_conv(i) > 0.0 ) then
+              if ( d_conv(i) > zero ) then
 !>  - If thickness of free convection layer > 0.0, call dtm_1p_fca()
 !! to apply free convection adjustment.
 !>   - If \a dtl thickness >= module_nst_parameters::z_w_max(), call dtl_reset()
@@ -483,7 +486,7 @@ cc
 
 !>  - Call cal_ttop() to calculate the diurnal warming amount at the top layer with
 !! thickness of \a dz.
-              if ( q_warm > 0.0 ) then
+              if ( q_warm > zero ) then
                 call cal_ttop(kdt,timestep,q_warm,rho_w,dz,
      &                        xt(i),xz(i),ttop0)
 
@@ -492,7 +495,7 @@ cc
 !    &' f_nsol=',f_nsol,' rho_w=',rho_w,' dz=',dz,' xt=',xt(i),
 !    &' xz=',xz(i),' qrain=',qrain(i)
 
-                ttop = ((xt(i)+xt(i))/xz(i))*(1.0-dz/((xz(i)+xz(i))))
+                ttop = ((xt(i)+xt(i))/xz(i))*(one-dz/((xz(i)+xz(i))))
 
 !     if (lprnt .and. i == ipr) print *,' beg xz4a=',xz(i)
 !    &,' ttop=',ttop,' ttop0=',ttop0,' xt=',xt(i),' dz=',dz
@@ -543,7 +546,7 @@ cc
 !
             endif             ! if ( xt(i) > 0.0 ) then
 !           reset dtl at midnight and when solar zenith angle > 89.994 degree
-            if ( abs(soltim) < 2.0*timestep ) then
+            if ( abs(soltim) < 2.0_r8*timestep ) then
               call dtl_reset
      &           (xt(i),xs(i),xu(i),xv(i),xz(i),xzts(i),xtts(i))
             endif
@@ -556,17 +559,17 @@ cc
 !>  - Call get_dtzm_point() to computes \a dtz and \a tsurf.
           call get_dtzm_point(xt(i),xz(i),dt_cool(i),z_c(i),
      &                        zsea1,zsea2,dtz)
-          tsurf(i) = max(271.2, tref(i) + dtz )
+          tsurf(i) = max(271.2_r8, tref(i) + dtz )
 
 !     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
 !    &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
 
 !>  - Call cal_w() to calculate \a w_0 and \a w_d.
-          if ( xt(i) > 0.0 ) then
+          if ( xt(i) > zero ) then
             call cal_w(kdt,xz(i),xt(i),xzts(i),xtts(i),w_0(i),w_d(i))
           else
-            w_0(i) = 0.0
-            w_d(i) = 0.0
+            w_0(i) = zero
+            w_d(i) = zero
           endif
 
 !         if ( xt(i) > 0.0 ) then
@@ -634,7 +637,7 @@ cc
 !
       do i=1,im
         if ( flag(i) ) then
-          tem     = 1.0 / rho_a(i)
+          tem     = one / rho_a(i)
           hflx(i) = hflx(i) * tem * cpinv
           evap(i) = evap(i) * tem * hvapi
         endif
@@ -682,6 +685,8 @@ cc
 
       implicit none
 
+      integer, parameter :: r8 = kind_phys
+
 !  ---  inputs:
       integer, intent(in) :: im
       logical, dimension(im), intent(in) :: wet
@@ -699,10 +704,10 @@ cc
 
 !  ---  locals
       integer :: i
-      real(kind=kind_phys), parameter :: zero = 0.0d0,
-     &                                   one  = 1.0d0,
-     &                                   half = 0.5d0,
-     &                                   omz1 = 10.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0_r8,
+     &                                   one  = 1.0_r8,
+     &                                   half = 0.5_r8,
+     &                                   omz1 = 10.0_r8
       real(kind=kind_phys) :: tem1, tem2, dt_warm
 
       ! Initialize CCPP error handling variables
@@ -725,7 +730,11 @@ cc
         tem1 = half / omz1
         do i=1,im
           if (wet(i) .and. oceanfrac(i) > zero) then
-            tem2 = one / xz(i)
+            if (abs(xz(i)) > zero) then
+              tem2 = one / xz(i)
+            else
+              tem2 = zero
+            endif
             dt_warm = (xt(i)+xt(i)) * tem2
             if ( xz(i) > omz1) then
               tref(i) = tseal(i) - (one-half*omz1*tem2) * dt_warm       &
@@ -735,7 +744,7 @@ cc
      &                  -  z_c(i)*dt_cool(i))*tem1
             endif
             tseal(i) = tref(i) + dt_warm - dt_cool(i)
-!                  - (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
+!                    - (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
             tsurf_ocn(i) = tseal(i)
           endif
         enddo
@@ -787,6 +796,8 @@ cc
 
       implicit none
 
+      integer, parameter :: r8 = kind_phys
+
 !  ---  inputs:
       integer, intent(in) :: im
       logical, dimension(im), intent(in) :: wet, icy
@@ -827,12 +838,11 @@ cc
 
 !  --- ...  run nsst model  ... ---
 
-      dtzm = 0.0
+      dtzm = 0.0_r8
       if (nstf_name1 > 1) then
-        zsea1 = 0.001*real(nstf_name4)
-        zsea2 = 0.001*real(nstf_name5)
-        call get_dtzm_2d (xt, xz, dt_cool,                              &
-     &                    z_c, wet, zsea1, zsea2,                       &
+        zsea1 = 0.001_r8*real(nstf_name4)
+        zsea2 = 0.001_r8*real(nstf_name5)
+        call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, zsea1, zsea2,      &
      &                    im, 1, dtzm)
         do i = 1, im
 !          if (wet(i) .and. .not.icy(i)) then

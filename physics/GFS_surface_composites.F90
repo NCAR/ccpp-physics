@@ -453,7 +453,6 @@ contains
             fh2(i)    = fh2_ocn(i)
            !tsurf(i)  = tsurf_ocn(i)
             tsfco(i)  = tsfc_ocn(i) ! over lake (and ocean when uncoupled)
-            if( cplflx ) tsfcl(i)  = tsfc_ocn(i) ! for restart repro comparisons
             cmm(i)    = cmm_ocn(i)
             chh(i)    = chh_ocn(i)
             gflx(i)   = gflx_ocn(i)
@@ -492,8 +491,6 @@ contains
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
-            tsfc(i)   = tsfc_ice(i)
-            tsfcl(i)  = tsfc(i)
             if (.not. flag_cice(i)) then
               tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
             elseif (wet(i)) then
@@ -506,6 +503,7 @@ contains
                 stress(i) = txi * stress_ice(i) + txo * stress_ocn(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_ocn(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_ocn(i)
+                zorl(i)   = txi * zorl_ice(i)   + txo * zorl_ocn(i)
               else
                 evap(i)   = evap_ocn(i)
                 hflx(i)   = hflx_ocn(i)
@@ -513,6 +511,7 @@ contains
                 stress(i) = stress_ocn(i)
                 qss(i)    = qss_ocn(i)
                 ep1d(i)   = ep1d_ocn(i)
+                zorl(i)   = zorl_ocn(i)
               endif
             endif
             if (wet(i)) then
@@ -520,6 +519,7 @@ contains
             else
               tsfco(i) = tsfc(i)
             endif
+            tsfcl(i)  = tsfc(i)
           endif
 
           zorll(i) = zorl_lnd(i)

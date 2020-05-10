@@ -41,21 +41,21 @@
       return
       end subroutine tridi1
 
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
 !>\ingroup satmedmf
 !>\ingroup satmedmfvdifq
 !> This subroutine ..
       subroutine tridi2(l,n,cl,cm,cu,r1,r2,au,a1,a2)
-cc
+!
       use machine     , only : kind_phys
       implicit none
       integer, parameter :: one = 1.0_kind_phys
       integer             k,n,l,i
       real(kind=kind_phys) fk
-cc
+!
       real(kind=kind_phys) cl(l,2:n),cm(l,n),cu(l,n-1),r1(l,n),r2(l,n), &
      &          au(l,n-1),a1(l,n),a2(l,n)
-c----------------------------------------------------------------------
+!----------------------------------------------------------------------
       do i=1,l
         fk      = one / cm(i,1)
         au(i,1) = fk*cu(i,1)
@@ -81,29 +81,29 @@ c----------------------------------------------------------------------
           a2(i,k) = a2(i,k)-au(i,k)*a2(i,k+1)
         enddo
       enddo
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
       return
       end subroutine tridi2
 
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
 !>\ingroup satmedmf
 !>\ingroup satmedmfvdifq
 !>  Routine to solve the tridiagonal system to calculate u- and
 !!  v-momentum at \f$ t + \Delta t \f$; part of two-part process to
 !!  calculate time tendencies due to vertical diffusion.
       subroutine tridin(l,n,nt,cl,cm,cu,r1,r2,au,a1,a2)
-cc
+!
       use machine     , only : kind_phys
       implicit none
       integer, parameter :: one = 1.0_kind_phys
       integer             is,k,kk,n,nt,l,i
       real(kind=kind_phys) fk(l)
-cc
+!
       real(kind=kind_phys) cl(l,2:n), cm(l,n), cu(l,n-1),               &
      &                     r1(l,n),   r2(l,n*nt),                       &
      &                     au(l,n-1), a1(l,n), a2(l,n*nt),              &
      &                     fkk(l,2:n-1)
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
       do i=1,l
         fk(i)   = one / cm(i,1)
         au(i,1) = fk(i)*cu(i,1)
@@ -153,11 +153,11 @@ c-----------------------------------------------------------------------
           enddo
         enddo
       enddo
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
       return
       end subroutine tridin
 
-c-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
 !>\ingroup satmedmf
 !>\ingroup satmedmfvdifq
 !! This subroutine solves tridiagonal problem for TKE.

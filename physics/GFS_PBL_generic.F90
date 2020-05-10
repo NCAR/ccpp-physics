@@ -92,6 +92,7 @@
 
       implicit none
 
+      integer, parameter  :: r8 = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
@@ -115,9 +116,11 @@
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
+      real (kind=kind_phys), parameter :: zero = 0.0_r8, one=1.0_r8
+
       ! Parameters for canopy heat storage parametrization
-      real (kind=kind_phys), parameter :: z0min=0.2, z0max=1.0
-      real (kind=kind_phys), parameter :: u10min=2.5, u10max=7.5
+      real (kind=kind_phys), parameter :: z0min=0.2_r8,  z0max=one
+      real (kind=kind_phys), parameter :: u10min=2.5_r8, u10max=7.5_r8
 
       ! Local variables
       integer :: i, k, kk, k1, n
@@ -283,20 +286,20 @@
       do i=1,im
         hflxq(i) = hflx(i)
         evapq(i) = evap(i)
-        hffac(i) = 1.0
-        hefac(i) = 1.0
+        hffac(i) = one
+        hefac(i) = one
       enddo
       if (lheatstrg) then
         do i=1,im
-          tem = 0.01 * zorl(i)     ! change unit from cm to m
+          tem = 0.01_r8 * zorl(i)     ! change unit from cm to m
           tem1 = (tem - z0min) / (z0max - z0min)
-          hffac(i) = z0fac * min(max(tem1, 0.0), 1.0)
-          tem = sqrt(u10m(i)**2+v10m(i)**2)
+          hffac(i) = z0fac * min(max(tem1, zero), one)
+          tem = sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i))
           tem1 = (tem - u10min) / (u10max - u10min)
-          tem2 = 1.0 - min(max(tem1, 0.0), 1.0)
+          tem2 = one - min(max(tem1, zero), one)
           hffac(i) = tem2 * hffac(i)
-          hefac(i) = 1. + e0fac * hffac(i)
-          hffac(i) = 1. + hffac(i)
+          hefac(i) = one + e0fac * hffac(i)
+          hffac(i) = one + hffac(i)
           hflxq(i) = hflx(i) / hffac(i)
           evapq(i) = evap(i) / hefac(i)
         enddo
@@ -339,6 +342,7 @@
 
       implicit none
 
+      integer, parameter  :: r8 = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
@@ -364,14 +368,14 @@
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
-      real(kind=kind_phys), dimension(:), intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
+      real(kind=kind_phys), dimension(:),   intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
 
       logical, dimension(:),intent(in) :: wet, dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
 
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dkt_cpl
-      real(kind=kind_phys), dimension(:,:), intent(in) :: dkt
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: dkt
 
       ! From canopy heat storage - reduction factors in latent/sensible heat flux due to surface roughness
       real(kind=kind_phys), dimension(im), intent(in) :: hffac, hefac
@@ -379,11 +383,10 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      real(kind=kind_phys), parameter :: zero  = 0.0d0
-      real(kind=kind_phys), parameter :: one   = 1.0d0
+      real(kind=kind_phys), parameter :: zero  = 0.0_r8, one = 1.0_r8
       real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
-      real(kind=kind_phys), parameter :: epsln = 1.0d-10 ! same as in GFS_physics_driver.F90
-      real(kind=kind_phys), parameter :: qmin  = 1.0d-8
+      real(kind=kind_phys), parameter :: epsln = 1.0e-10_r8 ! same as in GFS_physics_driver.F90
+      real(kind=kind_phys), parameter :: qmin  = 1.0e-8_r8
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, rho
 
@@ -438,12 +441,12 @@
   ! Ferrier-Aligo 
           do k=1,levs
             do i=1,im
-              dqdt(i,k,ntqv)  = dvdftra(i,k,1)
-              dqdt(i,k,ntcw)  = dvdftra(i,k,2)
-              dqdt(i,k,ntiw)  = dvdftra(i,k,3)
-              dqdt(i,k,ntrw)  = dvdftra(i,k,4)
+              dqdt(i,k,ntqv)    = dvdftra(i,k,1)
+              dqdt(i,k,ntcw)    = dvdftra(i,k,2)
+              dqdt(i,k,ntiw)    = dvdftra(i,k,3)
+              dqdt(i,k,ntrw)    = dvdftra(i,k,4)
               dqdt(i,k,nqrimef) = dvdftra(i,k,5)
-              dqdt(i,k,ntoz)  = dvdftra(i,k,6)
+              dqdt(i,k,ntoz)    = dvdftra(i,k,6)
             enddo
           enddo
 
@@ -592,14 +595,14 @@
 !-------------------------------------------------------lssav if loop ----------
       if (lssav) then
         do i=1,im
-          dusfc_diag (i) = dusfc_diag(i) + dusfc1(i)*dtf
-          dvsfc_diag (i) = dvsfc_diag(i) + dvsfc1(i)*dtf
-          dtsfc_diag (i) = dtsfc_diag(i) + dtsfc1(i)*hffac(i)*dtf
-          dqsfc_diag (i) = dqsfc_diag(i) + dqsfc1(i)*hefac(i)*dtf
+          dusfc_diag (i) = dusfc_diag(i) + dusfc1(i) * dtf
+          dvsfc_diag (i) = dvsfc_diag(i) + dvsfc1(i) * dtf
           dusfci_diag(i) = dusfc1(i)
           dvsfci_diag(i) = dvsfc1(i)
           dtsfci_diag(i) = dtsfc1(i)*hffac(i)
           dqsfci_diag(i) = dqsfc1(i)*hefac(i)
+          dtsfc_diag (i) = dtsfc_diag(i) + dtsfci_diag(i) * dtf
+          dqsfc_diag (i) = dqsfc_diag(i) + dqsfci_diag(i) * dtf
         enddo
 
         if (ldiag3d) then
