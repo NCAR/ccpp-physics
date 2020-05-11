@@ -107,7 +107,7 @@ end subroutine m_micro_init
 !! grid-scale condensation and evaporation of cloud condensate.
 !!
 !> \section arg_table_m_micro_run Argument Table
-!> \htmlinclude m_micro_run.html
+!! \htmlinclude m_micro_run.html
 !!
 !>\section detail_m_micro_run MG m_micro_run Detailed Algorithm
 !> @{
