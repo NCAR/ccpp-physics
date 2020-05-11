@@ -425,7 +425,7 @@ contains
     overlap_param(:,1) = 0._kind_phys
     do iCol=1,nCol
        do iLay=Model%levs,2,-1
-          overlap_param(iCol,iLay) = exp( -0.5 * (deltaZ(iCol,iLay)+deltaZ(iCol,iLay-1)) / de_lgth(iCol) )
+          overlap_param(iCol,iLay-1) = exp( -0.5 * (deltaZ(iCol,iLay)+deltaZ(iCol,iLay-1)) / de_lgth(iCol) )
        enddo
     enddo
 

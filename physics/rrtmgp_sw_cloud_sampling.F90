@@ -3,7 +3,7 @@ module rrtmgp_sw_cloud_sampling
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use physparam,                only: isubcsw, iovrsw
   use mo_optical_props,         only: ty_optical_props_2str
-  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
+  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_dcorr, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
@@ -77,7 +77,7 @@ contains
     integer :: iCol,iLay
     integer,dimension(ncol) :: ipseed_sw
     type(random_stat) :: rng_stat
-    real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLev,ncol) :: rng3D
+    real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
     real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLev) :: rng1D
     logical, dimension(ncol,nLev,sw_gas_props%get_ngpt()) :: cldfracMCICA
     real(kind_phys), dimension(ncol,nLev) :: cld_frac_noSamp
@@ -112,13 +112,16 @@ contains
           call random_number(rng1D,rng_stat)
           rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
        enddo
-       print*,'overlap_param: ',overlap_param
+
        ! Call McICA
        select case ( iovrsw )
        case(1) ! Maximum-random
           call check_error_msg('rrtmgp_sw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
        case(3) ! Exponential-random
-          call check_error_msg('rrtmgp_sw_cloud_sampling_run',sampled_mask_exp_ran(rng3D,cld_frac,overlap_param(:,1:nLev-1),cldfracMCICA))          
+          ! Generate second RNG
+          call random_number(rng1D,rng_stat)
+          rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+          call check_error_msg('rrtmgp_sw_cloud_sampling_run',sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,overlap_param(:,1:nLev-1),cldfracMCICA))          
        end select
        
        ! Map band optical depth to each g-point using McICA

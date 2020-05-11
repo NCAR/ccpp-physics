@@ -3,7 +3,7 @@ module rrtmgp_lw_cloud_sampling
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use physparam,                only: isubclw, iovrlw
   use mo_optical_props,         only: ty_optical_props_1scl
-  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_ran, draw_samples
+  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_dcorr, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
@@ -38,7 +38,8 @@ contains
 !! \htmlinclude rrtmgp_lw_cloud_sampling_run.html
 !!
   subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, ipsdlw0, icseed_lw, cld_frac,&
-       lw_gas_props, lw_optical_props_cloudsByBand, lw_optical_props_clouds, errmsg, errflg)
+       overlap_param, lw_gas_props, lw_optical_props_cloudsByBand, lw_optical_props_clouds, &
+       errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -54,6 +55,8 @@ contains
                                         ! random numbers. when isubclw /=2, it will not be used.
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
          cld_frac                       ! Total cloud fraction by layer
+    real(kind_phys), dimension(ncol,nLev), intent(in)  :: &
+         overlap_param                  ! Overlap parameter
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props                   ! RRTMGP DDT: K-distribution data
     type(ty_optical_props_1scl),intent(in) :: &
@@ -71,7 +74,7 @@ contains
     integer :: iCol
     integer,dimension(ncol) :: ipseed_lw
     type(random_stat) :: rng_stat
-    real(kind_phys), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D
+    real(kind_phys), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
     real(kind_phys), dimension(lw_gas_props%get_ngpt()*nLev) :: rng1D
     logical, dimension(ncol,nLev,lw_gas_props%get_ngpt()) :: cldfracMCICA
     real(kind_phys), dimension(ncol,nLev) :: cld_frac_noSamp
@@ -109,8 +112,13 @@ contains
     ! Call McICA
     select case ( iovrlw )
        ! Maximumn-random 
-    case(1)
+    case(1) ! Maximum-random overlap
        call check_error_msg('rrtmgp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
+    case(3) ! Exponential decorrelation length overlap
+       ! Generate second RNG
+       call random_number(rng1D,rng_stat)
+       rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,overlap_param(:,1:nLev-1),cldfracMCICA))
     end select
     
     ! Map band optical depth to each g-point using McICA
