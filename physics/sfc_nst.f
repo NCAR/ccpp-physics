@@ -363,7 +363,7 @@ cc
           dwat     = 2.11e-5_r8*(t1(i)/t0k)**1.94_r8               ! water vapor diffusivity
           dtmp     = (one+3.309e-3_r8*(t1(i)-t0k)-1.44e-6_r8*(t1(i)-t0k)
      &             * (t1(i)-t0k))*0.02411_r8/(rho_a(i)*cp)         ! heat diffusivity
-          wetc     = 622.0*le*qss(i)/(rd*t1(i)*t1(i))
+          wetc     = 622.0_r8*le*qss(i)/(rd*t1(i)*t1(i))
           alfac    = one / (one + (wetc*le*dwat)/(cp*dtmp))        ! wet bulb factor
           tem      = (1.0e3_r8 * rain(i) / rho_w) * alfac * cp_w
           qrain(i) =  tem * (tsea-t1(i)+1.0e3_r8*(qss(i)-q0(i))*le/cp)

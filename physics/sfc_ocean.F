@@ -149,6 +149,7 @@
 
           ep(i)    = evap(i)
           qsurf(i) = qss
+          gflux(i) = zero
         endif
       enddo
 !
