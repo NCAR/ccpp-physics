@@ -6,8 +6,8 @@
 !! "Unified": a) all GW effects due to both dissipation/breaking; b) identical GW solvers for all GW sources; c) ability to replace solvers.
 !! Unified Formalism:
 !! 1. GW Sources: Stochastic and physics based mechanisms for GW-excitations in the lower atmosphere, calibrated by the high-res analyses/forecasts, and observations (3 types of GW sources: orography, convection, fronts/jets).
-!! 2. GW Propagation: Unified solver for “propagation, dissipation and breaking” excited from all type of GW sources.
-!! 3. GW Effects: Unified representation of GW impacts on the ‘resolved’ flow for all sources (energy-balanced schemes for momentum, heat and mixing).
+!! 2. GW Propagation: Unified solver for "propagation, dissipation and breaking" excited from all type of GW sources.
+!! 3. GW Effects: Unified representation of GW impacts on the "resolved" flow for all sources (energy-balanced schemes for momentum, heat and mixing).
 !! https://www.weather.gov/media/sti/nggps/Presentations%202017/02%20NGGPS_VYUDIN_2017_.pdf
 
 module cires_ugwp
