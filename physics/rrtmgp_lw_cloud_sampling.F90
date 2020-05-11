@@ -116,8 +116,11 @@ contains
        call check_error_msg('rrtmgp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
     case(3) ! Exponential decorrelation length overlap
        ! Generate second RNG
-       call random_number(rng1D,rng_stat)
-       rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
+       do iCol=1,ncol
+          call random_setseed(ipseed_lw(icol),rng_stat)
+          call random_number(rng1D,rng_stat)
+          rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
+       enddo
        call check_error_msg('rrtmgp_lw_cloud_sampling_run',sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,overlap_param(:,1:nLev-1),cldfracMCICA))
     end select
     
