@@ -21,11 +21,9 @@ module mp_thompson
    contains
 
 !> This subroutine is a wrapper around the actual mp_gt_driver().
-#if 0
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-#endif
       subroutine mp_thompson_init(ncol, nlev, is_aerosol_aware, &
                                        nwfa2d, nifa2d, nwfa, nifa,   &
                                        mpicomm, mpirank, mpiroot,    &
@@ -129,11 +127,9 @@ module mp_thompson
       end subroutine mp_thompson_init
 
 
-#if 0
 !> \section arg_table_mp_thompson_run Argument Table
 !! \htmlinclude mp_thompson_run.html
 !!
-#endif
 !>\ingroup aathompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
