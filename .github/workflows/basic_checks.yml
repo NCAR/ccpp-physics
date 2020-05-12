@@ -19,15 +19,3 @@ jobs:
     #    brew install automake coreutils mpich gnu-sed
     - name: Check for ASCII encoding
       run: ./tools/check_encoding.py
-      #run: |
-        #export CC=gcc-9
-        #export FC=gfortran-9
-        #export CXX=g++-9
-        #mkdir build
-        #cd build
-        #cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install .. 2>&1 | tee log.cmake
-        #make -j8 2>&1 | tee log.make
-        #cd ..
-        #ls -l install/bin/ESMF_Info
-        #ls -l install/bin/wgrib2
-        #cat install/share/nceplibs-external.cmake.config
