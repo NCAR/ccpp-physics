@@ -1,0 +1,167 @@
+/**
+\page GFS_v16beta_no_nsst_page GFS_v16beta_no_nsst Suite 
+
+\section gfsv16beta_no_nsst_suite_overview Overview
+
+Suite GFS_v16beta_no_nsst is a companion suite of GFS_v16beta with GRIB2 data initialization.
+
+The GFS_v16beta_no_nsst physics suite uses the parameterizations in the following order:
+ - \ref GFS_RRTMG
+ - \ref GFS_SFCLYR
+ - \ref GFS_OCEAN
+ - \ref GFS_NOAH
+ - \ref GFS_SFCSICE
+ - \ref GFS_SATMEDMFVDIFQ
+ - \ref GFS_UGWP_v0
+ - \ref GFS_RAYLEIGH
+ - \ref GFS_OZPHYS
+ - \ref GFS_H2OPHYS
+ - \ref GFS_SAMFdeep
+ - \ref GFS_SAMFshal
+ - \ref GFDL_cloud
+ - \ref GFS_CALPRECIPTYPE
+
+\section sdf_gfsv16bnonsst Suite Definition File 
+- For GRIB2  initialization data: \subpage suite_FV3_GFS_v16beta_no_nsst_xml
+
+\section gfs16betanonsst_nml_opt_des Namelist 
+
+- \b &gfs_physics_nml
+\n \c  fhzero            = 6
+\n \c  h2o_phys          = .true.
+\n \c  ldiag3d           = .false.
+\n \c  fhcyc             = 24
+\n \c  use_ufo           = .true.
+\n \c  pre_rad           = .false.
+\n \c  ncld              = 5
+\n \c  imp_physics       = 11
+\n \c  pdfcld            = .false.
+\n \c  fhswr             = 3600.
+\n \c  fhlwr             = 3600.
+\n \c  ialb              = 1
+\n \c  iems              = 1
+\n \c  iaer              = 5111
+\n \c  icliq_sw          = 2
+\n \c  iovr_lw           = 3
+\n \c  iovr_sw           = 3
+\n \c  ico2              = 2
+\n \c  isubc_sw          = 2
+\n \c  isubc_lw          = 2
+\n \c  isol              = 2
+\n \c  lwhtr             = .true.
+\n \c  swhtr             = .true.
+\n \c  cnvgwd            = .true.
+\n \c  shal_cnv          = .true.
+\n \c  cal_pre           = .false.
+\n \c  redrag            = .true.
+\n \c  dspheat           = .true.
+\n \c  hybedmf           = .false.
+\n \c  satmedmf          = .true.
+\n \c  isatmedmf         = 1
+\n \c  lheatstrg         = .true.
+\n \c  random_clds       = .false.
+\n \c  trans_trac        = .true.
+\n \c  cnvcld            = .true.
+\n \c  imfshalcnv        = 2
+\n \c  imfdeepcnv        = 2
+\n \c  cdmbgwd           = 4.0,0.15,1.0,1.0 <span style="color:red">[1.1,0.72,1.0,1.0]</span> <span style="color:purple">[0.23,1.5,1.0,1.0]</span> <span style="color:orange">[0.14,1.8,1.0,1.0]</span>        ! <span style="color:black">[C768]</span> <span style="color:red">[C384]</span> <span style="color:purple">[C192]</span> <span style="color:orange">[C96]</span>L64
+\n \c  prslrd0           = 0.
+\n \c  ivegsrc           = 1
+\n \c  isot              = 1
+\n \c  lsoil             = 4
+\n \c  lsm               = 1
+\n \c  iopt_dveg         = 1
+\n \c  iopt_crs          = 1
+\n \c  iopt_btr          = 1
+\n \c  iopt_run          = 1
+\n \c  iopt_sfc          = 1
+\n \c  iopt_frz          = 1
+\n \c  iopt_inf          = 1
+\n \c  iopt_rad          = 1
+\n \c  iopt_alb          = 2
+\n \c  iopt_snf          = 4
+\n \c  iopt_tbot         = 2
+\n \c  iopt_stc          = 1
+\n \c  debug             = .false.
+\n \c  oz_phys           = .F.
+\n \c  oz_phys_2015      = .T.
+\n \c  nstf_name         = 0,0,0,0,0
+\n \c  nst_anl           = .true.
+\n \c  psautco           = 0.0008,0.0005
+\n \c  prautco           = 0.00015,0.00015
+\n \c  lgfdlmprad        = .true.
+\n \c  effr_in           = .true.
+\n \c  ldiag_ugwp        = .false.
+\n \c  do_ugwp           = .false.
+\n \c  do_tofd           = .true.
+\n \c  do_sppt           = .false.
+\n \c  do_shum           = .false.
+\n \c  do_skeb           = .false.
+\n \c  do_sfcperts       = .false.
+
+
+- \b &gfdl_cloud_microphysics_nml
+\n \c  sedi_transport    = .true.
+\n \c  do_sedi_heat      = .false.
+\n \c  rad_snow          = .true.
+\n \c  rad_graupel       = .true.
+\n \c  rad_rain          = .true.
+\n \c  const_vi          = .F.
+\n \c  const_vs          = .F.
+\n \c  const_vg          = .F.
+\n \c  const_vr          = .F.
+\n \c  vi_max            = 1.
+\n \c  vs_max            = 2.
+\n \c  vg_max            = 12.
+\n \c  vr_max            = 12.
+\n \c  qi_lim            = 1.
+\n \c  prog_ccn          = .false.
+\n \c  do_qa             = .true.
+\n \c  fast_sat_adj      = .true.
+\n \c  tau_l2v           = 225.
+\n \c  tau_v2l           = 150.
+\n \c  tau_g2v           = 900.
+\n \c  rthresh           = 10.e-6  
+\n \c  dw_land           = 0.16
+\n \c  dw_ocean          = 0.10
+\n \c  ql_gen            = 1.0e-3
+\n \c  ql_mlt            = 1.0e-3
+\n \c  qi0_crt           = 8.0E-5
+\n \c  qs0_crt           = 1.0e-3
+\n \c  tau_i2s           = 1000.
+\n \c  c_psaci           = 0.05
+\n \c  c_pgacs           = 0.01
+\n \c  rh_inc            = 0.30
+\n \c  rh_inr            = 0.30
+\n \c  rh_ins            = 0.30
+\n \c  ccn_l             = 300.
+\n \c  ccn_o             = 100.
+\n \c  c_paut            = 0.5
+\n \c  c_cracw           = 0.8
+\n \c  use_ppm           = .false.
+\n \c  use_ccn           = .true.
+\n \c  mono_prof         = .true.
+\n \c  z_slope_liq       = .true.
+\n \c  z_slope_ice       = .true.
+\n \c  de_ice            = .false.
+\n \c  fix_negative      = .true.
+\n \c  icloud_f          = 1
+\n \c  mp_time           = 150.
+\n \c  reiflag           = 2
+
+
+- \b &cires_ugwp_nml
+\n \c  knob_ugwp_solver  = 2
+\n \c  knob_ugwp_source  = 1,1,0,0
+\n \c  knob_ugwp_wvspec  = 1,25,25,25
+\n \c  knob_ugwp_azdir   = 2,4,4,4
+\n \c  knob_ugwp_stoch   = 0,0,0,0
+\n \c  knob_ugwp_effac   = 1,1,1,1
+\n \c  knob_ugwp_doaxyz  = 1
+\n \c  knob_ugwp_doheat  = 1
+\n \c  knob_ugwp_dokdis  = 1
+\n \c  knob_ugwp_ndx4lh  = 1
+\n \c  knob_ugwp_version = 0
+\n \c  launch_level      = 27
+
+*/
