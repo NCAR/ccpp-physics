@@ -8,10 +8,10 @@ import sys
 SUFFICES = [ '.f', '.F', '.f90', '.F90', '.meta' ]
 
 for root, dirs, files in os.walk(os.getcwd()):
-    print root, dirs, files
+    #print root, dirs, files
     for file in files:
         suffix = os.path.splitext(file)[1]
-        print file, suffix
+        #print file, suffix
         if suffix in SUFFICES:
             with open(os.path.join(root, file)) as f:
                 contents = f.read()
