@@ -1764,22 +1764,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
-  long_name = flag for mass-flux deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imfdeepcnv_gf]
-  standard_name = flag_for_gf_deep_convection_scheme
-  long_name = flag for Grell-Freitas deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

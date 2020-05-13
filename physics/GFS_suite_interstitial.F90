@@ -632,7 +632,7 @@
     subroutine GFS_suite_interstitial_4_run (im, levs, ltaerosol, cplchm, tracers_total, ntrac, ntcw, ntiw, ntclamt, &
       ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,  &
       imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, dtf, save_qc, save_qi, con_pi,                               &
-      gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, imfdeepcnv, imfdeepcnv_gf, errmsg, errflg)
+      gq0, clw, prsl, save_tcp, con_rd, nwfa, spechum, dqdti, errmsg, errflg)
 
       use machine,               only: kind_phys
       use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
@@ -643,7 +643,7 @@
 
       integer,                                  intent(in) :: im, levs, tracers_total, ntrac, ntcw, ntiw, ntclamt, ntrw,  &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, ntlnc, ntinc, nn, imp_physics, imp_physics_gfdl, imp_physics_thompson,           &
-        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imfdeepcnv, imfdeepcnv_gf
+        imp_physics_zhao_carr, imp_physics_zhao_carr_pdf
 
       logical,                                  intent(in) :: ltaerosol, cplchm
 
@@ -725,7 +725,7 @@
                  qv_mp(i,k) = spechum(i,k)/(1.0_kind_phys-spechum(i,k))
                  if (ntlnc>0) then
                    !> - Convert moist mixing ratio to dry mixing ratio
-                   qc_mp(i,k) = save_qc(i,k)/(1.0_kind_phys-spechum(i,k))
+                   qc_mp(i,k) = (clw(i,k,2)-save_qc(i,k))/(1.0_kind_phys-spechum(i,k))
                    !> - Convert number concentration from moist to dry
                    nc_mp(i,k) = gq0(i,k,ntlnc)/(1.0_kind_phys-spechum(i,k))
                    nc_mp(i,k) = nc_mp(i,k) + max(0.0, make_DropletNumber(qc_mp(i,k) * rho_dryair(i,k), nwfa(i,k)) * (1.0/rho_dryair(i,k)))
@@ -734,7 +734,7 @@
                  endif
                  if (ntinc>0) then
                    !> - Convert moist mixing ratio to dry mixing ratio
-                   qi_mp(i,k) = save_qi(i,k)/(1.0_kind_phys-spechum(i,k))
+                   qi_mp(i,k) = (clw(i,k,1)-save_qi(i,k))/(1.0_kind_phys-spechum(i,k))
                    !> - Convert number concentration from moist to dry
                    ni_mp(i,k) = gq0(i,k,ntinc)/(1.0_kind_phys-spechum(i,k)) 
                    ni_mp(i,k) = ni_mp(i,k) + max(0.0, make_IceNumber(qi_mp(i,k) * rho_dryair(i,k), save_tcp(i,k)) * (1.0/rho_dryair(i,k)))
