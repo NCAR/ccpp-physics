@@ -150,6 +150,12 @@ subroutine fv_sat_adj_init(do_sat_adj, kmp, nwat, ngas, rilist, cpilist, &
       return
     end if
 
+    if (.not.nwat==6) then
+      write(errmsg,'(a)') 'Logic error: fv_sat_adj requires six water species (nwat=6)'
+      errflg = 1
+      return
+    end if
+
     if (is_initialized) return
 
     ! generate es table (dt = 0.1 deg c)
