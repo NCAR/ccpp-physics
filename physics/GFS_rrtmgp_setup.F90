@@ -120,10 +120,8 @@ module GFS_rrtmgp_setup
              ' ccnorm=',ccnorm,' norad_precip=',norad_precip
      endif
      
-     ! Hack for using RRTMGP-Sw and RRTMG-LW
-     if (.not. Model%do_GPsw_Glw) then
-        call radinit( si, levr, imp_physics,  me )
-     endif
+
+     call radinit( Model, si, levr, imp_physics,  me )
      
      if ( me == 0 ) then
         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
@@ -199,7 +197,7 @@ module GFS_rrtmgp_setup
    ! Private functions
    
    
-   subroutine radinit( si, NLAY, imp_physics, me )
+   subroutine radinit( Model, si, NLAY, imp_physics, me )
      !...................................
 
 !  ---  inputs:
@@ -316,13 +314,14 @@ module GFS_rrtmgp_setup
       use module_radiation_aerosols,  only : aer_init
       use module_radiation_gases,     only : gas_init
       use module_radiation_surface,   only : sfc_init
-      use module_radiation_clouds,    only : cld_init
+      use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
 
       implicit none
 
 !  ---  inputs:
       integer, intent(in) :: NLAY, me, imp_physics 
-
+      type(GFS_control_type), intent(in) :: &
+          Model      ! DDT containing model control parameters
       real (kind=kind_phys), intent(in) :: si(:)
 
 !  ---  outputs: (none, to module variables)
@@ -409,7 +408,7 @@ module GFS_rrtmgp_setup
       call aer_init ( NLAY, me )                 !  --- ...  aerosols initialization routine
       call gas_init ( me )                       !  --- ...  co2 and other gases initialization routine
       call sfc_init ( me )                       !  --- ...  surface initialization routine
-      call cld_init ( si, NLAY, imp_physics, me) !  --- ...  cloud initialization routine
+      call hml_cloud_diagnostics_initialize( Model, NLAY, me, si) 
 
       return
       !...................................
