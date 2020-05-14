@@ -1068,7 +1068,7 @@ c
           enddo
         enddo
         if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
-     &               flag_for_pbl_generic_tend) then
+     &               .not. flag_for_pbl_generic_tend) then
           kk = ntoz
           is = (kk-1) * km
           do k = 1, km

@@ -373,7 +373,7 @@
       errmsg = ''
       errflg = 0
 !GJF: dvdftra is only used if nvdiff != ntrac or (nvdiff == ntrac .and. )
-      if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
+      if_nvdiff_ntrac: if (nvdiff == ntrac .and. (hybedmf .or. do_shoc .or. satmedmf)) then
         dqdt = dvdftra
       elseif (nvdiff /= ntrac .and. .not. shinhong .and. .not. do_ysu) then
 !
@@ -385,7 +385,7 @@
           enddo
         endif
 !
-        if (trans_aero) then
+        if_trans_aero: if (trans_aero) then
           ! Set kk if chemistry-aerosol tracers are diffused
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,        &
@@ -403,9 +403,9 @@
               enddo
             enddo
           enddo
-        endif
+        endif if_trans_aero
 !
-        if (imp_physics == imp_physics_wsm6) then
+        if_imp_physics: if (imp_physics == imp_physics_wsm6) then
   ! WSM6
           do k=1,levs
             do i=1,im
@@ -517,9 +517,9 @@
               dqdt(i,k,ntoz) = dvdftra(i,k,3)
             enddo
           enddo
-        endif
+        endif if_imp_physics
 
-      endif ! nvdiff == ntrac
+      endif if_nvdiff_ntrac
 
       if (cplchm) then
         do i = 1, im
@@ -534,7 +534,7 @@
 
 !  --- ...  coupling insertion
 
-      if (cplflx) then
+      if_cplflx: if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > 0.0) then ! Ocean only, NO LAKES
 !            if (fice(i) == ceanfrac(i)) then ! use results from CICE
@@ -572,10 +572,10 @@
 !!
           endif ! Ocean only, NO LAKES
         enddo
-      endif
+      endif if_cplflx
 
 !-------------------------------------------------------lssav if loop ----------
-      if (lssav) then
+      if_lssav: if (lssav) then
         do i=1,im
           dusfc_diag (i) = dusfc_diag(i) + dusfc1(i)*dtf
           dvsfc_diag (i) = dvsfc_diag(i) + dvsfc1(i)*dtf
@@ -591,7 +591,7 @@
   !    &     dtf,' kdt=',kdt,' lat=',lat
   !       endif
 
-        if (ldiag3d .and. flag_for_pbl_generic_tend .and. lssav) then
+        if_diag: if (ldiag3d .and. flag_for_pbl_generic_tend .and. lssav) then
           if (lsidea) then
             dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
           else
@@ -615,9 +615,9 @@
               enddo
             enddo
           endif
-        endif
-
-      endif   ! end if_lssav
+        endif if_diag
+        
+      endif if_lssav
 
       end subroutine GFS_PBL_generic_post_run
 
