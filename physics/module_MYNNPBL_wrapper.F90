@@ -10,7 +10,23 @@
 
       contains
 
-      subroutine mynnedmf_wrapper_init ()
+      subroutine mynnedmf_wrapper_init (lheatstrg, errmsg, errflg)
+        implicit none
+
+        logical,          intent(in)  :: lheatstrg
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        if (lheatstrg) then
+          errmsg = 'Logic error: lheatstrg not implemented for MYNN PBL'
+          errflg = 1
+          return
+        end if
+
       end subroutine mynnedmf_wrapper_init
 
       subroutine mynnedmf_wrapper_finalize ()
@@ -36,8 +52,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ice_aer_num_conc,          &
      &  prsl,exner,                     &
      &  slmsk,tsurf,qsfc,ps,            &
-     &  ust,ch,hflx,qflx,wspd,rb,       &
-     &  dtsfc1,dqsfc1,                  &
+     &  ust,ch,hflx,qflx,hflxq,qflxq,   &
+     &  wspd,rb,dtsfc1,dqsfc1,          &
      &  dtsfci_diag,dqsfci_diag,        &
      &  dtsfc_diag,dqsfc_diag,          &
      &  recmol,                         &
@@ -48,7 +64,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  edmf_a,edmf_w,edmf_qt,          &
      &  edmf_thl,edmf_ent,edmf_qc,      &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
-     &  nupdraft,maxMF,ktop_shallow,    &
+     &  nupdraft,maxMF,ktop_plume,      &
      &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor, dqdt_liquid_cloud,               &
      &  dqdt_ice_cloud, dqdt_ozone,                        &
@@ -153,7 +169,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
-  
+
   LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea, qdiag3d
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
@@ -252,13 +268,16 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind=kind_phys), dimension(im), intent(in) ::                 &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
+      real(kind=kind_phys), dimension(im), intent(out) ::                &
+     &        hflxq, evapq
+
       real(kind=kind_phys), dimension(im), intent(inout) ::              &
      &        pblh
       real(kind=kind_phys), dimension(im), intent(out) ::                &
      &        ch,dtsfc1,dqsfc1,                                          &
      &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag,             &
      &        maxMF
-     integer, dimension(im), intent(inout) ::                           &
+     integer, dimension(im), intent(inout) ::                            &
     &        kpbl,nupdraft,ktop_plume
 
      !LOCAL
@@ -286,6 +305,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          initflag=0
          !print*,"in MYNN, initflag=",initflag
       endif
+
+  ! Set "kinematic surface upward latent/sensible heat flux reduced by
+  ! surface roughness" to kinematic surface upward latent/sensible heat flux,
+  ! because the lheatstrg capability in GFS_PBL_generic_pre is not implemented
+      hflxq = hflx
+      qflxq = qflx
 
   ! Assign variables for each microphysics scheme
         if (imp_physics == imp_physics_wsm6) then
