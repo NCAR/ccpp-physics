@@ -269,7 +269,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
       real(kind=kind_phys), dimension(im), intent(out) ::                &
-     &        hflxq, evapq
+     &        hflxq, qflxq
 
       real(kind=kind_phys), dimension(im), intent(inout) ::              &
      &        pblh

@@ -463,7 +463,7 @@
     subroutine GFS_suite_interstitial_3_run (im, levs, nn, cscnv,       &
                satmedmf, trans_trac, do_shoc, ltaerosol, ntrac, ntcw,   &
                ntiw, ntclamt, ntrw, ntsw, ntrnc, ntsnc, ntgl, ntgnc,    &
-               xlon, xlat, gq0, imp_physics, imp_physics_mg,            &
+               xlon, xlat, gt0, gq0, imp_physics, imp_physics_mg,       &
                imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,        &
                imp_physics_gfdl, imp_physics_thompson,                  &
                imp_physics_wsm6, imp_physics_fer_hires, prsi,           &
