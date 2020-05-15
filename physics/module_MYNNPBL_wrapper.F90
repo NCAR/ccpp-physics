@@ -48,8 +48,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  edmf_a,edmf_w,edmf_qt,          &
      &  edmf_thl,edmf_ent,edmf_qc,      &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
-     &  nupdraft,maxMF,ktop_plume,      &
-     &  RTHRATEN,                       &
+     &  nupdraft,maxMF,ktop_shallow,    &
      &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor, dqdt_liquid_cloud,               &
      &  dqdt_ice_cloud, dqdt_ozone,                        &
@@ -224,8 +223,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        qgrs_cloud_ice_num_conc,                                    &
     &        qgrs_ozone,                                                 &
     &        qgrs_water_aer_num_conc,                                    &
-    &        qgrs_ice_aer_num_conc,                                      &
-    &        RTHRATEN
+    &        qgrs_ice_aer_num_conc
      real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
     &        Tsq, Qsq, Cov, exch_h, exch_m
      real(kind=kind_phys), dimension(:,:), intent(inout) ::              &
@@ -576,7 +574,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,nupdraft=nupdraft,maxMF=maxMF                      & !output
      &             ,ktop_plume=ktop_plume                              & !output
      &             ,spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl    & !input
-     &             ,RTHRATEN=RTHRATEN                                  & !input
+     &             ,RTHRATEN=htrlw                                     & !input
      &             ,FLAG_QI=flag_qi,FLAG_QNI=flag_qni                  & !input
      &             ,FLAG_QC=flag_qc,FLAG_QNC=flag_qnc                  & !input
      &             ,FLAG_QNWFA=FLAG_QNWFA,FLAG_QNIFA=FLAG_QNIFA        & !input

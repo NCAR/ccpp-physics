@@ -235,7 +235,7 @@
   optional = F
 [gq0_ntgl]
   standard_name = graupel_mixing_ratio_updated_by_physics
-  long_name = moist mixing ratio of graupel updated by physics
+  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

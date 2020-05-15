@@ -25,8 +25,7 @@ contains
          tot_zmtb, tot_zlwb, tot_zogw,                              &
          tot_tofd, tot_mtb, tot_ogw, tot_ngw,                       &
          du3dt_mtb,du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw,      &
-         dtdt, dudt, dvdt,     &
-         errmsg, errflg)
+         dtdt, dudt, dvdt, errmsg, errflg)
 
         use machine,                only: kind_phys
 

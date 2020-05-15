@@ -175,9 +175,9 @@
 #endif
             z0max = max(1.0e-6, min(0.01 * z0rl_lnd(i), z1(i)))
 !** xubin's new z0  over land
-            tem1 = 1.0 - shdmax(i)
-            tem2 = tem1 * tem1
-            tem1 = 1.0  - tem2
+            tem1  = 1.0 - shdmax(i)
+            tem2  = tem1 * tem1
+            tem1  = 1.0  - tem2
 
             if( ivegsrc == 1 ) then
 
@@ -220,11 +220,15 @@
             z0max = max(z0max, 1.0e-6)
 
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
-            czilc = 0.8
+!           czilc = 0.8
 
-            tem1  = 1.0 - sigmaf(i)
-            ztmax = z0max*exp( - tem1*tem1
-     &                     * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
+!           tem1  = 1.0 - sigmaf(i)
+!           ztmax = z0max*exp( - tem1*tem1
+!    &                     * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
+!
+            czilc = 10.0 ** (- 4. * z0max) ! Trier et al. (2011, WAF)
+            ztmax = z0max * exp( - czilc * ca
+     &            * 258.2 * sqrt(ustar_lnd(i)*z0max) )
 
 
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
@@ -246,9 +250,9 @@
             tvs   = 0.5 * (tsurf_ice(i)+tskin_ice(i)) * virtfac
             z0max = max(1.0e-6, min(0.01 * z0rl_ice(i), z1(i)))
 !** xubin's new z0  over land and sea ice
-            tem1 = 1.0 - shdmax(i)
-            tem2 = tem1 * tem1
-            tem1 = 1.0  - tem2
+            tem1  = 1.0 - shdmax(i)
+            tem2  = tem1 * tem1
+            tem1  = 1.0  - tem2
 
             if( ivegsrc == 1 ) then
 
@@ -261,11 +265,15 @@
 
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height
 !           dependance of czil
-            czilc = 0.8
+!           czilc = 0.8
 
-            tem1 = 1.0 - sigmaf(i)
-            ztmax = z0max*exp( - tem1*tem1
-     &                     * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
+!           tem1  = 1.0 - sigmaf(i)
+!           ztmax = z0max*exp( - tem1*tem1
+!    &                     * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
+            czilc = 10.0 ** (- 4. * z0max) ! Trier et al. (2011, WAF)
+            ztmax = z0max * exp( - czilc * ca
+     &            * 258.2 * sqrt(ustar_ice(i)*z0max) )
+
             ztmax = max(ztmax, 1.0e-6)
 !
             call stability
@@ -281,11 +289,11 @@
 !      the stuff now put into "stability"
 
           if (wet(i)) then ! Some open ocean
-            tvs        = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * virtfac
-            z0         = 0.01 * z0rl_ocn(i)
-            z0max      = max(1.0e-6, min(z0,z1(i)))
+            tvs          = 0.5 * (tsurf_ocn(i)+tskin_ocn(i)) * virtfac
+            z0           = 0.01 * z0rl_ocn(i)
+            z0max        = max(1.0e-6, min(z0,z1(i)))
             ustar_ocn(i) = sqrt(grav * z0 / charnock)
-            wind10m    = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
+            wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
 
 !**  test xubin's new z0
 
@@ -307,7 +315,7 @@
               call znot_t_v6(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
             else if (sfc_z0_type == 7) then
               call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
-            else if (sfc_z0_type /= 0) then
+            else if (sfc_z0_type > 0) then
               write(0,*)'no option for sfc_z0_type=',sfc_z0_type
               stop
             endif
@@ -322,33 +330,35 @@
 !
 !  update z0 over ocean
 !
-            if (sfc_z0_type == 0) then
-              z0 = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
+            if (sfc_z0_type >= 0) then
+              if (sfc_z0_type == 0) then
+                z0 = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
 
 ! mbek -- toga-coare flux algorithm
-!             z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
+!               z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
 !  new implementation of z0
-!             cc = ustar(i) * z0 / rnu
-!             pp = cc / (1. + cc)
-!             ff = grav * arnu / (charnock * ustar(i) ** 3)
-!             z0 = arnu / (ustar(i) * ff ** pp)
+!               cc = ustar(i) * z0 / rnu
+!               pp = cc / (1. + cc)
+!               ff = grav * arnu / (charnock * ustar(i) ** 3)
+!               z0 = arnu / (ustar(i) * ff ** pp)
 
-              if (redrag) then
-                z0rl_ocn(i) = 100.0 * max(min(z0, z0s_max), 1.e-7)
+                if (redrag) then
+                  z0rl_ocn(i) = 100.0 * max(min(z0, z0s_max), 1.e-7)
+                else
+                  z0rl_ocn(i) = 100.0 * max(min(z0,.1), 1.e-7)
+                endif
+
+              elseif (sfc_z0_type == 6) then   ! wang
+                 call znot_m_v6(wind10m, z0)  ! wind, m/s, z0, m
+                 z0rl_ocn(i) = 100.0 * z0          ! cm
+              elseif (sfc_z0_type == 7) then   ! wang
+                 call znot_m_v7(wind10m, z0)  ! wind, m/s, z0, m
+                 z0rl_ocn(i) = 100.0 * z0          ! cm
               else
-                z0rl_ocn(i) = 100.0 * max(min(z0,.1), 1.e-7)
+                 z0rl_ocn(i) = 1.0e-4
               endif
 
-            elseif (sfc_z0_type == 6) then   ! wang
-               call znot_m_v6(wind10m, z0)  ! wind, m/s, z0, m
-               z0rl_ocn(i) = 100.0 * z0          ! cm
-            elseif (sfc_z0_type == 7) then   ! wang
-               call znot_m_v7(wind10m, z0)  ! wind, m/s, z0, m
-               z0rl_ocn(i) = 100.0 * z0          ! cm
-            else
-               z0rl_ocn(i) = 1.0e-4
             endif
-
           endif              ! end of if(open ocean)
 !
         endif                ! end of if(flagiter) loop

@@ -516,15 +516,15 @@ module mp_thompson
 !>\ingroup aathompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{
-      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,         &
-                              spechum, qc, qr, qi, qs, qg, ni, nr,       &
-                              is_aerosol_aware, nc, nwfa, nifa,          &
-                              nwfa2d, nifa2d,                            &
-                              tgrs, prsl, phii, omega, dtp,              &
-                              prcp, rain, graupel, ice, snow, sr,        &
-                              refl_10cm, do_radar_ref,                   &
-                              re_cloud, re_ice, re_snow,                 &
-                              mpicomm, mpirank, mpiroot,                 &
+      subroutine mp_thompson_run(ncol, nlev, con_g, con_rd,        &
+                              spechum, qc, qr, qi, qs, qg, ni, nr, &
+                              is_aerosol_aware, nc, nwfa, nifa,    &
+                              nwfa2d, nifa2d,                      &
+                              tgrs, prsl, phii, omega, dtp,        &
+                              prcp, rain, graupel, ice, snow, sr,  &
+                              refl_10cm, reset, do_radar_ref,      &
+                              re_cloud, re_ice, re_snow,           &
+                              mpicomm, mpirank, mpiroot,           &
                               errmsg, errflg)
 
          implicit none
@@ -546,7 +546,7 @@ module mp_thompson
          real(kind_phys),           intent(inout) :: ni(1:ncol,1:nlev)
          real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
          ! Aerosols
-         logical,                   intent(in)    :: is_aerosol_aware
+         logical,                   intent(in)    :: is_aerosol_aware, reset
          ! The following arrays are not allocated if is_aerosol_aware is false
          real(kind_phys), optional, intent(inout) :: nc(:,:)
          real(kind_phys), optional, intent(inout) :: nwfa(:,:)
@@ -748,7 +748,7 @@ module mp_thompson
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg)
+                              errmsg=errmsg, errflg=errflg, reset=reset)
 
          else
             call mp_gt_driver(qv=qv_mp, qc=qc_mp, qr=qr_mp, qi=qi_mp, qs=qs_mp, qg=qg_mp,    &
@@ -765,7 +765,7 @@ module mp_thompson
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
-                              errmsg=errmsg, errflg=errflg)
+                              errmsg=errmsg, errflg=errflg, reset=reset)
          end if
          if (errflg/=0) return
 

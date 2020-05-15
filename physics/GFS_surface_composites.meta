@@ -33,6 +33,14 @@
   type = logical
   intent = in
   optional = F
+[cplwav2atm]
+  standard_name = flag_for_wave_coupling_to_atm
+  long_name = flag controlling ocean wave coupling to the atmosphere (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [landfrac]
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land
@@ -711,6 +719,33 @@
   kind = kind_phys
   intent = inout
   optional = F
+[adjsfcdsw]
+  standard_name = surface_downwelling_shortwave_flux
+  long_name = surface downwelling shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfcnsw]
+  standard_name = surface_net_downwelling_shortwave_flux
+  long_name = surface net downwelling shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[adjsfcusw]
+  standard_name = surface_upwelling_shortwave_flux
+  long_name = surface upwelling shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -744,6 +779,14 @@
 [cplflx]
   standard_name = flag_for_flux_coupling
   long_name = flag controlling cplflx collection (default off)
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[cplwav2atm]
+  standard_name = flag_for_wave_coupling_to_atm
+  long_name = flag controlling ocean wave coupling to the atmosphere (default off)
   units = flag
   dimensions = ()
   type = logical
