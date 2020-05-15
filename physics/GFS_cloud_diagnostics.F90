@@ -1,9 +1,9 @@
 module GFS_cloud_diagnostics
   use machine,                 only: kind_phys
-  use physcons,                only: con_pi
+  use physcons,                only: con_pi, con_rog
   use physparam,               only: iovrlw, iovrsw, ivflip, icldflg
   use GFS_typedefs,            only: GFS_control_type
-  
+
   ! Module parameters (imported directly from radiation_cloud.f)
   integer, parameter :: &
      NF_CLDS = 9,        &  ! Number of fields in cloud array
@@ -37,8 +37,8 @@ contains
 !! \section arg_table_GFS_cloud_diagnostics_run
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
-  subroutine GFS_cloud_diagnostics_run(Model, nCol, nLev, lat, p_lay, deltaZ, cld_frac,  &
-     mbota, mtopa, cldsa, de_lgth, overlap_param, errmsg, errflg)
+  subroutine GFS_cloud_diagnostics_run(Model, nCol, nLev, lat, p_lay, tv_lay, cld_frac,  &
+     p_lev, mbota, mtopa, cldsa, de_lgth, overlap_param, errmsg, errflg)
     implicit none
      
     ! Inputs
@@ -51,8 +51,10 @@ contains
        lat                  ! Latitude       
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &
        p_lay,             & ! Pressure at model-layer
-       deltaZ,            & ! Layer thickness at model-layers	
+       tv_lay,            & ! Virtual temperature
        cld_frac             ! Total cloud fraction
+    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &
+       p_lev                ! Pressure at model interfaces
        
     ! Outputs
     character(len=*), intent(out) :: &
@@ -74,7 +76,7 @@ contains
 	real(kind_phys) :: tem1
 	real(kind_phys),dimension(nCol,NK_CLDS+1) :: ptop1
 	real(kind_phys),dimension(nCol) :: rlat
-	real(kind_phys),dimension(nCol,nLev) :: cldcnv
+	real(kind_phys),dimension(nCol,nLev) :: cldcnv, deltaZ
 	
     if (.not. (Model%lsswr .or. Model%lslwr)) return
     	
@@ -91,6 +93,13 @@ contains
  	      rlat(i) = abs(lat(i) / con_pi )
           ptop1(i,icld) = ptopc(icld,1) + tem1*max( 0.0, 4.0*rlat(i)-1.0 )
         enddo
+    enddo
+    
+    ! Compute layer-thickness
+    do iCol=1,nCol
+       do iLay=1,nLev
+         deltaZ(iCol,iLay) = (con_rog*0.001) * abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
+       enddo
     enddo
 	
 	! Estimate clouds decorrelation length in km

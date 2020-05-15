@@ -43,15 +43,15 @@
   kind = kind_phys
   intent = in
   optional = F
-[deltaZ]
-  standard_name = layer_thickness
-  long_name = layer_thickness
-  units = m
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
+  units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F    
+  optional = F     
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -60,7 +60,16 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
+  optional = F 
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical interface for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops

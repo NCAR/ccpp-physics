@@ -180,10 +180,9 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-  subroutine GFS_rrtmgp_pre_run (Model, Grid, Statein, Sfcprop, Tbd, ncol, lw_gas_props, &
-       active_gases_array,                                                               & ! IN
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, qs_lay, q_lay,     & ! OUT
-       deltaZ, tracer,  gas_concentrations,  errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_run(Model, Grid, Statein, Sfcprop, Tbd, ncol, active_gases_array, &
+       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,                 &
+       gas_concentrations,  errmsg, errflg)
     
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -198,52 +197,46 @@ contains
          Tbd                  ! DDT: FV3-GFS data not yet assigned to a defined container
     integer, intent(in)    :: &
          ncol                 ! Number of horizontal grid points
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props         ! RRTMGP DDT: longwave spectral information
     character(len=*),dimension(Model%ngases), intent(in) :: &
          active_gases_array   ! Character array containing trace gases to include in RRTMGP
 
     ! Outputs
-    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
-         p_lay,             & ! Pressure at model-layer
-         t_lay                ! Temperature at model layer
-    real(kind_phys), dimension(ncol,Model%levs+1), intent(out) :: &
-         p_lev,             & ! Pressure at model-interface
-         t_lev                ! Temperature at model-interface
+    character(len=*), intent(out) :: &
+         errmsg               ! Error message
+    integer, intent(out) :: &  
+         errflg               ! Error flag    
     real(kind_phys), intent(out) :: &
          raddt                ! Radiation time-step
     real(kind_phys), dimension(ncol), intent(out) :: &
          tsfg,              & ! Ground temperature
-         tsfa                 ! Skin temperature
-    type(ty_gas_concs),intent(out) :: &
-         gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
-    character(len=*), intent(out) :: &
-         errmsg               ! Error message
-    integer, intent(out) :: &  
-         errflg               ! Error flag
-    real(kind_phys), dimension(ncol,Model%levs),intent(out) :: &
+         tsfa                 ! Skin temperature    
+    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
+         p_lay,             & ! Pressure at model-layer
+         t_lay,             & ! Temperature at model layer
          tv_lay,            & ! Virtual temperature at model-layers 
-         relhum,            & ! Relative-humidity at model-layers 
-         qs_lay,            & ! Saturation mixing-ratio at model-layers
-         q_lay,             & ! Water-vapor mixing-ratio at model-layers
-         deltaZ               ! Layer thickness at model-layers
+         relhum               ! Relative-humidity at model-layers          
+    real(kind_phys), dimension(ncol,Model%levs+1), intent(out) :: &
+         p_lev,             & ! Pressure at model-interface
+         t_lev                ! Temperature at model-interface
     real(kind_phys), dimension(ncol, Model%levs, Model%ntrac),intent(out) :: &
          tracer               ! Array containing trace gases
-
+    type(ty_gas_concs),intent(out) :: &
+         gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
+         
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
     logical :: top_at_1
     real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs, tem1, tem2
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
-    real(kind_phys), dimension(ncol, Model%levs) :: o3_lay
+    real(kind_phys), dimension(ncol, Model%levs) :: o3_lay, qs_lay, q_lay
     real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
+
+    if (.not. (Model%lsswr .or. Model%lslwr)) return
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
-    if (.not. (Model%lsswr .or. Model%lslwr)) return
     
     ! #######################################################################################
     ! What is vertical ordering?
@@ -295,7 +288,6 @@ contains
           relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(QMIN, q_lay(iCol,iLay))/qs ) )
           qs_lay(iCol,iLay) = qs
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + fvirt*q_lay(iCol,iLay)) 
-          deltaZ(iCol,iLay) = (rog*0.001) * abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
        enddo
     enddo
 

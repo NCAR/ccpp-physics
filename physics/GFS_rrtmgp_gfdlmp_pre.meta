@@ -49,15 +49,7 @@
   dimensions = (horizontal_dimension)
   type = real
   intent = in
-  kind = kind_phys
-[lon]
-  standard_name = longitude
-  long_name = longitude
-  units = radians
-  dimensions = (horizontal_dimension)
-  type = real
-  intent = in
-  kind = kind_phys  
+  kind = kind_phys 
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
@@ -85,15 +77,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[t_lev]
-  standard_name = air_temperature_at_interface_for_RRTMGP
-  long_name = air temperature  at vertical interface for radiation calculation
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [tv_lay]
   standard_name = virtual_temperature
   long_name = layer virtual temperature
@@ -103,42 +86,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[relhum]
-  standard_name = relative_humidity
-  long_name = layer relative humidity
-  units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[qs_lay]
-  standard_name = saturation_mixing_ratio
-  long_name = saturation mixing ratio
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[q_lay]
-  standard_name = water_vapor_mixing_ratio
-  long_name = water mixing ratio
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[deltaZ]
-  standard_name = layer_thickness
-  long_name = layer_thickness
-  units = m
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F    
 [tracer]
   standard_name = chemical_tracers
   long_name = chemical tracers

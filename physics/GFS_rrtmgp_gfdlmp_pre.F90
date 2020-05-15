@@ -27,8 +27,8 @@ contains
 !! \section arg_table_GFS_rrtmgp_gfdlmp_pre_run
 !! \htmlinclude GFS_rrtmgp_gfdlmp_pre_run.html
 !!  
-  subroutine GFS_rrtmgp_gfdlmp_pre_run(Model, Tbd, nCol, nLev, slmsk, lon, lat, p_lay,   &
-      p_lev, t_lay, t_lev, tv_lay, relhum, qs_lay, q_lay, deltaZ, tracer,                &
+  subroutine GFS_rrtmgp_gfdlmp_pre_run(Model, Tbd, nCol, nLev, slmsk, lat, p_lay, p_lev, &
+      t_lay, tv_lay, tracer,                                                             &
       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,    &
       cld_rerain, errmsg, errflg)
     implicit none
@@ -43,19 +43,13 @@ contains
          nLev                 ! Number of vertical-layers
     real(kind_phys), dimension(nCol), intent(in) :: &
          slmsk,             & ! Land/sea/sea-ice mask
-         lon,               & ! Longitude
          lat                  ! Latitude
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &
          p_lay,             & ! Pressure at model-layer (Pa)
          t_lay,             & ! Temperature at model layer  (K)
-         tv_lay,            & ! Virtual temperature at model-layers (K)
-         relhum,            & ! Relative-humidity at model-layers 
-         qs_lay,            & ! Saturation mixing-ratio at model-layers (kg/kg)
-         q_lay,             & ! Water-vapor mixing-ratio at model-layers (kg/kg)
-         deltaZ               ! Layer thickness at model-layers (km)
+         tv_lay               ! Virtual temperature at model-layers (K)
     real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &         
-         p_lev,             & ! Pressure at model-level interfaces (Pa)
-         t_lev                ! Temperature at model-level interfaces (K)
+         p_lev                ! Pressure at model-level interfaces (Pa)
     real(kind_phys), dimension(nCol, nLev, Model%ntrac),intent(in) :: &
          tracer               ! Cloud condensate amount in layer by type ()         
     
@@ -124,7 +118,7 @@ contains
     endif
     
 	! Cloud-fraction
-    cld_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nCol,Model%ntclamt)
+    cld_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,Model%ntclamt)
                            			    
 	! Set really tiny suspended particle amounts to clear
     do l=1,ncndl
