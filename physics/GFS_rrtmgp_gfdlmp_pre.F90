@@ -1,20 +1,25 @@
+! ########################################################################################
+! This module contains the interface between the GFDL macrophysics and the RRTMGP radiation
+! schemes. Only compatable with Model%imp_physics = Model%imp_physics_gfdl
+! ########################################################################################
 module GFS_rrtmgp_gfdlmp_pre
   use machine,      only: kind_phys
   use GFS_typedefs, only: GFS_control_type, GFS_tbd_type 
   use physcons,     only: con_ttp, & ! Temperature at h2o 3pt (K)
-  						  con_rd,  & ! Gas constant for dry air (J/KgK)
-  						  con_pi,  & ! PI
-  						  con_g      ! Gravity (m/s2)
+                          con_rd,  & ! Gas constant for dry air (J/KgK)
+                          con_pi,  & ! PI
+                          con_g      ! Gravity (m/s2)
   use physparam,    only: lcnorm,lcrick
+
   ! Parameters
   real(kind_phys), parameter :: &
-  	 reliq_def = 10.0,     & ! Default liq radius to 10 micron
-     reice_def = 50.0,     & ! Default ice radius to 50 micron
-     rrain_def = 1000.0,   & ! Default rain radius to 1000 micron
-     rsnow_def = 250.0,    & ! Default snow radius to 250 micron  
-     epsq      = 1.0e-12,  & ! Tiny value
-     cllimit   = 0.001,    & ! Lowest cloud fraction in GFDL MP scheme
-     gfac=1.0e5/con_g        !
+       reliq_def = 10.0,     & ! Default liq radius to 10 micron
+       reice_def = 50.0,     & ! Default ice radius to 50 micron
+       rrain_def = 1000.0,   & ! Default rain radius to 1000 micron
+       rsnow_def = 250.0,    & ! Default snow radius to 250 micron  
+       epsq      = 1.0e-12,  & ! Tiny value
+       cllimit   = 0.001,    & ! Lowest cloud fraction in GFDL MP scheme
+       gfac      = 1.0e5/con_g
        
 contains  
   ! ######################################################################################
@@ -28,9 +33,9 @@ contains
 !! \htmlinclude GFS_rrtmgp_gfdlmp_pre_run.html
 !!  
   subroutine GFS_rrtmgp_gfdlmp_pre_run(Model, Tbd, nCol, nLev, slmsk, lat, p_lay, p_lev, &
-      t_lay, tv_lay, tracer,                                                             &
-      cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,    &
-      cld_rerain, errmsg, errflg)
+       t_lay, tv_lay, tracer,                                                            &
+       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
+       cld_rerain, errmsg, errflg)
     implicit none
     
     ! Inputs  
@@ -68,7 +73,7 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag
-                      
+    
     ! Local variables
     real(kind_phys) :: tem1, tem2, tem3, clwt
     real(kind_phys), dimension(nCol) :: rlat
@@ -82,7 +87,7 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-
+    
     ! Initialize outputs
     cld_lwp(:,:)    = 0.0
     cld_reliq(:,:)  = 0.0
@@ -92,11 +97,11 @@ contains
     cld_rerain(:,:) = 0.0
     cld_swp(:,:)    = 0.0
     cld_resnow(:,:) = 0.0
-
+    
     ! Compute layer pressure thickness (hPa)
     deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  
-
-	! ####################################################################################
+    
+    ! ####################################################################################
     ! Pull out cloud information for GFDL MP scheme.
     ! ####################################################################################
     ! Cloud hydrometeors
@@ -105,7 +110,7 @@ contains
        cld_condensate(1:nCol,1:nLev,1) = tracer(1:nCol,1:nLev,Model%ntcw)     ! -liquid water
        cld_condensate(1:nCol,1:nLev,2) = tracer(1:nCol,1:nLev,Model%ntiw)     ! -ice water
        ncndl = Model%ncnd
-    endif   
+    endif
     if (Model%ncnd .eq. 5) then
        cld_condensate(1:nCol,1:nLev,1) = tracer(1:nCol,1:nLev,Model%ntcw)     ! -liquid water
        cld_condensate(1:nCol,1:nLev,2) = tracer(1:nCol,1:nLev,Model%ntiw)     ! -ice water
@@ -117,18 +122,18 @@ contains
        ncndl = min(4,Model%ncnd)       
     endif
     
-	! Cloud-fraction
+    ! Cloud-fraction
     cld_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,Model%ntclamt)
-                           			    
-	! Set really tiny suspended particle amounts to clear
+    
+    ! Set really tiny suspended particle amounts to clear
     do l=1,ncndl
        do k=1,nLev
           do i=1,nCol   
              if (cld_condensate(i,k,l) < epsq) cld_condensate(i,k,l) = 0.0
-	      enddo
+          enddo
        enddo
     enddo
-            
+    
     ! DJS asks. Do we need lcrick? If not replace clwf with cld_condensate(:,:,1)
     if ( lcrick ) then
        do icnd=1,ncndl
@@ -138,23 +143,23 @@ contains
           enddo
           do k = 2, nLev-1
              do i = 1, nCol
-               clwf(i,k,icnd) = 0.25*cld_condensate(i,k-1,icnd) + 0.5*cld_condensate(i,k,icnd) + &
-            	   		        0.25*cld_condensate(i,k+1,icnd)
+                clwf(i,k,icnd) = 0.25*cld_condensate(i,k-1,icnd) + 0.5*cld_condensate(i,k,icnd) + &
+                     0.25*cld_condensate(i,k+1,icnd)
              enddo
           enddo
-        enddo
+       enddo
     else
        do icnd=1,ncndl
           do k = 1, nLev
              do i = 1, nCol
                 clwf(i,k,icnd) = cld_condensate(i,k,icnd)
              enddo
-           enddo
-        enddo
-    endif    
+          enddo
+       enddo
+    endif
 
     ! ####################################################################################
-	! A) Compute Liquid/Ice/Rain/Snow(+groupel) cloud condensate paths
+    ! A) Compute Liquid/Ice/Rain/Snow(+groupel) cloud condensate paths
     ! ####################################################################################
     
     ! ####################################################################################
@@ -163,59 +168,59 @@ contains
     !    Formerly progclduni()
     ! ####################################################################################
     if (Model%lgfdlmprad) then    	
-      ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
-      do k = 1, nLev
-         do i = 1, nCol
-         	if (cld_frac(i,k) .ge. cllimit) then         
-               tem1          = gfac * deltaP(i,k)
-               cld_lwp(i,k)  = clwf(i,k,1) * tem1
-               cld_iwp(i,k)  = clwf(i,k,2) * tem1
-               ! Also Rain and Snow(+groupel) if provided
-               if (ncndl .eq. 4) then
-                  cld_rwp(i,k)  = clwf(i,k,3) * tem1
-                  cld_swp(i,k)  = clwf(i,k,4) * tem1  
-               endif                
-            endif
+       ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
+       do k = 1, nLev
+          do i = 1, nCol
+             if (cld_frac(i,k) .ge. cllimit) then         
+                tem1          = gfac * deltaP(i,k)
+                cld_lwp(i,k)  = clwf(i,k,1) * tem1
+                cld_iwp(i,k)  = clwf(i,k,2) * tem1
+                ! Also Rain and Snow(+groupel) if provided
+                if (ncndl .eq. 4) then
+                   cld_rwp(i,k)  = clwf(i,k,3) * tem1
+                   cld_swp(i,k)  = clwf(i,k,4) * tem1  
+                endif
+             endif
           enddo
-       enddo            
+       enddo
     ! ####################################################################################
     ! ii) This option uses only a single mixing-ratio and partitions into liquid/ice cloud
     !     properties by phase.
     !     Formerly progcld4()
     ! ####################################################################################
     else
-	   ! Compute total-cloud suspended water.
+       ! Compute total-cloud suspended water.
        clwf(:,:,1) = sum(clwf,dim=3)
 
-      ! Compute liquid/ice condensate path (g/m2)
-      do k = 1, nLev
-         do i = 1, nCol
-         	if (cld_frac(i,k) .ge. cllimit) then
-               clwt         = max(0.0,clwf(i,k,1)) * gfac * deltaP(i,k)
-               tem2         = min( 1.0, max( 0.0, (con_ttp-t_lay(i,k))*0.05 ) )
-               cld_iwp(i,k) = clwt * tem2
-               cld_lwp(i,k) = clwt - cld_iwp(i,k)
-            endif
-         enddo
-      enddo
-   endif
+       ! Compute liquid/ice condensate path (g/m2)
+       do k = 1, nLev
+          do i = 1, nCol
+             if (cld_frac(i,k) .ge. cllimit) then
+                clwt         = max(0.0,clwf(i,k,1)) * gfac * deltaP(i,k)
+                tem2         = min( 1.0, max( 0.0, (con_ttp-t_lay(i,k))*0.05 ) )
+                cld_iwp(i,k) = clwt * tem2
+                cld_lwp(i,k) = clwt - cld_iwp(i,k)
+             endif
+          enddo
+       enddo
+    endif
 
     ! ####################################################################################
     ! B) Particle sizes
     ! ####################################################################################
-
+    
     ! ####################################################################################
     ! i) Use radii provided from the macrophysics        
     ! ####################################################################################
     if (Model%effr_in) then
        do k=1,nLev
           do i=1,nCol
-            cld_reliq(i,k)  = Tbd%phy_f3d(i,k,1)
-            cld_reice(i,k)  = max(10.0, min(150.0,Tbd%phy_f3d(i,k,2)))
-            cld_rerain(i,k) = Tbd%phy_f3d(i,k,3)
-            cld_resnow(i,k) = Tbd%phy_f3d(i,k,4)
+             cld_reliq(i,k)  = Tbd%phy_f3d(i,k,1)
+             cld_reice(i,k)  = max(10.0, min(150.0,Tbd%phy_f3d(i,k,2)))
+             cld_rerain(i,k) = Tbd%phy_f3d(i,k,3)
+             cld_resnow(i,k) = Tbd%phy_f3d(i,k,4)
           enddo
-        enddo
+       enddo
     ! ####################################################################################
     ! ii) Start with default values. Modify liquid sizes over land. Adjust ice sizes following
     !     Hemsfield and McFarquhar (1996) https://doi.org/10.1175/1520-0469
@@ -226,51 +231,51 @@ contains
        cld_rerain(:,:) = rrain_def     
        cld_resnow(:,:) = rsnow_def     
         
-	   ! Compute effective liquid cloud droplet radius over land.
+       ! Compute effective liquid cloud droplet radius over land.
        do i = 1, nCol
-         if (nint(slmsk(i)) == 1) then
-           do k = 1, nLev
-             tem2           = min( 1.0, max( 0.0, (con_ttp-t_lay(i,k))*0.05 ) )
-             cld_reliq(i,k) = 5.0 + 5.0 * tem2
-           enddo
-         endif
+          if (nint(slmsk(i)) == 1) then
+             do k = 1, nLev
+                tem2           = min( 1.0, max( 0.0, (con_ttp-t_lay(i,k))*0.05 ) )
+                cld_reliq(i,k) = 5.0 + 5.0 * tem2
+             enddo
+          endif
        enddo
-
+       
        ! Compute effective ice cloud droplet radius.
        do k = 1, nLev
           do i = 1, nCol
              tem2 = t_lay(i,k) - con_ttp
              if (cld_iwp(i,k) > 0.0) then
-               tem3 = (con_g/con_rd)* cld_iwp(i,k) * (p_lay(i,k)/100.) / (deltaP(i,k)*tv_lay(i,k))
-               if (tem2 < -50.0) then
-                 cld_reice(i,k) = (1250.0/9.917) * tem3 ** 0.109
-               elseif (tem2 < -40.0) then
-                 cld_reice(i,k) = (1250.0/9.337) * tem3 ** 0.08
-               elseif (tem2 < -30.0) then
-                 cld_reice(i,k) = (1250.0/9.208) * tem3 ** 0.055
-               else
-                 cld_reice(i,k) = (1250.0/9.387) * tem3 ** 0.031
-               endif
-               cld_reice(i,k)   = max(10.0, min(cld_reice(i,k), 150.0))
+                tem3 = (con_g/con_rd)* cld_iwp(i,k) * (p_lay(i,k)/100.) / (deltaP(i,k)*tv_lay(i,k))
+                if (tem2 < -50.0) then
+                   cld_reice(i,k) = (1250.0/9.917) * tem3 ** 0.109
+                elseif (tem2 < -40.0) then
+                   cld_reice(i,k) = (1250.0/9.337) * tem3 ** 0.08
+                elseif (tem2 < -30.0) then
+                   cld_reice(i,k) = (1250.0/9.208) * tem3 ** 0.055
+                else
+                   cld_reice(i,k) = (1250.0/9.387) * tem3 ** 0.031
+                endif
+                cld_reice(i,k)   = max(10.0, min(cld_reice(i,k), 150.0))
              endif
-           enddo
-       enddo        
-    endif  
+          enddo
+       enddo
+    endif
     
-   ! Normalize cloud-condensate by cloud-cover?
-   if ( lcnorm ) then
-      do k = 1, nLev
-         do i = 1, nCol
-            if (cld_frac(i,k) >= cllimit) then
-               tem1 = 1.0 / max(0.05, cld_frac(i,k))
-               cld_lwp(i,k) = cld_lwp(i,k) * tem1
-               cld_iwp(i,k) = cld_iwp(i,k) * tem1
-               cld_rwp(i,k) = cld_rwp(i,k) * tem1
-               cld_swp(i,k) = cld_swp(i,k) * tem1
-            endif
-         enddo
-      enddo
-    endif  
+    ! Normalize cloud-condensate by cloud-cover?
+    if ( lcnorm ) then
+       do k = 1, nLev
+          do i = 1, nCol
+             if (cld_frac(i,k) >= cllimit) then
+                tem1 = 1.0 / max(0.05, cld_frac(i,k))
+                cld_lwp(i,k) = cld_lwp(i,k) * tem1
+                cld_iwp(i,k) = cld_iwp(i,k) * tem1
+                cld_rwp(i,k) = cld_rwp(i,k) * tem1
+                cld_swp(i,k) = cld_swp(i,k) * tem1
+             endif
+          enddo
+       enddo
+    endif
     
   end subroutine GFS_rrtmgp_gfdlmp_pre_run
 
