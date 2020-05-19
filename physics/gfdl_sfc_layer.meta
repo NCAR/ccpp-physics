@@ -401,6 +401,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[wspd]
+  standard_name = wind_speed_at_lowest_model_layer
+  long_name = wind speed at lowest model level
+  units = m s-1
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [u10]
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed

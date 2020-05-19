@@ -103,13 +103,13 @@
         lsm_noah, lsm_noahmp, lsm_ruc, lsm_noah_wrfv4, icoef_sf, cplwav,        &
         cplwav2atm, lcurr_sf, pert_Cd, ntsflg, sfenth, z1, shdmax, ivegsrc,     &
         vegtype, sigmaf, dt, wet, dry, icy, isltyp, rd, grav, ep1, ep2, smois,  &
-        psfc, prsl1, q1, t1, u1, v1, u10, v10, gsw, glw, tsurf_ocn, tsurf_lnd,  &
-        tsurf_ice, tskin_ocn, tskin_lnd, tskin_ice, ustar_ocn, ustar_lnd,       &
-        ustar_ice, znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd, cdm_ice,        &
-        stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice, fm_ocn,  &
-        fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd, fh2_ice,      &
-        ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice, qss_ocn, qss_lnd, &
-        qss_ice, errmsg, errflg)
+        psfc, prsl1, q1, t1, u1, v1, wspd, u10, v10, gsw, glw, tsurf_ocn,       &
+        tsurf_lnd, tsurf_ice, tskin_ocn, tskin_lnd, tskin_ice, ustar_ocn,       &
+        ustar_lnd, ustar_ice, znt_ocn, znt_lnd, znt_ice, cdm_ocn, cdm_lnd,      &
+        cdm_ice, stress_ocn, stress_lnd, stress_ice, rib_ocn, rib_lnd, rib_ice, &
+        fm_ocn, fm_lnd, fm_ice, fh_ocn, fh_lnd, fh_ice, fh2_ocn, fh2_lnd,       &
+        fh2_ice, ch_ocn, ch_lnd, ch_ice, fm10_ocn, fm10_lnd, fm10_ice, qss_ocn, &
+        qss_lnd, qss_ice, errmsg, errflg)
         
         use funcphys, only: fpvs
         
@@ -136,8 +136,8 @@
         real(kind=kind_phys),                      intent(in) :: rd,grav,ep1,ep2
         real(kind=kind_phys), dimension(im,nsoil), intent(in) :: smois
         real(kind=kind_phys), dimension(im),       intent(in) :: psfc, prsl1,   &
-            q1, t1, u1, v1, u10, v10, gsw, glw, z1, shdmax, sigmaf, xlat, xlon, &
-            tsurf_ocn, tsurf_lnd, tsurf_ice
+            q1, t1, u1, v1, wspd, u10, v10, gsw, glw, z1, shdmax, sigmaf, xlat, &
+            xlon, tsurf_ocn, tsurf_lnd, tsurf_ice
         
         real(kind=kind_phys), intent(inout), dimension(im) :: tskin_ocn,        & 
             tskin_lnd, tskin_ice, ustar_ocn, ustar_lnd, ustar_ice,              &
@@ -167,7 +167,7 @@
         real(kind=kind_phys) :: ens_Cdamp
         
         real(kind=kind_phys), dimension(im)   :: wetc, pspc, pkmax, tstrc, upc, &
-            vpc, mznt, slwdc, wspd, wind10, qfx, qgh, zkmax, z1_cm, z0max, ztmax
+            vpc, mznt, slwdc, wind10, qfx, qgh, zkmax, z1_cm, z0max, ztmax
         real(kind=kind_phys), dimension(im)   :: u10_lnd, u10_ocn, u10_ice,     &
             v10_lnd, v10_ocn, v10_ice
             
@@ -253,13 +253,6 @@
 
             upc(i) = u1(i)*100.       ! convert from m s-1 to cm s-1
             vpc(i) = v1(i)*100.       ! convert from m s-1 to cm s-1
-            
-            !GJF: wind speed at the lowest model layer is calculated in a scheme prior to this (if this scheme
-            ! is part of a GFS-based suite), but it is recalculated here because this one DOES NOT include
-            ! a convective wind enhancement component (convective gustiness factor) to follow the original
-            ! GFDL surface layer scheme; this may not be necessary
-            wspd(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
-            wspd(i) = amax1(wspd(i),1.0)    !wspd is in m s-1
             
             !Wang:  use previous u10 v10 to compute wind10, input to MFLUX2 to compute z0 (for first time step, u10 and v10 may be zero)
             wind10(i)=sqrt(u10(i)*u10(i)+v10(i)*v10(i)) !m s-1
@@ -373,8 +366,7 @@
               
               !GJF: from WRF's module_sf_gfdl.F
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 !GJF: why not use wspd(i) to save compute?
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/z0max(i))/alog(z1(i)/z0max(i)) !m s-1
+                 wind10(i)=wspd(i)*alog(10.0/z0max(i))/alog(z1(i)/z0max(i)) !m s-1
               end if
               wind10(i)=wind10(i)*100.0   !convert from m/s to cm/s
               
@@ -523,8 +515,7 @@
               
               !GJF: from WRF's module_sf_gfdl.F
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 !GJF: why not use wspd(i) to save compute?
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/z0max(i))/alog(z1(i)/z0max(i))
+                 wind10(i)=wspd(i)*alog(10.0/z0max(i))/alog(z1(i)/z0max(i))
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
@@ -628,7 +619,7 @@
               
               !GJF: from WRF's module_sf_gfdl.F
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
-                 wind10(i)=sqrt(u1(i)*u1(i)+v1(i)*v1(i))*alog(10.0/(0.01*znt_ocn(i)))/alog(z1(i)/(0.01*znt_ocn(i)))
+                 wind10(i)=wspd(i)*alog(10.0/(0.01*znt_ocn(i)))/alog(z1(i)/(0.01*znt_ocn(i)))
               end if
               wind10(i)=wind10(i)*100.0   !! m/s to cm/s
               
