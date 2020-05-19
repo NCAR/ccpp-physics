@@ -124,7 +124,7 @@ contains
     ! layer indices for low, mid, and high clouds. The three cloud domain boundaries are 
     ! defined by ptopc. The cloud overlapping method is defined by control flag 'iovr', which may
     ! be different for lw and sw radiation programs.
-    call gethml(p_lay, ptop1, cld_frac, cldcnv, deltaZ, de_lgth, nCol, nLev, cldsa, mtopa, mbota)	
+    call gethml(p_lay/100., ptop1, cld_frac, cldcnv, deltaZ, de_lgth, nCol, nLev, cldsa, mtopa, mbota)	
     
   end subroutine GFS_cloud_diagnostics_run
   
