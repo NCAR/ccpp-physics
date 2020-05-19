@@ -52,7 +52,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ice_aer_num_conc,          &
      &  prsl,exner,                     &
      &  slmsk,tsurf,qsfc,ps,            &
-     &  ust,ch,hflx,qflx,hflxq,qflxq,   &
+     &  ust,ch,hflx,qflx,               &
      &  wspd,rb,dtsfc1,dqsfc1,          &
      &  dtsfci_diag,dqsfci_diag,        &
      &  dtsfc_diag,dqsfc_diag,          &
@@ -268,8 +268,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind=kind_phys), dimension(im), intent(in) ::                 &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
-      real(kind=kind_phys), dimension(im), intent(out) ::                &
-     &        hflxq, qflxq
 
       real(kind=kind_phys), dimension(im), intent(inout) ::              &
      &        pblh
@@ -305,12 +303,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          initflag=0
          !print*,"in MYNN, initflag=",initflag
       endif
-
-  ! Set "kinematic surface upward latent/sensible heat flux reduced by
-  ! surface roughness" to kinematic surface upward latent/sensible heat flux,
-  ! because the lheatstrg capability in GFS_PBL_generic_pre is not implemented
-      hflxq = hflx
-      qflxq = qflx
 
   ! Assign variables for each microphysics scheme
         if (imp_physics == imp_physics_wsm6) then
