@@ -154,6 +154,8 @@
         
         integer :: i, its, ite, ims, ime
         
+        logical :: ch_bound_excursion
+        
         !GJF: the vonKarman constant should come in through the CCPP and be defined by the host model
         real (kind=kind_phys), parameter :: karman = 0.4
         real (kind=kind_phys), parameter :: log01=log(0.01), log05=log(0.05),   &
@@ -180,7 +182,8 @@
                                                  xxfh2, tzot
         real(kind=kind_phys), dimension(1:30) :: maxsmc, drysmc
         real(kind=kind_phys)                  :: smcmax, smcdry, zhalf, cd10,   &
-            esat, fm_lnd_old, fh_lnd_old, tem1, tem2, czilc, cdlimit
+            esat, fm_lnd_old, fh_lnd_old, tem1, tem2, czilc, cd_low_limit,      &
+            cd_high_limit, ch_low_limit, ch_high_limit
         
         !#### This block will become unnecessary when maxsmc and drysmc come through the CCPP ####
         if (lsm == lsm_noah) then
@@ -273,8 +276,13 @@
             zkmax(i) = z1(i)
             z1_cm(i) = 100.0*z1(i)
             
-            !GJF: this drag coefficient lower limit was suggested by Chunxi Zhang via his module_sf_sfclayrev.f90
-            cdlimit  = 1.0e-5/zkmax(i)
+            !GJF: these drag coefficient limits were suggested by Chunxi Zhang via his module_sf_sfclayrev.f90
+            cd_low_limit  = 1.0e-5/zkmax(i)
+            cd_high_limit = 0.1
+            !GJF: use the lower of 0.1 from Chunxi Zhang or 0.05/wspd from WRF's module_sf_gfdl.F 
+            !    (this will always be the latter if wspd has a minimum of 1.0 m s-1 from above)
+            ch_low_limit = cd_low_limit
+            ch_high_limit = min(0.1,0.05/wspd(i))
             
             !slwdc... GFDL downward net flux in units of cal/(cm**2/min)
             !also divide by 10**4 to convert from /m**2 to /cm**2
@@ -396,23 +404,37 @@
               !taux(i) = fxmx(i)/10.    ! gopal's doing for Ocean coupling
               !tauy(i) = fxmy(i)/10.    ! gopal's doing for Ocean coupling
               
+              cdm_lnd(i) = max(cdm_lnd(i), cd_low_limit)
+              cdm_lnd(i) = min(cdm_lnd(i), cd_high_limit)
               fm_lnd(i) = karman/sqrt(cdm_lnd(i))
+              
+              !1) try fh_lnd from MFLUX2
               fh_lnd(i) = karman*xxfh(i)
+              
+              !2) calc ch_lnd from fm_lnd and fh_lnd
+              ch_lnd(i)  = karman*karman/(fm_lnd(i) * fh_lnd(i))
+              
+              !3) check if ch_lnd is out of bounds (if so, recalculate fh_lnd from bounded value)
+              ch_bound_excursion = .false.
+              if (ch_lnd(i) < ch_low_limit) then 
+                ch_bound_excursion = .true.
+                ch_lnd(i) = ch_low_limit
+              else if (ch_lnd(i) > ch_high_limit) then
+                ch_bound_excursion = .true.
+                ch_lnd(i) = ch_high_limit
+              end if
+              
+              if (ch_bound_excursion) then
+                fh_lnd(i) = karman*karman/(fm_lnd(i)*ch_lnd(i))
+              end if
+              
+              !4) try fh2_lnd, limit to be less than or equal to constant*fh_lnd?
+              fh2_lnd(i) = karman*xxfh2(i)
+              fh2_lnd(i) = min(fh2_lnd(i), fh_lnd(i)) !fh2_lnd > fh_lnd leads to bad values in sfc_diag.f
               
               !GJF: Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
               !psim_lnd(i)=gz1oz0(i)-fm_lnd(i)
               !psih_lnd(i)=gz1oz0(i)-fh_lnd(i)
-              
-              fh2_lnd(i) = karman*xxfh2(i)
-              ch_lnd(i)  = karman*karman/(fm_lnd(i) * fh_lnd(i))
-              
-              !GJF: these bounds on drag coefficients are from Chunxi Zhang's module_sf_sfclayrev.f90
-              cdm_lnd(i) = max(cdm_lnd(i), cdlimit)
-              cdm_lnd(i) = min(cdm_lnd(i), 0.1)
-              ch_lnd(i)  = max(ch_lnd(i), cdlimit)
-              ch_lnd(i)  = min(ch_lnd(i), 0.1)
-              !GJF: this bound is from WRF's module_sf_gfdl.F (I'm not sure if both are needed or which is more restrictive.)
-              ch_lnd(i)  = min(ch_lnd(i), 0.05/wspd(i))
               
               !GJF: from WRF's module_sf_gfdl.F
               ustar_lnd(i) = 0.01*sqrt(cdm_lnd(i)*   &
@@ -532,23 +554,37 @@
               !taux(i) = fxmx(i)/10.    ! gopal's doing for Ocean coupling
               !tauy(i) = fxmy(i)/10.    ! gopal's doing for Ocean coupling
               
+              cdm_ice(i) = max(cdm_ice(i), cd_low_limit)
+              cdm_ice(i) = min(cdm_ice(i), cd_high_limit)
               fm_ice(i) = karman/sqrt(cdm_ice(i))
+              
+              !1) try fh_ice from MFLUX2
               fh_ice(i) = karman*xxfh(i)
+              
+              !2) calc ch_ice from fm_ice and fh_ice
+              ch_ice(i)  = karman*karman/(fm_ice(i) * fh_ice(i))
+              
+              !3) check if ch_ice is out of bounds (if so, recalculate fh_ice from bounded value)
+              ch_bound_excursion = .false.
+              if (ch_ice(i) < ch_low_limit) then 
+                ch_bound_excursion = .true.
+                ch_ice(i) = ch_low_limit
+              else if (ch_ice(i) > ch_high_limit) then
+                ch_bound_excursion = .true.
+                ch_ice(i) = ch_high_limit
+              end if
+              
+              if (ch_bound_excursion) then
+                fh_ice(i) = karman*karman/(fm_ice(i)*ch_ice(i))
+              end if
+              
+              !4) try fh2_ice, limit to be less than or equal to constant*fh_ice?
+              fh2_ice(i) = karman*xxfh2(i)
+              fh2_ice(i) = min(fh2_ice(i), fh_ice(i)) !fh2_ice > fh_ice leads to bad values in sfc_diag.f
               
               !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
               !psim_ice(i)=gz1oz0(i)-fm_ice(i)
               !psih_ice(i)=gz1oz0(i)-fh_ice(i)
-              
-              fh2_ice(i) = karman*xxfh2(i)
-              ch_ice(i)  = karman*karman/(fm_ice(i) * fh_ice(i))
-              
-              !GJF: these bounds on drag coefficients are from Chunxi Zhang's module_sf_sfclayrev.f90
-              cdm_ice(i) = max(cdm_ice(i), cdlimit)
-              cdm_ice(i) = min(cdm_ice(i), 0.1)
-              ch_ice(i)  = max(ch_ice(i), cdlimit)
-              ch_ice(i)  = min(ch_ice(i), 0.1)
-              !GJF: this bound is from WRF's module_sf_gfdl.F (I'm not sure if both are needed or which is more restrictive.)
-              ch_ice(i)  = min(ch_ice(i), 0.05/wspd(i))
               
               ustar_ice(i) = 0.01*sqrt(cdm_ice(i)*   &
                          (upc(i)*upc(i) + vpc(i)*vpc(i)))
@@ -627,24 +663,38 @@
               !gz1oz0(i) = alog(zkmax(i)/znt_ocn(i))
               !taux(i) = fxmx(i)/10.    ! gopal's doing for Ocean coupling
               !tauy(i) = fxmy(i)/10.    ! gopal's doing for Ocean coupling
-            
+              
+              cdm_ocn(i) = max(cdm_ocn(i), cd_low_limit)
+              cdm_ocn(i) = min(cdm_ocn(i), cd_high_limit)
               fm_ocn(i) = karman/sqrt(cdm_ocn(i))
+              
+              !1) try fh_ocn from MFLUX2
               fh_ocn(i) = karman*xxfh(i)
+              
+              !2) calc ch_ocn from fm_ocn and fh_ocn
+              ch_ocn(i)  = karman*karman/(fm_ocn(i) * fh_ocn(i))
+              
+              !3) check if ch_lnd is out of bounds (if so, recalculate fh_lnd from bounded value)
+              ch_bound_excursion = .false.
+              if (ch_ocn(i) < ch_low_limit) then 
+                ch_bound_excursion = .true.
+                ch_ocn(i) = ch_low_limit
+              else if (ch_ocn(i) > ch_high_limit) then
+                ch_bound_excursion = .true.
+                ch_ocn(i) = ch_high_limit
+              end if
+              
+              if (ch_bound_excursion) then
+                fh_ocn(i) = karman*karman/(fm_ocn(i)*ch_ocn(i))
+              end if
+              
+              !4) try fh2_ocn, limit to be less than or equal to constant*fh_ocn?
+              fh2_ocn(i) = karman*xxfh2(i)
+              fh2_ocn(i) = min(fh2_ocn(i), fh_ocn(i)) !fh2_ocn > fh_ocn leads to bad values in sfc_diag.F
               
               !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
               !psim_ocn(i)=gz1oz0(i)-fm_ocn(i)
               !psih_ocn(i)=gz1oz0(i)-fh_ocn(i)
-              
-              fh2_ocn(i) = karman*xxfh2(i)
-              ch_ocn(i)  = karman*karman/(fm_ocn(i) * fh_ocn(i))
-              
-              !GJF: these bounds on drag coefficients are from Chunxi Zhang's module_sf_sfclayrev.f90
-              cdm_ocn(i) = max(cdm_ocn(i), cdlimit)
-              cdm_ocn(i) = min(cdm_ocn(i), 0.1)
-              ch_ocn(i)  = max(ch_ocn(i), cdlimit)
-              ch_ocn(i)  = min(ch_ocn(i), 0.1)
-              !GJF: this bound is from WRF's module_sf_gfdl.F (I'm not sure if both are needed or which is more restrictive.)
-              ch_ocn(i)  = min(ch_ocn(i), 0.05/wspd(i))
               
               ustar_ocn(i) = 0.01*sqrt(cdm_ocn(i)*   &
                          (upc(i)*upc(i) + vpc(i)*vpc(i)))
