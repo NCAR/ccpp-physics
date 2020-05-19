@@ -682,6 +682,7 @@ cc
      &     z_c, tref, cplflx, oceanfrac, errmsg, errflg)
 
       use machine , only : kind_phys
+      use module_nst_water_prop, only: get_dtzm_2d
 
       implicit none
 
@@ -707,8 +708,9 @@ cc
       real(kind=kind_phys), parameter :: zero = 0.0_r8,
      &                                   one  = 1.0_r8,
      &                                   half = 0.5_r8,
-     &                                   omz1 = 10.0_r8
-      real(kind=kind_phys) :: tem1, tem2, dt_warm
+     &                                   omz1 = 2.0_r8
+      real(kind=kind_phys) :: tem1, tem2, dt_warm, dnsst
+      real(kind=kind_phys), dimension(im) :: dtzm
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -720,31 +722,30 @@ cc
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
           !tseal(i)     = tsfc_ocn(i)  + tem
-          tseal(i)     = tsfc_ocn(i)
+          tseal(i)      = tsfc_ocn(i)
           !tsurf_ocn(i) = tsurf_ocn(i) + tem
           ! *DH
         endif
       enddo
 
+!
+!   update tsfc & tref with T1 from OGCM & NSST Profile if coupled
+!
       if (cplflx) then
-        tem1 = half / omz1
+        call get_dtzm_2d (xt,  xz, dt_cool,                             &
+     &                    z_c, wet, zero, omz1, im, 1, dtzm)
         do i=1,im
           if (wet(i) .and. oceanfrac(i) > zero) then
+!           dnsst   = tsfc_ocn(i) - tref(i)          !  retrive/get difference of Ts and Tf
+            tref(i) = tsfc_ocn(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
+!           tsfc_ocn(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
+!           tseal(i)    = tsfc_ocn(i)
             if (abs(xz(i)) > zero) then
               tem2 = one / xz(i)
             else
               tem2 = zero
             endif
-            dt_warm = (xt(i)+xt(i)) * tem2
-            if ( xz(i) > omz1) then
-              tref(i) = tseal(i) - (one-half*omz1*tem2) * dt_warm       &
-     &                  + z_c(i)*dt_cool(i)*tem1
-            else
-              tref(i) = tseal(i) - (xz(i)*dt_warm                       &
-     &                  -  z_c(i)*dt_cool(i))*tem1
-            endif
-            tseal(i) = tref(i) + dt_warm - dt_cool(i)
-!                    - (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
+            tseal(i)     = tref(i) + (xt(i)+xt(i)) * tem2 - dt_cool(i)
             tsurf_ocn(i) = tseal(i)
           endif
         enddo
@@ -838,15 +839,14 @@ cc
 
 !  --- ...  run nsst model  ... ---
 
-      dtzm = 0.0_r8
       if (nstf_name1 > 1) then
         zsea1 = 0.001_r8*real(nstf_name4)
         zsea2 = 0.001_r8*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, zsea1, zsea2,      &
      &                    im, 1, dtzm)
         do i = 1, im
-!          if (wet(i) .and. .not.icy(i)) then
-!          if (wet(i) .and. (Model%frac_grid .or. .not. icy(i))) then
+!         if (wet(i) .and. .not.icy(i)) then
+!         if (wet(i) .and. (frac_grid .or. .not. icy(i))) then
           if (wet(i)) then
             tsfc_ocn(i) = max(tgice, tref(i) + dtzm(i))
 !           tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i)) -  &
