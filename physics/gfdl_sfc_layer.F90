@@ -183,7 +183,7 @@
         real(kind=kind_phys), dimension(1:30) :: maxsmc, drysmc
         real(kind=kind_phys)                  :: smcmax, smcdry, zhalf, cd10,   &
             esat, fm_lnd_old, fh_lnd_old, tem1, tem2, czilc, cd_low_limit,      &
-            cd_high_limit, ch_low_limit, ch_high_limit
+            cd_high_limit, ch_low_limit, ch_high_limit, fh2_fh_ratio
         
         !#### This block will become unnecessary when maxsmc and drysmc come through the CCPP ####
         if (lsm == lsm_noah) then
@@ -416,13 +416,13 @@
                 ch_lnd(i) = ch_high_limit
               end if
               
-              if (ch_bound_excursion) then
-                fh_lnd(i) = karman*karman/(fm_lnd(i)*ch_lnd(i))
-              end if
-              
-              !4) try fh2_lnd, limit to be less than or equal to constant*fh_lnd?
               fh2_lnd(i) = karman*xxfh2(i)
-              fh2_lnd(i) = min(fh2_lnd(i), fh_lnd(i)) !fh2_lnd > fh_lnd leads to bad values in sfc_diag.f
+              
+              if (ch_bound_excursion) then
+                fh2_fh_ratio = min(xxfh2(i)/xxfh(i), 1.0)
+                fh_lnd(i) = karman*karman/(fm_lnd(i)*ch_lnd(i))
+                fh2_lnd(i) = fh2_fh_ratio*fh_lnd(i)
+              end if
               
               !GJF: Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
               !psim_lnd(i)=gz1oz0(i)-fm_lnd(i)
@@ -565,13 +565,13 @@
                 ch_ice(i) = ch_high_limit
               end if
               
-              if (ch_bound_excursion) then
-                fh_ice(i) = karman*karman/(fm_ice(i)*ch_ice(i))
-              end if
-              
-              !4) try fh2_ice, limit to be less than or equal to constant*fh_ice?
               fh2_ice(i) = karman*xxfh2(i)
-              fh2_ice(i) = min(fh2_ice(i), fh_ice(i)) !fh2_ice > fh_ice leads to bad values in sfc_diag.f
+              
+              if (ch_bound_excursion) then
+                fh2_fh_ratio = min(xxfh2(i)/xxfh(i), 1.0)
+                fh_ice(i) = karman*karman/(fm_ice(i)*ch_ice(i))
+                fh2_ice(i) = fh2_fh_ratio*fh_ice(i)
+              end if
               
               !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
               !psim_ice(i)=gz1oz0(i)-fm_ice(i)
@@ -675,13 +675,13 @@
                 ch_ocn(i) = ch_high_limit
               end if
               
-              if (ch_bound_excursion) then
-                fh_ocn(i) = karman*karman/(fm_ocn(i)*ch_ocn(i))
-              end if
-              
-              !4) try fh2_ocn, limit to be less than or equal to constant*fh_ocn?
               fh2_ocn(i) = karman*xxfh2(i)
-              fh2_ocn(i) = min(fh2_ocn(i), fh_ocn(i)) !fh2_ocn > fh_ocn leads to bad values in sfc_diag.F
+              
+              if (ch_bound_excursion) then
+                fh2_fh_ratio = min(xxfh2(i)/xxfh(i), 1.0)
+                fh_ocn(i) = karman*karman/(fm_ocn(i)*ch_ocn(i))
+                fh2_ocn(i) = fh2_fh_ratio*fh_ocn(i)
+              end if
               
               !Other CCPP schemes (PBL) ask for fm/fh instead of psim/psih
               !psim_ocn(i)=gz1oz0(i)-fm_ocn(i)
