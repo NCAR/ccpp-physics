@@ -330,8 +330,8 @@
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac,             &
+        dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,           & 
+        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
         errmsg, errflg)
 
       use machine,                only : kind_phys
@@ -346,10 +346,11 @@
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
+      logical, dimension(:), intent(in) :: flag_cice
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
-      real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac, fice
+      real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
           wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1
@@ -382,7 +383,6 @@
       real(kind=kind_phys), parameter :: zero  = 0.0d0
       real(kind=kind_phys), parameter :: one   = 1.0d0
       real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
-      real(kind=kind_phys), parameter :: epsln = 1.0d-10 ! same as in GFS_physics_driver.F90
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
@@ -550,11 +550,18 @@
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
-            if (fice(i) > one - epsln) then ! no open water, use results from CICE
-              dusfci_cpl(i) = dusfc_cice(i)
-              dvsfci_cpl(i) = dvsfc_cice(i)
-              dtsfci_cpl(i) = dtsfc_cice(i)
-              dqsfci_cpl(i) = dqsfc_cice(i)
+            if ( .not. wet(i)) then ! no open water
+              if (flag_cice(i)) then !use results from CICE
+                dusfci_cpl(i) = dusfc_cice(i)
+                dvsfci_cpl(i) = dvsfc_cice(i)
+                dtsfci_cpl(i) = dtsfc_cice(i)
+                dqsfci_cpl(i) = dqsfc_cice(i)
+              else !use PBL fluxes when CICE fluxes is unavailable
+                dusfci_cpl(i) = dusfc1(i)
+                dvsfci_cpl(i) = dvsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)
+                dqsfci_cpl(i) = dqsfc1(i)
+              end if
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
               tem1 = max(q1(i), 1.e-8)
               rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
