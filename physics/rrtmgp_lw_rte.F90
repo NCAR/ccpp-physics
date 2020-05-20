@@ -29,14 +29,15 @@ contains
 !! \section arg_table_rrtmgp_lw_rte_run
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
-  subroutine rrtmgp_lw_rte_run(doLWrad, nCol, nLev, p_lay, t_lay, p_lev, skt, lw_gas_props, &
-       sfc_emiss_byband, sources, lw_optical_props_clrsky, lw_optical_props_clouds,         &
-       lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky,&
-       fluxlwUP_clrsky, fluxlwDOWN_clrsky, hlwb, errmsg, errflg)
+  subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, nCol, nLev, p_lay, t_lay, p_lev, skt, &
+       lw_gas_props, sfc_emiss_byband, sources, lw_optical_props_clrsky,                  &
+       lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky, &
+       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
-         doLWrad                    ! Logical flag for longwave radiation call
+         doLWrad,                 & ! Logical flag for longwave radiation call
+         doLWclrsky                 ! Compute clear-sky fluxes for clear-sky heating-rate?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
@@ -70,10 +71,6 @@ contains
     integer, intent(out) :: & 
          errflg                      ! CCPP error flag
 
-    ! Outputs (optional)
-    real(kind_phys), dimension(ncol,nLev,lw_gas_props%get_nband()), optional, intent(inout) :: &
-         hlwb                        ! All-sky heating rate, by band (K/sec)
-
     ! Local variables
     integer :: &
          iCol, iBand, iLay
@@ -82,7 +79,7 @@ contains
     real(kind_phys), dimension(ncol,nLev+1,lw_gas_props%get_nband()),target :: &
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
     logical :: &
-         l_AllSky_HR_byband, top_at_1
+         top_at_1
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -92,9 +89,6 @@ contains
 
     ! Vertical ordering?
     top_at_1 = (p_lev(1,1) .lt. p_lev(1, nLev))
-
-    ! Are any optional outputs requested? Need to know now to compute correct fluxes.
-    l_AllSky_HR_byband = present(hlwb)
 
     ! Initialize RRTMGP DDT containing 2D(3D) fluxes
     flux_allsky%bnd_flux_up => fluxLW_up_allsky
@@ -109,17 +103,22 @@ contains
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%increment(lw_optical_props_clrsky))
 
     ! Call RTE solver
-    call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-         lw_optical_props_clrsky,         & ! IN  - optical-properties
-         top_at_1,                        & ! IN  - veritcal ordering flag
-         sources,                         & ! IN  - source function
-         sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
-         flux_clrsky,                     & ! OUT - Fluxes
-         n_gauss_angles = nGauss_angles))
-    ! Store fluxes
-    fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
-    fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
-
+    if (doLWclrsky) then
+       call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+            lw_optical_props_clrsky,         & ! IN  - optical-properties
+            top_at_1,                        & ! IN  - veritcal ordering flag
+            sources,                         & ! IN  - source function
+            sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+            flux_clrsky,                     & ! OUT - Fluxes
+            n_gauss_angles = nGauss_angles))
+       ! Store fluxes
+       fluxlwUP_clrsky   = sum(flux_clrsky%bnd_flux_up,dim=3)
+       fluxlwDOWN_clrsky = sum(flux_clrsky%bnd_flux_dn,dim=3)
+    else
+       fluxlwUP_clrsky   = 0.0
+       fluxlwDOWN_clrsky = 0.0   
+    endif
+    
     !
     ! All-sky fluxes
     !
@@ -137,10 +136,6 @@ contains
     ! Store fluxes
     fluxlwUP_allsky   = sum(flux_allsky%bnd_flux_up,dim=3)
     fluxlwDOWN_allsky = sum(flux_allsky%bnd_flux_dn,dim=3) 
-
-    ! Only output fluxes by-band when heating-rate profiles by band are requested.
-    !if (l_AllSky_HR_byband) then
-    !endif
 
   end subroutine rrtmgp_lw_rte_run
   
