@@ -475,15 +475,6 @@
    errflg = 0
 
 
-! Temporary line
-!if (me==master) then
-!   print *, "Ahoj svete!:  In drag suite -- cdmbgwd =", cdmbgwd(:)
-!   print *, "imx =", imx, "   dx =", dx(1)
-!   print *
-!end if
-
-
-! if (me==master) print *,"Running drag suite"
 !--------------------------------------------------------------------
 ! SCALE-ADPTIVE PARAMETER FROM GFS GWD SCHEME
 !--------------------------------------------------------------------

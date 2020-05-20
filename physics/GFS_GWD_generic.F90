@@ -17,7 +17,7 @@ contains
 !!  @{
       subroutine GFS_GWD_generic_pre_run(                               &
      &           im, levs, nmtvr, mntvar,                               &
-     &           var, oc, oa4, clx, theta,                              &
+     &           oc, oa4, clx, theta,                                   &
      &           varss, ocss, oa4ss, clxss,                             &
      &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
      &           dudt, dvdt, dtdt, du3dt, dv3dt, dt3dt, dtf,            &
@@ -30,8 +30,8 @@ contains
       real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
 
       real(kind=kind_phys), intent(out) ::                              &
-     &  var(im), oc(im), oa4(im,4), clx(im,4),                          &
-     &  varss(im), ocss(im), oa4ss(im,4), clxss(im,4),                  &
+     &  oc(im), oa4(im,4), clx(im,4),                                   &
+     &  varss(:), ocss(:), oa4ss(:,:), clxss(:,:),                      &
      &  theta(im), sigma(im), gamma(im), elvmax(im)
 
       logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
@@ -84,7 +84,6 @@ contains
         clx(:,3)  = 0.0
         clx(:,4)  = 0.0
       elseif (nmtvr == 24) then   ! GSD_drag_suite
-        var(:)      = mntvar(:,1)
         oc(:)       = mntvar(:,2)
         oa4(:,1)    = mntvar(:,3)
         oa4(:,2)    = mntvar(:,4)
