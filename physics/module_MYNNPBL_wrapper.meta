@@ -1,4 +1,33 @@
 [ccpp-arg-table]
+  name = mynnedmf_wrapper_init
+  type = scheme
+[lheatstrg]
+  standard_name = flag_for_canopy_heat_storage
+  long_name = flag for canopy heat storage parameterization
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+[ccpp-arg-table]
   name = mynnedmf_wrapper_run
   type = scheme
 [ix]
@@ -171,7 +200,7 @@
   optional = F
 [qgrs_liquid_cloud]
   standard_name = cloud_condensed_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -180,7 +209,7 @@
   optional = F
 [qgrs_ice_cloud]
   standard_name = ice_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -305,8 +334,8 @@
   intent = out
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
-  long_name = kinematic surface upward sensible heat flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
   units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -314,8 +343,8 @@
   intent = in
   optional = F
 [qflx]
-  standard_name = kinematic_surface_upward_latent_heat_flux
-  long_name = kinematic surface upward latent heat flux
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward latent heat flux reduced by surface roughness
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -643,15 +672,6 @@
   type = integer
   intent = inout
   optional = F
-[RTHRATEN]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
-  long_name = total sky longwave heating rate
-  units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [dudt]
   standard_name = tendency_of_x_wind_due_to_model_physics
   long_name = updated tendency of the x wind
@@ -811,7 +831,7 @@
   type = real
   kind = kind_phys
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -820,7 +840,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)

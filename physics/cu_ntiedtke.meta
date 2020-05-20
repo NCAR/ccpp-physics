@@ -80,6 +80,24 @@
   kind = kind_phys
   intent = inout
   optional = F
+[tdi]
+  standard_name = air_temperature
+  long_name = mid-layer temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qvdi]
+  standard_name = water_vapor_specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [pqvf]
   standard_name = moisture_tendency_due_to_dynamics
   long_name = moisture tendency due to dynamics only
@@ -153,8 +171,8 @@
   intent = in
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux
-  long_name = kinematic surface upward latent heat flux
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward latent heat flux reduced by surface roughness
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -162,8 +180,8 @@
   intent = in
   optional = F
 [hfx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
-  long_name = kinematic surface upward sensible heat flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
   units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -254,8 +272,8 @@
   intent = out
   optional = F
 [ktrac]
-  standard_name = number_of_total_tracers
-  long_name = number of total tracers
+  standard_name = number_of_tracers_for_convective_transport
+  long_name = number of tracers for convective transport
   units = count
   dimensions = ()
   type = integer

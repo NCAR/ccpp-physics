@@ -834,7 +834,7 @@
   intent = in
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -843,7 +843,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -1176,8 +1176,8 @@
   intent = in
   optional = F
 [dusfc_cice]
-  standard_name = surface_x_momentum_flux_for_coupling_interstitial
-  long_name = sfc x momentum flux for coupling interstitial
+  standard_name = surface_x_momentum_flux_for_coupling
+  long_name = sfc x momentum flux for coupling
   units = Pa
   dimensions = (horizontal_dimension)
   type = real
@@ -1185,8 +1185,8 @@
   intent = in
   optional = F
 [dvsfc_cice]
-  standard_name = surface_y_momentum_flux_for_coupling_interstitial
-  long_name = sfc y momentum flux for coupling interstitial
+  standard_name = surface_y_momentum_flux_for_coupling
+  long_name = sfc y momentum flux for coupling
   units = Pa
   dimensions = (horizontal_dimension)
   type = real
@@ -1194,8 +1194,8 @@
   intent = in
   optional = F
 [dtsfc_cice]
-  standard_name = surface_upward_sensible_heat_flux_for_coupling_interstitial
-  long_name = sfc sensible heat flux for coupling interstitial
+  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  long_name = sfc sensible heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -1203,8 +1203,8 @@
   intent = in
   optional = F
 [dqsfc_cice]
-  standard_name = surface_upward_latent_heat_flux_for_coupling_interstitial
-  long_name = sfc latent heat flux for coupling interstitial
+  standard_name = surface_upward_latent_heat_flux_for_coupling
+  long_name = sfc latent heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -1303,6 +1303,24 @@
   long_name = diffusivity for heat
   units = m2 s-1
   dimensions = (horizontal_dimension,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hefac]
+  standard_name = surface_upward_latent_heat_flux_reduction_factor
+  long_name = surface upward latent heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hffac]
+  standard_name = surface_upward_sensible_heat_flux_reduction_factor
+  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in

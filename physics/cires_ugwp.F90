@@ -6,8 +6,8 @@
 !! "Unified": a) all GW effects due to both dissipation/breaking; b) identical GW solvers for all GW sources; c) ability to replace solvers.
 !! Unified Formalism:
 !! 1. GW Sources: Stochastic and physics based mechanisms for GW-excitations in the lower atmosphere, calibrated by the high-res analyses/forecasts, and observations (3 types of GW sources: orography, convection, fronts/jets).
-!! 2. GW Propagation: Unified solver for “propagation, dissipation and breaking” excited from all type of GW sources.
-!! 3. GW Effects: Unified representation of GW impacts on the ‘resolved’ flow for all sources (energy-balanced schemes for momentum, heat and mixing).
+!! 2. GW Propagation: Unified solver for "propagation, dissipation and breaking" excited from all type of GW sources.
+!! 3. GW Effects: Unified representation of GW impacts on the "resolved" flow for all sources (energy-balanced schemes for momentum, heat and mixing).
 !! https://www.weather.gov/media/sti/nggps/Presentations%202017/02%20NGGPS_VYUDIN_2017_.pdf
 
 module cires_ugwp
@@ -145,8 +145,8 @@ contains
 !> \section arg_table_cires_ugwp_run Argument Table
 !! \htmlinclude cires_ugwp_run.html
 !!
-
-! subroutines original
+!> \section gen_cires_ugwp CIRES UGWP Scheme General Algorithm
+!! @{
      subroutine cires_ugwp_run(do_ugwp, me,  master, im,  levs, ntrac, dtp, kdt, lonr, &
          oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,        &
          do_tofd, ldiag_ugwp, cdmbgwd, xlat, xlat_d, sinlat, coslat, area,             &
@@ -397,5 +397,6 @@ contains
     endif
 
     end subroutine cires_ugwp_run
-
+!! @}
+!>@}
 end module cires_ugwp

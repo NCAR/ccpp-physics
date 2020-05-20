@@ -10,7 +10,23 @@
 
       contains
 
-      subroutine mynnedmf_wrapper_init ()
+      subroutine mynnedmf_wrapper_init (lheatstrg, errmsg, errflg)
+        implicit none
+
+        logical,          intent(in)  :: lheatstrg
+        character(len=*), intent(out) :: errmsg
+        integer,          intent(out) :: errflg
+
+        ! Initialize CCPP error handling variables
+        errmsg = ''
+        errflg = 0
+
+        if (lheatstrg) then
+          errmsg = 'Logic error: lheatstrg not implemented for MYNN PBL'
+          errflg = 1
+          return
+        end if
+
       end subroutine mynnedmf_wrapper_init
 
       subroutine mynnedmf_wrapper_finalize ()
@@ -36,8 +52,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ice_aer_num_conc,          &
      &  prsl,exner,                     &
      &  slmsk,tsurf,qsfc,ps,            &
-     &  ust,ch,hflx,qflx,wspd,rb,       &
-     &  dtsfc1,dqsfc1,                  &
+     &  ust,ch,hflx,qflx,               &
+     &  wspd,rb,dtsfc1,dqsfc1,          &
      &  dtsfci_diag,dqsfci_diag,        &
      &  dtsfc_diag,dqsfc_diag,          &
      &  recmol,                         &
@@ -49,7 +65,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  edmf_thl,edmf_ent,edmf_qc,      &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
      &  nupdraft,maxMF,ktop_plume,      &
-     &  RTHRATEN,                       &
      &  dudt, dvdt, dtdt,                                  &
      &  dqdt_water_vapor, dqdt_liquid_cloud,               &
      &  dqdt_ice_cloud, dqdt_ozone,                        &
@@ -154,7 +169,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
-  
+
   LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea, qdiag3d
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
@@ -224,8 +239,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        qgrs_cloud_ice_num_conc,                                    &
     &        qgrs_ozone,                                                 &
     &        qgrs_water_aer_num_conc,                                    &
-    &        qgrs_ice_aer_num_conc,                                      &
-    &        RTHRATEN
+    &        qgrs_ice_aer_num_conc
      real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
     &        Tsq, Qsq, Cov, exch_h, exch_m
      real(kind=kind_phys), dimension(:,:), intent(inout) ::              &
@@ -254,13 +268,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind=kind_phys), dimension(im), intent(in) ::                 &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
+
       real(kind=kind_phys), dimension(im), intent(inout) ::              &
      &        pblh
       real(kind=kind_phys), dimension(im), intent(out) ::                &
      &        ch,dtsfc1,dqsfc1,                                          &
      &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag,             &
      &        maxMF
-     integer, dimension(im), intent(inout) ::                           &
+     integer, dimension(im), intent(inout) ::                            &
     &        kpbl,nupdraft,ktop_plume
 
      !LOCAL
@@ -576,7 +591,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &             ,nupdraft=nupdraft,maxMF=maxMF                      & !output
      &             ,ktop_plume=ktop_plume                              & !output
      &             ,spp_pbl=spp_pbl,pattern_spp_pbl=pattern_spp_pbl    & !input
-     &             ,RTHRATEN=RTHRATEN                                  & !input
+     &             ,RTHRATEN=htrlw                                     & !input
      &             ,FLAG_QI=flag_qi,FLAG_QNI=flag_qni                  & !input
      &             ,FLAG_QC=flag_qc,FLAG_QNC=flag_qnc                  & !input
      &             ,FLAG_QNWFA=FLAG_QNWFA,FLAG_QNIFA=FLAG_QNIFA        & !input
