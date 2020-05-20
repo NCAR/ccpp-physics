@@ -20,14 +20,18 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_sw_cloud_optics_init(cld_optics_scheme, nrghice, rrtmgp_root_dir,       &
-       rrtmgp_sw_file_clouds, mpicomm, mpirank, mpiroot, sw_cloud_props, errmsg, errflg)
+  subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, &
+      nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm, mpirank, mpiroot, sw_cloud_props,&
+      errmsg, errflg)
 
     ! Inputs
+    logical, intent(in) :: &
+        doG_cldoptics,       & ! Use legacy RRTMG cloud-optics?
+        doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
+        doGP_cldoptics_LUT     ! Use RRTMGP cloud-optics: LUTs?    
     integer, intent(inout) :: &
          nrghice               ! Number of ice-roughness categories
     integer, intent(in) :: &
-         cld_optics_scheme,  & ! Cloud-optics scheme
          mpicomm,            & ! MPI communicator
          mpirank,            & ! Current MPI rank
          mpiroot               ! Master MPI rank
@@ -44,7 +48,6 @@ contains
          errflg                ! CCPP error code
 
     ! Variables that will be passed to cloud_optics%load()
-    ! cld_optics_scheme = 1
     real(kind_phys) :: &
          radliq_lwr,          & ! Liquid particle size lower bound for LUT interpolation   
          radliq_upr,          & ! Liquid particle size upper bound for LUT interpolation
@@ -61,7 +64,6 @@ contains
          lut_extice,          & ! LUT shortwave ice extinction coefficient
          lut_ssaice,          & ! LUT shortwave ice single scattering albedo
          lut_asyice             ! LUT shortwave ice asymmetry parameter
-    ! cld_optics_scheme = 2
     real(kind_phys), dimension(:), allocatable :: &
          pade_sizereg_extliq, & ! Particle size regime boundaries for shortwave liquid extinction 
                                 ! coefficient for Pade interpolation  
@@ -97,7 +99,7 @@ contains
     errmsg = ''
     errflg = 0
 
-    if (cld_optics_scheme .eq. 0) return
+    if (doG_cldoptics) return
 
     ! Filenames are set in the physics_nml
     sw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_clouds)
@@ -141,7 +143,7 @@ contains
        endif
 
        ! Allocate space for arrays
-       if (cld_optics_scheme .eq. 1) then
+       if (doGP_cldoptics_LUT) then
           allocate(lut_extliq(nSize_liq, nBand))
           allocate(lut_ssaliq(nSize_liq, nBand))
           allocate(lut_asyliq(nSize_liq, nBand))
@@ -149,7 +151,7 @@ contains
           allocate(lut_ssaice(nSize_ice, nBand, nrghice_fromfile))
           allocate(lut_asyice(nSize_ice, nBand, nrghice_fromfile))
        endif
-       if (cld_optics_scheme .eq. 2) then
+       if (doGP_cldoptics_PADE) then
           allocate(pade_extliq(nBand, nSizeReg,  nCoeff_ext ))
           allocate(pade_ssaliq(nBand, nSizeReg,  nCoeff_ssa_g))
           allocate(pade_asyliq(nBand, nSizeReg,  nCoeff_ssa_g))
@@ -166,7 +168,7 @@ contains
        allocate(band_lims(2,nBand))
 
        ! Read in fields from file
-       if (cld_optics_scheme .eq. 1) then
+       if (doGP_cldoptics_LUT) then
           write (*,*) 'Reading RRTMGP shortwave cloud data (LUT) ... '
           status = nf90_inq_varid(ncid,'radliq_lwr',varID)
           status = nf90_get_var(ncid,varID,radliq_lwr)
@@ -195,7 +197,7 @@ contains
           status = nf90_inq_varid(ncid,'bnd_limits_wavenumber',varID)
           status = nf90_get_var(ncid,varID,band_lims)
        endif
-       if (cld_optics_scheme .eq. 2) then
+       if (doGP_cldoptics_PADE) then
           write (*,*) 'Reading RRTMGP shortwave cloud data (PADE) ... '
           status = nf90_inq_varid(ncid,'radliq_lwr',varID)
           status = nf90_get_var(ncid,varID,radliq_lwr)
@@ -242,18 +244,19 @@ contains
 !    endif
 
     ! Load tables data for RRTMGP cloud-optics  
-    if (cld_optics_scheme .eq. 1) then
+    if (doGP_cldoptics_LUT) then
        call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_lims,        &
             radliq_lwr, radliq_upr, radliq_fac, radice_lwr, radice_upr,  radice_fac,     &
             lut_extliq, lut_ssaliq, lut_asyliq, lut_extice, lut_ssaice, lut_asyice))
     endif
-    if (cld_optics_scheme .eq. 2) then
+    if (doGP_cldoptics_PADE) then
        call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_lims,       &
             pade_extliq, pade_ssaliq, pade_asyliq, pade_extice, pade_ssaice, pade_asyice,&
             pade_sizereg_extliq, pade_sizereg_ssaliq, pade_sizereg_asyliq,               &
             pade_sizereg_extice, pade_sizereg_ssaice, pade_sizereg_asyice))
     endif
     call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice))
+    
   end subroutine rrtmgp_sw_cloud_optics_init
 
   ! #########################################################################################
@@ -262,36 +265,38 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_optics_run
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
-  subroutine rrtmgp_sw_cloud_optics_run(doSWrad, nCol, nLev, nDay, idxday, nrghice,         &
-       cld_optics_scheme, cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp,        &
-       cld_resnow, cld_rwp, cld_rerain, sw_cloud_props, sw_gas_props,                       &
-       sw_optical_props_cloudsByBand, cldtausw, errmsg, errflg)
+  subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, doGP_cldoptics_PADE,        &
+       doGP_cldoptics_LUT, nCol, nLev, nDay, idxday, nrghice, cld_frac, cld_lwp, cld_reliq, &
+       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, sw_cloud_props,        &
+       sw_gas_props, sw_optical_props_cloudsByBand, cldtausw, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
-         doSWrad                       ! Logical flag for shortwave radiation call
+         doSWrad,             & ! Logical flag for shortwave radiation call
+         doG_cldoptics,       & ! Use legacy RRTMG cloud-optics?
+         doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
+         doGP_cldoptics_LUT     ! Use RRTMGP cloud-optics: LUTs?
     integer, intent(in) :: &
-         nCol,                        & ! Number of horizontal gridpoints
-         nLev,                        & ! Number of vertical levels
-         nday,                        & ! Number of daylit points.
-         nrghice,                     & ! Number of ice-roughness categories
-         cld_optics_scheme              ! Cloud-optics scheme
+         nCol,                & ! Number of horizontal gridpoints
+         nLev,                & ! Number of vertical levels
+         nday,                & ! Number of daylit points.
+         nrghice                ! Number of ice-roughness categories
     integer,intent(in),dimension(ncol) :: &
-         idxday                         ! Indices for daylit points.
+         idxday                 ! Indices for daylit points.
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
-         cld_frac,                    & ! Total cloud fraction by layer
-         cld_lwp,                     & ! Cloud liquid water path
-         cld_reliq,                   & ! Cloud liquid effective radius
-         cld_iwp,                     & ! Cloud ice water path
-         cld_reice,                   & ! Cloud ice effective radius
-         cld_swp,                     & ! Cloud snow water path
-         cld_resnow,                  & ! Cloud snow effective radius
-         cld_rwp,                     & ! Cloud rain water path
-         cld_rerain                     ! Cloud rain effective radius
+         cld_frac,            & ! Total cloud fraction by layer
+         cld_lwp,             & ! Cloud liquid water path
+         cld_reliq,           & ! Cloud liquid effective radius
+         cld_iwp,             & ! Cloud ice water path
+         cld_reice,           & ! Cloud ice effective radius
+         cld_swp,             & ! Cloud snow water path
+         cld_resnow,          & ! Cloud snow effective radius
+         cld_rwp,             & ! Cloud rain water path
+         cld_rerain             ! Cloud rain effective radius
     type(ty_cloud_optics),intent(in) :: &
-         sw_cloud_props                 ! RRTMGP DDT: shortwave cloud properties
+         sw_cloud_props         ! RRTMGP DDT: shortwave cloud properties
     type(ty_gas_optics_rrtmgp),intent(in) :: &
-         sw_gas_props                   ! RRTMGP DDT: shortwave K-distribution data
+         sw_gas_props           ! RRTMGP DDT: shortwave K-distribution data
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -328,7 +333,7 @@ contains
        sw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys 
 
        ! Compute cloud-optics for RTE.
-       if (cld_optics_scheme .gt. 0) then
+       if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
           ! RRTMGP cloud-optics.
           call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_cloud_props%cloud_optics(&
                cld_lwp(idxday(1:nday),:),    & ! IN  - Cloud liquid water path
@@ -337,7 +342,8 @@ contains
                cld_reice(idxday(1:nday),:),  & ! IN  - Cloud ice effective radius
                sw_optical_props_cloudsByBand)) ! OUT - RRTMGP DDT: Shortwave optical properties, 
                                                !       in each band (tau,ssa,g)
-       else
+       endif
+       if (doG_cldoptics) then
           ! RRTMG cloud-optics
           tau_cld(:,:,:) = 0._kind_phys
           ssa_cld(:,:,:) = 0._kind_phys
@@ -353,9 +359,9 @@ contains
           sw_optical_props_cloudsByBand%tau(:,:,1) = tau_cld(:,:,sw_gas_props%get_nband())
           sw_optical_props_cloudsByBand%ssa(:,:,1) = ssa_cld(:,:,sw_gas_props%get_nband())
           sw_optical_props_cloudsByBand%g(:,:,1)   = asy_cld(:,:,sw_gas_props%get_nband())
-	  sw_optical_props_cloudsByBand%tau(:,:,2:sw_gas_props%get_nband()) = tau_cld(:,:,1:sw_gas_props%get_nband()-1)
-	  sw_optical_props_cloudsByBand%ssa(:,:,2:sw_gas_props%get_nband()) = ssa_cld(:,:,1:sw_gas_props%get_nband()-1)
-	  sw_optical_props_cloudsByBand%g(:,:,2:sw_gas_props%get_nband())   = asy_cld(:,:,1:sw_gas_props%get_nband()-1)
+	      sw_optical_props_cloudsByBand%tau(:,:,2:sw_gas_props%get_nband()) = tau_cld(:,:,1:sw_gas_props%get_nband()-1)
+	      sw_optical_props_cloudsByBand%ssa(:,:,2:sw_gas_props%get_nband()) = ssa_cld(:,:,1:sw_gas_props%get_nband()-1)
+	      sw_optical_props_cloudsByBand%g(:,:,2:sw_gas_props%get_nband())   = asy_cld(:,:,1:sw_gas_props%get_nband()-1)
        endif
 
        ! All-sky SW optical depth ~0.55microns
