@@ -6,7 +6,8 @@ module mp_fer_hires
      
       use machine, only : kind_phys
 
-      use module_mp_fer_hires, only : ferrier_init_hr, FER_HIRES
+      use module_mp_fer_hires, only : ferrier_init_hr, FER_HIRES,       &
+                                      ferhires_finalize
 
       implicit none
 
@@ -91,8 +92,7 @@ module mp_fer_hires
        end if
           
      !MZ: fer_hires_init() in HWRF
-      IF(.NOT.RESTART .AND.  present(F_ICE)) THEN  !HWRF
-        write(errmsg,'(*(a))') " WARNING: F_ICE,F_RAIN AND F_RIMEF IS REINITIALIZED "
+        if (mpirank==mpiroot) write (0,*) 'F-A: F_ICE,F_RAIN AND F_RIMEF IS REINITIALIZED'
         DO K = 1,lm
         DO I= ims,ime
           F_ICE(i,k)=0.
@@ -100,9 +100,9 @@ module mp_fer_hires
           F_RIMEF(i,k)=1.
         ENDDO
         ENDDO
-      ENDIF
       !MZ: fer_hires_init() in HWRF
-
+       
+        if (mpirank==mpiroot) write (0,*) 'F-A: calling FERRIER_INIT_HR ...'
        CALL FERRIER_INIT_HR(dtp,mpicomm,mpirank,mpiroot,threads,errmsg,errflg)
 
        if (mpirank==mpiroot) write (0,*)'F-A: FERRIER_INIT_HR finished ...'
@@ -358,7 +358,23 @@ module mp_fer_hires
 
 !> \section arg_table_mp_fer_hires_finalize Argument Table
 !!
-       subroutine mp_fer_hires_finalize ()
+       subroutine mp_fer_hires_finalize (errmsg,errflg)
+         implicit none
+
+         character(len=*),          intent(  out) :: errmsg
+         integer,                   intent(  out) :: errflg
+
+         ! Initialize the CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         if (.not.is_initialized) return
+
+         call ferhires_finalize()
+
+         is_initialized = .false.
+
+
        end subroutine mp_fer_hires_finalize
 
 end module mp_fer_hires

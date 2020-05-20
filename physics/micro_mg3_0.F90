@@ -521,7 +521,7 @@ subroutine micro_mg_tend (                                       &
 !--ag
      freqs,                        freqr,                        &
      nfice,                        qcrat,                        &
-     prer_evap, xlat, xlon, lprnt, iccn, aero_in, nlball)
+     prer_evap, xlat, xlon, lprnt, iccn, nlball)
 
   ! Constituent properties.
   use micro_mg_utils, only: mg_liq_props,    &
@@ -610,8 +610,8 @@ subroutine micro_mg_tend (                                       &
   real(r8), intent(in) :: icecldf(mgncol,nlev)    !< ice cloud fraction (no units)
   real(r8), intent(in) :: qsatfac(mgncol,nlev)    !< subgrid cloud water saturation scaling factor (no units)
   logical, intent(in)  :: lprnt                   !< control flag for diagnostic print out 
-  logical, intent(in)  :: iccn                    !< flag for IN and CCN forcing for Morrison-Gettelman microphysics 
-  logical, intent(in)  :: aero_in                 !< flag for using aerosols in Morrison-Gettelman microphysics 
+  integer, intent(in)  :: iccn                    !< flag for IN and CCN forcing for Morrison-Gettelman microphysics 
+
 
 
   ! used for scavenging
@@ -1459,7 +1459,7 @@ subroutine micro_mg_tend (                                       &
     enddo
   enddo
 !> - initialize ccn activated number tendency (\p npccn)
-  if (iccn) then
+  if (iccn == 1) then
     do k=1,nlev
       do i=1,mgncol
         npccn(i,k) = npccnin(i,k)
@@ -1513,7 +1513,7 @@ subroutine micro_mg_tend (                                       &
     enddo
   enddo
 
-  if (iccn) then
+  if (iccn == 1) then
     do k=1,nlev
       do i=1,mgncol
         if (t(i,k) < icenuct) then
@@ -1528,11 +1528,13 @@ subroutine micro_mg_tend (                                       &
         endif
       enddo
     enddo
-  elseif (aero_in) then
+  elseif (iccn == 2) then
     do k=1,nlev
       do i=1,mgncol
         if (t(i,k) < icenuct) then
           ncai(i,k) = naai(i,k)*rho(i,k)
+          ncai(i,k) = min(ncai(i,k), 710.0e3_r8)
+          naai(i,k) = ncai(i,k)*rhoinv(i,k)
         else
           naai(i,k) = zero
           ncai(i,k) = zero

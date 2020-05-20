@@ -498,9 +498,10 @@
 !check  print *,' in grrad : calling setaer '
 
       call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk, & !  ---  inputs
-                   tracer1, Grid%xlon, Grid%xlat, IM, LMK, LMP,   &
-                   Model%lsswr, Model%lslwr,                      &
-                   faersw, faerlw, aerodp)                          !  ---  outputs
+                   tracer1, Tbd%aer_nm,                            &                      
+                   Grid%xlon, Grid%xlat, IM, LMK, LMP,             &
+                   Model%lsswr,Model%lslwr,                        &
+                   faersw,faerlw,aerodp)                              !  ---  outputs
 
 ! CCPP
       do j = 1,NBDSW

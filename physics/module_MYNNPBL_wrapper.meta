@@ -291,7 +291,7 @@
   intent = out
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_dimension)
@@ -300,7 +300,7 @@
   intent = in
   optional = F
 [qflx]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
@@ -729,7 +729,7 @@
   intent = inout
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -738,7 +738,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)

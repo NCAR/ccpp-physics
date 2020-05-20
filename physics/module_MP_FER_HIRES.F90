@@ -148,23 +148,23 @@
       INTEGER, PRIVATE,PARAMETER :: MY_T1=1, MY_T2=35
       REAL,PRIVATE,DIMENSION(MY_T1:MY_T2),SAVE :: MY_GROWTH_NMM
 !
-      REAL, PRIVATE,PARAMETER :: DMImin=.05e-3, DMImax=1.e-3,            &
+      REAL, PRIVATE,PARAMETER :: DMImin=.05e-3, DMImax=1.e-3,           &
      &      DelDMI=1.e-6,XMImin=1.e6*DMImin
       REAL, PUBLIC,PARAMETER :: XMImax=1.e6*DMImax, XMIexp=.0536
       INTEGER, PUBLIC,PARAMETER :: MDImin=XMImin, MDImax=XMImax
-      REAL, PRIVATE,DIMENSION(MDImin:MDImax) ::                          &
+      REAL, ALLOCATABLE, DIMENSION(:) ::                                &
      &      ACCRI,VSNOWI,VENTI1,VENTI2
       REAL, PUBLIC,DIMENSION(MDImin:MDImax) :: SDENS    !-- For RRTM
 !
-      REAL, PRIVATE,PARAMETER :: DMRmin=.05e-3, DMRmax=1.0e-3,           &
+      REAL, PRIVATE,PARAMETER :: DMRmin=.05e-3, DMRmax=1.0e-3,          &
      &      DelDMR=1.e-6, XMRmin=1.e6*DMRmin, XMRmax=1.e6*DMRmax
       INTEGER, PUBLIC,PARAMETER :: MDRmin=XMRmin, MDRmax=XMRmax
 !
-      REAL, PRIVATE,DIMENSION(MDRmin:MDRmax)::                           &
+       REAL, ALLOCATABLE, DIMENSION(:)::                                &
      &      ACCRR,MASSR,RRATE,VRAIN,VENTR1,VENTR2
 !
       INTEGER, PRIVATE,PARAMETER :: Nrime=40
-      REAL, DIMENSION(2:9,0:Nrime),PRIVATE,SAVE :: VEL_RF
+      REAL, ALLOCATABLE, DIMENSION(:,:) :: VEL_RF
 !
       INTEGER,PARAMETER :: NX=7501
       REAL, PARAMETER :: XMIN=180.0,XMAX=330.0
@@ -226,7 +226,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      !HWRF & ,NCW=300.E6           !- 100.e6 (maritime), 500.e6 (continental)
 
 !--- Other public variables passed to other routines:
-      REAL, PUBLIC,DIMENSION(MDImin:MDImax) :: MASSI
+        REAL, ALLOCATABLE ,DIMENSION(:) :: MASSI
 !
 
      CONTAINS
@@ -449,8 +449,9 @@ ENDIF
 !GFDL => New.  Added RHC_col to allow for height- and grid-dependent values for
 !GFDL          the relative humidity threshold for condensation ("RHgrd")
 !6/11/2010 mod - Use lower RHgrd_out threshold for < 850 hPa
+!mz 05/06/2020 - 10km
 !------------------------------------------------------------
-            IF(DX1 .GE. 10 .AND. P_col(L)<P_RHgrd_out) THEN  ! gopal's doing based on GFDL
+            IF(DX1 .GE. 10000 .AND. P_col(L)<P_RHgrd_out) THEN  ! gopal's doing based on GFDL
               RHC_col(L)=RHgrd
             ELSE
               RHC_col(L)=RHgrd_in
@@ -2445,6 +2446,9 @@ ENDIF
 !
 !-----------------------------------------------------------------------
 !
+#ifdef MPI
+      use mpi
+#endif
       IMPLICIT NONE
 !
 !------------------------------------------------------------------------- 
@@ -2473,11 +2477,16 @@ ENDIF
       INTEGER :: I,J,L,K
       INTEGER :: etampnew_unit1
       LOGICAL :: opened
-      INTEGER :: IRTN,rc !MYPE,mpi_comm_comp
+      INTEGER :: IRTN,rc 
       CHARACTER*80 errmess
+      INTEGER :: mpi_communicator,ierr
+      INTEGER :: good
+      LOGICAL :: lexist,lopen, force_read_ferhires
 !
 !-----------------------------------------------------------------------
 !
+        ! Assign mpicomm to module variable
+        mpi_communicator= mpi_comm_comp
         DTPH=GSMDT     !-- Time step in s
 !
 !--- Create lookup tables for saturation vapor pressure w/r/t water & ice
@@ -2486,44 +2495,77 @@ ENDIF
 !
         CALL GPVS_hr
 !
-!--- Read in various lookup tables
+!zhang: 
+      if (.NOT. ALLOCATED(ventr1)) ALLOCATE(ventr1(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(ventr2)) ALLOCATE(ventr2(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(accrr)) ALLOCATE(accrr(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(massr)) ALLOCATE(massr(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(vrain)) ALLOCATE(vrain(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(rrate)) ALLOCATE(rrate(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(venti1)) ALLOCATE(venti1(MDImin:MDImax))
+      if (.NOT. ALLOCATED(venti2)) ALLOCATE(venti2(MDImin:MDImax))
+      if (.NOT. ALLOCATED(accri)) ALLOCATE(accri(MDImin:MDImax))
+      if (.NOT. ALLOCATED(massi)) ALLOCATE(massi(MDImin:MDImax))
+      if (.NOT. ALLOCATED(vsnowi)) ALLOCATE(vsnowi(MDImin:MDImax))
+      if (.NOT. ALLOCATED(vel_rf)) ALLOCATE(vel_rf(2:9,0:Nrime))
+
+
+
+        force_read_ferhires = .true.
+        good = 0
+        INQUIRE(FILE="DETAMPNEW_DATA.expanded_rain_LE",EXIST=lexist)
+
+#ifdef MPI
+        call MPI_BARRIER(mpi_communicator,ierr)
+#endif
+
+        IF (lexist) THEN
+          OPEN(63,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
+     &        FORM="UNFORMATTED",STATUS="OLD",ERR=1234)
 !
-        IF(MYPE==0)THEN
-          etampnew_unit1 = -1
-          DO i = 31,99
-            INQUIRE ( i , OPENED = opened )
-            IF ( .NOT. opened ) THEN
-              etampnew_unit1 = i
-              EXIT
+!sms$serial begin
+          READ(63, err=1234) VENTR1
+          READ(63, err=1234) VENTR2
+          READ(63, err=1234) ACCRR
+          READ(63, err=1234) MASSR
+          READ(63, err=1234) VRAIN
+          READ(63, err=1234) RRATE
+          READ(63, err=1234) VENTI1
+          READ(63, err=1234) VENTI2
+          READ(63, err=1234) ACCRI
+          READ(63, err=1234) MASSI
+          READ(63, err=1234) VSNOWI
+          READ(63, err=1234) VEL_RF
+!sms$serial end
+          good = 1
+1234      CONTINUE
+          IF ( good .NE. 1 ) THEN
+            INQUIRE(63,opened=lopen)
+            IF (lopen) THEN
+              IF( force_read_ferhires ) THEN
+                write(0,*) "Error reading DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                return
+              ENDIF
+              CLOSE(63)
+            ELSE
+              IF( force_read_ferhires ) THEN
+                write(0,*) "Error opening DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                return
+              ENDIF
             ENDIF
-          ENDDO
-          IF (etampnew_unit1<0) THEN
-            errmsg = 'FERRIER_INIT_hr: Can not find unused fortran &
-                     &unit to read in lookup tables'
-            errmsg = trim(errmsg)//NEW_LINE('A')//' ABORTING!'
-            errflg = 1
-            RETURN 
+         ELSE
+            INQUIRE(63,opened=lopen)
+            IF (lopen) THEN
+              CLOSE(63)
+            ENDIF
+          ENDIF
+        ELSE
+          IF( force_read_ferhires ) THEN
+            write(0,*) "Non-existent DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+            return
           ENDIF
         ENDIF
-!
-        IF(MYPE==0)THEN
-          OPEN(UNIT=etampnew_unit1,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
-     &        FORM="UNFORMATTED",STATUS="OLD",ERR=9061)
-!
-          READ(etampnew_unit1) VENTR1
-          READ(etampnew_unit1) VENTR2
-          READ(etampnew_unit1) ACCRR
-          READ(etampnew_unit1) MASSR
-          READ(etampnew_unit1) VRAIN
-          READ(etampnew_unit1) RRATE
-          READ(etampnew_unit1) VENTI1
-          READ(etampnew_unit1) VENTI2
-          READ(etampnew_unit1) ACCRI
-          READ(etampnew_unit1) MASSI
-          READ(etampnew_unit1) VSNOWI
-          READ(etampnew_unit1) VEL_RF
-          CLOSE (etampnew_unit1)
-        ENDIF
+
 !
 #ifdef MPI
         CALL MPI_BCAST(VENTR1,SIZE(VENTR1),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
@@ -2539,6 +2581,7 @@ ENDIF
         CALL MPI_BCAST(VSNOWI,SIZE(VSNOWI),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
         CALL MPI_BCAST(VEL_RF,SIZE(VEL_RF),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
 #endif
+
 !
 !--- Calculates coefficients for growth rates of ice nucleated in water
 !    saturated conditions, scaled by physics time step (lookup table)
@@ -2933,6 +2976,25 @@ ENDIF
       FPVSX0=PSATK*(TR**XA)*EXP(XB*(1.-TR))
 !
       END FUNCTION FPVSX0
+
+      SUBROUTINE ferhires_finalize()
+      
+      IMPLICIT NONE
+
+      if (ALLOCATED(ventr1)) DEALLOCATE(ventr1)
+      if (ALLOCATED(ventr2)) DEALLOCATE(ventr2)
+      if (ALLOCATED(accrr))  DEALLOCATE(accrr)
+      if (ALLOCATED(massr))  DEALLOCATE(massr)
+      if (ALLOCATED(vrain))  DEALLOCATE(vrain)
+      if (ALLOCATED(rrate))  DEALLOCATE(rrate)
+      if (ALLOCATED(venti1)) DEALLOCATE(venti1)
+      if (ALLOCATED(venti2)) DEALLOCATE(venti2)
+      if (ALLOCATED(accri))  DEALLOCATE(accri)
+      if (ALLOCATED(massi))  DEALLOCATE(massi)
+      if (ALLOCATED(vsnowi)) DEALLOCATE(vsnowi)
+      if (ALLOCATED(vel_rf)) DEALLOCATE(vel_rf)
+      
+      END SUBROUTINE ferhires_finalize
 
 !
       END MODULE module_mp_fer_hires
