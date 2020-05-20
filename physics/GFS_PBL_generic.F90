@@ -330,8 +330,8 @@
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,           & 
-        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
+        dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          & 
+        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
         errmsg, errflg)
 
       use machine,                only : kind_phys
@@ -353,7 +353,7 @@
       real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
-          wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1
+          wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
       real(kind=kind_phys), dimension(im), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
       real(kind=kind_phys), dimension(im, levs), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
@@ -566,15 +566,15 @@
               tem1 = max(q1(i), 1.e-8)
               rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
               if (wind(i) > zero) then
-                tem = - rho * stress_ocn(i) / wind(i)
+                tem = - rho * stress_wat(i) / wind(i)
                 dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
                 dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
               else
                 dusfci_cpl(i) = zero
                 dvsfci_cpl(i) = zero
               endif
-              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
-              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+              dtsfci_cpl(i) = cp   * rho * hflx_wat(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = hvap * rho * evap_wat(i) ! latent heat flux over open ocean
             else                                       ! use results from PBL scheme for 100% open ocean
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)
