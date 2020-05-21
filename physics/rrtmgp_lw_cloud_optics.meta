@@ -233,6 +233,15 @@
   type = real
   intent = in
   kind = kind_phys
+[precip_frac]
+  standard_name = precipitation_fraction_by_layer
+  long_name = precipitation fraction in each layer
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure layer
@@ -293,6 +302,14 @@
   type = ty_optical_props_1scl
   intent = out
   optional = F
+[lw_optical_props_precipByBand]
+  standard_name = longwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = out
+  optional = F  
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

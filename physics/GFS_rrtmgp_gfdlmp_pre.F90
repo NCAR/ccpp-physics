@@ -33,7 +33,7 @@ contains
 !!  
   subroutine GFS_rrtmgp_gfdlmp_pre_run(Model, Tbd, nCol, nLev, p_lev, tracer,            &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
-       cld_rerain, errmsg, errflg)
+       cld_rerain, precip_frac, errmsg, errflg)
     implicit none
     
     ! Inputs  
@@ -59,7 +59,8 @@ contains
          cld_swp,           & ! Cloud snow water path
          cld_resnow,        & ! Cloud snow effective radius
          cld_rwp,           & ! Cloud rain water path
-         cld_rerain           ! Cloud rain effective radius             
+         cld_rerain,        & ! Cloud rain effective radius       
+         precip_frac          ! Precipitation fraction      
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
@@ -146,7 +147,10 @@ contains
     enddo
     
     ! Cloud-fraction
-    cld_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,Model%ntclamt)
+    cld_frac(1:nCol,1:nLev)   = tracer(1:nCol,1:nLev,Model%ntclamt)
+
+    ! Precipitation fraction (Hack. For now use cloud-fraction)
+    precip_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,Model%ntclamt)
     
 	! Condensate and effective size
 	deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  

@@ -42,7 +42,8 @@ contains
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
   subroutine GFS_cloud_diagnostics_run(Model, nCol, nLev, lat, p_lay, tv_lay, cld_frac,  &
-       p_lev, mbota, mtopa, cldsa, de_lgth, overlap_param, errmsg, errflg)
+       p_lev, mbota, mtopa, cldsa, de_lgth, cloud_overlap_param, precip_overlap_param,   &
+       errmsg, errflg)
     implicit none
      
     ! Inputs
@@ -62,18 +63,19 @@ contains
     
     ! Outputs
     character(len=*), intent(out) :: &
-         errmsg               ! Error message
+         errmsg                 ! Error message
     integer, intent(out) :: &  
-         errflg               ! Error flag
+         errflg                 ! Error flag
     integer,dimension(ncol,3),intent(out) :: &
-         mbota,             & ! Vertical indices for cloud tops
-         mtopa                ! Vertical indices for cloud bases
+         mbota,               & ! Vertical indices for cloud tops
+         mtopa                  ! Vertical indices for cloud bases
     real(kind_phys), dimension(ncol,5), intent(out) :: &
-         cldsa                ! Fraction of clouds for low, middle, high, total and BL 
+         cldsa                  ! Fraction of clouds for low, middle, high, total and BL 
     real(kind_phys), dimension(ncol), intent(out)  :: &
-         de_lgth              ! Decorrelation length
+         de_lgth                ! Decorrelation length
     real(kind_phys), dimension(nCol,nLev), intent(out) :: &
-         overlap_param        ! Cloud-overlap parameter
+         cloud_overlap_param, & ! Cloud-overlap parameter
+         precip_overlap_param   ! Precipitation overlap parameter
     
     ! Local variables
     integer i,id,iCol,iLay,icld
@@ -106,6 +108,9 @@ contains
        enddo
     enddo
     
+    !
+    ! Cloud overlap parameter
+    !
     ! Estimate clouds decorrelation length in km
     !      *this is only a tentative test, need to consider change later*
     if ( iovrlw == 3 .and. iovrsw == 3) then
@@ -113,12 +118,16 @@ contains
           de_lgth(iCol) = max( 0.6, 2.78-4.6*rlat(iCol) )
           do iLay=nLev,2,-1
              if (de_lgth(iCol) .gt. 0) then
-                overlap_param(iCol,iLay-1) = &
+                cloud_overlap_param(iCol,iLay-1) = &
                      exp( -0.5 * (deltaZ(iCol,iLay)+deltaZ(iCol,iLay-1)) / de_lgth(iCol) )
              endif
           enddo
        enddo
     endif
+	
+	! 
+	! Precipitation overlap parameter (Hack. Using same as cloud for now)
+	precip_overlap_param = cloud_overlap_param
 	
     ! Compute low, mid, high, total, and boundary layer cloud fractions and clouds top/bottom 
     ! layer indices for low, mid, and high clouds. The three cloud domain boundaries are 

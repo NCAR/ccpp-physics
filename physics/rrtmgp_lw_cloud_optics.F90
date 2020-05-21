@@ -12,6 +12,12 @@ module rrtmgp_lw_cloud_optics
 
   public rrtmgp_lw_cloud_optics_init, rrtmgp_lw_cloud_optics_run, rrtmgp_lw_cloud_optics_finalize
 
+  ! Parameters used for rain and snow(+groupel) RRTMGP cloud-optics
+  real(kind_phys), parameter :: &
+       absrain  = 0.33e-3, & ! Rain drop absorption coefficient \f$(m^{2}/g)\f$ .
+       abssnow0 = 1.5,     & ! Snow flake absorption coefficient (micron), fu coeff
+       abssnow1 = 2.34e-3    ! Snow flake absorption coefficient \f$(m^{2}/g)\f$, ncar coef
+
 contains
 
   ! #########################################################################################
@@ -29,7 +35,7 @@ contains
         doGP_cldoptics_PADE, & ! Use RRTMGP cloud-optics: PADE approximation?
         doGP_cldoptics_LUT     ! Use RRTMGP cloud-optics: LUTs?
     integer, intent(inout) :: &
-         nrghice                ! Number of ice-roughness categories
+         nrghice               ! Number of ice-roughness categories
    integer, intent(in) :: &
          mpicomm,            & ! MPI communicator
          mpirank,            & ! Current MPI rank
@@ -265,9 +271,10 @@ contains
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
   subroutine rrtmgp_lw_cloud_optics_run(doLWrad, doG_cldoptics, doGP_cldoptics_PADE,        &
-       doGP_cldoptics_LUT, nCol, nLev, nrghice, cld_frac, cld_lwp, cld_reliq, cld_iwp,      &
-       cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, p_lay, lw_cloud_props,          &
-       lw_gas_props, lon, lat, cldtaulw, lw_optical_props_cloudsByBand, errmsg, errflg)
+       doGP_cldoptics_LUT, nCol, nLev, nrghice, p_lay, cld_frac, cld_lwp, cld_reliq,        &
+       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,           &
+       lw_cloud_props, lw_gas_props, lon, lat, cldtaulw, lw_optical_props_cloudsByBand,     &
+       lw_optical_props_precipByBand, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -289,48 +296,53 @@ contains
          cld_reliq,           & ! Cloud liquid effective radius
          cld_iwp,             & ! Cloud ice water path
          cld_reice,           & ! Cloud ice effective radius
-         cld_swp,             & ! Cloud snow water path       (used only for RRTMG legacy scheme)
-         cld_resnow,          & ! Cloud snow effective radius (used only for RRTMG legacy scheme)
-         cld_rwp,             & ! Cloud rain water path       (used only for RRTMG legacy scheme)
-         cld_rerain             ! Cloud rain effective radius (used only for RRTMG legacy scheme)
+         cld_swp,             & ! Cloud snow water path       
+         cld_resnow,          & ! Cloud snow effective radius 
+         cld_rwp,             & ! Cloud rain water path      
+         cld_rerain,          & ! Cloud rain effective radius 
+         precip_frac            ! Precipitation fraction by layer.
     type(ty_cloud_optics),intent(in) :: &
          lw_cloud_props         ! RRTMGP DDT: spectral information for RRTMGP LW radiation scheme
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props           ! RRTMGP DDT: spectral information for RRTMGP LW radiation scheme
  
     ! Outputs
-    real(kind_phys), dimension(ncol,nLev), intent(out) :: &
-         cldtaulw                      ! Approx. 10.mu band layer cloud optical depth  
-    type(ty_optical_props_1scl),intent(out) :: &
-         lw_optical_props_cloudsByBand ! RRTMGP DDT: longwave cloud optical properties in each band
-    integer, intent(out) :: &
-         errflg                        ! CCPP error flag
     character(len=*), intent(out) :: &
-         errmsg                        ! CCPP error message
-
+         errmsg                             ! CCPP error message
+    integer, intent(out) :: &
+         errflg                             ! CCPP error flag
+    type(ty_optical_props_1scl),intent(out) :: &
+         lw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
+         lw_optical_props_precipByBand      ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
+    real(kind_phys), dimension(ncol,nLev), intent(out) :: &
+         cldtaulw                           ! Approx 10.mu band layer cloud optical depth  
+         
     ! Local variables
-    logical,dimension(ncol,nLev) :: liqmask, icemask
+    real(kind_phys) :: tau_rain, tau_snow
     real(kind_phys), dimension(ncol,nLev,lw_gas_props%get_nband()) :: &
-         tau_cld
-    integer :: iCol, iLay
+         tau_cld, tau_precip
+    integer :: iCol, iLay, iBand
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    tau_cld = 0.
+    
+    ! Initialize locals
+    tau_cld    = 0._kind_phys
+    tau_precip = 0._kind_phys
 
     if (.not. doLWrad) return
-    
-    ! Compute ice/liquid cloud masks, needed by rrtmgp_cloud_optics
-    liqmask = (cld_frac .gt. 0 .and. cld_lwp .gt. 0)
-    icemask = (cld_frac .gt. 0 .and. cld_iwp .gt. 0)
 
-    ! Allocate space for RRTMGP DDTs containing cloud radiative properties
+    ! Allocate space for RRTMGP DDTs containing cloud radiative properties    
     ! Cloud optics [nCol,nLev,nBands]
     call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_1scl(&
          ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
-    lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
-
+    lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys    
+    ! Precipitation optics [nCol,nLev,nBands]
+    call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_precipByBand%alloc_1scl(&
+         ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
+    lw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys
+    
     ! Compute cloud-optics for RTE.
     if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
        ! i) RRTMGP cloud-optics.
@@ -341,15 +353,35 @@ contains
             cld_reice,                     & ! IN  - Cloud ice effective radius (microns)
             lw_optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
                                              !       in each band
+        ! Add in rain and snow(+groupel) 
+        do iCol=1,nCol
+           do iLay=1,nLev                                      
+              if (cld_frac(iCol,iLay) .gt. 0.) then
+                 ! Rain optical-depth (No band dependence)
+                 tau_rain = absrain*cld_rwp(iCol,iLay)
+
+                 ! Snow (+groupel) optical-depth (No band dependence)
+                 if (cld_swp(iCol,iLay) .gt. 0. .and. cld_resnow(iCol,iLay) .gt. 10._kind_phys) then
+                    tau_snow = abssnow0*1.05756*cld_swp(iCol,iLay)/cld_resnow(iCol,iLay)
+                 else
+                    tau_snow = 0.0
+                 endif  
+                 do iBand=1,lw_gas_props%get_nband()
+                     lw_optical_props_precipByBand%tau(iCol,iLay,iBand) = tau_rain + tau_snow
+                 enddo 
+              endif
+           enddo
+        enddo                                                                                    
     endif
     if (doG_cldoptics) then
        ! ii) RRTMG cloud-optics.
        if (any(cld_frac .gt. 0)) then
           call rrtmg_lw_cloud_optics(ncol, nLev, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, &
-               cld_frac, tau_cld)
+               cld_frac, tau_cld, tau_precip)
        endif
        lw_optical_props_cloudsByBand%tau = tau_cld
+       lw_optical_props_precipByBand%tau = tau_precip
     endif    
  
     ! All-sky LW optical depth ~10microns

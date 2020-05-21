@@ -242,6 +242,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[precip_frac]
+  standard_name = precipitation_fraction_by_layer
+  long_name = precipitation fraction in each layer
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [sw_cloud_props]
   standard_name = coefficients_for_sw_cloud_optics
   long_name = DDT containing spectral information for cloudy RRTMGP SW radiation scheme
@@ -282,6 +291,14 @@
   type = ty_optical_props_2str
   intent = out
   optional = F
+[sw_optical_props_precipByBand]
+  standard_name = shortwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = out
+  optional = F  
 [cldtausw]
   standard_name = RRTMGP_cloud_optical_depth_layers_at_0_55mu_band
   long_name = approx .55mu band layer cloud optical depth

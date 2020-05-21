@@ -95,7 +95,7 @@
   kind = kind_phys
   intent = out
   optional = F
-[overlap_param]
+[cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
   units = km
@@ -104,6 +104,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[precip_overlap_param]
+  standard_name = precip_overlap_param
+  long_name = precipitation overlap parameter
+  units = km
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F  
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL
