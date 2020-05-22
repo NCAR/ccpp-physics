@@ -750,7 +750,7 @@
           endif
 
         elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6 .or.  &
-               Model%imp_physics == 15) then
+               Model%imp_physics == 15 .or. Model%imp_physics == 17) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.

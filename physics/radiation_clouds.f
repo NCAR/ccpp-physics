@@ -351,6 +351,8 @@
             print *,'   --- WSM6 cloud microphysics'
           elseif (imp_physics == 10) then
             print *,'   --- MG cloud microphysics'
+          elseif (imp_physics == 17) then
+            print *,'   --- NSSL cloud microphysics'
           elseif (imp_physics == 15) then
             print *,'   --- Ferrier-Aligo cloud microphysics'
           else

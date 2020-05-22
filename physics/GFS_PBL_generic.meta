@@ -209,6 +209,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_nssl]
+  standard_name = flag_for_nssl_microphysics_scheme
+  long_name = choice of NSSL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [imp_physics_thompson]
   standard_name = flag_for_thompson_microphysics_scheme
   long_name = choice of Thompson microphysics scheme

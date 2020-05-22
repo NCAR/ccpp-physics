@@ -14,7 +14,7 @@
       subroutine set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                           imp_physics_thompson, ltaerosol,        &
                                           imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                          imp_physics_zhao_carr, kk,              &
+                                          imp_physics_zhao_carr, kk, &
                                           errmsg, errflg)
       implicit none
       !
@@ -82,7 +82,7 @@
       subroutine GFS_PBL_generic_pre_run (im, levs, nvdiff, ntrac,                       &
         ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc,                 &
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
-        imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
+        imp_physics, imp_physics_gfdl, imp_physics_nssl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
         hybedmf, do_shoc, satmedmf, qgrs, vdftra, lheatstrg, z0fac, e0fac, zorl,         &
         u10m, v10m, hflx, evap, hflxq, evapq, hffac, hefac, errmsg, errflg)
@@ -96,7 +96,7 @@
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
       logical, intent(in) :: trans_aero
-      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
+      integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_nssl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
@@ -248,7 +248,7 @@
           call set_aerosol_tracer_index(imp_physics, imp_physics_wsm6,          &
                                         imp_physics_thompson, ltaerosol,        &
                                         imp_physics_mg, ntgl, imp_physics_gfdl, &
-                                        imp_physics_zhao_carr, kk,              &
+                                        imp_physics_zhao_carr, kk, &
                                         errmsg, errflg)
           if (.not.errflg==1) return
           !

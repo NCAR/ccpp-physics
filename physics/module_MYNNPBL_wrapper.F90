@@ -62,7 +62,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
      &  bl_mynn_edmf_part, bl_mynn_cloudmix, bl_mynn_mixqt,&
      &  icloud_bl, do_mynnsfclay,                          &
-     &  imp_physics, imp_physics_gfdl,                     &
+     &  imp_physics, imp_physics_gfdl, imp_physics_nssl,   &
      &  imp_physics_thompson, imp_physics_wsm6,            &
      &  ltaerosol, lprnt, errmsg, errflg  )
 
@@ -170,7 +170,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       bl_mynn_tkebudget,                             &
      &       grav_settling,                                 &
      &       imp_physics, imp_physics_wsm6,                 &
-     &       imp_physics_thompson, imp_physics_gfdl
+     &       imp_physics_thompson, imp_physics_gfdl, imp_physics_nssl
 
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
@@ -365,7 +365,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               enddo
             enddo
           endif
-        elseif (imp_physics == imp_physics_gfdl) then
+        elseif (imp_physics == imp_physics_gfdl .or. imp_physics == imp_physics_nssl) then
   ! GFDL MP
           FLAG_QI = .true.
           FLAG_QNI= .false.

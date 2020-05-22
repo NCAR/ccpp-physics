@@ -1,2 +1,3 @@
 # Auto-generated include files in Fortran code
 *.inc
+*_cap.F90
