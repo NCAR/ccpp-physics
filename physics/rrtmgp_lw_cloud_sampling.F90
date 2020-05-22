@@ -195,9 +195,8 @@ contains
     !    
 	! For GFDL MP just add precipitation optics to cloud-optics
     !
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run', & 
-        lw_optical_props_precip%increment(lw_optical_props_clouds))    
-         
+    lw_optical_props_clouds%tau = lw_optical_props_clouds%tau + lw_optical_props_precip%tau
+
   end subroutine rrtmgp_lw_cloud_sampling_run
 
   ! #########################################################################################

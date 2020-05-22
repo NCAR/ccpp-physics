@@ -79,9 +79,10 @@ contains
          sw_optical_props_precip            ! RRTMGP DDT: Shortwave optical properties at each spectral point (precipitation) 
 
     ! Local variables
-    integer :: iCol,iLay
+    integer :: iCol,iLay,iGpt
     integer,dimension(ncol) :: ipseed_sw
     type(random_stat) :: rng_stat
+    real(kind_phys) :: tauloc,asyloc,ssaloc
     real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
     real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLev) :: rng1D
     logical, dimension(ncol,nLev,sw_gas_props%get_ngpt()) :: cldfracMCICA,precipfracSAMP
@@ -201,9 +202,38 @@ contains
     !    
 	! For GFDL MP just add precipitation optics to cloud-optics
     !
-    call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
-        sw_optical_props_precip%increment(sw_optical_props_clouds))    
-         
+	do iGpt=1,sw_gas_props%get_ngpt()
+  	   do iCol=1,nCol
+  	      do iLay=1,nLev
+  	         tauloc = sw_optical_props_clouds%tau(iCol,iLay,iGpt) + &
+  	                  sw_optical_props_precip%tau(iCol,iLay,iGpt)
+  	         if (tauloc > 0) then
+                ssaloc = (sw_optical_props_clouds%tau(iCol,iLay,iGpt)  * &
+                          sw_optical_props_clouds%ssa(iCol,iLay,iGpt)  + &
+                          sw_optical_props_precip%tau(iCol,iLay,iGpt)  * &
+                          sw_optical_props_precip%ssa(iCol,iLay,iGpt)) / &
+                         tauloc
+                if (ssaloc > 0) then
+                   asyloc = (sw_optical_props_clouds%tau(iCol,iLay,iGpt) * &
+                             sw_optical_props_clouds%ssa(iCol,iLay,iGpt) * &
+                             sw_optical_props_clouds%g(iCol,iLay,iGpt)   + &
+                             sw_optical_props_precip%tau(iCol,iLay,iGpt) * &
+                             sw_optical_props_precip%ssa(iCol,iLay,iGpt) * &
+                             sw_optical_props_precip%g(iCol,iLay,iGpt))  / &
+                            (tauloc*ssaloc) 
+                   sw_optical_props_clouds%ssa(iCol,iLay,iGpt) = ssaloc   
+                   sw_optical_props_clouds%g(iCol,iLay,iGpt)   = asyloc           
+                endif   
+                sw_optical_props_clouds%tau(iCol,iLay,iGpt) = tauloc	
+  	         endif
+  	      enddo
+       enddo
+    enddo    
+    
+!    call combine_optics_2str(sw_optical_props_precip%tau, sw_optical_props_precip%ssa, &
+!           sw_optical_props_precip%g,sw_optical_props_clouds%tau,&
+!           sw_optical_props_clouds%ssa, sw_optical_props_clouds%g)
+    
   end subroutine rrtmgp_sw_cloud_sampling_run
 
   ! #########################################################################################
