@@ -85,7 +85,7 @@
         rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
-        do_sppt, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
+        do_sppt, ca_global, dtdtr, dtdtc, drain_cpl, dsnow_cpl, lsm, lsm_ruc, lsm_noahmp, raincprv, rainncprv, iceprv, snowprv,      &
         graupelprv, draincprv, drainncprv, diceprv, dsnowprv, dgraupelprv, dtp, errmsg, errflg)
 !
       use machine, only: kind_phys
@@ -114,7 +114,7 @@
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt, dq3dt
 
       ! Stochastic physics / surface perturbations
-      logical, intent(in) :: do_sppt
+      logical, intent(in) :: do_sppt, ca_global
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdtr
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: dtdtc
       real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
@@ -381,7 +381,7 @@
       enddo
 
       ! Stochastic physics / surface perturbations
-      if (do_sppt) then
+      if (do_sppt .or. ca_global) then
 !--- radiation heating rate
         dtdtr(1:im,:) = dtdtr(1:im,:) + dtdtc(1:im,:)*dtf
       endif

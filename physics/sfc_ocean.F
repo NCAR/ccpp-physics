@@ -1,3 +1,9 @@
+!>\file sfc_ocean.F
+!! This file contains an alternative GFS near-surface sea temperature
+!! scheme when the model is initialized from GRIB2 data.
+
+!> This module contains the CCPP-compliant GFS near-surface sea temperature
+!! scheme when the model is initialized from GRIB2 data.
       module sfc_ocean
       implicit none
       private
@@ -15,19 +21,19 @@
       subroutine sfc_ocean_finalize()
       end subroutine sfc_ocean_finalize
 
-#if 0
+!>\defgroup gfs_ocean_main GFS Simple Ocean Scheme Module
+!! This subroutine calculates thermodynamical properties over
+!! open water.
 !! \section arg_table_sfc_ocean_run Argument Table
 !! \htmlinclude sfc_ocean_run.html
 !!
-#endif
       subroutine sfc_ocean_run                                          &
 !...................................
 !  ---  inputs:
      &     ( im, rd, eps, epsm1, rvrdm1, ps, t1, q1,                    &
      &       tskin, cm, ch, prsl1, prslki, wet, wind,                   &
      &       flag_iter,                                                 &
-!  ---  outputs:
-     &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &
+     &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
      &       errmsg, errflg                                             &
      &     )
 
