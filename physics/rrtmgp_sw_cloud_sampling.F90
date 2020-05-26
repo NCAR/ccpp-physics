@@ -158,24 +158,25 @@ contains
             nday, nLev, sw_gas_props))
  
        ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
-       if(isubcsw == 1) then      ! advance prescribed permutation seed
-          do iCol = 1, ncol
-             ipseed_sw(iCol) = ipsdsw0 + iCol
-          enddo
-       elseif (isubcsw == 2) then ! use input array of permutaion seeds
-          do iCol = 1, ncol
-             ipseed_sw(iCol) = icseed_sw(iCol)
-          enddo
-       endif
+       !if(isubcsw == 1) then      ! advance prescribed permutation seed
+       !   do iCol = 1, ncol
+       !      ipseed_sw(iCol) = ipsdsw0 + iCol
+       !   enddo
+       !elseif (isubcsw == 2) then ! use input array of permutaion seeds
+       !   do iCol = 1, ncol
+       !      ipseed_sw(iCol) = icseed_sw(iCol)
+       !   enddo
+       !endif
 
        ! Call McICA to generate subcolumns.
-       ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-       ! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
-       do iCol=1,ncol
-          call random_setseed(ipseed_sw(icol),rng_stat)
-          call random_number(rng1D,rng_stat)
-          rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
-       enddo
+       ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
+       !! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
+       !! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
+       !do iCol=1,ncol
+       !   call random_setseed(ipseed_sw(icol),rng_stat)
+       !   call random_number(rng1D,rng_stat)
+       !   rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+       !enddo
 
        ! Call McICA
        select case ( iovrsw )
@@ -183,12 +184,13 @@ contains
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
              sampled_mask_max_ran(rng3D,precip_frac,precipfracSAMP))       
        case(3) ! Exponential-random
-          ! Generate second RNG
-	  do iCol=1,ncol
-	     call random_setseed(ipseed_sw(icol),rng_stat)
-             call random_number(rng1D,rng_stat)
-             rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
-	  enddo
+          ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
+          !! Generate second RNG
+	      !do iCol=1,ncol
+	      !call random_setseed(ipseed_sw(icol),rng_stat)
+           !  call random_number(rng1D,rng_stat)
+           !  rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+	      !enddo
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
              sampled_mask_exp_dcorr(rng3D,rng3D2,precip_frac,precip_overlap_param(:,1:nLev-1),precipfracSAMP))          
        end select
@@ -220,11 +222,14 @@ contains
                              sw_optical_props_precip%tau(iCol,iLay,iGpt) * &
                              sw_optical_props_precip%ssa(iCol,iLay,iGpt) * &
                              sw_optical_props_precip%g(iCol,iLay,iGpt))  / &
-                            (tauloc*ssaloc) 
-                   sw_optical_props_clouds%ssa(iCol,iLay,iGpt) = ssaloc   
-                   sw_optical_props_clouds%g(iCol,iLay,iGpt)   = asyloc           
+                            (tauloc*ssaloc)
+                else
+                   ssaloc = 1.
+                   asyloc = 0.           
                 endif   
                 sw_optical_props_clouds%tau(iCol,iLay,iGpt) = tauloc	
+                sw_optical_props_clouds%ssa(iCol,iLay,iGpt) = ssaloc   
+                sw_optical_props_clouds%g(iCol,iLay,iGpt)   = asyloc
   	         endif
   	      enddo
        enddo

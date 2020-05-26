@@ -413,10 +413,10 @@ contains
        if (doG_cldoptics) then
           ! RRTMG cloud(+precipitation) optics
           tau_cld(:,:,:)    = 0._kind_phys
-          ssa_cld(:,:,:)    = 0._kind_phys
+          ssa_cld(:,:,:)    = 1._kind_phys
           asy_cld(:,:,:)    = 0._kind_phys
           tau_precip(:,:,:) = 0._kind_phys
-          ssa_precip(:,:,:) = 0._kind_phys
+          ssa_precip(:,:,:) = 1._kind_phys
           asy_precip(:,:,:) = 0._kind_phys
           if (any(cld_frac .gt. 0)) then
              call rrtmg_sw_cloud_optics(nday, nLev, sw_gas_props%get_nband(),       &
