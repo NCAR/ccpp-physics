@@ -672,7 +672,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, tsfc_ocn, tsurf_ocn, tseal, xt, xz, dt_cool,
+     &    (im, wet, tsfc_wat, tsurf_wat, tseal, xt, xz, dt_cool,
      &     z_c, tref, cplflx, oceanfrac, errmsg, errflg)
 
       use machine , only : kind_phys
@@ -683,12 +683,12 @@ cc
       integer, intent(in) :: im
       logical, dimension(im), intent(in) :: wet
       real (kind=kind_phys), dimension(im), intent(in) ::
-     &      tsfc_ocn, xt, xz, dt_cool, z_c, oceanfrac
+     &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(im), intent(inout) ::
-     &    tsurf_ocn, tseal, tref
+     &    tsurf_wat, tseal, tref
 
 !  ---  outputs:
       character(len=*), intent(out) :: errmsg
@@ -711,9 +711,9 @@ cc
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
-          !tseal(i)     = tsfc_ocn(i)  + tem
-          tseal(i)     = tsfc_ocn(i)
-          !tsurf_ocn(i) = tsurf_ocn(i) + tem
+          !tseal(i)     = tsfc_wat(i)  + tem
+          tseal(i)     = tsfc_wat(i)
+          !tsurf_wat(i) = tsurf_wat(i) + tem
           ! *DH
         endif
       enddo
@@ -733,7 +733,7 @@ cc
             endif
             tseal(i) = tref(i) + dt_warm - dt_cool(i)
 !                  - (Sfcprop%oro(i)-Sfcprop%oro_uf(i))*rlapse
-            tsurf_ocn(i) = tseal(i)
+            tsurf_wat(i) = tseal(i)
           endif
         enddo
       endif
@@ -776,7 +776,7 @@ cc
       subroutine sfc_nst_post_run                                       &
      &     ( im, rlapse, tgice, wet, icy, oro, oro_uf, nstf_name1,      &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
-     &       tsurf_ocn, tsfc_ocn, dtzm, errmsg, errflg                  &
+     &       tsurf_wat, tsfc_wat, dtzm, errmsg, errflg                  &
      &     )
 
       use machine , only : kind_phys
@@ -794,8 +794,8 @@ cc
      &      dt_cool, z_c, tref, xlon
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_ocn, &
-     &      tsfc_ocn
+      real (kind=kind_phys), dimension(im), intent(inout) :: tsurf_wat, &
+     &      tsfc_wat
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(size(xlon,1)), intent(out) ::    &
@@ -818,7 +818,7 @@ cc
 
 !      do i = 1, im
 !        if (wet(i) .and. .not. icy(i)) then
-!          tsurf_ocn(i) = tsurf_ocn(i) - (oro(i)-oro_uf(i)) * rlapse
+!          tsurf_wat(i) = tsurf_wat(i) - (oro(i)-oro_uf(i)) * rlapse
 !        endif
 !      enddo
 
@@ -835,8 +835,8 @@ cc
 !          if (wet(i) .and. .not.icy(i)) then
 !          if (wet(i) .and. (Model%frac_grid .or. .not. icy(i))) then
           if (wet(i)) then
-            tsfc_ocn(i) = max(tgice, tref(i) + dtzm(i))
-!           tsfc_ocn(i) = max(271.2, tref(i) + dtzm(i)) -  &
+            tsfc_wat(i) = max(tgice, tref(i) + dtzm(i))
+!           tsfc_wat(i) = max(271.2, tref(i) + dtzm(i)) -  &
 !                           (oro(i)-oro_uf(i))*rlapse
           endif
         enddo
