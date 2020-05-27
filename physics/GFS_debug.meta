@@ -456,7 +456,7 @@
   optional = F
 [icy]
   standard_name = flag_nonzero_sea_ice_surface_fraction
-  long_name = flag indicating some sea ice surface area fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
@@ -464,7 +464,7 @@
   optional = F
 [wet]
   standard_name = flag_nonzero_wet_surface_fraction
-  long_name = flag indicating some ocean or lake surface area fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
@@ -472,7 +472,7 @@
   optional = F
 [lake]
   standard_name = flag_nonzero_lake_surface_fraction
-  long_name = flag indicating some lake surface area fraction
+  long_name = flag indicating presence of some lake surface area fraction
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
@@ -480,7 +480,7 @@
   optional = F
 [ocean]
   standard_name = flag_nonzero_ocean_surface_fraction
-  long_name = flag indicating some ocean surface area fraction
+  long_name = flag indicating presence of some ocean surface area fraction
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
