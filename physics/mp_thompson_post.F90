@@ -17,12 +17,11 @@ contains
 !! \section arg_table_mp_thompson_post_init Argument Table
 !! \htmlinclude mp_thompson_post_init.html
 !!
-   subroutine mp_thompson_post_init(ncol, ttendlim, errmsg, errflg)
+   subroutine mp_thompson_post_init(ttendlim, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
-      integer,         intent(in) :: ncol
       real(kind_phys), intent(in) :: ttendlim
 
       ! CCPP error handling

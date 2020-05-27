@@ -196,7 +196,7 @@
 !> \section det_gwdps GFS Orographic GWD Scheme Detailed Algorithm
 !> @{
       subroutine gwdps_run(                                             &
-     &           IM,IX,KM,A,B,C,U1,V1,T1,Q1,KPBL,                       &
+     &           IM,KM,A,B,C,U1,V1,T1,Q1,KPBL,                          &
      &           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,             &
      &           HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,           &
      &           DUSFC,DVSFC,G, CP, RD, RV, IMX,                        &
@@ -269,13 +269,13 @@
 !        CRITICAL LEVELS
 !
 !  INPUT
-!        A(IX,KM)  NON-LIN TENDENCY FOR V WIND COMPONENT
-!        B(IX,KM)  NON-LIN TENDENCY FOR U WIND COMPONENT
-!        C(IX,KM)  NON-LIN TENDENCY FOR TEMPERATURE
-!        U1(IX,KM) ZONAL WIND M/SEC  AT T0-DT
-!        V1(IX,KM) MERIDIONAL WIND M/SEC AT T0-DT
-!        T1(IX,KM) TEMPERATURE DEG K AT T0-DT
-!        Q1(IX,KM) SPECIFIC HUMIDITY AT T0-DT
+!        A(IM,KM)  NON-LIN TENDENCY FOR V WIND COMPONENT
+!        B(IM,KM)  NON-LIN TENDENCY FOR U WIND COMPONENT
+!        C(IM,KM)  NON-LIN TENDENCY FOR TEMPERATURE
+!        U1(IM,KM) ZONAL WIND M/SEC  AT T0-DT
+!        V1(IM,KM) MERIDIONAL WIND M/SEC AT T0-DT
+!        T1(IM,KM) TEMPERATURE DEG K AT T0-DT
+!        Q1(IM,KM) SPECIFIC HUMIDITY AT T0-DT
 !
 !        DELTIM  TIME STEP    SECS
 !        SI(N)   P/PSFC AT BASE OF LAYER N
@@ -297,24 +297,24 @@
       implicit none
 !
       ! Interface variables
-      integer, intent(in) :: im, ix, km, imx, kdt, ipr, me
+      integer, intent(in) :: im, km, imx, kdt, ipr, me
       integer, intent(in) :: KPBL(IM) ! Index for the PBL top layer!
       real(kind=kind_phys), intent(in) ::                               &
      &                     deltim, G, CP, RD, RV, cdmbgwd(4)
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     A(IX,KM), B(IX,KM), C(IX,KM)
+     &                     A(IM,KM), B(IM,KM), C(IM,KM)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     U1(IX,KM),   V1(IX,KM),     T1(IX,KM),       &
-     &                     Q1(IX,KM),   PRSI(IX,KM+1), DEL(IX,KM),      &
-     &                     PRSL(IX,KM), PRSLK(IX,KM),  PHIL(IX,KM),     &
-     &                     PHII(IX,KM+1)
+     &                     U1(IM,KM),   V1(IM,KM),     T1(IM,KM),       &
+     &                     Q1(IM,KM),   PRSI(IM,KM+1), DEL(IM,KM),      &
+     &                     PRSL(IM,KM), PRSLK(IM,KM),  PHIL(IM,KM),     &
+     &                     PHII(IM,KM+1)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     OC(IM), OA4(IX,4), CLX4(IX,4), HPRIME(IM)
+     &                     OC(IM), OA4(IM,4), CLX4(IM,4), HPRIME(IM)
       real(kind=kind_phys), intent(inout) :: ELVMAX(IM)
       real(kind=kind_phys), intent(in) ::                               &
      &                     THETA(IM), SIGMA(IM), GAMMA(IM)
       real(kind=kind_phys), intent(out) :: DUSFC(IM), DVSFC(IM),        &
-     &                     RDXZB(IX)
+     &                     RDXZB(IM)
       integer, intent(in) :: nmtvr
       logical, intent(in) :: lprnt
       character(len=*), intent(out) :: errmsg
@@ -471,7 +471,7 @@
 !         kreflm(i) = 0
         enddo
 !       if (lprnt) 
-!    &  print *,' in gwdps_lm.f npt,IM,IX,IY,km,me=',npt,IM,IX,IY,km,me
+!    &  print *,' in gwdps_lm.f npt,IM,IY,km,me=',npt,IM,IY,km,me
 !
 !
 !> --- Subgrid Mountain Blocking Section

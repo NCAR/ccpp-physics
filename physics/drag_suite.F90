@@ -194,7 +194,7 @@
 !     &           nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, errmsg, errflg)
 !
    subroutine drag_suite_run(                                           &
-     &           IM,IX,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,              &
+     &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
      &           VAR,oc1,oa4,ol4,                                       &
 !     &           varss,oc1ss,oa4ss,ol4ss,                               &
@@ -295,7 +295,7 @@
    implicit none
 
    ! Interface variables
-   integer, intent(in) :: im, ix, km, imx, kdt, ipr, me, master
+   integer, intent(in) :: im, km, imx, kdt, ipr, me, master
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(im)

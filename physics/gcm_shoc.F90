@@ -19,12 +19,10 @@ end subroutine shoc_init
 subroutine shoc_finalize ()
 end subroutine shoc_finalize
 
-#if 0
 !> \section arg_table_shoc_run Argument Table
 !! \htmlinclude shoc_run.html
 !!
-#endif
-subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, &
+subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd,     &
                      con_pi, con_fvirt, dtp, prsl, delp, phii, phil, u, v, omega, rhc,          &
                      supice, pcrit,  cefac, cesfac, tkef1, dis_opt, hflx, evap, prnum,          &
                      gt0, gq0, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc,         &
@@ -32,7 +30,7 @@ subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, 
 
     implicit none
 
-    integer, intent(in) :: ix, nx, nzm, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc
+    integer, intent(in) :: nx, nzm, ntrac, ntqv, ntcw, ntiw, ntrw, ntsw, ntgl, ntlnc, ntinc
     real(kind=kind_phys), intent(in) :: tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_rv, con_rd, con_pi, con_fvirt, &
                                         dtp, supice, pcrit, cefac, cesfac, tkef1, dis_opt
   !
@@ -114,7 +112,7 @@ subroutine shoc_run (ix, nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, 
     !     phy_f3d(1,1,ntot3d-1) - shoc determined diffusion coefficients
     !     phy_f3d(1,1,ntot3d  ) - shoc determined  w'theta'
 
-    call shoc_work (ix, nx, nzm, nzm+1, dtp, prsl, delp,                                &
+    call shoc_work (nx, nx, nzm, nzm+1, dtp, prsl, delp,                                &
                     phii, phil, u, v, omega, gt0, gq0(:,:,1), qi, qc, qsnw, qrn,        &
                     rhc, supice, pcrit, cefac, cesfac, tkef1, dis_opt,                  &
                     cld_sgs, tke, hflx, evap, prnum, tkh, wthv_sec,                     &

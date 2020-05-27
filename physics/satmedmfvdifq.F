@@ -57,7 +57,7 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
 !! @{
-      subroutine satmedmfvdifq_run(ix,im,km,ntrac,ntcw,ntiw,ntke,       &
+      subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntiw,ntke,          &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
@@ -74,7 +74,7 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke, ntoz
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
       logical, intent(in)  :: ldiag3d,qdiag3d
@@ -86,19 +86,19 @@
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     u1(im,km),     v1(im,km),                    &
+     &                     t1(im,km),     q1(im,km,ntrac),              &
+     &                     swh(im,km),    hlw(im,km),                   &
      &                     xmu(im),       garea(im),                    &
-     &                     psk(ix),       rbsoil(im),                   &
+     &                     psk(im),       rbsoil(im),                   &
      &                     zorl(im),      tsea(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
      &                     evap(im),      heat(im),                     &
      &                     stress(im),    spd1(im),                     &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km)
+     &                     prsi(im,km+1), del(im,km),                   &
+     &                     prsl(im,km),   prslk(im,km),                 &
+     &                     phii(im,km+1), phil(im,km)
       real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
      &                     du3dt(:,:),    dv3dt(:,:),                   &
      &                     dt3dt(:,:),    dq3dt(:,:),                   &
@@ -773,13 +773,13 @@
       enddo
 !>  - Call mfpbltq(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
 !!    to take into account nonlocal transport by large eddies. For details of the mfpbltq subroutine, step into its documentation ::mfpbltq
-      call mfpbltq(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
+      call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
 !>  - Call mfscuq(), which is a new mass-flux parameterization for 
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
-      call mfscuq(im,ix,km,kmscu,ntcw,ntrac1,dt2,
+      call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,xmfd,

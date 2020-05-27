@@ -32,7 +32,7 @@
 !>\section sgscloud_radpre GSD SGS Scheme General Algorithm
 !> @{
       subroutine sgscloud_radpre_run(    &
-           ix,im,levs,                   &
+           im,levs,                      &
            flag_init,flag_restart,       &
            do_mynnedmf,                  &
            qc, qi, T3D,                  &
@@ -57,7 +57,7 @@
 !------------------------------------------------------------------- 
       ! Interface variables
       real (kind=kind_phys), parameter :: gfac=1.0e5/con_g
-      integer, intent(in)  :: ix, im, levs, imfdeepcnv, imfdeepcnv_gf, nlay
+      integer, intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, nlay
       logical,          intent(in)  :: flag_init, flag_restart, do_mynnedmf
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qr, qs

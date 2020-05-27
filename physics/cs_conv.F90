@@ -289,7 +289,7 @@ module cs_conv
 !!
 !!  \section general_cs_conv CS Convection Scheme General Algorithm
 !> @{
-   subroutine cs_conv_run(IM     , IJSDIM ,  KMAX     , ntracp1 , NN,       &
+   subroutine cs_conv_run(         IJSDIM ,  KMAX     , ntracp1 , NN,       &
                           NTR    , nctp   ,                                 & !DD dimensions
                           otspt  , lat    ,  kdt      ,                     &
                           t      , q      ,  rain1    , clw     ,           &
@@ -308,24 +308,24 @@ module cs_conv
 !
 ! input arguments
 !
-   INTEGER, INTENT(IN)     :: IM,IJSDIM, KMAX, ntracp1, nn, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
+   INTEGER, INTENT(IN)     :: IJSDIM, KMAX, ntracp1, nn, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
    logical, intent(in)     :: otspt(1:ntracp1,1:2)! otspt(:,1) - on/off switch for tracer transport by updraft and
                                                   !              downdraft. should not include subgrid PDF and turbulence
                                                   ! otspt(:,2) - on/off switch for tracer transport by subsidence
                                                   !              should include subgrid PDF and turbulence
 
-   real(r8), intent(inout) :: t(IM,KMAX)          ! temperature at mid-layer (K)
-   real(r8), intent(inout) :: q(IM,KMAX)          ! water vapor array including moisture (kg/kg)
-   real(r8), intent(inout) :: clw(IM,KMAX,nn)     ! tracer array including cloud condensate (kg/kg)
-   real(r8), intent(in)    :: pap(IM,KMAX)        ! pressure at mid-layer (Pa)
-   real(r8), intent(in)    :: paph(IM,KMAX+1)     ! pressure at boundaries (Pa)
-   real(r8), intent(in)    :: zm(IM,KMAX)         ! geopotential at mid-layer (m)
-   real(r8), intent(in)    :: zi(IM,KMAX+1)       ! geopotential at boundaries (m)
+   real(r8), intent(inout) :: t(IJSDIM,KMAX)          ! temperature at mid-layer (K)
+   real(r8), intent(inout) :: q(IJSDIM,KMAX)          ! water vapor array including moisture (kg/kg)
+   real(r8), intent(inout) :: clw(IJSDIM,KMAX,nn)     ! tracer array including cloud condensate (kg/kg)
+   real(r8), intent(in)    :: pap(IJSDIM,KMAX)        ! pressure at mid-layer (Pa)
+   real(r8), intent(in)    :: paph(IJSDIM,KMAX+1)     ! pressure at boundaries (Pa)
+   real(r8), intent(in)    :: zm(IJSDIM,KMAX)         ! geopotential at mid-layer (m)
+   real(r8), intent(in)    :: zi(IJSDIM,KMAX+1)       ! geopotential at boundaries (m)
    real(r8), intent(in)    :: fscav(ntr), fswtr(ntr), wcbmaxm(ijsdim)
    real(r8), intent(in)    :: precz0in, preczhin, clmdin
 ! added for cs_convr
-   real(r8), intent(inout) :: u(IM,KMAX)          ! zonal wind at mid-layer (m/s)
-   real(r8), intent(inout) :: v(IM,KMAX)          ! meridional wind at mid-layer (m/s)
+   real(r8), intent(inout) :: u(IJSDIM,KMAX)          ! zonal wind at mid-layer (m/s)
+   real(r8), intent(inout) :: v(IJSDIM,KMAX)          ! meridional wind at mid-layer (m/s)
 
    real(r8), intent(in)    :: DELTA               ! physics time step
    real(r8), intent(in)    :: DELTI               ! dynamics time step (model time increment in seconds)
@@ -333,7 +333,7 @@ module cs_conv
 !
 ! modified arguments
 !
-   real(r8), intent(inout) :: CBMFX(IM,nctp)      ! cloud base mass flux (kg/m2/s)
+   real(r8), intent(inout) :: CBMFX(IJSDIM,nctp)      ! cloud base mass flux (kg/m2/s)
 !
 ! output arguments
 !
@@ -348,21 +348,21 @@ module cs_conv
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
 ! *GJF
-   integer, intent(inout) :: kcnv(im)             ! zero if no deep convection and 1 otherwise
+   integer, intent(inout) :: kcnv(ijsdim)             ! zero if no deep convection and 1 otherwise
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
 !DDsigma - output added for AW sigma diagnostics
 !  interface sigma and vertical velocity by cloud type (1=sfc) 
-!  real(r8), intent(out), dimension(IM,KMAX,nctp)  :: sigmai, vverti
-   real(r8), intent(out), dimension(IM,KMAX)       :: sigma  ! sigma  sigma totaled over cloud type - on interfaces (1=sfc)
+!  real(r8), intent(out), dimension(IJSDIM,KMAX,nctp)  :: sigmai, vverti
+   real(r8), intent(out), dimension(IJSDIM,KMAX)       :: sigma  ! sigma  sigma totaled over cloud type - on interfaces (1=sfc)
 !   sigma  terms in eq 91 and 92
-!  real(r8), dimension(IM,KMAX)                    :: sfluxterm, qvfluxterm, condterm
+!  real(r8), dimension(IJSDIM,KMAX)                    :: sfluxterm, qvfluxterm, condterm
 !DDsigma
 !
 ! output arguments of CS_CUMLUS
 !
-   real(r8), dimension(IM,KMAX,nctp)  :: vverti
+   real(r8), dimension(IJSDIM,KMAX,nctp)  :: vverti
 
    real(r8) GTT(IJSDIM,KMAX)           !< temperature tendency [K/s]
    real(r8) GTQ(IJSDIM,KMAX,NTR)       !< tracer tendency [kg/kg/s]
@@ -528,7 +528,7 @@ module cs_conv
    enddo
 !
 !> -# Call cs_cumlus() for the main CS cumulus parameterization
-   call CS_CUMLUS (im    , IJSDIM, KMAX  , NTR   ,    &  !DD dimensions
+   call CS_CUMLUS (IJSDIM, IJSDIM, KMAX  , NTR   ,    &  !DD dimensions
                    otspt(1:ntr,1), otspt(1:ntr,2),    &
                    lprnt , ipr   ,                    &
                    GTT   , GTQ   , GTU   , GTV   ,    & ! output
