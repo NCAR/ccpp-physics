@@ -173,8 +173,8 @@
   intent = in
   optional = F
 [cm]
-  standard_name = surface_drag_coefficient_for_momentum_in_air_over_ocean
-  long_name = surface exchange coeff for momentum over ocean
+  standard_name = surface_drag_coefficient_for_momentum_in_air_over_water
+  long_name = surface exchange coeff for momentum over water
   units = none
   dimensions = (horizontal_dimension)
   type = real
@@ -182,8 +182,8 @@
   intent = in
   optional = F
 [ch]
-  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean
-  long_name = surface exchange coeff heat & moisture over ocean
+  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_water
+  long_name = surface exchange coeff heat & moisture over water
   units = none
   dimensions = (horizontal_dimension)
   type = real
@@ -253,8 +253,8 @@
   intent = in
   optional = F
 [stress]
-  standard_name = surface_wind_stress_over_ocean
-  long_name = surface wind stress over ocean
+  standard_name = surface_wind_stress_over_water
+  long_name = surface wind stress over water
   units = m2 s-2
   dimensions = (horizontal_dimension)
   type = real
@@ -262,8 +262,8 @@
   intent = in
   optional = F
 [sfcemis]
-  standard_name = surface_longwave_emissivity_over_ocean_interstitial
-  long_name = surface lw emissivity in fraction over ocean (temporary use as interstitial)
+  standard_name = surface_longwave_emissivity_over_water_interstitial
+  long_name = surface lw emissivity in fraction over water (temporary use as interstitial)
   units = frac
   dimensions = (horizontal_dimension)
   type = real
@@ -271,8 +271,8 @@
   intent = in
   optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_ocean
-  long_name = total sky surface downward longwave flux absorbed by the ground over ocean
+  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_water
+  long_name = total sky surface downward longwave flux absorbed by the ground over water
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -289,8 +289,8 @@
   intent = in
   optional = F
 [rain]
-  standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_ocean
-  long_name = total precipitation amount in each time step over ocean
+  standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep_over_water
+  long_name = total precipitation amount in each time step over water
   units = m
   dimensions = (horizontal_dimension)
   type = real
@@ -407,8 +407,8 @@
   intent = inout
   optional = F
 [tsurf]
-  standard_name = surface_skin_temperature_after_iteration_over_ocean
-  long_name = surface skin temperature after iteration over ocean
+  standard_name = surface_skin_temperature_after_iteration_over_water
+  long_name = surface skin temperature after iteration over water
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -569,8 +569,8 @@
   intent = inout
   optional = F
 [qsurf]
-  standard_name = surface_specific_humidity_over_ocean
-  long_name = surface air saturation specific humidity over ocean
+  standard_name = surface_specific_humidity_over_water
+  long_name = surface air saturation specific humidity over water
   units = kg kg-1
   dimensions = (horizontal_dimension)
   type = real
@@ -578,8 +578,8 @@
   intent = inout
   optional = F
 [gflux]
-  standard_name = upward_heat_flux_in_soil_over_ocean
-  long_name = soil heat flux over ocean
+  standard_name = upward_heat_flux_in_soil_over_water
+  long_name = soil heat flux over water
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -587,8 +587,8 @@
   intent = inout
   optional = F
 [cmm]
-  standard_name = surface_drag_wind_speed_for_momentum_in_air_over_ocean
-  long_name = momentum exchange coefficient over ocean
+  standard_name = surface_drag_wind_speed_for_momentum_in_air_over_water
+  long_name = momentum exchange coefficient over water
   units = m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -596,8 +596,8 @@
   intent = inout
   optional = F
 [chh]
-  standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_ocean
-  long_name = thermal exchange coefficient over ocean
+  standard_name = surface_drag_mass_flux_for_heat_and_moisture_in_air_over_water
+  long_name = thermal exchange coefficient over water
   units = kg m-2 s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -605,8 +605,8 @@
   intent = inout
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux_over_ocean
-  long_name = kinematic surface upward latent heat flux over ocean
+  standard_name = kinematic_surface_upward_latent_heat_flux_over_water
+  long_name = kinematic surface upward latent heat flux over water
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -614,8 +614,8 @@
   intent = inout
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_over_ocean
-  long_name = kinematic surface upward sensible heat flux over ocean
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_water
+  long_name = kinematic surface upward sensible heat flux over water
   units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -623,8 +623,8 @@
   intent = inout
   optional = F
 [ep]
-  standard_name = surface_upward_potential_latent_heat_flux_over_ocean
-  long_name = surface upward potential latent heat flux over ocean
+  standard_name = surface_upward_potential_latent_heat_flux_over_water
+  long_name = surface upward potential latent heat flux over water
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -680,8 +680,8 @@
   intent = in
   optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_ocean_interstitial
-  long_name = surface skin temperature over ocean (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water_interstitial
+  long_name = surface skin temperature over water (temporary use as interstitial)
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -689,8 +689,8 @@
   intent = in
   optional = F
 [tsurf_wat]
-  standard_name = surface_skin_temperature_after_iteration_over_ocean
-  long_name = surface skin temperature after iteration over ocean
+  standard_name = surface_skin_temperature_after_iteration_over_water
+  long_name = surface skin temperature after iteration over water
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -939,8 +939,8 @@
   intent = in
   optional = F
 [tsurf_wat]
-  standard_name = surface_skin_temperature_after_iteration_over_ocean
-  long_name = surface skin temperature after iteration over ocean
+  standard_name = surface_skin_temperature_after_iteration_over_water
+  long_name = surface skin temperature after iteration over water
   units = K
   dimensions = (horizontal_dimension)
   type = real
@@ -948,8 +948,8 @@
   intent = inout
   optional = F
 [tsfc_wat]
-  standard_name = surface_skin_temperature_over_ocean_interstitial
-  long_name = surface skin temperature over ocean (temporary use as interstitial)
+  standard_name = surface_skin_temperature_over_water_interstitial
+  long_name = surface skin temperature over water (temporary use as interstitial)
   units = K
   dimensions = (horizontal_dimension)
   type = real
