@@ -234,11 +234,6 @@ contains
   	      enddo
        enddo
     enddo    
-    
-!    call combine_optics_2str(sw_optical_props_precip%tau, sw_optical_props_precip%ssa, &
-!           sw_optical_props_precip%g,sw_optical_props_clouds%tau,&
-!           sw_optical_props_clouds%ssa, sw_optical_props_clouds%g)
-    
   end subroutine rrtmgp_sw_cloud_sampling_run
 
   ! #########################################################################################

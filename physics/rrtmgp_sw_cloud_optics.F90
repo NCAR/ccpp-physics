@@ -437,15 +437,6 @@ contains
 	         sw_optical_props_precipByBand%ssa(:,:,2:sw_gas_props%get_nband()) = ssa_precip(:,:,1:sw_gas_props%get_nband()-1)
 	         sw_optical_props_precipByBand%g(:,:,2:sw_gas_props%get_nband())   = asy_precip(:,:,1:sw_gas_props%get_nband()-1)
           
-             do iLay=1,nLev
-                write(43,'(a10,i5)')      'nLay:     ',iLay
-                write(43,'(a10,14f12.7)') 'tau_cld:  ',sw_optical_props_cloudsByBand%tau(1,iLay,:)
-                write(43,'(a10,14f12.7)') 'ssa_cld:  ',sw_optical_props_cloudsByBand%ssa(1,iLay,:)
-                write(43,'(a10,14f12.7)') 'asy_cld:  ',sw_optical_props_cloudsByBand%g(1,iLay,:)
-                write(43,'(a10,14f12.7)') 'tau_prec: ',sw_optical_props_precipByBand%tau(1,iLay,:)
-                write(43,'(a10,14f12.7)') 'ssa_prec: ',sw_optical_props_precipByBand%ssa(1,iLay,:)
-                write(43,'(a10,14f12.7)') 'asy_prec: ',sw_optical_props_precipByBand%g(1,iLay,:)             
-             enddo
           endif   
        endif
 
