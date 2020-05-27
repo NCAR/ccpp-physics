@@ -2631,6 +2631,7 @@
       INTEGER, INTENT(IN)   :: OPT_THCND
       INTEGER, INTENT(IN)   :: NSOIL, VEGTYP, ISURBAN, SOILTYP
       INTEGER               :: I
+      LOGICAL, PARAMETER    :: TIME_AVERAGE_T_UPDATE = .TRUE.
 
       REAL, INTENT(IN)      :: BEXP,CSOIL,DF1,DT,F1,PSISAT,QUARTZ,     &
                                SMCMAX, SMCWLT, TBOT,YY, ZBOT,ZZ1
@@ -2641,7 +2642,10 @@
       REAL, DIMENSION(1:NSOIL), INTENT(INOUT) :: STC
       REAL, DIMENSION(1:NSOIL)             :: AI, BI, CI, STCF,RHSTS
       REAL, PARAMETER       :: T0 = 273.15
-
+      REAL                  :: OLDT1
+      REAL, DIMENSION(1:NSOIL) :: OLDSTC
+      REAL, PARAMETER :: CTFIL1 = 0.5
+      REAL, PARAMETER :: CTFIL2 = 1.0 - CTFIL1
 !
 ! FASDAS
 !
@@ -2652,7 +2656,14 @@
 ! ----------------------------------------------------------------------
 ! HRT ROUTINE CALCS THE RIGHT HAND SIDE OF THE SOIL TEMP DIF EQN
 ! ----------------------------------------------------------------------
-
+      
+      IF (TIME_AVERAGE_T_UPDATE) THEN
+        OLDT1 = T1
+        DO I = 1, NSOIL
+           OLDSTC(I) = STC(I)
+        ENDDO
+      ENDIF
+      
       ! Land case
 
       CALL HRT (RHSTS,STC,SMC,SMCMAX,NSOIL,ZSOIL,YY,ZZ1,TBOT,     &
@@ -2677,6 +2688,15 @@
 ! CALCULATE SURFACE SOIL HEAT FLUX
 ! ----------------------------------------------------------------------
       T1 = (YY + (ZZ1- 1.0) * STC (1)) / ZZ1
+      
+      !GJF: Following the GFS version of Noah, time average the updating of skin temperature and soil temperature 
+      IF (TIME_AVERAGE_T_UPDATE) THEN
+        T1 = CTFIL1*T1 + CTFIL2*OLDT1
+        DO I = 1, NSOIL
+          STC(I) = CTFIL1*STC(I) + CTFIL2*OLDSTC(I)
+        ENDDO
+      ENDIF
+      
       SSOIL = DF1 * (STC (1) - T1) / (0.5 * ZSOIL (1))
 
 ! ----------------------------------------------------------------------
