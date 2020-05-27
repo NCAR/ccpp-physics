@@ -5,7 +5,7 @@
   standard_name = GFS_data_type_instance_all_blocks
   long_name = Fortran DDT containing FV3-GFS data
   units = DDT
-  dimensions = (ccpp_block_number)
+  dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = inout
   optional = F
@@ -21,7 +21,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = Fortran DDT containing FV3-GFS interstitial data
   units = DDT
-  dimensions = (ccpp_thread_number)
+  dimensions = (omp_threads)
   type = GFS_interstitial_type
   intent = inout
   optional = F
@@ -81,7 +81,7 @@
   standard_name = GFS_data_type_instance_all_blocks
   long_name = Fortran DDT containing FV3-GFS data
   units = DDT
-  dimensions = (ccpp_block_number)
+  dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = inout
   optional = F
