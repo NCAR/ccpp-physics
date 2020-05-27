@@ -156,7 +156,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  active = (flag_for_microphysics_scheme == flag_for_thompson_microphysics_scheme .and. flag_for_aerosol_physics)
   optional = T
 [nifa2d]
   standard_name = tendency_of_ice_friendly_aerosols_at_surface
@@ -166,7 +165,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  active = (flag_for_microphysics_scheme == flag_for_thompson_microphysics_scheme .and. flag_for_aerosol_physics)
   optional = T
 [nwfa]
   standard_name = water_friendly_aerosol_number_concentration
@@ -452,7 +450,6 @@
   type = real
   kind = kind_phys
   intent = in
-  active = (flag_for_microphysics_scheme == flag_for_thompson_microphysics_scheme .and. flag_for_aerosol_physics)
   optional = T
 [nifa2d]
   standard_name = tendency_of_ice_friendly_aerosols_at_surface
@@ -462,7 +459,6 @@
   type = real
   kind = kind_phys
   intent = in
-  active = (flag_for_microphysics_scheme == flag_for_thompson_microphysics_scheme .and. flag_for_aerosol_physics)
   optional = T
 [tgrs]
   standard_name = air_temperature_updated_by_physics
