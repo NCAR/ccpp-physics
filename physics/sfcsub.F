@@ -2416,7 +2416,7 @@
       do j = 1,lsoil
         do i = 1,len
           smcfcs(i,j) = smcanl(i,j)
-          if (slifcs(i) .gt. 0.0) then
+          if (slifcs(i) > 0.0_kind_io8) then
              stcfcs(i,j) = stcanl(i,j)
           else
              stcfcs(i,j) = tsffcs(i)
@@ -2435,7 +2435,7 @@
       enddo
 
 !cwu [+20l] update sihfcs, sicfcs. remove sea ice over non-ice points
-!     crit=aislim
+!     crit = aislim
       do i=1,len
         sihfcs(i) = sihanl(i)
         sitfcs(i) = tsffcs(i)
@@ -2444,37 +2444,45 @@
         else
           crit = min_seaice
         endif
-        if (slifcs(i) >= 2.) then
+        if (slifcs(i) >= 1.99_kind_io8) then
           if (sicfcs(i) > crit) then
-            tem1 = 1.0 / sicfcs(i)
+            tem1 = 1.0_kind_io8 / sicfcs(i)
             tsffcs(i) = (sicanl(i)*tsffcs(i)
      &                + (sicfcs(i)-sicanl(i))*tgice) * tem1
             sitfcs(i) = (tsffcs(i)-tgice*(1.0-sicfcs(i))) * tem1
+            sicfcs(i) = sicanl(i)
           else
             tsffcs(i) = tsfanl(i)
 !           tsffcs(i) = tgice
-            sihfcs(i) = sihnew
+!           sihfcs(i) = sihnew
+            sihfcs(i) = 0.0_kind_io8
+            sicfcs(i) = 0.0_kind_io8
+            slifcs(i) = 0.0_kind_io8
           endif
         endif
-        sicfcs(i) = sicanl(i)
-      enddo
-      do i=1,len
-        if (slifcs(i) < 1.5) then
-          sihfcs(i) = 0.
-          sicfcs(i) = 0.
-          sitfcs(i) = tsffcs(i)
-        else
-          if (lake(i)) then
-            crit = min_lakeice
-          else
-            crit = min_seaice
-          endif
-          if (sicfcs(i)  < crit) then
+        if (slifcs(i) > 1.5_kind_io8 .and. sicfcs(i)  < crit) then
             print *,'warning: check, slifcs and sicfcs',                &
      &               slifcs(i),sicfcs(i)
-          endif
         endif
       enddo
+
+!     do i=1,len
+!       if (slifcs(i) < 1.5_kind_io8) then
+!         sihfcs(i) = 0.0_kind_io8
+!         sicfcs(i) = 0.0_kind_io8
+!         sitfcs(i) = tsffcs(i)
+!       else
+!         if (lake(i)) then
+!           crit = min_lakeice
+!         else
+!           crit = min_seaice
+!         endif
+!         if (sicfcs(i)  < crit) then
+!           print *,'warning: check, slifcs and sicfcs',                &
+!    &               slifcs(i),sicfcs(i)
+!         endif
+!       endif
+!     enddo
 
 !
 ! ensure the consistency between slc and smc
@@ -7323,8 +7331,7 @@ cjfe
 
         kpd7=-1
         if (ialb == 1) then
-!cbosu    still need facsf and facwf.  read them from the production
-!cbosu    file
+!cbosu    still need facsf and facwf.  read them from the production file
           if ( index(fnalbc2, "tileX.nc") == 0) then ! grib file
             call fixrdc(lugb,fnalbc2,kpdalf(1),kpd7,kpd9,slmask
      &,                 alf,len,iret
@@ -8133,8 +8140,7 @@ cjfe
 
 !>\ingroup mod_sfcsub
       subroutine fixrdc_tile(filename_raw, tile_num_ch,                 &
-     &                       i_index, j_index, kpds,                    &
-     &                       var, mon, npts, me)
+     &                       i_index, j_index, kpds, var, mon, npts, me)
       use netcdf
       use machine ,      only : kind_io8
       implicit none
@@ -8151,7 +8157,8 @@ cjfe
       integer                        :: nx, ny, num_times
       integer                        :: id_var
       real(kind=4), allocatable      :: dummy(:,:,:)
-      ii=index(filename_raw,"tileX")
+
+      ii = index(filename_raw,"tileX")
 
       do i = 1, len(filename)
         filename(i:i) = " "

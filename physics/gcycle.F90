@@ -84,22 +84,22 @@
 
       len = 0
       do jx = Model%jsc, (Model%jsc+Model%ny-1)
-      do ix = Model%isc, (Model%isc+Model%nx-1)
-        len = len + 1
-        i_index(len) = ix
-        j_index(len) = jx
-      enddo
+        do ix = Model%isc, (Model%isc+Model%nx-1)
+          len = len + 1
+          i_index(len) = ix
+          j_index(len) = jx
+        enddo
       enddo
 
-      sig1t = 0.0
+      sig1t = 0.0_kind_phys
       npts  = Model%nx*Model%ny
 !
       len = 0
       do nb = 1,nblks
         do ix = 1,size(Grid(nb)%xlat,1)
           len = len + 1
-          RLA     (len)          =    Grid(nb)%xlat   (ix) * pifac
-          RLO     (len)          =    Grid(nb)%xlon   (ix) * pifac
+          RLA     (len)          = Grid(nb)%xlat      (ix) * pifac
+          RLO     (len)          = Grid(nb)%xlon      (ix) * pifac
           OROG    (len)          = Sfcprop(nb)%oro    (ix)
           OROG_UF (len)          = Sfcprop(nb)%oro_uf (ix)
           SLIFCS  (len)          = Sfcprop(nb)%slmsk  (ix)
@@ -142,18 +142,18 @@
             SLCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%slc (ix,ls)
           enddo
 
-          IF (SLIFCS(len) .LT. 0.1 .OR. SLIFCS(len) .GT. 1.5) THEN
-             SLMASK(len) = 0
+          IF (SLIFCS(len) < 0.1_kind_phys .OR. SLIFCS(len) > 1.5_kind_phys) THEN
+             SLMASK(len) = 0.0_kind_phys
           ELSE
-             SLMASK(len) = 1
+             SLMASK(len) = 1.0_kind_phys
           ENDIF
 
-          IF (SLIFCS(len) .EQ. 2) THEN
-            AISFCS(len) = 1.
+          IF (SLIFCS(len) > 1.99_kind_phys) THEN
+            AISFCS(len) = 1.0_kind_phys
           ELSE
-            AISFCS(len) = 0.
+            AISFCS(len) = 0.0_kind_phys
           ENDIF
-          if (Sfcprop(nb)%lakefrac(ix) > 0.0) then
+          if (Sfcprop(nb)%lakefrac(ix) > 0.0_kind_phys) then
             lake(len) = .true.
           else
             lake(len) = .false.
