@@ -204,9 +204,12 @@ contains
     !    
 	! For GFDL MP just add precipitation optics to cloud-optics
     !
+	print*,'ShapeC: ',shape(sw_optical_props_clouds%tau)
+	print*,'ShapeP:	',shape(sw_optical_props_precip%tau)
 	do iGpt=1,sw_gas_props%get_ngpt()
   	   do iCol=1,nCol
   	      do iLay=1,nLev
+	         write(*,"(a10,3i,2f10.4)") 'tauloc: ',iGpt,iCol,iLay,sw_optical_props_clouds%tau(iCol,iLay,iGpt),sw_optical_props_precip%tau(iCol,iLay,iGpt)
   	         tauloc = sw_optical_props_clouds%tau(iCol,iLay,iGpt) + &
   	                  sw_optical_props_precip%tau(iCol,iLay,iGpt)
   	         if (tauloc > 0) then
