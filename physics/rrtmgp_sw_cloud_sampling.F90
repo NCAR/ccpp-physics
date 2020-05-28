@@ -25,10 +25,10 @@ contains
     ! Outputs
     integer, intent(out) :: &
          ipsdsw0      ! Initial permutation seed for McICA
-
+    
     ! Set initial permutation seed for McICA, initially set to number of G-points
     ipsdsw0 = sw_gas_props%get_ngpt()
-
+    
   end subroutine rrtmgp_sw_cloud_sampling_init
 
   ! #########################################################################################
@@ -91,14 +91,14 @@ contains
     errmsg = ''
     errflg = 0
     
-    ! 
+    ! Only works w/ SDFs v15p2 and v16beta
     if (iovrsw .ne. 1 .and. iovrsw .ne. 3) then
-	   errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
-	   errflg = 1
-	   call check_error_msg('rrtmgp_sw_cloud_sampling',errmsg)
-	   return
-    endif    
-
+       errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
+       errflg = 1
+       call check_error_msg('rrtmgp_sw_cloud_sampling',errmsg)
+       return
+    endif
+    
     if (.not. doSWrad) return
     if (nDay .gt. 0) then
        !
@@ -106,7 +106,7 @@ contains
        !
        ! Allocate space RRTMGP DDTs [nday,nLev,nGpt]
        call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
-           sw_optical_props_clouds%alloc_2str(nday, nLev, sw_gas_props))
+            sw_optical_props_clouds%alloc_2str(nday, nLev, sw_gas_props))
  
        ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
        if(isubcsw == 1) then      ! advance prescribed permutation seed
@@ -120,30 +120,27 @@ contains
        endif
 
        ! Call McICA to generate subcolumns.
-       ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
-       !! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-       !! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
-       !do iCol=1,ncol
-       !   call random_setseed(ipseed_sw(icol),rng_stat)
-       !   call random_number(rng1D,rng_stat)
-       !   rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
-       !enddo
+       ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
+       ! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
+       do iCol=1,ncol
+          call random_setseed(ipseed_sw(icol),rng_stat)
+          call random_number(rng1D,rng_stat)
+          rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+       enddo
 
        ! Call McICA
        select case ( iovrsw )
        case(1) ! Maximum-random
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
-             sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
+               sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
        case(3) ! Exponential-random
-          ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
-          !! Generate second RNG
-	      !do iCol=1,ncol
-	      !   call random_setseed(ipseed_sw(icol),rng_stat)
-          !   call random_number(rng1D,rng_stat)
-          !   rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
-	      !enddo
+          do iCol=1,ncol
+             call random_setseed(ipseed_sw(icol),rng_stat)
+             call random_number(rng1D,rng_stat)
+             rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+          enddo
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
-             sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,cloud_overlap_param(:,1:nLev-1),cldfracMCICA))          
+               sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,cloud_overlap_param(:,1:nLev-1),cldfracMCICA))          
        end select
        
        ! Map band optical depth to each g-point using McICA
@@ -182,37 +179,32 @@ contains
        select case ( iovrsw )
        case(1) ! Maximum-random
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
-             sampled_mask_max_ran(rng3D,precip_frac,precipfracSAMP))       
+               sampled_mask_max_ran(rng3D,precip_frac,precipfracSAMP))       
        case(3) ! Exponential-random
-          ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
           !! Generate second RNG
-	      !do iCol=1,ncol
-	      !call random_setseed(ipseed_sw(icol),rng_stat)
-           !  call random_number(rng1D,rng_stat)
-           !  rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
-	      !enddo
+          !do iCol=1,ncol
+          !   call random_setseed(ipseed_sw(icol),rng_stat)
+          !   call random_number(rng1D,rng_stat)
+          !   rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+          !enddo
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
-             sampled_mask_exp_dcorr(rng3D,rng3D2,precip_frac,precip_overlap_param(:,1:nLev-1),precipfracSAMP))          
+               sampled_mask_exp_dcorr(rng3D,rng3D2,precip_frac,precip_overlap_param(:,1:nLev-1),precipfracSAMP))          
        end select
        
        ! Map band optical depth to each g-point using McICA
        call check_error_msg('rrtmgp_sw_cloud_sampling_run',draw_samples(&
-            precipfracSAMP(idxday(1:nDay),:,:),sw_optical_props_precipByBand,sw_optical_props_precip))
-                  
+            precipfracSAMP(idxday(1:nDay),:,:),sw_optical_props_precipByBand,sw_optical_props_precip))                  
     endif
          
     !    
-	! For GFDL MP just add precipitation optics to cloud-optics
+    ! For GFDL MP just add precipitation optics to cloud-optics
     !
-	print*,'ShapeC: ',shape(sw_optical_props_clouds%tau)
-	print*,'ShapeP:	',shape(sw_optical_props_precip%tau)
-	do iGpt=1,sw_gas_props%get_ngpt()
-  	   do iCol=1,nCol
-  	      do iLay=1,nLev
-	         write(*,"(a10,3i,2f10.4)") 'tauloc: ',iGpt,iCol,iLay,sw_optical_props_clouds%tau(iCol,iLay,iGpt),sw_optical_props_precip%tau(iCol,iLay,iGpt)
-  	         tauloc = sw_optical_props_clouds%tau(iCol,iLay,iGpt) + &
-  	                  sw_optical_props_precip%tau(iCol,iLay,iGpt)
-  	         if (tauloc > 0) then
+    do iGpt=1,sw_gas_props%get_ngpt()
+       do iCol=1,nCol
+          do iLay=1,nLev
+             tauloc = sw_optical_props_clouds%tau(iCol,iLay,iGpt) + &
+                      sw_optical_props_precip%tau(iCol,iLay,iGpt)
+             if (sw_optical_props_precip%tau(iCol,iLay,iGpt) > 0) then
                 ssaloc = (sw_optical_props_clouds%tau(iCol,iLay,iGpt)  * &
                           sw_optical_props_clouds%ssa(iCol,iLay,iGpt)  + &
                           sw_optical_props_precip%tau(iCol,iLay,iGpt)  * &
@@ -227,16 +219,17 @@ contains
                              sw_optical_props_precip%g(iCol,iLay,iGpt))  / &
                             (tauloc*ssaloc)
                 else
-                   ssaloc = 1.
-                   asyloc = 0.           
-                endif   
+                   tauloc = sw_optical_props_clouds%tau(iCol,iLay,iGpt) 
+                   ssaloc = sw_optical_props_clouds%ssa(iCol,iLay,iGpt)
+                   asyloc = sw_optical_props_clouds%g(iCol,iLay,iGpt)            
+                endif
                 sw_optical_props_clouds%tau(iCol,iLay,iGpt) = tauloc	
                 sw_optical_props_clouds%ssa(iCol,iLay,iGpt) = ssaloc   
                 sw_optical_props_clouds%g(iCol,iLay,iGpt)   = asyloc
-  	         endif
-  	      enddo
+             endif
+          enddo
        enddo
-    enddo    
+    enddo
   end subroutine rrtmgp_sw_cloud_sampling_run
 
   ! #########################################################################################
