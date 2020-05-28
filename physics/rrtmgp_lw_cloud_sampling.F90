@@ -89,12 +89,12 @@ contains
 
     ! 
     if (iovrlw .ne. 1 .and. iovrlw .ne. 3) then
-	   errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
-	   errflg = 1
-	   call check_error_msg('rrtmgp_lw_cloud_sampling',errmsg)
-	   return
-    endif 
-
+       errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
+       errflg = 1
+       call check_error_msg('rrtmgp_lw_cloud_sampling',errmsg)
+       return
+    endif
+    
     if (.not. doLWrad) return
     !
     ! First sample the clouds...
@@ -193,7 +193,7 @@ contains
          precipfracSAMP,lw_optical_props_precipByBand,lw_optical_props_precip))
          
     !    
-	! For GFDL MP just add precipitation optics to cloud-optics
+    ! For GFDL MP just add precipitation optics to cloud-optics
     !
     lw_optical_props_clouds%tau = lw_optical_props_clouds%tau + lw_optical_props_precip%tau
 

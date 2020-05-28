@@ -353,25 +353,25 @@ contains
             cld_reice,                     & ! IN  - Cloud ice effective radius (microns)
             lw_optical_props_cloudsByBand))  ! OUT - RRTMGP DDT containing cloud radiative properties
                                              !       in each band
-        ! Add in rain and snow(+groupel) 
-        do iCol=1,nCol
-           do iLay=1,nLev                                      
-              if (cld_frac(iCol,iLay) .gt. 0.) then
-                 ! Rain optical-depth (No band dependence)
-                 tau_rain = absrain*cld_rwp(iCol,iLay)
-
-                 ! Snow (+groupel) optical-depth (No band dependence)
-                 if (cld_swp(iCol,iLay) .gt. 0. .and. cld_resnow(iCol,iLay) .gt. 10._kind_phys) then
-                    tau_snow = abssnow0*1.05756*cld_swp(iCol,iLay)/cld_resnow(iCol,iLay)
-                 else
-                    tau_snow = 0.0
-                 endif  
-                 do iBand=1,lw_gas_props%get_nband()
-                     lw_optical_props_precipByBand%tau(iCol,iLay,iBand) = tau_rain + tau_snow
-                 enddo 
-              endif
-           enddo
-        enddo                                                                                    
+       ! Add in rain and snow(+groupel) 
+       do iCol=1,nCol
+          do iLay=1,nLev                                      
+             if (cld_frac(iCol,iLay) .gt. 0.) then
+                ! Rain optical-depth (No band dependence)
+                tau_rain = absrain*cld_rwp(iCol,iLay)
+                
+                ! Snow (+groupel) optical-depth (No band dependence)
+                if (cld_swp(iCol,iLay) .gt. 0. .and. cld_resnow(iCol,iLay) .gt. 10._kind_phys) then
+                   tau_snow = abssnow0*1.05756*cld_swp(iCol,iLay)/cld_resnow(iCol,iLay)
+                else
+                   tau_snow = 0.0
+                endif
+                do iBand=1,lw_gas_props%get_nband()
+                   lw_optical_props_precipByBand%tau(iCol,iLay,iBand) = tau_rain + tau_snow
+                enddo
+             endif
+          enddo
+       enddo
     endif
     if (doG_cldoptics) then
        ! ii) RRTMG cloud-optics.
@@ -382,11 +382,11 @@ contains
        endif
        lw_optical_props_cloudsByBand%tau = tau_cld
        lw_optical_props_precipByBand%tau = tau_precip
-    endif    
- 
-    ! All-sky LW optical depth ~10microns
+    endif
+    
+    ! All-sky LW optical depth ~10microns (DJS asks: Same as SW, move to cloud-diagnostics?)
     cldtaulw = lw_optical_props_cloudsByBand%tau(:,:,7)
-
+    
   end subroutine rrtmgp_lw_cloud_optics_run
   
   ! #########################################################################################

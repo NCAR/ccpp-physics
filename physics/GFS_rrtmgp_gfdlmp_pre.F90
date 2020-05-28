@@ -80,38 +80,38 @@ contains
     
     ! Test inputs
     if (Model%ncnd .ne. 5) then
-	   errmsg = 'Incorrect number of cloud condensates provided'
-	   errflg = 1
-	   call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
-	   return
+       errmsg = 'Incorrect number of cloud condensates provided'
+       errflg = 1
+       call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
+       return
     endif
     ! 
     if (lcrick) then
-	   errmsg = 'Namelist option lcrick is not supported.'
-	   errflg = 1
-	   call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
-	   return
+       errmsg = 'Namelist option lcrick is not supported.'
+       errflg = 1
+       call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
+       return
     endif
     ! 
     if (lcnorm) then
-	   errmsg = 'Namelist option lcnorm is not supported.'
-	   errflg = 1
-	   call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
-	   return
-    endif    
+       errmsg = 'Namelist option lcnorm is not supported.'
+       errflg = 1
+       call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
+       return
+    endif
     !
     if (.not. Model%lgfdlmprad) then
-	   errmsg = 'Namelist option gfdlmprad=F is not supported.'
-	   errflg = 1
-	   call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
-	   return
+       errmsg = 'Namelist option gfdlmprad=F is not supported.'
+       errflg = 1
+       call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
+       return
     endif
     !
     if(.not. Model%effr_in) then
-	   errmsg = 'Namelist option effr_in=F is not supported.'
-	   errflg = 1
-	   call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
-	   return
+       errmsg = 'Namelist option effr_in=F is not supported.'
+       errflg = 1
+       call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
+       return
     endif    
     
     ! Initialize outputs
@@ -148,35 +148,35 @@ contains
     
     ! Cloud-fraction
     cld_frac(1:nCol,1:nLev)   = tracer(1:nCol,1:nLev,Model%ntclamt)
-
+    
     ! Precipitation fraction (Hack. For now use cloud-fraction)
     precip_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,Model%ntclamt)
     
-	! Condensate and effective size
-	deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  
+    ! Condensate and effective size
+    deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  
     do k = 1, nLev
        do i = 1, nCol
-           ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
-           if (cld_frac(i,k) .ge. cllimit) then         
-               tem1          = gfac * deltaP(i,k)
-               cld_lwp(i,k)  = cld_condensate(i,k,1) * tem1
-               cld_iwp(i,k)  = cld_condensate(i,k,2) * tem1
-               cld_rwp(i,k)  = cld_condensate(i,k,3) * tem1
-               cld_swp(i,k)  = cld_condensate(i,k,4) * tem1  
-           endif
-           ! Use radii provided from the macrophysics        
-           cld_reliq(i,k)  = Tbd%phy_f3d(i,k,1)
-           cld_reice(i,k)  = max(reice_min, min(reice_max,Tbd%phy_f3d(i,k,2)))
-           cld_rerain(i,k) = Tbd%phy_f3d(i,k,3)
-           cld_resnow(i,k) = Tbd%phy_f3d(i,k,4)            
-        enddo
+          ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
+          if (cld_frac(i,k) .ge. cllimit) then         
+             tem1          = gfac * deltaP(i,k)
+             cld_lwp(i,k)  = cld_condensate(i,k,1) * tem1
+             cld_iwp(i,k)  = cld_condensate(i,k,2) * tem1
+             cld_rwp(i,k)  = cld_condensate(i,k,3) * tem1
+             cld_swp(i,k)  = cld_condensate(i,k,4) * tem1  
+          endif
+          ! Use radii provided from the macrophysics        
+          cld_reliq(i,k)  = Tbd%phy_f3d(i,k,1)
+          cld_reice(i,k)  = max(reice_min, min(reice_max,Tbd%phy_f3d(i,k,2)))
+          cld_rerain(i,k) = Tbd%phy_f3d(i,k,3)
+          cld_resnow(i,k) = Tbd%phy_f3d(i,k,4)            
+       enddo
     enddo
     
   end subroutine GFS_rrtmgp_gfdlmp_pre_run
-
+  
   ! #########################################################################################
   ! #########################################################################################
   subroutine GFS_rrtmgp_gfdlmp_pre_finalize()
   end subroutine GFS_rrtmgp_gfdlmp_pre_finalize
-
+  
 end module GFS_rrtmgp_gfdlmp_pre
