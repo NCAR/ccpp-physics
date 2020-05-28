@@ -318,7 +318,7 @@
   intent = in
   optional = F
 [hswc]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step_and_radiation_levels
   long_name = shortwave total sky heating rate
   units = K s-1
   dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
@@ -352,7 +352,7 @@
   intent = inout
   optional = F
 [hsw0]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
   long_name = shortwave clear sky heating rate
   units = K s-1
   dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)

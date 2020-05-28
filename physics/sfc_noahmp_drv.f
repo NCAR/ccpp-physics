@@ -82,9 +82,6 @@
 !!    - Calculate the surface specific humidity and convert surface sensible and latent heat fluxes in W m-2 from their kinematic values.
 !!    - If a "guess" run, restore the land-related prognostic fields.
 !                                                                       !
-!     lheatstrg- logical, flag for canopy heat storage             1    !
-!                         parameterization                              !
-!                                                                       !
 !-----------------------------------
       subroutine noahmpdrv_run                                          &
 !...................................
@@ -93,7 +90,6 @@
      &       sigmaf, sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
      &       prsl1, prslki, zf, dry, wind, slopetyp,                    &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
-     &       lheatstrg,                                                 &
      &       idveg, iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,   &
      &       iopt_inf, iopt_rad, iopt_alb, iopt_snf, iopt_tbot,         &
      &       iopt_stc, xlatin, xcoszin, iyrlen, julian,                 &
@@ -181,8 +177,6 @@
 
       real (kind=kind_phys),  intent(in) :: delt
       logical, dimension(im), intent(in) :: flag_iter, flag_guess
-
-      logical, intent(in) :: lheatstrg
 
       real (kind=kind_phys),  intent(in) :: con_hvap, con_cp, con_jcal, &
      &                      rhoh2o, con_eps, con_epsm1, con_fvirt,      &
@@ -282,8 +276,6 @@
      &                         shg,shc,shb,evg,evb,ghv,ghb,irg,irc,     &
      &                         irb,tr,evc,chleaf,chuc,chv2,chb2,        &
      &                         fpice,pahv,pahg,pahb,pah,co2pp,o2pp,ch2b
-
-      real (kind=kind_phys) :: cpfac
 
       integer :: i, k, ice, stype, vtype ,slope,nroot,couple
       logical :: flag(im)
@@ -673,11 +665,6 @@
        call noahmp_options(idveg ,iopt_crs,iopt_btr,iopt_run,iopt_sfc,  &
      & iopt_frz,iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc)
 
-!
-!  initialize heat capacity enhancement factor for heat storage parameterization
-!
-       cpfac = 1.0
-
         if ( vtype == isice_table )  then
 
           ice = -1
@@ -765,7 +752,6 @@
      &        qc      , swdn    , lwdn                                 ,& ! in : forcing
      &        pconv   , pnonc   , pshcv   , psnow   , pgrpl   , phail  ,& ! in : forcing
      &        tbot    , co2pp   , o2pp    , foln    , ficeold , zlvl   ,& ! in : forcing
-     &        lheatstrg                                                ,& ! in : canopy heat storage
      &        alboldx , sneqvox                                        ,& ! in/out : 
      &        tsnsox  , slsoil  , smsoil  , tahx    , eahx    , fwetx  ,& ! in/out : 
      &        canliqx , canicex , tvx     , tgx     , qsfc1d  , qsnowx ,& ! in/out : 
@@ -773,7 +759,7 @@
      &        zwtx    , wax     , wtx     , wslakex , lfmassx , rtmassx,& ! in/out : 
      &        stmassx , woodx   , stblcpx , fastcpx , xlaix   ,xsaix   ,& ! in/out : 
      &        cmx     , chx     , taussx                               ,& ! in/out : 
-     &        smcwtdx ,deeprechx, rechx   , cpfac                      ,& ! in/out :
+     &        smcwtdx ,deeprechx, rechx                                ,& ! in/out :
      &        z0wrf                                                    ,& ! out
      &        fsa     , fsr     , fira    , fsh     , ssoil   , fcev   ,& ! out : 
      &        fgev    , fctr    , ecan    , etran   , edir    , trad   ,& ! out :
@@ -914,7 +900,7 @@
 !         ssoil     = -1.0 *ssoil
 
        call penman (sfctmp,sfcprs,chx,t2v,th2,prcp,fdown,ssoil,         &
-     &   cpfac,q2,q2sat,etp,snowng,frzgra,ffrozp,dqsdt2,emissi,fsno)
+     &   q2,q2sat,etp,snowng,frzgra,ffrozp,dqsdt2,emissi,fsno)
 
           ep(i) = etp
 
@@ -1183,7 +1169,7 @@
 !! partial sums/products are also calculated and passed back to the
 !! calling routine for later use.
       subroutine penman (sfctmp,sfcprs,ch,t2v,th2,prcp,fdown,ssoil,     &
-     &                   cpfac,q2,q2sat,etp,snowng,frzgra,ffrozp,       &
+     &                   q2,q2sat,etp,snowng,frzgra,ffrozp,             &
      &                   dqsdt2,emissi_in,sncovr)
  
 ! etp is calcuated right after ssoil
@@ -1194,12 +1180,11 @@
       implicit none
       logical, intent(in)     :: snowng, frzgra
       real, intent(in)        :: ch, dqsdt2,fdown,prcp,ffrozp,          &
-     &                           q2, q2sat,ssoil,cpfac, sfcprs, sfctmp, &
+     &                           q2, q2sat,ssoil, sfcprs, sfctmp,       &
      &                           t2v, th2,emissi_in,sncovr
       real, intent(out)       :: etp
       real                    :: epsca,flx2,rch,rr,t24
       real                    :: a, delta, fnet,rad,rho,emissi,elcp1,lvs
-      real                    :: elcpx
 
       real, parameter :: elcp = 2.4888e+3, lsubc = 2.501000e+6,cp = 1004.6
       real, parameter :: lsubs = 2.83e+6, rd = 287.05, cph2o = 4.1855e+3
@@ -1213,12 +1198,11 @@
 ! prepare partial quantities for penman equation.
 ! ----------------------------------------------------------------------
         emissi=emissi_in
-        elcpx = elcp / cpfac
-!       elcp1  = (1.0-sncovr)*elcpx  + sncovr*elcpx*lsubs/lsubc
+!       elcp1  = (1.0-sncovr)*elcp  + sncovr*elcp*lsubs/lsubc
         lvs    = (1.0-sncovr)*lsubc + sncovr*lsubs
 
       flx2 = 0.0
-      delta = elcpx * dqsdt2
+      delta = elcp * dqsdt2
 !     delta = elcp1 * dqsdt2
       t24 = sfctmp * sfctmp * sfctmp * sfctmp
        rr = t24 * 6.48e-8 / (sfcprs * ch) + 1.0
@@ -1229,7 +1213,7 @@
 ! adjust the partial sums / products with the latent heat
 ! effects caused by falling precipitation.
 ! ----------------------------------------------------------------------
-      rch = rho * cp * cpfac * ch
+      rch = rho * cp * ch
       if (.not. snowng) then
          if (prcp >  0.0) rr = rr + cph2o * prcp / rch
       else
@@ -1252,7 +1236,7 @@
 ! ----------------------------------------------------------------------
       end if
       rad = fnet / rch + th2- sfctmp
-       a = elcpx * (q2sat - q2)
+       a = elcp * (q2sat - q2)
 !     a = elcp1 * (q2sat - q2)
       epsca = (a * rr + rad * delta) / (delta + rr)
        etp = epsca * rch / lsubc
