@@ -78,13 +78,13 @@ contains
          sw_optical_props_precip            ! RRTMGP DDT: Shortwave optical properties at each spectral point (precipitation) 
 
     ! Local variables
-    integer :: iCol,iLay,iGpt
-    integer,dimension(ncol) :: ipseed_sw
+    integer :: iday,iLay,iGpt
+    integer,dimension(nday) :: ipseed_sw
     type(random_stat) :: rng_stat
     real(kind_phys) :: tauloc,asyloc,ssaloc
-    real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
+    real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLev,nday) :: rng3D,rng3D2
     real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLev) :: rng1D
-    logical, dimension(ncol,nLev,sw_gas_props%get_ngpt()) :: cldfracMCICA,precipfracSAMP
+    logical, dimension(nday,nLev,sw_gas_props%get_ngpt()) :: cldfracMCICA,precipfracSAMP
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -109,42 +109,44 @@ contains
  
        ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
        if(isubcsw == 1) then      ! advance prescribed permutation seed
-          do iCol = 1, ncol
-             ipseed_sw(iCol) = ipsdsw0 + iCol
+          do iday = 1, nday
+             ipseed_sw(iday) = ipsdsw0 + iday
           enddo
        elseif (isubcsw == 2) then ! use input array of permutaion seeds
-          do iCol = 1, ncol
-             ipseed_sw(iCol) = icseed_sw(iCol)
+          do iday = 1, nday
+             ipseed_sw(iday) = icseed_sw(iday)
           enddo
        endif
 
        ! Call McICA to generate subcolumns.
        ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-       ! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
-       do iCol=1,ncol
-          call random_setseed(ipseed_sw(icol),rng_stat)
+       ! and layers. ([nGpts,nLev,nDayumn]-> [nGpts*nLev]*nDayumn)
+       do iday=1,nday
+          call random_setseed(ipseed_sw(iday),rng_stat)
           call random_number(rng1D,rng_stat)
-          rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+          rng3D(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
        enddo
 
        ! Call McICA
        select case ( iovrsw )
        case(1) ! Maximum-random
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
-               sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
+               sampled_mask_max_ran(rng3D,cld_frac(idxday(1:nDay),:),cldfracMCICA))       
        case(3) ! Exponential-random
-          do iCol=1,ncol
-             call random_setseed(ipseed_sw(icol),rng_stat)
+          do iday=1,nday
+             call random_setseed(ipseed_sw(iday),rng_stat)
              call random_number(rng1D,rng_stat)
-             rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+             rng3D2(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
           enddo
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
-               sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,cloud_overlap_param(:,1:nLev-1),cldfracMCICA))          
+               sampled_mask_exp_dcorr(rng3D, rng3D2, cld_frac(idxday(1:nDay),:),    &
+                                      cloud_overlap_param(idxday(1:nDay),1:nLev-1), &
+                                      cldfracMCICA))          
        end select
        
        ! Map band optical depth to each g-point using McICA
-       call check_error_msg('rrtmgp_sw_cloud_sampling_run',draw_samples(&
-            cldfracMCICA(idxday(1:nDay),:,:),sw_optical_props_cloudsByBand,sw_optical_props_clouds))
+       call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
+            draw_samples(cldfracMCICA, sw_optical_props_cloudsByBand, sw_optical_props_clouds))
          
        !
        ! Next sample precipitation (same as clouds for now)
@@ -155,76 +157,78 @@ contains
  
        ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
        !if(isubcsw == 1) then      ! advance prescribed permutation seed
-       !   do iCol = 1, ncol
-       !      ipseed_sw(iCol) = ipsdsw0 + iCol
+       !   do iday = 1, nday
+       !      ipseed_sw(iday) = ipsdsw0 + iday
        !   enddo
        !elseif (isubcsw == 2) then ! use input array of permutaion seeds
-       !   do iCol = 1, ncol
-       !      ipseed_sw(iCol) = icseed_sw(iCol)
+       !   do iday = 1, nday
+       !      ipseed_sw(iday) = icseed_sw(iday)
        !   enddo
        !endif
 
        ! Call McICA to generate subcolumns.
        ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
        !! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
-       !! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
-       !do iCol=1,ncol
-       !   call random_setseed(ipseed_sw(icol),rng_stat)
+       !! and layers. ([nGpts,nLev,nDay]-> [nGpts*nLev]*nDay)
+       !do iday=1,nday
+       !   call random_setseed(ipseed_sw(iday),rng_stat)
        !   call random_number(rng1D,rng_stat)
-       !   rng3D(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+       !   rng3D(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
        !enddo
 
        ! Call McICA
        select case ( iovrsw )
        case(1) ! Maximum-random
           call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
-               sampled_mask_max_ran(rng3D,precip_frac,precipfracSAMP))       
+               sampled_mask_max_ran(rng3D,precip_frac(idxday(1:nDay),:),precipfracSAMP))       
        case(3) ! Exponential-random
           !! Generate second RNG
-          !do iCol=1,ncol
-          !   call random_setseed(ipseed_sw(icol),rng_stat)
+          !do iday=1,nday
+          !   call random_setseed(ipseed_sw(iday),rng_stat)
           !   call random_number(rng1D,rng_stat)
-          !   rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+          !   rng3D2(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
           !enddo
-          call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
-               sampled_mask_exp_dcorr(rng3D,rng3D2,precip_frac,precip_overlap_param(:,1:nLev-1),precipfracSAMP))          
+          call check_error_msg('rrtmgp_sw_cloud_sampling_run',                       &
+               sampled_mask_exp_dcorr(rng3D,rng3D2,precip_frac(idxday(1:nDay),:),    & 
+                                      precip_overlap_param(idxday(1:nDay),1:nLev-1), &
+                                      precipfracSAMP))
        end select
        
        ! Map band optical depth to each g-point using McICA
-       call check_error_msg('rrtmgp_sw_cloud_sampling_run',draw_samples(&
-            cldfracMCICA(idxday(1:nDay),:,:),sw_optical_props_precipByBand,sw_optical_props_precip))                  
+       call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
+            draw_samples(precipfracSAMP, sw_optical_props_precipByBand, sw_optical_props_precip))                  
     endif
          
     !    
     ! For GFDL MP just add precipitation optics to cloud-optics
     !
     do iGpt=1,sw_gas_props%get_ngpt()
-       do iCol=1,nCol
+       do iday=1,nDay
           do iLay=1,nLev
-             tauloc = sw_optical_props_clouds%tau(iCol,iLay,iGpt) + &
-                      sw_optical_props_precip%tau(iCol,iLay,iGpt)
-             if (sw_optical_props_precip%tau(iCol,iLay,iGpt) > 0) then
-                ssaloc = (sw_optical_props_clouds%tau(iCol,iLay,iGpt)  * &
-                          sw_optical_props_clouds%ssa(iCol,iLay,iGpt)  + &
-                          sw_optical_props_precip%tau(iCol,iLay,iGpt)  * &
-                          sw_optical_props_precip%ssa(iCol,iLay,iGpt)) / &
+             tauloc = sw_optical_props_clouds%tau(iday,iLay,iGpt) + &
+                      sw_optical_props_precip%tau(iday,iLay,iGpt)
+             if (sw_optical_props_precip%tau(iday,iLay,iGpt) > 0) then
+                ssaloc = (sw_optical_props_clouds%tau(iday,iLay,iGpt)  * &
+                          sw_optical_props_clouds%ssa(iday,iLay,iGpt)  + &
+                          sw_optical_props_precip%tau(iday,iLay,iGpt)  * &
+                          sw_optical_props_precip%ssa(iday,iLay,iGpt)) / &
                          tauloc
                 if (ssaloc > 0) then
-                   asyloc = (sw_optical_props_clouds%tau(iCol,iLay,iGpt) * &
-                             sw_optical_props_clouds%ssa(iCol,iLay,iGpt) * &
-                             sw_optical_props_clouds%g(iCol,iLay,iGpt)   + &
-                             sw_optical_props_precip%tau(iCol,iLay,iGpt) * &
-                             sw_optical_props_precip%ssa(iCol,iLay,iGpt) * &
-                             sw_optical_props_precip%g(iCol,iLay,iGpt))  / &
+                   asyloc = (sw_optical_props_clouds%tau(iday,iLay,iGpt) * &
+                             sw_optical_props_clouds%ssa(iday,iLay,iGpt) * &
+                             sw_optical_props_clouds%g(iday,iLay,iGpt)   + &
+                             sw_optical_props_precip%tau(iday,iLay,iGpt) * &
+                             sw_optical_props_precip%ssa(iday,iLay,iGpt) * &
+                             sw_optical_props_precip%g(iday,iLay,iGpt))  / &
                             (tauloc*ssaloc)
                 else
-                   tauloc = sw_optical_props_clouds%tau(iCol,iLay,iGpt) 
-                   ssaloc = sw_optical_props_clouds%ssa(iCol,iLay,iGpt)
-                   asyloc = sw_optical_props_clouds%g(iCol,iLay,iGpt)            
+                   tauloc = sw_optical_props_clouds%tau(iday,iLay,iGpt) 
+                   ssaloc = sw_optical_props_clouds%ssa(iday,iLay,iGpt)
+                   asyloc = sw_optical_props_clouds%g(iday,iLay,iGpt)            
                 endif
-                sw_optical_props_clouds%tau(iCol,iLay,iGpt) = tauloc	
-                sw_optical_props_clouds%ssa(iCol,iLay,iGpt) = ssaloc   
-                sw_optical_props_clouds%g(iCol,iLay,iGpt)   = asyloc
+                sw_optical_props_clouds%tau(iday,iLay,iGpt) = tauloc	
+                sw_optical_props_clouds%ssa(iday,iLay,iGpt) = ssaloc   
+                sw_optical_props_clouds%g(iday,iLay,iGpt)   = asyloc
              endif
           enddo
        enddo
