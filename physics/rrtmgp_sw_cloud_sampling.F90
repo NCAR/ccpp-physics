@@ -11,9 +11,8 @@ module rrtmgp_sw_cloud_sampling
   implicit none
 
 contains
-
   ! #########################################################################################
-  ! SUBROUTINE mcica_init
+  ! SUBROUTINE rrtmgp_sw_cloud_sampling_init()
   ! #########################################################################################
 !! \section arg_table_rrtmgp_sw_cloud_sampling_init
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
@@ -193,7 +192,7 @@ contains
        
        ! Map band optical depth to each g-point using McICA
        call check_error_msg('rrtmgp_sw_cloud_sampling_run',draw_samples(&
-            precipfracSAMP(idxday(1:nDay),:,:),sw_optical_props_precipByBand,sw_optical_props_precip))                  
+            cldfracMCICA(idxday(1:nDay),:,:),sw_optical_props_precipByBand,sw_optical_props_precip))                  
     endif
          
     !    

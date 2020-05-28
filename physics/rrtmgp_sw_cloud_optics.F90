@@ -356,14 +356,14 @@ contains
        call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_cloudsByBand%alloc_2str(&
             nday, nLev, sw_gas_props%get_band_lims_wavenumber()))
        sw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys
-       sw_optical_props_cloudsByBand%ssa(:,:,:) = 0._kind_phys
+       sw_optical_props_cloudsByBand%ssa(:,:,:) = 1._kind_phys
        sw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys 
        
        ! Cloud-precipitation optics [nday,nLev,nBands]
        call check_error_msg('rrtmgp_sw_cloud_optics_run',sw_optical_props_precipByBand%alloc_2str(&
             nday, nLev, sw_gas_props%get_band_lims_wavenumber()))
        sw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys
-       sw_optical_props_precipByBand%ssa(:,:,:) = 0._kind_phys
+       sw_optical_props_precipByBand%ssa(:,:,:) = 1._kind_phys
        sw_optical_props_precipByBand%g(:,:,:)   = 0._kind_phys 
        
        ! Compute cloud/precipitation optics.
