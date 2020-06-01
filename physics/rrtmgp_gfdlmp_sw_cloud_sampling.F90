@@ -1,4 +1,4 @@
-module rrtmgp_sw_cloud_sampling
+module rrtmgp_gfdlmp_sw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use physparam,                only: isubcsw, iovrsw
@@ -12,12 +12,12 @@ module rrtmgp_sw_cloud_sampling
 
 contains
   ! #########################################################################################
-  ! SUBROUTINE rrtmgp_sw_cloud_sampling_init()
+  ! SUBROUTINE rrtmgp_gfdlmp_sw_cloud_sampling_init()
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_cloud_sampling_init
-!! \htmlinclude rrtmgp_sw_cloud_sampling.html
+!! \section arg_table_rrtmgp_gfdlmp_sw_cloud_sampling_init
+!! \htmlinclude rrtmgp_gfdlmp_sw_cloud_sampling.html
 !!
-  subroutine rrtmgp_sw_cloud_sampling_init(sw_gas_props, ipsdsw0)
+  subroutine rrtmgp_gfdlmp_sw_cloud_sampling_init(sw_gas_props, ipsdsw0)
     ! Inputs
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props ! RRTMGP DDT: K-distribution data
@@ -28,15 +28,15 @@ contains
     ! Set initial permutation seed for McICA, initially set to number of G-points
     ipsdsw0 = sw_gas_props%get_ngpt()
     
-  end subroutine rrtmgp_sw_cloud_sampling_init
+  end subroutine rrtmgp_gfdlmp_sw_cloud_sampling_init
 
   ! #########################################################################################
-  ! SUBROTUINE rrtmgp_sw_cloud_sampling_run()
+  ! SUBROTUINE rrtmgp_gfdlmp_sw_cloud_sampling_run()
   ! #########################################################################################
-!! \section arg_table_rrtmgp_sw_cloud_sampling_run
-!! \htmlinclude rrtmgp_sw_cloud_sampling.html
+!! \section arg_table_rrtmgp_gfdlmp_sw_cloud_sampling_run
+!! \htmlinclude rrtmgp_gfdlmp_sw_cloud_sampling.html
 !!
-  subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday,       &
+  subroutine rrtmgp_gfdlmp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday,       &
        icseed_sw, cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,         &
        sw_gas_props, sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,          &
        sw_optical_props_clouds, sw_optical_props_precip, errmsg, errflg)
@@ -94,7 +94,7 @@ contains
     if (iovrsw .ne. 1 .and. iovrsw .ne. 3) then
        errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
        errflg = 1
-       call check_error_msg('rrtmgp_sw_cloud_sampling',errmsg)
+       call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling',errmsg)
        return
     endif
     
@@ -104,7 +104,7 @@ contains
        ! First sample the clouds...
        !
        ! Allocate space RRTMGP DDTs [nday,nLev,nGpt]
-       call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
+       call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', & 
             sw_optical_props_clouds%alloc_2str(nday, nLev, sw_gas_props))
  
        ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
@@ -130,7 +130,7 @@ contains
        ! Call McICA
        select case ( iovrsw )
        case(1) ! Maximum-random
-          call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
+          call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', &
                sampled_mask_max_ran(rng3D,cld_frac(idxday(1:nDay),:),cldfracMCICA))       
        case(3) ! Exponential-random
           do iday=1,nday
@@ -138,21 +138,21 @@ contains
              call random_number(rng1D,rng_stat)
              rng3D2(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
           enddo
-          call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
+          call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', & 
                sampled_mask_exp_dcorr(rng3D, rng3D2, cld_frac(idxday(1:nDay),:),    &
                                       cloud_overlap_param(idxday(1:nDay),1:nLev-1), &
                                       cldfracMCICA))          
        end select
        
        ! Map band optical depth to each g-point using McICA
-       call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
+       call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', & 
             draw_samples(cldfracMCICA, sw_optical_props_cloudsByBand, sw_optical_props_clouds))
          
        !
        ! Next sample precipitation (same as clouds for now)
        !
        ! Allocate space RRTMGP DDTs [nday,nLev,nGpt]
-       call check_error_msg('rrtmgp_sw_cloud_sampling_run',sw_optical_props_precip%alloc_2str(      &
+       call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run',sw_optical_props_precip%alloc_2str(      &
             nday, nLev, sw_gas_props))
  
        ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
@@ -179,7 +179,7 @@ contains
        ! Call McICA
        select case ( iovrsw )
        case(1) ! Maximum-random
-          call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
+          call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', &
                sampled_mask_max_ran(rng3D,precip_frac(idxday(1:nDay),:),precipfracSAMP))       
        case(3) ! Exponential-random
           !! Generate second RNG
@@ -188,14 +188,14 @@ contains
           !   call random_number(rng1D,rng_stat)
           !   rng3D2(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
           !enddo
-          call check_error_msg('rrtmgp_sw_cloud_sampling_run',                       &
+          call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run',                       &
                sampled_mask_exp_dcorr(rng3D,rng3D2,precip_frac(idxday(1:nDay),:),    & 
                                       precip_overlap_param(idxday(1:nDay),1:nLev-1), &
                                       precipfracSAMP))
        end select
        
        ! Map band optical depth to each g-point using McICA
-       call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
+       call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', & 
             draw_samples(precipfracSAMP, sw_optical_props_precipByBand, sw_optical_props_precip))                  
     endif
          
@@ -233,12 +233,12 @@ contains
           enddo
        enddo
     enddo
-  end subroutine rrtmgp_sw_cloud_sampling_run
+  end subroutine rrtmgp_gfdlmp_sw_cloud_sampling_run
 
   ! #########################################################################################
-  ! SUBROTUINE rrtmgp_sw_cloud_sampling_finalize()
+  ! SUBROTUINE rrtmgp_gfdlmp_sw_cloud_sampling_finalize()
   ! #########################################################################################  
-  subroutine rrtmgp_sw_cloud_sampling_finalize()
-  end subroutine rrtmgp_sw_cloud_sampling_finalize 
+  subroutine rrtmgp_gfdlmp_sw_cloud_sampling_finalize()
+  end subroutine rrtmgp_gfdlmp_sw_cloud_sampling_finalize 
 
-end module rrtmgp_sw_cloud_sampling
+end module rrtmgp_gfdlmp_sw_cloud_sampling
