@@ -92,7 +92,7 @@
 !!
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !> @{
-      subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, &
+      subroutine GFS_MP_generic_post_run(im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl,     &
         imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires, cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1,   &
         rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
@@ -104,7 +104,7 @@
 
       implicit none
 
-      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
+      integer, intent(in) :: im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
 
@@ -112,7 +112,7 @@
       real(kind=kind_phys), dimension(im),            intent(in)    :: rainc, rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel
       real(kind=kind_phys), dimension(im),            intent(in)    :: rain0, ice0, snow0, graupel0
-      real(kind=kind_phys), dimension(ix,nrcm),       intent(in)    :: rann
+      real(kind=kind_phys), dimension(im,nrcm),       intent(in)    :: rann
       real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
       real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)    :: gq0
@@ -224,7 +224,7 @@
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !
-        call calpreciptype (kdt, nrcm, im, ix, levs, levs+1, &
+        call calpreciptype (kdt, nrcm, im, im, levs, levs+1, &
                             rann, xlat, xlon, gt0,           &
                             gq0(:,:,1), prsl, prsi,          &
                             rain, phii, tsfc,                &  ! input

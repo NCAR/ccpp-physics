@@ -50,7 +50,7 @@
 !> \section genal_ozphys GFS ozphys_run General Algorithm
 !> @{
       subroutine ozphys_run (                                           &
-     &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
+     &  im, levs, ko3, dt, oz, tin, po3,                                &
      &  prsl, prdout, oz_coeff, delp, ldiag3d, qdiag3d,                 &
      &  ozp1, ozp2, ozp3, ozp4, con_g, me, errmsg, errflg)
 !
@@ -61,15 +61,15 @@
       implicit none
 !
       ! Interface variables
-      integer, intent(in) :: im, ix, levs, ko3, oz_coeff, me
+      integer, intent(in) :: im, levs, ko3, oz_coeff, me
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     oz(ix,levs)
+     &                     oz(im,levs)
       ! These arrays may not be allocated and need assumed array sizes
       real(kind=kind_phys), intent(inout) ::                            &
      &                     ozp1(:,:), ozp2(:,:), ozp3(:,:), ozp4(:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     dt, po3(ko3), prdout(ix,ko3,oz_coeff),       &
-     &                     prsl(ix,levs), tin(ix,levs), delp(ix,levs),  &
+     &                     dt, po3(ko3), prdout(im,ko3,oz_coeff),       &
+     &                     prsl(im,levs), tin(im,levs), delp(im,levs),  &
      &                     con_g
       real :: gravi
       logical, intent(in) :: ldiag3d, qdiag3d
@@ -82,7 +82,7 @@
       logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,oz_coeff),
-     &                     ozib(im),  colo3(im,levs+1), ozi(ix,levs)
+     &                     ozib(im),  colo3(im,levs+1), ozi(im,levs)
 !
       ! Initialize CCPP error handling variables
       errmsg = ''

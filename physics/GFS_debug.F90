@@ -348,12 +348,18 @@
                      end if
                      ! CCPP/MYNNPBL only
                      if (Model%do_mynnedmf) then
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_a      ',  Diag%edmf_a)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_w      ',  Diag%edmf_w)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_qt     ',  Diag%edmf_qt)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_thl    ',  Diag%edmf_thl)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_ent    ',  Diag%edmf_ent)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_qc     ',  Diag%edmf_qc)
+                       if (Model%bl_mynn_output .ne. 0) then
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_a      ',  Diag%edmf_a)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_w      ',  Diag%edmf_w)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_qt     ',  Diag%edmf_qt)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_thl    ',  Diag%edmf_thl)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_ent    ',  Diag%edmf_ent)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_qc     ',  Diag%edmf_qc)
+                         call print_var(mpirank,omprank, blkno, 'Diag%sub_thl     ',  Diag%sub_thl)
+                         call print_var(mpirank,omprank, blkno, 'Diag%sub_sqv     ',  Diag%sub_sqv)
+                         call print_var(mpirank,omprank, blkno, 'Diag%det_thl     ',  Diag%det_thl)
+                         call print_var(mpirank,omprank, blkno, 'Diag%det_sqv     ',  Diag%det_sqv)
+                       end if
                        call print_var(mpirank,omprank, blkno, 'Diag%nupdraft    ',  Diag%nupdraft)
                        call print_var(mpirank,omprank, blkno, 'Diag%maxMF       ',  Diag%maxMF)
                        call print_var(mpirank,omprank, blkno, 'Diag%ktop_plume  ',  Diag%ktop_plume)

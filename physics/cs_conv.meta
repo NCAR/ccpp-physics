@@ -266,14 +266,6 @@
 [ccpp-arg-table]
   name = cs_conv_run
   type = scheme
-[im]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [ijsdim]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent

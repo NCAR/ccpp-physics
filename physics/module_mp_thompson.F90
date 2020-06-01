@@ -418,14 +418,8 @@ MODULE module_mp_thompson
 
 !..OPTIONAL variables that control application of aerosol-aware scheme
 
-#if 0
-      REAL, DIMENSION(:,:,:), OPTIONAL, INTENT(IN) :: nwfa, nifa
-      REAL, DIMENSION(:,:),   OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
-#else
-! DH* 20200208 - change dimensions for nasty init hack
       REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: nwfa, nifa
       REAL, DIMENSION(:),   OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
-#endif
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg

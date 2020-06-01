@@ -37,7 +37,7 @@
 !! \htmlinclude mynnedmf_wrapper_run.html
 !!
 SUBROUTINE mynnedmf_wrapper_run(        &
-     &  ix,im,levs,                     &
+     &  im,levs,                        &
      &  flag_init,flag_restart,cycling, &
      &  lssav, ldiag3d, qdiag3d, lsidea,&
      &  delt,dtf,dx,zorl,               &
@@ -204,7 +204,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MYNN-1D
       REAL(kind=kind_phys), intent(in) :: delt, dtf
-      INTEGER, intent(in) :: im, ix, levs
+      INTEGER, intent(in) :: im, levs
       LOGICAL, intent(in) :: flag_init, flag_restart
       INTEGER :: initflag, k, i
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                                &
