@@ -309,8 +309,7 @@ c-----------------------------------------------------------------------
 c
 c  initialize arrays
 c
-      if (.not.hwrf_samfdeep) then
-       do i=1,im
+      do i=1,im
         cnvflg(i) = .true.
         rn(i)=0.
         mbdt(i)=10.
@@ -341,44 +340,14 @@ c
         vshear(i) = 0.
         rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
-       enddo
-      else
-       do i=1,im
-        cnvflg(i) = .true.
-        rn(i)=0.
-        mbdt(i)=10.
-        kbot(i)=km+1
-        ktop(i)=0
-        kbcon(i)=km
-        ktcon(i)=1
-        ktconn(i)=1
-        dtconv(i) = 3600.
-        cldwrk(i) = 0.
-        pdot(i) = 0.
-        lmin(i) = 1
-        jmin(i) = 1
-        qlko_ktcon(i) = 0.
-        edt(i)  = 0.
-        edto(i) = 0.
-        edtx(i) = 0.
-!       acrt(i) = 0.
-!       acrtfct(i) = 1.
-        aa1(i)  = 0.
-        aa2(i)  = 0.
-        xaa0(i) = 0.
-        cina(i) = 0.
-        pwavo(i)= 0.
-        pwevo(i)= 0.
-        xpwav(i)= 0.
-        xpwev(i)= 0.
-        vshear(i) = 0.
-        rainevap(i) = 0.
-        gdx(i) = sqrt(garea(i))
-        !HWRF SAS
-        scaldfunc(i)=-1.0
-        sigmagfm(i)=-1.0
-!       sigmuout(i)=-1.0
-       enddo
+      enddo
+!
+      if (hwrf_samfdeep) then
+        do i=1,im
+          scaldfunc(i)=-1.0
+          sigmagfm(i)=-1.0
+!         sigmuout(i)=-1.0
+        enddo
       endif
 !
 !>  - determine aerosol-aware rain conversion parameter over land
@@ -508,17 +477,15 @@ c
         enddo
       enddo
 !>  - Calculate interface height
+      do k = 1, km1
+      do i=1,im
+        zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
+      enddo
+      enddo
       if (hwrf_samfdeep) then
         do k = 1, km1
         do i=1,im
-          zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
           xlamue(i,k) = clam / zi(i,k)
-        enddo
-        enddo
-      else
-        do k = 1, km1
-        do i=1,im
-          zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
         enddo
         enddo
       endif
