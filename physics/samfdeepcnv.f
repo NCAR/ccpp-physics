@@ -63,7 +63,7 @@
 !!        + 2) For the "dynamic control", using a reference cloud work function, estimate the change in cloud work function due to the large-scale dynamics. Following the quasi-equilibrium assumption, calculate the cloud base mass flux required to keep the large-scale convective destabilization in balance with the stabilization effect of the convection.
 !!  -# For grid sizes smaller than the threshold value (currently 8 km):
 !!        + 1) compute the cloud base mass flux using the cumulus updraft velocity averaged ove the whole cloud depth.
-!!  -# For scale awareness, the updraft fraction (sigma) is obtained as a function of cloud base entrainment. Then, the final cloud base mass flux is obtained by the original mass flux multiplied by the (1−sigma) 2  .
+!!  -# For scale awareness, the updraft fraction (sigma) is obtained as a function of cloud base entrainment. Then, the final cloud base mass flux is obtained by the original mass flux multiplied by the (1-sigma) 2.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
@@ -72,11 +72,13 @@
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
      &    prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,hwrf_samfdeep,           &
-     &    do_ca,ca_deep,cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,         &
+     &    cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                       &
      &    dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                       &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
      &    CNV_DQLDT,CLCN,CNV_FICE,CNV_NDROP,CNV_NICE,mp_phys,mp_phys_mg,&
      &    clam,c0s,c1,betal,betas,evfact,evfactl,pgcon,asolfac,         &
+     &    do_ca, ca_closure, ca_entr, ca_trigger, nthresh, ca_deep,     &
+     &    rainevap,                                                     &
      &    errmsg,errflg)
 !
       use machine , only : kind_phys
@@ -92,9 +94,11 @@
       real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
      &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
-      logical, intent(in)  :: do_ca, hwrf_samfdeep
-      ! ca_deep only allocatedd when do_ca is true
-      real(kind=kind_phys), intent(in) :: ca_deep(:)
+      logical, intent(in)  :: hwrf_samfdeep
+      real(kind=kind_phys), intent(in) :: nthresh
+      real(kind=kind_phys), intent(in) :: ca_deep(ix)
+      real(kind=kind_phys), intent(out) :: rainevap(ix)
+      logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
@@ -335,6 +339,7 @@ c
         xpwav(i)= 0.
         xpwev(i)= 0.
         vshear(i) = 0.
+        rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
        enddo
 
@@ -368,12 +373,13 @@ c
         xpwav(i)= 0.
         xpwev(i)= 0.
         vshear(i) = 0.
+        rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
 
         !HWRF SAS
-         scaldfunc(i)=-1.0
-         sigmagfm(i)=-1.0
-!         sigmuout(i)=-1.0
+        scaldfunc(i)=-1.0
+        sigmagfm(i)=-1.0
+!       sigmuout(i)=-1.0
        enddo
       endif
 !
@@ -714,6 +720,14 @@ c
         if(kbcon(i) == kmax(i)) cnvflg(i) = .false.
       enddo
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -766,6 +780,14 @@ c
         endif
       enddo
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -814,11 +836,23 @@ c
 !
       else
 !
-        do i= 1, im
-          if(cnvflg(i)) then
-            clamt(i)  = clam
-          endif
-        enddo
+         if(do_ca .and. ca_entr)then
+            do i=1,im
+               if(cnvflg(i)) then
+                  if(ca_deep(i) > nthresh)then
+                     clamt(i) = clam - clamd
+                  else
+                     clamt(i) = clam
+                  endif
+               endif
+            enddo
+         else
+            do i=1,im
+               if(cnvflg(i))then
+                  clamt(i)  = clam
+               endif
+            enddo
+         endif
 !
       endif
 !
@@ -1074,6 +1108,14 @@ c
         endif
       enddo
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i = 1, im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -1149,6 +1191,14 @@ c
        enddo
       endif !hwrf_samfdeep
 !!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
+!!
       totflg = .true.
       do i=1,im
         totflg = totflg .and. (.not. cnvflg(i))
@@ -1183,6 +1233,14 @@ c
           if(tem < cthk) cnvflg(i) = .false.
         endif
       enddo
+!!
+      if(do_ca .and. ca_trigger)then
+      do i=1,im
+         if(ca_deep(i) > nthresh) then
+          cnvflg(i) = .true.
+         endif
+      enddo
+      endif
 !!
       totflg = .true.
       do i = 1, im
@@ -2499,6 +2557,7 @@ c
         endif
       enddo
 !!
+
 !> - If the large scale destabilization is less than zero, or the stabilization by the convection is greater than zero, then the scheme returns to the calling routine without modifying the state variables.
       totflg = .true.
       do i=1,im
@@ -2546,14 +2605,15 @@ c
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
        enddo
-
-      if (.not.hwrf_samfdeep) then
-!> - If stochastic physics using cellular automata is .true. then perturb the mass-flux here:
-
-      if(do_ca)then
-        do i=1,im
-         xmb(i) = xmb(i)*(1.0 + ca_deep(i)*5.)
-        enddo
+!
+      if (do_ca .and. ca_closure)then
+      do i = 1, im
+        if(cnvflg(i)) then
+           if (ca_deep(i) > nthresh) then
+              xmb(i) = xmb(i)*1.25
+           endif
+        endif
+      enddo
       endif
 
 !> - Transport aerosols if present
@@ -2740,6 +2800,13 @@ c             if(islimsk(i) == 1) evef = 0.
           endif
         enddo
       enddo
+
+!LB:                                                                                                                                                                                                                                                  
+      if(do_ca)then
+         do i = 1,im
+            rainevap(i)=delqev(i)
+         enddo
+      endif
 cj
 !     do i = 1, im
 !     if(me == 31 .and. cnvflg(i)) then

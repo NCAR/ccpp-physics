@@ -1401,9 +1401,11 @@ module cs_conv
          gcht(i,ctp)  = tem * gcht(i,ctp)
          gcqt(i,ctp)  = tem * gcqt(i,ctp)
          gcit(i,ctp)  = tem * gcit(i,ctp)
-         do n = ntrq,ntr
-           gctrt(i,n,ctp)  = tem * gctrt(i,n,ctp)
-         enddo
+         if (.not. flx_form) then
+           do n = ntrq,ntr
+             gctrt(i,n,ctp)  = tem * gctrt(i,n,ctp)
+           enddo
+         end if
          gcut(i,ctp)  = tem * gcut(i,ctp)
          gcvt(i,ctp)  = tem * gcvt(i,ctp)
          do k=1,kmax

@@ -1,0 +1,21 @@
+name: Basic checks for CCPP physics schemes
+
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Init submodules
+      run: git submodule update --init --recursive
+    #- name: Update packages
+    #  run: |
+    #    /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    #    #brew install autoconf automake coreutils gcc@9 libtool mpich gnu-sed wget
+    #    brew install automake coreutils mpich gnu-sed
+    - name: Check for ASCII encoding
+      run: ./tools/check_encoding.py

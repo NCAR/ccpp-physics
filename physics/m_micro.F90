@@ -14,17 +14,16 @@ module m_micro
 
 contains
 
-!>\ingroup mg_driver
-!! This subroutine is the MG initialization.
+!> This subroutine is the MG initialization.
 !> \section arg_table_m_micro_init  Argument Table
 !! \htmlinclude m_micro_init.html
 !!
-subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, cpair,&
+subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, cpair, &
                         eps, tmelt, latvap, latice, mg_dcs, mg_qcvar, mg_ts_auto_ice,  &
-                        mg_rhmini, microp_uniform, do_cldice, hetfrz_classnuc,        &
-                        mg_precip_frac_method, mg_berg_eff_factor, sed_supersat,      &
-                        do_sb_physics, mg_do_hail,  mg_do_graupel, mg_nccons,         &
-                        mg_nicons, mg_ngcons, mg_ncnst, mg_ninst, mg_ngnst,           &
+                        mg_rhmini, microp_uniform, do_cldice, hetfrz_classnuc,         &
+                        mg_precip_frac_method, mg_berg_eff_factor, sed_supersat,       &
+                        do_sb_physics, mg_do_hail,  mg_do_graupel, mg_nccons,          &
+                        mg_nicons, mg_ngcons, mg_ncnst, mg_ninst, mg_ngnst,            &
                         mg_do_ice_gmao, mg_do_liq_liu, errmsg, errflg)
 
     use machine,            only: kind_phys
@@ -103,20 +102,13 @@ end subroutine m_micro_init
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 
-!> \defgroup mg2mg3 Morrison-Gettelman MP scheme Module
-!! This module contains the the entity of MG2 and MG3 schemes. 
-!> @{
-!> \defgroup mg_driver Morrison-Gettelman MP Driver Module
+!> \defgroup mg2mg3 Morrison-Gettelman MP Driver Module
 !! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 
 !! grid-scale condensation and evaporation of cloud condensate.
-
-#if 0
-
+!!
 !> \section arg_table_m_micro_run Argument Table
 !! \htmlinclude m_micro_run.html
 !!
-#endif
-!>\ingroup mg_driver
 !>\section detail_m_micro_run MG m_micro_run Detailed Algorithm
 !> @{
       subroutine m_micro_run(   im,       ix,     lm,     flipv, dt_i   &
@@ -134,7 +126,7 @@ end subroutine m_micro_init
      &,                         CLLS_io,  KCBL                          &
      &,                         CLDREFFL, CLDREFFI, CLDREFFR, CLDREFFS  &
      &,                         CLDREFFG, aerfld_i                      &
-     &,                         aero_in,  naai_i, npccn_i, iccn         &
+     &,                         naai_i, npccn_i, iccn                   &
      &,                         skip_macro                              &
      &,                         alf_fac, qc_min, pdfflag                &
      &,                         kdt, xlat, xlon, rhc_i,                 &
@@ -183,7 +175,8 @@ end subroutine m_micro_init
 
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, ix,lm, kdt, fprcp, pdfflag
-       logical,intent(in) :: flipv, aero_in, skip_macro, iccn
+       logical,intent(in) :: flipv, skip_macro
+       integer,intent(in) :: iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
        real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
@@ -443,7 +436,7 @@ end subroutine m_micro_init
              temp(i,k)      = t_io(i,ll)
              radheat(i,k)   = lwheat_i(i,ll) + swheat_i(i,ll)
              rhc(i,k)       = rhc_i(i,ll)
-             if (iccn) then
+             if (iccn == 1) then
                CDNC_NUC(i,k) = npccn_i(i,ll)
                INC_NUC(i,k)  = naai_i (i,ll)
              endif
@@ -504,7 +497,7 @@ end subroutine m_micro_init
              temp(i,k)      = t_io(i,k)
              radheat(i,k)   = lwheat_i(i,k) + swheat_i(i,k)
              rhc(i,k)       = rhc_i(i,k)
-             if (iccn) then
+             if (iccn == 1) then
                CDNC_NUC(i,k) = npccn_i(i,k)
                INC_NUC(i,k)  = naai_i (i,k)
              endif
@@ -673,7 +666,7 @@ end subroutine m_micro_init
            NCPL(i,l)   = MAX( NCPL(i,l), 0.)
            NCPI(i,l)   = MAX( NCPI(i,l), 0.)
            RAD_CF(i,l) = max(0.0, min(CLLS(i,l)+CLCN(i,l), 1.0))
-           if (.not. iccn) then
+           if (iccn .ne. 1) then
              CDNC_NUC(i,l) = 0.0
              INC_NUC(i,l)  = 0.0
            endif
@@ -729,7 +722,7 @@ end subroutine m_micro_init
 !
 
        allocate(AERMASSMIX(IM,LM,15))
-       if ( aero_in ) then
+       if (iccn == 2) then
          AERMASSMIX(:,:,1:ntrcaer) = aerfld_i(:,:,1:ntrcaer)
        else
          AERMASSMIX(:,:,1:5) = 1.e-6
@@ -982,19 +975,21 @@ end subroutine m_micro_init
 !          if(temp(i,k) > T_ICE_ALL) SC_ICE(i,k) = 1.0
 !          if(temp(i,k) > TICE)      SC_ICE(i,k) = rhc(i,k)
 !
-           if(temp(i,k) < T_ICE_ALL) then
-!            SC_ICE(i,k) = max(SC_ICE(I,k), 1.2)
-             SC_ICE(i,k) = max(SC_ICE(I,k), 1.5)
-           elseif(temp(i,k) > TICE) then
-             SC_ICE(i,k) = rhc(i,k)
-           else
-!            SC_ICE(i,k) = 1.0
-!            tx1 = max(SC_ICE(I,k), 1.2)
-             tx1 = max(SC_ICE(I,k), 1.5)
-             SC_ICE(i,k) = ((tice-temp(i,k))*tx1 + (temp(i,k)-t_ice_all)*rhc(i,k)) &
-                         * t_ice_denom
+           if(iccn == 0) then
+             if(temp(i,k) < T_ICE_ALL) then
+!              SC_ICE(i,k) = max(SC_ICE(I,k), 1.2)
+               SC_ICE(i,k) = max(SC_ICE(I,k), 1.5)
+             elseif(temp(i,k) > TICE) then
+               SC_ICE(i,k) = rhc(i,k)
+             else
+!              SC_ICE(i,k) = 1.0
+!              tx1 = max(SC_ICE(I,k), 1.2)
+               tx1 = max(SC_ICE(I,k), 1.5)
+               SC_ICE(i,k) = ((tice-temp(i,k))*tx1 + (temp(i,k)-t_ice_all)*rhc(i,k)) &
+                           * t_ice_denom
+             endif
            endif
-           if (.not. iccn) then
+           if (iccn .ne. 1) then
              CDNC_NUC(I,k) = npccninr8(k)
              INC_NUC (I,k) = naair8(k)
            endif
@@ -1129,7 +1124,7 @@ end subroutine m_micro_init
 !           temp(i,k)   = th1(i,k) * PK(i,k)
             RAD_CF(i,k) = min(CLLS(i,k)+CLCN(i,k), 1.0)
 !
-            if (.not. iccn) then
+            if (iccn .ne. 1) then
               if (PFRZ(i,k) > 0.0) then
                 INC_NUC(i,k)  = INC_NUC(i,k)  * PFRZ(i,k)
                 NHET_NUC(i,k) = NHET_NUC(i,k) * PFRZ(i,k)
@@ -1500,7 +1495,7 @@ end subroutine m_micro_init
      &         drout2,                       dsout2,                    &
      &         freqs,                        freqr,                     &
      &         nfice,                        qcrat,                     &
-     &         prer_evap, xlat(i), xlon(i), lprint, iccn, aero_in,      &
+     &         prer_evap, xlat(i), xlon(i), lprint, iccn,               &
      &         lev_sed_strt)
 !
             LS_PRC2(I) = max(1000.*(prectr8(1)-precir8(1)), 0.0)
@@ -1637,7 +1632,7 @@ end subroutine m_micro_init
      &         qgout2,             ngout2,   dgout2, freqg,             &
      &         freqs,                        freqr,                     &
      &         nfice,                        qcrat,                     &
-     &         prer_evap, xlat(i), xlon(i), lprint, iccn, aero_in,      &
+     &         prer_evap, xlat(i), xlon(i), lprint, iccn,               &
      &         lev_sed_strt)
 
             LS_PRC2(I) = max(1000.*(prectr8(1)-precir8(1)), 0.0)
@@ -1888,7 +1883,7 @@ end subroutine m_micro_init
 !DONIF Calculate the Brunt_Vaisala frequency
 
 !===============================================================================
-!>\ingroup mg_driver
+!>\ingroup mg2mg3
 !> This subroutine computes profiles of background state quantities for 
 !! the multiple gravity wave drag parameterization.
 !!\section gw_prof_gen MG gw_prof General Algorithm
@@ -1975,7 +1970,7 @@ end subroutine m_micro_init
        end subroutine gw_prof
 !> @}
 
-!>\ingroup mg_driver
+!>\ingroup mg2mg3
 !! This subroutine is to find cloud top based on cloud fraction.
       subroutine find_cldtop(ncol, pver, cf, kcldtop)
        implicit none
@@ -2009,6 +2004,5 @@ end subroutine m_micro_init
 
 
       end subroutine find_cldtop
-!> @}
 
 end module m_micro
