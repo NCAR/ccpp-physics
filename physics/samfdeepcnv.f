@@ -203,13 +203,12 @@ cj
      &                     bb1,     bb2,     wucb
 !
 c  physical parameters
-!      parameter(asolfac=0.89)   !HWRF 
-!     parameter(grav=grav)
-!      parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
+!     parameter(grav=grav,asolfac=0.958)
+!     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
 !     parameter(c0s=.002,c1=.002,d0=.01)
 !     parameter(d0=.01)
       parameter(d0=.001)
-!      parameter(c0l=c0s*asolfac)
+!     parameter(c0l=c0s*asolfac)
 !
 ! asolfac: aerosol-aware parameter based on Lim (2011)
 !      asolfac= cx / c0s(=.002)
@@ -219,7 +218,7 @@ c  physical parameters
 !      as Nccn=100 for sea and Nccn=1000 for land
 !
       parameter(cm=1.0)
-!      parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
+!     parameter(fact1=(cvap-cliq)/rv,fact2=hvap/rv-fact1*t0c)
       parameter(clamd=0.03,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dbeta=0.1)
@@ -229,6 +228,7 @@ c  physical parameters
       parameter(cinacrmx=-120.,cinacrmn=-80.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
       parameter(betaw=.03,dxcrtas=8.e3,dxcrtuf=15.e3)
+
 !
 !  local variables and arrays
       real(kind=kind_phys) pfld(im,km),    to(im,km),     qo(im,km),
@@ -274,21 +274,21 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
 
-
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
 
 
-        elocp = hvap/cp
-        el2orc = hvap*hvap/(rv*cp)
+      elocp = hvap/cp
+      el2orc = hvap*hvap/(rv*cp)
 
-        fact1 = (cvap-cliq)/rv
-        fact2 = hvap/rv-fact1*t0c
-!
-      if(.not. hwrf_samfdeep) then
+      fact1 = (cvap-cliq)/rv
+      fact2 = hvap/rv-fact1*t0c
 c-----------------------------------------------------------------------
 !>  ## Determine whether to perform aerosol transport
+      if(hwrf_samfdeep) then
+        do_aerosols = .false.
+      else
         do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
         if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
       endif
@@ -342,7 +342,6 @@ c
         rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
        enddo
-
       else
        do i=1,im
         cnvflg(i) = .true.
@@ -375,7 +374,6 @@ c
         vshear(i) = 0.
         rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
-
         !HWRF SAS
         scaldfunc(i)=-1.0
         sigmagfm(i)=-1.0
@@ -391,7 +389,6 @@ c
            c0(i) = c0s
         endif
       enddo
-
 !>  - determine rain conversion parameter above the freezing level which exponentially decreases with decreasing temperature from Han et al.'s (2017) \cite han_et_al_2017 equation 8.
       do k = 1, km
         do i = 1, im
@@ -420,7 +417,6 @@ c
           dt_mf(i,k) = 0.
         enddo
       enddo
-
       if(mp_phys == mp_phys_mg) then
         do k = 1, km
           do i = 1, im
@@ -461,7 +457,6 @@ c
         crtlame = 1.0e-4
         cxlame  = 1.0e-4
       endif
-
       crtlamd = 1.0e-4
       cxlamd  = 1.0e-4
       xlamde  = 1.0e-4
@@ -527,7 +522,6 @@ c
         enddo
         enddo
       endif
-
 c
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c   convert surface pressure to mb from cb
@@ -684,7 +678,6 @@ c
           endif
         enddo
       enddo
-
       if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do k = 1, km1
@@ -773,7 +766,6 @@ c
           ptem1= .5*(cinpcrmx-cinpcrmn)
           cinpcr = cinpcrmx - ptem * ptem1
           tem1 = pfld(i,kb(i)) - pfld(i,kbcon(i))
-
           if(tem1 > cinpcr) then
              cnvflg(i) = .false.
           endif
@@ -793,12 +785,12 @@ c
         totflg = totflg .and. (.not. cnvflg(i))
       enddo
       if(totflg) return
-
-      if (.not. hwrf_samfdeep) then
+!!
+!
 ! turbulent entrainment rate assumed to be proportional
 !   to subcloud mean TKE
 !
-      if(ntk > 0) then
+      if(.not. hwrf_samfdeep .and. ntk > 0) then
 !
         do i= 1, im
           if(cnvflg(i)) then
@@ -854,7 +846,7 @@ c
             enddo
          endif
 !
-      endif
+      endif !(.not. hwrf_samfdeep .and. ntk > 0)
 !
 !  also initially assume updraft entrainment rate
 !     is an inverse function of height
@@ -867,8 +859,6 @@ c
           endif
         enddo
       enddo
-
-      endif !(.not.hwrf_samfdeep)
 c
 c  assume that updraft entrainment rate above cloud base is
 c    same as that at cloud base
@@ -1019,14 +1009,14 @@ c
       enddo
       if (.not.hwrf_samfdeep) then
 !  for tracers
-        do n = 1, ntr
+       do n = 1, ntr
         do i = 1, im
           if(cnvflg(i)) then
             indx = kb(i)
             ecko(i,indx,n) = ctro(i,indx,n)
           endif
         enddo
-        enddo
+       enddo
       endif
 c
 c  cloud property is modified by the entrainment process
@@ -1149,7 +1139,6 @@ c
         enddo
       enddo
 !> - Turn off convection if the CIN is less than a critical value (cinacr) which is inversely proportional to the large-scale vertical velocity.
-
       if(hwrf_samfdeep) then
        do i = 1, im
         if(cnvflg(i)) then
@@ -1532,8 +1521,8 @@ c
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
 !
-       bb1 = 4.0
-       bb2 = 0.8
+      bb1 = 4.0
+      bb2 = 0.8
       if (hwrf_samfdeep) then
       do i = 1, im
         if (cnvflg(i)) then
@@ -1949,7 +1938,6 @@ c
      &                   - vo(i,1)) * grav / dp
         endif
       enddo
-
       if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do i = 1, im
@@ -2072,7 +2060,6 @@ c
      &                     qlko_ktcon(i) * grav / dp
         endif
       enddo
-
       if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do i = 1, im
@@ -2115,7 +2102,6 @@ c
           endif
         enddo
       enddo
-
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c
 c--- the above changed environment is now used to calulate the
@@ -2452,7 +2438,6 @@ c
 !  compute convective turn-over time
 !
 !> - Following Bechtold et al. (2008) \cite bechtold_et_al_2008, the convective adjustment time (dtconv) is set to be proportional to the convective turnover time, which is computed using the mean updraft velocity (wc) and the cloud depth. It is also proportional to the grid size (gdx).
-
       if(hwrf_samfdeep) then
        do i= 1, im
         if(cnvflg(i)) then
@@ -2474,7 +2459,6 @@ c
         endif
        enddo
       endif
-      
 !
 !> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
       do i= 1, im
@@ -2513,7 +2497,6 @@ c
           xmb(i) = tfac*betaw*rho*wc(i)
         endif
       enddo
-
 !> - For the cases where the quasi-equilibrium assumption of Arakawa-Schubert is valid, first calculate the large scale destabilization as in equation 5 of Pan and Wu (1995) \cite pan_and_wu_1995 :
 !! \f[
 !!  \frac{\partial A}{\partial t}_{LS}=\frac{A^+-cA^0}{\Delta t_{LS}}
@@ -2565,7 +2548,7 @@ c
       enddo
       if(totflg) return
 !!
-
+!
 !> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
       if(hwrf_samfdeep) then
       do i = 1, im
@@ -2592,8 +2575,7 @@ c
       endif
 !
 !> - Then, calculate the reduction factor (scaldfunc) of the vertical convective eddy transport of mass flux as a function of updraft fraction from the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013 (also see Han et al.'s (2017) \cite han_et_al_2017 equation 1 and 2). The final cloud base mass flux with scale-aware parameterization is obtained from the mass flux when sigmagfm << 1, multiplied by the reduction factor (Han et al.'s (2017) \cite han_et_al_2017 equation 2).
-
-       do i = 1, im
+      do i = 1, im
         if(cnvflg(i)) then
           if (gdx(i) < dxcrtuf) then
             scaldfunc(i) = (1.-sigmagfm(i)) * (1.-sigmagfm(i))
@@ -2604,7 +2586,7 @@ c
           xmb(i) = xmb(i) * scaldfunc(i)
           xmb(i) = min(xmb(i),xmbmax(i))
         endif
-       enddo
+      enddo
 !
       if (do_ca .and. ca_closure)then
       do i = 1, im
@@ -2624,7 +2606,6 @@ c
      &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
      &  qtr, qaero)
 
-      endif
 c
 c  restore to,qo,uo,vo to t1,q1,u1,v1 in case convection stops
 c
@@ -2672,11 +2653,11 @@ c
         qcond(i) = 0.
       enddo
       if (.not.hwrf_samfdeep) then
-       do n = 1, ntr
-       do i = 1, im
+        do n = 1, ntr
+        do i = 1, im
           delebar(i,n) = 0.
-       enddo
-       enddo
+        enddo
+        enddo
       endif
       do k = 1, km
         do i = 1, im
@@ -2702,8 +2683,8 @@ c
       enddo
       if (.not.hwrf_samfdeep) then
        do n = 1, ntr
-         kk = n+2
-       do k = 1, km
+        kk = n+2
+        do k = 1, km
         do i = 1, im
           if (cnvflg(i) .and. k <= kmax(i)) then
             if(k <= ktcon(i)) then
@@ -2713,7 +2694,7 @@ c
             endif
           endif
         enddo
-       enddo
+        enddo
        enddo
       endif
 !> - Recalculate saturation specific humidity using the updated temperature.
@@ -2907,7 +2888,6 @@ c
           endif
         enddo
       enddo
-
       if (.not.hwrf_samfdeep) then
       do n = 1, ntr
          kk = n+2
@@ -3020,8 +3000,7 @@ c
           enddo
         enddo
       endif
-
-      endif
+      endif ! (.not.hwrf_samfdeep)
       return
       end subroutine samfdeepcnv_run
 
