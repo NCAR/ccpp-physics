@@ -223,7 +223,7 @@
 [re_cloud]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
   long_name = eff. radius of cloud liquid water particle in micrometer
-  units = um
+  units = m
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -232,7 +232,7 @@
 [re_ice]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
   long_name = eff. radius of cloud ice water particle in micrometer
-  units = um
+  units = m
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -241,7 +241,7 @@
 [re_snow]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
   long_name = effective radius of cloud snow particle in micrometer
-  units = um
+  units = m
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
