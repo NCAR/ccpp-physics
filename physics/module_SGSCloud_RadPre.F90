@@ -140,7 +140,7 @@
           enddo
         enddo
 
-      else ! kdt > 1 or restart
+      else ! timestep > 1 or restart
 
         ! Back-up microphysics cloud information:
         do k = 1, levs
@@ -293,7 +293,7 @@
           enddo
         endif ! imfdeepcnv_gf
 
-      endif ! kdt > 1
+      endif ! timestep > 1
 
 !> - Compute SFC/low/middle/high cloud top pressure for each cloud domain for given latitude.
 
