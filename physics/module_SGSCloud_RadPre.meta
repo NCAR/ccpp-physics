@@ -61,10 +61,28 @@
   kind = kind_phys
   intent = inout
   optional = F
+[qv]
+  standard_name = water_vapor_specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [T3D]
   standard_name = air_temperature
   long_name = layer mean air temperature
   units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[P3D]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -296,6 +314,38 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[imp_physics]
+  standard_name = flag_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_gfdl]
+  standard_name = flag_for_gfdl_microphysics_scheme
+  long_name = choice of GFDL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_thompson]
+  standard_name = flag_for_thompson_microphysics_scheme
+  long_name = choice of Thompson microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_wsm6]
+  standard_name = flag_for_wsm6_microphysics_scheme
+  long_name = choice of WSM6 microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [errmsg]
