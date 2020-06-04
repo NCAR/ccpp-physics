@@ -49,8 +49,6 @@
            nlay, plyr, xlat, dz,de_lgth, &
            cldsa,mtopa,mbota,            &
            imp_physics, imp_physics_gfdl,&
-           imp_physics_thompson,         &
-           imp_physics_wsm6,             &
            errmsg, errflg                )
 
 ! should be moved to inside the mynn:
@@ -67,8 +65,7 @@
       ! Interface variables
       real (kind=kind_phys), parameter :: gfac=1.0e5/con_g
       integer,          intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, &
-           &               nlay, imp_physics, imp_physics_wsm6,             &
-           &               imp_physics_thompson, imp_physics_gfdl
+           &               nlay, imp_physics, imp_physics_gfdl
       logical,          intent(in)  :: flag_init, flag_restart, do_mynnedmf
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qr, qs

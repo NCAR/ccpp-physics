@@ -332,22 +332,6 @@
   type = integer
   intent = in
   optional = F
-[imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
-  long_name = choice of Thompson microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics_wsm6]
-  standard_name = flag_for_wsm6_microphysics_scheme
-  long_name = choice of WSM6 microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

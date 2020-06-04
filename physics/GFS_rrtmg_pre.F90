@@ -65,7 +65,7 @@
      &                                     progcld1, progcld3,         &
      &                                     progcld2,                   &
      &                                     progcld4, progcld5,         &
-     &                                     progcld6, progclduni
+     &                                     progclduni
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
      &                                     profsw_type, NBDSW
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,   &
