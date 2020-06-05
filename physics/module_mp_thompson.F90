@@ -1100,6 +1100,13 @@ MODULE module_mp_thompson
         errflg = 1
         return
       end if
+      ! Activate this code when removing the guard above
+      !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
+      !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
+      !           'but optional argument rand_pert is not present'
+      !  errflg = 1
+      !  return
+      !end if
       ! *DH 2020-06-05
 
       if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
@@ -1428,13 +1435,13 @@ MODULE module_mp_thompson
             endif
 !
           if (present(vt_dbz_wt) .and. present(first_time_step)) then
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                t1d, p1d, dBZ, kts, kte, i, j,      & 
-                                melti, vt_dbz_wt(i,:,j),            &
+            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+                                melti, vt_dbz_wt(i,:,j),              &
                                 first_time_step)
           else
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                t1d, p1d, dBZ, kts, kte, i, j,      &
+            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
                                 melti)
           end if
           do k = kts, kte
@@ -5366,13 +5373,14 @@ MODULE module_mp_thompson
 !! of frozen species remaining from what initially existed at the
 !! melting level interface.
       subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-               t1d, p1d, dBZ, kts, kte, ii, jj, melti, vt_dBZ,      &
-               first_time_step)
+               t1d, p1d, dBZ, rand1, kts, kte, ii, jj, melti,       &
+               vt_dBZ, first_time_step)
 
       IMPLICIT NONE
 
 !..Sub arguments
       INTEGER, INTENT(IN):: kts, kte, ii, jj
+      REAL, INTENT(IN):: rand1
       REAL, DIMENSION(kts:kte), INTENT(IN)::                            &
                           qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, t1d, p1d
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: dBZ
