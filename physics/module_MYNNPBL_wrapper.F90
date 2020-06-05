@@ -37,7 +37,7 @@
 !! \htmlinclude mynnedmf_wrapper_run.html
 !!
 SUBROUTINE mynnedmf_wrapper_run(        &
-     &  ix,im,levs,                     &
+     &  im,levs,                        &
      &  flag_init,flag_restart,cycling, &
      &  lssav, ldiag3d, qdiag3d,        &
      &  lsidea, cplflx,                 &
@@ -51,7 +51,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ozone,                     &
      &  qgrs_water_aer_num_conc,        &
      &  qgrs_ice_aer_num_conc,          &
-     &  del,prsl,exner,                 &
+     &  prsl,exner,                     &
      &  slmsk,tsurf,qsfc,ps,            &
      &  ust,ch,hflx,qflx,wspd,rb,       &
      &  dtsfc1,dqsfc1,                  &
@@ -214,7 +214,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MYNN-1D
       REAL(kind=kind_phys), intent(in) :: delt, dtf
-      INTEGER, intent(in) :: im, ix, levs
+      INTEGER, intent(in) :: im, levs
       LOGICAL, intent(in) :: flag_init, flag_restart
       INTEGER :: initflag, k, i
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                                &
@@ -241,7 +241,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        sub_thl,sub_sqv,det_thl,det_sqv
      real(kind=kind_phys), dimension(im,levs), intent(in) ::             &
     &        u,v,omega,t3d,                                              &
-    &        del,exner,prsl,                                             &
+    &        exner,prsl,                                                 &
     &        qgrs_water_vapor,                                           &
     &        qgrs_liquid_cloud,                                          &
     &        qgrs_ice_cloud,                                             &
