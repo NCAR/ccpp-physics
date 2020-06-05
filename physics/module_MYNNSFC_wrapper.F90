@@ -19,14 +19,19 @@
 
 !>\defgroup gsd_mynn_sfc GSD MYNN Surface Layer Scheme Module
 !> \brief This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
+#if 0
 !! \section arg_table_mynnsfc_wrapper_run Argument Table
 !! \htmlinclude mynnsfc_wrapper_run.html
 !!
+#endif
 !###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
      &  itimestep,iter,                    &
      &  flag_init,flag_restart,lsm,        &
+     &  sigmaf,vegtype,shdmax,ivegsrc,     &  !intent(in)
+     &  z0pert,ztpert,                     &  !intent(in)
+     &  redrag,sfc_z0_type,                &  !intent(in)
      &  delt,dx,                           &
      &  u, v, t3d, qvsh, qc, prsl, phii,   &
      &  exner, ps, PBLH, slmsk,            &
@@ -100,6 +105,15 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &       isftcflx = 0,                                  &
      &       iz0tlnd  = 0,                                  &
      &       isfflx   = 1
+
+      integer, intent(in) :: ivegsrc
+      integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
+      logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
+
+!Input data
+      integer, dimension(im), intent(in) :: vegtype
+      real(kind=kind_phys), dimension(im), intent(in)    ::       &
+     &                    sigmaf,shdmax,z0pert,ztpert
 
 !MYNN-1D
       REAL    :: delt
@@ -235,8 +249,11 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                               &
              SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
-             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,                         &
-             iz0tlnd=iz0tlnd,itimestep=itimestep,iter=iter,                   &
+             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,iz0tlnd=iz0tlnd,         &
+    &        sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
+    &        z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
+    &        redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
+             itimestep=itimestep,iter=iter,                                   &
                          wet=wet,              dry=dry,              icy=icy, &  !intent(in)
              tskin_ocn=tskin_ocn,  tskin_lnd=tskin_lnd,  tskin_ice=tskin_ice, &  !intent(in)
              tsurf_ocn=tsurf_ocn,  tsurf_lnd=tsurf_lnd,  tsurf_ice=tsurf_ice, &  !intent(in)
