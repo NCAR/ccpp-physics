@@ -27,10 +27,17 @@
   intent = out
   optional = F
 
-#####################################################################
 [ccpp-arg-table]
   name = mynnedmf_wrapper_run
   type = scheme
+[ix]
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -96,6 +103,14 @@
 [lsidea]
   standard_name = flag_idealized_physics
   long_name = flag for idealized physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[cplflx]
+  standard_name = flag_for_flux_coupling
+  long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -254,6 +269,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[del]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = pres(k) - pres(k+1)
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [prsl]
   standard_name = air_pressure
   long_name = mean layer pressure
@@ -327,8 +351,8 @@
   intent = out
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
+  standard_name = kinematic_surface_upward_sensible_heat_flux
+  long_name = kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -336,8 +360,8 @@
   intent = in
   optional = F
 [qflx]
-  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward latent heat flux reduced by surface roughness
+  standard_name = kinematic_surface_upward_latent_heat_flux
+  long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -380,6 +404,42 @@
   kind = kind_phys
   intent = out
   optional = F
+[dusfc1]
+  standard_name = instantaneous_surface_x_momentum_flux
+  long_name = surface momentum flux in the x-direction valid for current call
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc1]
+  standard_name = instantaneous_surface_y_momentum_flux
+  long_name = surface momentum flux in the y-direction valid for current call
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfci_diag]
+  standard_name = instantaneous_surface_x_momentum_flux_for_diag
+  long_name = instantaneous sfc x momentum flux multiplied by timestep
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfci_diag]
+  standard_name = instantaneous_surface_y_momentum_flux_for_diag
+  long_name = instantaneous sfc y momentum flux multiplied by timestep
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [dtsfci_diag]
   standard_name = instantaneous_surface_upward_sensible_heat_flux_for_diag
   long_name = instantaneous sfc sensible heat flux multiplied by timestep
@@ -398,6 +458,24 @@
   kind = kind_phys
   intent = out
   optional = F
+[dusfc_diag]
+  standard_name = cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep
+  long_name = cumulative sfc x momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvsfc_diag]
+  standard_name = cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep
+  long_name = cumulative sfc y momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [dtsfc_diag]
   standard_name = cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc sensible heat flux multiplied by timestep
@@ -405,7 +483,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [dqsfc_diag]
   standard_name = cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep
@@ -414,7 +492,79 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
+  optional = F
+[dusfci_cpl]
+  standard_name = instantaneous_surface_x_momentum_flux_for_coupling
+  long_name = instantaneous sfc u momentum flux
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvsfci_cpl]
+  standard_name = instantaneous_surface_y_momentum_flux_for_coupling
+  long_name = instantaneous sfc v momentum flux
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtsfci_cpl]
+  standard_name = instantaneous_surface_upward_sensible_heat_flux_for_coupling
+  long_name = instantaneous sfc sensible heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dqsfci_cpl]
+  standard_name = instantaneous_surface_upward_latent_heat_flux_for_coupling
+  long_name = instantaneous sfc latent heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dusfc_cpl]
+  standard_name = cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc u momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvsfc_cpl]
+  standard_name = cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc v momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtsfc_cpl]
+  standard_name = cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc sensible heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dqsfc_cpl]
+  standard_name = cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc latent heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [recmol]
   standard_name = reciprocal_of_obukhov_length

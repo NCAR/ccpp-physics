@@ -37,9 +37,10 @@
 !! \htmlinclude mynnedmf_wrapper_run.html
 !!
 SUBROUTINE mynnedmf_wrapper_run(        &
-     &  im,levs,                        &
+     &  ix,im,levs,                     &
      &  flag_init,flag_restart,cycling, &
-     &  lssav, ldiag3d, qdiag3d, lsidea,&
+     &  lssav, ldiag3d, qdiag3d,        &
+     &  lsidea, cplflx,                 &
      &  delt,dtf,dx,zorl,               &
      &  phii,u,v,omega,t3d,             &
      &  qgrs_water_vapor,               &
@@ -50,12 +51,19 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  qgrs_ozone,                     &
      &  qgrs_water_aer_num_conc,        &
      &  qgrs_ice_aer_num_conc,          &
-     &  prsl,exner,                     &
+     &  del,prsl,exner,                 &
      &  slmsk,tsurf,qsfc,ps,            &
-     &  ust,ch,hflx,qflx,               &
-     &  wspd,rb,dtsfc1,dqsfc1,          &
+     &  ust,ch,hflx,qflx,wspd,rb,       &
+     &  dtsfc1,dqsfc1,                  &
+     &  dusfc1,dvsfc1,                  &
+     &  dusfci_diag,dvsfci_diag,        &
      &  dtsfci_diag,dqsfci_diag,        &
+     &  dusfc_diag,dvsfc_diag,          &
      &  dtsfc_diag,dqsfc_diag,          &
+     &  dusfci_cpl,dvsfci_cpl,          &
+     &  dtsfci_cpl,dqsfci_cpl,          &
+     &  dusfc_cpl,dvsfc_cpl,            &
+     &  dtsfc_cpl,dqsfc_cpl,            &
      &  recmol,                         &
      &  qke,qke_adv,Tsq,Qsq,Cov,        &
      &  el_pbl,sh3d,exch_h,exch_m,      &
@@ -171,6 +179,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   integer, intent(out) :: errflg
 
   LOGICAL, INTENT(IN) :: lssav, ldiag3d, lsidea, qdiag3d
+  LOGICAL, INTENT(IN) :: cplflx
+
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
                              lprnt, do_mynnsfclay, cycling
@@ -204,7 +214,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 !MYNN-1D
       REAL(kind=kind_phys), intent(in) :: delt, dtf
-      INTEGER, intent(in) :: im, levs
+      INTEGER, intent(in) :: im, ix, levs
       LOGICAL, intent(in) :: flag_init, flag_restart
       INTEGER :: initflag, k, i
       INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                                &
@@ -231,7 +241,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        sub_thl,sub_sqv,det_thl,det_sqv
      real(kind=kind_phys), dimension(im,levs), intent(in) ::             &
     &        u,v,omega,t3d,                                              &
-    &        exner,prsl,                                                 &
+    &        del,exner,prsl,                                             &
     &        qgrs_water_vapor,                                           &
     &        qgrs_liquid_cloud,                                          &
     &        qgrs_ice_cloud,                                             &
@@ -272,16 +282,24 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind=kind_phys), dimension(im), intent(inout) ::              &
      &        pblh
       real(kind=kind_phys), dimension(im), intent(out) ::                &
-     &        ch,dtsfc1,dqsfc1,                                          &
+     &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
      &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag,             &
+     &        dusfci_diag,dvsfci_diag,dusfc_diag,dvsfc_diag,             &
      &        maxMF
-     integer, dimension(im), intent(inout) ::                            &
-    &        kpbl,nupdraft,ktop_plume
+      integer, dimension(im), intent(inout) ::                           &
+     &        kpbl,nupdraft,ktop_plume
+
+      real(kind=kind_phys), dimension(im), intent(inout) ::              &
+     &        dusfc_cpl,dvsfc_cpl,dtsfc_cpl,dqsfc_cpl
+      real(kind=kind_phys), dimension(im), intent(out) ::                &
+     &        dusfci_cpl,dvsfci_cpl,dtsfci_cpl,dqsfci_cpl
 
      !LOCAL
       real, dimension(im) ::                                             &
      &        WSTAR,DELTA,qcg,hfx,qfx,rmol,xland,                        &
      &        uoce,voce,vdfg,znt,ts
+
+      real, dimension(im) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -474,12 +492,33 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          delta(i)=0.0
          qcg(i)=0.0
 
-         dtsfc1(i)=hfx(i)
-         dqsfc1(i)=qfx(i)*XLV
-         dtsfci_diag(i)=dtsfc1(i)
-         dqsfci_diag(i)=dqsfc1(i)
-         dtsfc_diag(i)=dtsfc_diag(i) + dtsfc1(i)*delt
-         dqsfc_diag(i)=dqsfc_diag(i) + dqsfc1(i)*delt
+         dtsfc1(i) = hfx(i)
+         dqsfc1(i) = qfx(i)*XLV
+         dusfc1(i) = -1.*rho(i,1)*ust(i)*ust(i)*u(i,1)/wspd(i)
+         dvsfc1(i) = -1.*rho(i,1)*ust(i)*ust(i)*v(i,1)/wspd(i)
+
+         !BWG: diagnostic surface fluxes for scalars & momentum
+         dtsfci_diag(i) = dtsfc1(i)
+         dqsfci_diag(i) = dqsfc1(i)
+         dtsfc_diag(i)  = dtsfc_diag(i) + dtsfc1(i)*delt
+         dqsfc_diag(i)  = dqsfc_diag(i) + dqsfc1(i)*delt
+         dusfci_diag(i) = dusfc1(i)
+         dvsfci_diag(i) = dvsfc1(i)
+         dusfc_diag(i)  = dusfc_diag(i) + dusfci_diag(i)*delt
+         dvsfc_diag(i)  = dvsfc_diag(i) + dvsfci_diag(i)*delt
+
+         ! BWG: Coupling insertion
+         if(cplflx) then
+           dusfci_cpl(i) = dusfci_diag(i)
+           dvsfci_cpl(i) = dvsfci_diag(i)
+           dtsfci_cpl(i) = dtsfci_diag(i)
+           dqsfci_cpl(i) = dqsfci_diag(i)
+
+           dusfc_cpl(i) = dusfc_cpl(i) + dusfci_cpl(i)*delt
+           dvsfc_cpl(i) = dvsfc_cpl(i) + dvsfci_cpl(i)*delt
+           dtsfc_cpl(i) = dtsfc_cpl(i) + dtsfci_cpl(i)*delt
+           dqsfc_cpl(i) = dqsfc_cpl(i) + dqsfci_cpl(i)*delt
+         endif
 
          znt(i)=zorl(i)*0.01 !cm -> m?
          if (do_mynnsfclay) then
@@ -782,7 +821,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
              enddo
            endif
        endif
-       
+
+
        if (lprnt) then
           print*
           print*,"===Finished with mynn_bl_driver; output:"
