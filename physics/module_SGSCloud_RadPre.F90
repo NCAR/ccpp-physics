@@ -20,7 +20,7 @@
 !> \ingroup sgscloud_radpre
 !! This interstitial code adds the subgrid clouds to the resolved-scale clouds 
 !! if there is no resolved-scale clouds in that particular grid box. It can also 
-!! specify a cloud fraction for resolved-scale clouds, using Wu-Randall (1996),
+!! specify a cloud fraction for resolved-scale clouds, using Xu-Randall (1996),
 !! if desired.
 !> \section arg_table_sgscloud_radpre_run Argument Table
 !! \htmlinclude sgscloud_radpre_run.html
@@ -202,7 +202,7 @@
 
         elseif (imp_physics /= imp_physics_gfdl) then 
 
-          ! Non-MYNN cloud fraction AND non-GFDL microphysics, since bith
+          ! Non-MYNN cloud fraction AND non-GFDL microphysics, since both
           ! have their own cloud fractions. In this case, we resort to
           ! Xu-Randall (1996).
           ! cloud fraction =
