@@ -239,6 +239,7 @@
             Sfcprop(nb)%smc (ix,ls) = SMCFC1 (len + (ls-1)*npts)
             Sfcprop(nb)%stc (ix,ls) = STCFC1 (len + (ls-1)*npts)
             Sfcprop(nb)%slc (ix,ls) = SLCFC1 (len + (ls-1)*npts)
+            if (ls<=Model%kice) Sfcprop(nb)%tiice (ix,ls) = STCFC1 (len + (ls-1)*npts)
           enddo
         ENDDO                 !-----END BLOCK SIZE LOOP------------------------------
       ENDDO                   !-----END BLOCK LOOP-------------------------------
