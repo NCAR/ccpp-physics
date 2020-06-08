@@ -19,11 +19,9 @@
 
 !>\defgroup gsd_mynn_sfc GSD MYNN Surface Layer Scheme Module
 !> \brief This scheme (1) performs pre-mynnsfc work, (2) runs the mynn sfc layer scheme, and (3) performs post-mynnsfc work
-#if 0
 !! \section arg_table_mynnsfc_wrapper_run Argument Table
 !! \htmlinclude mynnsfc_wrapper_run.html
 !!
-#endif
 !###===================================================================
 SUBROUTINE mynnsfc_wrapper_run(            &
      &  im,levs,                           &
