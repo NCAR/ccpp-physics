@@ -16,12 +16,14 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, &
+                                        phys_choice, phys_choice_thompson, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
       integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
+      integer,                                          intent(in) :: phys_choice, phys_choice_thompson
       logical,                                          intent(in) :: ldiag3d, do_aw
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
@@ -37,6 +39,12 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+      if (phys_choice==phys_choice_thompson) then
+          errmsg = 'quak'
+          errflg = 1
+          return
+      endif
 
       if (ldiag3d .or. do_aw) then
         do k=1,levs
