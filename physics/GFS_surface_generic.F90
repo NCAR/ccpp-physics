@@ -27,7 +27,7 @@
 !!
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
                           prsik_1, prslk_1, tsfc, phil, con_g,                                             &
-                          sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, dtdtr,          &
+                          sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, ca_global,dtdtr,&
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
                           pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
                           cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
@@ -51,7 +51,7 @@
         real(kind=kind_phys), dimension(im), intent(inout) :: sigmaf, work3, tsurf, zlvl
 
         ! Stochastic physics / surface perturbations
-        logical, intent(in) :: do_sppt
+        logical, intent(in) :: do_sppt, ca_global
         real(kind=kind_phys), dimension(im,levs),     intent(out) :: dtdtr
         real(kind=kind_phys), dimension(im),          intent(out) :: drain_cpl
         real(kind=kind_phys), dimension(im),          intent(out) :: dsnow_cpl
@@ -102,7 +102,7 @@
         errflg = 0
 
         ! Set initial quantities for stochastic physics deltas
-        if (do_sppt) then
+        if (do_sppt .or. ca_global) then
           dtdtr     = 0.0
         endif
 
@@ -215,8 +215,8 @@
 !! \htmlinclude GFS_surface_generic_post_run.html
 !!
       subroutine GFS_surface_generic_post_run (im, cplflx, cplwav, lssav, icy, wet, dtf, ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1,&
-        adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_ocn, adjnirbmu, adjnirdfu,           &
-        adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_ocn, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,              &
+        adjsfcdlw, adjsfcdsw, adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu,           &
+        adjvisbmu, adjvisdfu,t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf,              &
         epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl,       &
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
@@ -231,8 +231,8 @@
         real(kind=kind_phys),                   intent(in) :: dtf
 
         real(kind=kind_phys), dimension(im),  intent(in)  :: ep1d, gflx, tgrs_1, qgrs_1, ugrs_1, vgrs_1, adjsfcdlw, adjsfcdsw, &
-          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_ocn, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
-          t2m, q2m, u10m, v10m, tsfc, tsfc_ocn, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
+          adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd, adjsfculw, adjsfculw_wat, adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,    &
+          t2m, q2m, u10m, v10m, tsfc, tsfc_wat, pgr, xcosz, evbs, evcw, trans, sbsno, snowc, snohf
 
         real(kind=kind_phys), dimension(im),  intent(inout) :: epi, gfluxi, t1, q1, u1, v1, dlwsfci_cpl, dswsfci_cpl, dlwsfc_cpl, &
           dswsfc_cpl, dnirbmi_cpl, dnirdfi_cpl, dvisbmi_cpl, dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, &
@@ -287,13 +287,13 @@
             dvisdf_cpl  (i) = dvisdf_cpl(i) + adjvisdfd(i)*dtf
             nlwsfci_cpl (i) = adjsfcdlw(i)  - adjsfculw(i)
             if (wet(i)) then
-              nlwsfci_cpl(i) = adjsfcdlw(i) - adjsfculw_ocn(i)
+              nlwsfci_cpl(i) = adjsfcdlw(i) - adjsfculw_wat(i)
             endif
             nlwsfc_cpl  (i) = nlwsfc_cpl(i) + nlwsfci_cpl(i)*dtf
             t2mi_cpl    (i) = t2m(i)
             q2mi_cpl    (i) = q2m(i)
             tsfci_cpl   (i) = tsfc(i)
-!           tsfci_cpl   (i) = tsfc_ocn(i)
+!           tsfci_cpl   (i) = tsfc_wat(i)
             psurfi_cpl  (i) = pgr(i)
           enddo
 

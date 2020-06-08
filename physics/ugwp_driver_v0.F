@@ -8,6 +8,7 @@
        use machine,      only: kind_phys
        real(kind=kind_phys),parameter :: pgwd  = 1._kind_phys
        real(kind=kind_phys),parameter :: pgwd4 = 1._kind_phys
+       logical,parameter              :: debugprint = .false.
        end module sso_coorde
 !
 !
@@ -33,7 +34,7 @@
        use physcons,         only : con_cp, con_g, con_rd, con_rv
 
        use ugwp_wmsdis_init, only : tamp_mpa, ilaunch
-       use sso_coorde,       only : pgwd, pgwd4
+       use sso_coorde,       only : pgwd, pgwd4, debugprint
        implicit none
 !input
 
@@ -91,7 +92,7 @@
 !
 ! switches for GW-effects: pogw=1 (OGWs)  pngw=1 (NGWs) pked=1 (eddy mixing)
 !
-       if (me == master .and. kdt < 2) then
+       if (me == master .and. kdt < 2 .and. debugprint) then
          print *
          write(6,*) 'FV3GFS execute ugwp_driver_v0 '
 !        write(6,*) 'FV3GFS execute ugwp_driver_v0 nmtvr=', nmtvr
@@ -120,7 +121,7 @@
      &                 zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,
      &                 du3dt_mtb, du3dt_ogw, du3dt_tms)
 !
-         if (me == master .and. kdt < 2) then
+         if (me == master .and. kdt < 2 .and. debugprint) then
            print *
            write(6,*) 'FV3GFS finished gwdps_v0 in ugwp_driver_v0 '
            print *
@@ -192,7 +193,7 @@
      &                          gw_dudt, gw_dvdt, gw_dTdt, gw_kdis,
      &                          tau_ngw, me, master, kdt)
 
-         if (me == master .and. kdt < 2) then
+         if (me == master .and. kdt < 2 .and. debugprint) then
            print *
            write(6,*)'FV3GFS finished fv3_ugwp_v0 in ugwp_driver_v0 '
            write(6,*) ' non-stationary GWs with GMAO/MERRA GW-forcing '
@@ -263,7 +264,20 @@
 !=====================================================================
 !>\ingroup cires_ugwp_run
 !> @{
-!!<b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to degraded forecast scores of simulations with revised schemes for subgrid-scale orography effects in FV3GFS, EMC reinstalled the original gwdps-code with updated efficiency factors for the mountain blocking and OGW drag. The GFS OGW is described in the separate section (\ref GFS_GWDPS) and its “call” moved into UGWP-driver subroutine. This combination of NGW and OGW schemes was tested in the FV3GFS-L127 medium-range forecasts (15-30 days) for C96, C192, C384 and C768 resolutions and work in progress to introduce the optimal choice for the scale-aware representations of the efficiency factors that will reflect the better simulations of GW activity by FV3 dynamical core at higher horizontal resolutions. With the MERRA-2 VMF function for NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme (\ref GFS_GWDPS), FV3GFS simulations can successfully forecast the recent major mid-winter sudden stratospheric warming (SSW) events of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset; Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year (2015-2018) FV3GFS simulations with UGWP-v0 also produce the equatorial QBO-like oscillations in the zonal wind and temperature anomalies.
+!! <b>Note for the sub-grid scale orography scheme in UGWP-v0:</b> Due to degraded forecast
+!! scores of simulations with revised schemes for subgrid-scale orography effects in FV3GFS,
+!! EMC reinstalled the original gwdps-code with updated efficiency factors for the mountain
+!! blocking and OGW drag. The GFS OGW is described in the separate section (\ref GFS_GWDPS)
+!! and its "call" moved into UGWP-driver subroutine. This combination of NGW and OGW schemes
+!! was tested in the FV3GFS-L127 medium-range forecasts (15-30 days) for C96, C192, C384 and
+!! C768 resolutions and work in progress to introduce the optimal choice for the scale-aware
+!! representations of the efficiency factors that will reflect the better simulations of GW
+!! activity by FV3 dynamical core at higher horizontal resolutions. With the MERRA-2 VMF
+!! function for NGWs (\ref slat_geos5_tamp) and operational OGW drag scheme (\ref GFS_GWDPS),
+!! FV3GFS simulations can successfully forecast the recent major mid-winter sudden stratospheric
+!! warming (SSW) events of 2018-02-12 and 2018-12-31 (10-14 days before the SSW onset;
+!! Yudin et al. 2019 \cite yudin_et_al_2019). The first multi-year (2015-2018) FV3GFS simulations
+!! with UGWP-v0 also produce the equatorial QBO-like oscillations in the zonal wind and temperature anomalies.
 !!
       SUBROUTINE GWDPS_V0(IM,  km,    imx, do_tofd,
      &    Pdvdt, Pdudt, Pdtdt, Pkdis, U1,V1,T1,Q1,KPBL,
@@ -297,7 +311,7 @@
      &,                         n_tofd, ze_tofd, ztop_tofd
 
       use cires_ugwp_module, only : kxw,  max_kdis, max_axyz
-      use sso_coorde,        only : pgwd, pgwd4
+      use sso_coorde,        only : pgwd, pgwd4, debugprint
 !----------------------------------------
       implicit none
       character(len=8)    :: strsolver='PSS-1986'  ! current operational solver or  'WAM-2017'
@@ -439,7 +453,7 @@
 
       kxridge = float(IMX)/arad * cdmbgwd(2)
 
-      if (me == master .and. kdt == 1) then
+      if (me == master .and. kdt == 1 .and. debugprint) then
         print *, ' gwdps_v0 kxridge ', kxridge
         print *, ' gwdps_v0 scale2 ', cdmbgwd(2)
         print *, ' gwdps_v0 IMX ', imx
@@ -521,7 +535,7 @@
         endif
       enddo
 
-      IF (npt == 0) then
+      IF (npt == 0 .and. debugprint) then
 !         print *,  'oro-npt = 0 elvmax ', maxval(elvmaxd), hminmt
 !         print *,  'oro-npt = 0 hprime ', maxval(hprime), hpmin
         RETURN      ! No gwd/mb calculation done
@@ -1060,7 +1074,7 @@
 ! ---------------------------
       IF( do_tofd ) then
         axtms(:,:) = 0.0 ; aytms(:,:) = 0.0
-        if ( kdt == 1 .and. me == 0) then
+        if ( kdt == 1 .and. me == 0 .and. debugprint) then
           print *, 'VAY do_tofd  from surface to ', ztop_tofd
         endif
         DO I = 1,npt
@@ -1164,7 +1178,7 @@
 
 
 !============ debug ------------------------------------------------
-       if (kdt <= 2 .and. me == 0) then
+       if (kdt <= 2 .and. me == 0 .and. debugprint) then
         print *, 'vgw-oro done gwdps_v0 in ugwp-v0 step-proc ', kdt, me
 !
         print *, maxval(pdudt)*86400.,  minval(pdudt)*86400, 'vgw_axoro'
@@ -1286,6 +1300,8 @@
      &,                            zci,     zdci,    zci4, zci3, zci2
      &,                            zaz_fct, zcosang, zsinang
      &,                            nwav,    nazd,    zcimin, zcimax
+
+      use sso_coorde,       only : debugprint
 !
       implicit none
 !23456
@@ -1411,7 +1427,7 @@
 !        rcpd     = 1.0/(grav/cpd)     ! 1/[g/cp]
 !        grav2cpd = grav*grav/cpd      ! g*(g/cp)= g^2/cp
 
-        if (kdt ==1 .and. mpi_id == master) then
+        if (kdt ==1 .and. mpi_id == master .and. debugprint) then
           print *,  maxval(tm1), minval(tm1), 'vgw: temp-res '
           print *,  'ugwp-v0: zcimin=' , zcimin
           print *,  'ugwp-v0: zcimax=' , zcimax 
@@ -1839,7 +1855,7 @@
 !
 !--------------------------------------------------------------------------- 
 !
-       if (kdt == 1 .and. mpi_id == master) then
+       if (kdt == 1 .and. mpi_id == master .and. debugprint) then
          print *, 'vgw done  '
 !
          print *, maxval(pdudt)*86400.,  minval(pdudt)*86400, 'vgw ax'
@@ -1972,7 +1988,7 @@
 ! adjust PT-profile to bn2(k) = bnv2min	-- neutral atmosphere
 !  adapt "pdtdt = (Ptadj-Ptdyn)/Ptmap" 
 !
-             print *,' UGWP-V0 unstab PT(z) via gwdTdt ', bn2(k), k
+!            print *,' UGWP-V0 unstab PT(z) via gwdTdt ', bn2(k), k
 
              rineg = bn2(k)/shr2(k)
              bn2(k) = max(bn2(k), bnv2min)

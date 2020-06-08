@@ -87,7 +87,7 @@
 !! the GWD scheme has the same physical basis as in Alpert (1987) with the addition
 !! of enhancement factors for the amplitude, G, and mountain shape details
 !! in G(Fr) to account for effects from the mountain blocking.  A factor,
-!! E m’, is an enhancement factor on the stress in the Alpert '87 scheme.
+!! E m', is an enhancement factor on the stress in the Alpert '87 scheme.
 !!  The E ranges from no enhancement to an upper limit of 3, E=E(OA)[1-3],
 !!  and is a function of OA, the Orographic Asymmetry defined in Kim and Arakawa (1995) 
 !! \cite kim_and_arakawa_1995 as
@@ -103,9 +103,9 @@
 !! \; (x_{j} \; - \; \bar{x} )^2}{N_{x}} } 
 !!\f]
 !! where \f$N_{x}\f$ is the number of grid intervals for the large scale domain being
-!! considered. So the term, E(OA)m’/  \f$ \Delta X \f$ in Kim's scheme represents
-!! a multiplier on G shown in Alpert's eq (1), where m’ is the number of mountains
-!! in a sub-grid scale box. Kim increased the complexity of m’ making it a
+!! considered. So the term, E(OA)m'/  \f$ \Delta X \f$ in Kim's scheme represents
+!! a multiplier on G shown in Alpert's eq (1), where m' is the number of mountains
+!! in a sub-grid scale box. Kim increased the complexity of m' making it a
 !! function of the fractional area of the sub-grid mountain and the asymmetry
 !! and convexity statistics which are found from running a gravity wave
 !!  model for a large number of cases:
