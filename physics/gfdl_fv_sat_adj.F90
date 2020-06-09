@@ -269,7 +269,7 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
     real(kind=kind_dyn), intent(in)    :: hs(isd:ied, jsd:jed)
     real(kind=kind_dyn), intent(in)    :: peln(is:ie, 1:km+1, js:je)
     ! For hydrostatic build, kmdelz=1, otherwise kmdelz=km (see fv_arrays.F90)
-    real(kind=kind_dyn), intent(in)    :: delz(isd:ied, jsd:jed, 1:kmdelz)
+    real(kind=kind_dyn), intent(in)    :: delz(is:ie, js:je, 1:kmdelz)
     real(kind=kind_dyn), intent(in)    :: delp(isd:ied, jsd:jed, 1:km)
     real(kind=kind_dyn), intent(inout) :: pt(isd:ied, jsd:jed, 1:km)
     real(kind=kind_dyn), intent(inout) :: pkz(is:ie, js:je, 1:km)
@@ -342,7 +342,7 @@ subroutine fv_sat_adj_run(mdt, zvir, is, ie, isd, ied, kmp, km, kmdelz, js, je, 
 #endif
                             ql(isd,jsd,k), qi(isd,jsd,k),                                   &
                             qr(isd,jsd,k), qs(isd,jsd,k), qg(isd,jsd,k),                    &
-                            hs, dpln, delz(isd:,jsd:,kdelz), pt(isd,jsd,k), delp(isd,jsd,k),&
+                            hs, dpln, delz(is:,js:,kdelz), pt(isd,jsd,k), delp(isd,jsd,k),&
                             q_con(isd:,jsd:,k), cappa(isd:,jsd:,k), area, dtdt(is,js,k),    &
                             out_dt, last_step, do_qa, qa(isd,jsd,k))
        if ( .not. hydrostatic  ) then
@@ -402,8 +402,8 @@ subroutine fv_sat_adj_work(mdt, zvir, is, ie, js, je, ng, hydrostatic, consv_te,
     integer, intent (in) :: is, ie, js, je, ng
     logical, intent (in) :: hydrostatic, consv_te, out_dt, last_step, do_qa
     real(kind=kind_dyn), intent (in) :: zvir, mdt ! remapping time step
-    real(kind=kind_dyn), intent (in), dimension (is - ng:ie + ng, js - ng:je + ng) :: dp, delz, hs
-    real(kind=kind_dyn), intent (in), dimension (is:ie, js:je) :: dpln
+    real(kind=kind_dyn), intent (in), dimension (is - ng:ie + ng, js - ng:je + ng) :: dp,  hs
+    real(kind=kind_dyn), intent (in), dimension (is:ie, js:je) :: dpln, delz
     real(kind=kind_dyn), intent (inout), dimension (is - ng:ie + ng, js - ng:je + ng) :: pt
 #ifdef MULTI_GASES
     real(kind=kind_dyn), intent (inout), dimension (is - ng:ie + ng, js - ng:je + ng, 1:1, 1:num_gas) :: qvi
