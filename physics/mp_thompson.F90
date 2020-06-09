@@ -320,24 +320,11 @@ module mp_thompson
 
          ! Calculate initial cloud effective radii if requested
          if (present(re_cloud) .and. present(re_ice) .and. present(re_snow)) then
-           do i = 1, ncol
-             do k = 1, nlev
-               re_cloud(i,k) = 2.49E-6
-               re_ice(i,k)   = 4.99E-6
-               re_snow(i,k)  = 9.99E-6
-             end do
-           end do
+           ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
            do i = 1, ncol
              call calc_effectRad (tgrs(i,:), prsl(i,:), qv_mp(i,:), qc_mp(i,:),     &
                                   nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:),   &
                                   re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, nlev)
-           end do
-           do i = 1, ncol
-             do k = 1, nlev
-               re_cloud(i,k) = MAX(2.49E-6, MIN(re_cloud(i,k), 50.E-6))
-               re_ice(i,k)   = MAX(4.99E-6, MIN(re_ice(i,k), 125.E-6))
-               re_snow(i,k)  = MAX(9.99E-6, MIN(re_snow(i,k), 999.E-6))
-             end do
            end do
            !! Convert to micron: required for bit-for-bit identical restarts;
            !! otherwise entering mp_thompson_init and converting mu to m and

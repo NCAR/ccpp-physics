@@ -5246,7 +5246,7 @@ MODULE module_mp_thompson
       INTEGER, INTENT(IN):: kts, kte
       REAL, DIMENSION(kts:kte), INTENT(IN)::                            &
      &                    t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d
-      REAL, DIMENSION(kts:kte), INTENT(INOUT):: re_qc1d, re_qi1d, re_qs1d
+      REAL, DIMENSION(kts:kte), INTENT(OUT):: re_qc1d, re_qi1d, re_qs1d
 !..Local variables
       INTEGER:: k
       REAL, DIMENSION(kts:kte):: rho, rc, nc, ri, ni, rs
@@ -5262,6 +5262,30 @@ MODULE module_mp_thompson
       has_qi = .false.
       has_qs = .false.
 
+! DH* 2020-06-08 Moved the initial values and bounds from
+! the calling routines into calc_effectRad (to prevent
+! multiple definitions that may be inconsistent). The
+! initial values and bounds from the calling routines were
+!
+!    re_cloud(i,k) = MAX(2.49, MIN(re_cloud(i,k)*1.e6, 50.))
+!    re_ice(i,k)   = MAX(4.99, MIN(re_ice(i,k)*1.e6, 125.))
+!    re_snow(i,k)  = MAX(9.99, MIN(re_snow(i,k)*1.e6, 999.))
+!
+! independent of the version of Thompson MP. These values
+! are consistent with the WRFv3.8.1 settings, but inconsistent
+! with the WRFv4+ settings. In order to apply the same bounds
+! as before this change, use the WRF v3.8.1 settings throughout.
+#if 1
+!ifdef WRF381
+      re_qc1d(:) = 2.49E-6
+      re_qi1d(:) = 4.99E-6
+      re_qs1d(:) = 9.99E-6
+#else
+      re_qc1d(:) = 2.49E-6
+      re_qi1d(:) = 2.49E-6
+      re_qs1d(:) = 4.99E-6
+#endif
+
       do k = kts, kte
          rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
          rc(k) = MAX(R1, qc1d(k)*rho(k))
@@ -5270,7 +5294,8 @@ MODULE module_mp_thompson
 #else
          ! DH* 2020-06-05 is using 2.0 instead of R2
          ! a bug in the WRFv4.0+ version of Thompson?
-         ! For ni(k) a few lines below, it is still R2
+         ! For ni(k) a few lines below, it is still R2.
+         ! Note that R2 is defined as R2 = 1.E-6
          nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
 #endif
          if (.NOT. is_aerosol_aware) nc(k) = Nt_c
@@ -5284,9 +5309,6 @@ MODULE module_mp_thompson
 
       if (has_qc) then
       do k = kts, kte
-#ifndef WRF381
-         re_qc1d(k) = 2.49E-6
-#endif
          if (rc(k).le.R1 .or. nc(k).le.R2) CYCLE
          if (nc(k).lt.100) then
             inu_c = 15
@@ -5302,12 +5324,10 @@ MODULE module_mp_thompson
 
       if (has_qi) then
       do k = kts, kte
-#ifndef WRF381
-         re_qi1d(k) = 2.49E-6
-#endif
          if (ri(k).le.R1 .or. ni(k).le.R2) CYCLE
          lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
-#ifdef WRF381
+#if 1
+!ifdef WRF381
          re_qi1d(k) = MAX(5.01E-6, MIN(SNGL(0.5D0 * DBLE(3.+mu_i)/lami), 125.E-6))
 #else
          re_qi1d(k) = MAX(2.51E-6, MIN(SNGL(0.5D0 * DBLE(3.+mu_i)/lami), 125.E-6))
@@ -5317,9 +5337,6 @@ MODULE module_mp_thompson
 
       if (has_qs) then
       do k = kts, kte
-#ifndef WRF381
-         re_qs1d(k) = 4.99E-6
-#endif
          if (rs(k).le.R1) CYCLE
          tc0 = MIN(-0.1, t1d(k)-273.15)
          smob = rs(k)*oams
@@ -5354,7 +5371,8 @@ MODULE module_mp_thompson
      &        + sb(7)*tc0*tc0*cse(1) + sb(8)*tc0*cse(1)*cse(1) &
      &        + sb(9)*tc0*tc0*tc0 + sb(10)*cse(1)*cse(1)*cse(1)
          smoc = a_ * smo2**b_
-#ifdef WRF381
+#if 1
+!ifdef WRF381
          re_qs1d(k) = MAX(10.E-6, MIN(0.5*(smoc/smob), 999.E-6))
 #else
          re_qs1d(k) = MAX(5.01E-6, MIN(0.5*(smoc/smob), 999.E-6))
