@@ -33,7 +33,7 @@ contains
   subroutine GFS_rrtmgp_lw_post_run (Model, Grid, Radtend, Coupling, Diag,  Statein, im,   &
        p_lev, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky,&
        raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw,                             &
-       flxprf_lw, hlwc, hlw0, errmsg, errflg)
+       flxprf_lw, hlw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -77,8 +77,6 @@ contains
          Radtend              ! Fortran DDT: FV3-GFS radiation tendencies 
     type(GFS_diag_type), intent(inout) :: &
          Diag                 ! Fortran DDT: FV3-GFS diagnotics data 
-    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs), intent(inout)  :: &
-         hlwc                 ! Longwave all-sky heating-rate (K/sec)
     ! Outputs (optional)
     type(proflw_type), dimension(size(Grid%xlon,1), Model%levs+1), optional, intent(inout) :: &
          flxprf_lw            ! 2D radiative fluxes, components:
@@ -92,6 +90,7 @@ contains
     integer :: i, j, k, iSFC, iTOA, itop, ibtc
     logical :: l_fluxeslw2d, top_at_1
     real(kind_phys) :: tem0d, tem1, tem2
+    real(kind_phys),dimension(size(Grid%xlon,1), Model%levs) :: hlwc
 
     ! Initialize CCPP error handling variables
     errmsg = ''

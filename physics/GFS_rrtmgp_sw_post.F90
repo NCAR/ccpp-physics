@@ -30,7 +30,7 @@ contains
        nCol, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, &
        sw_gas_props, nday, idxday, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,     &
        fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota, mtopa, cld_frac, cldtausw, flxprf_sw,&
-       hswc, hsw0, errmsg, errflg)
+       hsw0, errmsg, errflg)
 
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -78,8 +78,6 @@ contains
          cldtausw             ! approx .55mu band layer cloud optical depth  
 
     ! Outputs (mandatory)
-    real(kind_phys),dimension(nCol, Model%levs), intent(inout) :: &
-         hswc                 ! All-sky heating rate (K/s)
     character(len=*), intent(out) :: &
          errmsg
     integer, intent(out) :: &
@@ -108,7 +106,7 @@ contains
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys), dimension(nDay, Model%levs) :: thetaTendClrSky, thetaTendAllSky
     logical :: l_fluxessw2d, top_at_1, l_sfcFluxessw1D
-
+    real(kind_phys),dimension(nCol, Model%levs) :: hswc            
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
