@@ -5295,7 +5295,9 @@ MODULE module_mp_thompson
          ! DH* 2020-06-05 is using 2.0 instead of R2
          ! a bug in the WRFv4.0+ version of Thompson?
          ! For ni(k) a few lines below, it is still R2.
-         ! Note that R2 is defined as R2 = 1.E-6
+         ! Note that R2 is defined as R2 = 1.E-6, and is
+         ! used in other parts of Thompson MP for ni/nr
+         ! calculations (but not for nc calculations)
          nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
 #endif
          if (.NOT. is_aerosol_aware) nc(k) = Nt_c
