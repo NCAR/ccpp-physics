@@ -459,7 +459,7 @@ CONTAINS
 !> @{
   SUBROUTINE  mym_initialize (                                & 
        &            kts,kte,                                  &
-       &            dz, zw,                                   &
+       &            dz, dx, zw,                               &
        &            u, v, thl, qw,                            &
 !       &            ust, rmo, pmz, phh, flt, flq,             &
        &            zi, theta, sh,                            &
@@ -476,7 +476,7 @@ CONTAINS
     INTEGER, INTENT(IN)   :: bl_mynn_mixlength,bl_mynn_edmf
     LOGICAL, INTENT(IN)   :: INITIALIZE_QKE
 !    REAL, INTENT(IN)   :: ust, rmo, pmz, phh, flt, flq
-    REAL, INTENT(IN)   :: ust, rmo, Psig_bl
+    REAL, INTENT(IN)   :: ust, rmo, Psig_bl, dx
     REAL, DIMENSION(kts:kte), INTENT(in) :: dz
     REAL, DIMENSION(kts:kte+1), INTENT(in) :: zw
     REAL, DIMENSION(kts:kte), INTENT(in) :: u,v,thl,qw,cldfra_bl1D,&
@@ -546,7 +546,7 @@ CONTAINS
 !> - call mym_length() to calculate the master length scale.
        CALL mym_length (                     &
             &            kts,kte,            &
-            &            dz, zw,             &
+            &            dz, dx, zw,         &
             &            rmo, flt, flq,      &
             &            vt, vq,             &
             &            u, v, qke,          &
@@ -791,7 +791,7 @@ CONTAINS
 !! This subroutine calculates the mixing lengths.
   SUBROUTINE  mym_length (                     & 
     &            kts,kte,                      &
-    &            dz, zw,                       &
+    &            dz, dx, zw,                   &
     &            rmo, flt, flq,                &
     &            vt, vq,                       &
     &            u1, v1, qke,                  &
@@ -813,7 +813,7 @@ CONTAINS
     INTEGER, INTENT(IN)   :: bl_mynn_mixlength,bl_mynn_edmf
     REAL, DIMENSION(kts:kte), INTENT(in)   :: dz
     REAL, DIMENSION(kts:kte+1), INTENT(in) :: zw
-    REAL, INTENT(in) :: rmo,flt,flq,Psig_bl
+    REAL, INTENT(in) :: rmo,flt,flq,Psig_bl,dx
     REAL, DIMENSION(kts:kte), INTENT(IN)   :: u1,v1,qke,vt,vq,cldfra_bl1D,&
                                           edmf_w1,edmf_a1,edmf_qc1
     REAL, DIMENSION(kts:kte), INTENT(out)  :: qkw, el
@@ -1042,7 +1042,7 @@ CONTAINS
         Ugrid  = sqrt(u1(kts)**2 + v1(kts)**2)
         cns  = 3.5 * (1.0 - MIN(MAX(Ugrid - Uonset, 0.0)/10.0, 1.0))
         alp1 = 0.23
-        alp2 = 0.30
+        alp2 = 0.30 + 0.3*MIN(MAX((dx - 3000.)/10000., 0.0), 1.0)
         alp3 = 2.0
         alp4 = 20.  !10.
         alp5 = alp2 !like alp2, but for free atmosphere
@@ -1543,7 +1543,7 @@ CONTAINS
   SUBROUTINE  mym_turbulence (                                &
     &            kts,kte,                                     &
     &            levflag,                                     &
-    &            dz, zw,                                      &
+    &            dz, dx, zw,                                  &
     &            u, v, thl, ql, qw,                           &
     &            qke, tsq, qsq, cov,                          &
     &            vt, vq,                                      &
@@ -1571,7 +1571,7 @@ CONTAINS
     INTEGER, INTENT(IN)   :: levflag,bl_mynn_mixlength,bl_mynn_edmf
     REAL, DIMENSION(kts:kte), INTENT(in) :: dz
     REAL, DIMENSION(kts:kte+1), INTENT(in) :: zw
-    REAL, INTENT(in) :: rmo,flt,flq,Psig_bl,Psig_shcu
+    REAL, INTENT(in) :: rmo,flt,flq,Psig_bl,Psig_shcu,dx
     REAL, DIMENSION(kts:kte), INTENT(in) :: u,v,thl,qw,& 
          &ql,vt,vq,qke,tsq,qsq,cov,cldfra_bl1D,edmf_w1,edmf_a1,edmf_qc1,&
          &TKEprodTD
@@ -1632,7 +1632,7 @@ CONTAINS
 !
     CALL mym_length (                           &
     &            kts,kte,                       &
-    &            dz, zw,                        &
+    &            dz, dx, zw,                    &
     &            rmo, flt, flq,                 &
     &            vt, vq,                        &
     &            u, v, qke,                     &
@@ -1893,14 +1893,6 @@ CONTAINS
           gamq = 0.0
           gamv = 0.0
        END IF
-!
-!      Add stochastic perturbation of prandtl number limit
-       if (spp_pbl==1) then
-          prlimit = MIN(MAX(1.,2.5 + 5.0*rstoch_col(k)), 10.)
-          IF(sm(k) > sh(k)*Prlimit) THEN
-             sm(k) = sh(k)*Prlimit
-          ENDIF
-       ENDIF
 !
 !      Add min background stability function (diffusivity) within model levels
 !      with active plumes and low cloud fractions.
@@ -2701,11 +2693,11 @@ CONTAINS
            !CLOUD WATER AND ICE
            IF (q1k < 0.) THEN        !unstaurated
               ql_water = sgm(k)*EXP(1.2*q1k-1)
-!              ql_ice   = sgm(k)*EXP(0.9*q1k-2.6)
+              ql_ice   = sgm(k)*EXP(1.2*q1k-1.)
               !Reduce ice mixing ratios in the upper troposphere
-              low_weight = MIN(MAX(p(k)-40000.0, 0.0),40000.0)/40000.0
-              ql_ice   = low_weight * sgm(k)*EXP(1.1*q1k-1.6) &  !low-lev
-                  + (1.-low_weight) * sgm(k)*EXP(1.1*q1k-2.8)!upper-lev
+!              low_weight = MIN(MAX(p(k)-40000.0, 0.0),40000.0)/40000.0
+!              ql_ice   = low_weight * sgm(k)*EXP(1.1*q1k-1.6) &  !low-lev
+!                  + (1.-low_weight) * sgm(k)*EXP(1.1*q1k-2.8)!upper-lev
            ELSE IF (q1k > 2.) THEN   !supersaturated
               ql_water = sgm(k)*q1k
               ql_ice = MIN(80.*qv(k),0.1)*sgm(k)*q1k
@@ -2889,7 +2881,7 @@ CONTAINS
 !! grav_settling = 0 otherwise
 ! thl - liquid water potential temperature
 ! qw - total water
-! dfm,dfh,dfq - as above
+! dfm,dfh,dfq - diffusivities i.e., dfh(k) = elq*sh(k) / dzk
 ! flt - surface flux of thl
 ! flq - surface flux of qw
 
@@ -2915,7 +2907,7 @@ CONTAINS
     REAL, DIMENSION(kts:kte) :: dtz,vt,vq,dfhc,dfmc !Kh for clouds (Pr < 2)
     REAL, DIMENSION(kts:kte) :: sqv2,sqc2,sqi2,sqw2,qni2,qnc2, & !AFTER MIXING
                                 qnwfa2,qnifa2,ozone2
-    REAL, DIMENSION(kts:kte) :: zfac,plumeKh
+    REAL, DIMENSION(kts:kte) :: zfac,plumeKh,rhoinv
     REAL, DIMENSION(kts:kte) :: a,b,c,d,x
     REAL, DIMENSION(kts:kte+1) :: rhoz, & !rho on model interface
           &         khdz, kmdz
@@ -2940,28 +2932,31 @@ CONTAINS
     ENDIF
 
     !Prepare "constants" for diffusion equation.
-    !khdz = rho*Kh/dz
-    dtz(kts)=delt/dz(kts)
-    kh=dfh(kts)*dz(kts)
-    km=dfm(kts)*dz(kts)
-    rhoz(kts)=rho(kts)
-    khdz(kts)=rhoz(kts)*kh/dz(kts)
-    kmdz(kts)=rhoz(kts)*km/dz(kts)
+    !khdz = rho*Kh/dz = rho*dfh
+    dtz(kts)   =delt/dz(kts)
+    rhoz(kts)  =rho(kts)
+    rhoinv(kts)=1./rho(kts)
+    khdz(kts)  =rhoz(kts)*dfh(kts)
+    kmdz(kts)  =rhoz(kts)*dfm(kts)
     DO k=kts+1,kte
-       dtz(k)=delt/dz(k)
-       rhoz(k)=(rho(k)*dz(k-1) + rho(k-1)*dz(k))/(dz(k-1)+dz(k))
-
-       dzk = 0.5  *( dz(k)+dz(k-1) )
-       kh  = dfh(k)*dzk
-       km  = dfm(k)*dzk
-       khdz(k)= rhoz(k)*kh/dzk
-       kmdz(k)= rhoz(k)*km/dzk
+       dtz(k)   =delt/dz(k)
+       rhoz(k)  =(rho(k)*dz(k-1) + rho(k-1)*dz(k))/(dz(k-1)+dz(k))
+       rhoz(k)  =  MAX(rhoz(k),1E-4)
+       rhoinv(k)=1./MAX(rho(k),1E-4)
+       dzk      = 0.5  *( dz(k)+dz(k-1) )
+       khdz(k)  = rhoz(k)*dfh(k)
+       kmdz(k)  = rhoz(k)*dfm(k)
     ENDDO
-    rhoz(kte+1)=rho(kte)
-    kh=dfh(kte)*dz(kte)
-    km=dfm(kte)*dz(kte)
-    khdz(kte+1)=rhoz(kte+1)*kh/dz(kte)
-    kmdz(kte+1)=rhoz(kte+1)*km/dz(kte)
+    khdz(kte+1)=rhoz(kte+1)*dfh(kte)
+    kmdz(kte+1)=rhoz(kte+1)*dfm(kte)
+
+    !stability criteria for mf
+    DO k=kts+1,kte-1
+       khdz(k) = MAX(khdz(k),  0.5*rho(k)* s_aw(k))
+       khdz(k) = MAX(khdz(k), -0.5*rho(k)*(s_aw(k)-s_aw(k+1)))
+       kmdz(k) = MAX(kmdz(k),  0.5*rho(k)* s_aw(k))
+       kmdz(k) = MAX(kmdz(k), -0.5*rho(k)*(s_aw(k)-s_aw(k+1)))
+    ENDDO
 
 !!============================================
 !! u
@@ -2969,25 +2964,41 @@ CONTAINS
 
     k=kts
 
-    a(1)=0.
-    b(1)=1. + dtz(k)*(dfm(k+1)+ust**2/wspd) - 0.5*dtz(k)*s_aw(k+1)*onoff
-    c(1)=-dtz(k)*dfm(k+1) - 0.5*dtz(k)*s_aw(k+1)*onoff
-    d(1)=u(k) + dtz(k)*uoce*ust**2/wspd - dtz(k)*s_awu(k+1)*onoff + &
-         sub_u(k)*delt + det_u(k)*delt
+!    a(1)=0.
+!    b(1)=1. + dtz(k)*(dfm(k+1)+ust**2/wspd) - 0.5*dtz(k)*s_aw(k+1)*onoff
+!    c(1)=-dtz(k)*dfm(k+1) - 0.5*dtz(k)*s_aw(k+1)*onoff
+!    d(1)=u(k) + dtz(k)*uoce*ust**2/wspd - dtz(k)*s_awu(k+1)*onoff + &
+!         sub_u(k)*delt + det_u(k)*delt
+!
+!    DO k=kts+1,kte-1
+!       a(k)=   - dtz(k)*dfm(k)            + 0.5*dtz(k)*s_aw(k)*onoff
+!       b(k)=1. + dtz(k)*(dfm(k)+dfm(k+1)) + 0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*onoff
+!       c(k)=   - dtz(k)*dfm(k+1)          - 0.5*dtz(k)*s_aw(k+1)*onoff
+!       d(k)=u(k) + dtz(k)*(s_awu(k)-s_awu(k+1))*onoff + &
+!            sub_u(k)*delt + det_u(k)*delt
+!    ENDDO
 
-!JOE - tend test
-!    a(k)=0.
-!    b(k)=1.+dtz(k)*dfm(k+1)    - 0.5*dtz(k)*s_aw(k+1)*onoff
-!    c(k)=-dtz(k)*dfm(k+1)      - 0.5*dtz(k)*s_aw(k+1)*onoff
-!    d(k)=u(k)*(1.-ust**2/wspd*dtz(k)) + &
-!         dtz(k)*uoce*ust**2/wspd - dtz(k)*s_awu(k+1)*onoff
+!rho-weighted:
+    a(k)=  -dtz(k)*kmdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(kmdz(k+1)+ust**2/wspd)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*onoff
+    c(k)=  -dtz(k)*kmdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)*onoff
+    d(k)=u(k)  + dtz(k)*uoce*ust**2/wspd - dtz(k)*s_awu(k+1)*onoff + &
+       & sub_u(k)*delt + det_u(k)*delt
+
+!!JOE - tend test
+!!    a(k)=0.
+!!    b(k)=1.+dtz(k)*kmdz(k+1)*rhoinv(k)    - 0.5*dtz(k)*s_aw(k+1)*onoff
+!!    c(k)  =-dtz(k)*kmdz(k+1)*rhoinv(k)    - 0.5*dtz(k)*s_aw(k+1)*onoff
+!!    d(k)=u(k)*(1.-ust**2/wspd*dtz(k)) + &
+!!         dtz(k)*uoce*ust**2/wspd - dtz(k)*s_awu(k+1)*onoff
 
     DO k=kts+1,kte-1
-       a(k)=   - dtz(k)*dfm(k)            + 0.5*dtz(k)*s_aw(k)*onoff
-       b(k)=1. + dtz(k)*(dfm(k)+dfm(k+1)) + 0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*onoff
-       c(k)=   - dtz(k)*dfm(k+1)          - 0.5*dtz(k)*s_aw(k+1)*onoff
+       a(k)=  -dtz(k)*kmdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)*onoff
+       b(k)=1.+dtz(k)*(kmdz(k)+kmdz(k+1))*rhoinv(k) + &
+           &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*onoff
+       c(k)=  -dtz(k)*kmdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*onoff
        d(k)=u(k) + dtz(k)*(s_awu(k)-s_awu(k+1))*onoff + &
-            sub_u(k)*delt + det_u(k)*delt
+           &    sub_u(k)*delt + det_u(k)*delt
     ENDDO
 
 !! no flux at the top
@@ -3009,7 +3020,7 @@ CONTAINS
     d(kte)=u(kte)
 
 !    CALL tridiag(kte,a,b,c,d)
-    CALL tridiag2(kte,a,b,c,d,x)
+    CALL tridiag3(kte,a,b,c,d,x)
 
     DO k=kts,kte
 !       du(k)=(d(k-kts+1)-u(k))/delt
@@ -3022,26 +3033,42 @@ CONTAINS
 
     k=kts
 
-    a(1)=0.
-    b(1)=1. + dtz(k)*(dfm(k+1)+ust**2/wspd) - 0.5*dtz(k)*s_aw(k+1)*onoff
-    c(1)=   - dtz(k)*dfm(k+1)               - 0.5*dtz(k)*s_aw(k+1)*onoff
+!    a(1)=0.
+!    b(1)=1. + dtz(k)*(dfm(k+1)+ust**2/wspd) - 0.5*dtz(k)*s_aw(k+1)*onoff
+!    c(1)=   - dtz(k)*dfm(k+1)               - 0.5*dtz(k)*s_aw(k+1)*onoff
 !!    d(1)=v(k)
-    d(1)=v(k) + dtz(k)*voce*ust**2/wspd - dtz(k)*s_awv(k+1)*onoff + &
-          sub_v(k)*delt + det_v(k)*delt
+!    d(1)=v(k) + dtz(k)*voce*ust**2/wspd - dtz(k)*s_awv(k+1)*onoff + &
+!          sub_v(k)*delt + det_v(k)*delt
+!
+!    DO k=kts+1,kte-1
+!       a(k)=   - dtz(k)*dfm(k)            + 0.5*dtz(k)*s_aw(k)*onoff
+!       b(k)=1. + dtz(k)*(dfm(k)+dfm(k+1)) + 0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*onoff
+!       c(k)=   - dtz(k)*dfm(k+1)          - 0.5*dtz(k)*s_aw(k+1)*onoff
+!       d(k)=v(k) + dtz(k)*(s_awv(k)-s_awv(k+1))*onoff + &
+!            sub_v(k)*delt + det_v(k)*delt
+!    ENDDO
 
-!JOE - tend test
-!    a(k)=0.
-!    b(k)=1.+dtz(k)*dfm(k+1)  - 0.5*dtz(k)*s_aw(k+1)*onoff
-!    c(k)=  -dtz(k)*dfm(k+1)  - 0.5*dtz(k)*s_aw(k+1)*onoff
-!    d(k)=v(k)*(1.-ust**2/wspd*dtz(k)) + &
-!         dtz(k)*voce*ust**2/wspd - dtz(k)*s_awv(k+1)*onoff
+!rho-weighted:
+    a(k)=  -dtz(k)*kmdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(kmdz(k+1)+ust**2/wspd)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*onoff
+    c(k)=  -dtz(k)*kmdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)*onoff
+    d(k)=v(k)  + dtz(k)*voce*ust**2/wspd - dtz(k)*s_awv(k+1)*onoff + &
+       & sub_v(k)*delt + det_v(k)*delt
+
+!!JOE - tend test
+!!    a(k)=0.
+!!    b(k)=1.+dtz(k)*kmdz(k+1)*rhoinv(k)  - 0.5*dtz(k)*s_aw(k+1)*onoff
+!!    c(k)=  -dtz(k)*kmdz(k+1)*rhoinv(k)  - 0.5*dtz(k)*s_aw(k+1)*onoff
+!!    d(k)=v(k)*(1.-ust**2/wspd*dtz(k)) + &
+!!         dtz(k)*voce*ust**2/wspd - dtz(k)*s_awv(k+1)*onoff
 
     DO k=kts+1,kte-1
-       a(k)=   - dtz(k)*dfm(k)            + 0.5*dtz(k)*s_aw(k)*onoff
-       b(k)=1. + dtz(k)*(dfm(k)+dfm(k+1)) + 0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*onoff
-       c(k)=   - dtz(k)*dfm(k+1)          - 0.5*dtz(k)*s_aw(k+1)*onoff
+       a(k)=  -dtz(k)*kmdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)*onoff
+       b(k)=1.+dtz(k)*(kmdz(k)+kmdz(k+1))*rhoinv(k) + &
+           &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*onoff
+       c(k)=  -dtz(k)*kmdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*onoff
        d(k)=v(k) + dtz(k)*(s_awv(k)-s_awv(k+1))*onoff + &
-            sub_v(k)*delt + det_v(k)*delt
+           &    sub_v(k)*delt + det_v(k)*delt
     ENDDO
 
 !! no flux at the top
@@ -3063,7 +3090,7 @@ CONTAINS
     d(kte)=v(kte)
 
 !    CALL tridiag(kte,a,b,c,d)
-    CALL tridiag2(kte,a,b,c,d,x)
+    CALL tridiag3(kte,a,b,c,d,x)
 
     DO k=kts,kte
 !       dv(k)=(d(k-kts+1)-v(k))/delt
@@ -3093,19 +3120,19 @@ CONTAINS
 !    ENDDO
 
 !rho-weighted:                                                                                                           
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k) - 0.5*dtz(k)*s_aw(k+1)
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k)           - 0.5*dtz(k)*s_aw(k+1)
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)
     d(k)=thl(k)  + dtz(k)*flt + tcd(k)*delt - dtz(k)*s_awthl(k+1) + &
        & diss_heat(k)*delt*dheat_opt + sub_thl(k)*delt + det_thl(k)*delt
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
        d(k)=thl(k) + tcd(k)*delt + dtz(k)*(s_awthl(k)-s_awthl(k+1)) + &
-          &         diss_heat(k)*delt*dheat_opt + &
+          &       + diss_heat(k)*delt*dheat_opt + &
           &         sub_thl(k)*delt + det_thl(k)*delt
     ENDDO
 
@@ -3161,16 +3188,16 @@ IF (bl_mynn_mixqt > 0) THEN
 !    ENDDO
 
 !rho-weighted:
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k) - 0.5*dtz(k)*s_aw(k+1)
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k)           - 0.5*dtz(k)*s_aw(k+1)
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)
     d(k)=sqw(k)  + dtz(k)*flq + qcd(k)*delt - dtz(k)*s_awqt(k+1)
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
        d(k)=sqw(k) + qcd(k)*delt + dtz(k)*(s_awqt(k)-s_awqt(k+1))
     ENDDO
 
@@ -3226,17 +3253,17 @@ IF (bl_mynn_mixqt == 0) THEN
 !    ENDDO
 
 !rho-weighted:
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k) - 0.5*dtz(k)*s_aw(k+1)
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k)           - 0.5*dtz(k)*s_aw(k+1)
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)
     d(k)=sqc(k)  + dtz(k)*flqc + qcd(k)*delt - dtz(k)*s_awqc(k+1) + &
        & det_sqc(k)*delt
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
        d(k)=sqc(k) + qcd(k)*delt + dtz(k)*(s_awqc(k)-s_awqc(k+1)) + &
           & det_sqc(k)*delt
     ENDDO
@@ -3283,17 +3310,17 @@ IF (bl_mynn_mixqt == 0) THEN
 !    ENDDO
 
 !rho-weighted:
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k) - 0.5*dtz(k)*s_aw(k+1)
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k)           - 0.5*dtz(k)*s_aw(k+1)
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)
     d(k)=sqv(k)  + dtz(k)*flqv + qcd(k)*delt - dtz(k)*s_awqv(k+1) + &
        & sub_sqv(k)*delt + det_sqv(k)*delt
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)
        d(k)=sqv(k) + qcd(k)*delt + dtz(k)*(s_awqv(k)-s_awqv(k+1)) + &
           & sub_sqv(k)*delt + det_sqv(k)*delt
     ENDDO
@@ -3348,15 +3375,15 @@ IF (bl_mynn_cloudmix > 0 .AND. FLAG_QI) THEN
 !    ENDDO
 
 !rho-weighted:
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k)
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k)
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k)
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)
     d(k)=sqi(k)
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k)
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k)
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k)
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)
        d(k)=sqi(k)
     ENDDO
 
@@ -3398,16 +3425,16 @@ IF (bl_mynn_cloudmix > 0 .AND. FLAG_QNI .AND. &
 
     k=kts
 
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
     d(k)=qni(k)  - dtz(k)*s_awqni(k+1)*nonloc
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*nonloc
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
        d(k)=qni(k) + dtz(k)*(s_awqni(k)-s_awqni(k+1))*nonloc
     ENDDO
 
@@ -3439,16 +3466,16 @@ ENDIF
 
     k=kts
 
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k)           - 0.5*dtz(k)*s_aw(k+1)*nonloc
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)           - 0.5*dtz(k)*s_aw(k+1)*nonloc
     d(k)=qnc(k)  - dtz(k)*s_awqnc(k+1)*nonloc
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*nonloc
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
        d(k)=qnc(k) + dtz(k)*(s_awqnc(k)-s_awqnc(k+1))*nonloc
     ENDDO
 
@@ -3479,17 +3506,17 @@ IF (bl_mynn_cloudmix > 0 .AND. FLAG_QNWFA .AND. &
 
     k=kts
 
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))/rho(k) - &
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))*rhoinv(k) - &
            &    0.5*dtz(k)*s_aw(k+1)*nonloc
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
     d(k)=qnwfa(k)  - dtz(k)*s_awqnwfa(k+1)*nonloc
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
-       b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
+       b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*nonloc
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
        d(k)=qnwfa(k) + dtz(k)*(s_awqnwfa(k)-s_awqnwfa(k+1))*nonloc
     ENDDO
 
@@ -3521,17 +3548,17 @@ IF (bl_mynn_cloudmix > 0 .AND. FLAG_QNIFA .AND. &
 
    k=kts
 
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))/rho(k) - &
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))*rhoinv(k) - &
            &    0.5*dtz(k)*s_aw(k+1)*nonloc
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
     d(k)=qnifa(k)  - dtz(k)*s_awqnifa(k+1)*nonloc
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
-       b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))/rho(k) + &
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)     + 0.5*dtz(k)*s_aw(k)*nonloc
+       b(k)=1.+dtz(k)*(khdz(k) + khdz(k+1))*rhoinv(k) + &
            &    0.5*dtz(k)*(s_aw(k)-s_aw(k+1))*nonloc
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k) - 0.5*dtz(k)*s_aw(k+1)*nonloc
        d(k)=qnifa(k) + dtz(k)*(s_awqnifa(k)-s_awqnifa(k+1))*nonloc
     ENDDO
 
@@ -3562,15 +3589,15 @@ ENDIF
     k=kts
 
 !rho-weighted:
-    a(k)=  -dtz(k)*khdz(k)/rho(k)
-    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))/rho(k)
-    c(k)=  -dtz(k)*khdz(k+1)/rho(k)
+    a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+    b(k)=1.+dtz(k)*(khdz(k+1)+khdz(k))*rhoinv(k)
+    c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)
     d(k)=ozone(k)
 
     DO k=kts+1,kte-1
-       a(k)=  -dtz(k)*khdz(k)/rho(k)
-       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))/rho(k)
-       c(k)=  -dtz(k)*khdz(k+1)/rho(k)
+       a(k)=  -dtz(k)*khdz(k)*rhoinv(k)
+       b(k)=1.+dtz(k)*(khdz(k)+khdz(k+1))*rhoinv(k)
+       c(k)=  -dtz(k)*khdz(k+1)*rhoinv(k)
        d(k)=ozone(k)
     ENDDO
 
@@ -4440,7 +4467,8 @@ ENDIF
 !! within mym_initialize(): mym_level2() and mym_length().
              CALL mym_initialize (             & 
                   &kts,kte,                    &
-                  &dz1, zw, u1, v1, thl, sqv,  &
+                  &dz1, dx(i,j), zw,           &
+                  &u1, v1, thl, sqv,           &
                   &PBLH(i,j), th1, sh,         &
                   &ust(i,j), rmol(i,j),        &
                   &el, Qke1, Tsq1, Qsq1, Cov1, &
@@ -4816,7 +4844,7 @@ ENDIF
 
                 !More strict limits over land to reduce stable-layer mixouts
                 if ((xland(i,j)-1.5).GE.0)THEN ! WATER
-                   radsum=MIN(radsum,120.0)
+                   radsum=MIN(radsum,90.0)
                    bfx0 = max(radsum/rho1(k)/cp,0.)
                 else                           ! LAND
                    radsum=MIN(0.25*radsum,30.0)!practically turn off over land
@@ -4871,7 +4899,7 @@ ENDIF
                &qnc1,qni1,qnwfa1,qnifa1,          &
                &ex1,Vt,Vq,sgm,                    &
                &ust(i,j),flt,flq,flqv,flqc,       &
-               &PBLH(i,j),KPBL(i,j),DX(i,j),           &
+               &PBLH(i,j),KPBL(i,j),DX(i,j),      &
                &xland(i,j),th_sfc,                &
             ! now outputs - tendencies
             ! &,dth1mf,dqv1mf,dqc1mf,du1mf,dv1mf &
@@ -4908,7 +4936,8 @@ ENDIF
 !! to carry out successive claculations.
           CALL mym_turbulence (                  & 
                &kts,kte,levflag,                 &
-               &dz1, zw, u1, v1, thl, sqc, sqw,  &
+               &dz1, DX(i,j), zw,                &
+               &u1, v1, thl, sqc, sqw,           &
                &qke1, tsq1, qsq1, cov1,          &
                &vt, vq,                          &
                &rmol(i,j), flt, flq,             &
@@ -5875,7 +5904,7 @@ ENDIF
           !w-dependency for entrainment a la Tian and Kuang (2016)
           !ENT(k,i) = 0.35/(MIN(MAX(UPW(K-1,I),0.75),1.9)*l)
           wmin = 0.3 + l*0.0005 !* MAX(pblh-ZW(k+1), 0.0)/pblh
-          ENT(k,i) = 0.31/(MIN(MAX(UPW(K-1,I),wmin),1.9)*l)
+          ENT(k,i) = 0.33/(MIN(MAX(UPW(K-1,I),wmin),1.9)*l)
           !Entrainment from Negggers (2015, JAMES)
           !ENT(k,i) = 0.02*l**-0.35 - 0.0009
           !Minimum background entrainment 
