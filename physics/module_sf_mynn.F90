@@ -26,20 +26,22 @@ MODULE module_sf_mynn
 !   roughness lengths (defaults are recommended):
 !
 !   LAND only:
-!   "iz0tlnd" namelist option is used to select the following options:
+!   "iz0tlnd" namelist option is used to select the following momentum options:
 !   (default) =0: Zilitinkevich (1995); Czil now set to 0.085
 !             =1: Czil_new (modified according to Chen & Zhang 2008)
 !             =2: Modified Yang et al (2002, 2008) - generalized for all landuse
 !             =3: constant zt = z0/7.4 (original form; Garratt 1992)
+!             =4: GFS - taken from sfc_diff.f, for comparison/testing
 !
 !   WATER only:
-!   "isftcflx" namelist option is used to select the following options:
+!   "isftcflx" namelist option is used to select the following scalar options:
 !   (default) =0: z0, zt, and zq from the COARE algorithm. Set COARE_OPT (below) to
 !                 3.0 (Fairall et al. 2003, default)
 !                 3.5 (Edson et al 2013) 
 !             =1: z0 from Davis et al (2008), zt & zq from COARE 3.0/3.5
 !             =2: z0 from Davis et al (2008), zt & zq from Garratt (1992)
 !             =3: z0 from Taylor and Yelland (2004), zt and zq from COARE 3.0/3.5
+!             =4: GFS - taken from sfc_diff.f, for comparison/testing
 !
 !   SNOW/ICE only:
 !   Andreas (2002) snow/ice parameterization for thermal and
@@ -78,6 +80,9 @@ MODULE module_sf_mynn
      &                     EP_1   => con_fvirt,           &
      &                     EP_2   => con_eps
 
+!use subroutines from sfc_diff:
+!  USE sfc_diff, only: znot_t_v6, znot_t_v7, znot_m_v6, znot_m_v7
+
 !-------------------------------------------------------------------
   IMPLICIT NONE
 !-------------------------------------------------------------------
@@ -99,6 +104,7 @@ MODULE module_sf_mynn
   REAL, PARAMETER :: onethird = 1./3.
   REAL, PARAMETER :: sqrt3 = 1.7320508075688773
   REAL, PARAMETER :: atan1 = 0.785398163397     !in radians
+  REAL, PARAMETER :: log01=log(0.01), log05=log(0.05), log07=log(0.07)
   REAL, PARAMETER :: SNOWZ0=0.011
   REAL, PARAMETER :: COARE_OPT=3.0  ! 3.0 or 3.5
   !For debugging purposes:
@@ -141,6 +147,9 @@ CONTAINS
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
               ISFFLX,isftcflx,lsm,iz0tlnd,           & !in
+     &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)                                   
+     &        z0pert,ztpert,                         & !intent(in)
+     &        redrag,sfc_z0_type,                    & !intent(in)
               itimestep,iter,                        & !in
                     wet,       dry,       icy,       & !intent(in)
               tskin_ocn, tskin_lnd, tskin_ice,       & !intent(in)
@@ -271,11 +280,18 @@ CONTAINS
       REAL,     INTENT(IN)   ::        SVP1,SVP2,SVP3,SVPT0
       REAL,     INTENT(IN)   ::        EP1,EP2,KARMAN
       REAL,     INTENT(IN)   ::        CP,G,ROVCP,R,XLV !,DX
-!NAMELIST OPTIONS:
+!NAMELIST/CONFIGURATION OPTIONS:
       INTEGER,  INTENT(IN)   ::        ISFFLX, LSM
       INTEGER,  OPTIONAL,  INTENT(IN)   :: ISFTCFLX, IZ0TLND
       INTEGER,  OPTIONAL,  INTENT(IN)   ::     spp_pbl
+      integer, intent(in) :: ivegsrc
+      integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
+      logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
 
+!Input data
+      integer, dimension(ims:ime), intent(in) :: vegtype
+      real,    dimension(ims:ime), intent(in) ::       &
+     &                    sigmaf,shdmax,z0pert,ztpert
 !===================================
 ! 3D VARIABLES
 !===================================
@@ -432,7 +448,11 @@ CONTAINS
              XLAND(ims,j),DX(ims,j),                              &
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
              EP1,EP2,KARMAN,                                      &
-             ISFFLX,isftcflx,iz0tlnd,itimestep,iter,              &
+             ISFFLX,isftcflx,iz0tlnd,                             &
+     &       sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
+     &       z0pert,ztpert,                                       &  !intent(in)
+     &       redrag,sfc_z0_type,                                  &  !intent(in)
+             itimestep,iter,                                      &
                     wet,          dry,          icy,              &  !intent(in)
               tskin_ocn,    tskin_lnd,    tskin_ice,              &  !intent(in)
               tsurf_ocn,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
@@ -479,7 +499,11 @@ CONTAINS
              PSFCPA,PBLH,MAVAIL,XLAND,DX,                         &
              CP,G,ROVCP,R,XLV,SVP1,SVP2,SVP3,SVPT0,               &
              EP1,EP2,KARMAN,                                      &
-             ISFFLX,isftcflx,iz0tlnd,itimestep,iter,              &
+             ISFFLX,isftcflx,iz0tlnd,                             &
+     &       sigmaf,vegtype,shdmax,ivegsrc,                       &  !intent(in)
+     &       z0pert,ztpert,                                       &  !intent(in)
+     &       redrag,sfc_z0_type,                                  &  !intent(in)
+             itimestep,iter,                                      &
                     wet,          dry,          icy,              &  !intent(in)
               tskin_ocn,    tskin_lnd,    tskin_ice,              &  !intent(in)
               tsurf_ocn,    tsurf_lnd,    tsurf_ice,              &  !intent(in)
@@ -529,6 +553,14 @@ CONTAINS
       INTEGER,  INTENT(IN) :: ISFFLX
       INTEGER,  OPTIONAL,  INTENT(IN )   ::     ISFTCFLX, IZ0TLND
       INTEGER,    INTENT(IN)             ::     spp_pbl
+      integer, intent(in) :: ivegsrc
+      integer, intent(in) :: sfc_z0_type ! option for calculating surface roughness length over ocean
+      logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
+
+!Input data
+      integer, dimension(ims:ime), intent(in) :: vegtype
+      real,    dimension(ims:ime), intent(in) ::       &
+     &                    sigmaf,shdmax,z0pert,ztpert
 
 !-----------------------------
 ! 1D ARRAYS
@@ -837,7 +869,7 @@ CONTAINS
             ! Mahrt and Sun low-res correction - modified for water points (halved)
             ! (for 13 km ~ 0.18 m/s; for 3 km == 0 m/s)
             !--------------------------------------------------------
-            VSGD = MIN( 0.16 * (max(dx(i)/5000.-1.,0.))**onethird , 0.25)
+            VSGD = MIN( 0.25 * (max(dx(i)/5000.-1.,0.))**onethird , 0.5)
             WSPD_ocn=SQRT(WSPD(I)*WSPD(I)+WSTAR(I)*WSTAR(I)+vsgd*vsgd)
             WSPD_ocn=MAX(WSPD_ocn,wmin)
             !--------------------------------------------------------
@@ -968,44 +1000,41 @@ CONTAINS
        !--------------------------------------
        ! WATER
        !--------------------------------------
-       ! CALCULATE z0 (znt)
-       !--------------------------------------
-       IF (debug_code >= 1) THEN
-          write(*,*)"=============Input to ZNT over water:"
-          write(*,*)"u*:",UST_ocn(i)," wspd=",WSPD(i)," visc=",visc," za=",ZA(I)
-       ENDIF
-       IF ( PRESENT(ISFTCFLX) ) THEN
-          IF ( ISFTCFLX .EQ. 0 ) THEN
-             IF (COARE_OPT .EQ. 3.0) THEN
-                !COARE 3.0 (MISLEADING SUBROUTINE NAME)
-                CALL charnock_1955(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
-             ELSE
-                !COARE 3.5
-                CALL edson_etal_2013(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
-             ENDIF
-          ELSEIF ( ISFTCFLX .EQ. 1 .OR. ISFTCFLX .EQ. 2 ) THEN
-             CALL davis_etal_2008(ZNT_ocn(i),UST_ocn(i))
-          ELSEIF ( ISFTCFLX .EQ. 3 ) THEN
-             CALL Taylor_Yelland_2001(ZNT_ocn(i),UST_ocn(i),WSPD(i))
-          ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
-             IF (COARE_OPT .EQ. 3.0) THEN
-                !COARE 3.0 (MISLEADING SUBROUTINE NAME)
-                CALL charnock_1955(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
-             ELSE
-                !COARE 3.5
-                CALL edson_etal_2013(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
-             ENDIF
+       if (sfc_z0_type >= 0) then ! Avoid calculation is using wave model
+          ! CALCULATE z0 (znt)
+          !--------------------------------------
+          IF (debug_code >= 1) THEN
+            write(*,*)"=============Input to ZNT over water:"
+            write(*,*)"u*:",UST_ocn(i)," wspd=",WSPD(i)," visc=",visc," za=",ZA(I)
           ENDIF
-       ELSE
-          !DEFAULT TO COARE 3.0/3.5
-          IF (COARE_OPT .EQ. 3.0) THEN
-             !COARE 3.0
-             CALL charnock_1955(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+          IF ( PRESENT(ISFTCFLX) ) THEN
+             IF ( ISFTCFLX .EQ. 0 ) THEN
+                IF (COARE_OPT .EQ. 3.0) THEN
+                   !COARE 3.0 (MISLEADING SUBROUTINE NAME)
+                   CALL charnock_1955(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+                ELSE
+                   !COARE 3.5
+                   CALL edson_etal_2013(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+                ENDIF
+             ELSEIF ( ISFTCFLX .EQ. 1 .OR. ISFTCFLX .EQ. 2 ) THEN
+                CALL davis_etal_2008(ZNT_ocn(i),UST_ocn(i))
+             ELSEIF ( ISFTCFLX .EQ. 3 ) THEN
+                CALL Taylor_Yelland_2001(ZNT_ocn(i),UST_ocn(i),WSPD(i))
+             ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
+                !GFS surface layer scheme
+                CALL GFS_z0_ocn(ZNT_ocn(i),UST_ocn(i),WSPD(i),ZA(I),sfc_z0_type,redrag)
+             ENDIF
           ELSE
-             !COARE 3.5
-             CALL edson_etal_2013(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+             !DEFAULT TO COARE 3.0/3.5
+             IF (COARE_OPT .EQ. 3.0) THEN
+                !COARE 3.0
+                CALL charnock_1955(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+             ELSE
+                !COARE 3.5
+                CALL edson_etal_2013(ZNT_ocn(i),UST_ocn(i),WSPD(i),visc,ZA(I))
+             ENDIF
           ENDIF
-       ENDIF
+       endif !-end wave model check
 
        ! add stochastic perturbation of ZNT
        if (spp_pbl==1) then
@@ -1061,6 +1090,10 @@ CONTAINS
                 CALL fairall_etal_2014(ZT_ocn(i),ZQ_ocn(i),restar,UST_ocn(i),visc,&
                                        rstoch1D(i),spp_pbl)
              ENDIF
+          ELSEIF ( ISFTCFLX .EQ. 4 ) THEN
+             !GFS zt formulation
+             CALL GFS_zt_ocn(ZT_ocn(i),ZNTstoch_ocn(i),restar,WSPD(i),ZA(i),sfc_z0_type)
+             ZQ_ocn(i)=ZT_ocn(i)
           ENDIF
        ELSE
           !DEFAULT TO COARE 3.0/3.5
@@ -1088,6 +1121,10 @@ CONTAINS
     ENDIF !end water point
 
     IF (dry(I)) THEN
+
+       if ( IZ0TLND .EQ. 4 ) then
+          CALL GFS_z0_lnd(ZNT_lnd(i),shdmax(i),ZA(i),vegtype(i),ivegsrc,z0pert(i))
+       endif
 
        ! add stochastic perturbaction of ZNT
        if (spp_pbl==1) then
@@ -1118,6 +1155,10 @@ CONTAINS
              ELSEIF ( IZ0TLND .EQ. 3 ) THEN
                 !Original MYNN in WRF-ARW used this form:
                 CALL garratt_1992(ZT_lnd(i),ZQ_lnd(i),ZNTSTOCH_lnd(i),restar,1.0)
+             ELSEIF ( IZ0TLND .EQ. 4 ) THEN
+                !GFS:
+                CALL GFS_zt_lnd(ZT_lnd(i),ZNTSTOCH_lnd(i),sigmaf(i),ztpert(i),UST_lnd(i))
+                ZQ_lnd(i)=ZT_lnd(i)
              ENDIF
           ELSE
              !DEFAULT TO ZILITINKEVICH
@@ -1136,7 +1177,7 @@ CONTAINS
 
     ENDIF !end land point
 
-    IF (icy(I)) THEN
+    IF (icy(I) .OR. snowh_lnd(i) > 50.) THEN
 
        ! add stochastic perturbaction of ZNT
        if (spp_pbl==1) then
@@ -2422,6 +2463,414 @@ END SUBROUTINE SFCLAY1D_mynn
        return
 
     END SUBROUTINE Yang_2008
+!--------------------------------------------------------------------
+!  Taken from the GFS (sfc_diff.f) for comparison
+    SUBROUTINE GFS_z0_lnd(z0max,shdmax,z1,vegtype,ivegsrc,z0pert)
+
+        REAL, INTENT(OUT)  :: z0max
+        REAL, INTENT(IN)   :: shdmax,z1,z0pert
+        INTEGER, INTENT(IN):: vegtype,ivegsrc
+        REAL :: tem1, tem2
+
+!            z0max = max(1.0e-6, min(0.01 * z0max, z1))
+!already converted into meters in the wrapper
+            z0max = max(1.0e-6, min(z0max, z1))
+!** xubin's new z0  over land
+            tem1  = 1.0 - shdmax
+            tem2  = tem1 * tem1
+            tem1  = 1.0  - tem2
+
+            if( ivegsrc == 1 ) then
+
+              if (vegtype == 10) then
+                z0max = exp( tem2*log01 + tem1*log07 )
+              elseif (vegtype == 6) then
+                z0max = exp( tem2*log01 + tem1*log05 )
+              elseif (vegtype == 7) then
+!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+                z0max = 0.01
+              elseif (vegtype == 16) then
+!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+                z0max = 0.01
+              else
+                z0max = exp( tem2*log01 + tem1*log(z0max) )
+              endif
+
+            elseif (ivegsrc == 2 ) then
+
+              if (vegtype == 7) then
+                z0max = exp( tem2*log01 + tem1*log07 )
+              elseif (vegtype == 8) then
+                z0max = exp( tem2*log01 + tem1*log05 )
+              elseif (vegtype == 9) then
+!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+                z0max = 0.01
+              elseif (vegtype == 11) then
+!               z0max = exp( tem2*log01 + tem1*log01 )                                                                   
+                z0max = 0.01
+              else
+                z0max = exp( tem2*log01 + tem1*log(z0max) )
+              endif
+
+            endif
+
+! mg, sfc-perts: add surface perturbations to z0max over land                                                            
+            if (z0pert /= 0.0 ) then
+              z0max = z0max * (10.**z0pert)
+            endif
+
+            z0max = max(z0max, 1.0e-6)
+
+    END SUBROUTINE GFS_z0_lnd
+!--------------------------------------------------------------------
+!  Taken from the GFS (sfc_diff.f) for comparison
+    SUBROUTINE GFS_zt_lnd(ztmax,z0max,sigmaf,ztpert,ustar_lnd)
+
+        REAL, INTENT(OUT)  :: ztmax
+        REAL, INTENT(IN)   :: z0max,sigmaf,ztpert,ustar_lnd
+        REAL :: czilc, tem1, tem2
+        REAL, PARAMETER    :: ca = 0.4
+
+!           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
+           czilc = 0.8
+
+           tem1  = 1.0 - sigmaf
+           ztmax = z0max*exp( - tem1*tem1                 &
+    &                     * czilc*ca*sqrt(ustar_lnd*(0.01/1.5e-05)))
+!
+!            czilc = 10.0 ** (- 4. * z0max) ! Trier et al. (2011, WAF)
+!            ztmax = z0max * exp( - czilc * ca      &
+!     &            * 258.2 * sqrt(ustar_lnd*z0max) )
+
+
+! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
+            if (ztpert /= 0.0) then
+              ztmax = ztmax * (10.**ztpert)
+            endif
+            ztmax = max(ztmax, 1.0e-6)
+
+    END SUBROUTINE GFS_zt_lnd
+!--------------------------------------------------------------------
+    SUBROUTINE GFS_z0_ocn(z0rl_ocn,ustar_ocn,WSPD,z1,sfc_z0_type,redrag)
+
+        REAL, INTENT(OUT)  :: z0rl_ocn
+        REAL, INTENT(INOUT):: ustar_ocn
+        REAL, INTENT(IN)   :: wspd,z1
+        LOGICAL, INTENT(IN):: redrag
+        INTEGER, INTENT(IN):: sfc_z0_type
+        REAL :: z0,z0max,wind10m
+        REAL, PARAMETER    :: charnock = 0.014, z0s_max=.317e-2 
+
+!            z0           = 0.01 * z0rl_ocn
+!Already converted to meters in the wrapper
+            z0           = z0rl_ocn
+            z0max        = max(1.0e-6, min(z0,z1))
+            ustar_ocn    = sqrt(g * z0 / charnock)
+            wind10m      = wspd*log(10./1e-4)/log(z1/1e-4)
+            !wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
+!
+            if (sfc_z0_type >= 0) then
+              if (sfc_z0_type == 0) then
+                z0 = (charnock / g) * ustar_ocn * ustar_ocn
+
+! mbek -- toga-coare flux algorithm
+!               z0 = (charnock / g) * ustar(i)*ustar(i) +  arnu/ustar(i)
+!  new implementation of z0
+!               cc = ustar(i) * z0 / rnu
+!               pp = cc / (1. + cc)
+!               ff = g * arnu / (charnock * ustar(i) ** 3)
+!               z0 = arnu / (ustar(i) * ff ** pp)
+
+                if (redrag) then
+                  !z0rl_ocn = 100.0 * max(min(z0, z0s_max), 1.e-7)
+                  z0rl_ocn = max(min(z0, z0s_max), 1.e-7)
+                else
+                  !z0rl_ocn = 100.0 * max(min(z0,.1), 1.e-7)
+                  z0rl_ocn = max(min(z0,.1), 1.e-7)
+                endif
+
+              elseif (sfc_z0_type == 6) then   ! wang
+                 call znot_m_v6(wind10m, z0)  ! wind, m/s, z0, m
+                 !z0rl_ocn = 100.0 * z0          ! cm
+              elseif (sfc_z0_type == 7) then   ! wang
+                 call znot_m_v7(wind10m, z0)  ! wind, m/s, z0, m
+                 !z0rl_ocn = 100.0 * z0          ! cm
+              else
+                 z0rl_ocn = 1.0e-6
+              endif
+
+            endif
+
+    END SUBROUTINE GFS_z0_ocn
+!--------------------------------------------------------------------
+    SUBROUTINE GFS_zt_ocn(ztmax,z0rl_ocn,restar,WSPD,z1,sfc_z0_type)
+
+        REAL, INTENT(OUT)  :: ztmax
+        REAL, INTENT(IN)   :: wspd,z1,z0rl_ocn,restar
+        INTEGER, INTENT(IN):: sfc_z0_type
+        REAL :: z0,z0max,wind10m,rat,ustar_ocn
+        REAL, PARAMETER    :: charnock = 0.014, z0s_max=.317e-2
+
+!            z0           = 0.01 * z0rl_ocn
+!Already converted to meters in the wrapper
+            z0           = z0rl_ocn
+            z0max        = max(1.0e-6, min(z0,z1))
+            ustar_ocn    = sqrt(g * z0 / charnock)
+            wind10m      = wspd*log(10./1e-4)/log(z1/1e-4)
+
+!**  test xubin's new z0
+
+!           ztmax  = z0max
+
+!input            restar = max(ustar_ocn(i)*z0max*visi, 0.000001)
+
+!           restar = log(restar)
+!           restar = min(restar,5.)
+!           restar = max(restar,-5.)
+!           rat    = aa1 + (bb1 + cc1*restar) * restar
+!           rat    = rat    / (1. + (bb2 + cc2*restar) * restar))
+!  rat taken from zeng, zhao and dickinson 1997
+
+            rat   = min(7.0, 2.67 * sqrt(sqrt(restar)) - 2.57)
+            ztmax = max(z0max * exp(-rat), 1.0e-6)
+!
+            if (sfc_z0_type == 6) then
+              call znot_t_v6(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+            else if (sfc_z0_type == 7) then
+              call znot_t_v7(wind10m, ztmax)   ! 10-m wind,m/s, ztmax(m)
+            else if (sfc_z0_type > 0) then
+              write(0,*)'no option for sfc_z0_type=',sfc_z0_type
+              stop
+            endif
+
+    END SUBROUTINE GFS_zt_ocn
+!--------------------------------------------------------------------
+!! add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
+!! Weiguo Wang, 2019-0425
+
+      SUBROUTINE znot_m_v6(uref, znotm)
+      use machine , only : kind_phys
+      IMPLICIT NONE
+! Calculate areodynamical roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
+! For high winds, try to fit available observational data
+!
+! Bin Liu, NOAA/NCEP/EMC 2017
+!
+! uref(m/s)   :   wind speed at 10-m height
+! znotm(meter):   areodynamical roughness scale over water
+!
+
+      REAL(kind=kind_phys), INTENT(IN) :: uref
+      REAL(kind=kind_phys), INTENT(OUT):: znotm
+      real(kind=kind_phys), parameter  :: p13 = -1.296521881682694e-02,&
+     &      p12 =  2.855780863283819e-01, p11 = -1.597898515251717e+00,&
+     &      p10 = -8.396975715683501e+00,                              &
+
+     &      p25 =  3.790846746036765e-10, p24 =  3.281964357650687e-09,&
+     &      p23 =  1.962282433562894e-07, p22 = -1.240239171056262e-06,&
+     &      p21 =  1.739759082358234e-07, p20 =  2.147264020369413e-05,&
+
+     &      p35 =  1.840430200185075e-07, p34 = -2.793849676757154e-05,&
+     &      p33 =  1.735308193700643e-03, p32 = -6.139315534216305e-02,&
+     &      p31 =  1.255457892775006e+00, p30 = -1.663993561652530e+01,&
+
+     &      p40 =  4.579369142033410e-04
+
+
+       if (uref >= 0.0 .and.  uref <= 6.5 ) then
+        znotm = exp(p10 + uref * (p11 + uref * (p12 + uref*p13)))
+       elseif (uref > 6.5 .and. uref <= 15.7) then
+        znotm = p20 + uref * (p21 + uref * (p22 + uref * (p23       &
+     &              + uref * (p24 + uref * p25))))
+       elseif (uref > 15.7 .and. uref <= 53.0) then
+        znotm = exp( p30 + uref * (p31 + uref * (p32 + uref * (p33  &
+     &                   + uref * (p34 + uref * p35)))))
+       elseif ( uref > 53.0) then
+         znotm = p40
+       else
+          print*, 'Wrong input uref value:',uref
+       endif
+
+      END SUBROUTINE znot_m_v6
+!--------------------------------------------------------------------
+      SUBROUTINE znot_t_v6(uref, znott)
+
+      IMPLICIT NONE
+! Calculate scalar roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF
+!                                                  
+! Bin Liu, NOAA/NCEP/EMC 2017                      
+!                                                  
+! uref(m/s)   :   wind speed at 10-m height        
+! znott(meter):   scalar roughness scale over water
+!
+      REAL, INTENT(IN) :: uref
+      REAL, INTENT(OUT):: znott
+      real, parameter  :: p00 =  1.100000000000000e-04,&
+     &      p15 = -9.144581627678278e-10, p14 =  7.020346616456421e-08,&
+     &      p13 = -2.155602086883837e-06, p12 =  3.333848806567684e-05,&
+     &      p11 = -2.628501274963990e-04, p10 =  8.634221567969181e-04,&
+
+     &      p25 = -8.654513012535990e-12, p24 =  1.232380050058077e-09,&
+     &      p23 = -6.837922749505057e-08, p22 =  1.871407733439947e-06,&
+     &      p21 = -2.552246987137160e-05, p20 =  1.428968311457630e-04,&
+
+     &      p35 =  3.207515102100162e-12, p34 = -2.945761895342535e-10,&
+     &      p33 =  8.788972147364181e-09, p32 = -3.814457439412957e-08,&
+     &      p31 = -2.448983648874671e-06, p30 =  3.436721779020359e-05,&
+
+     &      p45 = -3.530687797132211e-11, p44 =  3.939867958963747e-09,&
+     &      p43 = -1.227668406985956e-08, p42 = -1.367469811838390e-05,&
+     &      p41 =  5.988240863928883e-04, p40 = -7.746288511324971e-03,&
+
+     &      p56 = -1.187982453329086e-13, p55 =  4.801984186231693e-11,&
+     &      p54 = -8.049200462388188e-09, p53 =  7.169872601310186e-07,&
+     &      p52 = -3.581694433758150e-05, p51 =  9.503919224192534e-04,&
+     &      p50 = -1.036679430885215e-02,                              &
+
+     &      p60 =  4.751256171799112e-05
+
+      if (uref >= 0.0 .and. uref < 5.9 ) then
+         znott = p00
+      elseif (uref >= 5.9 .and. uref <= 15.4) then
+         znott = p10 + uref * (p11 + uref * (p12 + uref * (p13  &
+     &               + uref * (p14 + uref * p15))))
+      elseif (uref > 15.4 .and. uref <= 21.6) then
+         znott = p20 + uref * (p21 + uref * (p22 + uref * (p23  &
+     &               + uref * (p24 + uref * p25))))
+      elseif (uref > 21.6 .and. uref <= 42.2) then
+         znott = p30 + uref * (p31 + uref * (p32 + uref * (p33  &
+     &               + uref * (p34 + uref * p35))))
+      elseif ( uref > 42.2 .and. uref <= 53.3) then
+         znott = p40 + uref * (p41 + uref * (p42 + uref * (p43  &
+     &               + uref * (p44 + uref * p45))))
+      elseif ( uref > 53.3 .and. uref <= 80.0) then
+         znott = p50 + uref * (p51 + uref * (p52 + uref * (p53  &
+     &               + uref * (p54 + uref * (p55 + uref * p56)))))
+      elseif ( uref > 80.0) then
+         znott = p60
+      else
+         print*, 'Wrong input uref value:',uref
+      endif
+
+      END SUBROUTINE znot_t_v6
+
+!-------------------------------------------------------------------
+
+      SUBROUTINE znot_m_v7(uref, znotm)
+
+      IMPLICIT NONE
+! Calculate areodynamical roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
+! For high winds, try to fit available observational data
+! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
+!                                          
+! Bin Liu, NOAA/NCEP/EMC 2018              
+!                                          
+! uref(m/s)   :   wind speed at 10-m height
+! znotm(meter):   areodynamical roughness scale over water
+!
+
+      REAL, INTENT(IN) :: uref
+      REAL, INTENT(OUT):: znotm
+
+      real, parameter  :: p13 = -1.296521881682694e-02,&
+     &      p12 =  2.855780863283819e-01, p11 = -1.597898515251717e+00,&
+     &      p10 = -8.396975715683501e+00,&
+
+     &      p25 =  3.790846746036765e-10, p24 =  3.281964357650687e-09,&
+     &      p23 =  1.962282433562894e-07, p22 = -1.240239171056262e-06,&
+     &      p21 =  1.739759082358234e-07, p20 =  2.147264020369413e-05,&
+
+     &      p35 =  1.897534489606422e-07, p34 = -3.019495980684978e-05,&
+     &      p33 =  1.931392924987349e-03, p32 = -6.797293095862357e-02,&
+     &      p31 =  1.346757797103756e+00, p30 = -1.707846930193362e+01,&
+
+     &      p40 =  3.371427455376717e-04
+
+      if (uref >= 0.0 .and.  uref <= 6.5 ) then
+        znotm = exp( p10 + uref * (p11 + uref * (p12 + uref * p13)))
+      elseif (uref > 6.5 .and. uref <= 15.7) then
+        znotm = p20 + uref * (p21 + uref * (p22 + uref * (p23        &
+     &              + uref * (p24 + uref * p25))))
+      elseif (uref > 15.7 .and. uref <= 53.0) then
+        znotm = exp( p30 + uref * (p31 + uref * (p32 + uref * (p33   &
+     &                   + uref * (p34 + uref * p35)))))
+      elseif ( uref > 53.0) then
+        znotm = p40
+      else
+        print*, 'Wrong input uref value:',uref
+      endif
+
+      END SUBROUTINE znot_m_v7
+!--------------------------------------------------------------------
+      SUBROUTINE znot_t_v7(uref, znott)
+
+      IMPLICIT NONE
+! Calculate scalar roughness over water with input 10-m wind
+! For low-to-moderate winds, try to match the Ck-U10 relationship from COARE algorithm
+! For high winds, try to retain the Ck-U10 relationship of FY2015 HWRF 
+! To be compatible with the slightly decreased Cd for higher wind speed
+!                            
+! Bin Liu, NOAA/NCEP/EMC 2018
+!
+! uref(m/s)   :   wind speed at 10-m height        
+! znott(meter):   scalar roughness scale over water
+!
+
+      REAL, INTENT(IN) :: uref
+      REAL, INTENT(OUT):: znott
+
+      real, parameter  :: p00 =  1.100000000000000e-04,                &
+
+     &      p15 = -9.193764479895316e-10, p14 =  7.052217518653943e-08,&
+     &      p13 = -2.163419217747114e-06, p12 =  3.342963077911962e-05,&
+     &      p11 = -2.633566691328004e-04, p10 =  8.644979973037803e-04,&
+
+     &      p25 = -9.402722450219142e-12, p24 =  1.325396583616614e-09,&
+     &      p23 = -7.299148051141852e-08, p22 =  1.982901461144764e-06,&
+     &      p21 = -2.680293455916390e-05, p20 =  1.484341646128200e-04,&
+
+     &      p35 =  7.921446674311864e-12, p34 = -1.019028029546602e-09,&
+     &      p33 =  5.251986927351103e-08, p32 = -1.337841892062716e-06,&
+     &      p31 =  1.659454106237737e-05, p30 = -7.558911792344770e-05,&
+
+     &      p45 = -2.694370426850801e-10, p44 =  5.817362913967911e-08,&
+     &      p43 = -5.000813324746342e-06, p42 =  2.143803523428029e-04,&
+     &      p41 = -4.588070983722060e-03, p40 =  3.924356617245624e-02,&
+
+     &      p56 = -1.663918773476178e-13, p55 =  6.724854483077447e-11,&
+     &      p54 = -1.127030176632823e-08, p53 =  1.003683177025925e-06,&
+     &      p52 = -5.012618091180904e-05, p51 =  1.329762020689302e-03,&
+     &      p50 = -1.450062148367566e-02, p60 =  6.840803042788488e-05
+
+        if (uref >= 0.0 .and. uref < 5.9 ) then
+           znott = p00
+        elseif (uref >= 5.9 .and. uref <= 15.4) then
+           znott = p10 + uref * (p11 + uref * (p12 + uref * (p13     &
+     &                 + uref * (p14 + uref * p15))))
+        elseif (uref > 15.4 .and. uref <= 21.6) then
+           znott = p20 + uref * (p21 + uref * (p22 + uref * (p23     &
+     &                 + uref * (p24 + uref * p25))))
+        elseif (uref > 21.6 .and. uref <= 42.6) then
+           znott = p30 + uref * (p31 + uref * (p32 + uref * (p33     &
+     &                 + uref * (p34 + uref * p35))))
+        elseif ( uref > 42.6 .and. uref <= 53.0) then
+           znott = p40 + uref * (p41 + uref * (p42 + uref * (p43     &
+     &                 + uref * (p44 + uref * p45))))
+        elseif ( uref > 53.0 .and. uref <= 80.0) then
+           znott = p50 + uref * (p51 + uref * (p52 + uref * (p53     &
+     &                 + uref * (p54 + uref * (p55 + uref * p56)))))
+        elseif ( uref > 80.0) then
+           znott = p60
+        else
+           print*, 'Wrong input uref value:',uref
+        endif
+
+        END SUBROUTINE znot_t_v7
+
 !--------------------------------------------------------------------
 !>\ingroup module_sf_mynn_mod
 !> This is taken from Andreas (2002; J. of Hydromet) and 
