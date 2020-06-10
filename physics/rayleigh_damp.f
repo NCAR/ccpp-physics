@@ -24,7 +24,7 @@
 !>\section gen_ray_damp_run GFS rayleigh_damp_runGeneral Algorithm
 !> @{
       subroutine rayleigh_damp_run (                                    &
-     &           lsidea,IM,IX,KM,A,B,C,U1,V1,DT,CP,                     &
+     &           lsidea,IM,KM,A,B,C,U1,V1,DT,CP,                        &
      &           LEVR,pgr,PRSL,PRSLRD0,ral_ts,                          &
      &           ldiag3d,du3dt,dv3dt,dt3dt,                             &
      &           errmsg,errflg)
@@ -49,16 +49,16 @@
 !        IS CONVERTED INTO INTERNAL ENERGY.   
 !
 !  INPUT
-!        A(IX,KM)  NON-LIN TENDENCY FOR V WIND COMPONENT
-!        B(IX,KM)  NON-LIN TENDENCY FOR U WIND COMPONENT
-!        C(IX,KM)  NON-LIN TENDENCY FOR TEMPERATURE
-!        U1(IX,KM) ZONAL WIND M/SEC  AT T0-DT
-!        V1(IX,KM) MERIDIONAL WIND M/SEC AT T0-DT
-!        T1(IX,KM) TEMPERATURE DEG K AT T0-DT
+!        A(IM,KM)  NON-LIN TENDENCY FOR V WIND COMPONENT
+!        B(IM,KM)  NON-LIN TENDENCY FOR U WIND COMPONENT
+!        C(IM,KM)  NON-LIN TENDENCY FOR TEMPERATURE
+!        U1(IM,KM) ZONAL WIND M/SEC  AT T0-DT
+!        V1(IM,KM) MERIDIONAL WIND M/SEC AT T0-DT
+!        T1(IM,KM) TEMPERATURE DEG K AT T0-DT
 !
 !        DT  TIME STEP    SECS
 !        pgr(im)          surface pressure (Pa)
-!        prsl(IX,KM)      PRESSURE AT MIDDLE OF LAYER (Pa)
+!        prsl(IM,KM)      PRESSURE AT MIDDLE OF LAYER (Pa)
 !        prslrd0          pressure level above which to apply Rayleigh damping
 !        ral_ts           timescale in days for Rayleigh damping
 !
@@ -69,11 +69,11 @@
       implicit none
 !
       logical,intent(in)                 :: lsidea,ldiag3d
-      integer,intent(in)                 :: im, ix, km,levr
+      integer,intent(in)                 :: im, km,levr
       real(kind=kind_phys),intent(in)    :: DT, CP, PRSLRD0, ral_ts
-      real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IX,KM)
-      real(kind=kind_phys),intent(in)    :: U1(IX,KM), V1(IX,KM)
-      real(kind=kind_phys),intent(inout) :: A(IX,KM), B(IX,KM), C(IX,KM)
+      real(kind=kind_phys),intent(in)    :: pgr(im), PRSL(IM,KM)
+      real(kind=kind_phys),intent(in)    :: U1(IM,KM), V1(IM,KM)
+      real(kind=kind_phys),intent(inout) :: A(IM,KM), B(IM,KM), C(IM,KM)
       real(kind=kind_phys),intent(inout) :: du3dt(:,:)
       real(kind=kind_phys),intent(inout) :: dv3dt(:,:)
       real(kind=kind_phys),intent(inout) :: dt3dt(:,:)

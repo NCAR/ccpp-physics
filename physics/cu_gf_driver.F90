@@ -68,7 +68,7 @@ contains
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
-      subroutine cu_gf_driver_run(ntracer,garea,im,ix,km,dt,cactiv,             &
+      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,cactiv,                &
                forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,           &
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
@@ -97,39 +97,37 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
-   integer, intent(in   ) :: im,ix,km,ntracer
+   integer, intent(in   ) :: im,km,ntracer
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    logical, intent(in   ) :: ldiag3d,qdiag3d
 
-   real(kind=kind_phys),  dimension( ix , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
-   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: t,us,vs
-   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: qci_conv
-   real(kind=kind_phys),  dimension( ix )   :: rand_mom,rand_vmas
-   real(kind=kind_phys),  dimension( ix,4 ) :: rand_clos
-   real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
-   real(kind=kind_phys),  dimension( ix , km ),     intent(out ) :: cnvw_moist,cnvc
-   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: cliw, clcw
+   real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
+   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: qci_conv
+   real(kind=kind_phys),  dimension( im )   :: rand_mom,rand_vmas
+   real(kind=kind_phys),  dimension( im,4 ) :: rand_clos
+   real(kind=kind_phys),  dimension( im , km, 11 ) :: gdc,gdc2
+   real(kind=kind_phys),  dimension( im , km ),     intent(out ) :: cnvw_moist,cnvc
+   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: cliw, clcw
 
    real(kind=kind_phys),  dimension(  : ,  : ), intent(inout ) :: &
                du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV, &
                du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV
 
-!  change from ix to im
    integer, dimension (im), intent(inout) :: hbot,htop,kcnv
    integer,    dimension (im), intent(in) :: xland
    real(kind=kind_phys),    dimension (im), intent(in) :: pbl
-   integer, dimension (ix) :: tropics
+   integer, dimension (im) :: tropics
 !  ruc variable
    real(kind=kind_phys), dimension (im)  :: hfx2,qfx2,psuri
    real(kind=kind_phys), dimension (im,km) :: ud_mf,dd_mf,dt_mf
    real(kind=kind_phys), dimension (im), intent(inout) :: raincv,cld1d
-!  end change ix to im
-   real(kind=kind_phys), dimension (ix,km) :: t2di,p2di
+   real(kind=kind_phys), dimension (im,km) :: t2di,p2di
    ! Specific humidity from FV3
-   real(kind=kind_phys), dimension (ix,km), intent(in) :: qv2di_spechum
-   real(kind=kind_phys), dimension (ix,km), intent(inout) :: qv_spechum
+   real(kind=kind_phys), dimension (im,km), intent(in) :: qv2di_spechum
+   real(kind=kind_phys), dimension (im,km), intent(inout) :: qv_spechum
    ! Local water vapor mixing ratios and cloud water mixing ratios
-   real(kind=kind_phys), dimension (ix,km) :: qv2di, qv, forceqv, cnvw
+   real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
    !
    real(kind=kind_phys), dimension( im ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 

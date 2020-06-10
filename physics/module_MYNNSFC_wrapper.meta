@@ -1,14 +1,6 @@
 [ccpp-arg-table]
   name = mynnsfc_wrapper_run
   type = scheme
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -60,6 +52,74 @@
 [lsm]
   standard_name = flag_for_land_surface_scheme
   long_name = flag for land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[sigmaf]
+  standard_name = bounded_vegetation_area_fraction
+  long_name = areal fractional cover of green vegetation bounded on the bottom
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vegtype]
+  standard_name = vegetation_type_classification
+  long_name = vegetation type at each grid cell
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[shdmax]
+  standard_name = maximum_vegetation_area_fraction
+  long_name = max fractnl cover of green veg
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ivegsrc]
+  standard_name = vegetation_type_dataset_choice
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[z0pert]
+  standard_name = perturbation_of_momentum_roughness_length
+  long_name = perturbation of momentum roughness length
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ztpert]
+  standard_name = perturbation_of_heat_to_momentum_roughness_length_ratio
+  long_name = perturbation of heat to momentum roughness length ratio
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[redrag]
+  standard_name = flag_for_reduced_drag_coefficient_over_sea
+  long_name = flag for reduced drag coefficient over sea
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[sfc_z0_type]
+  standard_name = flag_for_surface_roughness_option_over_ocean
+  long_name = surface roughness options over ocean
   units = flag
   dimensions = ()
   type = integer
@@ -121,7 +181,7 @@
   optional = F
 [qc]
   standard_name = cloud_condensed_water_mixing_ratio
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water (condensate)
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real

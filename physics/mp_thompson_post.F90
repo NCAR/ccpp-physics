@@ -17,12 +17,11 @@ contains
 !! \section arg_table_mp_thompson_post_init Argument Table
 !! \htmlinclude mp_thompson_post_init.html
 !!
-   subroutine mp_thompson_post_init(ncol, ttendlim, errmsg, errflg)
+   subroutine mp_thompson_post_init(ttendlim, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
-      integer,         intent(in) :: ncol
       real(kind_phys), intent(in) :: ttendlim
 
       ! CCPP error handling
@@ -77,7 +76,9 @@ contains
       ! Local variables
       real(kind_phys), dimension(1:ncol,1:nlev) :: mp_tend
       integer :: i, k
+#ifdef DEBUG
       integer :: events
+#endif
 
       ! Initialize the CCPP error handling variables
       errmsg = ''
@@ -96,26 +97,30 @@ contains
       ! mp_tend and ttendlim are expressed in potential temperature
       mp_tend = (tgrs - tgrs_save)/prslk
 
+#ifdef DEBUG
       events = 0
+#endif
       do k=1,nlev
          do i=1,ncol
             mp_tend(i,k) = max( -ttendlim*dtp, min( ttendlim*dtp, mp_tend(i,k) ) )
 
-            if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
 #ifdef DEBUG
+            if (tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k) .ne. tgrs(i,k)) then
               write(0,'(a,3i6,3e16.7)') "mp_thompson_post_run mp_tend limiter: kdt, i, k, t_old, t_new, t_lim:", &
                                       & kdt, i, k, tgrs_save(i,k), tgrs(i,k), tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
-#endif
               events = events + 1
             end if
+#endif
             tgrs(i,k) = tgrs_save(i,k) + mp_tend(i,k)*prslk(i,k)
          end do
       end do
 
+#ifdef DEBUG
       if (events > 0) then
         write(0,'(a,i0,a,i0,a,i0)') "mp_thompson_post_run: ttendlim applied ", events, "/", nlev*ncol, &
                                   & " times at timestep ", kdt
       end if
+#endif
 
    end subroutine mp_thompson_post_run
 

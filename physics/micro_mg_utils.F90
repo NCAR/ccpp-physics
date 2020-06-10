@@ -839,7 +839,7 @@ end function var_coef_integer
 !! Initial ice deposition and sublimation loop.
 !! Run before the main loop
 !! This subroutine written by Peter Caldwell
-subroutine ice_deposition_sublimation(t, qv, qi, ni, &
+subroutine ice_deposition_sublimation(t, qv, qi, ni,           &
                                       icldm, rho, dv,qvl, qvi, &
                                       berg, vap_dep, ice_sublim, mgncol)
 
@@ -2656,7 +2656,7 @@ end subroutine graupel_rime_splintering
 !      prdg(i) = epsg*(q(i)-qvi(i))/abi
 !
 !! make sure not pushed into ice supersat/subsat
-!! put this in main mg3 code…..check for it…
+!! put this in main mg3 code ... check for it ...
 !! formula from reisner 2 scheme
 
 !!

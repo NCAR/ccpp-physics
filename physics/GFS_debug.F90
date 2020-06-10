@@ -348,15 +348,21 @@
                      end if
                      ! CCPP/MYNNPBL only
                      if (Model%do_mynnedmf) then
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_a      ',  Diag%edmf_a)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_w      ',  Diag%edmf_w)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_qt     ',  Diag%edmf_qt)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_thl    ',  Diag%edmf_thl)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_ent    ',  Diag%edmf_ent)
-                       call print_var(mpirank,omprank, blkno, 'Diag%edmf_qc     ',  Diag%edmf_qc)
+                       if (Model%bl_mynn_output .ne. 0) then
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_a      ',  Diag%edmf_a)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_w      ',  Diag%edmf_w)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_qt     ',  Diag%edmf_qt)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_thl    ',  Diag%edmf_thl)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_ent    ',  Diag%edmf_ent)
+                         call print_var(mpirank,omprank, blkno, 'Diag%edmf_qc     ',  Diag%edmf_qc)
+                         call print_var(mpirank,omprank, blkno, 'Diag%sub_thl     ',  Diag%sub_thl)
+                         call print_var(mpirank,omprank, blkno, 'Diag%sub_sqv     ',  Diag%sub_sqv)
+                         call print_var(mpirank,omprank, blkno, 'Diag%det_thl     ',  Diag%det_thl)
+                         call print_var(mpirank,omprank, blkno, 'Diag%det_sqv     ',  Diag%det_sqv)
+                       end if
                        call print_var(mpirank,omprank, blkno, 'Diag%nupdraft    ',  Diag%nupdraft)
                        call print_var(mpirank,omprank, blkno, 'Diag%maxMF       ',  Diag%maxMF)
-                       call print_var(mpirank,omprank, blkno, 'Diag%ktop_shallow',  Diag%ktop_shallow)
+                       call print_var(mpirank,omprank, blkno, 'Diag%ktop_plume  ',  Diag%ktop_plume)
                        call print_var(mpirank,omprank, blkno, 'Diag%exch_h      ',  Diag%exch_h)
                        call print_var(mpirank,omprank, blkno, 'Diag%exch_m      ',  Diag%exch_m)
                      end if
@@ -404,7 +410,12 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%rain_cpl', Coupling%rain_cpl)
                         call print_var(mpirank,omprank, blkno, 'Coupling%snow_cpl', Coupling%snow_cpl)
                      end if
+                     if (Model%cplwav2atm) then
+                        call print_var(mpirank,omprank, blkno, 'Coupling%zorlwav_cpl' , Coupling%zorlwav_cpl  )
+                     end if
                      if (Model%cplflx) then
+                        call print_var(mpirank,omprank, blkno, 'Coupling%oro_cpl'     , Coupling%oro_cpl      )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%slmsk_cpl'   , Coupling%slmsk_cpl    )
                         call print_var(mpirank,omprank, blkno, 'Coupling%slimskin_cpl', Coupling%slimskin_cpl )
                         call print_var(mpirank,omprank, blkno, 'Coupling%dusfcin_cpl ', Coupling%dusfcin_cpl  )
                         call print_var(mpirank,omprank, blkno, 'Coupling%dvsfcin_cpl ', Coupling%dvsfcin_cpl  )
@@ -468,11 +479,19 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%shum_wts', Coupling%shum_wts)
                      end if
                      if (Model%do_skeb) then
-                        call print_var(mpirank,omprank, blkno, 'Coupling%skebu_wts', Coupling%skebu_wts)
-                        call print_var(mpirank,omprank, blkno, 'Coupling%skebv_wts', Coupling%skebv_wts)
+                        call print_var(mpirank,omprank, blkno, 'Coupling%skebu_wts', Coupling%skebu_wts )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%skebv_wts', Coupling%skebv_wts )
                      end if
                      if (Model%do_sfcperts) then
-                        call print_var(mpirank,omprank, blkno, 'Coupling%sfc_wts', Coupling%sfc_wts)
+                        call print_var(mpirank,omprank, blkno, 'Coupling%sfc_wts'  , Coupling%sfc_wts   )
+                     end if
+                     if (Model%do_ca) then
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca1      ', Coupling%ca1       )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca_deep  ', Coupling%ca_deep   )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca_turb  ', Coupling%ca_turb   )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca_shal  ', Coupling%ca_shal   )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca_rad   ', Coupling%ca_rad    )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca_micro ', Coupling%ca_micro  )
                      end if
                      if(Model%imp_physics == Model%imp_physics_thompson .and. Model%ltaerosol) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%nwfa2d', Coupling%nwfa2d)

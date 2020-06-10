@@ -65,7 +65,7 @@
      &                                     progcld1, progcld3,         &
      &                                     progcld2,                   &
      &                                     progcld4, progcld5,         &
-     &                                     progcld6, progclduni
+     &                                     progclduni
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
      &                                     profsw_type, NBDSW
       use module_radlw_parameters,   only: topflw_type, sfcflw_type,   &
@@ -180,7 +180,6 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDSW,NF_AESW)::faersw
       real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP,NBDLW,NF_AELW)::faerlw
  
-      logical :: clduni
       real(kind=kind_phys) :: qvs
 !
 !===> ...  begin here
@@ -505,9 +504,10 @@
 !check  print *,' in grrad : calling setaer '
 
       call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk, & !  ---  inputs
-                   tracer1, Grid%xlon, Grid%xlat, IM, LMK, LMP,   &
-                   Model%lsswr, Model%lslwr,                      &
-                   faersw, faerlw, aerodp)                          !  ---  outputs
+                   tracer1, Tbd%aer_nm,                            &                      
+                   Grid%xlon, Grid%xlat, IM, LMK, LMP,             &
+                   Model%lsswr,Model%lslwr,                        &
+                   faersw,faerlw,aerodp)                              !  ---  outputs
 
 ! CCPP
       do j = 1,NBDSW
@@ -580,7 +580,7 @@
           if (Model%imp_physics == Model%imp_physics_thompson .and. Model%ltaerosol) then
             do k=1,LMK
               do i=1,IM
-                qvs = Statein%qgrs(i,k2,1)
+                qvs = Statein%qgrs(i,k,1)
                 qv_mp (i,k) = qvs/(1.-qvs)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
@@ -593,7 +593,7 @@
           elseif (Model%imp_physics == Model%imp_physics_thompson) then
             do k=1,LMK
               do i=1,IM
-                qvs = Statein%qgrs(i,k2,1)
+                qvs = Statein%qgrs(i,k,1)
                 qv_mp (i,k) = qvs/(1.-qvs)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
@@ -700,76 +700,60 @@
             enddo
           endif
         elseif (Model%imp_physics == Model%imp_physics_thompson) then                     !  Thompson MP
-          if(Model%kdt == 1 ) then
-            do k=1,lm
-              k1 = k + kd
-              do i=1,im
-                effrl(i,k1) = Tbd%phy_f3d(i,k,Model%nleffr)
-                effri(i,k1) = Tbd%phy_f3d(i,k,Model%nieffr)
-                effrr(i,k1) = 1000. ! rrain_def=1000.
-                effrs(i,k1) = Tbd%phy_f3d(i,k,Model%nseffr)
-              enddo
+          !
+          ! Compute effective radii for QC, QI, QS with (GF, MYNN) or without (all others) sub-grid clouds
+          !
+          ! Update number concentration, consistent with sub-grid clouds (GF, MYNN) or without (all others)
+          do k=1,lm
+            do i=1,im
+              if (Model%ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
+                nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)) * orho(i,k)
+              endif
+              if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
+                ni_mp(i,k) = make_IceNumber(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
+              endif
+            end do
+          end do
+          ! Call Thompson's subroutine to compute effective radii
+          do i=1,im
+            ! Initialize to default in units m as in module_mp_thompson.F90
+            re_cloud(i,:) = 2.49E-6
+            re_ice(i,:)   = 4.99E-6
+            re_snow(i,:)  = 9.99E-6
+            call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),   &
+                                 nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
+                                 re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
+          end do
+          ! Scale Thompson's effective radii from meter to micron and apply bounds
+          do k=1,lm
+            do i=1,im
+              re_cloud(i,k) = MAX(2.49, MIN(re_cloud(i,k)*1.e6, 50.))
+              re_ice(i,k)   = MAX(4.99, MIN(re_ice(i,k)*1.e6, 125.))
+              !tgs: progclduni has different limits for ice radii: 10.0-150.0
+              !     it will raise the low limit from 5 to 10, but the
+              !     high limit will remain 125.
+              re_snow(i,k)  = MAX(9.99, MIN(re_snow(i,k)*1.e6, 999.))
+            end do
+          end do
+          do k=1,lm
+            k1 = k + kd
+            do i=1,im
+              effrl(i,k1) = re_cloud (i,k)
+              effri(i,k1) = re_ice (i,k)
+              effrr(i,k1) = 1000. ! rrain_def=1000.
+              effrs(i,k1) = re_snow(i,k)
             enddo
-          else ! kdt>1
-            if(Model%do_mynnedmf .or.                                    &
-               Model%imfdeepcnv == Model%imfdeepcnv_gf ) then
-              !tgs - take into account sub-grid clouds from GF or MYNN PBL
-
-              ! Compute effective radii for QC and QI with sub-grid clouds
-              do k=1,lm
-                do i=1,im
-                  ! make NC consistent with sub-grid clouds
-                  if (Model%ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
-                    nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)) * orho(i,k)
-                  endif
-                  if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
-                    ni_mp(i,k) = make_IceNumber(qi_mp(i,k)*rho(i,k), tlyr(i,k)) * orho(i,k)
-                  endif
-                end do
-              end do
-              ! Call Thompson's subroutine to compute effective radii
-              do i=1,im
-                ! Initialize to default in units m as in module_mp_thompson.F90
-                re_cloud(i,:) = 2.49E-6
-                re_ice(i,:)   = 4.99E-6
-                re_snow(i,:)  = 9.99E-6
-                call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),   &
-                                     nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
-                                     re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
-              end do
-              do k=1,lm
-                do i=1,im
-                  re_cloud(i,k) = MAX(2.49, MIN(re_cloud(i,k)*1.e6, 50.))
-                  re_ice(i,k)   = MAX(4.99, MIN(re_ice(i,k)*1.e6, 125.))
-                  !tgs: clduni has different limits for ice radii: 10.0-150.0
-                  !     it will raise the low limit from 5 to 10, but the
-                  !     high limit will remain 125.
-                  re_snow(i,k)  = MAX(9.99, MIN(re_snow(i,k)*1.e6, 999.))
-                end do
-              end do
-
-              do k=1,lm
-                k1 = k + kd
-                do i=1,im
-                  effrl(i,k1) = re_cloud (i,k) ! Tbd%phy_f3d(i,k,Model%nleffr)
-                  effri(i,k1) = re_ice (i,k) !  Tbd%phy_f3d(i,k,Model%nieffr)
-                  effrr(i,k1) = 1000. ! rrain_def=1000.
-                  effrs(i,k1) = Tbd%phy_f3d(i,k,Model%nseffr)
-                enddo
-              enddo
-            else ! not MYNN or not GF
-              do k=1,lm
-                k1 = k + kd
-                do i=1,im
-                  effrl(i,k1) = Tbd%phy_f3d(i,k,Model%nleffr)
-                  effri(i,k1) = Tbd%phy_f3d(i,k,Model%nieffr)
-                  effrr(i,k1) = 1000. ! rrain_def=1000.
-                  effrs(i,k1) = Tbd%phy_f3d(i,k,Model%nseffr)
-                enddo
-              enddo
-            endif ! MYNN PBL or GF conv
-          endif ! kdt
-        else                                                           ! neither of the other two cases
+          enddo
+          ! Update global arrays
+          do k=1,lm
+            k1 = k + kd
+            do i=1,im
+              Tbd%phy_f3d(i,k,Model%nleffr) = effrl(i,k1)
+              Tbd%phy_f3d(i,k,Model%nieffr) = effri(i,k1)
+              Tbd%phy_f3d(i,k,Model%nseffr) = effrs(i,k1)
+            enddo
+          enddo
+        else                                                           ! all other cases
           cldcov = 0.0
         endif
 
@@ -903,99 +887,16 @@
 
         elseif(Model%imp_physics == Model%imp_physics_thompson) then                              ! Thompson MP
 
-          clduni = .true.
-
           if(Model%do_mynnedmf .or.                                 & 
                            Model%imfdeepcnv == Model%imfdeepcnv_gf ) then ! MYNN PBL or GF conv
-          ! MYNN PBL or convective GF
-
-            if (Model%kdt == 1 ) then
-              !  --- call progcld6 to get Xu-Randall total cloud cover (clouds(:,1:LMK,1)) at
-              !  --- initial time step, it takes into account subgrid PBL
-              !  --- clouds
-              call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     & !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-                         ntsw-1,ntgl-1,                                 &
-                         im, lmk, lmp, Model%uni_cld,                   &
-                         Model%lmfshal,Model%lmfdeep2,                  &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,Model%nleffr), &
-                         Tbd%phy_f3d(:,:,Model%nieffr),                 &
-                         Tbd%phy_f3d(:,:,Model%nseffr),                 &
-                         clouds,cldsa,mtopa,mbota, de_lgth)               !  --- outputs
-              if (clduni) then
-                ! use progclduni for interaction with radiation,
-                ! overwrites 'clouds' from progcld6
-                call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,   & !  ---  inputs
-                         Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp,  &
-                         IM, LMK, LMP, clouds(:,1:LMK,1),               &
-                         effrl, effri, effrr, effrs, Model%effr_in ,    &
-                         clouds, cldsa, mtopa, mbota, de_lgth)            !  ---  outputs
-              endif
-
-            else ! kdt > 1 
-
-              do k=1,lm
-                k1 = k + kd
+              !-- MYNN PBL or convective GF
+              !-- use cloud fractions with SGS clouds
+              do k=1,lmk
                 do i=1,im
-                  Tbd%phy_f3d(i,k,Model%nleffr) = effrl(i,k1)
-                  Tbd%phy_f3d(i,k,Model%nieffr) = effri(i,k1)
-                  Tbd%phy_f3d(i,k,Model%nseffr) = effrs(i,k1)
+                  clouds(i,k,1)  = clouds1(i,k)
                 enddo
               enddo
-              !  --- call progcld6 to get Xu-Randall total cloud cover (clouds(:,1:LMK,1))
-              !  tgs: a short subroutine could be made of progcld5 to
-              !       compute only total cloud fraction.
-              call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     & !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-                         ntsw-1,ntgl-1,                                 &
-                         im, lmk, lmp, Model%uni_cld,                   &
-                         Model%lmfshal,Model%lmfdeep2,                  &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,Model%nleffr), &
-                         Tbd%phy_f3d(:,:,Model%nieffr),                 &
-                         Tbd%phy_f3d(:,:,Model%nseffr),                 &
-                         clouds,cldsa,mtopa,mbota, de_lgth)               !  --- outputs
 
-              if (Model%do_mynnedmf) then
-                !tgs - let's use the PBL cloud fraction for now
-                do k=1,lmk
-                  do i=1,im
-                    !if (tracer1(i,k,ntrw) > 1.0e-7 .OR. tracer1(i,k,ntsw) > 1.0e-7) then
-                    !  ! Xu-Randall cloud fraction computed in progcld6
-                    !  cldcov(i,k) = clouds(i,k,1)
-                    !else
-                      ! MYNN sub-grid cloud fraction 
-                      cldcov(i,k)    = clouds1(i,k)
-                      clouds(i,k,1)  = clouds1(i,k)
-                    !endif
-                  enddo
-                enddo
-              elseif (Model%imfdeepcnv == Model%imfdeepcnv_gf) then ! GF conv
-                do k=1,lmk
-                  do i=1,im
-                    ! Xu-Randall cloud fraction computed in progcld6
-                    cldcov(i,k)    = clouds(i,k,1)
-                  enddo
-                enddo
-              endif
-
-              if (.not. clduni) then
-                !  --- call progcld6 for interaction with the radiation with setting
-                !  --- uni_cld=.true. to keep precomputed cloud
-                !  --- fraction
-                call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-                         ntsw-1,ntgl-1,                                 &
-                         im, lmk, lmp, .true.,                          & ! Model%uni_cld  
-                         Model%lmfshal,Model%lmfdeep2,                  &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,Model%nleffr), &
-                         Tbd%phy_f3d(:,:,Model%nieffr),                 &
-                         Tbd%phy_f3d(:,:,Model%nseffr),                 &
-                         clouds,cldsa,mtopa,mbota, de_lgth)               !  --- outputs
-
-              else ! clduni
                 ! --- use clduni as with the GFDL microphysics.
                 ! --- make sure that effr_in=.true. in the input.nml!
                 call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,   & !  ---  inputs
@@ -1003,9 +904,6 @@
                          IM, LMK, LMP, clouds(:,1:LMK,1),               &
                          effrl, effri, effrr, effrs, Model%effr_in ,    &
                          clouds, cldsa, mtopa, mbota, de_lgth)            !  ---  outputs
-              endif ! clduni
-
-            endif ! kdt
 
           else
             ! MYNN PBL or GF convective are not used

@@ -19,7 +19,7 @@
 !! \htmlinclude sgscloud_radpost_run.html
 !!
       subroutine sgscloud_radpost_run( &
-           ix,im,levs,                 &
+           im,levs,                    &
            flag_init,flag_restart,     &
            qc,qi,                      &
            qc_save,qi_save,            &
@@ -32,7 +32,7 @@
       implicit none
 !------------------------------------------------------------------- 
 
-      integer, intent(in)  :: ix, im, levs
+      integer, intent(in)  :: im, levs
       logical,          intent(in)  :: flag_init, flag_restart
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: qc_save, qi_save
