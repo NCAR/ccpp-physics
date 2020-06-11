@@ -224,7 +224,7 @@
 
             tem1  = 1.0 - sigmaf(i)
             ztmax = z0max*exp( - tem1*tem1
-     &                       * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
+     &              * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
 
 
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
@@ -265,7 +265,7 @@
 
             tem1  = 1.0 - sigmaf(i)
             ztmax = z0max*exp( - tem1*tem1
-     &                       * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
+     &              * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
             ztmax = max(ztmax, 1.0e-6)
 !
             call stability
