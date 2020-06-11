@@ -284,6 +284,23 @@
   kind = kind_phys
   intent = in
   optional = F
+[islimsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[snwdph_lnd]
+  standard_name = surface_snow_thickness_water_equivalent_over_land
+  long_name = water equivalent snow depth over land
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [psk]
   standard_name = dimensionless_exner_function_at_lowest_model_interface
   long_name = dimensionless Exner function at the surface interface
