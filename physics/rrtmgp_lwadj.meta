@@ -1,0 +1,109 @@
+########################################################################
+#
+########################################################################
+[ccpp-arg-table]
+  name = rrtmgp_lwadj_init
+  type = scheme
+  
+########################################################################
+#
+########################################################################
+[ccpp-arg-table]
+  name = rrtmgp_lwadj_run
+  type = scheme
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F   
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[skt]
+  standard_name = surface_ground_temperature_for_radiation
+  long_name = surface ground temperature for radiation
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sktp1r]
+  standard_name = surface_ground_temperature_for_radiation_at_previous_rad_time_step
+  long_name = surface ground temperature for radiation at previous radiation time step
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[fluxlwUP_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
+  long_name = RRTMGP Jacobian upward longwave flux profile
+  units = W m-2 K-1
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fluxlwDOWN_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_profile_downward
+  long_name = RRTMGP Jacobian downward of longwave flux profile
+  units = W m-2 K-1
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F 
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+[adjsfcdlw]
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[adjsfculw]
+  standard_name = surface_upwelling_longwave_flux
+  long_name = surface upwelling longwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F    
+  
