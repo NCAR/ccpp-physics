@@ -220,15 +220,11 @@
             z0max = max(z0max, 1.0e-6)
 
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
-!           czilc = 0.8
+            czilc = 0.8
 
-!           tem1  = 1.0 - sigmaf(i)
-!           ztmax = z0max*exp( - tem1*tem1
-!    &                     * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
-!
-            czilc = 10.0 ** (- 4. * z0max) ! Trier et al. (2011, WAF)
-            ztmax = z0max * exp( - czilc * ca
-     &            * 258.2 * sqrt(ustar_lnd(i)*z0max) )
+            tem1  = 1.0 - sigmaf(i)
+            ztmax = z0max*exp( - tem1*tem1
+     &              * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
 
 
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
@@ -265,15 +261,11 @@
 
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height
 !           dependance of czil
-!           czilc = 0.8
+            czilc = 0.8
 
-!           tem1  = 1.0 - sigmaf(i)
-!           ztmax = z0max*exp( - tem1*tem1
-!    &                     * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
-            czilc = 10.0 ** (- 4. * z0max) ! Trier et al. (2011, WAF)
-            ztmax = z0max * exp( - czilc * ca
-     &            * 258.2 * sqrt(ustar_ice(i)*z0max) )
-
+            tem1  = 1.0 - sigmaf(i)
+            ztmax = z0max*exp( - tem1*tem1
+     &              * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
             ztmax = max(ztmax, 1.0e-6)
 !
             call stability
@@ -357,7 +349,6 @@
               else
                  z0rl_wat(i) = 1.0e-4
               endif
-
             endif
           endif              ! end of if(open ocean)
 !
