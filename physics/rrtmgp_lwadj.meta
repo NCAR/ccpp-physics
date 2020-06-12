@@ -1,13 +1,3 @@
-########################################################################
-#
-########################################################################
-[ccpp-arg-table]
-  name = rrtmgp_lwadj_init
-  type = scheme
-  
-########################################################################
-#
-########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lwadj_run
   type = scheme
@@ -95,7 +85,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
