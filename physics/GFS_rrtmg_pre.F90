@@ -716,23 +716,20 @@
           end do
           ! Call Thompson's subroutine to compute effective radii
           do i=1,im
-            ! Initialize to default in units m as in module_mp_thompson.F90
-            re_cloud(i,:) = 2.49E-6
-            re_ice(i,:)   = 4.99E-6
-            re_snow(i,:)  = 9.99E-6
+            ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
+            !tgs: progclduni has different limits for ice radii (10.0-150.0) than
+            !     calc_effectRad (4.99-125.0 for WRFv3.8.1; 2.49-125.0 for WRFv4+)
+            !     it will raise the low limit from 5 to 10, but the high limit will remain 125.
             call calc_effectRad (tlyr(i,:), plyr(i,:), qv_mp(i,:), qc_mp(i,:),   &
                                  nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:), &
                                  re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, lm )
           end do
-          ! Scale Thompson's effective radii from meter to micron and apply bounds
+          ! Scale Thompson's effective radii from meter to micron
           do k=1,lm
             do i=1,im
-              re_cloud(i,k) = MAX(2.49, MIN(re_cloud(i,k)*1.e6, 50.))
-              re_ice(i,k)   = MAX(4.99, MIN(re_ice(i,k)*1.e6, 125.))
-              !tgs: progclduni has different limits for ice radii: 10.0-150.0
-              !     it will raise the low limit from 5 to 10, but the
-              !     high limit will remain 125.
-              re_snow(i,k)  = MAX(9.99, MIN(re_snow(i,k)*1.e6, 999.))
+              re_cloud(i,k) = re_cloud(i,k)*1.e6
+              re_ice(i,k)   = re_ice(i,k)*1.e6
+              re_snow(i,k)  = re_snow(i,k)*1.e6
             end do
           end do
           do k=1,lm
