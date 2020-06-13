@@ -351,10 +351,9 @@ contains
          rain    = max(0.0, (delta_rain_mp - (delta_graupel_mp + delta_ice_mp + delta_snow_mp + delta_hail_mp))/1000.0_kind_phys)
 
          if (do_effective_radii) then
-            ! Convert m to micron
-            re_cloud = re_cloud_mp*1.0E6_kind_phys
-            re_ice   = re_ice_mp*1.0E6_kind_phys
-            re_snow  = re_snow_mp*1.0E6_kind_phys
+            re_cloud = re_cloud_mp
+            re_ice   = re_ice_mp
+            re_snow  = re_snow_mp
          end if
 
         end subroutine mp_nssl_2mom_run
