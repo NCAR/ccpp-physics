@@ -356,15 +356,25 @@
 
               elseif (sfc_z0_type == 6) then   ! wang
                  call znot_m_v6(wind10m, z0)   ! wind, m/s, z0, m
-                 z0rl_ocn(i) = 100.0_r8 * z0          ! cm
+                 z0rl_ocn(i) = 100.0_r8 * z0   ! cm
               elseif (sfc_z0_type == 7) then   ! wang
-                 call znot_m_v7(wind10m, z0)  ! wind, m/s, z0, m
-                 z0rl_ocn(i) = 100.0_r8 * z0          ! cm
+                 call znot_m_v7(wind10m, z0)   ! wind, m/s, z0, m
+                 z0rl_ocn(i) = 100.0_r8 * z0   ! cm
               else
                  z0rl_ocn(i) = 1.0e-4_r8
               endif
 
+            elseif (z0rl_ocn(i) <= 0.0_r8) then
+              z0 = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
+
+              if (redrag) then
+                z0rl_ocn(i) = 100.0_r8 * max(min(z0, z0s_max),1.0e-7_r8)
+              else
+                z0rl_ocn(i) = 100.0_r8 * max(min(z0,0.1_r8), 1.e-7_r8)
+              endif
+
             endif
+
           endif              ! end of if(open ocean)
 !
         endif                ! end of if(flagiter) loop
