@@ -68,19 +68,19 @@
      &                    flag_iter,redrag,                             &  !intent(in)
      &                    u10m,v10m,sfc_z0_type,                        &  !hafs,z0 type !intent(in)
      &                    wet,dry,icy,                                  &  !intent(in)
-     &                    tskin_ocn, tskin_lnd, tskin_ice,              &  !intent(in)
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &  !intent(in)
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice,              &  !intent(in)
-     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
-     &                    ustar_ocn, ustar_lnd, ustar_ice,              &  !intent(inout)
-     &                       cm_ocn,    cm_lnd,    cm_ice,              &  !intent(inout)
-     &                       ch_ocn,    ch_lnd,    ch_ice,              &  !intent(inout)
-     &                       rb_ocn,    rb_lnd,    rb_ice,              &  !intent(inout)
-     &                   stress_ocn,stress_lnd,stress_ice,              &  !intent(inout)
-     &                       fm_ocn,    fm_lnd,    fm_ice,              &  !intent(inout)
-     &                       fh_ocn,    fh_lnd,    fh_ice,              &  !intent(inout)
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &  !intent(inout)
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice,              &  !intent(inout)
+     &                    tskin_wat, tskin_lnd, tskin_ice,              &  !intent(in)
+     &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &  !intent(in)
+     &                   snwdph_wat,snwdph_lnd,snwdph_ice,              &  !intent(in)
+     &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
+     &                    ustar_wat, ustar_lnd, ustar_ice,              &  !intent(inout)
+     &                       cm_wat,    cm_lnd,    cm_ice,              &  !intent(inout)
+     &                       ch_wat,    ch_lnd,    ch_ice,              &  !intent(inout)
+     &                       rb_wat,    rb_lnd,    rb_ice,              &  !intent(inout)
+     &                   stress_wat,stress_lnd,stress_ice,              &  !intent(inout)
+     &                       fm_wat,    fm_lnd,    fm_ice,              &  !intent(inout)
+     &                       fh_wat,    fh_lnd,    fh_ice,              &  !intent(inout)
+     &                     fm10_wat,  fm10_lnd,  fm10_ice,              &  !intent(inout)
+     &                      fh2_wat,   fh2_lnd,   fh2_ice,              &  !intent(inout)
      &                    errmsg, errflg)                                  !intent(out)
 !
       implicit none
@@ -101,21 +101,21 @@
      &                    wind,sigmaf,shdmax,                           &
      &                    z0pert,ztpert ! mg, sfc-perts
       real(kind=kind_phys), dimension(im), intent(in)    ::             &
-     &                    tskin_ocn, tskin_lnd, tskin_ice,              &
-     &                    tsurf_ocn, tsurf_lnd, tsurf_ice,              &
-     &                   snwdph_ocn,snwdph_lnd,snwdph_ice
+     &                    tskin_wat, tskin_lnd, tskin_ice,              &
+     &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &
+     &                   snwdph_wat,snwdph_lnd,snwdph_ice
 
       real(kind=kind_phys), dimension(im), intent(inout) ::             &
-     &                     z0rl_ocn,  z0rl_lnd,  z0rl_ice,              &
-     &                    ustar_ocn, ustar_lnd, ustar_ice,              &
-     &                       cm_ocn,    cm_lnd,    cm_ice,              &
-     &                       ch_ocn,    ch_lnd,    ch_ice,              &
-     &                       rb_ocn,    rb_lnd,    rb_ice,              &
-     &                   stress_ocn,stress_lnd,stress_ice,              &
-     &                       fm_ocn,    fm_lnd,    fm_ice,              &
-     &                       fh_ocn,    fh_lnd,    fh_ice,              &
-     &                     fm10_ocn,  fm10_lnd,  fm10_ice,              &
-     &                      fh2_ocn,   fh2_lnd,   fh2_ice
+     &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &
+     &                    ustar_wat, ustar_lnd, ustar_ice,              &
+     &                       cm_wat,    cm_lnd,    cm_ice,              &
+     &                       ch_wat,    ch_lnd,    ch_ice,              &
+     &                       rb_wat,    rb_lnd,    rb_ice,              &
+     &                   stress_wat,stress_lnd,stress_ice,              &
+     &                       fm_wat,    fm_lnd,    fm_ice,              &
+     &                       fh_wat,    fh_lnd,    fh_ice,              &
+     &                     fm10_wat,  fm10_lnd,  fm10_ice,              &
+     &                      fh2_wat,   fh2_lnd,   fh2_ice
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -224,15 +224,11 @@
             z0max = max(z0max, zmin)
 
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height dependance of czil
-!           czilc = 0.8_r8
+            czilc = 0.8_r8
 
-!           tem1  = one - sigmaf(i)
-!           ztmax = z0max*exp( - tem1*tem1
-!    &                   * czilc*ca*sqrt(ustar_lnd(i)*(0.01_r8/1.5d-05)))
-!
-            czilc = 10.0_r8 ** (- 4.0_r8 * z0max) ! Trier et al. (2011, WAF)
-            ztmax = z0max * exp( - czilc * ca
-     &            * 258.2_r8 * sqrt(ustar_lnd(i)*z0max) )
+            tem1  = 1.0_r8 - sigmaf(i)
+            ztmax = z0max*exp( - tem1*tem1
+     &              * czilc*ca*sqrt(ustar_lnd(i)*(0.01/1.5e-05)))
 
 
 ! mg, sfc-perts: add surface perturbations to ztmax/z0max ratio over land
@@ -269,17 +265,12 @@
 
 !           czilc = 10.0 ** (- (0.40/0.07) * z0) ! fei's canopy height
 !           dependance of czil
-!           czilc = 0.8_r8
+            czilc = 0.8_r8
 
-!           tem1  = one - sigmaf(i)
-!           ztmax = z0max*exp( - tem1*tem1
-!    &                   * czilc*ca*sqrt(ustar_ice(i)*(0.01_r8/1.5d-05)))
-
-            czilc = 10.0_r8 ** (- 4.0_r8 * z0max) ! Trier et al. (2011, WAF)
-            ztmax = z0max * exp( - czilc * ca
-     &            * 258.2_r8 * sqrt(ustar_ice(i)*z0max) )
-
-            ztmax = max(ztmax, zmin)
+            tem1  = 1.0_r8 - sigmaf(i)
+            ztmax = z0max*exp( - tem1*tem1
+     &              * czilc*ca*sqrt(ustar_ice(i)*(0.01/1.5e-05)))
+            ztmax = max(ztmax, 1.0e-6)
 !
             call stability
 !  ---  inputs:
@@ -294,17 +285,17 @@
 !      the stuff now put into "stability"
 
           if (wet(i)) then ! Some open ocean
-            tvs          = half * (tsurf_ocn(i)+tskin_ocn(i)) * virtfac
-            z0           = 0.01_r8 * z0rl_ocn(i)
+            tvs          = half * (tsurf_wat(i)+tskin_wat(i)) * virtfac
+            z0           = 0.01_r8 * z0rl_wat(i)
             z0max        = max(zmin, min(z0,z1(i)))
-            ustar_ocn(i) = sqrt(grav * z0 / charnock)
+            ustar_wat(i) = sqrt(grav * z0 / charnock)
             wind10m      = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
 
 !**  test xubin's new z0
 
 !           ztmax  = z0max
 
-            restar = max(ustar_ocn(i)*z0max*visi, 0.000001_r8)
+            restar = max(ustar_wat(i)*z0max*visi, 0.000001_r8)
 
 !           restar = log(restar)
 !           restar = min(restar,5.)
@@ -327,17 +318,17 @@
 !
             call stability
 !  ---  inputs:
-     &       (z1(i), snwdph_ocn(i), thv1, wind(i),
+     &       (z1(i), snwdph_wat(i), thv1, wind(i),
      &        z0max, ztmax, tvs, grav,
 !  ---  outputs:
-     &        rb_ocn(i), fm_ocn(i), fh_ocn(i), fm10_ocn(i), fh2_ocn(i),
-     &        cm_ocn(i), ch_ocn(i), stress_ocn(i), ustar_ocn(i))
+     &        rb_wat(i), fm_wat(i), fh_wat(i), fm10_wat(i), fh2_wat(i),
+     &        cm_wat(i), ch_wat(i), stress_wat(i), ustar_wat(i))
 !
 !  update z0 over ocean
 !
             if (sfc_z0_type >= 0) then
               if (sfc_z0_type == 0) then
-                z0 = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
+                z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
 
 ! mbek -- toga-coare flux algorithm
 !               z0 = (charnock / grav) * ustar(i)*ustar(i) +  arnu/ustar(i)
@@ -348,31 +339,30 @@
 !               z0 = arnu / (ustar(i) * ff ** pp)
 
                 if (redrag) then
-                  z0rl_ocn(i) = 100.0_r8 * max(min(z0, z0s_max),        &
+                  z0rl_wat(i) = 100.0_r8 * max(min(z0, z0s_max),        &
      &                                                 1.0e-7_r8)
                 else
-                  z0rl_ocn(i) = 100.0_r8 * max(min(z0,0.1_r8), 1.e-7_r8)
+                  z0rl_wat(i) = 100.0_r8 * max(min(z0,0.1_r8), 1.e-7_r8)
                 endif
 
               elseif (sfc_z0_type == 6) then   ! wang
                  call znot_m_v6(wind10m, z0)   ! wind, m/s, z0, m
-                 z0rl_ocn(i) = 100.0_r8 * z0   ! cm
+                 z0rl_wat(i) = 100.0_r8 * z0   ! cm
               elseif (sfc_z0_type == 7) then   ! wang
                  call znot_m_v7(wind10m, z0)   ! wind, m/s, z0, m
-                 z0rl_ocn(i) = 100.0_r8 * z0   ! cm
+                 z0rl_wat(i) = 100.0_r8 * z0   ! cm
               else
-                 z0rl_ocn(i) = 1.0e-4_r8
+                 z0rl_wat(i) = 1.0e-4_r8
               endif
 
-            elseif (z0rl_ocn(i) <= 0.0_r8) then
-              z0 = (charnock / grav) * ustar_ocn(i) * ustar_ocn(i)
+            elseif (z0rl_wat(i) <= 0.0_r8) then
+              z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
 
               if (redrag) then
-                z0rl_ocn(i) = 100.0_r8 * max(min(z0, z0s_max),1.0e-7_r8)
+                z0rl_wat(i) = 100.0_r8 * max(min(z0, z0s_max),1.0e-7_r8)
               else
-                z0rl_ocn(i) = 100.0_r8 * max(min(z0,0.1_r8), 1.e-7_r8)
+                z0rl_wat(i) = 100.0_r8 * max(min(z0,0.1_r8), 1.e-7_r8)
               endif
-
             endif
 
           endif              ! end of if(open ocean)

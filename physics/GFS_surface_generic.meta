@@ -677,7 +677,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[adjsfculw_ocn]
+[adjsfculw_wat]
   standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
   long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
   units = W m-2
@@ -767,7 +767,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[tsfc_ocn]
+[tsfc_wat]
   standard_name = surface_skin_temperature_over_ocean_interstitial
   long_name = surface skin temperature over ocean (temporary use as interstitial)
   units = K
