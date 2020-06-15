@@ -47,8 +47,8 @@
 !    call dcyc2t3                                                       !
 !      inputs:                                                          !
 !          ( solhr,slag,sdec,cdec,sinlat,coslat,                        !
-!            xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_ocn,                    !
-!            tf,tsflw,sfcemis_lnd,sfcemis_ice,sfcemis_ocn,              !
+!            xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,                    !
+!            tf,tsflw,sfcemis_lnd,sfcemis_ice,sfcemis_wat,              !
 !            sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    !
 !            sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   !
 !            sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   !
@@ -58,7 +58,7 @@
 !            dtdt,dtdtc,                                                !
 !      outputs:                                                         !
 !            adjsfcdsw,adjsfcnsw,adjsfcdlw,                             !
-!            adjsfculw_lnd,adjsfculw_ice,adjsfculw_ocn,xmu,xcosz,       !
+!            adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       !
 !            adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   !
 !            adjdnnbmd,adjdnndfd,adjdnvbmd,adjdnvdfd)                   !
 !                                                                       !
@@ -74,11 +74,11 @@
 !     coszen (im)  - real, avg of cosz over daytime sw call interval    !
 !     tsfc_lnd  (im) - real, bottom surface temperature over land (k)   !
 !     tsfc_ice  (im) - real, bottom surface temperature over ice (k)    !
-!     tsfc_ocn  (im) - real, bottom surface temperature over ocean (k)  !
+!     tsfc_wat  (im) - real, bottom surface temperature over ocean (k)  !
 !     tf     (im)  - real, surface air (layer 1) temperature (k)        !
 !     sfcemis_lnd(im) - real, surface emissivity (fraction) o. land (k) !
 !     sfcemis_ice(im) - real, surface emissivity (fraction) o. ice (k)  !
-!     sfcemis_ocn(im) - real, surface emissivity (fraction) o. ocean (k)!
+!     sfcemis_wat(im) - real, surface emissivity (fraction) o. ocean (k)!
 !     tsflw  (im)  - real, sfc air (layer 1) temp in k saved in lw call !
 !     sfcdsw (im)  - real, total sky sfc downward sw flux ( w/m**2 )    !
 !     sfcnsw (im)  - real, total sky sfc net sw into ground (w/m**2)    !
@@ -115,7 +115,7 @@
 !     adjsfcdlw(im)- real, time step adjusted sfc dn lw flux (w/m**2)   !
 !     adjsfculw_lnd(im)- real, sfc upw. lw flux at current time (w/m**2)!
 !     adjsfculw_ice(im)- real, sfc upw. lw flux at current time (w/m**2)!
-!     adjsfculw_ocn(im)- real, sfc upw. lw flux at current time (w/m**2)!
+!     adjsfculw_wat(im)- real, sfc upw. lw flux at current time (w/m**2)!
 !     adjnirbmu(im)- real, t adj sfc nir-beam sw upward flux (w/m2)     !
 !     adjnirdfu(im)- real, t adj sfc nir-diff sw upward flux (w/m2)     !
 !     adjvisbmu(im)- real, t adj sfc uv+vis-beam sw upward flux (w/m2)  !
@@ -179,8 +179,8 @@
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
      &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
-     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_ocn, tsfc_lke, tf,tsflw,           &
-     &       sfcemis_lnd, sfcemis_ice, sfcemis_ocn, sfcemis_lke,                     &
+     &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,           &
+     &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
@@ -192,8 +192,7 @@
      &       dtdt,dtdtc,                                                &
 !  ---  outputs:
      &       adjsfcdsw,adjsfcnsw,adjsfcdlw,                             &
-     &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_ocn,adjsfculw_lke,   &
-     &       xmu,xcosz,                                                 &
+     &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
      &       errmsg,errflg                                              &
@@ -227,9 +226,8 @@
      &      sfcdsw, sfcnsw
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
-     &                         tsfc_lnd, tsfc_ice, tsfc_ocn, tsfc_lke,  &
-     &                         sfcemis_lnd, sfcemis_ice, sfcemis_ocn,   &
-     &                         sfcemis_lke
+     &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
+     &                         sfcemis_lnd, sfcemis_ice, sfcemis_wat
 
       real(kind=kind_phys), dimension(im), intent(in) ::                &
      &      sfcnirbmu, sfcnirdfu, sfcvisbmu, sfcvisdfu,                 &
@@ -249,7 +247,7 @@
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
       real(kind=kind_phys), dimension(im), intent(out) ::               &
-     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_ocn, adjsfculw_lke
+     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -323,10 +321,10 @@
           adjsfculw_ice(i) =  sfcemis_ice(i) * con_sbc * tem2 * tem2
      &                     + (one - sfcemis_ice(i)) * adjsfcdlw(i)
         endif
-        if (ocean(i)) then
-          tem2 = tsfc_ocn(i) * tsfc_ocn(i)
-          adjsfculw_ocn(i) =  sfcemis_ocn(i) * con_sbc * tem2 * tem2
-     &                     + (one - sfcemis_ocn(i)) * adjsfcdlw(i)
+        if (wet(i)) then
+          tem2 = tsfc_wat(i) * tsfc_wat(i)
+          adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * tem2 * tem2
+     &                     + (one - sfcemis_wat(i)) * adjsfcdlw(i)
         endif
 !     if (lprnt .and. i == ipr) write(0,*)' in dcyc3: dry==',dry(i)
 !    &,' wet=',wet(i),' icy=',icy(i),' tsfc3=',tsfc3(i,:)
