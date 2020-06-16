@@ -26,23 +26,23 @@
   intent = in
   optional = F
 [skt]
-  standard_name = surface_ground_temperature_for_radiation
-  long_name = surface ground temperature for radiation
+  standard_name = surface_skin_temperature
+  long_name = surface skin temperature
   units = K
   dimensions = (horizontal_dimension)
   type = real
-  kind = kind_phys
+  kind = kind_phys  
   intent = in
   optional = F
 [sktp1r]
-  standard_name = surface_ground_temperature_for_radiation_at_previous_rad_time_step
-  long_name = surface ground temperature for radiation at previous radiation time step
+  standard_name = surface_skin_temperature_at_previous_time_step
+  long_name = surface skin temperature at previous time step
   units = K
   dimensions = (horizontal_dimension)
   type = real
-  kind = kind_phys
+  kind = kind_phys  
   intent = in
-  optional = F  
+  optional = F     
 [fluxlwUP_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
   long_name = RRTMGP Jacobian upward longwave flux profile
@@ -51,7 +51,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = T
 [fluxlwDOWN_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_profile_downward
   long_name = RRTMGP Jacobian downward of longwave flux profile
@@ -60,7 +60,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F 
+  optional = T 
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
