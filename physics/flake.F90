@@ -1155,7 +1155,7 @@ T_ice_n_flk =  MIN(T_ice_n_flk,  tpl_T_f)
 !  T_snow_n_flk = MAX(T_snow_n_flk, 73.15)  
 !  T_ice_n_flk =  MAX(T_ice_n_flk,  73.15)  
 !   The lowest natural temperature ever
-!  directly recorded at ground level on Earth is -89.2 °C (-128.6 °F; 184.0 K)
+!  directly recorded at ground level on Earth is -89.2 C (-128.6 F; 184.0 K)
 !  at the Soviet Vostok Station in Antarctica on 21 July, 1983 by ground
 !  measurements.
 !  https://en.wikipedia.org/wiki/Lowest_temperature_recorded_on_Earth
