@@ -320,24 +320,11 @@ module mp_thompson
 
          ! Calculate initial cloud effective radii if requested
          if (present(re_cloud) .and. present(re_ice) .and. present(re_snow)) then
-           do i = 1, ncol
-             do k = 1, nlev
-               re_cloud(i,k) = 2.49E-6
-               re_ice(i,k)   = 4.99E-6
-               re_snow(i,k)  = 9.99E-6
-             end do
-           end do
+           ! Effective radii [m] are now intent(out), bounds applied in calc_effectRad
            do i = 1, ncol
              call calc_effectRad (tgrs(i,:), prsl(i,:), qv_mp(i,:), qc_mp(i,:),     &
                                   nc_mp(i,:), qi_mp(i,:), ni_mp(i,:), qs_mp(i,:),   &
                                   re_cloud(i,:), re_ice(i,:), re_snow(i,:), 1, nlev)
-           end do
-           do i = 1, ncol
-             do k = 1, nlev
-               re_cloud(i,k) = MAX(2.49E-6, MIN(re_cloud(i,k), 50.E-6))
-               re_ice(i,k)   = MAX(4.99E-6, MIN(re_ice(i,k), 125.E-6))
-               re_snow(i,k)  = MAX(9.99E-6, MIN(re_snow(i,k), 999.E-6))
-             end do
            end do
            !! Convert to micron: required for bit-for-bit identical restarts;
            !! otherwise entering mp_thompson_init and converting mu to m and
@@ -472,6 +459,12 @@ module mp_thompson
          integer         :: has_reqc
          integer         :: has_reqi
          integer         :: has_reqs
+         ! DH* 2020-06-05 hardcode these values for not using random perturbations,
+         ! hasn't been tested yet with this version of module_mp_thompson.F90
+         integer, parameter :: rand_perturb_on = 0
+         integer, parameter :: kme_stoch = 1
+         !real(kind_phys) :: rand_pert(1:ncol,1:kme_stoch)
+         ! *DH 2020-06-05
          ! Dimensions used in mp_gt_driver
          integer         :: ids,ide, jds,jde, kds,kde, &
                             ims,ime, jms,jme, kms,kme, &
@@ -601,6 +594,10 @@ module mp_thompson
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                              rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                              ! DH* 2020-06-05 not passing this optional argument, see
+                              !       comment in module_mp_thompson.F90 / mp_gt_driver
+                              !rand_pert=rand_pert,                                          &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
@@ -618,6 +615,10 @@ module mp_thompson
                               diagflag=diagflag, do_radar_ref=do_radar_ref_mp,               &
                               re_cloud=re_cloud, re_ice=re_ice, re_snow=re_snow,             &
                               has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                              rand_perturb_on=rand_perturb_on, kme_stoch=kme_stoch,          &
+                              ! DH* 2020-06-05 not passing this optional argument, see
+                              !       comment in module_mp_thompson.F90 / mp_gt_driver
+                              !rand_pert=rand_pert,                                          &
                               ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                               ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                               its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte,          &
