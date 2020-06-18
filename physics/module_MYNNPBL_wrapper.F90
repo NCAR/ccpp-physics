@@ -429,6 +429,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 qni(i,k)   = 0.
                 qnwfa(i,k) = 0.
                 qnifa(i,k) = 0.
+                ozone(i,k) = qgrs_ozone(i,k)
             enddo
           enddo
         else
@@ -456,6 +457,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                 qni(i,k)   = 0.
                 qnwfa(i,k) = 0.
                 qnifa(i,k) = 0.
+                ozone(i,k) = qgrs_ozone(i,k)
             enddo
           enddo
         endif
