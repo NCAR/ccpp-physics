@@ -522,9 +522,30 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          dusfc_diag(i)  = dusfc_diag(i) + dusfci_diag(i)*delt
          dvsfc_diag(i)  = dvsfc_diag(i) + dvsfci_diag(i)*delt
 
-         ! BWG: Coupling insertion
+         znt(i)=zorl(i)*0.01 !cm -> m?
+         if (do_mynnsfclay) then
+           rmol(i)=recmol(i)
+         else
+           if (hfx(i) .ge. 0.)then
+             rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
+           else
+             rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
+           endif
+           !if (rb(i) .ge. 0.)then
+           !  rmol(i)=rb(i)*8./(dz(i,1)*0.5)
+           !else
+           !  rmol(i)=MAX(rb(i)*5.,-10.)/(dz(i,1)*0.5)
+           !endif
+         endif
+         ts(i)=tsurf(i)/exner(i,1)  !theta
+!        qsfc(i)=qss(i)
+!        ps(i)=pgr(i)
+!        wspd(i)=wind(i)
+      enddo
+
+      ! BWG: Coupling insertion
       if (cplflx) then
-        !do i=1,im
+        do i=1,im
           if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
             if (fice(i) > one - epsln) then ! no open water, use results from CICE
               dusfci_cpl(i) = dusfc_cice(i)
@@ -558,41 +579,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
             dtsfc_cpl(i) = huge
             dqsfc_cpl(i) = huge
           endif ! Ocean only, NO LAKES
-        !enddo
-      endif
-
-!         if(cplflx) then
-!           dusfci_cpl(i) = dusfci_diag(i)
-!           dvsfci_cpl(i) = dvsfci_diag(i)
-!           dtsfci_cpl(i) = dtsfci_diag(i)
-!           dqsfci_cpl(i) = dqsfci_diag(i)
-!
-!           dusfc_cpl(i) = dusfc_cpl(i) + dusfci_cpl(i)*delt
-!           dvsfc_cpl(i) = dvsfc_cpl(i) + dvsfci_cpl(i)*delt
-!           dtsfc_cpl(i) = dtsfc_cpl(i) + dtsfci_cpl(i)*delt
-!           dqsfc_cpl(i) = dqsfc_cpl(i) + dqsfci_cpl(i)*delt
-!         endif
-
-         znt(i)=zorl(i)*0.01 !cm -> m?
-         if (do_mynnsfclay) then
-           rmol(i)=recmol(i)
-         else
-           if (hfx(i) .ge. 0.)then
-             rmol(i)=-hfx(i)/(200.*dz(i,1)*0.5)
-           else
-             rmol(i)=ABS(rb(i))*1./(dz(i,1)*0.5)
-           endif
-           !if (rb(i) .ge. 0.)then
-           !  rmol(i)=rb(i)*8./(dz(i,1)*0.5)
-           !else
-           !  rmol(i)=MAX(rb(i)*5.,-10.)/(dz(i,1)*0.5)
-           !endif
-         endif
-         ts(i)=tsurf(i)/exner(i,1)  !theta
-!        qsfc(i)=qss(i)
-!        ps(i)=pgr(i)
-!        wspd(i)=wind(i)
-      enddo
+        enddo
+      endif ! End coupling insertion
 
       if (lprnt) then
          print*
