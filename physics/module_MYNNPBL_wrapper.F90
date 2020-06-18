@@ -304,9 +304,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       integer, dimension(im), intent(inout) ::                           &
      &        kpbl,nupdraft,ktop_plume
 
-      real(kind=kind_phys), dimension(im), intent(inout) ::              &
+      real(kind=kind_phys), dimension(:), intent(inout) ::              &
      &        dusfc_cpl,dvsfc_cpl,dtsfc_cpl,dqsfc_cpl
-      real(kind=kind_phys), dimension(im), intent(inout) ::              &
+      real(kind=kind_phys), dimension(:), intent(inout) ::              &
      &        dusfci_cpl,dvsfci_cpl,dtsfci_cpl,dqsfci_cpl
 
      !LOCAL
