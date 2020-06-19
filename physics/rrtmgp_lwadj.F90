@@ -24,7 +24,7 @@ contains
 !! \htmlinclude rrtmgp_lwadj_run.html
 !!  
   subroutine rrtmgp_lwadj_run(use_LW_jacobian, nCol, nLev, skt, sktp1r, fluxlwUP_jac,       &
-       fluxlwDOWN_jac, adjsfculw, adjsfcdlw, errmsg, errflg)
+       fluxlwDOWN_jac, fluxlwUP, adjsfculw, adjsfcdlw, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -38,6 +38,7 @@ contains
     real(kind_phys), dimension(nCol), intent(inout) :: &
          sktp1r             ! Surface(skin) temperature from previous radiation time step (K)
     real(kind_phys), dimension(nCol,nLev+1), intent(in),optional :: &
+    	 fluxlwUP,        & ! Upwelling LW flux
          fluxlwUP_jac,    & ! Jacobian of upward LW flux (W/m2/K)
          fluxlwDOWN_jac     ! Jacobian of downward LW flux (W/m2/K)
 
@@ -56,23 +57,19 @@ contains
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0    
-    
-    print*,'skt:                ',skt,sktp1r,linit_mod
-    print*,'Jacobian(up):       ',fluxlwUP_jac
-    print*,'use_LW_jacobian:    ',use_LW_jacobian
-    
-    if (.not. present(fluxlwUP_jac)) return
+ 
     if (.not. use_LW_jacobian)    return    
     
     ! Compute adjustment to the surface flux using Jacobian.
     if(linit_mod) then
        dT(:)        = (skt(:) - sktp1r(:)) 
-       adjsfculw(:) = fluxlwUP_jac(:,nLev+1)   * dT(:)
+       adjsfculw(:) = fluxlwUP(:,1) + fluxlwUP_jac(:,1)  * dT(:)
     else
        adjsfculw(:) = 0.
        linit_mod    = .true.
     endif
-    
+    print*,'adjsfculw: ',adjsfculw
+
     ! Store surface temperature for next iteration
     sktp1r(:) = skt(:)
     

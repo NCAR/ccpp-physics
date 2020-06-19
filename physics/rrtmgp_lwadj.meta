@@ -24,14 +24,14 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
+  optional = F 
 [skt]
-  standard_name = surface_skin_temperature
-  long_name = surface skin temperature
+  standard_name = air_temperature_at_lowest_model_layer
+  long_name = air temperature at lowest model layer
   units = K
   dimensions = (horizontal_dimension)
   type = real
-  kind = kind_phys  
+  kind = kind_phys
   intent = in
   optional = F
 [sktp1r]
@@ -42,7 +42,16 @@
   type = real
   kind = kind_phys  
   intent = in
-  optional = F     
+  optional = F    
+[fluxlwUP]
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky
+  long_name = RRTMGP upward longwave all-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [fluxlwUP_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
   long_name = RRTMGP Jacobian upward longwave flux profile
