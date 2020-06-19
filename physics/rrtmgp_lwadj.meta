@@ -85,7 +85,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
