@@ -480,17 +480,12 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%sfc_wts'  , Coupling%sfc_wts   )
                      end if
                      if (Model%do_ca) then
-                        call print_var(mpirank,omprank, blkno, 'Coupling%tconvtend', Coupling%tconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%qconvtend', Coupling%qconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%uconvtend', Coupling%uconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%vconvtend', Coupling%vconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%ca_out   ', Coupling%ca_out    )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca1      ', Coupling%ca1       )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_deep  ', Coupling%ca_deep   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_turb  ', Coupling%ca_turb   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_shal  ', Coupling%ca_shal   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_rad   ', Coupling%ca_rad    )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_micro ', Coupling%ca_micro  )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%cape     ', Coupling%cape      )
                      end if
                      if(Model%imp_physics == Model%imp_physics_thompson .and. Model%ltaerosol) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%nwfa2d', Coupling%nwfa2d)
