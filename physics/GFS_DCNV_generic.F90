@@ -17,8 +17,8 @@
 !! \htmlinclude GFS_DCNV_generic_pre_run.html
 !!
 #endif
-    subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, do_cnvgwd, do_ca, cplchm,&
-                                         isppt_deep, gu0, gv0, gt0, gq0_water_vapor, &
+    subroutine GFS_DCNV_generic_pre_run (im, levs, ldiag3d, do_cnvgwd, cplchm,       &
+                                         gu0, gv0, gt0, gq0_water_vapor,             &
                                          save_u, save_v, save_t, save_qv, ca_deep,   &
                                          dqdti, errmsg, errflg)
 
@@ -27,7 +27,7 @@
       implicit none
 
       integer, intent(in) :: im, levs
-      logical, intent(in) :: ldiag3d, do_cnvgwd, do_ca, cplchm, isppt_deep
+      logical, intent(in) :: ldiag3d, do_cnvgwd, cplchm
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gu0
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gv0
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: gt0
@@ -49,15 +49,7 @@
       errmsg = ''
       errflg = 0
 
-      if (do_ca) then
-        do k=1,levs
-          do i=1,im
-            gq0_water_vapor(i,k) = gq0_water_vapor(i,k)*(1.0 + ca_deep(i)/500.)
-          enddo
-        enddo
-      endif
-
-      if (ldiag3d .or. isppt_deep) then
+      if (ldiag3d) then
         do k=1,levs
           do i=1,im
             save_t(i,k) = gt0(i,k)
@@ -73,7 +65,7 @@
         enddo
       endif
 
-      if (ldiag3d .or. cplchm .or. isppt_deep) then
+      if (ldiag3d .or. cplchm) then
         do k=1,levs
           do i=1,im
             save_qv(i,k) = gq0_water_vapor(i,k)
@@ -102,19 +94,19 @@
 !> \section arg_table_GFS_DCNV_generic_post_run Argument Table
 !! \htmlinclude GFS_DCNV_generic_post_run.html
 !!
-    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, ras, cscnv, do_ca,               &
-      isppt_deep, frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,          &
+    subroutine GFS_DCNV_generic_post_run (im, levs, lssav, ldiag3d, ras, cscnv,                      &
+      frain, rain1, dtf, cld1d, save_u, save_v, save_t, save_qv, gu0, gv0, gt0,                      &
       gq0_water_vapor, ud_mf, dd_mf, dt_mf, con_g,  npdf3d, num_p3d, ncnvcld3d,                      &
       rainc, cldwrk, dt3dt, dq3dt, du3dt, dv3dt, upd_mf, dwn_mf, det_mf,                             &
       cnvw, cnvc, cnvw_phy_f3d, cnvc_phy_f3d,                                                        &
-      cape, tconvtend, qconvtend, uconvtend, vconvtend, errmsg, errflg)
+      errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
       integer, intent(in) :: im, levs
-      logical, intent(in) :: lssav, ldiag3d, ras, cscnv, do_ca, isppt_deep
+      logical, intent(in) :: lssav, ldiag3d, ras, cscnv
 
       real(kind=kind_phys), intent(in) :: frain, dtf
       real(kind=kind_phys), dimension(im), intent(in) :: rain1, cld1d
@@ -135,9 +127,6 @@
       ! as long as these do not get used when not allocated (it is still invalid Fortran code, though).
       real(kind=kind_phys), dimension(:,:), intent(inout) :: cnvw_phy_f3d, cnvc_phy_f3d
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: cape
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: tconvtend, qconvtend, uconvtend, vconvtend
-
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
@@ -148,11 +137,6 @@
       errflg = 0
 
       if (.not. ras .and. .not. cscnv) then
-        if(do_ca) then
-          do i=1,im
-            cape(i) = cld1d(i)
-          enddo
-        endif
         if (npdf3d == 3 .and. num_p3d == 4) then
           do k=1,levs
             do i=1,im
@@ -197,18 +181,6 @@
         endif ! if (ldiag3d)
 
       endif ! if (lssav)
-
-
-      if (isppt_deep) then
-        do k=1,levs
-          do i=1,im
-            tconvtend(i,k) = gt0(i,k) - save_t(i,k)
-            qconvtend(i,k) = gq0_water_vapor(i,k) - save_qv(i,k)
-            uconvtend(i,k) = gu0(i,k) - save_u(i,k)
-            vconvtend(i,k) = gv0(i,k) - save_v(i,k)
-          enddo
-        enddo
-      endif
 
     end subroutine GFS_DCNV_generic_post_run
 

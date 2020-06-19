@@ -604,7 +604,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[adjsfculw_ocn]
+[adjsfculw_wat]
   standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
   long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
   units = W m-2

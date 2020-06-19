@@ -33,25 +33,9 @@
   type = logical
   intent = in
   optional = F
-[do_ca]
-  standard_name = flag_for_cellular_automata
-  long_name = cellular automata main switch
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[isppt_deep]
-  standard_name = flag_for_combination_of_sppt_with_isppt_deep
-  long_name = switch for combination with isppt_deep.
   units = flag
   dimensions = ()
   type = logical
@@ -212,22 +196,6 @@
 [cscnv]
   standard_name = flag_for_Chikira_Sugiyama_deep_convection
   long_name = flag for Chikira-Sugiyama convection
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ca]
-  standard_name = flag_for_cellular_automata
-  long_name = cellular automata main switch
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[isppt_deep]
-  standard_name = flag_for_combination_of_sppt_with_isppt_deep
-  long_name = switch for combination with isppt_deep.
   units = flag
   dimensions = ()
   type = logical
@@ -513,51 +481,6 @@
   standard_name = convective_cloud_cover_in_phy_f3d
   long_name = convective cloud cover in the phy_f3d array
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[cape]
-  standard_name = convective_available_potential_energy_for_coupling
-  long_name = convective available potential energy for coupling
-  units = m2 s-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tconvtend]
-  standard_name = tendency_of_air_temperature_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency of air temperature due to deep convection
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[qconvtend]
-  standard_name = tendency_of_water_vapor_specific_humidity_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency of specific humidity due to deep convection
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[uconvtend]
-  standard_name = tendency_of_x_wind_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency_of_x_wind_due_to_deep_convection
-  units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[vconvtend]
-  standard_name = tendency_of_y_wind_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency_of_y_wind_due_to_deep_convection
-  units = m s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
