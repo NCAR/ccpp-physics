@@ -18,6 +18,7 @@
 
       interface print_var
         module procedure print_logic_0d
+        module procedure print_logic_1d
         module procedure print_int_0d
         module procedure print_int_1d
         module procedure print_real_0d
@@ -116,6 +117,7 @@
          do impi=0,mpisize-1
              do iomp=0,ompsize-1
                  if (mpirank==impi .and. omprank==iomp) then
+                     call print_var(mpirank,omprank, blkno, 'Model%kdt'        , Model%kdt)
                      ! Sfcprop
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%slmsk'    , Sfcprop%slmsk)
                      call print_var(mpirank,omprank, blkno, 'Sfcprop%oceanfrac', Sfcprop%oceanfrac)
@@ -478,17 +480,12 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%sfc_wts'  , Coupling%sfc_wts   )
                      end if
                      if (Model%do_ca) then
-                        call print_var(mpirank,omprank, blkno, 'Coupling%tconvtend', Coupling%tconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%qconvtend', Coupling%qconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%uconvtend', Coupling%uconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%vconvtend', Coupling%vconvtend )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%ca_out   ', Coupling%ca_out    )
+                        call print_var(mpirank,omprank, blkno, 'Coupling%ca1      ', Coupling%ca1       )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_deep  ', Coupling%ca_deep   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_turb  ', Coupling%ca_turb   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_shal  ', Coupling%ca_shal   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_rad   ', Coupling%ca_rad    )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ca_micro ', Coupling%ca_micro  )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%cape     ', Coupling%cape      )
                      end if
                      if(Model%imp_physics == Model%imp_physics_thompson .and. Model%ltaerosol) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%nwfa2d', Coupling%nwfa2d)
@@ -556,6 +553,30 @@
           write(0,'(2a,3i6,i15)') 'XXX: ', trim(name), mpirank, omprank, blkno, var
 
       end subroutine print_int_0d
+
+      subroutine print_logic_1d(mpirank,omprank,blkno,name,var)
+
+          use machine,               only: kind_phys
+
+          implicit none
+
+          integer, intent(in) :: mpirank, omprank, blkno
+          character(len=*), intent(in) :: name
+          logical, intent(in) :: var(:)
+
+          integer :: i
+
+#ifdef PRINT_SUM
+          write(0,'(2a,3i6,2i8)') 'XXX: ', trim(name), mpirank, omprank, blkno, size(var), count(var)
+#elif defined(PRINT_CHKSUM)
+          write(0,'(2a,3i6,2i8)') 'XXX: ', trim(name), mpirank, omprank, blkno, size(var), count(var)
+#else
+          do i=ISTART,min(IEND,size(var(:)))
+              write(0,'(2a,3i6,i6,1x,l)') 'XXX: ', trim(name), mpirank, omprank, blkno, i, var(i)
+          end do
+#endif
+
+      end subroutine print_logic_1d
 
       subroutine print_int_1d(mpirank,omprank,blkno,name,var)
 

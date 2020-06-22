@@ -352,7 +352,7 @@
   standard_name = thickness_at_Lagrangian_surface
   long_name = thickness at Lagrangian_surface
   units = m
-  dimensions = (starting_x_direction_index_domain:ending_x_direction_index_domain,starting_y_direction_index_domain:ending_y_direction_index_domain,1:vertical_dimension_for_thickness_at_Lagrangian_surface)
+  dimensions = (starting_x_direction_index:ending_x_direction_index,starting_y_direction_index:ending_y_direction_index,1:vertical_dimension_for_thickness_at_Lagrangian_surface)
   type = real
   kind = kind_dyn
   intent = in
