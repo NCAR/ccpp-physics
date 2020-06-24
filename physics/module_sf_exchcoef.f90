@@ -1,4 +1,4 @@
-!  This MODULE holds the routines that calculate air-sea exchange coefficients 
+!  This MODULE holds the routines that calculate air-sea exchange coefficients
 
 MODULE module_sf_exchcoef
 CONTAINS
@@ -48,7 +48,7 @@ CONTAINS
     END IF
 
   END SUBROUTINE znot_m_v1
-        
+
   SUBROUTINE znot_m_v0(uref,znotm)
   IMPLICIT NONE
 
@@ -57,7 +57,7 @@ CONTAINS
 ! Author      :  Biju Thomas on 02/07/2014
 
     REAL, INTENT(IN) :: uref
-    REAL, INTENT(OUT):: znotm 
+    REAL, INTENT(OUT):: znotm
     REAL             :: yz, y1, y2, y3, y4
 
     yz =  0.0001344
@@ -145,7 +145,7 @@ CONTAINS
     END IF
 
   END SUBROUTINE znot_t_v1
-        
+
   SUBROUTINE znot_t_v0(uref,znott)
   IMPLICIT NONE
 
@@ -154,7 +154,7 @@ CONTAINS
 ! Author      :  Biju Thomas on 02/07/2014
 
     REAL, INTENT(IN) :: uref
-    REAL, INTENT(OUT):: znott 
+    REAL, INTENT(OUT):: znott
 
     IF ( uref .LT. 7.0 ) THEN
        znott = (0.0185 / 9.8*(7.59e-4*uref**2+2.46e-2*uref)**2)
@@ -210,7 +210,7 @@ CONTAINS
        znott = ta6 + ta5*uu + ta4*uu**2  + ta3*uu**3 + ta2*uu**4 +     &
                ta1*uu**5 + ta0*uu**6
     ELSEIF ( uu .GE. 15.0  .AND. uu .LT. 60.0) THEN
-       znott = tb6 + tb5*uu + tb4*uu**2 + tb3*uu**3 + tb2*uu**4 +      & 
+       znott = tb6 + tb5*uu + tb4*uu**2 + tb3*uu**3 + tb2*uu**4 +      &
                tb1*uu**5 + tb0*uu**6
     ELSE
        znott = tt6 + tt5*uu + tt4*uu**2  + tt3*uu**3 + tt2*uu**4 +    &
@@ -226,7 +226,7 @@ CONTAINS
 ! For high winds, try to fit available observational data
 !
 ! Bin Liu, NOAA/NCEP/EMC 2017
-! 
+!
 ! uref(m/s)   :   wind speed at 10-m height
 ! znotm(meter):   areodynamical roughness scale over water
 !
@@ -361,10 +361,10 @@ CONTAINS
 ! Calculate areodynamical roughness over water with input 10-m wind
 ! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
 ! For high winds, try to fit available observational data
-! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed 
+! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
 !
 ! Bin Liu, NOAA/NCEP/EMC 2018
-! 
+!
 ! uref(m/s)   :   wind speed at 10-m height
 ! znotm(meter):   areodynamical roughness scale over water
 !
@@ -443,28 +443,28 @@ CONTAINS
     p12 =  3.342963077911962e-05
     p11 = -2.633566691328004e-04
     p10 =  8.644979973037803e-04
-    
+
     p25 = -9.402722450219142e-12
     p24 =  1.325396583616614e-09
     p23 = -7.299148051141852e-08
     p22 =  1.982901461144764e-06
     p21 = -2.680293455916390e-05
     p20 =  1.484341646128200e-04
-    
+
     p35 =  7.921446674311864e-12
     p34 = -1.019028029546602e-09
     p33 =  5.251986927351103e-08
     p32 = -1.337841892062716e-06
     p31 =  1.659454106237737e-05
     p30 = -7.558911792344770e-05
-    
+
     p45 = -2.694370426850801e-10
     p44 =  5.817362913967911e-08
     p43 = -5.000813324746342e-06
     p42 =  2.143803523428029e-04
     p41 = -4.588070983722060e-03
     p40 =  3.924356617245624e-02
-    
+
     p56 = -1.663918773476178e-13
     p55 =  6.724854483077447e-11
     p54 = -1.127030176632823e-08
@@ -472,7 +472,7 @@ CONTAINS
     p52 = -5.012618091180904e-05
     p51 =  1.329762020689302e-03
     p50 = -1.450062148367566e-02
-    
+
     p60 =  6.840803042788488e-05
 
     if (uref >= 0.0 .and. uref < 5.9 ) then
@@ -500,11 +500,11 @@ CONTAINS
 ! Calculate areodynamical roughness over water with input 10-m wind
 ! For low-to-moderate winds, try to match the Cd-U10 relationship from COARE V3.5 (Edson et al. 2013)
 ! For high winds, try to fit available observational data
-! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed 
+! Comparing to znot_t_v6, slightly decrease Cd for higher wind speed
 ! And this is another variation similar to v7
 !
 ! Bin Liu, NOAA/NCEP/EMC 2018
-! 
+!
 ! uref(m/s)   :   wind speed at 10-m height
 ! znotm(meter):   areodynamical roughness scale over water
 !
@@ -584,14 +584,14 @@ CONTAINS
     p12 =  3.342963077911962e-05
     p11 = -2.633566691328004e-04
     p10 =  8.644979973037803e-04
-    
+
     p25 = -9.402722450219142e-12
     p24 =  1.325396583616614e-09
     p23 = -7.299148051141852e-08
     p22 =  1.982901461144764e-06
     p21 = -2.680293455916390e-05
     p20 =  1.484341646128200e-04
-    
+
     p35 =  7.921446674311864e-12
     p34 = -1.019028029546602e-09
     p33 =  5.251986927351103e-08
@@ -605,7 +605,7 @@ CONTAINS
     p42 =  2.156326523752734e-04
     p41 = -4.617267288861201e-03
     p40 =  3.951492707214883e-02
-    
+
     p56 = -1.112896580069263e-13
     p55 =  4.450334755105140e-11
     p54 = -7.375373918500171e-09
@@ -613,7 +613,7 @@ CONTAINS
     p52 = -3.206421106713471e-05
     p51 =  8.407596231678149e-04
     p50 = -9.027924333673693e-03
-    
+
     p60 =  5.791179079892191e-05
 
     if (uref >= 0.0 .and. uref < 5.9 ) then
@@ -672,7 +672,7 @@ CONTAINS
               call  znot_t_v2(windmks,zt)
 !! adjust a little to match obs at 10m, cd is reduced
             tmp=0.4*0.4/(alog(zlev/zm))**2   ! cd at zlev
-            zm1=z10/exp( sqrt(0.4*0.4/(tmp*0.95-0.0002)) ) 
+            zm1=z10/exp( sqrt(0.4*0.4/(tmp*0.95-0.0002)) )
 !ch
             tmp=0.4*0.4/(alog(zlevt/zm)*alog(zlevt/zt))  ! ch at zlev using old formula
             zt1=z10/exp( 0.4*0.4/( 0.95*tmp*alog(z10/zm1) )  )
@@ -681,7 +681,7 @@ CONTAINS
 
               call  znot_m_v1(windmks,zm)
               call  znot_t_v2(windmks,zt)
-!!  for wind<20, cd similar to icoef=2 at 10m, then reduced 
+!!  for wind<20, cd similar to icoef=2 at 10m, then reduced
              tmp=0.4*0.4/(alog(10.0/zm))**2   ! cd at zlev
              aaa=0.75
             if (windmks < 20) then
@@ -689,7 +689,7 @@ CONTAINS
             elseif(windmks < 45.0) then
               aaa=0.99+(windmks-20)*(0.75-0.99)/(45.0-20.0)
             endif
-            zm1=z10/exp( sqrt(0.4*0.4/(tmp*aaa)) )  
+            zm1=z10/exp( sqrt(0.4*0.4/(tmp*aaa)) )
 !ch
           tmp=0.4*0.4/(alog(zlevt/zm)*alog(zlevt/zt))  ! ch at zlev using old formula
             zt1=z10/exp( 0.4*0.4/( 0.95*tmp*alog(z10/zm1) )  )

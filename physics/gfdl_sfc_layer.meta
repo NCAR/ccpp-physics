@@ -436,7 +436,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F  
+  optional = F
 [glw]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
