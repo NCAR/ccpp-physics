@@ -179,7 +179,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
   REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, g_inv=1./g
 
-  REAL, PARAMETER :: zero=0.0d0, one=1.0d0, epsln=1.0d-10
+  REAL, PARAMETER :: zero=0.0d0, one=1.0d0
   REAL, PARAMETER :: huge=9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
 
   character(len=*), intent(out) :: errmsg
@@ -549,7 +549,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
-            if (fice(i) > one - epsln) then ! no open water, use results from CICE
+            if ( .not. wet(i)) then ! no open water, use results from CICE
               dusfci_cpl(i) = dusfc_cice(i)
               dvsfci_cpl(i) = dvsfc_cice(i)
               dtsfci_cpl(i) = dtsfc_cice(i)
