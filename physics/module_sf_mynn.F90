@@ -166,6 +166,8 @@ CONTAINS
                  fh_ocn,    fh_lnd,    fh_ice,       & !intent(inout)
                fm10_ocn,  fm10_lnd,  fm10_ice,       & !intent(inout)
                 fh2_ocn,   fh2_lnd,   fh2_ice,       & !intent(inout)
+               HFLX_ocn,  HFLX_lnd,  HFLX_ice,       &
+               QFLX_ocn,  QFLX_lnd,  QFLX_ice,       &
               CH,CHS,CHS2,CQS2,CPM,                  &
               ZNT,USTM,ZOL,MOL,RMOL,                 &
               PSIM,PSIH,                             &
@@ -360,6 +362,8 @@ CONTAINS
      &                       fh_ocn,    fh_lnd,    fh_ice,         &
      &                     fm10_ocn,  fm10_lnd,  fm10_ice,         &
      &                      fh2_ocn,   fh2_lnd,   fh2_ice,         &
+     &                     HFLX_ocn,  HFLX_lnd,  HFLX_ice,         &
+     &                     QFLX_ocn,  QFLX_lnd,  QFLX_ice,         &
      &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice,         &
      &                                qsfc_ruc
 
@@ -468,6 +472,8 @@ CONTAINS
                  fh_ocn,       fh_lnd,       fh_ice,              &  !intent(inout)
                fm10_ocn,     fm10_lnd,     fm10_ice,              &  !intent(inout)
                 fh2_ocn,      fh2_lnd,      fh2_ice,              &
+               HFLX_ocn,     HFLX_lnd,     HFLX_ice,              &
+               QFLX_ocn,     QFLX_lnd,     QFLX_ice,              &
              ch(ims,j),CHS(ims,j),CHS2(ims,j),CQS2(ims,j),        &
              CPM(ims,j),                                          &
              ZNT(ims,j),USTM(ims,j),ZOL(ims,j),                   &
@@ -519,6 +525,8 @@ CONTAINS
                psit_ocn,     psit_lnd,     psit_ice,              &  !=fh, intent(inout)
              psix10_ocn,   psix10_lnd,   psix10_ice,              &  !=fm10, intent(inout)
               psit2_ocn,    psit2_lnd,    psit2_ice,              &  !=fh2, intent(inout)
+               HFLX_ocn,     HFLX_lnd,     HFLX_ice,              &
+               QFLX_ocn,     QFLX_lnd,     QFLX_ice,              &
              ch,CHS,CHS2,CQS2,CPM,                                &
              ZNT,USTM,ZOL,MOL,RMOL,                               &
              PSIM,PSIH,                                           &
@@ -613,6 +621,8 @@ CONTAINS
      &                     psit_ocn,  psit_lnd,  psit_ice,         &
      &                   psix10_ocn,psix10_lnd,psix10_ice,         &
      &                    psit2_ocn, psit2_lnd, psit2_ice,         &
+     &                     HFLX_ocn,  HFLX_lnd,  HFLX_ice,         &
+     &                     QFLX_ocn,  QFLX_lnd,  QFLX_ice,         &
      &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
 
       REAL,     DIMENSION( its:ite ), INTENT(IN)   ::     rstoch1D
@@ -1763,14 +1773,18 @@ CONTAINS
             QFX(I)=FLQC(I)*(QSFC_lnd(I)-QV1D(I))
             QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
             LH(i)=XLV*QFX(i)
-            QFLX(i)=QFX(i)/RHO1D(i)
+            ! BWG, 2020-06-17: Mod next 2 lines for fractional
+            QFLX_lnd(i)=QFX(i)/RHO1D(i)
+            QFLX(i)=QFLX_lnd(i)
 
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:
             !----------------------------------
             HFX(I)=FLHC(I)*(THSK_lnd(I)-TH1D(I))
             HFX(I)=MAX(HFX(I),-250.)
-            HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            ! BWG, 2020-06-17: Mod next 2 lines for fractional
+            HFLX_lnd(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            HFLX(I)=HFLX_lnd(I)
          ENDIF
 
          !TRANSFER COEFF FOR SOME LSMs:
@@ -1801,7 +1815,9 @@ CONTAINS
             QFX(I)=FLQC(I)*(QSFC_ocn(I)-QV1D(I))
             QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
             LH(I)=XLV*QFX(I)
-            QFLX(i)=QFX(i)/RHO1D(i)
+            ! BWG, 2020-06-17: Mod next 2 lines for fractional
+            QFLX_ocn(i)=QFX(i)/RHO1D(i)
+            QFLX(i)=QFLX_ocn(i)
 
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:       
@@ -1813,7 +1829,9 @@ CONTAINS
                   HFX(I)=HFX(I)+RHO1D(I)*USTM(I)*USTM(I)*WSPDI(I)
                ENDIF
             ENDIF
-            HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            ! BWG, 2020-06-17: Mod next 2 lines for fractional
+            HFLX_ocn(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            HFLX(I)=HFLX_ocn(I)
          ENDIF
 
          !TRANSFER COEFF FOR SOME LSMs:
@@ -1844,14 +1862,18 @@ CONTAINS
             QFX(I)=FLQC(I)*(QSFC_ice(I)-QV1D(I))
             QFX(I)=MAX(QFX(I),-0.02)      !allows small neg QFX
             LH(I)=XLF*QFX(I)
-            QFLX(i)=QFX(i)/RHO1D(i)
+            ! BWG, 2020-06-17: Mod next 2 lines for fractional
+            QFLX_ice(i)=QFX(i)/RHO1D(i)
+            QFLX(i)=QFLX_ice(i)
 
             !----------------------------------
             ! COMPUTE SURFACE HEAT FLUX:
             !----------------------------------
             HFX(I)=FLHC(I)*(THSK_ice(I)-TH1D(I))
             HFX(I)=MAX(HFX(I),-250.)
-            HFLX(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            ! BWG, 2020-06-17: Mod next 2 lines for fractional
+            HFLX_ice(I)=HFX(I)/(RHO1D(I)*cpm(I))
+            HFLX(I)=HFLX_ice(I)
          ENDIF
 
          !TRANSFER COEFF FOR SOME LSMs:

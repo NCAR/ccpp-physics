@@ -48,6 +48,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &      fh_ocn,    fh_lnd,    fh_ice,  &  !intent(inout)
      &    fm10_ocn,  fm10_lnd,  fm10_ice,  &  !intent(inout)
      &     fh2_ocn,   fh2_lnd,   fh2_ice,  &  !intent(inout)
+     &    hflx_ocn,  hflx_lnd,  hflx_ice,  &
+     &    qflx_ocn,  qflx_lnd,  qflx_ice,  &
      &  QSFC, qsfc_ruc, USTM, ZOL, MOL,    &
      &  RMOL, WSPD, ch, HFLX, QFLX, LH,    &
      &  FLHC, FLQC,                        &
@@ -149,6 +151,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                       fh_ocn,    fh_lnd,    fh_ice,  &
      &                     fm10_ocn,  fm10_lnd,  fm10_ice,  &
      &                      fh2_ocn,   fh2_lnd,   fh2_ice,  &
+     &                     hflx_ocn,  hflx_lnd,  hflx_ice,  &
+     &                     qflx_ocn,  qflx_lnd,  qflx_ice,  &
      &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
 
 !MYNN-2D
@@ -267,6 +271,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
                    fh_ocn=fh_ocn,        fh_lnd=fh_lnd,        fh_ice=fh_ice, &  !intent(inout)
                fm10_ocn=fm10_ocn,    fm10_lnd=fm10_lnd,    fm10_ice=fm10_ice, &  !intent(inout)
                  fh2_ocn=fh2_ocn,      fh2_lnd=fh2_lnd,      fh2_ice=fh2_ice, &  !intent(inout)
+               hflx_ocn=hflx_ocn,    hflx_lnd=hflx_lnd,    hflx_ice=hflx_ice, &
+               qflx_ocn=qflx_ocn,    qflx_lnd=qflx_lnd,    qflx_ice=qflx_ice, &
              ch=ch,CHS=chs,CHS2=chs2,CQS2=cqs2,CPM=cpm,                       &
              ZNT=znt,USTM=ustm,ZOL=zol,MOL=mol,RMOL=rmol,                     &
              psim=psim,psih=psih,                                             &

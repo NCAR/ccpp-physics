@@ -60,6 +60,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dtsfci_diag,dqsfci_diag,        &
      &  dusfc_diag,dvsfc_diag,          &
      &  dtsfc_diag,dqsfc_diag,          &
+     &  dusfc_cice,dvsfc_cice,          &
+     &  dtsfc_cice,dqsfc_cice,          &
+     &  hflx_ocn,qflx_ocn,stress_ocn,   &
+     &  oceanfrac,fice,wet,icy,dry,     &
      &  dusfci_cpl,dvsfci_cpl,          &
      &  dtsfci_cpl,dqsfci_cpl,          &
      &  dusfc_cpl,dvsfc_cpl,            &
@@ -175,6 +179,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
   REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, g_inv=1./g
 
+  REAL, PARAMETER :: zero=0.0d0, one=1.0d0
+  REAL, PARAMETER :: huge=9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
+
   character(len=*), intent(out) :: errmsg
   integer, intent(out) :: errflg
 
@@ -278,6 +285,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real(kind=kind_phys), dimension(im), intent(in) ::                 &
      &        dx,zorl,slmsk,tsurf,qsfc,ps,                               &
      &        hflx,qflx,ust,wspd,rb,recmol
+
+      real(kind=kind_phys), dimension(im), intent(in) ::                 &
+     &        dusfc_cice,dvsfc_cice,dtsfc_cice,dqsfc_cice,               &
+     &        stress_ocn,hflx_ocn,qflx_ocn,                              &
+     &        oceanfrac,fice
+
+      logical, dimension(im), intent(in) ::                              &
+     &        wet, dry, icy
 
       real(kind=kind_phys), dimension(im), intent(inout) ::              &
      &        pblh
@@ -509,19 +524,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          dusfc_diag(i)  = dusfc_diag(i) + dusfci_diag(i)*delt
          dvsfc_diag(i)  = dvsfc_diag(i) + dvsfci_diag(i)*delt
 
-         ! BWG: Coupling insertion
-         if(cplflx) then
-           dusfci_cpl(i) = dusfci_diag(i)
-           dvsfci_cpl(i) = dvsfci_diag(i)
-           dtsfci_cpl(i) = dtsfci_diag(i)
-           dqsfci_cpl(i) = dqsfci_diag(i)
-
-           dusfc_cpl(i) = dusfc_cpl(i) + dusfci_cpl(i)*delt
-           dvsfc_cpl(i) = dvsfc_cpl(i) + dvsfci_cpl(i)*delt
-           dtsfc_cpl(i) = dtsfc_cpl(i) + dtsfci_cpl(i)*delt
-           dqsfc_cpl(i) = dqsfc_cpl(i) + dqsfci_cpl(i)*delt
-         endif
-
          znt(i)=zorl(i)*0.01 !cm -> m?
          if (do_mynnsfclay) then
            rmol(i)=recmol(i)
@@ -542,6 +544,45 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !        ps(i)=pgr(i)
 !        wspd(i)=wind(i)
       enddo
+
+      ! BWG: Coupling insertion
+      if (cplflx) then
+        do i=1,im
+          if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
+            if ( .not. wet(i)) then ! no open water, use results from CICE
+              dusfci_cpl(i) = dusfc_cice(i)
+              dvsfci_cpl(i) = dvsfc_cice(i)
+              dtsfci_cpl(i) = dtsfc_cice(i)
+              dqsfci_cpl(i) = dqsfc_cice(i)
+            elseif (icy(i) .or. dry(i)) then ! use stress_ocean for opw component at mixed point
+              if (wspd(i) > zero) then
+                dusfci_cpl(i) = -1.*rho(i,1)*stress_ocn(i)*u(i,1)/wspd(i)   ! U-momentum flux
+                dvsfci_cpl(i) = -1.*rho(i,1)*stress_ocn(i)*v(i,1)/wspd(i)   ! V-momentum flux
+              else
+                dusfci_cpl(i) = zero
+                dvsfci_cpl(i) = zero
+              endif
+              dtsfci_cpl(i) =  cp*rho(i,1)*hflx_ocn(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = XLV*rho(i,1)*qflx_ocn(i) ! latent heat flux over open ocean
+            else                                       ! use results from this scheme for 100% open ocean
+              dusfci_cpl(i) = dusfci_diag(i)
+              dvsfci_cpl(i) = dvsfci_diag(i)
+              dtsfci_cpl(i) = dtsfci_diag(i)
+              dqsfci_cpl(i) = dqsfci_diag(i)
+            endif
+!
+            dusfc_cpl (i) = dusfc_cpl(i) + dusfci_cpl(i) * delt
+            dvsfc_cpl (i) = dvsfc_cpl(i) + dvsfci_cpl(i) * delt
+            dtsfc_cpl (i) = dtsfc_cpl(i) + dtsfci_cpl(i) * delt
+            dqsfc_cpl (i) = dqsfc_cpl(i) + dqsfci_cpl(i) * delt
+          else ! If no ocean
+            dusfc_cpl(i) = huge
+            dvsfc_cpl(i) = huge
+            dtsfc_cpl(i) = huge
+            dqsfc_cpl(i) = huge
+          endif ! Ocean only, NO LAKES
+        enddo
+      endif ! End coupling insertion
 
       if (lprnt) then
          print*

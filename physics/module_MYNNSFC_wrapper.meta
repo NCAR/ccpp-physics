@@ -644,6 +644,60 @@
   kind = kind_phys
   intent = inout
   optional = F
+[hflx_ocn]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_ocean
+  long_name = kinematic surface upward sensible heat flux over ocean
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[hflx_lnd]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_land
+  long_name = kinematic surface upward sensible heat flux over land
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[hflx_ice]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_ice
+  long_name = kinematic surface upward sensible heat flux over ice
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qflx_ocn]
+  standard_name = kinematic_surface_upward_latent_heat_flux_over_ocean
+  long_name = kinematic surface upward latent heat flux over ocean
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qflx_lnd]
+  standard_name = kinematic_surface_upward_latent_heat_flux_over_land
+  long_name = kinematic surface upward latent heat flux over land
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qflx_ice]
+  standard_name = kinematic_surface_upward_latent_heat_flux_over_ice
+  long_name = kinematic surface upward latent heat flux over ice
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [qsfc]
   standard_name = surface_specific_humidity
   long_name = surface air saturation specific humidity
