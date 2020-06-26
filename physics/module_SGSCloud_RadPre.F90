@@ -39,7 +39,7 @@
            flag_init,flag_restart,       &
            do_mynnedmf,                  &
            qc, qi, qv, T3D, P3D,         &
-           qr, qs,                       &
+           qr, qs, qg,                   &
            qci_conv,                     &
            imfdeepcnv, imfdeepcnv_gf,    &
            qc_save, qi_save,             &
@@ -68,7 +68,7 @@
            &               nlay, imp_physics, imp_physics_gfdl
       logical,          intent(in)  :: flag_init, flag_restart, do_mynnedmf
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qr, qs
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qr, qs, qg
       ! qci_conv only allocated if GF is used
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: qci_conv
       real(kind=kind_phys), dimension(im,levs), intent(in)    :: T3D,delp, &
@@ -117,22 +117,20 @@
             if ( qi(i,k) > 1E-7 .OR. qc(i,k) > 1E-7 ) then
               es     = min( p3d(i,k),  fpvs( t3d(i,k) ) )  ! fpvs and prsl in pa
               qsat   = max( QMIN, eps * es / (p3d(i,k) + epsm1*es) )
-              rhgrid = max( 0., min( 0.95, qv(i,k)/qsat ) )
-              h2oliq = qc(i,k) + qi(i,k)                   ! g/kg
+              rhgrid = max( 0., min( 1., qv(i,k)/qsat ) )
+              h2oliq = qc(i,k) + qi(i,k) + qr(i,k) + qs(i,k) + qg(i,k)   ! g/kg
               clwt   = 1.0e-6 * (p3d(i,k)*0.00001)
 
               if (h2oliq > clwt) then
                 onemrh= max( 1.e-10, 1.0-rhgrid )
                 tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan                                                          
                 tem1  = 100.0 / tem1
-                value = max( min( tem1*(h2oliq), 50.0 ), 0.0 )
+                value = max( min( tem1*(h2oliq-clwt), 50.0 ), 0.0 )
                 tem2  = sqrt( sqrt(rhgrid) )
 
                 clouds1(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
               endif
-              !clouds1(i,k)=(1.-exp(-coef_alph*h2oliq/    &
-              !   & ((1.-rhgrid)*qsat*1000.0)**coef_gamm))*(rhgrid**coef_p)
-              !clouds1(i,k)=max(0.0,MIN(1.,clouds1(i,k)))
+
             endif
           enddo
         enddo
@@ -213,27 +211,20 @@
 
                 es     = min( p3d(i,k),  fpvs( t3d(i,k) ) )  ! fpvs and prsl in pa
                 qsat   = max( QMIN, eps * es / (p3d(i,k) + epsm1*es) )
-                rhgrid = max( 0., min( 0.95, qv(i,k)/qsat ) )
-                h2oliq = qc(i,k) + qi(i,k)                   ! g/kg
+                rhgrid = max( 0., min( 1., qv(i,k)/qsat ) )
+                h2oliq = qc(i,k) + qi(i,k) + qr(i,k) + qs(i,k) + qg(i,k) ! g/kg
                 clwt   = 1.0e-6 * (p3d(i,k)*0.00001)
 
                 if (h2oliq > clwt) then
                   onemrh= max( 1.e-10, 1.0-rhgrid )
                   tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan
                   tem1  = 100.0 / tem1
-                  value = max( min( tem1*(h2oliq), 50.0 ), 0.0 )
+                  value = max( min( tem1*(h2oliq-clwt), 50.0 ), 0.0 )
                   tem2  = sqrt( sqrt(rhgrid) )
 
                   clouds1(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
                 endif
 
-                !es     = min( p3d(i,k),  fpvs( t3d(i,k) ) )  ! fpvs and prsl in pa
-                !qsat   = max( QMIN, eps * es / (p3d(i,k) + epsm1*es) )
-                !rhgrid = max( 0., min( 0.95, qv(i,k)/qsat ) )
-                !h2oliq=1000.0*( qc(i,k) + qi(i,k) )          ! g/kg
-                !clouds1(i,k)=(1.-exp(-coef_alph*h2oliq/    &
-                !  & ((1.-rhgrid)*qsat*1000.0)**coef_gamm))*(rhgrid**coef_p)
-                !clouds1(i,k)=max(0.0,MIN(1.,clouds1(i,k)))
               endif
             enddo
           enddo
@@ -265,27 +256,32 @@
                   if(qi(i,k)>1.E-8)clouds5(i,k)=max(173.45 + 2.14*Tc, 20.)
                 endif
 
-                ! Xu-Randall (1996) cloud fraction
-                es     = min( p3d(i,k),  fpvs( t3d(i,k) ) )  ! fpvs and prsl in pa
-                qsat   = max( QMIN, eps * es / (p3d(i,k) + epsm1*es) )
-                rhgrid = max( 0., min( 0.95, qv(i,k)/qsat ) )
-                h2oliq = qc(i,k) + qi(i,k)                   ! g/kg
-                clwt   = 1.0e-6 * (p3d(i,k)*0.00001)
-
-                if (h2oliq > clwt) then
-                  onemrh= max( 1.e-10, 1.0-rhgrid )
-                  tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan
-                  tem1  = 100.0 / tem1
-                  value = max( min( tem1*(h2oliq), 50.0 ), 0.0 )
-                  tem2  = sqrt( sqrt(rhgrid) )
-
-                  clouds1(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+                if ( do_mynnedmf .or. (imp_physics == imp_physics_gfdl) ) then
+                  !print *,'MYNN PBL or GFDL MP cldcov used'
                 else
-                  clouds1(i,k) = 0.0
-                endif
-                !print*,"XuRandla- cf:",clouds1(i,k)," rh:",rhgrid," qt:",h2oliq
-                !print*,"XuRandlb- clwt:",clwt," qsat:",qsat," p:",p3d(i,k)
-              endif
+                  !print *,'GF with Xu-Randall cloud fraction'
+                  ! Xu-Randall (1996) cloud fraction
+                  es     = min( p3d(i,k),  fpvs( t3d(i,k) ) )  ! fpvs and prsl in pa
+                  qsat   = max( QMIN, eps * es / (p3d(i,k) + epsm1*es) )
+                  rhgrid = max( 0., min( 1.00, qv(i,k)/qsat ) )
+                  h2oliq = qc(i,k) + qi(i,k) + qr(i,k) + qs(i,k) + qg(i,k) ! g/kg
+                  clwt   = 1.0e-6 * (p3d(i,k)*0.00001)
+
+                  if (h2oliq > clwt) then
+                    onemrh= max( 1.e-10, 1.0-rhgrid )
+                    tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan
+                    tem1  = 100.0 / tem1
+                    value = max( min( tem1*(h2oliq-clwt), 50.0 ), 0.0 )
+                    tem2  = sqrt( sqrt(rhgrid) )
+
+                    clouds1(i,k) = max( tem2*(1.0-exp(-value)), 0.0 )
+                  else
+                    clouds1(i,k) = 0.0
+                  endif
+                  !print*,"XuRandla- cf:",clouds1(i,k)," rh:",rhgrid," qt:",h2oliq
+                  !print*,"XuRandlb- clwt:",clwt," qsat:",qsat," p:",p3d(i,k)
+                endif ! not MYNN PBL or GFDL MP
+              endif ! qci_conv
             enddo
           enddo
         endif ! imfdeepcnv_gf
