@@ -37,7 +37,8 @@ module GFS_rrtmgp_pre
        progcld1,                 & ! Zhao/Moorthi's prognostic cloud scheme
        progcld3,                 & ! Zhao/Moorthi's prognostic cloud+pdfcld
        progcld4,                 & ! GFDL cloud scheme
-       progcld5,                 & ! Thompson / WSM6 cloud micrphysics scheme
+       progcld5,                 & ! Ferrier Aligo microphysics scheme
+       progcld6,                 & ! Thompson cloud microphysics scheme
        progclduni                  ! Unified cloud-scheme
   use surface_perturbation, only: & 
        cdfnor                      ! Routine to compute CDF (used to compute percentiles)
@@ -740,10 +741,47 @@ contains
                mbota,                & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
                de_lgth)                ! OUT - clouds decorrelation length (km)
        endif
-       ! *) Thompson / WSM6 cloud micrphysics scheme
-    elseif(Model%imp_physics == 8 .or. Model%imp_physics == 6) then
+       ! *) Ferrier-Aligo cloud microphysics scheme
+    elseif(Model%imp_physics == 15) then
  
        call progcld5 ( & ! IN
+            p_lay/100.,               & ! IN  - Pressure at model layer centers                (mb)
+            p_lev/100.,               & ! IN  - Pressure at model interfaces                   (mb)
+            t_lay,                    & ! IN  - Temperature at layer centers                   (K)
+            tv_lay,                   & ! IN  - Virtual temperature at layer centers           (K)
+            q_lay,                    & ! IN  - Specific humidity at layer center              (kg/kg)
+            qs_lay,                   & ! IN  - Saturation specific humidity at layer center   (kg/kg)
+            relhum,                   & ! IN  - Relative humidity at layer center              (1)
+            tracer,                   & ! IN  - Cloud condensate amount in layer by type       ()
+            Grid%xlat,                & ! IN  - Latitude                                       (radians)
+            Grid%xlon,                & ! IN  - Longitude                                      (radians)
+            Sfcprop%slmsk,            & ! IN  - Land/Sea mask                                  ()
+            deltaZ,                   & ! IN  - Layer thickness                                (km)
+            deltaP/100.,              & ! IN  - Layer thickness                                (hPa)
+            Model%ntrac-1,            & ! IN  - Number of tracers
+            Model%ntcw-1,             & ! IN  - Tracer index for cloud condensate (or liquid water)
+            Model%ntiw-1,             & ! IN  - Tracer index for ice
+            Model%ntrw-1,             & ! IN  - Tracer index for rain
+            NCOL,                     & ! IN  - Number of horizontal gridpoints
+            MODEL%LEVS,               & ! IN  - Number of model layers
+            MODEL%LEVS+1,             & ! IN  - Number of model levels
+            Model%icloud,             & ! IN  - cloud effect to the optical depth and cloud fraction in radiation
+            Model%uni_cld,            & ! IN  - True for cloud fraction from shoc
+            Model%lmfshal,            & ! IN  - True for mass flux shallow convection
+            Model%lmfdeep2,           & ! IN  - True for mass flux deep convection
+            cldcov(:,1:Model%levs),   & ! IN  - Layer cloud fraction (used if uni_cld=.true.)
+            Tbd%phy_f3d(:,:,1),       & ! IN  - Liquid-water effective radius                  (microns)
+            Tbd%phy_f3d(:,:,2),       & ! IN  - Ice-water effective radius                     (microns)
+            Tbd%phy_f3d(:,:,3),       & ! IN  - LSnow-water effective radius                   (microns)
+            clouds,                   & ! OUT - Cloud properties                               (NCOL,Model%levs,NF_CLDS)
+            cldsa,                    & ! OUT - fraction of clouds for low, mid, hi, tot, bl   (NCOL,5)
+            mtopa,                    & ! OUT - vertical indices for low, mid, hi cloud tops   (NCOL,3)
+            mbota,                    & ! OUT - vertical indices for low, mid, hi cloud bases  (NCOL,3)
+            de_lgth)                    ! OUT - clouds decorrelation length (km)
+       ! *) Thompson  cloud microphysics scheme
+    elseif(Model%imp_physics == 8) then
+
+       call progcld6 ( & ! IN
             p_lay/100.,               & ! IN  - Pressure at model layer centers                (mb)
             p_lev/100.,               & ! IN  - Pressure at model interfaces                   (mb)
             t_lay,                    & ! IN  - Temperature at layer centers                   (K)
