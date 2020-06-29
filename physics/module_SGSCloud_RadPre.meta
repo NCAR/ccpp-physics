@@ -106,6 +106,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[qg]
+  standard_name = graupel_mixing_ratio
+  long_name = graupel mixing ratio wrt dry+vapor (no condensates)
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
