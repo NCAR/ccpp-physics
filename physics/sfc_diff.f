@@ -355,13 +355,13 @@
                  z0rl_wat(i) = 1.0e-4_r8
               endif
 
-            elseif (z0rl_wat(i) <= 0.0_r8) then
+            elseif (z0rl_wat(i) <= 1.0e-7_r8) then
               z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
 
               if (redrag) then
                 z0rl_wat(i) = 100.0_r8 * max(min(z0, z0s_max),1.0e-7_r8)
               else
-                z0rl_wat(i) = 100.0_r8 * max(min(z0,0.1_r8), 1.e-7_r8)
+                z0rl_wat(i) = 100.0_r8 * max(min(z0,0.1_r8), 1.0e-7_r8)
               endif
             endif
 
