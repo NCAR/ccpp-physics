@@ -59,8 +59,8 @@
 !! @{
       subroutine satmedmfvdifq_run(ix,im,km,ntrac,ntcw,ntiw,ntke,       &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,islimsk,         &
+     &     snwdph_lnd,psk,rbsoil,zorl,u10m,v10m,fm,fh,                  &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
@@ -75,6 +75,7 @@
 !----------------------------------------------------------------------
       integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke
       integer, intent(in)  :: kinver(im)
+      integer, intent(in)  :: islimsk(im)
       integer, intent(out) :: kpbl(im)
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
@@ -88,6 +89,7 @@
      &                     t1(ix,km),     q1(ix,km,ntrac),              &
      &                     swh(ix,km),    hlw(ix,km),                   &
      &                     xmu(im),       garea(im),                    &
+     &                     snwdph_lnd(im),                              &
      &                     psk(ix),       rbsoil(im),                   &
      &                     zorl(im),      tsea(im),                     &
      &                     u10m(im),      v10m(im),                     &
@@ -201,6 +203,8 @@
      &                     zlup,    zldn,   bsum,
      &                     tem,     tem1,   tem2,
      &                     ptem,    ptem0,  ptem1,  ptem2
+!
+      real(kind=kind_phys)       xkzm_mp, xkzm_hp
 !
       real(kind=kind_phys) ck0, ck1, ch0, ch1, ce0, rchck
 !
@@ -317,16 +321,31 @@
 !!    \n  xkzm_mx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
 
       do i=1,im
+        xkzm_mp = xkzm_m
+        xkzm_hp = xkzm_h
+!
+        if( islimsk(i) == 1 .and. snwdph_lnd(i) > 10.0 ) then    ! over land
+           if (rbsoil(i) > 0. .and. rbsoil(i) <= 0.25) then
+             xkzm_mp = xkzm_m * (1.0 - rbsoil(i)/0.25)**2 +
+     &                     0.1 * (1.0 - (1.0-rbsoil(i)/0.25)**2)
+             xkzm_hp = xkzm_h * (1.0 - rbsoil(i)/0.25)**2 +
+     &                     0.1 * (1.0 - (1.0-rbsoil(i)/0.25)**2)
+           else if (rbsoil(i) > 0.25) then
+             xkzm_mp = 0.1
+             xkzm_hp = 0.1
+           endif
+        endif
+!
         kx1(i) = 1
         tx1(i) = 1.0 / prsi(i,1)
         tx2(i) = tx1(i)
         if(gdx(i) >= xkgdx) then
-          xkzm_hx(i) = xkzm_h
-          xkzm_mx(i) = xkzm_m
+          xkzm_hx(i) = xkzm_hp
+          xkzm_mx(i) = xkzm_mp
         else
           tem  = 1. / (xkgdx - 5.)
-          tem1 = (xkzm_h - 0.01) * tem
-          tem2 = (xkzm_m - 0.01) * tem
+          tem1 = (xkzm_hp - 0.01) * tem
+          tem2 = (xkzm_mp - 0.01) * tem
           ptem = gdx(i) - 5.
           xkzm_hx(i) = 0.01 + tem1 * ptem
           xkzm_mx(i) = 0.01 + tem2 * ptem
@@ -833,7 +852,7 @@
 !         tem1 = (tvx(i,k+1)-tvx(i,k)) * rdzt(i,k)
 !         if(tem1 > 1.e-5) then
           tem1 = tvx(i,k+1)-tvx(i,k)
-          if(tem1 > 0.) then
+          if(tem1 > 0. .and. islimsk(i) /= 1) then
              xkzo(i,k)  = min(xkzo(i,k), xkzinv)
              xkzmo(i,k) = min(xkzmo(i,k), xkzinv)
              rlmnz(i,k) = min(rlmnz(i,k), rlmn2)

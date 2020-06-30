@@ -21,11 +21,9 @@ module mp_thompson
    contains
 
 !> This subroutine is a wrapper around the actual mp_gt_driver().
-#if 0
 !! \section arg_table_mp_thompson_init Argument Table
 !! \htmlinclude mp_thompson_init.html
 !!
-#endif
       subroutine mp_thompson_init(ncol, nlev, is_aerosol_aware, &
                                        nwfa2d, nifa2d, nwfa, nifa,   &
                                        mpicomm, mpirank, mpiroot,    &
@@ -39,10 +37,10 @@ module mp_thompson
          integer,                   intent(in)    :: ncol
          integer,                   intent(in)    :: nlev
          logical,                   intent(in)    :: is_aerosol_aware
-         real(kind_phys), optional, intent(inout) :: nwfa2d(1:ncol)
-         real(kind_phys), optional, intent(inout) :: nifa2d(1:ncol)
-         real(kind_phys), optional, intent(inout) :: nwfa(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(inout) :: nifa(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(inout) :: nwfa2d(:)
+         real(kind_phys), optional, intent(inout) :: nifa2d(:)
+         real(kind_phys), optional, intent(inout) :: nwfa(:,:)
+         real(kind_phys), optional, intent(inout) :: nifa(:,:)
          integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank
          integer,                   intent(in)    :: mpiroot
@@ -129,11 +127,9 @@ module mp_thompson
       end subroutine mp_thompson_init
 
 
-#if 0
 !> \section arg_table_mp_thompson_run Argument Table
 !! \htmlinclude mp_thompson_run.html
 !!
-#endif
 !>\ingroup aathompson
 !>\section gen_thompson_hrrr Thompson MP General Algorithm
 !>@{

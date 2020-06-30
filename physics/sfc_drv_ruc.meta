@@ -782,7 +782,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[tskin_ocn]
+[tskin_wat]
   standard_name = surface_skin_temperature_over_ocean_interstitial
   long_name = surface skin temperature over ocean (temporary use as interstitial)
   units = K

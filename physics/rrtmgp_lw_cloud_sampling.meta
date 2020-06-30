@@ -1,0 +1,114 @@
+[ccpp-arg-table]
+  name = rrtmgp_lw_cloud_sampling_init
+  type = scheme
+[lw_gas_props]
+  standard_name = coefficients_for_lw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[ipsdlw0]
+  standard_name = initial_permutation_seed_lw
+  long_name = initial seed for McICA LW
+  units = none
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+######################################################
+[ccpp-arg-table]
+  name = rrtmgp_lw_cloud_sampling_run
+  type = scheme
+[doLWrad]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ipsdlw0]
+  standard_name = initial_permutation_seed_lw
+  long_name = initial seed for McICA LW
+  units = none
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[icseed_lw]
+  standard_name = seed_random_numbers_lw
+  long_name = seed for random number generation for longwave radiation
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[cld_frac]
+  standard_name = total_cloud_fraction
+  long_name = layer total cloud fraction
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lw_gas_props]
+  standard_name = coefficients_for_lw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[lw_optical_props_cloudsByBand]
+  standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = in
+  optional = F
+[lw_optical_props_clouds]
+  standard_name = longwave_optical_properties_for_cloudy_atmosphere
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F

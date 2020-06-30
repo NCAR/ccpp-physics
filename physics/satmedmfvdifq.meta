@@ -249,7 +249,7 @@
   intent = in
   optional = F
 [swh]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky shortwave heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -258,7 +258,7 @@
   intent = in
   optional = F
 [hlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky longwave heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -279,6 +279,23 @@
   standard_name = cell_area
   long_name = area of the grid cell
   units = m2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[islimsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[snwdph_lnd]
+  standard_name = surface_snow_thickness_water_equivalent_over_land
+  long_name = water equivalent snow depth over land
+  units = mm
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -357,7 +374,7 @@
   intent = in
   optional = F
 [heat]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_dimension)
@@ -366,7 +383,7 @@
   intent = in
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)

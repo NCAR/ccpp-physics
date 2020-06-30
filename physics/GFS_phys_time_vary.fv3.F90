@@ -61,7 +61,6 @@
          integer :: nb, nblks, nt
          integer :: i, j, ix
          logical :: non_uniform_blocks
-
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -167,7 +166,7 @@
                ! If Model%iaerclm is .true., then ntrcaer == ntrcaerm
                ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
                ! Read aerosol climatology
-               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
+               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate,errmsg,errflg)
             endif
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
