@@ -225,7 +225,7 @@
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
-        runoff, srunoff, runof, drain, errmsg, errflg)
+        runoff, srunoff, runof, drain, lheatstrg, z0fac, e0fac, zorl, hflx, evap, hflxq, evapq, hffac, hefac, errmsg, errflg)
 
         implicit none
 
@@ -247,13 +247,29 @@
         real(kind=kind_phys), dimension(im), intent(inout) :: runoff, srunoff
         real(kind=kind_phys), dimension(im), intent(in)    :: drain, runof
 
+        ! For canopy heat storage
+        logical, intent(in) :: lheatstrg
+        real(kind=kind_phys), intent(in) :: z0fac, e0fac
+        real(kind=kind_phys), dimension(im), intent(in)  :: zorl
+        real(kind=kind_phys), dimension(im), intent(in)  :: hflx,  evap
+        real(kind=kind_phys), dimension(im), intent(out) :: hflxq, evapq
+        real(kind=kind_phys), dimension(im), intent(out) :: hffac, hefac
+
+        ! CCPP error handling variables
         character(len=*), intent(out) :: errmsg
         integer,          intent(out) :: errflg
 
+        ! Local variables
+
         real(kind=kind_phys), parameter :: albdf   = 0.06d0
+
+        ! Parameters for canopy heat storage parametrization
+        real(kind=kind_phys), parameter :: z0min=0.2, z0max=1.0
+        real(kind=kind_phys), parameter :: u10min=2.5, u10max=7.5
 
         integer :: i
         real(kind=kind_phys) :: xcosz_loc, ocalnirdf_cpl, ocalnirbm_cpl, ocalvisdf_cpl, ocalvisbm_cpl
+        real(kind=kind_phys) :: tem, tem1, tem2
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -355,6 +371,35 @@
           do i=1,im
             runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * dtf
             srunoff(i) = srunoff(i) + runof(i) * dtf
+          enddo
+        endif
+
+!  --- ...  Boundary Layer and Free atmospheic turbulence parameterization
+!
+!  in order to achieve heat storage within canopy layer, in the canopy heat
+!    storage parameterization the kinematic sensible and latent heat fluxes
+!    (hflx & evap) as surface boundary forcings to the pbl scheme are
+!    reduced as a function of surface roughness
+!
+        do i=1,im
+          hflxq(i) = hflx(i)
+          evapq(i) = evap(i)
+          hffac(i) = 1.0
+          hefac(i) = 1.0
+        enddo
+        if (lheatstrg) then
+          do i=1,im
+            tem = 0.01 * zorl(i)     ! change unit from cm to m
+            tem1 = (tem - z0min) / (z0max - z0min)
+            hffac(i) = z0fac * min(max(tem1, 0.0), 1.0)
+            tem = sqrt(u10m(i)**2+v10m(i)**2)
+            tem1 = (tem - u10min) / (u10max - u10min)
+            tem2 = 1.0 - min(max(tem1, 0.0), 1.0)
+            hffac(i) = tem2 * hffac(i)
+            hefac(i) = 1. + e0fac * hffac(i)
+            hffac(i) = 1. + hffac(i)
+            hflxq(i) = hflx(i) / hffac(i)
+            evapq(i) = evap(i) / hefac(i)
           enddo
         endif
 

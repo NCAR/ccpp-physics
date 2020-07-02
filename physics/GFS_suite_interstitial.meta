@@ -677,7 +677,7 @@
   intent = inout
   optional = F
 [dt3dt_scnv]
-  standard_name = cumulative_change_in_temperature_due_to_shal_convection
+  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
   long_name = cumulative change in temperature due to shal conv.
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -1194,22 +1194,6 @@
   type = integer
   intent = in
   optional = F
-[ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
-  long_name = tracer index for liquid number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
-  long_name = tracer index for ice    number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [ntclamt]
   standard_name = index_for_cloud_amount
   long_name = tracer index for cloud amount integer
@@ -1280,6 +1264,15 @@
   long_name = latitude
   units = radians
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gt0]
+  standard_name = air_temperature_updated_by_physics
+  long_name = temperature updated by physics
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1509,6 +1502,15 @@
   standard_name = ice_water_mixing_ratio_save
   long_name = cloud ice water mixing ratio before entering a physics scheme
   units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[save_tcp]
+  standard_name = air_temperature_save_from_cumulus_paramterization
+  long_name = air temperature after cumulus parameterization
+  units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -1774,14 +1776,50 @@
   kind = kind_phys
   intent = inout
   optional = F
-[gt0]
-  standard_name = air_temperature_updated_by_physics
-  long_name = temperature updated by physics
+[prsl]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_tcp]
+  standard_name = air_temperature_save_from_cumulus_paramterization
+  long_name = air temperature after cumulus parameterization
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
+  optional = F
+[con_rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[nwfa]
+  standard_name = water_friendly_aerosol_number_concentration
+  long_name = number concentration of water-friendly aerosols
+  units = kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[spechum]
+  standard_name = water_vapor_specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [dqdti]
   standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
@@ -1791,22 +1829,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[imfdeepcnv]
-  standard_name = flag_for_mass_flux_deep_convection_scheme
-  long_name = flag for mass-flux deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imfdeepcnv_gf]
-  standard_name = flag_for_gf_deep_convection_scheme
-  long_name = flag for Grell-Freitas deep convection scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

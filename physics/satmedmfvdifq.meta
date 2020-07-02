@@ -39,14 +39,6 @@
 [ccpp-arg-table]
   name = satmedmfvdifq_run
   type = scheme
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -279,6 +271,23 @@
   standard_name = cell_area
   long_name = area of the grid cell
   units = m2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[islimsk]
+  standard_name = sea_land_ice_mask
+  long_name = sea/land/ice mask (=0/1/2)
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[snwdph_lnd]
+  standard_name = surface_snow_thickness_water_equivalent_over_land
+  long_name = water equivalent snow depth over land
+  units = mm
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -586,6 +595,75 @@
   type = real
   kind = kind_phys
   intent = out
+  optional = F
+[ntoz]
+  standard_name = index_for_ozone
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[du3dt]
+  standard_name = cumulative_change_in_x_wind_due_to_PBL
+  long_name = cumulative change in x wind due to PBL
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt]
+  standard_name = cumulative_change_in_y_wind_due_to_PBL
+  long_name = cumulative change in y wind due to PBL
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dt3dt]
+  standard_name = cumulative_change_in_temperature_due_to_PBL
+  long_name = cumulative change in temperature due to PBL
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dq3dt]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
+  long_name = cumulative change in water vapor specific humidity due to PBL
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[do3dt]
+  standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
+  long_name = cumulative change in ozone mixing ratio due to PBL
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

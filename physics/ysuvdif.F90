@@ -25,7 +25,7 @@
 !! \htmlinclude ysuvdif_run.html
 !!
 !-------------------------------------------------------------------------------
-   subroutine ysuvdif_run(ix,im,km,ux,vx,tx,qx,p2d,p2di,pi2d,                  &
+   subroutine ysuvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,                     &
                     utnp,vtnp,ttnp,qtnp,                                       &
                     swh,hlw,xmu,ntrac,ndiff,ntcw,ntiw,                         &
                     phii,phil,psfcpa,                                          &
@@ -59,16 +59,16 @@
 !
 !-------------------------------------------------------------------------------------
 !  input variables
-   integer,  intent(in   )   ::     ix,im,km,ntrac,ndiff,ntcw,ntiw
+   integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
 
-   real(kind=kind_phys),     dimension( ix,km ),                                    &
+   real(kind=kind_phys),     dimension( im,km ),                                    &
              intent(in)      ::                 pi2d,p2d,phil,ux,vx,swh,hlw,tx
 
-   real(kind=kind_phys),     dimension( ix,km,ntrac )                             , &
+   real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
              intent(in   )   ::                                             qx
 
-   real(kind=kind_phys),     dimension( ix, km+1 )                                , &
+   real(kind=kind_phys),     dimension( im, km+1 )                                , &
              intent(in   )   ::                                      p2di,phii
 
    real(kind=kind_phys),     dimension( im )                                      , &

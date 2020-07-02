@@ -86,12 +86,10 @@ contains
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-  subroutine GFS_rrtmgp_pre_init(Model, Radtend, active_gases_array, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_init(Model, active_gases_array, errmsg, errflg)
     ! Inputs
     type(GFS_control_type), intent(inout) :: &
          Model      ! DDT: FV3-GFS model control parameters
-    type(GFS_radtend_type), intent(inout) :: &
-         Radtend    ! DDT: FV3-GFS radiation tendencies 
 
     ! Outputs
     character(len=*),dimension(Model%ngases), intent(out) :: &

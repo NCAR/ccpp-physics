@@ -228,11 +228,10 @@
 !! inputs:                                                       size
 !! !
 !!    im       - integer, horiz dimension and num of used pts      1    !
-!!    ix       - integer, maximum horiz dimension                  1    !
 !!    k        - integer, vertical dimension                       1    !
 !!    dt       - real, time step in seconds                        1    !
 !!    dtf      - real, dynamics time step in seconds               1    !
-!!    rannum   - real, array holding random numbers between 0 an 1 (ix,nrcm)  !
+!!    rannum   - real, array holding random numbers between 0 an 1 (im,nrcm)  !
 !!    tin      - real, input temperature (K)
 !!    qin      - real, input specific humidity (kg/kg)
 !!    uin      - real, input zonal wind component
@@ -286,7 +285,7 @@
 !! \section arg_table_rascnv_run Argument Table
 !! \htmlinclude rascnv_run.html
 !!
-      subroutine rascnv_run(IM,     IX,     k,     ntr,     dt,   dtf   &
+      subroutine rascnv_run(IM,             k,     ntr,     dt,   dtf   &
      &,                     ccwf,   area,   dxmin, dxinv                &
      &,                     psauras, prauras, wminras, dlqf, flipv      &
      &,                     me,     rannum, nrcm,  mp_phys, mp_phys_mg  &
@@ -321,7 +320,7 @@
 !
 !      input
 !
-      integer, intent(in) :: im, ix, k, ntr, me, nrcm, ntk, kdt         &
+      integer, intent(in) :: im, k, ntr, me, nrcm, ntk, kdt             &
      &,                      mp_phys, mp_phys_mg
       integer, dimension(im) :: kbot, ktop, kcnv, kpbl
 !
@@ -329,9 +328,9 @@
      &,                                          psauras(2), prauras(2) &
      &,                                          wminras(2), dlqf(2)
 !
-      real(kind=kind_phys), dimension(ix,k)   :: tin, qin,  uin, vin    &
+      real(kind=kind_phys), dimension(im,k)   :: tin, qin,  uin, vin    &
      &,                                          prsl, prslk, phil
-      real(kind=kind_phys), dimension(ix,k+1) :: prsi, prsik, phii
+      real(kind=kind_phys), dimension(im,k+1) :: prsi, prsik, phii
       real(kind=kind_phys), dimension(im,k)   :: ud_mf, dd_mf, dt_mf    &
      &,                                          rhc, qlcn, qicn, w_upi &
      &,                                          cnv_mfd                &
@@ -340,8 +339,8 @@
      &,                                          cnv_nice, cf_upi
       real(kind=kind_phys), dimension(im)     :: area,  cdrag           &
      &,                                          rainc, ddvel
-      real(kind=kind_phys), dimension(ix,nrcm):: rannum
-      real(kind=kind_phys)                       ccin(ix,k,ntr+2)
+      real(kind=kind_phys), dimension(im,nrcm):: rannum
+      real(kind=kind_phys)                       ccin(im,k,ntr+2)
       real(kind=kind_phys)                       trcmin(ntr+2)
 
       real(kind=kind_phys) DT, dtf, qw0, qi0

@@ -57,7 +57,7 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed_hedmf  GFS Hybrid HEDMF Detailed Algorithm
 !!  @{
-      subroutine hedmf_run (ix,im,km,ntrac,ntcw,dv,du,tau,rtg,          &
+      subroutine hedmf_run (im,km,ntrac,ntcw,dv,du,tau,rtg,             &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
@@ -65,7 +65,9 @@
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
-     &   coef_ric_l,coef_ric_s,errmsg,errflg)
+     &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,lsidea,ntoz,       &
+     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
+     &   flag_for_pbl_generic_tend, errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -80,8 +82,10 @@
 !     arguments
 !
       logical, intent(in) :: lprnt, hurr_pbl
+      logical, intent(in) :: lssav,ldiag3d,qdiag3d,lsidea
+      logical, intent(in) :: flag_for_pbl_generic_tend
       integer, intent(in) :: ipr, islimsk(im)
-      integer, intent(in) :: ix, im, km, ntrac, ntcw, kinver(im)
+      integer, intent(in) :: im, km, ntrac, ntcw, kinver(im), ntoz
       integer, intent(out) :: kpbl(im)
 
 !
@@ -90,10 +94,13 @@
      &                     coef_ric_l, coef_ric_s
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tau(im,km),    rtg(im,km,ntrac)
+      ! Only allocated if ldiag3d or qdiag3d are true
+      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
+     &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     u1(im,km),     v1(im,km),                    &
+     &                     t1(im,km),     q1(im,km,ntrac),              &
+     &                     swh(im,km),    hlw(im,km),                   &
      &                     xmu(im),       psk(im),                      &
      &                     rbsoil(im),    zorl(im),                     &
      &                     u10m(im),      v10m(im),                     &
@@ -102,9 +109,9 @@
      &                     heat(im),      evap(im),                     &
      &                     stress(im),    spd1(im)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km)
+     &                     prsi(im,km+1), del(im,km),                   &
+     &                     prsl(im,km),   prslk(im,km),                 &
+     &                     phii(im,km+1), phil(im,km)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -251,8 +258,6 @@ c
       errflg = 0
 
 ! compute preliminary variables
-!
-      if (ix .lt. im) stop
 !
 !     iprt = 0
 !     if(iprt.eq.1) then
@@ -1080,7 +1085,7 @@ c
       enddo
       enddo
 !>  For details of the mfpbl subroutine, step into its documentation ::mfpbl
-      call mfpbl(im,ix,km,ntrac,dt2,pcnvflg,
+      call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
      &       zl,zi,thvx,q1,t1,u1,v1,hpbl,kpbl,
      &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
 !
@@ -1279,6 +1284,18 @@ c
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
+            if(lssav .and. ldiag3d .and. .not.                          &
+     &                flag_for_pbl_generic_tend) then
+               if(lsidea) then
+                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*rdt
+               else
+                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) +                     &
+     &                 ((ttend-hlw(i,k)-swh(i,k)*xmu(i))*rdt)
+               endif
+               if(qdiag3d) then
+                  dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*rdt
+               endif
+            endif
          enddo
       enddo
       if(ntrac >= 2) then
@@ -1291,6 +1308,17 @@ c
             enddo
           enddo
         enddo
+        if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
+     &               .not. flag_for_pbl_generic_tend) then
+          kk = ntoz
+          is = (kk-1) * km
+          do k = 1, km
+            do i = 1, im
+              qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
+              do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
+            enddo
+          enddo
+        endif
       endif
 !
 !   compute tke dissipation rate
@@ -1398,6 +1426,11 @@ c
             dv(i,k)  = dv(i,k)  + vtend
             dusfc(i) = dusfc(i) + conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i) + conw*del(i,k)*vtend
+            if(lssav .and. ldiag3d .and. .not.                          &
+     &             flag_for_pbl_generic_tend) then
+               du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
+               dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
+            endif
 !
 !  for dissipative heating for ecmwf model
 !

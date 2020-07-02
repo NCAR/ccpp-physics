@@ -25,7 +25,7 @@
 !! \htmlinclude shinhongvdif_run.html
 !!
 !-------------------------------------------------------------------------------
-   subroutine shinhongvdif_run(ix,im,km,ux,vx,tx,qx,p2d,p2di,pi2d,             &
+   subroutine shinhongvdif_run(im,km,ux,vx,tx,qx,p2d,p2di,pi2d,                &
                   utnp,vtnp,ttnp,qtnp,ntrac,ndiff,ntcw,ntiw,                   &
                   phii,phil,psfcpa,                                            &
                   zorl,stress,hpbl,psim,psih,                                  &
@@ -104,20 +104,20 @@
    real(kind=kind_phys),parameter    ::  cpent = -0.4,rigsmax = 100.
    real(kind=kind_phys),parameter    ::  entfmin = 1.0, entfmax = 5.0
 ! 1D in
-   integer,  intent(in   )   ::     ix,im,km,ntrac,ndiff,ntcw,ntiw
+   integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
 ! 3D in
-   real(kind=kind_phys),     dimension(ix, km)                                               , &
+   real(kind=kind_phys),     dimension(im, km)                                               , &
              intent(in   )   ::                                          phil, &
                                                                          pi2d, &
                                                                           p2d, &
                                                                            ux, &
                                                                            vx, &
                                                                            tx
-   real(kind=kind_phys),     dimension( ix, km, ntrac )                                      , &
+   real(kind=kind_phys),     dimension( im, km, ntrac )                                      , &
              intent(in   )   ::                                            qx
 
-   real(kind=kind_phys),     dimension( ix, km+1 )                                           , &
+   real(kind=kind_phys),     dimension( im, km+1 )                                           , &
              intent(in   )   ::                                          p2di, &
                                                                          phii
 ! 3D in&out

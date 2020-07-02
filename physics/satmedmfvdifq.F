@@ -57,15 +57,17 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
 !! @{
-      subroutine satmedmfvdifq_run(ix,im,km,ntrac,ntcw,ntiw,ntke,       &
+      subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntiw,ntke,          &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
-     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
-     &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
+     &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,islimsk,         &
+     &     snwdph_lnd,psk,rbsoil,zorl,u10m,v10m,fm,fh,                  &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     dkudiagnostic,errmsg,errflg)
+     &     dkudiagnostic,                                               &
+     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,ldiag3d,qdiag3d,          &
+     &     errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -73,9 +75,11 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz
       integer, intent(in)  :: kinver(im)
+      integer, intent(in)  :: islimsk(im)
       integer, intent(out) :: kpbl(im)
+      logical, intent(in)  :: ldiag3d,qdiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -84,19 +88,24 @@
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     u1(im,km),     v1(im,km),                    &
+     &                     t1(im,km),     q1(im,km,ntrac),              &
+     &                     swh(im,km),    hlw(im,km),                   &
      &                     xmu(im),       garea(im),                    &
-     &                     psk(ix),       rbsoil(im),                   &
+     &                     snwdph_lnd(im),                              &
+     &                     psk(im),       rbsoil(im),                   &
      &                     zorl(im),      tsea(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
      &                     evap(im),      heat(im),                     &
      &                     stress(im),    spd1(im),                     &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km)
+     &                     prsi(im,km+1), del(im,km),                   &
+     &                     prsl(im,km),   prslk(im,km),                 &
+     &                     phii(im,km+1), phil(im,km)
+      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
+     &                     du3dt(:,:),    dv3dt(:,:),                   &
+     &                     dt3dt(:,:),    dq3dt(:,:),                   &
+     &                     do3dt(:,:)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -203,6 +212,8 @@
      &                     tem,     tem1,   tem2,
      &                     ptem,    ptem0,  ptem1,  ptem2
 !
+      real(kind=kind_phys)       xkzm_mp, xkzm_hp
+!
       real(kind=kind_phys) ck0, ck1, ch0, ch1, ce0, rchck
 !
       real(kind=kind_phys) qlcr, zstblmax
@@ -213,7 +224,7 @@
       parameter(gamcrt=3.,gamcrq=0.,sfcfrac=0.1)
       parameter(vk=0.4,rimin=-100.)
       parameter(rbcr=0.25,zolcru=-0.02,tdzmin=1.e-3)
-      parameter(rlmn=30.,rlmn1=5.,rlmn2=15.)
+      parameter(rlmn=30.,rlmn1=5.,rlmn2=10.)
       parameter(rlmx=300.,elmx=300.)
       parameter(prmin=0.25,prmax=4.0)
       parameter(pr0=1.0,prtke=1.0,prscu=0.67)
@@ -223,7 +234,7 @@
       parameter(aphi5=5.,aphi16=16.)
       parameter(elmfac=1.0,elefac=1.0,cql=100.)
       parameter(dw2min=1.e-4,dkmax=1000.,xkgdx=5000.)
-      parameter(qlcr=3.5e-5,zstblmax=2500.,xkzinv=0.15)
+      parameter(qlcr=3.5e-5,zstblmax=2500.,xkzinv=0.1)
       parameter(h1=0.33333333)
       parameter(ck0=0.4,ck1=0.15,ch0=0.4,ch1=0.15)
       parameter(ce0=0.4)
@@ -318,16 +329,31 @@
 !!    \n  xkzm_mx = 0.01 + (xkzm_h - 0.01)/(xkgdx-5.) * (gdx-5.)
 
       do i=1,im
+        xkzm_mp = xkzm_m
+        xkzm_hp = xkzm_h
+!
+        if( islimsk(i) == 1 .and. snwdph_lnd(i) > 10.0 ) then    ! over land
+           if (rbsoil(i) > 0. .and. rbsoil(i) <= 0.25) then
+             xkzm_mp = xkzm_m * (1.0 - rbsoil(i)/0.25)**2 +
+     &                     0.1 * (1.0 - (1.0-rbsoil(i)/0.25)**2)
+             xkzm_hp = xkzm_h * (1.0 - rbsoil(i)/0.25)**2 +
+     &                     0.1 * (1.0 - (1.0-rbsoil(i)/0.25)**2)
+           else if (rbsoil(i) > 0.25) then
+             xkzm_mp = 0.1
+             xkzm_hp = 0.1
+           endif
+        endif
+!
         kx1(i) = 1
         tx1(i) = 1.0 / prsi(i,1)
         tx2(i) = tx1(i)
         if(gdx(i) >= xkgdx) then
-          xkzm_hx(i) = xkzm_h
-          xkzm_mx(i) = xkzm_m
+          xkzm_hx(i) = xkzm_hp
+          xkzm_mx(i) = xkzm_mp
         else
           tem  = 1. / (xkgdx - 5.)
-          tem1 = (xkzm_h - 0.01) * tem
-          tem2 = (xkzm_m - 0.01) * tem
+          tem1 = (xkzm_hp - 0.01) * tem
+          tem2 = (xkzm_mp - 0.01) * tem
           ptem = gdx(i) - 5.
           xkzm_hx(i) = 0.01 + tem1 * ptem
           xkzm_mx(i) = 0.01 + tem2 * ptem
@@ -768,13 +794,13 @@
       enddo
 !>  - Call mfpbltq(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
 !!    to take into account nonlocal transport by large eddies. For details of the mfpbltq subroutine, step into its documentation ::mfpbltq
-      call mfpbltq(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
+      call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
 !>  - Call mfscuq(), which is a new mass-flux parameterization for 
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
-      call mfscuq(im,ix,km,kmscu,ntcw,ntrac1,dt2,
+      call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,xmfd,
@@ -834,7 +860,7 @@
 !         tem1 = (tvx(i,k+1)-tvx(i,k)) * rdzt(i,k)
 !         if(tem1 > 1.e-5) then
           tem1 = tvx(i,k+1)-tvx(i,k)
-          if(tem1 > 0.) then
+          if(tem1 > 0. .and. islimsk(i) /= 1) then
              xkzo(i,k)  = min(xkzo(i,k), xkzinv)
              xkzmo(i,k) = min(xkzmo(i,k), xkzinv)
              rlmnz(i,k) = min(rlmnz(i,k), rlmn2)
@@ -1397,6 +1423,22 @@ c
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
+      if(ldiag3d) then
+        do  k = 1,km
+          do i = 1,im
+            ttend      = (f1(i,k)-t1(i,k))*rdt
+            dt3dt(i,k) = dt3dt(i,k)+dspfac*ttend*delt
+          enddo
+        enddo
+        if(qdiag3d) then
+          do  k = 1,km
+            do i = 1,im
+              qtend      = (f2(i,k)-q1(i,k,1))*rdt
+              dq3dt(i,k) = dq3dt(i,k)+dspfac*qtend*delt
+            enddo
+          enddo
+        endif
+      endif
 !
       if(ntrac1 >= 2) then
         do kk = 2, ntrac1
@@ -1408,19 +1450,37 @@ c
             enddo
           enddo
         enddo
+        if(ldiag3d .and. qdiag3d .and. ntoz>0) then
+          kk=ntoz
+          is = (kk-1) * km
+          do k = 1, km
+            do i = 1, im
+              qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
+              do3dt(i,k) = do3dt(i,k)+qtend*delt
+            enddo
+          enddo
+        endif
       endif
 !
 !> ## Add TKE dissipative heating to temperature tendency
 !
       if(dspheat) then
-      do k = 1,km1
-        do i = 1,im
-!         tem = min(diss(i,k), dspmax)
-!         ttend = tem / cp
-          ttend = diss(i,k) / cp
-          tdt(i,k) = tdt(i,k) + dspfac * ttend
+        do k = 1,km1
+          do i = 1,im
+!           tem = min(diss(i,k), dspmax)
+!           ttend = tem / cp
+            ttend = diss(i,k) / cp
+            tdt(i,k) = tdt(i,k) + dspfac * ttend
+          enddo
         enddo
-      enddo
+        if(ldiag3d) then
+          do k = 1,km1
+            do i = 1,im
+              ttend = diss(i,k) / cp
+              dt3dt(i,k) = dt3dt(i,k)+dspfac * ttend*delt
+            enddo
+          enddo
+        endif
       endif
 c
 !> ## Compute tridiagonal matrix elements for momentum
@@ -1503,6 +1563,16 @@ c
             dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
+      if(ldiag3d) then
+        do k = 1,km
+          do i = 1,im
+            utend = (f1(i,k)-u1(i,k))*rdt
+            vtend = (f2(i,k)-v1(i,k))*rdt
+            du3dt(i,k) = du3dt(i,k) + utend*delt
+            dv3dt(i,k) = dv3dt(i,k) + vtend*delt
+          enddo
+        enddo
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> ## Save PBL height for diagnostic purpose

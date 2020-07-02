@@ -246,7 +246,7 @@
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
      &       cld_init, progcld5, progcld6, progcld4o, cal_cldfra3,      &
      &       find_cloudLayers, adjust_cloudIce, adjust_cloudH2O,        &
-     &       adjust_cloudFinal
+     &       adjust_cloudFinal, gethml
 
 
 ! =================
