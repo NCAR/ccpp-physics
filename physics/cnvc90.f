@@ -21,7 +21,7 @@
 !! \htmlinclude cnvc90_run.html
 !!
 ! \section gen_cnvc_run GFS cnvc90_run General Algorithm
-      SUBROUTINE cnvc90_run(CLSTP,IM,IX,RN,KBOT,KTOP,KM,PRSI,           &
+      SUBROUTINE cnvc90_run(CLSTP,IM,RN,KBOT,KTOP,KM,PRSI,              &
      &                      ACV,ACVB,ACVT,CV,CVB,CVT,errmsg,errflg)
 
       USE MACHINE, ONLY :kind_phys
@@ -29,11 +29,11 @@
 
       ! Interface variables
       real(kind=kind_phys), intent(in) :: clstp
-      integer,              intent(in) :: im, ix, km
+      integer,              intent(in) :: im, km
       real(kind=kind_phys), intent(in) :: RN(IM)
       integer,              intent(in) :: KBOT(IM)
       integer,              intent(in) :: KTOP(IM)
-      real(kind=kind_phys), intent(in) :: prsi(ix,km+1)
+      real(kind=kind_phys), intent(in) :: prsi(IM,km+1)
       real(kind=kind_phys), intent(inout) :: ACV(IM)
       real(kind=kind_phys), intent(inout) :: ACVB(IM)
       real(kind=kind_phys), intent(inout) :: ACVT(IM)

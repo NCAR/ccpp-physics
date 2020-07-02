@@ -18,8 +18,10 @@ contains
       subroutine GFS_GWD_generic_pre_run(                               &
      &           im, levs, nmtvr, mntvar,                               &
      &           oc, oa4, clx, theta,                                   &
+     &           varss, ocss, oa4ss, clxss,                             &
      &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
-     &           dtdt, dt3dt, dtf, errmsg, errflg)
+     &           dudt, dvdt, dtdt, du3dt, dv3dt, dt3dt, dtf,            &
+     &           flag_for_gwd_generic_tend, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
@@ -29,12 +31,13 @@ contains
 
       real(kind=kind_phys), intent(out) ::                              &
      &  oc(im), oa4(im,4), clx(im,4),                                   &
+     &  varss(:), ocss(:), oa4ss(:,:), clxss(:,:),                      &
      &  theta(im), sigma(im), gamma(im), elvmax(im)
 
-      logical, intent(in) :: lssav, ldiag3d
-      real(kind=kind_phys), intent(in) :: dtdt(im,levs)
+      logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
+      real(kind=kind_phys), intent(in) :: dtdt(im,levs), dudt(im,levs), dvdt(im,levs)
       ! dt3dt only allocated only if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout) :: dt3dt(:,:)
+      real(kind=kind_phys), intent(inout) :: dt3dt(:,:), du3dt(:,:), dv3dt(:,:)
       real(kind=kind_phys), intent(in) :: dtf
 
       character(len=*), intent(out) :: errmsg
@@ -80,6 +83,26 @@ contains
         clx(:,2)  = 0.0
         clx(:,3)  = 0.0
         clx(:,4)  = 0.0
+      elseif (nmtvr == 24) then   ! GSD_drag_suite
+        oc(:)       = mntvar(:,2)
+        oa4(:,1)    = mntvar(:,3)
+        oa4(:,2)    = mntvar(:,4)
+        oa4(:,3)    = mntvar(:,5)
+        oa4(:,4)    = mntvar(:,6)
+        clx(:,1)    = mntvar(:,7)
+        clx(:,2)    = mntvar(:,8)
+        clx(:,3)    = mntvar(:,9)
+        clx(:,4)    = mntvar(:,10)
+        varss(:)    = mntvar(:,15)
+        ocss(:)     = mntvar(:,16)
+        oa4ss(:,1)  = mntvar(:,17)
+        oa4ss(:,2)  = mntvar(:,18)
+        oa4ss(:,3)  = mntvar(:,19)
+        oa4ss(:,4)  = mntvar(:,20)
+        clxss(:,1)  = mntvar(:,21)
+        clxss(:,2)  = mntvar(:,22)
+        clxss(:,3)  = mntvar(:,23)
+        clxss(:,4)  = mntvar(:,24)
       else
         oc     = 0
         oa4    = 0
@@ -91,10 +114,12 @@ contains
       endif   ! end if_nmtvr
 
       if (lssav) then
-        if (ldiag3d) then
+        if (ldiag3d .and. flag_for_gwd_generic_tend) then
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) - dtdt(i,k)*dtf
+              du3dt(i,k) = du3dt(i,k) - dudt(i,k)*dtf
+              dv3dt(i,k) = dv3dt(i,k) - dvdt(i,k)*dtf
             enddo
           enddo
         endif
@@ -125,12 +150,12 @@ contains
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
-      &  dugwd, dvgwd, du3dt, dv3dt, dt3dt, errmsg, errflg)
+      &  dugwd, dvgwd, du3dt, dv3dt, dt3dt, flag_for_gwd_generic_tend, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none
       
-      logical, intent(in) :: lssav, ldiag3d
+      logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
       
       real(kind=kind_phys), intent(in) :: dusfcg(:), dvsfcg(:)
       real(kind=kind_phys), intent(in) :: dudt(:,:), dvdt(:,:), dtdt(:,:)
@@ -150,7 +175,7 @@ contains
         dugwd(:) = dugwd(:) + dusfcg(:)*dtf
         dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
 
-        if (ldiag3d) then
+        if (ldiag3d .and. flag_for_gwd_generic_tend) then
           du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
           dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
           dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf
