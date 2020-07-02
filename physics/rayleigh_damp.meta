@@ -22,14 +22,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension
   long_name = number of vertical layers
@@ -144,6 +136,41 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for calculating 3-D diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[du3dt]
+  standard_name = cumulative_change_in_x_wind_due_to_rayleigh_damping
+  long_name = cumulative change in zonal wind due to Rayleigh damping
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt]
+  standard_name = cumulative_change_in_y_wind_due_to_rayleigh_damping
+  long_name = cumulative change in meridional wind due to Rayleigh damping
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dt3dt]
+  standard_name = cumulative_change_in_temperature_due_to_rayleigh_damping
+  long_name = cumulative change in temperature due to Rayleigh damping
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

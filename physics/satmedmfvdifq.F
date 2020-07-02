@@ -57,7 +57,7 @@
 !! (mfscuq.f).
 !! \section detail_satmedmfvidfq GFS satmedmfvdifq Detailed Algorithm 
 !! @{
-      subroutine satmedmfvdifq_run(ix,im,km,ntrac,ntcw,ntiw,ntke,       &
+      subroutine satmedmfvdifq_run(im,km,ntrac,ntcw,ntiw,ntke,          &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,islimsk,         &
      &     snwdph_lnd,psk,rbsoil,zorl,u10m,v10m,fm,fh,                  &
@@ -65,6 +65,7 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
+     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,ldiag3d,qdiag3d,          &
      &     errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -73,10 +74,11 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz
       integer, intent(in)  :: kinver(im)
       integer, intent(in)  :: islimsk(im)
       integer, intent(out) :: kpbl(im)
+      logical, intent(in)  :: ldiag3d,qdiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -85,20 +87,24 @@
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     u1(im,km),     v1(im,km),                    &
+     &                     t1(im,km),     q1(im,km,ntrac),              &
+     &                     swh(im,km),    hlw(im,km),                   &
      &                     xmu(im),       garea(im),                    &
      &                     snwdph_lnd(im),                              &
-     &                     psk(ix),       rbsoil(im),                   &
+     &                     psk(im),       rbsoil(im),                   &
      &                     zorl(im),      tsea(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
      &                     evap(im),      heat(im),                     &
      &                     stress(im),    spd1(im),                     &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km)
+     &                     prsi(im,km+1), del(im,km),                   &
+     &                     prsl(im,km),   prslk(im,km),                 &
+     &                     phii(im,km+1), phil(im,km)
+      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
+     &                     du3dt(:,:),    dv3dt(:,:),                   &
+     &                     dt3dt(:,:),    dq3dt(:,:),                   &
+     &                     do3dt(:,:)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -786,13 +792,13 @@
       enddo
 !>  - Call mfpbltq(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
 !!    to take into account nonlocal transport by large eddies. For details of the mfpbltq subroutine, step into its documentation ::mfpbltq
-      call mfpbltq(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
+      call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
 !>  - Call mfscuq(), which is a new mass-flux parameterization for 
 !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
-      call mfscuq(im,ix,km,kmscu,ntcw,ntrac1,dt2,
+      call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,xmfd,
@@ -1415,6 +1421,22 @@ c
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
+      if(ldiag3d) then
+        do  k = 1,km
+          do i = 1,im
+            ttend      = (f1(i,k)-t1(i,k))*rdt
+            dt3dt(i,k) = dt3dt(i,k)+dspfac*ttend*delt
+          enddo
+        enddo
+        if(qdiag3d) then
+          do  k = 1,km
+            do i = 1,im
+              qtend      = (f2(i,k)-q1(i,k,1))*rdt
+              dq3dt(i,k) = dq3dt(i,k)+dspfac*qtend*delt
+            enddo
+          enddo
+        endif
+      endif
 !
       if(ntrac1 >= 2) then
         do kk = 2, ntrac1
@@ -1426,19 +1448,37 @@ c
             enddo
           enddo
         enddo
+        if(ldiag3d .and. qdiag3d .and. ntoz>0) then
+          kk=ntoz
+          is = (kk-1) * km
+          do k = 1, km
+            do i = 1, im
+              qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
+              do3dt(i,k) = do3dt(i,k)+qtend*delt
+            enddo
+          enddo
+        endif
       endif
 !
 !> ## Add TKE dissipative heating to temperature tendency
 !
       if(dspheat) then
-      do k = 1,km1
-        do i = 1,im
-!         tem = min(diss(i,k), dspmax)
-!         ttend = tem / cp
-          ttend = diss(i,k) / cp
-          tdt(i,k) = tdt(i,k) + dspfac * ttend
+        do k = 1,km1
+          do i = 1,im
+!           tem = min(diss(i,k), dspmax)
+!           ttend = tem / cp
+            ttend = diss(i,k) / cp
+            tdt(i,k) = tdt(i,k) + dspfac * ttend
+          enddo
         enddo
-      enddo
+        if(ldiag3d) then
+          do k = 1,km1
+            do i = 1,im
+              ttend = diss(i,k) / cp
+              dt3dt(i,k) = dt3dt(i,k)+dspfac * ttend*delt
+            enddo
+          enddo
+        endif
       endif
 c
 !> ## Compute tridiagonal matrix elements for momentum
@@ -1515,6 +1555,16 @@ c
             dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
+      if(ldiag3d) then
+        do k = 1,km
+          do i = 1,im
+            utend = (f1(i,k)-u1(i,k))*rdt
+            vtend = (f2(i,k)-v1(i,k))*rdt
+            du3dt(i,k) = du3dt(i,k) + utend*delt
+            dv3dt(i,k) = dv3dt(i,k) + vtend*delt
+          enddo
+        enddo
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> ## Save PBL height for diagnostic purpose

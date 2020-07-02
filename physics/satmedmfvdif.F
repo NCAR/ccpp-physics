@@ -53,14 +53,16 @@
 !! (mfscu.f).
 !! \section detail_satmedmfvidf GFS satmedmfvdif Detailed Algorithm 
 !> @{
-      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
+      subroutine satmedmfvdif_run(im,km,ntrac,ntcw,ntiw,ntke,           &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
+     &     dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL,           &
+     &     ldiag3d,qdiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -68,9 +70,13 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
+!
+      logical, intent(in)  :: ldiag3d, qdiag3d
+      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
+     &  dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -78,19 +84,19 @@
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     u1(im,km),     v1(im,km),                    &
+     &                     t1(im,km),     q1(im,km,ntrac),              &
+     &                     swh(im,km),    hlw(im,km),                   &
      &                     xmu(im),       garea(im),                    &
-     &                     psk(ix),       rbsoil(im),                   &
+     &                     psk(im),       rbsoil(im),                   &
      &                     zorl(im),      tsea(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
      &                     evap(im),      heat(im),                     &
      &                     stress(im),    spd1(im),                     &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km)
+     &                     prsi(im,km+1), del(im,km),                   &
+     &                     prsl(im,km),   prslk(im,km),                 &
+     &                     phii(im,km+1), phil(im,km)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -801,13 +807,13 @@
       enddo
 !>  - Call mfpblt(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
 !! to take into account nonlocal transport by large eddies. 
-      call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
+      call mfpblt(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue)
 !>  - Call mfscu(), which is a new mass-flux parameterization for 
 !! stratocumulus-top-induced turbulence mixing.
-      call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,
+      call mfscu(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,radj,
      &    krad,mrad,radmin,buod,xmfd,
@@ -1391,6 +1397,12 @@
             rtg(i,k,1) = rtg(i,k,1)+qtend
             dtsfc(i)   = dtsfc(i)+cont*del(i,k)*ttend
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
+            if(ldiag3d) then
+              dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
+              if(qdiag3d) then
+                dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
+              endif
+            endif
          enddo
       enddo
 !
@@ -1491,6 +1503,10 @@
             dv(i,k)  = dv(i,k)+vtend
             dusfc(i) = dusfc(i)+conw*del(i,k)*utend
             dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
+            if(ldiag3d) then
+              du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
+              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
+            endif
          enddo
       enddo
 !

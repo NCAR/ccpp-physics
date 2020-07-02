@@ -45,7 +45,7 @@
 !! -# Calculate precipitation at surface (\f$rn\f$) and fraction of frozen precipitation (\f$sr\f$).
 !! \section Zhao-Carr_precip_detailed GFS precpd Scheme Detailed Algorithm
 !> @{
-       subroutine zhaocarr_precpd_run (im,ix,km,dt,del,prsl,q,cwm,t,rn  &
+       subroutine zhaocarr_precpd_run (im,km,dt,del,prsl,q,cwm,t,rn     &
      &,                   sr,rainp,u00k,psautco,prautco,evpco,wminco    &
      &,                   wk1,lprnt,jpr,errmsg,errflg)
 
@@ -77,18 +77,17 @@
 !     argument list:
 !     --------------
 !       im         : inner dimension over which calculation is made
-!       ix         : maximum inner dimension
 !       km         : number of vertical levels
 !       dt         : time step in seconds
 !       del(km)    : pressure layer thickness (bottom to top)
 !       prsl(km)   : pressure values for model layers (bottom to top)
-!       q(ix,km)   : specific humidity (updated in the code)
-!       cwm(ix,km) : condensate mixing ratio (updated in the code)
-!       t(ix,km)   : temperature       (updated in the code)
+!       q(im,km)   : specific humidity (updated in the code)
+!       cwm(im,km) : condensate mixing ratio (updated in the code)
+!       t(im,km)   : temperature       (updated in the code)
 !       rn(im)     : precipitation over one time-step dt (m/dt)
 !old    sr(im)     : index (=-1 snow, =0 rain/snow, =1 rain)
 !new    sr(im)     : "snow ratio", ratio of snow to total precipitation
-!       cll(ix,km) : cloud cover
+!       cll(im,km) : cloud cover
 !hchuang rn(im) unit in m per time step
 !        precipitation rate conversion 1 mm/s = 1 kg/m2/s
 !
@@ -101,11 +100,11 @@
 !     include 'constant.h'
 !
 ! Interface variables
-      integer, intent(in) :: im, ix, km, jpr
+      integer, intent(in) :: im, km, jpr
       real (kind=kind_phys), intent(in) :: dt
-      real (kind=kind_phys), intent(in) :: del(ix,km), prsl(ix,km)
-      real (kind=kind_phys), intent(inout) :: q(ix,km), t(ix,km),       &
-     &                                        cwm(ix,km)
+      real (kind=kind_phys), intent(in) :: del(im,km), prsl(im,km)
+      real (kind=kind_phys), intent(inout) :: q(im,km), t(im,km),       &
+     &                                        cwm(im,km)
       real (kind=kind_phys), intent(out) :: rn(im), sr(im), rainp(im,km)
       real (kind=kind_phys), intent(in) :: u00k(im,km)
       real (kind=kind_phys), intent(in) :: psautco(2), prautco(2),      &
