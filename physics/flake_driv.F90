@@ -55,7 +55,8 @@
             wet, flag_iter, yearlen, julian, imon,           &
 ! ---- in/outs
             snwdph, hice, tsurf, fice, T_sfc, hflx, evap,    &
-            ustar, qsfc, ch, cm, chh, cmm    )     
+            ustar, qsfc, ch, cm, chh, cmm,                   &
+            errmsg, errflg                                   )     
 
 !==============================================================================
 !
@@ -95,6 +96,9 @@ IMPLICIT NONE
       real (kind=kind_phys),  intent(in) :: julian
 
       logical, dimension(im), intent(in) :: flag_iter, wet, lake
+
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
 
 ! --- locals
 
