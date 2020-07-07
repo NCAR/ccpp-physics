@@ -52,7 +52,7 @@
 !            sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    !
 !            sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   !
 !            sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   !
-!            ix, im, levs, deltim, fhswr,                               !
+!            im, levs, deltim, fhswr,                                   !
 !            dry, icy, wet                                              !
 !      input/output:                                                    !
 !            dtdt,dtdtc,                                                !
@@ -83,10 +83,10 @@
 !     sfcdsw (im)  - real, total sky sfc downward sw flux ( w/m**2 )    !
 !     sfcnsw (im)  - real, total sky sfc net sw into ground (w/m**2)    !
 !     sfcdlw (im)  - real, total sky sfc downward lw flux ( w/m**2 )    !
-!     swh(ix,levs) - real, total sky sw heating rates ( k/s )           !
-!     swhc(ix,levs) - real, clear sky sw heating rates ( k/s )          !
-!     hlw(ix,levs) - real, total sky lw heating rates ( k/s )           !
-!     hlwc(ix,levs) - real, clear sky lw heating rates ( k/s )          !
+!     swh(im,levs) - real, total sky sw heating rates ( k/s )           !
+!     swhc(im,levs) - real, clear sky sw heating rates ( k/s )          !
+!     hlw(im,levs) - real, total sky lw heating rates ( k/s )           !
+!     hlwc(im,levs) - real, clear sky lw heating rates ( k/s )          !
 !     sfcnirbmu(im)- real, tot sky sfc nir-beam sw upward flux (w/m2)   !
 !     sfcnirdfu(im)- real, tot sky sfc nir-diff sw upward flux (w/m2)   !
 !     sfcvisbmu(im)- real, tot sky sfc uv+vis-beam sw upward flux (w/m2)!
@@ -95,7 +95,7 @@
 !     sfcnirdfd(im)- real, tot sky sfc nir-diff sw downward flux (w/m2) !
 !     sfcvisbmd(im)- real, tot sky sfc uv+vis-beam sw dnward flux (w/m2)!
 !     sfcvisdfd(im)- real, tot sky sfc uv+vis-diff sw dnward flux (w/m2)!
-!     ix, im       - integer, horiz. dimention and num of used points   !
+!     im           - integer, horizontal dimension                      !
 !     levs         - integer, vertical layer dimension                  !
 !     deltim       - real, physics time step in seconds                 !
 !     fhswr        - real, Short wave radiation time step in seconds    !
@@ -184,7 +184,7 @@
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
      &       sfcnirbmu,sfcnirdfu,sfcvisbmu,sfcvisdfu,                   &
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
-     &       ix, im, levs, deltim, fhswr,                               &
+     &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
@@ -212,7 +212,7 @@
      &                                   pid12  = con_pi / hour12
 
 !  ---  inputs:
-      integer, intent(in) :: ix, im, levs
+      integer, intent(in) :: im, levs
 
 !     integer, intent(in) :: ipr
 !     logical lprnt
@@ -232,7 +232,7 @@
      &      sfcnirbmu, sfcnirdfu, sfcvisbmu, sfcvisdfu,                 &
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
-      real(kind=kind_phys), dimension(ix,levs), intent(in) :: swh,  hlw &
+      real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
      &,                                                       swhc, hlwc
 
 !  ---  input/output:

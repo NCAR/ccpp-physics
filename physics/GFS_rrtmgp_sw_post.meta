@@ -56,7 +56,7 @@
   dimensions = (horizontal_dimension)
   type = cmpfsw_type
   intent = inout
-  optional = T
+  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
