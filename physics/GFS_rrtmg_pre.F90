@@ -948,26 +948,7 @@
 !                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 6 .or. Model%imp_physics == 8) then
-          if (Model%kdt == 1) then
-            Tbd%phy_f3d(:,:,Model%nleffr) = 10.
-            Tbd%phy_f3d(:,:,Model%nieffr) = 50.
-            Tbd%phy_f3d(:,:,Model%nseffr) = 250.
-          endif
-
-          ! mz* this is the original progcld5 - temporary
-          ! will be replaced with GSL's version of progcld6 for Thompson MP
-          call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,         &  !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,     &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                 &
-                         ntsw-1,ntgl-1,                                 &
-                         im, lmk, lmp, Model%uni_cld,                   &
-                         Model%lmfshal,Model%lmfdeep2,                  &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),            &
-                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),        &
-                         clouds,cldsa,mtopa,mbota, de_lgth)                !  --- outputs
-
-        elseif(Model%imp_physics == 15) then
+        elseif(Model%imp_physics == Model%imp_physics_fer_hires) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.

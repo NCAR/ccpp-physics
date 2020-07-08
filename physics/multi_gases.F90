@@ -77,8 +77,8 @@ module ccpp_multi_gases_mod
 !        vicv(0): cv0/cv_air
 !--------------------------------------------
       integer, intent(in):: ngas, nwat
-      real, intent(in):: ri(0:ngas)
-      real, intent(in):: cpi(0:ngas)
+      real(kind=kind_dyn), intent(in):: ri(0:ngas)
+      real(kind=kind_dyn), intent(in):: cpi(0:ngas)
       logical, intent(in):: is_master
 ! Local:
       integer n
@@ -121,11 +121,11 @@ module ccpp_multi_gases_mod
       enddo
 
       if( is_master ) then
-        write(*,*) ' multi_gases_init with ind_gas=',ind_gas
-        write(*,*) ' multi_gases_init with num_gas=',num_gas
-        write(*,*) ' multi_gases_init with vir =',vir
-        write(*,*) ' multi_gases_init with vicp=',vicp
-        write(*,*) ' multi_gases_init with vicv=',vicv
+        write(*,*) ' ccpp multi_gases_init with ind_gas=',ind_gas
+        write(*,*) ' ccpp multi_gases_init with num_gas=',num_gas
+        write(*,*) ' ccpp multi_gases_init with vir =',vir
+        write(*,*) ' ccpp multi_gases_init with vicp=',vicp
+        write(*,*) ' ccpp multi_gases_init with vicv=',vicv
       endif
 
       return
@@ -149,7 +149,7 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas 1+zvir/(1-qc)
 !--------------------------------------------
-      real, intent(in)           :: q(num_gas)
+      real(kind=kind_dyn), intent(in)           :: q(num_gas)
 ! Local:
       integer :: n
 
@@ -169,7 +169,7 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas 1+zvir without dividing by 1-qv or 1-qv-qc
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
 ! Local:
       integer :: n
 
@@ -188,8 +188,8 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas 1+zvir using max(qmin,q(sphum))
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
-      real, intent(in) :: qmin
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: qmin
 ! Local:
       integer :: n
 
@@ -210,8 +210,8 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas 1+zvir/(1.-qpz): qpz in place of qv+qc from q
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
-      real, intent(in) :: qpz
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: qpz
 ! Local:
       integer :: n
 
@@ -232,7 +232,7 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas 1+zvir/(1-(qv+qc)) (dry)
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
 ! Local:
       integer :: n
 
@@ -252,7 +252,7 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas cp (dry)
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
 ! Local:
       integer :: n
 
@@ -272,8 +272,8 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas cp (dry) with qpz in place of qv+qc from q
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
-      real, intent(in) :: qpz
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: qpz
 ! Local:
       integer :: n
 
@@ -293,7 +293,7 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas cv (dry)
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
 ! Local:
       integer :: n
 
@@ -313,8 +313,8 @@ module ccpp_multi_gases_mod
 ! !OUTPUT PARAMETERS
 ! Ouput: variable gas cv (dry) with qpz in place of qv+qc from q
 !--------------------------------------------
-      real, intent(in) :: q(num_gas)
-      real, intent(in) :: qpz
+      real(kind=kind_dyn), intent(in) :: q(num_gas)
+      real(kind=kind_dyn), intent(in) :: qpz
 ! Local:
       integer :: n
 
