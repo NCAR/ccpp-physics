@@ -948,7 +948,7 @@
 !                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 8) then
+        elseif(Model%imp_physics == 6 .or. Model%imp_physics == 8) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.
@@ -967,8 +967,7 @@
                          Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),        &
                          clouds,cldsa,mtopa,mbota, de_lgth)                !  --- outputs
 
-
-        elseif(Model%imp_physics == 6 .or. Model%imp_physics == 15) then
+        elseif(Model%imp_physics == 15) then
           if (Model%kdt == 1) then
             Tbd%phy_f3d(:,:,Model%nleffr) = 10.
             Tbd%phy_f3d(:,:,Model%nieffr) = 50.
