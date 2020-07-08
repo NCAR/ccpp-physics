@@ -1,3 +1,11 @@
 # Auto-generated include files in Fortran code
 *.inc
 *_cap.F90
+
+CCPP_CAPS.*
+CCPP_SCHEMES.*
+CCPP_TYPEDEFS.*
+ccpp_static_api.*
+
+CCPP_STATIC_API.sh
+CCPP_VARIABLES_FV3.html
