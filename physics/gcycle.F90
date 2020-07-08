@@ -67,7 +67,7 @@
     character(len=6) :: tile_num_ch
     real(kind=kind_phys), parameter :: pifac=180.0/pi
     real(kind=kind_phys)            :: sig1t, dt_warm
-    integer :: npts, len, nb, ix, jx, ls, ios
+    integer :: npts, len, nb, ix, jx, ls, ios, ll
     logical :: exists
 !
 !@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -244,10 +244,11 @@
           Sfcprop(nb)%alnsf  (ix) = ALBFC1  (len + npts*2)
           Sfcprop(nb)%alnwf  (ix) = ALBFC1  (len + npts*3)
           do ls = 1,Model%lsoil
-            Sfcprop(nb)%smc (ix,ls) = SMCFC1 (len + (ls-1)*npts)
-            Sfcprop(nb)%stc (ix,ls) = STCFC1 (len + (ls-1)*npts)
-            Sfcprop(nb)%slc (ix,ls) = SLCFC1 (len + (ls-1)*npts)
-            if (ls<=Model%kice) Sfcprop(nb)%tiice (ix,ls) = STCFC1 (len + (ls-1)*npts)
+            ll = len + (ls-1)*npts
+            Sfcprop(nb)%smc (ix,ls) = SMCFC1 (ll)
+            Sfcprop(nb)%stc (ix,ls) = STCFC1 (ll)
+            Sfcprop(nb)%slc (ix,ls) = SLCFC1 (ll)
+            if (ls<=Model%kice) Sfcprop(nb)%tiice (ix,ls) = STCFC1 (ll)
           enddo
         ENDDO                 !-----END BLOCK SIZE LOOP------------------------------
       ENDDO                   !-----END BLOCK LOOP-------------------------------

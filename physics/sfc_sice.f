@@ -43,11 +43,12 @@
      &     ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,  & !  ---  inputs:
      &       t0c, rd, ps, t1, q1, delt,                                 &
      &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
-     &       cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      &
-     &       flag_iter, lprnt, ipr, cimin,                              &
+     &       cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
+     &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-     &       cplflx, cplchm, flag_cice, islmsk_cice,                    &
+     &       frac_grid, icy, islmsk_cice,                               &
+     &       min_lakeice, min_seaice, oceanfrac,                        &
      &       errmsg, errflg
      &     )
 
@@ -60,10 +61,10 @@
 !       inputs:                                                         !
 !          ( im, kice, ps, t1, q1, delt,                                !
 !            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   !
-!            cm, ch, prsl1, prslki, prsik1, prslk1, islimsk, wind,      !
+!            cm, ch, prsl1, prslki, prsik1, prslk1, wind,               !
 !            flag_iter,                                                 !
 !       input/outputs:                                                  !
-!            hice, fice, tice, weasd, tskin, tprcp, tiice, ep,            !
+!            hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          !
 !       outputs:                                                        !
 !            snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx )       !
 !                                                                       !
@@ -151,21 +152,21 @@
 !  ---  inputs:
       integer, intent(in) :: im, kice, ipr
       logical, intent(in) :: lprnt
-      logical, intent(in) :: cplflx
-      logical, intent(in) :: cplchm
+      logical, intent(in) :: frac_grid
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd
 
       real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
-     &       prsl1, prslki, prsik1, prslk1, wind
+     &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
 
-      integer, dimension(im), intent(in) :: islimsk
+!     integer, dimension(im), intent(in) :: islimsk
       integer, dimension(im), intent(in) :: islmsk_cice
-      real (kind=kind_phys), intent(in)  :: delt, cimin
+      real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
+     &                                            min_lakeice
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_cice
+      logical, dimension(im), intent(in) :: flag_iter, icy
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
@@ -189,7 +190,7 @@
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kice)
      &,                        hflxi, hflxw, q0, qs1, qssi, qssw
-      real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw
+      real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
 
       integer :: i, k
       integer, dimension(im) :: islmsk_local
@@ -207,15 +208,22 @@
       errflg = 0
 
 
-      if (cplflx) then
-         where (flag_cice)
-            islmsk_local = islmsk_cice
-         elsewhere
-            islmsk_local = islimsk
-         endwhere
-      else
-        islmsk_local = islimsk
-      end if
+      islmsk_local = islmsk_cice
+      if (frac_grid) then
+        do i=1,im
+          if (icy(i) .and. islmsk_local(i) < 2) then
+            if (oceanfrac(i) > zero) then
+              tem = min_seaice
+            else
+              tem = min_lakeice
+            endif
+            if (fice(i) > tem) then
+              islmsk_local(i) = 2
+              tice(i) =min( tice(i), tgice)
+            endif
+          endif
+        enddo
+      endif
 
 !
 !> - Set flag for sea-ice.
@@ -255,6 +263,11 @@
 
       do i = 1, im
         if (flag(i)) then
+          if (oceanfrac(i) > zero) then
+            cimin = min_seaice
+          else
+            cimin = min_lakeice
+          endif
 !         psurf(i) = 1000.0 * ps(i)
 !         ps1(i)   = 1000.0 * prsl1(i)
 

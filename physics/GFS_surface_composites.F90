@@ -26,7 +26,7 @@ contains
 !!
    subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, cplwav2atm,                     &
                                  landfrac, lakefrac, oceanfrac,                                                 &
-                                 frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorl_wat, &
+                                 frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorli, zorl_wat, &
                                  zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,  &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_lnd, uustar_ice, weasd, weasd_wat,        &
                                  weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat, tsfc_lnd,        &
@@ -47,7 +47,7 @@ contains
       real(kind=kind_phys), dimension(im), intent(  out) :: frland
       real(kind=kind_phys), dimension(im), intent(in   ) :: zorl, snowd, tprcp, uustar, weasd
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: zorlo, zorll, tsfc, tsfco, tsfcl, tisfc, tsurf
+      real(kind=kind_phys), dimension(im), intent(inout) :: zorlo, zorll, zorli, tsfc, tsfco, tsfcl, tisfc, tsurf
       real(kind=kind_phys), dimension(im), intent(inout) :: snowd_wat, snowd_lnd, snowd_ice, tprcp_wat, &
         tprcp_lnd, tprcp_ice, zorl_wat, zorl_lnd, zorl_ice, tsfc_wat, tsfc_lnd, tsfc_ice, tsurf_wat,    &
         tsurf_lnd, tsurf_ice, uustar_lnd, uustar_ice, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, gflx_ice
@@ -77,23 +77,31 @@ contains
             if (flag_cice(i)) then
               if (cice(i) >= min_seaice) then
                 icy(i)  = .true.
+                if (cice(i) < one) wet(i) = .true. ! some open ocean/lake water exists
               else
-                cice(i)      = zero
-                flag_cice(i) = .false.
-                islmsk(i)    = 0
+                cice(i)        = zero
+                flag_cice(i)   = .false.
+!               islmsk_cice(i) = 0
+!               islmsk(i)      = 0
+                wet(i) = .true. ! some open ocean/lake water exists
               endif
             else
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
+                if (cice(i) < one) wet(i) = .true. ! some open ocean/lake water exists
+                islmsk(i) = 2
               else
                 cice(i)   = zero
-                islmsk(i) = 0
+!               islmsk(i) = 0
+                wet(i)    = .true. ! some open ocean/lake water exists
               endif
             endif
-            if (cice(i) < one ) then
-              wet(i) = .true. ! some open ocean/lake water exists
-              if ((.not. cplflx .or. oceanfrac(i) == zero) .and. icy(i))      &
-                  tsfco(i) = max(tisfc(i), tgice)
+            if (wet(i) .and. .not. cplflx) then
+              if (oceanfrac(i) > zero) then
+                tsfco(i) = max(tsfco(i), tisfc(i), tgice)
+              elseif (icy(i)) then
+                 tsfco(i) = max(tisfc(i), tgice)
+              endif
             endif
           else
             cice(i) = zero
@@ -173,7 +181,7 @@ contains
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
            weasd_ice(i) = weasd(i)
-            zorl_ice(i) = zorll(i)
+            zorl_ice(i) = zorli(i)
             tsfc_ice(i) = tisfc(i)
            tsurf_ice(i) = tisfc(i)
            snowd_ice(i) = snowd(i)
@@ -296,7 +304,7 @@ contains
 #endif
    subroutine GFS_surface_composites_post_run (                                                                                   &
       im, kice, km, cplflx, cplwav2atm, frac_grid, flag_cice, islmsk, dry, wet, icy, landfrac, lakefrac, oceanfrac,               &
-      zorl, zorlo, zorll, zorl_wat, zorl_lnd, zorl_ice,                                                                           &
+      zorl, zorlo, zorll, zorli, zorl_wat, zorl_lnd, zorl_ice,                                                                    &
       cd, cd_wat, cd_lnd, cd_ice, cdq, cdq_wat, cdq_lnd, cdq_ice, rb, rb_wat, rb_lnd, rb_ice, stress, stress_wat, stress_lnd,     &
       stress_ice, ffmm, ffmm_wat, ffmm_lnd, ffmm_ice, ffhh, ffhh_wat, ffhh_lnd, ffhh_ice, uustar, uustar_wat, uustar_lnd,         &
       uustar_ice, fm10, fm10_wat, fm10_lnd, fm10_ice, fh2, fh2_wat, fh2_lnd, fh2_ice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,     &
@@ -319,7 +327,7 @@ contains
         snowd_wat, snowd_lnd, snowd_ice,tprcp_wat, tprcp_lnd, tprcp_ice, evap_wat, evap_lnd, evap_ice, hflx_wat, hflx_lnd,      &
         hflx_ice, qss_wat, qss_lnd, qss_ice, tsfc_wat, tsfc_lnd, tsfc_ice
 
-      real(kind=kind_phys), dimension(im),  intent(inout) :: zorl, zorlo, zorll, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10, &
+      real(kind=kind_phys), dimension(im),  intent(inout) :: zorl, zorlo, zorll, zorli, cd, cdq, rb, stress, ffmm, ffhh, uustar, fm10, &
         fh2, tsurf, cmm, chh, gflx, ep1d, weasd, snowd, tprcp, evap, hflx, qss, tsfc, tsfco, tsfcl, tisfc
 
       real(kind=kind_phys), dimension(im),  intent(in   ) :: tice ! interstitial sea ice temperature
@@ -361,7 +369,7 @@ contains
           uustar(i) = txl*uustar_lnd(i) + txi*uustar_ice(i) + txo*uustar_wat(i)
           fm10(i)   = txl*fm10_lnd(i)   + txi*fm10_ice(i)   + txo*fm10_wat(i)
           fh2(i)    = txl*fh2_lnd(i)    + txi*fh2_ice(i)    + txo*fh2_wat(i)
-         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)      + txo*tsurf_wat(i)
+         !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tice(i)       + txo*tsurf_wat(i)
          !tsurf(i)  = txl*tsurf_lnd(i)  + txi*tsurf_ice(i)  + txo*tsurf_wat(i) ! not used again! Moorthi
           cmm(i)    = txl*cmm_lnd(i)    + txi*cmm_ice(i)    + txo*cmm_wat(i)
           chh(i)    = txl*chh_lnd(i)    + txi*chh_ice(i)    + txo*chh_wat(i)
@@ -388,10 +396,30 @@ contains
           tsfc(i)   = txl*tsfc_lnd(i)   + txi*tice(i)       + txo*tsfc_wat(i)
 
           zorll(i) = zorl_lnd(i)
+          zorli(i) = zorl_ice(i)
           zorlo(i) = zorl_wat(i)
   
-          if (dry(i)) tsfcl(i) = tsfc_lnd(i)      ! over land
-          if (wet(i)) tsfco(i) = tsfc_wat(i)      ! over lake or ocean when uncoupled
+          if (dry(i)) then
+            tsfcl(i) = tsfc_lnd(i)       ! over land
+          elseif (wet(i)) then
+            tsfcl(i) = tsfc_wat(i)       ! over water
+          else
+            tsfcl(i) = tice(i)           ! over ice
+          endif
+          if (wet(i)) then
+            tsfco(i) = tsfc_wat(i)       ! over lake or ocean when uncoupled
+          elseif (icy(i)) then
+            tsfco(i) = tice(i)           ! over lake or ocean ice when uncoupled
+          else
+            tsfco(i) = tsfc_lnd(i)       ! over land
+          endif
+          if (icy(i)) then
+            tisfc(i) = tice(i)           ! over lake or ocean ice when uncoupled
+          elseif (wet(i)) then
+            tisfc(i) = tsfc_wat(i)       ! over lake or ocean when uncoupled
+          else
+            tisfc(i) = tsfc_lnd(i)       ! over land
+          endif
                                                   ! for coupled model ocean will replace this
 !         if (icy(i)) tisfc(i) = tsfc_ice(i)      ! over ice when uncoupled
 !         if (icy(i)) tisfc(i) = tice(i)          ! over ice when uncoupled
@@ -402,9 +430,9 @@ contains
 !         endif
 
           if (.not. flag_cice(i)) then
-            if (islmsk(i) == 2) then                           ! return updated lake ice thickness & concentration to global array
+            if (islmsk(i) == 2) then              ! return updated lake ice thickness & concentration to global array
               tisfc(i) = tice(i)
-            else                                               ! this would be over open ocean or land (no ice fraction)
+            else                                  ! this would be over open ocean or land (no ice fraction)
               hice(i)  = zero
               cice(i)  = zero
               tisfc(i) = tsfc(i)
@@ -530,6 +558,7 @@ contains
 
           zorll(i) = zorl_lnd(i)
           zorlo(i) = zorl_wat(i)
+          zorli(i) = zorl_ice(i)
 
         enddo
 

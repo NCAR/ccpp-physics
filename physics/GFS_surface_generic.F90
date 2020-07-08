@@ -141,6 +141,7 @@
 
         do i=1,im
           sigmaf(i) = max(vfrac(i), 0.01_kind_phys)
+          islmsk_cice(i) = islmsk(i)
           if (islmsk(i) == 2) then
             if (isot == 1) then
               soiltyp(i)  = 16
