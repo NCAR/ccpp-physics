@@ -221,8 +221,7 @@
         dvisdfi_cpl, dnirbm_cpl, dnirdf_cpl, dvisbm_cpl, dvisdf_cpl, nlwsfci_cpl, nlwsfc_cpl, t2mi_cpl, q2mi_cpl, u10mi_cpl,        &
         v10mi_cpl, tsfci_cpl, psurfi_cpl, nnirbmi_cpl, nnirdfi_cpl, nvisbmi_cpl, nvisdfi_cpl, nswsfci_cpl, nswsfc_cpl, nnirbm_cpl,  &
         nnirdf_cpl, nvisbm_cpl, nvisdf_cpl, gflux, evbsa, evcwa, transa, sbsnoa, snowca, snohfa, ep,                                &
-        runoff, srunoff, runof, drain, lheatstrg, z0fac, e0fac, zorl, hflx, evap, hflxq, evapq, hffac, hefac,           &
-        errmsg, errflg)
+        runoff, srunoff, runof, drain, lheatstrg, z0fac, e0fac, zorl, hflx, evap, hflxq, evapq, hffac, hefac, errmsg, errflg)
 
         implicit none
 
