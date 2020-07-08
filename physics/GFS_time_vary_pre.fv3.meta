@@ -102,6 +102,14 @@
   type = integer
   intent = in
   optional = F
+[nhfrad]
+  standard_name = number_of_timesteps_for_radiation_calls_on_physics_timestep
+  long_name = number of timesteps for radiation calls on physics timestep (coldstarts only)
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [idate]
   standard_name = date_and_time_at_model_initialization_reordered
   long_name = initial date with different size and ordering
