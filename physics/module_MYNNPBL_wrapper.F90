@@ -38,7 +38,7 @@
 !!
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  im,levs,                        &
-     &  flag_init,flag_restart,cycling, &
+     &  flag_init,flag_restart,         &
      &  lssav, ldiag3d, qdiag3d,        &
      &  lsidea, cplflx,                 &
      &  delt,dtf,dx,zorl,               &
@@ -190,7 +190,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 
 ! NAMELIST OPTIONS (INPUT):
       LOGICAL, INTENT(IN) :: bl_mynn_tkeadvect, ltaerosol,  &
-                             lprnt, do_mynnsfclay, cycling
+                             lprnt, do_mynnsfclay
       INTEGER, INTENT(IN) ::                                &
      &       bl_mynn_cloudpdf,                              &
      &       bl_mynn_mixlength,                             &
@@ -215,6 +215,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       LOGICAL ::                                            &
      &       FLAG_QI, FLAG_QNI, FLAG_QC, FLAG_QNC,          &
      &       FLAG_QNWFA, FLAG_QNIFA
+      ! Define locally until needed from CCPP
+      LOGICAL, PARAMETER :: cycling = .false.
       INTEGER, PARAMETER :: param_first_scalar = 1
       INTEGER ::                                            &
        &      p_qc, p_qr, p_qi, p_qs, p_qg, p_qnc, p_qni
