@@ -213,7 +213,7 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
       do i = 1, im
         if (flag(i)) then
           if( lake(i) ) then
-           print*,'lake depth=',lakedepth
+!           print*,'lake depth=',lakedepth
            T_ice(i)    = 273.15
            T_snow(i)   = 273.15
            fetch(i)    = 2.0E+03
@@ -273,8 +273,8 @@ CHARACTER(LEN=*), PARAMETER  :: FMT2 = "(1x,8(F12.4,1x))"
 
 !     write(65,1002) julian,xlat(i),w_albedo(I),w_extinc(i),lakedepth(i),elev(i),tb,tt,tsurf(i),T_sfc(i)
 !     print 1002 julian,xlat(i),w_albedo(I),w_extinc(i),lakedepth(i),elev(i),tb,tt,tsurf(i),T_sfc(i)
-     print*,'inside flake driv'
-     print*,  julian,xlat(i),w_albedo(I),w_extinc(i),lakedepth(i),elev(i),tb,tt,tsurf(i),T_sfc(i)
+!     print*,'inside flake driv'
+!     print*,  julian,xlat(i),w_albedo(I),w_extinc(i),lakedepth(i),elev(i),tb,tt,tsurf(i),T_sfc(i)
 
         endif  !lake fraction and depth
         endif  !flag
