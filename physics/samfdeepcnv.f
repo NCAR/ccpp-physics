@@ -423,9 +423,9 @@ c
         cxlamu  = 1.0e-3
       else
         aafac   = .05
-        crtlame = 1.0e-4
         cxlame  = 1.0e-4
       endif
+      crtlame = 1.0e-4
       crtlamd = 1.0e-4
       cxlamd  = 1.0e-4
       xlamde  = 1.0e-4
