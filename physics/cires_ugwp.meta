@@ -397,8 +397,8 @@
   optional = F
 [xlat]
   standard_name = latitude
-  long_name = grid latitude in radians
-  units = radians
+  long_name = grid latitude
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -406,8 +406,8 @@
   optional = F
 [xlat_d]
   standard_name = latitude_degree
-  long_name = latitude in degrees
-  units = degree
+  long_name = latitude in degrees north
+  units = degrees_north
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -757,7 +757,7 @@
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
