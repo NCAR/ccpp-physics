@@ -1467,7 +1467,7 @@
   intent = inout
   optional = F
 [save_tcp]
-  standard_name = air_temperature_save_from_cumulus_paramterization
+  standard_name = air_temperature_save_from_convective_parameterization
   long_name = air temperature after cumulus parameterization
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -1745,7 +1745,7 @@
   intent = in
   optional = F
 [save_tcp]
-  standard_name = air_temperature_save_from_cumulus_paramterization
+  standard_name = air_temperature_save_from_convective_parameterization
   long_name = air temperature after cumulus parameterization
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
