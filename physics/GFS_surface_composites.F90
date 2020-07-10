@@ -25,7 +25,7 @@ contains
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
    subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, cplwav2atm,                     &
-                                 landfrac, lakefrac, oceanfrac,                                                 &
+                                 landfrac, lakefrac, lakedepth, oceanfrac,                                      &
                                  frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorl_wat, &
                                  zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,  &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,              &
@@ -43,7 +43,7 @@ contains
       logical, dimension(im),              intent(in   ) :: flag_cice
       logical,              dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
       real(kind=kind_phys),                intent(in   ) :: cimin
-      real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, oceanfrac
+      real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(im), intent(inout) :: cice
       real(kind=kind_phys), dimension(im), intent(  out) :: frland
       real(kind=kind_phys), dimension(im), intent(in   ) :: zorl, snowd, tprcp, uustar, weasd, qss, hflx
@@ -180,6 +180,15 @@ contains
              qss_ice(i) = qss(i)
             hflx_ice(i) = hflx(i)
         endif
+      enddo
+
+! to prepare to separate lake from ocean in later
+      do i = 1, im
+          if(lakefrac(i) .ge. 0.15 .and. lakedepth(i) .gt. 1.0) then
+             lake(i) = .true.
+          else
+             lake(i) = .false.
+          endif
       enddo
 
      ! Assign sea ice temperature to interstitial variable

@@ -121,7 +121,8 @@
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
 
-        if(lsm == lsm_noahmp) then
+!        if(lsm == lsm_noahmp) then
+!  flake need this too
           !GJF* These calculations were originally in GFS_physics_driver.F90 for
           !     NoahMP. They were moved to this routine since they only depend
           !     on time (not space). Note that this code is included as-is from
@@ -157,7 +158,7 @@
               endif
             endif
           endif
-        endif
+!        endif
 
         ipt    = 1
         lprnt  = .false.
