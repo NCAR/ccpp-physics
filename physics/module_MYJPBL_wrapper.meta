@@ -17,14 +17,6 @@
   type = logical
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -446,7 +438,7 @@
   intent = inout
   optional = F
 [hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
   dimensions = (horizontal_dimension)
@@ -455,7 +447,7 @@
   intent = in
   optional = F
 [evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
   long_name = kinematic surface upward latent heat flux
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)

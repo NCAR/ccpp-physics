@@ -1,14 +1,6 @@
 [ccpp-arg-table]
   name = mp_thompson_post_init
   type = scheme
-[ncol]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [ttendlim]
   standard_name = limit_for_temperature_tendency_for_microphysics
   long_name = temperature tendency limiter per physics time step
@@ -87,6 +79,15 @@
   standard_name = time_step_for_physics
   long_name = physics timestep
   units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ttendlim]
+  standard_name = limit_for_temperature_tendency_for_microphysics
+  long_name = temperature tendency limiter per physics time step
+  units = K s-1
   dimensions = ()
   type = real
   kind = kind_phys

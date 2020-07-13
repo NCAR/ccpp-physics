@@ -50,7 +50,7 @@ contains
         end do
       end do
       call nf_close(ncid)
-      call nf_open("INPUT/cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
+      call nf_open("cam5_4_143_NPCCN_monclimo2.nc", NF90_NOWRITE, ncid)
       call nf_inq_varid(ncid, "NPCCN", varid)
       call nf_get_var(ncid, varid, ccnin)
       call nf_close(ncid)

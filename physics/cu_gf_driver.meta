@@ -69,14 +69,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension
   long_name = vertical layer dimension
@@ -261,8 +253,8 @@
   intent = in
   optional = F
 [hfx2]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
-  long_name = kinematic surface upward sensible heat flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
   units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -270,8 +262,8 @@
   intent = in
   optional = F
 [qfx2]
-  standard_name = kinematic_surface_upward_latent_heat_flux
-  long_name = kinematic surface upward latent heat flux
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward latent heat flux reduced by surface roughness
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -280,7 +272,7 @@
   optional = F
 [cliw]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -289,7 +281,7 @@
   optional = F
 [clcw]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water in the convectively transported tracer array
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -358,64 +350,106 @@
   type = integer
   intent = in
   optional = F
-[nwfa]
-  standard_name = water_friendly_aerosol_number_concentration
-  long_name = number concentration of water-friendly aerosols
-  units = kg-1
+[flag_for_scnv_generic_tend]
+  standard_name = flag_for_generic_shallow_convection_tendency
+  long_name = true if GFS_SCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[flag_for_dcnv_generic_tend]
+  standard_name = flag_for_generic_deep_convection_tendency
+  long_name = true if GFS_DCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+[du3dt_SCNV]
+  standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
+  long_name = cumulative change in x wind due to shallow convection
+  units = m s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[con_rd]
-  standard_name = gas_constant_dry_air
-  long_name = ideal gas constant for dry air
-  units = J kg-1 K-1
-  dimensions = ()
+  intent = inout
+[dv3dt_SCNV]
+  standard_name = cumulative_change_in_y_wind_due_to_shallow_convection
+  long_name = cumulative change in y wind due to shallow convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[gq0]
-  standard_name = tracer_concentration_updated_by_physics
-  long_name = tracer concentration updated by physics
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
-  type = real 
+  intent = inout
+[dt3dt_SCNV]
+  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
+  long_name = cumulative change in temperature due to shallow convection
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[ntinc]
-  standard_name = index_for_ice_cloud_number_concentration
-  long_name = tracer index for ice number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ntlnc]
-  standard_name = index_for_liquid_cloud_number_concentration
-  long_name = tracer index for liquid number concentration
-  units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[imp_physics]
-  standard_name = flag_for_microphysics_scheme
-  long_name = choice of microphysics scheme
+[dq3dt_SCNV]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shallow_convection
+  long_name = cumulative change in water vapor specific humidity due to shallow convection
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[du3dt_DCNV]
+  standard_name = cumulative_change_in_x_wind_due_to_deep_convection
+  long_name = cumulative change in x wind due to deep convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dv3dt_DCNV]
+  standard_name = cumulative_change_in_y_wind_due_to_deep_convection
+  long_name = cumulative change in y wind due to deep convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dt3dt_DCNV]
+  standard_name = cumulative_change_in_temperature_due_to_deep_convection
+  long_name = cumulative change in temperature due to deep convection
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[dq3dt_DCNV]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection
+  long_name = cumulative change in water vapor specific humidity due to deep convection
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
   units = flag
-  dimensions = () 
-  type = integer
+  dimensions = ()
+  type = logical
   intent = in
-  optional = F
-[imp_physics_thompson]
-  standard_name = flag_for_thompson_microphysics_scheme
-  long_name = choice of Thompson microphysics scheme
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

@@ -9,14 +9,6 @@
   type = logical
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -473,7 +465,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[z0rl_ocn]
+[z0rl_wat]
   standard_name = surface_roughness_length_over_ocean_interstitial
   long_name = surface roughness length over ocean (interstitial)
   units = cm
@@ -500,7 +492,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[ustar_ocn]
+[ustar_wat]
   standard_name = surface_friction_velocity_over_ocean
   long_name = surface friction velocity over ocean
   units = m s-1
@@ -527,7 +519,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[cm_ocn]
+[cm_wat]
   standard_name = surface_drag_coefficient_for_momentum_in_air_over_ocean
   long_name = surface exchange coeff for momentum over ocean
   units = none
@@ -554,7 +546,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[ch_ocn]
+[ch_wat]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ocean
   long_name = surface exchange coeff heat & moisture over ocean
   units = none
@@ -581,7 +573,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[rb_ocn]
+[rb_wat]
   standard_name = bulk_richardson_number_at_lowest_model_level_over_ocean
   long_name = bulk Richardson number at the surface over ocean
   units = none
@@ -608,7 +600,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[stress_ocn]
+[stress_wat]
   standard_name = surface_wind_stress_over_ocean
   long_name = surface wind stress over ocean
   units = m2 s-2
@@ -635,7 +627,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[fm_ocn]
+[fm_wat]
   standard_name = Monin_Obukhov_similarity_function_for_momentum_over_ocean
   long_name = Monin-Obukhov similarity funct for momentum over ocean
   units = none
@@ -662,7 +654,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[fh_ocn]
+[fh_wat]
   standard_name = Monin_Obukhov_similarity_function_for_heat_over_ocean
   long_name = Monin-Obukhov similarity function for heat over ocean
   units = none
@@ -689,7 +681,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[fm10_ocn]
+[fm10_wat]
   standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m_over_ocean
   long_name = Monin-Obukhov parameter for momentum at 10m over ocean
   units = none
@@ -716,7 +708,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[fh2_ocn]
+[fh2_wat]
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m_over_ocean
   long_name = Monin-Obukhov parameter for heat at 2m over ocean
   units = none

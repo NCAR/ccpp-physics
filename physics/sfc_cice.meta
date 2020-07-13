@@ -17,14 +17,6 @@
   type = logical
   intent = in
   optional = F
-[cplchm]
-  standard_name = flag_for_chemistry_coupling
-  long_name = flag controlling cplchm collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [hvap]
   standard_name = latent_heat_of_vaporization_of_water_at_0C
   long_name = latent heat of evaporation/sublimation
@@ -132,8 +124,8 @@
   intent = in
   optional = F
 [dqsfc]
-  standard_name = surface_upward_latent_heat_flux_for_coupling_interstitial
-  long_name = sfc latent heat flux for coupling interstitial
+  standard_name = surface_upward_latent_heat_flux_for_coupling
+  long_name = sfc latent heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -141,8 +133,8 @@
   intent = in
   optional = F
 [dtsfc]
-  standard_name = surface_upward_sensible_heat_flux_for_coupling_interstitial
-  long_name = sfc sensible heat flux for coupling interstitial
+  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  long_name = sfc sensible heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -150,8 +142,8 @@
   intent = in
   optional = F
 [dusfc]
-  standard_name = surface_x_momentum_flux_for_coupling_interstitial
-  long_name = sfc x momentum flux for coupling interstitial
+  standard_name = surface_x_momentum_flux_for_coupling
+  long_name = sfc x momentum flux for coupling
   units = Pa 
   dimensions = (horizontal_dimension)
   type = real
@@ -159,8 +151,8 @@
   intent = in
   optional = F
 [dvsfc]
-  standard_name = surface_y_momentum_flux_for_coupling_interstitial
-  long_name = sfc y momentum flux for coupling interstitial
+  standard_name = surface_y_momentum_flux_for_coupling
+  long_name = sfc y momentum flux for coupling
   units = Pa 
   dimensions = (horizontal_dimension)
   type = real
