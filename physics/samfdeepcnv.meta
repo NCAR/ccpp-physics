@@ -263,6 +263,8 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
 [nthresh]
   standard_name = threshold_for_perturbed_vertical_velocity
   long_name = threshold used for perturbed vertical velocity
