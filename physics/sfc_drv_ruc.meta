@@ -388,6 +388,14 @@
   type = integer
   intent = in
   optional = F
+[ivegsrc]
+  standard_name = vegetation_type_dataset_choice
+  long_name = land use dataset choice
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [fice]
   standard_name = sea_ice_concentration
   long_name = ice fraction over open water
@@ -604,7 +612,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[tskin_ocn]
+[tskin_wat]
   standard_name = surface_skin_temperature_over_ocean_interstitial
   long_name = surface skin temperature over ocean (temporary use as interstitial)
   units = K
@@ -739,9 +747,9 @@
   kind = kind_phys
   intent = inout
   optional = F
-[tskin_wat]
-  standard_name = surface_skin_temperature_over_ocean_interstitial
-  long_name = surface skin temperature over ocean (temporary use as interstitial)
+[tsnow]
+  standard_name = snow_temperature_bottom_first_layer
+  long_name = snow temperature at the bottom of first snow layer
   units = K
   dimensions = (horizontal_dimension)
   type = real
