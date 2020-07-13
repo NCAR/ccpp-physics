@@ -243,7 +243,7 @@
       integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
-     &                 cld_init, progcld5, progcld4o
+     &                 cld_init, progcld5, progcld4o, gethml
 
 
 ! =================

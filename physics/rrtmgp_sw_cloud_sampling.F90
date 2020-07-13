@@ -18,13 +18,21 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_sampling_init
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
-  subroutine rrtmgp_sw_cloud_sampling_init(sw_gas_props, ipsdsw0)
+  subroutine rrtmgp_sw_cloud_sampling_init(sw_gas_props, ipsdsw0, errmsg, errflg)
     ! Inputs
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props ! RRTMGP DDT: K-distribution data
     ! Outputs
     integer, intent(out) :: &
          ipsdsw0      ! Initial permutation seed for McICA
+    character(len=*), intent(out) :: &
+         errmsg                         ! Error message
+    integer,          intent(out) :: &
+         errflg                         ! Error code
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
 
     ! Set initial permutation seed for McICA, initially set to number of G-points
     ipsdsw0 = sw_gas_props%get_ngpt()

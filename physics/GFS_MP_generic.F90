@@ -16,17 +16,17 @@
 !> \section arg_table_GFS_MP_generic_pre_run Argument Table
 !! \htmlinclude GFS_MP_generic_pre_run.html
 !!
-      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_q, errmsg, errflg)
+      subroutine GFS_MP_generic_pre_run(im, levs, ldiag3d, qdiag3d, do_aw, ntcw, nncl, ntrac, gt0, gq0, save_t, save_qv, save_q, errmsg, errflg)
 !
       use machine,               only: kind_phys
 
       implicit none
       integer,                                          intent(in) :: im, levs, ntcw, nncl, ntrac
-      logical,                                          intent(in) :: ldiag3d, do_aw
+      logical,                                          intent(in) :: ldiag3d, qdiag3d, do_aw
       real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t
+      real(kind=kind_phys), dimension(im, levs),        intent(inout) :: save_t, save_qv
       real(kind=kind_phys), dimension(im, levs, ntrac), intent(inout) :: save_q
 
       character(len=*), intent(out) :: errmsg
@@ -42,12 +42,24 @@
         do k=1,levs
           do i=1,im
             save_t(i,k) = gt0(i,k)
-            save_q(1:im,:,1) = gq0(1:im,:,1)
           enddo
         enddo
-        do n=ntcw,ntcw+nncl-1
-          save_q(1:im,:,n) = gq0(1:im,:,n)
-        enddo
+        if(qdiag3d) then
+           do k=1,levs
+              do i=1,im
+                 ! Here, gq0(...,1) is used instead of gq0_water_vapor
+                 ! to be consistent with the GFS_MP_generic_post_run
+                 ! code.
+                 save_qv(i,k) = gq0(i,k,1)
+              enddo
+           enddo
+        endif
+        if(do_aw) then
+           save_q(1:im,:,1) = gq0(1:im,:,1)
+           do n=ntcw,ntcw+nncl-1
+              save_q(1:im,:,n) = gq0(1:im,:,n)
+           enddo
+        endif
       endif
 
       end subroutine GFS_MP_generic_pre_run
@@ -80,8 +92,8 @@
 !!
 !> \section gfs_mp_gen GFS MP Generic Post General Algorithm
 !> @{
-      subroutine GFS_MP_generic_post_run(im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_nssl, &
-        imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires, cal_pre, lssav, ldiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1,   &
+      subroutine GFS_MP_generic_post_run(im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac, imp_physics, imp_physics_gfdl, imp_physics_nssl,    &
+        imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires, cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm, con_g, dtf, frain, rainc, rain1,   &
         rann, xlat, xlon, gt0, gq0, prsl, prsi, phii, tsfc, ice, snow, graupel, save_t, save_qv, rain0, ice0, snow0,      &
         graupel0, del, rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp, srflag, sr, cnvprcp, totprcp, totice,   &
         totsnw, totgrp, cnvprcpb, totprcpb, toticeb, totsnwb, totgrpb, dt3dt, dq3dt, rain_cpl, rainc_cpl, snow_cpl, pwat, &
@@ -92,15 +104,15 @@
 
       implicit none
 
-      integer, intent(in) :: im, ix, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
+      integer, intent(in) :: im, levs, kdt, nrcm, ncld, nncl, ntcw, ntrac
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_nssl, imp_physics_thompson, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: cal_pre, lssav, ldiag3d, cplflx, cplchm
+      logical, intent(in) :: cal_pre, lssav, ldiag3d, qdiag3d, cplflx, cplchm
 
       real(kind=kind_phys),                           intent(in)    :: dtf, frain, con_g
       real(kind=kind_phys), dimension(im),            intent(in)    :: rainc, rain1, xlat, xlon, tsfc
       real(kind=kind_phys), dimension(im),            intent(inout) :: ice, snow, graupel
       real(kind=kind_phys), dimension(im),            intent(in)    :: rain0, ice0, snow0, graupel0
-      real(kind=kind_phys), dimension(ix,nrcm),       intent(in)    :: rann
+      real(kind=kind_phys), dimension(im,nrcm),       intent(in)    :: rann
       real(kind=kind_phys), dimension(im,levs),       intent(in)    :: gt0, prsl, save_t, save_qv, del
       real(kind=kind_phys), dimension(im,levs+1),     intent(in)    :: prsi, phii
       real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)    :: gq0
@@ -110,8 +122,9 @@
                                                                  srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
                                                                  totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,   &
                                                                  snow_cpl, pwat
-      ! These arrays are only allocated if ldiag3d is .true.
-      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt, dq3dt
+
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt ! only if ldiag3d
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
 
       ! Stochastic physics / surface perturbations
       logical, intent(in) :: do_sppt, ca_global
@@ -211,7 +224,7 @@
 
       if (cal_pre) then       ! hchuang: add dominant precipitation type algorithm
 !
-        call calpreciptype (kdt, nrcm, im, ix, levs, levs+1, &
+        call calpreciptype (kdt, nrcm, im, im, levs, levs+1, &
                             rann, xlat, xlon, gt0,           &
                             gq0(:,:,1), prsl, prsi,          &
                             rain, phii, tsfc,                &  ! input
@@ -262,9 +275,15 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-!             dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
             enddo
           enddo
+          if (qdiag3d) then
+             do k=1,levs
+                do i=1,im
+                   dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
+                enddo
+             enddo
+          endif
         endif
       endif
 

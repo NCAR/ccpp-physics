@@ -19,14 +19,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension
   long_name = vertical layer dimension
@@ -265,6 +257,12 @@
   kind = kind_phys
   intent = in
   optional = F
+[hwrf_samfdeep]
+  standard_name = flag_for_hwrf_samfdeepcnv_scheme
+  long_name = flag for hwrf samfdeepcnv scheme 
+  units = flag
+  dimensions = ()
+  type = logical
 [nthresh]
   standard_name = threshold_for_perturbed_vertical_velocity
   long_name = threshold used for perturbed vertical velocity
