@@ -337,7 +337,7 @@
 [theta]
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with_respect to east of maximum subgrid orographic variations
-  units = degrees
+  units = degree
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -405,9 +405,9 @@
   intent = in
   optional = F
 [xlat_d]
-  standard_name = latitude_degree
-  long_name = latitude in degrees north
-  units = degrees_north
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
