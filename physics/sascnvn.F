@@ -55,8 +55,7 @@
 !!
 !!  As in Grell (1993) \cite grell_1993 , the SAS convective scheme can be described in terms of three types of "controls": static, dynamic, and feedback. The static control component consists of the simple entraining/detraining updraft/downdraft cloud model and is used to determine the cloud properties, convective precipitation, as well as the convective cloud top height. The dynamic control is the determination of the potential energy available for convection to "consume", or how primed the large-scale environment is for convection to occur due to changes by the dyanmics of the host model. The feedback control is the determination of how the parameterized convection changes the large-scale environment (the host model state variables) given the changes to the state variables per unit cloud base mass flux calculated in the static control portion and the deduced cloud base mass flux determined from the dynamic control.
 !!
-!!  \param[in] im number of used points
-!!  \param[in] ix horizontal dimension
+!!  \param[in] im horizontal dimension
 !!  \param[in] km vertical layer dimension
 !!  \param[in] jcap number of spectral wave trancation
 !!  \param[in] delt physics time step in seconds
@@ -99,7 +98,7 @@
 !!  @{
       subroutine sascnvn_run(
      &     grav,cp,hvap,rv,fv,t0c,rgas,cvap,cliq,eps,epsm1,             &
-     &     im,ix,km,jcap,delt,delp,prslp,psp,phil,qlc,qli,              &
+     &     im,km,jcap,delt,delp,prslp,psp,phil,qlc,qli,                 &
      &     q1,t1,u1,v1,cldwrk,rn,kbot,ktop,kcnv,islimsk,                &
      &     dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                      &
      &     qlcn,qicn,w_upi,cf_upi,cnv_mfd,                              &
@@ -119,7 +118,7 @@
 !
       real(kind=kind_phys), intent(in) :: grav, cp, hvap, rv, fv, t0c,  &
      &                                    rgas, cvap, cliq, eps, epsm1
-      integer,              intent(in) :: im, ix,  km, jcap, ncloud,    &
+      integer,              intent(in) :: im, km, jcap, ncloud,         &
      &                                    mp_phys, mp_phys_mg
       integer,              intent(inout) :: kbot(:), ktop(:), kcnv(:)
       integer,              intent(in) :: islimsk(:)
@@ -184,7 +183,7 @@
      &                     jmin(im), lmin(im), kbmax(im),
      &                     kbm(im), kmax(im)
 !
-      real(kind=kind_phys) ps(im),      del(ix,km), prsl(ix,km)
+      real(kind=kind_phys) ps(im),      del(im,km), prsl(im,km)
 !
       real(kind=kind_phys) aa1(im),     acrt(im),   acrtfct(im),
      &                     delhbar(im), delq(im),   delq2(im),

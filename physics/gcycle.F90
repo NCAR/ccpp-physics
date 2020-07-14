@@ -250,7 +250,7 @@
             Sfcprop(nb)%slc (ix,ls) = SLCFC1 (ll)
             if (ls<=Model%kice) Sfcprop(nb)%tiice (ix,ls) = STCFC1 (ll)
           enddo
-        ENDDO                 !-----END BLOCK SIZE LOOP------------------------------
+        ENDDO                 !-----END BLOCK SIZE LOOP--------------------------
       ENDDO                   !-----END BLOCK LOOP-------------------------------
 
 ! check

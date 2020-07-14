@@ -57,7 +57,7 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed_hedmf  GFS Hybrid HEDMF Detailed Algorithm
 !!  @{
-      subroutine hedmf_hafs_run(ix,im,km,ntrac,ntcw,dv,du,tau,rtg,      &
+      subroutine hedmf_hafs_run(im,km,ntrac,ntcw,dv,du,tau,rtg,         &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
@@ -76,7 +76,7 @@
 !
       logical, intent(in) :: lprnt
       integer, intent(in) :: ipr
-      integer, intent(in) :: ix, im, km, ntrac, ntcw, kinver(im)
+      integer, intent(in) :: im, km, ntrac, ntcw, kinver(im)
       integer, intent(in) :: islimsk(1:im)
       integer, intent(out) :: kpbl(im)
 
@@ -86,9 +86,9 @@
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tau(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     u1(im,km),     v1(im,km),                    &
+     &                     t1(im,km),     q1(im,km,ntrac),              &
+     &                     swh(im,km),    hlw(im,km),                   &
      &                     xmu(im),       psk(im),                      &
      &                     rbsoil(im),    zorl(im),                     &
      &                     u10m(im),      v10m(im),                     &
@@ -97,9 +97,9 @@
      &                     heat(im),      evap(im),                     &
      &                     stress(im),    spd1(im)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km)
+     &                     prsi(im,km+1), del(im,km),                   &
+     &                     prsl(im,km),   prslk(im,km),                 &
+     &                     phii(im,km+1), phil(im,km)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -257,8 +257,6 @@ c
 !>  ## Compute preliminary variables from input arguments
 
 ! compute preliminary variables
-!
-      if (ix .lt. im) stop
 !
 !     iprt = 0
 !     if(iprt.eq.1) then
@@ -1107,7 +1105,7 @@ c
       enddo
       enddo
 !>  For details of the mfpbl subroutine, step into its documentation ::mfpbl
-      call mfpbl(im,ix,km,ntrac,dt2,pcnvflg,
+      call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
      &       zl,zi,thvx,q1,t1,u1,v1,hpbl,kpbl,
      &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
 !

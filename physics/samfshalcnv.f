@@ -49,7 +49,7 @@
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
 !!  @{
-      subroutine samfshalcnv_run(im,ix,km,itc,ntc,cliq,cp,cvap,         &
+      subroutine samfshalcnv_run(im,km,itc,ntc,cliq,cp,cvap,            &
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,                                       &
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                        &
@@ -62,23 +62,23 @@
 
       implicit none
 !
-      integer, intent(in)  :: im, ix, km, itc, ntc, ntk, ntr, ncloud
+      integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
-     &   prslp(ix,km), garea(im), hpbl(im), dot(ix,km), phil(ix,km)
+      real(kind=kind_phys), intent(in) :: psp(im), delp(im,km),         &
+     &   prslp(im,km), garea(im), hpbl(im), dot(im,km), phil(im,km)
 !
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
-     &   q1(ix,km), t1(ix,km), u1(ix,km), v1(ix,km)
+      real(kind=kind_phys), intent(inout) ::   qtr(im,km,ntr+2),        &
+     &   q1(im,km), t1(im,km), u1(im,km), v1(im,km)
 !
       integer, intent(out) :: kbot(im), ktop(im)
       real(kind=kind_phys), intent(out) :: rn(im),                      &
-     &   cnvw(ix,km), cnvc(ix,km), ud_mf(im,km), dt_mf(im,km)
+     &   cnvw(im,km), cnvc(im,km), ud_mf(im,km), dt_mf(im,km)
 !
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, pgcon
@@ -120,7 +120,7 @@
 !
       real(kind=kind_phys) aa1(im),     cina(im),
      &                     tkemean(im), clamt(im),
-     &                     ps(im),      del(ix,km), prsl(ix,km),
+     &                     ps(im),      del(im,km), prsl(im,km),
      &                     umean(im),   tauadv(im), gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
@@ -1586,7 +1586,7 @@ c
 !
       if (.not.hwrf_samfshal) then
        if (do_aerosols)
-     &  call samfshalcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
+     &  call samfshalcnv_aerosols(im, im, km, itc, ntc, ntr, delt,
 !    &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
      &  cnvflg, kb, kmax, kbcon, ktcon, fscav,
 !    &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
