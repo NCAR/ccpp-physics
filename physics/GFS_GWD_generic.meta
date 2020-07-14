@@ -66,6 +66,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[theta]
+  standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
+  long_name = angle with_respect to east of maximum subgrid orographic variations
+  units = degree
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [varss]
   standard_name = standard_deviation_of_subgrid_orography_small_scale
   long_name = standard deviation of subgrid orography small scale
@@ -73,7 +82,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = out
   optional = F
 [ocss]
   standard_name = convexity_of_subgrid_orography_small_scale
@@ -98,15 +107,6 @@
   long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height small scale
   units = frac
   dimensions = (horizontal_dimension,4)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[theta]
-  standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
-  long_name = angle with_respect to east of maximum subgrid orographic variations
-  units = degree
-  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -162,6 +162,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dvdt]
   standard_name = tendency_of_y_wind_due_to_model_physics
   long_name = meridional wind tendency due to model physics
@@ -170,6 +171,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dtdt]
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = updated tendency of the temperature
@@ -187,6 +189,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dv3dt]
   standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in y wind due to orographic gravity wave drag
@@ -195,6 +198,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dt3dt]
   standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in temperature due to orographic gravity wave drag
@@ -220,6 +224,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -368,6 +373,8 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
