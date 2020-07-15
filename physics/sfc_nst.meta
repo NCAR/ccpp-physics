@@ -112,7 +112,7 @@
 [pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
@@ -237,7 +237,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -932,7 +932,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
