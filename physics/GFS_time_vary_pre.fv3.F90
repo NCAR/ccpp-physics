@@ -65,8 +65,8 @@
 !> \section arg_table_GFS_time_vary_pre_run Argument Table
 !! \htmlinclude GFS_time_vary_pre_run.html
 !!
-      subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr,  &
-        nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, &
+      subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lkm, lsm, lsm_noahmp, nsswr,  &
+        nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour,      &
         kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys
@@ -75,7 +75,7 @@
 
         integer,                          intent(in)    :: idate(4)
         integer,                          intent(in)    :: jdat(1:8), idat(1:8)
-        integer,                          intent(in)    :: lsm, lsm_noahmp,      &
+        integer,                          intent(in)    :: lkm, lsm, lsm_noahmp, &
                                                            nsswr, nslwr, me,     &
                                                            master, nscyc, nhfrad
         logical,                          intent(in)    :: debug
@@ -121,7 +121,7 @@
         fhour = (sec + dtp)/con_hr
         kdt   = nint((sec + dtp)/dtp)
 
-!        if(lsm == lsm_noahmp) then
+        if(lsm == lsm_noahmp .or. lkm == 1) then
 !  flake need this too
           !GJF* These calculations were originally in GFS_physics_driver.F90 for
           !     NoahMP. They were moved to this routine since they only depend
@@ -158,7 +158,7 @@
               endif
             endif
           endif
-!        endif
+        endif
 
         ipt    = 1
         lprnt  = .false.

@@ -24,7 +24,7 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, cplwav2atm,                     &
+   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                &
                                  landfrac, lakefrac, lakedepth, oceanfrac,                                      &
                                  frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorl_wat, &
                                  zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,  &
@@ -38,7 +38,7 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im
+      integer,                             intent(in   ) :: im, lkm
       logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
       logical, dimension(im),              intent(in   ) :: flag_cice
       logical,              dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
@@ -184,11 +184,15 @@ contains
 
 ! to prepare to separate lake from ocean in later
       do i = 1, im
-          if(lakefrac(i) .ge. 0.15 .and. lakedepth(i) .gt. 1.0) then
-             lake(i) = .true.
-          else
-             lake(i) = .false.
-          endif
+        if(lkm == 1) then
+           if(lakefrac(i) .ge. 0.15 .and. lakedepth(i) .gt. 1.0) then
+              lake(i) = .true.
+           else
+              lake(i) = .false.
+           endif
+        else
+           lake(i) = .false.
+        endif
       enddo
 
      ! Assign sea ice temperature to interstitial variable
