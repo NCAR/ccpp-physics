@@ -736,6 +736,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[adjsfcusw]
+  standard_name = surface_upwelling_shortwave_flux
+  long_name = surface upwelling shortwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [adjsfcdsw]
   standard_name = surface_downwelling_shortwave_flux
   long_name = surface downwelling shortwave flux at current time
@@ -753,15 +762,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[adjsfcusw]
-  standard_name = surface_upwelling_shortwave_flux
-  long_name = surface upwelling shortwave flux at current time
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
