@@ -207,6 +207,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[alpha]
+  standard_name = cloud_overlap_decorrelation_parameter
+  long_name = cloud overlap decorrelation parameter
+  units = frac
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [npts]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -257,7 +266,7 @@
   intent = in
   optional = F
 [hlwc]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step_and_radiation_levels
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = longwave total sky heating rate
   units = K s-1
   dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
@@ -291,7 +300,7 @@
   intent = inout
   optional = F
 [hlw0]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
   long_name = longwave clear sky heating rate
   units = K s-1
   dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
