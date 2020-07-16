@@ -182,7 +182,7 @@ contains
         endif
       enddo
 
-! to prepare to separate lake from ocean in later
+! to prepare to separate lake from ocean under water category
       do i = 1, im
         if(lkm == 1) then
            if(lakefrac(i) .ge. 0.15 .and. lakedepth(i) .gt. 1.0) then
