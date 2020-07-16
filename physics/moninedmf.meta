@@ -541,6 +541,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -548,6 +549,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [qdiag3d]
   standard_name = flag_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
@@ -555,6 +557,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [lsidea]
   standard_name = flag_idealized_physics
   long_name = flag for idealized physics
@@ -562,6 +565,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [ntoz]
   standard_name = index_for_ozone
   long_name = tracer index for ozone mixing ratio
@@ -578,6 +582,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dv3dt_PBL]
   standard_name = cumulative_change_in_y_wind_due_to_PBL
   long_name = cumulative change in y wind due to PBL
@@ -586,6 +591,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dt3dt_PBL]
   standard_name = cumulative_change_in_temperature_due_to_PBL
   long_name = cumulative change in temperature due to PBL
@@ -594,6 +600,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dq3dt_PBL]
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
   long_name = cumulative change in water vapor specific humidity due to PBL
@@ -602,6 +609,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [do3dt_PBL]
   standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
   long_name = cumulative change in ozone mixing ratio due to PBL
@@ -610,6 +618,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [flag_for_pbl_generic_tend]
   standard_name = flag_for_generic_planetary_boundary_layer_tendency
   long_name = true if GFS_PBL_generic should calculate tendencies
@@ -617,6 +626,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

@@ -145,7 +145,6 @@ module lsm_ruc
 !! \htmlinclude lsm_ruc_run.html
 !!
 !>\section gen_lsmruc GSD RUC LSM General Algorithm
-! DH* TODO - make order of arguments the same as in the metadata table
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, kdt, im, nlev, lsoil_ruc, lsoil, zs,     &
      &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &

@@ -1253,7 +1253,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -1262,7 +1262,7 @@
 [xlat]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -1508,7 +1508,7 @@
   intent = inout
   optional = F
 [save_tcp]
-  standard_name = air_temperature_save_from_cumulus_paramterization
+  standard_name = air_temperature_save_from_convective_parameterization
   long_name = air temperature after cumulus parameterization
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -1752,7 +1752,7 @@
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
@@ -1786,7 +1786,7 @@
   intent = in
   optional = F
 [save_tcp]
-  standard_name = air_temperature_save_from_cumulus_paramterization
+  standard_name = air_temperature_save_from_convective_parameterization
   long_name = air temperature after cumulus parameterization
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)

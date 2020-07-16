@@ -312,7 +312,7 @@
 [slag]
   standard_name = equation_of_time
   long_name = equation of time (radian)
-  units = radians
+  units = radian
   dimensions = ()
   type = real
   kind = kind_phys

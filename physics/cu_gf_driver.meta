@@ -357,6 +357,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [flag_for_dcnv_generic_tend]
   standard_name = flag_for_generic_deep_convection_tendency
   long_name = true if GFS_DCNV_generic should calculate tendencies
@@ -364,6 +365,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [du3dt_SCNV]
   standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
   long_name = cumulative change in x wind due to shallow convection
@@ -372,6 +374,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dv3dt_SCNV]
   standard_name = cumulative_change_in_y_wind_due_to_shallow_convection
   long_name = cumulative change in y wind due to shallow convection
@@ -380,6 +383,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dt3dt_SCNV]
   standard_name = cumulative_change_in_temperature_due_to_shallow_convection
   long_name = cumulative change in temperature due to shallow convection
@@ -388,6 +392,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dq3dt_SCNV]
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shallow_convection
   long_name = cumulative change in water vapor specific humidity due to shallow convection
@@ -396,6 +401,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [du3dt_DCNV]
   standard_name = cumulative_change_in_x_wind_due_to_deep_convection
   long_name = cumulative change in x wind due to deep convection
@@ -404,6 +410,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dv3dt_DCNV]
   standard_name = cumulative_change_in_y_wind_due_to_deep_convection
   long_name = cumulative change in y wind due to deep convection
@@ -412,6 +419,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dt3dt_DCNV]
   standard_name = cumulative_change_in_temperature_due_to_deep_convection
   long_name = cumulative change in temperature due to deep convection
@@ -420,6 +428,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [dq3dt_DCNV]
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection
   long_name = cumulative change in water vapor specific humidity due to deep convection
@@ -428,6 +437,7 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -435,6 +445,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [qdiag3d]
   standard_name = flag_tracer_diagnostics_3D
   long_name = flag for 3d tracer diagnostic fields
@@ -442,6 +453,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [qci_conv]
   standard_name = convective_cloud_condesate_after_rainout
   long_name = convective cloud condesate after rainout
