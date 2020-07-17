@@ -98,7 +98,7 @@
 [xlat]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -107,7 +107,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
