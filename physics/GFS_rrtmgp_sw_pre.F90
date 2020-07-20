@@ -86,6 +86,7 @@ contains
     ! Local variables
     integer :: i, j, iCol, iBand, iLay
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
+    real(kind_phys) :: lndp_alb
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -117,13 +118,17 @@ contains
     !  ---  turn vegetation fraction pattern into percentile pattern
     ! #######################################################################################
     alb1d(:) = 0.
-    if (Model%do_sfcperts) then
-       if (Model%pertalb(1) > 0.) then
+    lndp_alb = -999.
+    if (Model%lndp_type ==1) then
+      do k =1,Model%n_var_lndp
+       if (Model%lndp_var_list(k) == 'alb') then
           do i=1,ncol
-             call cdfnor(Coupling%sfc_wts(i,5),alb1d(i))
+            call cdfnor(Coupling%sfc_wts(i,k),alb1d(i))
+            lndp_alb = Model%lndp_prt_list(k)
           enddo
-       endif
-    endif  
+        endif
+      enddo
+    endif
     
     ! #######################################################################################
     ! Call module_radiation_surface::setalb() to setup surface albedo.
@@ -131,7 +136,7 @@ contains
     call setalb (Sfcprop%slmsk, Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%snoalb, Sfcprop%zorl, &
          Radtend%coszen, Sfcprop%tsfc, Sfcprop%tsfc, Sfcprop%hprime(:,1), Sfcprop%alvsf,     &
          Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf, Sfcprop%facsf, Sfcprop%facwf,          &
-         Sfcprop%fice, Sfcprop%tisfc, NCOL, alb1d, Model%pertalb, sfcalb)
+         Sfcprop%fice, Sfcprop%tisfc, NCOL, alb1d, lndp_alb, sfcalb)
        
     ! Approximate mean surface albedo from vis- and nir-  diffuse values.
     Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
