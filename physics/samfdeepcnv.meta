@@ -19,14 +19,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension
   long_name = vertical layer dimension
@@ -143,7 +135,7 @@
   optional = F
 [t0c]
   standard_name = temperature_at_zero_celsius
-  long_name = temperature at 0 degrees Celsius
+  long_name = temperature at 0 degree Celsius
   units = K
   dimensions = ()
   type = real
@@ -271,64 +263,7 @@
   units = flag
   dimensions = ()
   type = logical
-[nthresh]
-  standard_name = threshold_for_perturbed_vertical_velocity
-  long_name = threshold used for perturbed vertical velocity
-  units = m s-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
-  optional = F
-[do_ca]
-  standard_name = flag_for_cellular_automata
-  long_name = cellular automata main switch
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ca_closure]
-  standard_name = flag_for_global_cellular_automata_closure
-  long_name = switch for ca on closure
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ca_entr]
-  standard_name = flag_for_global_cellular_automata_entr
-  long_name = switch for ca on entr
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ca_trigger]
-  standard_name = flag_for_global_cellular_automata_trigger
-  long_name = switch for ca on trigger
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ca_deep]
-  standard_name = fraction_of_cellular_automata_for_deep_convection
-  long_name = fraction of cellular automata for deep convection
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[rainevap]
-  standard_name = physics_field_for_coupling
-  long_name = physics_field_for_coupling
-  units = m2 s-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [cldwrk]
   standard_name = cloud_work_function
@@ -637,6 +572,65 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[do_ca]
+  standard_name = flag_for_cellular_automata
+  long_name = cellular automata main switch
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_closure]
+  standard_name = flag_for_global_cellular_automata_closure
+  long_name = switch for ca on closure
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_entr]
+  standard_name = flag_for_global_cellular_automata_entr
+  long_name = switch for ca on entr
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ca_trigger]
+  standard_name = flag_for_global_cellular_automata_trigger
+  long_name = switch for ca on trigger
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[nthresh]
+  standard_name = threshold_for_perturbed_vertical_velocity
+  long_name = threshold used for perturbed vertical velocity
+  units = m s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ca_deep]
+  standard_name = fraction_of_cellular_automata_for_deep_convection
+  long_name = fraction of cellular automata for deep convection
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[rainevap]
+  standard_name = physics_field_for_coupling
+  long_name = physics_field_for_coupling
+  units = m2 s-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

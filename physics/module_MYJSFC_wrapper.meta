@@ -9,14 +9,6 @@
   type = logical
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -354,7 +346,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [ustar]
   standard_name = surface_friction_velocity
@@ -399,7 +391,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = out
   optional = F
 [ffm]
   standard_name = Monin_Obukhov_similarity_function_for_momentum
@@ -471,7 +463,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [z0rl_wat]
   standard_name = surface_roughness_length_over_ocean_interstitial

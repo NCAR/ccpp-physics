@@ -23,14 +23,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [rn]
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
   long_name = convective rainfall amount on dynamics timestep

@@ -1,14 +1,36 @@
 [ccpp-arg-table]
-  name = mynnedmf_wrapper_run
+  name = mynnedmf_wrapper_init
   type = scheme
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
+[lheatstrg]
+  standard_name = flag_for_canopy_heat_storage
+  long_name = flag for canopy heat storage parameterization
+  units = flag
   dimensions = ()
-  type = integer
+  type = logical
   intent = in
   optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+#####################################################################
+[ccpp-arg-table]
+  name = mynnedmf_wrapper_run
+  type = scheme
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -57,9 +79,25 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [lsidea]
   standard_name = flag_idealized_physics
   long_name = flag for idealized physics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[cplflx]
+  standard_name = flag_for_flux_coupling
+  long_name = flag controlling cplflx collection (default off)
   units = flag
   dimensions = ()
   type = logical
@@ -292,7 +330,7 @@
   optional = F
 [hflx]
   standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward sensible heat flux
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
   units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -301,7 +339,7 @@
   optional = F
 [qflx]
   standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward latent heat flux
+  long_name = kinematic surface upward latent heat flux reduced by surface roughness
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -344,6 +382,42 @@
   kind = kind_phys
   intent = out
   optional = F
+[dusfc1]
+  standard_name = instantaneous_surface_x_momentum_flux
+  long_name = surface momentum flux in the x-direction valid for current call
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc1]
+  standard_name = instantaneous_surface_y_momentum_flux
+  long_name = surface momentum flux in the y-direction valid for current call
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfci_diag]
+  standard_name = instantaneous_surface_x_momentum_flux_for_diag
+  long_name = instantaneous sfc x momentum flux multiplied by timestep
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfci_diag]
+  standard_name = instantaneous_surface_y_momentum_flux_for_diag
+  long_name = instantaneous sfc y momentum flux multiplied by timestep
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [dtsfci_diag]
   standard_name = instantaneous_surface_upward_sensible_heat_flux_for_diag
   long_name = instantaneous sfc sensible heat flux multiplied by timestep
@@ -362,6 +436,24 @@
   kind = kind_phys
   intent = out
   optional = F
+[dusfc_diag]
+  standard_name = cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep
+  long_name = cumulative sfc x momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvsfc_diag]
+  standard_name = cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep
+  long_name = cumulative sfc y momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [dtsfc_diag]
   standard_name = cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc sensible heat flux multiplied by timestep
@@ -369,7 +461,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [dqsfc_diag]
   standard_name = cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep
@@ -378,7 +470,184 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
+  optional = F
+[dusfc_cice]
+  standard_name = surface_x_momentum_flux_for_coupling
+  long_name = sfc x momentum flux for coupling
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dvsfc_cice]
+  standard_name = surface_y_momentum_flux_for_coupling
+  long_name = sfc y momentum flux for coupling
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dtsfc_cice]
+  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  long_name = sfc sensible heat flux for coupling
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dqsfc_cice]
+  standard_name = surface_upward_latent_heat_flux_for_coupling
+  long_name = sfc latent heat flux for coupling
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hflx_ocn]
+  standard_name = kinematic_surface_upward_sensible_heat_flux_over_ocean
+  long_name = kinematic surface upward sensible heat flux over ocean
+  units = K m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qflx_ocn]
+  standard_name = kinematic_surface_upward_latent_heat_flux_over_ocean
+  long_name = kinematic surface upward latent heat flux over ocean
+  units = kg kg-1 m s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[stress_ocn]
+  standard_name = surface_wind_stress_over_ocean
+  long_name = surface wind stress over ocean
+  units = m2 s-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fice]
+  standard_name = sea_ice_concentration
+  long_name = ice fraction over open water
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[wet]
+  standard_name = flag_nonzero_wet_surface_fraction
+  long_name = flag indicating presence of some ocean or lake surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[dry]
+  standard_name = flag_nonzero_land_surface_fraction
+  long_name = flag indicating presence of some land surface area fraction
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = logical
+  intent = in
+  optional = F
+[dusfci_cpl]
+  standard_name = instantaneous_surface_x_momentum_flux_for_coupling
+  long_name = instantaneous sfc u momentum flux
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvsfci_cpl]
+  standard_name = instantaneous_surface_y_momentum_flux_for_coupling
+  long_name = instantaneous sfc v momentum flux
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtsfci_cpl]
+  standard_name = instantaneous_surface_upward_sensible_heat_flux_for_coupling
+  long_name = instantaneous sfc sensible heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dqsfci_cpl]
+  standard_name = instantaneous_surface_upward_latent_heat_flux_for_coupling
+  long_name = instantaneous sfc latent heat flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dusfc_cpl]
+  standard_name = cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc u momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dvsfc_cpl]
+  standard_name = cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc v momentum flux multiplied by timestep
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtsfc_cpl]
+  standard_name = cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc sensible heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dqsfc_cpl]
+  standard_name = cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep
+  long_name = cumulative sfc latent heat flux multiplied by timestep
+  units = W m-2 s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [recmol]
   standard_name = reciprocal_of_obukhov_length
@@ -488,8 +757,17 @@
   intent = inout
   optional = F
 [QC_BL]
-  standard_name = subgrid_cloud_mixing_ratio_pbl
-  long_name = subgrid cloud cloud mixing ratio from PBL scheme
+  standard_name = subgrid_cloud_water_mixing_ratio_pbl
+  long_name = subgrid cloud water mixing ratio from PBL scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[QI_BL]
+  standard_name = subgrid_cloud_ice_mixing_ratio_pbl
+  long_name = subgrid cloud ice mixing ratio from PBL scheme
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -559,6 +837,42 @@
   kind = kind_phys
   intent = inout
   optional = F
+[sub_thl]
+  standard_name = theta_subsidence_tendency
+  long_name = updraft theta subsidence tendency
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sub_sqv]
+  standard_name = water_vapor_subsidence_tendency
+  long_name = updraft water vapor subsidence tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[det_thl]
+  standard_name = theta_detrainment_tendency
+  long_name = updraft theta detrainment tendency
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[det_sqv]
+  standard_name = water_vapor_detrainment_tendency
+  long_name = updraft water vapor detrainment tendency
+  units = kg kg-1 s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [nupdraft]
   standard_name = number_of_plumes
   long_name = number of plumes per grid column
@@ -576,9 +890,9 @@
   kind = kind_phys
   intent = out
   optional = F
-[ktop_shallow]
-  standard_name = k_level_of_highest_reaching_plume
-  long_name = k-level of highest reaching plume
+[ktop_plume]
+  standard_name = k_level_of_highest_plume
+  long_name = k-level of highest plume
   units = count
   dimensions = (horizontal_dimension)
   type = integer
@@ -683,15 +997,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_PBL
-  long_name = cumulative change in temperature due to PBL
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [du3dt_PBL]
   standard_name = cumulative_change_in_x_wind_due_to_PBL
   long_name = cumulative change in x wind due to PBL
@@ -723,6 +1028,33 @@
   standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in y wind due to orographic gravity wave drag
   units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[do3dt_PBL]
+  standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
+  long_name = cumulative change in ozone mixing ratio due to PBL
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dq3dt_PBL]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
+  long_name = cumulative change in water vapor specific humidity due to PBL
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dt3dt_PBL]
+  standard_name = cumulative_change_in_temperature_due_to_PBL
+  long_name = cumulative change in temperature due to PBL
+  units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -838,6 +1170,14 @@
 [bl_mynn_mixqt]
   standard_name = mix_total_water_flag
   long_name = flag to mix total water or individual species
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[bl_mynn_output]
+  standard_name = mynn_output_flag
+  long_name = flag initialize and output extra 3D variables
   units = flag
   dimensions = ()
   type = integer

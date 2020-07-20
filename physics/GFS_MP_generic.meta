@@ -30,6 +30,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = logical flag for 3D tracer diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_aw]
   standard_name = flag_for_Arakawa_Wu_adjustment
   long_name = flag for Arakawa Wu scale-aware adjustment
@@ -89,6 +97,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[save_qv]
+  standard_name = water_vapor_specific_humidity_save
+  long_name = water vapor specific humidity before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -133,14 +150,6 @@
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -266,6 +275,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = logical flag for 3D tracer diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [cplflx]
   standard_name = flag_for_flux_coupling
   long_name = flag controlling cplflx collection (default off)
@@ -339,7 +356,7 @@
 [xlat]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -348,7 +365,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

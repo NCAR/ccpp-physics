@@ -307,112 +307,92 @@
   kind = kind_phys
   intent = inout
   optional = F
-[lheatstrg]
-  standard_name = flag_for_canopy_heat_storage
-  long_name = flag for canopy heat storage parameterization
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[save_t]
+  standard_name = air_temperature_save
+  long_name = air temperature before entering a physics scheme
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F
-[z0fac]
-  standard_name = surface_roughness_fraction_factor
-  long_name = surface roughness fraction factor for canopy heat storage parameterization
-  units = none
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
   dimensions = ()
-  type = real
-  kind = kind_phys
+  type = logical
   intent = in
   optional = F
-[e0fac]
-  standard_name = latent_heat_flux_fraction_factor_relative_to_sensible_heat_flux
-  long_name = latent heat flux fraction factor relative to sensible heat flux for canopy heat storage parameterization
-  units = none
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
   dimensions = ()
-  type = real
-  kind = kind_phys
+  type = logical
   intent = in
   optional = F
-[zorl]
-  standard_name = surface_roughness_length
-  long_name = surface roughness length
-  units = cm
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[u10m]
-  standard_name = x_wind_at_10m
-  long_name = 10 meter u wind speed
+[ugrs]
+  standard_name = x_wind
+  long_name = zonal wind
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[v10m]
-  standard_name = y_wind_at_10m
-  long_name = 10 meter v wind speed
+[vgrs]
+  standard_name = y_wind
+  long_name = meridional wind
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[hflx]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
-  long_name = kinematic surface upward sensible heat flux
-  units = K m s-1
-  dimensions = (horizontal_dimension)
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[evap]
-  standard_name = kinematic_surface_upward_latent_heat_flux
-  long_name = kinematic surface upward latent heat flux
-  units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[hflxq]
-  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
-  units = K m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[evapq]
-  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
-  long_name = kinematic surface upward latent heat flux reduced by surface roughness
-  units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[hefac]
-  standard_name = surface_upward_latent_heat_flux_reduction_factor
-  long_name = surface upward latent heat flux reduction factor from canopy heat storage
-  units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[hffac]
-  standard_name = surface_upward_sensible_heat_flux_reduction_factor
-  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
-  units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -716,9 +696,25 @@
   type = logical
   intent = in
   optional = F
+[flag_for_pbl_generic_tend]
+  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  long_name = true if GFS_PBL_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
   type = logical
@@ -1340,6 +1336,78 @@
   long_name = surface upward sensible heat flux reduction factor from canopy heat storage
   units = none
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ugrs]
+  standard_name = x_wind
+  long_name = zonal wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vgrs]
+  standard_name = y_wind
+  long_name = meridional wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qgrs]
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_t]
+  standard_name = air_temperature_save
+  long_name = air temperature before entering a physics scheme
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in

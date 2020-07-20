@@ -23,7 +23,7 @@
 [slag]
   standard_name = equation_of_time
   long_name = equation of time
-  units = radians
+  units = radian
   dimensions = ()
   type = real
   kind = kind_phys
@@ -68,7 +68,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude of grid box
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -288,14 +288,6 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [im]

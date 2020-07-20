@@ -22,7 +22,7 @@
 !###===================================================================
  SUBROUTINE myjsfc_wrapper_run(                    &
      &  restart,                                   &
-     &  ix,im,levs,                                &
+     &  im,levs,                                   &
      &  kdt,ntrac,ntke,                            &
      &  ntcw,ntiw,ntrw,ntsw,ntgl,                  &
      &  iter,flag_iter,                            &
@@ -84,7 +84,7 @@
       integer, intent(out) :: errflg
 
 !MYJ-1D
-      integer,intent(in) :: im, ix, levs
+      integer,intent(in) :: im, levs
       integer,intent(in) :: kdt, iter, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
       logical,intent(in) :: restart, lprnt
