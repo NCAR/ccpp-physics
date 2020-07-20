@@ -626,7 +626,7 @@
           if(qdiag3d) then
             do k=1,levs
               do i=1,im
-                dq3dt(i,k)   = dq3dt(i,k) + (qgrs(i,k,ntqv)-save_q(i,k,ntqv))
+                dq3dt      (i,k) = dq3dt      (i,k) + (qgrs(i,k,ntqv)-save_q(i,k,ntqv))
                 dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + (qgrs(i,k,ntoz)-save_q(i,k,ntoz))
               enddo
             enddo

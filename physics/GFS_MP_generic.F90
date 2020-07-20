@@ -253,40 +253,6 @@
 
       endif
 
-      if (lssav) then
-!        if (Model%me == 0) print *,'in phys drive, kdt=',Model%kdt, &
-!          'totprcpb=', Diag%totprcpb(1),'totprcp=',Diag%totprcp(1), &
-!          'rain=',Diag%rain(1)
-        do i=1,im
-          cnvprcp (i) = cnvprcp (i) + rainc(i)
-          totprcp (i) = totprcp (i) + rain(i)
-          totice  (i) = totice  (i) + ice(i)
-          totsnw  (i) = totsnw  (i) + snow(i)
-          totgrp  (i) = totgrp  (i) + graupel(i)
-
-          cnvprcpb(i) = cnvprcpb(i) + rainc(i)
-          totprcpb(i) = totprcpb(i) + rain(i)
-          toticeb (i) = toticeb (i) + ice(i)
-          totsnwb (i) = totsnwb (i) + snow(i)
-          totgrpb (i) = totgrpb (i) + graupel(i)
-        enddo
-
-        if (ldiag3d) then
-          do k=1,levs
-            do i=1,im
-              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-            enddo
-          enddo
-          if (qdiag3d) then
-             do k=1,levs
-                do i=1,im
-                   dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
-                enddo
-             enddo
-          endif
-        endif
-      endif
-
       t850(1:im) = gt0(1:im,1)
 
       do k = 1, levs-1
@@ -365,9 +331,9 @@
       endif
 
       if (lssav) then
-!        if (Model%me == 0) print *,'in phys drive, kdt=',kdt, &
-!          'totprcpb=', totprcpb(1),'totprcp=',totprcp(1),     &
-!          'rain=',rain(1)
+!        if (Model%me == 0) print *,'in phys drive, kdt=',Model%kdt, &
+!          'totprcpb=', Diag%totprcpb(1),'totprcp=',Diag%totprcp(1), &
+!          'rain=',Diag%rain(1)
         do i=1,im
           cnvprcp (i) = cnvprcp (i) + rainc(i)
           totprcp (i) = totprcp (i) + rain(i)
@@ -386,9 +352,15 @@
           do k=1,levs
             do i=1,im
               dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k)-save_t(i,k)) * frain
-!             dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
             enddo
           enddo
+          if (qdiag3d) then
+             do k=1,levs
+                do i=1,im
+                   dq3dt(i,k) = dq3dt(i,k) + (gq0(i,k,1)-save_qv(i,k)) * frain
+                enddo
+             enddo
+          endif
         endif
       endif
 

@@ -141,13 +141,13 @@
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: cvt1, cvb1, tem1d, tskn
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP) :: &
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP) ::         &
                           htswc, htlwc, gcice, grain, grime, htsw0, htlw0, &
                           rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
                           cldcov, deltaq, cnvc, cnvw,                      &
                           effrl, effri, effrr, effrs, rho, orho
       ! for Thompson MP
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),Model%levr+LTP) :: &
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP) ::         &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
                                   qi_mp, qs_mp, nc_mp, ni_mp, nwfa
 
