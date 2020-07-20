@@ -25,6 +25,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_cnvgwd]
   standard_name = flag_for_convective_gravity_wave_drag
   long_name = flag for convective gravity wave drag (gwd)
@@ -113,15 +121,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[ca_deep]
-  standard_name = fraction_of_cellular_automata_for_deep_convection
-  long_name = fraction of cellular automata for deep convection
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [dqdti]
   standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
   long_name = instantaneous moisture tendency due to convection
@@ -180,6 +179,14 @@
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
   type = logical
@@ -485,6 +492,14 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[flag_for_dcnv_generic_tend]
+  standard_name = flag_for_generic_deep_convection_tendency
+  long_name = true if GFS_DCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

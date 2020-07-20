@@ -19,14 +19,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension
   long_name = vertical layer dimension
@@ -143,7 +135,7 @@
   optional = F
 [t0c]
   standard_name = temperature_at_zero_celsius
-  long_name = temperature at 0 degrees Celsius
+  long_name = temperature at 0 degree Celsius
   units = K
   dimensions = ()
   type = real

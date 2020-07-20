@@ -65,9 +65,9 @@
 !> \section arg_table_GFS_time_vary_pre_run Argument Table
 !! \htmlinclude GFS_time_vary_pre_run.html
 !!
-      subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
-        nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
-        julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
+      subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr,  &
+        nslwr, nhfrad, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, &
+        kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
 
         use machine,               only: kind_phys
 
@@ -77,7 +77,7 @@
         integer,                          intent(in)    :: jdat(1:8), idat(1:8)
         integer,                          intent(in)    :: lsm, lsm_noahmp,      &
                                                            nsswr, nslwr, me,     &
-                                                           master, nscyc
+                                                           master, nscyc, nhfrad
         logical,                          intent(in)    :: debug
         real(kind=kind_phys),             intent(in)    :: dtp
 
@@ -169,6 +169,12 @@
         !--- allow for radiation to be called on every physics time step, if needed
         if (nsswr == 1)  lsswr = .true.
         if (nslwr == 1)  lslwr = .true.
+        !--- allow for radiation to be called on every physics time step
+        !    for the first nhfrad timesteps (for spinup, coldstarts only)
+        if (kdt<=nhfrad) then
+           lsswr = .true.
+           lslwr = .true.
+        end if
 
         !--- set the solar hour based on a combination of phour and time initial hour
         solhr  = mod(phour+idate(1),con_24)

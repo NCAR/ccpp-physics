@@ -54,8 +54,9 @@
 !!     climatological T and O3 are in location 5 and 6 of prdout array
 !!\author June 2015 - Shrinivas Moorthi
       subroutine ozphys_2015_run (                                      &
-     &                        ix, im, levs, ko3, dt, oz, tin, po3,      &
-     &                        prsl, prdout, pl_coeff, delp, ldiag3d,    &
+     &                        im, levs, ko3, dt, oz, tin, po3,          &
+     &                        prsl, prdout, pl_coeff, delp,             &
+     &                        ldiag3d, qdiag3d,                         &
      &                        ozp1,ozp2,ozp3,ozp4,con_g,                &
      &                        me, errmsg, errflg)
 !
@@ -65,26 +66,26 @@
 !
       real(kind=kind_phys),intent(in) :: con_g
       real :: gravi
-      integer, intent(in) :: im, ix, levs, ko3, pl_coeff,me
+      integer, intent(in) :: im, levs, ko3, pl_coeff,me
       real(kind=kind_phys), intent(in) :: po3(ko3),                     &
-     &                                    prsl(ix,levs), tin(ix,levs),  &
-     &                                    delp(ix,levs),                &
-     &                                    prdout(ix,ko3,pl_coeff), dt
+     &                                    prsl(im,levs), tin(im,levs),  &
+     &                                    delp(im,levs),                &
+     &                                    prdout(im,ko3,pl_coeff), dt
       ! These arrays may not be allocated and need assumed array sizes
       real(kind=kind_phys), intent(inout) ::                            &
      &                  ozp1(:,:), ozp2(:,:), ozp3(:,:),ozp4(:,:)
-      real(kind=kind_phys), intent(inout) :: oz(ix,levs)
+      real(kind=kind_phys), intent(inout) :: oz(im,levs)
 
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
       integer k,kmax,kmin,l,i,j
-      logical              ldiag3d, flg(im)
+      logical              ldiag3d, flg(im), qdiag3d
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im),prod(im,pl_coeff), &
      &                     ozib(im), colo3(im,levs+1), coloz(im,levs+1),&
-     &                     ozi(ix,levs)
+     &                     ozi(im,levs)
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -163,16 +164,15 @@
 !ccpp            ozo(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
           oz(i,l) = (ozib(i)  + tem*dt) / (1.0 - prod(i,2)*dt)
         enddo
-!        if (ldiag3d) then     !     ozone change diagnostics
-!          do i=1,im
-!            ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
-!!ccpp            ozp(i,l,2) = ozp(i,l,2) + (ozo(i,l) - ozib(i))
-!            ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-!            ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
-!            ozp4(i,l) = ozp4(i,l) + prod(i,4)
-!     &                              * (colo3(i,l)-coloz(i,l))*dt
-!          enddo
-!        endif
+        if (ldiag3d .and. qdiag3d) then     !     ozone change diagnostics
+          do i=1,im
+            ozp1(i,l) = ozp1(i,l) + (prod(i,1)-prod(i,2)*prod(i,6))*dt
+            ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
+            ozp3(i,l) = ozp3(i,l) + prod(i,3)*(tin(i,l)-prod(i,5))*dt
+            ozp4(i,l) = ozp4(i,l) + prod(i,4)
+     &                              * (colo3(i,l)-coloz(i,l))*dt
+          enddo
+        endif
       enddo                                ! vertical loop
 !
       return

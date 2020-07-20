@@ -24,7 +24,7 @@
 !> \section arg_table_moninshoc_run Argument Table
 !! \htmlinclude moninshoc_run.html
 !!
-      subroutine moninshoc_run (ix,im,km,ntrac,ntcw,ncnd,dv,du,tau,rtg,
+      subroutine moninshoc_run (im,km,ntrac,ntcw,ncnd,dv,du,tau,rtg,
      &                          u1,v1,t1,q1,tkh,prnum,ntke,
      &                          psk,rbsoil,zorl,u10m,v10m,fm,fh,
      &                          tsea,heat,evap,stress,spd1,kpbl,
@@ -41,7 +41,7 @@
 !
 !     arguments
 !
-      integer,                                  intent(in) :: ix, im,
+      integer,                                  intent(in) :: im,
      &  km, ntrac, ntcw, ncnd, ntke
       integer, dimension(im),                   intent(in) ::  kinver
 
@@ -51,10 +51,10 @@
      &  rd, cp, hvap, fv
       real(kind=kind_phys), dimension(im),      intent(in) :: psk,
      &  rbsoil, zorl, u10m, v10m, fm, fh, tsea, heat, evap, stress, spd1
-      real(kind=kind_phys), dimension(ix,km),   intent(in) :: u1, v1,
+      real(kind=kind_phys), dimension(im,km),   intent(in) :: u1, v1,
      &  t1, tkh, del, prsl, phil, prslk
-      real(kind=kind_phys), dimension(ix,km+1), intent(in) :: prsi, phii
-      real(kind=kind_phys), dimension(ix,km,ntrac), intent(in) :: q1
+      real(kind=kind_phys), dimension(im,km+1), intent(in) :: prsi, phii
+      real(kind=kind_phys), dimension(im,km,ntrac), intent(in) :: q1
 
       real(kind=kind_phys), dimension(im,km),   intent(inout) :: du, dv,
      &  tau
@@ -114,8 +114,6 @@
 !-----------------------------------------------------------------------
 !
 !     compute preliminary variables
-!
-      if (ix < im) stop
 !
       dt2   = delt
       rdt   = 1. / dt2

@@ -155,7 +155,9 @@ contains
          tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
          dudt_mtb,dudt_ogw, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                 &
          dudt, dvdt, dtdt, rdxzb, con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt,    &
-         rain, ntke, q_tke, dqdt_tke, lprnt, ipr, errmsg, errflg)
+         rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                                      &
+         ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
+         ldiag3d, lssav, flag_for_gwd_generic_tend, errmsg, errflg)
 
     implicit none
 
@@ -163,6 +165,7 @@ contains
     integer,                 intent(in) :: me, master, im, levs, ntrac, kdt, lonr, nmtvr
     integer,                 intent(in), dimension(im)       :: kpbl
     real(kind=kind_phys),    intent(in), dimension(im)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
+    logical,                 intent(in)                      :: flag_for_gwd_generic_tend
     ! elvmax is intent(in) for CIRES UGWP, but intent(inout) for GFS GWDPS
     real(kind=kind_phys),    intent(inout), dimension(im)    :: elvmax
     real(kind=kind_phys),    intent(in), dimension(im, 4)    :: clx, oa4
@@ -178,6 +181,12 @@ contains
     real(kind=kind_phys),    intent(out), dimension(im)      :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
     real(kind=kind_phys),    intent(out), dimension(im, levs):: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
     real(kind=kind_phys),    intent(out), dimension(im, levs):: dudt_mtb, dudt_ogw, dudt_tms
+
+    ! These arrays are only allocated if ldiag=.true.
+    real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw
+    real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw
+    logical,                 intent(in)                         :: ldiag3d, lssav
+
     ! These arrays only allocated if ldiag_ugwp = .true.
     real(kind=kind_phys),    intent(out), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms
 
@@ -251,7 +260,7 @@ contains
       enddo
 
       if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
-        call gwdps_run(im, im, levs, Pdvdt, Pdudt, Pdtdt,              &
+        call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
                    ugrs, vgrs, tgrs, qgrs,                             &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
                    hprime, oc, oa4, clx, theta, sigma, gamma,          &
@@ -268,6 +277,18 @@ contains
       end if
 
     endif ! do_ugwp
+
+
+    if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
+      do k=1,levs
+        do i=1,im
+           ldu3dt_ogw(i,k) = ldu3dt_ogw(i,k) + Pdudt(i,k)*dtp
+           ldv3dt_ogw(i,k) = ldv3dt_ogw(i,k) + Pdvdt(i,k)*dtp
+           ldt3dt_ogw(i,k) = ldt3dt_ogw(i,k) + Pdtdt(i,k)*dtp
+        enddo
+      enddo
+    endif
+    
 
     if (cdmbgwd(3) > 0.0) then
 
@@ -344,8 +365,7 @@ contains
       dudt_mtb = 0. ; dudt_ogw = 0. ; dudt_tms = 0.
     endif
 
-    return
-
+#if 0
     !=============================================================================
     ! make "ugwp eddy-diffusion" update for gw_dtdt/gw_dudt/gw_dvdt by solving
     ! vert diffusion equations & update "Statein%tgrs, Statein%ugrs, Statein%vgrs"
@@ -364,6 +384,17 @@ contains
     gw_dtdt = gw_dtdt*(1.-pked) +  ed_dtdt*pked
     gw_dvdt = gw_dvdt*(1.-pked) +  ed_dvdt*pked
     gw_dudt = gw_dudt*(1.-pked) +  ed_dudt*pked
+#endif
+
+    if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
+      do k=1,levs
+        do i=1,im
+           ldu3dt_cgw(i,k) = ldu3dt_cgw(i,k) + (gw_dudt(i,k) - Pdudt(i,k))*dtp
+           ldv3dt_cgw(i,k) = ldv3dt_cgw(i,k) + (gw_dvdt(i,k) - Pdvdt(i,k))*dtp
+           ldt3dt_cgw(i,k) = ldt3dt_cgw(i,k) + (gw_dtdt(i,k) - Pdtdt(i,k))*dtp
+        enddo
+      enddo
+    endif
 
     end subroutine cires_ugwp_run
 !! @}
