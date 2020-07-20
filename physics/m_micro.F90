@@ -14,8 +14,7 @@ module m_micro
 
 contains
 
-!>\ingroup mg_driver
-!! This subroutine is the MG initialization.
+!> This subroutine is the MG initialization.
 !> \section arg_table_m_micro_init  Argument Table
 !! \htmlinclude m_micro_init.html
 !!
@@ -103,23 +102,16 @@ end subroutine m_micro_init
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 
-!> \defgroup mg2mg3 Morrison-Gettelman MP scheme Module
-!! This module contains the the entity of MG2 and MG3 schemes. 
-!> @{
-!> \defgroup mg_driver Morrison-Gettelman MP Driver Module
+!> \defgroup mg2mg3 Morrison-Gettelman MP Driver Module
 !! \brief This subroutine is the Morrison-Gettelman MP driver, which computes 
 !! grid-scale condensation and evaporation of cloud condensate.
-
-#if 0
-
+!!
 !> \section arg_table_m_micro_run Argument Table
 !! \htmlinclude m_micro_run.html
 !!
-#endif
-!>\ingroup mg_driver
 !>\section detail_m_micro_run MG m_micro_run Detailed Algorithm
 !> @{
-      subroutine m_micro_run(   im,       ix,     lm,     flipv, dt_i   &
+      subroutine m_micro_run(   im,       lm,     flipv, dt_i           &
      &,                         prsl_i,   prsi_i, phil,   phii          &
      &,                         omega_i,  QLLS_i, QLCN_i, QILS_i, QICN_i&
      &,                         lwheat_i, swheat_i, w_upi, cf_upi       &
@@ -182,15 +174,15 @@ end subroutine m_micro_init
      &                       fourb3=4.0/3.0, RL_cub=1.0e-15, nmin=1.0
 
        integer, parameter :: ncolmicro = 1
-       integer,intent(in) :: im, ix,lm, kdt, fprcp, pdfflag
+       integer,intent(in) :: im, lm, kdt, fprcp, pdfflag
        logical,intent(in) :: flipv, skip_macro
        integer,intent(in) :: iccn
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
-       real (kind=kind_phys), dimension(ix,lm),intent(in)  ::           &
+       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
-       real (kind=kind_phys), dimension(ix,0:lm),intent(in):: prsi_i,   &
+       real (kind=kind_phys), dimension(im,0:lm),intent(in):: prsi_i,   &
      &                                                        phii
 ! GJF* These variables are conditionally allocated depending on whether the
 !     Morrison-Gettelman microphysics is used, so they must be declared 
@@ -210,7 +202,7 @@ end subroutine m_micro_init
 !    &       CNVPRCP
 
 !   output
-       real (kind=kind_phys),dimension(ix,lm), intent(out) :: lwm_o, qi_o,  &
+       real (kind=kind_phys),dimension(im,lm), intent(out) :: lwm_o, qi_o,  &
                         cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
        real (kind=kind_phys),dimension(im), intent(out) :: rn_o,  sr_o
        character(len=*),                    intent(out) :: errmsg
@@ -219,7 +211,7 @@ end subroutine m_micro_init
 !   input and output
 !      Anning Cheng 10/24/2016 twat for total water, diagnostic purpose
        integer, dimension(IM), intent(inout):: KCBL
-       real (kind=kind_phys),dimension(ix,lm),intent(inout):: q_io, t_io,   &
+       real (kind=kind_phys),dimension(im,lm),intent(inout):: q_io, t_io,   &
      &                                             ncpl_io,ncpi_io,CLLS_io
 ! GJF* These variables are conditionally allocated depending on whether the
 !     Morrison-Gettelman microphysics is used, so they must be declared 
@@ -1891,7 +1883,7 @@ end subroutine m_micro_init
 !DONIF Calculate the Brunt_Vaisala frequency
 
 !===============================================================================
-!>\ingroup mg_driver
+!>\ingroup mg2mg3
 !> This subroutine computes profiles of background state quantities for 
 !! the multiple gravity wave drag parameterization.
 !!\section gw_prof_gen MG gw_prof General Algorithm
@@ -1978,7 +1970,7 @@ end subroutine m_micro_init
        end subroutine gw_prof
 !> @}
 
-!>\ingroup mg_driver
+!>\ingroup mg2mg3
 !! This subroutine is to find cloud top based on cloud fraction.
       subroutine find_cldtop(ncol, pver, cf, kcldtop)
        implicit none
@@ -2012,6 +2004,5 @@ end subroutine m_micro_init
 
 
       end subroutine find_cldtop
-!> @}
 
 end module m_micro

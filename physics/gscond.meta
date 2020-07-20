@@ -1,27 +1,9 @@
 [ccpp-arg-table]
-  name = gscond_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = gscond_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = zhaocarr_gscond_run
   type = scheme
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer

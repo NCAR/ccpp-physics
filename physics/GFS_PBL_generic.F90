@@ -84,8 +84,8 @@
         ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef, trans_aero, ntchs, ntchm,          &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,           &
         imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires, cplchm, ltaerosol, &
-        hybedmf, do_shoc, satmedmf, qgrs, vdftra, lheatstrg, z0fac, e0fac, zorl,         &
-        u10m, v10m, hflx, evap, hflxq, evapq, hffac, hefac, errmsg, errflg)
+        hybedmf, do_shoc, satmedmf, qgrs, vdftra, save_u, save_v, save_t, save_q,        &
+        ldiag3d, qdiag3d, lssav, ugrs, vgrs, tgrs, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -95,33 +95,23 @@
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
-      logical, intent(in) :: trans_aero
+      logical, intent(in) :: trans_aero, ldiag3d, qdiag3d, lssav
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
       logical, intent(in) :: cplchm, ltaerosol, hybedmf, do_shoc, satmedmf
 
-      real(kind=kind_phys), dimension(im, levs, ntrac),  intent(in)    :: qgrs
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(im, levs), intent(in) :: ugrs, vgrs, tgrs
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(inout) :: vdftra
-
-      ! For canopy heat storage
-      logical, intent(in) :: lheatstrg
-      real(kind=kind_phys), intent(in) :: z0fac, e0fac
-      real(kind=kind_phys), dimension(im), intent(in)  :: zorl, u10m, v10m
-      real(kind=kind_phys), dimension(im), intent(in)  :: hflx, evap
-      real(kind=kind_phys), dimension(im), intent(out) :: hflxq, evapq
-      real(kind=kind_phys), dimension(im), intent(out) :: hffac, hefac
+      real(kind=kind_phys), dimension(im, levs), intent(out) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(out) :: save_q
 
       ! CCPP error handling variables
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      ! Parameters for canopy heat storage parametrization
-      real (kind=kind_phys), parameter :: z0min=0.2, z0max=1.0
-      real (kind=kind_phys), parameter :: u10min=2.5, u10max=7.5
-
       ! Local variables
       integer :: i, k, kk, k1, n
-      real(kind=kind_phys) :: tem, tem1, tem2
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -165,11 +155,13 @@
                 vdftra(i,k,3)  = qgrs(i,k,ntiw)
                 vdftra(i,k,4)  = qgrs(i,k,ntrw)
                 vdftra(i,k,5)  = qgrs(i,k,ntsw)
-                vdftra(i,k,6)  = qgrs(i,k,ntlnc)
-                vdftra(i,k,7)  = qgrs(i,k,ntinc)
-                vdftra(i,k,8)  = qgrs(i,k,ntoz)
-                vdftra(i,k,9)  = qgrs(i,k,ntwa)
-                vdftra(i,k,10) = qgrs(i,k,ntia)
+                vdftra(i,k,6)  = qgrs(i,k,ntgl)
+                vdftra(i,k,7)  = qgrs(i,k,ntlnc)
+                vdftra(i,k,8)  = qgrs(i,k,ntinc)
+                vdftra(i,k,9)  = qgrs(i,k,ntrnc)
+                vdftra(i,k,10) = qgrs(i,k,ntoz)
+                vdftra(i,k,11) = qgrs(i,k,ntwa)
+                vdftra(i,k,12) = qgrs(i,k,ntia)
               enddo
             enddo
           else
@@ -180,8 +172,10 @@
                 vdftra(i,k,3) = qgrs(i,k,ntiw)
                 vdftra(i,k,4) = qgrs(i,k,ntrw)
                 vdftra(i,k,5) = qgrs(i,k,ntsw)
-                vdftra(i,k,6) = qgrs(i,k,ntinc)
-                vdftra(i,k,7) = qgrs(i,k,ntoz)
+                vdftra(i,k,6) = qgrs(i,k,ntgl)
+                vdftra(i,k,7) = qgrs(i,k,ntinc)
+                vdftra(i,k,8) = qgrs(i,k,ntrnc)
+                vdftra(i,k,9) = qgrs(i,k,ntoz)
               enddo
             enddo
           endif
@@ -273,33 +267,22 @@
 !
       endif
 
-!  --- ...  Boundary Layer and Free atmospheic turbulence parameterization
-!
-!  in order to achieve heat storage within canopy layer, in the canopy heat
-!    storage parameterization the kinematic sensible and latent heat fluxes
-!    (hflx & evap) as surface boundary forcings to the pbl scheme are
-!    reduced as a function of surface roughness
-!
-      do i=1,im
-        hflxq(i) = hflx(i)
-        evapq(i) = evap(i)
-        hffac(i) = 1.0
-        hefac(i) = 1.0
-      enddo
-      if (lheatstrg) then
-        do i=1,im
-          tem = 0.01 * zorl(i)     ! change unit from cm to m
-          tem1 = (tem - z0min) / (z0max - z0min)
-          hffac(i) = z0fac * min(max(tem1, 0.0), 1.0)
-          tem = sqrt(u10m(i)**2+v10m(i)**2)
-          tem1 = (tem - u10min) / (u10max - u10min)
-          tem2 = 1.0 - min(max(tem1, 0.0), 1.0)
-          hffac(i) = tem2 * hffac(i)
-          hefac(i) = 1. + e0fac * hffac(i)
-          hffac(i) = 1. + hffac(i)
-          hflxq(i) = hflx(i) / hffac(i)
-          evapq(i) = evap(i) / hefac(i)
+      if(ldiag3d .and. lssav) then
+        do k=1,levs
+          do i=1,im
+            save_t(i,k) = tgrs(i,k)
+            save_u(i,k) = ugrs(i,k)
+            save_v(i,k) = vgrs(i,k)
+          enddo
         enddo
+        if(qdiag3d) then
+          do k=1,levs
+            do i=1,im
+              save_q(i,k,ntqv) = qgrs(i,k,ntqv)
+              save_q(i,k,ntoz) = qgrs(i,k,ntoz)
+            enddo
+          enddo
+        endif
       endif
 
     end subroutine GFS_PBL_generic_pre_run
@@ -325,14 +308,14 @@
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires,                                                                                                 &
-        ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf, shinhong, do_ysu,                       &
-        dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                                     &
+        ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lsidea, hybedmf, do_shoc, satmedmf,     &
+        shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
         dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
         dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, rd, cp,fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, fice, dusfc_cice, dvsfc_cice, dtsfc_cice,    &
-        dqsfc_cice, wet, dry, icy, wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac,             &
-        errmsg, errflg)
+        dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          &
+        dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
+        ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
       use machine,                only : kind_phys
       use GFS_PBL_generic_common, only : set_aerosol_tracer_index
@@ -344,15 +327,24 @@
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
+      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
+      logical, dimension(:), intent(in) :: flag_cice
+
+      logical, intent(in) :: flag_for_pbl_generic_tend      
+      real(kind=kind_phys), dimension(im, levs), intent(in) :: save_u, save_v, save_t
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: save_q
 
       real(kind=kind_phys), intent(in) :: dtf
       real(kind=kind_phys), intent(in) :: rd, cp, fvirt, hvap
-      real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac, fice
+      real(kind=kind_phys), dimension(:), intent(in) :: t1, q1, hflx, oceanfrac
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
       real(kind=kind_phys), dimension(:), intent(in) :: dusfc_cice, dvsfc_cice, dtsfc_cice, dqsfc_cice, &
-          wind, stress_ocn, hflx_ocn, evap_ocn, ugrs1, vgrs1
+          wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1
+
+      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: qgrs
+      real(kind=kind_phys), dimension(im, levs), intent(in) :: ugrs, vgrs, tgrs
+
       real(kind=kind_phys), dimension(im, levs, nvdiff), intent(in) :: dvdftra
       real(kind=kind_phys), dimension(im), intent(in) :: dusfc1, dvsfc1, dtsfc1, dqsfc1, xmu
       real(kind=kind_phys), dimension(im, levs), intent(in) :: dudt, dvdt, dtdt, htrsw, htrlw
@@ -382,7 +374,6 @@
       real(kind=kind_phys), parameter :: zero  = 0.0d0
       real(kind=kind_phys), parameter :: one   = 1.0d0
       real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
-      real(kind=kind_phys), parameter :: epsln = 1.0d-10 ! same as in GFS_physics_driver.F90
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, tem1, rho
 
@@ -456,11 +447,13 @@
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
                 dqdt(i,k,ntrw)  = dvdftra(i,k,4)
                 dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntlnc) = dvdftra(i,k,6)
-                dqdt(i,k,ntinc) = dvdftra(i,k,7)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,8)
-                dqdt(i,k,ntwa)  = dvdftra(i,k,9)
-                dqdt(i,k,ntia)  = dvdftra(i,k,10)
+                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
+                dqdt(i,k,ntlnc) = dvdftra(i,k,7)
+                dqdt(i,k,ntinc) = dvdftra(i,k,8)
+                dqdt(i,k,ntrnc) = dvdftra(i,k,9)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,10)
+                dqdt(i,k,ntwa)  = dvdftra(i,k,11)
+                dqdt(i,k,ntia)  = dvdftra(i,k,12)
               enddo
             enddo
           else
@@ -471,8 +464,10 @@
                 dqdt(i,k,ntiw)  = dvdftra(i,k,3)
                 dqdt(i,k,ntrw)  = dvdftra(i,k,4)
                 dqdt(i,k,ntsw)  = dvdftra(i,k,5)
-                dqdt(i,k,ntinc) = dvdftra(i,k,6)
-                dqdt(i,k,ntoz)  = dvdftra(i,k,7)
+                dqdt(i,k,ntgl)  = dvdftra(i,k,6)
+                dqdt(i,k,ntinc) = dvdftra(i,k,7)
+                dqdt(i,k,ntrnc) = dvdftra(i,k,8)
+                dqdt(i,k,ntoz)  = dvdftra(i,k,9)
               enddo
             enddo
           endif
@@ -550,24 +545,31 @@
       if (cplflx) then
         do i=1,im
           if (oceanfrac(i) > zero) then ! Ocean only, NO LAKES
-            if (fice(i) > one - epsln) then ! no open water, use results from CICE
-              dusfci_cpl(i) = dusfc_cice(i)
-              dvsfci_cpl(i) = dvsfc_cice(i)
-              dtsfci_cpl(i) = dtsfc_cice(i)
-              dqsfci_cpl(i) = dqsfc_cice(i)
+            if ( .not. wet(i)) then ! no open water
+              if (flag_cice(i)) then !use results from CICE
+                dusfci_cpl(i) = dusfc_cice(i)
+                dvsfci_cpl(i) = dvsfc_cice(i)
+                dtsfci_cpl(i) = dtsfc_cice(i)
+                dqsfci_cpl(i) = dqsfc_cice(i)
+              else !use PBL fluxes when CICE fluxes is unavailable
+                dusfci_cpl(i) = dusfc1(i)
+                dvsfci_cpl(i) = dvsfc1(i)
+                dtsfci_cpl(i) = dtsfc1(i)
+                dqsfci_cpl(i) = dqsfc1(i)
+              end if
             elseif (icy(i) .or. dry(i)) then ! use stress_ocean from sfc_diff for opw component at mixed point
               tem1 = max(q1(i), 1.e-8)
               rho = prsl(i,1) / (rd*t1(i)*(one+fvirt*tem1))
               if (wind(i) > zero) then
-                tem = - rho * stress_ocn(i) / wind(i)
+                tem = - rho * stress_wat(i) / wind(i)
                 dusfci_cpl(i) = tem * ugrs1(i)   ! U-momentum flux
                 dvsfci_cpl(i) = tem * vgrs1(i)   ! V-momentum flux
               else
                 dusfci_cpl(i) = zero
                 dvsfci_cpl(i) = zero
               endif
-              dtsfci_cpl(i) = cp   * rho * hflx_ocn(i) ! sensible heat flux over open ocean
-              dqsfci_cpl(i) = hvap * rho * evap_ocn(i) ! latent heat flux over open ocean
+              dtsfci_cpl(i) = cp   * rho * hflx_wat(i) ! sensible heat flux over open ocean
+              dqsfci_cpl(i) = hvap * rho * evap_wat(i) ! latent heat flux over open ocean
             else                                       ! use results from PBL scheme for 100% open ocean
               dusfci_cpl(i) = dusfc1(i)
               dvsfci_cpl(i) = dvsfc1(i)
@@ -603,25 +605,30 @@
           dqsfci_diag(i) = dqsfc1(i)*hefac(i)
         enddo
 
-        if (ldiag3d) then
+        if (ldiag3d .and. flag_for_pbl_generic_tend .and. lssav) then
           if (lsidea) then
             dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
           else
             do k=1,levs
               do i=1,im
-                tem  = dtdt(i,k) - (htrlw(i,k)+htrsw(i,k)*xmu(i))
-                dt3dt(i,k) = dt3dt(i,k) + tem*dtf
+                dt3dt(i,k) = dt3dt(i,k) + (tgrs(i,k) - save_t(i,k))
               enddo
             enddo
           endif
           do k=1,levs
             do i=1,im
-              du3dt_PBL(i,k)  = du3dt_PBL(i,k)  + dudt(i,k) * dtf
-              du3dt_OGWD(i,k) = du3dt_OGWD(i,k) - dudt(i,k) * dtf
-              dv3dt_PBL(i,k)  = dv3dt_PBL(i,k)  + dvdt(i,k) * dtf
-              dv3dt_OGWD(i,k) = dv3dt_OGWD(i,k) - dvdt(i,k) * dtf
+              du3dt_PBL(i,k) = du3dt_PBL(i,k) + (ugrs(i,k) - save_u(i,k))
+              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + (vgrs(i,k) - save_v(i,k))
             enddo
           enddo
+          if(qdiag3d) then
+            do k=1,levs
+              do i=1,im
+                dq3dt(i,k)   = dq3dt(i,k) + (qgrs(i,k,ntqv)-save_q(i,k,ntqv))
+                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + (qgrs(i,k,ntoz)-save_q(i,k,ntoz))
+              enddo
+            enddo
+          endif
         endif
 
       endif   ! end if_lssav

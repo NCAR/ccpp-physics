@@ -58,8 +58,7 @@
 !!
 !!  This routine follows the \ref SAS scheme quite closely, although it can be interpreted as only having the "static" and "feedback" control portions, since the "dynamic" control is not necessary to find the cloud base mass flux. The algorithm is simplified from SAS deep convection by excluding convective downdrafts and being confined to operate below \f$p=0.7p_{sfc}\f$. Also, entrainment is both simpler and stronger in magnitude compared to the deep scheme.
 !!
-!!  \param[in] im number of used points
-!!  \param[in] ix horizontal dimension
+!!  \param[in] im horizontal dimension
 !!  \param[in] km vertical layer dimension
 !!  \param[in] jcap number of spectral wave trancation
 !!  \param[in] delt physics time step in seconds
@@ -101,7 +100,7 @@
 !!  @{
       subroutine shalcnv_run(                                           &
      &     grav,cp,hvap,rv,fv,t0c,rd,cvap,cliq,eps,epsm1,               &
-     &     im,ix,km,jcap,delt,delp,prslp,psp,phil,qlc,qli,              &
+     &     im,km,jcap,delt,delp,prslp,psp,phil,qlc,qli,                 &
      &     q1,t1,u1,v1,rn,kbot,ktop,kcnv,islimsk,                       &
      &     dot,ncloud,hpbl,heat,evap,ud_mf,dt_mf,cnvw,cnvc,             &
      &     clam,c0,c1,pgcon,errmsg,errflg)
@@ -118,7 +117,7 @@
 !
       real(kind=kind_phys), intent(in) :: grav, cp, hvap, rv, fv, t0c,  &
      &                                    rd, cvap, cliq, eps, epsm1
-      integer,              intent(in) :: im, ix,  km, jcap, ncloud
+      integer,              intent(in) :: im, km, jcap, ncloud
       integer,              intent(inout) :: kbot(:), ktop(:), kcnv(:)
       integer,              intent(in) :: islimsk(:)
       real(kind=kind_phys), intent(in) :: delt, clam, c0, c1, pgcon

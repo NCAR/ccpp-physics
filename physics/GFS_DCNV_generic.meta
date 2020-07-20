@@ -25,6 +25,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_cnvgwd]
   standard_name = flag_for_convective_gravity_wave_drag
   long_name = flag for convective gravity wave drag (gwd)
@@ -33,25 +41,9 @@
   type = logical
   intent = in
   optional = F
-[do_ca]
-  standard_name = flag_for_cellular_automata
-  long_name = cellular automata main switch
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[isppt_deep]
-  standard_name = flag_for_combination_of_sppt_with_isppt_deep
-  long_name = switch for combination with isppt_deep.
   units = flag
   dimensions = ()
   type = logical
@@ -129,15 +121,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[ca_deep]
-  standard_name = fraction_of_cellular_automata_for_deep_convection
-  long_name = fraction of cellular automata for deep convection
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [dqdti]
   standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
   long_name = instantaneous moisture tendency due to convection
@@ -201,6 +184,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [ras]
   standard_name = flag_for_ras_deep_convection
   long_name = flag for ras convection scheme
@@ -212,22 +203,6 @@
 [cscnv]
   standard_name = flag_for_Chikira_Sugiyama_deep_convection
   long_name = flag for Chikira-Sugiyama convection
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ca]
-  standard_name = flag_for_cellular_automata
-  long_name = cellular automata main switch
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[isppt_deep]
-  standard_name = flag_for_combination_of_sppt_with_isppt_deep
-  long_name = switch for combination with isppt_deep.
   units = flag
   dimensions = ()
   type = logical
@@ -518,50 +493,13 @@
   kind = kind_phys
   intent = inout
   optional = F
-[cape]
-  standard_name = convective_available_potential_energy_for_coupling
-  long_name = convective available potential energy for coupling
-  units = m2 s-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tconvtend]
-  standard_name = tendency_of_air_temperature_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency of air temperature due to deep convection
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[qconvtend]
-  standard_name = tendency_of_water_vapor_specific_humidity_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency of specific humidity due to deep convection
-  units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[uconvtend]
-  standard_name = tendency_of_x_wind_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency_of_x_wind_due_to_deep_convection
-  units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[vconvtend]
-  standard_name = tendency_of_y_wind_due_to_deep_convection_for_coupling_on_physics_timestep
-  long_name = tendency_of_y_wind_due_to_deep_convection
-  units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[flag_for_dcnv_generic_tend]
+  standard_name = flag_for_generic_deep_convection_tendency
+  long_name = true if GFS_DCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

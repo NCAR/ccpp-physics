@@ -1,14 +1,6 @@
 [ccpp-arg-table]
   name = shoc_run
   type = scheme
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [nx]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -100,7 +92,7 @@
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
