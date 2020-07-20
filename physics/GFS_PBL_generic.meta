@@ -322,6 +322,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = out
+  optional = F
 [save_v]
   standard_name = y_wind_save
   long_name = y-wind before entering a physics scheme
@@ -329,6 +331,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = out
+  optional = F
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -336,6 +340,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = out
+  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -343,6 +349,8 @@
   dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
+  intent = out
+  optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -366,6 +374,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [ugrs]
   standard_name = x_wind
   long_name = zonal wind
@@ -373,6 +382,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [vgrs]
   standard_name = y_wind
   long_name = meridional wind
@@ -380,6 +391,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -387,6 +400,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -696,6 +711,7 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -1339,6 +1355,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [vgrs]
   standard_name = y_wind
   long_name = meridional wind
@@ -1346,6 +1364,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [tgrs]
   standard_name = air_temperature
   long_name = model layer mean temperature
@@ -1353,6 +1373,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [qgrs]
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
@@ -1360,6 +1382,8 @@
   dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [save_u]
   standard_name = x_wind_save
   long_name = x-wind before entering a physics scheme
@@ -1367,6 +1391,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [save_v]
   standard_name = y_wind_save
   long_name = y-wind before entering a physics scheme
@@ -1374,6 +1400,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -1381,6 +1409,8 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -1388,6 +1418,8 @@
   dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
