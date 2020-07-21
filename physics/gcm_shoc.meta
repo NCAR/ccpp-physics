@@ -92,7 +92,7 @@
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
