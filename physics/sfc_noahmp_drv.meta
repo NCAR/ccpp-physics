@@ -424,7 +424,7 @@
 [xlatin]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

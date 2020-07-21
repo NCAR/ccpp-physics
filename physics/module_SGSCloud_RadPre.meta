@@ -267,8 +267,8 @@
   optional = F
 [xlat]
   standard_name = latitude
-  long_name = grid latitude in radians
-  units = radians
+  long_name = grid latitude
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

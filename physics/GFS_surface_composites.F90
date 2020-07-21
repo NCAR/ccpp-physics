@@ -24,9 +24,9 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, frac_grid, flag_cice, cplflx, cplwav2atm,                     &
-                                 landfrac, lakefrac, oceanfrac,                                                 &
-                                 frland, dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorli, zorl_wat, &
+   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland,                              &
+                                 dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorli, zorl_wat,  &
                                  zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,  &
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,              &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,&
@@ -38,12 +38,12 @@ contains
       implicit none
 
       ! Interface variables
-      integer,                             intent(in   ) :: im
+      integer,                             intent(in   ) :: im, lkm
       logical,                             intent(in   ) :: frac_grid, cplflx, cplwav2atm
       logical, dimension(im),              intent(inout) :: flag_cice
       logical,              dimension(im), intent(inout) :: dry, icy, lake, ocean, wet
       real(kind=kind_phys),                intent(in   ) :: cimin
-      real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, oceanfrac
+      real(kind=kind_phys), dimension(im), intent(in   ) :: landfrac, lakefrac, lakedepth, oceanfrac
       real(kind=kind_phys), dimension(im), intent(inout) :: cice
       real(kind=kind_phys), dimension(im), intent(  out) :: frland
       real(kind=kind_phys), dimension(im), intent(in   ) :: zorl, snowd, tprcp, uustar, weasd, qss, hflx
@@ -197,6 +197,19 @@ contains
            semis_ice(i) = 0.95_kind_phys
              qss_ice(i) = qss(i)
             hflx_ice(i) = hflx(i)
+        endif
+      enddo
+
+! to prepare to separate lake from ocean under water category
+      do i = 1, im
+        if(lkm == 1) then
+           if(lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
+              lake(i) = .true.
+           else
+              lake(i) = .false.
+           endif
+        else
+           lake(i) = .false.
         endif
       enddo
 

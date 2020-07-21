@@ -31,7 +31,7 @@
 !...................................
 !  ---  inputs:
      &     ( im, rd, eps, epsm1, rvrdm1, ps, t1, q1,                    &
-     &       tskin, cm, ch, prsl1, prslki, wet, wind,                   &
+     &       tskin, cm, ch, prsl1, prslki, wet, lake, wind,             &,  ! --- inputs
      &       flag_iter,                                                 &
      &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
      &       errmsg, errflg                                             &
@@ -46,7 +46,7 @@
 !       inputs:                                                         !
 !          ( im, ps, t1, q1, tskin, cm, ch,                             !
 !!         ( im, ps, u1, v1, t1, q1, tskin, cm, ch,                     !
-!            prsl1, prslki, wet, wind, flag_iter,                       !
+!            prsl1, prslki, wet, lake, wind, flag_iter,                 !
 !       outputs:                                                        !
 !            qsurf, cmm, chh, gflux, evap, hflx, ep )                   !
 !                                                                       !
@@ -106,7 +106,7 @@
       real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &      t1, q1, tskin, cm, ch, prsl1, prslki, wind
 
-      logical, dimension(im), intent(in) :: flag_iter, wet
+      logical, dimension(im), intent(in) :: flag_iter, wet, lake
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: qsurf,     &
@@ -134,7 +134,7 @@
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface
 
-        if (wet(i) .and. flag_iter(i)) then
+        if (wet(i) .and. flag_iter(i) .and. .not. lake(i)) then
           q0       = max( q1(i), qmin )
           rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
 
