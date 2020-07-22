@@ -72,6 +72,7 @@
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &  !intent(in)
      &                   snwdph_wat,snwdph_lnd,snwdph_ice,              &  !intent(in)
      &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &  !intent(inout)
+     &                     z0rl_wav,                                    &  !intent(inout)
      &                    ustar_wat, ustar_lnd, ustar_ice,              &  !intent(inout)
      &                       cm_wat,    cm_lnd,    cm_ice,              &  !intent(inout)
      &                       ch_wat,    ch_lnd,    ch_ice,              &  !intent(inout)
@@ -105,6 +106,7 @@
      &                    tsurf_wat, tsurf_lnd, tsurf_ice,              &
      &                   snwdph_wat,snwdph_lnd,snwdph_ice
 
+      real(kind=kind_phys), dimension(im), intent(in)    :: z0rl_wav
       real(kind=kind_phys), dimension(im), intent(inout) ::             &
      &                     z0rl_wat,  z0rl_lnd,  z0rl_ice,              &
      &                    ustar_wat, ustar_lnd, ustar_ice,              &
@@ -355,7 +357,7 @@
                  z0rl_wat(i) = 1.0e-4_r8
               endif
 
-            elseif (z0rl_wat(i) <= 1.0e-7_r8) then
+            elseif (z0rl_wav(i) <= 1.0e-7_r8) then
               z0 = (charnock / grav) * ustar_wat(i) * ustar_wat(i)
 
               if (redrag) then
