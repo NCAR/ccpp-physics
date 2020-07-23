@@ -34,7 +34,9 @@
                   dusfc,dvsfc,dtsfc,dqsfc,                                     &
                   dt,kpbl1d,                                                   &
                   u10,v10,                                                     &
-                  dx,errmsg,errflg )
+                  dx,lssav,ldiag3d,qdiag3d,                                    &
+                  flag_for_pbl_generic_tend,ntoz,du3dt_PBL,dv3dt_PBL,          &
+                  dt3dt_PBL,dq3dt_PBL,do3dt_PBL,errmsg,errflg )
 
    use machine , only : kind_phys
 !
@@ -104,8 +106,10 @@
    real(kind=kind_phys),parameter    ::  cpent = -0.4,rigsmax = 100.
    real(kind=kind_phys),parameter    ::  entfmin = 1.0, entfmax = 5.0
 ! 1D in
-   integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw
+   integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw,ntoz
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
+   logical,  intent(in   )   :: lssav, ldiag3d, qdiag3d,                       &
+                                flag_for_pbl_generic_tend
 ! 3D in
    real(kind=kind_phys),     dimension(im, km)                                               , &
              intent(in   )   ::                                          phil, &
@@ -127,6 +131,8 @@
                                                                          ttnp
    real(kind=kind_phys),     dimension(im, km, ntrac )                                       , &
              intent(inout)   ::                                          qtnp
+   real(kind=kind_phys),     dimension(im,km)                                     , &
+             intent(inout)   :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
 ! 2D in
    integer,  dimension(im)                                                   , &
              intent(in   )   ::                                      landmask
@@ -948,6 +954,10 @@
      do i = its,ite
        ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
        ttnp(i,k) = ttnp(i,k)+ttend
+       if(lssav .and. ldiag3d .and. .not.                          &
+&                flag_for_pbl_generic_tend) then
+          dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*dtstep
+       endif
        dtsfc(i) = dtsfc(i)+ttend*cont*del(i,k)
        if(k.eq.kte) then
          tflux_e(i,k) = ttend*dz8w2d(i,k)
@@ -1071,6 +1081,10 @@
      do i = its,ite
        qtend = (f3(i,k,1)-qx(i,k,1))*rdt
        qtnp(i,k,1) = qtnp(i,k,1)+qtend
+       if(lssav .and. ldiag3d .and. qdiag3d .and. .not.                          &
+&                flag_for_pbl_generic_tend) then
+          dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*dtstep
+       endif
        dqsfc(i) = dqsfc(i)+qtend*conq*del(i,k)
        if(k.eq.kte) then
          qflux_e(i,k) = qtend*dz8w2d(i,k)
@@ -1109,6 +1123,16 @@
          enddo
        endif
      enddo
+     if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
+  &               .not. flag_for_pbl_generic_tend) then
+       ic = ntoz
+       do k = kte,kts,-1
+         do i = its,ite
+           qtend = f3(i,k,ic)-qx(i,k,ic)
+           do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
+         enddo
+       enddo
+     endif
    endif
 !
 !     compute tridiagonal matrix elements for momentum
@@ -1198,6 +1222,11 @@
        vtnp(i,k) = vtnp(i,k)+vtend
        dusfc(i) = dusfc(i) + utend*conwrc*del(i,k)
        dvsfc(i) = dvsfc(i) + vtend*conwrc*del(i,k)
+       if(lssav .and. ldiag3d .and. .not.                          &
+&             flag_for_pbl_generic_tend) then
+          du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*dtstep
+          dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*dtstep
+       endif
      enddo
    enddo
 !

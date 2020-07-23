@@ -1044,13 +1044,14 @@ c
             if(lssav .and. ldiag3d .and. .not.                          &
      &                flag_for_pbl_generic_tend) then
                if(lsidea) then
-                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*rdt
+                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
                else
-                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) +                     &
-     &                 ((ttend-hlw(i,k)-swh(i,k)*xmu(i))*rdt)
+                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
+!                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) +                     &
+!     &                 ((ttend-hlw(i,k)-swh(i,k)*xmu(i))*delt)
                endif
                if(qdiag3d) then
-                  dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*rdt
+                  dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
                endif
             endif
          enddo
@@ -1071,7 +1072,7 @@ c
           is = (kk-1) * km
           do k = 1, km
             do i = 1, im
-              qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
+              qtend = (a2(i,k+is)-q1(i,k,kk))
               do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
             enddo
           enddo
