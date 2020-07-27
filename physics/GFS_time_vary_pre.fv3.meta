@@ -70,6 +70,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[lkm]
+  standard_name = flag_for_lake_surface_scheme
+  long_name = flag for lake surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [lsm]
   standard_name = flag_for_land_surface_scheme
   long_name = flag for land surface model
@@ -98,6 +106,14 @@
   standard_name = number_of_timesteps_between_longwave_radiation_calls
   long_name = number of timesteps between longwave radiation calls
   units = 
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nhfrad]
+  standard_name = number_of_timesteps_for_radiation_calls_on_physics_timestep
+  long_name = number of timesteps for radiation calls on physics timestep (coldstarts only)
+  units = count
   dimensions = ()
   type = integer
   intent = in

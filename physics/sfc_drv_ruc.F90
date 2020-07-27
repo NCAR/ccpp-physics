@@ -130,13 +130,10 @@ module lsm_ruc
 !> \defgroup lsm_ruc_group GSD RUC LSM Model
 !! This module contains the RUC Land Surface Model developed by NOAA/GSD
 !! (Smirnova et al. 2016 \cite Smirnova_2016).
-#if 0
 !> \section arg_table_lsm_ruc_run Argument Table
 !! \htmlinclude lsm_ruc_run.html
 !!
-#endif
 !>\section gen_lsmruc GSD RUC LSM General Algorithm
-! DH* TODO - make order of arguments the same as in the metadata table
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, kdt, im, nlev, lsoil_ruc, lsoil, zs,     &
      &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &
@@ -147,7 +144,7 @@ module lsm_ruc
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       smcwlt2, smcref2, do_mynnsfclay,                           &
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,& !  constants
-     &       weasd, snwdph, tskin, tskin_ocn,                           & !  in/outs
+     &       weasd, snwdph, tskin, tskin_wat,                           & !  in/outs
      &       rainnc, rainc, ice, snow, graupel,                         & ! in
      &       srflag, smois, tslb, sh2o, keepfr, smfrkeep,               & ! in/outs, on RUC levels
      &       canopy, trans, tsurf, tsnow, zorl,                         &
@@ -196,7 +193,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
       real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-     &       snwdph, tskin, tskin_ocn,                                  &
+     &       snwdph, tskin, tskin_wat,                                  &
      &       srflag, canopy, trans, tsurf, zorl, tsnow,                 &
      &       sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
 !  ---  in
@@ -314,7 +311,7 @@ module lsm_ruc
 
         call rucinit          (flag_restart, im, lsoil_ruc, lsoil, nlev, & ! in
                                isot, soiltyp, vegtype, fice,             & ! in
-                               land, tskin, tskin_ocn, tg3,              & ! in
+                               land, tskin, tskin_wat, tg3,              & ! in
                                smc, slc, stc,                            & ! in
                                smcref2, smcwlt2,                         & ! inout
                                lsm_ruc, lsm,                             & ! in
@@ -1040,7 +1037,7 @@ module lsm_ruc
 !! This subroutine contains RUC LSM initialization.
       subroutine rucinit      (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
-                               land, tsurf, tsurf_ocn,                & ! in
+                               land, tsurf, tsurf_wat,                & ! in
                                tg3, smc, slc, stc,                    & ! in
                                smcref2, smcwlt2,                      & ! inout
                                lsm_ruc, lsm,                          & ! in
@@ -1057,7 +1054,7 @@ module lsm_ruc
       integer,                                 intent(in   ) :: lsoil_ruc
       integer,                                 intent(in   ) :: lsoil
       logical,               dimension(im),    intent(in   ) :: land
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf, tsurf_ocn
+      real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf, tsurf_wat
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcref2
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcwlt2
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
@@ -1216,7 +1213,7 @@ module lsm_ruc
          ! land only version
           if (land(i)) then
             tsk(i,j) = tsurf(i)
-            sst(i,j) = tsurf_ocn(i)
+            sst(i,j) = tsurf_wat(i)
             tbot(i,j)= tg3(i)
             ivgtyp(i,j)=vegtype(i)
             isltyp(i,j)=soiltyp(i)

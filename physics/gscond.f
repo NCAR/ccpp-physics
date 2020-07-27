@@ -41,7 +41,7 @@
 !! -# Update \f$t\f$, \f$q\f$, \f$cwm\f$ due to cloud evaporation and condensation processes.
 !> \section Zhao-Carr_cond_detailed GFS gscond Scheme Detailed Algorithm
 !> @{
-        subroutine zhaocarr_gscond_run (im,ix,km,dt,dtf,prsl,ps,q,clw1  &
+        subroutine zhaocarr_gscond_run (im,km,dt,dtf,prsl,ps,q,clw1     &
      &,                  clw2, cwm, t, tp, qp, psp                      &
      &,                  tp1, qp1, psp1, u, lprnt, ipr, errmsg, errflg)
 
@@ -71,15 +71,15 @@
       implicit none
 !
 ! Interface variables
-      integer,              intent(in)    :: im, ix, km, ipr
+      integer,              intent(in)    :: im, km, ipr
       real(kind=kind_phys), intent(in)    :: dt, dtf
-      real(kind=kind_phys), intent(in)    :: prsl(ix,km), ps(im)
-      real(kind=kind_phys), intent(inout) :: q(ix,km)
-      real(kind=kind_phys), intent(in)    :: clw1(ix,km), clw2(ix,km)
-      real(kind=kind_phys), intent(out)   :: cwm(ix,km)
-      real(kind=kind_phys), intent(inout) :: t(ix,km)                   &
-     &,                     tp(ix,km),   qp(ix,km),   psp(im)           &
-     &,                     tp1(ix,km),  qp1(ix,km),  psp1(im)
+      real(kind=kind_phys), intent(in)    :: prsl(im,km), ps(im)
+      real(kind=kind_phys), intent(inout) :: q(im,km)
+      real(kind=kind_phys), intent(in)    :: clw1(im,km), clw2(im,km)
+      real(kind=kind_phys), intent(out)   :: cwm(im,km)
+      real(kind=kind_phys), intent(inout) :: t(im,km)                   &
+     &,                     tp(im,km),   qp(im,km),   psp(im)           &
+     &,                     tp1(im,km),  qp1(im,km),  psp1(im)
       real(kind=kind_phys), intent(in)    :: u(im,km)
       logical,              intent(in)    :: lprnt
 !
@@ -124,7 +124,7 @@
 !
       el2orc = hvap*hvap / (rv*cp)
       albycp = hvap / cp
-!     write(0,*)' in gscond im=',im,' ix=',ix
+!     write(0,*)' in gscond im=',im
 !
       rdt     = h1/dt
       us      = h1

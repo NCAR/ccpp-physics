@@ -25,6 +25,32 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = updated x-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = updated y-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [gt0]
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
@@ -43,6 +69,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [save_t]
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
@@ -50,7 +94,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [save_qv]
   standard_name = water_vapor_specific_humidity_save
@@ -59,7 +103,15 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
+  optional = F
+[flag_for_scnv_generic_tend]
+  standard_name = flag_for_generic_shallow_convection_tendency
+  long_name = true if GFS_SCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -115,6 +167,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
@@ -140,6 +200,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[gu0]
+  standard_name = x_wind_updated_by_physics
+  long_name = updated x-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[gv0]
+  standard_name = y_wind_updated_by_physics
+  long_name = updated y-direction wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [gt0]
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
@@ -153,6 +231,24 @@
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -185,8 +281,26 @@
   kind = kind_phys
   intent = inout
   optional = F
+[du3dt]
+  standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
+  long_name = cumulative change in x wind due to shallow convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt]
+  standard_name = cumulative_change_in_y_wind_due_to_shallow_convection
+  long_name = cumulative change in y wind due to shallow convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_shal_convection
+  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
   long_name = cumulative change in temperature due to shal conv.
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -195,7 +309,7 @@
   intent = inout
   optional = F
 [dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shal_convection
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shallow_convection
   long_name = cumulative change in water vapor specific humidity due to shal conv.
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -315,6 +429,14 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[flag_for_scnv_generic_tend]
+  standard_name = flag_for_generic_shallow_convection_tendency
+  long_name = true if GFS_SCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
   optional = F
 [imfshalcnv]
   standard_name = flag_for_mass_flux_shallow_convection_scheme

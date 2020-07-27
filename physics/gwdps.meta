@@ -14,14 +14,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension
   long_name = number of vertical layers
@@ -211,7 +203,7 @@
 [theta]
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with respect to east of maximum subgrid orographic variations
-  units = degrees
+  units = degree
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

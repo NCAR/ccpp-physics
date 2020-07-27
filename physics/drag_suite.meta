@@ -14,14 +14,6 @@
   type = integer
   intent = in
   optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [km]
   standard_name = vertical_dimension
   long_name = number of vertical layers
@@ -208,10 +200,46 @@
   kind = kind_phys
   intent = in
   optional = F
+[varss]
+  standard_name = standard_deviation_of_subgrid_orography_small_scale
+  long_name = standard deviation of subgrid orography small scale
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oc1ss]
+  standard_name = convexity_of_subgrid_orography_small_scale
+  long_name = convexity of subgrid orography small scale
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oa4ss]
+  standard_name = asymmetry_of_subgrid_orography_small_scale
+  long_name = asymmetry of subgrid orography small scale
+  units = none
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ol4ss]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
+  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height small scale
+  units = frac
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [theta]
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with respect to east of maximum subgrid orographic variations
-  units = degrees
+  units = degree
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -481,7 +509,7 @@
 [pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys

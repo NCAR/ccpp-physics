@@ -8,7 +8,7 @@ endif (NOT PROJECT)
 cmake_minimum_required(VERSION 3.0)
 
 project(ccppphys
-        VERSION 3.0.0
+        VERSION 4.0.0
         LANGUAGES C CXX Fortran)
 
 # Use rpaths on MacOSX
@@ -19,7 +19,7 @@ endif(POLICY CMP0042)
 
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
-set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
+set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Laurie Carson")
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
@@ -58,12 +58,8 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #------------------------------------------------------------------------------
-# By default we want a shared library (unless a static build is requested)
-if(STATIC)
-  option(BUILD_SHARED_LIBS "Build a static library" OFF)
-else(STATIC)
-  option(BUILD_SHARED_LIBS "Build a shared library" ON)
-endif(STATIC)
+# Request a static build
+option(BUILD_SHARED_LIBS "Build a shared library" OFF)
 
 #------------------------------------------------------------------------------
 # Set the sources: physics type definitions
@@ -177,14 +173,16 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/cu_gf_sh.F90
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bl_mynn.F90
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNPBL_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNSFC_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNrad_pre.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNrad_post.F90
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
                                 ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
                                 PROPERTIES COMPILE_FLAGS "-r8 -ftz")
+
+    # Reduce optimization for module_sf_mynn.F90 (to avoid an apparent compiler bug with Intel 18 on Hera)
+    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
+                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT} -O1")
+    list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
 
     # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
     set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
@@ -327,44 +325,17 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
 #------------------------------------------------------------------------------
-if(STATIC)
-  add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
-  # Generate list of Fortran modules from defined sources
-  foreach(source_f90 ${CAPS})
-      get_filename_component(tmp_source_f90 ${source_f90} NAME)
-      string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${tmp_source_f90})
-      string(TOLOWER ${tmp_module_f90} module_f90)
-      list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
-  endforeach()
-else(STATIC)
-  add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
-endif(STATIC)
-
-if (NOT STATIC)
-  target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
-endif (NOT STATIC)
+add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
+# Generate list of Fortran modules from defined sources
+foreach(source_f90 ${CAPS})
+    get_filename_component(tmp_source_f90 ${source_f90} NAME)
+    string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${tmp_source_f90})
+    string(TOLOWER ${tmp_module_f90} module_f90)
+    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
+endforeach()
 
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
-
-# DH* Hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy,
-# this is only needed for dynamics builds - static build generates plain Fortran code.
-if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-  if (NOT STATIC)
-  set(CAPOBJS)
-  foreach(cap ${CAPS})
-      string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
-      list(APPEND CAPOBJS ${capobj})
-  endforeach(cap)
-  
-  add_custom_command(TARGET ccppphys
-                     PRE_LINK
-                     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                     COMMENT "Running pgifix_wrapper.py over all scheme caps")
-  endif (NOT STATIC)
-endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-# *DH end hack for PGI compiler
 
 if (PROJECT STREQUAL "CCPP-FV3")
   # Define where to install the library

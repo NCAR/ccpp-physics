@@ -116,7 +116,6 @@ contains
 
        ! Are any optional outputs requested?
        l_fluxessw2d    = present(flxprf_sw)
-       l_sfcfluxessw1D = present(scmpsw)
 
        ! #######################################################################################
        ! What is vertical ordering?
