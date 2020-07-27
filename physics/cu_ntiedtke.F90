@@ -148,8 +148,8 @@ contains
 !-----------------------------------------------------------------------
 !          level 1 subroutine 'tiecnvn'
 !-----------------------------------------------------------------
-      subroutine cu_ntiedtke_run(pu,pv,pt,pqv,tdi,qvdi,pqvf,ptf,clw,poz,pzz,prsl,prsi,pomg,   &
-                                 evap,hfx,zprecc,lmask,lq,ix,km,dt,dx,kbot,ktop,kcnv,&
+      subroutine cu_ntiedtke_run(pu,pv,pt,pqv,tdi,qvdi,pqvf,ptf,clw,poz,pzz,prsl,prsi,pomg, &
+                                 evap,hfx,zprecc,lmask,lq,km,dt,dx,kbot,ktop,kcnv, &
                                  ktrac,ud_mf,dd_mf,dt_mf,cnvw,cnvc,errmsg,errflg)
 !-----------------------------------------------------------------
 !  this is the interface between the model and the mass 
@@ -157,14 +157,14 @@ contains
 !-----------------------------------------------------------------
       implicit none
 ! in&out variables
-      integer, intent(in)  ::  lq, ix, km, ktrac
+      integer, intent(in)  ::  lq, km, ktrac
       real(kind=kind_phys),     intent(in ) :: dt
       integer, dimension( lq ),   intent(in)  :: lmask
       real(kind=kind_phys), dimension( lq ),     intent(in ) :: evap, hfx, dx
-      real(kind=kind_phys), dimension( ix , km ),     intent(inout) :: pu, pv, pt, pqv
-      real(kind=kind_phys), dimension( ix , km ),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
-      real(kind=kind_phys), dimension( ix , km+1 ),   intent(in )   :: pzz, prsi
-      real(kind=kind_phys), dimension( ix , km, ktrac ),    intent(inout ) ::  clw
+      real(kind=kind_phys), dimension( lq , km ),     intent(inout) :: pu, pv, pt, pqv
+      real(kind=kind_phys), dimension( lq , km ),     intent(in )   :: tdi, qvdi, poz, prsl, pomg, pqvf, ptf
+      real(kind=kind_phys), dimension( lq , km+1 ),   intent(in )   :: pzz, prsi
+      real(kind=kind_phys), dimension( lq , km, ktrac ),    intent(inout ) ::  clw
 
       integer, dimension( lq ),   intent(out)  :: kbot, ktop, kcnv
       real(kind=kind_phys), dimension( lq ),   intent(out)  :: zprecc

@@ -26,7 +26,7 @@
 !!
 !! \section genal_h2ophys GFS H2O Physics Scheme General Algorithm
 !> @{
-      subroutine h2ophys_run(ix, im, levs, kh2o, dt, h2o, ph2o, prsl,   &
+      subroutine h2ophys_run(im, levs, kh2o, dt, h2o, ph2o, prsl,       &
      &                     h2opltc, h2o_coeff, ldiag3d, me,             &
      &                     errmsg, errflg)
 !
@@ -39,14 +39,14 @@
       use machine , only : kind_phys
       implicit none
 !     interface variables
-      integer, intent(in) :: ix, im, levs, kh2o, h2o_coeff, me
+      integer, intent(in) :: im, levs, kh2o, h2o_coeff, me
       real(kind=kind_phys), intent(in) :: dt
-      real(kind=kind_phys), intent(inout) :: h2o(ix,levs)
+      real(kind=kind_phys), intent(inout) :: h2o(im,levs)
       real(kind=kind_phys), intent(in) :: ph2o(kh2o)
-      real(kind=kind_phys), intent(in) :: prsl(ix,levs)
-      real(kind=kind_phys), intent(in) :: h2opltc(ix,kh2o,h2o_coeff)
+      real(kind=kind_phys), intent(in) :: prsl(im,levs)
+      real(kind=kind_phys), intent(in) :: h2opltc(im,kh2o,h2o_coeff)
       logical             , intent(in) :: ldiag3d
-      !real(kind=kind_phys), intent(inout) :: h2op(ix,levs,h2o_coeff)
+      !real(kind=kind_phys), intent(inout) :: h2op(im,levs,h2o_coeff)
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 !     local variables
@@ -61,7 +61,7 @@
       errmsg = ''
       errflg = 0
 !
-!     write(1000+me,*)' in h2ophys ix=',ix, im, levs, kh2o, dt
+!     write(1000+me,*)' in h2ophys im=', im, levs, kh2o, dt
       do l=1,levs
         pmin =  1.0e10
         pmax = -1.0e10

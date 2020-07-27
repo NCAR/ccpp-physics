@@ -90,7 +90,7 @@ contains
                           ! dnfxc - total sky dnward flux            (W/m2)
                           ! upfx0 - clear sky upward flux            (W/m2)
                           ! dnfx0 - clear sky dnward flux            (W/m2)
-    type(cmpfsw_type), dimension(nCol), intent(inout), optional :: &
+    type(cmpfsw_type), dimension(nCol), intent(inout) :: &
          scmpsw           ! 2D surface fluxes, components:
                           ! uvbfc - total sky downward uv-b flux at  (W/m2)
                           ! uvbf0 - clear sky downward uv-b flux at  (W/m2)
@@ -105,8 +105,9 @@ contains
     integer :: i, j, k, iSFC, iTOA, itop, ibtc
     real(kind_phys) :: tem0d, tem1, tem2
     real(kind_phys), dimension(nDay, Model%levs) :: thetaTendClrSky, thetaTendAllSky
-    logical :: l_fluxessw2d, top_at_1, l_sfcFluxessw1D
-    real(kind_phys),dimension(nCol, Model%levs) :: hswc            
+    logical :: l_fluxessw2d, top_at_1
+    real(kind_phys),dimension(nCol, Model%levs) :: hswc
+
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
@@ -116,7 +117,6 @@ contains
 
        ! Are any optional outputs requested?
        l_fluxessw2d    = present(flxprf_sw)
-       l_sfcfluxessw1D = present(scmpsw)
 
        ! #######################################################################################
        ! What is vertical ordering?

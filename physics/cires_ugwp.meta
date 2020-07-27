@@ -316,28 +316,10 @@
   kind = kind_phys
   intent = in
   optional = F
-[oa4]
-  standard_name = asymmetry_of_subgrid_orography
-  long_name = asymmetry of subgrid orography
-  units = none
-  dimensions = (horizontal_dimension,4)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[clx]
-  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
-  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
-  units = frac
-  dimensions = (horizontal_dimension,4)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [theta]
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with_respect to east of maximum subgrid orographic variations
-  units = degrees
+  units = degree
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -366,6 +348,24 @@
   long_name = maximum of subgrid orography
   units = m
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[clx]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
+  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
+  units = frac
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oa4]
+  standard_name = asymmetry_of_subgrid_orography
+  long_name = asymmetry of subgrid orography
+  units = none
+  dimensions = (horizontal_dimension,4)
   type = real
   kind = kind_phys
   intent = in
@@ -397,17 +397,17 @@
   optional = F
 [xlat]
   standard_name = latitude
-  long_name = grid latitude in radians
-  units = radians
+  long_name = grid latitude
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [xlat_d]
-  standard_name = latitude_degree
-  long_name = latitude in degrees
-  units = degree
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -757,7 +757,7 @@
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
@@ -848,6 +848,84 @@
   units = index
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[ldu3dt_ogw]
+  standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in x wind due to orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldv3dt_ogw]
+  standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in y wind due to orographic gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldt3dt_ogw]
+  standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
+  long_name = cumulative change in temperature due to orographic gravity wave drag
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldu3dt_cgw]
+  standard_name = cumulative_change_in_x_wind_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in x wind due to convective gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldv3dt_cgw]
+  standard_name = cumulative_change_in_y_wind_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in y wind due to convective gravity wave drag
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldt3dt_cgw]
+  standard_name = cumulative_change_in_temperature_due_to_convective_gravity_wave_drag
+  long_name = cumulative change in temperature due to convective gravity wave drag
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[flag_for_gwd_generic_tend]
+  standard_name = flag_for_generic_gravity_wave_drag_tendency
+  long_name = true if GFS_GWD_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [errmsg]
