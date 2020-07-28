@@ -90,7 +90,7 @@ contains
                           ! dnfxc - total sky dnward flux            (W/m2)
                           ! upfx0 - clear sky upward flux            (W/m2)
                           ! dnfx0 - clear sky dnward flux            (W/m2)
-    type(cmpfsw_type), dimension(nCol), intent(inout) :: &
+    type(cmpfsw_type), dimension(nCol), intent(inout), optional :: &
          scmpsw           ! 2D surface fluxes, components:
                           ! uvbfc - total sky downward uv-b flux at  (W/m2)
                           ! uvbf0 - clear sky downward uv-b flux at  (W/m2)

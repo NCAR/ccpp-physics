@@ -353,7 +353,7 @@
   dimensions = ()
   type = logical
   intent = in
-  optional = F   
+  optional = F
 [frac_grid]
   standard_name = flag_for_fractional_grid
   long_name = flag for fractional grid
