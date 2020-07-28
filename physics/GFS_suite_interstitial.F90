@@ -161,7 +161,7 @@
     subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
-      adjsfculw_ice, adjsfculw_ocn, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
+      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
       ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_GP_jacobian, skt, sktp1r, fluxlwUP, fluxlwUP_jac, errmsg, errflg)
 
       implicit none
@@ -169,7 +169,7 @@
       ! interface variables
       integer,              intent(in   ) :: im, levs, imfshalcnv
       logical,              intent(in   ) :: lssav, ldiag3d, lsidea, cplflx, shal_cnv
-      logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid, use_GP_jacobian
+      logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid
       real(kind=kind_phys), intent(in   ) :: dtf, cp, hvap
 
       logical,              intent(in   ), dimension(im) :: flag_cice
@@ -259,11 +259,11 @@
                if (flag_cice(i)) then
                  adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
                               + ulwsfc_cice(i)   * tem                     &
-                              + adjsfculw_ocn(i) * (one - frland(i) - tem)
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
                 else
                  adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
                               + adjsfculw_ice(i) * tem                     &
-                              + adjsfculw_ocn(i) * (one - frland(i) - tem)
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
                endif
              enddo
            else
@@ -273,20 +273,20 @@
                elseif (icy(i)) then                 ! ice (and water)
                  tem = one - cice(i)
                  if (flag_cice(i)) then
-                   if (wet(i) .and. adjsfculw_ocn(i) /= huge) then
-                     adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_ocn(i)*tem
+                   if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                     adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_wat(i)*tem
                    else
                      adjsfculw(i) = ulwsfc_cice(i)
                    endif
                  else
-                   if (wet(i) .and. adjsfculw_ocn(i) /= huge) then
-                     adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_ocn(i)*tem
+                   if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                     adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_wat(i)*tem
                    else
                      adjsfculw(i) = adjsfculw_ice(i)
                    endif
                  endif
                else                                 ! all water
-                 adjsfculw(i) = adjsfculw_ocn(i)
+                 adjsfculw(i) = adjsfculw_wat(i)
                endif
              enddo
            endif
