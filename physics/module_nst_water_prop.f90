@@ -657,7 +657,7 @@ end subroutine solar_time_from_julian
  end subroutine get_dtzm_point
 
 !>\ingroup waterprop
- subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,z1,z2,nx,ny,dtm)
+ subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,z1,z2,nx,ny,nth,dtm)
 !subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,icy,z1,z2,nx,ny,dtm)
 ! ===================================================================== !
 !                                                                       !
@@ -687,6 +687,7 @@ end subroutine solar_time_from_julian
 !     ny      - integer, dimension in y-direction (meridional)       1  !
 !     z1      - lower bound of depth of sea temperature              1  !
 !     z2      - upper bound of depth of sea temperature              1  !
+!     nth     - integer, num of openmp thread                        1  !
 !  outputs:                                                             !
 !     dtm   - mean of dT(z)  (z1 to z2)                              1  !
 !
@@ -694,7 +695,7 @@ end subroutine solar_time_from_julian
 
   implicit none
 
-  integer, intent(in) :: nx,ny
+  integer, intent(in) :: nx,ny, nth
   real (kind=kind_phys), dimension(nx,ny), intent(in)  :: xt,xz,dt_cool,zc
   logical, dimension(nx,ny), intent(in)  :: wet
 ! logical, dimension(nx,ny), intent(in)  :: wet,icy
@@ -706,7 +707,7 @@ end subroutine solar_time_from_julian
   real (kind=kind_phys), parameter :: zero=0.0, half=0.5, one=1.0
 
 
-!$omp parallel do private(j,i,dtw,dtc,xzi)
+!$omp parallel do num_threads (nth) private(j,i,dtw,dtc,xzi)
   do j = 1, ny
     do i= 1, nx
 

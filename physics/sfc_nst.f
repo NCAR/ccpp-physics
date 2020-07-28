@@ -676,7 +676,7 @@ cc
 !! @{
       subroutine sfc_nst_pre_run
      &    (im, wet, tsfc_wat, tsurf_wat, tseal, xt, xz, dt_cool,
-     &     z_c, tref, cplflx, oceanfrac, errmsg, errflg)
+     &     z_c, tref, cplflx, oceanfrac, nthreads, errmsg, errflg)
 
       use machine , only : kind_phys
       use module_nst_water_prop, only: get_dtzm_2d
@@ -686,7 +686,7 @@ cc
       integer, parameter :: r8 = kind_phys
 
 !  ---  inputs:
-      integer, intent(in) :: im
+      integer, intent(in) :: im, nthreads
       logical, dimension(im), intent(in) :: wet
       real (kind=kind_phys), dimension(im), intent(in) ::
      &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
@@ -730,7 +730,7 @@ cc
 !
       if (cplflx) then
         call get_dtzm_2d (xt,  xz, dt_cool,                             &
-     &                    z_c, wet, zero, omz1, im, 1, dtzm)
+     &                    z_c, wet, zero, omz1, im, 1, nthreads, dtzm)
         do i=1,im
           if (wet(i) .and. oceanfrac(i) > zero) then
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
@@ -786,7 +786,7 @@ cc
       subroutine sfc_nst_post_run                                       &
      &     ( im, rlapse, tgice, wet, icy, oro, oro_uf, nstf_name1,      &
      &       nstf_name4, nstf_name5, xt, xz, dt_cool, z_c, tref, xlon,  &
-     &       tsurf_wat, tsfc_wat, dtzm, errmsg, errflg                  &
+     &       tsurf_wat, tsfc_wat, nthreads, dtzm, errmsg, errflg        &
      &     )
 
       use machine , only : kind_phys
@@ -797,7 +797,7 @@ cc
       integer, parameter :: r8 = kind_phys
 
 !  ---  inputs:
-      integer, intent(in) :: im
+      integer, intent(in) :: im, nthreads
       logical, dimension(im), intent(in) :: wet, icy
       real (kind=kind_phys), intent(in) :: rlapse, tgice
       real (kind=kind_phys), dimension(im), intent(in) :: oro, oro_uf
@@ -840,7 +840,7 @@ cc
         zsea1 = 0.001_r8*real(nstf_name4)
         zsea2 = 0.001_r8*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, zsea1, zsea2,      &
-     &                    im, 1, dtzm)
+     &                    im, 1, nthreads, dtzm)
         do i = 1, im
 !         if (wet(i) .and. .not.icy(i)) then
 !         if (wet(i) .and. (frac_grid .or. .not. icy(i))) then
