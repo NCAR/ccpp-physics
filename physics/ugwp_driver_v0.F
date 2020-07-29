@@ -138,7 +138,7 @@
              pkdis(i,k) = zero
            enddo
          enddo
-         if (cdmbgwd(1) > zero.or. cdmbgwd(2) > zero)_r8 then
+         if (cdmbgwd(1) > zero.or. cdmbgwd(2) > zero) then
            call gwdps(im, im, im, levs, Pdvdt, Pdudt, Pdtdt             &
      &,               ugrs, vgrs, tgrs, qgrs                            &
      &,               kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt&
