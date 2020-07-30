@@ -34,6 +34,31 @@
   type = integer
   intent = in
   optional = F  
+[yearlen]
+  standard_name = number_of_days_in_year
+  long_name = number of days in a year
+  units = days
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F  
+[julian]
+  standard_name = julian_day
+  long_name = julian day
+  units = days
+  dimensions = ()
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F   
+[lat]
+  standard_name = latitude
+  long_name = latitude
+  units = radian
+  dimensions = (horizontal_dimension)
+  type = real
+  intent = in
+  kind = kind_phys    
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
@@ -43,6 +68,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical layer for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
 [tracer]
   standard_name = chemical_tracers
   long_name = chemical tracers
@@ -51,6 +94,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F  
+[de_lgth]
+  standard_name = cloud_decorrelation_length
+  long_name = cloud decorrelation length
+  units = km
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F  
 [cld_frac]
   standard_name = total_cloud_fraction
@@ -142,6 +194,33 @@
   kind = kind_phys
   intent = out
   optional = F   
+[cloud_overlap_param]
+  standard_name = cloud_overlap_param
+  long_name = cloud overlap parameter
+  units = km
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[precip_overlap_param]
+  standard_name = precip_overlap_param
+  long_name = precipitation overlap parameter
+  units = km
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F  
+[deltaZ]
+  standard_name = layer_thickness
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

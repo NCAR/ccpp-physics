@@ -104,9 +104,11 @@ contains
     endif
     
     if (.not. doLWrad) return
-    !
+    
+    ! ####################################################################################    
     ! First sample the clouds...
-    !       
+    ! ####################################################################################
+
     ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
     call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',&
          lw_optical_props_clouds%alloc_1scl(nCol, nLev, lw_gas_props))
@@ -122,7 +124,6 @@ contains
        enddo
     endif
     
-    ! Call McICA to generate subcolumns.
     ! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
     ! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
     do iCol=1,ncol
@@ -131,10 +132,13 @@ contains
        rng3D(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
     enddo
 
-    ! Call McICA
+    ! Cloud-overlap.
     select case ( iovrlw )
     case(1) ! Maximum-random overlap
-       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run', &
+            sampled_mask_max_ran(rng3D,                            &
+                                 cld_frac,                         &
+                                 cldfracMCICA))       
     case(3) ! Exponential decorrelation length overlap
        ! Generate second RNG
        do iCol=1,ncol
@@ -142,19 +146,36 @@ contains
           call random_number(rng1D,rng_stat)
           rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
        enddo
-       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',&
-          sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,cloud_overlap_param(:,1:nLev-1),cldfracMCICA))
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',   &
+            sampled_mask_exp_dcorr(rng3D,                            &
+                                   rng3D2,                           &
+                                   cld_frac,                         &
+                                   cloud_overlap_param(:,1:nLev-1),  &
+                                   cldfracMCICA))
+    case(4) ! Exponential overlap
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',   &
+            sampled_mask_exp_ran(rng3D,                              &
+                                 cld_frac,                           &
+                                 cloud_overlap_param(:,1:nLev-1),    &
+                                 cldfracMCICA))
     case(5) ! Exponential-random overlap
-       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',sampled_mask_exp_ran(rng3D,cld_frac,cldfracMCICA))
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',   &
+            sampled_mask_exp_ran(rng3D,                              &
+                                 cld_frac,                           &
+                                 cloud_overlap_param(:,1:nLev-1),    &
+                                 cldfracMCICA))       
     end select
     
-    ! Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',draw_samples(&
-         cldfracMCICA,lw_optical_props_cloudsByBand,lw_optical_props_clouds))
+    ! Sampling. Map band optical depth to each g-point using McICA
+    call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',      &
+         draw_samples(cldfracMCICA,                                  &
+                      lw_optical_props_cloudsByBand,                 &
+                      lw_optical_props_clouds))
 
-    !
+    ! ####################################################################################
     ! Next sample the precipitation...
-    !       
+    ! ####################################################################################
+    
     ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
     call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',&
          lw_optical_props_precip%alloc_1scl(nCol, nLev, lw_gas_props))
@@ -170,7 +191,6 @@ contains
        enddo
     endif
     
-    ! Call McICA to generate subcolumns.
     ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
     !! Call RNG. Mersennse Twister accepts 1D array, so loop over columns and collapse along G-points 
     !! and layers. ([nGpts,nLev,nColumn]-> [nGpts*nLev]*nColumn)
@@ -180,11 +200,13 @@ contains
     !   rng3D(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
     !enddo
 
-    ! Call McICA
+    ! Precipitation overlap.
     select case ( iovrlw )
-       ! Maximumn-random 
     case(1) ! Maximum-random overlap
-       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,precip_frac,precipfracSAMP))       
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',   &
+            sampled_mask_max_ran(rng3D,                              &
+                                 precip_frac,                        &
+                                 precipfracSAMP))       
     case(3) ! Exponential decorrelation length overlap
        ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
        !! Generate second RNG
@@ -193,17 +215,35 @@ contains
        !   call random_number(rng1D,rng_stat)
        !   rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
        !enddo
-       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run', &
-          sampled_mask_exp_dcorr(rng3D,rng3D2,precip_frac,precip_overlap_param(:,1:nLev-1),precipfracSAMP))
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',   &
+            sampled_mask_exp_dcorr(rng3D,                            &
+                                   rng3D2,                           &
+                                   precip_frac,                      &
+                                   precip_overlap_param(:,1:nLev-1), &
+                                   precipfracSAMP))
+    case(4) ! Exponential overlap
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',   &
+            sampled_mask_exp_ran(rng3D,                              &
+                                 precip_frac,                        &
+                                 precip_overlap_param(:,1:nLev-1),   &
+                                 precipfracSAMP))
+    case(5) ! Exponential-random overlap
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',   &
+            sampled_mask_exp_ran(rng3D,                              &
+                                 precip_frac,                        &
+                                 precip_overlap_param(:,1:nLev-1),   &
+                                 precipfracSAMP))
     end select
     
-    ! Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',draw_samples(&
-         precipfracSAMP,lw_optical_props_precipByBand,lw_optical_props_precip))
+    ! Sampling. Map band optical depth to each g-point using McICA
+    call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',      &
+         draw_samples(precipfracSAMP,                                &
+                      lw_optical_props_precipByBand,                 &
+                      lw_optical_props_precip))
          
-    !    
+    ! ####################################################################################
     ! For GFDL MP just add precipitation optics to cloud-optics
-    !
+    ! ####################################################################################
     lw_optical_props_clouds%tau = lw_optical_props_clouds%tau + lw_optical_props_precip%tau
 
   end subroutine rrtmgp_gfdlmp_lw_cloud_sampling_run

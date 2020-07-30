@@ -42,16 +42,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[tv_lay]
-  standard_name = virtual_temperature
-  long_name = layer virtual temperature
-  units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F     
+  optional = F   
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -69,7 +60,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F   
+  optional = F    
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
@@ -93,8 +84,17 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F
+[deltaZ]
+  standard_name = layer_thickness
+  long_name = layer_thickness
+  units = m
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
 [cloud_overlap_param]
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
@@ -102,7 +102,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F
 [precip_overlap_param]
   standard_name = precip_overlap_param
@@ -111,7 +111,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = in
   optional = F  
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation

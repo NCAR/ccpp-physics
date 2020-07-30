@@ -26,7 +26,7 @@ module mo_cloud_sampling
                               ty_optical_props_nstr
   implicit none
   private
-  public :: draw_samples, sampled_mask_max_ran, sampled_mask_exp_dcorr
+  public :: draw_samples, sampled_mask_max_ran, sampled_mask_exp_dcorr, sampled_mask_exp_ran
 contains
   ! -------------------------------------------------------------------------------------------------
   !
@@ -394,4 +394,5 @@ contains
       end do
     end do
   end subroutine apply_cloud_mask
+
 end module mo_cloud_sampling

@@ -5,8 +5,8 @@
 ! ########################################################################################
 module GFS_cloud_diagnostics
   use machine,                 only: kind_phys
-  use physcons,                only: con_pi, con_rog
-  use physparam,               only: iovrlw, iovrsw, ivflip, icldflg
+  use physcons,                only: con_pi, con_rog, decorr_con
+  use physparam,               only: iovrlw, iovrsw, ivflip, icldflg, idcor
   use GFS_typedefs,            only: GFS_control_type
   
   ! Module parameters (imported directly from radiation_cloud.f)
@@ -41,9 +41,9 @@ contains
 !! \section arg_table_GFS_cloud_diagnostics_run
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
-  subroutine GFS_cloud_diagnostics_run(Model, nCol, nLev, lat, p_lay, tv_lay, cld_frac,  &
-       p_lev, mbota, mtopa, cldsa, de_lgth, cloud_overlap_param, precip_overlap_param,   &
-       errmsg, errflg)
+  subroutine GFS_cloud_diagnostics_run(Model, nCol, nLev, lat, de_lgth, p_lay, cld_frac, &
+       p_lev, deltaZ, cloud_overlap_param, precip_overlap_param,                &
+       mbota, mtopa, cldsa, errmsg, errflg)
     implicit none
      
     ! Inputs
@@ -53,13 +53,17 @@ contains
          nCol,              & ! Number of horizontal grid-points
          nLev                 ! Number of vertical-layers
     real(kind_phys), dimension(nCol), intent(in) :: &
-         lat                  ! Latitude       
+         lat,               & ! Latitude       
+         de_lgth              ! Decorrelation length     
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &
          p_lay,             & ! Pressure at model-layer
-         tv_lay,            & ! Virtual temperature
          cld_frac             ! Total cloud fraction
     real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &
-         p_lev                ! Pressure at model interfaces
+         p_lev                ! Pressure at model interfaces         
+    real(kind_phys), dimension(nCol,nLev), intent(in) :: &
+    	 deltaZ,              & ! Layer thickness (km)
+         cloud_overlap_param, & ! Cloud-overlap parameter
+         precip_overlap_param   ! Precipitation overlap parameter
     
     ! Outputs
     character(len=*), intent(out) :: &
@@ -71,18 +75,15 @@ contains
          mtopa                  ! Vertical indices for cloud bases
     real(kind_phys), dimension(ncol,5), intent(out) :: &
          cldsa                  ! Fraction of clouds for low, middle, high, total and BL 
-    real(kind_phys), dimension(ncol), intent(out)  :: &
-         de_lgth                ! Decorrelation length
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
-         cloud_overlap_param, & ! Cloud-overlap parameter
-         precip_overlap_param   ! Precipitation overlap parameter
+
+
     
     ! Local variables
     integer i,id,iCol,iLay,icld
     real(kind_phys) :: tem1
     real(kind_phys),dimension(nCol,NK_CLDS+1) :: ptop1
     real(kind_phys),dimension(nCol) :: rlat
-    real(kind_phys),dimension(nCol,nLev) :: cldcnv, deltaZ
+    real(kind_phys),dimension(nCol,nLev) :: cldcnv
 	
     if (.not. (Model%lsswr .or. Model%lslwr)) return
     
@@ -100,47 +101,13 @@ contains
           ptop1(i,icld) = ptopc(icld,1) + tem1*max( 0.0, 4.0*rlat(i)-1.0 )
        enddo
     enddo
-    
-    ! Compute layer-thickness
-    do iCol=1,nCol
-       do iLay=1,nLev
-          deltaZ(iCol,iLay) = (con_rog*0.001) * abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
-       enddo
-    enddo
-    
-    !
-    ! Cloud overlap parameter
-    !
-    ! Estimate clouds decorrelation length in km
-    !      *this is only a tentative test, need to consider change later*
-    if ( iovr == 3) then
-       do iCol =1,nCol
-          de_lgth(iCol) = max( 0.6, 2.78-4.6*rlat(iCol) )
-          do iLay=nLev,2,-1
-             if (de_lgth(iCol) .gt. 0) then
-                cloud_overlap_param(iCol,iLay-1) = &
-                     exp( -0.5 * (deltaZ(iCol,iLay)+deltaZ(iCol,iLay-1)) / de_lgth(iCol) )
-             endif
-          enddo
-       enddo
-    endif
-
-
-    ! Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
-    if ( iovr == 4 .or. iovr == 5 ) then 
-       call get_alpha(nCol, nLev, deltaZ, iovr, lat, julian, yearlen, cldtot, cloud_overlap_param)
-    endif
-	
-    ! 
-    ! Precipitation overlap parameter (Hack. Using same as cloud for now)
-    precip_overlap_param = cloud_overlap_param
-
 	
     ! Compute low, mid, high, total, and boundary layer cloud fractions and clouds top/bottom 
     ! layer indices for low, mid, and high clouds. The three cloud domain boundaries are 
     ! defined by ptopc. The cloud overlapping method is defined by control flag 'iovr', which may
     ! be different for lw and sw radiation programs.
-    call gethml(p_lay/100., ptop1, cld_frac, cldcnv, deltaZ, de_lgth, nCol, nLev, cldsa, mtopa, mbota)	
+    call gethml(p_lay/100., ptop1, cld_frac, cldcnv, deltaZ, de_lgth, cloud_overlap_param,&
+         nCol, nLev, cldsa, mtopa, mbota)	
     
   end subroutine GFS_cloud_diagnostics_run
   
@@ -212,7 +179,7 @@ contains
   
   ! #########################################################################################
   ! #########################################################################################
-  subroutine gethml(plyr, ptop1, cldtot, cldcnv, dz, de_lgth, IX, NLAY, clds, mtop, mbot)
+  subroutine gethml(plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha, IX, NLAY, clds, mtop, mbot)
     !  ===================================================================  !
     !                                                                       !
     ! abstract: compute high, mid, low, total, and boundary cloud fractions !
@@ -240,6 +207,7 @@ contains
     !   cldcnv(IX,NLAY) : convective cloud (for diagnostic scheme only)     !
     !   dz    (ix,nlay) : layer thickness (km)                              !
     !   de_lgth(ix)     : clouds vertical de-correlation length (km)        !
+    !   alpha(ix,nlay)  : alpha decorrelation parameter                     !
     !   IX              : horizontal dimention                              !
     !   NLAY            : vertical layer dimensions                         !
     !                                                                       !
@@ -259,6 +227,8 @@ contains
     !                     =1 max/ran overlapping clouds                     !
     !                     =2 maximum overlapping  ( for mcica only )        !
     !                     =3 decorr-length ovlp   ( for mcica only )        !
+    !                     =4 exponential cloud overlap  (AER; mcica only)  !
+    !                     =5 exponential-random overlap (AER; mcica only)  !
     !                                                                       !
     !  ====================    end of description    =====================  !
     !
@@ -270,6 +240,7 @@ contains
     real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, ptop1, &
          cldtot, cldcnv, dz
     real (kind=kind_phys), dimension(:),   intent(in) :: de_lgth
+    real (kind=kind_phys), dimension(:,:), intent(in) :: alpha
     
     !  ---  outputs
     real (kind=kind_phys), dimension(:,:), intent(out) :: clds
