@@ -3,7 +3,7 @@ module rrtmgp_gfdlmp_lw_cloud_sampling
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use physparam,                only: isubclw, iovrlw
   use mo_optical_props,         only: ty_optical_props_1scl
-  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_dcorr, draw_samples
+  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_dcorr, sampled_mask_exp_ran, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
@@ -96,7 +96,7 @@ contains
     errflg = 0
 
     ! 
-    if (iovrlw .ne. 1 .and. iovrlw .ne. 3) then
+    if (iovrlw .ne. 1 .and. iovrlw .ne. 3 .and. iovrlw .ne. 4 .and. iovrlw .ne. 5) then
        errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
        errflg = 1
        call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling',errmsg)
@@ -133,7 +133,6 @@ contains
 
     ! Call McICA
     select case ( iovrlw )
-       ! Maximumn-random 
     case(1) ! Maximum-random overlap
        call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',sampled_mask_max_ran(rng3D,cld_frac,cldfracMCICA))       
     case(3) ! Exponential decorrelation length overlap
@@ -145,6 +144,8 @@ contains
        enddo
        call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',&
           sampled_mask_exp_dcorr(rng3D,rng3D2,cld_frac,cloud_overlap_param(:,1:nLev-1),cldfracMCICA))
+    case(5) ! Exponential-random overlap
+       call check_error_msg('rrtmgp_gfdlmp_lw_cloud_sampling_run',sampled_mask_exp_ran(rng3D,cld_frac,cldfracMCICA))
     end select
     
     ! Map band optical depth to each g-point using McICA

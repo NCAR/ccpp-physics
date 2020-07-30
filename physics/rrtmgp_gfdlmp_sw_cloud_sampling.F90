@@ -3,7 +3,7 @@ module rrtmgp_gfdlmp_sw_cloud_sampling
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use physparam,                only: isubcsw, iovrsw
   use mo_optical_props,         only: ty_optical_props_2str
-  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_dcorr, draw_samples
+  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_dcorr, sampled_mask_exp_ran, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
@@ -99,7 +99,7 @@ contains
     errflg = 0
     
     ! Only works w/ SDFs v15p2 and v16beta
-    if (iovrsw .ne. 1 .and. iovrsw .ne. 3) then
+    if (iovrsw .ne. 1 .and. iovrsw .ne. 3 .and. iovrsw .ne. 4 .an. iovrsw .ne. 5) then
        errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
        errflg = 1
        call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling',errmsg)
@@ -137,10 +137,10 @@ contains
 
        ! Call McICA
        select case ( iovrsw )
-       case(1) ! Maximum-random
+       case(1) ! Maximum-random overlap
           call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', &
                sampled_mask_max_ran(rng3D,cld_frac(idxday(1:nDay),:),cldfracMCICA))       
-       case(3) ! Exponential-random
+       case(3) ! Decorrelation-length overlap
           do iday=1,nday
              call random_setseed(ipseed_sw(iday),rng_stat)
              call random_number(rng1D,rng_stat)
@@ -150,6 +150,9 @@ contains
                sampled_mask_exp_dcorr(rng3D, rng3D2, cld_frac(idxday(1:nDay),:),    &
                                       cloud_overlap_param(idxday(1:nDay),1:nLev-1), &
                                       cldfracMCICA))          
+       case(5) ! Exponential-random overlap
+          call check_error_msg('rrtmgp_gfdlmp_sw_cloud_sampling_run', &
+               sampled_mask_exp_ran(rng3D,cld_frac(idxday(1:nDay),:),cldfracMCICA))
        end select
        
        ! Map band optical depth to each g-point using McICA

@@ -113,7 +113,7 @@ contains
     !
     ! Estimate clouds decorrelation length in km
     !      *this is only a tentative test, need to consider change later*
-    if ( iovrlw == 3 .and. iovrsw == 3) then
+    if ( iovr == 3) then
        do iCol =1,nCol
           de_lgth(iCol) = max( 0.6, 2.78-4.6*rlat(iCol) )
           do iLay=nLev,2,-1
@@ -124,10 +124,17 @@ contains
           enddo
        enddo
     endif
+
+
+    ! Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+    if ( iovr == 4 .or. iovr == 5 ) then 
+       call get_alpha(nCol, nLev, deltaZ, iovr, lat, julian, yearlen, cldtot, cloud_overlap_param)
+    endif
 	
-	! 
-	! Precipitation overlap parameter (Hack. Using same as cloud for now)
-	precip_overlap_param = cloud_overlap_param
+    ! 
+    ! Precipitation overlap parameter (Hack. Using same as cloud for now)
+    precip_overlap_param = cloud_overlap_param
+
 	
     ! Compute low, mid, high, total, and boundary layer cloud fractions and clouds top/bottom 
     ! layer indices for low, mid, and high clouds. The three cloud domain boundaries are 
@@ -398,6 +405,29 @@ contains
           clds(i,4) = 1.0 - cl1(i) * cl2(i)     ! save total cloud
        enddo
        
+    elseif ( iovr == 4 .or. iovr == 5 ) then  ! exponential overlap (iovr=4), or
+                                              ! exponential-random  (iovr=5);
+                                              ! distinction defined by alpha
+       do k = kstr, kend, kinc
+          do i = 1, ix
+             ccur = min( ovcst, max( cldtot(i,k), cldcnv(i,k) ))
+             if (ccur >= climit) then                                   ! cloudy layer
+                cl2(i) =   alpha(i,k) * min(cl2(i), (1.0 - ccur))     & ! maximum part
+                     + (1.0 - alpha(i,k)) * (cl2(i) * (1.0 - ccur))     ! random part
+             else                                                       ! clear layer
+                cl1(i) = cl1(i) * cl2(i)
+                cl2(i) = 1.0
+             endif
+          enddo
+          if (k == llyr) then
+             do i = 1, ix
+                clds(i,5) = 1.0 - cl1(i) * cl2(i) ! save bl cloud
+             enddo
+          endif
+       enddo
+       do i = 1, ix
+          clds(i,4) = 1.0 - cl1(i) * cl2(i)     ! save total cloud
+       enddo
     endif                                     ! end_if_iovr
     
     !  ---  high, mid, low clouds, where cl1, cl2 are cloud fractions
