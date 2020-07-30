@@ -38,7 +38,7 @@
        implicit none
 !input
 
-       integer, parameter :: r8 = kind_phys
+       integer, parameter :: kp = kind_phys
 
        integer, intent(in) :: me,  master
        integer, intent(in) :: im, levs, kdt, imx, nmtvr, ntke, ipr
@@ -89,9 +89,9 @@
 !	
 ! switches that activate impact of OGWs and NGWs along with eddy diffusion
 !
-       real(kind=kind_phys), parameter :: pogw=1.0_r8, pngw=1.0_r8
-     &,                                   pked=1.0_r8, zero=0.0_r8
-     &,                                   ompked=1.0_r8-pked
+       real(kind=kind_phys), parameter :: pogw=1.0_kp, pngw=1.0_kp
+     &,                                   pked=1.0_kp, zero=0.0_kp
+     &,                                   ompked=1.0_kp-pked
 !
 ! switches for GW-effects: pogw=1 (OGWs)  pngw=1 (NGWs) pked=1 (eddy mixing)
 !
@@ -162,7 +162,7 @@
 
 !        call slat_geos5(im, xlatd, tau_ngw)
 !
-         if (abs(1.0_r8-cdmbgwd(3)) > 1.0e-6_r8) then
+         if (abs(1.0_kp-cdmbgwd(3)) > 1.0e-6_kp) then
            if (cdmbgwd(4) > zero) then
              do i=1,im
                turb_fac(i) = zero
@@ -182,7 +182,7 @@
              rfac = 86400000 / dtp
              do i=1,im
                tx1 = cdmbgwd(4)*min(10.0, max(turb_fac(i),rain(i)*rfac))
-               tau_ngw(i) = tau_ngw(i) * max(0.1_r8, min(5.0_r8, tx1))
+               tau_ngw(i) = tau_ngw(i) * max(0.1_kp, min(5.0_kp, tx1))
              enddo
            endif
            do i=1,im
@@ -317,7 +317,7 @@
       use sso_coorde,        only : pgwd, pgwd4, debugprint
 !----------------------------------------
       implicit none
-      integer, parameter :: r8 = kind_phys
+      integer, parameter :: kp = kind_phys
       character(len=8)    :: strsolver='PSS-1986'  ! current operational solver or  'WAM-2017'
       integer, intent(in) :: im, km, imx, kdt
       integer, intent(in) :: me, master
@@ -363,9 +363,9 @@
 !     cleff = 2.5*0.5e-5 * sqrt(192./768.) => Lh_eff = 1004. km
 !      6*dx = 240 km 8*dx = 320. ~ 3-5 more effective
 !---------------------------------------------------------------------
-      real(kind=kind_phys)            :: gammin = 0.00999999_r8
-      real(kind=kind_phys), parameter :: nhilmax = 25.0_r8
-      real(kind=kind_phys), parameter :: sso_min = 3000.0_r8
+      real(kind=kind_phys)            :: gammin = 0.00999999_kp
+      real(kind=kind_phys), parameter :: nhilmax = 25.0_kp
+      real(kind=kind_phys), parameter :: sso_min = 3000.0_kp
       logical, parameter              :: do_adjoro = .true.
 !
       real(kind=kind_phys)            :: shilmin, sgrmax, sgrmin
@@ -439,7 +439,7 @@
       dsmax  = sqrt(sgrmax)   ; dsmin  = sqrt(sgrmin)
 
       dxres   = pi2*arad/float(IMX)
-      hdxres  = 0.5_r8*dxres
+      hdxres  = 0.5_kp*dxres
 !     shilmin = sgrmin/nhilmax            ! not used - Moorthi
 
 !     gammin = min(sso_min/dsmax, 1.)     ! Moorthi - with this results are not reproducible
@@ -1311,7 +1311,7 @@
       implicit none
 !23456
 
-      integer, parameter :: r8 = kind_phys
+      integer, parameter :: kp = kind_phys
       integer, intent(in) :: klev             ! vertical level
       integer, intent(in) :: klon             ! horiz tiles
 
@@ -1338,9 +1338,9 @@
       real, intent(out) :: pdvdt(klon,klev)     ! meridional momentum tendency
       real, intent(out) :: pdtdt(klon,klev)     ! gw-heating (u*ax+v*ay)/cp
       real, intent(out) :: dked(klon,klev)      ! gw-eddy diffusion
-      real, parameter   :: minvel = 0.5_r8      !
-      real, parameter   :: epsln  = 1.0e-12_r8  !
-      real, parameter   :: zero   = 0.0_r8, one = 1.0_r8, half = 0.5_r8
+      real, parameter   :: minvel = 0.5_kp      !
+      real, parameter   :: epsln  = 1.0e-12_kp  !
+      real, parameter   :: zero   = 0.0_kp, one = 1.0_kp, half = 0.5_kp
 
 !vay-2018
 
@@ -1466,7 +1466,7 @@
            tvc1 = tm1(jl,jk)   * (one +fv*qm1(jl,jk))
            tvm1 = tm1(jl,jk-1) * (one +fv*qm1(jl,jk-1))
 !          zthm1(jl,jk)   = 0.5 *(tvc1+tvm1)
-           zthm1          = 2.0_r8 / (tvc1+tvm1)
+           zthm1          = 2.0_kp / (tvc1+tvm1)
            zuhm1(jl,jk)   = half *(um1(jl,jk-1)+um1(jl,jk))
            zvhm1(jl,jk)   = half *(vm1(jl,jk-1)+vm1(jl,jk))
 !          zrhohm1(jl,jk) = prsi(jl,jk)*rdi/zthm1(jl,jk)   !  rho = p/(RTv) 
@@ -1475,7 +1475,7 @@
            v_zmet(jl,jk)  = zdelp + zdelp
            delpi(jl,jk)  = grav / (prsi(jl,jk-1) - prsi(jl,jk))
            vueff(jl,jk)   =
-     &     2.e-5_r8*exp( (phil(jl,jk)+phil(jl,jk-1))*rhp2)+dked_min
+     &     2.e-5_kp*exp( (phil(jl,jk)+phil(jl,jk-1))*rhp2)+dked_min
 !
 !          zbn2(jl,jk)    =  grav2cpd/zthm1(jl,jk)
            zbn2(jl,jk)    =  grav2cpd*zthm1
