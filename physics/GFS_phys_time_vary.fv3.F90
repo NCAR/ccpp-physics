@@ -61,7 +61,6 @@
          integer :: nb, nblks, nt
          integer :: i, j, ix
          logical :: non_uniform_blocks
-
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
@@ -153,7 +152,7 @@
 
 !$OMP section
 !> - Call read_aerdata() to read aerosol climatology
-         if (Model%aero_in) then
+         if (Model%iaerclm) then
             ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
             ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
             if (size(Data(1)%Tbd%aer_nm, dim=3).ne.ntrcaerm) then
@@ -164,21 +163,21 @@
             else
                ! Update the value of ntrcaer in aerclm_def with the value defined
                ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-               ! If Model%aero_in is .true., then ntrcaer == ntrcaerm
+               ! If Model%iaerclm is .true., then ntrcaer == ntrcaerm
                ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
                ! Read aerosol climatology
-               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate)
+               call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate,errmsg,errflg)
             endif
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
             ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-            ! If Model%aero_in is .false., then ntrcaer == 1
+            ! If Model%iaerclm is .false., then ntrcaer == 1
             ntrcaer = size(Data(1)%Tbd%aer_nm, dim=3)
          endif
 
 !$OMP section
 !> - Call read_cidata() to read IN and CCN data
-         if (Model%iccn) then
+         if (Model%iccn == 1) then
            call read_cidata  ( Model%me, Model%master)
            ! No consistency check needed for in/ccn data, all values are
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
@@ -230,7 +229,7 @@
          endif
 
 !> - Call setindxaer() to initialize aerosols data
-         if (Model%aero_in) then
+         if (Model%iaerclm) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxaer (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_aer,           &
@@ -242,7 +241,7 @@
          endif
 
 !> - Call setindxci() to initialize IN and CCN data
-         if (Model%iccn) then
+         if (Model%iccn == 1) then
 !$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxci (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_ci,       &
@@ -260,7 +259,7 @@
          do j = 1,Model%ny
            do i = 1,Model%nx
              ix = ix + 1
-             if (ix .gt. Model%blksz(nb)) then
+             if (ix > Model%blksz(nb)) then
                ix = 1
                nb = nb + 1
              endif
@@ -436,7 +435,7 @@
         endif
 
 !> - Call aerinterpol() to make aerosol interpolation
-        if (Model%aero_in) then
+        if (Model%iaerclm) then
 !$OMP do schedule (dynamic,1)
          do nb = 1, nblks
            call aerinterpol (Model%me, Model%master, Model%blksz(nb),             &
@@ -451,7 +450,7 @@
         endif
 
 !> - Call ciinterpol() to make IN and CCN data interpolation
-        if (Model%iccn) then
+        if (Model%iccn == 1) then
 !$OMP do schedule (dynamic,1)
           do nb = 1, nblks
             call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &

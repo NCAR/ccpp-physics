@@ -21,8 +21,8 @@
 !!
 !###===================================================================
   SUBROUTINE myjpbl_wrapper_run(                    &
-     &  restart,do_myjsfc,                           &
-     &  ix,im,levs,dt_phs,                          &
+     &  restart,do_myjsfc,                          &
+     &  im,levs,dt_phs,                             &
      &  kdt,ntrac,ntke,                             &
      &  ntcw,ntiw,ntrw,ntsw,ntgl,                   &
      &  ugrs, vgrs, tgrs, qgrs,                     &
@@ -76,7 +76,7 @@
       integer, intent(out) :: errflg
 
 !MYJ-1D
-      integer,intent(in) :: im, ix, levs
+      integer,intent(in) :: im, levs
       integer,intent(in) :: kdt, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
       logical,intent(in) :: restart,do_myjsfc,lprnt

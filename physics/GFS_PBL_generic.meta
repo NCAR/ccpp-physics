@@ -161,6 +161,14 @@
   type = integer
   intent = in
   optional = F
+[nqrimef]
+  standard_name = index_for_mass_weighted_rime_factor
+  long_name = tracer index for mass weighted rime factor
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [trans_aero]
   standard_name = flag_for_aerosol_convective_transport_and_PBL_diffusion
   long_name = flag for aerosol convective transport and PBL diffusion
@@ -233,6 +241,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cplchm]
   standard_name = flag_for_chemistry_coupling
   long_name = flag controlling cplchm collection (default off)
@@ -290,6 +306,93 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[save_t]
+  standard_name = air_temperature_save
+  long_name = air temperature before entering a physics scheme
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[ugrs]
+  standard_name = x_wind
+  long_name = zonal wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vgrs]
+  standard_name = y_wind
+  long_name = meridional wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -473,6 +576,14 @@
   type = integer
   intent = in
   optional = F
+[nqrimef]
+  standard_name = index_for_mass_weighted_rime_factor
+  long_name = tracer index for mass weighted rime factor
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [trans_aero]
   standard_name = flag_for_aerosol_convective_transport_and_PBL_diffusion
   long_name = flag for aerosol convective transport and PBL diffusion
@@ -545,6 +656,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ltaerosol]
   standard_name = flag_for_aerosol_physics
   long_name = flag for aerosol physics
@@ -577,9 +696,25 @@
   type = logical
   intent = in
   optional = F
+[flag_for_pbl_generic_tend]
+  standard_name = flag_for_generic_planetary_boundary_layer_tendency
+  long_name = true if GFS_PBL_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
   type = logical
@@ -715,7 +850,7 @@
   intent = in
   optional = F
 [htrsw]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -724,7 +859,7 @@
   intent = in
   optional = F
 [htrlw]
-  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_timestep
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -1047,18 +1182,17 @@
   kind = kind_phys
   intent = in
   optional = F
-[fice]
-  standard_name = sea_ice_concentration
-  long_name = ice fraction over open water
-  units = frac
+[flag_cice]
+  standard_name = flag_for_cice
+  long_name = flag for cice
+  units = flag
   dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
+  type = logical
   intent = in
   optional = F
 [dusfc_cice]
-  standard_name = surface_x_momentum_flux_for_coupling_interstitial
-  long_name = sfc x momentum flux for coupling interstitial
+  standard_name = surface_x_momentum_flux_for_coupling
+  long_name = sfc x momentum flux for coupling
   units = Pa
   dimensions = (horizontal_dimension)
   type = real
@@ -1066,8 +1200,8 @@
   intent = in
   optional = F
 [dvsfc_cice]
-  standard_name = surface_y_momentum_flux_for_coupling_interstitial
-  long_name = sfc y momentum flux for coupling interstitial
+  standard_name = surface_y_momentum_flux_for_coupling
+  long_name = sfc y momentum flux for coupling
   units = Pa
   dimensions = (horizontal_dimension)
   type = real
@@ -1075,8 +1209,8 @@
   intent = in
   optional = F
 [dtsfc_cice]
-  standard_name = surface_upward_sensible_heat_flux_for_coupling_interstitial
-  long_name = sfc sensible heat flux for coupling interstitial
+  standard_name = surface_upward_sensible_heat_flux_for_coupling
+  long_name = sfc sensible heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -1084,8 +1218,8 @@
   intent = in
   optional = F
 [dqsfc_cice]
-  standard_name = surface_upward_latent_heat_flux_for_coupling_interstitial
-  long_name = sfc latent heat flux for coupling interstitial
+  standard_name = surface_upward_latent_heat_flux_for_coupling
+  long_name = sfc latent heat flux for coupling
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
@@ -1125,7 +1259,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[stress_ocn]
+[stress_wat]
   standard_name = surface_wind_stress_over_ocean
   long_name = surface wind stress over ocean
   units = m2 s-2
@@ -1134,7 +1268,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[hflx_ocn]
+[hflx_wat]
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_ocean
   long_name = kinematic surface upward sensible heat flux over ocean
   units = K m s-1
@@ -1143,7 +1277,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[evap_ocn]
+[evap_wat]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ocean
   long_name = kinematic surface upward latent heat flux over ocean
   units = kg kg-1 m s-1
@@ -1184,6 +1318,96 @@
   long_name = diffusivity for heat
   units = m2 s-1
   dimensions = (horizontal_dimension,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hefac]
+  standard_name = surface_upward_latent_heat_flux_reduction_factor
+  long_name = surface upward latent heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hffac]
+  standard_name = surface_upward_sensible_heat_flux_reduction_factor
+  long_name = surface upward sensible heat flux reduction factor from canopy heat storage
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ugrs]
+  standard_name = x_wind
+  long_name = zonal wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vgrs]
+  standard_name = y_wind
+  long_name = meridional wind
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qgrs]
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_u]
+  standard_name = x_wind_save
+  long_name = x-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_v]
+  standard_name = y_wind_save
+  long_name = y-wind before entering a physics scheme
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_t]
+  standard_name = air_temperature_save
+  long_name = air temperature before entering a physics scheme
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in

@@ -3320,7 +3320,7 @@ subroutine fall_speed (ktop, kbot, den, qs, qi, qg, ql, tk, vts, vti, vtg)
             else
                 tc (k) = tk (k) - tice
                 vti (k) = (3. + log10 (qi (k) * den (k))) * (tc (k) * (aa * tc (k) + bb) + cc) + dd * tc (k) + ee
-                vti (k) = vi0 * exp (log_10 * vti (k)) * 0.8 
+                vti (k) = vi0 * exp (log_10 * vti (k)) * 0.9
                 vti (k) = min (vi_max, max (vf_min, vti (k)))
             endif
         enddo
@@ -4729,7 +4729,7 @@ subroutine cloud_diagnosis (is, ie, ks, ke, den, delp, lsm, qmw, qmi, qmr, qms, 
     real :: n0r = 8.0e6, n0s = 3.0e6, n0g = 4.0e6
     real :: alphar = 0.8, alphas = 0.25, alphag = 0.5
     real :: gammar = 17.837789, gammas = 8.2850630, gammag = 11.631769
-    real :: qmin = 1.0e-12, beta = 1.22
+    real :: qmin = 1.0e-12, beta = 1.22, qmin1 = 9.e-6
 
     do k = ks, ke
         do i = is, ie
@@ -4759,7 +4759,7 @@ subroutine cloud_diagnosis (is, ie, ks, ke, den, delp, lsm, qmw, qmi, qmr, qms, 
                 ! cloud ice (Heymsfield and Mcfarquhar, 1996)
             ! -----------------------------------------------------------------------
 
-                if (qmi (i, k) .gt. qmin) then
+                if (qmi (i, k) .gt. qmin1) then
                     qci (i, k) = dpg * qmi (i, k) * 1.0e3
                     rei_fac = log (1.0e3 * qmi (i, k) * den (i, k))
                     if (t (i, k) - tice .lt. - 50) then
@@ -4785,7 +4785,7 @@ subroutine cloud_diagnosis (is, ie, ks, ke, den, delp, lsm, qmw, qmi, qmr, qms, 
                 ! cloud ice (Wyser, 1998)
             ! -----------------------------------------------------------------------
 
-                if (qmi (i, k) .gt. qmin) then
+                if (qmi (i, k) .gt. qmin1) then
                     qci (i, k) = dpg * qmi (i, k) * 1.0e3
                     bw = - 2. + 1.e-3 * log10 (den (i, k) * qmi (i, k) / rho_0) * max (0.0, tice - t (i, k)) ** 1.5
                     rei (i, k) = 377.4 + bw * (203.3 + bw * (37.91 + 2.3696 * bw))
@@ -4815,7 +4815,7 @@ subroutine cloud_diagnosis (is, ie, ks, ke, den, delp, lsm, qmw, qmi, qmr, qms, 
             ! snow (Lin et al., 1983)
             ! -----------------------------------------------------------------------
 
-            if (qms (i, k) .gt. qmin) then
+            if (qms (i, k) .gt. qmin1) then
                 qcs (i, k) = dpg * qms (i, k) * 1.0e3
                 lambdas = exp (0.25 * log (pi * rhos * n0s / qms (i, k) / den (i, k)))
                 res (i, k) = 0.5 * exp (log (gammas / 6) / alphas) / lambdas * 1.0e6

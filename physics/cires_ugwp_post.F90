@@ -25,8 +25,7 @@ contains
          tot_zmtb, tot_zlwb, tot_zogw,                              &
          tot_tofd, tot_mtb, tot_ogw, tot_ngw,                       &
          du3dt_mtb,du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw,      &
-         dtdt, dudt, dvdt, lssav, ldiag3d, dusfcg, dvsfcg, dugwd,   &
-         dvgwd, du3dt, dv3dt, dt3dt, errmsg, errflg)
+         dtdt, dudt, dvdt, errmsg, errflg)
 
         use machine,                only: kind_phys
 
@@ -44,12 +43,6 @@ contains
         real(kind=kind_phys), intent(in),    dimension(:,:) :: gw_dtdt, gw_dudt, gw_dvdt, dudt_mtb, dudt_ogw, dudt_tms
         real(kind=kind_phys), intent(inout), dimension(:,:) :: du3dt_mtb, du3dt_ogw, du3dt_tms, du3dt_ngw, dv3dt_ngw
         real(kind=kind_phys), intent(inout), dimension(:,:) :: dtdt, dudt, dvdt
-
-        ! For if (lssav) block, originally in gwdps_post_run
-        logical, intent(in) :: lssav, ldiag3d
-        real(kind=kind_phys), intent(in),    dimension(:)   :: dusfcg, dvsfcg
-        real(kind=kind_phys), intent(inout), dimension(:)   :: dugwd, dvgwd
-        real(kind=kind_phys), intent(inout), dimension(:,:) :: du3dt, dv3dt, dt3dt
 
         character(len=*),        intent(out) :: errmsg
         integer,                 intent(out) :: errflg
@@ -78,18 +71,6 @@ contains
         dtdt = dtdt + gw_dtdt
         dudt = dudt + gw_dudt
         dvdt = dvdt + gw_dvdt
-
-        ! Originally in gwdps_post_run
-        if (lssav) then
-          dugwd(:) = dugwd(:) + dusfcg(:)*dtf
-          dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
-
-          if (ldiag3d) then
-            du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
-            dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
-            dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf
-          endif
-        endif
 
       end subroutine cires_ugwp_post_run
 

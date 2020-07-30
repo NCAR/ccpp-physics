@@ -23,7 +23,7 @@
 [slag]
   standard_name = equation_of_time
   long_name = equation of time
-  units = radians
+  units = radian
   dimensions = ()
   type = real
   kind = kind_phys
@@ -68,7 +68,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude of grid box
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -92,7 +92,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[tsfc_ocn]
+[tsfc_wat]
   standard_name = surface_skin_temperature_over_ocean_interstitial
   long_name = surface skin temperature over ocean (temporary use as interstitial)
   units = K
@@ -146,7 +146,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[sfcemis_ocn]
+[sfcemis_wat]
   standard_name = surface_longwave_emissivity_over_ocean_interstitial
   long_name = surface lw emissivity in fraction over ocean (temporary use as interstitial)
   units = frac
@@ -186,7 +186,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky shortwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -195,7 +195,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step
   long_name = clear sky shortwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -204,7 +204,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky longwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -213,7 +213,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
   long_name = clear sky longwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -288,14 +288,6 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [im]
@@ -419,7 +411,7 @@
   kind = kind_phys
   intent = out
   optional = F
-[adjsfculw_ocn]
+[adjsfculw_wat]
   standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
   long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
   units = W m-2
@@ -512,73 +504,6 @@
 [adjvisdfd]
   standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux
   long_name = surface downwelling diffuse ultraviolet plus visible shortwave flux at current time
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-  optional = F
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = dcyc2t3_post_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = dcyc2t3_post_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = dcyc2t3_post_run
-  type = scheme
-[im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[adjsfcdsw]
-  standard_name = surface_downwelling_shortwave_flux
-  long_name = surface downwelling shortwave flux at current time
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[adjsfcnsw]
-  standard_name = surface_net_downwelling_shortwave_flux
-  long_name = surface net downwelling shortwave flux at current time
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[adjsfcusw]
-  standard_name = surface_upwelling_shortwave_flux
-  long_name = surface upwelling shortwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real

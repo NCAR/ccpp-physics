@@ -30,6 +30,14 @@
   type = logical
   intent = in
   optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = logical flag for 3D tracer diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_aw]
   standard_name = flag_for_Arakawa_Wu_adjustment
   long_name = flag for Arakawa Wu scale-aware adjustment
@@ -89,6 +97,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[save_qv]
+  standard_name = water_vapor_specific_humidity_save
+  long_name = water vapor specific humidity before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -133,14 +150,6 @@
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -234,6 +243,14 @@
   type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [cal_pre]
   standard_name = flag_for_precipitation_type_algorithm
   long_name = flag controls precip type algorithm
@@ -253,6 +270,14 @@
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = logical flag for 3D tracer diagnostics
   units = flag
   dimensions = ()
   type = logical
@@ -331,7 +356,7 @@
 [xlat]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -340,7 +365,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -714,6 +739,14 @@
   type = logical
   intent = in
   optional = F
+[ca_global]
+  standard_name = flag_for_global_cellular_automata
+  long_name = switch for global ca
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [dtdtr]
   standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
   long_name = temp. change due to radiative heating per time step
@@ -766,6 +799,14 @@
   type = integer
   intent = in
   optional = F
+[lsm_noahmp]
+  standard_name = flag_for_noahmp_land_surface_scheme
+  long_name = flag for NOAH MP land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [raincprv]
   standard_name = lwe_thickness_of_convective_precipitation_amount_from_previous_timestep
   long_name = convective_precipitation_amount from previous timestep
@@ -806,6 +847,51 @@
   standard_name = lwe_thickness_of_graupel_amount_from_previous_timestep
   long_name = graupel amount from previous timestep
   units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[draincprv]
+  standard_name = convective_precipitation_rate_from_previous_timestep
+  long_name = convective precipitation rate from previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[drainncprv]
+  standard_name = explicit_rainfall_rate_from_previous_timestep
+  long_name = explicit rainfall rate previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[diceprv]
+  standard_name = ice_precipitation_rate_from_previous_timestep
+  long_name = ice precipitation rate from previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dsnowprv]
+  standard_name = snow_precipitation_rate_from_previous_timestep
+  long_name = snow precipitation rate from previous timestep
+  units = mm s-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dgraupelprv]
+  standard_name = graupel_precipitation_rate_from_previous_timestep
+  long_name = graupel precipitation rate from previous timestep
+  units = mm s-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

@@ -243,7 +243,7 @@
       integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
-     &                 cld_init, progcld5, progcld4o
+     &                 cld_init, progcld5, progcld4o, gethml
 
 
 ! =================
@@ -262,6 +262,7 @@
 !!\n                     =8:  Thompson microphysics
 !!\n                     =6:  WSM6 microphysics
 !!\n                     =10: MG microphysics
+!!\n                     =15: Ferrier-Aligo microphysics
 !!\param me              print control flag
 !>\section gen_cld_init cld_init General Algorithm
 !! @{
@@ -350,6 +351,8 @@
             print *,'   --- WSM6 cloud microphysics'
           elseif (imp_physics == 10) then
             print *,'   --- MG cloud microphysics'
+          elseif (imp_physics == 15) then
+            print *,'   --- Ferrier-Aligo cloud microphysics'
           else
             print *,'  !!! ERROR in cloud microphysc specification!!!', &
      &              '  imp_physics (NP3D) =',imp_physics

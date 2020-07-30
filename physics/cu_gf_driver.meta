@@ -44,6 +44,14 @@
 [ccpp-arg-table]
   name = cu_gf_driver_run
   type = scheme
+[ntracer]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [garea]
   standard_name = cell_area
   long_name = grid cell area
@@ -56,14 +64,6 @@
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -253,8 +253,8 @@
   intent = in
   optional = F
 [hfx2]
-  standard_name = kinematic_surface_upward_sensible_heat_flux
-  long_name = kinematic surface upward sensible heat flux
+  standard_name = kinematic_surface_upward_sensible_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward sensible heat flux reduced by surface roughness
   units = K m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -262,8 +262,8 @@
   intent = in
   optional = F
 [qfx2]
-  standard_name = kinematic_surface_upward_latent_heat_flux
-  long_name = kinematic surface upward latent heat flux
+  standard_name = kinematic_surface_upward_latent_heat_flux_reduced_by_surface_roughness
+  long_name = kinematic surface upward latent heat flux reduced by surface roughness
   units = kg kg-1 m s-1
   dimensions = (horizontal_dimension)
   type = real
@@ -272,7 +272,7 @@
   optional = F
 [cliw]
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of ice water in the convectively transported tracer array
+  long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -281,7 +281,7 @@
   optional = F
 [clcw]
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
-  long_name = moist (dry+vapor, no condensates) mixing ratio of cloud water in the convectively transported tracer array
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
@@ -349,6 +349,119 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = F
+[flag_for_scnv_generic_tend]
+  standard_name = flag_for_generic_shallow_convection_tendency
+  long_name = true if GFS_SCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[flag_for_dcnv_generic_tend]
+  standard_name = flag_for_generic_deep_convection_tendency
+  long_name = true if GFS_DCNV_generic should calculate tendencies
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[du3dt_SCNV]
+  standard_name = cumulative_change_in_x_wind_due_to_shallow_convection
+  long_name = cumulative change in x wind due to shallow convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt_SCNV]
+  standard_name = cumulative_change_in_y_wind_due_to_shallow_convection
+  long_name = cumulative change in y wind due to shallow convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dt3dt_SCNV]
+  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
+  long_name = cumulative change in temperature due to shallow convection
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dq3dt_SCNV]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_shallow_convection
+  long_name = cumulative change in water vapor specific humidity due to shallow convection
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[du3dt_DCNV]
+  standard_name = cumulative_change_in_x_wind_due_to_deep_convection
+  long_name = cumulative change in x wind due to deep convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dv3dt_DCNV]
+  standard_name = cumulative_change_in_y_wind_due_to_deep_convection
+  long_name = cumulative change in y wind due to deep convection
+  units = m s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dt3dt_DCNV]
+  standard_name = cumulative_change_in_temperature_due_to_deep_convection
+  long_name = cumulative change in temperature due to deep convection
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dq3dt_DCNV]
+  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection
+  long_name = cumulative change in water vapor specific humidity due to deep convection
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = flag for 3d tracer diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qci_conv]
+  standard_name = convective_cloud_condesate_after_rainout
+  long_name = convective cloud condesate after rainout
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

@@ -2551,7 +2551,7 @@
 !> band index (3rd index in array sfluxref described below)
       integer, dimension(nblow:nbhgh), public :: ibx
 
-      data  layreffr/ 18,30, 6, 3, 3, 8, 2, 6, 1, 2, 0,32,58,49 /
+      data  layreffr/ 18,30, 6, 3, 3, 8, 2, 6, 1, 2, 0,32,42,49 /
       data  ix1     /  1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 3, 0 /
       data  ix2     /  5, 2, 5, 2, 0, 2, 6, 0, 6, 0, 0, 0, 6, 0 /
       data  ibx     /  1, 1, 1, 2, 2, 3, 4, 3, 5, 4, 5, 6, 2, 7 /

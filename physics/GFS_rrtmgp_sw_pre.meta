@@ -1,0 +1,194 @@
+[ccpp-arg-table]
+  name = GFS_rrtmgp_sw_pre_run
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Grid]
+  standard_name = GFS_grid_type_instance
+  long_name = instance of derived type GFS_grid_type
+  units = DDT
+  dimensions = ()
+  type = GFS_grid_type
+  intent = in
+  optional = F
+[Sfcprop]
+  standard_name = GFS_sfcprop_type_instance
+  long_name = instance of derived type GFS_sfcprop_type
+  units = DDT
+  dimensions = ()
+  type = GFS_sfcprop_type
+  intent = in
+  optional = F
+[Statein]
+  standard_name = GFS_statein_type_instance
+  long_name = instance of derived type GFS_statein_type
+  units = DDT
+  dimensions = ()
+  type = GFS_statein_type
+  intent = in
+  optional = F
+[Radtend]
+  standard_name = GFS_radtend_type_instance
+  long_name = instance of derived type GFS_radtend_type
+  units = DDT
+  dimensions = ()
+  type = GFS_radtend_type
+  intent = inout
+  optional = F
+[Coupling]
+  standard_name = GFS_coupling_type_instance
+  long_name = Fortran DDT containing FV3-GFS fields to/from coupling with other components
+  units = DDT
+  dimensions = ()
+  type = GFS_coupling_type
+  intent = inout
+  optional = F
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[tv_lay]
+  standard_name = virtual_temperature
+  long_name = layer virtual temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[relhum]
+  standard_name = relative_humidity
+  long_name = layer relative humidity
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lay]
+  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical layer for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[p_lev]
+  standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
+  long_name = air pressure at vertical interface for radiation calculation
+  units = hPa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tracer]
+  standard_name = chemical_tracers
+  long_name = chemical tracers
+  units = g g-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sw_gas_props]
+  standard_name = coefficients_for_sw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
+[alb1d]
+  standard_name = surface_albedo_perturbation
+  long_name = surface albedo perturbation
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_nir_dir]
+  standard_name = surface_albedo_nearIR_direct
+  long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_nir_dif]
+  standard_name = surface_albedo_nearIR_diffuse
+  long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_uvvis_dir]
+  standard_name =  surface_albedo_uvvis_dir
+  long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[sfc_alb_uvvis_dif]
+  standard_name =  surface_albedo_uvvis_dif
+  long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
+  units = none
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[nday]
+  standard_name = daytime_points_dimension
+  long_name = daytime points dimension
+  units = count
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+[idxday]
+  standard_name = daytime_points
+  long_name = daytime points
+  units = index
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = out
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+########################################################################
+[ccpp-arg-table]
+  name = GFS_rrtmgp_sw_pre_finalize
+  type = scheme
