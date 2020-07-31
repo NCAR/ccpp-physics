@@ -121,7 +121,7 @@ module GFS_rrtmgp_setup
      endif
      
 
-     call radinit( Model, si, levr, imp_physics,  me )
+     call radinit( Model, si, levr, imp_physics,  me, errflg )
      
      if ( me == 0 ) then
         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
@@ -197,13 +197,13 @@ module GFS_rrtmgp_setup
    ! Private functions
    
    
-   subroutine radinit( Model, si, NLAY, imp_physics, me )
+   subroutine radinit( Model, si, NLAY, imp_physics, me, errflg )
      !...................................
 
 !  ---  inputs:
 !     &     ( si, NLAY, imp_physics, me )
 !  ---  outputs:
-!          ( none )
+!          ( errflg )
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -325,9 +325,13 @@ module GFS_rrtmgp_setup
       real (kind=kind_phys), intent(in) :: si(:)
 
 !  ---  outputs: (none, to module variables)
+	  integer, intent(out) :: &
+	      errflg
 
 !  ---  locals:
 
+	! Initialize
+	errflg = 0
 !
 !===> ...  begin here
 !
@@ -408,7 +412,7 @@ module GFS_rrtmgp_setup
       call aer_init ( NLAY, me )                 !  --- ...  aerosols initialization routine
       call gas_init ( me )                       !  --- ...  co2 and other gases initialization routine
       call sfc_init ( me )                       !  --- ...  surface initialization routine
-      call hml_cloud_diagnostics_initialize( Model, NLAY, me, si) 
+      call hml_cloud_diagnostics_initialize( Model, NLAY, me, si, errflg) 
 
       return
       !...................................

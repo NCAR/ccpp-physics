@@ -119,7 +119,7 @@ contains
   ! ######################################################################################
   ! Initialization routine for High/Mid/Low cloud diagnostics. 
   ! ######################################################################################
-  subroutine hml_cloud_diagnostics_initialize(Model, nLev, mpi_rank, sigmainit)
+  subroutine hml_cloud_diagnostics_initialize(Model, nLev, mpi_rank, sigmainit, errflg)
     implicit none
     ! Inputs
     type(GFS_control_type), intent(in) :: &
@@ -129,9 +129,15 @@ contains
          mpi_rank 
     real(kind_phys), dimension(nLev+1), intent(in) :: &
          sigmainit
+    ! Outputs
+    integer, intent(out) :: &
+    	errflg
     
     ! Local variables
     integer :: iLay, kl
+ 
+ 	! Initialize error flag
+ 	errflg = 0
     
     ! Cloud overlap used for diagnostic HML cloud outputs      
     iovr = max(iovrsw,iovrlw)  
@@ -140,7 +146,7 @@ contains
     
     if ( icldflg == 0 ) then
        print *,' - Diagnostic Cloud Method has been discontinued'
-       stop ! NoNo
+       errflg = 1
     else
        if (mpi_rank == 0) then
           print *,' - Using Prognostic Cloud Method'
@@ -161,7 +167,7 @@ contains
           else
              print *,'  !!! ERROR in cloud microphysc specification!!!', &
                   '  imp_physics (NP3D) =',Model%imp_physics
-             stop
+             errflg = 1
           endif
        endif
     endif

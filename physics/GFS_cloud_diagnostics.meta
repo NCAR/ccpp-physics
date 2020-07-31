@@ -34,6 +34,7 @@
   type = real
   intent = in
   kind = kind_phys
+  optional = F  
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
