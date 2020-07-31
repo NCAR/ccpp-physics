@@ -3,7 +3,7 @@
 
 
 !>\defgroup mod_sfcsub GFS sfcsub Module
-!!\ingroup Noah_LSM
+!!\ingroup LSMs
 !> @{
 !! This module contains grib code for each parameter-used in subroutines sfccycle()
 !! and setrmsk().
@@ -299,7 +299,7 @@
       parameter(plrlmx=1000.,plrlmn=0.0,plromx=1000.0,plromn=0.0,
      &          plrsmx=1000.,plrsmn=0.0,plrimx=1000.,plrimn=0.0,
      &          plrjmx=1000.,plrjmn=0.0)
-!clu [-1l/+1l] relax tsfsmx (for noah lsm)
+!clu [-1l/+1l] relax tsfsmx 
       parameter(tsflmx=353.,tsflmn=173.0,tsfomx=313.0,tsfomn=271.2,
      &          tsfsmx=305.0,tsfsmn=173.0,tsfimx=271.2,tsfimn=173.0,
      &          tsfjmx=273.16,tsfjmn=173.0)
@@ -384,8 +384,9 @@
       parameter(snwmin=5.0,snwmax=100.)
       real (kind=kind_io8), parameter :: ten=10.0, one=1.0
 !
-!  coeeficients of blending forecast and interpolated clim
+!  coeficients of blending forecast and interpolated clim
 !  (or analyzed) fields over sea or land(l) (not for clouds)
+!tgs -- important
 !  1.0 = use of forecast
 !  0.0 = replace with interpolated analysis
 !
@@ -395,10 +396,10 @@
 !   ---------------------------------------------------------
 !   surface temperature        forecast             analysis
 !   surface temperature        forecast             forecast (over sea ice)
-!   albedo                     analysis             analysis
+!   albedo                     forecast/analysis    analysis
 !   sea-ice                    analysis             analysis
-!   snow                       analysis             forecast (over sea ice)
-!   roughness                  analysis             forecast
+!   snow                       forecast/analysis             forecast (over sea ice)
+!   roughness                  forecast/analysis             forecast
 !   plant resistance           analysis             analysis
 !   soil wetness (layer)       weighted average     analysis
 !   soil temperature           forecast             analysis
@@ -416,7 +417,7 @@
 !   max snow albedo            analysis             analysis
 !   slope type                 analysis             analysis
 !   liquid soil wetness        analysis-weighted    analysis
-!   actual snow depth          analysis-weighted    analysis
+!   actual snow depth          forecast/analysis-weighted    analysis
 !
 !  note: if analysis file is not given, then time interpolated climatology
 !        is used.  if analyiss file is given, it will be used as far as the
@@ -533,9 +534,9 @@
 !       rec.  1    label
 !       rec.  2    date record
 !       rec.  3    tsf
-!       rec.  4    soilm(two layers)              ----> 4 layers
+!       rec.  4    soilm(lsoil)
 !       rec.  5    snow
-!       rec.  6    soilt(two layers)              ----> 4 layers
+!       rec.  6    soilt(lsoil)
 !       rec.  7    tg3
 !       rec.  8    zor
 !       rec.  9    cv
@@ -560,7 +561,7 @@
 !       rec. 25    tprcp
 !       rec. 26    srflag
 !       rec. 27    swd
-!       rec. 28    slc (4 layers)
+!       rec. 28    slc (lsoil)
 !       rec. 29    vmn
 !       rec. 30    vmx
 !       rec. 31    slp
@@ -1234,50 +1235,27 @@
 !
 !  get soil temp and moisture (after all the qcs are completed)
 !
+      !-- soil moisture
       if(fnsmcc(1:8).eq.'        ') then
         call getsmc(wetclm,len,lsoil,smcclm,me)
       endif
-      call qcmxmn('smc1c   ',smcclm(1,1),sliclm,snoclm,icefl1,
+      do k=1,lsoil
+      call qcmxmn('smc   ',smcclm(1,k),sliclm,snoclm,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('smc2c   ',smcclm(1,2),sliclm,snoclm,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add smcclm(3:4)
-      if(lsoil.gt.2) then
-      call qcmxmn('smc3c   ',smcclm(1,3),sliclm,snoclm,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('smc4c   ',smcclm(1,4),sliclm,snoclm,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      endif
+      enddo
+      !-- soil temperature
       if(fnstcc(1:8).eq.'        ') then
         call getstc(tsfclm,tg3clm,sliclm,len,lsoil,stcclm,tsfimx)
       endif
-      call qcmxmn('stc1c   ',stcclm(1,1),sliclm,snoclm,icefl1,
+      do k=1,lsoil
+      call qcmxmn('stc   ',stcclm(1,k),sliclm,snoclm,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('stc2c   ',stcclm(1,2),sliclm,snoclm,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add stcclm(3:4)
-      if(lsoil.gt.2) then
-      call qcmxmn('stc3c   ',stcclm(1,3),sliclm,snoclm,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('stc4c   ',stcclm(1,4),sliclm,snoclm,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      endif
+      enddo
+
       call qcmxmn('vegc    ',vegclm,sliclm,snoclm,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
@@ -1335,17 +1313,10 @@
         call monitr('aisclm',aisclm,sliclm,snoclm,len)
         call monitr('snoclm',snoclm,sliclm,snoclm,len)
         call monitr('scvclm',scvclm,sliclm,snoclm,len)
-        call monitr('smcclm1',smcclm(1,1),sliclm,snoclm,len)
-        call monitr('smcclm2',smcclm(1,2),sliclm,snoclm,len)
-        call monitr('stcclm1',stcclm(1,1),sliclm,snoclm,len)
-        call monitr('stcclm2',stcclm(1,2),sliclm,snoclm,len)
-!clu [+4l] add smcclm(3:4) and stcclm(3:4)
-        if(lsoil.gt.2) then
-        call monitr('smcclm3',smcclm(1,3),sliclm,snoclm,len)
-        call monitr('smcclm4',smcclm(1,4),sliclm,snoclm,len)
-        call monitr('stcclm3',stcclm(1,3),sliclm,snoclm,len)
-        call monitr('stcclm4',stcclm(1,4),sliclm,snoclm,len)
-        endif
+        do k=1,lsoil
+          call monitr('smcclm1',smcclm(1,k),sliclm,snoclm,len)
+          call monitr('stcclm1',stcclm(1,k),sliclm,snoclm,len)
+        enddo
         call monitr('tg3clm',tg3clm,sliclm,snoclm,len)
         call monitr('zorclm',zorclm,sliclm,snoclm,len)
 !       if (gaus) then
@@ -1637,47 +1608,23 @@
       if(fnsmca(1:8).eq.'        ' .and. fnsmcc(1:8).eq.'        ') then
         call getsmc(wetanl,len,lsoil,smcanl,me)
       endif
-      call qcmxmn('smc1a   ',smcanl(1,1),slianl,snoanl,icefl1,
+      !-- soil moisture
+      do k=1,lsoil
+       call qcmxmn('smca   ',smcanl(1,1),slianl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('smc2a   ',smcanl(1,2),slianl,snoanl,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add smcanl(3:4)
-      if(lsoil.gt.2) then
-      call qcmxmn('smc3a   ',smcanl(1,3),slianl,snoanl,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('smc4a   ',smcanl(1,4),slianl,snoanl,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      endif
+      enddo
+      !-- soil temperature
       if(fnstca(1:8).eq.'        ') then
         call getstc(tsfanl,tg3anl,slianl,len,lsoil,stcanl,tsfimx)
       endif
-      call qcmxmn('stc1a   ',stcanl(1,1),slianl,snoanl,icefl1,
+      do k=1,lsoil
+        call qcmxmn('stca   ',stcanl(1,1),slianl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('stc2a   ',stcanl(1,2),slianl,snoanl,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add stcanl(3:4)
-      if(lsoil.gt.2) then
-      call qcmxmn('stc3a   ',stcanl(1,3),slianl,snoanl,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('stc4a   ',stcanl(1,4),slianl,snoanl,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      endif
+      enddo
       call qcmxmn('vega    ',veganl,slianl,snoanl,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &            vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
@@ -1723,17 +1670,10 @@
         call monitr('aisanl',aisanl,slianl,snoanl,len)
         call monitr('snoanl',snoanl,slianl,snoanl,len)
         call monitr('scvanl',scvanl,slianl,snoanl,len)
-        call monitr('smcanl1',smcanl(1,1),slianl,snoanl,len)
-        call monitr('smcanl2',smcanl(1,2),slianl,snoanl,len)
-        call monitr('stcanl1',stcanl(1,1),slianl,snoanl,len)
-        call monitr('stcanl2',stcanl(1,2),slianl,snoanl,len)
-!clu [+4l] add smcanl(3:4) and stcanl(3:4)
-        if(lsoil.gt.2) then
-        call monitr('smcanl3',smcanl(1,3),slianl,snoanl,len)
-        call monitr('smcanl4',smcanl(1,4),slianl,snoanl,len)
-        call monitr('stcanl3',stcanl(1,3),slianl,snoanl,len)
-        call monitr('stcanl4',stcanl(1,4),slianl,snoanl,len)
-        endif
+        do k=1,lsoil
+          call monitr('smcanl',smcanl(1,k),slianl,snoanl,len)
+          call monitr('stcanl',stcanl(1,k),slianl,snoanl,len)
+        enddo
         call monitr('tg3anl',tg3anl,slianl,snoanl,len)
         call monitr('zoranl',zoranl,slianl,snoanl,len)
 !       if (gaus) then
@@ -1902,44 +1842,20 @@
      &                siclmx,siclmn,sicomx,sicomn,sicimx,sicimn,
      &                sicjmx,sicjmn,sicsmx,sicsmn,epssic,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('smc1f    ',smcfcs(1,1),slifcs,snofcs,icefl1,
+!-- soil moisture forecast
+        do k=1,lsoil
+          call qcmxmn('smcf    ',smcfcs(1,k),slifcs,snofcs,icefl1,
      &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('smc2f   ',smcfcs(1,2),slifcs,snofcs,icefl1,
-     &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &                rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add smcfcs(3:4)
-          if(lsoil.gt.2) then
-          call qcmxmn('smc3f    ',smcfcs(1,3),slifcs,snofcs,icefl1,
-     &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('smc4f   ',smcfcs(1,4),slifcs,snofcs,icefl1,
-     &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          endif
-          call qcmxmn('stc1f   ',stcfcs(1,1),slifcs,snofcs,icefl1,
+        enddo
+!-- soil temperature forecast
+        do k=1,lsoil
+          call qcmxmn('stcf   ',stcfcs(1,k),slifcs,snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('stc2f   ',stcfcs(1,2),slifcs,snofcs,icefl1,
-     &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &                rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add stcfcs(3:4)
-         if(lsoil.gt.2) then
-          call qcmxmn('stc3f   ',stcfcs(1,3),slifcs,snofcs,icefl1,
-     &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &                rla,rlo,len,kqcm,percrit,lgchek,me)
-          call qcmxmn('stc4f   ',stcfcs(1,4),slifcs,snofcs,icefl1,
-     &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &                rla,rlo,len,kqcm,percrit,lgchek,me)
-         endif
+        enddo
           call qcmxmn('vegf    ',vegfcs,slifcs,snofcs,icefl1,
      &                veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
      &                vegjmx,vegjmn,vegsmx,vegsmn,epsveg,
@@ -1985,17 +1901,10 @@
         call monitr('albfcs',albfcs,slifcs,snofcs,len)
         call monitr('aisfcs',aisfcs,slifcs,snofcs,len)
         call monitr('snofcs',snofcs,slifcs,snofcs,len)
-        call monitr('smcfcs1',smcfcs(1,1),slifcs,snofcs,len)
-        call monitr('smcfcs2',smcfcs(1,2),slifcs,snofcs,len)
-        call monitr('stcfcs1',stcfcs(1,1),slifcs,snofcs,len)
-        call monitr('stcfcs2',stcfcs(1,2),slifcs,snofcs,len)
-!clu [+4l] add smcfcs(3:4) and stcfcs(3:4)
-        if(lsoil.gt.2) then
-        call monitr('smcfcs3',smcfcs(1,3),slifcs,snofcs,len)
-        call monitr('smcfcs4',smcfcs(1,4),slifcs,snofcs,len)
-        call monitr('stcfcs3',stcfcs(1,3),slifcs,snofcs,len)
-        call monitr('stcfcs4',stcfcs(1,4),slifcs,snofcs,len)
-        endif
+        do k=1,lsoil
+          call monitr('smcfcs',smcfcs(1,k),slifcs,snofcs,len)
+          call monitr('stcfcs',stcfcs(1,k),slifcs,snofcs,len)
+        enddo
         call monitr('tg3fcs',tg3fcs,slifcs,snofcs,len)
         call monitr('zorfcs',zorfcs,slifcs,snofcs,len)
 !       if (gaus) then
@@ -2138,44 +2047,18 @@
 !    &            plrjmx,plrjmn,plrsmx,plrsmn,epsplr,
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !     endif
-      call qcmxmn('stc1m   ',stcanl(1,1),slianl,snoanl,icefl1,
+      do k=1,lsoil
+        call qcmxmn('stcm   ',stcanl(1,k),slianl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('stc2m   ',stcanl(1,2),slianl,snoanl,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add stcanl(3:4)
-       if(lsoil.gt.2) then
-      call qcmxmn('stc3m   ',stcanl(1,3),slianl,snoanl,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('stc4m   ',stcanl(1,4),slianl,snoanl,icefl1,
-     &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
-     &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-       endif
-      call qcmxmn('smc1m   ',smcanl(1,1),slianl,snoanl,icefl1,
+      enddo
+      do k=1,lsoil
+        call qcmxmn('smcm   ',smcanl(1,k),slianl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('smc2m   ',smcanl(1,2),slianl,snoanl,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-!clu [+8l] add smcanl(3:4)
-       if(lsoil.gt.2) then
-      call qcmxmn('smc3m   ',smcanl(1,3),slianl,snoanl,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      call qcmxmn('smc4m   ',smcanl(1,4),slianl,snoanl,icefl1,
-     &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
-     &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
-     &            rla,rlo,len,kqcm,percrit,lgchek,me)
-      endif
+      enddo
       kqcm=1
       call qcmxmn('vegm    ',veganl,slianl,snoanl,icefl1,
      &            veglmx,veglmn,vegomx,vegomn,vegimx,vegimn,
@@ -2258,19 +2141,12 @@
         call monitr('albanl',albanl,slianl,snoanl,len)
         call monitr('aisanl',aisanl,slianl,snoanl,len)
         call monitr('snoanl',snoanl,slianl,snoanl,len)
-        call monitr('smcanl1',smcanl(1,1),slianl,snoanl,len)
-        call monitr('smcanl2',smcanl(1,2),slianl,snoanl,len)
-        call monitr('stcanl1',stcanl(1,1),slianl,snoanl,len)
-        call monitr('stcanl2',stcanl(1,2),slianl,snoanl,len)
-!clu [+4l] add smcanl(3:4) and stcanl(3:4)
-        if(lsoil.gt.2) then
-        call monitr('smcanl3',smcanl(1,3),slianl,snoanl,len)
-        call monitr('smcanl4',smcanl(1,4),slianl,snoanl,len)
-        call monitr('stcanl3',stcanl(1,3),slianl,snoanl,len)
-        call monitr('stcanl4',stcanl(1,4),slianl,snoanl,len)
+        do k=1,lsoil
+          call monitr('smcanl',smcanl(1,k),slianl,snoanl,len)
+          call monitr('stcanl',stcanl(1,k),slianl,snoanl,len)
+        enddo
         call monitr('tg3anl',tg3anl,slianl,snoanl,len)
         call monitr('zoranl',zoranl,slianl,snoanl,len)
-        endif
 !       if (gaus) then
           call monitr('cvaanl',cvanl ,slianl,snoanl,len)
           call monitr('cvbanl',cvbanl,slianl,snoanl,len)
@@ -2344,17 +2220,10 @@
         call monitr('albdif4',albfcs(1,4),slianl,snoanl,len)
         call monitr('aisdif',aisfcs,slianl,snoanl,len)
         call monitr('snodif',snofcs,slianl,snoanl,len)
-        call monitr('smcanl1',smcfcs(1,1),slianl,snoanl,len)
-        call monitr('smcanl2',smcfcs(1,2),slianl,snoanl,len)
-        call monitr('stcanl1',stcfcs(1,1),slianl,snoanl,len)
-        call monitr('stcanl2',stcfcs(1,2),slianl,snoanl,len)
-!clu [+4l] add smcfcs(3:4) and stc(3:4)
-        if(lsoil.gt.2) then
-        call monitr('smcanl3',smcfcs(1,3),slianl,snoanl,len)
-        call monitr('smcanl4',smcfcs(1,4),slianl,snoanl,len)
-        call monitr('stcanl3',stcfcs(1,3),slianl,snoanl,len)
-        call monitr('stcanl4',stcfcs(1,4),slianl,snoanl,len)
-        endif
+        do k=1,lsoil
+          call monitr('smcanl',smcfcs(1,k),slianl,snoanl,len)
+          call monitr('stcanl',stcfcs(1,k),slianl,snoanl,len)
+        enddo
         call monitr('tg3dif',tg3fcs,slianl,snoanl,len)
         call monitr('zordif',zorfcs,slianl,snoanl,len)
 !       if (gaus) then
