@@ -1,54 +1,16 @@
 module GFS_rrtmgp_pre
-  use physparam
   use machine, only: &
        kind_phys                   ! Working type
-  use GFS_typedefs, only:        &
-       GFS_statein_type,         & ! Prognostic state data in from dycore
-       GFS_stateout_type,        & ! Prognostic state or tendencies return to dycore
-       GFS_sfcprop_type,         & ! Surface fields
-       GFS_control_type,         & ! Model control parameters
-       GFS_grid_type,            & ! Grid and interpolation related data
-       GFS_tbd_type,             & ! To-Be-Determined data that doesn't fit in any one container
-       GFS_diag_type               ! Fields targetted for diagnostic output
-  use physcons, only:            &
-       eps   => con_eps,         & ! Rd/Rv
-       epsm1 => con_epsm1,       & ! Rd/Rv-1
-       fvirt => con_fvirt,       & ! Rv/Rd-1
-       rog   => con_rog            ! Rd/g
-  use radcons, only: &
-       qmin, epsq                  ! Minimum vlaues for varius calculations
   use funcphys, only:            &
        fpvs                        ! Function ot compute sat. vapor pressure over liq.
-  use module_radiation_astronomy,only: &
-       coszmn                      ! Function to compute cos(SZA)
   use module_radiation_gases,    only: &
        NF_VGAS,                  & ! Number of active gas species
        getgases,                 & ! Routine to setup trace gases
        getozn                      ! Routine to setup ozone
-  use module_radiation_aerosols, only: &
-       NF_AESW,                  & ! Number of optical-fields in SW output (3=tau+g+omega)
-       NF_AELW,                  & ! Number of optical-fields in LW output (3=tau+g+omega)
-       setaer,                   & ! Routine to compute aerosol radiative properties (tau,g,omega)
-       NSPC1                       ! Number of species for vertically integrated aerosol optical-depth
-  use module_radiation_clouds, only: &
-       NF_CLDS,                  & ! Number of fields in "clouds" array (e.g. (cloud(1)=lwp,clouds(2)=ReffLiq,...)
-       progcld1,                 & ! Zhao/Moorthi's prognostic cloud scheme
-       progcld3,                 & ! Zhao/Moorthi's prognostic cloud+pdfcld
-       progcld4,                 & ! GFDL cloud scheme
-       progcld5,                 & ! Thompson / WSM6 cloud micrphysics scheme
-       progclduni                  ! Unified cloud-scheme
-  use surface_perturbation, only: & 
-       cdfnor                      ! Routine to compute CDF (used to compute percentiles)
-  use module_radiation_surface,  only: &
-       setemis,                  & ! Routine to compute surface-emissivity
-       NF_ALBD,                  & ! Number of surface albedo categories (4; nir-direct, nir-diffuse, uvvis-direct, uvvis-diffuse)
-       setalb                      ! Routine to compute surface albedo
   ! RRTMGP types
   use mo_gas_optics_rrtmgp,  only: ty_gas_optics_rrtmgp
   use mo_gas_concentrations, only: ty_gas_concs
-  use rrtmgp_aux,            only: check_error_msg!, rrtmgp_minP, rrtmgp_minT
-  use mo_rrtmgp_constants,   only: grav, avogad
-  use mo_rrtmg_lw_cloud_optics
+  use rrtmgp_aux,            only: check_error_msg
 
   real(kind_phys), parameter :: &
        amd   = 28.9644_kind_phys,  & ! Molecular weight of dry-air     (g/mol)
@@ -83,13 +45,14 @@ contains
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-  subroutine GFS_rrtmgp_pre_init(Model, active_gases_array, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_init(nGases, active_gases, active_gases_array, errmsg, errflg)
     ! Inputs
-    type(GFS_control_type), intent(inout) :: &
-         Model      ! DDT: FV3-GFS model control parameters
-
+	integer, intent(in) :: &
+	     nGases     ! Number of active gases in RRTMGP
+	character(len=*), intent(in) :: &
+	     active_gases ! List of active gases from namelist.     
     ! Outputs
-    character(len=*),dimension(Model%ngases), intent(out) :: &
+    character(len=*),dimension(nGases), intent(out) :: &
          active_gases_array  ! Character array containing trace gases to include in RRTMGP
     character(len=*), intent(out) :: &
          errmsg     ! Error message
@@ -99,13 +62,13 @@ contains
     ! Local variables
     character(len=1) :: tempstr
     integer :: ij, count
-    integer,dimension(Model%ngases,2) :: gasIndices
+    integer,dimension(nGases,2) :: gasIndices
 
     ! Initialize
     errmsg = ''
     errflg = 0
 
-    if (len(Model%active_gases) .eq. 0) return
+    if (len(active_gases) .eq. 0) return
     
     ! Which gases are active? Provided via physics namelist.
 
@@ -113,23 +76,23 @@ contains
     ! First grab indices in character array corresponding to start:end of gas name.
     gasIndices(1,1)=1
     count=1
-    do ij=1,len(Model%active_gases)
-       tempstr=trim(Model%active_gases(ij:ij))
+    do ij=1,len(active_gases)
+       tempstr=trim(active_gases(ij:ij))
        if (tempstr .eq. '_') then
           gasIndices(count,2)=ij-1
           gasIndices(count+1,1)=ij+1
           count=count+1
        endif
     enddo
-    gasIndices(Model%ngases,2)=len(trim(Model%active_gases))
+    gasIndices(nGases,2)=len(trim(active_gases))
     
     ! Now extract the gas names
-    do ij=1,Model%ngases
-       active_gases_array(ij) = Model%active_gases(gasIndices(ij,1):gasIndices(ij,2))
+    do ij=1,nGases
+       active_gases_array(ij) = active_gases(gasIndices(ij,1):gasIndices(ij,2))
     enddo
 
     ! Which gases are active? (This is purely for flexibility)
-    do ij=1,Model%ngases
+    do ij=1,nGases
        if(trim(active_gases_array(ij)) .eq. 'h2o')   then
           isActive_h2o   = .true. 
           istr_h2o       = ij
@@ -180,25 +143,45 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-  subroutine GFS_rrtmgp_pre_run(Model, Grid, Statein, Sfcprop, Tbd, ncol, active_gases_array, &
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,                 &
+  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr, &
+       fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array,      &
+       pcon_eps, pcon_epsm1, pcon_fvirt, acon_qMin,                                      &
+       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,            &
        gas_concentrations,  errmsg, errflg)
     
-    ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model                ! DDT: FV3-GFS model control parameters
-    type(GFS_grid_type), intent(in) :: &
-         Grid                 ! DDT: FV3-GFS grid and interpolation related data 
-    type(GFS_statein_type), intent(in) :: &
-         Statein              ! DDT: FV3-GFS prognostic state data in from dycore    
-    type(GFS_sfcprop_type), intent(in) :: &
-         Sfcprop              ! DDT: FV3-GFS surface fields
-    type(GFS_tbd_type), intent(in) :: &
-         Tbd                  ! DDT: FV3-GFS data not yet assigned to a defined container
+    ! Inputs   
     integer, intent(in)    :: &
-         ncol                 ! Number of horizontal grid points
-    character(len=*),dimension(Model%ngases), intent(in) :: &
+         nCol,              & ! Number of horizontal grid points
+         nLev,              & ! Number of vertical layers
+         nGases,            & ! Number of active gases in RRTMGP.
+         nTracers,          & ! Number of tracers from model. 
+         i_o3                 ! Index into tracer array for ozone
+    logical, intent(in) :: &
+    	 lsswr,             & ! Call SW radiation?
+    	 lslwr                ! Call LW radiation
+    character(len=*),dimension(nGases), intent(in) :: &
          active_gases_array   ! Character array containing trace gases to include in RRTMGP
+    real(kind_phys), intent(in) :: &
+         fhswr,             & ! Frequency of SW radiation call.
+         fhlwr                ! Frequency of LW radiation call.
+    real(kind_phys), intent(in) :: &
+         pcon_eps,          & ! Physical constant: Epsilon (Rd/Rv)
+         pcon_epsm1,        & ! Physical constant: Epsilon (Rd/Rv) minus one
+         pcon_fvirt,        & ! Physical constant: Inverse of epsilon minus one
+         acon_qMin            ! Algorithmic constant: Lower limit for saturation vapor pressure
+         
+    real(kind_phys), dimension(nCol), intent(in) :: & 
+    	 xlon,              & ! Longitude
+    	 xlat,              & ! Latitude
+    	 tsfc                 ! Surface skin temperature (K)
+    real(kind_phys), dimension(nCol,nLev), intent(in) :: & 
+         prsl,              & ! Pressure at model-layer centers (Pa)
+         tgrs,              & ! Temperature at model-layer centers (K)
+         prslk                ! Exner function at model layer centers (1)
+    real(kind_phys), dimension(nCol,nLev+1) :: & 
+         prsi                 ! Pressure at model-interfaces (Pa)
+    real(kind_phys), dimension(nCol,nLev,nTracers) :: & 
+         qgrs                 ! Tracer concentrations (kg/kg)
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -210,15 +193,15 @@ contains
     real(kind_phys), dimension(ncol), intent(out) :: &
          tsfg,              & ! Ground temperature
          tsfa                 ! Skin temperature    
-    real(kind_phys), dimension(ncol,Model%levs), intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
          tv_lay,            & ! Virtual temperature at model-layers 
          relhum               ! Relative-humidity at model-layers          
-    real(kind_phys), dimension(ncol,Model%levs+1), intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev+1), intent(out) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(ncol, Model%levs, Model%ntrac),intent(out) :: &
+    real(kind_phys), dimension(nCol, nLev, nTracers),intent(out) :: &
          tracer               ! Array containing trace gases
     type(ty_gas_concs),intent(out) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
@@ -226,28 +209,27 @@ contains
     ! Local variables
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
     logical :: top_at_1
-    real(kind_phys),dimension(NCOL,Model%levs) :: vmr_o3, vmr_h2o
+    real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs, tem1, tem2
-    real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
-    real(kind_phys), dimension(ncol, Model%levs) :: o3_lay, qs_lay, q_lay
-    real(kind_phys), dimension(ncol, Model%levs, NF_VGAS) :: gas_vmr
-
-    if (.not. (Model%lsswr .or. Model%lslwr)) return
+    real(kind_phys), dimension(nCol,nLev) :: o3_lay, qs_lay, q_lay
+    real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
     
+    if (.not. (lsswr .or. lslwr)) return
+        
     ! #######################################################################################
     ! What is vertical ordering?
     ! #######################################################################################
-    top_at_1 = (Statein%prsi(1,1) .lt.  Statein%prsi(1, Model%levs))
+    top_at_1 = (prsi(1,1) .lt.  prsi(1, nLev))
     if (top_at_1) then 
-       iSFC = Model%levs
+       iSFC = nLev
        iTOA = 1
     else
        iSFC = 1
-       iTOA = Model%levs
+       iTOA = nLev
     endif
 
     ! #######################################################################################
@@ -255,25 +237,25 @@ contains
     ! #######################################################################################
     
     ! Water-vapor mixing-ratio
-    q_lay(1:ncol,:)  = Statein%qgrs(1:NCOL,:,1)
+    q_lay(1:ncol,:)  = qgrs(1:NCOL,:,1)
     where(q_lay .lt. 1.e-6) q_lay = 1.e-6
     
     ! Pressure at layer-interface
-    p_lev(1:NCOL,:) = Statein%prsi(1:NCOL,:)
+    p_lev(1:NCOL,:) = prsi(1:NCOL,:)
 
     ! Pressure at layer-center
-    p_lay(1:NCOL,:)   = Statein%prsl(1:NCOL,:)
+    p_lay(1:NCOL,:)   = prsl(1:NCOL,:)
 
     ! Temperature at layer-center
-    t_lay(1:NCOL,:) = Statein%tgrs(1:NCOL,:)
+    t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
     ! Temperature at layer-interfaces
     if (top_at_1) then
        t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
        t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
-       t_lev(1:NCOL,iSFC+1) = Sfcprop%tsfc(1:NCOL)
+       t_lev(1:NCOL,iSFC+1) = tsfc(1:NCOL)
     else
-       t_lev(1:NCOL,1)      = Sfcprop%tsfc(1:NCOL)
+       t_lev(1:NCOL,1)      = tsfc(1:NCOL)
        t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
        t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
     endif
@@ -282,12 +264,12 @@ contains
     ! Relative humidity, saturation mixing-ratio, vapor mixing-ratio, virtual temperature, 
     ! layer thickness,...
     do iCol=1,NCOL
-       do iLay=1,Model%levs
+       do iLay=1,nLev
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
-          qs                = max( QMIN, eps * es / (p_lay(iCol,iLay) + epsm1*es) )
-          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(QMIN, q_lay(iCol,iLay))/qs ) )
+          qs                = max( acon_qMin, pcon_eps * es / (p_lay(iCol,iLay) + pcon_epsm1*es) )
+          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(acon_qMin, q_lay(iCol,iLay))/qs ) )
           qs_lay(iCol,iLay) = qs
-          tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + fvirt*q_lay(iCol,iLay)) 
+          tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + pcon_fvirt*q_lay(iCol,iLay)) 
        enddo
     enddo
 
@@ -295,27 +277,27 @@ contains
     ! Get layer ozone mass mixing ratio 
     ! #######################################################################################
     ! First recast remaining all tracers (except sphum) forcing them all to be positive
-    do j = 2, model%NTRAC
-       tracer(1:NCOL,:,j) = Statein%qgrs(1:NCOL,:,j)
+    do j = 2, nTracers
+       tracer(1:NCOL,:,j) = qgrs(1:NCOL,:,j)
        where(tracer(:,:,j) .lt. 0.0) tracer(:,:,j) = 0._kind_phys
     enddo
 
-    if (Model%ntoz > 0) then 
-       do iLay=1,Model%levs
+    if (i_o3 > 0) then 
+       do iLay=1,nlev
           do iCol=1,NCOL
-             o3_lay(iCol,iLay) = max( QMIN, tracer(iCol,iLay,Model%ntoz) )
+             o3_lay(iCol,iLay) = max( acon_qMin, tracer(iCol,iLay,i_o3) )
           enddo
        enddo
     ! OR Use climatological ozone data
     else                               
-       call getozn (Statein%prslk(1:NCOL,:), Grid%xlat, NCOL, Model%levs, o3_lay)
+       call getozn (prslk(1:NCOL,:), xlat, nCol, nLev, o3_lay)
     endif
 
     ! #######################################################################################
     ! Set gas concentrations for RRTMGP
     ! #######################################################################################
     ! Call getgases(), to set up non-prognostic gas volume mixing ratios (gas_vmr).
-    call getgases (p_lev/100., Grid%xlon, Grid%xlat, NCOL, Model%levs, gas_vmr)
+    call getgases (p_lev/100., xlon, xlat, nCol, nLev, gas_vmr)
 
     ! Compute volume mixing-ratios for ozone (mmr) and specific-humidity.
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
@@ -331,15 +313,15 @@ contains
     call check_error_msg('GFS_rrtmgp_pre_run',gas_concentrations%set_vmr(active_gases_array(iStr_o3),  vmr_o3))
 
     ! #######################################################################################
-    ! Radiation time step (output) (Is this really needed?) (Used by some diangostics)
+    ! Radiation time step (output) (Is this really needed?) (Used by some diagnostics)
     ! #######################################################################################
-    raddt = min(Model%fhswr, Model%fhlwr)
+    raddt = min(fhswr, fhlwr)
 
     ! #######################################################################################
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
-    tsfg(1:NCOL) = Sfcprop%tsfc(1:NCOL)
-    tsfa(1:NCOL) = Sfcprop%tsfc(1:NCOL)
+    tsfg(1:NCOL) = tsfc(1:NCOL)
+    tsfa(1:NCOL) = tsfc(1:NCOL)
 
   end subroutine GFS_rrtmgp_pre_run
   
