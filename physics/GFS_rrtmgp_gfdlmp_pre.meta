@@ -58,7 +58,8 @@
   dimensions = (horizontal_dimension)
   type = real
   intent = in
-  kind = kind_phys    
+  kind = kind_phys 
+  optional = F     
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
