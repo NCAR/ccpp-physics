@@ -1,5 +1,5 @@
 [ccpp-arg-table]
-  name = rrtmgp_gfdlmp_lw_cloud_sampling_init
+  name = rrtmgp_lw_cloud_sampling_init
   type = scheme
 [lw_gas_props]
   standard_name = coefficients_for_lw_gas_optics
@@ -37,7 +37,7 @@
 
 ######################################################
 [ccpp-arg-table]
-  name = rrtmgp_gfdlmp_lw_cloud_sampling_run
+  name = rrtmgp_lw_cloud_sampling_run
   type = scheme
 [doLWrad]
   standard_name = flag_to_calc_lw
