@@ -2,14 +2,6 @@
 [ccpp-arg-table]
   name = GFS_cloud_diagnostics_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F  
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -26,6 +18,22 @@
   type = integer
   intent = in
   optional = F  
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lslwr]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F    
 [lat]
   standard_name = latitude
   long_name = latitude
@@ -114,6 +122,15 @@
   kind = kind_phys
   intent = in
   optional = F  
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [cldsa]
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL

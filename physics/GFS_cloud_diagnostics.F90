@@ -5,9 +5,7 @@
 ! ########################################################################################
 module GFS_cloud_diagnostics
   use machine,                 only: kind_phys
-  use physcons,                only: con_pi, con_rog, decorr_con
   use physparam,               only: iovrlw, iovrsw, ivflip, icldflg, idcor
-  use GFS_typedefs,            only: GFS_control_type
   
   ! Module parameters (imported directly from radiation_cloud.f)
   integer, parameter :: &
@@ -41,17 +39,20 @@ contains
 !! \section arg_table_GFS_cloud_diagnostics_run
 !! \htmlinclude GFS_cloud_diagnostics_run.html
 !!  
-  subroutine GFS_cloud_diagnostics_run(Model, nCol, nLev, lat, de_lgth, p_lay, cld_frac, &
-       p_lev, deltaZ, cloud_overlap_param, precip_overlap_param,                &
+  subroutine GFS_cloud_diagnostics_run(nCol, nLev, lsswr, lslwr, lat, de_lgth, p_lay,    &
+       cld_frac, p_lev, deltaZ, cloud_overlap_param, precip_overlap_param, con_pi,       &
        mbota, mtopa, cldsa, errmsg, errflg)
     implicit none
      
-    ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model                ! DDT: FV3-GFS model control parameters 
+    ! Inputs 
     integer, intent(in) :: &
          nCol,              & ! Number of horizontal grid-points
          nLev                 ! Number of vertical-layers
+    logical, intent(in) :: &
+    	 lsswr,             & ! Call SW radiation?
+    	 lslwr                ! Call LW radiation 
+    real(kind_phys), intent(in) :: &
+         con_pi               ! Physical constant: pi  
     real(kind_phys), dimension(nCol), intent(in) :: &
          lat,               & ! Latitude       
          de_lgth              ! Decorrelation length     
@@ -75,8 +76,6 @@ contains
          mtopa                  ! Vertical indices for cloud bases
     real(kind_phys), dimension(ncol,5), intent(out) :: &
          cldsa                  ! Fraction of clouds for low, middle, high, total and BL 
-
-
     
     ! Local variables
     integer i,id,iCol,iLay,icld
@@ -85,7 +84,7 @@ contains
     real(kind_phys),dimension(nCol) :: rlat
     real(kind_phys),dimension(nCol,nLev) :: cldcnv
 	
-    if (.not. (Model%lsswr .or. Model%lslwr)) return
+    if (.not. (lsswr .or. lslwr)) return
     
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -119,11 +118,21 @@ contains
   ! ######################################################################################
   ! Initialization routine for High/Mid/Low cloud diagnostics. 
   ! ######################################################################################
-  subroutine hml_cloud_diagnostics_initialize(Model, nLev, mpi_rank, sigmainit, errflg)
+  subroutine hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,        &
+          imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
+          imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, nLev,        &
+          mpi_rank, sigmainit, errflg)
     implicit none
     ! Inputs
-    type(GFS_control_type), intent(in) :: &
-         Model          ! DDT: FV3-GFS model control parameters  
+    integer, intent(in) :: &
+          imp_physics,               & ! Flag for MP scheme
+          imp_physics_fer_hires,     & ! Flag for fer-hires scheme
+          imp_physics_gfdl,          & ! Flag for gfdl scheme
+          imp_physics_thompson,      & ! Flag for thompsonscheme
+          imp_physics_wsm6,          & ! Flag for wsm6 scheme
+          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
+          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
+          imp_physics_mg               ! Flag for MG scheme
     integer, intent(in) :: &
          nLev,        & ! Number of vertical-layers
          mpi_rank 
@@ -150,23 +159,23 @@ contains
     else
        if (mpi_rank == 0) then
           print *,' - Using Prognostic Cloud Method'
-          if (Model%imp_physics == Model%imp_physics_zhao_carr) then
+          if (imp_physics == imp_physics_zhao_carr) then
              print *,'   --- Zhao/Carr/Sundqvist microphysics'
-          elseif (Model%imp_physics == Model%imp_physics_zhao_carr_pdf) then
+          elseif (imp_physics == imp_physics_zhao_carr_pdf) then
              print *,'   --- zhao/carr/sundqvist + pdf cloud'
-          elseif (Model%imp_physics == Model%imp_physics_gfdl) then
+          elseif (imp_physics == imp_physics_gfdl) then
              print *,'   --- GFDL Lin cloud microphysics'
-          elseif (Model%imp_physics == Model%imp_physics_thompson) then
+          elseif (imp_physics == imp_physics_thompson) then
              print *,'   --- Thompson cloud microphysics'
-          elseif (Model%imp_physics == Model%imp_physics_wsm6) then
+          elseif (imp_physics == imp_physics_wsm6) then
              print *,'   --- WSM6 cloud microphysics'
-          elseif (Model%imp_physics == Model%imp_physics_mg) then
+          elseif (imp_physics == imp_physics_mg) then
              print *,'   --- MG cloud microphysics'
-          elseif (Model%imp_physics == Model%imp_physics_fer_hires) then
+          elseif (imp_physics == imp_physics_fer_hires) then
              print *,'   --- Ferrier-Aligo cloud microphysics'
           else
              print *,'  !!! ERROR in cloud microphysc specification!!!', &
-                  '  imp_physics (NP3D) =',Model%imp_physics
+                  '  imp_physics (NP3D) =',imp_physics
              errflg = 1
           endif
        endif

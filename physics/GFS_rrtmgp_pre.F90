@@ -145,7 +145,7 @@ contains
 !!
   subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr, &
        fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array,      &
-       pcon_eps, pcon_epsm1, pcon_fvirt, acon_qMin,                                      &
+       con_eps, con_epsm1, con_fvirt, qs_Min,                                            &
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,            &
        gas_concentrations,  errmsg, errflg)
     
@@ -165,10 +165,10 @@ contains
          fhswr,             & ! Frequency of SW radiation call.
          fhlwr                ! Frequency of LW radiation call.
     real(kind_phys), intent(in) :: &
-         pcon_eps,          & ! Physical constant: Epsilon (Rd/Rv)
-         pcon_epsm1,        & ! Physical constant: Epsilon (Rd/Rv) minus one
-         pcon_fvirt,        & ! Physical constant: Inverse of epsilon minus one
-         acon_qMin            ! Algorithmic constant: Lower limit for saturation vapor pressure
+         con_eps,           & ! Physical constant: Epsilon (Rd/Rv)
+         con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
+         con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
+         qs_Min               ! Algorithmic constant: Lower limit for saturation vapor pressure
          
     real(kind_phys), dimension(nCol), intent(in) :: & 
     	 xlon,              & ! Longitude
@@ -266,10 +266,10 @@ contains
     do iCol=1,NCOL
        do iLay=1,nLev
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
-          qs                = max( acon_qMin, pcon_eps * es / (p_lay(iCol,iLay) + pcon_epsm1*es) )
-          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(acon_qMin, q_lay(iCol,iLay))/qs ) )
+          qs                = max( qs_Min, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
+          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(qs_Min, q_lay(iCol,iLay))/qs ) )
           qs_lay(iCol,iLay) = qs
-          tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + pcon_fvirt*q_lay(iCol,iLay)) 
+          tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + con_fvirt*q_lay(iCol,iLay)) 
        enddo
     enddo
 
@@ -285,7 +285,7 @@ contains
     if (i_o3 > 0) then 
        do iLay=1,nlev
           do iCol=1,NCOL
-             o3_lay(iCol,iLay) = max( acon_qMin, tracer(iCol,iLay,i_o3) )
+             o3_lay(iCol,iLay) = max( qs_Min, tracer(iCol,iLay,i_o3) )
           enddo
        enddo
     ! OR Use climatological ozone data

@@ -204,35 +204,8 @@
   kind = len=*
   intent = in
   optional = F
-[pcon_eps]
-  standard_name = physical_constant_epsilon
-  long_name     = gas constant for air divided by gas constant for h2o
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F    
-[pcon_epsm1]
-  standard_name = physical_constant_epsilon_minus_one
-  long_name     = gas constant for air divided by gas constant for h2o minus one
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys  
-  intent = in
-  optional = F
-[pcon_fvirt]  
-  standard_name = physical_constant_inverse_of_epsilon
-  long_name     = gas constant for h2o divided by gas constant fir air minus one
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[acon_qMin]
-  standard_name = algorithmic_constant_lower_limit_for_saturation_vapor_pressure
+[qs_Min]
+  standard_name = lower_limit_for_saturation_vapor_pressure
   long_name     = lower limit allowed when computing saturation vapor pressure  
   units = none
   dimensions = ()
@@ -240,6 +213,33 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_epsm1]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
+  long_name = (rd/rv) - 1
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F    
 [raddt]
   standard_name = time_step_for_radiation
   long_name = radiation time step
