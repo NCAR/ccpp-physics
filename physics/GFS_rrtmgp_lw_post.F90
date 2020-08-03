@@ -20,14 +20,14 @@ contains
 
  ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_lw_post_run
-  ! #########################################################################################
+  ! ########################################################################################
 !> \section arg_table_GFS_rrtmgp_lw_post_run
 !! \htmlinclude GFS_rrtmgp_lw_post.html
 !!
-  subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr,  do_lw_clrsky_hr, save_diag, fhlwr, &
-       p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky,&
-       raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw,                             &
-       sfcdlw, sfcflw, tsflw, htrlw, topflw, flxprf_lw, htrlwc, errmsg, errflg)
+  subroutine GFS_rrtmgp_lw_post_run (nCol, nLev, lslwr, do_lw_clrsky_hr, save_diag, fhlwr, &
+       p_lev, t_lay, tsfa, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,            &
+       fluxlwDOWN_clrsky, raddt, aerodp, cldsa, mtopa, mbota, cld_frac, cldtaulw, sfcdlw,  &
+       sfcflw, tsflw, htrlw, topflw, flxprf_lw, htrlwc, errmsg, errflg)
 
     ! Inputs                    
     integer, intent(in) :: &

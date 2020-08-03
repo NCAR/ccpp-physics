@@ -145,7 +145,7 @@ contains
 !!
   subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr, &
        fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array,      &
-       con_eps, con_epsm1, con_fvirt, qs_Min,                                            &
+       con_eps, con_epsm1, con_fvirt, con_epsqs,                                         &
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,            &
        gas_concentrations,  errmsg, errflg)
     
@@ -168,8 +168,7 @@ contains
          con_eps,           & ! Physical constant: Epsilon (Rd/Rv)
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
-         qs_Min               ! Algorithmic constant: Lower limit for saturation vapor pressure
-         
+         con_epsqs            ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
     real(kind_phys), dimension(nCol), intent(in) :: & 
     	 xlon,              & ! Longitude
     	 xlat,              & ! Latitude
@@ -211,7 +210,7 @@ contains
     logical :: top_at_1
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, qs, tem1, tem2
-    real(kind_phys), dimension(nCol,nLev) :: o3_lay, qs_lay, q_lay
+    real(kind_phys), dimension(nCol,nLev) :: o3_lay, q_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
 
     ! Initialize CCPP error handling variables
@@ -266,9 +265,8 @@ contains
     do iCol=1,NCOL
        do iLay=1,nLev
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
-          qs                = max( qs_Min, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
-          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(qs_Min, q_lay(iCol,iLay))/qs ) )
-          qs_lay(iCol,iLay) = qs
+          qs                = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
+          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs ) )
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + con_fvirt*q_lay(iCol,iLay)) 
        enddo
     enddo
@@ -285,7 +283,7 @@ contains
     if (i_o3 > 0) then 
        do iLay=1,nlev
           do iCol=1,NCOL
-             o3_lay(iCol,iLay) = max( qs_Min, tracer(iCol,iLay,i_o3) )
+             o3_lay(iCol,iLay) = max( con_epsqs, tracer(iCol,iLay,i_o3) )
           enddo
        enddo
     ! OR Use climatological ozone data

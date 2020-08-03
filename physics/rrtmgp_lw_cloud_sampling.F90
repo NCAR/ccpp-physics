@@ -97,7 +97,7 @@ contains
 
     ! 
     if (iovrlw .ne. 1 .and. iovrlw .ne. 3 .and. iovrlw .ne. 4 .and. iovrlw .ne. 5) then
-       errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
+       errmsg = 'Cloud overlap assumption not supported.'
        errflg = 1
        call check_error_msg('rrtmgp_lw_cloud_sampling',errmsg)
        return
@@ -135,7 +135,7 @@ contains
     ! Cloud-overlap.
     select case ( iovrlw )
     case(1) ! Maximum-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run', &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',        &
             sampled_mask_max_ran(rng3D,                            &
                                  cld_frac,                         &
                                  cldfracMCICA))       
@@ -146,20 +146,20 @@ contains
           call random_number(rng1D,rng_stat)
           rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
        enddo
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',   &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
             sampled_mask_exp_dcorr(rng3D,                            &
                                    rng3D2,                           &
                                    cld_frac,                         &
                                    cloud_overlap_param(:,1:nLev-1),  &
                                    cldfracMCICA))
     case(4) ! Exponential overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',   &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
             sampled_mask_exp_ran(rng3D,                              &
                                  cld_frac,                           &
                                  cloud_overlap_param(:,1:nLev-1),    &
                                  cldfracMCICA))
     case(5) ! Exponential-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',   &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
             sampled_mask_exp_ran(rng3D,                              &
                                  cld_frac,                           &
                                  cloud_overlap_param(:,1:nLev-1),    &
@@ -167,7 +167,7 @@ contains
     end select
     
     ! Sampling. Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',      &
+    call check_error_msg('rrtmgp_lw_cloud_sampling_run',             &
          draw_samples(cldfracMCICA,                                  &
                       lw_optical_props_cloudsByBand,                 &
                       lw_optical_props_clouds))
@@ -203,7 +203,7 @@ contains
     ! Precipitation overlap.
     select case ( iovrlw )
     case(1) ! Maximum-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',   &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
             sampled_mask_max_ran(rng3D,                              &
                                  precip_frac,                        &
                                  precipfracSAMP))       
@@ -215,20 +215,20 @@ contains
        !   call random_number(rng1D,rng_stat)
        !   rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
        !enddo
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',   &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
             sampled_mask_exp_dcorr(rng3D,                            &
                                    rng3D2,                           &
                                    precip_frac,                      &
                                    precip_overlap_param(:,1:nLev-1), &
                                    precipfracSAMP))
     case(4) ! Exponential overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',   &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
             sampled_mask_exp_ran(rng3D,                              &
                                  precip_frac,                        &
                                  precip_overlap_param(:,1:nLev-1),   &
                                  precipfracSAMP))
     case(5) ! Exponential-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',   &
+       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
             sampled_mask_exp_ran(rng3D,                              &
                                  precip_frac,                        &
                                  precip_overlap_param(:,1:nLev-1),   &
@@ -236,13 +236,13 @@ contains
     end select
     
     ! Sampling. Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',      &
+    call check_error_msg('rrtmgp_lw_cloud_sampling_run',             &
          draw_samples(precipfracSAMP,                                &
                       lw_optical_props_precipByBand,                 &
                       lw_optical_props_precip))
          
     ! ####################################################################################
-    ! For GFDL MP just add precipitation optics to cloud-optics
+    ! Just add precipitation optics to cloud-optics
     ! ####################################################################################
     lw_optical_props_clouds%tau = lw_optical_props_clouds%tau + lw_optical_props_precip%tau
 

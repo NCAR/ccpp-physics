@@ -204,15 +204,6 @@
   kind = len=*
   intent = in
   optional = F
-[qs_Min]
-  standard_name = lower_limit_for_saturation_vapor_pressure
-  long_name     = lower limit allowed when computing saturation vapor pressure  
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [con_eps]
   standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
   long_name = rd/rv
@@ -240,6 +231,15 @@
   kind = kind_phys  
   intent = in
   optional = F    
+[con_epsqs]
+  standard_name = minimum_value_of_saturation_mixing_ratio
+  long_name = floor value for saturation mixing ratio
+  units = kg kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F     
 [raddt]
   standard_name = time_step_for_radiation
   long_name = radiation time step

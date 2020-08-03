@@ -9,10 +9,13 @@ module GFS_rrtmgp_gfdlmp_pre
   
   ! Parameters
   real(kind_phys), parameter :: &
-       reice_min = 10.0,     & ! Minimum ice size allowed by scheme
-       reice_max = 150.0,    & ! Maximum ice size allowed by scheme
-       cllimit   = 0.001,    & ! Lowest cloud fraction in GFDL MP scheme
-       decorr_con = 2.50       ! Decorrelation length constant (km) for iovrlw/iovrsw = 4 or 5 and idcor = 0
+       reliq_def  = 10.0 ,      & ! Default liq radius to 10 micron (used when effr_in=F)
+       reice_def  = 50.0,       & ! Default ice radius to 50 micron (used when effr_in=F)
+       rerain_def = 1000.0,     & ! Default rain radius to 1000 micron (used when effr_in=F)
+       resnow_def = 250.0,      & ! Default snow radius to 250 micron (used when effr_in=F)    
+       reice_min  = 10.0,       & ! Minimum ice size allowed by scheme
+       reice_max  = 150.0,      & ! Maximum ice size allowed by scheme
+       cllimit    = 0.001         ! Lowest cloud fraction in GFDL MP scheme
          
    public GFS_rrtmgp_gfdlmp_pre_init, GFS_rrtmgp_gfdlmp_pre_run, GFS_rrtmgp_gfdlmp_pre_finalize
    private get_alpha_dcorr, get_alpha_exp
@@ -128,14 +131,7 @@ contains
        call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
        return
     endif
-    !
-    if(.not. effr_in) then
-       errmsg = 'Namelist option effr_in=F is not supported.'
-       errflg = 1
-       call check_error_msg('GFS_rrtmgp_gfdlmp_pre_run',errmsg)
-       return
-    endif    
-    
+
     ! Initialize outputs
     cld_lwp(:,:)    = 0.0
     cld_reliq(:,:)  = 0.0
@@ -187,10 +183,17 @@ contains
              cld_swp(iCol,iLay)  = cld_condensate(iCol,iLay,4) * tem1  
           endif
           ! Use radii provided from the macrophysics        
-          cld_reliq(iCol,iLay)  = effrin_cldliq(iCol,iLay)
-          cld_reice(iCol,iLay)  = max(reice_min, min(reice_max,effrin_cldice(iCol,iLay)))
-          cld_rerain(iCol,iLay) = effrin_cldrain(iCol,iLay)
-          cld_resnow(iCol,iLay) = effrin_cldsnow(iCol,iLay)
+		  if (effr_in) then
+             cld_reliq(iCol,iLay)  = effrin_cldliq(iCol,iLay)
+             cld_reice(iCol,iLay)  = max(reice_min, min(reice_max,effrin_cldice(iCol,iLay)))
+             cld_rerain(iCol,iLay) = effrin_cldrain(iCol,iLay)
+             cld_resnow(iCol,iLay) = effrin_cldsnow(iCol,iLay)
+          else
+             cld_reliq(iCol,iLay)  = reliq_def
+             cld_reice(iCol,iLay)  = reice_def
+             cld_rerain(iCol,iLay) = rerain_def
+             cld_resnow(iCol,iLay) = resnow_def
+          endif
        enddo
     enddo
     
@@ -358,6 +361,7 @@ contains
 !  ====================    end of description    =====================  !
 !
       use physparam,        only: idcor
+      use physcons,         only: decorr_con
       implicit none
 ! Input
       integer, intent(in)              :: nlon, nlay

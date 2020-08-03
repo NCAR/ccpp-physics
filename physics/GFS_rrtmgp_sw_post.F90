@@ -24,12 +24,12 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_post_run
 !! \htmlinclude GFS_rrtmgp_sw_post_run.html
 !!
-  subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,       &
-       save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir,                     &
-       sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sw_gas_props, fluxswUP_allsky, &
-       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota,   &
-       mtopa, cld_frac, cldtausw,                                                            &
-       nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw,       &
+  subroutine GFS_rrtmgp_sw_post_run (nCol, nLev, nDay, idxday, lsswr, do_sw_clrsky_hr,      &
+       save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
+       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sw_gas_props, fluxswUP_allsky,                 &
+       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota,  &
+       mtopa, cld_frac, cldtausw,                                                           &
+       nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw,      &
        sfcdsw, htrsw, sfcfsw, topfsw, htrswc, flxprf_sw, scmpsw, errmsg, errflg)
 
     ! Inputs      

@@ -101,7 +101,7 @@ contains
     
     ! Only works w/ SDFs v15p2 and v16beta
     if (iovrsw .ne. 1 .and. iovrsw .ne. 3 .and. iovrsw .ne. 4 .and. iovrsw .ne. 5) then
-       errmsg = 'Cloud overlap assumption not supported by GFDL microphysics suite.'
+       errmsg = 'Cloud overlap assumption not supported.'
        errflg = 1
        call check_error_msg('rrtmgp_sw_cloud_sampling',errmsg)
        return
@@ -245,7 +245,7 @@ contains
     endif
          
     ! ####################################################################################        
-    ! For GFDL MP just add precipitation optics to cloud-optics
+    ! Just add precipitation optics to cloud-optics
     ! ####################################################################################        
     do iGpt=1,sw_gas_props%get_ngpt()
        do iday=1,nDay
