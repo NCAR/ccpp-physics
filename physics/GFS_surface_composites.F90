@@ -144,18 +144,18 @@ contains
         enddo
       endif
 
-      if (.not. cplflx .or. .not. frac_grid) then
-        if (cplwav2atm) then
-          do i=1,im
-            zorll(i) = zorl(i)
-          enddo
-        else
-          do i=1,im
-            zorll(i) = zorl(i)
-            zorlo(i) = zorl(i)
-          enddo
-        endif
-      endif
+!     if (.not. cplflx .or. .not. frac_grid) then
+!       if (cplwav2atm) then
+!         do i=1,im
+!           zorll(i) = zorl(i)
+!         enddo
+!       else
+!         do i=1,im
+!           zorll(i) = zorl(i)
+!           zorlo(i) = zorl(i)
+!         enddo
+!       endif
+!     endif
 
       do i=1,im
         tprcp_wat(i) = tprcp(i)
@@ -546,6 +546,7 @@ contains
             qss(i)    = qss_ice(i)
             if (.not. flag_cice(i)) then
               tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
+              zorl(i)  = cice(i) * zorl_ice(i)   + (one - cice(i)) * zorl_wat(i)
             elseif (wet(i)) then
               if (cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
                 txi = cice(i)

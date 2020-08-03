@@ -109,7 +109,12 @@
             TSFFCS(len)          = Sfcprop(nb)%tsfc   (ix)
           endif
           SNOFCS  (len)          = Sfcprop(nb)%weasd  (ix)
-          ZORFCS  (len)          = Sfcprop(nb)%zorl   (ix)
+          ZORFCS  (len)          = Sfcprop(nb)%zorll  (ix)
+          if (SLIFCS(len) > 1.9_kind_phys .and. .not. Model%frac_grid) then
+            ZORFCS  (len)        = Sfcprop(nb)%zorli  (ix)
+          elseif (SLIFCS(len) < 0.1_kind_phys .and. .not. Model%frac_grid) then
+            ZORFCS  (len)        = Sfcprop(nb)%zorlo  (ix)
+          endif
           TG3FCS  (len)          = Sfcprop(nb)%tg3    (ix)
           CNPFCS  (len)          = Sfcprop(nb)%canopy (ix)
 !         F10MFCS (len)          = Sfcprop(nb)%f10m   (ix)
@@ -217,7 +222,12 @@
              Sfcprop(nb)%tsfco(ix) = TSFFCS  (len)
           endif
           Sfcprop(nb)%weasd  (ix) = SNOFCS  (len)
-          Sfcprop(nb)%zorl   (ix) = ZORFCS  (len)
+          Sfcprop(nb)%zorll  (ix) = ZORFCS  (len)
+          if (SLIFCS(len) > 1.9_kind_phys .and. .not. Model%frac_grid) then
+            Sfcprop(nb)%zorli(ix) = ZORFCS  (len)
+          elseif (SLIFCS(len) < 0.1_kind_phys .and. .not. Model%frac_grid) then
+            Sfcprop(nb)%zorlo(ix) = ZORFCS  (len)
+          endif
           Sfcprop(nb)%tg3    (ix) = TG3FCS  (len)
           Sfcprop(nb)%canopy (ix) = CNPFCS  (len)
 !         Sfcprop(nb)%f10m   (ix) = F10MFCS (len)
