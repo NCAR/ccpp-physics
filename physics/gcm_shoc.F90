@@ -10,7 +10,7 @@ module shoc
   private
 
   public shoc_run, shoc_init, shoc_finalize
-  integer, parameter :: r8 = kind_phys
+  integer, parameter :: kp = kind_phys
 
 contains
 
@@ -45,7 +45,7 @@ subroutine shoc_run (nx, nzm, tcr, tcrf, con_cp, con_g, con_hvap, con_hfus, con_
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
-   real(kind=kind_phys), parameter :: epsq = 1.0e-20_r8, zero=0.0_r8, one=1.0_r8
+   real(kind=kind_phys), parameter :: epsq = 1.0e-20_kp, zero=0.0_kp, one=1.0_kp
 
    integer :: i, k
 
@@ -219,34 +219,34 @@ end subroutine shoc_run
   real, intent(in)    :: prnum  (nx,nzm)   ! turbulent Prandtl number
   real, intent(inout) :: wthv_sec (ix,nzm) ! Buoyancy flux, K*m/s
 
-  real, parameter :: zero=0.0_r8,  one=1.0_r8,  half=0.5_r8, two=2.0_r8, eps=0.622_r8,    &
-                     three=3.0_r8, oneb3=one/three, twoby3=two/three, fourb3=twoby3+twoby3
-  real, parameter :: sqrt2 = sqrt(two), twoby15 = two / 15.0_r8,                          &
-                     nmin = 1.0_r8,    RI_cub = 6.4e-14_r8, RL_cub = 1.0e-15_r8,          &
-                     skew_facw=1.2_r8, skew_fact=0.0_r8,                                  &
-                     tkhmax=300.0_r8,  qcmin=1.0e-9_r8
+  real, parameter :: zero=0.0_kp,  one=1.0_kp,  half=0.5_kp, two=2.0_kp, eps=0.622_kp,    &
+                     three=3.0_kp, oneb3=one/three, twoby3=two/three, fourb3=twoby3+twoby3
+  real, parameter :: sqrt2 = sqrt(two), twoby15 = two / 15.0_kp,                          &
+                     nmin = 1.0_kp,    RI_cub = 6.4e-14_kp, RL_cub = 1.0e-15_kp,          &
+                     skew_facw=1.2_kp, skew_fact=0.0_kp,                                  &
+                     tkhmax=300.0_kp,  qcmin=1.0e-9_kp
   real            :: lsub, fac_cond, fac_fus, cpolv, fac_sub, ggri, kapa, gocp,           &
                      rog, sqrtpii, epsterm, onebeps, onebrvcp
 
 ! SHOC tunable parameters
 
-  real, parameter :: lambda  = 0.04_r8
-! real, parameter :: min_tke = 1.0e-6_r8  ! Minumum TKE value, m**2/s**2
-  real, parameter :: min_tke = 1.0e-4_r8  ! Minumum TKE value, m**2/s**2
-! real, parameter :: max_tke = 100.0_r8 ! Maximum TKE value, m**2/s**2
-  real, parameter :: max_tke = 40.0_r8  ! Maximum TKE value, m**2/s**2
+  real, parameter :: lambda  = 0.04_kp
+! real, parameter :: min_tke = 1.0e-6_kp  ! Minumum TKE value, m**2/s**2
+  real, parameter :: min_tke = 1.0e-4_kp  ! Minumum TKE value, m**2/s**2
+! real, parameter :: max_tke = 100.0_kp ! Maximum TKE value, m**2/s**2
+  real, parameter :: max_tke = 40.0_kp  ! Maximum TKE value, m**2/s**2
 ! Maximum turbulent eddy length scale, m
-! real, parameter :: max_eddy_length_scale  = 2000.0_r8
-  real, parameter :: max_eddy_length_scale  = 1000.0_r8
+! real, parameter :: max_eddy_length_scale  = 2000.0_kp
+  real, parameter :: max_eddy_length_scale  = 1000.0_kp
 ! Maximum "return-to-isotropy" time scale, s
-  real, parameter :: max_eddy_dissipation_time_scale = 2000.0_r8
-  real, parameter :: Pr    = 1.0_r8           ! Prandtl number
+  real, parameter :: max_eddy_dissipation_time_scale = 2000.0_kp
+  real, parameter :: Pr    = 1.0_kp           ! Prandtl number
 
 ! Constants for the TKE dissipation term based on Deardorff (1980)
-  real, parameter :: pt19=0.19_r8,  pt51=0.51_r8, pt01=0.01_r8, atmin=0.01_r8, atmax=one-atmin
-  real, parameter :: Cs  = 0.15_r8, epsln=1.0e-6_r8
-! real, parameter :: Ck  = 0.2_r8     ! Coeff in the eddy diffusivity - TKE relationship, see Eq. 7 in BK13
-  real, parameter :: Ck  = 0.1_r8     ! Coeff in the eddy diffusivity - TKE relationship, see Eq. 7 in BK13 
+  real, parameter :: pt19=0.19_kp,  pt51=0.51_kp, pt01=0.01_kp, atmin=0.01_kp, atmax=one-atmin
+  real, parameter :: Cs  = 0.15_kp, epsln=1.0e-6_kp
+! real, parameter :: Ck  = 0.2_kp     ! Coeff in the eddy diffusivity - TKE relationship, see Eq. 7 in BK13
+  real, parameter :: Ck  = 0.1_kp     ! Coeff in the eddy diffusivity - TKE relationship, see Eq. 7 in BK13 
 
 ! real, parameter :: Ce  = Ck**3/(0.7*Cs**4)
 ! real, parameter :: Ce  = Ck**3/(0.7*Cs**4) * 2.2
@@ -260,28 +260,28 @@ end subroutine shoc_run
 ! real, parameter :: Ce  = Ck**3/Cs**4, Ces = Ce*3.0/0.7
 
 ! real, parameter :: vonk=0.35                ! Von Karman constant
-  real, parameter :: vonk=0.4_r8              ! Von Karman constant Moorthi - as in GFS
-  real, parameter :: tscale=400.0_r8          ! time scale set based off of similarity results of BK13, s
-  real, parameter :: w_tol_sqd = 4.0e-04_r8   ! Min vlaue of second moment of w
-! real, parameter :: w_tol_sqd = 1.0e-04_r8   ! Min vlaue of second moment of w
-  real, parameter :: w_thresh  = 0.0_r8, thresh = 0.0_r8
-  real, parameter :: w3_tol    = 1.0e-20_r8   ! Min vlaue of third moment of w
+  real, parameter :: vonk=0.4_kp              ! Von Karman constant Moorthi - as in GFS
+  real, parameter :: tscale=400.0_kp          ! time scale set based off of similarity results of BK13, s
+  real, parameter :: w_tol_sqd = 4.0e-04_kp   ! Min vlaue of second moment of w
+! real, parameter :: w_tol_sqd = 1.0e-04_kp   ! Min vlaue of second moment of w
+  real, parameter :: w_thresh  = 0.0_kp, thresh = 0.0_kp
+  real, parameter :: w3_tol    = 1.0e-20_kp   ! Min vlaue of third moment of w
 
 
 ! These parameters are a tie-in with a microphysical scheme
 ! Double check their values for the Zhao-Carr scheme.
-  real, parameter :: tbgmin = 233.16_r8    ! Minimum temperature for cloud water., K (ZC)
-! real, parameter :: tbgmin = 258.16_r8    ! Minimum temperature for cloud water., K (ZC)
-! real, parameter :: tbgmin = 253.16_r8    ! Minimum temperature for cloud water., K
-  real, parameter :: tbgmax = 273.16_r8    ! Maximum temperature for cloud ice, K
+  real, parameter :: tbgmin = 233.16_kp    ! Minimum temperature for cloud water., K (ZC)
+! real, parameter :: tbgmin = 258.16_kp    ! Minimum temperature for cloud water., K (ZC)
+! real, parameter :: tbgmin = 253.16_kp    ! Minimum temperature for cloud water., K
+  real, parameter :: tbgmax = 273.16_kp    ! Maximum temperature for cloud ice, K
   real, parameter :: a_bg   = one/(tbgmax-tbgmin)
 !
 ! Parameters to tune the second order moments-  No tuning is performed currently
 
-! real, parameter :: thl2tune = 2.0_r8,   qw2tune = 2.0_r8,  qwthl2tune = 2.0_r8, &
-  real, parameter :: thl2tune = 1.0_r8,   qw2tune = 1.0_r8,  qwthl2tune = 1.0_r8, &
-!                    thl_tol  = 1.0e-4_r8, rt_tol = 1.0e-8_r8, basetemp  = 300.0_r8
-                     thl_tol  = 1.0e-2_r8, rt_tol = 1.0e-4_r8
+! real, parameter :: thl2tune = 2.0_kp,   qw2tune = 2.0_kp,  qwthl2tune = 2.0_kp, &
+  real, parameter :: thl2tune = 1.0_kp,   qw2tune = 1.0_kp,  qwthl2tune = 1.0_kp, &
+!                    thl_tol  = 1.0e-4_kp, rt_tol = 1.0e-8_kp, basetemp  = 300.0_kp
+                     thl_tol  = 1.0e-2_kp, rt_tol = 1.0e-4_kp
 
   integer, parameter :: nitr=6
 
@@ -453,7 +453,7 @@ end subroutine shoc_run
 !
       total_water(i,k) = qcl(i,k) + qci(i,k) + qv(i,k)
 
-      prespot      = (100000.0_r8*wrk) ** kapa ! Exner function
+      prespot      = (100000.0_kp*wrk) ** kapa ! Exner function
       bet(i,k)     = ggr/(tabs(i,k)*prespot)     ! Moorthi
       thv(i,k)     = thv(i,k)*prespot            ! Moorthi
 !
@@ -635,8 +635,8 @@ contains
 
       if (dis_opt > 0) then
         do i=1,nx
-          wrk = (zl(i,k)-zi(i,1)) / adzl(i,1) + 1.5_r8
-          cek(i) = (one + two / max((wrk*wrk - 3.3_r8), 0.5_r8)) * cefac
+          wrk = (zl(i,k)-zi(i,1)) / adzl(i,1) + 1.5_kp
+          cek(i) = (one + two / max((wrk*wrk - 3.3_kp), 0.5_kp)) * cefac
         enddo
       else
         if (k == 1) then
@@ -660,7 +660,7 @@ contains
 !Obtain Brunt-Vaisalla frequency from diagnosed SGS buoyancy flux
 !Presumably it is more precise than BV freq. calculated in  eddy_length()?
 
-        buoy_sgs = - (a_prod_bu+a_prod_bu) / (tkh(i,ku)+tkh(i,kd) + 0.0001_r8)   ! tkh is eddy thermal diffussivity
+        buoy_sgs = - (a_prod_bu+a_prod_bu) / (tkh(i,ku)+tkh(i,kd) + 0.0001_kp)   ! tkh is eddy thermal diffussivity
 
 
 !Compute $c_k$ (variable Cee) for the TKE dissipation term following Deardorff (1980)
@@ -668,7 +668,7 @@ contains
         if (buoy_sgs <= zero) then
           smix = grd
         else
-          smix = min(grd,max(0.1_r8*grd, 0.76_r8*sqrt(tke(i,k)/(buoy_sgs+1.0e-10_r8))))
+          smix = min(grd,max(0.1_kp*grd, 0.76_kp*sqrt(tke(i,k)/(buoy_sgs+1.0e-10_kp))))
         endif
 
         ratio     = smix/grd
@@ -810,9 +810,9 @@ contains
 ! Calculate the measure of PBL depth,  Eq. 11 in BK13 (Is this really PBL depth?)
     do i=1,nx
       if (denom(i) >  zero .and. numer(i) > zero) then
-        l_inf(i) = min(0.1_r8 * (numer(i)/denom(i)), 100.0_r8)
+        l_inf(i) = min(0.1_kp * (numer(i)/denom(i)), 100.0_kp)
       else
-        l_inf(i) = 100.0_r8
+        l_inf(i) = 100.0_kp
       endif
     enddo
 
@@ -848,7 +848,7 @@ contains
 
 ! Find the in-cloud Brunt-Vaisalla frequency
 
-           omn = qcl(i,k) / (wrk+1.0e-20_r8) ! Ratio of liquid water to total water
+           omn = qcl(i,k) / (wrk+1.0e-20_kp) ! Ratio of liquid water to total water
 
 ! Latent heat of phase transformation based on relative water phase content
 ! fac_cond = lcond/cp, fac_fus = lfus/cp
@@ -867,7 +867,7 @@ contains
 ! liquid/ice moist static energy static energy divided by cp?
 
            bbb = (one + epsv*qsatt-wrk-qpl(i,k)-qpi(i,k)                &
-               + 1.61_r8*tabs(i,k)*dqsat) / (one+lstarn*dqsat)
+               + 1.61_kp*tabs(i,k)*dqsat) / (one+lstarn*dqsat)
 
 ! Calculate Brunt-Vaisalla frequency using centered differences in the vertical
 
@@ -917,7 +917,7 @@ contains
             wrk1 = one / (tscale*tkes*vonk*zl(i,k))
             wrk2 = one / (tscale*tkes*l_inf(i))
             wrk1 = wrk1 + wrk2 + pt01 * brunt2(i,k) / tke(i,k)
-            wrk1 = sqrt(one / max(wrk1,1.0e-8_r8)) * (one/0.3_r8)
+            wrk1 = sqrt(one / max(wrk1,1.0e-8_kp)) * (one/0.3_kp)
 !           smixt(i,k) = min(max_eddy_length_scale, 2.8284*sqrt(wrk1)/0.3)
             smixt(i,k) = min(max_eddy_length_scale, wrk1)
 
@@ -988,7 +988,7 @@ contains
 ! The calculation below finds the integral in the Eq. 10 in BK13 for the current cloud
             conv_var = zero
             do kk=kl,ku
-              conv_var = conv_var+ 2.5_r8*adzi(i,kk)*bet(i,kk)*wthv_sec(i,kk)
+              conv_var = conv_var+ 2.5_kp*adzi(i,kk)*bet(i,kk)*wthv_sec(i,kk)
             enddo
             conv_var = conv_var ** oneb3
 
@@ -1005,7 +1005,7 @@ contains
                 wrk = conv_var/(depth*depth*sqrt(tke(i,kk)))  &
                     + pt01*brunt2(i,kk)/tke(i,kk)
 
-                smixt(i,kk) = min(max_eddy_length_scale, (one/0.3_r8)*sqrt(one/wrk))
+                smixt(i,kk) = min(max_eddy_length_scale, (one/0.3_kp)*sqrt(one/wrk))
 
               enddo
 
@@ -1052,7 +1052,7 @@ contains
 !**********************************************************************
 
         conv_vel2(i,k) = conv_vel2(i,k-1)                               &
-                       + 2.5_r8*adzi(i,k)*bet(i,k)*wthv_sec(i,k)
+                       + 2.5_kp*adzi(i,k)*bet(i,k)*wthv_sec(i,k)
       enddo
     enddo
 
@@ -1083,7 +1083,7 @@ contains
 
       do i=1,nx
 
-        wrk = 0.1_r8*adzl(i,k)
+        wrk = 0.1_kp*adzl(i,k)
                                                             ! Minimum 0.1 of local dz
         smixt(i,k) = max(wrk, min(max_eddy_length_scale,smixt(i,k)))
 
@@ -1091,7 +1091,7 @@ contains
 ! be not larger that that.
 !       if (sqrt(dx*dy) .le. 1000.) smixt(i,k)=min(sqrt(dx*dy),smixt(i,k))
 
-        if (qcl(i,kb) == zero .and. qcl(i,k) > zero .and. brunt(i,k) > 1.0e-4_r8) then
+        if (qcl(i,kb) == zero .and. qcl(i,k) > zero .and. brunt(i,k) > 1.0e-4_kp) then
 !If just above the cloud top and atmosphere is stable, set to  0.1 of local dz
           smixt(i,k) = wrk
         endif
@@ -1117,10 +1117,10 @@ contains
 !        cond,   wrk, wrk1,  wrk2, wrk3, avew
 !
 ! See Eq. 7 in C01 (B.7 in Pete's dissertation)
-    real, parameter :: c=7.0_r8,    a0=0.52_r8/(c*c*(c-2.0_r8)), a1=0.87_r8/(c*c),         &
-                       a2=0.5_r8/c, a3=0.6_r8/(c*(c-2.0_r8)), a4=2.4_r8/(3.0_r8*c+5.0_r8), &
-                       a5=0.6_r8/(c*(3.0_r8*c+5.0_r8))
-!Moorthi               a5=0.6_r8/(c*(3.0_r8+5.0_r8*c))
+    real, parameter :: c=7.0_kp,    a0=0.52_kp/(c*c*(c-2.0_kp)), a1=0.87_kp/(c*c),         &
+                       a2=0.5_kp/c, a3=0.6_kp/(c*(c-2.0_kp)), a4=2.4_kp/(3.0_kp*c+5.0_kp), &
+                       a5=0.6_kp/(c*(3.0_kp*c+5.0_kp))
+!Moorthi               a5=0.6_kp/(c*(3.0_kp+5.0_kp*c))
 
 !   do k=1,nzm
     do k=2,nzm
@@ -1210,7 +1210,7 @@ contains
 
         omega0 = a4 / (one-a5*buoy_sgs2)
         omega1 = omega0 / (c+c)
-        omega2 = omega1*f3+(5.0_r8/4.0_r8)*omega0*f4
+        omega2 = omega1*f3+(5.0_kp/4.0_kp)*omega0*f4
 
 ! Compute the X0, Y0, X1, Y1 terms,  see Eq. 5 a-b in C01  (B.5 in Pete's dissertation)
 
@@ -1233,7 +1233,7 @@ contains
 !<aab
 ! Move clipping of w3 to assumed_pdf()
 !       w3(i,k) = max(-cond_w, min(cond_w, (AA1-1.2*X1-1.5*f5)/(c-1.2*X0+AA0)))
-        w3(i,k) = (AA1-1.2_r8*X1-1.5_r8*f5)/(c-1.2_r8*X0+AA0)
+        w3(i,k) = (AA1-1.2_kp*X1-1.5_kp*f5)/(c-1.2_kp*X0+AA0)
 !>aab
 
 ! Implemetation of the C01 approach in this subroutine is nearly complete
@@ -1287,7 +1287,7 @@ contains
         diag_qi   = zero
 
         pval  = prsl(i,k)
-        pfac  = pval * 1.0e-5_r8
+        pfac  = pval * 1.0e-5_kp
         pkap  = pfac ** kapa
 
 ! Read in liquid/ice static energy, total water mixing ratio, 
@@ -1361,21 +1361,21 @@ contains
         ELSE
 !<aab
 ! Clip w3
-          cond_w = 1.2_r8*sqrt2*max(w3_tol, sqrtw2*sqrtw2*sqrtw2)
+          cond_w = 1.2_kp*sqrt2*max(w3_tol, sqrtw2*sqrtw2*sqrtw2)
           w3var  = max(-cond_w, min(cond_w, w3var))
 !>aab
 
           Skew_w = w3var / (sqrtw2*sqrtw2*sqrtw2)     ! Moorthi
 ! Proportionality coefficients between widths of each vertical velocity 
 ! gaussian and the sqrt of the second moment of w
-          w2_1 = 0.4_r8
-          w2_2 = 0.4_r8
+          w2_1 = 0.4_kp
+          w2_2 = 0.4_kp
 
 ! Compute realtive weight of the first PDF "plume" 
 ! See Eq A4 in Pete's dissertaion -  Ensure 0.01 < a < 0.99
 
           wrk   = one - w2_1
-          aterm = max(atmin,min(half*(one-Skew_w*sqrt(one/(4.0_r8*wrk*wrk*wrk+Skew_w*Skew_w))),atmax))
+          aterm = max(atmin,min(half*(one-Skew_w*sqrt(one/(4.0_kp*wrk*wrk*wrk+Skew_w*Skew_w))),atmax))
           onema = one - aterm
 
           sqrtw2t = sqrt(wrk)
@@ -1414,8 +1414,8 @@ contains
 !         wrk4   =     - aterm*wrk1*thl1_1 - onema*wrk2*thl1_2
           wrk    = three * (thl1_2-thl1_1)
           if (wrk /= zero) then
-            thl2_1 = thlsec * min(100.0_r8,max(zero,(thl1_2*wrk3-wrk4)/(aterm*wrk))) ! A.10
-            thl2_2 = thlsec * min(100.0_r8,max(zero,(-thl1_1*wrk3+wrk4)/(onema*wrk))) ! A.11
+            thl2_1 = thlsec * min(100.0_kp,max(zero,(thl1_2*wrk3-wrk4)/(aterm*wrk))) ! A.10
+            thl2_2 = thlsec * min(100.0_kp,max(zero,(-thl1_1*wrk3+wrk4)/(onema*wrk))) ! A.11
           else
             thl2_1 = zero
             thl2_2 = zero
@@ -1449,12 +1449,12 @@ contains
 
 !         Skew_qw = skew_facw*Skew_w
 
-          IF (tsign > 0.4_r8) THEN
+          IF (tsign > 0.4_kp) THEN
             Skew_qw = skew_facw*Skew_w
-          ELSEIF (tsign <= 0.2_r8) THEN
+          ELSEIF (tsign <= 0.2_kp) THEN
             Skew_qw = zero
           ELSE
-            Skew_qw = (skew_facw/0.2_r8) * Skew_w * (tsign-0.2_r8)
+            Skew_qw = (skew_facw/0.2_kp) * Skew_w * (tsign-0.2_kp)
           ENDIF
 
           wrk1  = qw1_1 * qw1_1
@@ -1464,8 +1464,8 @@ contains
           wrk   = three * (qw1_2-qw1_1)
 
           if (wrk /= zero) then
-            qw2_1 = qwsec * min(100.0_r8,max(zero,( qw1_2*wrk3-wrk4)/(aterm*wrk))) ! A.10
-            qw2_2 = qwsec * min(100.0_r8,max(zero,(-qw1_1*wrk3+wrk4)/(onema*wrk))) ! A.11
+            qw2_1 = qwsec * min(100.0_kp,max(zero,( qw1_2*wrk3-wrk4)/(aterm*wrk))) ! A.10
+            qw2_2 = qwsec * min(100.0_kp,max(zero,(-qw1_1*wrk3+wrk4)/(onema*wrk))) ! A.11
           else
             qw2_1 = zero
             qw2_2 = zero
@@ -1511,18 +1511,18 @@ contains
         IF (Tl1_1 >= tbgmax) THEN
           lstarn1  = lcond
           esval    = min(fpvsl(Tl1_1), pval)
-          qs1      = eps * esval / (pval-0.378_r8*esval)
+          qs1      = eps * esval / (pval-0.378_kp*esval)
         ELSE IF (Tl1_1 <= tbgmin) THEN
           lstarn1  = lsub
           esval    = min(fpvsi(Tl1_1), pval)
-          qs1      = epss * esval / (pval-0.378_r8*esval)
+          qs1      = epss * esval / (pval-0.378_kp*esval)
         ELSE
           om1      = max(zero, min(one, a_bg*(Tl1_1-tbgmin)))
           lstarn1  = lcond + (one-om1)*lfus
           esval    = min(fpvsl(Tl1_1), pval)
           esval2   = min(fpvsi(Tl1_1), pval)
-          qs1      =      om1  * eps  * esval  / (pval-0.378_r8*esval)      &
-                   + (one-om1) * epss * esval2 / (pval-0.378_r8*esval2)
+          qs1      =      om1  * eps  * esval  / (pval-0.378_kp*esval)      &
+                   + (one-om1) * epss * esval2 / (pval-0.378_kp*esval2)
         ENDIF
 
 !       beta1 = (rgas/rv)*(lstarn1/(rgas*Tl1_1))*(lstarn1/(cp*Tl1_1))
@@ -1541,18 +1541,18 @@ contains
           IF (Tl1_2 >= tbgmax) THEN
             lstarn2  = lcond
             esval    = min(fpvsl(Tl1_2), pval)
-            qs2      = eps * esval / (pval-0.378_r8*esval)
+            qs2      = eps * esval / (pval-0.378_kp*esval)
           ELSE IF (Tl1_2 <= tbgmin) THEN
             lstarn2  = lsub
             esval    = min(fpvsi(Tl1_2), pval)
-            qs2      = epss * esval / (pval-0.378_r8*esval)
+            qs2      = epss * esval / (pval-0.378_kp*esval)
           ELSE
             om2      = max(zero, min(one, a_bg*(Tl1_2-tbgmin)))
             lstarn2  = lcond + (one-om2)*lfus
             esval    = min(fpvsl(Tl1_2), pval)
             esval2   = min(fpvsi(Tl1_2), pval)
-            qs2      =      om2  * eps  * esval  / (pval-0.378_r8*esval)    &
-                     + (one-om2) * epss * esval2 / (pval-0.378_r8*esval2)
+            qs2      =      om2  * eps  * esval  / (pval-0.378_kp*esval)    &
+                     + (one-om2) * epss * esval2 / (pval-0.378_kp*esval2)
           ENDIF
 
 !         beta2 = (rgas/rv)*(lstarn2/(rgas*Tl1_2))*(lstarn2/(cp*Tl1_2))   ! A.18
@@ -1662,14 +1662,14 @@ contains
 ! Update ncpl and ncpi Moorthi  12/12/2018
         if (ntlnc > 0) then         ! liquid and ice number concentrations predicted
           if (ncpl(i,k) > nmin) then
-            ncpl(i,k) = diag_ql/max(qc(i,k),1.0e-10_r8)*ncpl(i,k)
+            ncpl(i,k) = diag_ql/max(qc(i,k),1.0e-10_kp)*ncpl(i,k)
           else
-            ncpl(i,k) = max(diag_ql/(fourb3*pi*RL_cub*997.0_r8), nmin)
+            ncpl(i,k) = max(diag_ql/(fourb3*pi*RL_cub*997.0_kp), nmin)
           endif
           if (ncpi(i,k) > nmin) then
-            ncpi(i,k) = diag_qi/max(qi(i,k),1.0e-10_r8)*ncpi(i,k)
+            ncpi(i,k) = diag_qi/max(qi(i,k),1.0e-10_kp)*ncpi(i,k)
           else
-            ncpi(i,k) = max(diag_qi/(fourb3*pi*RI_cub*500.0_r8), nmin)
+            ncpi(i,k) = max(diag_qi/(fourb3*pi*RI_cub*500.0_kp), nmin)
           endif
         endif
 

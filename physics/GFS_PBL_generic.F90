@@ -92,7 +92,7 @@
 
       implicit none
 
-      integer, parameter  :: r8 = kind_phys
+      integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc
       integer, intent(in) :: ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef,ntchs, ntchm
@@ -111,7 +111,7 @@
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      real (kind=kind_phys), parameter :: zero = 0.0_r8, one=1.0_r8
+      real (kind=kind_phys), parameter :: zero = 0.0_kp, one=1.0_kp
 
       ! Local variables
       integer :: i, k, kk, k1, n
@@ -325,7 +325,7 @@
 
       implicit none
 
-      integer, parameter  :: r8 = kind_phys
+      integer, parameter  :: kp = kind_phys
       integer, intent(in) :: im, levs, nvdiff, ntrac, ntchs, ntchm
       integer, intent(in) :: ntqv, ntcw, ntiw, ntrw, ntsw, ntlnc, ntinc, ntrnc, ntsnc, ntgnc, ntwa, ntia, ntgl, ntoz, ntke, ntkev, nqrimef
       logical, intent(in) :: trans_aero
@@ -375,9 +375,9 @@
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
 
-      real(kind=kind_phys), parameter :: zero  = 0.0_r8, one = 1.0_r8
+      real(kind=kind_phys), parameter :: zero  = 0.0_kp, one = 1.0_kp
       real(kind=kind_phys), parameter :: huge  = 9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
-      real(kind=kind_phys), parameter :: qmin  = 1.0e-8_r8
+      real(kind=kind_phys), parameter :: qmin  = 1.0e-8_kp
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, rho
 

@@ -71,7 +71,7 @@
 !
 !    locals
 !
-      integer, parameter :: r8 = kind_phys
+      integer, parameter :: kp = kind_phys
       integer i,is,k,kk,km1,kmpbl,kp1, ntloc
 !
       logical  pblflg(im), sfcflg(im), flg(im)
@@ -92,23 +92,23 @@
      &,                    ttend,  utend, vtend,  qtend
      &,                    spdk2,  rbint, ri,     zol1, robn, bvf2
 !
-      real(kind=kind_phys), parameter ::  one=1.0_r8, zero=0.0_r8
-     &,              zolcr=0.2_r8,
-     &               zolcru=-0.5_r8, rimin=-100.0_r8, sfcfrac=0.1_r8,
-     &               crbcon=0.25_r8, crbmin=0.15_r8,  crbmax=0.35_r8,
-     &               qmin=1.0e-8_r8, zfmin=1.0d-8,    qlmin=1.0e-12_r8,
-     &               aphi5=5.0_r8,   aphi16=16.0_r8,  f0=1.0e-4_r8
-     &,              dkmin=zero,     dkmax=1000.0_r8
+      real(kind=kind_phys), parameter ::  one=1.0_kp, zero=0.0_kp
+     &,              zolcr=0.2_kp,
+     &               zolcru=-0.5_kp, rimin=-100.0_kp, sfcfrac=0.1_kp,
+     &               crbcon=0.25_kp, crbmin=0.15_kp,  crbmax=0.35_kp,
+     &               qmin=1.0e-8_kp, zfmin=1.0d-8,    qlmin=1.0e-12_kp,
+     &               aphi5=5.0_kp,   aphi16=16.0_kp,  f0=1.0e-4_kp
+     &,              dkmin=zero,     dkmax=1000.0_kp
 !    &,              dkmin=zero,     dkmax=1000.,     xkzminv=0.3
-     &,              prmin=0.25_r8,  prmax=4.0_r8,    vk=0.4_r8,
-     &               cfac=6.5_r8
+     &,              prmin=0.25_kp,  prmax=4.0_kp,    vk=0.4_kp,
+     &               cfac=6.5_kp
       real(kind=kind_phys) :: gravi, cont, conq, gocp, go2
 
       gravi = one  / grav
       cont  = cp   * gravi
       conq  = hvap * gravi
       gocp  = grav / cp
-      go2   = grav * 0.5_r8
+      go2   = grav * 0.5_kp
 
 ! Initialize CCPP error handling variables
       errmsg = ''
@@ -155,7 +155,7 @@
           if (k <= kinver(i)) then
 !    vertical background diffusivity for heat and momentum
             tem1       = one - prsi(i,k+1) * tx1(i)
-            tem1       = min(one, exp(-tem1 * tem1 * 10.0_r8))
+            tem1       = min(one, exp(-tem1 * tem1 * 10.0_kp))
             xkzo(i,k)  = xkzm_h * tem1
             xkzmo(i,k) = xkzm_m * tem1
           endif
@@ -166,9 +166,9 @@
 !
       do k = 1,kmpbl
         do i=1,im
-          if(zi(i,k+1) > 250.0_r8) then
+          if(zi(i,k+1) > 250.0_kp) then
             tem1 = (t1(i,k+1)-t1(i,k)) * rdzt(i,k)
-            if(tem1 > 1.0e-5_r8) then
+            if(tem1 > 1.0e-5_kp) then
                xkzo(i,k)  = min(xkzo(i,k),xkzminv)
             endif
           endif
@@ -177,7 +177,7 @@
 !
 !
       do i = 1,im
-         z0(i)     = 0.01_r8 * zorl(i)
+         z0(i)     = 0.01_kp * zorl(i)
          kpbl(i)   = 1
          hpbl(i)   = zi(i,1)
          pblflg(i) = .true.
@@ -224,8 +224,8 @@
            thermal(i) = tsea(i)*(one+fv*max(q1(i,1,1),qmin))
            tem   = max(one, sqrt(u10m(i)*u10m(i) + v10m(i)*v10m(i)))
            robn   = tem / (f0 * z0(i))
-           tem1   = 1.0e-7_r8 * robn
-           crb(i) = max(min(0.16_r8 * (tem1 ** (-0.18_r8)), crbmax),
+           tem1   = 1.0e-7_kp * robn
+           crb(i) = max(min(0.16_kp * (tem1 ** (-0.18_kp)), crbmax),
      &                                                      crbmin)
          endif
       enddo
@@ -272,7 +272,7 @@
          if (sfcflg(i)) then
 !          phim(i) = (1.-aphi16*zol1)**(-1./4.)
 !          phih(i) = (1.-aphi16*zol1)**(-1./2.)
-           tem     = one / max(one - aphi16*zol1, 1.0e-8_r8)
+           tem     = one / max(one - aphi16*zol1, 1.0e-8_kp)
            phih(i) = sqrt(tem)
            phim(i) = sqrt(phih(i))
          else
@@ -351,7 +351,7 @@
             if(ri < zero) then ! unstable regime
               prnum(i,kp1) = one
             else
-              prnum(i,kp1) = min(one + 2.1_r8*ri, prmax)
+              prnum(i,kp1) = min(one + 2.1_kp*ri, prmax)
             endif
           elseif (k > 1) then
             prnum(i,kp1) = prnum(i,1)

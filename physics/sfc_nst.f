@@ -176,13 +176,13 @@
 !
       implicit none
 
-      integer, parameter :: r8 = kind_phys
+      integer, parameter :: kp = kind_phys
 !
 !  ---  constant parameters:
-      real (kind=kind_phys), parameter :: f24   = 24.0_r8     ! hours/day
-      real (kind=kind_phys), parameter :: f1440 = 1440.0_r8   ! minutes/day
-      real (kind=kind_phys), parameter :: czmin = 0.0001_r8   ! cos(89.994)
-      real (kind=kind_phys), parameter :: zero  = 0.0_r8, one = 1.0_r8
+      real (kind=kind_phys), parameter :: f24   = 24.0_kp     ! hours/day
+      real (kind=kind_phys), parameter :: f1440 = 1440.0_kp   ! minutes/day
+      real (kind=kind_phys), parameter :: czmin = 0.0001_kp   ! cos(89.994)
+      real (kind=kind_phys), parameter :: zero  = 0.0_kp, one = 1.0_kp
 
 
 !  ---  inputs:
@@ -256,7 +256,7 @@ cc
       hvapi = one/hvap
       elocp = hvap/cp
 
-      sss = 34.0_r8             ! temporarily, when sea surface salinity data is not ready
+      sss = 34.0_kp             ! temporarily, when sea surface salinity data is not ready
 !
 ! flag for open water and where the iteration is on
 !
@@ -297,7 +297,7 @@ cc
           nswsfc(i) = sfcnsw(i) ! net solar radiation at the air-sea surface (positive downward)
           wndmag(i) = sqrt(u1(i)*u1(i) + v1(i)*v1(i))
 
-          q0(i)     = max(q1(i), 1.0e-8_r8)
+          q0(i)     = max(q1(i), 1.0e-8_kp)
 #ifdef GSD_SURFACE_FLUXES_BUGFIX
           theta1(i) = t1(i) / prslk1(i) ! potential temperature at the middle of lowest model layer
 #else
@@ -337,8 +337,8 @@ cc
 
 ! run nst model: dtm + slm
 !
-      zsea1 = 0.001_r8*real(nstf_name4)
-      zsea2 = 0.001_r8*real(nstf_name5)
+      zsea1 = 0.001_kp*real(nstf_name4)
+      zsea2 = 0.001_kp*real(nstf_name5)
 
 !> - Call module_nst_water_prop::density() to compute sea water density.
 !> - Call module_nst_water_prop::rhocoef() to compute thermal expansion
@@ -350,20 +350,20 @@ cc
           ulwflx(i) = sfcemis(i) * sbc * t12 * t12
           alon      = xlon(i)*rad2deg
           grav      = grv(sinlat(i))
-          soltim  = mod(alon/15.0_r8 + solhr, 24.0_r8)*3600.0_r8
+          soltim  = mod(alon/15.0_kp + solhr, 24.0_kp)*3600.0_kp
           call density(tsea,sss,rho_w)                     ! sea water density
           call rhocoef(tsea,sss,rho_w,alpha,beta)          ! alpha & beta
 !
 !> - Calculate sensible heat flux (\a qrain) due to rainfall.
 !
-          le       = (2.501_r8-0.00237_r8*tsea)*1e6_r8
-          dwat     = 2.11e-5_r8*(t1(i)/t0k)**1.94_r8               ! water vapor diffusivity
-          dtmp     = (one+3.309e-3_r8*(t1(i)-t0k)-1.44e-6_r8*(t1(i)-t0k)
-     &             * (t1(i)-t0k))*0.02411_r8/(rho_a(i)*cp)         ! heat diffusivity
-          wetc     = 622.0_r8*le*qss(i)/(rd*t1(i)*t1(i))
+          le       = (2.501_kp-0.00237_kp*tsea)*1e6_kp
+          dwat     = 2.11e-5_kp*(t1(i)/t0k)**1.94_kp               ! water vapor diffusivity
+          dtmp     = (one+3.309e-3_kp*(t1(i)-t0k)-1.44e-6_kp*(t1(i)-t0k)
+     &             * (t1(i)-t0k))*0.02411_kp/(rho_a(i)*cp)         ! heat diffusivity
+          wetc     = 622.0_kp*le*qss(i)/(rd*t1(i)*t1(i))
           alfac    = one / (one + (wetc*le*dwat)/(cp*dtmp))        ! wet bulb factor
-          tem      = (1.0e3_r8 * rain(i) / rho_w) * alfac * cp_w
-          qrain(i) =  tem * (tsea-t1(i)+1.0e3_r8*(qss(i)-q0(i))*le/cp)
+          tem      = (1.0e3_kp * rain(i) / rho_w) * alfac * cp_w
+          qrain(i) =  tem * (tsea-t1(i)+1.0e3_kp*(qss(i)-q0(i))*le/cp)
 
 !> - Calculate input non solar heat flux as upward = positive to models here
 
@@ -379,7 +379,7 @@ cc
 !
 !  sensitivities of heat flux components to ts
 !
-          rnl_ts = 4.0_r8*sfcemis(i)*sbc*tsea*tsea*tsea     ! d(rnl)/d(ts)
+          rnl_ts = 4.0_kp*sfcemis(i)*sbc*tsea*tsea*tsea     ! d(rnl)/d(ts)
           hs_ts  = rch(i)
           hl_ts  = rch(i)*elocp*eps*hvap*qss(i)/(rd*t12)
           rf_ts  = tem * (one+rch(i)*hl_ts)
@@ -543,7 +543,7 @@ cc
 !
             endif             ! if ( xt(i) > 0.0 ) then
 !           reset dtl at midnight and when solar zenith angle > 89.994 degree
-            if ( abs(soltim) < 2.0_r8*timestep ) then
+            if ( abs(soltim) < 2.0_kp*timestep ) then
               call dtl_reset
      &           (xt(i),xs(i),xu(i),xv(i),xz(i),xzts(i),xtts(i))
             endif
@@ -556,7 +556,7 @@ cc
 !>  - Call get_dtzm_point() to computes \a dtz and \a tsurf.
           call get_dtzm_point(xt(i),xz(i),dt_cool(i),z_c(i),
      &                        zsea1,zsea2,dtz)
-          tsurf(i) = max(271.2_r8, tref(i) + dtz )
+          tsurf(i) = max(271.2_kp, tref(i) + dtz )
 
 !     if (lprnt .and. i == ipr) print *,' tsurf=',tsurf(i),' tref=',
 !    &tref(i),' xz=',xz(i),' dt_cool=',dt_cool(i)
@@ -683,7 +683,7 @@ cc
 
       implicit none
 
-      integer, parameter :: r8 = kind_phys
+      integer, parameter :: kp = kind_phys
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
@@ -702,10 +702,10 @@ cc
 
 !  ---  locals
       integer :: i
-      real(kind=kind_phys), parameter :: zero = 0.0_r8,
-     &                                   one  = 1.0_r8,
-     &                                   half = 0.5_r8,
-     &                                   omz1 = 2.0_r8
+      real(kind=kind_phys), parameter :: zero = 0.0_kp,
+     &                                   one  = 1.0_kp,
+     &                                   half = 0.5_kp,
+     &                                   omz1 = 2.0_kp
       real(kind=kind_phys) :: tem1, tem2, dnsst
       real(kind=kind_phys), dimension(im) :: dtzm
 
@@ -794,7 +794,7 @@ cc
 
       implicit none
 
-      integer, parameter :: r8 = kind_phys
+      integer, parameter :: kp = kind_phys
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
@@ -837,8 +837,8 @@ cc
 !  --- ...  run nsst model  ... ---
 
       if (nstf_name1 > 1) then
-        zsea1 = 0.001_r8*real(nstf_name4)
-        zsea2 = 0.001_r8*real(nstf_name5)
+        zsea1 = 0.001_kp*real(nstf_name4)
+        zsea2 = 0.001_kp*real(nstf_name5)
         call get_dtzm_2d (xt, xz, dt_cool, z_c, wet, zsea1, zsea2,      &
      &                    im, 1, nthreads, dtzm)
         do i = 1, im
