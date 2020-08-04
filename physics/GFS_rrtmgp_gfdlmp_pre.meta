@@ -364,7 +364,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = out
   optional = F    
 [errmsg]
   standard_name = ccpp_error_message

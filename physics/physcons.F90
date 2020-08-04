@@ -79,6 +79,7 @@
   real(kind=kind_phys),parameter:: con_jcal   =4.1855E+0_kind_phys                 !< joules per calorie
   real(kind=kind_phys),parameter:: con_rhw0   =1022.0_kind_phys                    !< sea water reference density (\f$kg/m^{3}\f$)
   real(kind=kind_phys),parameter:: con_epsq   =1.0E-12_kind_phys                   !< min q for computing precip type
+  real(kind=kind_phys),parameter:: con_epsqs  =1.0E-10_kind_phys
   ! Selected thermodynamics constants with kind=kind_dyn
   real(kind=kind_dyn), parameter:: con_rd_dyn   =2.8705e+2_kind_dyn                !< gas constant air (\f$J/kg/K\f$)
   real(kind=kind_dyn), parameter:: con_rv_dyn   =4.6150e+2_kind_dyn                !< gas constant H2O (\f$J/kg/K\f$)
