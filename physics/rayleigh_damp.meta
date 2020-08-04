@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = rayleigh_damp_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = rayleigh_damp_run
   type = scheme
 [lsidea]
@@ -195,7 +190,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rayleigh_damp_finalize
-  type = scheme

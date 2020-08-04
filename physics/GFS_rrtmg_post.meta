@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmg_post_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = GFS_rrtmg_post_run
   type = scheme
 [Model]
@@ -211,7 +206,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = GFS_rrtmg_post_finalize
-  type = scheme

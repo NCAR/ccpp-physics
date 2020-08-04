@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = drag_suite_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = drag_suite_run
   type = scheme
 [im]
@@ -613,7 +608,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = drag_suite_finalize
-  type = scheme

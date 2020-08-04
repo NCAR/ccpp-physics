@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = rrtmg_sw_pre_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = rrtmg_sw_pre_run
   type = scheme
 [Model]
@@ -148,7 +143,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmg_sw_pre_finalize
-  type = scheme

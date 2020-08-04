@@ -4,16 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = samfdeepcnv_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = samfdeepcnv_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = samfdeepcnv_run
   type = scheme
 [im]

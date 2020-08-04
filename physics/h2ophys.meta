@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = h2ophys_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = h2ophys_run
   type = scheme
 [im]
@@ -122,7 +117,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = h2ophys_finalize
-  type = scheme

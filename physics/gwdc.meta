@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = gwdc_pre_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = gwdc_pre_run
   type = scheme
 [im]
@@ -169,19 +164,9 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = gwdc_pre_finalize
-  type = scheme
-
-########################################################################
 [ccpp-scheme-properties]
   name = gwdc
   type = properties
-
-########################################################################
-[ccpp-arg-table]
-  name = gwdc_init
-  type = scheme
 
 ########################################################################
 [ccpp-arg-table]
@@ -459,19 +444,9 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = gwdc_finalize
-  type = scheme
-
-########################################################################
 [ccpp-scheme-properties]
   name = gwdc_post
   type = properties
-
-########################################################################
-[ccpp-arg-table]
-  name = gwdc_post_init
-  type = scheme
 
 ########################################################################
 [ccpp-arg-table]
@@ -653,7 +628,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = gwdc_post_finalize
-  type = scheme

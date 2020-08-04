@@ -42,11 +42,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = cu_ntiedtke_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = cu_ntiedtke_run
   type = scheme
 [pu]

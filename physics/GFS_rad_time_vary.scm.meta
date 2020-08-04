@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rad_time_vary_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = GFS_rad_time_vary_run
   type = scheme
 [Model]
@@ -53,7 +48,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = GFS_rad_time_vary_finalize
-  type = scheme

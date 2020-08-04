@@ -193,7 +193,3 @@
   type = integer
   intent = out
   optional = F
-########################################################################
-[ccpp-arg-table]
-  name = GFS_rrtmgp_sw_pre_finalize
-  type = scheme

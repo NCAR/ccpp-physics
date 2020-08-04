@@ -133,10 +133,6 @@
   optional = F
 ########################################################################
 [ccpp-arg-table]
-  name = mp_fer_hires_finalize
-  type = scheme
-########################################################################
-[ccpp-arg-table]
   name = mp_fer_hires_run
   type = scheme
 [ncol]

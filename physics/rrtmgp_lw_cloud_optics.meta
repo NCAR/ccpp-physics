@@ -284,7 +284,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmgp_lw_cloud_optics_finalize
-  type = scheme

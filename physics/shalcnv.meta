@@ -58,11 +58,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = shalcnv_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = shalcnv_run
   type = scheme
 [grav]

@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = zhaocarr_precpd_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = zhaocarr_precpd_run
   type = scheme
 [im]
@@ -196,7 +191,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = zhaocarr_precpd_finalize
-  type = scheme

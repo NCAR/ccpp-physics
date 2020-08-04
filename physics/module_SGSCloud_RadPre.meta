@@ -4,16 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = sgscloud_radpre_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = sgscloud_radpre_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = sgscloud_radpre_run
   type = scheme
 [im]

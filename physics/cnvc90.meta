@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = cnvc90_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = cnvc90_run
   type = scheme
 [clstp]
@@ -142,7 +137,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = cnvc90_finalize
-  type = scheme

@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = rrtmg_lw_post_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = rrtmg_lw_post_run
   type = scheme
 [Model]
@@ -120,7 +115,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmg_lw_post_finalize
-  type = scheme

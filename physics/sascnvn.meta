@@ -42,11 +42,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = sascnvn_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = sascnvn_run
   type = scheme
 [grav]

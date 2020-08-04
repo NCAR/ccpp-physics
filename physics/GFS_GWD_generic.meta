@@ -4,11 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_GWD_generic_pre_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = GFS_GWD_generic_pre_run
   type = scheme
 [im]

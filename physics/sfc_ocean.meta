@@ -4,16 +4,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = sfc_ocean_init
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = sfc_ocean_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = sfc_ocean_run
   type = scheme
 [im]
