@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = drag_suite
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = drag_suite_init
   type = scheme

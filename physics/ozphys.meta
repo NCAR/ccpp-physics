@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = ozphys
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = ozphys_init
   type = scheme

@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = GFS_GWD_generic_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_GWD_generic_pre_init
   type = scheme
@@ -244,10 +249,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = GFS_GWD_generic_pre_finalize
-  type = scheme
-  
+[ccpp-scheme-properties]
+  name = GFS_GWD_generic_post
+  type = properties
+
 ########################################################################
 [ccpp-arg-table]
   name = GFS_GWD_generic_post_run

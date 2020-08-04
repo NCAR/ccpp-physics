@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = GFS_surface_composites_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_surface_composites_pre_run
   type = scheme
@@ -638,6 +643,11 @@
   optional = F
 
 ########################################################################
+[ccpp-scheme-properties]
+  name = GFS_surface_composites_inter
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_surface_composites_inter_run
   type = scheme
@@ -780,6 +790,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_surface_composites_post
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

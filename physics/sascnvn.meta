@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = sascnvn
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = sascnvn_init
   type = scheme

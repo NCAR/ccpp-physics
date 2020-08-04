@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = shalcnv
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = shalcnv_init
   type = scheme

@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = rrtmgp_lw_aerosol_optics
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_aerosol_optics_run
   type = scheme

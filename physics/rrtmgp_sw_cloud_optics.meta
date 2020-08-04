@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = rrtmgp_sw_cloud_optics
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_sw_cloud_optics_init
   type = scheme

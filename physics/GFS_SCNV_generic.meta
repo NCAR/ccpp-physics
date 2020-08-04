@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = GFS_SCNV_generic_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_SCNV_generic_pre_run
   type = scheme
@@ -130,6 +135,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_SCNV_generic_post
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

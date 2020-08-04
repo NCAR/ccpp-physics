@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = gwdps
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = gwdps_init
   type = scheme

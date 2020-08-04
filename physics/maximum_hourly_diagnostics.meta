@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = maximum_hourly_diagnostics
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = maximum_hourly_diagnostics_run
   type = scheme

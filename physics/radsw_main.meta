@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = rrtmg_sw
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmg_sw_run
   type = scheme

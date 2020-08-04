@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = cu_gf_driver_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = cu_gf_driver_pre_run
   type = scheme

@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = rayleigh_damp
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = rayleigh_damp_init
   type = scheme

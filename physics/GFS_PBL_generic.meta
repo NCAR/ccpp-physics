@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = GFS_PBL_generic_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_PBL_generic_pre_run
   type = scheme
@@ -411,6 +416,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_PBL_generic_post
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

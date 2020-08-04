@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = hedmf
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = hedmf_init
   type = scheme

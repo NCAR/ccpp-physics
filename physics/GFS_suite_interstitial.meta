@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = GFS_suite_interstitial_rad_reset
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_suite_interstitial_rad_reset_run
   type = scheme
@@ -36,6 +41,11 @@
   optional = F
 
 ########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_interstitial_phys_reset
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_suite_interstitial_phys_reset_run
   type = scheme
@@ -72,6 +82,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_interstitial_1
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]
@@ -261,6 +276,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_interstitial_2
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]
@@ -781,6 +801,11 @@
   optional = F
 
 ########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_stateout_reset
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_suite_stateout_reset_run
   type = scheme
@@ -897,6 +922,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_stateout_update
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]
@@ -1060,6 +1090,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_interstitial_3
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]
@@ -1494,6 +1529,11 @@
   optional = F
 
 ########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_interstitial_4
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_suite_interstitial_4_run
   type = scheme
@@ -1806,6 +1846,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_suite_interstitial_5
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

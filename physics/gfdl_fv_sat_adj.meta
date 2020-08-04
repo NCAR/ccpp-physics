@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = fv_sat_adj
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = fv_sat_adj_init
   type = scheme

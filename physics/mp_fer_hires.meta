@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = mp_fer_hires
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = mp_fer_hires_init
   type = scheme

@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = cnvc90
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = cnvc90_init
   type = scheme

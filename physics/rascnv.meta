@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = rascnv
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = rascnv_init
   type = scheme

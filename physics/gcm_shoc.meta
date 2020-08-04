@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = shoc
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = shoc_run
   type = scheme

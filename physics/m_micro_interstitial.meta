@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = m_micro_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = m_micro_pre_init
   type = scheme
@@ -292,6 +297,11 @@
 [ccpp-arg-table]
   name = m_micro_pre_finalize
   type = scheme
+
+########################################################################
+[ccpp-scheme-properties]
+  name = m_micro_post
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = GFS_diagtoscreen
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_diagtoscreen_run
   type = scheme
@@ -122,6 +127,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_interstitialtoscreen
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]
@@ -250,6 +260,11 @@
   optional = F
 
 ########################################################################
+[ccpp-scheme-properties]
+  name = GFS_abort
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_abort_run
   type = scheme
@@ -286,6 +301,11 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-scheme-properties]
+  name = GFS_checkland
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

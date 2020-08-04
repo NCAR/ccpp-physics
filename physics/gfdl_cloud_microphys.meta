@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = gfdl_cloud_microphys
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = gfdl_cloud_microphys_init
   type = scheme

@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = m_micro
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = m_micro_init
   type = scheme

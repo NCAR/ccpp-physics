@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = gwdc_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = gwdc_pre_init
   type = scheme
@@ -167,6 +172,11 @@
 [ccpp-arg-table]
   name = gwdc_pre_finalize
   type = scheme
+
+########################################################################
+[ccpp-scheme-properties]
+  name = gwdc
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]
@@ -452,6 +462,11 @@
 [ccpp-arg-table]
   name = gwdc_finalize
   type = scheme
+
+########################################################################
+[ccpp-scheme-properties]
+  name = gwdc_post
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

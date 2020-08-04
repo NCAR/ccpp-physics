@@ -1,7 +1,8 @@
 [ccpp-scheme-properties]
-  name = mp_thompson
+  name = mp_thompson_pre
   type = properties
 
+########################################################################
 [ccpp-arg-table]
   name = mp_thompson_pre_run
   type = scheme

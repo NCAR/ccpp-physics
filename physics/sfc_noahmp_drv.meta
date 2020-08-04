@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = noahmpdrv
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = noahmpdrv_init
   type = scheme

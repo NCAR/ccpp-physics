@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = sfc_sice
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_sice_run
   type = scheme

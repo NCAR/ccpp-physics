@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = get_prs_fv3
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = get_prs_fv3_init
   type = scheme
@@ -103,6 +108,11 @@
 [ccpp-arg-table]
   name = get_phi_fv3_init
   type = scheme
+
+########################################################################
+[ccpp-scheme-properties]
+  name = get_phi_fv3
+  type = properties
 
 ########################################################################
 [ccpp-arg-table]

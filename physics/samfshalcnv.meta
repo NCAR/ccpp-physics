@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = samfshalcnv
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = samfshalcnv_init
   type = scheme

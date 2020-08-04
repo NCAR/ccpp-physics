@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = mynnedmf_wrapper
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = mynnedmf_wrapper_init
   type = scheme

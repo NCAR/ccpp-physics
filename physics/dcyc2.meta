@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = dcyc2t3
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = dcyc2t3_init
   type = scheme

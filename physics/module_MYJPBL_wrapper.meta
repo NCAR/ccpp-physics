@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = myjpbl_wrapper
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = myjpbl_wrapper_run
   type = scheme

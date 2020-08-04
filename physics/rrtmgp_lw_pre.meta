@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = rrtmgp_lw_pre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_pre_run
   type = scheme

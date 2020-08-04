@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = sgscloud_radpre
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = sgscloud_radpre_init
   type = scheme

@@ -1,3 +1,8 @@
+[ccpp-scheme-properties]
+  name = h2ophys
+  type = properties
+
+########################################################################
 [ccpp-arg-table]
   name = h2ophys_init
   type = scheme
