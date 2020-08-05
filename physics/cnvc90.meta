@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = cnvc90
   type = properties
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = gwdc_pre
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -167,6 +168,7 @@
 [ccpp-scheme-properties]
   name = gwdc
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -447,6 +449,7 @@
 [ccpp-scheme-properties]
   name = gwdc_post
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

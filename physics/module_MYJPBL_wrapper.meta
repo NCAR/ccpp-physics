@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = myjpbl_wrapper
   type = properties
+  dependencies = module_BL_MYJPBL.F90
 
 ########################################################################
 [ccpp-arg-table]

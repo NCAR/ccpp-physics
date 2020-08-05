@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_rrtmg_post
   type = properties
+  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radlw_param.f,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]

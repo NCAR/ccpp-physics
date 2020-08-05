@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = hedmf_hafs
   type = properties
+  dependencies = funcphys.f90,machine.F,mfpbl.f,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]

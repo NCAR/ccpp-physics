@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = flake_driver
   type = properties
+  dependencies = flake.F90,machine.F
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = cs_conv_pre
   type = properties
+  dependencies = funcphys.f90,machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -177,6 +178,7 @@
 [ccpp-scheme-properties]
   name = cs_conv_post
   type = properties
+  dependencies = funcphys.f90,machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -246,6 +248,7 @@
 [ccpp-scheme-properties]
   name = cs_conv
   type = properties
+  dependencies = funcphys.f90,machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]

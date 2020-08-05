@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = gmtb_scm_sfc_flux_spec
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

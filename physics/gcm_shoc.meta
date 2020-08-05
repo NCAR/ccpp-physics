@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = shoc
   type = properties
+  dependencies = funcphys.f90,machine.F
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_time_vary_pre
   type = properties
+  dependencies = funcphys.f90,machine.F
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = ozphys_2015
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

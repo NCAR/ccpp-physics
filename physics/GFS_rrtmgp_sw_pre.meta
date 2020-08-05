@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_rrtmgp_sw_pre
   type = properties
+  dependencies = iounitdef.f,machine.F,physparam.f,radiation_astronomy.f,radiation_surface.f,rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90,rte-rrtmgp/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90,rte-rrtmgp/rrtmgp/mo_rrtmgp_util_reorder.F90,rte-rrtmgp/rrtmgp/mo_gas_optics.F90,rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90,surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]

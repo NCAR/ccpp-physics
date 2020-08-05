@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = myjsfc_wrapper
   type = properties
+  dependencies = module_SF_JSFC.F90
 
 ########################################################################
 [ccpp-arg-table]

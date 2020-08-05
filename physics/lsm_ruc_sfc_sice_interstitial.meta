@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = lsm_ruc_sfc_sice_pre
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -103,6 +104,7 @@
 [ccpp-scheme-properties]
   name = lsm_ruc_sfc_sice_post
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

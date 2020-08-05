@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = cs_conv_aw_adj
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

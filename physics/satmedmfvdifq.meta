@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = satmedmfvdifq
   type = properties
+  dependencies = funcphys.f90,machine.F,mfpbltq.f,mfscuq.f,tridi.f
 
 ########################################################################
 [ccpp-arg-table]

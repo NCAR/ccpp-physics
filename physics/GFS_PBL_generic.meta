@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_PBL_generic_pre
   type = properties
+  dependencies = GFS_PBL_generic.F90,machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -421,6 +422,7 @@
 [ccpp-scheme-properties]
   name = GFS_PBL_generic_post
   type = properties
+  dependencies = GFS_PBL_generic.F90,machine.F
 
 ########################################################################
 [ccpp-arg-table]

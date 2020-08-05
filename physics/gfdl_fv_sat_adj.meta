@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = fv_sat_adj
   type = properties
+  dependencies = machine.F,module_gfdl_cloud_microphys.F90,module_mp_radar.F90,multi_gases.F90,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]

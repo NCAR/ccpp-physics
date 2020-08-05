@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = rrtmg_sw_post
   type = properties
+  dependencies = machine.F,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]

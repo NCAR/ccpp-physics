@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_surface_composites_pre
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -646,6 +647,7 @@
 [ccpp-scheme-properties]
   name = GFS_surface_composites_inter
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -795,6 +797,7 @@
 [ccpp-scheme-properties]
   name = GFS_surface_composites_post
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

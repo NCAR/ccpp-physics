@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = gwdps
   type = properties
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]

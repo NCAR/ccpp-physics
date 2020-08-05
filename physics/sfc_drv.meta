@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = lsm_noah
   type = properties
+  dependencies = funcphys.f90,machine.F,set_soilveg.f,sflx.f,surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]

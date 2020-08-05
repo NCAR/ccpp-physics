@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = cu_gf_driver
   type = properties
+  dependencies = cu_gf_deep.F90,cu_gf_sh.F90,machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]

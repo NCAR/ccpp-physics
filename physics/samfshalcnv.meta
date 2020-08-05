@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = samfshalcnv
   type = properties
+  dependencies = funcphys.f90,machine.F,samfaerosols.F
 
 ########################################################################
 [ccpp-arg-table]

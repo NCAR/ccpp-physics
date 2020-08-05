@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = m_micro
   type = properties
+  dependencies = aer_cloud.F,aerclm_def.F,cldmacro.F,cldwat2m_micro.F,machine.F,micro_mg_utils.F90,micro_mg2_0.F90,micro_mg3_0.F90,physcons.F90,wv_saturation.F
 
 ########################################################################
 [ccpp-arg-table]

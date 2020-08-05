@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = drag_suite
   type = properties
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]

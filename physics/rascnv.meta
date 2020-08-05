@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = rascnv
   type = properties
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]

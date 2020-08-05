@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = mp_fer_hires
   type = properties
+  dependencies = machine.F,module_MP_FER_HIRES.F90
 
 ########################################################################
 [ccpp-arg-table]

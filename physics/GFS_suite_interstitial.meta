@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_interstitial_rad_reset
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -44,6 +45,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_interstitial_phys_reset
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -87,6 +89,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_interstitial_1
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -281,6 +284,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_interstitial_2
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -804,6 +808,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_stateout_reset
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -927,6 +932,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_stateout_update
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -1095,6 +1101,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_interstitial_3
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -1532,6 +1539,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_interstitial_4
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -1851,6 +1859,7 @@
 [ccpp-scheme-properties]
   name = GFS_suite_interstitial_5
   type = properties
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]

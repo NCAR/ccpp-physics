@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = rrtmg_sw
   type = properties
+  dependencies = mersenne_twister.f,physcons.F90,physparam.f,radsw_datatb.f,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]

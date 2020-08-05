@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = cu_gf_driver_post
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

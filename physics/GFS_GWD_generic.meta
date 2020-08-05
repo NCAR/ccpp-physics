@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_GWD_generic_pre
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -247,6 +248,7 @@
 [ccpp-scheme-properties]
   name = GFS_GWD_generic_post
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

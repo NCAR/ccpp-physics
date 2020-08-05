@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = rrtmgp_sw_gas_optics
   type = properties
+  dependencies = iounitdef.f,machine.F,radiation_gases.f,rrtmgp_aux.F90,rte-rrtmgp/extensions/mo_compute_bc.F90,rte-rrtmgp/rrtmgp/mo_gas_concentrations.F90,rte-rrtmgp/rrtmgp/mo_rrtmgp_util_string.F90,rte-rrtmgp/rrtmgp/mo_gas_optics_rrtmgp.F90,rte-rrtmgp/rrtmgp/kernels/mo_rrtmgp_util_reorder_kernels.F90,rte-rrtmgp/rrtmgp/mo_rrtmgp_util_reorder.F90,rte-rrtmgp/rrtmgp/mo_gas_optics.F90,rte-rrtmgp/rrtmgp/kernels/mo_gas_optics_kernels.F90,rte-rrtmgp/rte/mo_optical_props.F90,rte-rrtmgp/rte/kernels/mo_optical_props_kernels.F90,rte-rrtmgp/rte/mo_rte_util_array.F90,rte-rrtmgp/rte/mo_rte_kind.F90
 
 ########################################################################
 [ccpp-arg-table]

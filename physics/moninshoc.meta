@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = moninshoc
   type = properties
+  dependencies = funcphys.f90,machine.F,tridi.f
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_rrtmg_pre
   type = properties
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_thompson.F90,module_mp_thompson_make_number_concentrations.F90,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]

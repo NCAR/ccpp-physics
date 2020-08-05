@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = sfc_diag_post
   type = properties
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

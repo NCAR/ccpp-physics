@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = GFS_rrtmg_setup
   type = properties
+  dependencies = iounitdef.f,module_bfmicrophysics.f,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f,radlw_main.f,radlw_param.f,radsw_main.f,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]

@@ -1,6 +1,7 @@
 [ccpp-scheme-properties]
   name = machine
   type = properties
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]
