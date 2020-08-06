@@ -275,6 +275,7 @@
   dimensions = (number_of_land_surface_variables_perturbed) 
   type = real
   kind = kind_phys
+  optional = F
 [lndp_var_list]
   standard_name = variables_to_be_perturbed_for_landperts
   long_name = variables to be perturbed for landperts
@@ -282,6 +283,7 @@
   dimensions =  (number_of_land_surface_variables_perturbed) 
   type = character
   kind = len=3
+  optional = F
 [z01d]
   standard_name = perturbation_of_momentum_roughness_length
   long_name = perturbation of momentum roughness length
