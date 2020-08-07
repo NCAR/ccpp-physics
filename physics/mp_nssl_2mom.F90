@@ -1,5 +1,6 @@
 !>\file mp_nssl_2mom.F90
 !! This file contains the NSSL 2-moment microphysics scheme.
+!!  Added by Chunxi Zhang and Tim Supinie of CAPS in May 2020
 
 
 !>\defgroup nssl2mom NSSL 2-moment microphysics scheme
@@ -85,7 +86,8 @@ contains
        nssl_params(11) = 0.
        nssl_params(12) = 0.
 
-       CALL nssl_2mom_init(nssl_params,ipctmp,mixphase,ihvol)
+       CALL nssl_2mom_init(nssl_params,ipctmp,mixphase,ihvol, errmsg, errflg)
+       if (errflg /= 0) return
 
        is_initialized = .true.
 
@@ -256,7 +258,7 @@ contains
              has_reqi = 0
              has_reqs = 0
          else
-             write(errmsg,fmt='(*(a))') 'Logic error in mp_thompson_hrrr_run:',  &
+             write(errmsg,fmt='(*(a))') 'Logic error in mp_nssl_2mom_run:',  &
                                         ' all or none of the following optional', &
                                         ' arguments are required: re_cloud, re_ice, re_snow'
              errflg = 1
@@ -329,6 +331,7 @@ contains
                      re_ice   = re_ice_mp,            &
                      re_snow  = re_snow_mp,           &
                      has_reqc=has_reqc, has_reqi=has_reqi, has_reqs=has_reqs,       &
+                     errmsg=errmsg, errflg=errflg,                                  &
                      ids=ids, ide=ide, jds=jds, jde=jde, kds=kds, kde=kde,          &
                      ims=ims, ime=ime, jms=jms, jme=jme, kms=kms, kme=kme,          &
                      its=its, ite=ite, jts=jts, jte=jte, kts=kts, kte=kte  )

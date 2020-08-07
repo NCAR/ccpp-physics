@@ -113,10 +113,16 @@
 !   Removed a duplicate factor from hail reflectivity that was causing a loss of about 6 dBZ (since WRF 3.5).
 !
 !---------------------------------------------------------------------
-
+!
+! Ported to UFS/CCPP by Chunxi Zhang and Tim Supinie of CAPS in May 2020
+!
+!---------------------------------------------------------------------
 
 
 MODULE module_mp_nssl_2mom
+
+  use physcons, only : pi => con_pi, gr => con_g, rd => con_rd, cp => con_cp, rw => con_rv, tfr => con_t0c, &
+                       cv => con_cv, cpl => con_cliq, cpigb => con_csol, cp608 => con_eps
 
   IMPLICIT NONE
   
@@ -675,7 +681,7 @@ MODULE module_mp_nssl_2mom
 !
 !  constants
 !
-      real, parameter :: cp608 = 0.608          ! constant used in conversion of T to Tv
+!     real, parameter :: cp608 = 0.608          ! constant used in conversion of T to Tv
       real, parameter :: ar = 841.99666         ! rain terminal velocity power law coefficient (LFO)
       real, parameter :: br = 0.8               ! rain terminal velocity power law coefficient (LFO)
       real, parameter :: aradcw = -0.27544      !
@@ -692,11 +698,11 @@ MODULE module_mp_nssl_2mom
 !  new values for  cs and ds
       real, parameter :: cs = 12.42             ! snow terminal velocity power law coefficient 
       real, parameter :: ds = 0.42              ! snow terminal velocity power law coefficient 
-      real, parameter :: pi = 3.141592653589793
+!     real, parameter :: pi = 3.141592653589793
       real, parameter :: piinv = 1./pi
       real, parameter :: pid4 = pi/4.0
 
-      real, parameter :: gr = 9.8
+!     real, parameter :: gr = 9.8
 
 !
 ! max and min mean volumes
@@ -760,13 +766,14 @@ MODULE module_mp_nssl_2mom
       real, parameter :: cbwbolton = 29.65 ! constants for Bolton formulation
       real, parameter :: cawbolton = 17.67
 
-      real, parameter :: tfr = 273.15, tfrh = 233.15
+!     real, parameter :: tfr = 273.15
+      real, parameter :: tfrh = 233.15
 
-      real, parameter :: cp = 1004.0, rd = 287.04
+!     real, parameter :: cp = 1004.0, rd = 287.04
       real, parameter :: cpi = 1./cp
       real, parameter :: cap = rd/cp, poo = 1.0e+05
 
-      real, parameter :: rw = 461.5              ! gas const. for water vapor
+!     real, parameter :: rw = 461.5              ! gas const. for water vapor
       real, parameter :: advisc0 = 1.832e-05     ! reference dynamic viscosity (SMT; see Beard & Pruppacher 71)
       real, parameter :: advisc1 = 1.718e-05     ! dynamic viscosity constant used in thermal conductivity calc
       real, parameter :: tka0 = 2.43e-02         ! reference thermal conductivity
@@ -775,10 +782,10 @@ MODULE module_mp_nssl_2mom
 
      ! GHB: Needed for eqtset=2 in cm1
 !     REAL, PRIVATE ::      cv = cp - rd
-     real, private, parameter ::      cv = 717.0             ! specific heat at constant volume - air
+!    real, private, parameter ::      cv = 717.0             ! specific heat at constant volume - air
      REAL, PRIVATE, parameter ::      cvv = 1408.5
-     REAL, PRIVATE, parameter ::      cpl = 4190.0
-     REAL, PRIVATE, parameter ::      cpigb = 2106.0
+!    REAL, PRIVATE, parameter ::      cpl = 4190.0
+!    REAL, PRIVATE, parameter ::      cpigb = 2106.0
      ! GHB
 
       real, parameter ::  bfnu0 = (rnu + 2.0)/(rnu + 1.0) 
@@ -829,12 +836,16 @@ MODULE module_mp_nssl_2mom
  
 ! #####################################################################
 
-       SUBROUTINE nssl_2mom_init(nssl_params, ipctmp, mixphase,ihvol)
+       SUBROUTINE nssl_2mom_init(nssl_params, ipctmp, mixphase,ihvol, errmsg, errflg)
 
   implicit none
   
    real,  intent(in), dimension(20) :: nssl_params
    integer, intent(in) :: ipctmp,mixphase,ihvol
+   ! CCPP error handling
+   character(len=*), intent(  out) :: errmsg
+   integer,          intent(  out) :: errflg
+
      double precision :: arg
      real    :: temq
      integer :: igam
@@ -845,7 +856,9 @@ MODULE module_mp_nssl_2mom
 
       real    :: alp,ratio,x,y,y7
       logical :: turn_on_ccna
-     
+
+     errmsg = ''
+     errflg = 0
 
      turn_on_ccna = .false.
 !     turn_on_cin  = .false.
@@ -1097,8 +1110,10 @@ MODULE module_mp_nssl_2mom
       ltmp = lhlw
       ENDIF
     ELSEIF ( ipconc >= 6 ) THEN
-      write(0,*) 'NSSL microphysics has not been compiled for 3-moment. Sorry.'
-        STOP
+      errmsg = 'NSSL microphysics has not been compiled for 3-moment. Sorry.'
+      errflg = 1
+      return
+
       lccn = 9
       lnc = 10
       lnr = 11
@@ -1587,6 +1602,7 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
                               rainprod, evapprod,                                       & ! wrf-chem 
 ! 20130903 acd_mb_washout end
                               cu_used, qrcuten, qscuten, qicuten, qccuten,              & ! hm added
+                              errmsg, errflg,                                           &
                               ids,ide, jds,jde, kds,kde,                                &  ! domain dims
                               ims,ime, jms,jme, kms,kme,                                &  ! memory dims
                               its,ite, jts,jte, kts,kte)                                   ! tile dims
@@ -1672,6 +1688,9 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
    REAL, DIMENSION(ims:ime, kms:kme, jms:jme), optional, INTENT(IN):: qrcuten, qscuten, qicuten, qccuten
    INTEGER, optional, intent(in) :: cu_used
 
+   ! CCPP error handling
+   character(len=*), intent(  out) :: errmsg
+   integer,          intent(  out) :: errflg
 !
 ! local variables
 !
@@ -1709,6 +1728,9 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
       
       logical :: f_cnatmp
 
+
+     errmsg = ''
+     errflg = 0
 
 
 ! -------------------------------------------------------------------
@@ -2151,11 +2173,11 @@ SUBROUTINE nssl_2mom_driver(qv, qc, qr, qi, qs, qh, qhl, ccw, crw, cci, csw, chw
      &   xdn0,dbz2d,tke2d,                 &
      &   timevtcalc,axtra, makediag        &
      &   ,rainprod2d, evapprod2d           &
-     & ,elec2,its,ids,ide,jds,jde          &
+     & ,elec2,errmsg,errflg,its,ids,ide,jds,jde          &
      & )
 
 
-
+     IF (errflg /= 0) RETURN
 
 
    ENDIF ! isedonly /= 1
@@ -2390,12 +2412,12 @@ END SUBROUTINE nssl_2mom_driver
         ELSE IF (X.LE.1.0+A) THEN
            S=1.0D0/A
            R=S
-           DO 10 K=1,60
+           k_loop: DO K=1,60
               R=R*X/(A+K)
               S=S+R
-              IF (DABS(R/S).LT.1.0D-15) GO TO 15
-10         CONTINUE
-15         GIN=DEXP(XAM)*S
+              IF (DABS(R/S).LT.1.0D-15) EXIT k_loop
+           END DO k_loop
+           GIN=DEXP(XAM)*S
            ga = GAMMA_SP(A1)
            GIM=GA-GIN
         ELSE IF (X.GT.1.0+A) THEN
@@ -2447,12 +2469,12 @@ END SUBROUTINE nssl_2mom_driver
         ELSE IF (X.LE.1.0+A) THEN
            S=1.0D0/A
            R=S
-           DO 10 K=1,60
+           k_loop: DO K=1,60
               R=R*X/(A+K)
               S=S+R
-              IF (DABS(R/S).LT.1.0D-15) GO TO 15
-10         CONTINUE
-15         GIN=DEXP(XAM)*S
+              IF (DABS(R/S).LT.1.0D-15) EXIT k_loop
+           END DO k_loop
+           GIN=DEXP(XAM)*S
            ga = GAMMA_DP(A)
            GIM=GA-GIN
         ELSE IF (X.GT.1.0+A) THEN
@@ -5869,11 +5891,11 @@ END SUBROUTINE nssl_2mom_driver
       ENDIF
 
 
-      do inumgs = 1,numgs
+      inumgs_loop: do inumgs = 1,numgs
        ngscnt = 0
 
 
-       do kz = nzmpb,nz
+       kz_loop: do kz = nzmpb,nz
         do ix = ixcol,ixcol
         flag = .false.
 
@@ -5888,19 +5910,17 @@ END SUBROUTINE nssl_2mom_driver
         ngscnt = ngscnt + 1
         igs(ngscnt) = ix
         kgs(ngscnt) = kz
-        if ( ngscnt .eq. ngs ) goto 1100
+        if ( ngscnt .eq. ngs ) exit kz_loop
         end if
 !#ifndef MPI
         end do !!ix
 !#endif
         nxmpb = 1
-       end do !! kz
+       end do kz_loop
 
 !      if ( jy .eq. (ny-jstag) ) iend = 1
 
- 1100 continue
-
-      if ( ngscnt .eq. 0 ) go to 9998
+      if ( ngscnt .gt. 0 ) then
 !
 !  set temporaries for microphysics variables
 !
@@ -6136,24 +6156,21 @@ END SUBROUTINE nssl_2mom_driver
       if (ndebugzf .gt. 0 ) write(0,*)  'ZIEGFALL: COPIED FALL SPEEDS'
 
 
-
- 9998 continue
+      endif
 
       if (ndebugzf .gt. 0 ) write(0,*)  'ZIEGFALL: DONE WITH LOOP'
 
       if ( kz .gt. nz-1 ) then
-        go to 1200
+        exit inumgs_loop
       else
         nzmpb = kz 
       end if
 
       if (ndebugzf .gt. 0 ) write(0,*) 'ZIEGFALL: SET NZMPB'
 
-      end do !! inumgs
+      end do inumgs_loop
 
       if (ndebugzf .gt. 0 ) write(0,*) 'ZIEGFALL: SET NXMPB'
-
- 1200 continue
 
 
 !       ENDDO ! ix
@@ -7407,7 +7424,7 @@ END SUBROUTINE nssl_2mom_driver
        pb(:) = 0.0
        pinit(:) = 0.0
       
-      IF ( ipconc <= 1 .or. isedonly == 2 ) GOTO 2200
+      IF ( ipconc > 1 .and. isedonly /= 2 ) THEN
 
 !
 !  Ziegler nucleation 
@@ -7452,7 +7469,7 @@ END SUBROUTINE nssl_2mom_driver
       numgs = nxz/ngs + 1
 
 
-      do 2000 inumgs = 1,numgs
+      inumgs_loop: do inumgs = 1,numgs
 
       ngscnt = 0
 
@@ -7464,7 +7481,7 @@ END SUBROUTINE nssl_2mom_driver
       ixb = nxmpb
       ixe = itile
 
-      do kz = kzb,kze
+      kz_loop: do kz = kzb,kze
       do ix = nxmpb,nxi
 
       pqs(1) = 380.0/(pn(ix,jy,kz) + pb(kz))
@@ -7491,17 +7508,16 @@ END SUBROUTINE nssl_2mom_driver
       ngscnt = ngscnt + 1
       igs(ngscnt) = ix
       kgs(ngscnt) = kz
-      if ( ngscnt .eq. ngs ) goto 2100
+      if ( ngscnt .eq. ngs ) exit kz_loop
       end if
 
       end do  !ix
 
       nxmpb = 1
-      end do  !kz
+      end do kz_loop
 !      if ( jy .eq. (ny-jstag) ) iend = 1
- 2100 continue
 
-      if ( ngscnt .eq. 0 ) go to 29998
+      if ( ngscnt .gt. 0 ) then
 
       if (ndebug .gt. 0 ) write(0,*) 'ICEZVD_DR: dbg = 8'
       
@@ -8634,12 +8650,12 @@ END SUBROUTINE nssl_2mom_driver
       end do
 
 
-29998 continue
+      endif
 
 
       if ( kz .gt. nz-1 .and. ix .ge. nxi) then
         if ( ix .ge. nxi ) then
-         go to 2200 ! exit gather scatter
+          exit inumgs_loop
         else
          nzmpb = kz
         endif
@@ -8654,8 +8670,8 @@ END SUBROUTINE nssl_2mom_driver
        nxmpb = ix+1
       end if
 
- 2000 continue ! inumgs
- 2200 continue
+    end do inumgs_loop
+    end if
 !
 !  end of gather scatter (for this jy slice)
 
@@ -9074,7 +9090,7 @@ END SUBROUTINE nssl_2mom_driver
      &   xdn0,tmp3d,tkediss  &
      & ,timevtcalc,axtra,io_flag  &
      & ,rainprod2d, evapprod2d &
-     & ,elec,its,ids,ide,jds,jde &
+     & ,elec,errmsg,errflg,its,ids,ide,jds,jde &
      & )
 
 
@@ -9189,6 +9205,10 @@ END SUBROUTINE nssl_2mom_driver
       logical, parameter :: usegamxinf3 = .false.
 !      real rar  ! rime accretion rate as calculated from qxacw
 
+
+      ! CCPP error handling
+      character(len=*), intent(  out) :: errmsg
+      integer,          intent(  out) :: errflg
 
 ! a few vars for time-split fallout      
       real vtmax
@@ -10112,8 +10132,9 @@ END SUBROUTINE nssl_2mom_driver
 !
 
       IF ( ngs .lt. nz ) THEN
-!       write(0,*) 'Error in ICEZVD: Must have ngs .ge. nz!'
-!       STOP
+        errmsg = 'Error in ICEZVD: Must have ngs .ge. nz!'
+        errflg = 1
+        RETURN
       ENDIF
 
       cntnic_noliq = 0
@@ -10348,10 +10369,10 @@ END SUBROUTINE nssl_2mom_driver
       numgs = nxz/ngs + 1
 !      write(0,*) 'ICEZVD_GS: ENTER GATHER STAGE: nx,nz,nxz,numgs,ngs = ',nx,nz,nxz,numgs,ngs
 
-      do 1000 inumgs = 1,numgs
+      inumgs_loop: do inumgs = 1,numgs
       ngscnt = 0
       
-      do kz = nzmpb,kze
+      kz_loop: do kz = nzmpb,kze
       do ix = nxmpb,itile
 
       pqs(1) = t00(ix,jy,kz)
@@ -10400,14 +10421,13 @@ END SUBROUTINE nssl_2mom_driver
       ngscnt = ngscnt + 1
       igs(ngscnt) = ix
       kgs(ngscnt) = kz
-      if ( ngscnt .eq. ngs ) goto 1100
+      if ( ngscnt .eq. ngs ) exit kz_loop
       end if
       enddo !ix
       nxmpb = 1
-      enddo !kz
- 1100 continue
+      enddo kz_loop
 
-      if ( ngscnt .eq. 0 ) go to 9998
+      if ( ngscnt .gt. 0 ) then
 
       if ( ndebug .gt. 0 ) write(0,*) 'ICEZVD_GS: dbg = 5'
 
@@ -13368,7 +13388,6 @@ END SUBROUTINE nssl_2mom_driver
 !           write(iunit,*)  'qr,temcg = ',qx(mgs,lr)*1000.,temcg(mgs)
            crfrz(mgs) = cxmxd(mgs,lr) ! cx(mgs,lr)*dtpinv
            qrfrz(mgs) = qxmxd(mgs,lr) ! qx(mgs,lr)*dtpinv
-!           STOP
          ELSE ! } {
          crfrz(mgs) = tmp
  !        crfrzfmx = cx(mgs,lr)*Exp(-4./3.*pi*(40.e-6)**3/xv(mgs,lr))
@@ -14124,9 +14143,10 @@ END SUBROUTINE nssl_2mom_driver
      &  + fmlt2(mgs)*(qhacrmlr(mgs)+qhacw(mgs))    &
      &   , 0.0 )
        ELSEIF ( ibinhmlr == 1 ) THEN ! use incomplete gamma functions to approximate the bin results
-
-         write(0,*) 'ibinhmlr = 1 not available for 2-moment'
-         STOP
+         
+         errmsg = 'ibinhmlr = 1 not available for 2-moment'
+         errflg = 1
+         RETURN
          
        ELSEIF ( ibinhmlr == 2 .or. ibinhmlr == 3 ) THEN
 
@@ -15362,8 +15382,6 @@ END SUBROUTINE nssl_2mom_driver
            vhlcnhl(mgs) = rho0(mgs)*qhlcnh(mgs)/Max(xdnmn(lhl), xdn(mgs,lh))
 !           write(0,*) 'qhlcnh = ',qhlcnh(mgs)*1000.,chlcnh(mgs)
           ENDIF
-!         write(0,*) 'graupel to hail conversion not complete! STOP!'
-!         STOP
         ENDIF
         ENDIF
       
@@ -16282,7 +16300,6 @@ END SUBROUTINE nssl_2mom_driver
         pccii(mgs) = pccii(mgs) - (1.-frac)*il5(mgs)*(cwfrzc(mgs)+cwctfzc(mgs))*(1. - ffrzs)
         IF ( lhl .gt. 1 ) chlacw(mgs)   = frac*chlacw(mgs)
 
-!       STOP
       ENDIF
 
       end do
@@ -16368,7 +16385,6 @@ END SUBROUTINE nssl_2mom_driver
         crcev(mgs) = frac*crcev(mgs)
         cracr(mgs) = frac*cracr(mgs)
 
-!       STOP
       ENDIF
 
       end do
@@ -16700,7 +16716,6 @@ END SUBROUTINE nssl_2mom_driver
         ENDIF
 !        IF ( lzh .gt. 1 ) zhacw(mgs) = frac*zhacw(mgs)
 
-!       STOP
       ENDIF
       
 
@@ -16879,7 +16894,6 @@ END SUBROUTINE nssl_2mom_driver
        ENDIF
 
 
-!       STOP
       ENDIF
       end do
 
@@ -17915,7 +17929,6 @@ END SUBROUTINE nssl_2mom_driver
 !     :   ab(igs(mgs),jy,kgs(mgs),lt),
 !     :   t0(igs(mgs),jy,kgs(mgs))
 !        write(iunit,*) fcc3(mgs),qx(mgs,lc),qitmp(mgs),dtp,ptem(mgs)
-!        STOP
 ! C$PAR END CRITICAL SECTION
 !      END IF
       qvs(mgs) = pqs(mgs)*tabqvs(ltemq)
@@ -18203,7 +18216,6 @@ END SUBROUTINE nssl_2mom_driver
          IF (  ipconc .ge. 4 .and. ipc(il) .ge. 1 ) THEN ! {
 
 !            write(0,*) 'MY limiter: il,ipc,lz: ',il,ipc(il),lz(il),lr,lzr
-!            STOP
 
           IF ( lz(il) <= 1 .or. ioldlimiter == 1 ) THEN ! { { is a two-moment category so dont worry about reflectivity
           
@@ -18314,11 +18326,11 @@ END SUBROUTINE nssl_2mom_driver
 
       if (ndebug .gt. 0 ) write(0,*) 'gs 13'
 
- 9998 continue
+      END IF
 
       if ( kz .gt. nz-1 .and. ix .ge. itile) then
         if ( ix .ge. itile ) then
-         go to 1200 ! exit gather scatter
+         exit inumgs_loop
         else
          nzmpb = kz
         endif
@@ -18333,8 +18345,8 @@ END SUBROUTINE nssl_2mom_driver
        nxmpb = ix+1
       end if
 
- 1000 continue
- 1200 continue
+ end do inumgs_loop
+
 !
 !  end of gather scatter (for this jy slice)
 !
