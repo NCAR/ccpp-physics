@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = mp_thompson
-  type = properties
+  type = scheme
   dependencies = machine.F,module_mp_radar.F90,module_mp_thompson.F90,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################

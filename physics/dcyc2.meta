@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = dcyc2t3
-  type = properties
+  type = scheme
   dependencies = machine.F,physcons.F90
 
 ########################################################################

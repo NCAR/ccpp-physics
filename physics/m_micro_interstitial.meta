@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = m_micro_pre
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -290,9 +290,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = m_micro_post
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

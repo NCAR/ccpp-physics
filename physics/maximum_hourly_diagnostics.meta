@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = maximum_hourly_diagnostics
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

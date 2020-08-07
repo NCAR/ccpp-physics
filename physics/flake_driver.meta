@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = flake_driver
-  type = properties
+  type = scheme
   dependencies = flake.F90,machine.F
 
 ########################################################################

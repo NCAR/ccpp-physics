@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = hedmf
-  type = properties
+  type = scheme
   dependencies = funcphys.f90,machine.F,mfpbl.f,physcons.F90,tridi.f
 
 ########################################################################

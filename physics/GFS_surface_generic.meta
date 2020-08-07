@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_surface_generic_pre
-  type = properties
+  type = scheme
   dependencies = machine.F,surface_perturbation.F90
 
 ########################################################################
@@ -506,9 +506,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_surface_generic_post
-  type = properties
+  type = scheme
   dependencies = machine.F,surface_perturbation.F90
 
 ########################################################################

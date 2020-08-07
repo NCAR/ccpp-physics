@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = machine
-  type = properties
+  type = module
   dependencies = 
 
 ########################################################################

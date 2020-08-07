@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = zhaocarr_precpd
-  type = properties
+  type = scheme
   dependencies = funcphys.f90,machine.F,physcons.F90
 
 ########################################################################

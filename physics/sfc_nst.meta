@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = sfc_nst
-  type = properties
+  type = scheme
   dependencies = date_def.f,funcphys.f90,machine.F,module_nst_model.f90,module_nst_parameters.f90,module_nst_water_prop.f90
 
 ########################################################################
@@ -646,9 +646,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = sfc_nst_pre
-  type = properties
+  type = scheme
   dependencies = date_def.f,funcphys.f90,machine.F,module_nst_model.f90,module_nst_parameters.f90,module_nst_water_prop.f90
 
 ########################################################################
@@ -779,9 +779,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = sfc_nst_post
-  type = properties
+  type = scheme
   dependencies = date_def.f,funcphys.f90,machine.F,module_nst_model.f90,module_nst_parameters.f90,module_nst_water_prop.f90
 
 ########################################################################

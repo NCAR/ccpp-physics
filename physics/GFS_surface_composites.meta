@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_surface_composites_pre
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -644,9 +644,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_surface_composites_inter
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -794,9 +794,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_surface_composites_post
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

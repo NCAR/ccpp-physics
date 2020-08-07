@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_stochastics
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

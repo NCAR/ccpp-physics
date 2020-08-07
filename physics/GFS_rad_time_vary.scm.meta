@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_rad_time_vary
-  type = properties
+  type = scheme
   dependencies = machine.F,mersenne_twister.f,physparam.f,radcons.f90
 
 ########################################################################

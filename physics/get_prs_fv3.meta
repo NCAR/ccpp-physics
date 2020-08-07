@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = get_prs_fv3
-  type = properties
+  type = scheme
   dependencies = machine.F,physcons.F90
 
 ########################################################################
@@ -96,9 +96,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = get_phi_fv3
-  type = properties
+  type = scheme
   dependencies = machine.F,physcons.F90
 
 ########################################################################

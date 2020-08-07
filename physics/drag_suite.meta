@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = drag_suite
-  type = properties
+  type = scheme
   dependencies = 
 
 ########################################################################

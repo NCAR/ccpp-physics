@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = h2ophys
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

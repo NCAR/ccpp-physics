@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = rrtmg_lw
-  type = properties
+  type = scheme
   dependencies = mersenne_twister.f,physcons.F90,physparam.f,radlw_datatb.f,radlw_param.f
 
 ########################################################################

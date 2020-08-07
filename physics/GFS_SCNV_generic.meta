@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_SCNV_generic_pre
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -138,9 +138,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_SCNV_generic_post
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

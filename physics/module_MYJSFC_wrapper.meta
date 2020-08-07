@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = myjsfc_wrapper
-  type = properties
+  type = scheme
   dependencies = module_SF_JSFC.F90
 
 ########################################################################

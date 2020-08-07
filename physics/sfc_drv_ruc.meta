@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = lsm_ruc
-  type = properties
+  type = scheme
   dependencies = machine.F,module_sf_ruclsm.F90,module_soil_pre.F90,namelist_soilveg_ruc.F90,set_soilveg_ruc.F90
 
 ########################################################################

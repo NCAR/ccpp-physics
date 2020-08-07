@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = cu_ntiedtke
-  type = properties
+  type = scheme
   dependencies = machine.F,physcons.F90
 
 ########################################################################

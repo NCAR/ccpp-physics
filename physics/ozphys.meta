@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = ozphys
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

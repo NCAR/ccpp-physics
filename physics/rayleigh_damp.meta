@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = rayleigh_damp
-  type = properties
+  type = scheme
   dependencies = 
 
 ########################################################################

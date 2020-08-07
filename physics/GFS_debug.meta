@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_diagtoscreen
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -130,9 +130,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_interstitialtoscreen
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -262,9 +262,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_abort
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -306,9 +306,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_checkland
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

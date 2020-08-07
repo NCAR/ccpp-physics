@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_MP_generic_pre
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -135,9 +135,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_MP_generic_post
-  type = properties
+  type = scheme
   dependencies = calpreciptype.f90,machine.F
 
 ########################################################################

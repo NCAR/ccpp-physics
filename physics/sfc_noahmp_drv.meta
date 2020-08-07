@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = noahmpdrv
-  type = properties
+  type = scheme
   dependencies = funcphys.f90,machine.F,module_sf_noahmp_glacier.f90,module_sf_noahmplsm.f90,noahmp_tables.f90,set_soilveg.f
 
 ########################################################################

@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = lsm_ruc_sfc_sice_pre
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -101,9 +101,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = lsm_ruc_sfc_sice_post
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

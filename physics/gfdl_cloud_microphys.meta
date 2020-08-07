@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = gfdl_cloud_microphys
-  type = properties
+  type = scheme
   dependencies = machine.F,module_mp_radar.F90,module_gfdl_cloud_microphys.F90
 
 ########################################################################

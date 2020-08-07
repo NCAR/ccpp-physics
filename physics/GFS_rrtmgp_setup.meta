@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = GFS_rrtmgp_setup
-  type = properties
+  type = scheme
   dependencies = iounitdef.f,machine.F,module_bfmicrophysics.f,physparam.f,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f
 
 ########################################################################

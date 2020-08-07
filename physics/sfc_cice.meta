@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = sfc_cice
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

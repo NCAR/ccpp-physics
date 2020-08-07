@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = gwdc_pre
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -165,9 +165,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = gwdc
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################
@@ -446,9 +446,9 @@
   optional = F
 
 ########################################################################
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = gwdc_post
-  type = properties
+  type = scheme
   dependencies = machine.F
 
 ########################################################################

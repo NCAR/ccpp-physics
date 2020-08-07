@@ -1,6 +1,6 @@
-[ccpp-scheme-properties]
+[ccpp-table-properties]
   name = mynnsfc_wrapper
-  type = properties
+  type = scheme
   dependencies = machine.F,module_sf_mynn.F90
 
 ########################################################################
