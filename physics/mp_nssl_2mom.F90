@@ -347,6 +347,7 @@ contains
          qg      = qg_mp/(1.0_kind_phys+qv_mp)         
          qh      = qh_mp/(1.0_kind_phys+qv_mp)         
 
+         ! Convert mm output from microphysics to m expected by CCPP
          prcp    = max(0.0, delta_rain_mp/1000.0_kind_phys)
          graupel = max(0.0, delta_graupel_mp/1000.0_kind_phys)
          ice     = max(0.0, delta_ice_mp/1000.0_kind_phys)
