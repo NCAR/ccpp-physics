@@ -9,7 +9,7 @@
 !! This module contain some utility functions for saturation vapor pressure.
       module wv_saturation
 #ifdef GEOS5
-       use MAPL_ConstantsMod, kp => MAPL_kp
+       use MAPL_ConstantsMod, kp => MAPL_R8
 #endif
 #ifdef NEMS_GSM
        use funcphys,  only : fpvsl, fpvsi, fpvs    ! saturation vapor pressure for water & ice
