@@ -5576,7 +5576,7 @@
             do i=1,nprt
               ij = iwk(i)
               print 8004,rla(ij),rlo(ij),fld(ij),fldsmx
- 8004         format(' snow land max. check. lat=',f5.1,i               &
+ 8004         format(' snow land max. check. lat=',f5.1,                &
      &             ' lon=',f6.1,' fld=',e11.4, ' to ',e11.4)
             enddo
           endif
