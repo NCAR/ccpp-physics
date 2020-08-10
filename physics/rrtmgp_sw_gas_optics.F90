@@ -60,14 +60,18 @@ contains
     real(kind_phys) :: &
          press_ref_trop,                  & ! Reference pressure separating the lower and upper atmosphere [Pa]    
          temp_ref_p,                      & ! Standard spectroscopic reference pressure [Pa] 
-         temp_ref_t                         ! Standard spectroscopic reference temperature [K] 
+         temp_ref_t,                      & ! Standard spectroscopic reference temperature [K] 
+	 tsi_default,                     & !
+	 mg_default,                      & !
+	 sb_default                         !
     real(kind_phys), dimension(:), allocatable :: &
          press_ref,                       & ! Pressures for reference atmosphere; press_ref(# reference layers) [Pa] 
          temp_ref,                        & ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K] 
-         solar_source                       ! Stored solar source function from original RRTM 
+    	 solar_quiet,                     & !
+	 solar_facular,                   & !
+	 solar_sunspot                      !
     real(kind_phys), dimension(:,:), allocatable :: &
          band_lims                          ! Beginning and ending wavenumber [cm -1] for each band                         
-
     real(kind_phys), dimension(:,:,:), allocatable :: &
          vmr_ref,                         & ! Volume mixing ratios for reference atmosphere
          kminor_lower,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to
@@ -113,7 +117,7 @@ contains
     ! Read dimensions for k-distribution fields (only on master processor(0))
 !    if (mpirank .eq. mpiroot) then
        ! Open file
-       status = nf90_open(trim(sw_gas_props_file), NF90_WRITE, ncid)
+       status = nf90_open(trim(sw_gas_props_file), NF90_NOWRITE, ncid)
 
        ! Read dimensions for k-distribution fields
        status = nf90_inq_dimid(ncid, 'temperature', dimid)
@@ -172,7 +176,9 @@ contains
        allocate(scale_by_complement_upper(nminor_absorber_intervals_upper))
        allocate(rayl_upper(ngpts, nmixingfracs, ntemps))
        allocate(rayl_lower(ngpts, nmixingfracs, ntemps))
-       allocate(solar_source(ngpts))
+       allocate(solar_quiet(ngpts))
+       allocate(solar_facular(ngpts))	
+       allocate(solar_sunspot(ngpts))
        allocate(temp1(nminor_absorber_intervals_lower))
        allocate(temp2(nminor_absorber_intervals_upper))
        allocate(temp3(nminor_absorber_intervals_lower))
@@ -211,7 +217,13 @@ contains
        status = nf90_inq_varid(ncid, 'absorption_coefficient_ref_P', varID)
        status = nf90_get_var(  ncid, varID, temp_ref_p)
        status = nf90_inq_varid(ncid, 'absorption_coefficient_ref_T', varID)
-       status = nf90_get_var(  ncid, varID, temp_ref_t)       
+       status = nf90_get_var(  ncid, varID, temp_ref_t) 
+       status = nf90_inq_varid(ncid, 'tsi_default', varID)
+       status = nf90_get_var(  ncid, varID, tsi_default)
+       status = nf90_inq_varid(ncid, 'mg_default', varID)
+       status =	nf90_get_var(  ncid, varID, mg_default)
+       status = nf90_inq_varid(ncid, 'sb_default', varID)
+       status =	nf90_get_var(  ncid, varID, sb_default)
        status = nf90_inq_varid(ncid, 'press_ref_trop', varID)
        status = nf90_get_var(  ncid, varID, press_ref_trop)       
        status = nf90_inq_varid(ncid, 'kminor_lower', varID)
@@ -226,8 +238,12 @@ contains
        status = nf90_get_var(  ncid, varID, kminor_start_lower)       
        status = nf90_inq_varid(ncid, 'kminor_start_upper', varID)
        status = nf90_get_var(  ncid, varID, kminor_start_upper)       
-       status = nf90_inq_varid(ncid, 'solar_source', varID)
-       status = nf90_get_var(  ncid, varID, solar_source)       
+       status = nf90_inq_varid(ncid, 'solar_source_quiet', varID)
+       status = nf90_get_var(  ncid, varID, solar_quiet)
+       status = nf90_inq_varid(ncid, 'solar_source_facular', varID)
+       status = nf90_get_var(  ncid, varID, solar_facular)
+       status = nf90_inq_varid(ncid, 'solar_source_sunspot', varID)
+       status = nf90_get_var(  ncid, varID, solar_sunspot)       
        status = nf90_inq_varid(ncid, 'rayl_lower', varID)
        status = nf90_get_var(  ncid, varID, rayl_lower)
        status = nf90_inq_varid(ncid, 'rayl_upper', varID)
@@ -264,7 +280,8 @@ contains
          minor_gases_lower, minor_gases_upper, minor_limits_gpt_lower,minor_limits_gpt_upper,  &
          minor_scales_with_density_lower, minor_scales_with_density_upper, scaling_gas_lower,  &
          scaling_gas_upper, scale_by_complement_lower, scale_by_complement_upper,              &
-         kminor_start_lower, kminor_start_upper, solar_source, rayl_lower, rayl_upper))
+         kminor_start_lower, kminor_start_upper, solar_quiet, solar_facular, solar_sunspot,    &
+	 tsi_default, mg_default, sb_default, rayl_lower, rayl_upper)) 
 
   end subroutine rrtmgp_sw_gas_optics_init
 

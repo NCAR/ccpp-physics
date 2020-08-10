@@ -79,6 +79,7 @@
   real(kind=kind_phys),parameter:: con_jcal   =4.1855E+0_kind_phys                 !< joules per calorie
   real(kind=kind_phys),parameter:: con_rhw0   =1022.0_kind_phys                    !< sea water reference density (\f$kg/m^{3}\f$)
   real(kind=kind_phys),parameter:: con_epsq   =1.0E-12_kind_phys                   !< min q for computing precip type
+  real(kind=kind_phys),parameter:: con_epsqs  =1.0E-10_kind_phys
   ! Selected thermodynamics constants with kind=kind_dyn
   real(kind=kind_dyn), parameter:: con_rd_dyn   =2.8705e+2_kind_dyn                !< gas constant air (\f$J/kg/K\f$)
   real(kind=kind_dyn), parameter:: con_rv_dyn   =4.6150e+2_kind_dyn                !< gas constant H2O (\f$J/kg/K\f$)
@@ -136,6 +137,9 @@
   real(kind=kind_phys),parameter:: rhowater   = 1000._kind_phys                    !< density of water (kg/m^3)
   real(kind=kind_phys),parameter:: rhosnow    = 100._kind_phys                     !< density of snow (kg/m^3)
   real(kind=kind_phys),parameter:: rhoair     = 1.28_kind_phys                     !< density of air near surface (kg/m^3)
+
+! Decorrelation length constant (km) for iovrlw/iovrsw = 4 or 5 and idcor = 0
+  real(kind=kind_phys),parameter:: decorr_con = 2.50_kind_phys
 
 !........................................!
       end module physcons                !
