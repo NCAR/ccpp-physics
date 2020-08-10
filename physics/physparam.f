@@ -234,6 +234,8 @@
 !!\n =1:use maximum-random cloud overlapping method
 !!\n =2:use maximum cloud overlapping method
 !!\n =3:use decorrelation length overlapping method
+!!\n =4:use exponential overlapping method
+!!\n =5:use exponential-random overlapping method
 !!\n Opr GFS/CFS=1; see IOVR_SW in run scripts
       integer, save :: iovrsw  = 1
 !> cloud overlapping control flag for LW
@@ -241,9 +243,15 @@
 !!\n =1:use maximum-random cloud overlapping method
 !!\n =2:use maximum cloud overlapping method
 !!\n =3:use decorrelation length overlapping method
+!!\n =4:use exponential overlapping method
+!!\n =5:use exponential-random overlapping method
 !!\n Opr GFS/CFS=1; see IOVR_LW in run scripts
       integer, save :: iovrlw  = 1
-
+!!\n Decorrelation length type for iovrlw/iovrsw = 4 or 5
+!!\n =0:use constant decorrelation length defined by decorr_con (in module physcons)
+!!\n =1:use day-of-year and latitude-varying decorrelation length
+      integer, save :: idcor   = 1
+      
 !> sub-column cloud approx flag in SW radiation
 !!\n =0:no McICA approximation in SW radiation
 !!\n =1:use McICA with precribed permutation seeds (test mode)

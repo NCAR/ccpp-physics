@@ -554,7 +554,8 @@ contains
   ! subroutine rrtmg_lw_cloud_optics
   ! #######################################################################################
   subroutine rrtmg_lw_cloud_optics(ncol, nlay, nBandsLW, cld_lwp, cld_ref_liq, cld_iwp,  &
-       cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow, cld_frac, tau_cld)
+       cld_ref_ice, cld_rwp, cld_ref_rain, cld_swp, cld_ref_snow, cld_frac, tau_cld,     &
+       tau_precip)
     ! Inputs
     integer,intent(in) :: &
          nBandsLW,     & ! Number of spectral bands
@@ -573,14 +574,16 @@ contains
 
      ! Outputs
      real(kind_phys),dimension(ncol,nlay,nBandsLW),intent(out) :: &
-          tau_cld       
-
+          tau_cld,     & ! Cloud optical-depth                    (1)     
+          tau_precip     ! Precipitation optical-depth            (1)
+	
      ! Local variables
      integer :: ij,ik,ib,index,ia
      real(kind_phys) :: factor,fint,cld_ref_iceTemp,tau_snow, tau_rain
      real(kind_phys),dimension(nBandsLW)  :: tau_liq, tau_ice
 
-     tau_cld(:,:,:) = 0._kind_phys
+     tau_cld(:,:,:)    = 0._kind_phys
+     tau_precip(:,:,:) = 0._kind_phys
 
      if (ilwcliq .gt. 0) then 
         do ij=1,ncol
@@ -655,167 +658,11 @@ contains
               endif
               ! Cloud optical depth
               do ib = 1, nBandsLW
-                 tau_cld(ij,ik,ib) = tau_ice(ib) + tau_liq(ib) + tau_rain + tau_snow
+                 tau_cld(ij,ik,ib)    = tau_ice(ib) + tau_liq(ib) 
+                 tau_precip(ij,ik,ib) = tau_rain + tau_snow
               enddo
            end do
         end do
      endif
    end subroutine rrtmg_lw_cloud_optics
-   ! #######################################################################################
-   ! SUBROUTINE mcica_subcol_lw
-   ! #######################################################################################
-   subroutine mcica_subcol_lw(ncol, nlay, ngpts, cld_frac, icseed,  dzlyr, de_lgth, cld_frac_mcica)
-     ! Inputs
-    integer,intent(in) :: &
-         ncol,         & ! Number of horizontal gridpoints
-         nlay,         & ! Number of vertical layers
-         ngpts           ! Number of spectral g-points
-    integer,dimension(ncol),intent(in) :: &
-         icseed          ! Permutation seed for each column.
-    real(kind_phys), dimension(ncol), intent(in) :: &
-         de_lgth         ! Cloud decorrelation length (km)
-    real(kind_phys), dimension(ncol,nlay), intent(in) :: &
-         cld_frac,     & ! Cloud-fraction  
-         dzlyr           ! Layer thinkness (km)
-    ! Outputs
-    !real(kind_phys),dimension(ncol,nlay,ngpts),intent(out) :: &
-    logical,dimension(ncol,nlay,ngpts),intent(out) :: &
-         cld_frac_mcica
-    ! Local variables
-    type(random_stat) :: stat
-    integer :: icol,n,k,k1
-    real(kind_phys) :: tem1
-    real(kind_phys),dimension(ngpts) :: rand1D
-    real(kind_phys),dimension(nlay*ngpts) :: rand2D
-    real(kind_phys),dimension(ngpts,nlay) :: cdfunc,cdfun2
-    real(kind_phys),dimension(nlay) :: fac_lcf
-    logical,dimension(ngpts,nlay) :: lcloudy
-
-    ! Loop over all columns
-    do icol=1,ncol
-       ! Call random_setseed() to advance random number generator by "icseed" values.
-       call random_setseed(icseed(icol),stat)
-
-       ! ###################################################################################
-       ! Sub-column set up according to overlapping assumption:
-       !  - For random overlap, pick a random value at every level 
-       !  - For max-random overlap, pick a random value at every level
-       !  - For maximum overlap, pick same random numebr at every level
-       ! ###################################################################################
-       select case ( iovrlw )
-       ! ###################################################################################
-       ! 0) Random overlap
-       ! ###################################################################################
-       case( 0 )
-          call random_number(rand2D,stat)
-          k1 = 0
-          do n = 1, ngpts
-             do k = 1, nlay
-                k1 = k1 + 1
-                cdfunc(n,k) = rand2d(k1)
-             enddo
-          enddo
-
-       ! ###################################################################################
-       ! 1) Maximum-random overlap
-       ! ###################################################################################
-       case(1)
-          call random_number(rand2D,stat)
-          k1 = 0
-          do n = 1, ngpts
-             do k = 1, nlay
-                k1 = k1 + 1
-                cdfunc(n,k) = rand2d(k1)
-             enddo
-          enddo          
-
-          ! First pick a random number for bottom (or top) layer.
-          ! then walk up the column: (aer's code)
-          ! if layer below is cloudy, use the same rand num in the layer below
-          ! if layer below is clear,  use a new random number
-          do k = 2, nlay
-             k1 = k - 1
-             tem1 = 1._kind_phys - cld_frac(icol,k1)
-             do n = 1, ngpts
-                if ( cdfunc(n,k1) > tem1 ) then
-                   cdfunc(n,k) = cdfunc(n,k1)
-                else
-                   cdfunc(n,k) = cdfunc(n,k) * tem1
-                endif
-             enddo
-          enddo
-
-       ! ###################################################################################
-       ! 2) Maximum overlap
-       ! ###################################################################################
-       case(2)
-          call random_number(rand1d,stat)
-          do n = 1, ngpts
-             tem1 = rand1d(n)
-             do k = 1, nlay
-                cdfunc(n,k) = tem1
-             enddo
-          enddo
-
-       ! ###################################################################################
-       ! 3) Decorrelation length
-       ! ###################################################################################
-       case(3)
-          ! Compute overlapping factors based on layer midpoint distances and decorrelation 
-          ! depths
-          do k = nlay, 2, -1
-             fac_lcf(k) = exp( -0.5 * (dzlyr(iCol,k)+dzlyr(iCol,k-1)) / de_lgth(iCol) )
-          enddo
-
-          ! Setup 2 sets of random numbers
-          call random_number ( rand2d, stat )
-          k1 = 0
-          do k = 1, nlay
-             do n = 1, ngpts
-                k1 = k1 + 1
-                cdfunc(n,k) = rand2d(k1)
-             enddo
-          enddo
-          !
-          call random_number ( rand2d, stat )
-          k1 = 0
-          do k = 1, nlay
-             do n = 1, ngpts
-                k1 = k1 + 1
-                cdfun2(n,k) = rand2d(k1)
-             enddo
-          enddo
-
-          ! Then working from the top down:
-          !   if a random number (from an independent set -cdfun2) is smaller then the
-          !   scale factor: use the upper layer's number,  otherwise use a new random
-          !   number (keep the original assigned one).
-          do k = nlay-1, 1, -1
-             k1 = k + 1
-             do n = 1, ngpts
-                if ( cdfun2(n,k) <= fac_lcf(k1) ) then
-                   cdfunc(n,k) = cdfunc(n,k1)
-                endif
-             enddo
-          enddo
-
-       end select
-       
-       ! ###################################################################################
-       ! Generate subcolumn cloud mask (.false./.true. for clear/cloudy)
-       ! ###################################################################################
-       do k = 1, nlay
-          tem1 = 1._kind_phys - cld_frac(icol,k)
-          do n = 1, ngpts
-             lcloudy(n,k) = cdfunc(n,k) >= tem1
-             if (lcloudy(n,k)) then
-                cld_frac_mcica(icol,k,n) = .true.
-             else
-                cld_frac_mcica(icol,k,n) = .false.
-             endif
-          enddo
-       enddo
-    enddo ! END LOOP OVER COLUMNS
-  end subroutine mcica_subcol_lw
-
 end module mo_rrtmg_lw_cloud_optics

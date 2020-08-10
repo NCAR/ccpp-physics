@@ -94,6 +94,33 @@
   kind = kind_phys
   intent = in
   optional = F
+[precip_frac]
+  standard_name = precipitation_fraction_by_layer
+  long_name = precipitation fraction in each layer
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
+[cloud_overlap_param]
+  standard_name = cloud_overlap_param
+  long_name = cloud overlap parameter
+  units = km
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[precip_overlap_param]
+  standard_name = precip_overlap_param
+  long_name = precipitation overlap parameter
+  units = km
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [lw_gas_props]
   standard_name = coefficients_for_lw_gas_optics
   long_name = DDT containing spectral information for RRTMGP LW radiation scheme
@@ -110,6 +137,14 @@
   type = ty_optical_props_1scl
   intent = in
   optional = F
+[lw_optical_props_precipByBand]
+  standard_name = longwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = in
+  optional = F    
 [lw_optical_props_clouds]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere
   long_name = Fortran DDT containing RRTMGP optical properties
@@ -118,6 +153,14 @@
   type = ty_optical_props_1scl
   intent = out
   optional = F
+[lw_optical_props_precip]
+  standard_name = longwave_optical_properties_for_precipitation
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = out
+  optional = F    
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
