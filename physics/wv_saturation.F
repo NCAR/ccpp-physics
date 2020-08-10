@@ -13,9 +13,8 @@
 #endif
 #ifdef NEMS_GSM
        use funcphys,  only : fpvsl, fpvsi, fpvs    ! saturation vapor pressure for water & ice
-#endif
        use machine,   only : kp => kind_phys
-
+#endif
 
 !++jtb (comm out)
 
