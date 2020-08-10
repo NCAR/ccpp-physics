@@ -294,44 +294,6 @@
           endif
         endif
 
-        if (frac_grid) then
-          do i=1,im
-            tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
-            if (flag_cice(i)) then
-              adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                           + ulwsfc_cice(i)   * tem                     &
-                           + adjsfculw_wat(i) * (one - frland(i) - tem)
-            else
-              adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                           + adjsfculw_ice(i) * tem                     &
-                           + adjsfculw_wat(i) * (one - frland(i) - tem)
-            endif
-          enddo
-        else
-          do i=1,im
-            if (dry(i)) then                     ! all land
-              adjsfculw(i) = adjsfculw_lnd(i)
-            elseif (icy(i)) then                 ! ice (and water)
-              tem = one - cice(i)
-              if (flag_cice(i)) then
-                if (wet(i) .and. abs(adjsfculw_wat(i)-huge) > epsln) then
-                  adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_wat(i)*tem
-                else
-                  adjsfculw(i) = ulwsfc_cice(i)
-                endif
-              else
-                if (wet(i) .and. abs(adjsfculw_wat(i)-huge) > epsln) then
-                  adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_wat(i)*tem
-                else
-                  adjsfculw(i) = adjsfculw_ice(i)
-                endif
-              endif
-            else                                 ! all water
-              adjsfculw(i) = adjsfculw_wat(i)
-            endif
-          enddo
-        endif
-
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf
           ulwsfc(i) = ulwsfc(i) + adjsfculw(i)*dtf
