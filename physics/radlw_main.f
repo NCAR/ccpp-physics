@@ -2060,7 +2060,7 @@
 !
 !       NOTE: The code below is identical for case (4) and (5) because the 
 !       distinction in the vertical correlation between EXP and ER is already 
-!       built into the specification of alpha (in subroutine get_alpha). 
+!       built into the specification of alpha (in subroutine get_alpha_exp). 
 
 !  ---  setup 2 sets of random numbers
 

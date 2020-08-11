@@ -341,6 +341,14 @@
   type = integer
   intent = in
   optional = F
+[iovr]
+  standard_name = flag_for_max_random_overlap_clouds_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

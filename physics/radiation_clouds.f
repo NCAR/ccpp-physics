@@ -837,9 +837,9 @@
         enddo
       endif
 
-!>  - Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
       if ( iovr == 4 .or. iovr == 5 ) then 
-        call get_alpha                                                  &
+        call get_alpha_exp                                              &
 !  ---  inputs:
      &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
 !  ---  outputs:
@@ -1309,9 +1309,9 @@
         enddo
       endif
 
-!>  - Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
       if ( iovr == 4 .or. iovr == 5 ) then 
-        call get_alpha                                                  &
+        call get_alpha_exp                                              &
 !  ---  inputs:
      &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
 !  ---  outputs:
@@ -1732,9 +1732,9 @@
         enddo
       endif
 
-!>  - Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
       if ( iovr == 4 .or. iovr == 5 ) then 
-        call get_alpha                                                  &
+        call get_alpha_exp                                              &
 !  ---  inputs:
      &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
 !  ---  outputs:
@@ -2095,9 +2095,9 @@
         enddo
       endif
 
-!>  - Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
       if ( iovr == 4 .or. iovr == 5 ) then 
-        call get_alpha                                                  &
+        call get_alpha_exp                                              &
 !  ---  inputs:
      &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
 !  ---  outputs:
@@ -2449,9 +2449,9 @@
         enddo
       endif
 
-!>  - Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
       if ( iovr == 4 .or. iovr == 5 ) then 
-        call get_alpha                                                  &
+        call get_alpha_exp                                              &
 !  ---  inputs:
      &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
 !  ---  outputs:
@@ -2817,9 +2817,9 @@
         enddo
       endif
 
-!>  - Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
       if ( iovr == 4 .or. iovr == 5 ) then 
-        call get_alpha                                                  &
+        call get_alpha_exp                                              &
 !  ---  inputs:
      &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
 !  ---  outputs:
@@ -3212,9 +3212,9 @@
         enddo
       endif
 
-!>  - Call subroutine get_alpha to define alpha parameter for EXP and ER cloud overlap options
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
       if ( iovr == 4 .or. iovr == 5 ) then 
-        call get_alpha                                                  &
+        call get_alpha_exp                                              &
 !  ---  inputs:
      &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
 !  ---  outputs:
@@ -3761,7 +3761,7 @@
 !  random, and blocks of cloudy layers separated by one or more         !
 !  clear layers are correlated randomly.                                !
 !                                                                       !
-! usage:        call get_alpha                                          !
+! usage:        call get_alpha_exp                                      !
 !                                                                       !
 ! subprograms called:  none                                             !
 !                                                                       !
