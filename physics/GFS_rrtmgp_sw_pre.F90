@@ -40,17 +40,16 @@ contains
          me,                & ! Current MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
-         n_var_lndp         &  ! Number of surface variables perturbed
+         n_var_lndp,        &  ! Number of surface variables perturbed
          lndp_type             ! Type of land perturbations scheme used
-    character(len=3), dimension(n_var_lndp), intent(in) :: 
+    character(len=3), dimension(n_var_lndp), intent(in) ::  & 
          lndp_var_list
-    real(kind_phys), dimension(n_var_lndp), intent(in) :: 
+    real(kind_phys), dimension(n_var_lndp), intent(in) ::   &
          lndp_prt_list
     logical,intent(in) :: &
-         lsswr,             ! Call RRTMGP SW radiation?
+         lsswr             ! Call RRTMGP SW radiation?
     real(kind_phys), intent(in) :: &
-         solhr                ! Time in hours after 00z at the current timestep
-         lndp_alb              ! Magnitude of surface albedo perturbation (frac)
+         solhr                 ! Time in hours after 00z at the current timestep
     real(kind_phys), dimension(nCol), intent(in) :: &
          lsmask,            & ! Landmask: sea/land/ice=0/1/2
          lon,               & ! Longitude
