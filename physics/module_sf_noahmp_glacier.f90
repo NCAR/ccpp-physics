@@ -1111,6 +1111,8 @@ contains
         dtg    = 0.
         mozsgn = 0
         mozold = 0.
+        moz    = 0.
+
         h      = 0.
         fv     = 0.1
 

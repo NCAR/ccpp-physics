@@ -473,6 +473,7 @@
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
+   var_temp2 = 0.
 
 
 !--------------------------------------------------------------------

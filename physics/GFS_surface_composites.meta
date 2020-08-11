@@ -9,6 +9,14 @@
   type = integer
   intent = in
   optional = F
+[lkm]
+  standard_name = flag_for_lake_surface_scheme
+  long_name = flag for lake surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [frac_grid]
   standard_name = flag_for_fractional_grid
   long_name = flag for fractional grid
@@ -54,6 +62,15 @@
   standard_name = lake_area_fraction
   long_name = fraction of horizontal grid area occupied by lake
   units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lakedepth]
+  standard_name = lake_depth
+  long_name = lake depth
+  units = m
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
