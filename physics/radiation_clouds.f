@@ -257,7 +257,8 @@
       integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
-     &                 cld_init, progcld5, progcld4o, gethml, get_alpha
+     &                 cld_init, progcld5, progcld4o, gethml,           &
+     &                 get_alpha_dcorr, get_alpha_exp
 
 
 ! =================
@@ -3678,12 +3679,42 @@
       end subroutine gethml
 !-----------------------------------
 !! @}
-
+ ! #########################################################################################
+  ! Subroutine to compute cloud-overlap parameter, alpha, for decorrelation-length cloud
+  ! overlap assumption.
+  ! #########################################################################################
+      subroutine get_alpha_dcorr(nCol, nLev, lat, con_pi, deltaZ,       &
+     &     de_lgth, cloud_overlap_param)
+      
+      integer, intent(in) :: nCol, nLev
+      real(kind_phys), intent(in) :: con_pi
+      real(kind_phys), dimension(nCol), intent(in) :: lat
+      real(kind_phys), dimension(nCol,nLev),intent(in) :: deltaZ
+      real(kind_phys), dimension(nCol),intent(out) :: de_lgth 
+      real(kind_phys), dimension(nCol,nLev),intent(out) ::              &
+     &     cloud_overlap_param
+         
+      ! Local
+      integer :: iCol, iLay 
+                     
+      do iCol =1,nCol
+         de_lgth(iCol) = max( 0.6, 2.78-4.6*abs(lat(iCol)/con_pi) )
+         do iLay=nLev,2,-1
+            if (de_lgth(iCol) .gt. 0) then
+               cloud_overlap_param(iCol,iLay-1) =                       &
+     &              exp( -0.5 * (deltaZ(iCol,iLay)+deltaZ(iCol,iLay-1))/&
+     &              de_lgth(iCol))
+            endif
+         enddo
+      enddo
+      end subroutine get_alpha_dcorr
+  
+  ! #########################################################################################
 !> \ingroup module_radiation_clouds
 !! This program derives the exponential transition, alpha, from maximum to
 !! random overlap needed to define the fractional cloud vertical correlation
 !! for the exponential (EXP, iovrlp=4) or the exponential-random (ER, iovrlp=5)
-!! cloud overlap options for RRTMG. For exponential, the transition from
+!! cloud overlap options for RRTMG/RRTMGP. For exponential, the transition from
 !! maximum to random with distance through model layers occurs without regard
 !! to the configuration of clear and cloudy layers. For the ER method, each 
 !!  block of adjacent cloudy layers is treated with a separate transition from
@@ -3710,7 +3741,7 @@
 !!
 !>\section detail Detailed Algorithm
 !! @{
-      subroutine get_alpha                                               &
+      subroutine get_alpha_exp                                           &
 !  ---  inputs:
      &      (nlon, nlay, dzlay, iovrlp, latdeg, juldat, yearlen, cldf,   &
 !  ---  outputs:
@@ -3857,7 +3888,7 @@
 
       return
 
-      end subroutine get_alpha
+      end subroutine get_alpha_exp
 !-----------------------------------
 !! @}
 !
