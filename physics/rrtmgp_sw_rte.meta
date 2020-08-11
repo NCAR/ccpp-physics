@@ -9,6 +9,14 @@
   type = logical
   intent = in
   optional = F
+[doSWclrsky]
+  standard_name = flag_for_output_of_shortwave_heating_rate
+  long_name = flag to output sw heating rate (Radtend%swhc)
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -215,15 +223,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[hswb]
-  standard_name = RRTMGP_sw_heating_rate_spectral
-  long_name = shortwave total sky heating rate (spectral)
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_sw_spectral_points_rrtmgp)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = T
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

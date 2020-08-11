@@ -9,6 +9,22 @@
   type = logical
   intent = in
   optional = F
+[doLWclrsky]
+  standard_name = flag_for_output_of_longwave_heating_rate
+  long_name = flag to output lw heating rate (Radtend%lwhc)
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F  
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical 
+  intent = in
+  optional = F  
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -118,24 +134,6 @@
   type = ty_source_func_lw
   intent = in
   optional = F
-[hlwb]
-  standard_name = RRTMGP_lw_heating_rate_spectral
-  long_name = RRTMGP longwave total sky heating rate (spectral)
-  units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_lw_spectral_points_rrtmgp)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = T
-[secdiff]
-  standard_name = secant_of_diffusivity_angle_each_RRTMGP_LW_band
-  long_name = secant of diffusivity angle in each RRTMGP LW band
-  units = none
-  dimensions = (number_of_lw_bands_rrtmgp,horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [fluxlwUP_allsky]
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
@@ -172,6 +170,24 @@
   kind = kind_phys
   intent = out
   optional = F
+[fluxlwUP_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
+  long_name = RRTMGP Jacobian upward longwave flux profile
+  units = W m-2 K-1
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = T
+[fluxlwDOWN_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_profile_downward
+  long_name = RRTMGP Jacobian downward of longwave flux profile
+  units = W m-2 K-1
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = T 
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

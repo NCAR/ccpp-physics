@@ -144,6 +144,7 @@
 
   use machine, only: kind_phys
   real(kind=kind_phys), parameter :: one = 1.0d0
+  logical :: linit_mod  = .false. 
 
   contains
 
@@ -157,11 +158,11 @@
 !! \htmlinclude GFS_suite_interstitial_2_run.html
 !!
 #endif
-    subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,       &
-      do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm,    &
-      work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,         &
-      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,         &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, errmsg, errflg)
+    subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
+      do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
+      work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
+      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_GP_jacobian, skt, sktp1r, fluxlwUP, fluxlwUP_jac, errmsg, errflg)
 
       implicit none
 
@@ -178,11 +179,21 @@
       real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
       real(kind=kind_phys), intent(in   ), dimension(im, levs+1) :: prsi
       real(kind=kind_phys), intent(in   ), dimension(im, levs, 6) :: lwhd
-
       integer,              intent(inout), dimension(im) :: kinver
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
       real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
       real(kind=kind_phys), intent(  out), dimension(im) :: adjsfculw
+      
+      ! RRTMGP	
+      logical,              intent(in   ) :: &
+           use_GP_jacobian   ! Use RRTMGP LW Jacobian of upwelling to adjust the surface flux?
+      real(kind=kind_phys), intent(in   ), dimension(im) :: &
+           skt               ! Skin temperature
+      real(kind=kind_phys), intent(inout), dimension(im) :: &
+           sktp1r            ! Skin temperature at previous timestep
+      real(kind=kind_phys), intent(in   ), dimension(im,levs+1), optional :: &
+           fluxlwUP,       & ! Upwelling LW flux (W/m2)
+           fluxlwUP_jac      ! Jacobian of upwelling LW flux (W/m2/K)
 
       ! These arrays are only allocated if ldiag3d is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
@@ -199,7 +210,7 @@
       integer :: i, k
       real(kind=kind_phys) :: tem1, tem2, tem, hocp
       logical, dimension(im) :: invrsn
-      real(kind=kind_phys), dimension(im) :: tx1, tx2
+      real(kind=kind_phys), dimension(im) :: tx1, tx2, dT
 
       real(kind=kind_phys), parameter :: qmin = 1.0d-10
 
@@ -225,6 +236,61 @@
         enddo
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
+
+!  --- ... when using RRTMGP w/ use_GP_jacobian, these adjustment factors are pre-computed
+!  --- ... and provided as inputs in this routine.
+        
+	if (use_GP_jacobian) then
+           ! Compute adjustment to the surface flux using Jacobian.
+           if(linit_mod) then
+              dT(:)        = (skt(:) - sktp1r(:)) 
+              adjsfculw(:) = fluxlwUP(:,1) + fluxlwUP_jac(:,1)  * dT(:)
+           else
+              adjsfculw(:) = 0.
+              linit_mod    = .true.
+           endif
+  
+           ! Store surface temperature for next iteration
+           sktp1r(:) = skt(:)       
+	else
+           if (frac_grid) then
+             do i=1,im
+               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
+               if (flag_cice(i)) then
+                 adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                              + ulwsfc_cice(i)   * tem                     &
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
+                else
+                 adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                              + adjsfculw_ice(i) * tem                     &
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
+               endif
+             enddo
+           else
+             do i=1,im
+               if (dry(i)) then                     ! all land
+                 adjsfculw(i) = adjsfculw_lnd(i)
+               elseif (icy(i)) then                 ! ice (and water)
+                 tem = one - cice(i)
+                 if (flag_cice(i)) then
+                   if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                     adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_wat(i)*tem
+                   else
+                     adjsfculw(i) = ulwsfc_cice(i)
+                   endif
+                 else
+                   if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                     adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_wat(i)*tem
+                   else
+                     adjsfculw(i) = adjsfculw_ice(i)
+                   endif
+                 endif
+               else                                 ! all water
+                 adjsfculw(i) = adjsfculw_wat(i)
+               endif
+             enddo
+           endif
+	    endif
 
         if (frac_grid) then
           do i=1,im

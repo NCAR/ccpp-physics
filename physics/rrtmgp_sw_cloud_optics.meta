@@ -1,14 +1,30 @@
 [ccpp-arg-table]
   name = rrtmgp_sw_cloud_optics_init
   type = scheme
-[cld_optics_scheme]
-  standard_name = rrtmgp_cloud_optics_flag
-  long_name = Flag to control which RRTMGP cloud-optics scheme
+[doG_cldoptics]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMG
+  long_name = logical flag to control cloud optics scheme.
   units = flag
-  dimensions =  ()
-  type = integer
+  dimensions = ()
+  type = logical
   intent = in
-  optional = F
+  optional = F  
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F 
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F     
 [nrghice]
   standard_name = number_of_rrtmgp_ice_roughness
   long_name = number of ice-roughness categories in RRTMGP calculation
@@ -113,14 +129,30 @@
   type = integer
   intent = in
   optional = F
-[cld_optics_scheme]
-  standard_name = rrtmgp_cloud_optics_flag
-  long_name = Flag to control which RRTMGP cloud-optics scheme
+[doG_cldoptics]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMG
+  long_name = logical flag to control cloud optics scheme.
   units = flag
-  dimensions =  ()
-  type = integer
+  dimensions = ()
+  type = logical
   intent = in
-  optional = F
+  optional = F  
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F 
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F   
 [nrghice]
   standard_name = number_of_rrtmgp_ice_roughness
   long_name = number of ice-roughness categories in RRTMGP calculation
@@ -210,6 +242,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[precip_frac]
+  standard_name = precipitation_fraction_by_layer
+  long_name = precipitation fraction in each layer
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [sw_cloud_props]
   standard_name = coefficients_for_sw_cloud_optics
   long_name = DDT containing spectral information for cloudy RRTMGP SW radiation scheme
@@ -250,6 +291,14 @@
   type = ty_optical_props_2str
   intent = out
   optional = F
+[sw_optical_props_precipByBand]
+  standard_name = shortwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_2str
+  intent = out
+  optional = F  
 [cldtausw]
   standard_name = RRTMGP_cloud_optical_depth_layers_at_0_55mu_band
   long_name = approx .55mu band layer cloud optical depth
