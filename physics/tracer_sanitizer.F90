@@ -59,7 +59,7 @@ contains
         tracers(:,:,ntiw)=zero
       end where
       ! Adjust second moments
-      if (ntlnc>0) then
+      if (ntinc>0) then
         where (tracers(:,:,ntinc)==zero)
           tracers(:,:,ntinc)=zero
         end where
@@ -72,7 +72,7 @@ contains
         tracers(:,:,ntrw)=zero
       end where
       ! Adjust second moments
-      if (ntlnc>0) then
+      if (ntrnc>0) then
         where (tracers(:,:,ntrnc)==zero)
           tracers(:,:,ntrnc)=zero
         end where
@@ -85,7 +85,7 @@ contains
         tracers(:,:,ntsw)=zero
       end where
       ! Adjust second moments
-      if (ntlnc>0) then
+      if (ntsnc>0) then
         where (tracers(:,:,ntsnc)==zero)
           tracers(:,:,ntsnc)=zero
         end where
@@ -98,7 +98,7 @@ contains
         tracers(:,:,ntgl)=zero
       end where
       ! Adjust second moments
-      if (ntlnc>0) then
+      if (ntgnc>0) then
         where (tracers(:,:,ntgnc)==zero)
           tracers(:,:,ntgnc)=zero
         end where
