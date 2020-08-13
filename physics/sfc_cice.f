@@ -44,9 +44,9 @@
      &     ( im, cplflx, hvap, cp, rvrdm1, rd,                          &
      &       t1, q1, cm, ch, prsl1,                                     &
      &       wind, flag_cice, flag_iter, dqsfc, dtsfc,                  &
-     &       dusfc, dvsfc,                                              &
+     &       dusfc, dvsfc, snowd,                                       &
 !  ---  outputs:
-     &       qsurf, cmm, chh, evap, hflx, stress,                       &
+     &       qsurf, cmm, chh, evap, hflx, stress, weasd, snwdph, ep,    &
      &       errmsg, errflg
      &     )
 
@@ -61,9 +61,9 @@
 !          ( im, cplflx, hvap, cp, rvrdm1, rd,                          !
 !            t1, q1, cm, ch, prsl1,                                     !
 !            wind, flag_cice, flag_iter, dqsfc, dtsfc,                  !
-!            dusfc, dvsfc,                                              !
+!            dusfc, dvsfc, snowd,                                       !
 !       outputs:                                                        !
-!            qsurf, cmm, chh, evap, hflx, stress)                       !
+!            qsurf, cmm, chh, evap, hflx, stress, weasd, snwdph, ep)    !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
 !                                                                       !
@@ -81,6 +81,7 @@
 !     dtsfc    - real, sensible heat flux
 !     dusfc    - real, zonal momentum stress
 !     dvsfc    - real, meridional momentum stress
+!     snowd    - real, snow depth from cice
 !  outputs:
 !     qsurf    - real, specific humidity at sfc
 !     cmm      - real, ?
@@ -88,12 +89,17 @@
 !     evap     - real, evaperation from latent heat
 !     hflx     - real, sensible heat
 !     stress   - real, surface stress
+!     weasd    - real, water equivalent accumulated snow depth (mm)
+!     snwdph   - real, water equivalent snow depth (mm)
+!     ep       - real, potential evaporation
 !  ====================    end of description    =====================  !
 !
 !
       use machine , only : kind_phys
       implicit none
 
+      real(kind=kind_phys), parameter   :: one = 1.0_kind_phys
+      real(kind=kind_phys), parameter   :: dsi = one/0.33_kind_phys
       real (kind=kind_phys), intent(in) :: hvap, cp, rvrdm1, rd
 
 !  ---  inputs:
@@ -103,12 +109,14 @@
 !     real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,       &
       real (kind=kind_phys), dimension(im), intent(in) ::               &
      &       t1, q1, cm, ch, prsl1, wind, dqsfc, dtsfc, dusfc, dvsfc
+     &,      snowd
 
       logical,                intent(in) :: flag_cice(im), flag_iter(im)
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(out) :: qsurf,       &
+      real (kind=kind_phys), dimension(im), intent(inout) :: qsurf,     &
      &                                  cmm, chh, evap, hflx, stress
+     &,                                 weasd, snwdph, ep
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -127,24 +135,32 @@
 !
       if (.not. cplflx) return
 !
-      cpinv = 1.0/cp
-      hvapi = 1.0/hvap
+      cpinv = one / cp
+      hvapi = one / hvap
       elocp = hvap/cp
 !
       do i = 1, im
         if (flag_cice(i) .and. flag_iter(i)) then
 
           rho    = prsl1(i)                                             &
-     &           / (rd * t1(i) * (1.0 + rvrdm1*max(q1(i), 1.0e-8)))
+     &      / (rd * t1(i) * (one + rvrdm1*max(q1(i), 1.0e-8_kind_phys)))
 
           cmm(i) = wind(i) * cm(i)
           chh(i) = wind(i) * ch(i) * rho
 
           qsurf(i)  = q1(i) + dqsfc(i) / (hvap*chh(i))
-          tem       = 1.0 / rho
+          tem       = one / rho
           hflx(i)   = dtsfc(i) * tem * cpinv
           evap(i)   = dqsfc(i) * tem * hvapi
           stress(i) = sqrt(dusfc(i)*dusfc(i) + dvsfc(i)*dvsfc(i)) * tem
+
+          snwdph(i) = snowd(i)  * 1000.0_kind_phys
+          weasd(i)  = snwdph(i) * 0.33_kind_phys
+
+!         weasd(i)  = snowd(i) * 1000.0_kind_phys
+!         snwdph(i) = weasd(i) * dsi           ! snow depth in mm
+
+          ep(i)     = evap(i)
         endif
       enddo
  
