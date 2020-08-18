@@ -515,14 +515,6 @@
   type = logical
   intent = in
   optional = F
-[lsidea]
-  standard_name = flag_idealized_physics
-  long_name = flag for idealized physics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [ntoz]
   standard_name = index_for_ozone
   long_name = tracer index for ozone mixing ratio
