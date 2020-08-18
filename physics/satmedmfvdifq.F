@@ -1425,14 +1425,14 @@ c
         do  k = 1,km
           do i = 1,im
             ttend      = (f1(i,k)-t1(i,k))*rdt
-            dt3dt(i,k) = dt3dt(i,k)+dspfac*ttend*delt
+            dt3dt(i,k) = dt3dt(i,k)+ttend*delt
           enddo
         enddo
         if(qdiag3d) then
           do  k = 1,km
             do i = 1,im
               qtend      = (f2(i,k)-q1(i,k,1))*rdt
-              dq3dt(i,k) = dq3dt(i,k)+dspfac*qtend*delt
+              dq3dt(i,k) = dq3dt(i,k)+qtend*delt
             enddo
           enddo
         endif
