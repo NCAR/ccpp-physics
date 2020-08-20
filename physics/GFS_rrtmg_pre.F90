@@ -32,7 +32,7 @@
           faersw1,  faersw2,  faersw3,                               &
           faerlw1, faerlw2, faerlw3, aerodp,                         &
           clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,      &
-          clouds7, clouds8, clouds9, cldsa,                          &
+          clouds7, clouds8, clouds9, cldsa, cldfra,                  &
           mtopa, mbota, de_lgth, alb1d, errmsg, errflg)
 
       use machine,                   only: kind_phys
@@ -123,7 +123,7 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(inout) :: clouds1, &
                                                              clouds2, clouds3, clouds4, clouds5
       real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(out)   :: clouds6, &
-                                                             clouds7, clouds8, clouds9
+                                                             clouds7, clouds8, clouds9, cldfra
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),5),            intent(out) :: cldsa
       integer,              dimension(size(Grid%xlon,1),3),            intent(out) :: mbota, mtopa
@@ -922,6 +922,7 @@
             clouds7(i,k)  = clouds(i,k,7)
             clouds8(i,k)  = clouds(i,k,8)
             clouds9(i,k)  = clouds(i,k,9)
+            cldfra(i,k)   = clouds(i,k,1)
          enddo
        enddo
 
