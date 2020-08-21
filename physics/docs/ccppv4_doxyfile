@@ -2,7 +2,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "CCPP Scientific Documentation"
 PROJECT_NUMBER         = ""
-PROJECT_BRIEF          = "v4.0"
+PROJECT_BRIEF          = "v4.1.0"
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO

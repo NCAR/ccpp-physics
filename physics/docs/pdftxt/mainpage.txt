@@ -2,7 +2,7 @@
 \mainpage Introduction 
 
 Welcome to the scientific documentation for the parameterizations and suites available in the Common 
-Community Physics Package (CCPP) v4.  
+Community Physics Package (CCPP) v4.1.0.  
 
 The CCPP-Physics is envisioned to contain parameterizations used in NOAA's Unified Forecast System (UFS) 
 applications for weather through seasonal prediction timescales, encompassing operational schemes as well as 
@@ -19,7 +19,7 @@ fields necessary to predict (SST) are not available in the GRIB2 files.
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 4.0 (March 2020), and more details on it may be found on the
+The latest CCPP public release is Version 4.1.0 (September 2020), and more details on it may be found on the
 <a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP website </a> hosted by
 the Developmental Testbed Center (DTC).
 
