@@ -33,9 +33,9 @@
   type = logical
   intent = in
   optional = F
-[aero_in]
-  standard_name = flag_for_aerosol_input_MG
-  long_name = flag for using aerosols in Morrison-Gettelman MP
+[iaerclm]
+  standard_name = flag_for_aerosol_input_MG_radiation
+  long_name = flag for using aerosols in Morrison-Gettelman MP_radiation
   units = flag
   dimensions = ()
   type = logical

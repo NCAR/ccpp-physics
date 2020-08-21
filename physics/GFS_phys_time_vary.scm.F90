@@ -33,7 +33,7 @@
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
 !! \htmlinclude GFS_phys_time_vary_init.html
 !!
-      subroutine GFS_phys_time_vary_init (im, ntoz, me, master, h2o_phys, aero_in, &
+      subroutine GFS_phys_time_vary_init (im, ntoz, me, master, h2o_phys, iaerclm, &
         iccn, iflip, idate, nblks, blksz, nx, ny, xlat_d, xlon_d, levh2o_int,      &
         levozp_int, ozpl, h2opl, aer_nm, jindx1_o3, jindx2_o3, ddy_o3, jindx1_h,   &
         jindx2_h, ddy_h, jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer,  &
@@ -48,7 +48,7 @@
          integer,                              intent(in)    :: im, ntoz, me, master, iflip, nblks, nx, ny, levh2o_int, levozp_int
          integer, dimension(4),                intent(in)    :: idate
          integer, dimension(nblks),            intent(in)    :: blksz
-         logical,                              intent(in)    :: h2o_phys, aero_in, iccn
+         logical,                              intent(in)    :: h2o_phys, iaerclm, iccn
          real(kind=kind_phys), dimension(im),  intent(in)    :: xlat_d, xlon_d
          real(kind=kind_phys), dimension(:,:,:), intent(in) :: ozpl
          real(kind=kind_phys), dimension(:,:,:), intent(in) :: h2opl
