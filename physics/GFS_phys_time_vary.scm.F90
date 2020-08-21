@@ -33,18 +33,33 @@
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
 !! \htmlinclude GFS_phys_time_vary_init.html
 !!
-      subroutine GFS_phys_time_vary_init (Grid, Model, Interstitial, Tbd, errmsg, errflg)
+      subroutine GFS_phys_time_vary_init (im, ntoz, me, master, h2o_phys, aero_in, &
+        iccn, iflip, idate, nblks, blksz, nx, ny, xlat_d, xlon_d, levh2o_int,      &
+        levozp_int, ozpl, h2opl, aer_nm, jindx1_o3, jindx2_o3, ddy_o3, jindx1_h,   &
+        jindx2_h, ddy_h, jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer,  &
+        ddx_aer, jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci,       &
+        oz_pres_int, h2o_pres_int, imap, jmap, errmsg, errflg)
 
-         use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
-                                          GFS_Tbd_type, GFS_interstitial_type
+         use machine,                   only: kind_phys
 
          implicit none
 
          ! Interface variables
-         type(GFS_grid_type),              intent(inout) :: Grid
-         type(GFS_control_type),           intent(in)    :: Model
-         type(GFS_interstitial_type),      intent(inout) :: Interstitial
-         type(GFS_tbd_type),               intent(in)    :: Tbd
+         integer,                              intent(in)    :: im, ntoz, me, master, iflip, nblks, nx, ny, levh2o_int, levozp_int
+         integer, dimension(4),                intent(in)    :: idate
+         integer, dimension(nblks),            intent(in)    :: blksz
+         logical,                              intent(in)    :: h2o_phys, aero_in, iccn
+         real(kind=kind_phys), dimension(im),  intent(in)    :: xlat_d, xlon_d
+         real(kind=kind_phys), dimension(:,:,:), intent(in) :: ozpl
+         real(kind=kind_phys), dimension(:,:,:), intent(in) :: h2opl
+         real(kind=kind_phys), dimension(:,:,:), intent(in) :: aer_nm
+         
+         integer, dimension(im), intent(inout)              :: imap, jmap
+         integer, dimension(:),               intent(inout) :: jindx1_o3, jindx2_o3, jindx1_h, jindx2_h, jindx1_aer, jindx2_aer, iindx1_aer, iindx2_aer, jindx1_ci, jindx2_ci, iindx1_ci, iindx2_ci
+         real(kind=kind_phys), dimension(:),  intent(inout) :: ddy_o3, ddy_h, ddy_aer, ddx_aer, ddy_ci, ddx_ci
+         real(kind=kind_phys), dimension(levozp_int), intent(inout) :: oz_pres_int
+         real(kind=kind_phys), dimension(levh2o_int), intent(inout) :: h2o_pres_int
+         
          character(len=*),                 intent(out)   :: errmsg
          integer,                          intent(out)   :: errflg
 
@@ -60,121 +75,121 @@
          nb = 1
          nt = 1
          
-         call read_o3data  (Model%ntoz, Model%me, Model%master)
+         call read_o3data  (ntoz, me, master)
 
          ! Consistency check that the hardcoded values for levozp and
          ! oz_coeff in GFS_typedefs.F90 match what is set by read_o3data
          ! in GFS_typedefs.F90: allocate (Tbd%ozpl  (IM,levozp,oz_coeff))
-         if (size(Tbd%ozpl, dim=2).ne.levozp) then
+         if (size(ozpl, dim=2).ne.levozp) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",    &
                   "levozp from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  levozp, " /= ", size(Tbd%ozpl, dim=2)
+                  levozp, " /= ", size(ozpl, dim=2)
             errflg = 1
          end if
-         if (size(Tbd%ozpl, dim=3).ne.oz_coeff) then
+         if (size(ozpl, dim=3).ne.oz_coeff) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",      &
                   "oz_coeff from read_o3data does not match value in GFS_typedefs.F90: ", &
-                  oz_coeff, " /= ", size(Tbd%ozpl, dim=3)
+                  oz_coeff, " /= ", size(ozpl, dim=3)
             errflg = 1
          end if
            
-         call read_h2odata (Model%h2o_phys, Model%me, Model%master)
+         call read_h2odata (h2o_phys, me, master)
          
          ! Consistency check that the hardcoded values for levh2o and
          ! h2o_coeff in GFS_typedefs.F90 match what is set by read_o3data
          ! in GFS_typedefs.F90: allocate (Tbd%h2opl (IM,levh2o,h2o_coeff))
-         if (size(Tbd%h2opl, dim=2).ne.levh2o) then
+         if (size(h2opl, dim=2).ne.levh2o) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
                   "levh2o from read_h2odata does not match value in GFS_typedefs.F90: ", &
-                  levh2o, " /= ", size(Tbd%h2opl, dim=2)
+                  levh2o, " /= ", size(h2opl, dim=2)
             errflg = 1
          end if
-         if (size(Tbd%h2opl, dim=3).ne.h2o_coeff) then
+         if (size(h2opl, dim=3).ne.h2o_coeff) then
             write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",       &
                   "h2o_coeff from read_h2odata does not match value in GFS_typedefs.F90: ", &
-                  h2o_coeff, " /= ", size(Tbd%h2opl, dim=3)
+                  h2o_coeff, " /= ", size(h2opl, dim=3)
             errflg = 1
          end if 
                        
-         if (Model%iaerclm) then
+         if (iaerclm) then
            ! Consistency check that the value for ntrcaerm set in GFS_typedefs.F90
            ! and used to allocate Tbd%aer_nm matches the value defined in aerclm_def
-           if (size(Tbd%aer_nm, dim=3).ne.ntrcaerm) then
+           if (size(aer_nm, dim=3).ne.ntrcaerm) then
               write(errmsg,'(2a,i0,a,i0)') "Value error in GFS_phys_time_vary_init: ",     &
                     "ntrcaerm from aerclm_def does not match value in GFS_typedefs.F90: ", &
-                    ntrcaerm, " /= ", size(Tbd%aer_nm, dim=3)
+                    ntrcaerm, " /= ", size(aer_nm, dim=3)
               errflg = 1
            else
               ! Update the value of ntrcaer in aerclm_def with the value defined
               ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-              ! If Model%iaerclm is .true., then ntrcaer == ntrcaerm
-              ntrcaer = size(Tbd%aer_nm, dim=3)
+              ! If iaerclm is .true., then ntrcaer == ntrcaerm
+              ntrcaer = size(aer_nm, dim=3)
               ! Read aerosol climatology
-              call read_aerdata (Model%me,Model%master,Model%iflip,Model%idate,errmsg,errflg)
+              call read_aerdata (me, master, iflip, idate, errmsg, errflg)
               if (errflg/=0) return
            endif
          else
             ! Update the value of ntrcaer in aerclm_def with the value defined
             ! in GFS_typedefs.F90 that is used to allocate the Tbd DDT.
-            ! If Model%iaerclm is .false., then ntrcaer == 1
-            ntrcaer = size(Tbd%aer_nm, dim=3)
+            ! If iaerclm is .false., then ntrcaer == 1
+            ntrcaer = size(aer_nm, dim=3)
          endif
          
-         if (Model%iccn == 1) then
-            call read_cidata  ( Model%me, Model%master)
+         if (iccn) then
+            call read_cidata  (me, master)
             ! No consistency check needed for in/ccn data, all values are
             ! hardcoded in module iccn_def.F and GFS_typedefs.F90
          endif
          
          ! Update values of oz_pres in Interstitial data type for all threads
-         if (Model%ntoz > 0) then
-            Interstitial%oz_pres = oz_pres
+         if (ntoz > 0) then
+            oz_pres_int = oz_pres
          end if
 
          ! Update values of h2o_pres in Interstitial data type for all threads
-         if (Model%h2o_phys) then
-            Interstitial%h2o_pres = h2o_pres
+         if (h2o_phys) then
+            h2o_pres_int = h2o_pres
          end if
          
          
          !--- read in and initialize ozone
-         if (Model%ntoz > 0) then
-            call setindxoz (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_o3, &
-                            Grid%jindx2_o3, Grid%ddy_o3)
+         if (ntoz > 0) then
+            call setindxoz (blksz(nb), xlat_d, jindx1_o3, &
+                            jindx2_o3, ddy_o3)
          endif
 
          !--- read in and initialize stratospheric water
-         if (Model%h2o_phys) then
-            call setindxh2o (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_h, &
-                             Grid%jindx2_h, Grid%ddy_h)
+         if (h2o_phys) then
+            call setindxh2o (blksz(nb), xlat_d, jindx1_h, &
+                             jindx2_h, ddy_h)
          endif
 
          !--- read in and initialize aerosols
-         if (Model%iaerclm) then
-           call setindxaer (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_aer,           &
-                              Grid%jindx2_aer, Grid%ddy_aer, Grid%xlon_d,     &
-                              Grid%iindx1_aer, Grid%iindx2_aer, Grid%ddx_aer, &
-                              Model%me, Model%master)
+         if (iaerclm) then
+           call setindxaer (blksz(nb), xlat_d, jindx1_aer,           &
+                              jindx2_aer, ddy_aer, xlon_d,     &
+                              iindx1_aer, iindx2_aer, ddx_aer, &
+                              me, master)
          endif
           !--- read in and initialize IN and CCN
-         if (Model%iccn == 1) then
-             call setindxci (Model%blksz(nb), Grid%xlat_d, Grid%jindx1_ci,       &
-                             Grid%jindx2_ci, Grid%ddy_ci, Grid%xlon_d,  &
-                             Grid%iindx1_ci, Grid%iindx2_ci, Grid%ddx_ci)
+         if (iccn) then
+             call setindxci (blksz(nb), xlat_d, jindx1_ci,       &
+                             jindx2_ci, ddy_ci, xlon_d,  &
+                             iindx1_ci, iindx2_ci, ddx_ci)
          endif
          
         !--- initial calculation of maps local ix -> global i and j, store in Tbd
          ix = 0
          nb = 1
-         do j = 1,Model%ny
-           do i = 1,Model%nx
+         do j = 1, ny
+           do i = 1, nx
              ix = ix + 1
-             if (ix .gt. Model%blksz(nb)) then
+             if (ix .gt. blksz(nb)) then
                ix = 1
                nb = nb + 1
              endif
-             Tbd%jmap(ix) = j
-             Tbd%imap(ix) = i
+             jmap(ix) = j
+             imap(ix) = i
            enddo
          enddo
 
