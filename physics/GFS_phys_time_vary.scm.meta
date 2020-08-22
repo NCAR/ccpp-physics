@@ -44,9 +44,9 @@
 [iccn]
   standard_name = flag_for_in_ccn_forcing_for_morrison_gettelman_microphysics
   long_name = flag for IN and CCN forcing for morrison gettelman microphysics
-  units = flag
+  units = none
   dimensions = ()
-  type = logical
+  type = integer
   intent = in
   optional = F
 [iflip]
@@ -66,7 +66,7 @@
   intent = in
   optional = F
 [nblks]
-  standard_name = number_of_blocks
+  standard_name = ccpp_block_count
   long_name = for explicit data blocking: number of blocks
   units = count
   dimensions = ()
@@ -74,10 +74,10 @@
   intent = in
   optional = F
 [blksz]
-  standard_name = horizontal_block_size
+  standard_name = ccpp_block_sizes
   long_name = for explicit data blocking: block sizes of all blocks
   units = count
-  dimensions = (number_of_blocks)
+  dimensions = (ccpp_block_count)
   type = integer
   intent = in
   optional = F
@@ -106,18 +106,18 @@
   intent = in
   optional = F
 [xlat_d]
-  standard_name = latitude_degree
+  standard_name = latitude_in_degree
   long_name = latitude in degrees
-  units = degree
+  units = degree_north
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [xlon_d]
-  standard_name = longitude_degree
+  standard_name = longitude_in_degree
   long_name = longitude in degrees
-  units = degree
+  units = degree_east
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
