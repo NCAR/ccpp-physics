@@ -95,39 +95,39 @@
       integer,              intent(out) :: kd, kt, kb
 
 ! F-A mp scheme only
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: f_ice, &
+      real(kind=kind_phys), dimension(:, :), intent(in) :: f_ice, &
                                                                        f_rain, f_rimef
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(out) :: cwm
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),        intent(in)  :: flgmin
+      real(kind=kind_phys), dimension(:, :), intent(out) :: cwm
+      real(kind=kind_phys), dimension(:),        intent(in)  :: flgmin
       real(kind=kind_phys), intent(out) :: raddt
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),   intent(out) :: delp, &
+      real(kind=kind_phys), dimension(:, :),   intent(out) :: delp, &
                                                             dz, plyr, tlyr, qlyr, olyr
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+1+LTP), intent(out) :: plvl, tlvl
+      real(kind=kind_phys), dimension(:, :), intent(out) :: plvl, tlvl
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),          intent(out) :: tsfg, tsfa
+      real(kind=kind_phys), dimension(:),          intent(out) :: tsfg, tsfa
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),   intent(out) :: gasvmr_co2, &
+      real(kind=kind_phys), dimension(:, :),   intent(out) :: gasvmr_co2, &
                                   gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11, &
                                   gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NBDSW), intent(out) :: faersw1, &
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: faersw1, &
                                                                              faersw2, faersw3
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NBDLW), intent(out) :: faerlw1, &
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: faerlw1, &
                                                                              faerlw2, faerlw3
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),        intent(out) :: aerodp
+      real(kind=kind_phys), dimension(:,:),        intent(out) :: aerodp
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(inout) :: clouds1, &
+      real(kind=kind_phys), dimension(:,:),       intent(inout) :: clouds1, &
                                                              clouds2, clouds3, clouds4, clouds5
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(out)   :: clouds6, &
+      real(kind=kind_phys), dimension(:,:),       intent(out)   :: clouds6, &
                                                              clouds7, clouds8, clouds9
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),5),            intent(out) :: cldsa
-      integer,              dimension(size(Grid%xlon,1),3),            intent(out) :: mbota, mtopa
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),              intent(out) :: de_lgth, alb1d
+      real(kind=kind_phys), dimension(:,:),            intent(out) :: cldsa
+      integer,              dimension(:,:),            intent(out) :: mbota, mtopa
+      real(kind=kind_phys), dimension(:),              intent(out) :: de_lgth, alb1d
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

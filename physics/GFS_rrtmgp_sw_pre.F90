@@ -45,9 +45,9 @@ contains
          do_sfcperts
     real(kind_phys), intent(in) :: &
          solhr                ! Time in hours after 00z at the current timestep
-    real(kind_phys), dimension(5), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          pertalb              ! Magnitude of surface albedo perturbation (frac)
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lsmask,            & ! Landmask: sea/land/ice=0/1/2
          lon,               & ! Longitude
          coslat,            & ! Cosine(latitude)
@@ -66,13 +66,13 @@ contains
          facwf,             & ! Fractional coverage with weak cosz dependency (frac)
          fice,              & ! Ice fraction over open water (frac)
          tisfc                ! Sea ice surface skin temperature (K)
-    real(kind_phys), dimension(nCol,nsfcpert), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          sfc_wts              ! Weights for stochastic surface physics perturbation ()    
-    real(kind_phys), dimension(nCol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:, :),intent(in) :: &
          p_lay,             & ! Layer pressure
          tv_lay,            & ! Layer virtual-temperature
          relhum               ! Layer relative-humidity
-    real(kind_phys), dimension(nCol,nLev+1),intent(in) :: &
+    real(kind_phys), dimension(:, :),intent(in) :: &
          p_lev                ! Pressure @ layer interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props         ! RRTMGP DDT: spectral information for SW calculation
@@ -80,14 +80,14 @@ contains
     ! Outputs
     integer, intent(out)   :: &
          nday                 ! Number of daylit points
-    integer, dimension(ncol), intent(out) :: &
+    integer, dimension(:), intent(out) :: &
          idxday               ! Indices for daylit points
-    real(kind_phys), dimension(ncol), intent(out) :: &
+    real(kind_phys), dimension(:), intent(out) :: &
          alb1d,             & ! Surface albedo pertubation
          coszen,            & ! Cosine of SZA
          coszdg,            & ! Cosine of SZA, daytime
          sfc_alb_dif          ! Mean surface diffused (nIR+uvvis) sw albedo
-    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(out) :: &
+    real(kind_phys), dimension(:, :), intent(out) :: &
          sfc_alb_nir_dir,   & ! Surface albedo (direct) 
          sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & ! Surface albedo (direct)

@@ -30,8 +30,8 @@
       type(GFS_grid_type),            intent(in)    :: Grid
       type(GFS_radtend_type),         intent(inout) :: Radtend
       integer,                        intent(in)    :: im, ltp, LM, kd
-      real(kind=kind_phys), dimension(size(Grid%xlon,1), lm+LTP), intent(in) :: htlwc, htlw0
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),         intent(in) :: tsfa
+      real(kind=kind_phys), dimension(:,:), intent(in) :: htlwc, htlw0
+      real(kind=kind_phys), dimension(:),         intent(in) :: tsfa
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! local variables

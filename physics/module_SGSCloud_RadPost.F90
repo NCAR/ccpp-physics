@@ -34,8 +34,8 @@
 
       integer, intent(in)  :: im, levs
       logical,          intent(in)  :: flag_init, flag_restart
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: qc, qi
-      real(kind=kind_phys), dimension(im,levs), intent(in)    :: qc_save, qi_save
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: qc, qi
+      real(kind=kind_phys), dimension(:,:), intent(in)    :: qc_save, qi_save
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variable

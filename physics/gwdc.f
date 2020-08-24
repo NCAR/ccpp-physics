@@ -187,15 +187,15 @@
 !-----------------------------------------------------------------------
 
       integer, intent(in) :: im, km, lat, ipr
-      integer, intent(in) :: ktop(im),kbot(im),kcnv(im)
+      integer, intent(in) :: ktop(:),kbot(:),kcnv(:)
       real(kind=kind_phys), intent(in) :: grav,cp,rd,fv,fhour,deltim,pi
-      real(kind=kind_phys), dimension(im), intent(in) :: qmax
-      real(kind=kind_phys), dimension(im), intent(out) :: tauctx,taucty
-      real(kind=kind_phys), dimension(im), intent(in) :: cldf,dlength
-      real(kind=kind_phys), dimension(im,km), intent(in) :: u1,v1,t1,   &
+      real(kind=kind_phys), dimension(:), intent(in) :: qmax
+      real(kind=kind_phys), dimension(:), intent(out) :: tauctx,taucty
+      real(kind=kind_phys), dimension(:), intent(in) :: cldf,dlength
+      real(kind=kind_phys), dimension(:,:), intent(in) :: u1,v1,t1,     &
      &                                                  q1,pmid1,dpmid1
-      real(kind=kind_phys), dimension(im,km), intent(out) :: utgwc,vtgwc
-      real(kind=kind_phys), dimension(im,km+1), intent(in) :: pint1
+      real(kind=kind_phys), dimension(:,:), intent(out) :: utgwc,vtgwc
+      real(kind=kind_phys), dimension(:,:), intent(in) :: pint1
 !
       logical, intent(in) :: lprnt
 !

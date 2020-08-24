@@ -90,10 +90,10 @@
       ! Interface variables
       integer,                             intent(in)    :: im
       integer,                             intent(in)    :: iter
-      real(kind=kind_phys), dimension(im), intent(in)    :: wind
-      logical,              dimension(im), intent(inout) :: flag_guess
-      logical,              dimension(im), intent(inout) :: flag_iter
-      logical,              dimension(im), intent(in)    :: dry, wet, icy
+      real(kind=kind_phys), dimension(:), intent(in)    :: wind
+      logical,              dimension(:), intent(inout) :: flag_guess
+      logical,              dimension(:), intent(inout) :: flag_iter
+      logical,              dimension(:), intent(in)    :: dry, wet, icy
       integer,                             intent(in)    :: nstf_name1
 
       character(len=*), intent(out) :: errmsg

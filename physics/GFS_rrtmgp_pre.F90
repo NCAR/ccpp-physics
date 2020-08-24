@@ -52,7 +52,7 @@ contains
 	character(len=*), intent(in) :: &
 	     active_gases ! List of active gases from namelist.     
     ! Outputs
-    character(len=*),dimension(nGases), intent(out) :: &
+    character(len=*),dimension(:), intent(out) :: &
          active_gases_array  ! Character array containing trace gases to include in RRTMGP
     character(len=*), intent(out) :: &
          errmsg     ! Error message
@@ -159,7 +159,7 @@ contains
     logical, intent(in) :: &
     	 lsswr,             & ! Call SW radiation?
     	 lslwr                ! Call LW radiation
-    character(len=*),dimension(nGases), intent(in) :: &
+    character(len=*),dimension(:), intent(in) :: &
          active_gases_array   ! Character array containing trace gases to include in RRTMGP
     real(kind_phys), intent(in) :: &
          fhswr,             & ! Frequency of SW radiation call.
@@ -169,11 +169,11 @@ contains
          con_epsm1,         & ! Physical constant: Epsilon (Rd/Rv) minus one
          con_fvirt,         & ! Physical constant: Inverse of epsilon minus one
          con_epsqs            ! Physical constant: Minimum saturation mixing-ratio (kg/kg)
-    real(kind_phys), dimension(nCol), intent(in) :: & 
+    real(kind_phys), dimension(:), intent(in) :: & 
     	 xlon,              & ! Longitude
     	 xlat,              & ! Latitude
     	 tsfc                 ! Surface skin temperature (K)
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: & 
+    real(kind_phys), dimension(:, :), intent(in) :: & 
          prsl,              & ! Pressure at model-layer centers (Pa)
          tgrs,              & ! Temperature at model-layer centers (K)
          prslk                ! Exner function at model layer centers (1)
@@ -189,18 +189,18 @@ contains
          errflg               ! Error flag    
     real(kind_phys), intent(out) :: &
          raddt                ! Radiation time-step
-    real(kind_phys), dimension(ncol), intent(out) :: &
+    real(kind_phys), dimension(:), intent(out) :: &
          tsfg,              & ! Ground temperature
          tsfa                 ! Skin temperature    
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(:, :), intent(out) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
          tv_lay,            & ! Virtual temperature at model-layers 
          relhum               ! Relative-humidity at model-layers          
-    real(kind_phys), dimension(nCol,nLev+1), intent(out) :: &
+    real(kind_phys), dimension(:, :), intent(out) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(out) :: &
+    real(kind_phys), dimension(:, :,:),intent(out) :: &
          tracer               ! Array containing trace gases
     type(ty_gas_concs),intent(out) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios

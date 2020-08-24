@@ -31,15 +31,15 @@ module cs_conv_pre
 
 ! --- inputs
   integer, intent(in) :: im, levs, ntrac, ncld
-  real(r8), dimension(im,levs), intent(in) :: q
-  real(r8), dimension(im,levs), intent(in) :: clw1,clw2
-  real(r8), dimension(im),      intent(in) :: work1, work2
+  real(r8), dimension(:, :), intent(in) :: q
+  real(r8), dimension(:, :), intent(in) :: clw1,clw2
+  real(r8), dimension(:),      intent(in) :: work1, work2
   real(r8), intent(in) :: cs_parm1, cs_parm2
 
 ! --- input/output
-  real(r8), dimension(ntrac-ncld+2), intent(out) :: fswtr, fscav
-  real(r8), dimension(im), intent(out) :: wcbmax
-  real(r8), dimension(im,levs), intent(out) :: save_q1,save_q2
+  real(r8), dimension(:), intent(out) :: fswtr, fscav
+  real(r8), dimension(:), intent(out) :: wcbmax
+  real(r8), dimension(:, :), intent(out) :: save_q1,save_q2
   ! save_q3 is not allocated for Zhao-Carr MP
   real(r8), dimension(:,:), intent(out)     :: save_q3
 
@@ -101,10 +101,10 @@ module cs_conv_post
 ! --- inputs
   integer, intent(in)  :: im, kmax
   logical,  intent(in) :: do_aw
-  real(r8), dimension(im,kmax), intent(in) :: sigmatot
+  real(r8), dimension(:, :), intent(in) :: sigmatot
 
 ! --- input/output
-  real(r8), dimension(im,kmax), intent(out)  :: sigmafrac
+  real(r8), dimension(:, :), intent(out)  :: sigmafrac
 
   character(len=*), intent(out) :: errmsg
   integer,          intent(out) :: errflg
@@ -309,23 +309,23 @@ module cs_conv
 ! input arguments
 !
    INTEGER, INTENT(IN)     :: IJSDIM, KMAX, ntracp1, nn, NTR, mype, nctp, mp_phys, kdt, lat !! DD, for GFS, pass in
-   logical, intent(in)     :: otspt(1:ntracp1,1:2)! otspt(:,1) - on/off switch for tracer transport by updraft and
+   logical, intent(in)     :: otspt(:, :)! otspt(:,1) - on/off switch for tracer transport by updraft and
                                                   !              downdraft. should not include subgrid PDF and turbulence
                                                   ! otspt(:,2) - on/off switch for tracer transport by subsidence
                                                   !              should include subgrid PDF and turbulence
 
-   real(r8), intent(inout) :: t(IJSDIM,KMAX)          ! temperature at mid-layer (K)
-   real(r8), intent(inout) :: q(IJSDIM,KMAX)          ! water vapor array including moisture (kg/kg)
-   real(r8), intent(inout) :: clw(IJSDIM,KMAX,nn)     ! tracer array including cloud condensate (kg/kg)
-   real(r8), intent(in)    :: pap(IJSDIM,KMAX)        ! pressure at mid-layer (Pa)
-   real(r8), intent(in)    :: paph(IJSDIM,KMAX+1)     ! pressure at boundaries (Pa)
-   real(r8), intent(in)    :: zm(IJSDIM,KMAX)         ! geopotential at mid-layer (m)
-   real(r8), intent(in)    :: zi(IJSDIM,KMAX+1)       ! geopotential at boundaries (m)
-   real(r8), intent(in)    :: fscav(ntr), fswtr(ntr), wcbmaxm(ijsdim)
+   real(r8), intent(inout) :: t(:, :)          ! temperature at mid-layer (K)
+   real(r8), intent(inout) :: q(:, :)          ! water vapor array including moisture (kg/kg)
+   real(r8), intent(inout) :: clw(:, :, :)     ! tracer array including cloud condensate (kg/kg)
+   real(r8), intent(in)    :: pap(:, :)        ! pressure at mid-layer (Pa)
+   real(r8), intent(in)    :: paph(:, :)     ! pressure at boundaries (Pa)
+   real(r8), intent(in)    :: zm(:, :)         ! geopotential at mid-layer (m)
+   real(r8), intent(in)    :: zi(:, :)       ! geopotential at boundaries (m)
+   real(r8), intent(in)    :: fscav(:), fswtr(:), wcbmaxm(:)
    real(r8), intent(in)    :: precz0in, preczhin, clmdin
 ! added for cs_convr
-   real(r8), intent(inout) :: u(IJSDIM,KMAX)          ! zonal wind at mid-layer (m/s)
-   real(r8), intent(inout) :: v(IJSDIM,KMAX)          ! meridional wind at mid-layer (m/s)
+   real(r8), intent(inout) :: u(:, :)          ! zonal wind at mid-layer (m/s)
+   real(r8), intent(inout) :: v(:, :)          ! meridional wind at mid-layer (m/s)
 
    real(r8), intent(in)    :: DELTA               ! physics time step
    real(r8), intent(in)    :: DELTI               ! dynamics time step (model time increment in seconds)
@@ -333,12 +333,12 @@ module cs_conv
 !
 ! modified arguments
 !
-   real(r8), intent(inout) :: CBMFX(IJSDIM,nctp)      ! cloud base mass flux (kg/m2/s)
+   real(r8), intent(inout) :: CBMFX(:, :)      ! cloud base mass flux (kg/m2/s)
 !
 ! output arguments
 !
 !  updraft, downdraft, and detrainment mass flux (kg/m2/s)
-   real(r8), intent(inout), dimension(IJSDIM,KMAX) :: ud_mf, dd_mf, dt_mf
+   real(r8), intent(inout), dimension(:, :) :: ud_mf, dd_mf, dt_mf
    
    real(r8), intent(out)   :: rain1(IJSDIM)       ! lwe thickness of deep convective precipitation amount (m)
 ! GJF* These variables are conditionally allocated depending on whether the
@@ -348,14 +348,14 @@ module cs_conv
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
 ! *GJF
-   integer, intent(inout) :: kcnv(ijsdim)             ! zero if no deep convection and 1 otherwise
+   integer, intent(inout) :: kcnv(:)             ! zero if no deep convection and 1 otherwise
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 
 !DDsigma - output added for AW sigma diagnostics
 !  interface sigma and vertical velocity by cloud type (1=sfc) 
 !  real(r8), intent(out), dimension(IJSDIM,KMAX,nctp)  :: sigmai, vverti
-   real(r8), intent(out), dimension(IJSDIM,KMAX)       :: sigma  ! sigma  sigma totaled over cloud type - on interfaces (1=sfc)
+   real(r8), intent(out), dimension(:, :)       :: sigma  ! sigma  sigma totaled over cloud type - on interfaces (1=sfc)
 !   sigma  terms in eq 91 and 92
 !  real(r8), dimension(IJSDIM,KMAX)                    :: sfluxterm, qvfluxterm, condterm
 !DDsigma
@@ -738,19 +738,19 @@ module cs_conv
    logical, intent(in)   :: otspt1(ntr), otspt2(ntr), lprnt
 !
 ! [OUTPUT]
-   REAL(r8), INTENT(OUT) :: GTT   (IJSDIM, KMAX     ) ! heating rate
+   REAL(r8), INTENT(OUT) :: GTT   (IJSDIM, KMAX   ) ! heating rate
    REAL(r8), INTENT(OUT) :: GTQ   (IJSDIM, KMAX, NTR) ! change in q
-   REAL(r8), INTENT(OUT) :: GTU   (IJSDIM, KMAX     ) ! tendency of u
-   REAL(r8), INTENT(OUT) :: GTV   (IJSDIM, KMAX     ) ! tendency of v
-   REAL(r8), INTENT(OUT) :: CMDET (IJSDIM, KMAX     ) ! detrainment mass flux
+   REAL(r8), INTENT(OUT) :: GTU   (IJSDIM, KMAX    ) ! tendency of u
+   REAL(r8), INTENT(OUT) :: GTV   (IJSDIM, KMAX    ) ! tendency of v
+   REAL(r8), INTENT(OUT) :: CMDET (IJSDIM, KMAX    ) ! detrainment mass flux
 
 ! assuming there is no flux  at the top of the atmospherea - Moorthi
-   REAL(r8), INTENT(OUT) :: GTPRP (IJSDIM, KMAX     ) ! rain+snow flux
-   REAL(r8), INTENT(OUT) :: GSNWP (IJSDIM, KMAX     ) ! snowfall flux
-   REAL(r8), INTENT(OUT) :: GMFX0 (IJSDIM, KMAX     ) ! updraft mass flux
-   REAL(r8), INTENT(OUT) :: GMFX1 (IJSDIM, KMAX     ) ! downdraft mass flux
+   REAL(r8), INTENT(OUT) :: GTPRP (IJSDIM, KMAX    ) ! rain+snow flux
+   REAL(r8), INTENT(OUT) :: GSNWP (IJSDIM, KMAX    ) ! snowfall flux
+   REAL(r8), INTENT(OUT) :: GMFX0 (IJSDIM, KMAX    ) ! updraft mass flux
+   REAL(r8), INTENT(OUT) :: GMFX1 (IJSDIM, KMAX    ) ! downdraft mass flux
 
-   REAL(r8), INTENT(OUT) :: CAPE  (IJSDIM           )
+   REAL(r8), INTENT(OUT) :: CAPE  (IJSDIM          )
    INTEGER , INTENT(OUT) :: KT    (IJSDIM, NCTP     ) ! cloud top
 !
 !  [MODIFIED]
@@ -774,14 +774,14 @@ module cs_conv
    real(r8), allocatable,  dimension(:,:,:) :: trfluxterm ! tendencies of tracers due to eddy mass flux
 !
 !  [INPUT]
-   REAL(r8), INTENT(IN) :: GDT   (IJSDIM, KMAX     ) ! temperature T
+   REAL(r8), INTENT(IN) :: GDT   (IJSDIM, KMAX    ) ! temperature T
    REAL(r8), INTENT(IN) :: GDQ   (IJSDIM, KMAX, NTR) ! humidity, tracer  !DDsigmadiag
-   REAL(r8), INTENT(IN) :: GDU   (IJSDIM, KMAX     ) ! westerly u
-   REAL(r8), INTENT(IN) :: GDV   (IJSDIM, KMAX     ) ! southern wind v
-   REAL(r8), INTENT(IN) :: GDTM  (IJSDIM, KMAX+1   ) ! temperature T
+   REAL(r8), INTENT(IN) :: GDU   (IJSDIM, KMAX    ) ! westerly u
+   REAL(r8), INTENT(IN) :: GDV   (IJSDIM, KMAX    ) ! southern wind v
+   REAL(r8), INTENT(IN) :: GDTM  (IJSDIM, KMAX+1    ) ! temperature T
    REAL(r8), INTENT(IN) :: GDP   (IJSDIM, KMAX     ) ! pressure P
    REAL(r8), INTENT(IN) :: GDPM  (IJSDIM, KMAX+1   ) ! pressure (half lev)
-   REAL(r8), INTENT(IN) :: GDZ   (IJSDIM, KMAX     ) ! altitude
+   REAL(r8), INTENT(IN) :: GDZ   (IJSDIM, KMAX   ) ! altitude
    REAL(r8), INTENT(IN) :: GDZM  (IJSDIM, KMAX+1   ) ! altitude
    REAL(r8), INTENT(IN) :: DELTA                     ! delta(t) (dynamics)
    REAL(r8), INTENT(IN) :: DELTI                     ! delta(t) (internal variable)

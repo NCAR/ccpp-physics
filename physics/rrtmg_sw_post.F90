@@ -35,9 +35,9 @@
       type(GFS_grid_type),            intent(in)    :: Grid
       type(GFS_diag_type),            intent(inout) :: Diag
       integer,                        intent(in)    :: im, lm, kd, nday, ltp
-      type(cmpfsw_type),    dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
-      real(kind=kind_phys), dimension(Size(Grid%xlon,1), lm+LTP), intent(in) ::  htswc, htsw0
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      type(cmpfsw_type),    dimension(:), intent(inout) :: scmpsw
+      real(kind=kind_phys), dimension(:,:), intent(in) ::  htswc, htsw0
+      real(kind=kind_phys), dimension(:), intent(in) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables

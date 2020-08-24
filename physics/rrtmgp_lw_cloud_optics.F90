@@ -286,10 +286,10 @@ contains
          nCol,                & ! Number of horizontal gridpoints
          nLev,                & ! Number of vertical levels
          nrghice                ! Number of ice-roughness categories
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lon,                 & ! Longitude
          lat                    ! Latitude
-    real(kind_phys), dimension(ncol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          p_lay,               & ! Layer pressure (Pa)
          cld_frac,            & ! Total cloud fraction by layer
          cld_lwp,             & ! Cloud liquid water path
@@ -314,7 +314,7 @@ contains
     type(ty_optical_props_1scl),intent(out) :: &
          lw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
          lw_optical_props_precipByBand      ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
-    real(kind_phys), dimension(ncol,nLev), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          cldtaulw                           ! Approx 10.mu band layer cloud optical depth  
          
     ! Local variables

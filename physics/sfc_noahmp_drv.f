@@ -142,17 +142,17 @@
 
       integer, intent(in) :: im, km, itime
 
-      integer, dimension(im), intent(in) :: soiltyp, vegtype, slopetyp
+      integer, dimension(:), intent(in) :: soiltyp, vegtype, slopetyp
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
      &       t1, q1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,    &
      &       ch, prsl1, prslki, wind, shdmin, shdmax,                   &
      &       snoalb, sfalb, zf,                                         &
      &       rainn_mp,rainc_mp,snow_mp,graupel_mp,ice_mp
 
-      logical, dimension(im), intent(in) :: dry
+      logical, dimension(:), intent(in) :: dry
 
-      real (kind=kind_phys),dimension(im),intent(in) :: xlatin,xcoszin
+      real (kind=kind_phys),dimension(:),intent(in) :: xlatin,xcoszin
 
       integer,  intent(in) ::  idveg, iopt_crs,iopt_btr,iopt_run,       &
      &                         iopt_sfc,iopt_frz,iopt_inf,iopt_rad,     &
@@ -170,24 +170,24 @@
      &                      con_rd, con_hfus
 
 !  ---  in/out:
-      real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: weasd,      &
      &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl
 
-      real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
+      real (kind=kind_phys), dimension(:,:), intent(inout) ::           &
      &       smc, stc, slc
 
-      real (kind=kind_phys), dimension(im), intent(inout) :: snowxy,    &
+      real (kind=kind_phys), dimension(:), intent(inout) :: snowxy,     &
      &                      tvxy,tgxy,canicexy,canliqxy,eahxy,tahxy,    & 
      &                      cmxy,chxy,fwetxy,sneqvoxy,alboldxy,qsnowxy, &
      &                      wslakexy,zwtxy,waxy,wtxy,lfmassxy,rtmassxy, &
      &                      stmassxy,woodxy,stblcpxy,fastcpxy,xlaixy,   &
      &                      xsaixy,taussxy,smcwtdxy,deeprechxy,rechxy  
 
-      real (kind=kind_phys),dimension(im,-2:0),intent(inout) :: tsnoxy 
-      real (kind=kind_phys),dimension(im,-2:0),intent(inout) :: snicexy
-      real (kind=kind_phys),dimension(im,-2:0),intent(inout) :: snliqxy
-      real (kind=kind_phys),dimension(im,1:4), intent(inout) :: smoiseq
-      real (kind=kind_phys),dimension(im,-2:4),intent(inout) :: zsnsoxy
+      real (kind=kind_phys),dimension(:,:),intent(inout) :: tsnoxy 
+      real (kind=kind_phys),dimension(:,:),intent(inout) :: snicexy
+      real (kind=kind_phys),dimension(:,:),intent(inout) :: snliqxy
+      real (kind=kind_phys),dimension(:,:), intent(inout) :: smoiseq
+      real (kind=kind_phys),dimension(:,:),intent(inout) :: zsnsoxy
 
       integer, dimension(im)                   :: jsnowxy
       real (kind=kind_phys),dimension(im)      :: snodep
@@ -195,7 +195,7 @@
       
 !  ---  output:
 
-      real (kind=kind_phys), dimension(im), intent(out) :: sncovr1,     &
+      real (kind=kind_phys), dimension(:), intent(out) :: sncovr1,      &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &    evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2, wet1
       real (kind=kind_phys), dimension(:), intent(out) :: t2mmp, q2mp

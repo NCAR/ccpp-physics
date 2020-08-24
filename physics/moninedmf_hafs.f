@@ -76,37 +76,37 @@
 !
       logical, intent(in) :: lprnt
       integer, intent(in) :: ipr
-      integer, intent(in) :: im, km, ntrac, ntcw, kinver(im)
-      integer, intent(in) :: islimsk(1:im)
-      integer, intent(out) :: kpbl(im)
+      integer, intent(in) :: im, km, ntrac, ntcw, kinver(:)
+      integer, intent(in) :: islimsk(:)
+      integer, intent(out) :: kpbl(:)
 
 !
       real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac
-      real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
-     &                     tau(im,km),    rtg(im,km,ntrac)
+      real(kind=kind_phys), intent(inout) :: dv(:,:),     du(:,:),      &
+     &                     tau(:,:),    rtg(:,:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(im,km),     v1(im,km),                    &
-     &                     t1(im,km),     q1(im,km,ntrac),              &
-     &                     swh(im,km),    hlw(im,km),                   &
-     &                     xmu(im),       psk(im),                      &
-     &                     rbsoil(im),    zorl(im),                     &
-     &                     u10m(im),      v10m(im),                     &
-     &                     fm(im),        fh(im),                       &
-     &                     tsea(im),                                    &
-     &                     heat(im),      evap(im),                     &
-     &                     stress(im),    spd1(im)
+     &                     u1(:,:),     v1(:,:),                        &
+     &                     t1(:,:),     q1(:,:,:),                      &
+     &                     swh(:,:),    hlw(:,:),                       &
+     &                     xmu(:),       psk(:),                        &
+     &                     rbsoil(:),    zorl(:),                       &
+     &                     u10m(:),      v10m(:),                       &
+     &                     fm(:),        fh(:),                         &
+     &                     tsea(:),                                     &
+     &                     heat(:),      evap(:),                       &
+     &                     stress(:),    spd1(:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     prsi(im,km+1), del(im,km),                   &
-     &                     prsl(im,km),   prslk(im,km),                 &
-     &                     phii(im,km+1), phil(im,km)
+     &                     prsi(:,:), del(:,:),                         &
+     &                     prsl(:,:),   prslk(:,:),                     &
+     &                     phii(:,:), phil(:,:)
       real(kind=kind_phys), intent(out) ::                              &
-     &                     dusfc(im),     dvsfc(im),                    &
-     &                     dtsfc(im),     dqsfc(im),                    &
-     &                     hpbl(im),      dkt(im,km-1)
+     &                     dusfc(:),     dvsfc(:),                      &
+     &                     dtsfc(:),     dqsfc(:),                      &
+     &                     hpbl(:),      dkt(:,:)
 
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     hgamt(im),     hgamq(im)
+     &                     hgamt(:),     hgamq(:)
 !
       logical, intent(in) :: dspheat
 !          flag for tke dissipative heating

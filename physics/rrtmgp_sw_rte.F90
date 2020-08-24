@@ -42,14 +42,14 @@ contains
          nCol,                    & ! Number of horizontal gridpoints
          nday,                    & ! Number of daytime points
          nLev                       ! Number of vertical levels
-    integer, intent(in), dimension(ncol) :: &
+    integer, intent(in), dimension(:) :: &
          idxday                     ! Index array for daytime points
-    real(kind_phys),intent(in), dimension(ncol) :: &
+    real(kind_phys),intent(in), dimension(:) :: &
          coszen                     ! Cosize of SZA
-    real(kind_phys), dimension(ncol,NLev), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,                   & ! Pressure @ model layer-centers (Pa)
          t_lay                      ! Temperature (K)
-    real(kind_phys), dimension(ncol,NLev+1), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                      ! Pressure @ model layer-interfaces (Pa)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props               ! RRTMGP DDT: SW spectral information
@@ -58,16 +58,16 @@ contains
    type(ty_optical_props_2str),intent(in) :: &
          sw_optical_props_clouds, & ! RRTMGP DDT: shortwave cloud radiative properties 
          sw_optical_props_aerosol   ! RRTMGP DDT: shortwave aerosol radiative properties
-    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          sfc_alb_nir_dir,         & ! Surface albedo (direct) 
          sfc_alb_nir_dif,         & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir,       & ! Surface albedo (direct)
          sfc_alb_uvvis_dif          ! Surface albedo (diffuse)
-    real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          toa_src_sw                 ! TOA incident spectral flux (W/m2)
     integer, intent(in) :: &
          rrtmgp_nGases              ! Number of trace gases active in RRTMGP
-    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
+    character(len=*),dimension(:), intent(in) :: &
          active_gases_array         ! Character array containing trace gases to include in RRTMGP
 
     ! Outputs
@@ -75,14 +75,14 @@ contains
          errmsg                     ! CCPP error message
     integer, intent(out) :: &
          errflg                     ! CCPP error flag
-    real(kind_phys), dimension(ncol,NLev+1), intent(inout) :: &
+    real(kind_phys), dimension(:,:), intent(inout) :: &
          fluxswUP_allsky,         & ! RRTMGP upward all-sky flux profiles (W/m2)
          fluxswDOWN_allsky,       & ! RRTMGP downward all-sky flux profiles (W/m2)
          fluxswUP_clrsky,         & ! RRTMGP upward clear-sky flux profiles (W/m2)
          fluxswDOWN_clrsky          ! RRTMGP downward clear-sky flux profiles (W/m2)
 
     ! Outputs (optional)
-    type(cmpfsw_type), dimension(ncol), intent(inout),optional :: &
+    type(cmpfsw_type), dimension(:), intent(inout),optional :: &
          scmpsw                     ! 2D surface fluxes, components:
                                     ! uvbfc - total sky downward uv-b flux (W/m2)
                                     ! uvbf0 - clear sky downward uv-b flux (W/m2)

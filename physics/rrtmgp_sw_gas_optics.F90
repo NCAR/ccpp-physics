@@ -28,7 +28,7 @@ contains
          rrtmgp_sw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
     integer, intent(in) :: &
          rrtmgp_nGases       ! Number of trace gases active in RRTMGP
-    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
+    character(len=*),dimension(:), intent(in) :: &
          active_gases_array  ! Character array containing trace gases to include in RRTMGP
     integer,intent(in) :: &
          mpicomm,          & ! MPI communicator
@@ -302,14 +302,14 @@ contains
          nDay,                 & ! Number of daylit points.
          nCol,                 & ! Number of horizontal points
          nLev                    ! Number of vertical levels
-    integer,intent(in),dimension(ncol) :: &
+    integer,intent(in),dimension(:) :: &
          idxday                  ! Indices for daylit points.
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          sw_gas_props            ! RRTMGP DDT: spectral information for RRTMGP SW radiation scheme
-    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,                & ! Pressure @ model layer-centers (hPa)
          t_lay                   ! Temperature (K)
-    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev,                & ! Pressure @ model layer-interfaces (hPa)
          t_lev                   ! Temperature @ model levels
     type(ty_gas_concs),intent(in) :: &
@@ -318,7 +318,7 @@ contains
          solcon                  ! Solar constant
     integer, intent(in) :: &
          rrtmgp_nGases           ! Number of trace gases active in RRTMGP
-    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
+    character(len=*),dimension(:), intent(in) :: &
          active_gases_array      ! Character array containing trace gases to include in RRTMGP
 
     ! Output
@@ -328,7 +328,7 @@ contains
          errflg                  ! CCPP error code
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_clrsky ! RRTMGP DDT: clear-sky shortwave optical properties, spectral (tau,ssa,g) 
-    real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          toa_src_sw              ! TOA incident spectral flux (W/m2)
 
     ! Local variables

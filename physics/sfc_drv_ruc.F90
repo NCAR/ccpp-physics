@@ -168,9 +168,9 @@ module lsm_ruc
       integer, intent(in) :: lsm_ruc, lsm
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson
 
-      real (kind=kind_phys), dimension(im,lsoil), intent(inout) :: smc,stc,slc
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: smc,stc,slc
 
-      real (kind=kind_phys), dimension(im), intent(in) ::               &
+      real (kind=kind_phys), dimension(:), intent(in) ::               &
      &       t1, sigmaf, sfcemis, dlwflx, dswsfc, snet, tg3, cm,        &
      &       ch, prsl1, wind, shdmin, shdmax,                           &
      &       snoalb, alvwf, alnwf, zf, qc, q1
@@ -182,30 +182,30 @@ module lsm_ruc
                                             con_pi, con_rd,             &
                                             con_hvap, con_fvirt
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, land
-      integer, dimension(im), intent(in) :: islimsk ! sea/land/ice mask (=0/1/2)
+      logical, dimension(:), intent(in) :: flag_iter, flag_guess, land
+      integer, dimension(:), intent(in) :: islimsk ! sea/land/ice mask (=0/1/2)
       logical,                intent(in) :: do_mynnsfclay
 
       logical,                intent(in) :: rdlai
 
 !  ---  in/out:
-      integer, dimension(im), intent(inout) :: soiltyp, vegtype
+      integer, dimension(:), intent(inout) :: soiltyp, vegtype
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
-      real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
-      real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
+      real (kind=kind_phys), dimension(:), intent(inout   ) :: zs
+      real (kind=kind_phys), dimension(:), intent(inout) :: weasd,     &
      &       snwdph, tskin, tskin_wat,                                  &
      &       srflag, canopy, trans, tsurf, zorl, tsnow,                 &
      &       sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
 !  ---  in
-      real (kind=kind_phys), dimension(im), intent(in) ::               &
+      real (kind=kind_phys), dimension(:), intent(in) ::               &
      &       rainnc, rainc, ice, snow, graupel
 !  ---  in/out:
 !  --- on RUC levels
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) ::         &
+      real (kind=kind_phys), dimension(:,:), intent(inout) ::         &
      &       smois, tslb, sh2o, keepfr, smfrkeep
 
 !  ---  output:
-      real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
+      real (kind=kind_phys), dimension(:), intent(inout) :: sncovr1,   &
      &       qsurf , gflux , evap , runof , drain ,                     &
      &       runoff, srunoff, hflx, cmm, chh,                           &
      &       rhosnf, evbs, evcw, sbsno, stm, wetness,                   &
@@ -1053,25 +1053,25 @@ module lsm_ruc
       integer,                                 intent(in   ) :: im, nlev
       integer,                                 intent(in   ) :: lsoil_ruc
       integer,                                 intent(in   ) :: lsoil
-      logical,               dimension(im),    intent(in   ) :: land
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf, tsurf_wat
-      real (kind=kind_phys), dimension(im),    intent(inout) :: smcref2
-      real (kind=kind_phys), dimension(im),    intent(inout) :: smcwlt2
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
-      real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: smc !  Noah
-      real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: stc !  Noah
-      real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: slc !  Noah
+      logical,               dimension(:),    intent(in   ) :: land
+      real (kind=kind_phys), dimension(:),    intent(in   ) :: tsurf, tsurf_wat
+      real (kind=kind_phys), dimension(:),    intent(inout) :: smcref2
+      real (kind=kind_phys), dimension(:),    intent(inout) :: smcwlt2
+      real (kind=kind_phys), dimension(:),    intent(in   ) :: tg3
+      real (kind=kind_phys), dimension(:,:),  intent(in   ) :: smc !  Noah
+      real (kind=kind_phys), dimension(:,:),  intent(in   ) :: stc !  Noah
+      real (kind=kind_phys), dimension(:,:),  intent(in   ) :: slc !  Noah
 
-      integer,               dimension(im),    intent(inout) :: soiltyp
-      integer,               dimension(im),    intent(inout) :: vegtype
-      real (kind=kind_phys), dimension(im),    intent(inout) :: wetness
-      real (kind=kind_phys), dimension(im),    intent(inout) :: fice
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smois! ruc
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb ! ruc
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: sh2o ! ruc
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: smfrkeep ! ruc
+      integer,               dimension(:),    intent(inout) :: soiltyp
+      integer,               dimension(:),    intent(inout) :: vegtype
+      real (kind=kind_phys), dimension(:),    intent(inout) :: wetness
+      real (kind=kind_phys), dimension(:),    intent(inout) :: fice
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: smois! ruc
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: tslb ! ruc
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: sh2o ! ruc
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: smfrkeep ! ruc
 
-      real (kind=kind_phys), dimension(1:lsoil_ruc), intent (out)  :: zs
+      real (kind=kind_phys), dimension(:), intent (out)  :: zs
 
       integer,          intent(in ) :: me
       integer,          intent(in ) :: master

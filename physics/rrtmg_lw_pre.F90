@@ -30,7 +30,7 @@
       type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
       type(GFS_grid_type),            intent(in)    :: Grid
       integer, intent(in)                           :: im
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: tsfa, tsfg
+      real(kind=kind_phys), dimension(:), intent(in) :: tsfa, tsfg
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 

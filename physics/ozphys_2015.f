@@ -67,14 +67,14 @@
       real(kind=kind_phys),intent(in) :: con_g
       real :: gravi
       integer, intent(in) :: im, levs, ko3, pl_coeff,me
-      real(kind=kind_phys), intent(in) :: po3(ko3),                     &
-     &                                    prsl(im,levs), tin(im,levs),  &
-     &                                    delp(im,levs),                &
-     &                                    prdout(im,ko3,pl_coeff), dt
+      real(kind=kind_phys), intent(in) :: po3(:),                       &
+     &                                    prsl(:,:), tin(:,:),          &
+     &                                    delp(:,:),                    &
+     &                                    prdout(:,:,:), dt
       ! These arrays may not be allocated and need assumed array sizes
       real(kind=kind_phys), intent(inout) ::                            &
      &                  ozp1(:,:), ozp2(:,:), ozp3(:,:),ozp4(:,:)
-      real(kind=kind_phys), intent(inout) :: oz(im,levs)
+      real(kind=kind_phys), intent(inout) :: oz(:,:)
 
 
       character(len=*), intent(out) :: errmsg

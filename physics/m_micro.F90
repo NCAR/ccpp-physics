@@ -181,10 +181,10 @@ end subroutine m_micro_init
        logical,intent(in) :: flipv, skip_macro
        real (kind=kind_phys), intent(in):: dt_i, alf_fac, qc_min(2)
 
-       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+       real (kind=kind_phys), dimension(:,:),intent(in)  ::           &
      &                prsl_i,u_i,v_i,phil,   omega_i, QLLS_i,QILS_i,    &
      &                                       lwheat_i,swheat_i
-       real (kind=kind_phys), dimension(im,0:lm),intent(in):: prsi_i,   &
+       real (kind=kind_phys), dimension(:,:),intent(in):: prsi_i,   &
      &                                                        phii
 ! GJF* These variables are conditionally allocated depending on whether the
 !     Morrison-Gettelman microphysics is used, so they must be declared 
@@ -194,26 +194,26 @@ end subroutine m_micro_init
      &       CNV_MFD_i,               cf_upi, CNV_FICE_i, CNV_NDROP_i,  &
      &       CNV_NICE_i,  w_upi
 ! *GJF
-       real (kind=kind_phys), dimension(im,lm),intent(in)  ::           &
+       real (kind=kind_phys), dimension(:,:),intent(in)  ::           &
      &       rhc_i, naai_i, npccn_i
-       real (kind=kind_phys), dimension(im,lm,ntrcaer),intent(in) ::    &
+       real (kind=kind_phys), dimension(:,:,:),intent(in) ::    &
      &       aerfld_i
-       real (kind=kind_phys),dimension(im),intent(in):: TAUGWX,         &
+       real (kind=kind_phys),dimension(:),intent(in):: TAUGWX,         &
      &       TAUGWY, TAUOROX, TAUOROY, FRLAND,ZPBL,xlat,xlon
 !    &       TAUGWY, TAUX, TAUY, TAUOROX, TAUOROY,ps_i,FRLAND,ZPBL
 !    &       CNVPRCP
 
 !   output
-       real (kind=kind_phys),dimension(im,lm), intent(out) :: lwm_o, qi_o,  &
+       real (kind=kind_phys),dimension(:,:), intent(out) :: lwm_o, qi_o,  &
                         cldreffl, cldreffi, cldreffr, cldreffs, cldreffg
-       real (kind=kind_phys),dimension(im), intent(out) :: rn_o,  sr_o
+       real (kind=kind_phys),dimension(:), intent(out) :: rn_o,  sr_o
        character(len=*),                    intent(out) :: errmsg
        integer,                             intent(out) :: errflg
 
 !   input and output
 !      Anning Cheng 10/24/2016 twat for total water, diagnostic purpose
-       integer, dimension(IM), intent(inout):: KCBL
-       real (kind=kind_phys),dimension(im,lm),intent(inout):: q_io, t_io,   &
+       integer, dimension(:), intent(inout):: KCBL
+       real (kind=kind_phys),dimension(:,:),intent(inout):: q_io, t_io,   &
      &                                             ncpl_io,ncpi_io,CLLS_io
 ! GJF* These variables are conditionally allocated depending on whether the
 !     Morrison-Gettelman microphysics is used, so they must be declared 

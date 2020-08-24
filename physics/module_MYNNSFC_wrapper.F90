@@ -111,8 +111,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
       logical, intent(in) :: redrag ! reduced drag coeff. flag for high wind over sea (j.han)
 
 !Input data
-      integer, dimension(im), intent(in) :: vegtype
-      real(kind=kind_phys), dimension(im), intent(in)    ::       &
+      integer, dimension(:), intent(in) :: vegtype
+      real(kind=kind_phys), dimension(:), intent(in)    ::       &
      &                    sigmaf,shdmax,z0pert,ztpert
 
 !MYNN-1D
@@ -124,23 +124,23 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
 
-      real(kind=kind_phys), dimension(im,levs+1),           &
+      real(kind=kind_phys), dimension(:,:),           &
      &      intent(in)  ::                  phii
-      real(kind=kind_phys), dimension(im,levs),             &
+      real(kind=kind_phys), dimension(:,:),             &
      &      intent(in)  ::         exner, PRSL,             &
      &                     u, v, t3d, qvsh, qc
 
       real(kind=kind_phys), dimension(im,levs) ::           &
      &        pattern_spp_pbl, dz, th, qv
 
-      logical, dimension(im), intent(in) :: wet, dry, icy
+      logical, dimension(:), intent(in) :: wet, dry, icy
 
-      real(kind=kind_phys), dimension(im), intent(in)    :: &
+      real(kind=kind_phys), dimension(:), intent(in)    :: &
      &                    tskin_ocn, tskin_lnd, tskin_ice,  &
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,  &
      &                    snowh_ocn, snowh_lnd, snowh_ice
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: &
+      real(kind=kind_phys), dimension(:), intent(inout) :: &
      &                      znt_ocn,   znt_lnd,   znt_ice,  &
      &                      ust_ocn,   ust_lnd,   ust_ice,  &
      &                       cm_ocn,    cm_lnd,    cm_ice,  &
@@ -156,10 +156,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
 
 !MYNN-2D
-      real(kind=kind_phys), dimension(im), intent(in)    :: &
+      real(kind=kind_phys), dimension(:), intent(in)    :: &
      &        dx, pblh, slmsk, ps
 
-      real(kind=kind_phys), dimension(im), intent(inout) :: &
+      real(kind=kind_phys), dimension(:), intent(inout) :: &
      &        ustm, hflx, qflx, wspd, qsfc, qsfc_ruc,       &
      &        FLHC, FLQC, U10, V10, TH2, T2, Q2,            &
      &        CHS2, CQS2, rmol, zol, mol, ch,               &

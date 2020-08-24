@@ -34,10 +34,10 @@
       type(GFS_grid_type),            intent(in)    :: Grid
       integer,                        intent(in)    :: im
       integer,                        intent(out)   :: nday
-      integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: tsfa, tsfg
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: alb1d
+      integer, dimension(:), intent(out) :: idxday
+      real(kind=kind_phys), dimension(:), intent(in)  :: tsfa, tsfg
+      real(kind=kind_phys), dimension(:), intent(out) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      real(kind=kind_phys), dimension(:), intent(in)  :: alb1d
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables

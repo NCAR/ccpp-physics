@@ -39,17 +39,17 @@
       type(GFS_coupling_type),             intent(inout) :: Coupling
       type(GFS_radtend_type),              intent(in)    :: Radtend
       type(GFS_diag_type),                 intent(inout) :: Diag
-      type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(in) :: scmpsw
+      type(cmpfsw_type), dimension(:), intent(in) :: scmpsw
 
       integer,              intent(in) :: im, lm, ltp, kt, kb, kd, nday
       real(kind=kind_phys), intent(in) :: raddt
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),  intent(in) :: aerodp
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),5),      intent(in) :: cldsa
-      integer,              dimension(size(Grid%xlon,1),3),      intent(in) :: mbota, mtopa
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: clouds1
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: cldtausw
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: cldtaulw
+      real(kind=kind_phys), dimension(:,:),  intent(in) :: aerodp
+      real(kind=kind_phys), dimension(:,:),      intent(in) :: cldsa
+      integer,              dimension(:,:),      intent(in) :: mbota, mtopa
+      real(kind=kind_phys), dimension(:,:), intent(in) :: clouds1
+      real(kind=kind_phys), dimension(:,:), intent(in) :: cldtausw
+      real(kind=kind_phys), dimension(:,:), intent(in) :: cldtaulw
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg

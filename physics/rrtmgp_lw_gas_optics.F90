@@ -28,7 +28,7 @@ contains
          rrtmgp_lw_file_gas  ! RRTMGP file containing coefficients used to compute gaseous optical properties
     integer, intent(in) :: &
          rrtmgp_nGases       ! Number of trace gases active in RRTMGP
-    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
+    character(len=*),dimension(:), intent(in) :: &
          active_gases_array  ! Character array containing trace gases to include in RRTMGP
     integer,intent(in) :: &
          mpicomm,          & ! MPI communicator
@@ -292,13 +292,13 @@ contains
          nLev                    ! Number of vertical levels
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props            ! RRTMGP DDT:
-    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,                & ! Pressure @ model layer-centers (hPa)
          t_lay                   ! Temperature (K)
-    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev,                & ! Pressure @ model layer-interfaces (hPa)
          t_lev                   ! Temperature @ model levels
-    real(kind_phys), dimension(ncol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          skt                     ! Surface(skin) temperature (K)
     type(ty_gas_concs),intent(in) :: &
          gas_concentrations      ! RRTMGP DDT: trace gas concentrations (vmr)

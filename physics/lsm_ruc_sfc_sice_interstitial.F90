@@ -27,12 +27,12 @@ contains
 
       ! Interface variables
       integer, intent(in) :: im, lsoil_ruc, lsoil, kice
-      logical, dimension(im), intent(in) :: land, icy
+      logical, dimension(:), intent(in) :: land, icy
 !  --- on Noah levels
-      real (kind=kind_phys), dimension(im,lsoil), intent(inout) :: stc
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: stc
 !  --- on RUC levels
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(in) :: tslb
-      real (kind=kind_phys), dimension(im,kice), intent(inout) :: tiice
+      real (kind=kind_phys), dimension(:,:), intent(in) :: tslb
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: tiice
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -89,12 +89,12 @@ contains
 
       ! Interface variables
       integer, intent(in) :: im, lsoil_ruc, lsoil, kice
-      logical, dimension(im), intent(in) :: land, icy
+      logical, dimension(:), intent(in) :: land, icy
 !  --- on Noah levels
-      real (kind=kind_phys), dimension(im,lsoil), intent(in) :: stc
-      real (kind=kind_phys), dimension(im,kice),  intent(in) :: tiice
+      real (kind=kind_phys), dimension(:,:), intent(in) :: stc
+      real (kind=kind_phys), dimension(:,:),  intent(in) :: tiice
 !  --- on RUC levels
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: tslb
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

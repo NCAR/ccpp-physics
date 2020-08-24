@@ -43,16 +43,16 @@ contains
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
          nGauss_angles              ! Number of angles used in Gaussian quadrature
-    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,                   & ! Pressure @ model layer-centers (hPa)
          t_lay                      ! Temperature (K)
-    real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                      ! Pressure @ model layer-interfaces (hPa)
-    real(kind_phys), dimension(ncol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          skt                        ! Surface(skin) temperature (K)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props               ! RRTMGP DDT: longwave spectral information
-    real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          sfc_emiss_byband           ! Surface emissivity in each band
     type(ty_source_func_lw),intent(in) :: &
          sources                    ! RRTMGP DDT: longwave source functions
@@ -62,7 +62,7 @@ contains
          lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
          lw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
     ! Outputs
-    real(kind_phys), dimension(ncol,nLev+1), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
          fluxlwDOWN_allsky,        & ! All-sky flux (W/m2)
          fluxlwUP_clrsky,          & ! Clear-sky flux (W/m2)
@@ -72,7 +72,7 @@ contains
     integer, intent(out) :: & 
          errflg                      ! CCPP error flag
     ! Outputs (optional)
-    real(kind_phys), dimension(ncol,nLev+1), intent(out), optional :: &
+    real(kind_phys), dimension(:,:), intent(out), optional :: &
          fluxlwUP_jac,             & ! Jacobian of upward LW flux (W/m2/K)
          fluxlwDOWN_jac              ! Jacobian of downward LW flux (W/m2/K)         
 

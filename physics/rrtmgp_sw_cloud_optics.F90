@@ -304,9 +304,9 @@ contains
          nLev,                & ! Number of vertical levels
          nday,                & ! Number of daylit points.
          nrghice                ! Number of ice-roughness categories
-    integer,intent(in),dimension(ncol) :: &
+    integer,intent(in),dimension(:) :: &
          idxday                 ! Indices for daylit points.
-    real(kind_phys), dimension(ncol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          cld_frac,            & ! Total cloud fraction by layer
          cld_lwp,             & ! Cloud liquid water path
          cld_reliq,           & ! Cloud liquid effective radius
@@ -330,7 +330,7 @@ contains
     type(ty_optical_props_2str),intent(out) :: &
          sw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Shortwave optical properties in each band (clouds)
          sw_optical_props_precipByBand      ! RRTMGP DDT: Shortwave optical properties in each band (cloud precipitation)
-    real(kind_phys), dimension(ncol,NLev), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          cldtausw                           ! Approx 10.mu band layer cloud optical depth  
     
     ! Local variables

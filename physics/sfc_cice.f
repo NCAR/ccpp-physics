@@ -107,14 +107,14 @@
       logical, intent(in) :: cplflx
 
 !     real (kind=kind_phys), dimension(im), intent(in) :: u1, v1,       &
-      real (kind=kind_phys), dimension(im), intent(in) ::               &
+      real (kind=kind_phys), dimension(:), intent(in) ::                &
      &       t1, q1, cm, ch, prsl1, wind, dqsfc, dtsfc, dusfc, dvsfc
      &,      snowd
 
       logical,                intent(in) :: flag_cice(im), flag_iter(im)
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: qsurf,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: qsurf,      &
      &                                  cmm, chh, evap, hflx, stress
      &,                                 weasd, snwdph, ep
 !

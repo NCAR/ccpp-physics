@@ -157,25 +157,25 @@
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd
 
-      real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps,            &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
      &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
 
 !     integer, dimension(im), intent(in) :: islimsk
-      integer, dimension(im), intent(in) :: islmsk_cice
+      integer, dimension(:), intent(in) :: islmsk_cice
       real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
      &                                            min_lakeice
 
-      logical, dimension(im), intent(in) :: flag_iter, icy
+      logical, dimension(:), intent(in) :: flag_iter, icy
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
+      real (kind=kind_phys), dimension(:), intent(inout) :: hice,       &
      &       fice, tice, weasd, tskin, tprcp, ep
 
-      real (kind=kind_phys), dimension(im,kice), intent(inout) :: tiice
+      real (kind=kind_phys), dimension(:,:), intent(inout) :: tiice
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) :: snwdph,    &
+      real (kind=kind_phys), dimension(:), intent(inout) :: snwdph,     &
      &       qsurf, snowmt, gflux, cmm, chh, evap, hflx
 
       character(len=*), intent(out) :: errmsg

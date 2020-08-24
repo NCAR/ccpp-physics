@@ -50,7 +50,7 @@
          logical,                               intent(in)    :: use_zmtnblck
          logical,                               intent(in)    :: do_shum
          logical,                               intent(in)    :: do_skeb
-         real(kind_phys), dimension(1:im),      intent(in)    :: zmtnblck
+         real(kind_phys), dimension(:),      intent(in)    :: zmtnblck
          ! sppt_wts only allocated if do_sppt == .true.
          real(kind_phys), dimension(:,:),       intent(inout) :: sppt_wts
          ! skebu_wts, skebv_wts only allocated if do_skeb == .true.
@@ -59,28 +59,28 @@
          ! shum_wts only allocated if do_shum == .true.
          real(kind_phys), dimension(:,:),       intent(in)    :: shum_wts
          ! inverse/flipped weights are always allocated
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: sppt_wts_inv
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: skebu_wts_inv
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: skebv_wts_inv
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: shum_wts_inv
-         real(kind_phys), dimension(1:im,1:km), intent(in)    :: diss_est
-         real(kind_phys), dimension(1:im,1:km), intent(in)    :: ugrs
-         real(kind_phys), dimension(1:im,1:km), intent(in)    :: vgrs
-         real(kind_phys), dimension(1:im,1:km), intent(in)    :: tgrs
-         real(kind_phys), dimension(1:im,1:km), intent(in)    :: qgrs
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: gu0
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: gv0
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: gt0
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: gq0
+         real(kind_phys), dimension(:,:), intent(inout) :: sppt_wts_inv
+         real(kind_phys), dimension(:,:), intent(inout) :: skebu_wts_inv
+         real(kind_phys), dimension(:,:), intent(inout) :: skebv_wts_inv
+         real(kind_phys), dimension(:,:), intent(inout) :: shum_wts_inv
+         real(kind_phys), dimension(:,:), intent(in)    :: diss_est
+         real(kind_phys), dimension(:,:), intent(in)    :: ugrs
+         real(kind_phys), dimension(:,:), intent(in)    :: vgrs
+         real(kind_phys), dimension(:,:), intent(in)    :: tgrs
+         real(kind_phys), dimension(:,:), intent(in)    :: qgrs
+         real(kind_phys), dimension(:,:), intent(inout) :: gu0
+         real(kind_phys), dimension(:,:), intent(inout) :: gv0
+         real(kind_phys), dimension(:,:), intent(inout) :: gt0
+         real(kind_phys), dimension(:,:), intent(inout) :: gq0
          ! dtdtr only allocated if do_sppt == .true.
          real(kind_phys), dimension(:,:),       intent(in)    :: dtdtr
-         real(kind_phys), dimension(1:im),      intent(in)    :: rain
-         real(kind_phys), dimension(1:im),      intent(in)    :: rainc
-         real(kind_phys), dimension(1:im),      intent(inout) :: tprcp
-         real(kind_phys), dimension(1:im),      intent(inout) :: totprcp
-         real(kind_phys), dimension(1:im),      intent(inout) :: cnvprcp
-         real(kind_phys), dimension(1:im),      intent(inout) :: totprcpb
-         real(kind_phys), dimension(1:im),      intent(inout) :: cnvprcpb
+         real(kind_phys), dimension(:),      intent(in)    :: rain
+         real(kind_phys), dimension(:),      intent(in)    :: rainc
+         real(kind_phys), dimension(:),      intent(inout) :: tprcp
+         real(kind_phys), dimension(:),      intent(inout) :: totprcp
+         real(kind_phys), dimension(:),      intent(inout) :: cnvprcp
+         real(kind_phys), dimension(:),      intent(inout) :: totprcpb
+         real(kind_phys), dimension(:),      intent(inout) :: cnvprcpb
          logical,                               intent(in)    :: cplflx
          ! rain_cpl, snow_cpl only allocated if cplflx == .true. or cplchm == .true.
          real(kind_phys), dimension(:),         intent(inout) :: rain_cpl
@@ -88,9 +88,9 @@
          ! drain_cpl, dsnow_cpl only allocated if cplflx == .true. or cplchm == .true.
          real(kind_phys), dimension(:),         intent(in)    :: drain_cpl
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
-         real(kind_phys), dimension(1:km),      intent(in)    :: si
-         real(kind_phys), dimension(1:km),      intent(inout) :: vfact_ca
-         real(kind_phys), dimension(1:im),      intent(in)    :: ca1
+         real(kind_phys), dimension(:),      intent(in)    :: si
+         real(kind_phys), dimension(:),      intent(inout) :: vfact_ca
+         real(kind_phys), dimension(:),      intent(in)    :: ca1
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
 

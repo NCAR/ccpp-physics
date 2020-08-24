@@ -39,11 +39,11 @@ contains
     	 save_diag            ! Output radiation diagnostics?
     real(kind_phys), intent(in) :: &
          fhlwr                ! Frequency for SW radiation    	 
-    real(kind_phys), dimension(nCol), intent(in) ::  &
+    real(kind_phys), dimension(:), intent(in) ::  &
          tsfa                 ! Lowest model layer air temperature for radiation (K)
-    real(kind_phys), dimension(nCol, nLev), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          t_lay                ! Temperature @ model layer centers (K)
-    real(kind_phys), dimension(nCol, nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          p_lev,             & ! Pressure @ model layer-interfaces    (Pa)
          fluxlwUP_allsky,   & ! RRTMGP longwave all-sky flux (W/m2)
          fluxlwDOWN_allsky, & ! RRTMGP longwave all-sky flux (W/m2)
@@ -51,26 +51,26 @@ contains
          fluxlwDOWN_clrsky    ! RRTMGP longwave clear-sky flux (W/m2)
     real(kind_phys), intent(in) :: &
          raddt                ! Radiation time step
-    real(kind_phys), dimension(nCol,NSPC1), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          aerodp               ! Vertical integrated optical depth for various aerosol species  
-    real(kind_phys), dimension(nCol,5), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
-    integer,         dimension(nCol,3), intent(in) ::&
+    integer,         dimension(:, :), intent(in) ::&
          mbota,             & ! vertical indices for low, middle and high cloud tops 
          mtopa                ! vertical indices for low, middle and high cloud bases
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          cld_frac,          & ! Total cloud fraction in each layer
          cldtaulw             ! approx 10.mu band layer cloud optical depth  
 
     ! Outputs (mandatory)
-	real(kind_phys), dimension(nCol), intent(out) :: &
+	real(kind_phys), dimension(:), intent(out) :: &
 	     sfcdlw,            & ! Total sky sfc downward lw flux (W/m2)
 	     tsflw                ! surface air temp during lw calculation (K)
-	type(sfcflw_type), dimension(nCol), intent(out) :: &
+	type(sfcflw_type), dimension(:), intent(out) :: &
 	     sfcflw               ! LW radiation fluxes at sfc    
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(:, :), intent(out) :: &
          htrlw                ! LW all-sky heating rate
-    type(topflw_type), dimension(nCol), intent(out) :: &
+    type(topflw_type), dimension(:), intent(out) :: &
          topflw               ! lw_fluxes_top_atmosphere
     character(len=*), intent(out) :: &
          errmsg
@@ -78,13 +78,13 @@ contains
          errflg
                   
     ! Outputs (optional)
-    type(proflw_type), dimension(nCol, nLev+1), optional, intent(out) :: &
+    type(proflw_type), dimension(:, :), optional, intent(out) :: &
          flxprf_lw            ! 2D radiative fluxes, components:
                               ! upfxc - total sky upward flux (W/m2)
                               ! dnfxc - total sky dnward flux (W/m2)
                               ! upfx0 - clear sky upward flux (W/m2)
                               ! dnfx0 - clear sky dnward flux (W/m2)
-    real(kind_phys),dimension(nCol, nLev),intent(out),optional  :: &
+    real(kind_phys),dimension(:, :),intent(out),optional  :: &
          htrlwc               ! Longwave clear-sky heating-rate (K/sec)
          
     ! Local variables

@@ -216,36 +216,36 @@
 
 !     integer, intent(in) :: ipr
 !     logical lprnt
-      logical, dimension(im), intent(in) :: dry, icy, wet
+      logical, dimension(:), intent(in) :: dry, icy, wet
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &                                      deltim, fhswr
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sinlat, coslat, xlon, coszen, tf, tsflw, sfcdlw,            &
      &      sfcdsw, sfcnsw
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &                         tsfc_lnd, tsfc_ice, tsfc_wat,            &
      &                         sfcemis_lnd, sfcemis_ice, sfcemis_wat
 
-      real(kind=kind_phys), dimension(im), intent(in) ::                &
+      real(kind=kind_phys), dimension(:), intent(in) ::                 &
      &      sfcnirbmu, sfcnirdfu, sfcvisbmu, sfcvisdfu,                 &
      &      sfcnirbmd, sfcnirdfd, sfcvisbmd, sfcvisdfd
 
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
+      real(kind=kind_phys), dimension(:,:), intent(in) :: swh,  hlw     &
      &,                                                       swhc, hlwc
 
 !  ---  input/output:
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: dtdt       &
      &,                                                          dtdtc
 
 !  ---  outputs:
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfcdsw, adjsfcnsw, adjsfcdlw,            xmu, xcosz,     &
      &      adjnirbmu, adjnirdfu, adjvisbmu, adjvisdfu,                 &
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
-      real(kind=kind_phys), dimension(im), intent(out) ::               &
+      real(kind=kind_phys), dimension(:), intent(out) ::                &
      &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
 
       character(len=*), intent(out) :: errmsg

@@ -30,12 +30,12 @@ contains
       real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
 
       real(kind=kind_phys), intent(out) ::                              &
-     &  oc(im), oa4(im,4), clx(im,4),                                   &
+     &  oc(:), oa4(:,:), clx(:,:),                                   &
      &  varss(:), ocss(:), oa4ss(:,:), clxss(:,:),                      &
-     &  theta(im), sigma(im), gamma(im), elvmax(im)
+     &  theta(:), sigma(:), gamma(:), elvmax(:)
 
       logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
-      real(kind=kind_phys), intent(in) :: dtdt(im,levs), dudt(im,levs), dvdt(im,levs)
+      real(kind=kind_phys), intent(in) :: dtdt(:,:), dudt(:,:), dvdt(:,:)
       ! dt3dt only allocated only if ldiag3d is .true.
       real(kind=kind_phys), intent(inout) :: dt3dt(:,:), du3dt(:,:), dv3dt(:,:)
       real(kind=kind_phys), intent(in) :: dtf

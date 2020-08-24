@@ -58,17 +58,17 @@ contains
          nDay,                            & ! Number of daylit points.
          nLev,                            & ! Number of vertical layers
          ipsdsw0                            ! Initial permutation seed for McICA
-    integer,intent(in),dimension(ncol) :: &
+    integer,intent(in),dimension(:) :: &
          idxday                             ! Indices for daylit points.
-    integer,intent(in),dimension(ncol) :: &
+    integer,intent(in),dimension(:) :: &
          icseed_sw                          ! auxiliary special cloud related array when module 
                                             ! variable isubcsw=2, it provides permutation seed 
                                             ! for each column profile that are used for generating 
                                             ! random numbers. when isubcsw /=2, it will not be used.
-    real(kind_phys), dimension(ncol,nLev),intent(in) :: &
+    real(kind_phys), dimension(:,:),intent(in) :: &
          cld_frac,                        & ! Total cloud fraction by layer
          precip_frac                        ! Precipitation fraction by layer
-    real(kind_phys), dimension(ncol,nLev), intent(in)  :: &
+    real(kind_phys), dimension(:,:), intent(in)  :: &
          cloud_overlap_param,             & ! Cloud overlap parameter
          precip_overlap_param               ! Precipitation overlap parameter
     type(ty_gas_optics_rrtmgp),intent(in) :: &

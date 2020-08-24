@@ -37,7 +37,7 @@ contains
          nCol,              & ! Horizontal loop extent 
          nLev,              & ! Number of vertical layers
          nDay                 ! Number of daylit columns
-    integer, intent(in), dimension(nday) :: &
+    integer, intent(in), dimension(:) :: &
          idxday               ! Index array for daytime points
     logical, intent(in) :: &
     	 lsswr,             & ! Call SW radiation?
@@ -47,37 +47,37 @@ contains
          sw_gas_props         ! DDT containing SW spectral information
     real(kind_phys), intent(in) :: &
          fhswr                ! Frequency for SW radiation
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(ncol), intent(in) :: &
          t_lay,             & ! Temperature at model layer centers (K)
          coszen,            & ! Cosine(SZA)     
          coszdg               ! Cosine(SZA), daytime     
-    real(kind_phys), dimension(nCol, nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          p_lev                ! Pressure @ model layer-interfaces    (Pa)
-    real(kind_phys), dimension(sw_gas_props%get_nband(),ncol), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          sfc_alb_nir_dir,   & ! Surface albedo (direct) 
          sfc_alb_nir_dif,   & ! Surface albedo (diffuse)
          sfc_alb_uvvis_dir, & ! Surface albedo (direct)
          sfc_alb_uvvis_dif    ! Surface albedo (diffuse)
-    real(kind_phys), dimension(nCol, nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          fluxswUP_allsky,   & ! SW All-sky flux                    (W/m2)
          fluxswDOWN_allsky, & ! SW All-sky flux                    (W/m2)
          fluxswUP_clrsky,   & ! SW Clear-sky flux                  (W/m2)
          fluxswDOWN_clrsky    ! SW All-sky flux                    (W/m2)
     real(kind_phys), intent(in) :: &
          raddt                ! Radiation time step
-    real(kind_phys), dimension(nCol,NSPC1), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          aerodp               ! Vertical integrated optical depth for various aerosol species  
-    real(kind_phys), dimension(nCol,5), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          cldsa                ! Fraction of clouds for low, middle, high, total and BL 
-    integer,         dimension(nCol,3), intent(in) ::&
+    integer,         dimension(:, :), intent(in) ::&
          mbota,             & ! vertical indices for low, middle and high cloud tops 
          mtopa                ! vertical indices for low, middle and high cloud bases
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:, :), intent(in) :: &
          cld_frac,          & ! Total cloud fraction in each layer
          cldtausw             ! approx .55mu band layer cloud optical depth
     
     ! Inputs (optional)     
-    type(cmpfsw_type), dimension(nCol), intent(in), optional :: &
+    type(cmpfsw_type), dimension(:), intent(in), optional :: &
          scmpsw           ! 2D surface fluxes, components:
                           ! uvbfc - total sky downward uv-b flux at  (W/m2)
                           ! uvbf0 - clear sky downward uv-b flux at  (W/m2)
@@ -87,7 +87,7 @@ contains
                           ! visdf - downward uv+vis diffused flux    (W/m2)           
 
     ! Outputs (mandatory)
-    real(kind_phys), dimension(nCol), intent(out) :: &
+    real(kind_phys), dimension(:), intent(out) :: &
          nirbmdi,           & ! sfc nir beam sw downward flux    (W/m2)
          nirdfdi,           & ! sfc nir diff sw downward flux    (W/m2)
          visbmdi,           & ! sfc uv+vis beam sw downward flux (W/m2)
@@ -98,11 +98,11 @@ contains
          visdfui,           & ! sfc uv+vis diff sw upward flux   (W/m2)    
          sfcnsw,            & ! total sky sfc netsw flx into ground
          sfcdsw               !
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(:, :), intent(out) :: &
          htrsw                ! SW all-sky heating rate
-    type(sfcfsw_type), dimension(nCol), intent(out) :: &
+    type(sfcfsw_type), dimension(:), intent(out) :: &
          sfcfsw               ! sw radiation fluxes at sfc
-    type(topfsw_type), dimension(nCol), intent(out) :: &
+    type(topfsw_type), dimension(:), intent(out) :: &
          topfsw               ! sw_fluxes_top_atmosphere
     character(len=*), intent(out) :: &
          errmsg
@@ -110,13 +110,13 @@ contains
          errflg
 
     ! Outputs (optional)
-    type(profsw_type), dimension(nCol, nLev), intent(out), optional :: &
+    type(profsw_type), dimension(:, :), intent(out), optional :: &
          flxprf_sw        ! 2D radiative fluxes, components:
                           ! upfxc - total sky upward flux            (W/m2)
                           ! dnfxc - total sky dnward flux            (W/m2)
                           ! upfx0 - clear sky upward flux            (W/m2)
                           ! dnfx0 - clear sky dnward flux            (W/m2)
-    real(kind_phys),dimension(nCol, nLev),intent(out),optional :: &
+    real(kind_phys),dimension(:, :),intent(out),optional :: &
          htrswc           ! Clear-sky heating rate (K/s)
 	
     ! Local variables

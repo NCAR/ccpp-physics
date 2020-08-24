@@ -53,15 +53,15 @@ contains
     	 lslwr                ! Call LW radiation 
     real(kind_phys), intent(in) :: &
          con_pi               ! Physical constant: pi  
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lat,               & ! Latitude       
          de_lgth              ! Decorrelation length     
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lay,             & ! Pressure at model-layer
          cld_frac             ! Total cloud fraction
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
          p_lev                ! Pressure at model interfaces         
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &
+    real(kind_phys), dimension(:,:), intent(in) :: &
     	 deltaZ,              & ! Layer thickness (km)
          cloud_overlap_param, & ! Cloud-overlap parameter
          precip_overlap_param   ! Precipitation overlap parameter
@@ -71,10 +71,10 @@ contains
          errmsg                 ! Error message
     integer, intent(out) :: &  
          errflg                 ! Error flag
-    integer,dimension(ncol,3),intent(out) :: &
+    integer,dimension(:,:),intent(out) :: &
          mbota,               & ! Vertical indices for cloud tops
          mtopa                  ! Vertical indices for cloud bases
-    real(kind_phys), dimension(ncol,5), intent(out) :: &
+    real(kind_phys), dimension(:,:), intent(out) :: &
          cldsa                  ! Fraction of clouds for low, middle, high, total and BL 
     
     ! Local variables
@@ -136,7 +136,7 @@ contains
     integer, intent(in) :: &
          nLev,        & ! Number of vertical-layers
          mpi_rank 
-    real(kind_phys), dimension(nLev+1), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          sigmainit
     ! Outputs
     integer, intent(out) :: &

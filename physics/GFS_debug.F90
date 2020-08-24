@@ -970,29 +970,29 @@
            integer,          intent(in   ) :: im
            integer,          intent(in   ) :: kdt
            integer,          intent(in   ) :: iter
-           logical,          intent(in   ) :: flag_iter(im)
-           logical,          intent(in   ) :: flag_guess(im)
+           logical,          intent(in   ) :: flag_iter(:)
+           logical,          intent(in   ) :: flag_guess(:)
            logical,          intent(in   ) :: flag_init
            logical,          intent(in   ) :: flag_restart
            logical,          intent(in   ) :: frac_grid
            integer,          intent(in   ) :: isot
            integer,          intent(in   ) :: ivegsrc
-           real(kind_phys),  intent(in   ) :: stype(im)
-           real(kind_phys),  intent(in   ) :: vtype(im)
-           real(kind_phys),  intent(in   ) :: slope(im)
-           integer,          intent(in   ) :: soiltyp(im)
-           integer,          intent(in   ) :: vegtype(im)
-           integer,          intent(in   ) :: slopetyp(im)
-           logical,          intent(in   ) :: dry(im)
-           logical,          intent(in   ) :: icy(im)
-           logical,          intent(in   ) :: wet(im)
-           logical,          intent(in   ) :: lake(im)
-           logical,          intent(in   ) :: ocean(im)
-           real(kind_phys),  intent(in   ) :: oceanfrac(im)
-           real(kind_phys),  intent(in   ) :: landfrac(im)
-           real(kind_phys),  intent(in   ) :: lakefrac(im)
-           real(kind_phys),  intent(in   ) :: slmsk(im)
-           integer,          intent(in   ) :: islmsk(im)
+           real(kind_phys),  intent(in   ) :: stype(:)
+           real(kind_phys),  intent(in   ) :: vtype(:)
+           real(kind_phys),  intent(in   ) :: slope(:)
+           integer,          intent(in   ) :: soiltyp(:)
+           integer,          intent(in   ) :: vegtype(:)
+           integer,          intent(in   ) :: slopetyp(:)
+           logical,          intent(in   ) :: dry(:)
+           logical,          intent(in   ) :: icy(:)
+           logical,          intent(in   ) :: wet(:)
+           logical,          intent(in   ) :: lake(:)
+           logical,          intent(in   ) :: ocean(:)
+           real(kind_phys),  intent(in   ) :: oceanfrac(:)
+           real(kind_phys),  intent(in   ) :: landfrac(:)
+           real(kind_phys),  intent(in   ) :: lakefrac(:)
+           real(kind_phys),  intent(in   ) :: slmsk(:)
+           integer,          intent(in   ) :: islmsk(:)
            character(len=*), intent(  out) :: errmsg
            integer,          intent(  out) :: errflg
 

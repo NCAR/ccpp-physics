@@ -190,25 +190,25 @@
      &       nstf_name5
       real (kind=kind_phys), intent(in) :: hvap, cp, hfus, jcal, eps,   &
      &       epsm1, rvrdm1, rd, rhw0, sbc, pi
-      real (kind=kind_phys), dimension(im), intent(in) :: ps, u1, v1,   &
+      real (kind=kind_phys), dimension(:), intent(in) :: ps, u1, v1,    &
      &       t1, q1, tref, cm, ch, prsl1, prslki, prsik1, prslk1,       &
      &       xlon,xcosz,                                                &
      &       sinlat, stress, sfcemis, dlwflx, sfcnsw, rain, wind
       real (kind=kind_phys), intent(in) :: timestep
       real (kind=kind_phys), intent(in) :: solhr
 
-      logical, dimension(im), intent(in) :: flag_iter, flag_guess, wet
+      logical, dimension(:), intent(in) :: flag_iter, flag_guess, wet
 !    &,      icy
       logical,                intent(in) :: lprnt
 
 !  ---  input/outputs:
 ! control variables of dtl system (5+2) and sl (2) and coefficients for d(tz)/d(ts) calculation
-      real (kind=kind_phys), dimension(im), intent(inout) :: tskin,     &
+      real (kind=kind_phys), dimension(:), intent(inout) :: tskin,      &
      &      tsurf, xt, xs, xu, xv, xz, zm, xtts, xzts, dt_cool,         &
      &      z_c, c_0, c_d, w_0, w_d, d_conv, ifd, qrain
 
 !  ---  outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) ::            &
+      real (kind=kind_phys), dimension(:), intent(inout) ::             &
      &       qsurf, gflux, cmm, chh, evap, hflx, ep
 
       character(len=*), intent(out) :: errmsg
@@ -687,13 +687,13 @@ cc
 
 !  ---  inputs:
       integer, intent(in) :: im, nthreads
-      logical, dimension(im), intent(in) :: wet
-      real (kind=kind_phys), dimension(im), intent(in) ::
+      logical, dimension(:), intent(in) :: wet
+      real (kind=kind_phys), dimension(:), intent(in) ::
      &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
-      real (kind=kind_phys), dimension(im), intent(inout) ::
+      real (kind=kind_phys), dimension(:), intent(inout) ::
      &    tsurf_wat, tseal, tref
 
 !  ---  outputs:

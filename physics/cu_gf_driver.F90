@@ -101,42 +101,42 @@ contains
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    logical, intent(in   ) :: ldiag3d,qdiag3d
 
-   real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
-   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
-   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: qci_conv
+   real(kind=kind_phys),  dimension( :, :), intent(in )    :: forcet,forceqv_spechum,w,phil
+   real(kind=kind_phys),  dimension( :, : ), intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( :, : ), intent(inout ) :: qci_conv
    real(kind=kind_phys),  dimension( im )   :: rand_mom,rand_vmas
-   real(kind=kind_phys),  dimension( im,4 ) :: rand_clos
+   real(kind=kind_phys),  dimension( im,4  ) :: rand_clos
    real(kind=kind_phys),  dimension( im , km, 11 ) :: gdc,gdc2
-   real(kind=kind_phys),  dimension( im , km ),     intent(out ) :: cnvw_moist,cnvc
-   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: cliw, clcw
+   real(kind=kind_phys),  dimension( :, :),     intent(out ) :: cnvw_moist,cnvc
+   real(kind=kind_phys),  dimension( :, : ), intent(inout ) :: cliw, clcw
 
    real(kind=kind_phys),  dimension(  : ,  : ), intent(inout ) :: &
                du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV, &
                du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV
 
-   integer, dimension (im), intent(inout) :: hbot,htop,kcnv
-   integer,    dimension (im), intent(in) :: xland
-   real(kind=kind_phys),    dimension (im), intent(in) :: pbl
+   integer, dimension (:), intent(inout) :: hbot,htop,kcnv
+   integer,    dimension (:), intent(in) :: xland
+   real(kind=kind_phys),    dimension (:), intent(in) :: pbl
    integer, dimension (im) :: tropics
 !  ruc variable
-   real(kind=kind_phys), dimension (im)  :: hfx2,qfx2,psuri
-   real(kind=kind_phys), dimension (im,km) :: ud_mf,dd_mf,dt_mf
-   real(kind=kind_phys), dimension (im), intent(inout) :: raincv,cld1d
-   real(kind=kind_phys), dimension (im,km) :: t2di,p2di
+   real(kind=kind_phys), dimension (:)  :: hfx2,qfx2,psuri
+   real(kind=kind_phys), dimension (:,:) :: ud_mf,dd_mf,dt_mf
+   real(kind=kind_phys), dimension (:), intent(inout) :: raincv,cld1d
+   real(kind=kind_phys), dimension (:,:) :: t2di,p2di
    ! Specific humidity from FV3
-   real(kind=kind_phys), dimension (im,km), intent(in) :: qv2di_spechum
-   real(kind=kind_phys), dimension (im,km), intent(inout) :: qv_spechum
+   real(kind=kind_phys), dimension (:,:), intent(in) :: qv2di_spechum
+   real(kind=kind_phys), dimension (:,:), intent(inout) :: qv_spechum
    ! Local water vapor mixing ratios and cloud water mixing ratios
    real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
    !
-   real(kind=kind_phys), dimension( im ),intent(in) :: garea
+   real(kind=kind_phys), dimension( : ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
 
    integer, intent(in   ) :: imfshalcnv
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
 !  define locally for now.
-   integer, dimension(im),intent(inout) :: cactiv
+   integer, dimension(:),intent(inout) :: cactiv
    integer, dimension(im) :: k22_shallow,kbcon_shallow,ktop_shallow
    real(kind=kind_phys),    dimension(im) :: ht
    real(kind=kind_phys),    dimension(im) :: dx

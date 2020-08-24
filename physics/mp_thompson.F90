@@ -380,14 +380,14 @@ module mp_thompson
          real(kind_phys),           intent(in   ) :: con_g
          real(kind_phys),           intent(in   ) :: con_rd
          ! Hydrometeors
-         real(kind_phys),           intent(inout) :: spechum(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qc(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qr(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qi(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qs(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: qg(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: ni(1:ncol,1:nlev)
-         real(kind_phys),           intent(inout) :: nr(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: spechum(:,:)
+         real(kind_phys),           intent(inout) :: qc(:,:)
+         real(kind_phys),           intent(inout) :: qr(:,:)
+         real(kind_phys),           intent(inout) :: qi(:,:)
+         real(kind_phys),           intent(inout) :: qs(:,:)
+         real(kind_phys),           intent(inout) :: qg(:,:)
+         real(kind_phys),           intent(inout) :: ni(:,:)
+         real(kind_phys),           intent(inout) :: nr(:,:)
          ! Aerosols
          logical,                   intent(in)    :: is_aerosol_aware, reset
          ! The following arrays are not allocated if is_aerosol_aware is false
@@ -397,25 +397,25 @@ module mp_thompson
          real(kind_phys), optional, intent(in   ) :: nwfa2d(:)
          real(kind_phys), optional, intent(in   ) :: nifa2d(:)
          ! State variables and timestep information
-         real(kind_phys),           intent(inout) :: tgrs(1:ncol,1:nlev)
-         real(kind_phys),           intent(in   ) :: prsl(1:ncol,1:nlev)
-         real(kind_phys),           intent(in   ) :: phii(1:ncol,1:nlev+1)
-         real(kind_phys),           intent(in   ) :: omega(1:ncol,1:nlev)
+         real(kind_phys),           intent(inout) :: tgrs(:,:)
+         real(kind_phys),           intent(in   ) :: prsl(:,:)
+         real(kind_phys),           intent(in   ) :: phii(:,:)
+         real(kind_phys),           intent(in   ) :: omega(:,:)
          real(kind_phys),           intent(in   ) :: dtp
          ! Precip/rain/snow/graupel fall amounts and fraction of frozen precip
-         real(kind_phys),           intent(  out) :: prcp(1:ncol)
-         real(kind_phys),           intent(  out) :: rain(1:ncol)
-         real(kind_phys),           intent(  out) :: graupel(1:ncol)
-         real(kind_phys),           intent(  out) :: ice(1:ncol)
-         real(kind_phys),           intent(  out) :: snow(1:ncol)
-         real(kind_phys),           intent(  out) :: sr(1:ncol)
+         real(kind_phys),           intent(  out) :: prcp(:)
+         real(kind_phys),           intent(  out) :: rain(:)
+         real(kind_phys),           intent(  out) :: graupel(:)
+         real(kind_phys),           intent(  out) :: ice(:)
+         real(kind_phys),           intent(  out) :: snow(:)
+         real(kind_phys),           intent(  out) :: sr(:)
          ! Radar reflectivity
-         real(kind_phys),           intent(  out) :: refl_10cm(1:ncol,1:nlev)
+         real(kind_phys),           intent(  out) :: refl_10cm(:,:)
          logical,         optional, intent(in   ) :: do_radar_ref
          ! Cloud effective radii
-         real(kind_phys), optional, intent(  out) :: re_cloud(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(  out) :: re_ice(1:ncol,1:nlev)
-         real(kind_phys), optional, intent(  out) :: re_snow(1:ncol,1:nlev)
+         real(kind_phys), optional, intent(  out) :: re_cloud(:,:)
+         real(kind_phys), optional, intent(  out) :: re_ice(:,:)
+         real(kind_phys), optional, intent(  out) :: re_snow(:,:)
          ! MPI information
          integer,                   intent(in)    :: mpicomm
          integer,                   intent(in)    :: mpirank

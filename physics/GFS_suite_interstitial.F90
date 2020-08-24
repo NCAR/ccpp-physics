@@ -94,12 +94,12 @@
       ! interface variables
       integer,              intent(in) :: im, levs, ntrac
       real(kind=kind_phys), intent(in) :: dtf, dtp, dxmin, dxinv
-      real(kind=kind_phys), intent(in), dimension(im) :: slmsk, area, pgr
+      real(kind=kind_phys), intent(in), dimension(:) :: slmsk, area, pgr
 
-      integer,              intent(out), dimension(im) :: islmsk
-      real(kind=kind_phys), intent(out), dimension(im) :: work1, work2, psurf
-      real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt, dtdtc
-      real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
+      integer,              intent(out), dimension(:) :: islmsk
+      real(kind=kind_phys), intent(out), dimension(:) :: work1, work2, psurf
+      real(kind=kind_phys), intent(out), dimension(:,:) :: dudt, dvdt, dtdt, dtdtc
+      real(kind=kind_phys), intent(out), dimension(:,:,:) ::  dqdt
       real(kind=kind_phys), parameter   :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
@@ -173,34 +173,34 @@
       logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid
       real(kind=kind_phys), intent(in   ) :: dtf, cp, hvap
 
-      logical,              intent(in   ), dimension(im) :: flag_cice
-      real(kind=kind_phys), intent(in   ), dimension(2) :: ctei_rm
-      real(kind=kind_phys), intent(in   ), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, ulwsfc_cice, work1, work2
-      real(kind=kind_phys), intent(in   ), dimension(im) :: cice
-      real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
-      real(kind=kind_phys), intent(in   ), dimension(im, levs+1) :: prsi
-      real(kind=kind_phys), intent(in   ), dimension(im, levs, 6) :: lwhd
-      integer,              intent(inout), dimension(im) :: kinver
-      real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
-      real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
-      real(kind=kind_phys), intent(  out), dimension(im) :: adjsfculw
+      logical,              intent(in   ), dimension(:) :: flag_cice
+      real(kind=kind_phys), intent(in   ), dimension(:) :: ctei_rm
+      real(kind=kind_phys), intent(in   ), dimension(:) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, ulwsfc_cice, work1, work2
+      real(kind=kind_phys), intent(in   ), dimension(:) :: cice
+      real(kind=kind_phys), intent(in   ), dimension(:, :) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
+      real(kind=kind_phys), intent(in   ), dimension(:, :) :: prsi
+      real(kind=kind_phys), intent(in   ), dimension(:, :, :) :: lwhd
+      integer,              intent(inout), dimension(:) :: kinver
+      real(kind=kind_phys), intent(inout), dimension(:) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
+      real(kind=kind_phys), intent(in   ), dimension(:) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
+      real(kind=kind_phys), intent(  out), dimension(:) :: adjsfculw
       
       ! RRTMGP	
       logical,              intent(in   ) :: &
            use_GP_jacobian   ! Use RRTMGP LW Jacobian of upwelling to adjust the surface flux?
-      real(kind=kind_phys), intent(in   ), dimension(im) :: &
+      real(kind=kind_phys), intent(in   ), dimension(:) :: &
            skt               ! Skin temperature
-      real(kind=kind_phys), intent(inout), dimension(im) :: &
+      real(kind=kind_phys), intent(inout), dimension(:) :: &
            sktp1r            ! Skin temperature at previous timestep
-      real(kind=kind_phys), intent(in   ), dimension(im,levs+1), optional :: &
+      real(kind=kind_phys), intent(in   ), dimension(:,:), optional :: &
            fluxlwUP,       & ! Upwelling LW flux (W/m2)
            fluxlwUP_jac      ! Jacobian of upwelling LW flux (W/m2/K)
 
       ! These arrays are only allocated if ldiag3d is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
 
-      logical,              intent(in   ), dimension(im) :: dry, icy, wet
-      real(kind=kind_phys), intent(in   ), dimension(im) :: frland
+      logical,              intent(in   ), dimension(:) :: dry, icy, wet
+      real(kind=kind_phys), intent(in   ), dimension(:) :: frland
       real(kind=kind_phys), intent(in   ) :: huge
 
       character(len=*),     intent(out) :: errmsg
@@ -402,10 +402,10 @@
       integer, intent(in) :: im
       integer, intent(in) :: levs
       integer, intent(in) :: ntrac
-      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: qgrs
-      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(out) :: gq0
+      real(kind=kind_phys), dimension(:,:),       intent(in)  :: tgrs, ugrs, vgrs
+      real(kind=kind_phys), dimension(:,:,:), intent(in)  :: qgrs
+      real(kind=kind_phys), dimension(:,:),       intent(out) :: gt0, gu0, gv0
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: gq0
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -451,12 +451,12 @@
       integer,              intent(in) :: ntrac
       real(kind=kind_phys), intent(in) :: dtp
 
-      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: tgrs, ugrs, vgrs
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: qgrs
-      real(kind=kind_phys), dimension(im,levs),       intent(in)  :: dudt, dvdt, dtdt
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(in)  :: dqdt
-      real(kind=kind_phys), dimension(im,levs),       intent(out) :: gt0, gu0, gv0
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(out) :: gq0
+      real(kind=kind_phys), dimension(:,:),       intent(in)  :: tgrs, ugrs, vgrs
+      real(kind=kind_phys), dimension(:,:,:), intent(in)  :: qgrs
+      real(kind=kind_phys), dimension(:,:),       intent(in)  :: dudt, dvdt, dtdt
+      real(kind=kind_phys), dimension(:,:,:), intent(in)  :: dqdt
+      real(kind=kind_phys), dimension(:,:),       intent(out) :: gt0, gu0, gv0
+      real(kind=kind_phys), dimension(:,:,:), intent(out) :: gq0
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -509,22 +509,22 @@
       integer,                                          intent(in) :: im, levs, nn, ntrac, ntcw, ntiw, ntclamt, ntrw,   &
         ntsw, ntrnc, ntsnc, ntgl, ntgnc, imp_physics, imp_physics_mg, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, &
         imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,imp_physics_fer_hires, me
-      integer, dimension(im),                           intent(in) :: islmsk, kpbl, kinver
+      integer, dimension(:),                           intent(in) :: islmsk, kpbl, kinver
       logical,                                          intent(in) :: cscnv, satmedmf, trans_trac, do_shoc, ltaerosol, ras
 
       real(kind=kind_phys),                             intent(in) :: rhcbot, rhcmax, rhcpbl, rhctop
-      real(kind=kind_phys), dimension(im),              intent(in) :: work1, work2
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: prsl, prslk
-      real(kind=kind_phys), dimension(im, levs+1),      intent(in) :: prsi
-      real(kind=kind_phys), dimension(im),              intent(in) :: xlon, xlat
-      real(kind=kind_phys), dimension(im, levs),        intent(in) :: gt0
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in) :: gq0
+      real(kind=kind_phys), dimension(:),              intent(in) :: work1, work2
+      real(kind=kind_phys), dimension(:, :),        intent(in) :: prsl, prslk
+      real(kind=kind_phys), dimension(:, :),      intent(in) :: prsi
+      real(kind=kind_phys), dimension(:),              intent(in) :: xlon, xlat
+      real(kind=kind_phys), dimension(:, :),        intent(in) :: gt0
+      real(kind=kind_phys), dimension(:, :, :), intent(in) :: gq0
 
-      real(kind=kind_phys), dimension(im, levs),      intent(inout) :: rhc, save_qc
+      real(kind=kind_phys), dimension(:, :),      intent(inout) :: rhc, save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_qi
       real(kind=kind_phys), dimension(:, :),          intent(inout) :: save_tcp ! ONLY ALLOCATE FOR THOMPSON! TODO
-      real(kind=kind_phys), dimension(im, levs, nn),  intent(inout) :: clw
+      real(kind=kind_phys), dimension(:, :, :),  intent(inout) :: clw
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -679,16 +679,16 @@
       logical,                                  intent(in) :: ltaerosol, cplchm
 
       real(kind=kind_phys),                     intent(in) :: con_pi, dtf
-      real(kind=kind_phys), dimension(im,levs), intent(in) :: save_qc
+      real(kind=kind_phys), dimension(:, :), intent(in) :: save_qc
       ! save_qi is not allocated for Zhao-Carr MP
       real(kind=kind_phys), dimension(:, :),    intent(in) :: save_qi
 
-      real(kind=kind_phys), dimension(im,levs,ntrac), intent(inout) :: gq0
-      real(kind=kind_phys), dimension(im,levs,nn),    intent(inout) :: clw
-      real(kind=kind_phys), dimension(im,levs),       intent(in) :: prsl
+      real(kind=kind_phys), dimension(:, :,:), intent(inout) :: gq0
+      real(kind=kind_phys), dimension(:, :,:),    intent(inout) :: clw
+      real(kind=kind_phys), dimension(:, :),       intent(in) :: prsl
       real(kind=kind_phys),                           intent(in) :: con_rd
       real(kind=kind_phys), dimension(:,:),           intent(in) :: nwfa, save_tcp
-      real(kind=kind_phys), dimension(im,levs),       intent(in) :: spechum
+      real(kind=kind_phys), dimension(:, :),       intent(in) :: spechum
 
       ! dqdti may not be allocated
       real(kind=kind_phys), dimension(:,:),           intent(inout) :: dqdti
@@ -828,9 +828,9 @@
       ! interface variables
       integer,                                          intent(in)  :: im, levs, ntrac, ntcw, ntiw, nn
 
-      real(kind=kind_phys), dimension(im, levs, ntrac), intent(in)  :: gq0
+      real(kind=kind_phys), dimension(:, :, :), intent(in)  :: gq0
 
-      real(kind=kind_phys), dimension(im, levs, nn),    intent(out) :: clw
+      real(kind=kind_phys), dimension(:, :, :),    intent(out) :: clw
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg

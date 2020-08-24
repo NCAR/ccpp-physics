@@ -62,33 +62,33 @@
    integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
 
-   real(kind=kind_phys),     dimension( im,km ),                                    &
+   real(kind=kind_phys),     dimension( :,: ),                                    &
              intent(in)      ::                 pi2d,p2d,phil,ux,vx,swh,hlw,tx
 
-   real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
+   real(kind=kind_phys),     dimension( :,:,: )                             , &
              intent(in   )   ::                                             qx
 
-   real(kind=kind_phys),     dimension( im, km+1 )                                , &
+   real(kind=kind_phys),     dimension( :,: )                                , &
              intent(in   )   ::                                      p2di,phii
 
-   real(kind=kind_phys),     dimension( im )                                      , &
+   real(kind=kind_phys),     dimension( : )                                      , &
              intent(in)  ::     stress,zorl,heat,evap,wspd,br,psim,psih,psfcpa,     &
                                                                    u10,v10,xmu
-   integer,  dimension(im)                                                         ,&
+   integer,  dimension(:)                                                         ,&
              intent(in   )   ::                                      landmask
 !
 !----------------------------------------------------------------------------------
 ! input/output variables
 !
-   real(kind=kind_phys),     dimension( im,km )                                   , &
+   real(kind=kind_phys),     dimension( :,: )                                   , &
              intent(inout)   ::                                utnp,vtnp,ttnp
-   real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
+   real(kind=kind_phys),     dimension( :,:,: )                             , &
              intent(inout)   ::                                          qtnp
 !
 !---------------------------------------------------------------------------------
 ! output variables
-   integer,  dimension( im ), intent(out  )   ::                       kpbl1d
-   real(kind=kind_phys),     dimension( im ),                                       &
+   integer,  dimension( : ), intent(out  )   ::                       kpbl1d
+   real(kind=kind_phys),     dimension( : ),                                       &
              intent(out)   ::                                            hpbl
 
    ! error messages

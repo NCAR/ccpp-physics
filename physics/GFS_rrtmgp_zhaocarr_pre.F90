@@ -59,10 +59,10 @@ contains
          con_ttp,           & ! Triple point temperature of water (K)
          con_rd,            & ! Ideal gas constant for dry air (J/kg/K)
          con_pi               ! Pi
-    real(kind_phys), dimension(nCol), intent(in) :: &
+    real(kind_phys), dimension(:), intent(in) :: &
          lsmask,            & ! Land/Sea mask
          lat                  ! Latitude             
-    real(kind_phys), dimension(nCol,nLev), intent(in) :: &         
+    real(kind_phys), dimension(:, :), intent(in) :: &         
          tv_lay,            & ! Virtual temperature (K)
          p_lay,             & ! Pressure at model-layers (Pa)
          t_lay,             & ! Temperature at model-layers (K)
@@ -73,15 +73,15 @@ contains
          effrin_cldsnow,    & ! Effective radius for snow cloud-particles (microns)         
          shoc_sgs_cldfrac,  & ! Subgrid-scale cloud fraction from the SHOC scheme
          cncvw                ! Convective cloud water mixing ratio (kg/kg)
-    real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &         
+    real(kind_phys), dimension(:, :), intent(in) :: &         
          p_lev                ! Pressure at model-level interfaces (Pa)
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(in) :: &
+    real(kind_phys), dimension(:, :, :),intent(in) :: &
          tracer               ! Cloud condensate amount in layer by type ()         
     
     ! Outputs       
-    real(kind_phys), dimension(nCol),intent(out) :: &
+    real(kind_phys), dimension(:),intent(out) :: &
          de_lgth                 ! Decorrelation length    
-    real(kind_phys), dimension(nCol,nLev),intent(out) :: &
+    real(kind_phys), dimension(:, :),intent(out) :: &
          cld_frac,             & ! Total cloud fraction
          cld_lwp,              & ! Cloud liquid water path
          cld_reliq,            & ! Cloud liquid effective radius
