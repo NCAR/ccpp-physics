@@ -889,7 +889,7 @@ subroutine cool_skin(ustar_a,f_nsol,f_sol_0,evap,sss,alpha,beta,rho_w,rho_a,ts,q
     zcsq = z_c * z_c
     a_c = a2 + a3/zcsq - (a3/(a4*z_c)+a3/zcsq) * exp(-z_c/a4)
 
-    if ( hb > 0.0 ) then
+    if ( hb > 0.0  .and. zcsq > 0.0 .and. alpha > 0.0) then
       bc1 = zcsq * (q_ts+cc3*hl_ts)
       bc2 = zcsq * f_sol_0*a_c - 4.0*(cc1*tcw)**3*(hb/alpha)**0.25/(cc2**0.75*zcsq)
       zc_ts = bc1/bc2

@@ -185,6 +185,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[zorli]
+  standard_name = surface_roughness_length_over_ice
+  long_name = surface roughness length over ice
+  units = cm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [zorl_wat]
   standard_name = surface_roughness_length_over_ocean_interstitial
   long_name = surface roughness length over ocean (temporary use as interstitial)
@@ -610,7 +619,7 @@
 [min_lakeice]
   standard_name = lake_ice_minimum
   long_name = minimum lake ice value
-  units = ???
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
@@ -619,7 +628,7 @@
 [min_seaice]
   standard_name = sea_ice_minimum
   long_name = minimum sea ice value
-  units = ???
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
@@ -939,6 +948,15 @@
 [zorll]
   standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land
+  units = cm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorli]
+  standard_name = surface_roughness_length_over_ice
+  long_name = surface roughness length over ice
   units = cm
   dimensions = (horizontal_dimension)
   type = real
@@ -1782,6 +1800,14 @@
   kind = kind_phys
   intent = inout
   optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [tiice]
   standard_name = internal_ice_temperature
   long_name = sea ice internal temperature

@@ -530,6 +530,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[cldfra]
+  standard_name = instantaneous_3d_cloud_fraction
+  long_name = instantaneous 3D cloud fraction for all MPs
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
