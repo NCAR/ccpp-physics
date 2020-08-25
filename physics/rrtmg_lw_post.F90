@@ -30,9 +30,8 @@
       type(GFS_grid_type),            intent(in)    :: Grid
       type(GFS_radtend_type),         intent(inout) :: Radtend
       integer,                        intent(in)    :: im, ltp, LM, kd
-      real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htlwc
-      real(kind=kind_phys), dimension(size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htlw0
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),                 intent(in) ::  tsfa
+      real(kind=kind_phys), dimension(size(Grid%xlon,1), lm+LTP), intent(in) :: htlwc, htlw0
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)),         intent(in) :: tsfa
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! local variables
@@ -54,7 +53,7 @@
         enddo
         ! --- repopulate the points above levr
         if (lm < Model%levs) then
-          do k = lm,Model%levs
+          do k = lm+1,Model%levs
             Radtend%htrlw (1:im,k) = Radtend%htrlw (1:im,LM)
           enddo
         endif
@@ -66,7 +65,7 @@
           enddo
           ! --- repopulate the points above levr
           if (lm < Model%levs) then
-            do k = lm,Model%levs
+            do k = lm+1,Model%levs
               Radtend%lwhc(1:im,k) = Radtend%lwhc(1:im,LM)
             enddo
           endif

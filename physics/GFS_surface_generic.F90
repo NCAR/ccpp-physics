@@ -11,8 +11,7 @@
 
       public GFS_surface_generic_pre_init, GFS_surface_generic_pre_finalize, GFS_surface_generic_pre_run
 
-      real(kind=kind_phys), parameter :: one = 1.0d0
-      real(kind=kind_phys), parameter :: zero = 0.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
 
       contains
 
@@ -134,7 +133,8 @@
         ! End of stochastic physics / surface perturbation
 
         do i=1,im
-          sigmaf(i) = max(vfrac(i),0.01 )
+          sigmaf(i) = max(vfrac(i), 0.01_kind_phys)
+          islmsk_cice(i) = islmsk(i)
           if (islmsk(i) == 2) then
             if (isot == 1) then
               soiltyp(i)  = 16
@@ -148,9 +148,9 @@
             endif
             slopetyp(i) = 9
           else
-            soiltyp(i)  = int( stype(i)+0.5 )
-            vegtype(i)  = int( vtype(i)+0.5 )
-            slopetyp(i) = int( slope(i)+0.5 )    !! clu: slope -> slopetyp
+            soiltyp(i)  = int( stype(i)+0.5_kind_phys )
+            vegtype(i)  = int( vtype(i)+0.5_kind_phys )
+            slopetyp(i) = int( slope(i)+0.5_kind_phys )    !! clu: slope -> slopetyp
             if (soiltyp(i)  < 1) soiltyp(i)  = 14
             if (vegtype(i)  < 1) vegtype(i)  = 17
             if (slopetyp(i) < 1) slopetyp(i) = 1
@@ -164,7 +164,7 @@
           smcref2(i) = zero
 
           wind(i)  = max(sqrt(u1(i)*u1(i) + v1(i)*v1(i))   &
-                         + max(zero, min(cnvwind(i), 30.0)), one)
+                         + max(zero, min(cnvwind(i), 30.0_kind_phys)), one)
           !wind(i)  = max(sqrt(Statein%ugrs(i,1)*Statein%ugrs(i,1) + &
           !                         Statein%vgrs(i,1)*Statein%vgrs(i,1))  &
           !              + max(zero, min(Tbd%phy_f2d(i,Model%num_p2d), 30.0)), one)
@@ -194,7 +194,7 @@
 
       public GFS_surface_generic_post_init, GFS_surface_generic_post_finalize, GFS_surface_generic_post_run
 
-      real(kind=kind_phys), parameter :: zero = 0.0, one = 1.0d0
+      real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
 
       contains
 
@@ -249,8 +249,7 @@
         integer,          intent(out) :: errflg
 
         ! Local variables
-
-        real(kind=kind_phys), parameter :: albdf   = 0.06d0
+        real(kind=kind_phys), parameter :: albdf = 0.06_kind_phys
 
         ! Parameters for canopy heat storage parametrization
         real(kind=kind_phys), parameter :: z0min=0.2, z0max=1.0
@@ -313,12 +312,12 @@
 !           if (Sfcprop%landfrac(i) < one) then ! Not 100% land
             if (wet(i)) then                    ! some open water 
 !  ---  compute open water albedo
-              xcosz_loc = max( 0.0, min( 1.0, xcosz(i) ))
-              ocalnirdf_cpl = 0.06
-              ocalnirbm_cpl = max(albdf, 0.026/(xcosz_loc**1.7+0.065)  &
-       &                       + 0.15 * (xcosz_loc-0.1) * (xcosz_loc-0.5) &
-       &                       * (xcosz_loc-1.0))
-              ocalvisdf_cpl = 0.06
+              xcosz_loc = max( zero, min( one, xcosz(i) ))
+              ocalnirdf_cpl = 0.06_kind_phys
+              ocalnirbm_cpl = max(albdf, 0.026_kind_phys/(xcosz_loc**1.7_kind_phys+0.065_kind_phys)     &
+       &                       + 0.15_kind_phys * (xcosz_loc-0.1_kind_phys) * (xcosz_loc-0.5_kind_phys) &
+       &                       * (xcosz_loc-one))
+              ocalvisdf_cpl = 0.06_kind_phys
               ocalvisbm_cpl = ocalnirbm_cpl
 
               nnirbmi_cpl(i) = adjnirbmd(i) * (one-ocalnirbm_cpl)
@@ -332,7 +331,7 @@
               nvisdfi_cpl(i) = adjvisdfd(i) - adjvisdfu(i)
             endif
             nswsfci_cpl(i) = nnirbmi_cpl(i) + nnirdfi_cpl(i)   &
-                            + nvisbmi_cpl(i) + nvisdfi_cpl(i)
+                           + nvisbmi_cpl(i) + nvisdfi_cpl(i)
             nswsfc_cpl(i)  = nswsfc_cpl(i)  + nswsfci_cpl(i)*dtf
             nnirbm_cpl(i)  = nnirbm_cpl(i)  + nnirbmi_cpl(i)*dtf
             nnirdf_cpl(i)  = nnirdf_cpl(i)  + nnirdfi_cpl(i)*dtf
@@ -351,13 +350,9 @@
             snowca(i)  = snowca(i) + snowc(i) * dtf
             snohfa(i)  = snohfa(i) + snohf(i) * dtf
             ep(i)      = ep(i)     + ep1d(i)  * dtf
-          enddo
-        endif
 
 !  --- ...  total runoff is composed of drainage into water table and
 !           runoff at the surface and is accumulated in unit of meters
-        if (lssav) then
-          do i=1,im
             runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * dtf
             srunoff(i) = srunoff(i) + runof(i) * dtf
           enddo

@@ -35,7 +35,7 @@
       integer,                        intent(in)    :: im
       integer,                        intent(out)   :: nday
       integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  ::  tsfa, tsfg
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: tsfa, tsfg
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: alb1d
       character(len=*), intent(out) :: errmsg
@@ -90,7 +90,7 @@
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
         Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
       else
-        nday = 0
+        nday   = 0
         idxday = 0
         sfcalb = 0.0
       endif

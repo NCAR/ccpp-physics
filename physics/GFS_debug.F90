@@ -412,9 +412,9 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%rain_cpl', Coupling%rain_cpl)
                         call print_var(mpirank,omprank, blkno, 'Coupling%snow_cpl', Coupling%snow_cpl)
                      end if
-                     if (Model%cplwav2atm) then
-                        call print_var(mpirank,omprank, blkno, 'Coupling%zorlwav_cpl' , Coupling%zorlwav_cpl  )
-                     end if
+!                    if (Model%cplwav2atm) then
+!                       call print_var(mpirank,omprank, blkno, 'Coupling%zorlwav_cpl' , Coupling%zorlwav_cpl  )
+!                    end if
                      if (Model%cplflx) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%oro_cpl'     , Coupling%oro_cpl      )
                         call print_var(mpirank,omprank, blkno, 'Coupling%slmsk_cpl'   , Coupling%slmsk_cpl    )
@@ -424,10 +424,10 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%dtsfcin_cpl ', Coupling%dtsfcin_cpl  )
                         call print_var(mpirank,omprank, blkno, 'Coupling%dqsfcin_cpl ', Coupling%dqsfcin_cpl  )
                         call print_var(mpirank,omprank, blkno, 'Coupling%ulwsfcin_cpl', Coupling%ulwsfcin_cpl )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%tseain_cpl  ', Coupling%tseain_cpl   )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%tisfcin_cpl ', Coupling%tisfcin_cpl  )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%ficein_cpl  ', Coupling%ficein_cpl   )
-                        call print_var(mpirank,omprank, blkno, 'Coupling%hicein_cpl  ', Coupling%hicein_cpl   )
+!                       call print_var(mpirank,omprank, blkno, 'Coupling%tseain_cpl  ', Coupling%tseain_cpl   )
+!                       call print_var(mpirank,omprank, blkno, 'Coupling%tisfcin_cpl ', Coupling%tisfcin_cpl  )
+!                       call print_var(mpirank,omprank, blkno, 'Coupling%ficein_cpl  ', Coupling%ficein_cpl   )
+!                       call print_var(mpirank,omprank, blkno, 'Coupling%hicein_cpl  ', Coupling%hicein_cpl   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%hsnoin_cpl  ', Coupling%hsnoin_cpl   )
                         call print_var(mpirank,omprank, blkno, 'Coupling%dusfc_cpl   ', Coupling%dusfc_cpl    )
                         call print_var(mpirank,omprank, blkno, 'Coupling%dvsfc_cpl   ', Coupling%dvsfc_cpl    )
