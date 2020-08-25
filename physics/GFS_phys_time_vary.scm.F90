@@ -45,10 +45,10 @@
          implicit none
 
          ! Interface variables
-         integer,                              intent(in)    :: im, ntoz, me, master, iflip, nblks, nx, ny, levh2o_int, levozp_int
+         integer,                              intent(in)    :: im, ntoz, me, master, iflip, nblks, nx, ny, levh2o_int, levozp_int, iccn
          integer, dimension(4),                intent(in)    :: idate
          integer, dimension(nblks),            intent(in)    :: blksz
-         logical,                              intent(in)    :: h2o_phys, iaerclm, iccn
+         logical,                              intent(in)    :: h2o_phys, iaerclm
          real(kind=kind_phys), dimension(im),  intent(in)    :: xlat_d, xlon_d
          real(kind=kind_phys), dimension(:,:,:), intent(in) :: ozpl
          real(kind=kind_phys), dimension(:,:,:), intent(in) :: h2opl
@@ -135,7 +135,7 @@
             ntrcaer = size(aer_nm, dim=3)
          endif
          
-         if (iccn) then
+         if (iccn == 1) then
             call read_cidata  (me, master)
             ! No consistency check needed for in/ccn data, all values are
             ! hardcoded in module iccn_def.F and GFS_typedefs.F90
@@ -172,7 +172,7 @@
                               me, master)
          endif
           !--- read in and initialize IN and CCN
-         if (iccn) then
+         if (iccn == 1) then
              call setindxci (blksz(nb), xlat_d, jindx1_ci,       &
                              jindx2_ci, ddy_ci, xlon_d,  &
                              iindx1_ci, iindx2_ci, ddx_ci)

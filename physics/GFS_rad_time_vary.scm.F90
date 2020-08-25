@@ -21,29 +21,46 @@
 !> \section arg_table_GFS_rad_time_vary_run Argument Table
 !! \htmlinclude GFS_rad_time_vary_run.html
 !!
-      subroutine GFS_rad_time_vary_run (Model, Statein, Tbd, errmsg, errflg)
+      subroutine GFS_rad_time_vary_run (cnx, cny, lsswr, lslwr, isubc_sw, &
+          isubc_lw, sec, nblks, blksz, isc, jsc, imp_physics,             &
+          imp_physics_zhao_carr, kdt, tgrs, qgrs_wv, prsi, imap, jmap,    &
+          icsdsw, icsdlw, t_minus_two_delt, qv_minus_two_delt,            &
+          t_minus_delt, qv_minus_delt, ps_minus_two_delt, ps_minus_delt,  &
+          errmsg, errflg)
 
       use physparam,                 only: ipsd0, ipsdlim, iaerflg
       use mersenne_twister,          only: random_setseed, random_index, random_stat
       use machine,                   only: kind_phys
-      use GFS_typedefs,              only: GFS_statein_type,   &
-                                           GFS_control_type,   &
-                                           GFS_grid_type,      &
-                                           GFS_tbd_type
       use radcons,                   only: qmin, con_100
 
       implicit none
 
-      type(GFS_control_type), intent(inout) :: Model
-      type(GFS_statein_type), intent(in)    :: Statein
-      type(GFS_tbd_type),     intent(inout) :: Tbd
+      integer,                intent(in)    :: cnx, cny, isubc_sw, isubc_lw, &
+                                                nblks, isc, jsc, imp_physics,&
+                                                imp_physics_zhao_carr, kdt
+      logical,                intent(in)    :: lsswr, lslwr
+      real(kind=kind_phys),   intent(in)    :: sec
+      
+      integer, dimension(nblks), intent(in) :: blksz
+      integer, dimension(:),     intent(in) :: imap, jmap
+      
+      integer, dimension(:),  intent(inout) :: icsdsw, icsdlw
+      
+      real(kind=kind_phys), dimension(:,:), intent(in) :: tgrs, qgrs_wv
+      real(kind=kind_phys), dimension(:,:), intent(in) :: prsi
+      
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: t_minus_two_delt, &
+                                qv_minus_two_delt, t_minus_delt, qv_minus_delt
+      real(kind=kind_phys), dimension(:),   intent(inout) :: ps_minus_two_delt,&
+                                ps_minus_delt
+      
       character(len=*),       intent(out) :: errmsg
       integer,                intent(out) :: errflg
 
       !--- local variables
       type (random_stat) :: stat
-      integer :: ix, nb, j, i, nblks, ipseed
-      integer :: numrdm(Model%cnx*Model%cny*2)
+      integer :: ix, nb, j, i, ipseed
+      integer :: numrdm(cnx*cny*2)
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -51,34 +68,34 @@
 
       nb = 1
 
-      if (Model%lsswr .or. Model%lslwr) then
+      if (lsswr .or. lslwr) then
 
         !--- call to GFS_radupdate_run is now in GFS_rrtmg_setup_run
 
         !--- set up random seed index in a reproducible way for entire cubed-sphere face (lat-lon grid)
-        if ((Model%isubc_lw==2) .or. (Model%isubc_sw==2)) then
-          ipseed = mod(nint(con_100*sqrt(Model%sec)), ipsdlim) + 1 + ipsd0
+        if ((isubc_lw==2) .or. (isubc_sw==2)) then
+          ipseed = mod(nint(con_100*sqrt(sec)), ipsdlim) + 1 + ipsd0
           call random_setseed (ipseed, stat)
           call random_index (ipsdlim, numrdm, stat)
 
           !--- set the random seeds for each column in a reproducible way
-          do ix=1,Model%blksz(nb)
-             j = Tbd%jmap(ix)
-             i = Tbd%imap(ix)
+          do ix=1,blksz(nb)
+             j = jmap(ix)
+             i = imap(ix)
              !--- for testing purposes, replace numrdm with '100'
-             Tbd%icsdsw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx)
-             Tbd%icsdlw(ix) = numrdm(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + Model%cnx*Model%cny)
+             icsdsw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx)
+             icsdlw(ix) = numrdm(i+isc-1 + (j+jsc-2)*cnx + cnx*cny)
           enddo
         endif  ! isubc_lw and isubc_sw
 
-        if (Model%imp_physics == 99) then
-          if (Model%kdt == 1) then
-            Tbd%phy_f3d(:,:,1) = Statein%tgrs
-            Tbd%phy_f3d(:,:,2) = max(qmin,Statein%qgrs(:,:,1))
-            Tbd%phy_f3d(:,:,3) = Statein%tgrs
-            Tbd%phy_f3d(:,:,4) = max(qmin,Statein%qgrs(:,:,1))
-            Tbd%phy_f2d(:,1)   = Statein%prsi(:,1)
-            Tbd%phy_f2d(:,2)   = Statein%prsi(:,1)
+        if (imp_physics == imp_physics_zhao_carr) then
+          if (kdt == 1) then
+            t_minus_two_delt(:,:)  = tgrs
+            qv_minus_two_delt(:,:) = max(qmin,qgrs_wv(:,:))
+            t_minus_delt(:,:)      = tgrs
+            qv_minus_delt(:,:)     = max(qmin,qgrs_wv(:,:))
+            ps_minus_two_delt(:)   = prsi(:,1)
+            ps_minus_delt(:)       = prsi(:,1)
           endif
         endif
 
