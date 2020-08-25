@@ -48,6 +48,7 @@
   dimensions = (number_of_land_surface_variables_perturbed)
   type = real
   kind = kind_phys
+  intent = in 
   optional = F
 [lndp_var_list]
   standard_name = variables_to_be_perturbed_for_landperts
@@ -56,6 +57,7 @@
   dimensions =  (number_of_land_surface_variables_perturbed)
   type = character
   kind = len=3
+  intent = in
   optional = F
 [lsswr]
   standard_name = flag_to_calc_sw
