@@ -13,32 +13,29 @@
 !> \section arg_table_GFS_rrtmg_post_run Argument Table
 !! \htmlinclude GFS_rrtmg_post_run.html
 !!
-      subroutine GFS_rrtmg_post_run (lsswr, lslwr, lssav, fhlwr, fhswr, prsi, tgrs, sfcflw, sfcfsw, topflw, topfsw, coszen, coszdg, fluxr, &
-              scmpsw, nspc1, nfxr, im, km, kmp1, lm, ltp, kt, kb, kd, raddt, aerodp,   &
-              cldsa, mtopa, mbota, clouds1, cldtaulw, cldtausw, nday,     &
-              errmsg, errflg)
+      subroutine GFS_rrtmg_post_run (im, km, kmp1, lm, ltp, kt, kb, kd, nspc1, &
+              nfxr, nday, lsswr, lslwr, lssav, fhlwr, fhswr, raddt, coszen,    &
+              coszdg, prsi, tgrs, aerodp, cldsa, mtopa, mbota, clouds1,        &
+              cldtaulw, cldtausw, sfcflw, sfcfsw, topflw, topfsw, scmpsw,      &
+              fluxr, errmsg, errflg)
 
       use machine,                             only: kind_phys
-      use module_radsw_parameters,             only: topfsw_type, sfcfsw_type, cmpfsw_type
+      use module_radsw_parameters,             only: topfsw_type, sfcfsw_type, &
+                                                     cmpfsw_type
       use module_radlw_parameters,             only: topflw_type, sfcflw_type
 
       implicit none
 
       ! Interface variables
-      type(sfcflw_type), dimension(im), intent(in) :: sfcflw
-      type(sfcfsw_type), dimension(im), intent(in) :: sfcfsw
-      type(cmpfsw_type), dimension(im), intent(in) :: scmpsw
-      type(topflw_type), dimension(im), intent(in) :: topflw
-      type(topfsw_type), dimension(im), intent(in) :: topfsw
-
-      integer,              intent(in) :: nspc1, nfxr, im, km, kmp1, lm, ltp, kt, kb, kd, nday
-      real(kind=kind_phys), intent(in) :: raddt, fhlwr, fhswr
+      integer,              intent(in) :: im, km, kmp1, lm, ltp, kt, kb, kd,   &
+                                          nspc1, nfxr, nday
       logical,              intent(in) :: lsswr, lslwr, lssav
+      real(kind=kind_phys), intent(in) :: raddt, fhlwr, fhswr
+            
+      real(kind=kind_phys), dimension(im),        intent(in) :: coszen, coszdg
       
-      real(kind=kind_phys), dimension(im), intent(in) :: coszen, coszdg
-      
-      real(kind=kind_phys), dimension(im,kmp1), intent(in) :: prsi
-      real(kind=kind_phys), dimension(im,km),   intent(in) :: tgrs
+      real(kind=kind_phys), dimension(im,kmp1),   intent(in) :: prsi
+      real(kind=kind_phys), dimension(im,km),     intent(in) :: tgrs
       
       real(kind=kind_phys), dimension(im,NSPC1),  intent(in) :: aerodp
       real(kind=kind_phys), dimension(im,5),      intent(in) :: cldsa
@@ -46,6 +43,12 @@
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: clouds1
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtausw
       real(kind=kind_phys), dimension(im,lm+LTP), intent(in) :: cldtaulw
+      
+      type(sfcflw_type), dimension(im), intent(in) :: sfcflw
+      type(sfcfsw_type), dimension(im), intent(in) :: sfcfsw
+      type(cmpfsw_type), dimension(im), intent(in) :: scmpsw
+      type(topflw_type), dimension(im), intent(in) :: topflw
+      type(topfsw_type), dimension(im), intent(in) :: topfsw
       
       real(kind=kind_phys), dimension(im,nfxr), intent(inout) :: fluxr
 
