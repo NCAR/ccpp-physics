@@ -16,10 +16,10 @@
 !!
 #endif
       subroutine rrtmg_sw_post_run (im, levr, levs, ltp, nday, lm, kd, lsswr,  &
-                 swhtr, htswc, htsw0, sfcalb1, sfcalb2, sfcalb3, sfcalb4,      &
-                 scmpsw, sfcfsw, topfsw, nirbmdi, nirdfdi, visbmdi, visdfdi,   &
-                 nirbmui, nirdfui, visbmui, visdfui, sfcdsw, sfcnsw, htrsw,    &
-                 swhc, errmsg, errflg)
+                 swhtr, sfcalb1, sfcalb2, sfcalb3, sfcalb4, htswc, htsw0,      &
+                 nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui,&
+                 visdfui, sfcdsw, sfcnsw, htrsw, swhc, scmpsw, sfcfsw, topfsw, &
+                 errmsg, errflg)
 
       use machine,                   only: kind_phys
       use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
@@ -27,17 +27,24 @@
 
       implicit none
 
-      integer,                              intent(in)    :: im, lm, kd, nday, levr, levs, ltp
+      integer,                              intent(in)    :: im, levr, levs,   &
+                                                             ltp, nday, lm, kd   
       logical,                              intent(in)    :: lsswr, swhtr
+      real(kind=kind_phys), dimension(im),  intent(in)    :: sfcalb1, sfcalb2, &
+                                                             sfcalb3, sfcalb4
       real(kind=kind_phys), dimension(im, levr+LTP), intent(in) ::  htswc, htsw0
-      real(kind=kind_phys), dimension(im),  intent(in)    :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      
+      real(kind=kind_phys), dimension(im),  intent(inout) :: nirbmdi, nirdfdi, &
+                                                             visbmdi, visdfdi, &
+                                                             nirbmui, nirdfui, &
+                                                             visbmui, visdfui, &
+                                                             sfcdsw,  sfcnsw
+      real(kind=kind_phys), dimension(im,levs), intent(inout) :: htrsw, swhc
+
       type(cmpfsw_type), dimension(im),     intent(inout) :: scmpsw
       type(sfcfsw_type), dimension(im),     intent(inout) :: sfcfsw
       type(topfsw_type), dimension(im),     intent(inout) :: topfsw
-      real(kind=kind_phys), dimension(im),  intent(inout) :: nirbmdi, nirdfdi, visbmdi, &
-                                                             visdfdi, nirbmui, nirdfui, &
-                                                             visbmui, visdfui, sfcdsw, sfcnsw
-      real(kind=kind_phys), dimension(im,levs), intent(inout) :: htrsw, swhc
+
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables

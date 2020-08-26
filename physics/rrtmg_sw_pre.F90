@@ -28,17 +28,20 @@
       integer,                              intent(in)    :: im
       logical,                              intent(in)    :: lsswr
       real(kind=kind_phys), dimension(5),   intent(in)    :: pertalb
-      real(kind=kind_phys), dimension(im),  intent(in)    :: tsfa, tsfg, coszen
+      real(kind=kind_phys), dimension(im),  intent(in)    :: tsfg, tsfa, coszen
       real(kind=kind_phys), dimension(im),  intent(in)    :: alb1d
-      real(kind=kind_phys), dimension(im),  intent(in)    :: slmsk, snowd, &
-                                                             sncovr, snoalb, zorl, &
-                                                             hprime, alvsf, alnsf, &
-                                                             alvwf, alnwf, facsf,  &
-                                                             facwf, fice, tisfc
+      real(kind=kind_phys), dimension(im),  intent(in)    :: slmsk, snowd,     &
+                                                             sncovr, snoalb,   &
+                                                             zorl, hprime,     &
+                                                             alvsf, alnsf,     &
+                                                             alvwf, alnwf,     &
+                                                             facsf, facwf,     &
+                                                             fice, tisfc
       real(kind=kind_phys), dimension(im),  intent(inout) :: sfalb
       integer,                              intent(out)   :: nday
       integer, dimension(im),               intent(out)   :: idxday
-      real(kind=kind_phys), dimension(im),  intent(out)   :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
+      real(kind=kind_phys), dimension(im),  intent(out)   :: sfcalb1, sfcalb2, &
+                                                             sfcalb3, sfcalb4
       character(len=*),                     intent(out)   :: errmsg
       integer,                              intent(out)   :: errflg
       ! Local variables

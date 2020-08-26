@@ -25,7 +25,7 @@
       integer,                              intent(in)  :: im
       logical,                              intent(in)  :: lslwr
       real(kind=kind_phys), dimension(im),  intent(in)  :: xlat, xlon, slmsk,  &
-        snowd, sncovr, zorl, hprime, tsfa, tsfg
+        snowd, sncovr, zorl, hprime, tsfg, tsfa 
       real(kind=kind_phys), dimension(im),  intent(out) :: semis
       character(len=*),                     intent(out) :: errmsg
       integer,                              intent(out) :: errflg
