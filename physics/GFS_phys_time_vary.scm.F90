@@ -33,30 +33,36 @@
 !> \section arg_table_GFS_phys_time_vary_init Argument Table
 !! \htmlinclude GFS_phys_time_vary_init.html
 !!
-      subroutine GFS_phys_time_vary_init (im, ntoz, me, master, h2o_phys, iaerclm, &
-        iccn, iflip, idate, nblks, blksz, nx, ny, xlat_d, xlon_d, levh2o_int,      &
-        levozp_int, ozpl, h2opl, aer_nm, jindx1_o3, jindx2_o3, ddy_o3, jindx1_h,   &
-        jindx2_h, ddy_h, jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer,  &
-        ddx_aer, jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci,       &
-        oz_pres_int, h2o_pres_int, imap, jmap, errmsg, errflg)
+      subroutine GFS_phys_time_vary_init (im, nx, ny, me, master, nblks, ntoz, iflip, &
+        iccn, levh2o_int, levozp_int, idate, blksz, h2o_phys, iaerclm, xlat_d, xlon_d,&
+        ozpl, h2opl, aer_nm, imap, jmap, jindx1_o3, jindx2_o3, jindx1_h, jindx2_h,    &
+        jindx1_aer, jindx2_aer, iindx1_aer, iindx2_aer, jindx1_ci, jindx2_ci,         &
+        iindx1_ci, iindx2_ci, ddy_o3, ddy_h, ddy_aer, ddx_aer, ddy_ci, ddx_ci,        &
+        oz_pres_int, h2o_pres_int, errmsg, errflg)
 
          use machine,                   only: kind_phys
 
          implicit none
 
          ! Interface variables
-         integer,                              intent(in)    :: im, ntoz, me, master, iflip, nblks, nx, ny, levh2o_int, levozp_int, iccn
-         integer, dimension(4),                intent(in)    :: idate
-         integer, dimension(nblks),            intent(in)    :: blksz
-         logical,                              intent(in)    :: h2o_phys, iaerclm
-         real(kind=kind_phys), dimension(im),  intent(in)    :: xlat_d, xlon_d
-         real(kind=kind_phys), dimension(:,:,:), intent(in) :: ozpl
-         real(kind=kind_phys), dimension(:,:,:), intent(in) :: h2opl
-         real(kind=kind_phys), dimension(:,:,:), intent(in) :: aer_nm
-         
-         integer, dimension(im), intent(inout)              :: imap, jmap
-         integer, dimension(:),               intent(inout) :: jindx1_o3, jindx2_o3, jindx1_h, jindx2_h, jindx1_aer, jindx2_aer, iindx1_aer, iindx2_aer, jindx1_ci, jindx2_ci, iindx1_ci, iindx2_ci
-         real(kind=kind_phys), dimension(:),  intent(inout) :: ddy_o3, ddy_h, ddy_aer, ddx_aer, ddy_ci, ddx_ci
+         integer,                                intent(in) :: im, nx, ny, me, master,  &
+                                                               nblks, ntoz, iflip, iccn,&
+                                                               levh2o_int, levozp_int 
+         integer, dimension(4),                  intent(in) :: idate
+         integer, dimension(nblks),              intent(in) :: blksz
+         logical,                                intent(in) :: h2o_phys, iaerclm
+         real(kind=kind_phys), dimension(im),    intent(in) :: xlat_d, xlon_d
+         real(kind=kind_phys), dimension(:,:,:), intent(in) :: ozpl, h2opl, aer_nm
+                  
+         integer, dimension(im),              intent(inout) :: imap, jmap
+         integer, dimension(:),               intent(inout) :: jindx1_o3, jindx2_o3,    &
+                                                               jindx1_h, jindx2_h,      &
+                                                               jindx1_aer, jindx2_aer,  &
+                                                               iindx1_aer, iindx2_aer,  &
+                                                               jindx1_ci, jindx2_ci,    &
+                                                               iindx1_ci, iindx2_ci
+         real(kind=kind_phys), dimension(:),  intent(inout) :: ddy_o3, ddy_h, ddy_aer,  &
+                                                               ddx_aer, ddy_ci, ddx_ci
          real(kind=kind_phys), dimension(levozp_int), intent(inout) :: oz_pres_int
          real(kind=kind_phys), dimension(levh2o_int), intent(inout) :: h2o_pres_int
          
@@ -241,25 +247,53 @@
 !> \section arg_table_GFS_phys_time_vary_run Argument Table
 !! \htmlinclude GFS_phys_time_vary_run.html
 !!
-      subroutine GFS_phys_time_vary_run (Grid, Statein, Model, Tbd, Sfcprop, Cldprop, Diag, first_time_step, errmsg, errflg)
+      subroutine GFS_phys_time_vary_run (levs, cnx, cny, isc, jsc, me, master,   &
+        ntoz, iccn, nrcm, nsswr, nszero, kdt, imfdeepcnv, seed0, first_time_step,&
+        lsswr, cal_pre, random_clds, h2o_phys, iaerclm, fhswr, fhlwr, fhour,     &
+        fhzero, dtp, idate, jindx1_o3, jindx2_o3, jindx1_h, jindx2_h, jindx1_aer,&
+        jindx2_aer, iindx1_aer, iindx2_aer, jindx1_ci, jindx2_ci, iindx1_ci,     &
+        iindx2_ci, blksz, imap, jmap, ddy_o3, ddy_h, ddy_aer, ddx_aer, ddy_ci,   &
+        ddx_ci, slmsk, vtype, weasd, prsl, Model, clstp, sncovr, rann, in_nm,    &
+        ccn_nm, ozpl, h2opl, aer_nm, Diag, errmsg, errflg)
 
         use mersenne_twister,      only: random_setseed, random_number
         use machine,               only: kind_phys
-        use GFS_typedefs,          only: GFS_control_type, GFS_grid_type, &
-                                         GFS_Tbd_type, GFS_sfcprop_type,  &
-                                         GFS_cldprop_type, GFS_diag_type, &
-                                         GFS_statein_type
-
+        use GFS_typedefs,          only: GFS_control_type, GFS_diag_type
+        
         implicit none
 
-        type(GFS_grid_type),              intent(in)    :: Grid
-        type(GFS_statein_type),           intent(in)    :: Statein
-        type(GFS_control_type),           intent(inout) :: Model
-        type(GFS_tbd_type),               intent(inout) :: Tbd
-        type(GFS_sfcprop_type),           intent(inout) :: Sfcprop
-        type(GFS_cldprop_type),           intent(inout) :: Cldprop
+        integer,                              intent(in) :: levs, cnx, cny, isc, jsc, &
+                                                            me, master, ntoz, iccn,   &
+                                                            nrcm, nsswr, nszero, kdt, &
+                                                            imfdeepcnv, seed0 
+        logical,                              intent(in) :: first_time_step, lsswr,   &
+                                                            cal_pre, random_clds,     &
+                                                            h2o_phys, iaerclm
+        real(kind=kind_phys),                 intent(in) :: fhswr, fhlwr, fhour,      &
+                                                            fhzero, dtp
+        
+        integer, dimension(4),                intent(in) :: idate
+        integer, dimension(:),                intent(in) :: jindx1_o3, jindx2_o3,     &
+                                                            jindx1_h, jindx2_h,       &
+                                                            jindx1_aer, jindx2_aer,   &
+                                                            iindx1_aer, iindx2_aer,   &
+                                                            jindx1_ci, jindx2_ci,     &
+                                                            iindx1_ci, iindx2_ci,     &
+                                                            blksz, imap, jmap
+        real(kind=kind_phys), dimension(:),   intent(in) :: ddy_o3, ddy_h, ddy_aer,   &
+                                                            ddx_aer, ddy_ci, ddx_ci,  &
+                                                            slmsk, vtype, weasd
+        real(kind=kind_phys), dimension(:,:), intent(in) :: prsl
+        
+        type(GFS_control_type),               intent(in) :: Model
+        
+        real(kind=kind_phys),                   intent(inout) :: clstp
+        real(kind=kind_phys), dimension(:),     intent(inout) :: sncovr
+        real(kind=kind_phys), dimension(:,:),   intent(inout) :: rann, in_nm, ccn_nm
+        real(kind=kind_phys), dimension(:,:,:), intent(inout) :: ozpl, h2opl, aer_nm
+        
         type(GFS_diag_type),              intent(inout) :: Diag
-        logical,                          intent(in)    :: first_time_step
+
         character(len=*),                 intent(out)   :: errmsg
         integer,                          intent(out)   :: errflg
 
@@ -270,8 +304,8 @@
         integer :: i, j, k, iseed, iskip, ix, nb, kdt_rad, vegtyp
         real(kind=kind_phys) :: sec_zero, rsnow
         real(kind=kind_phys) :: wrk(1)
-        real(kind=kind_phys) :: rannie(Model%cny)
-        real(kind=kind_phys) :: rndval(Model%cnx*Model%cny*Model%nrcm)
+        real(kind=kind_phys) :: rannie(cny)
+        real(kind=kind_phys) :: rndval(cnx*cny*nrcm)
 
         ! Initialize CCPP error handling variables
         errmsg = ''
@@ -288,98 +322,98 @@
 
         !--- switch for saving convective clouds - cnvc90.f
         !--- aka Ken Campana/Yu-Tai Hou legacy
-        if ((mod(Model%kdt,Model%nsswr) == 0) .and. (Model%lsswr)) then
+        if ((mod(kdt,nsswr) == 0) .and. (lsswr)) then
           !--- initialize,accumulate,convert
-          Model%clstp = 1100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-        elseif (mod(Model%kdt,Model%nsswr) == 0) then
+          clstp = 1100 + min(fhswr/con_hr,fhour,con_99)
+        elseif (mod(kdt,nsswr) == 0) then
           !--- accumulate,convert
-          Model%clstp = 0100 + min(Model%fhswr/con_hr,Model%fhour,con_99)
-        elseif (Model%lsswr) then
+          clstp = 0100 + min(fhswr/con_hr,fhour,con_99)
+        elseif (lsswr) then
           !--- initialize,accumulate
-          Model%clstp = 1100
+          clstp = 1100
         else
           !--- accumulate
-          Model%clstp = 0100
+          clstp = 0100
         endif
 
         !--- random number needed for RAS and old SAS and when cal_pre=.true.
-        if ( (Model%imfdeepcnv <= 0 .or. Model%cal_pre) .and. Model%random_clds ) then
-          iseed = mod(con_100*sqrt(Model%fhour*con_hr),1.0d9) + Model%seed0
+        if ( (imfdeepcnv <= 0 .or. cal_pre) .and. random_clds ) then
+          iseed = mod(con_100*sqrt(fhour*con_hr),1.0d9) + seed0
           call random_setseed(iseed)
           call random_number(wrk)
-          do i = 1,Model%cnx*Model%nrcm
+          do i = 1,cnx*nrcm
             iseed = iseed + nint(wrk(1)*1000.0) * i
             call random_setseed(iseed)
             call random_number(rannie)
-            rndval(1+(i-1)*Model%cny:i*Model%cny) = rannie(1:Model%cny)
+            rndval(1+(i-1)*cny:i*cny) = rannie(1:cny)
           enddo
 
-          do k = 1,Model%nrcm
-            iskip = (k-1)*Model%cnx*Model%cny
-            do ix=1,Model%blksz(nb)
-                j = Tbd%jmap(ix)
-                i = Tbd%imap(ix)
-                Tbd%rann(ix,k) = rndval(i+Model%isc-1 + (j+Model%jsc-2)*Model%cnx + iskip)
+          do k = 1,nrcm
+            iskip = (k-1)*cnx*cny
+            do ix=1,blksz(nb)
+                j = jmap(ix)
+                i = imap(ix)
+                rann(ix,k) = rndval(i+isc-1 + (j+jsc-2)*cnx + iskip)
               enddo
           enddo
         endif  ! imfdeepcnv, cal_re, random_clds
 
         !--- o3 interpolation
-        if (Model%ntoz > 0) then
-          call ozinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                           Grid%jindx1_o3, Grid%jindx2_o3, Tbd%ozpl, Grid%ddy_o3)
+        if (ntoz > 0) then
+          call ozinterpol (me, blksz(nb), idate, fhour, &
+                           jindx1_o3, jindx2_o3, ozpl, ddy_o3)
         endif
 
         !--- h2o interpolation
-        if (Model%h2o_phys) then
-          call h2ointerpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                            Grid%jindx1_h, Grid%jindx2_h, Tbd%h2opl, Grid%ddy_h)
+        if (h2o_phys) then
+          call h2ointerpol (me, blksz(nb), idate, fhour, &
+                            jindx1_h, jindx2_h, h2opl, ddy_h)
         endif
 
         !--- aerosol interpolation
-        if (Model%iaerclm) then
-          call aerinterpol (Model%me, Model%master, Model%blksz(nb),             &
-                             Model%idate, Model%fhour,                            &
-                             Grid%jindx1_aer, Grid%jindx2_aer,  &
-                             Grid%ddy_aer,Grid%iindx1_aer,      &
-                             Grid%iindx2_aer,Grid%ddx_aer,      &
-                             Model%levs,Statein%prsl,                    &
-                             Tbd%aer_nm)
+        if (iaerclm) then
+          call aerinterpol (me, master, blksz(nb),             &
+                             idate, fhour,                            &
+                             jindx1_aer, jindx2_aer,  &
+                             ddy_aer,iindx1_aer,      &
+                             iindx2_aer,ddx_aer,      &
+                             levs,prsl,                    &
+                             aer_nm)
         endif
          !--- ICCN interpolation
-        if (Model%iccn == 1) then
-            call ciinterpol (Model%me, Model%blksz(nb), Model%idate, Model%fhour, &
-                             Grid%jindx1_ci, Grid%jindx2_ci,    &
-                             Grid%ddy_ci,Grid%iindx1_ci,        &
-                             Grid%iindx2_ci,Grid%ddx_ci,        &
-                             Model%levs,Statein%prsl,                    &
-                             Tbd%in_nm, Tbd%ccn_nm)
+        if (iccn == 1) then
+            call ciinterpol (me, blksz(nb), idate, fhour, &
+                             jindx1_ci, jindx2_ci,    &
+                             ddy_ci,iindx1_ci,        &
+                             iindx2_ci,ddx_ci,        &
+                             levs,prsl,                    &
+                             in_nm, ccn_nm)
         endif
 
         !--- original FV3 code, not needed for SCM; also not compatible with the way
         !    the time vary steps are run (over each block) --> cannot use
         !--- repopulate specific time-varying sfc properties for AMIP/forecast runs
         !if (Model%nscyc >  0) then
-        !  if (mod(Model%kdt,Model%nscyc) == 1) THEN
+        !  if (mod(kdt,Model%nscyc) == 1) THEN
         !    call gcycle (nblks, Model, Grid(:), Sfcprop(:), Cldprop(:))
         !  endif
         !endif
 
         !--- determine if diagnostics buckets need to be cleared
-        sec_zero = nint(Model%fhzero*con_hr)
-        if (sec_zero >= nint(max(Model%fhswr,Model%fhlwr))) then
-          if (mod(Model%kdt,Model%nszero) == 1) then
+        sec_zero = nint(fhzero*con_hr)
+        if (sec_zero >= nint(max(fhswr,fhlwr))) then
+          if (mod(kdt,nszero) == 1) then
               call Diag%rad_zero  (Model)
               call Diag%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
         else
-          if (mod(Model%kdt,Model%nszero) == 1) then
+          if (mod(kdt,nszero) == 1) then
               call Diag%phys_zero (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
-          kdt_rad = nint(min(Model%fhswr,Model%fhlwr)/Model%dtp)
-          if (mod(Model%kdt, kdt_rad) == 1) then
+          kdt_rad = nint(min(fhswr,fhlwr)/dtp)
+          if (mod(kdt, kdt_rad) == 1) then
               call Diag%rad_zero  (Model)
         !!!!  THIS IS THE POINT AT WHICH DIAG%ZHOUR NEEDS TO BE UPDATED
           endif
@@ -388,19 +422,19 @@
 #if 0
         !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
         if (first_time_step) then
-          if (nint(Sfcprop%sncovr(1)) == -9999) then
+          if (nint(sncovr(1)) == -9999) then
             !--- compute sncovr from existing variables
             !--- code taken directly from read_fix.f
-              do ix = 1, Model%blksz(nb)
-                Sfcprop%sncovr(ix) = 0.0
-                if (Sfcprop%slmsk(ix) > 0.001) then
-                  vegtyp = Sfcprop%vtype(ix)
+              do ix = 1, blksz(nb)
+                sncovr(ix) = 0.0
+                if (slmsk(ix) > 0.001) then
+                  vegtyp = vtype(ix)
                   if (vegtyp == 0) vegtyp = 7
-                  rsnow  = 0.001*Sfcprop%weasd(ix)/snupx(vegtyp)
-                  if (0.001*Sfcprop%weasd(ix) < snupx(vegtyp)) then
-                    Sfcprop%sncovr(ix) = 1.0 - (exp(-salp_data*rsnow) - rsnow*exp(-salp_data))
+                  rsnow  = 0.001*weasd(ix)/snupx(vegtyp)
+                  if (0.001*weasd(ix) < snupx(vegtyp)) then
+                    sncovr(ix) = 1.0 - (exp(-salp_data*rsnow) - rsnow*exp(-salp_data))
                   else
-                    Sfcprop%sncovr(ix) = 1.0
+                    sncovr(ix) = 1.0
                   endif
                 endif
               enddo
