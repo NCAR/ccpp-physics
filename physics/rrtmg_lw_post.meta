@@ -106,6 +106,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[sfcdlw]
+  standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
+  long_name = total sky sfc downward lw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [htrlw]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
@@ -120,15 +129,6 @@
   long_name = clear sky lw heating rates
   units = K s-1
   dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[sfcdlw]
-  standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
-  long_name = total sky sfc downward lw flux
-  units = W m-2
-  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout

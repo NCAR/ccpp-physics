@@ -17,7 +17,7 @@
 !!
 #endif
       subroutine rrtmg_lw_post_run (im, levs, ltp, lm, kd, lslwr, lwhtr,       &
-                 tsfa, htlwc, htlw0, sfcflw, tsflw, htrlw, lwhc, sfcdlw,       &
+                 tsfa, htlwc, htlw0, sfcflw, tsflw, sfcdlw, htrlw, lwhc,       &
                  errmsg, errflg)
     
       use machine,                   only: kind_phys
@@ -25,12 +25,14 @@
       
       implicit none
       
-      integer,                                     intent(in) :: im, ltp, LM, kd, levs
+      integer,                                     intent(in) :: im, levs, ltp, lm, kd
       logical,                                     intent(in) :: lslwr, lwhtr
+      real(kind=kind_phys), dimension(im),         intent(in) ::  tsfa
       real(kind=kind_phys), dimension(im, LM+LTP), intent(in) ::  htlwc
       real(kind=kind_phys), dimension(im, LM+LTP), intent(in) ::  htlw0
-      real(kind=kind_phys), dimension(im),         intent(in) ::  tsfa
+      
       type(sfcflw_type), dimension(im),            intent(in) :: sfcflw
+      
       real(kind=kind_phys), dimension(im),         intent(inout) ::  tsflw, sfcdlw
       real(kind=kind_phys), dimension(im, levs),   intent(inout) ::  htrlw, lwhc
       character(len=*),                            intent(out) :: errmsg
