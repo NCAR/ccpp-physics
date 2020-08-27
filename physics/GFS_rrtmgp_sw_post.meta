@@ -138,6 +138,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[sw_gas_props]
+  standard_name = coefficients_for_sw_gas_optics
+  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_optics_rrtmgp
+  intent = in
+  optional = F
 [fluxswUP_allsky]
   standard_name = RRTMGP_sw_flux_profile_upward_allsky
   long_name = RRTMGP upward shortwave all-sky flux profile
@@ -201,17 +209,17 @@
   kind = kind_phys
   intent = in
   optional = F
-[mtopa]
-  standard_name = model_layer_number_at_cloud_top
-  long_name = vertical indices for low, middle and high cloud tops
+[mbota]
+  standard_name = model_layer_number_at_cloud_base
+  long_name = vertical indices for low, middle and high cloud bases
   units = index
   dimensions = (horizontal_dimension,3)
   type = integer
   intent = in
   optional = F
-[mbota]
-  standard_name = model_layer_number_at_cloud_base
-  long_name = vertical indices for low, middle and high cloud bases
+[mtopa]
+  standard_name = model_layer_number_at_cloud_top
+  long_name = vertical indices for low, middle and high cloud tops
   units = index
   dimensions = (horizontal_dimension,3)
   type = integer
@@ -235,13 +243,14 @@
   kind = kind_phys
   intent = in
   optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
+[fluxr]
+  standard_name = cumulative_radiation_diagnostic
+  long_name = time-accumulated 2D radiation-related diagnostic fields
+  units = various
+  dimensions = (horizontal_dimension,number_of_radiation_diagnostic_variables)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [nirbmdi]
   standard_name = surface_downwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
@@ -333,14 +342,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[sfcfsw]
-  standard_name = sw_fluxes_sfc
-  long_name = sw radiation fluxes at sfc
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = sfcfsw_type
-  intent = out
-  optional = F
 [htrsw]
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
@@ -348,6 +349,14 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
+  intent = out
+  optional = F
+[sfcfsw]
+  standard_name = sw_fluxes_sfc
+  long_name = sw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = sfcfsw_type
   intent = out
   optional = F
 [topfsw]
@@ -366,15 +375,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = T  
-[scmpsw]
-  standard_name = components_of_surface_downward_shortwave_fluxes
-  long_name = derived type for special components of surface downward shortwave fluxes
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = cmpfsw_type
-  intent = in
-  optional = T   
+  optional = T
 [flxprf_sw]
   standard_name = RRTMGP_sw_fluxes
   long_name = sw fluxes total sky / csk and up / down at levels
@@ -382,7 +383,15 @@
   dimensions = (horizontal_dimension,adjusted_vertical_level_dimension_plus_one)
   type = profsw_type
   intent = out
-  optional = T      
+  optional = T
+[scmpsw]
+  standard_name = components_of_surface_downward_shortwave_fluxes
+  long_name = derived type for special components of surface downward shortwave fluxes
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = cmpfsw_type
+  intent = in
+  optional = T
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
