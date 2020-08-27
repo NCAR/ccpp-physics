@@ -286,7 +286,7 @@
   standard_name = cumulative_radiation_diagnostic
   long_name = time-accumulated 2D radiation-related diagnostic fields
   units = various
-  dimensions = (horizontal_dimension,number_of_radiation_diagnostic_variables)
+  dimensions = (horizontal_loop_extent,number_of_radiation_diagnostic_variables)
   type = real
   kind = kind_phys
   intent = inout
