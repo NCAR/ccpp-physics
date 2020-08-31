@@ -31,7 +31,7 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
-  intent = in
+  intent = inout
   optional = F
 [cplflx]
   standard_name = flag_for_flux_coupling
@@ -500,7 +500,7 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = integer
-  intent = in
+  intent = inout
   optional = F
 [semis_rad]
   standard_name = surface_longwave_emissivity
@@ -1797,7 +1797,7 @@
   dimensions = (horizontal_dimension,ice_vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [stc]
   standard_name = soil_temperature

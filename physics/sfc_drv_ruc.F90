@@ -108,7 +108,6 @@ module lsm_ruc
 !     tslb     - real, soil temp (k)                              im,km !
 !     sh2o     - real, liquid soil moisture                       im,km !
 !     canopy   - real, canopy moisture content (mm)                im   !
-!     trans    - real, total plant transpiration (m/s)             im   !
 !     tsurf    - real, surface skin temperature (after iteration)  im   !
 !                                                                       !
 !  outputs:                                                             !
@@ -122,6 +121,7 @@ module lsm_ruc
 !     evcw     - real, canopy water evaporation (m/s)              im   !
 !     sbsno    - real, sublimation/deposit from snopack (m/s)      im   !
 !     stm      - real, total soil column moisture content (m)      im   !
+!     trans    - real, total plant transpiration (m/s)             im   !
 !     zorl     - real, surface roughness                           im   !
 !     wetness  - real, normalized soil wetness                     im   !
 !                                                                       !
@@ -194,7 +194,7 @@ module lsm_ruc
       real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
      &       snwdph, tskin, tskin_wat,                                  &
-     &       srflag, canopy, trans, tsurf, zorl, tsnow,                 &
+     &       srflag, canopy, tsurf, zorl, tsnow,                        &
      &       sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
 !  ---  in
       real (kind=kind_phys), dimension(im), intent(in) ::               &
@@ -204,12 +204,14 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) ::         &
      &       smois, tslb, sh2o, keepfr, smfrkeep
 
-!  ---  output:
       real (kind=kind_phys), dimension(im), intent(inout) :: sncovr1,   &
-     &       qsurf , gflux , evap , runof , drain ,                     &
-     &       runoff, srunoff, hflx, cmm, chh,                           &
-     &       rhosnf, evbs, evcw, sbsno, stm, wetness,                   &
-     &       acsnow, snowfallac
+     &       qsurf , runoff, srunoff, cmm, chh, stm, wetness, acsnow,   &
+     &       snowfallac
+
+!  ---  output:
+      real (kind=kind_phys), dimension(im), intent(out) :: trans,   &
+     &       gflux, drain, evap, hflx, rhosnf, runof, evbs, evcw,   &
+     &       sbsno
 
       logical,          intent(in)  :: flag_init, flag_restart
       character(len=*), intent(out) :: errmsg

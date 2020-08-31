@@ -218,7 +218,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [dlwflx]
   standard_name = surface_downwelling_longwave_flux

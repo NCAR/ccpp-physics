@@ -47,7 +47,7 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [stc]
   standard_name = soil_temperature
@@ -144,7 +144,7 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
-  intent = inout
+  intent = in
   optional = F
 [stc]
   standard_name = soil_temperature
@@ -171,7 +171,7 @@
   dimensions = (horizontal_dimension,ice_vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
