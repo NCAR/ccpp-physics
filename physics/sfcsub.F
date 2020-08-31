@@ -581,6 +581,7 @@
       character*500 fndclm,fndanl
 !
       logical lanom
+      character(len=10) :: message
 
 !
       namelist/namsfc/fnglac,fnmxic,
@@ -1240,7 +1241,7 @@
         call getsmc(wetclm,len,lsoil,smcclm,me)
       endif
       do k=1,lsoil
-      call qcmxmn('smc   ',smcclm(1,k),sliclm,snoclm,icefl1,
+      call qcmxmn(message('stc',k),smcclm(1,k),sliclm,snoclm,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1250,7 +1251,7 @@
         call getstc(tsfclm,tg3clm,sliclm,len,lsoil,stcclm,tsfimx)
       endif
       do k=1,lsoil
-      call qcmxmn('stc   ',stcclm(1,k),sliclm,snoclm,icefl1,
+      call qcmxmn(message('stc',k),stcclm(1,k),sliclm,snoclm,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1314,8 +1315,8 @@
         call monitr('snoclm',snoclm,sliclm,snoclm,len)
         call monitr('scvclm',scvclm,sliclm,snoclm,len)
         do k=1,lsoil
-          call monitr('smcclm1',smcclm(1,k),sliclm,snoclm,len)
-          call monitr('stcclm1',stcclm(1,k),sliclm,snoclm,len)
+          call monitr(message('smcclm',k),smcclm(1,k),sliclm,snoclm,len)
+          call monitr(message('stcclm',k),stcclm(1,k),sliclm,snoclm,len)
         enddo
         call monitr('tg3clm',tg3clm,sliclm,snoclm,len)
         call monitr('zorclm',zorclm,sliclm,snoclm,len)
@@ -1610,7 +1611,7 @@
       endif
       !-- soil moisture
       do k=1,lsoil
-       call qcmxmn('smca   ',smcanl(1,1),slianl,snoanl,icefl1,
+       call qcmxmn(message('smca',k),smcanl(1,1),slianl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1620,7 +1621,7 @@
         call getstc(tsfanl,tg3anl,slianl,len,lsoil,stcanl,tsfimx)
       endif
       do k=1,lsoil
-        call qcmxmn('stca   ',stcanl(1,1),slianl,snoanl,icefl1,
+        call qcmxmn(message('stca',k),stcanl(1,1),slianl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1671,8 +1672,8 @@
         call monitr('snoanl',snoanl,slianl,snoanl,len)
         call monitr('scvanl',scvanl,slianl,snoanl,len)
         do k=1,lsoil
-          call monitr('smcanl',smcanl(1,k),slianl,snoanl,len)
-          call monitr('stcanl',stcanl(1,k),slianl,snoanl,len)
+          call monitr(message('smcanl',k),smcanl(1,k),slianl,snoanl,len)
+          call monitr(message('stcanl',k),stcanl(1,k),slianl,snoanl,len)
         enddo
         call monitr('tg3anl',tg3anl,slianl,snoanl,len)
         call monitr('zoranl',zoranl,slianl,snoanl,len)
@@ -1844,14 +1845,14 @@
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
 !-- soil moisture forecast
         do k=1,lsoil
-          call qcmxmn('smcf    ',smcfcs(1,k),slifcs,snofcs,icefl1,
+          call qcmxmn(message('smcfcw',k),smcfcs(1,k),slifcs,snofcs,icefl1,
      &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
         enddo
 !-- soil temperature forecast
         do k=1,lsoil
-          call qcmxmn('stcf   ',stcfcs(1,k),slifcs,snofcs,icefl1,
+          call qcmxmn(message('stcf',k),stcfcs(1,k),slifcs,snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -1902,8 +1903,8 @@
         call monitr('aisfcs',aisfcs,slifcs,snofcs,len)
         call monitr('snofcs',snofcs,slifcs,snofcs,len)
         do k=1,lsoil
-          call monitr('smcfcs',smcfcs(1,k),slifcs,snofcs,len)
-          call monitr('stcfcs',stcfcs(1,k),slifcs,snofcs,len)
+          call monitr(message('smcfcs',k),smcfcs(1,k),slifcs,snofcs,len)
+          call monitr(message('stcfcs',k),stcfcs(1,k),slifcs,snofcs,len)
         enddo
         call monitr('tg3fcs',tg3fcs,slifcs,snofcs,len)
         call monitr('zorfcs',zorfcs,slifcs,snofcs,len)
@@ -2048,13 +2049,13 @@
 !    &            rla,rlo,len,kqcm,percrit,lgchek,me)
 !     endif
       do k=1,lsoil
-        call qcmxmn('stcm   ',stcanl(1,k),slianl,snoanl,icefl1,
+        call qcmxmn(message('stcm',k),stcanl(1,k),slianl,snoanl,icefl1,
      &            stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &            stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
       enddo
       do k=1,lsoil
-        call qcmxmn('smcm   ',smcanl(1,k),slianl,snoanl,icefl1,
+        call qcmxmn(message('smcm',k),smcanl(1,k),slianl,snoanl,icefl1,
      &            smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &            smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &            rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -2142,7 +2143,7 @@
         call monitr('aisanl',aisanl,slianl,snoanl,len)
         call monitr('snoanl',snoanl,slianl,snoanl,len)
         do k=1,lsoil
-          call monitr('smcanl',smcanl(1,k),slianl,snoanl,len)
+          call monitr(message('smcanl',k),smcanl(1,k),slianl,snoanl,len)
           call monitr('stcanl',stcanl(1,k),slianl,snoanl,len)
         enddo
         call monitr('tg3anl',tg3anl,slianl,snoanl,len)
@@ -2221,8 +2222,8 @@
         call monitr('aisdif',aisfcs,slianl,snoanl,len)
         call monitr('snodif',snofcs,slianl,snoanl,len)
         do k=1,lsoil
-          call monitr('smcanl',smcfcs(1,k),slianl,snoanl,len)
-          call monitr('stcanl',stcfcs(1,k),slianl,snoanl,len)
+          call monitr(message('smcanl',k),smcfcs(1,k),slianl,snoanl,len)
+          call monitr('stcanl(k)',stcfcs(1,k),slianl,snoanl,len)
         enddo
         call monitr('tg3dif',tg3fcs,slianl,snoanl,len)
         call monitr('zordif',zorfcs,slianl,snoanl,len)
@@ -8605,4 +8606,14 @@ cjfe
       enddo
       return
       end
+      function message(prefix,index)
+      implicit none
+      character(len=*), intent(in) :: prefix
+      integer, intent(in) :: index
+      character(len=10) :: message
+      !
+      ! probably need to implement a check that len(prefix) + '-' + length of
+      ! string representation of index <= len(message)
+      write(message,fmt='(a,a,i0)') trim(prefix), '-', index
+      end function message
 !>@}
