@@ -384,7 +384,7 @@
       parameter(snwmin=5.0,snwmax=100.)
       real (kind=kind_io8), parameter :: ten=10.0, one=1.0
 !
-!  coeficients of blending forecast and interpolated clim
+!  coefficients of blending forecast and interpolated clim
 !  (or analyzed) fields over sea or land(l) (not for clouds)
 !tgs -- important
 !  1.0 = use of forecast
