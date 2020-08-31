@@ -18,12 +18,13 @@
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
-      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, imfdeepcnv,        &
-        imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d, ntqv, ntcw,&
-        ntiw, ntlnc, ntinc, ncld, ntrw, ntsw, ntgl, ntwa, ntoz, ntclamt,       &
-        nleffr, nieffr, nseffr, kdt, imp_physics, imp_physics_thompson,        &
-        imp_physics_gfdl, imp_physics_zhao_carr, imp_physics_zhao_carr_pdf,    &
-        imp_physics_mg, imp_physics_wsm6, imp_physics_fer_hires, lsswr, lslwr, &
+      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
+        imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ncld, ntrw, ntsw, ntgl, ntwa, ntoz,     &
+        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
+        imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
+        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
+        imp_physics_fer_hires, lndp_var_list, lsswr, lslwr,                    &
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
         lmfdeep2, do_sfcperts, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,    &
         rog, rocp, con_rd, pertalb, xlat, xlon, coslat, sinlat, tsfc, slmsk,   &
@@ -70,12 +71,14 @@
 
       implicit none
 
-      integer,              intent(in)  :: im, levs, lm, lmk, lmp, imfdeepcnv, &
+      integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
+                                           imfdeepcnv,                         &
                                            imfdeepcnv_gf, me, ncnd, ntrac,     &
                                            num_p3d, npdf3d, ncnvcld3d, ntqv,   &
                                            ntcw, ntiw, ntlnc, ntinc, ncld,     &
                                            ntrw, ntsw, ntgl, ntwa, ntoz,       &
                                            ntclamt, nleffr, nieffr, nseffr,    &
+                                           lndp_type,                          &
                                            kdt, imp_physics,                   &
                                            imp_physics_thompson,               &
                                            imp_physics_gfdl,                   &
@@ -83,7 +86,9 @@
                                            imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_fer_hires
-
+      
+      character(len=3), dimension(:), intent(in) :: lndp_var_list
+      
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
                                           lmfshal, lmfdeep2, do_sfcperts
@@ -940,12 +945,15 @@
 !  perturbation size
 !  ---  turn vegetation fraction pattern into percentile pattern
       alb1d(:) = 0.
-      if (do_sfcperts) then
-        if (pertalb(1) > 0.) then
-          do i=1,im
-            call cdfnor(sfc_wts(i,5),alb1d(i))
+      if (lndp_type==1) then
+          do k =1,n_var_lndp
+            if (lndp_var_list(k) == 'alb') then
+              do i=1,im
+                call cdfnor(sfc_wts(i,k),alb1d(i)) 
+                !lndp_alb = lndp_prt_list(k)
+              enddo
+            endif
           enddo
-        endif
       endif
 ! mg, sfc-perts
 

@@ -484,7 +484,7 @@
                         call print_var(mpirank,omprank, blkno, 'Coupling%skebu_wts', Coupling%skebu_wts )
                         call print_var(mpirank,omprank, blkno, 'Coupling%skebv_wts', Coupling%skebv_wts )
                      end if
-                     if (Model%do_sfcperts) then
+                     if (Model%lndp_type .NE. 0) then
                         call print_var(mpirank,omprank, blkno, 'Coupling%sfc_wts'  , Coupling%sfc_wts   )
                      end if
                      if (Model%do_ca) then

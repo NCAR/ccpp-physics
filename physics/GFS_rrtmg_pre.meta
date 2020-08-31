@@ -46,6 +46,14 @@
   type = integer
   intent = in
   optional = F
+[n_var_lndp]
+  standard_name = number_of_land_surface_variables_perturbed
+  long_name = number of land surface variables perturbed
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [imfdeepcnv]
   standard_name = flag_for_mass_flux_deep_convection_scheme
   long_name = flag for mass-flux deep convection scheme
@@ -230,6 +238,14 @@
   type = integer
   intent = in
   optional = F
+[lndp_type]
+  standard_name = index_for_stochastic_land_surface_perturbation_type
+  long_name = index for stochastic land surface perturbations type
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [kdt]
   standard_name = index_of_time_step
   long_name = current forecast iteration
@@ -300,6 +316,15 @@
   units = flag
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[lndp_var_list]
+  standard_name = variables_to_be_perturbed_for_landperts
+  long_name = variables to be perturbed for landperts
+  units = none
+  dimensions =  (number_of_land_surface_variables_perturbed) 
+  type = character
+  kind = len=3
   intent = in
   optional = F
 [lsswr]

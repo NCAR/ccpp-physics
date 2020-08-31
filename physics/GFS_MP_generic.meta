@@ -732,8 +732,8 @@
   intent = inout
   optional = F
 [do_sppt]
-  standard_name = flag_for_stochastic_surface_physics_perturbations
-  long_name = flag for stochastic surface physics perturbations
+  standard_name = flag_for_stochastic_physics_perturbations
+  long_name = flag for stochastic physics perturbations
   units = flag
   dimensions = ()
   type = logical

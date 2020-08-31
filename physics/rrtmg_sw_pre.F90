@@ -14,7 +14,7 @@
 !> \section arg_table_rrtmg_sw_pre_run Argument Table
 !! \htmlinclude rrtmg_sw_pre_run.html
 !!
-      subroutine rrtmg_sw_pre_run (im, lsswr, pertalb, tsfg, tsfa, coszen,     &
+      subroutine rrtmg_sw_pre_run (im, lndp_type, n_var_lndp, lsswr, lndp_var_list, lndp_prt_list, tsfg, tsfa, coszen,     &
         alb1d, slmsk, snowd, sncovr, snoalb, zorl, hprime, alvsf, alnsf, alvwf,&
         alnwf, facsf, facwf, fice, tisfc, sfalb, nday, idxday, sfcalb1,        &
         sfcalb2, sfcalb3, sfcalb4, errmsg, errflg)
@@ -25,9 +25,10 @@
 
       implicit none
 
-      integer,                              intent(in)    :: im
+      integer,                              intent(in)    :: im, lndp_type, n_var_lndp
+      character(len=3)    , dimension(:),   intent(in)    :: lndp_var_list
       logical,                              intent(in)    :: lsswr
-      real(kind=kind_phys), dimension(5),   intent(in)    :: pertalb
+      real(kind=kind_phys), dimension(:),   intent(in)    :: lndp_prt_list
       real(kind=kind_phys), dimension(im),  intent(in)    :: tsfg, tsfa, coszen
       real(kind=kind_phys), dimension(im),  intent(in)    :: alb1d
       real(kind=kind_phys), dimension(im),  intent(in)    :: slmsk, snowd,     &
@@ -48,6 +49,8 @@
       integer :: i
       real(kind=kind_phys), dimension(im,NF_ALBD) :: sfcalb
 
+      real(kind=kind_phys) :: lndp_alb
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -67,12 +70,22 @@
           endif
         enddo
 
+! set albedo pert, if requested.
+        lndp_alb = -999.
+        if (lndp_type==1) then
+          do i =1,n_var_lndp
+            if (lndp_var_list(i) == 'alb') then
+                lndp_alb = lndp_prt_list(i)
+            endif
+          enddo
+        endif
+
 !>  - Call module_radiation_surface::setalb() to setup surface albedo.
 !!  for SW radiation.
 
         call setalb (slmsk, snowd, sncovr, snoalb, zorl,  coszen, tsfg, tsfa,  &  !  ---  inputs
                      hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice,   &
-                     tisfc, IM, alb1d, pertalb,                                &  !  mg, sfc-perts
+                     tisfc, IM, alb1d, lndp_alb,                               &  !  mg, sfc-perts
                      sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
