@@ -25,25 +25,43 @@
   type = integer
   intent = in
   optional = F 
-[nsfcpert]
-  standard_name = number_of_surface_perturbations
-  long_name = number of surface perturbations
+[n_var_lndp]
+  standard_name = number_of_land_surface_variables_perturbed
+  long_name = number of land surface variables perturbed
   units = count
   dimensions = ()
   type = integer
   intent = in
   optional = F   
+[lndp_type]
+  standard_name = index_for_stochastic_land_surface_perturbation_type
+  long_name = index for stochastic land surface perturbations type
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lndp_prt_list]
+  standard_name =magnitude_of_perturbations_for_landperts
+  long_name = magnitude of perturbations for landperts
+  units = variable
+  dimensions = (number_of_land_surface_variables_perturbed)
+  type = real
+  kind = kind_phys
+  intent = in 
+  optional = F
+[lndp_var_list]
+  standard_name = variables_to_be_perturbed_for_landperts
+  long_name = variables to be perturbed for landperts
+  units = none
+  dimensions =  (number_of_land_surface_variables_perturbed)
+  type = character
+  kind = len=3
+  intent = in
+  optional = F
 [lsswr]
   standard_name = flag_to_calc_sw
   long_name = logical flags for sw radiation calls
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_sfcperts]
-  standard_name = flag_for_stochastic_surface_perturbations
-  long_name = flag for stochastic surface perturbations option
   units = flag
   dimensions = ()
   type = logical
@@ -54,15 +72,6 @@
   long_name = time in hours after 00z at the current timestep
   units = h
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[pertalb]
-  standard_name = magnitude_of_surface_albedo_perturbation
-  long_name = magnitude of surface albedo perturbation
-  units = frac
-  dimensions = (5)
   type = real
   kind = kind_phys
   intent = in

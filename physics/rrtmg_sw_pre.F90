@@ -44,6 +44,8 @@
       integer :: i
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
 
+      real(kind=kind_phys) :: lndp_alb
+
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -63,6 +65,16 @@
           endif
         enddo
 
+! set albedo pert, if requested.
+        lndp_alb = -999.
+        if (Model%lndp_type==1) then
+          do i =1,Model%n_var_lndp
+            if (Model%lndp_var_list(i) == 'alb') then
+                lndp_alb = Model%lndp_prt_list(i)
+            endif
+          enddo
+        endif
+
 !>  - Call module_radiation_surface::setalb() to setup surface albedo.
 !!  for SW radiation.
 
@@ -72,8 +84,8 @@
                      Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf,    &
                      Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,     &
                      Sfcprop%tisfc, IM,                              &
-                     alb1d, Model%pertalb,                           &  !  mg, sfc-perts
-                     sfcalb)                                            !  ---  outputs
+                     alb1d, lndp_alb,                           &  !  mg, sfc-perts
+                     sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
         Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
