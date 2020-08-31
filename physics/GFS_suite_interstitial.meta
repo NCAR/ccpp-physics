@@ -584,7 +584,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [adjsfculw_lnd]
   standard_name = surface_upwelling_longwave_flux_over_land_interstitial
@@ -762,6 +762,50 @@
   kind = kind_phys
   intent = in
   optional = F
+[use_GP_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F  
+[skt]
+  standard_name = air_temperature_at_lowest_model_layer
+  long_name = air temperature at lowest model layer
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sktp1r]
+  standard_name = surface_skin_temperature_at_previous_time_step
+  long_name = surface skin temperature at previous time step
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F  
+[fluxlwUP]
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky
+  long_name = RRTMGP upward longwave all-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T   
+[fluxlwUP_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
+  long_name = RRTMGP Jacobian upward longwave flux profile
+  units = W m-2 K-1
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T   
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1212,7 +1256,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -1221,7 +1265,7 @@
 [xlat]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -1467,7 +1511,7 @@
   intent = inout
   optional = F
 [save_tcp]
-  standard_name = air_temperature_save_from_cumulus_paramterization
+  standard_name = air_temperature_save_from_convective_parameterization
   long_name = air temperature after cumulus parameterization
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)
@@ -1711,7 +1755,7 @@
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
-  units = radians
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
@@ -1745,7 +1789,7 @@
   intent = in
   optional = F
 [save_tcp]
-  standard_name = air_temperature_save_from_cumulus_paramterization
+  standard_name = air_temperature_save_from_convective_parameterization
   long_name = air temperature after cumulus parameterization
   units = K
   dimensions = (horizontal_dimension,vertical_dimension)

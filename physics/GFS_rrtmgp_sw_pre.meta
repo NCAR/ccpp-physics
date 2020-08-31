@@ -1,53 +1,13 @@
 [ccpp-arg-table]
   name = GFS_rrtmgp_sw_pre_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
+[me]
+  standard_name = mpi_rank
+  long_name = current MPI-rank
+  units = index
   dimensions = ()
-  type = GFS_control_type
+  type = integer  
   intent = in
-  optional = F
-[Grid]
-  standard_name = GFS_grid_type_instance
-  long_name = instance of derived type GFS_grid_type
-  units = DDT
-  dimensions = ()
-  type = GFS_grid_type
-  intent = in
-  optional = F
-[Sfcprop]
-  standard_name = GFS_sfcprop_type_instance
-  long_name = instance of derived type GFS_sfcprop_type
-  units = DDT
-  dimensions = ()
-  type = GFS_sfcprop_type
-  intent = in
-  optional = F
-[Statein]
-  standard_name = GFS_statein_type_instance
-  long_name = instance of derived type GFS_statein_type
-  units = DDT
-  dimensions = ()
-  type = GFS_statein_type
-  intent = in
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = instance of derived type GFS_radtend_type
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = inout
-  optional = F
-[Coupling]
-  standard_name = GFS_coupling_type_instance
-  long_name = Fortran DDT containing FV3-GFS fields to/from coupling with other components
-  units = DDT
-  dimensions = ()
-  type = GFS_coupling_type
-  intent = inout
   optional = F
 [ncol]
   standard_name = horizontal_loop_extent
@@ -55,6 +15,227 @@
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F 
+[nsfcpert]
+  standard_name = number_of_surface_perturbations
+  long_name = number of surface perturbations
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F   
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_sfcperts]
+  standard_name = flag_for_stochastic_surface_perturbations
+  long_name = flag for stochastic surface perturbations option
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[solhr]
+  standard_name = forecast_hour_of_the_day
+  long_name = time in hours after 00z at the current timestep
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[pertalb]
+  standard_name = magnitude_of_surface_albedo_perturbation
+  long_name = magnitude of surface albedo perturbation
+  units = frac
+  dimensions = (5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[lon]
+  standard_name = longitude
+  long_name = longitude
+  units = radian
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[coslat]
+  standard_name = cosine_of_latitude
+  long_name = cosine of latitude
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sinlat]
+  standard_name = sine_of_latitude
+  long_name = sine of latitude
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[lsmask]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[snowd]
+  standard_name = surface_snow_thickness_water_equivalent
+  long_name = water equivalent snow depth
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[sncovr]
+  standard_name = surface_snow_area_fraction_over_land
+  long_name = surface snow area fraction
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snoalb]
+  standard_name = upper_bound_on_max_albedo_over_deep_snow
+  long_name = maximum snow albedo
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zorl]
+  standard_name = surface_roughness_length
+  long_name = surface roughness length
+  units = cm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tsfc]
+  standard_name = surface_skin_temperature
+  long_name = surface skin temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hprime]
+  standard_name = standard_deviation_of_subgrid_orography
+  long_name = standard deviation of subgrid orography
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[alvsf]
+  standard_name = mean_vis_albedo_with_strong_cosz_dependency
+  long_name = mean vis albedo with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F        
+[alnsf]
+  standard_name = mean_nir_albedo_with_strong_cosz_dependency
+  long_name = mean nir albedo with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F 
+[alvwf]
+  standard_name = mean_vis_albedo_with_weak_cosz_dependency
+  long_name = mean vis albedo with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[alnwf]
+  standard_name = mean_nir_albedo_with_weak_cosz_dependency
+  long_name = mean nir albedo with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[facsf]
+  standard_name =fractional_coverage_with_strong_cosz_dependency
+  long_name = fractional coverage with strong cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[facwf]
+  standard_name = fractional_coverage_with_weak_cosz_dependency
+  long_name = fractional coverage with weak cosz dependency
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fice]
+  standard_name = sea_ice_concentration
+  long_name = ice fraction over open water
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F    
+[tisfc]
+  standard_name = sea_ice_temperature
+  long_name = sea ice surface skin temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfc_wts]
+  standard_name = weights_for_stochastic_surface_physics_perturbation
+  long_name = weights for stochastic surface physics perturbation
+  units = none
+  dimensions = (horizontal_dimension,number_of_surface_perturbations)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [tv_lay]
@@ -89,15 +270,6 @@
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tracer]
-  standard_name = chemical_tracers
-  long_name = chemical tracers
-  units = g g-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -171,6 +343,33 @@
   type = integer
   intent = out
   optional = F
+[coszen]
+  standard_name = cosine_of_zenith_angle
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[coszdg]
+  standard_name = daytime_mean_cosz_over_rad_call_period
+  long_name = daytime mean cosz over rad call period
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F    
+[sfc_alb_dif]
+  standard_name = surface_diffused_shortwave_albedo
+  long_name = mean surface diffused sw albedo
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys  
+  intent = out
+  optional = F  
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

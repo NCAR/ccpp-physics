@@ -140,7 +140,7 @@
   dimensions = (horizontal_dimension,vertical_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [prsl]
   standard_name = air_pressure
