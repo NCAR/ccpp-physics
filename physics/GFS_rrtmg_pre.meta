@@ -399,14 +399,6 @@
   type = logical
   intent = in
   optional = F
-[do_sfcperts]
-  standard_name = flag_for_stochastic_surface_perturbations
-  long_name = flag for stochastic surface perturbations option
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [fhswr]
   standard_name = frequency_for_shortwave_radiation
   long_name = frequency for shortwave radiation
@@ -493,15 +485,6 @@
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[pertalb]
-  standard_name = magnitude_of_surface_albedo_perturbation
-  long_name = magnitude of surface albedo perturbation
-  units = frac
-  dimensions = (5)
   type = real
   kind = kind_phys
   intent = in

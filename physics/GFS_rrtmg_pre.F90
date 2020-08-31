@@ -26,8 +26,8 @@
         imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
         imp_physics_fer_hires, lndp_var_list, lsswr, lslwr,                    &
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
-        lmfdeep2, do_sfcperts, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,    &
-        rog, rocp, con_rd, pertalb, xlat, xlon, coslat, sinlat, tsfc, slmsk,   &
+        lmfdeep2, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,                 &
+        rog, rocp, con_rd, xlat, xlon, coslat, sinlat, tsfc, slmsk,            &
         prsi, prsl, prslk, tgrs, sfc_wts, phy_f3d_mg_cld, phy_f3d_reffr,       &
         phy_f3d_cnvw, phy_f3d_cnvc, f_ice, f_rain, f_rimef, qgrs, aer_nm,      & !inputs from here and above
         coszen, coszdg, phy_f3d_leffr, phy_f3d_ieffr, phy_f3d_seffr,           &
@@ -91,12 +91,12 @@
       
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2, do_sfcperts
+                                          lmfshal, lmfdeep2
       
       real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup
       real(kind=kind_phys), intent(in) :: eps, epsm1, fvirt, rog, rocp, con_rd
       
-      real(kind=kind_phys), dimension(:), intent(in) :: pertalb, xlat, xlon,   &
+      real(kind=kind_phys), dimension(:), intent(in) :: xlat, xlon,   &
                                                         coslat, sinlat, tsfc,  &
                                                         slmsk
       
