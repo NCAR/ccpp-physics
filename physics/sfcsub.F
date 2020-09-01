@@ -581,7 +581,6 @@
       character*500 fndclm,fndanl
 !
       logical lanom
-      character(len=10) :: message
 
 !
       namelist/namsfc/fnglac,fnmxic,
