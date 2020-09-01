@@ -1,4 +1,14 @@
 [ccpp-arg-table]
+  name = zhaocarr_gscond_init
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
+  name = zhaocarr_gscond_finalize
+  type = scheme
+
+########################################################################
+[ccpp-arg-table]
   name = zhaocarr_gscond_run
   type = scheme
 [im]

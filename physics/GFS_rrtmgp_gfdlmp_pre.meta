@@ -34,30 +34,6 @@
   type = integer  
   intent = in
   optional = F  
-[lsswr]
-  standard_name = flag_to_calc_sw
-  long_name = logical flags for sw radiation calls
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lslwr]
-  standard_name = flag_to_calc_lw
-  long_name = logical flags for lw radiation calls
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F    
-[effr_in]
-  standard_name = flag_for_cloud_effective_radii
-  long_name = flag for cloud effective radii calculations in GFDL microphysics
-  units = 
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F   
 [i_cldliq]
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
@@ -106,42 +82,6 @@
   type = integer  
   intent = in
   optional = F 
-[effrin_cldliq]
-  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
-  long_name = eff. radius of cloud liquid water particle in micrometer
-  units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F   
-[effrin_cldice]
-  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
-  long_name = eff. radius of cloud ice water particle in micrometer
-  units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F   
-[effrin_cldrain]
-  standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
-  long_name = effective radius of cloud rain particle in micrometers
-  units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F   
-[effrin_cldsnow]
-  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
-  long_name = effective radius of cloud snow particle in micrometers
-  units = um
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys  
-  intent = in
-  optional = F   
 [yearlen]
   standard_name = number_of_days_in_year
   long_name = number of days in a year
@@ -150,6 +90,30 @@
   type = integer
   intent = in
   optional = F  
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lslwr]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F    
+[effr_in]
+  standard_name = flag_for_cloud_effective_radii
+  long_name = flag for cloud effective radii calculations in GFDL microphysics
+  units = 
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F   
 [julian]
   standard_name = julian_day
   long_name = julian day
@@ -195,6 +159,42 @@
   kind = kind_phys
   intent = in
   optional = F    
+[effrin_cldliq]
+  standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
+  long_name = eff. radius of cloud liquid water particle in micrometer
+  units = um
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
+[effrin_cldice]
+  standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
+  long_name = eff. radius of cloud ice water particle in micrometer
+  units = um
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
+[effrin_cldrain]
+  standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
+  long_name = effective radius of cloud rain particle in micrometers
+  units = um
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
+[effrin_cldsnow]
+  standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
+  long_name = effective radius of cloud snow particle in micrometers
+  units = um
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F   
 [tracer]
   standard_name = chemical_tracers
   long_name = chemical tracers
@@ -240,15 +240,6 @@
   kind = kind_phys
   intent = in
   optional = F       
-[de_lgth]
-  standard_name = cloud_decorrelation_length
-  long_name = cloud decorrelation length
-  units = km
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F  
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -353,6 +344,15 @@
   long_name = precipitation overlap parameter
   units = km
   dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F  
+[de_lgth]
+  standard_name = cloud_decorrelation_length
+  long_name = cloud decorrelation length
+  units = km
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out

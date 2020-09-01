@@ -10,14 +10,14 @@
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gscond_init  Argument Table
+!> \section arg_table_zhaocarr_gscond_init  Argument Table
 !!
        subroutine zhaocarr_gscond_init
        end subroutine zhaocarr_gscond_init
 
 ! \brief Brief description of the subroutine
 !
-!> \section arg_table_gscond_finalize  Argument Table
+!> \section arg_table_zhaocarr_gscond_finalize  Argument Table
 !!
        subroutine zhaocarr_gscond_finalize
        end subroutine zhaocarr_gscond_finalize

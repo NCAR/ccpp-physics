@@ -1,4 +1,4 @@
-!>  \file cs_conv.F90
+u>  \file cs_conv.F90
 !!  This file contains the Chikira-Sugiyama Convection scheme.
 
 module cs_conv_pre
@@ -348,6 +348,7 @@ module cs_conv
                                                     cnv_dqldt, clcn, cnv_fice,          &
                                                     cnv_ndrop, cnv_nice, cf_upi
 ! *GJF
+   integer, intent(in)    :: lprnt, ipr 
    integer, intent(inout) :: kcnv(ijsdim)             ! zero if no deep convection and 1 otherwise
    character(len=*), intent(out) :: errmsg
    integer,          intent(out) :: errflg
@@ -397,14 +398,13 @@ module cs_conv
 
    integer KTMAX(IJSDIM)               !< max of KT
    real(r8)    :: ftintm, wrk, wrk1, tem
-   integer i, k, n, ISTS, IENS, kp1, ipr
+   integer i, k, n, ISTS, IENS, kp1
 
 !DD borrowed from RAS to go form total condensate to ice/water separately
 !  parameter (tf=130.16, tcr=160.16, tcrf=1.0/(tcr-tf),tcl=2.0)
 !  parameter (tf=230.16, tcr=260.16, tcrf=1.0/(tcr-tf))
    real(r8), parameter :: tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf), tcl=2.0
    logical, save       :: first=.true.
-   logical lprnt
 
    ! Initialize CCPP error handling variables
    errmsg = ''

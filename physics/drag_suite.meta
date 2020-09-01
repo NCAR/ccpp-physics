@@ -270,7 +270,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [dtaux2d_ls]
   standard_name = x_momentum_tendency_from_large_scale_gwd
