@@ -35,6 +35,7 @@
       integer, parameter :: xdata=5000, ydata=2500, mdata=xdata*ydata
       integer            :: veg_type_landice
       integer            :: soil_type_landice
+      integer            :: num_threads
 !
       end module sfccyc_module
 
@@ -67,7 +68,7 @@
      &,                   tsffcs,snofcs,zorfcs,albfcs,tg3fcs            &
      &,                   cnpfcs,smcfcs,stcfcs,slifcs,aisfcs            &
      &,                   vegfcs,vetfcs,sotfcs,alffcs                   &
-     &,                   cvfcs,cvbfcs,cvtfcs,me,nlunit                 &
+     &,                   cvfcs,cvbfcs,cvtfcs,me,nthrds,nlunit          &
      &,                   sz_nml,input_nml_file                         &
      &,                   lake, min_lakeice, min_seaice                 &
      &,                   ialb,isot,ivegsrc,tile_num_ch,i_index,j_index)
@@ -76,7 +77,8 @@
       use sfccyc_module
       implicit none
       character(len=*),     intent(in) :: tile_num_ch
-      integer,              intent(in) :: i_index(len), j_index(len)
+      integer,              intent(in) :: i_index(len), j_index(len),   &
+     &                                    me, nthrds
       logical,              intent(in) :: use_ufo, nst_anl
       logical,              intent(in) :: lake(len)
       real (kind=kind_io8), intent(in) :: min_lakeice, min_seaice
@@ -156,13 +158,11 @@
      &        irtwet,k,iprnt,kk,irttsf,iret,i,igrdbg,iy,im,id,          &
      &        icalbl,icalbs,icalfl,ictsfs,lugb,len,lsoil,ih,            &
      &        ictsfl,iczors,icplrl,icplrs,iczorl,icalfs,icsnol,         &
-     &        icsnos,irttg3,me,kqcm,nlunit,sz_nml,ialb                  &
+     &        icsnos,irttg3,kqcm,nlunit,sz_nml,ialb                     &
      &,       irtvmn, irtvmx, irtslp, irtabs, isot, ivegsrc
       logical gausm, deads, qcmsk, znlst, monclm, monanl,               &
      &        monfcs, monmer, mondif, landice
       character(len=*), intent(in) :: input_nml_file(sz_nml)
-
-      integer num_parthds
 !
 !>  This is a limited point version of surface program.
 !!
@@ -760,6 +760,9 @@
      &,    imsk, jmsk, slmskh, blnmsk, bltmsk
      &,    glacir, amxice, tsfcl0
      &,    caisl, caiss, cvegs
+! Set number of threads num_threads in sfccyc_module for later use
+! to the value received from the calling routine (nthrds)
+      num_threads = nthrds
 !
       lprnt = .false.
       iprnt = 1
@@ -3083,6 +3086,7 @@
      &                 gauout,len,lmask,rslmsk,slmask                   &
      &,                outlat, outlon,me)
       use machine , only : kind_io8,kind_io4
+      use sfccyc_module , only : num_threads
       implicit none
       real (kind=kind_io8) wei4,wei3,wei2,sum2,sum1,sum3,wei1,sum4,     &
      &                     wsum,tem,wsumiv,sums,sumn,wi2j2,x,y,wi1j1,   &
@@ -3106,15 +3110,12 @@
       logical lmask
 !
       logical first
-      integer   num_threads
       data first /.true./
-      save num_threads, first
+      save first
 !
       integer len_thread_m, len_thread, i1_t, i2_t
-      integer num_parthds
 !
       if (first) then
-         num_threads = num_parthds()
          first = .false.
          if (.not. allocated(imxnx)) allocate (imxnx(num_threads))
       endif
@@ -4714,7 +4715,8 @@
      &                 irtvmn,irtvmx,irtslp,irtabs,                     &
      &                 irtvet,irtsot,irtalf, landice, me)
       use machine , only : kind_io8,kind_io4
-      use sfccyc_module, only : veg_type_landice, soil_type_landice
+      use sfccyc_module, only : veg_type_landice, soil_type_landice,    &
+     &                          num_threads
       implicit none
       integer k,i,im,id,iy,len,lsoil,ih,irtacn,irtsmc,irtscv,irtais,    &
      &        irttg3,irtstc,irtalf,me,irtsot,irtveg,irtvet, irtzor,     &
@@ -4766,15 +4768,12 @@
       real (kind=kind_io8) qsmcl(lsoil), qsmcs(lsoil),                  &
      &                     qstcl(lsoil), qstcs(lsoil)
       logical first
-      integer   num_threads
       data first /.true./
-      save num_threads, first
+      save first
 !
       integer len_thread_m, i1_t, i2_t, it
-      integer num_parthds
 !
       if (first) then
-         num_threads = num_parthds()
          first = .false.
       endif
 !
@@ -5426,6 +5425,7 @@
      &                  rla,rlo,len,mode,percrit,lgchek,me)
 !
       use machine , only : kind_io8,kind_io4
+      use sfccyc_module , only : num_threads
       implicit none
       integer, intent(in)              :: len, mode, me
       real (kind=kind_io8), intent(in) :: fldimx,fldimn,fldjmx,fldomn,  &
@@ -5439,18 +5439,16 @@
       logical lgchek
 !
       logical first
-      integer   num_threads
       real (kind=kind_io8) permax, per
       data first /.true./
-      save num_threads, first
+      save first
 !
-      integer  :: len_thread_m, i1_t, i2_t, it, num_parthds,            &
+      integer  :: len_thread_m, i1_t, i2_t, it,                         &
      &            kmaxi,kmini,kmaxj,kmino,kmaxl,kminl,kmaxo,kminj,      &
      &            ij,nprt,kmaxs,kmins,i
       integer  :: islimsk(len), iwk(len)
 !
       if (first) then
-         num_threads = num_parthds()
          first = .false.
       endif
       do it=1,len
@@ -6656,6 +6654,7 @@
       subroutine ga2la(gauin,imxin,jmxin,regout,imxout,jmxout,          &
      &                 wlon,rnlat,rlnout,rltout,gaus,blno, blto)
       use machine , only : kind_io8,kind_io4
+      use sfccyc_module , only : num_threads
       implicit none
       integer i1,i2,j2,ishft,i,jj,j1,jtem,jmxout,imxin,jmxin,imxout,    &
      &        j,iret
@@ -6681,15 +6680,12 @@
 !
 !
       logical first
-      integer   num_threads
       data first /.true./
-      save num_threads, first
+      save first
 !
       integer len_thread_m, j1_t, j2_t, it
-      integer num_parthds
 !
       if (first) then
-         num_threads = num_parthds()
          first = .false.
       endif
 !
