@@ -36,6 +36,20 @@
       integer            :: veg_type_landice
       integer            :: soil_type_landice
 !
+!
+      contains
+
+      function message(prefix,index)
+      implicit none
+      character(len=*), intent(in) :: prefix
+      integer, intent(in) :: index
+      character(len=10) :: message
+      !
+      ! probably need to implement a check that len(prefix) + '-' + length of
+      ! string representation of index <= len(message)
+      write(message,fmt='(a,a,i0)') trim(prefix), '-', index
+      end function message
+
       end module sfccyc_module
 
 !>\ingroup mod_GFS_phys_time_vary
@@ -8607,17 +8621,5 @@ cjfe
       enddo
       return
       end
-
-!>\ingroup mod_sfcsub
-      function message(prefix,index)
-      implicit none
-      character(len=*), intent(in) :: prefix
-      integer, intent(in) :: index
-      character(len=10) :: message
-      !
-      ! probably need to implement a check that len(prefix) + '-' + length of
-      ! string representation of index <= len(message)
-      write(message,fmt='(a,a,i0)') trim(prefix), '-', index
-      end function message
 
 !>@}
