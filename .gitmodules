@@ -1,6 +1,4 @@
 [submodule "physics/rte-rrtmgp"]
 	path = physics/rte-rrtmgp
-	#url = https://github.com/earth-system-radiation/rte-rrtmgp
-	#branch = dtc/ccpp
-	url = https://github.com/climbfuji/rte-rrtmgp
-	branch = add_ccpp_table_properties_and_dependencies
+	url = https://github.com/earth-system-radiation/rte-rrtmgp
+	branch = dtc/ccpp
