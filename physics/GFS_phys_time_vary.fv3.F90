@@ -468,7 +468,7 @@
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
         if (Model%nscyc >  0) then
           if (mod(Model%kdt,Model%nscyc) == 1) THEN
-            call gcycle (nblks, Model, Data(:)%Grid, Data(:)%Sfcprop, Data(:)%Cldprop)
+            call gcycle (nblks, nthrds, Model, Data(:)%Grid, Data(:)%Sfcprop, Data(:)%Cldprop)
           endif
         endif
 

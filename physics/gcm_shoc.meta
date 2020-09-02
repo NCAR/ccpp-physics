@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = shoc
+  type = scheme
+  dependencies = funcphys.f90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = shoc_run
   type = scheme

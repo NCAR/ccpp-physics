@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = get_prs_fv3_init
+[ccpp-table-properties]
+  name = get_prs_fv3
   type = scheme
+  dependencies = machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -95,14 +96,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = get_prs_fv3_finalize
+[ccpp-table-properties]
+  name = get_phi_fv3
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = get_phi_fv3_init
-  type = scheme
+  dependencies = machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -187,7 +184,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = get_phi_fv3_finalize
-  type = scheme

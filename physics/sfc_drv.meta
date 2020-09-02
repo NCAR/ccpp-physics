@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = lsm_noah
+  type = scheme
+  dependencies = funcphys.f90,machine.F,set_soilveg.f,sflx.f,surface_perturbation.F90
+
+########################################################################
 [ccpp-arg-table]
   name = lsm_noah_init
   type = scheme

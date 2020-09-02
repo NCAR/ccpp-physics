@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_diag
+  type = scheme
+  dependencies = funcphys.f90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_diag_run
   type = scheme
