@@ -83,7 +83,7 @@ contains
         clx(:,2)  = 0.0
         clx(:,3)  = 0.0
         clx(:,4)  = 0.0
-      elseif (nmtvr == 24) then   ! GSD_drag_suite
+      elseif (nmtvr == 24) then   ! GSD_drag_suite and unified_ugwp
         oc(:)       = mntvar(:,2)
         oa4(:,1)    = mntvar(:,3)
         oa4(:,2)    = mntvar(:,4)

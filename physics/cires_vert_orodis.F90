@@ -1,3 +1,9 @@
+module cires_vert_orodis
+
+
+contains
+
+
 ! subroutine ugwp_drag_mtb
 ! subroutine ugwp_taub_oro  
 ! subroutine ugwp_oro_lsatdis  
@@ -1016,3 +1022,5 @@
      enddo
 !                
      end subroutine ugwp_tofd1d    
+
+end module cires_vert_orodis
