@@ -1844,14 +1844,16 @@
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
 !-- soil moisture forecast
         do k=1,lsoil
-          call qcmxmn(message('smcfcw',k),smcfcs(1,k),slifcs,snofcs,icefl1,
+          call qcmxmn(message('smcfcw',k),smcfcs(1,k),slifcs,
+     &                snofcs,icefl1,
      &                smclmx,smclmn,smcomx,smcomn,smcimx,smcimn,
      &                smcjmx,smcjmn,smcsmx,smcsmn,epssmc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
         enddo
 !-- soil temperature forecast
         do k=1,lsoil
-          call qcmxmn(message('stcf',k),stcfcs(1,k),slifcs,snofcs,icefl1,
+          call qcmxmn(message('stcf',k),stcfcs(1,k),slifcs,
+     &                snofcs,icefl1,
      &                stclmx,stclmn,stcomx,stcomn,stcimx,stcimn,
      &                stcjmx,stcjmn,stcsmx,stcsmn,eptsfc,
      &                rla,rlo,len,kqcm,percrit,lgchek,me)
@@ -8605,6 +8607,8 @@ cjfe
       enddo
       return
       end
+
+!>\ingroup mod_sfcsub
       function message(prefix,index)
       implicit none
       character(len=*), intent(in) :: prefix
@@ -8615,4 +8619,5 @@ cjfe
       ! string representation of index <= len(message)
       write(message,fmt='(a,a,i0)') trim(prefix), '-', index
       end function message
+
 !>@}
