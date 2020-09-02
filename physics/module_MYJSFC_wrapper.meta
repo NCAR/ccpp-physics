@@ -202,7 +202,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [phy_myj_qsfc]
   standard_name = surface_specific_humidity_for_MYJ_schemes
@@ -373,7 +373,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [ch]
   standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
@@ -382,7 +382,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [stress]
   standard_name = surface_wind_stress
@@ -400,7 +400,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [ffh]
   standard_name = Monin_Obukhov_similarity_function_for_heat
@@ -409,7 +409,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [fm10]
   standard_name = Monin_Obukhov_similarity_function_for_momentum_at_10m
@@ -418,7 +418,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [fh2]
   standard_name = Monin_Obukhov_similarity_function_for_heat_at_2m
@@ -427,7 +427,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [landfrac]
   standard_name = land_area_fraction
@@ -742,7 +742,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure

@@ -161,7 +161,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [dvdt]
   standard_name = tendency_of_y_wind_due_to_model_physics
@@ -170,7 +170,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [dtdt]
   standard_name = tendency_of_air_temperature_due_to_model_physics

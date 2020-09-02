@@ -114,15 +114,15 @@ contains
                du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV, &
                du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV
 
-   integer, dimension (im), intent(inout) :: hbot,htop,kcnv
-   integer,    dimension (im), intent(in) :: xland
+   integer, dimension (im), intent(out) :: hbot,htop,kcnv
+   integer, dimension (im), intent(in)  :: xland
    real(kind=kind_phys),    dimension (im), intent(in) :: pbl
    integer, dimension (im) :: tropics
 !  ruc variable
-   real(kind=kind_phys), dimension (im)  :: hfx2,qfx2,psuri
-   real(kind=kind_phys), dimension (im,km) :: ud_mf,dd_mf,dt_mf
-   real(kind=kind_phys), dimension (im), intent(inout) :: raincv,cld1d
-   real(kind=kind_phys), dimension (im,km) :: t2di,p2di
+   real(kind=kind_phys), dimension (im), intent(in)     :: hfx2,qfx2,psuri
+   real(kind=kind_phys), dimension (im,km), intent(out) :: ud_mf,dd_mf,dt_mf
+   real(kind=kind_phys), dimension (im), intent(out)    :: raincv,cld1d
+   real(kind=kind_phys), dimension (im,km), intent(in)  :: t2di,p2di
    ! Specific humidity from FV3
    real(kind=kind_phys), dimension (im,km), intent(in) :: qv2di_spechum
    real(kind=kind_phys), dimension (im,km), intent(inout) :: qv_spechum

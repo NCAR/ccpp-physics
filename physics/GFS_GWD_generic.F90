@@ -6,6 +6,9 @@ module GFS_GWD_generic_pre
 
 contains
 
+!! \section arg_table_GFS_GWD_generic_pre_init Argument Table
+!! \htmlinclude GFS_GWD_generic_pre_init.html
+!!
       subroutine GFS_GWD_generic_pre_init()
       end subroutine GFS_GWD_generic_pre_init
 
@@ -128,6 +131,9 @@ contains
       end subroutine GFS_GWD_generic_pre_run
 !> @}
 
+!! \section arg_table_GFS_GWD_generic_pre_finalize Argument Table
+!! \htmlinclude GFS_GWD_generic_pre_finalize.html
+!!
       subroutine GFS_GWD_generic_pre_finalize()
       end subroutine GFS_GWD_generic_pre_finalize
 
@@ -185,6 +191,9 @@ contains
     end subroutine GFS_GWD_generic_post_run
 !> @}
     
+!! \section arg_table_GFS_GWD_generic_post_finalize Argument Table
+!! \htmlinclude GFS_GWD_generic_post_finalize.html
+!!
     subroutine GFS_GWD_generic_post_finalize()
     end subroutine GFS_GWD_generic_post_finalize
 

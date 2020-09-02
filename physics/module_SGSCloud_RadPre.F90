@@ -10,9 +10,15 @@
 
       contains
 
+!> \section arg_table_sgscloud_radpre_init Argument Table
+!! \htmlinclude sgscloud_radpre_init.html
+!!
       subroutine sgscloud_radpre_init ()
       end subroutine sgscloud_radpre_init
 
+!> \section arg_table_sgscloud_radpre_finalize Argument Table
+!! \htmlinclude sgscloud_radpre_finalize.html
+!!
       subroutine sgscloud_radpre_finalize ()
       end subroutine sgscloud_radpre_finalize
 

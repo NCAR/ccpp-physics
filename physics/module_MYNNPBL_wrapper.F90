@@ -10,6 +10,9 @@
 
       contains
 
+!> \section arg_table_mynnedmf_wrapper_init Argument Table
+!! \htmlinclude mynnedmf_wrapper_init.html
+!!
       subroutine mynnedmf_wrapper_init (lheatstrg, errmsg, errflg)
         implicit none
 
@@ -297,11 +300,10 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        wet, dry, icy
 
       real(kind=kind_phys), dimension(im), intent(inout) ::              &
-     &        pblh
+     &        pblh,dusfc_diag,dvsfc_diag,dtsfc_diag,dqsfc_diag
       real(kind=kind_phys), dimension(im), intent(out) ::                &
      &        ch,dtsfc1,dqsfc1,dusfc1,dvsfc1,                            &
-     &        dtsfci_diag,dqsfci_diag,dtsfc_diag,dqsfc_diag,             &
-     &        dusfci_diag,dvsfci_diag,dusfc_diag,dvsfc_diag,             &
+     &        dtsfci_diag,dqsfci_diag,dusfci_diag,dvsfci_diag,           &
      &        maxMF
       integer, dimension(im), intent(inout) ::                           &
      &        kpbl,nupdraft,ktop_plume

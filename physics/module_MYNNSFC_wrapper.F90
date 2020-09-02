@@ -116,11 +116,12 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &                    sigmaf,shdmax,z0pert,ztpert
 
 !MYNN-1D
-      REAL    :: delt
-      INTEGER :: im, levs
-      INTEGER :: iter, k, i, itimestep, lsm
-      LOGICAL :: flag_init,flag_restart,lprnt
-      INTEGER :: IDS,IDE,JDS,JDE,KDS,KDE,                   &
+      REAL,    intent(in) :: delt
+      INTEGER, intent(in) :: im, levs
+      INTEGER, intent(in) :: iter, itimestep, lsm
+      LOGICAL, intent(in) :: flag_init,flag_restart,lprnt
+      INTEGER :: k, i
+      INTEGER ::  IDS,IDE,JDS,JDE,KDS,KDE,                  &
      &            IMS,IME,JMS,JME,KMS,KME,                  &
      &            ITS,ITE,JTS,JTE,KTS,KTE
 
