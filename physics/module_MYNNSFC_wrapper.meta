@@ -678,7 +678,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [qflx_lnd]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_land
@@ -687,7 +687,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [qflx_ice]
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ice
@@ -696,7 +696,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [qsfc]
   standard_name = surface_specific_humidity

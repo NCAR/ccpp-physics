@@ -1,55 +1,7 @@
 [ccpp-arg-table]
   name = GFS_rrtmgp_lw_post_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[Grid]
-  standard_name = GFS_grid_type_instance
-  long_name = instance of derived type GFS_grid_type
-  units = DDT
-  dimensions = ()
-  type = GFS_grid_type
-  intent = in
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = instance of derived type GFS_radtend_type
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = inout
-  optional = F
-[Coupling]
-  standard_name = GFS_coupling_type_instance
-  long_name = instance of derived type GFS_coupling_type
-  units = DDT
-  dimensions = ()
-  type = GFS_coupling_type
-  intent = inout
-  optional = F
-[Diag]
-  standard_name = GFS_diag_type_instance
-  long_name = instance of derived type GFS_diag_type
-  units = DDT
-  dimensions = ()
-  type = GFS_diag_type
-  intent = inout
-  optional = F
-[Statein]
-  standard_name = GFS_statein_type_instance
-  long_name = instance of derived type GFS_statein_type
-  units = DDT
-  dimensions = ()
-  type = GFS_statein_type
-  intent = in
-  optional = F
-[im]
+[nCol]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
   units = count
@@ -57,6 +9,47 @@
   type = integer
   intent = in
   optional = F
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F   
+[lslwr]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F   
+[do_lw_clrsky_hr]
+  standard_name = flag_for_output_of_longwave_heating_rate
+  long_name = flag to output lw heating rate
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F   
+[save_diag]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F 
+[fhlwr]
+  standard_name = frequency_for_longwave_radiation
+  long_name = frequency for longwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F      
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
@@ -66,6 +59,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[t_lay]
+  standard_name = air_temperature_at_layer_for_RRTMGP
+  long_name = air temperature at vertical layer for radiation calculation
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
@@ -172,13 +174,65 @@
   kind = kind_phys
   intent = in
   optional = F
+[sfcdlw]
+  standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
+  long_name = total sky sfc downward lw flux
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out  
+  optional = F
+[sfcflw]
+  standard_name = lw_fluxes_sfc
+  long_name = lw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = sfcflw_type
+  intent = out  
+  optional = F
+[tsflw]
+  standard_name = surface_midlayer_air_temperature_in_longwave_radiation
+  long_name = surface air temp during lw calculation
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out  
+  optional = F  
+[htrlw]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
+  long_name = total sky lw heating rate
+  units = K s-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out  
+  optional = F
+[topflw]
+  standard_name = lw_fluxes_top_atmosphere
+  long_name = lw radiation fluxes at top
+  units = W m-2
+  dimensions = (horizontal_dimension)
+  type = topflw_type
+  intent = out  
+  optional = F      
 [flxprf_lw]
   standard_name = RRTMGP_lw_fluxes
   long_name = lw fluxes total sky / csk and up / down at levels
   units = W m-2
   dimensions = (horizontal_dimension,vertical_dimension_plus_one)
   type = proflw_type
-  intent = inout
+  intent = out
+  optional = T
+[htrlwc]
+  standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
+  long_name = longwave clear sky heating rate
+  units = K s-1
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = T
 [errmsg]
   standard_name = ccpp_error_message
