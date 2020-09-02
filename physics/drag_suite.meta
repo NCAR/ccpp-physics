@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = drag_suite_init
+[ccpp-table-properties]
+  name = drag_suite
   type = scheme
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]
@@ -608,7 +609,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = drag_suite_finalize
-  type = scheme

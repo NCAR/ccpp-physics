@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = mp_fer_hires
+  type = scheme
+  dependencies = machine.F,module_MP_FER_HIRES.F90
+
+########################################################################
 [ccpp-arg-table]
   name = mp_fer_hires_init
   type = scheme
@@ -126,10 +132,6 @@
   type = integer
   intent = out
   optional = F
-########################################################################
-[ccpp-arg-table]
-  name = mp_fer_hires_finalize
-  type = scheme
 ########################################################################
 [ccpp-arg-table]
   name = mp_fer_hires_run

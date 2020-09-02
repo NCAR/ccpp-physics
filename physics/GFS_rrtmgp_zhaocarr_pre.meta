@@ -1,3 +1,8 @@
+[ccpp-table-properties]
+  name = GFS_rrtmgp_zhaocarr_pre
+  type = scheme
+  dependencies = rrtmgp_aux.F90
+
 ########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_zhaocarr_pre_run

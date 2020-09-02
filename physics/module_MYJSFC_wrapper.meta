@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = myjsfc_wrapper
+  type = scheme
+  dependencies = module_SF_JSFC.F90
+
+########################################################################
 [ccpp-arg-table]
   name = myjsfc_wrapper_run
   type = scheme

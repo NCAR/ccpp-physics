@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_phys_time_vary
+  type = scheme
+  dependencies = aerclm_def.F,aerinterp.F90,gcycle.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f,namelist_soilveg.f,ozinterp.f90,ozne_def.f,sfcsub.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_phys_time_vary_init
   type = scheme

@@ -1,3 +1,10 @@
+[ccpp-table-properties]
+  name = cires_ugwp
+  type = scheme
+# DH* 20200804 - this is a result of the nasty hack to call gwdps from within ugwp!
+  dependencies = cires_ugwp_triggers.F90,cires_ugwp_initialize.F90,cires_ugwp_solvers.F90,cires_ugwp_utils.F90,cires_orowam2017.f,cires_vert_lsatdis.F90,cires_vert_orodis.F90,cires_vert_wmsdis.F90,cires_ugwp_module.F90,gwdps.f,machine.F,ugwp_driver_v0.F
+
+########################################################################
 [ccpp-arg-table]
   name = cires_ugwp_init
   type = scheme

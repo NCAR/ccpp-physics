@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = lsm_ruc_sfc_sice_pre
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = lsm_ruc_sfc_sice_pre_run
   type = scheme
@@ -93,6 +99,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = lsm_ruc_sfc_sice_post
+  type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

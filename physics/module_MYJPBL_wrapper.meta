@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = myjpbl_wrapper
+  type = scheme
+  dependencies = module_BL_MYJPBL.F90
+
+########################################################################
 [ccpp-arg-table]
   name = myjpbl_wrapper_run
   type = scheme

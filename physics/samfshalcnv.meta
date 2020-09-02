@@ -1,11 +1,7 @@
-[ccpp-arg-table]
-  name = samfshalcnv_init
+[ccpp-table-properties]
+  name = samfshalcnv
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = samfshalcnv_finalize
-  type = scheme
+  dependencies = funcphys.f90,machine.F,samfaerosols.F
 
 ########################################################################
 [ccpp-arg-table]
