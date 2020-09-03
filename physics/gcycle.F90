@@ -58,9 +58,9 @@
         ABSFCS (Model%nx*Model%ny),             &
         ALFFC1 (Model%nx*Model%ny*2),           &
         ALBFC1 (Model%nx*Model%ny*4),           &
-        SMCFC1 (Model%nx*Model%ny*Model%lsoil), &
-        STCFC1 (Model%nx*Model%ny*Model%lsoil), &
-        SLCFC1 (Model%nx*Model%ny*Model%lsoil)
+        SMCFC1 (Model%nx*Model%ny*max(Model%lsoil,Model%lsoil_lsm)), &
+        STCFC1 (Model%nx*Model%ny*max(Model%lsoil,Model%lsoil_lsm)), &
+        SLCFC1 (Model%nx*Model%ny*max(Model%lsoil,Model%lsoil_lsm))
 
     character(len=6) :: tile_num_ch
     real(kind=kind_phys), parameter :: pifac=180.0/pi
@@ -134,10 +134,16 @@
           ALBFC1  (len + npts*2) = Sfcprop(nb)%alnsf  (ix)
           ALBFC1  (len + npts*3) = Sfcprop(nb)%alnwf  (ix)
 
-          do ls = 1,Model%lsoil
-            SMCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%smc (ix,ls)
-            STCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%stc (ix,ls)
-            SLCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%slc (ix,ls)
+          do ls = 1,max(Model%lsoil,Model%lsoil_lsm)
+            if (Model%lsoil == Model%lsoil_lsm) then
+              SMCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%smc (ix,ls)
+              STCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%stc (ix,ls)
+              SLCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%slc (ix,ls)
+            else
+              SMCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%smois (ix,ls)
+              STCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%tslb (ix,ls)
+              SLCFC1 (len + (ls-1)*npts) = Sfcprop(nb)%sh2o (ix,ls)
+            endif
           enddo
 
           IF (SLIFCS(len) .LT. 0.1 .OR. SLIFCS(len) .GT. 1.5) THEN
@@ -171,7 +177,7 @@
         rewind (Model%nlunit)
       endif
 #endif
-      CALL SFCCYCLE (9998, npts, Model%lsoil, SIG1T, Model%fhcyc, &
+      CALL SFCCYCLE (9998, npts, max(Model%lsoil,Model%lsoil_lsm), SIG1T, Model%fhcyc, &
                      Model%idate(4), Model%idate(2),              &
                      Model%idate(3), Model%idate(1),              &
                      Model%phour, RLA, RLO, SLMASK,               &
@@ -235,10 +241,16 @@
           Sfcprop(nb)%alvwf  (ix) = ALBFC1  (len + npts  )
           Sfcprop(nb)%alnsf  (ix) = ALBFC1  (len + npts*2)
           Sfcprop(nb)%alnwf  (ix) = ALBFC1  (len + npts*3)
-          do ls = 1,Model%lsoil
-            Sfcprop(nb)%smc (ix,ls) = SMCFC1 (len + (ls-1)*npts)
-            Sfcprop(nb)%stc (ix,ls) = STCFC1 (len + (ls-1)*npts)
-            Sfcprop(nb)%slc (ix,ls) = SLCFC1 (len + (ls-1)*npts)
+          do ls = 1,max(Model%lsoil,Model%lsoil_lsm)
+            if(Model%lsoil == Model%lsoil_lsm) then
+              Sfcprop(nb)%smc (ix,ls) = SMCFC1 (len + (ls-1)*npts)
+              Sfcprop(nb)%stc (ix,ls) = STCFC1 (len + (ls-1)*npts)
+              Sfcprop(nb)%slc (ix,ls) = SLCFC1 (len + (ls-1)*npts)
+            else
+              Sfcprop(nb)%smois (ix,ls) = SMCFC1 (len + (ls-1)*npts)
+              Sfcprop(nb)%tslb (ix,ls) = STCFC1 (len + (ls-1)*npts)
+              Sfcprop(nb)%sh2o (ix,ls) = SLCFC1 (len + (ls-1)*npts)
+            endif
             if (ls<=Model%kice) Sfcprop(nb)%tiice (ix,ls) = STCFC1 (len + (ls-1)*npts)
           enddo
         ENDDO                 !-----END BLOCK SIZE LOOP------------------------------
