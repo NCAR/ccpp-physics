@@ -1,13 +1,28 @@
+[ccpp-table-properties]
+  name = topflw_type
+  type = ddt
+  dependencies = 
+
 [ccpp-arg-table]
   name = topflw_type
   type = ddt
 
 ########################################################################
+[ccpp-table-properties]
+  name = sfcflw_type
+  type = ddt
+  dependencies = 
+
 [ccpp-arg-table]
   name = sfcflw_type
   type = ddt
 
 ########################################################################
+[ccpp-table-properties]
+  name = module_radlw_parameters
+  type = module
+  dependencies = 
+
 [ccpp-arg-table]
   name = module_radlw_parameters
   type = module

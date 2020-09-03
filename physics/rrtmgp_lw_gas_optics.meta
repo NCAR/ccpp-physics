@@ -1,3 +1,10 @@
+[ccpp-table-properties]
+  name = rrtmgp_lw_gas_optics
+  type = scheme
+  dependencies = machine.F,rte-rrtmgp/extensions/mo_compute_bc.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
+  dependencies = rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_rte_sw.F90,rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90,rrtmgp_aux.F90
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_gas_optics_init
   type = scheme

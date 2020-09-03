@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = h2ophys_init
+[ccpp-table-properties]
+  name = h2ophys
   type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -117,7 +118,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = h2ophys_finalize
-  type = scheme

@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = cs_conv_aw_adj
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = cs_conv_aw_adj_run
   type = scheme

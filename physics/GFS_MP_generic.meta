@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = GFS_MP_generic_pre_init
+[ccpp-table-properties]
+  name = GFS_MP_generic_pre
   type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -134,14 +135,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = GFS_MP_generic_pre_finalize
+[ccpp-table-properties]
+  name = GFS_MP_generic_post
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = GFS_MP_generic_post_init
-  type = scheme
+  dependencies = calpreciptype.f90,machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -924,7 +921,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = GFS_MP_generic_post_finalize
-  type = scheme

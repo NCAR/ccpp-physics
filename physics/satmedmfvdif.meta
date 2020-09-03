@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = satmedmfvdif
+  type = scheme
+  dependencies = funcphys.f90,machine.F,mfpblt.f,mfscu.f,tridi.f
+
+########################################################################
 [ccpp-arg-table]
   name = satmedmfvdif_init
   type = scheme

@@ -1,11 +1,7 @@
-[ccpp-arg-table]
-  name = sfc_ocean_init
+[ccpp-table-properties]
+  name = sfc_ocean
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = sfc_ocean_finalize
-  type = scheme
+  dependencies = funcphys.f90,machine.F
 
 ########################################################################
 [ccpp-arg-table]

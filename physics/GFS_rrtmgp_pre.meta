@@ -1,3 +1,10 @@
+[ccpp-table-properties]
+  name = GFS_rrtmgp_pre
+  type = scheme
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
+  dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f,rrtmgp_aux.F90,rrtmg_lw_cloud_optics.F90
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_pre_init
   type = scheme

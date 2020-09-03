@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_time_vary_pre
+  type = scheme
+  dependencies = funcphys.f90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_time_vary_pre_init
   type = scheme
