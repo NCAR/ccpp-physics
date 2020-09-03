@@ -43,8 +43,8 @@
       implicit none
       character(len=*), intent(in) :: prefix
       integer, intent(in) :: index
-      ! Safety measure: prevent writing out of bounds, use a longer string
-      character(len=128) :: message
+      ! Safety measure: prevent writing out of bounds, use a longer string than 8 characters
+      character(len=16) :: message
       write(message,fmt='(a,a,i0)') trim(prefix), '-', index
       end function message
 
