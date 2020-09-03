@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = ysuvdif
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = ysuvdif_run
   type = scheme

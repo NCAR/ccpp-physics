@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_cice
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_cice_run
   type = scheme
@@ -159,6 +165,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[snowd]
+  standard_name = surface_snow_thickness_for_coupling
+  long_name = sfc snow depth in meters over sea ice for coupling
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [qsurf]
   standard_name = surface_specific_humidity_over_ice
   long_name = surface air saturation specific humidity over ice
@@ -208,6 +223,33 @@
   standard_name = surface_wind_stress_over_ice
   long_name = surface wind stress over ice
   units = m2 s-2
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[weasd]
+  standard_name = water_equivalent_accumulated_snow_depth_over_ice
+  long_name = water equiv of acc snow depth over ice
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[snwdph]
+  standard_name = surface_snow_thickness_water_equivalent_over_ice
+  long_name = water equivalent snow depth over ice
+  units = mm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ep]
+  standard_name = surface_upward_potential_latent_heat_flux_over_ice
+  long_name = surface upward potential latent heat flux over ice
+  units = W m-2
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = ozphys_2015
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = ozphys_2015_init
   type = scheme
@@ -26,11 +32,6 @@
   type = integer
   intent = out
   optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = ozphys_2015_finalize
-  type = scheme
 
 ########################################################################
 [ccpp-arg-table]
