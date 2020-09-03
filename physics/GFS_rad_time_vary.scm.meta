@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = GFS_rad_time_vary_init
+[ccpp-table-properties]
+  name = GFS_rad_time_vary
   type = scheme
+  dependencies = machine.F,mersenne_twister.f,physparam.f,radcons.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -48,7 +49,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = GFS_rad_time_vary_finalize
-  type = scheme

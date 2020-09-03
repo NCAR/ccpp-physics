@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = cu_gf_driver_post
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = cu_gf_driver_post_run
   type = scheme

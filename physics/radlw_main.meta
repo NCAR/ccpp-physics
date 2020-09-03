@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = rrtmg_lw
+  type = scheme
+  dependencies = mersenne_twister.f,physcons.F90,physparam.f,radlw_datatb.f,radlw_param.f
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmg_lw_run
   type = scheme

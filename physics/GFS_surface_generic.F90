@@ -27,8 +27,9 @@
       subroutine GFS_surface_generic_pre_run (im, levs, vfrac, islmsk, isot, ivegsrc, stype, vtype, slope, &
                           prsik_1, prslk_1, tsfc, phil, con_g,                                             &
                           sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, ca_global,dtdtr,&
-                          drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, do_sfcperts, nsfcpert, sfc_wts,        &
-                          pertz0, pertzt, pertshc, pertlai, pertvegf, z01d, zt1d, bexp1d, xlai1d, vegf1d,  &
+                          drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
+                          lndp_var_list, lndp_prt_list,                                                    &
+                          z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf,                                    &
                           cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
                           wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
@@ -56,19 +57,17 @@
         real(kind=kind_phys), dimension(im),          intent(out) :: dsnow_cpl
         real(kind=kind_phys), dimension(im),          intent(in)  :: rain_cpl
         real(kind=kind_phys), dimension(im),          intent(in)  :: snow_cpl
-        logical, intent(in) :: do_sfcperts
-        integer, intent(in) :: nsfcpert
-        real(kind=kind_phys), dimension(im,nsfcpert), intent(in)  :: sfc_wts
-        real(kind=kind_phys), dimension(:),           intent(in)  :: pertz0
-        real(kind=kind_phys), dimension(:),           intent(in)  :: pertzt
-        real(kind=kind_phys), dimension(:),           intent(in)  :: pertshc
-        real(kind=kind_phys), dimension(:),           intent(in)  :: pertlai
-        real(kind=kind_phys), dimension(:),           intent(in)  :: pertvegf
+        integer, intent(in) :: lndp_type
+        integer, intent(in) :: n_var_lndp
+        character(len=3), dimension(n_var_lndp),      intent(in)  :: lndp_var_list
+        real(kind=kind_phys), dimension(n_var_lndp),  intent(in)  :: lndp_prt_list
+        real(kind=kind_phys), dimension(im,n_var_lndp), intent(in)  :: sfc_wts
         real(kind=kind_phys), dimension(im),          intent(out) :: z01d
         real(kind=kind_phys), dimension(im),          intent(out) :: zt1d
         real(kind=kind_phys), dimension(im),          intent(out) :: bexp1d
         real(kind=kind_phys), dimension(im),          intent(out) :: xlai1d
         real(kind=kind_phys), dimension(im),          intent(out) :: vegf1d
+        real(kind=kind_phys),                         intent(out) :: lndp_vgf
 
         logical, intent(in) :: cplflx
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
@@ -89,7 +88,7 @@
         integer,          intent(out) :: errflg
 
         ! Local variables
-        integer              :: i
+        integer              :: i, k
         real(kind=kind_phys) :: onebg
         real(kind=kind_phys) :: cdfz
 
@@ -107,34 +106,28 @@
 
         ! Scale random patterns for surface perturbations with perturbation size
         ! Turn vegetation fraction pattern into percentile pattern
-        if (do_sfcperts) then
-          if (pertz0(1) > zero) then
-            z01d(:) = pertz0(1) * sfc_wts(:,1)
-!            if (me == 0) print*,'sfc_wts(:,1) min and max',minval(sfc_wts(:,1)),maxval(sfc_wts(:,1))
-!            if (me == 0) print*,'z01d min and max ',minval(z01d),maxval(z01d)
-          endif
-          if (pertzt(1) > zero) then
-            zt1d(:) = pertzt(1) * sfc_wts(:,2)
-          endif
-          if (pertshc(1) > zero) then
-            bexp1d(:) = pertshc(1) * sfc_wts(:,3)
-          endif
-          if (pertlai(1) > zero) then
-            xlai1d(:) = pertlai(1) * sfc_wts(:,4)
-          endif
-!   --- do the albedo percentile calculation in GFS_radiation_driver instead --- !
-!          if (pertalb(1) > 0.) then
-!            do i=1,im
-!              call cdfnor(sfc_wts(i,5),cdfz)
-!              alb1d(i) = cdfz
-!            enddo
-!          endif
-          if (pertvegf(1) > zero) then
-            do i=1,im
-              call cdfnor(sfc_wts(i,6),cdfz)
-              vegf1d(i) = cdfz
-            enddo
-          endif
+        lndp_vgf=-999.
+
+        if (lndp_type==1) then
+        do k =1,n_var_lndp
+           select case(lndp_var_list(k))
+           case ('rz0')
+                z01d(:) = lndp_prt_list(k)* sfc_wts(:,k)
+           case ('rzt')
+                zt1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
+           case ('shc')
+                bexp1d(:) = lndp_prt_list(k) * sfc_wts(:,k)
+           case ('lai')
+                xlai1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
+           case ('vgf')
+        ! note that the pertrubed vegfrac is being used in sfc_drv, but not sfc_diff
+              do i=1,im
+                call cdfnor(sfc_wts(i,k),cdfz)
+                vegf1d(i) = cdfz
+              enddo
+              lndp_vgf = lndp_prt_list(k)
+           end select
+        enddo
         endif
 
         ! End of stochastic physics / surface perturbation

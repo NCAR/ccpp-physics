@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = phys_tend
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = phys_tend_run
   type = scheme

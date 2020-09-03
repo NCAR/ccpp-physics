@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = hedmf
+  type = scheme
+  dependencies = funcphys.f90,machine.F,mfpbl.f,physcons.F90,tridi.f
+
+########################################################################
 [ccpp-arg-table]
   name = hedmf_init
   type = scheme
