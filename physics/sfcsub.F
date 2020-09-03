@@ -43,10 +43,8 @@
       implicit none
       character(len=*), intent(in) :: prefix
       integer, intent(in) :: index
-      character(len=10) :: message
-      !
-      ! probably need to implement a check that len(prefix) + '-' + length of
-      ! string representation of index <= len(message)
+      ! Safety measure: prevent writing out of bounds, use a longer string
+      character(len=128) :: message
       write(message,fmt='(a,a,i0)') trim(prefix), '-', index
       end function message
 
@@ -5234,7 +5232,7 @@
      &        ij,nprt,kmaxs,kmins,i,me,len,mode
       parameter(mmprt=2)
 !
-      character*8 ttl
+      character(len=*) ttl
       logical iceflg(len)
       real (kind=kind_io8) fld(len),slimsk(len),sno(len),               &
      &                     rla(len), rlo(len)
