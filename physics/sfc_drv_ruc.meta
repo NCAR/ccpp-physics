@@ -113,20 +113,40 @@
   type = integer
   intent = in
   optional = F
-[soiltyp]
-  standard_name = soil_type_classification
-  long_name = soil type at each grid cell
-  units = index
+[slmsk]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
   dimensions = (horizontal_dimension)
-  type = integer
-  intent = inout
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
-[vegtype]
-  standard_name = vegetation_type_classification
-  long_name = vegetation type at each grid cell
+[landfrac]
+  standard_name = land_area_fraction
+  long_name = fraction of horizontal grid area occupied by land
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[stype]
+  standard_name = soil_type_classification_real
+  long_name = soil type for lsm
   units = index
   dimensions = (horizontal_dimension)
-  type = integer
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[vtype]
+  standard_name = vegetation_type_classification_real
+  long_name = vegetation type for lsm
+  units = index
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
   intent = inout
   optional = F
 [frac_grid]
@@ -137,20 +157,30 @@
   type = logical
   intent = in
   optional = F
-[land]
-  standard_name = flag_nonzero_land_surface_fraction
-  long_name = flag indicating presence of some land surface area fraction
+[flag_cice]
+  standard_name = flag_for_cice
+  long_name = flag for cice
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
   intent = in
   optional = F
-[icy]
-  standard_name = flag_nonzero_sea_ice_surface_fraction
-  long_name = flag indicating presence of some sea ice surface area fraction
-  units = flag
-  dimensions = (horizontal_dimension)
-  type = logical
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = ???
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[min_lakeice]
+  standard_name = lake_ice_minimum
+  long_name = minimum lake ice value
+  units = ???
+  dimensions = ()
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [fice]
@@ -179,15 +209,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[tice]
-  standard_name = sea_ice_temperature_interstitial
-  long_name = sea ice surface skin temperature use as interstitial
-  units = K
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [tg3]
   standard_name = deep_soil_temperature

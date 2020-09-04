@@ -7075,6 +7075,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
    errflag = 0
    DO j = jts,jtf
      DO i = its,itf
+
        IF ( ISLTYP( i,j ) .LT. 0 ) THEN
          errflag = 1
          print *, &
@@ -7128,23 +7129,23 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
            endif
          ENDDO
 
-       elseif(icy(i) .and. .not. frac_grid ) then
+       elseif( icy(i) .and. .not. frac_grid ) then
        !-- ice
          DO L=1,NZS
            smfr3d(i,l,j)=1.
            sh2o(i,l,j)=0.
            mavail(i,j) = 1.
          ENDDO
-       endif ! land
     
-       !else
-!-- for water  ISLTYP=14
-       !  DO L=1,NZS
-       !    smfr3d(i,l,j)=0.
-       !    sh2o(i,l,j)=1.
-       !    mavail(i,j) = 1.
-       !  ENDDO
-       !endif
+       elseif( .not. frac_grid) then
+       !-- water  ISLTYP=14
+         DO L=1,NZS
+           smfr3d(i,l,j)=0.
+           sh2o(i,l,j)=1.
+           mavail(i,j) = 1.
+         ENDDO
+
+       endif ! land
     !ENDIF
 
     ENDDO

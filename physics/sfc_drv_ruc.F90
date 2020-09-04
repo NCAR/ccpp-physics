@@ -16,6 +16,8 @@ module lsm_ruc
 
         public :: lsm_ruc_init, lsm_ruc_run, lsm_ruc_finalize
 
+        real(kind=kind_phys), parameter :: zero = 0.0d0, one = 1.0d0, epsln = 1.0d-10
+
       contains
 
 !> This subroutine calls set_soilveg_ruc() to specify vegetation and soil parameters for 
@@ -26,9 +28,10 @@ module lsm_ruc
       subroutine lsm_ruc_init (me, master, isot, ivegsrc, nlunit,        &
                                flag_restart, flag_init,                  &
                                im, lsoil_ruc, lsoil, kice, nlev,         & ! in
-                               lsm_ruc, lsm,                             & ! in
-                               soiltyp, vegtype, frac_grid, land, icy,   & ! in 
-                               fice, tsfc_lnd, tsfc_wat, tice,           &
+                               lsm_ruc, lsm, slmsk, landfrac,            & ! in
+                               stype, vtype, frac_grid,                  & ! in 
+                               flag_cice, min_seaice, min_lakeice,       &
+                               fice, tsfc_lnd, tsfc_wat,                 &
                                tg3, smc, slc, stc,                       & ! in
                                smcref2, smcwlt2,                         & ! inout
                                sh2o, smfrkeep, tslb, smois, wetness,     & ! out
@@ -46,19 +49,22 @@ module lsm_ruc
       integer,              intent(in)  :: kice
       integer,              intent(in)  :: nlev
       integer,              intent(in)  :: lsm_ruc, lsm
-      integer,dimension(im),intent(inout)  :: soiltyp, vegtype
 
-      logical, dimension(im), intent(in) :: land, icy
 
-      real (kind=kind_phys), dimension(im), intent(in   ) :: fice
+      real (kind=kind_phys), dimension(im), intent(in   ) :: slmsk
+      real (kind=kind_phys), dimension(im), intent(in   ) :: landfrac
+      real (kind=kind_phys), dimension(im), intent(in   ) :: stype
+      real (kind=kind_phys), dimension(im), intent(in   ) :: vtype
+      logical,               dimension(im), intent(in   ) :: flag_cice
+      real (kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
       real (kind=kind_phys), dimension(im), intent(in   ) :: tsfc_lnd
       real (kind=kind_phys), dimension(im), intent(in   ) :: tsfc_wat
-      real (kind=kind_phys), dimension(im), intent(in   ) :: tice
       real (kind=kind_phys), dimension(im), intent(in)    :: tg3
 
       real (kind=kind_phys), dimension(im,lsoil), intent(in) :: smc,slc,stc
 
 !  ---  in/out:
+      real (kind=kind_phys), dimension(im), intent(inout) :: fice
       real (kind=kind_phys), dimension(im), intent(inout) :: wetness
       real (kind=kind_phys), dimension(im), intent(inout) :: smcref2, smcwlt2
 
@@ -73,31 +79,32 @@ module lsm_ruc
 ! --- local
       integer  :: ipr, i, k
       logical  :: debug_print
+      logical, dimension(im) :: land, icy, wet
+      integer, dimension(im) :: soiltyp, vegtype
+      real (kind=kind_phys), dimension(im) :: frland
 
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0 
 
       ipr = 10
-      debug_print = .true.
+      debug_print = .false.
 
 !> - Call rucinit() to initialize soil/ice/water  variables
 
       if ( debug_print) then
         write (0,*) 'RUC LSM initialization'
         write (0,*) 'lsoil_ruc, lsoil',lsoil_ruc, lsoil
-        write (0,*) 'noah soil temp',stc(:,1)
-        write (0,*) 'noah soil mois',smc(:,1)
+        write (0,*) 'me, isot, ivegsrc, nlunit ',me, isot, ivegsrc, nlunit
+        write (0,*) 'noah soil temp',stc(ipr,:)
         write (0,*) 'noah mois(ipr)',ipr,smc(ipr,:)
-        write (0,*) 'soiltyp=',soiltyp(:)
-        write (0,*) 'vegtype=',vegtype(:)
-        write (0,*) 'fice=',fice(:)
-        write (0,*) 'tice=',tice(:)
-        write (0,*) 'tsfc_lnd=',tsfc_lnd(:)
-        write (0,*) 'tsfc_wat=',tsfc_wat(:)
-        write (0,*) 'tg3=',tg3(:)
-        write (0,*) 'land=',land(:)
-        write (0,*) 'icy=',icy(:)
+        write (0,*) 'stype=',stype(ipr)
+        write (0,*) 'vtype=',vtype(ipr)
+        write (0,*) 'fice=',fice(ipr)
+        write (0,*) 'tsfc_lnd=',tsfc_lnd(ipr)
+        write (0,*) 'tsfc_wat=',tsfc_wat(ipr)
+        write (0,*) 'tg3=',tg3(ipr)
+        write (0,*) 'slmsk=',slmsk(ipr)
         write (0,*) 'flag_init =',flag_init
         write (0,*) 'flag_restart =',flag_restart
       endif
@@ -105,13 +112,89 @@ module lsm_ruc
       !--- initialize soil vegetation
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
 
+      soiltyp(:) = 0
+      vegtype(:) = 0
+      land (:) = .false.
+      icy (:)  = .false.
+      wet (:)  = .false.
+
+      if (frac_grid) then  ! fice is ice fraction wrt water area
+        do i=1,im
+          frland(i) = landfrac(i)
+          if (frland(i) > zero) land(i) = .true.
+          if (frland(i) < one) then
+            if (flag_cice(i)) then
+              if (fice(i) >= min_seaice) then
+                icy(i)  = .true.
+              else
+                fice(i) = zero
+              endif
+            else
+              if (fice(i) >= min_lakeice) then
+                icy(i) = .true.
+              else
+                fice(i) = zero
+              endif
+            endif
+            if (fice(i) < one ) then
+              wet(i)=.true. ! some open ocean/lake water exists
+            end if
+          else
+            fice(i) = zero
+          endif
+        enddo
+
+      else
+
+        do i = 1, IM
+          frland(i) = zero
+          if (slmsk(i) == 0) then
+            wet(i)  = .true.
+            fice(i) = zero
+          elseif (slmsk(i) == 1) then
+            land(i)   = .true.
+            frland(i) = one
+            fice(i)   = zero
+          else
+            icy(i)  = .true.
+            if (fice(i) < one) then
+              wet(i) = .true.
+            endif
+          endif
+        enddo
+
+      endif
+
+      do i  = 1, im ! i - horizontal loop
+        if( land(i) ) then
+        !-- land
+          soiltyp(i)  = int( stype(i)+0.5 )
+          vegtype(i)  = int( vtype(i)+0.5 )
+        elseif( icy(i) > 0. ) then
+        !-- ice
+          if (isot == 1) then
+            soiltyp(i)  = 16
+          else
+            soiltyp(i)  = 9
+          endif
+          if (ivegsrc == 1) then
+            vegtype(i)  = 15
+          elseif(ivegsrc == 2) then
+            vegtype(i)  = 13
+          endif
+        elseif ( wet(i) ) then
+        !-- water
+          if (soiltyp(i)  < 1) soiltyp(i)  = 14
+          if (vegtype(i)  < 1) vegtype(i)  = 17
+        endif
+      enddo
+
       if( .not.  flag_restart) then
         call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                             me, master, isot, ivegsrc, nlunit,     & ! in
-                             lsm_ruc, lsm,                          & ! in
+                             me, master, lsm_ruc, lsm, slmsk,       & ! in
                              frac_grid, land, icy,                  & ! in
                              soiltyp, vegtype, fice,                & ! in
-                             tsfc_lnd, tsfc_wat, tice, tg3,         & ! in
+                             tsfc_lnd, tsfc_wat, tg3,               & ! in
                              smc, slc, stc,                         & ! in
                              smcref2, smcwlt2,                      & ! inout
                              sh2o, smfrkeep, tslb, smois,           & ! out
@@ -400,6 +483,8 @@ module lsm_ruc
       endif
  
       if(flag_init .and. iter==1) then
+      ! Initialize the RUC soil levels, needed for cold starts and warm starts
+        CALL init_soil_depth_3 ( zs , dzs , lsoil_ruc )
         xlai = 0.
       endif ! flag_init=.true.,iter=1
 
@@ -773,7 +858,7 @@ module lsm_ruc
         znt(i,j) = zorl(i)/100.
 
         !if(debug_print) then
-          if(me==0 .and. i==ipr) then
+          !if(i==ipr) then
             write (0,*)'before RUC smsoil = ',smsoil(i,:,j), i,j
             write (0,*)'stsoil = ',stsoil(i,:,j), i,j
             write (0,*)'soilt = ',soilt(i,j), i,j
@@ -849,25 +934,12 @@ module lsm_ruc
             write (0,*)'stsoil(i,:,j)=',i,j,stsoil(i,:,j)
             write (0,*)'smfrsoil(i,:,j)=',i,j,smfrsoil(i,:,j)
             write (0,*)'keepfrsoil(i,:,j)=',i,j,keepfrsoil(i,:,j)
-            write (0,*)'soilm(i,j) =',i,j,soilm(i,j)
-            write (0,*)'smmax(i,j) =',i,j,smmax(i,j)
-            write (0,*)'hfx(i,j) =',i,j,hfx(i,j)
-            write (0,*)'qfx(i,j) =',i,j,qfx(i,j)
-            write (0,*)'lh(i,j) =',i,j,lh(i,j)
-            write (0,*)'infiltr(i,j) =',i,j,infiltr(i,j)
-            write (0,*)'runoff1(i,j) =',i,j,runoff1(i,j)
-            write (0,*)'runoff2(i,j) =',i,j,runoff2(i,j)
             write (0,*)'acrunoff(i,j) =',i,j,acrunoff(i,j)
-            write (0,*)'sfcexc(i,j) =',i,j,sfcexc(i,j)
-            write (0,*)'acceta(i,j) =',i,j,acceta(i,j)
-            write (0,*)'ssoil(i,j) =',i,j,ssoil(i,j)
-            write (0,*)'snfallac(i,j) =',i,j,snfallac(i,j)
             write (0,*)'acsn(i,j) =',i,j,acsn(i,j)
-            write (0,*)'snomlt(i,j) =',i,j,snomlt(i,j)
             write (0,*)'shdmin1d(i,j) =',i,j,shdmin1d(i,j)
             write (0,*)'shdmax1d(i,j) =',i,j,shdmax1d(i,j)
             write (0,*)'rdlai2d =',rdlai2d
-          endif
+          !endif
         !endif
 
 !> - Call RUC LSM lsmruc(). 
@@ -906,7 +978,7 @@ module lsm_ruc
      &          its,ite, jts,jte, kts,kte                                    )
 
       !if(debug_print) then
-        if(me==0.and.i==ipr) then
+        !if(i==ipr) then
           write (0,*)'after  RUC smsoil = ',smsoil(i,:,j), i, j
           write (0,*)'after sneqv(i,j) =',i,j,sneqv(i,j)
           write (0,*)'after snowh(i,j) =',i,j,snowh(i,j)
@@ -941,7 +1013,7 @@ module lsm_ruc
           write (0,*)'after snfallac(i,j) =',i,j,snfallac(i,j)
           write (0,*)'after acsn(i,j) =',i,j,acsn(i,j)
           write (0,*)'after snomlt(i,j) =',i,j,snomlt(i,j)
-        endif
+        !endif
       !endif
 
 
@@ -1109,11 +1181,10 @@ module lsm_ruc
 !>\ingroup lsm_ruc_group
 !! This subroutine contains RUC LSM initialization.
       subroutine rucinit        (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                                 me, master, isot, ivegsrc, nlunit,     & ! in
-                                 lsm_ruc, lsm,                          & ! in
+                                 me, master, lsm_ruc, lsm, slmsk,       & ! in
                                  frac_grid, land, icy,                  & ! in
                                  soiltyp, vegtype, fice,                & ! in
-                                 tskin_lnd, tskin_wat, tice, tg3,       & ! !in
+                                 tskin_lnd, tskin_wat, tg3,             & ! !in
                                  smc, slc, stc,                         & ! in
                                  smcref2, smcwlt2,                      & !  inout
                                  sh2o, smfrkeep, tslb, smois,           & ! out
@@ -1124,14 +1195,13 @@ module lsm_ruc
       logical,                                 intent(in   ) :: restart
       integer,                                 intent(in   ) :: lsm
       integer,                                 intent(in   ) :: lsm_ruc
-      integer,                                 intent(in   ) :: isot
-      integer,                                 intent(in   ) :: ivegsrc, nlunit
       integer,                                 intent(in   ) :: im, nlev
       integer,                                 intent(in   ) :: lsoil_ruc
       integer,                                 intent(in   ) :: lsoil
       logical,                                 intent(in   ) :: frac_grid
       logical,               dimension(im),    intent(in   ) :: land, icy
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tskin_lnd, tskin_wat, tice
+      real (kind=kind_phys), dimension(im),    intent(in   ) :: slmsk
+      real (kind=kind_phys), dimension(im),    intent(in   ) :: tskin_lnd, tskin_wat
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcref2
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcwlt2
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
@@ -1165,7 +1235,6 @@ module lsm_ruc
       integer , dimension( 1:im , 1:1 )      :: ivgtyp
       integer , dimension( 1:im , 1:1)       :: isltyp
       real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: mavail
-      real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: xice
       real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: sst
       real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: landmask
       real (kind=kind_phys),    dimension( 1:im , 1:1 )       :: tsk
@@ -1274,15 +1343,15 @@ module lsm_ruc
 
       endif
 
-      !if(debug_print) then
+      if(debug_print) then
          write (0,*)'smc(ipr,:) ==', ipr, smc(ipr,:)
          write (0,*)'stc(ipr,:) ==', ipr, stc(ipr,:)
-         !write (0,*)'vegtype(ipr) ==', ipr, vegtype(ipr)
-         !write (0,*)'soiltyp(ipr) ==', ipr, soiltyp(ipr)
          write (0,*)'tskin_lnd(:)=',tskin_lnd(:)
          write (0,*)'tskin_wat(:)=',tskin_wat(:)
+         write (0,*)'vegtype(ipr) ==', ipr, vegtype(ipr)
+         write (0,*)'soiltyp(ipr) ==', ipr, soiltyp(ipr)
          write (0,*)'its,ite,jts,jte ',its,ite,jts,jte 
-      !endif
+      endif
 
 
         do j=jts,jte !
@@ -1290,16 +1359,15 @@ module lsm_ruc
 
             sst(i,j) = tskin_wat(i)
             tbot(i,j)= tg3(i)
-         ! land only version
-          if (land(i)) then
-            tsk(i,j) = tskin_lnd(i)
             ivgtyp(i,j)=vegtype(i)
             isltyp(i,j)=soiltyp(i)
-            !ivgtyp(i,j )= 12
-            !isltyp(i,j) = 3
+          if (land(i) .or. icy(i)) then
+          !-- land or ice
+            tsk(i,j) = tskin_lnd(i)
             landmask(i,j)=1.
-            xice(i,j)=0.
          else
+         !-- water
+            tsk(i,j) = tskin_wat(i)
             landmask(i,j)=0.
          endif ! land(i)
 
@@ -1311,15 +1379,13 @@ module lsm_ruc
         do j=jts,jte !
         do i=its,ite ! i = horizontal loop
 
-         if (land(i)) then
-
           st_input(i,1,j)=tsk(i,j)
           sm_input(i,1,j)=0.
 
           do k=1,lsoil
              st_input(i,k+1,j)=stc(i,k)
              ! convert volumetric soil moisture to SWI (soil wetness index)
-             if(swi_init) then
+             if(land(i) .and. swi_init) then
              !--- initialize smcwlt2 and smcref2 with Noah values
                smcref2 (i) = REFSMCnoah(soiltyp(i))
                smcwlt2 (i) = WLTSMCnoah(soiltyp(i))
@@ -1333,8 +1399,6 @@ module lsm_ruc
              st_input(i,k,j)=0.
              sm_input(i,k,j)=0.
           enddo
-
-         endif ! land(i)
 
         enddo ! i - horizontal loop
         enddo ! jme
@@ -1360,17 +1424,21 @@ module lsm_ruc
         do j=jts,jte
         do i=its,ite
          if (land(i)) then
-          do k=1,lsoil_ruc
+           do k=1,lsoil_ruc
            ! convert from SWI to RUC volumetric soil moisture
-           if(swi_init) then
+             if(swi_init) then
                soilm(i,k,j)= dumsm(i,k,j) *                             &
                  (refsmc(isltyp(i,j))-drysmc(isltyp(i,j)))              &
                  + drysmc(isltyp(i,j))
-           else
-             soilm(i,k,j)= dumsm(i,k,j)
-           endif
+             else
+               soilm(i,k,j)= dumsm(i,k,j)
+             endif
              soiltemp(i,k,j) = dumt(i,k,j)
-          enddo
+           enddo ! k
+         elseif (icy(i)) then
+           do k=1,lsoil_ruc
+             soiltemp(i,k,j) = dumt(i,k,j)
+           enddo ! k
          endif ! land(i)
         enddo
         enddo
@@ -1469,33 +1537,38 @@ module lsm_ruc
       ! Initialize liquid and frozen soil moisture from total soil moisture
       ! and soil temperature, and also soil moisture availability in the top
       ! layer
-      !call ruclsminit( debug_print, frac_grid, land, icy,             &
-      !           lsoil_ruc, isltyp, ivgtyp, mavail,                   &
-      !           soilh2o, smfr, soiltemp, soilm,                      &
-      !           ims,ime, jms,jme, kms,kme,                           &
-      !           its,ite, jts,jte, kts,kte                            )
+
+      call ruclsminit( debug_print, frac_grid, land, icy,             &
+                 lsoil_ruc, isltyp, ivgtyp, mavail,                   &
+                 soilh2o, smfr, soiltemp, soilm,                      &
+                 ims,ime, jms,jme, kms,kme,                           &
+                 its,ite, jts,jte, kts,kte                            )
 
       do j=jts,jte
       do i=its,ite
         if (land(i)) then
-          wetness(i) = soilm(i,1,j)/0.5
-          !wetness(i) = mavail(i,j)
+          wetness(i) = mavail(i,j)
           do k = 1, lsoil_ruc
             smois(i,k) = soilm(i,k,j)
             tslb(i,k)  = soiltemp(i,k,j)
-            sh2o(i,k)  = soilm(i,k,j)
-            smfrkeep(i,k)  = soilm(i,k,j)
-            !sh2o(i,k)  = soilh2o(i,k,j)
-            !smfrkeep(i,k)  = smfr(i,k,j)
+            sh2o(i,k)  = soilh2o(i,k,j)
+            smfrkeep(i,k)  = smfr(i,k,j)
           enddo 
+        elseif (icy(i)) then
+          wetness (i) = 1.
+          do k = 1, lsoil_ruc
+            smois(i,k) = 1.
+            tslb(i,k)  = soiltemp(i,k,j)
+            sh2o(i,k)  = 0.
+            smfrkeep(i,k)  = 1.
+          enddo
         endif ! land(i)
       enddo
       enddo
 
-      ! For non-land points, set RUC LSM fields to input (Noah or RUC) fields
        if (.not. frac_grid) then
         do i=1,im
-          if (.not.land(i)) then
+          if (.not.land(i) .and. .not.icy(i)) then
             wetness (i) = 1.
             do k=1,min(lsoil,lsoil_ruc)
               smois(i,k) = smc(i,k)
