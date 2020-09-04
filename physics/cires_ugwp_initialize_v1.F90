@@ -10,7 +10,7 @@
 ! 
 !
     
-    module ugwp_common
+    module ugwp_common_v1
 !
 !     use machine,  only : kind_phys
 !     use physcons, only : pi => con_pi, grav => con_g, rd => con_rd,   &
@@ -46,7 +46,7 @@
       real, parameter :: mkzmin = pi2/80.0e3, mkz2min = mkzmin*mkzmin
       real, parameter :: mkzmax = pi2/500.,  mkz2max = mkzmax*mkzmax 
       real, parameter :: cdmin  = 2.e-2/mkzmax   
-     end module ugwp_common
+     end module ugwp_common_v1
 !
 !
 !===================================================
@@ -56,7 +56,7 @@
 !===================================================
      subroutine init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, pa_rf, tau_rf, me, master)
 
-     use ugwp_common, only : pih 
+     use ugwp_common_v1, only : pih 
       
 
      implicit none
@@ -178,13 +178,13 @@
 !      wave  sources
 ! ========================================================================
 !
-!    ugwp_oro_init
+!    ugwp_oro_init_v1
 !
 !=========================================================================
-     module ugwp_oro_init
+     module ugwp_oro_init_v1
 
-     use ugwp_common, only : bnv2min, grav, grcp, fv, grav, cpd, grcp, pi
-     use ugwp_common, only : mkzmin, mkz2min
+     use ugwp_common_v1, only : bnv2min, grav, grcp, fv, grav, cpd, grcp, pi
+     use ugwp_common_v1, only : mkzmin, mkz2min
      implicit none
 !  
 ! constants and "crirtical" values to run oro-mtb_gw physics
@@ -281,7 +281,7 @@
       real, parameter :: lonr_refmb =  4.0 * 192.0
       real, parameter :: lonr_refgw =  192.0
 
-! copy  to "ugwp_oro_init"  =>  nwaves, nazdir, nstoch
+! copy  to "ugwp_oro_init_v1"  =>  nwaves, nazdir, nstoch
  
       nworo  =  nwaves
       nazoro =  nazdir
@@ -306,13 +306,13 @@
       end subroutine init_oro_gws
 !
 
-    end module ugwp_oro_init
+    end module ugwp_oro_init_v1
 ! =========================================================================
 !
-!    ugwp_conv_init
+!    ugwp_conv_init_v1
 !
 !=========================================================================
-    module ugwp_conv_init
+    module ugwp_conv_init_v1
 
      implicit none
       real    ::  eff_con                   ! scale factors for conv GWs
@@ -336,7 +336,7 @@
 !
      subroutine init_conv_gws(nwaves, nazdir, nstoch, effac, &
                               lonr, kxw, cgwf)
-     use ugwp_common,  only : pi2, arad
+     use ugwp_common_v1,  only : pi2, arad
      implicit none
  
       integer :: nwaves, nazdir, nstoch
@@ -382,14 +382,14 @@
      end subroutine init_conv_gws
 
 
-    end module ugwp_conv_init
+    end module ugwp_conv_init_v1
 !=========================================================================
 !
-!    ugwp_fjet_init
+!    ugwp_fjet_init_v1
 !
 !=========================================================================
 
-   module ugwp_fjet_init
+   module ugwp_fjet_init_v1
       implicit none
       real    ::  eff_fj                     ! scale factors for conv GWs
       integer ::  nwfj                       ! number of waves
@@ -406,7 +406,7 @@
       real, allocatable  :: xaz_fjet(:), yaz_fjet(:)
      contains
      subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
-     use ugwp_common,  only : pi2, arad
+     use ugwp_common_v1,  only : pi2, arad
      implicit none
 
       integer :: nwaves, nazdir, nstoch
@@ -435,12 +435,12 @@
 
      end subroutine init_fjet_gws
 
-    end module ugwp_fjet_init
+    end module ugwp_fjet_init_v1
 !
 !=========================================================================
 !
 !
-     module ugwp_okw_init
+     module ugwp_okw_init_v1
 !=========================================================================
      implicit none
 
@@ -461,7 +461,7 @@
 !
      subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
 
-     use ugwp_common,  only : pi2, arad
+     use ugwp_common_v1,  only : pi2, arad
      implicit none
 
       integer :: nwaves, nazdir, nstoch
@@ -490,7 +490,7 @@
 
      end subroutine init_okw_gws
  
-     end module ugwp_okw_init
+     end module ugwp_okw_init_v1
 
 !=============================== end of GW  sources
 !
@@ -501,7 +501,7 @@
 !  Part -3  init  wave solvers
 !===============================
 
-  module ugwp_lsatdis_init
+  module ugwp_lsatdis_init_v1
      implicit none
 
       integer  :: nwav, nazd
@@ -543,14 +543,14 @@
 !
      end subroutine initsolv_lsatdis
 !
-  end module ugwp_lsatdis_init
+  end module ugwp_lsatdis_init_v1
 !
 !
-  module ugwp_wmsdis_init
+  module ugwp_wmsdis_init_v1
 
-     use ugwp_common, only : arad, pi, pi2, hpscale, rhp, rhp2, rh4, omega2 
-     use ugwp_common, only : bnv2max,  bnv2min, minvel 
-     use ugwp_common, only : mkzmin,  mkz2min, mkzmax, mkz2max, cdmin
+     use ugwp_common_v1, only : arad, pi, pi2, hpscale, rhp, rhp2, rh4, omega2 
+     use ugwp_common_v1, only : bnv2max,  bnv2min, minvel 
+     use ugwp_common_v1, only : mkzmin,  mkz2min, mkzmax, mkz2max, cdmin
     implicit none
 
       real,     parameter   :: maxdudt = 250.e-5, maxdtdt=15.e-2
@@ -782,7 +782,7 @@
 ! make a list of  all-initilized parameters needed for "gw_solver_wmsdis"
 !
 
-  end module ugwp_wmsdis_init
+  end module ugwp_wmsdis_init_v1
 !=========================================================================
 !
 ! work TODO for 2-extra WAM-solvers:

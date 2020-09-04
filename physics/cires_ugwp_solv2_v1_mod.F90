@@ -26,18 +26,18 @@ contains
  
       use machine,          only : kind_phys  
 
-      use cires_ugwp_module,only :  krad, kvg, kion, ktg 
+      use cires_ugwp_module_v1,only :  krad, kvg, kion, ktg 
       
-      use cires_ugwp_module,only :  knob_ugwp_doheat, knob_ugwp_dokdis, idebug_gwrms
+      use cires_ugwp_module_v1,only :  knob_ugwp_doheat, knob_ugwp_dokdis, idebug_gwrms
       
-      use ugwp_common ,     only : rgrav,  grav,  cpd,    rd,  rv, rcpdl, grav2cpd,    &
+      use ugwp_common_v1 ,     only : rgrav,  grav,  cpd,    rd,  rv, rcpdl, grav2cpd,    &
                                    omega2,  rcpd,   rcpd2,  pi,    pi2, fv,            &
                                    rad_to_deg, deg_to_rad,                             &
                                    rdi,        gor,    grcp,   gocp,                   &
                                    bnv2min,  bnv2max,  dw2min, velmin, gr2,            &
                                    hpscale, rhp, rh4, grav2, rgrav2, mkzmin, mkz2min
 !
-      use ugwp_wmsdis_init, only : v_kxw,  rv_kxw,   v_kxw2, tamp_mpa, tau_min, ucrit, &    
+      use ugwp_wmsdis_init_v1, only : v_kxw,  rv_kxw,   v_kxw2, tamp_mpa, tau_min, ucrit, &    
                                    maxdudt, gw_eff,  dked_min,  dked_max, maxdtdt,     &
                                    nslope,  ilaunch, zms,                              &
                                    zci,     zdci,    zci4, zci3, zci2,                 &

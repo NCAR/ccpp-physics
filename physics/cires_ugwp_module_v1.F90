@@ -9,7 +9,7 @@ module  cires_ugwp_module_v1
 !...................................................................................
 !
 !
-    use ugwp_common, only : arad, pi, pi2, hpscale, rhp, rhp2, rh4 
+    use ugwp_common_v1, only : arad, pi, pi2, hpscale, rhp, rhp2, rh4 
     implicit none
     logical            :: module_is_initialized
 !logical               :: do_ugwp   = .false.              ! control => true - ugwp false old gws + rayeleigh friction
@@ -176,18 +176,18 @@ module  cires_ugwp_module_v1
 !
 !  input_nml_file ='input.nml'=fn_nml   ..... OLD_namelist and cdmvgwd(4) Corrected Bug Oct 4
 !
-    ! use  netcdf
-    use  ugwp_oro_init,     only :  init_oro_gws
-    use  ugwp_conv_init,    only :  init_conv_gws
-    use  ugwp_fjet_init,    only :  init_fjet_gws
-    use  ugwp_okw_init,     only :  init_okw_gws
-    use  ugwp_wmsdis_init,  only :  initsolv_wmsdis
+    use  netcdf
+    use  ugwp_oro_init_v1,     only :  init_oro_gws
+    use  ugwp_conv_init_v1,    only :  init_conv_gws
+    use  ugwp_fjet_init_v1,    only :  init_fjet_gws
+    use  ugwp_okw_init_v1,     only :  init_okw_gws
+    use  ugwp_wmsdis_init_v1,  only :  initsolv_wmsdis
     
-    use  ugwp_lsatdis_init, only :  initsolv_lsatdis
+    use  ugwp_lsatdis_init_v1, only :  initsolv_lsatdis
        
     
-    use  ugwp_wmsdis_init,  only : ilaunch, nslope, lhmet, lzmax, lzmin, lzstar   
-    use  ugwp_wmsdis_init,  only : tau_min, tamp_mpa    
+    use  ugwp_wmsdis_init_v1,  only : ilaunch, nslope, lhmet, lzmax, lzmin, lzstar   
+    use  ugwp_wmsdis_init_v1,  only : tau_min, tamp_mpa    
     implicit none
 
     integer, intent (in) :: me
@@ -322,7 +322,7 @@ module  cires_ugwp_module_v1
 
     IF (do_physb_gwsrcs) THEN
 
-      if (me == master) print *, ' do_physb_gwsrcs ',  do_physb_gwsrcs, ' in cires_ugwp_init '
+      if (me == master) print *, ' do_physb_gwsrcs ',  do_physb_gwsrcs, ' in cires_ugwp_init_v1 '
       if (knob_ugwp_wvspec(4) > 0) then
 ! okw
         call init_okw_gws(knob_ugwp_wvspec(4), knob_ugwp_azdir(4), &

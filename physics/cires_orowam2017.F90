@@ -4,13 +4,13 @@ module cires_orowam2017
 contains
 
 
-      subroutine oro_wam_2017(im, levs,npt,ipt, kref,kdt,me,master,
-     &   dtp,dxres, taub, u1, v1, t1, xn, yn, bn2, rho, prsi, prsL, 
-     &   del, sigma, hprime, gamma, theta,
+      subroutine oro_wam_2017(im, levs,npt,ipt, kref,kdt,me,master, &
+     &   dtp,dxres, taub, u1, v1, t1, xn, yn, bn2, rho, prsi, prsL, &
+     &   del, sigma, hprime, gamma, theta,  &
      &   sinlat, xlatd, taup, taud, pkdis)
 ! 
       USE MACHINE ,      ONLY : kind_phys
-      use ugwp_common ,  only : grav,  omega2
+      use ugwp_common_v1 ,  only : grav,  omega2
 !      
       implicit none
 
@@ -22,12 +22,12 @@ contains
       real(kind=kind_phys), intent(in) :: taub(im)
 
       real(kind=kind_phys), intent(in) :: sinlat(im), xlatd(im)
-      real(kind=kind_phys), intent(in), dimension(im) :: sigma,
+      real(kind=kind_phys), intent(in), dimension(im) :: sigma,  &
      &                      hprime, gamma, theta
 
       real(kind=kind_phys), intent(in), dimension(im) :: xn, yn
 
-      real(kind=kind_phys), intent(in), dimension(im, levs) ::
+      real(kind=kind_phys), intent(in), dimension(im, levs) ::   &
      &   u1, v1, t1,  bn2,  rho,   prsl, del
  
       real(kind=kind_phys), intent(in), dimension(im, levs+1) :: prsi
@@ -102,8 +102,8 @@ contains
 
       if (kdt == 1) then
 771     format( 'vay-oro19 ', 3(2x,F8.3))
-        write(6,771)
-     &    maxval(tau_kx)*maxval(taub)*1.e3,
+        write(6,771)                         &
+     &    maxval(tau_kx)*maxval(taub)*1.e3,  &
      &    minval(tau_kx), maxval(tau_kx)
       endif
 !
@@ -127,9 +127,9 @@ contains
            taub_kx(1:nw) = tau_kx(1:nw) * taub(i)
            wkdis(:,:)    = kedmin
 
-           call oro_meanflow(levs, nzi, u1(j,:), v1(j,:), t1(j,:),
-     &                       prsi(j,:), prsL(j,:), del(j,:), rho(i,:),
-     &                       bn2(i,:), uzi, rhoi,ktur, kalp,dzi,
+           call oro_meanflow(levs, nzi, u1(j,:), v1(j,:), t1(j,:),      &
+     &                       prsi(j,:), prsL(j,:), del(j,:), rho(i,:),  &
+     &                       bn2(i,:), uzi, rhoi,ktur, kalp,dzi,        &
      &                       xn(i), yn(i))
 
            fcor2 = (omega2*sinlat(j))*(omega2*sinlat(j))*fc_flag
@@ -242,7 +242,7 @@ contains
                   wrms(iw,k) =  etwk
                   tauk = etwk*kxw/kzw
                   tau_sp(iw,k) = tauk *rhoint
-                  if ( tau_sp(iw,k) > tau_sp(iw,k-1))
+                  if ( tau_sp(iw,k) > tau_sp(iw,k-1))        &
      &                                tau_sp(iw,k) = tau_sp(iw,k-1)
 
                ENDIF  ! upward
@@ -281,10 +281,10 @@ contains
 ! define mean flow  and dissipation for OGW-kx spectrum
 !
 !-------------------------------------------------------------      
-      subroutine oro_meanflow(nz, nzi, u1, v1, t1, pint, pmid,
+      subroutine oro_meanflow(nz, nzi, u1, v1, t1, pint, pmid,       &
      &           delp, rho, bn2, uzi, rhoi, ktur, kalp, dzi, xn, yn)
 
-      use ugwp_common ,  only : grav, rgrav, rdi,  velmin, dw2min
+      use ugwp_common_v1 ,  only : grav, rgrav, rdi,  velmin, dw2min
       implicit none
 
       integer :: nz, nzi

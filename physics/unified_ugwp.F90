@@ -122,6 +122,7 @@ contains
          call cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
                                 fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
+       end if
     else
       write(errmsg,'(*(a))') "Logic error: cires_ugwp_init called but do_ugwp is false and cdmbgwd(3) <= 0"
       errflg = 1
@@ -192,6 +193,9 @@ contains
 !! @{
      subroutine unified_ugwp_run(me,  master, im,  levs, ntrac, dtp, fhzero, kdt,      &
          lonr, oro, oro_uf, hprime, nmtvr, oc, theta, sigma, gamma, elvmax, clx, oa4,  &
+         varss,oc1ss,oa4ss,ol4ss,dx,dusfc_ls,dvsfc_ls,dusfc_bl,dvsfc_bl,dusfc_ss,      &
+         dvsfc_ss,dusfc_fd,dvsfc_fd,dtaux2d_ls,dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,       &
+         dtaux2d_ss,dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,br1,hpbl,slmsk,                   &
          do_tofd, ldiag_ugwp, cdmbgwd, jdat, xlat, xlat_d, sinlat, coslat, area,       &
          ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,                          &
          del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
@@ -202,7 +206,7 @@ contains
          ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
          ldiag3d, lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,  &
          do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, do_ugwp_v1,              &
-         do_ugwp_v1_orog_only, errmsg, errflg)
+         do_ugwp_v1_orog_only, gwd_opt, errmsg, errflg)
 
     implicit none
 
@@ -331,8 +335,8 @@ contains
                  kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
                  ol4ss,theta,sigma,gamma,elvmax,dtaux2d_ls,          &
                  dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss,        &
-                 dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dusfc,             &
-                 dvsfc,dusfc_ls,dvsfc_ls,dusfc_bl,dvsfc_bl,          &
+                 dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,dusfcg,            &
+                 dvsfcg,dusfc_ls,dvsfc_ls,dusfc_bl,dvsfc_bl,         &
                  dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                &
                  slmsk,br1,hpbl,con_g,con_cp,con_rd,con_rv,          &
                  con_fvirt,con_pi,lonr,                              &
@@ -363,7 +367,7 @@ contains
                       prslk, zmeti, zmet, dtp, kdt, hprime, oc, oa4,   &
                       clx, theta, sigma, gamma, elvmax,                &
                       sgh30,   DUSFCg, DVSFCg, xlat_d, sinlat, coslat, &
-                      spgrid,cdmbgwd(1:2), me, master, rdxzb,          &
+                      area,cdmbgwd(1:2), me, master, rdxzb,            &
                       zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,          &
                       du3dt_mtb, du3dt_ogw, du3dt_tms)
 

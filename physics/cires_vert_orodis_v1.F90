@@ -1,3 +1,9 @@
+module cires_vert_orodis_v1
+
+
+contains
+
+
 ! subroutine ugwp_drag_mtb
 ! subroutine ugwp_taub_oro  
 ! subroutine ugwp_oro_lsatdis  
@@ -6,8 +12,8 @@
         elvpd, elvp, hprime , sigma, theta, oc,  oa4, clx4, gam, zpbl,  &
         up, vp, tp, qp, dp, zpm, zpi, pmid, pint, idxzb, drmtb,taumtb)
 
-      use ugwp_common,  only : bnv2min, grav, grcp, fv, rad_to_deg, dw2min, velmin, rdi
-      use ugwp_oro_init,only : nridge, cdmb, fcrit_mtb, frmax, frmin, strver
+      use ugwp_common_v1,  only  : bnv2min, grav, grcp, fv, rad_to_deg, dw2min, velmin, rdi
+      use ugwp_oro_init_v1, only : nridge, cdmb, fcrit_mtb, frmax, frmin, strver
       
       implicit none   
 !========================
@@ -16,8 +22,6 @@
 ! version 2 => kdn_2005 ; Kim & Doyle in NRL-2005
 ! version 3 => ncep/gfs-2017 -gfs_2017 with lm1997
 !======================== 
-      
-!     character(len=8)  ::  strver = 'vay_2018'
 !     real, parameter   ::  Fcrit_mtb  = 0.7   
       
       integer, intent(in)              ::  nz     
@@ -271,16 +275,17 @@
           elvp, up, vp, tp, qp, dp, zpm, zpi, pmid, pint, xn, yn, umag,        &
           tautot, tauogw,  taulee, drlee, tau_src, kxridge, kdswj, krefj, kotr)
 !	  
-      use ugwp_common,       only : bnv2min, grav, pi, pi2, dw2min, velmin
-      use cires_ugwp_module, only : frcrit, ricrit, linsat
-      use ugwp_oro_init,     only :  hpmax, cleff, frmax
-      use ugwp_oro_init,     only :  nwdir, mdir, fdir    
-      use ugwp_oro_init,     only :  efmin, efmax , gmax, cg, ceofrc  
-      use ugwp_oro_init,     only :  fcrit_sm, fcrit_gfs, frmin, frmax
-      use ugwp_oro_init,     only :  coro, nridge, odmin, odmax
-      use ugwp_oro_init,     only :  strver
+      use ugwp_common_v1,       only : bnv2min, grav, pi, pi2, dw2min, velmin
+      use ugwp_common_v1,       only : mkz2min, mkzmin     
+      use cires_ugwp_module_v1, only : frcrit, ricrit, linsat
+      use ugwp_oro_init_v1,     only :  hpmax, cleff, frmax
+      use ugwp_oro_init_v1,     only :  nwdir, mdir, fdir    
+      use ugwp_oro_init_v1,     only :  efmin, efmax , gmax, cg, ceofrc  
+      use ugwp_oro_init_v1,     only :  fcrit_sm, fcrit_gfs, frmin, frmax
+      use ugwp_oro_init_v1,     only :  coro, nridge, odmin, odmax
+      use ugwp_oro_init_v1,     only :  strver
 ! 
-      use ugwp_oro_init,     only : mkz2min, lzmax, zbr_pi
+      use ugwp_oro_init_v1,     only : zbr_pi
 ! ---
 ! 
 ! define oro-GW fluxes: taulin,  taufrb amd if kdswj > 0 (LWB-lee wave breaking)
@@ -769,10 +774,10 @@
            kxw, fcor,  kxridge, up, vp, tp, qp, dp, zpm, zpi, pmid, pint,       &
            xn, yn, umag, drtau, kdis)
 
-      use ugwp_common,       only : bnv2min, grav, pi, pi2, dw2min, velmin, rgrav
-      use cires_ugwp_module, only : frcrit, ricrit, linsat, hps, rhp1, rhp2
-      use cires_ugwp_module, only : kvg, ktg, krad, kion
-      use ugwp_oro_init,     only : coro , fcrit_sm , fcrit_sm2
+      use ugwp_common_v1,       only : bnv2min, grav, pi, pi2, dw2min, velmin, rgrav
+      use cires_ugwp_module_v1, only : frcrit, ricrit, linsat, hps, rhp1, rhp2
+      use cires_ugwp_module_v1, only : kvg, ktg, krad, kion
+      use ugwp_oro_init_v1,     only : coro , fcrit_sm , fcrit_sm2
       implicit none 
 !      	   
       integer, intent(in)        ::   krefj,   levs
@@ -929,8 +934,8 @@
      subroutine ugwp_tofd(im, levs, sigflt, elvmax, zpbl,  u, v, zmid, &
                           utofd, vtofd, epstofd, krf_tofd)
        use machine ,      only : kind_phys 
-       use ugwp_common  , only :  rcpd2         
-       use ugwp_oro_init, only : n_tofd, const_tofd, ze_tofd, a12_tofd, ztop_tofd
+       use ugwp_common_v1  , only :  rcpd2         
+       use ugwp_oro_init_v1, only : n_tofd, const_tofd, ze_tofd, a12_tofd, ztop_tofd
 !       
      implicit none
 !     
@@ -977,8 +982,8 @@
      subroutine ugwp_tofd1d(levs, sigflt, elvmax, zsurf, zpbl,  u, v, &
                             zmid, utofd, vtofd, epstofd, krf_tofd)
        use machine ,      only : kind_phys 
-       use ugwp_common  , only :  rcpd2         
-       use ugwp_oro_init, only : n_tofd, const_tofd, ze_tofd, a12_tofd, ztop_tofd
+       use ugwp_common_v1  , only :  rcpd2         
+       use ugwp_oro_init_v1, only : n_tofd, const_tofd, ze_tofd, a12_tofd, ztop_tofd
 !       
      implicit none
       integer ::  levs
@@ -1016,3 +1021,6 @@
      enddo
 !                
      end subroutine ugwp_tofd1d    
+
+
+end module cires_vert_orodis_v1

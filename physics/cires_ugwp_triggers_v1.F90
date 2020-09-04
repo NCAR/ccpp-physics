@@ -11,7 +11,7 @@ contains
 !	
      SUBROUTINE  subs_diag_geo(nx, ny,  lat, lon, rlat, rlon, dy, dx,  &
                                cosv, rlatc, brcos, brcos2, dlam1, dlam2, dlat, divJp, divJm)
-      use ugwp_common , only : deg_to_rad
+      use ugwp_common_v1 , only : deg_to_rad
       
       implicit none
        integer :: nx, ny
@@ -545,7 +545,7 @@ contains
 !      
       end subroutine slat_geos5
       subroutine init_nazdir(naz,  xaz,  yaz)
-      use ugwp_common , only : pi2
+      use ugwp_common_v1 , only : pi2
       implicit none
       integer :: naz
       real, dimension(naz) :: xaz,  yaz

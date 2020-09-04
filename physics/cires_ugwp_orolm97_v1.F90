@@ -8,7 +8,7 @@ contains
      subroutine gwdps_oro_v1(im,  km,    imx, do_tofd,           &
          pdvdt, pdudt, pdtdt, pkdis, u1,v1,t1,q1,kpbl,           &  
          prsi,del,prsl,prslk, zmeti, zmet, dtp, kdt, hprime,     &
-         oc, oa4, clx4, theta, sigma, gamma, elvmaxd,  sgh30,    &
+         oc, oa4, clx4, theta, sigmad, gammad, elvmaxd,  sgh30,  &
          dusfc, dvsfc,  xlatd, sinlat, coslat, sparea,           &
          cdmbgwd, me, master, rdxzb,                             &
          zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,                 &
@@ -23,12 +23,12 @@ contains
 !----------------------------------------    
 
       use machine ,      only : kind_phys
-      use ugwp_common ,  only : rgrav,   grav,  cpd, rd, rv, rcpd, rcpd2, &
+      use ugwp_common_v1,  only : rgrav,   grav,  cpd, rd, rv, rcpd, rcpd2, &
                                 pi,      rad_to_deg, deg_to_rad, pi2,     &
                                 rdi,     gor,    grcp, gocp,  fv, gr2,    &
                                 bnv2min, dw2min, velmin, arad
  
-      use ugwp_oro_init, only : rimin,  ric,     efmin,     efmax   ,  &
+      use ugwp_oro_init_v1, only : rimin,  ric,     efmin,     efmax   ,  &
                                 hpmax,  hpmin,   sigfaci => sigfac  ,  &
                                 dpmin,  minwnd,  hminmt,    hncrit  ,  &
                                 rlolev, gmax,    veleps,    factop  ,  &
@@ -37,11 +37,11 @@ contains
                                 cdmb,   cleff,   fcrit_gfs, fcrit_mtb, &
                                 n_tofd, ze_tofd, ztop_tofd
 
-      use cires_ugwp_module, only : kxw,  max_kdis, max_axyz
+      use cires_ugwp_module_v1, only : kxw,  max_kdis, max_axyz
 
       use cires_orowam2017, only : oro_wam_2017
 
-      use cires_vert_orodis, only : ugwp_tofd1d
+      use cires_vert_orodis_v1, only : ugwp_tofd1d
       
       
 !      use sso_coorde,        only : pgwd, pgwd4
@@ -67,8 +67,8 @@ contains
       real(kind=kind_phys), intent(in) :: cdmbgwd(2)
       
       real(kind=kind_phys), intent(in) :: hprime(im), oc(im), oa4(im,4),   &
-                                  clx4(im,4), theta(im), sigma(im),        &
-                                  gamma(im), elvmaxd(im)
+                                  clx4(im,4), theta(im), sigmad(im),        &
+                                  gammad(im), elvmaxd(im)
 
       real(kind=kind_phys), intent(in) :: sgh30(im)       
       real(kind=kind_phys), intent(in), dimension(im,km) ::   &
@@ -118,7 +118,8 @@ contains
       real(kind=kind_phys), dimension(im,km) :: ri_n, bnv2, ro
       real(kind=kind_phys), dimension(im,km) :: vtk, vtj, velco
 !mtb     
-      real(kind=kind_phys), dimension(im)    :: oa,  clx , elvmax, wk
+      real(kind=kind_phys), dimension(im)    :: oa,  clx , sigma, gamma,  &
+                                                elvmax, wk
       real(kind=kind_phys), dimension(im)    :: pe, ek, up
       
       real(kind=kind_phys), dimension(im,km) :: db, ang, uds
@@ -174,6 +175,10 @@ contains
       integer ::   k_mtb, k_zlow, ktrial, klevm1
       integer ::   i, j, k
 ! 
+! initialize gamma and sigma
+      gamma(:) = gammad(:)
+      sigma(:) = sigmad(:)
+!
       rcpdt = 1.0 / (cpd*dtp)
       grav2 = grav + grav
 !       
