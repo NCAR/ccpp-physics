@@ -209,7 +209,7 @@ module lsm_ruc
         enddo ! i
 
       endif ! flag_restart
-!-- end of initialization
+      !-- end of initialization
 
       if ( debug_print) then
         write (0,*) 'ruc soil tslb',tslb(:,1)
@@ -857,8 +857,8 @@ module lsm_ruc
         z0(i,j)  = zorl(i)/100.
         znt(i,j) = zorl(i)/100.
 
-        !if(debug_print) then
-          !if(i==ipr) then
+        if(debug_print) then
+          if(i==ipr) then
             write (0,*)'before RUC smsoil = ',smsoil(i,:,j), i,j
             write (0,*)'stsoil = ',stsoil(i,:,j), i,j
             write (0,*)'soilt = ',soilt(i,j), i,j
@@ -939,8 +939,8 @@ module lsm_ruc
             write (0,*)'shdmin1d(i,j) =',i,j,shdmin1d(i,j)
             write (0,*)'shdmax1d(i,j) =',i,j,shdmax1d(i,j)
             write (0,*)'rdlai2d =',rdlai2d
-          !endif
-        !endif
+          endif
+        endif
 
 !> - Call RUC LSM lsmruc(). 
       call lsmruc( delt, flag_init, flag_restart, kdt, iter, nsoil,          &
@@ -977,8 +977,8 @@ module lsm_ruc
      &          ims,ime, jms,jme, kms,kme,                                   &
      &          its,ite, jts,jte, kts,kte                                    )
 
-      !if(debug_print) then
-        !if(i==ipr) then
+      if(debug_print) then
+        if(i==ipr) then
           write (0,*)'after  RUC smsoil = ',smsoil(i,:,j), i, j
           write (0,*)'after sneqv(i,j) =',i,j,sneqv(i,j)
           write (0,*)'after snowh(i,j) =',i,j,snowh(i,j)
@@ -1013,8 +1013,8 @@ module lsm_ruc
           write (0,*)'after snfallac(i,j) =',i,j,snfallac(i,j)
           write (0,*)'after acsn(i,j) =',i,j,acsn(i,j)
           write (0,*)'after snomlt(i,j) =',i,j,snomlt(i,j)
-        !endif
-      !endif
+        endif
+      endif
 
 
 !> - RUC LSM: prepare variables for return to parent model and unit conversion.
@@ -1320,8 +1320,8 @@ module lsm_ruc
           flag_soil_levels = 1  ! =1 for input from RUC LSM
         else
           ! for Noah input set smadj and swi_init to .true.
-          smadj = .false.
-          swi_init = .false.
+          smadj = .true.
+          swi_init = .true.
           flag_soil_layers = 1  ! =1 for input from the Noah LSM
           flag_soil_levels = 0  ! =1 for input from RUC LSM
         endif
@@ -1358,18 +1358,18 @@ module lsm_ruc
         do i=its,ite ! i = horizontal loop
 
             sst(i,j) = tskin_wat(i)
-            tbot(i,j)= tg3(i)
-            ivgtyp(i,j)=vegtype(i)
-            isltyp(i,j)=soiltyp(i)
+            tbot(i,j) = tg3(i)
+            ivgtyp(i,j) = vegtype(i)
+            isltyp(i,j) = soiltyp(i)
           if (land(i) .or. icy(i)) then
           !-- land or ice
             tsk(i,j) = tskin_lnd(i)
             landmask(i,j)=1.
-         else
-         !-- water
+          else
+          !-- water
             tsk(i,j) = tskin_wat(i)
             landmask(i,j)=0.
-         endif ! land(i)
+          endif ! land(i)
 
         enddo
         enddo
@@ -1382,13 +1382,19 @@ module lsm_ruc
           st_input(i,1,j)=tsk(i,j)
           sm_input(i,1,j)=0.
 
+          !--- initialize smcwlt2 and smcref2 with Noah values
+          if(land(i)) then
+          smcref2 (i) = REFSMCnoah(soiltyp(i))
+          smcwlt2 (i) = WLTSMCnoah(soiltyp(i))
+          else
+          smcref2 (i) = 1.
+          smcwlt2 (i) = 0.
+          endif
+
           do k=1,lsoil
              st_input(i,k+1,j)=stc(i,k)
              ! convert volumetric soil moisture to SWI (soil wetness index)
              if(land(i) .and. swi_init) then
-             !--- initialize smcwlt2 and smcref2 with Noah values
-               smcref2 (i) = REFSMCnoah(soiltyp(i))
-               smcwlt2 (i) = WLTSMCnoah(soiltyp(i))
                sm_input(i,k+1,j)=min(1.,max(0.,(smc(i,k) - smcwlt2(i))/  &
                                  (smcref2(i) - smcwlt2(i))))
              else
@@ -1579,14 +1585,14 @@ module lsm_ruc
         enddo
        endif ! frac_grid
 
-      !if(debug_print) then
+      if(debug_print) then
         do i=1,im
         write (0,*)'End of RUC LSM initialization'
         write (0,*)'tslb(i)=',i,land(i),icy(i),tslb(i,:)
         write (0,*)'smois(i)=',i,land(i),icy(i),smois(i,:)
         write (0,*)'wetness(i)=',i,land(i),icy(i),wetness(i)
         enddo
-      !endif ! debug_print
+      endif ! debug_print
 
       end subroutine rucinit
 
