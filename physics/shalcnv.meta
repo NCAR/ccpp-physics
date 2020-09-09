@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = shalcnv
+  type = scheme
+  dependencies = funcphys.f90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = shalcnv_init
   type = scheme
@@ -50,11 +56,6 @@
   type = integer
   intent = out
   optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = shalcnv_finalize
-  type = scheme
 
 ########################################################################
 [ccpp-arg-table]

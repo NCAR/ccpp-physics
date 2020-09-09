@@ -261,7 +261,7 @@ contains
 
       if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
         call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
-                   ugrs, vgrs, tgrs, qgrs,                             &
+                   ugrs, vgrs, tgrs, qgrs(:,:,1),                      &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
                    hprime, oc, oa4, clx, theta, sigma, gamma,          &
                    elvmax, dusfcg, dvsfcg,                             &

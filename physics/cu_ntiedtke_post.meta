@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = cu_ntiedtke_post
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = cu_ntiedtke_post_run
   type = scheme

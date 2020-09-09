@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = moninshoc
+  type = scheme
+  dependencies = funcphys.f90,machine.F,tridi.f
+
+########################################################################
 [ccpp-arg-table]
   name = moninshoc_run
   type = scheme

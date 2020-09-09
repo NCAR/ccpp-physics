@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = shinhongvdif
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = shinhongvdif_run
   type = scheme
