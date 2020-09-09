@@ -302,10 +302,10 @@ module  cires_ugwp_module_v1
       launch_level = max(k-1, 5)    ! above 5-layers from the surface
     
 !
-! Part-1 :init_global_gwdis
+! Part-1 :init_global_gwdis_v1
 !
-    call init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, pa_rf, tau_rf,  me,  master)
-    call rf_damp_init     (levs, pa_rf, tau_rf, dtp, pmb, rfdis, rfdist, levs_rf)
+    call init_global_gwdis_v1(levs, zkm, pmb, kvg, ktg, krad, kion, pa_rf, tau_rf,  me,  master)
+    call rf_damp_init_v1  (levs, pa_rf, tau_rf, dtp, pmb, rfdis, rfdist, levs_rf)
 !
 ! Part-2 :init_SOURCES_gws
 !

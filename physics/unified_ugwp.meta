@@ -51,6 +51,12 @@
   kind = len=*
   intent = in
   optional = F
+[jdat]
+  standard_name = forecast_date_and_time
+  long_name = current forecast date and time
+  units = none
+  dimensions = (8)
+  type = integer
 [lonr]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of global points in x-dir (i) along the equator
@@ -111,12 +117,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[jdat]
-  standard_name = forecast_date_and_time
-  long_name = current forecast date and time
-  units = none
-  dimensions = (8)
-  type = integer
 [cgwf]
   standard_name = multiplication_factors_for_convective_gravity_wave_drag
   long_name = multiplication factor for convective GWD
@@ -261,14 +261,6 @@
 [ccpp-arg-table]
   name = unified_ugwp_run
   type = scheme
-[do_ugwp]
-  standard_name = do_ugwp
-  long_name = flag to activate CIRES UGWP
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [me]
   standard_name = mpi_rank
   long_name = MPI rank of current process
@@ -421,6 +413,141 @@
   kind = kind_phys
   intent = inout
   optional = F
+[clx]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
+  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
+  units = frac
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oa4]
+  standard_name = asymmetry_of_subgrid_orography
+  long_name = asymmetry of subgrid orography
+  units = none
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[varss]
+  standard_name = standard_deviation_of_subgrid_orography_small_scale
+  long_name = standard deviation of subgrid orography small scale
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oc1ss]
+  standard_name = convexity_of_subgrid_orography_small_scale
+  long_name = convexity of subgrid orography small scale
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oa4ss]
+  standard_name = asymmetry_of_subgrid_orography_small_scale
+  long_name = asymmetry of subgrid orography small scale
+  units = none
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ol4ss]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
+  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height small scale
+  units = frac
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dx]
+  standard_name = cell_size
+  long_name = size of the grid cell
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dusfc_ls]
+  standard_name = integrated_x_momentum_flux_from_large_scale_gwd
+  long_name = integrated x momentum flux from large scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_ls]
+  standard_name = integrated_y_momentum_flux_from_large_scale_gwd
+  long_name = integrated y momentum flux from large scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfc_bl]
+  standard_name = integrated_x_momentum_flux_from_blocking_drag
+  long_name = integrated x momentum flux from blocking drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_bl]
+  standard_name = integrated_y_momentum_flux_from_blocking_drag
+  long_name = integrated y momentum flux from blocking drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfc_ss]
+  standard_name = integrated_x_momentum_flux_from_small_scale_gwd
+  long_name = integrated x momentum flux from small scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_ss]
+  standard_name = integrated_y_momentum_flux_from_small_scale_gwd
+  long_name = integrated y momentum flux from small scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfc_fd]
+  standard_name = integrated_x_momentum_flux_from_form_drag
+  long_name = integrated x momentum flux from form drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_fd]
+  standard_name = integrated_y_momentum_flux_from_form_drag
+  long_name = integrated y momentum flux from form drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [dtaux2d_ls]
   standard_name = x_momentum_tendency_from_large_scale_gwd
   long_name = x momentum tendency from large scale gwd
@@ -493,56 +620,29 @@
   kind = kind_phys
   intent = out
   optional = F
-[clx]
-  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
-  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
-  units = frac
-  dimensions = (horizontal_dimension,4)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[oa4]
-  standard_name = asymmetry_of_subgrid_orography
-  long_name = asymmetry of subgrid orography
+[br1]
+  standard_name = bulk_richardson_number_at_lowest_model_level
+  long_name = bulk Richardson number at the surface
   units = none
-  dimensions = (horizontal_dimension,4)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[varss]
-  standard_name = standard_deviation_of_subgrid_orography_small_scale
-  long_name = standard deviation of subgrid orography small scale
+[hpbl]
+  standard_name = atmosphere_boundary_layer_thickness
+  long_name = PBL thickness
   units = m
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[oc1ss]
-  standard_name = convexity_of_subgrid_orography_small_scale
-  long_name = convexity of subgrid orography small scale
-  units = none
+[slmsk]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
   dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[oa4ss]
-  standard_name = asymmetry_of_subgrid_orography_small_scale
-  long_name = asymmetry of subgrid orography small scale
-  units = none
-  dimensions = (horizontal_dimension,4)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[ol4ss]
-  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
-  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height small scale
-  units = frac
-  dimensions = (horizontal_dimension,4)
   type = real
   kind = kind_phys
   intent = in
@@ -572,6 +672,12 @@
   kind = kind_phys
   intent = in
   optional = F
+[jdat]
+  standard_name = forecast_date_and_time
+  long_name = current forecast date and time
+  units = none
+  dimensions = (8)
+  type = integer
 [xlat]
   standard_name = latitude
   long_name = grid latitude
@@ -733,104 +839,7 @@
   kind = kind_phys
   intent = out
   optional = F
-[dusfc_ls]
-  standard_name = integrated_x_momentum_flux_from_large_scale_gwd
-  long_name = integrated x momentum flux from large scale gwd
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
   intent = out
-  optional = F
-[dvsfc_ls]
-  standard_name = integrated_y_momentum_flux_from_large_scale_gwd
-  long_name = integrated y momentum flux from large scale gwd
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[dusfc_bl]
-  standard_name = integrated_x_momentum_flux_from_blocking_drag
-  long_name = integrated x momentum flux from blocking drag
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[dvsfc_bl]
-  standard_name = integrated_y_momentum_flux_from_blocking_drag
-  long_name = integrated y momentum flux from blocking drag
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[dusfc_ss]
-  standard_name = integrated_x_momentum_flux_from_small_scale_gwd
-  long_name = integrated x momentum flux from small scale gwd
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[dvsfc_ss]
-  standard_name = integrated_y_momentum_flux_from_small_scale_gwd
-  long_name = integrated y momentum flux from small scale gwd
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[dusfc_fd]
-  standard_name = integrated_x_momentum_flux_from_form_drag
-  long_name = integrated x momentum flux from form drag
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[dvsfc_fd]
-  standard_name = integrated_y_momentum_flux_from_form_drag
-  long_name = integrated y momentum flux from form drag
-  units = Pa s
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[slmsk]
-  standard_name = sea_land_ice_mask_real
-  long_name = landmask: sea/land/ice=0/1/2
-  units = flag
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[br1]
-  standard_name = bulk_richardson_number_at_lowest_model_level
-  long_name = bulk Richardson number at the surface
-  units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[hpbl]
-  standard_name = atmosphere_boundary_layer_thickness
-  long_name = PBL thickness
-  units = m
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [gw_dudt]
   standard_name = tendency_of_x_wind_due_to_ugwp
@@ -1020,23 +1029,6 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F
-[dx]
-  standard_name = cell_size
-  long_name = size of the grid cell
-  units = m
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[gwd_opt]
-  standard_name = gwd_opt
-  long_name = flag to choose gwd scheme
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
   optional = F
 [con_g]
   standard_name = gravitational_acceleration
@@ -1275,6 +1267,14 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[gwd_opt]
+  standard_name = gwd_opt
+  long_name = flag to choose gwd scheme
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [errmsg]

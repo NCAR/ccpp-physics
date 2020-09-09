@@ -54,7 +54,7 @@
 !Part-1 init =>   wave dissipation + RFriction
 !
 !===================================================
-     subroutine init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, pa_rf, tau_rf, me, master)
+     subroutine init_global_gwdis_v1(levs, zkm, pmb, kvg, ktg, krad, kion, pa_rf, tau_rf, me, master)
 
      use ugwp_common_v1, only : pih 
       
@@ -139,10 +139,10 @@
 !
  132  format( 2x, F8.3,' dis-scales:', 4(2x, E10.3))    
                                                           
-     end subroutine init_global_gwdis
+     end subroutine init_global_gwdis_v1
 !
 !
-     subroutine  rf_damp_init(levs, pa_rf, tau_rf, dtp, pmb, rfdis, rfdist, levs_rf)
+     subroutine  rf_damp_init_v1(levs, pa_rf, tau_rf, dtp, pmb, rfdis, rfdist, levs_rf)
      implicit none
 
      integer         ::   levs
@@ -172,7 +172,7 @@
         endif
       enddo
 
-     end subroutine  rf_damp_init
+     end subroutine  rf_damp_init_v1
 ! ========================================================================
 ! Part 2 - sources
 !      wave  sources
@@ -789,11 +789,11 @@
 !           DSPDIS (Hines)+ADODIS (Alexander-Dunkerton-Ortland)
 !
 !========================================================================= 
-     subroutine init_dspdis
+     subroutine init_dspdis_v1
      implicit none
-     end subroutine init_dspdis
+     end subroutine init_dspdis_v1
 
-     subroutine init_adodis
+     subroutine init_adodis_v1
      implicit none
-     end subroutine init_adodis
+     end subroutine init_adodis_v1
      
