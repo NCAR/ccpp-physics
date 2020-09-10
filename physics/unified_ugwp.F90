@@ -340,9 +340,9 @@ contains
                  dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                &
                  slmsk,br1,hpbl,con_g,con_cp,con_rd,con_rv,          &
                  con_fvirt,con_pi,lonr,                              &
-                 cdmbgwd(1:2),me,master,do_gsl_drag_ls_bl,           &
-                 do_gsl_drag_ss,do_gsl_drag_tofd,lprnt,ipr,rdxzb,dx, &
-                 gwd_opt,errmsg,errflg)
+                 cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
+                 do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
+                 errmsg,errflg)
 
     else if ( do_ugwp_v1.or.do_ugwp_v1_orog_only ) then
 

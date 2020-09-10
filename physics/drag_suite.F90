@@ -199,8 +199,9 @@
      &           dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                   &
      &           slmsk,br1,hpbl,                                        &
      &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, me, master,       &
+     &           lprnt, ipr, rdxzb, dx, gwd_opt,                        &
      &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
-     &           lprnt, ipr, rdxzb, dx, gwd_opt, errmsg, errflg     )
+     &           errmsg, errflg     )
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
