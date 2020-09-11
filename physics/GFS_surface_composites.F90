@@ -478,6 +478,9 @@ contains
             fh2(i)    = fh2_lnd(i)
            !tsurf(i)  = tsurf_lnd(i)
             tsfcl(i)  = tsfc_lnd(i) ! over land
+            tsfc(i)   = tsfcl(i)
+            tsfco(i)  = tsfc(i)
+            tisfc(i)  = tsfc(i)
             cmm(i)    = cmm_lnd(i)
             chh(i)    = chh_lnd(i)
             gflx(i)   = gflx_lnd(i)
@@ -488,11 +491,8 @@ contains
             evap(i)   = evap_lnd(i)
             hflx(i)   = hflx_lnd(i)
             qss(i)    = qss_lnd(i)
-            tsfc(i)   = tsfc_lnd(i)
             hice(i)   = zero
             cice(i)   = zero
-            tisfc(i)  = tsfc(i)
-            tsfco(i)  = tsfc(i)
           elseif (islmsk(i) == 0) then
             zorl(i)   = zorl_wat(i)
             cd(i)     = cd_wat(i)
@@ -506,7 +506,9 @@ contains
             fh2(i)    = fh2_wat(i)
            !tsurf(i)  = tsurf_wat(i)
             tsfco(i)  = tsfc_wat(i) ! over lake (and ocean when uncoupled)
+            tsfc(i)   = tsfco(i)
             tsfcl(i)  = tsfc(i)
+            tisfc(i)  = tsfc(i)
             cmm(i)    = cmm_wat(i)
             chh(i)    = chh_wat(i)
             gflx(i)   = gflx_wat(i)
@@ -517,10 +519,8 @@ contains
             evap(i)   = evap_wat(i)
             hflx(i)   = hflx_wat(i)
             qss(i)    = qss_wat(i)
-            tsfc(i)   = tsfc_wat(i)
             hice(i)   = zero
             cice(i)   = zero
-            tisfc(i)  = tsfc(i)
           else ! islmsk(i) == 2
             zorl(i)   = zorl_ice(i)
             cd(i)     = cd_ice(i)
@@ -544,9 +544,11 @@ contains
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
+            tisfc(i)  = tice(i)
             if (.not. flag_cice(i)) then
-              tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
+!             tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
               zorl(i)  = cice(i) * zorl_ice(i)   + (one - cice(i)) * zorl_wat(i)
+              tsfc(i)  = tsfc_ice(i) ! over lake (and ocean when uncoupled)
             elseif (wet(i)) then
               if (cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
                 txi = cice(i)
@@ -575,7 +577,7 @@ contains
             endif
             tsfcl(i)  = tsfc(i)
             do k=1,kice ! store tiice in stc to reduce output in the nonfrac grid case
-              stc(i,k)=tiice(i,k)
+              stc(i,k) = tiice(i,k)
             end do
           endif
 
