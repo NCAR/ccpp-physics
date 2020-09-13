@@ -106,7 +106,7 @@ contains
 
        write(errmsg,'(*(a))') "Logic error: Only one large-scale&
           &/blocking scheme (do_ugwp_v0,do_ugwp_v0_orog_only,&
-          do_gsl_drag_ls_bl,do_ugwp_v1 or&
+          &do_gsl_drag_ls_bl,do_ugwp_v1 or &
           &do_ugwp_v1_orog_only) can be chosen"
        errflg = 1
        return
@@ -117,16 +117,18 @@ contains
     if (is_initialized) return
 
 
-    if ( do_ugwp_v0 .and. (do_ugwp .or. cdmbgwd(3) > 0.0) ) then
-       if (do_ugwp .or. cdmbgwd(3) > 0.0) then
+    if ( do_ugwp_v0 ) then
+       ! if (do_ugwp .or. cdmbgwd(3) > 0.0) then (deactivate effect of do_ugwp)
+       if (cdmbgwd(3) > 0.0) then
          call cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
                                 fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
+       else
+         write(errmsg,'(*(a))') "Logic error: cires_ugwp_mod_init called but &
+               &do_ugwp_v0 is true and cdmbgwd(3) <= 0"
+         errflg = 1
+         return
        end if
-    else
-      write(errmsg,'(*(a))') "Logic error: cires_ugwp_init called but do_ugwp is false and cdmbgwd(3) <= 0"
-      errflg = 1
-      return
     end if
 
 
