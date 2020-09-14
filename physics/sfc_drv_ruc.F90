@@ -170,7 +170,7 @@ module lsm_ruc
         !-- land
           soiltyp(i)  = int( stype(i)+0.5 )
           vegtype(i)  = int( vtype(i)+0.5 )
-        elseif( icy(i) > 0. ) then
+        elseif( icy(i) ) then
         !-- ice
           if (isot == 1) then
             soiltyp(i)  = 16
