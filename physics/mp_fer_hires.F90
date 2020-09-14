@@ -121,7 +121,7 @@ module mp_fer_hires
        SUBROUTINE mp_fer_hires_run(NCOL, NLEV, DT ,SPEC_ADV             &
                          ,SLMSK                                         &
                          ,PRSI,P_PHY                                    &
-                         ,T,Q,CWM                                       &
+                         ,T,Q                                           &
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
                          ,QC,QR,QI,QG                                   & ! wet mixing ratio
@@ -159,7 +159,6 @@ module mp_fer_hires
       real(kind_phys),   intent(in   ) :: epsq,r_d,p608,cp,g
       real(kind_phys),   intent(inout) :: t(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: q(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: cwm(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: train(1:ncol,1:nlev)
       real(kind_phys),   intent(out  ) :: sr(1:ncol)
       real(kind_phys),   intent(inout) :: f_ice(1:ncol,1:nlev)
@@ -185,7 +184,7 @@ module mp_fer_hires
       integer            :: I,J,K,N
       integer            :: lowlyr(1:ncol)
       integer            :: dx1
-      !real(kind_phys)    :: mprates(1:ncol,1:nlev,d_ss)
+      real(kind_phys)    :: cwm(1:ncol,1:nlev)
       real(kind_phys)    :: DTPHS,PCPCOL,RDTPHS,TNEW  
       real(kind_phys)    :: ql(1:nlev),tl(1:nlev)
       real(kind_phys)    :: rainnc(1:ncol),rainncv(1:ncol)

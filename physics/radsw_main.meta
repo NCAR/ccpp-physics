@@ -386,7 +386,7 @@
 [cld_ref_liq]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -404,7 +404,7 @@
 [cld_ref_ice]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -422,7 +422,7 @@
 [cld_ref_rain]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain drop
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -440,7 +440,7 @@
 [cld_ref_snow]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow flake
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys

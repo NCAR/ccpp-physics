@@ -22,7 +22,7 @@
           Tbd, Cldprop, Coupling,                                    &
           Radtend,                                                   & ! input/output
           imfdeepcnv, imfdeepcnv_gf,                                 &
-          f_ice, f_rain, f_rimef, flgmin, cwm,                       & ! F-A mp scheme only
+          flgmin,                                                    & ! F-A mp scheme only
           lm, im, lmk, lmp,                                          & ! input
           kd, kt, kb, raddt, delp, dz, plvl, plyr,                   & ! output
           tlvl, tlyr, tsfg, tsfa, qlyr, olyr,                        &
@@ -95,9 +95,6 @@
       integer,              intent(out) :: kd, kt, kb
 
 ! F-A mp scheme only
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: f_ice, &
-                                                                       f_rain, f_rimef
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(out) :: cwm
       real(kind=kind_phys), dimension(size(Grid%xlon,1)),        intent(in)  :: flgmin
       real(kind=kind_phys), intent(out) :: raddt
 
