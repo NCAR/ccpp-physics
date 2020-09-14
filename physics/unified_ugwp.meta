@@ -239,6 +239,22 @@
 [ccpp-arg-table]
   name = unified_ugwp_finalize
   type = scheme
+[do_ugwp_v0]
+  standard_name = do_ugwp_v0
+  long_name = flag to activate ver 0 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v1]
+  standard_name = do_ugwp_v1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

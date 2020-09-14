@@ -153,10 +153,11 @@ contains
 !! \htmlinclude unified_ugwp_finalize.html
 !!
 #endif
-    subroutine unified_ugwp_finalize(errmsg, errflg)
+    subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v1,errmsg, errflg)
 
     implicit none
 !
+    logical,          intent (in) :: do_ugwp_v0, do_ugwp_v1
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 
@@ -166,7 +167,9 @@ contains
 
     if (.not.is_initialized) return
 
-    call cires_ugwp_finalize()
+    if ( do_ugwp_v0 ) call cires_ugwp_mod_finalize()
+
+    if ( do_ugwp_v1 ) call cires_ugwp_finalize()
 
     is_initialized = .false.
 
