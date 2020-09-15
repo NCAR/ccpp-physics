@@ -7022,7 +7022,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !> This subroutine computes liquid and forezen soil moisture from the
 !! total soil moisture, and also computes soil moisture availability in
 !! the top soil layer.
-  SUBROUTINE RUCLSMINIT( debug_print, frac_grid, land, icy,        &
+  SUBROUTINE RUCLSMINIT( debug_print, slmsk,                       &
                      nzs, isltyp, ivgtyp, mavail,                  &
                      sh2o, smfr3d, tslb, smois,                    &
                      ims,ime, jms,jme, kms,kme,                    &
@@ -7035,8 +7035,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 #endif
    IMPLICIT NONE
    LOGICAL,  INTENT(IN   )   ::  debug_print
-   LOGICAL,  INTENT(IN   )   ::  frac_grid
-   LOGICAL,  DIMENSION( ims:ime),  INTENT(IN   )   ::  land, icy
+   REAL, DIMENSION( ims:ime),  INTENT(IN   )   :: slmsk
 
    INTEGER,  INTENT(IN   )   ::     &
                                     ims,ime, jms,jme, kms,kme,  &
@@ -7095,11 +7094,11 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        ! in Zobler classification isltyp=0 for water. Statsgo classification
        ! has isltyp=14 for water
        if (isltyp(i,j) == 0) isltyp(i,j)=14
-
      
-       if(land(i) ) then
-       !--- Computation of volumetric content of ice in soil
-       !--- and initialize MAVAIL
+       if(slmsk(i) == 1. ) then
+       !-- land
+       !-- Computate volumetric content of ice in soil
+       !-- and initialize MAVAIL
          DQM    = MAXSMC   (ISLTYP(I,J)) - &
                   DRYSMC   (ISLTYP(I,J))
          REF    = REFSMC   (ISLTYP(I,J))
@@ -7129,24 +7128,23 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
            endif
          ENDDO
 
-       elseif( icy(i) .and. .not. frac_grid ) then
+       elseif( slmsk(i) == 2.) then
        !-- ice
+         mavail(i,j) = 1.
          DO L=1,NZS
            smfr3d(i,l,j)=1.
            sh2o(i,l,j)=0.
-           mavail(i,j) = 1.
          ENDDO
     
-       elseif( .not. frac_grid) then
+       else
        !-- water  ISLTYP=14
+         mavail(i,j) = 1.
          DO L=1,NZS
            smfr3d(i,l,j)=0.
            sh2o(i,l,j)=1.
-           mavail(i,j) = 1.
          ENDDO
 
        endif ! land
-    !ENDIF
 
     ENDDO
    ENDDO
