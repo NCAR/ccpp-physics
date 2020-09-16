@@ -8,8 +8,8 @@
   name = mp_thompson_init
   type = scheme
 [ncol]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
