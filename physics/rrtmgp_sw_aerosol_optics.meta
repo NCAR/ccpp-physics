@@ -129,7 +129,7 @@
 [aerfld]
   standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
   long_name = GOCART aerosol climatology number concentration
-  units = kg-1?
+  units = kg-1
   dimensions = (horizontal_dimension,vertical_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
