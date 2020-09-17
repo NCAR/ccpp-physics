@@ -443,6 +443,9 @@
       LCAP   = KM
       LCAPP1 = LCAP + 1
 !
+! Temporary line
+      if ( me == 0 ) print *, "ahoj svete: in gwdps_run, nmtvr =", nmtvr
+!
 !
       IF ( NMTVR == 14) then 
 ! ----  for lm and gwd calculation points
@@ -456,6 +459,9 @@
              if (ipr == i) npr = npt
           ENDIF
         ENDDO
+        ! Temporary line
+        if (npt == 0 .and. me==0) print *, "ahoj svete: in gwdps_run ",
+     &         kdt, " npt =", npt
         IF (npt == 0) RETURN     ! No gwd/mb calculation done!
 !
 !       if (lprnt) print *,' npt=',npt,' npr=',npr,' ipr=',ipr,' im=',im
