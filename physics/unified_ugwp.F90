@@ -120,8 +120,6 @@ contains
     if ( do_ugwp_v0 ) then
        ! if (do_ugwp .or. cdmbgwd(3) > 0.0) then (deactivate effect of do_ugwp)
        if (cdmbgwd(3) > 0.0) then
-         ! Temporary line
-         if ( me==master ) print *, "ahoj svete: in unified_ugwp_init calling cires_ugwp_mod_init"
          call cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
                                 fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
@@ -135,8 +133,6 @@ contains
 
 
     if ( do_ugwp_v1 ) then
-       ! Temporary line
-       if ( me == master ) print *, "ahoj svete: in unified_ugwp_init calling cires_ugwp_init_v1"
        call cires_ugwp_init_v1 (me, master, nlunit, logunit, jdat,              &
                                 fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
@@ -335,25 +331,11 @@ contains
 
      zlwb(:)   = 0.
 
-      ! Temporary lines
-      if ( me == master ) write (80,*) "ahoj svete: in unified beginning ",  & 
-              kdt, " elvmax =", elvmax
-      if ( me == master ) write (81,*) "ahoj svete: in unified beginning ",  &
-              kdt, " sigma =", sigma
-      if ( me == master ) write (82,*) "ahoj svete: in unified beginning ",  &
-              kdt, " oc =", oc
-
-
-    ! Temporary line
-    if ( me == master ) write (40,*) "ahoj svete: q1 = ", q1
-
     ! Run the appropriate large-scale (large-scale GWD + blocking) scheme
     ! Note:  In case of GSL drag_suite, this includes ss and tofd
 
     if ( do_gsl_drag_ls_bl.or.do_gsl_drag_ss.or.do_gsl_drag_tofd ) then
 
-       ! Temporary line
-       if ( me == master ) print *, "ahoj svete: in unified_ugwp_run calling drag_suite_run"
        call drag_suite_run(im,levs,dvdt,dudt,dtdt,ugrs,vgrs,tgrs,q1, &
                  kpbl,prsi,del,prsl,prslk,phii,phil,dtp,             &
                  kdt,hprime,oc,oa4,clx,varss,oc1ss,oa4ss,            &
@@ -369,9 +351,6 @@ contains
                  errmsg,errflg)
 
     else if ( do_ugwp_v1.or.do_ugwp_v1_orog_only ) then
-
-       ! Temporary line
-       if ( me == master ) print *, "ahoj svete: in unified_ugwp_run calling gwdps_oro_v1"
 
        ! Valery's TOFD
        ! topo paras
@@ -400,9 +379,6 @@ contains
 
     else if ( do_ugwp_v0.or.do_ugwp_v0_orog_only ) then
 
-      ! Temporary line
-      if ( me == master ) print *, "ahoj svete: in unified_ugwp_run getting ready to call something"
-
       do k=1,levs
         do i=1,im
           Pdvdt(i,k) = 0.0
@@ -413,15 +389,14 @@ contains
       enddo
 
       if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
-        ! Temporary line
-        if ( me == master ) print *, "ahoj svete: in unified_ugwp_run calling gwdps_run"
 
         ! Override nmtvr with nmtvr_temp = 14 for passing into gwdps_run if necessary
         if ( nmtvr == 24 ) then  ! gwd_opt = 2, 22, 3, or 33
            nmtvr_temp = 14
         else
-          nmtvr_temp = nmtvr
+           nmtvr_temp = nmtvr
         end if
+
         call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
                    ugrs, vgrs, tgrs, q1,                               &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
@@ -432,17 +407,6 @@ contains
                    errmsg, errflg)
         if (errflg/=0) return
       endif
-
-      if ( me == master ) write (52,*) "ahoj svete: in unified after &
-              &gwdps_run ", kdt, " Pdudt = ", Pdudt
-      if ( me == master ) write (54,*) "ahoj svete: in unified after &
-              &gwdps_run ", kdt, " Pdvdt = ", Pdvdt
-      if ( me == master ) write (56,*) "ahoj svete: in unified after &
-              &gwdps_run ", kdt, " Pdtdt = ", Pdtdt
-      if ( me == master ) write (58,*) "ahoj svete: in unified after & 
-              &gwdps_run ", kdt, " hprime =", hprime
-      if ( me == master ) write (60,*) "ahoj svete: in unified after & 
-              &gwdps_run ", kdt, " elvmax =", elvmax
 
       tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
       if (ldiag_ugwp) then
@@ -474,10 +438,6 @@ contains
     if (do_ugwp_v0) then
 
       if (cdmbgwd(3) > 0.0) then
-
-        ! Temporary line
-        if ( me == master ) print *, "ahoj svete: in unified_drag_run calling slat_geos5_tamp"
-
 
         ! 2) non-stationary GW-scheme with GMAO/MERRA GW-forcing
         call slat_geos5_tamp(im, tamp_mpa, xlat_d, tau_ngw)
@@ -517,9 +477,6 @@ contains
           enddo
         endif
 
-        ! Temporary line
-        if ( me == master ) print *, "ahoj svete: in unified_drag_run calling fv3_ugwp_solv2_v0"
-
         call fv3_ugwp_solv2_v0(im, levs, dtp, tgrs, ugrs, vgrs, q1,                        &
              prsl, prsi, phil, xlat_d, sinlat, coslat, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, &
              tau_ngw, me, master, kdt)
@@ -538,9 +495,6 @@ contains
         enddo
 
       else  ! .not.(cdmbgwd(3) > 0.0)
-
-        ! Temporary line
-        if ( me == master ) print *, "ahoj svete: in unified_ugwp_run not calling slat_geos5_tamp"
 
         do k=1,levs
           do i=1,im

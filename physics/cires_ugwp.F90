@@ -77,8 +77,6 @@ contains
     if (is_initialized) return
 
     if (do_ugwp .or. cdmbgwd(3) > 0.0) then
-      ! Temporary line
-      if ( me == master ) print *, "ahoj svete: in cires_ugwp_init calling cires_ugwp_mod_init"
       call cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
                                 fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
@@ -226,9 +224,6 @@ contains
     errmsg = ''
     errflg = 0
 
-    ! Temporary line
-    if ( me == master ) write (41,*) "ahoj svete: qgrs(:,:,1) = ", qgrs(:,:,1)
-
     ! 1) ORO stationary GWs
     !    ------------------
     ! wrap everything in a do_ugwp 'if test' in order not to break the namelist functionality
@@ -246,9 +241,6 @@ contains
 
      zlwb(:)   = 0.
 
-     ! Temporary line
-     if ( me == master ) print *, "ahoj svete: in cires_ugwp_run calling GWDPS_V0"
-
      call GWDPS_V0(im, levs, lonr, do_tofd, Pdvdt, Pdudt, Pdtdt, Pkdis,          &
           ugrs, vgrs, tgrs, qgrs(:,:,1), kpbl, prsi,del,prsl, prslk, phii, phil, &
           dtp, kdt, sgh30, hprime, oc, oa4, clx, theta, sigma, gamma, elvmax,    &
@@ -257,9 +249,6 @@ contains
           dudt_mtb, dudt_ogw, dudt_tms)
 
     else                                    ! calling old GFS gravity wave drag as is
-
-      ! Temporary line
-      if ( me == master ) print *, "ahoj svete: in cires_ugwp_run possibly about to call gwdps_run"
 
       do k=1,levs
         do i=1,im
@@ -271,8 +260,6 @@ contains
       enddo
 
       if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
-        ! Temporary line
-        if ( me == master ) print *, "ahoj svete: in cires_ugwp_run calling gwdps_run"
         call gwdps_run(im, levs, Pdvdt, Pdudt, Pdtdt,                  &
                    ugrs, vgrs, tgrs, qgrs,                             &
                    kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt, &
@@ -283,17 +270,6 @@ contains
                    errmsg, errflg)
         if (errflg/=0) return
       endif
-
-      if ( me == master ) write (51,*) "ahoj svete: in cires after &
-              &gwdps_run ", kdt, " Pdudt = ", Pdudt
-      if ( me == master ) write (53,*) "ahoj svete: in cires after &
-              &gwdps_run ", kdt, " Pdvdt = ", Pdvdt
-      if ( me == master ) write (55,*) "ahoj svete: in cires after &
-              &gwdps_run ", kdt, " Pdtdt = ", Pdtdt
-      if ( me == master ) write (57,*) "ahoj svete: in cires after &           
-              &gwdps_run ", kdt, " hprime =", hprime
-      if ( me == master ) write (59,*) "ahoj svete: in cires after & 
-              &gwdps_run ", kdt, " elvmax =", elvmax
 
       tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
       if (ldiag_ugwp) then
@@ -315,9 +291,6 @@ contains
     
 
     if (cdmbgwd(3) > 0.0) then
-
-      ! Temporary line
-      if ( me == master ) print *, "ahoj svete: in cires_ugwp_run calling slat_geos5_tamp"
 
       ! 2) non-stationary GW-scheme with GMAO/MERRA GW-forcing
       call slat_geos5_tamp(im, tamp_mpa, xlat_d, tau_ngw)
@@ -357,9 +330,6 @@ contains
         enddo
       endif
 
-      ! Temporary line
-      if ( me == master ) print *, "ahoj svete: in cires_ugwp_run calling fv3_ugwp_solv2_v0"
-
       call fv3_ugwp_solv2_v0(im, levs, dtp, tgrs, ugrs, vgrs,qgrs(:,:,1), &
            prsl, prsi, phil, xlat_d, sinlat, coslat, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, &
            tau_ngw, me, master, kdt)
@@ -378,9 +348,6 @@ contains
       enddo
 
     else
-
-      ! Temporary line
-      if ( me == master ) print *, "ahoj svete: in cires_ugwp_run, didn't call ngw schemes"
 
       do k=1,levs
         do i=1,im
