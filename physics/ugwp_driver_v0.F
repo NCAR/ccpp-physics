@@ -267,7 +267,7 @@
 !! subgrid-scale orography effects in FV3GFS, EMC reinstalled the 
 !! original gwdps-code with updated efficiency factors for the mountain
 !! blocking and OGW drag. The GFS OGW is described in the separate section 
-!! (\ref gfs_gwdps) and its “call” moved into UGWP-driver subroutine.
+!! (\ref gfs_gwdps) and its "call" moved into UGWP-driver subroutine.
 !! This combination of NGW and OGW schemes was tested in the FV3GFS-L127
 !! medium-range forecasts (15-30 days) for C96, C192, C384 and C768 
 !! resolutions and work in progress to introduce the optimal choice for
