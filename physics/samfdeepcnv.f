@@ -68,7 +68,7 @@
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
-      subroutine samfdeepcnv_run (im,ix,km,itc,ntc,cliq,cp,cvap,        &
+      subroutine samfdeepcnv_run (im,km,itc,ntc,cliq,cp,cvap,           &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
      &    prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,hwrf_samfdeep,           &
@@ -86,25 +86,25 @@
 
       implicit none
 !
-      integer, intent(in)  :: im, ix, km, itc, ntc, ntk, ntr, ncloud
+      integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
-     &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
+      real(kind=kind_phys), intent(in) :: psp(im), delp(im,km),         &
+     &   prslp(im,km),  garea(im), dot(im,km), phil(im,km)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       logical, intent(in)  :: hwrf_samfdeep
       real(kind=kind_phys), intent(in) :: nthresh
-      real(kind=kind_phys), intent(in) :: ca_deep(ix)
-      real(kind=kind_phys), intent(out) :: rainevap(ix)
+      real(kind=kind_phys), intent(in) :: ca_deep(im)
+      real(kind=kind_phys), intent(out) :: rainevap(im)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
-     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),                  &
-     &   cnvw(ix,km),  cnvc(ix,km)
+      real(kind=kind_phys), intent(inout) ::   qtr(im,km,ntr+2),        &
+     &   q1(im,km), t1(im,km),   u1(im,km), v1(im,km),                  &
+     &   cnvw(im,km),  cnvc(im,km)
 
       integer, intent(out) :: kbot(im), ktop(im)
       real(kind=kind_phys), intent(out) :: cldwrk(im),                  &
@@ -172,7 +172,7 @@
 !
 !     real(kind=kind_phys) aa1(im),     acrt(im),   acrtfct(im),
       real(kind=kind_phys) aa1(im),     tkemean(im),clamt(im),
-     &                     ps(im),      del(ix,km), prsl(ix,km),
+     &                     ps(im),      del(im,km), prsl(im,km),
      &                     umean(im),   tauadv(im), gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
@@ -222,7 +222,7 @@ c  physical parameters
       parameter(clamd=0.03,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dbeta=0.1)
-      parameter(cthk=200.,dthk=25.)
+      parameter(cthk=150.,dthk=25.)
       parameter(cinpcrmx=180.,cinpcrmn=120.)
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
@@ -1239,23 +1239,13 @@ c
 c  specify upper limit of mass flux at cloud base
 c
 !> - Calculate the maximum value of the cloud base mass flux using the CFL-criterion-based formula of Han and Pan (2011) \cite han_and_pan_2011, equation 7.
-      if(hwrf_samfdeep) then
-       do i = 1, im
+      do i = 1, im
         if(cnvflg(i)) then
           k = kbcon(i)
           dp = 1000. * del(i,k)
           xmbmax(i) = dp / (grav * dt2)
         endif
-       enddo
-      else
-       do i = 1, im
-        if(cnvflg(i)) then
-          k = kbcon(i)
-          dp = 1000. * del(i,k)
-          xmbmax(i) = dp / (2. * grav * dt2)
-        endif
-       enddo
-      endif
+      enddo
 c
 c  compute cloud moisture property and precipitation
 c
@@ -2568,7 +2558,7 @@ c
 !> - Transport aerosols if present
 
       if (do_aerosols)
-     &  call samfdeepcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
+     &  call samfdeepcnv_aerosols(im, im, km, itc, ntc, ntr, delt,
      &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
      &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
      &  qtr, qaero)

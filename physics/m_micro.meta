@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = m_micro
+  type = scheme
+  dependencies = aer_cloud.F,aerclm_def.F,cldmacro.F,cldwat2m_micro.F,machine.F,micro_mg_utils.F90,micro_mg2_0.F90,micro_mg3_0.F90,physcons.F90,wv_saturation.F
+
+########################################################################
 [ccpp-arg-table]
   name = m_micro_init
   type = scheme
@@ -294,24 +300,11 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = m_micro_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = m_micro_run
   type = scheme
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -861,7 +854,7 @@
 [xlat]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
@@ -870,7 +863,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

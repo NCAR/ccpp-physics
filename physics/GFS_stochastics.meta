@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_stochastics
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_stochastics_run
   type = scheme
@@ -26,8 +32,8 @@
   intent = in
   optional = F
 [do_sppt]
-  standard_name = flag_for_stochastic_surface_physics_perturbations
-  long_name = flag for stochastic surface physics perturbations
+  standard_name = flag_for_stochastic_physics_perturbations
+  long_name = flag for stochastic physics perturbations
   units = flag
   dimensions = ()
   type = logical
@@ -57,24 +63,6 @@
   type = logical
   intent = in
   optional = F
-[zmtnblck]
-  standard_name = level_of_dividing_streamline
-  long_name = level of the dividing streamline
-  units = none
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[sppt_wts]
-  standard_name = weights_for_stochastic_sppt_perturbation
-  long_name = weights for stochastic sppt perturbation
-  units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [do_ca]
   standard_name = flag_for_cellular_automata
   long_name = cellular automata main switch
@@ -100,6 +88,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[si]
+  standard_name = vertical_sigma_coordinate_for_radiation_initialization
+  long_name = vertical sigma coordinate for radiation initialization
+  units = none
+  dimensions = (number_of_vertical_layers_for_radiation_calculations_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [vfact_ca]
   standard_name = vertical_weight_for_ca
   long_name = vertical weight for ca
@@ -109,14 +106,23 @@
   kind = kind_phys
   intent = inout
   optional = F
-[si]
-  standard_name = vertical_sigma_coordinate_for_radiation_initialization
-  long_name = vertical sigma coordinate for radiation initialization
+[zmtnblck]
+  standard_name = level_of_dividing_streamline
+  long_name = level of the dividing streamline
   units = none
-  dimensions = (number_of_vertical_layers_for_radiation_calculations_plus_one)
+  dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[sppt_wts]
+  standard_name = weights_for_stochastic_sppt_perturbation
+  long_name = weights for stochastic sppt perturbation
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [skebu_wts]
   standard_name = weights_for_stochastic_skeb_perturbation_of_x_wind

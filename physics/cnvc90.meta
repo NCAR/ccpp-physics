@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = cnvc90_init
+[ccpp-table-properties]
+  name = cnvc90
   type = scheme
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]
@@ -18,14 +19,6 @@
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -145,7 +138,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = cnvc90_finalize
-  type = scheme

@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = rrtmg_sw_post_init
+[ccpp-table-properties]
+  name = rrtmg_sw_post
   type = scheme
+  dependencies = machine.F,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -166,7 +167,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmg_sw_post_finalize
-  type = scheme

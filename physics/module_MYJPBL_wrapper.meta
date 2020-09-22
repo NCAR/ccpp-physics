@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = myjpbl_wrapper
+  type = scheme
+  dependencies = module_BL_MYJPBL.F90
+
+########################################################################
 [ccpp-arg-table]
   name = myjpbl_wrapper_run
   type = scheme
@@ -15,14 +21,6 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [im]
@@ -148,7 +146,7 @@
   dimensions = (horizontal_dimension,vertical_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [prsl]
   standard_name = air_pressure

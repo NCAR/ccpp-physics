@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = shalcnv
+  type = scheme
+  dependencies = funcphys.f90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = shalcnv_init
   type = scheme
@@ -53,11 +59,6 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = shalcnv_finalize
-  type = scheme
-
-########################################################################
-[ccpp-arg-table]
   name = shalcnv_run
   type = scheme
 [grav]
@@ -107,7 +108,7 @@
   optional = F
 [t0c]
   standard_name = temperature_at_zero_celsius
-  long_name = temperature at 0 degrees Celsius
+  long_name = temperature at 0 degree Celsius
   units = K
   dimensions = ()
   type = real
@@ -162,14 +163,6 @@
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal_dimension
   units = count
   dimensions = ()
   type = integer

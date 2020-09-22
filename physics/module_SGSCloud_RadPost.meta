@@ -1,14 +1,12 @@
-[ccpp-arg-table]
-  name = mynnrad_post_run
+[ccpp-table-properties]
+  name = sgscloud_radpost
   type = scheme
-[ix]
-  standard_name = horizontal_dimension
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
+  dependencies = machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = sgscloud_radpost_run
+  type = scheme
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -48,7 +46,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [qi]
   standard_name = ice_water_mixing_ratio
@@ -57,7 +55,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [qc_save]
   standard_name = cloud_condensed_water_mixing_ratio_save

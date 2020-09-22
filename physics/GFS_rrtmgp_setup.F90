@@ -8,8 +8,6 @@ module GFS_rrtmgp_setup
         isubcsw, isubclw, ivflip , ipsd0,   iswcliq
    use machine, only: &
         kind_phys                  ! Working type
-   use GFS_typedefs, only:        &
-        GFS_control_type           ! Model control parameters
    implicit none
 
    public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_run, GFS_rrtmgp_setup_finalize
@@ -39,21 +37,28 @@ module GFS_rrtmgp_setup
 !! \section arg_table_GFS_rrtmgp_setup_init
 !! \htmlinclude GFS_rrtmgp_setup_init.html
 !!
-   subroutine GFS_rrtmgp_setup_init (Model, si, levr, ictm, isol, ico2,  &
-        iaer, ialb, iems, ntcw,  num_p3d,  ntoz, iovr_sw, iovr_lw,       &
-        isubc_sw, isubc_lw, icliq_sw, crick_proof, ccnorm, imp_physics,  &
-        norad_precip, idate, iflip, me,                                  &
-        errmsg, errflg)
+   subroutine GFS_rrtmgp_setup_init(imp_physics, imp_physics_fer_hires, imp_physics_gfdl,&
+        imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                   &
+        imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,    &
+        ialb, iems, ntcw,  num_p3d,  ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,         &
+        icliq_sw, crick_proof, ccnorm, norad_precip, idate, iflip, me, errmsg, errflg)
      implicit none
 
      ! Inputs
-     type(GFS_control_type), intent(in) :: &
-          Model      ! DDT containing model control parameters
+     integer, intent(in) :: &
+          imp_physics,               & ! Flag for MP scheme
+          imp_physics_fer_hires,     & ! Flag for fer-hires scheme
+          imp_physics_gfdl,          & ! Flag for gfdl scheme
+          imp_physics_thompson,      & ! Flag for thompsonscheme
+          imp_physics_wsm6,          & ! Flag for wsm6 scheme
+          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
+          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
+          imp_physics_mg               ! Flag for MG scheme
      real(kind_phys), dimension(levr+1), intent(in) :: &
           si
      integer, intent(in) :: levr, ictm, isol, ico2, iaer, ialb, iems,   & 
           ntcw, num_p3d, ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,    &
-          icliq_sw, imp_physics, iflip, me 
+          icliq_sw, iflip, me 
      logical, intent(in) :: &
           crick_proof, ccnorm, norad_precip
      integer, intent(in), dimension(4) :: &
@@ -120,10 +125,10 @@ module GFS_rrtmgp_setup
              ' ccnorm=',ccnorm,' norad_precip=',norad_precip
      endif
      
-     ! Hack for using RRTMGP-Sw and RRTMG-LW
-     if (.not. Model%do_GPsw_Glw) then
-        call radinit( si, levr, imp_physics,  me )
-     endif
+
+     call radinit( si, levr, imp_physics, imp_physics_fer_hires, imp_physics_gfdl,       &
+        imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                   &
+        imp_physics_zhao_carr_pdf, imp_physics_mg,  me, errflg )
      
      if ( me == 0 ) then
         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
@@ -199,13 +204,17 @@ module GFS_rrtmgp_setup
    ! Private functions
    
    
-   subroutine radinit( si, NLAY, imp_physics, me )
+   subroutine radinit(si, NLAY, imp_physics, imp_physics_fer_hires, imp_physics_gfdl,    &
+        imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, &
+        imp_physics_zhao_carr_pdf, imp_physics_mg, me, errflg )
      !...................................
 
 !  ---  inputs:
-!     &     ( si, NLAY, imp_physics, me )
+!     &     ( si, NLAY, imp_physics, imp_physics_fer_hires, imp_physics_gfdl,            &
+!     &       imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,             &
+!     &       imp_physics_zhao_carr_pdf, imp_physics_mg, me )
 !  ---  outputs:
-!          ( none )
+!          ( errflg )
 
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -316,19 +325,31 @@ module GFS_rrtmgp_setup
       use module_radiation_aerosols,  only : aer_init
       use module_radiation_gases,     only : gas_init
       use module_radiation_surface,   only : sfc_init
-      use module_radiation_clouds,    only : cld_init
+      use GFS_cloud_diagnostics,      only : hml_cloud_diagnostics_initialize
 
       implicit none
 
 !  ---  inputs:
-      integer, intent(in) :: NLAY, me, imp_physics 
-
+     integer, intent(in) :: &
+          imp_physics,               & ! Flag for MP scheme
+          imp_physics_fer_hires,     & ! Flag for fer-hires scheme
+          imp_physics_gfdl,          & ! Flag for gfdl scheme
+          imp_physics_thompson,      & ! Flag for thompsonscheme
+          imp_physics_wsm6,          & ! Flag for wsm6 scheme
+          imp_physics_zhao_carr,     & ! Flag for zhao-carr scheme
+          imp_physics_zhao_carr_pdf, & ! Flag for zhao-carr+PDF scheme
+          imp_physics_mg               ! Flag for MG scheme
+      integer, intent(in) :: NLAY, me
       real (kind=kind_phys), intent(in) :: si(:)
 
 !  ---  outputs: (none, to module variables)
+	  integer, intent(out) :: &
+	      errflg
 
 !  ---  locals:
 
+	! Initialize
+	errflg = 0
 !
 !===> ...  begin here
 !
@@ -409,7 +430,10 @@ module GFS_rrtmgp_setup
       call aer_init ( NLAY, me )                 !  --- ...  aerosols initialization routine
       call gas_init ( me )                       !  --- ...  co2 and other gases initialization routine
       call sfc_init ( me )                       !  --- ...  surface initialization routine
-      call cld_init ( si, NLAY, imp_physics, me) !  --- ...  cloud initialization routine
+      call hml_cloud_diagnostics_initialize(imp_physics, imp_physics_fer_hires,          &
+          imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6,                      &
+          imp_physics_zhao_carr, imp_physics_zhao_carr_pdf, imp_physics_mg, NLAY, me, si,&
+          errflg) 
 
       return
       !...................................

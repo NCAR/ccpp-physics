@@ -1,17 +1,15 @@
+[ccpp-table-properties]
+  name = lsm_ruc_sfc_sice_pre
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = lsm_ruc_sfc_sice_pre_run
   type = scheme
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[kice]
-  standard_name = ice_vertical_dimension
-  long_name = vertical loop extent for ice levels, start at 1
   units = count
   dimensions = ()
   type = integer
@@ -33,6 +31,14 @@
   type = integer
   intent = in
   optional = F
+[kice]
+  standard_name = ice_vertical_dimension
+  long_name = vertical loop extent for ice levels, start at 1
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [land]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -47,15 +53,6 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
-  intent = inout
-  optional = F
-[tiice]
-  standard_name = internal_ice_temperature
-  long_name = sea ice internal temperature
-  units = K
-  dimensions = (horizontal_dimension,ice_vertical_dimension)
-  type = real
-  kind = kind_phys
   intent = inout
   optional = F
 [stc]
@@ -75,6 +72,15 @@
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[tiice]
+  standard_name = internal_ice_temperature
+  long_name = sea ice internal temperature
+  units = K
+  dimensions = (horizontal_dimension,ice_vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -95,6 +101,12 @@
   optional = F
 
 ########################################################################
+[ccpp-table-properties]
+  name = lsm_ruc_sfc_sice_post
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = lsm_ruc_sfc_sice_post_run
   type = scheme
@@ -105,14 +117,6 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
-[kice]
-  standard_name = ice_vertical_dimension
-  long_name = vertical loop extent for ice levels, start at 1
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in 
   optional = F
 [lsoil_ruc]
   standard_name = soil_vertical_dimension_for_land_surface_model
@@ -130,6 +134,14 @@
   type = integer
   intent = in
   optional = F
+[kice]
+  standard_name = ice_vertical_dimension
+  long_name = vertical loop extent for ice levels, start at 1
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in 
+  optional = F
 [land]
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
@@ -146,15 +158,6 @@
   type = logical
   intent = inout
   optional = F
-[tiice]
-  standard_name = internal_ice_temperature
-  long_name = sea ice internal temperature
-  units = K
-  dimensions = (horizontal_dimension,ice_vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [stc]
   standard_name = soil_temperature
   long_name = soil temperature
@@ -169,6 +172,15 @@
   long_name = soil temperature for land surface model
   units = K
   dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tiice]
+  standard_name = internal_ice_temperature
+  long_name = sea ice internal temperature
+  units = K
+  dimensions = (horizontal_dimension,ice_vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout

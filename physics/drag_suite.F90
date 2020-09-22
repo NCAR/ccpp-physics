@@ -194,10 +194,10 @@
 !     &           nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, errmsg, errflg)
 !
    subroutine drag_suite_run(                                           &
-     &           IM,IX,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,              &
+     &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
-     &           VAR,oc1,oa4,ol4,                                       &
-!     &           varss,oc1ss,oa4ss,ol4ss,                               &
+     &           var,oc1,oa4,ol4,                                       &
+     &           varss,oc1ss,oa4ss,ol4ss,                               &
      &           THETA,SIGMA,GAMMA,ELVMAX,                              &
      &           dtaux2d_ls,dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,           &
      &           dtaux2d_ss,dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,           &
@@ -295,7 +295,7 @@
    implicit none
 
    ! Interface variables
-   integer, intent(in) :: im, ix, km, imx, kdt, ipr, me, master
+   integer, intent(in) :: im, km, imx, kdt, ipr, me, master
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(im)
@@ -307,9 +307,10 @@
    real(kind=kind_phys) ::  rcl, cdmb
    real(kind=kind_phys) ::  g_inv
 
-   real(kind=kind_phys), intent(out) ::                          &
+   real(kind=kind_phys), intent(inout) ::                        &
      &                   dudt(im,km),dvdt(im,km),                &
-     &                   dtdt(im,km), rdxzb(im)
+     &                   dtdt(im,km)
+   real(kind=kind_phys), intent(out) :: rdxzb(im)
    real(kind=kind_phys), intent(in) ::                           &
      &                            u1(im,km),v1(im,km),           &
      &                            t1(im,km),q1(im,km),           &
@@ -320,8 +321,7 @@
    real(kind=kind_phys), intent(in) ::   var(im),oc1(im),        &
      &                                   oa4(im,4),ol4(im,4),    &
      &                                   dx(im)
-   !real(kind=kind_phys), intent(in) ::   varss(im),oc1ss(im),   &
-   real(kind=kind_phys)             ::   varss(im),oc1ss(im),    &
+   real(kind=kind_phys), intent(in) ::   varss(im),oc1ss(im),    &
      &                              oa4ss(im,4),ol4ss(im,4)
    real(kind=kind_phys), intent(in) :: THETA(im),SIGMA(im),      &
      &                                 GAMMA(im),ELVMAX(im)
@@ -473,8 +473,9 @@
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
+   var_temp2 = 0.
 
-if (me==master) print *,"Running drag suite"
+
 !--------------------------------------------------------------------
 ! SCALE-ADPTIVE PARAMETER FROM GFS GWD SCHEME
 !--------------------------------------------------------------------
@@ -527,14 +528,14 @@ if (me==master) print *,"Running drag suite"
    enddo
 
 !temporary use of large-scale data:
-   do i=1,im
-      varss(i)=var(i)
-      oc1ss(i)=oc1(i)
-      do j=1,4
-         oa4ss(i,j)=oa4(i,j)
-         ol4ss(i,j)=ol4(i,j)
-      enddo
-   enddo
+!   do i=1,im
+!      varss(i)=var(i)
+!      oc1ss(i)=oc1(i)
+!      do j=1,4
+!         oa4ss(i,j)=oa4(i,j)
+!         ol4ss(i,j)=ol4(i,j)
+!      enddo
+!   enddo
 !
 !--- calculate scale-aware tapering factors
 !NOTE: if dx(1) is not representative of most/all dx, this needs to change...
@@ -548,7 +549,7 @@ else
                                 (dxmax_ls-dxmin_ls)) + 1. )
    end if
 end if
-if (me==master) print *,"in Drag Suite, dx(1:2):",dx(1),dx(2)
+! if (me==master) print *,"in Drag Suite, dx(1:2):",dx(1),dx(2)
 if ( dx(1) .ge. dxmax_ss ) then
    ss_taper = 1.
 else
@@ -558,7 +559,7 @@ else
       ss_taper = dxmax_ss * (1. - dxmin_ss/dx(1))/(dxmax_ss-dxmin_ss)
    end if
 end if
-if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
+! if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
 
 !--- calculate length of grid for flow-blocking drag
 !
@@ -907,7 +908,7 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
   vtendwave=0.
 !
   IF ( (gwd_opt_ss .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
-    if (me==master) print *,"in Drag Suite: Running small-scale gravity wave drag"
+    ! if (me==master) print *,"in Drag Suite: Running small-scale gravity wave drag"
 !
 ! declaring potential temperature
 !
@@ -943,11 +944,11 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
        enddo
        if((xland(i)-1.5).le.0. .and. 2.*varss(i).le.hpbl(i))then
           if(br1(i).gt.0. .and. thvx(i,kpbl2)-thvx(i,kts) > 0.)then
-!WRF            cleff_ss    = sqrt(dxy(i)**2 + dxyp(i)**2)
+            cleff_ss    = sqrt(dxy(i)**2 + dxyp(i)**2)   ! WRF
 !            cleff_ss    = 3. * max(dx(i),cleff_ss)
 !            cleff_ss    = 10. * max(dxmax_ss,cleff_ss)
-!WRF            cleff_ss    = 0.1 * max(dxmax_ss,cleff_ss)
-            cleff_ss    = 0.1 * 12000.
+            cleff_ss    = 0.1 * max(dxmax_ss,cleff_ss)  ! WRF
+!             cleff_ss    = 0.1 * 12000.
             coefm_ss(i) = (1. + olss(i)) ** (oass(i)+1.)
             xlinv(i) = coefm_ss(i) / cleff_ss
             !govrth(i)=g/(0.5*(thvx(i,kpbl(i))+thvx(i,kts)))
@@ -1024,7 +1025,7 @@ ENDIF  ! end if gwd_opt_ss == 1
 ! Topographic Form Drag from Beljaars et al. (2004, QJRMS, equ. 16):
 !================================================================
 IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
-    if (me==master) print *,"in Drag Suite: Running form drag"
+    ! if (me==master) print *,"in Drag Suite: Running form drag"
 
    utendform=0.
    vtendform=0.
@@ -1080,7 +1081,7 @@ ENDIF  ! end if gwd_opt_fd == 1
 !=======================================================
 ! More for the large-scale gwd component
 IF ( (gwd_opt_ls .EQ. 1).and.(ls_taper.GT.1.E-02) ) THEN
-    if (me==master) print *,"in Drag Suite: Running large-scale gravity wave drag"
+    ! if (me==master) print *,"in Drag Suite: Running large-scale gravity wave drag"
 !
 !   now compute vertical structure of the stress.
    do k = kts,kpblmax
@@ -1148,7 +1149,7 @@ ENDIF !END LARGE-SCALE TAU CALCULATION
 !COMPUTE BLOCKING COMPONENT                                     
 !===============================================================
 IF ( (gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
-   if (me==master) print *,"in Drag Suite: Running blocking drag"
+   ! if (me==master) print *,"in Drag Suite: Running blocking drag"
 
    do i = its,im
       if(.not.ldrag(i)) then

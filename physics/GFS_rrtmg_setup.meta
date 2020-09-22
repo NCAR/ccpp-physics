@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_rrtmg_setup
+  type = scheme
+  dependencies = iounitdef.f,module_bfmicrophysics.f,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f,radlw_main.f,radlw_param.f,radsw_main.f,radsw_param.f
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmg_setup_init
   type = scheme
@@ -195,8 +201,8 @@
   intent = in
   optional = F
 [im]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -312,7 +318,7 @@
 [slag]
   standard_name = equation_of_time
   long_name = equation of time (radian)
-  units = radians
+  units = radian
   dimensions = ()
   type = real
   kind = kind_phys

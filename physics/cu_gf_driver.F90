@@ -9,7 +9,6 @@ module cu_gf_driver
    use machine   , only: kind_phys
    use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
-   use module_mp_thompson_make_number_concentrations, only: make_IceNumber, make_DropletNumber
 
    implicit none
 
@@ -69,13 +68,15 @@ contains
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
-      subroutine cu_gf_driver_run(ntracer,garea,im,ix,km,dt,cactiv,             &
+      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,cactiv,                &
                forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,           &
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
-               nwfa,con_rd,gq0,ntinc,ntlnc,imp_physics,imp_physics_thompson,    &
-               errmsg,errflg)
+               flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
+               du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
+               du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
+               ldiag3d,qdiag3d,qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -96,41 +97,40 @@ contains
       integer            :: ishallow_g3 ! depend on imfshalcnv
 !-------------------------------------------------------------
    integer      :: its,ite, jts,jte, kts,kte 
-   integer, intent(in   ) :: im,ix,km,ntracer
+   integer, intent(in   ) :: im,km,ntracer
+   logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
+   logical, intent(in   ) :: ldiag3d,qdiag3d
 
-   real(kind=kind_phys),  dimension( ix , km ),     intent(in ) :: forcet,forceqv_spechum,w,phil
-   real(kind=kind_phys),  dimension( ix , km ),     intent(inout ) :: t,us,vs
-   real(kind=kind_phys),  dimension( ix )   :: rand_mom,rand_vmas
-   real(kind=kind_phys),  dimension( ix,4 ) :: rand_clos
-   real(kind=kind_phys),  dimension( ix , km, 11 ) :: gdc,gdc2
-   real(kind=kind_phys),  dimension( ix , km ),     intent(out ) :: cnvw_moist,cnvc
-   real(kind=kind_phys),  dimension( ix , km ), intent(inout ) :: cliw, clcw
+   real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
+   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
+   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: qci_conv
+   real(kind=kind_phys),  dimension( im )   :: rand_mom,rand_vmas
+   real(kind=kind_phys),  dimension( im,4 ) :: rand_clos
+   real(kind=kind_phys),  dimension( im , km, 11 ) :: gdc,gdc2
+   real(kind=kind_phys),  dimension( im , km ),     intent(out ) :: cnvw_moist,cnvc
+   real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: cliw, clcw
 
-!  change from ix to im
+   real(kind=kind_phys),  dimension(  : ,  : ), intent(inout ) :: &
+               du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV, &
+               du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV
+
    integer, dimension (im), intent(inout) :: hbot,htop,kcnv
    integer,    dimension (im), intent(in) :: xland
    real(kind=kind_phys),    dimension (im), intent(in) :: pbl
-   integer, dimension (ix) :: tropics
+   integer, dimension (im) :: tropics
 !  ruc variable
    real(kind=kind_phys), dimension (im)  :: hfx2,qfx2,psuri
    real(kind=kind_phys), dimension (im,km) :: ud_mf,dd_mf,dt_mf
    real(kind=kind_phys), dimension (im), intent(inout) :: raincv,cld1d
-!  end change ix to im
-   real(kind=kind_phys), dimension (ix,km) :: t2di,p2di
+   real(kind=kind_phys), dimension (im,km) :: t2di,p2di
    ! Specific humidity from FV3
-   real(kind=kind_phys), dimension (ix,km), intent(in) :: qv2di_spechum
-   real(kind=kind_phys), dimension (ix,km), intent(inout) :: qv_spechum
+   real(kind=kind_phys), dimension (im,km), intent(in) :: qv2di_spechum
+   real(kind=kind_phys), dimension (im,km), intent(inout) :: qv_spechum
    ! Local water vapor mixing ratios and cloud water mixing ratios
-   real(kind=kind_phys), dimension (ix,km) :: qv2di, qv, forceqv, cnvw
+   real(kind=kind_phys), dimension (im,km) :: qv2di, qv, forceqv, cnvw
    !
    real(kind=kind_phys), dimension( im ),intent(in) :: garea
    real(kind=kind_phys), intent(in   ) :: dt 
-
-!  additional variables for number concentrations
-   real(kind=kind_phys), intent(in) :: nwfa(1:im,1:km)
-   real(kind=kind_phys), intent(in) :: con_rd
-   real(kind=kind_phys), dimension(im,km,ntracer), intent(inout) :: gq0
-   integer, intent(in) :: imp_physics,imp_physics_thompson,ntlnc,ntinc
 
    integer, intent(in   ) :: imfshalcnv
    character(len=*), intent(out) :: errmsg
@@ -751,6 +751,7 @@ contains
 
                gdc(i,k,1)= max(0.,tun_rad_shall(i)*cupclws(i,k)*cutens(i))      ! my mod
                gdc2(i,k,1)=max(0.,tun_rad_deep(i)*(cupclwm(i,k)*cutenm(i)+cupclw(i,k)*cuten(i)))
+               qci_conv(i,k)=gdc2(i,k,1)
                gdc(i,k,2)=(outt(i,k))*86400.
                gdc(i,k,3)=(outtm(i,k))*86400. 
                gdc(i,k,4)=(outts(i,k))*86400.
@@ -826,25 +827,7 @@ contains
                 cliw(i,k) = max(0.,cliw(i,k) + tem)
                endif
 
-!
-!> calculate cloud water and cloud ice number concentrations
-!
-               rho_dryar(i,k) = p2di(i,k)/(con_rd*t(i,k)) ! Density of dry air in kg m-3
-               if (imp_physics == imp_physics_thompson) then
-                 if ((tem*tem1)>1.e-5) then
-                    gq0(i,k,ntinc) = max(0., gq0(i,k,ntinc) +           &
-                    make_IceNumber(tem*tem1*rho_dryar(i,k), t(i,k)) *   &
-                    (1/rho_dryar(i,k)))
-                 end if
-                 if ((tem*(1-tem1))>1.e-5) then
-                    gq0(i,k,ntlnc) = max(0., gq0(i,k,ntlnc) +           &
-                    make_DropletNumber(tem*(1-tem1)*rho_dryar(i,k), nwfa(i,k)) &
-                    * (1/rho_dryar(i,k)))
-                 end if
-               end if
-
              enddo
-
 
             gdc(i,1,10)=forcing(i,1)
             gdc(i,2,10)=forcing(i,2)
@@ -879,6 +862,34 @@ contains
         qv_spechum = qv/(1.0_kind_phys+qv)
         cnvw_moist = cnvw/(1.0_kind_phys+qv)
 !
+! Diagnostic tendency updates
+!
+        if(ldiag3d) then
+          if(ishallow_g3.eq.1 .and. .not.flag_for_scnv_generic_tend) then
+            do k=kts,ktf
+              do i=its,itf
+                du3dt_SCNV(i,k) = du3dt_SCNV(i,k) + outus(i,k) * dt
+                dv3dt_SCNV(i,k) = dv3dt_SCNV(i,k) + outvs(i,k) * dt
+                dt3dt_SCNV(i,k) = dt3dt_SCNV(i,k) + outts(i,k) * dt
+                if(qdiag3d) then
+                  dq3dt_SCNV(i,k) = dq3dt_SCNV(i,k) + outqs(i,k) * dt
+                endif
+              enddo
+            enddo
+          endif
+          if((ideep.eq.1. .or. imid_gf.eq.1) .and. .not.flag_for_dcnv_generic_tend) then
+            do k=kts,ktf
+              do i=its,itf
+                du3dt_DCNV(i,k) = du3dt_DCNV(i,k) + (outu(i,k)+outum(i,k)) * dt
+                dv3dt_DCNV(i,k) = dv3dt_DCNV(i,k) + (outv(i,k)+outvm(i,k)) * dt
+                dt3dt_DCNV(i,k) = dt3dt_DCNV(i,k) + (outt(i,k)+outtm(i,k)) * dt
+                if(qdiag3d) then
+                  dq3dt_DCNV(i,k) = dq3dt_DCNV(i,k) + (outq(i,k)+outqm(i,k)) * dt
+                endif
+              enddo
+            enddo
+          endif
+        endif
    end subroutine cu_gf_driver_run
 !> @}
 end module cu_gf_driver
