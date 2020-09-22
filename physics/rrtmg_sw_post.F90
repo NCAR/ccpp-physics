@@ -34,9 +34,9 @@
       type(GFS_radtend_type),         intent(inout) :: Radtend
       type(GFS_grid_type),            intent(in)    :: Grid
       type(GFS_diag_type),            intent(inout) :: Diag
-      integer, intent(in)                           :: im, lm, kd, nday, ltp
-      type(cmpfsw_type), dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
-      real(kind=kind_phys), dimension(Size(Grid%xlon,1), Model%levr+LTP), intent(in) ::  htswc, htsw0
+      integer,                        intent(in)    :: im, lm, kd, nday, ltp
+      type(cmpfsw_type),    dimension(size(Grid%xlon,1)), intent(inout) :: scmpsw
+      real(kind=kind_phys), dimension(Size(Grid%xlon,1), lm+LTP), intent(in) ::  htswc, htsw0
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -56,7 +56,7 @@
           ! We are assuming that radiative tendencies are from bottom to top 
           ! --- repopulate the points above levr i.e. LM
           if (lm < Model%levs) then
-            do k = lm,Model%levs
+            do k = lm+1,Model%levs
               Radtend%htrsw (1:im,k) = Radtend%htrsw (1:im,LM)
             enddo
           endif
@@ -68,7 +68,7 @@
              enddo
              ! --- repopulate the points above levr i.e. LM
              if (lm < Model%levs) then
-               do k = lm,Model%levs
+               do k = lm+1,Model%levs
                  Radtend%swhc(1:im,k) = Radtend%swhc(1:im,LM)
                enddo
              endif

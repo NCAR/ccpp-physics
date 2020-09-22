@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = rrtmgp_lw_pre
+  type = scheme
+  dependencies = iounitdef.f,machine.F,physparam.f,radiation_surface.f
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_pre_run
   type = scheme

@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_suite_interstitial_rad_reset
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_suite_interstitial_rad_reset_run
   type = scheme
@@ -36,6 +42,12 @@
   optional = F
 
 ########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_interstitial_phys_reset
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_suite_interstitial_phys_reset_run
   type = scheme
@@ -72,6 +84,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_interstitial_1
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -261,6 +279,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_interstitial_2
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -584,7 +608,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = out
   optional = F
 [adjsfculw_lnd]
   standard_name = surface_upwelling_longwave_flux_over_land_interstitial
@@ -762,6 +786,50 @@
   kind = kind_phys
   intent = in
   optional = F
+[use_GP_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F  
+[skt]
+  standard_name = air_temperature_at_lowest_model_layer
+  long_name = air temperature at lowest model layer
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sktp1r]
+  standard_name = surface_skin_temperature_at_previous_time_step
+  long_name = surface skin temperature at previous time step
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F  
+[fluxlwUP]
+  standard_name = RRTMGP_lw_flux_profile_upward_allsky
+  long_name = RRTMGP upward longwave all-sky flux profile
+  units = W m-2
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T   
+[fluxlwUP_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
+  long_name = RRTMGP Jacobian upward longwave flux profile
+  units = W m-2 K-1
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T   
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -779,6 +847,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_stateout_reset
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -897,6 +971,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_stateout_update
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -1060,6 +1140,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_interstitial_3
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -1494,6 +1580,12 @@
   optional = F
 
 ########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_interstitial_4
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_suite_interstitial_4_run
   type = scheme
@@ -1806,6 +1898,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_suite_interstitial_5
+  type = scheme
+  dependencies = machine.F,module_mp_thompson_make_number_concentrations.F90
 
 ########################################################################
 [ccpp-arg-table]

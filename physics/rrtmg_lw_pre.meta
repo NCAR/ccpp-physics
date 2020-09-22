@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = rrtmg_lw_pre_init
+[ccpp-table-properties]
+  name = rrtmg_lw_pre
   type = scheme
+  dependencies = iounitdef.f,machine.F,radiation_surface.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -82,7 +83,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmg_lw_pre_finalize
-  type = scheme

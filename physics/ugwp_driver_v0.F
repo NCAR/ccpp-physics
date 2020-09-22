@@ -6,9 +6,9 @@
 !                         pgd4=4 (4 timse taub, control pgwd=1)
 !     
        use machine,      only: kind_phys
-       real(kind=kind_phys),parameter :: pgwd  = 1._kind_phys
-       real(kind=kind_phys),parameter :: pgwd4 = 1._kind_phys
-       logical,parameter              :: debugprint = .false.
+       real(kind=kind_phys),parameter :: pgwd  = 1.0_kind_phys
+       real(kind=kind_phys),parameter :: pgwd4 = 1.0_kind_phys
+       logical,             parameter :: debugprint = .false.
        end module sso_coorde
 !
 !
@@ -37,6 +37,8 @@
        use sso_coorde,       only : pgwd, pgwd4, debugprint
        implicit none
 !input
+
+       integer, parameter :: kp = kind_phys
 
        integer, intent(in) :: me,  master
        integer, intent(in) :: im, levs, kdt, imx, nmtvr, ntke, ipr
@@ -87,8 +89,9 @@
 !	
 ! switches that activate impact of OGWs and NGWs along with eddy diffusion
 !
-       real(kind=kind_phys), parameter :: pogw=1.0, pngw=1.0, pked=1.0
-     &,                                   ompked=1.0-pked
+       real(kind=kind_phys), parameter :: pogw=1.0_kp, pngw=1.0_kp
+     &,                                   pked=1.0_kp, zero=0.0_kp
+     &,                                   ompked=1.0_kp-pked
 !
 ! switches for GW-effects: pogw=1 (OGWs)  pngw=1 (NGWs) pked=1 (eddy mixing)
 !
@@ -103,7 +106,7 @@
        endif
 
        do i=1,im
-         zlwb(i) = 0.
+         zlwb(i) = zero
        enddo
 !
 ! 1) ORO stationary GWs
@@ -129,13 +132,13 @@
        else                                  ! calling old GFS gravity wave drag as is
          do k=1,levs
            do i=1,im
-             pdvdt(i,k) = 0.0
-             pdudt(i,k) = 0.0
-             pdtdt(i,k) = 0.0
-             pkdis(i,k) = 0.0
+             pdvdt(i,k) = zero
+             pdudt(i,k) = zero
+             pdtdt(i,k) = zero
+             pkdis(i,k) = zero
            enddo
          enddo
-         if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
+         if (cdmbgwd(1) > zero.or. cdmbgwd(2) > zero) then
            call gwdps(im, im, im, levs, Pdvdt, Pdudt, Pdtdt             &
      &,               ugrs, vgrs, tgrs, qgrs                            &
      &,               kpbl, prsi, del, prsl, prslk, phii, phil, dtp, kdt&
@@ -145,11 +148,11 @@
      &,               nmtvr,  cdmbgwd(1:2), me, lprnt, ipr, rdxzb)
          endif
 
-         tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
-         du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
+         tau_mtb   = zero  ; tau_ogw   = zero ;  tau_tofd = zero
+         du3dt_mtb = zero  ; du3dt_ogw = zero ;  du3dt_tms= zero
        endif
 !
-       if (cdmbgwd(3) > 0.0) then
+       if (cdmbgwd(3) > zero) then
 ! 2) non-stationary GWs with GEOS-5/MERRA GW-forcing
 !    ----------------------------------------------
 !--------	
@@ -159,11 +162,11 @@
 
 !        call slat_geos5(im, xlatd, tau_ngw)
 !
-         if (abs(1.0-cdmbgwd(3)) > 1.0e-6) then
-           if (cdmbgwd(4) > 0.0) then
+         if (abs(1.0_kp-cdmbgwd(3)) > 1.0e-6_kp) then
+           if (cdmbgwd(4) > zero) then
              do i=1,im
-               turb_fac(i) = 0.0
-               tem(i)      = 0.0
+               turb_fac(i) = zero
+               tem(i)      = zero
              enddo
              if (ntke > 0) then
                do k=1,(levs+levs)/3
@@ -179,7 +182,7 @@
              rfac = 86400000 / dtp
              do i=1,im
                tx1 = cdmbgwd(4)*min(10.0, max(turb_fac(i),rain(i)*rfac))
-               tau_ngw(i) = tau_ngw(i) * max(0.1, min(5.0, tx1))
+               tau_ngw(i) = tau_ngw(i) * max(0.1_kp, min(5.0_kp, tx1))
              enddo
            endif
            do i=1,im
@@ -218,10 +221,10 @@
          enddo
        endif
 
-       if (pogw == 0.0) then
+       if (pogw == zero) then
 !        zmtb = 0.;  zogw =0.
-         tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
-         du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
+         tau_mtb   = zero  ; tau_ogw   = zero ;  tau_tofd = zero
+         du3dt_mtb = zero  ; du3dt_ogw = zero ;  du3dt_tms= zero
        endif
 
        return
@@ -235,7 +238,7 @@
 !------------------------------------------------------------------------------
        do k=1,levs
          do i=1,im
-           ed_dudt(i,k) = 0.0 ; ed_dvdt(i,k) = 0.0 ; ed_dtdt(i,k) = 0.0
+           ed_dudt(i,k) = zero ; ed_dvdt(i,k) = zero ; ed_dtdt(i,k) = zero
          enddo
        enddo
 
@@ -314,6 +317,7 @@
       use sso_coorde,        only : pgwd, pgwd4, debugprint
 !----------------------------------------
       implicit none
+      integer, parameter :: kp = kind_phys
       character(len=8)    :: strsolver='PSS-1986'  ! current operational solver or  'WAM-2017'
       integer, intent(in) :: im, km, imx, kdt
       integer, intent(in) :: me, master
@@ -359,9 +363,9 @@
 !     cleff = 2.5*0.5e-5 * sqrt(192./768.) => Lh_eff = 1004. km
 !      6*dx = 240 km 8*dx = 320. ~ 3-5 more effective
 !---------------------------------------------------------------------
-      real(kind=kind_phys)            :: gammin = 0.00999999
-      real(kind=kind_phys), parameter :: nhilmax = 25.
-      real(kind=kind_phys), parameter :: sso_min = 3000.
+      real(kind=kind_phys)            :: gammin = 0.00999999_kp
+      real(kind=kind_phys), parameter :: nhilmax = 25.0_kp
+      real(kind=kind_phys), parameter :: sso_min = 3000.0_kp
       logical, parameter              :: do_adjoro = .true.
 !
       real(kind=kind_phys)            :: shilmin, sgrmax, sgrmin
@@ -435,7 +439,7 @@
       dsmax  = sqrt(sgrmax)   ; dsmin  = sqrt(sgrmin)
 
       dxres   = pi2*arad/float(IMX)
-      hdxres  = 0.5*dxres
+      hdxres  = 0.5_kp*dxres
 !     shilmin = sgrmin/nhilmax            ! not used - Moorthi
 
 !     gammin = min(sso_min/dsmax, 1.)     ! Moorthi - with this results are not reproducible
@@ -1286,6 +1290,7 @@
 !      nov 2017 nh/rotational gw-modes for nh-fv3gfs
 ! ---------------------------------------------------------------------------------
 !
+      use machine,          only : kind_phys
 
       use ugwp_common ,     only : rgrav,      grav,  cpd,    rd,  rv
      &,                            omega2,     rcpd2,  pi,    pi2, fv
@@ -1306,6 +1311,7 @@
       implicit none
 !23456
 
+      integer, parameter :: kp = kind_phys
       integer, intent(in) :: klev             ! vertical level
       integer, intent(in) :: klon             ! horiz tiles
 
@@ -1332,8 +1338,9 @@
       real, intent(out) :: pdvdt(klon,klev)     ! meridional momentum tendency
       real, intent(out) :: pdtdt(klon,klev)     ! gw-heating (u*ax+v*ay)/cp
       real, intent(out) :: dked(klon,klev)      ! gw-eddy diffusion
-      real, parameter   :: minvel = 0.5         !
-      real, parameter   :: epsln  = 1.0d-12     !
+      real, parameter   :: minvel = 0.5_kp      !
+      real, parameter   :: epsln  = 1.0e-12_kp  !
+      real, parameter   :: zero   = 0.0_kp, one = 1.0_kp, half = 0.5_kp
 
 !vay-2018
 
@@ -1395,7 +1402,7 @@
 !      real  :: rcpd, grav2cpd
        real, parameter ::  rcpdl    = cpd/grav     ! 1/[g/cp]  == cp/g
      &,                    grav2cpd = grav/rcpdl   ! g*(g/cp)= g^2/cp
-     &,                    cpdi     = 1.0d0/cpd
+     &,                    cpdi     = one/cpd
 
        real :: expdis, fdis
 !      real :: fmode, expdis, fdis
@@ -1407,10 +1414,10 @@
 !
         do k=1,klev
           do j=1,klon
-            pdvdt(j,k) = 0.0
-            pdudt(j,k) = 0.0
-            pdtdt(j,k) = 0.0
-            dked(j,k)  = 0.0
+            pdvdt(j,k) = zero
+            pdudt(j,k) = zero
+            pdtdt(j,k) = zero
+            dked(j,k)  = zero
             phil(j,k)  = philg(j,k) * rgrav
           enddo
         enddo
@@ -1438,9 +1445,9 @@
        do iazi=1, nazd
          do jk=1,klev
            do jl=1,klon
-             zpu(jl,jk,iazi)  = 0.0
-!            zcrt(jl,jk,iazi) = 0.0
-!            zdfl(jl,jk,iazi) = 0.0
+             zpu(jl,jk,iazi)  = zero
+!            zcrt(jl,jk,iazi) = zero
+!            zdfl(jl,jk,iazi) = zero
            enddo
          enddo
        enddo
@@ -1456,23 +1463,23 @@
 !       ---------------------------------------------
        do jk=max(ilaunch,2),klev
          do jl=1,klon
-           tvc1 = tm1(jl,jk)   * (1. +fv*qm1(jl,jk))
-           tvm1 = tm1(jl,jk-1) * (1. +fv*qm1(jl,jk-1))
+           tvc1 = tm1(jl,jk)   * (one +fv*qm1(jl,jk))
+           tvm1 = tm1(jl,jk-1) * (one +fv*qm1(jl,jk-1))
 !          zthm1(jl,jk)   = 0.5 *(tvc1+tvm1)
-           zthm1          = 2.0 / (tvc1+tvm1)
-           zuhm1(jl,jk)   = 0.5 *(um1(jl,jk-1)+um1(jl,jk))
-           zvhm1(jl,jk)   = 0.5 *(vm1(jl,jk-1)+vm1(jl,jk))
+           zthm1          = 2.0_kp / (tvc1+tvm1)
+           zuhm1(jl,jk)   = half *(um1(jl,jk-1)+um1(jl,jk))
+           zvhm1(jl,jk)   = half *(vm1(jl,jk-1)+vm1(jl,jk))
 !          zrhohm1(jl,jk) = prsi(jl,jk)*rdi/zthm1(jl,jk)   !  rho = p/(RTv) 
            zrhohm1(jl,jk) = prsi(jl,jk)*rdi*zthm1          !  rho = p/(RTv) 
            zdelp          = phil(jl,jk)-phil(jl,jk-1)      !>0 ...... dz-meters
            v_zmet(jl,jk)  = zdelp + zdelp
            delpi(jl,jk)  = grav / (prsi(jl,jk-1) - prsi(jl,jk))
            vueff(jl,jk)   =
-     &     2.e-5*exp( (phil(jl,jk)+phil(jl,jk-1))*rhp2)+dked_min
+     &     2.e-5_kp*exp( (phil(jl,jk)+phil(jl,jk-1))*rhp2)+dked_min
 !
 !          zbn2(jl,jk)    =  grav2cpd/zthm1(jl,jk)
            zbn2(jl,jk)    =  grav2cpd*zthm1
-     &                    * (1.0+rcpdl*(tm1(jl,jk)-tm1(jl,jk-1))/zdelp)
+     &                    * (one+rcpdl*(tm1(jl,jk)-tm1(jl,jk-1))/zdelp)
            zbn2(jl,jk)    = max(min(zbn2(jl,jk), gssec), bv2min)
            zbvfhm1(jl,jk) = sqrt(zbn2(jl,jk))       ! bn = sqrt(bn2)
          enddo
@@ -1621,8 +1628,8 @@
 
 !     copy zflux into all other azimuths
 !     --------------------------------
-!     zact(:,:,:) = 1.0 ; zacc(:,:,:) = 1.0
-      zact(:,:,:) = 1.0
+!     zact(:,:,:) = one ; zacc(:,:,:) = one
+      zact(:,:,:) = one
       do iazi=2, nazd
         do inc=1,nwav
           do jl=1,klon
@@ -1690,9 +1697,9 @@
           do inc=1, nwav
             zcin  = zci(inc)
             if (abs(zcin) > epsln) then
-              zcinc = 1.0 / zcin
+              zcinc = one / zcin
             else
-              zcinc = 1.0
+              zcinc = one
             endif
             do jl=1,klon
 !=======================================================================
@@ -1704,12 +1711,12 @@
               v_wdp = v_kxw*v_cdp
               wdop2 = v_wdp* v_wdp
               cdf2  = v_cdp*v_cdp - c2f2(jL)
-              if (cdf2 > 0) then
+              if (cdf2 > zero) then
                 kzw2 = (zBn2(jL,jk)-wdop2)/Cdf2  - v_kxw2
               else
-                kzw2 = 0.0
+                kzw2 = zero
               endif
-              if ( kzw2 > 0 ) then
+              if ( kzw2 > zero ) then
                 v_kzw = sqrt(kzw2)
 !	       
 !linsatdis:  kzw2, kzw3, kdsat, c2f2,  cdf2, cdf1
@@ -1722,10 +1729,10 @@
                 v_kzi  = abs(v_kzw*v_kzw*vueff(jl,jk)/v_wdp*v_kzw)
                 expdis = exp(-v_kzi*v_zmet(jl,jk))
               else
-                v_kzi  = 0.
-                expdis = 1.0
-                v_kzw  = 0.
-                v_cdp  = 0.   ! no effects of reflected waves
+                v_kzi  = zero
+                expdis = one
+                v_kzw  = zero
+                v_cdp  = zero   ! no effects of reflected waves
               endif
 
 !             fmode =  zflux(jl,inc,iazi)
@@ -1741,7 +1748,7 @@
 ! flux_tot - sat.flux
 ! 
               zdep = zact(jl,inc,iazi)* (fdis-zfluxs)
-              if(zdep > 0.0 ) then
+              if(zdep > zero ) then
 ! subs on sat-limit
                 zflux(jl,inc,iazi) = zfluxs
                 zflux_z(jl,inc,jk) = zfluxs
@@ -1755,7 +1762,7 @@
 !
 ! integrate over spectral modes  zpu(y, z, azimuth)    zact(jl,inc,iazi)*zflux(jl,inc,iazi)*[d("zcinc")]
 !
-          zdfdz_v(:,jk,iazi) = 0.0
+          zdfdz_v(:,jk,iazi) = zero
  
           do inc=1, nwav
             zcinc = zdci(inc)                    ! dc-integration
@@ -1795,8 +1802,8 @@
 !
        do jk=1,klev+1
          do jl=1,klon
-           taux(jl,jk) = 0.0
-           tauy(jl,jk) = 0.0
+           taux(jl,jk) = zero
+           tauy(jl,jk) = zero
          enddo
        enddo
 
@@ -1858,10 +1865,10 @@
        if (kdt == 1 .and. mpi_id == master .and. debugprint) then
          print *, 'vgw done  '
 !
-         print *, maxval(pdudt)*86400.,  minval(pdudt)*86400, 'vgw ax'
-         print *, maxval(pdvdt)*86400.,  minval(pdvdt)*86400, 'vgw ay'
+         print *, maxval(pdudt)*86400,  minval(pdudt)*86400, 'vgw ax'
+         print *, maxval(pdvdt)*86400,  minval(pdvdt)*86400, 'vgw ay'
          print *, maxval(dked)*1.,  minval(dked)*1,  'vgw keddy m2/sec'
-         print *, maxval(pdtdt)*86400.,  minval(pdtdt)*86400,'vgw eps'
+         print *, maxval(pdtdt)*86400,  minval(pdtdt)*86400,'vgw eps'
 !
 !        print *, ' ugwp -heating rates '
        endif
@@ -2064,22 +2071,22 @@
       S(K)  = F(k)
       S1(K) = F1(k)
       do k=2, levs-1
-       ad = cd
-       kp1 = .5*(Km(k)+Km(k+1))
-       cd = rdp(k)*rdpm(k)*kp1*dt
-       bd = 1.-(ad +cd)
-       S(k)  = cd*F(k+1)  + ad *F(k-1)  + bd *F(k)
-       S1(k) = cd*F1(k+1) + ad *F1(k-1) + bd *F1(k)
+        ad = cd
+        kp1 = .5*(Km(k)+Km(k+1))
+        cd = rdp(k)*rdpm(k)*kp1*dt
+        bd = 1.-(ad +cd)
+        S(k)  = cd*F(k+1)  + ad *F(k-1)  + bd *F(k)
+        S1(k) = cd*F1(k+1) + ad *F1(k-1) + bd *F1(k)
       enddo
-       k     = levs
-       S(k)  = F(k)
-       S1(k) = F1(k)
+      k     = levs
+      S(k)  = F(k)
+      S1(k) = F1(k)
       end subroutine diff_1d_wtend
 
       subroutine diff_1d_ptend(levs, dt, F, Km, rdp, rdpm, S)
-       use machine,      only: kind_phys
-       implicit none
-       integer :: levs
+      use machine,      only: kind_phys
+      implicit none
+      integer :: levs
       real(kind=kind_phys) :: dt
       real(kind=kind_phys) :: S(levs),   S1(levs),  F(levs), F1(levs)
       real(kind=kind_phys) :: Km(levs),  rdp(levs), rdpm(levs-1)
@@ -2096,15 +2103,15 @@
       kp1 = .5*(Km(k)+Km(k+1))
       cd = rdp(1)*rdpm(1)*kp1*dt
       bd = 1. -(cd +ad)
-!      S(k) = cd*F(k+1) + ad *F(k-1) + bd *F(k)
+!     S(k) = cd*F(k+1) + ad *F(k-1) + bd *F(k)
       S(K) = F(k)
       do k=2, levs-1
-       ad = cd
-       kp1 = .5*(Km(k)+Km(k+1))
-       cd = rdp(k)*rdpm(k)*kp1*dt
-       bd = 1.-(ad +cd)
-       S(k) = cd*F(k+1) + ad *F(k-1) + bd *F(k)
+        ad = cd
+        kp1 = .5*(Km(k)+Km(k+1))
+        cd = rdp(k)*rdpm(k)*kp1*dt
+        bd = 1.-(ad +cd)
+        S(k) = cd*F(k+1) + ad *F(k-1) + bd *F(k)
       enddo
-       k = levs
-       S(k) = F(k)
+      k = levs
+      S(k) = F(k)
       end subroutine diff_1d_ptend

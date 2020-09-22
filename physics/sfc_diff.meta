@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_diff
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_diff_run
   type = scheme
@@ -351,6 +357,15 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[z0rl_wav]
+  standard_name = surface_roughness_length_from_wave_model
+  long_name = surface roughness length from wave model
+  units = cm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [ustar_wat]
   standard_name = surface_friction_velocity_over_ocean
