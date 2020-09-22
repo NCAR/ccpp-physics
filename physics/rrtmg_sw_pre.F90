@@ -35,7 +35,7 @@
       integer,                        intent(in)    :: im
       integer,                        intent(out)   :: nday
       integer, dimension(size(Grid%xlon,1)), intent(out) :: idxday
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  ::  tsfa, tsfg
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: tsfa, tsfg
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(out) :: sfcalb1, sfcalb2, sfcalb3, sfcalb4
       real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in)  :: alb1d
       character(len=*), intent(out) :: errmsg
@@ -43,6 +43,8 @@
       ! Local variables
       integer :: i
       real(kind=kind_phys), dimension(size(Grid%xlon,1),NF_ALBD) :: sfcalb
+
+      real(kind=kind_phys) :: lndp_alb
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -63,6 +65,16 @@
           endif
         enddo
 
+! set albedo pert, if requested.
+        lndp_alb = -999.
+        if (Model%lndp_type==1) then
+          do i =1,Model%n_var_lndp
+            if (Model%lndp_var_list(i) == 'alb') then
+                lndp_alb = Model%lndp_prt_list(i)
+            endif
+          enddo
+        endif
+
 !>  - Call module_radiation_surface::setalb() to setup surface albedo.
 !!  for SW radiation.
 
@@ -72,13 +84,13 @@
                      Sfcprop%alnsf, Sfcprop%alvwf, Sfcprop%alnwf,    &
                      Sfcprop%facsf, Sfcprop%facwf, Sfcprop%fice,     &
                      Sfcprop%tisfc, IM,                              &
-                     alb1d, Model%pertalb,                           &  !  mg, sfc-perts
+                     alb1d, lndp_alb,                           &  !  mg, sfc-perts
                      sfcalb)                                           !  ---  outputs
 
 !> -# Approximate mean surface albedo from vis- and nir-  diffuse values.
         Radtend%sfalb(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
       else
-        nday = 0
+        nday   = 0
         idxday = 0
         sfcalb = 0.0
       endif

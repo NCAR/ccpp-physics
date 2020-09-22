@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_surface_loop_control_part1
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_surface_loop_control_part1_run
   type = scheme
@@ -51,6 +57,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_surface_loop_control_part2
+  type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]

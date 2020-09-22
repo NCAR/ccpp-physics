@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = cnvc90_init
+[ccpp-table-properties]
+  name = cnvc90
   type = scheme
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]
@@ -137,7 +138,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = cnvc90_finalize
-  type = scheme

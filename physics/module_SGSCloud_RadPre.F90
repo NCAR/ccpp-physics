@@ -311,7 +311,7 @@
 
 ! DH* 20200723
 ! iovr == 4 or 5 requires alpha, which is computed in GFS_rrmtg_pre,
-! which comes after sgscloud_radpre. Computing alpha here requires
+! which comes after SGSCloud_RadPre. Computing alpha here requires
 ! a lot more input variables and computations (dzlay etc.), and
 ! recomputing it in GFS_rrmtg_pre is a waste of time. Workaround:
 ! pass a dummy array initialized to zero to gethml for other values of iovr.
