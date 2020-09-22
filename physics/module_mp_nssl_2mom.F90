@@ -121,8 +121,7 @@
 
 MODULE module_mp_nssl_2mom
 
-  use physcons, only : pi => con_pi, gr => con_g, rd => con_rd, cp => con_cp, rw => con_rv, tfr => con_t0c, &
-                       cv => con_cv, cpl => con_cliq, cpigb => con_csol, cp608 => con_eps
+  USE machine, only : kind_phys
 
   IMPLICIT NONE
   
@@ -681,7 +680,7 @@ MODULE module_mp_nssl_2mom
 !
 !  constants
 !
-!     real, parameter :: cp608 = 0.608          ! constant used in conversion of T to Tv
+      real            :: cp608                  ! constant used in conversion of T to Tv (set from ccpp)
       real, parameter :: ar = 841.99666         ! rain terminal velocity power law coefficient (LFO)
       real, parameter :: br = 0.8               ! rain terminal velocity power law coefficient (LFO)
       real, parameter :: aradcw = -0.27544      !
@@ -698,11 +697,9 @@ MODULE module_mp_nssl_2mom
 !  new values for  cs and ds
       real, parameter :: cs = 12.42             ! snow terminal velocity power law coefficient 
       real, parameter :: ds = 0.42              ! snow terminal velocity power law coefficient 
-!     real, parameter :: pi = 3.141592653589793
-      real, parameter :: piinv = 1./pi
-      real, parameter :: pid4 = pi/4.0
+      real            :: pi, piinv, pid4
 
-!     real, parameter :: gr = 9.8
+      real            :: gr                     ! acceleration due to gravity (set from ccpp)
 
 !
 ! max and min mean volumes
@@ -720,7 +717,7 @@ MODULE module_mp_nssl_2mom
 
       real, parameter :: cwradn = 2.5e-6, xcradmn = cwradn    ! minimum radius
       real, parameter :: cwradx = 60.e-6, xcradmx = cwradx    ! maximum radius
-      real, parameter :: cwc1 = 6.0/(pi*1000.)
+      real            :: cwc1
 
 !      parameter( xvcmn=4.188e-18 )   ! mks  min volume = 3 micron radius
       real, parameter :: xvcmn=0.523599*(2.*cwradn)**3    ! mks  min volume = 2.5 micron radius
@@ -766,26 +763,24 @@ MODULE module_mp_nssl_2mom
       real, parameter :: cbwbolton = 29.65 ! constants for Bolton formulation
       real, parameter :: cawbolton = 17.67
 
-!     real, parameter :: tfr = 273.15
+      real            :: tfr                     ! water freezing temperature (set from ccpp)
       real, parameter :: tfrh = 233.15
 
-!     real, parameter :: cp = 1004.0, rd = 287.04
-      real, parameter :: cpi = 1./cp
-      real, parameter :: cap = rd/cp, poo = 1.0e+05
+      real            :: cp, rd, cpi, cap        ! specific heat and gas constant for dry air (set from ccpp)
+      real, parameter :: poo = 1.0e+05
 
-!     real, parameter :: rw = 461.5              ! gas const. for water vapor
+      real            :: rw                      ! gas const. for water vapor (set from ccpp)
       real, parameter :: advisc0 = 1.832e-05     ! reference dynamic viscosity (SMT; see Beard & Pruppacher 71)
       real, parameter :: advisc1 = 1.718e-05     ! dynamic viscosity constant used in thermal conductivity calc
       real, parameter :: tka0 = 2.43e-02         ! reference thermal conductivity
-      real, parameter :: tfrcbw = tfr - cbw
-      real, parameter :: tfrcbi = tfr - cbi
+      real            :: tfrcbw
+      real            :: tfrcbi
 
      ! GHB: Needed for eqtset=2 in cm1
 !     REAL, PRIVATE ::      cv = cp - rd
-!    real, private, parameter ::      cv = 717.0             ! specific heat at constant volume - air
+     real, private, parameter ::      cv = 717.0             ! specific heat at constant volume - air
      REAL, PRIVATE, parameter ::      cvv = 1408.5
-!    REAL, PRIVATE, parameter ::      cpl = 4190.0
-!    REAL, PRIVATE, parameter ::      cpigb = 2106.0
+     REAL, PRIVATE            ::      cpl, cpigb     ! specific heat for liquid and solid water (set from ccpp)
      ! GHB
 
       real, parameter ::  bfnu0 = (rnu + 2.0)/(rnu + 1.0) 
@@ -836,11 +831,14 @@ MODULE module_mp_nssl_2mom
  
 ! #####################################################################
 
-       SUBROUTINE nssl_2mom_init(nssl_params, ipctmp, mixphase,ihvol, errmsg, errflg)
+       SUBROUTINE nssl_2mom_init(nssl_params, ipctmp, mixphase,ihvol, con_pi, con_g, con_rd, con_cp, con_rv, &
+                                 con_t0c, con_cliq, con_csol, con_eps, errmsg, errflg)
 
   implicit none
   
    real,  intent(in), dimension(20) :: nssl_params
+   real(kind=kind_phys), intent(in) :: con_pi, con_g, con_rd, con_cp, con_rv, con_t0c, &
+                                       con_cliq, con_csol, con_eps
    integer, intent(in) :: ipctmp,mixphase,ihvol
    ! CCPP error handling
    character(len=*), intent(  out) :: errmsg
@@ -859,6 +857,29 @@ MODULE module_mp_nssl_2mom
 
      errmsg = ''
      errflg = 0
+
+     ! Set constants from CCPP
+     pi = con_pi
+     piinv = 1./pi
+     pid4 = pi/4.0
+     cwc1 = 6.0/(pi*1000.)
+
+     gr = con_g
+
+     rd = con_rd
+     cp = con_cp
+     cpi = 1./cp
+     cap = rd/cp
+
+     rw = con_rv
+
+     tfr = con_t0c
+     tfrcbw = tfr - cbw
+     tfrcbi = tfr - cbi
+
+     cpl = con_cliq
+     cpigb = con_csol
+     cp608 = con_eps
 
      turn_on_ccna = .false.
 !     turn_on_cin  = .false.
@@ -3757,19 +3778,20 @@ END SUBROUTINE nssl_2mom_driver
       double precision :: zr, zs, zh, dninv
       real, parameter :: xn0s = 3.0e6, xn0r = 8.0e6, xn0h = 4.0e4, xn0hl = 4.0e4
       real, parameter :: xdnr = 1000., xdns = 100. ,xdnh = 700.0, xdnhl = 900.0
-      real, parameter :: zhlfac = 1./(pi*xdnhl*xn0hl)
-      real, parameter :: zhfac = 1./(pi*xdnh*xn0h)
-      real, parameter :: zrfac = 1./(pi*xdnr*xn0r)
-      real, parameter :: zsfac = 1./(pi*xdns*xn0s)
       real, parameter :: g0 = (6.0)*(5.0)*(4.0)/((3.0)*(2.0)*(1.0))
       real, parameter :: xims=900.*0.523599*(2.*50.e-6)**3    ! mks   (100 micron diam solid sphere approx)
+      real            :: zhlfac, zhfac, zrfac, zsfac
 
       real xv,xdn
       integer :: ndbz, nmwgt, nnwgt, nwlessthanz
 
 ! ------------------------------------------------------------------
       
-      
+      zhlfac = 1./(pi*xdnhl*xn0hl)
+      zhfac = 1./(pi*xdnh*xn0h)
+      zrfac = 1./(pi*xdnr*xn0r)
+      zsfac = 1./(pi*xdns*xn0s)
+     
       jy = 1
       
       
@@ -3933,19 +3955,20 @@ END SUBROUTINE nssl_2mom_driver
       double precision :: zr, zs, zh, dninv
       real, parameter :: xn0s = 3.0e6, xn0r = 8.0e6, xn0h = 4.0e4, xn0hl = 4.0e4
       real, parameter :: xdnr = 1000., xdns = 100. ,xdnh = 700.0, xdnhl = 900.0
-      real, parameter :: zhlfac = 1./(pi*xdnhl*xn0hl)
-      real, parameter :: zhfac = 1./(pi*xdnh*xn0h)
-      real, parameter :: zrfac = 1./(pi*xdnr*xn0r)
-      real, parameter :: zsfac = 1./(pi*xdns*xn0s)
       real, parameter :: g0 = (6.0)*(5.0)*(4.0)/((3.0)*(2.0)*(1.0))
       real, parameter :: xims=900.*0.523599*(2.*50.e-6)**3    ! mks   (100 micron diam solid sphere approx)
       real, parameter :: xcms=1000.*0.523599*(2.*7.5e-6)**3    ! mks   (100 micron diam solid sphere approx)
+      real :: zhlfac, zhfac, zrfac, zsfac
 
       real :: xmass,xv,xdn
       integer :: ndbz, nmwgt, nnwgt, nwlessthanz
 
 ! ------------------------------------------------------------------
-      
+
+      zhlfac = 1./(pi*xdnhl*xn0hl)
+      zhfac = 1./(pi*xdnh*xn0h)
+      zrfac = 1./(pi*xdnr*xn0r)
+      zsfac = 1./(pi*xdns*xn0s)
       
       jy = 1
       
@@ -7396,7 +7419,7 @@ END SUBROUTINE nssl_2mom_driver
       
       real :: cvm,cpm,rmm
 
-      real, parameter :: rovcp = rd/cp
+      real            :: rovcp
       real, parameter ::      cpv = 1885.0       ! specific heat of water vapor at constant pressure
       
       integer :: kstag
@@ -7405,6 +7428,9 @@ END SUBROUTINE nssl_2mom_driver
       
 
 ! -------------------------------------------------------------------------------
+
+      rovcp = rd/cp
+
       itile = nxi
       jtile = ny
       ktile = nz
@@ -9498,7 +9524,7 @@ END SUBROUTINE nssl_2mom_driver
       
       real cvm,cpm,rmm
 
-      real, parameter :: rovcp = rd/cp
+      real            :: rovcp
       real, parameter ::      cpv = 1885.0       ! specific heat of water vapor at constant pressure
 !
       real fcci(ngs), fcip(ngs)
@@ -9560,7 +9586,7 @@ END SUBROUTINE nssl_2mom_driver
       real :: qhgt20mm ! mass greater than 20mm
       real :: fwmhtmp
       real, parameter :: fwmhtmptem = -15. ! temperature at which fwmhtmp fully switches to liquid water only being on large particles
-      real, parameter :: d1t = (6.0 * 0.268e-3/(917.* pi))**(1./3.) ! d1t is the diameter of the ice sphere with the mass of an 8mm spherical drop
+      real            :: d1t               ! d1t is the diameter of the ice sphere with the mass of an 8mm spherical drop
       real, parameter :: srasheym = 0.1389 ! slope fraction from Rasmussen and Heymsfield 
 !
       real swvent(ngs),hwvent(ngs),rwvent(ngs),hlvent(ngs),hwventy(ngs),hlventy(ngs),rwventz(ngs)
@@ -10107,6 +10133,8 @@ END SUBROUTINE nssl_2mom_driver
 
 
 !
+      rovcp = rd/cp
+      d1t = (6.0 * 0.268e-3/(917.* pi))**(1./3.)
 
        pb(:) = 0.0
        pinit(:) = 0.0

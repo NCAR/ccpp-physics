@@ -26,12 +26,15 @@ contains
 !! \section arg_table_mp_nssl_2mom_init Argument Table
 !! \htmlinclude mp_nssl_2mom_init.html
 !!
-  subroutine mp_nssl_2mom_init(mpirank, mpiroot, imp_physics, imp_physics_nssl, errmsg, errflg)
+  subroutine mp_nssl_2mom_init(mpirank, mpiroot, con_pi, con_g, con_rd, con_cp, con_rv, con_t0c,  &
+                               con_cliq, con_csol, con_eps, imp_physics, imp_physics_nssl, errmsg, errflg)
 
   implicit none
 
    integer,                   intent(in)    :: mpirank
    integer,                   intent(in)    :: mpiroot
+   real(kind=kind_phys),      intent(in)    :: con_pi, con_g, con_rd, con_cp, con_rv, con_t0c, &
+                                               con_cliq, con_csol, con_eps
    integer,                   intent(in)    :: imp_physics
    integer,                   intent(in)    :: imp_physics_nssl
    character(len=*),          intent(  out) :: errmsg
@@ -86,7 +89,8 @@ contains
        nssl_params(11) = 0.
        nssl_params(12) = 0.
 
-       CALL nssl_2mom_init(nssl_params,ipctmp,mixphase,ihvol, errmsg, errflg)
+       CALL nssl_2mom_init(nssl_params,ipctmp,mixphase,ihvol, con_pi, con_g, con_rd, con_cp, con_rv, con_t0c, &
+                           con_cliq, con_csol, con_eps, errmsg, errflg)
        if (errflg /= 0) return
 
        is_initialized = .true.
