@@ -1,14 +1,30 @@
+[ccpp-table-properties]
+  name = GFS_rrtmgp_pre
+  type = scheme
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f
+  dependencies = radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f,rrtmgp_aux.F90,rrtmg_lw_cloud_optics.F90
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_pre_init
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
-  intent = inout
-  optional = F
+[active_gases]
+  standard_name = active_gases_used_by_RRTMGP
+  long_name = active gases used by RRTMGP
+  units = none
+  dimensions =  ()
+  type = character
+  kind = len=128
+  intent = in
+  optional = F  
+[nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP (Model%nGases)
+  units = count
+  dimensions =  ()
+  type = integer  
+  intent = in
+  optional = F  
 [active_gases_array]
   standard_name = list_of_active_gases_used_by_RRTMGP
   long_name = list of active gases used by RRTMGP
@@ -40,76 +56,150 @@
 [ccpp-arg-table]
   name = GFS_rrtmgp_pre_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[Grid]
-  standard_name = GFS_grid_type_instance
-  long_name = instance of derived type GFS_grid_type
-  units = DDT
-  dimensions = ()
-  type = GFS_grid_type
-  intent = in
-  optional = F
-[Sfcprop]
-  standard_name = GFS_sfcprop_type_instance
-  long_name = instance of derived type GFS_sfcprop_type
-  units = DDT
-  dimensions = ()
-  type = GFS_sfcprop_type
-  intent = in
-  optional = F
-[Statein]
-  standard_name = GFS_statein_type_instance
-  long_name = instance of derived type GFS_statein_type
-  units = DDT
-  dimensions = ()
-  type = GFS_statein_type
-  intent = in
-  optional = F
-[Tbd]
-  standard_name = GFS_tbd_type_instance
-  long_name = instance of derived type GFS_tbd_type
-  units = DDT
-  dimensions = ()
-  type = GFS_tbd_type
-  intent = in
-  optional = F
-[Coupling]
-  standard_name = GFS_coupling_type_instance
-  long_name = instance of derived type GFS_coupling_type
-  units = DDT
-  dimensions = ()
-  type = GFS_coupling_type
-  intent = in
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = instance of derived type GFS_radtend_type
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = inout
-  optional = F
 [ncol]
   standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
+  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
   intent = in
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
   dimensions = ()
-  type = ty_gas_optics_rrtmgp
+  type = integer
+  intent = in
+  optional = F  
+[nGases]
+  standard_name = number_of_active_gases_used_by_RRTMGP
+  long_name = number of gases available used by RRTMGP (Model%nGases)
+  units = count
+  dimensions =  ()
+  type = integer  
+  intent = in
+  optional = F  
+[nTracers]
+  standard_name = number_of_tracers
+  long_name = number of tracers
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lslwr]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F  
+[i_o3]
+  standard_name = index_for_ozone
+  long_name = tracer index for ozone mixing ratio
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F 
+[fhswr]
+  standard_name = frequency_for_shortwave_radiation
+  long_name = frequency for shortwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F 
+[fhlwr]
+  standard_name = frequency_for_longwave_radiation
+  long_name = frequency for longwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F 
+[xlat]
+  standard_name = latitude
+  long_name = latitude
+  units = radian
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
+[xlon]
+  standard_name = longitude
+  long_name = longitude
+  units = radian
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F   
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F   
+[prslk]
+  standard_name = dimensionless_exner_function_at_model_layers
+  long_name = dimensionless Exner function at model layer centers
+  units = none
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys    
+  intent = in
+  optional = F  
+[prsl]
+  standard_name = air_pressure
+  long_name = mean layer pressure
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F  
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
+[qgrs]
+  standard_name = tracer_concentration
+  long_name = model layer mean tracer concentration
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F   
+[tsfc]
+  standard_name = surface_skin_temperature
+  long_name = surface skin temperature
+  units = K
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [active_gases_array]
@@ -121,20 +211,47 @@
   kind = len=*
   intent = in
   optional = F
+[con_eps]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants
+  long_name = rd/rv
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_epsm1]
+  standard_name = ratio_of_dry_air_to_water_vapor_gas_constants_minus_one
+  long_name = (rd/rv) - 1
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = (rv/rd) - 1 (rv = ideal gas constant for water vapor)
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys  
+  intent = in
+  optional = F    
+[con_epsqs]
+  standard_name = minimum_value_of_saturation_mixing_ratio
+  long_name = floor value for saturation mixing ratio
+  units = kg kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F     
 [raddt]
   standard_name = time_step_for_radiation
   long_name = radiation time step
   units = s
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[sec_diff_byband]
-  standard_name = secant_of_diffusivity_angle_each_RRTMGP_LW_band
-  long_name = secant of diffusivity angle in each RRTMGP LW band
-  units = none
-  dimensions = (number_of_lw_bands_rrtmgp,horizontal_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -220,121 +337,6 @@
   kind = kind_phys
   intent = out
   optional = F
-[cld_frac]
-  standard_name = total_cloud_fraction
-  long_name = layer total cloud fraction
-  units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_lwp]
-  standard_name = cloud_liquid_water_path
-  long_name = layer cloud liquid water path
-  units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_reliq]
-  standard_name = mean_effective_radius_for_liquid_cloud
-  long_name = mean effective radius for liquid cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_iwp]
-  standard_name = cloud_ice_water_path
-  long_name = layer cloud ice water path
-  units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_reice]
-  standard_name = mean_effective_radius_for_ice_cloud
-  long_name = mean effective radius for ice cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_swp]
-  standard_name = cloud_snow_water_path
-  long_name = layer cloud snow water path
-  units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_resnow]
-  standard_name = mean_effective_radius_for_snow_flake
-  long_name = mean effective radius for snow cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_rwp]
-  standard_name = cloud_rain_water_path
-  long_name = layer cloud rain water path
-  units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cld_rerain]
-  standard_name = mean_effective_radius_for_rain_drop
-  long_name = mean effective radius for rain cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[mtopa]
-  standard_name = model_layer_number_at_cloud_top
-  long_name = vertical indices for low, middle and high cloud tops
-  units = index
-  dimensions = (horizontal_dimension,3)
-  type = integer
-  intent = out
-  optional = F
-[mbota]
-  standard_name = model_layer_number_at_cloud_base
-  long_name = vertical indices for low, middle and high cloud bases
-  units = index
-  dimensions = (horizontal_dimension,3)
-  type = integer
-  intent = out
-  optional = F
-[de_lgth]
-  standard_name = cloud_decorrelation_length
-  long_name = cloud decorrelation length
-  units = km
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[cldsa]
-  standard_name = cloud_area_fraction_for_radiation
-  long_name = fraction of clouds for low, middle, high, total and BL
-  units = frac
-  dimensions = (horizontal_dimension,5)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
   long_name = DDT containing gas concentrations for RRTMGP radiation scheme
@@ -360,8 +362,3 @@
   type = integer
   intent = out
   optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = GFS_rrtmgp_pre_finalize
-  type = scheme

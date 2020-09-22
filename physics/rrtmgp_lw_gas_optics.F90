@@ -66,7 +66,8 @@ contains
          temp_ref                           ! Temperatures for reference atmosphere; temp_ref(# reference layers) [K]  
     real(kind_phys), dimension(:,:), allocatable :: &
          band_lims,                       & ! Beginning and ending wavenumber [cm -1] for each band  
-         totplnk                            ! Integrated Planck function by band  
+         totplnk,                         & ! Integrated Planck function by band  
+         optimal_angle_fit
     real(kind_phys), dimension(:,:,:), allocatable :: &
          vmr_ref,                         & ! volume mixing ratios for reference atmosphere   
          kminor_lower,                    & ! (transformed from [nTemp x nEta x nGpt x nAbsorbers] array to 
@@ -97,7 +98,7 @@ contains
          ntemps, npress, ngpts, nabsorbers, nextrabsorbers, nminorabsorbers,&    
          nmixingfracs, nlayers, nbnds, npairs, ninternalSourcetemps,           &
          nminor_absorber_intervals_lower, nminor_absorber_intervals_upper,     &
-         ncontributors_lower, ncontributors_upper
+         ncontributors_lower, ncontributors_upper,nfit_coeffs
 
     ! Local variables
     integer :: ncid, dimID, varID, status, iGas, ierr
@@ -115,7 +116,7 @@ contains
     ! On master processor only...
 !    if (mpirank .eq. mpiroot) then
        ! Open file
-       status = nf90_open(trim(lw_gas_props_file), NF90_WRITE, ncid)
+       status = nf90_open(trim(lw_gas_props_file), NF90_NOWRITE, ncid)
 
        ! Read dimensions for k-distribution fields
        status = nf90_inq_dimid(ncid, 'temperature', dimid)
@@ -142,6 +143,8 @@ contains
        status = nf90_inquire_dimension(ncid, dimid, len = ncontributors_lower)
        status = nf90_inq_dimid(ncid, 'contributors_upper', dimid)
        status = nf90_inquire_dimension(ncid, dimid, len = ncontributors_upper)
+       status = nf90_inq_dimid(ncid, 'fit_coeffs',  dimid)
+       status = nf90_inquire_dimension(ncid, dimid, len = nfit_coeffs)
        status = nf90_inq_dimid(ncid, 'minor_absorber_intervals_lower', dimid)
        status = nf90_inquire_dimension(ncid, dimid, len = nminor_absorber_intervals_lower)
        status = nf90_inq_dimid(ncid, 'minor_absorber_intervals_upper', dimid)
@@ -170,6 +173,7 @@ contains
        allocate(kminor_start_lower(nminor_absorber_intervals_lower))
        allocate(kminor_upper(ncontributors_upper, nmixingfracs, ntemps))
        allocate(kminor_start_upper(nminor_absorber_intervals_upper))
+       allocate(optimal_angle_fit(nfit_coeffs,nbnds))
        allocate(minor_scales_with_density_lower(nminor_absorber_intervals_lower))
        allocate(minor_scales_with_density_upper(nminor_absorber_intervals_upper))
        allocate(scale_by_complement_lower(nminor_absorber_intervals_lower))
@@ -223,6 +227,8 @@ contains
        status = nf90_get_var(  ncid, varID, kminor_upper)
        status = nf90_inq_varid(ncid, 'vmr_ref', varID)
        status = nf90_get_var(  ncid, varID, vmr_ref)
+       status = nf90_inq_varid(ncid, 'optimal_angle_fit',varID)
+       status = nf90_get_var(  ncid, varID, optimal_angle_fit)
        status = nf90_inq_varid(ncid, 'kmajor', varID)
        status = nf90_get_var(  ncid, varID, kmajor)
        status = nf90_inq_varid(ncid, 'kminor_start_lower', varID)
@@ -264,7 +270,8 @@ contains
          minor_gases_lower, minor_gases_upper, minor_limits_gpt_lower, minor_limits_gpt_upper, &
          minor_scales_with_density_lower,  minor_scales_with_density_upper, scaling_gas_lower, &
          scaling_gas_upper, scale_by_complement_lower, scale_by_complement_upper,              &
-         kminor_start_lower, kminor_start_upper, totplnk, planck_frac, rayl_lower, rayl_upper))
+         kminor_start_lower, kminor_start_upper, totplnk, planck_frac, rayl_lower, rayl_upper, &
+	 optimal_angle_fit))
 
   end subroutine rrtmgp_lw_gas_optics_init
 

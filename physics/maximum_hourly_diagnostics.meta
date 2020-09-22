@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = maximum_hourly_diagnostics
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = maximum_hourly_diagnostics_run
   type = scheme

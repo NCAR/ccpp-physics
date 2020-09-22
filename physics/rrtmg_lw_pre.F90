@@ -30,7 +30,7 @@
       type(GFS_sfcprop_type),         intent(in)    :: Sfcprop
       type(GFS_grid_type),            intent(in)    :: Grid
       integer, intent(in)                           :: im
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) ::  tsfa, tsfg
+      real(kind=kind_phys), dimension(size(Grid%xlon,1)), intent(in) :: tsfa, tsfg
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -44,7 +44,7 @@
         call setemis (Grid%xlon, Grid%xlat, Sfcprop%slmsk,        &        !  ---  inputs
                      Sfcprop%snowd, Sfcprop%sncovr, Sfcprop%zorl, &
                      tsfg, tsfa, Sfcprop%hprime(:,1), IM,         &
-                      Radtend%semis)                              !  ---  outputs
+                      Radtend%semis)                                       !  ---  outputs
       endif
 
       end subroutine rrtmg_lw_pre_run
