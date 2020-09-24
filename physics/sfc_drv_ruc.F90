@@ -125,7 +125,7 @@ module lsm_ruc
         endif
       enddo
 
-      if( .not.  flag_restart) then
+      !if( .not.  flag_restart) then
         call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                              me, master, lsm_ruc, lsm, slmsk,       & ! in
                              soiltyp, vegtype,                      & ! in
@@ -142,7 +142,7 @@ module lsm_ruc
           enddo
         enddo ! i
 
-      endif ! flag_restart
+      !endif ! flag_restart
       !-- end of initialization
 
       if ( debug_print) then
