@@ -1092,7 +1092,7 @@ subroutine micro_mg_tend (                                       &
 ! real(r8), parameter :: qimax=0.010, qimin=0.001, qiinv=one/(qimax-qimin), &
   real(r8), parameter :: qimax=0.010_r8, qimin=0.005_r8, qiinv=one/(qimax-qimin)
 !                        ts_au_min=180.0
-  real(r8), parameter :: pmin_sed = 5000.0     ! layer pressur in Pa below which
+  real(r8), parameter :: pmin_sed = 5000.0     ! layer pressure in Pa below which
                                                ! sedimentation calcuation is done
 ! integer,  parameter :: nstep_fac=10          ! factor for definng nstep_def
   integer,  parameter :: nstep_fac=5           ! factor for definng nstep_def
