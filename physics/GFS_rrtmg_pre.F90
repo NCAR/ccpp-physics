@@ -33,7 +33,7 @@
           faerlw1, faerlw2, faerlw3, aerodp,                         &
           clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,      &
           clouds7, clouds8, clouds9, cldsa, cldfra,                  &
-          mtopa, mbota, de_lgth, alb1d, errmsg, errflg)
+          mtopa, mbota, de_lgth, alpha, alb1d, errmsg, errflg)
 
       use machine,                   only: kind_phys
       use GFS_typedefs,              only: GFS_statein_type,   &
@@ -128,6 +128,7 @@
       real(kind=kind_phys), dimension(size(Grid%xlon,1),5),            intent(out) :: cldsa
       integer,              dimension(size(Grid%xlon,1),3),            intent(out) :: mbota, mtopa
       real(kind=kind_phys), dimension(size(Grid%xlon,1)),              intent(out) :: de_lgth, alb1d
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(out) :: alpha
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -137,22 +138,21 @@
 
       integer :: i, j, k, k1, k2, lsk, lv, n, itop, ibtc, LP1, lla, llb, lya, lyb
 
-      real(kind=kind_phys) :: es, qs, delt, tem0d
+      real(kind=kind_phys) :: es, qs, delt, tem0d, pfac
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: cvt1, cvb1, tem1d, tskn
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP) ::         &
                           htswc, htlwc, gcice, grain, grime, htsw0, htlw0, &
                           rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
-                          cldcov, deltaq, cnvc, cnvw,                      &
+                          dzb, hzb, cldcov, deltaq, cnvc, cnvw,            &
                           effrl, effri, effrr, effrs, rho, orho
       ! for Thompson MP
       real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP) ::         &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
                                   qi_mp, qs_mp, nc_mp, ni_mp, nwfa
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP+1) :: tem2db
-!     real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP+1) :: hz
+      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP+1) :: tem2db, hz
 
       real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,min(4,Model%ncnd)) :: ccnd
       real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,2:Model%ntrac) :: tracer1
@@ -424,6 +424,10 @@
         enddo
 
 !  ---  ...  level height and layer thickness (km)
+! dz:  Layer thickness between layer boundaries
+! dzb: Layer thickness between layer centers (lowest is from surface to lowest layer center)
+! hz:  Height of each level (i.e. layer boundary)
+! hzb: Height of each layer center
 
         tem0d = 0.001 * rog
         do i = 1, IM
@@ -431,10 +435,20 @@
             dz(i,k) = tem0d * (tem2db(i,k+1) - tem2db(i,k)) * tvly(i,k)
           enddo
 
-!         hz(i,LMP) = 0.0
-!         do k = LMK, 1, -1
-!           hz(i,k) = hz(i,k+1) + dz(i,k)
-!         enddo
+          hz(i,LMP) = 0.0
+          do k = LMK, 1, -1
+            hz(i,k) = hz(i,k+1) + dz(i,k)
+          enddo
+
+          do k = LMK, 1, -1
+            pfac = (tem2db(i,k+1) - tem2da(i,k)) / (tem2db(i,k+1) - tem2db(i,k))
+            hzb(i,k) = hz(i,k+1) + pfac * (hz(i,k) - hz(i,k+1))
+          enddo
+
+          do k = LMK-1, 1, -1
+            dzb(i,k) = hzb(i,k) - hzb(i,k+1)
+          enddo
+          dzb(i,LMK) = hzb(i,LMK) - hz(i,LMP)
         enddo
 
       else                               ! input data from sfc to toa
@@ -475,6 +489,10 @@
         enddo
 
 !  ---  ...  level height and layer thickness (km)
+! dz:  Layer thickness between layer boundaries
+! dzb: Layer thickness between layer centers (lowest is from surface to lowest layer center)
+! hz:  Height of each level (i.e. layer boundary)
+! hzb: Height of each layer center
 
         tem0d = 0.001 * rog
         do i = 1, IM
@@ -482,10 +500,20 @@
             dz(i,k) = tem0d * (tem2db(i,k) - tem2db(i,k+1)) * tvly(i,k)
           enddo
 
-!         hz(i,1) = 0.0
-!         do k = 1, LMP
-!           hz(i,k+1) = hz(i,k) + dz(i,k)
-!         enddo
+          hz(i,1) = 0.0
+          do k = 1, LMK
+            hz(i,k+1) = hz(i,k) + dz(i,k)
+          enddo
+
+          do k = 1, LMK
+            pfac = (tem2db(i,k) - tem2da(i,k)) / (tem2db(i,k) - tem2db(i,k+1))
+            hzb(i,k) = hz(i,k) + pfac * (hz(i,k+1) - hz(i,k))
+          enddo
+
+          do k = 2, LMK
+            dzb(i,k) = hzb(i,k) - hzb(i,k-1)
+          enddo
+          dzb(i,1) = hzb(i,1) - hz(i,1)
         enddo
 
       endif                              ! end_if_ivflip
@@ -807,19 +835,21 @@
                                          ! or unified cloud and/or with MG microphysics
 
           if (Model%uni_cld .and. Model%ncld >= 2) then
-            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         & !  ---  inputs
-                             Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp, &
-                             IM, LMK, LMP, cldcov,                        &
-                             effrl, effri, effrr, effrs, Model%effr_in,   &
-                             clouds, cldsa, mtopa, mbota, de_lgth)          !  ---  outputs
+            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,           & !  ---  inputs
+                             Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp,   &
+                             IM, LMK, LMP, cldcov,                          &
+                             effrl, effri, effrr, effrs, Model%effr_in,     &
+                             dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
+                             clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
           else
-            call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl, rhly,    & !  ---  inputs
-                           ccnd(1:IM,1:LMK,1), Grid%xlat,Grid%xlon,     &
-                           Sfcprop%slmsk, dz, delp, IM, LMK, LMP,       &
-                           Model%uni_cld, Model%lmfshal,                &
-                           Model%lmfdeep2, cldcov,                      &
-                           effrl, effri, effrr, effrs, Model%effr_in,   &
-                           clouds, cldsa, mtopa, mbota, de_lgth)          !  ---  outputs
+            call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl, rhly,        & !  ---  inputs
+                           ccnd(1:IM,1:LMK,1), Grid%xlat,Grid%xlon,         &
+                           Sfcprop%slmsk, dz, delp, IM, LMK, LMP,           &
+                           Model%uni_cld, Model%lmfshal,                    &
+                           Model%lmfdeep2, cldcov,                          &
+                           effrl, effri, effrr, effrs, Model%effr_in,       &
+                           dzb, Grid%xlat_d, Model%julian, Model%yearlen,   &
+                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)       !  ---  outputs
           endif
 
         elseif(Model%imp_physics == 98) then      ! zhao/moorthi's prognostic cloud+pdfcld
@@ -829,7 +859,8 @@
                          cnvw, cnvc, Grid%xlat, Grid%xlon,              &
                          Sfcprop%slmsk, dz, delp, im, lmk, lmp, deltaq, &
                          Model%sup, Model%kdt, me,                      &
-                         clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
+                         dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
+                         clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
 
 
         elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
@@ -839,21 +870,24 @@
                            ccnd(1:IM,1:LMK,1), cnvw, cnvc,                &
                            Grid%xlat, Grid%xlon, Sfcprop%slmsk,           &
                            cldcov, dz, delp, im, lmk, lmp,                &
-                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
+                           dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
+                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
           else
 
             call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         &    !  ---  inputs
                             Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp, &
                             IM, LMK, LMP, cldcov,                         &
                             effrl, effri, effrr, effrs, Model%effr_in,    &
-                            clouds, cldsa, mtopa, mbota, de_lgth)              !  ---  outputs
+                            dzb, Grid%xlat_d, Model%julian, Model%yearlen,&
+                            clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
 !           call progcld4o (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,       &   !  ---  inputs
 !                           tracer1, Grid%xlat, Grid%xlon, Sfcprop%slmsk,   &
 !                           dz, delp,                                       &
 !                           ntrac-1, Model%ntcw-1,Model%ntiw-1,Model%ntrw-1,&
 !                           Model%ntsw-1,Model%ntgl-1,Model%ntclamt-1,      &
 !                           im, lmk, lmp,                                   &
-!                           clouds, cldsa, mtopa, mbota, de_lgth)               !  ---  outputs
+!                           dzb, Grid%xlat_d, Model%julian, Model%yearlen,  &
+!                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
           endif
 
         elseif(Model%imp_physics == 6 .or. Model%imp_physics == 15) then
@@ -863,15 +897,16 @@
             Tbd%phy_f3d(:,:,Model%nseffr) = 250.
           endif
 
-          call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
-                         ntsw-1,ntgl-1,                             &
-                         im, lmk, lmp, Model%uni_cld,               &
-                         Model%lmfshal,Model%lmfdeep2,              &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
-                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
-                         clouds,cldsa,mtopa,mbota, de_lgth)            !  --- outputs
+          call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,        &  !  --- inputs
+                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,    &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                &
+                         ntsw-1,ntgl-1,                                &
+                         im, lmk, lmp, Model%uni_cld,                  &
+                         Model%lmfshal,Model%lmfdeep2,                 &
+                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),           &
+                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),       &
+                         dzb, Grid%xlat_d, Model%julian, Model%yearlen,&
+                         clouds,cldsa,mtopa,mbota, de_lgth, alpha)        !  --- outputs
 
 
         elseif(Model%imp_physics == Model%imp_physics_thompson) then                              ! Thompson MP
@@ -892,19 +927,21 @@
                          Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp,  &
                          IM, LMK, LMP, clouds(:,1:LMK,1),               &
                          effrl, effri, effrr, effrs, Model%effr_in ,    &
-                         clouds, cldsa, mtopa, mbota, de_lgth)            !  ---  outputs
+                         dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
+                         clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
 
           else
             ! MYNN PBL or GF convective are not used
-            call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp, &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
-                         ntsw-1,ntgl-1,                             &
-                         im, lmk, lmp, Model%uni_cld,               &
-                         Model%lmfshal,Model%lmfdeep2,              &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),        &
-                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),    &
-                         clouds,cldsa,mtopa,mbota, de_lgth)           !  --- outputs
+            call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,      & !  --- inputs
+                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,    &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                &
+                         ntsw-1,ntgl-1,                                &
+                         im, lmk, lmp, Model%uni_cld,                  &
+                         Model%lmfshal,Model%lmfdeep2,                 &
+                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),           &
+                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),       &
+                         dzb, Grid%xlat_d, Model%julian, Model%yearlen,&
+                         clouds,cldsa,mtopa,mbota, de_lgth, alpha)        !  --- outputs
           endif ! MYNN PBL or GF
 
         endif                            ! end if_imp_physics
