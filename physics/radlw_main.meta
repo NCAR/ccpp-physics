@@ -213,6 +213,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[alpha]
+  standard_name = cloud_overlap_decorrelation_parameter
+  long_name = cloud overlap decorrelation parameter
+  units = frac
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [npts]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
