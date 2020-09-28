@@ -201,7 +201,9 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
 
     # Remove files with special compiler flags from list of files with standard compiler flags
-    list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    if (SCHEMES_SFX_OPT)
+      list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    endif(SCHEMES_SFX_OPT)
     # Assign standard compiler flags to all remaining schemes and caps
     SET_SOURCE_FILES_PROPERTIES(${SCHEMES} ${CAPS}
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT}")
