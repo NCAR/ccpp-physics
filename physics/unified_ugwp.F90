@@ -350,7 +350,9 @@ contains
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
                  errmsg,errflg)
 
-    else if ( do_ugwp_v1.or.do_ugwp_v1_orog_only ) then
+    end if
+
+    if ( do_ugwp_v1.or.do_ugwp_v1_orog_only ) then
 
        ! Valery's TOFD
        ! topo paras
@@ -377,7 +379,9 @@ contains
                       zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,          &
                       du3dt_mtb, du3dt_ogw, du3dt_tms)
 
-    else if ( do_ugwp_v0.or.do_ugwp_v0_orog_only ) then
+    end if
+
+    if ( do_ugwp_v0.or.do_ugwp_v0_orog_only ) then
 
       do k=1,levs
         do i=1,im
