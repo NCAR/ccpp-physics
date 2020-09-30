@@ -40,7 +40,9 @@
      &  dusfc,dvsfc,dtsfc,dqsfc,                    &
      &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
      &  con_cp,con_g,con_rd,                        &
-     &  me, lprnt, errmsg, errflg )
+     &  me, lprnt, dt3dt_PBL, du3dt_PBL, dv3dt_PBL, &
+     &  dq3dt_PBL, gen_tend, ldiag3d, qdiag3d,      &
+     &  errmsg, errflg )
 
 !
 
@@ -79,7 +81,7 @@
       integer,intent(in) :: im, levs
       integer,intent(in) :: kdt, me
       integer,intent(in) :: ntrac,ntke,ntcw,ntiw,ntrw,ntsw,ntgl
-      logical,intent(in) :: restart,do_myjsfc,lprnt
+      logical,intent(in) :: restart,do_myjsfc,lprnt,ldiag3d,qdiag3d,gen_tend
       real(kind=kind_phys),intent(in) :: con_cp, con_g, con_rd
       real(kind=kind_phys),intent(in) :: dt_phs, xkzm_m, xkzm_h, xkzm_s
 
@@ -111,6 +113,8 @@
              dudt, dvdt, dtdt
       real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
              dkt
+      real(kind=kind_phys),dimension(:,:),intent(inout)     :: &
+             du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL
 
 !MYJ-4D
       real(kind=kind_phys),dimension(im,levs,ntrac),intent(inout) ::  &
@@ -576,6 +580,24 @@
             dqdt(i,k,ntcw)=dqdt(i,k,ntcw)+rqcblten(i,k1)
          end do
       end do
+      if (ldiag3d .and. .not. gen_tend) then
+        do k=1,levs
+           k1=levs+1-k
+           do i=1,im
+             du3dt_PBL(i,k) = rublten(i,k1)*dt_phs
+             dv3dt_PBL(i,k) = rvblten(i,k1)*dt_phs
+             dt3dt_PBL(i,k) = rthblten(i,k1)*exner(i,k1)*dt_phs
+           end do
+        end do
+        if (qdiag3d) then
+          do k=1,levs
+             k1=levs+1-k
+             do i=1,im
+               dq3dt_PBL(i,k) = rqvblten(i,k1)*dt_phs
+             end do
+          end do
+        end if
+      end if
 
       if (lprnt1) then
 
