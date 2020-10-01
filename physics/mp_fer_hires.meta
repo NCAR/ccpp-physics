@@ -214,6 +214,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[cwm]
+  standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
+  long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [train]
   standard_name = accumulated_change_of_air_temperature_due_to_FA_scheme
   long_name = accumulated change of air temperature due to FA MP scheme
