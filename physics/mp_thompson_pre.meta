@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = mp_thompson_pre
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = mp_thompson_pre_run
   type = scheme

@@ -6,7 +6,7 @@ module GFS_rrtmgp_zhaocarr_pre
   use machine,      only: kind_phys
   use rrtmgp_aux,   only: check_error_msg
   use funcphys,     only: fpvs
-  use module_radiation_clouds, only: get_alpha_dcorr  
+  use module_radiation_clouds, only: get_alpha_dcorr
 
   ! Zhao-Carr MP parameters.
   real(kind_phys), parameter :: &

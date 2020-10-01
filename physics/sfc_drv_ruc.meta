@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = lsm_ruc
+  type = scheme
+  dependencies = machine.F,module_sf_ruclsm.F90,module_soil_pre.F90,namelist_soilveg_ruc.F90,set_soilveg_ruc.F90
+
+########################################################################
 [ccpp-arg-table]
   name = lsm_ruc_init
   type = scheme

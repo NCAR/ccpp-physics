@@ -3,7 +3,7 @@ module rrtmgp_lw_cloud_sampling
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use physparam,                only: isubclw, iovrlw
   use mo_optical_props,         only: ty_optical_props_1scl
-  use mo_cloud_sampling,        only: sampled_mask_max_ran, sampled_mask_exp_dcorr, sampled_mask_exp_ran, draw_samples
+  use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
@@ -133,41 +133,30 @@ contains
     enddo
 
     ! Cloud-overlap.
-    select case ( iovrlw )
-    case(1) ! Maximum-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',        &
-            sampled_mask_max_ran(rng3D,                            &
-                                 cld_frac,                         &
-                                 cldfracMCICA))       
-    case(3) ! Exponential decorrelation length overlap
+    ! Maximum-random
+    if (iovrlw == 1) then
+       call sampled_mask(rng3D, cld_frac, cldfracMCICA) 
+    endif
+	!  Exponential decorrelation length overlap
+    if (iovrlw == 3) then
        ! Generate second RNG
        do iCol=1,ncol
           call random_setseed(ipseed_lw(icol),rng_stat)
           call random_number(rng1D,rng_stat)
           rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
        enddo
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
-            sampled_mask_exp_dcorr(rng3D,                            &
-                                   rng3D2,                           &
-                                   cld_frac,                         &
-                                   cloud_overlap_param(:,1:nLev-1),  &
-                                   cldfracMCICA))
-    case(4) ! Exponential overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
-            sampled_mask_exp_ran(rng3D,                              &
-                                 cld_frac,                           &
-                                 cloud_overlap_param(:,1:nLev-1),    &
-                                 cldfracMCICA))
-    case(5) ! Exponential-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
-            sampled_mask_exp_ran(rng3D,                              &
-                                 cld_frac,                           &
-                                 cloud_overlap_param(:,1:nLev-1),    &
-                                 cldfracMCICA))       
-    end select
-    
+       call sampled_mask(rng3D, cld_frac, cldfracMCICA,                    &
+                         overlap_param = cloud_overlap_param(:,1:nLev-1),  &
+                         randoms2      = rng3D2)
+    endif
+    ! Exponential or Exponential-random
+    if (iovrlw == 4 .or. iovrlw == 5) then
+       call sampled_mask(rng3D, cld_frac, cldfracMCICA,  &
+                         overlap_param = cloud_overlap_param(:,1:nLev-1))    
+    endif
+
     ! Sampling. Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',             &
+    call check_error_msg('rrtmgp_lw_cloud_sampling_run_draw_samples',&
          draw_samples(cldfracMCICA,                                  &
                       lw_optical_props_cloudsByBand,                 &
                       lw_optical_props_clouds))
@@ -201,13 +190,12 @@ contains
     !enddo
 
     ! Precipitation overlap.
-    select case ( iovrlw )
-    case(1) ! Maximum-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
-            sampled_mask_max_ran(rng3D,                              &
-                                 precip_frac,                        &
-                                 precipfracSAMP))       
-    case(3) ! Exponential decorrelation length overlap
+	! Maximum-random
+    if (iovrlw == 1) then
+        call sampled_mask(rng3D, precip_frac, precipfracSAMP)      
+    endif 
+	!  Exponential decorrelation length overlap
+    if (iovrlw == 3) then
        ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
        !! Generate second RNG
        !do iCol=1,ncol
@@ -215,30 +203,21 @@ contains
        !   call random_number(rng1D,rng_stat)
        !   rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
        !enddo
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
-            sampled_mask_exp_dcorr(rng3D,                            &
-                                   rng3D2,                           &
-                                   precip_frac,                      &
-                                   precip_overlap_param(:,1:nLev-1), &
-                                   precipfracSAMP))
-    case(4) ! Exponential overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
-            sampled_mask_exp_ran(rng3D,                              &
-                                 precip_frac,                        &
-                                 precip_overlap_param(:,1:nLev-1),   &
-                                 precipfracSAMP))
-    case(5) ! Exponential-random overlap
-       call check_error_msg('rrtmgp_lw_cloud_sampling_run',          &
-            sampled_mask_exp_ran(rng3D,                              &
-                                 precip_frac,                        &
-                                 precip_overlap_param(:,1:nLev-1),   &
-                                 precipfracSAMP))
-    end select
+       call sampled_mask(rng3D, precip_frac, precipfracSAMP,               &
+                         overlap_param = precip_overlap_param(:,1:nLev-1), &
+                         randoms2      = rng3D2)
+    endif
+    ! Exponential or Exponential-random
+    if (iovrlw == 4 .or. iovrlw == 5) then
+       call sampled_mask(rng3D, precip_frac, precipfracSAMP,               &
+                         overlap_param = precip_overlap_param(:,1:nLev-1))
+    endif
+    
     
     ! Sampling. Map band optical depth to each g-point using McICA
-    call check_error_msg('rrtmgp_lw_cloud_sampling_run',             &
-         draw_samples(precipfracSAMP,                                &
-                      lw_optical_props_precipByBand,                 &
+    call check_error_msg('rrtmgp_lw_precip_sampling_run_draw_samples',&
+         draw_samples(precipfracSAMP,                                 &
+                      lw_optical_props_precipByBand,                  &
                       lw_optical_props_precip))
          
     ! ####################################################################################

@@ -5,8 +5,7 @@
 !>\ingroup mod_GFS_phys_time_vary
 !! This subroutine repopulates specific time-varying surface properties for
 !! atmospheric forecast runs.
-# 1 "physics/gcycle.F90"
-  SUBROUTINE GCYCLE (nblks, Model, Grid, Sfcprop, Cldprop)
+  SUBROUTINE GCYCLE (nblks, nthrds, Model, Grid, Sfcprop, Cldprop)
 !
 !
     USE MACHINE,      only: kind_phys
@@ -15,7 +14,7 @@
                             GFS_sfcprop_type, GFS_cldprop_type
     implicit none
 
-    integer,                  intent(in)    :: nblks
+    integer,                  intent(in)    :: nblks, nthrds
     type(GFS_control_type),   intent(in)    :: Model
     type(GFS_grid_type),      intent(in)    :: Grid(nblks)
     type(GFS_sfcprop_type),   intent(inout) :: Sfcprop(nblks)
@@ -194,8 +193,8 @@
                      SNOFCS, ZORFCS, ALBFC1, TG3FCS, CNPFCS,      &
                      SMCFC1, STCFC1, SLIFCS, AISFCS,              &
                      VEGFCS, VETFCS, SOTFCS, ALFFC1, CVFCS,       &
-                     CVBFCS, CVTFCS, Model%me, Model%nlunit,      &
-                     size(Model%input_nml_file),                  &
+                     CVBFCS, CVTFCS, Model%me, nthrds,            &
+                     Model%nlunit, size(Model%input_nml_file),    &
                      Model%input_nml_file,                        &
                      lake, Model%min_lakeice, Model%min_seaice,   &
                      Model%ialb, Model%isot, Model%ivegsrc,       &
