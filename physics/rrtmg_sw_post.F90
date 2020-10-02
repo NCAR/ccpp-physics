@@ -5,16 +5,12 @@
 
 !>\defgroup rrtmg_sw_post GFS RRTMG scheme post
 !! @{
-!> \section arg_table_rrtmg_sw_post_init Argument Table
-!!
       subroutine rrtmg_sw_post_init ()
       end subroutine rrtmg_sw_post_init
-! PGI compiler does not accept lines longer than 264 characters, remove during pre-processing
-#ifndef __PGI
+
 !> \section arg_table_rrtmg_sw_post_run Argument Table
 !! \htmlinclude rrtmg_sw_post_run.html
 !!
-#endif
       subroutine rrtmg_sw_post_run (Model, Grid, Diag, Radtend, Coupling,  &
                  im, ltp, nday, lm, kd, htswc, htsw0,                      &
                  sfcalb1, sfcalb2, sfcalb3, sfcalb4, scmpsw, errmsg, errflg)
@@ -126,8 +122,6 @@
 
       end subroutine rrtmg_sw_post_run
  
-!> \section arg_table_rrtmg_sw_post_finalize Argument Table
-!!
       subroutine rrtmg_sw_post_finalize ()
       end subroutine rrtmg_sw_post_finalize
 !! @}

@@ -8,8 +8,6 @@
 
 !> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
 !! @{
-!! \section arg_table_GFS_rrtmg_pre_init Argument Table
-!!
       subroutine GFS_rrtmg_pre_init ()
       end subroutine GFS_rrtmg_pre_init
 
@@ -982,8 +980,6 @@
 
       end subroutine GFS_rrtmg_pre_run
 
-!> \section arg_table_GFS_rrtmg_pre_finalize Argument Table
-!!
       subroutine GFS_rrtmg_pre_finalize ()
       end subroutine GFS_rrtmg_pre_finalize
 

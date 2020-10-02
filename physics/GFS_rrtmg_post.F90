@@ -5,8 +5,6 @@
 
 !>\defgroup GFS_rrtmg_post GFS RRTMG Scheme Post
 !! @{
-!> \section arg_table_GFS_rrtmg_post_init Argument Table
-!!
        subroutine GFS_rrtmg_post_init ()
        end subroutine GFS_rrtmg_post_init
 
@@ -198,8 +196,6 @@
 !
       end subroutine GFS_rrtmg_post_run
 
-!> \section arg_table_GFS_rrtmg_post_finalize Argument Table
-!!
       subroutine GFS_rrtmg_post_finalize ()
       end subroutine GFS_rrtmg_post_finalize
 

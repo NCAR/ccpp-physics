@@ -46,11 +46,6 @@ contains
 
       end subroutine cu_gf_driver_init
 
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_cu_gf_driver_finalize Argument Table
-!!
       subroutine cu_gf_driver_finalize()
       end subroutine cu_gf_driver_finalize
 !

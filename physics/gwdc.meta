@@ -138,6 +138,34 @@
   kind = kind_phys
   intent = out
   optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = gwdc
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = gwdc_init
+  type = scheme
 [do_cnvgwd]
   standard_name = flag_for_convective_gravity_wave_drag
   long_name = flag for convective gravity wave drag (gwd)
@@ -163,12 +191,6 @@
   type = integer
   intent = out
   optional = F
-
-########################################################################
-[ccpp-table-properties]
-  name = gwdc
-  type = scheme
-  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -630,4 +652,3 @@
   type = integer
   intent = out
   optional = F
-

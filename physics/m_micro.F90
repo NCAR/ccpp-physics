@@ -95,10 +95,6 @@ subroutine m_micro_init(imp_physics, imp_physics_mg, fprcp, gravit, rair, rh2o, 
 
 end subroutine m_micro_init
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_finalize  Argument Table
-!!
        subroutine m_micro_finalize
        end subroutine m_micro_finalize
 
