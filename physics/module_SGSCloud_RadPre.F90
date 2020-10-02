@@ -49,6 +49,7 @@
            nlay, plyr, xlat, dz,de_lgth, &
            cldsa,mtopa,mbota,            &
            imp_physics, imp_physics_gfdl,&
+           iovr,                         &
            errmsg, errflg                )
 
 ! should be moved to inside the mynn:
@@ -81,6 +82,7 @@
       real(kind=kind_phys), dimension(im,nlay), intent(in)    :: plyr, dz      
       real(kind=kind_phys), dimension(im,5),    intent(inout) :: cldsa
       integer,              dimension(im,3),    intent(inout) :: mbota, mtopa
+      integer,                                  intent(in)    :: iovr
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
       ! Local variables
@@ -93,6 +95,9 @@
       real(kind=kind_phys), dimension(im)      :: rxlat
       real (kind=kind_phys):: Tc, iwc
       integer              :: i, k, id
+      ! DH* 20200723 - see comment at the end of this routine around 'gethml'
+      real(kind=kind_phys), dimension(im,nlay) :: alpha_dummy
+      ! *DH
 
       ! PARAMETERS FOR RANDALL AND XU (1996) CLOUD FRACTION
       REAL, PARAMETER  ::  coef_p = 0.25, coef_gamm = 0.49, coef_alph = 100.
@@ -123,7 +128,7 @@
 
               if (h2oliq > clwt) then
                 onemrh= max( 1.e-10, 1.0-rhgrid )
-                tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan                                                          
+                tem1  = min(max((onemrh*qsat)**0.49,0.0001),1.0)  !jhan
                 tem1  = 100.0 / tem1
                 value = max( min( tem1*(h2oliq-clwt), 50.0 ), 0.0 )
                 tem2  = sqrt( sqrt(rhgrid) )
@@ -304,12 +309,35 @@
 
       cldcnv = 0.
 
+! DH* 20200723
+! iovr == 4 or 5 requires alpha, which is computed in GFS_rrmtg_pre,
+! which comes after SGSCloud_RadPre. Computing alpha here requires
+! a lot more input variables and computations (dzlay etc.), and
+! recomputing it in GFS_rrmtg_pre is a waste of time. Workaround:
+! pass a dummy array initialized to zero to gethml for other values of iovr.
+      if ( iovr == 4 .or. iovr == 5 ) then
+        errmsg = 'Logic error in sgscloud_radpre: iovr==4 or 5 not implemented'
+        errflg = 1
+        return
+      end if
+!! Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+!      if ( iovr == 4 .or. iovr == 5 ) then 
+!        call get_alpha_exp                                              &
+!!  ---  inputs:
+!             (im, nlay, dzlay, iovr, latdeg, julian, yearlen, clouds1,  &
+!!  ---  outputs:
+!              alpha                                                     &
+!            )
+!      endif
+      alpha_dummy = 0.0
+! *DH 2020723
+
 !> - Recompute the diagnostic high, mid, low, total and bl cloud fraction
       call gethml                                                       &
 !  ---  inputs:
-           ( plyr, ptop1, clouds1, cldcnv, dz, de_lgth, im, nlay,       &
+           ( plyr, ptop1, clouds1, cldcnv, dz, de_lgth, alpha_dummy,    &
 !  ---  outputs:
-             cldsa, mtopa, mbota)
+             im, nlay, cldsa, mtopa, mbota)
 
        !print*,"===Finished adding subgrid clouds to the resolved-scale clouds"
        !print*,"qc_save:",qc_save(1,1)," qi_save:",qi_save(1,1)

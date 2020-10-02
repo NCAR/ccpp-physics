@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = m_micro_pre_init
+[ccpp-table-properties]
+  name = m_micro_pre
   type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -289,14 +290,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = m_micro_pre_finalize
+[ccpp-table-properties]
+  name = m_micro_post
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = m_micro_post_init
-  type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -505,7 +502,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = m_micro_post_finalize
-  type = scheme

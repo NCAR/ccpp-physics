@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sgscloud_radpost
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = sgscloud_radpost_run
   type = scheme

@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = gmtb_scm_sfc_flux_spec
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = gmtb_scm_sfc_flux_spec_run
   type = scheme
