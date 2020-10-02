@@ -45,7 +45,7 @@
   standard_name = air_pressure
   long_name = layer mean air pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -54,7 +54,7 @@
   standard_name = surface_air_pressure
   long_name = surface pressure
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -63,7 +63,7 @@
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -72,7 +72,7 @@
   standard_name = ice_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -81,7 +81,7 @@
   standard_name = cloud_condensed_water_mixing_ratio_convective_transport_tracer
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) in the convectively transported tracer array
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -90,7 +90,7 @@
   standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
   long_name = moist cloud condensed water mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -99,7 +99,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = layer mean air temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -108,7 +108,7 @@
   standard_name = air_temperature_two_time_steps_back
   long_name = air temperature two time steps back
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -117,7 +117,7 @@
   standard_name = water_vapor_specific_humidity_two_time_steps_back
   long_name = water vapor specific humidity two time steps back
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -126,7 +126,7 @@
   standard_name = surface_air_pressure_two_time_steps_back
   long_name = surface air pressure two time steps back
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -135,7 +135,7 @@
   standard_name = air_temperature_at_previous_time_step
   long_name = air temperature at previous time step
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -144,7 +144,7 @@
   standard_name = water_vapor_specific_humidity_at_previous_time_step
   long_name = water vapor specific humidity at previous time step
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -153,7 +153,7 @@
   standard_name = surface_air_pressure_at_previous_time_step
   long_name = surface air surface pressure at previous time step
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -162,7 +162,7 @@
   standard_name = critical_relative_humidity
   long_name = critical relative humidity
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in

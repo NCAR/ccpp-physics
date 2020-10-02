@@ -36,7 +36,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = pressure level thickness
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -45,7 +45,7 @@
   standard_name = air_pressure
   long_name = layer mean pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -54,7 +54,7 @@
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -63,7 +63,7 @@
   standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
   long_name = moist cloud condensed water mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -72,7 +72,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = layer mean air temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -81,7 +81,7 @@
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation amount on physics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -90,7 +90,7 @@
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = ratio of snowfall to large-scale rainfall
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -99,7 +99,7 @@
   standard_name = tendency_of_rain_water_mixing_ratio_due_to_microphysics
   long_name = tendency of rain water mixing ratio due to microphysics
   units = kg kg-1 s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -108,7 +108,7 @@
   standard_name = critical_relative_humidity
   long_name = critical relative humidity
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -153,7 +153,7 @@
   standard_name = grid_size_related_coefficient_used_in_scale_sensitive_schemes
   long_name = grid size related coefficient used in scale-sensitive schemes
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in

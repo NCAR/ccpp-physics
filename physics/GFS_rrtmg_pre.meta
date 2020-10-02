@@ -75,7 +75,7 @@
   standard_name = fraction_of_ice_water_cloud
   long_name = fraction of ice water cloud
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -84,7 +84,7 @@
   standard_name = fraction_of_rain_water_cloud
   long_name = fraction of rain water cloud
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -93,7 +93,7 @@
   standard_name = rime_factor
   long_name = rime factor
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -111,7 +111,7 @@
   standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
   long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -185,7 +185,7 @@
   standard_name = layer_pressure_thickness_for_radiation
   long_name = layer pressure thickness on radiation levels
   units = hPa
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -194,7 +194,7 @@
   standard_name = layer_thickness_for_radiation
   long_name = layer thickness on radiation levels
   units = km
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -203,7 +203,7 @@
   standard_name = air_pressure_at_interface_for_radiation_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,adjusted_vertical_level_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -212,7 +212,7 @@
   standard_name = air_pressure_at_layer_for_radiation_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -221,7 +221,7 @@
   standard_name = air_temperature_at_interface_for_radiation
   long_name = air temperature at vertical interface for radiation calculation
   units = K
-  dimensions = (horizontal_dimension,adjusted_vertical_level_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_level_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -230,7 +230,7 @@
   standard_name = air_temperature_at_layer_for_radiation
   long_name = air temperature at vertical layer for radiation calculation
   units = K
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -239,7 +239,7 @@
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -248,7 +248,7 @@
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -257,7 +257,7 @@
   standard_name = water_vapor_specific_humidity_at_layer_for_radiation
   long_name = water vapor specific humidity at vertical layer for radiation calculation
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -266,7 +266,7 @@
   standard_name = ozone_concentration_at_layer_for_radiation
   long_name = ozone concentration
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -291,7 +291,7 @@
   standard_name = volume_mixing_ratio_co2
   long_name = CO2 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -300,7 +300,7 @@
   standard_name = volume_mixing_ratio_n2o
   long_name = N2O volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -309,7 +309,7 @@
   standard_name = volume_mixing_ratio_ch4
   long_name = CH4 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -318,7 +318,7 @@
   standard_name = volume_mixing_ratio_o2
   long_name = O2 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -327,7 +327,7 @@
   standard_name = volume_mixing_ratio_co
   long_name = CO volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -336,7 +336,7 @@
   standard_name = volume_mixing_ratio_cfc11
   long_name = CFC11 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -345,7 +345,7 @@
   standard_name = volume_mixing_ratio_cfc12
   long_name = CFC12 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -354,7 +354,7 @@
   standard_name = volume_mixing_ratio_cfc22
   long_name = CFC22 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -363,7 +363,7 @@
   standard_name = volume_mixing_ratio_ccl4
   long_name = CCL4 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -372,7 +372,7 @@
   standard_name = volume_mixing_ratio_cfc113
   long_name = CFC113 volume mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -381,7 +381,7 @@
   standard_name = aerosol_optical_depth_for_shortwave_bands_01_16
   long_name = aerosol optical depth for shortwave bands 01-16
   units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -390,7 +390,7 @@
   standard_name = aerosol_single_scattering_albedo_for_shortwave_bands_01_16
   long_name = aerosol single scattering albedo for shortwave bands 01-16
   units = frac
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -399,7 +399,7 @@
   standard_name = aerosol_asymmetry_parameter_for_shortwave_bands_01_16
   long_name = aerosol asymmetry parameter for shortwave bands 01-16
   units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_shortwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -408,7 +408,7 @@
   standard_name = aerosol_optical_depth_for_longwave_bands_01_16
   long_name = aerosol optical depth for longwave bands 01-16
   units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -417,7 +417,7 @@
   standard_name = aerosol_single_scattering_albedo_for_longwave_bands_01_16
   long_name = aerosol single scattering albedo for longwave bands 01-16
   units = frac
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -426,7 +426,7 @@
   standard_name = aerosol_asymmetry_parameter_for_longwave_bands_01_16
   long_name = aerosol asymmetry parameter for longwave bands 01-16
   units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation,number_of_aerosol_bands_for_longwave_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -435,7 +435,7 @@
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
   long_name = vertical integrated optical depth for various aerosol species
   units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
+  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
   type = real
   kind = kind_phys
   intent = out
@@ -444,7 +444,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -453,7 +453,7 @@
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -462,7 +462,7 @@
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -471,7 +471,7 @@
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -480,7 +480,7 @@
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -489,7 +489,7 @@
   standard_name = cloud_rain_water_path
   long_name = cloud rain water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -498,7 +498,7 @@
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain drop
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -507,7 +507,7 @@
   standard_name = cloud_snow_water_path
   long_name = cloud snow water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -516,7 +516,7 @@
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow flake
   units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -525,7 +525,7 @@
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle,high, total and BL
   units = frac
-  dimensions = (horizontal_dimension,5)
+  dimensions = (horizontal_loop_extent,5)
   type = real
   kind = kind_phys
   intent = out
@@ -534,7 +534,7 @@
   standard_name = instantaneous_3d_cloud_fraction
   long_name = instantaneous 3D cloud fraction for all MPs
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -543,7 +543,7 @@
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
   units = index
-  dimensions = (horizontal_dimension,3)
+  dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = out
   optional = F
@@ -551,7 +551,7 @@
   standard_name = model_layer_number_at_cloud_base
   long_name = vertical indices for low, middle and high cloud bases
   units = index
-  dimensions = (horizontal_dimension,3)
+  dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = out
   optional = F
@@ -559,7 +559,7 @@
   standard_name = cloud_decorrelation_length
   long_name = cloud decorrelation length
   units = km
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -577,7 +577,7 @@
   standard_name = surface_albedo_perturbation
   long_name = surface albedo perturbation
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out

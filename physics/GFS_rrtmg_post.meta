@@ -59,7 +59,7 @@
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
   intent = in
   optional = F
@@ -124,7 +124,7 @@
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
   long_name = vertical integrated optical depth for various aerosol species
   units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
+  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
   type = real
   kind = kind_phys
   intent = in
@@ -133,7 +133,7 @@
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL
   units = frac
-  dimensions = (horizontal_dimension,5)
+  dimensions = (horizontal_loop_extent,5)
   type = real
   kind = kind_phys
   intent = in
@@ -142,7 +142,7 @@
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
   units = index
-  dimensions = (horizontal_dimension,3)
+  dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = in
   optional = F
@@ -150,7 +150,7 @@
   standard_name = model_layer_number_at_cloud_base
   long_name = vertical indices for low, middle and high cloud bases
   units = index
-  dimensions = (horizontal_dimension,3)
+  dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = in
   optional = F
@@ -158,7 +158,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -167,7 +167,7 @@
   standard_name = cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -176,7 +176,7 @@
   standard_name = cloud_optical_depth_layers_at_0p55mu_band
   long_name = approx .55mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
