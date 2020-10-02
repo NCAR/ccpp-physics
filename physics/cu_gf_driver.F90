@@ -868,11 +868,13 @@ contains
           if(ishallow_g3.eq.1 .and. .not.flag_for_scnv_generic_tend) then
             do k=kts,ktf
               do i=its,itf
-                du3dt_SCNV(i,k) = du3dt_SCNV(i,k) + outus(i,k) * dt
-                dv3dt_SCNV(i,k) = dv3dt_SCNV(i,k) + outvs(i,k) * dt
-                dt3dt_SCNV(i,k) = dt3dt_SCNV(i,k) + outts(i,k) * dt
+                du3dt_SCNV(i,k) = du3dt_SCNV(i,k) + cutens(i)*outus(i,k) * dt
+                dv3dt_SCNV(i,k) = dv3dt_SCNV(i,k) + cutens(i)*outvs(i,k) * dt
+                dt3dt_SCNV(i,k) = dt3dt_SCNV(i,k) + cutens(i)*outts(i,k) * dt
                 if(qdiag3d) then
-                  dq3dt_SCNV(i,k) = dq3dt_SCNV(i,k) + outqs(i,k) * dt
+                  tem = cutens(i)*outqs(i,k)* dt
+                  tem = tem/(1.0_kind_phys+tem)
+                  dq3dt_SCNV(i,k) = dq3dt_SCNV(i,k) + tem
                 endif
               enddo
             enddo
@@ -880,11 +882,13 @@ contains
           if((ideep.eq.1. .or. imid_gf.eq.1) .and. .not.flag_for_dcnv_generic_tend) then
             do k=kts,ktf
               do i=its,itf
-                du3dt_DCNV(i,k) = du3dt_DCNV(i,k) + (outu(i,k)+outum(i,k)) * dt
-                dv3dt_DCNV(i,k) = dv3dt_DCNV(i,k) + (outv(i,k)+outvm(i,k)) * dt
-                dt3dt_DCNV(i,k) = dt3dt_DCNV(i,k) + (outt(i,k)+outtm(i,k)) * dt
+                du3dt_DCNV(i,k) = du3dt_DCNV(i,k) + (cuten(i)*outu(i,k)+cutenm(i)*outum(i,k)) * dt
+                dv3dt_DCNV(i,k) = dv3dt_DCNV(i,k) + (cuten(i)*outv(i,k)+cutenm(i)*outvm(i,k)) * dt
+                dt3dt_DCNV(i,k) = dt3dt_DCNV(i,k) + (cuten(i)*outt(i,k)+cutenm(i)*outtm(i,k)) * dt
                 if(qdiag3d) then
-                  dq3dt_DCNV(i,k) = dq3dt_DCNV(i,k) + (outq(i,k)+outqm(i,k)) * dt
+                  tem = (cuten(i)*outq(i,k) + cutenm(i)*outqm(i,k))* dt
+                  tem = tem/(1.0_kind_phys+tem)
+                  dq3dt_DCNV(i,k) = dq3dt_DCNV(i,k) + tem
                 endif
               enddo
             enddo
