@@ -390,7 +390,7 @@
      &       slmsk, snowf, zorlf, coszf, tsknf, tairf, hprif,           &
      &       alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc,     &
      &       sncovr, snoalb, albPpert                                     ! sfc-perts, mgehne
-      real (kind=kind_phys), dimension(5), intent(in) :: pertalb          ! sfc-perts, mgehne
+      real (kind=kind_phys),  intent(in) :: pertalb          ! sfc-perts, mgehne
 
 !  ---  outputs
       real (kind=kind_phys), dimension(IMAX,NF_ALBD), intent(out) ::    &
@@ -628,12 +628,12 @@
 
 ! sfc-perts, mgehne ***
 !> - Call ppebet () to perturb all 4 elements of surface albedo sfcalb(:,1:4).
-      if (pertalb(1)>0.0) then
+      if (pertalb>0.0) then
         do i = 1, imax
           do kk=1, 4
             ! compute beta distribution parameters for all 4 albedos
             m = sfcalb(i,kk)
-            s = pertalb(1)*m*(1.-m)
+            s = pertalb*m*(1.-m)
             alpha = m*m*(1.-m)/(s*s)-m
             beta  = alpha*(1.-m)/m
             ! compute beta distribution value corresponding

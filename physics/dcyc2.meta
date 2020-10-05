@@ -1,11 +1,7 @@
-[ccpp-arg-table]
-  name = dcyc2t3_init
+[ccpp-table-properties]
+  name = dcyc2t3
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = dcyc2t3_finalize
-  type = scheme
+  dependencies = machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]

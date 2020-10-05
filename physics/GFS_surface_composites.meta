@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_surface_composites_pre
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_surface_composites_pre_run
   type = scheme
@@ -173,6 +179,15 @@
 [zorll]
   standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land
+  units = cm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorli]
+  standard_name = surface_roughness_length_over_ice
+  long_name = surface roughness length over ice
   units = cm
   dimensions = (horizontal_dimension)
   type = real
@@ -604,7 +619,7 @@
 [min_lakeice]
   standard_name = lake_ice_minimum
   long_name = minimum lake ice value
-  units = ???
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
@@ -613,7 +628,7 @@
 [min_seaice]
   standard_name = sea_ice_minimum
   long_name = minimum sea ice value
-  units = ???
+  units = frac
   dimensions = ()
   type = real
   kind = kind_phys
@@ -636,6 +651,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_surface_composites_inter
+  type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -782,6 +803,12 @@
   optional = F
 
 ########################################################################
+[ccpp-table-properties]
+  name = GFS_surface_composites_post
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_surface_composites_post_run
   type = scheme
@@ -921,6 +948,15 @@
 [zorll]
   standard_name = surface_roughness_length_over_land
   long_name = surface roughness length over land
+  units = cm
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[zorli]
+  standard_name = surface_roughness_length_over_ice
+  long_name = surface roughness length over ice
   units = cm
   dimensions = (horizontal_dimension)
   type = real
@@ -1764,6 +1800,14 @@
   kind = kind_phys
   intent = inout
   optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
 [tiice]
   standard_name = internal_ice_temperature
   long_name = sea ice internal temperature

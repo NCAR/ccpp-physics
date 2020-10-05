@@ -172,7 +172,7 @@
         if (nslwr == 1)  lslwr = .true.
         !--- allow for radiation to be called on every physics time step
         !    for the first nhfrad timesteps (for spinup, coldstarts only)
-        if (kdt<=nhfrad) then
+        if (kdt <= nhfrad) then
            lsswr = .true.
            lslwr = .true.
         end if

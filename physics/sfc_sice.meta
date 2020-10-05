@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_sice
+  type = scheme
+  dependencies = funcphys.f90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_sice_run
   type = scheme
@@ -242,14 +248,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[islimsk]
-  standard_name = sea_land_ice_mask
-  long_name = sea/land/ice mask (=0/1/2)
-  units = flag
-  dimensions = (horizontal_dimension)
-  type = integer
-  intent = in
-  optional = F
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
@@ -281,15 +279,6 @@
   units = index
   dimensions = ()
   type = integer
-  intent = in
-  optional = F
-[cimin]
-  standard_name = lake_ice_minimum
-  long_name = minimum lake ice value
-  units = ???
-  dimensions = ()
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [hice]
@@ -436,25 +425,17 @@
   kind = kind_phys
   intent = inout
   optional = F
-[cplflx]
-  standard_name = flag_for_flux_coupling
-  long_name = flag controlling cplflx collection (default off)
+[frac_grid]
+  standard_name = flag_for_fractional_grid
+  long_name = flag for fractional grid
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F
-[cplchm]
-  standard_name = flag_for_chemistry_coupling
-  long_name = flag controlling cplchm collection (default off)
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[flag_cice]
-  standard_name = flag_for_cice
-  long_name = flag for cice
+[icy]
+  standard_name = flag_nonzero_sea_ice_surface_fraction
+  long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
   dimensions = (horizontal_dimension)
   type = logical
@@ -466,6 +447,33 @@
   units = flag
   dimensions = (horizontal_dimension)
   type = integer
+  intent = in
+  optional = F
+[min_lakeice]
+  standard_name = lake_ice_minimum
+  long_name = minimum lake ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[min_seaice]
+  standard_name = sea_ice_minimum
+  long_name = minimum sea ice value
+  units = frac
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oceanfrac]
+  standard_name = sea_area_fraction
+  long_name = fraction of horizontal grid area occupied by ocean
+  units = frac
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [errmsg]

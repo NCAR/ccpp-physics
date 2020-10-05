@@ -25,16 +25,18 @@
 !            IX, NLAY, NLP1,                                           !
 !            uni_cld, lmfshal, lmfdeep2, cldcov,                       !
 !            effrl,effri,effrr,effrs,effr_in,                          !
+!            dzlay, latdeg, julian, yearlen,                           !
 !          outputs:                                                    !
-!            clouds,clds,mtop,mbot,de_lgth)                            !
+!            clouds,clds,mtop,mbot,de_lgth,alpha)                      !
 !                                                                      !
 !       'progcld2'           --- ferrier prognostic cloud microphysics !
 !          inputs:                                                     !
 !           (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                   !
 !            xlat,xlon,slmsk,dz,delp, f_ice,f_rain,r_rime,flgmin,      !
 !            IX, NLAY, NLP1, lmfshal, lmfdeep2,                        !
+!            dzlay, latdeg, julian, yearlen,                           !
 !          outputs:                                                    !
-!            clouds,clds,mtop,mbot,de_lgth)                            !
+!            clouds,clds,mtop,mbot,de_lgth,alpha)                      !
 !                                                                      !
 !       'progcld3'           --- zhao/moorthi prognostic cloud + pdfcld!
 !          inputs:                                                     !
@@ -42,16 +44,18 @@
 !            xlat,xlon,slmsk, dz, delp,                                !
 !            ix, nlay, nlp1,                                           !
 !            deltaq,sup,kdt,me,                                        !
+!            dzlay, latdeg, julian, yearlen,                           !
 !          outputs:                                                    !
-!            clouds,clds,mtop,mbot,de_lgth)                            !
+!            clouds,clds,mtop,mbot,de_lgth,alpha)                      !
 !                                                                      !
 !       'progcld4'           --- gfdl-lin cloud microphysics           !
 !          inputs:                                                     !
 !           (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,         !
 !            xlat,xlon,slmsk, dz, delp,                                !
 !            ix, nlay, nlp1,                                           !
+!            dzlay, latdeg, julian, yearlen,                           !
 !          outputs:                                                    !
-!            clouds,clds,mtop,mbot,de_lgth)                            !
+!            clouds,clds,mtop,mbot,de_lgth,alpha)                      !
 !                                                                      !
 !       'progcld4o'          --- inactive                              !
 !                                                                      !
@@ -63,16 +67,18 @@
 !            ix, nlay, nlp1,                                           !
 !            uni_cld, lmfshal, lmfdeep2, cldcov,                       !
 !            re_cloud,re_ice,re_snow,                                  !
+!            dzlay, latdeg, julian, yearlen,                           !
 !          outputs:                                                    !
-!            clouds,clds,mtop,mbot,de_lgth)                            !
+!            clouds,clds,mtop,mbot,de_lgth,alpha)                      !
 !                                                                      !
 !       'progclduni'           --- for unified clouds with MG microphys!
 !          inputs:                                                     !
 !           (plyr,plvl,tlyr,tvly,ccnd,ncnd,                            !
 !            xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1, cldtot,          !
 !            effrl,effri,effrr,effrs,effr_in,                          !
+!            dzlay, latdeg, julian, yearlen,                           !
 !          outputs:                                                    !
-!            clouds,clds,mtop,mbot,de_lgth)                            !
+!            clouds,clds,mtop,mbot,de_lgth,alpha)                      !
 !                                                                      !
 !    internal accessable only subroutines:                             !
 !       'gethml'             --- get diagnostic hi, mid, low clouds    !
@@ -154,6 +160,10 @@
 !        'diagcld1' for diagnostic cloud scheme, added new cloud       !
 !        overlapping method of de-correlation length, and optimized    !
 !        the code structure.                                           !
+!      jul 2020, m.j. iacono - added rrtmg/mcica cloud overlap options !
+!        exponential and exponential-random. each method can use       !
+!        either a constant or a latitude-varying and day-of-year       !
+!        varying decorrelation length selected with parameter "idcor". !
 !                                                                      !
 !!!!!  ==========================================================  !!!!!
 !!!!!                       end descriptions                       !!!!!
@@ -181,6 +191,10 @@
 !! Cloud overlapping method (namelist control parameter - \b IOVR_LW, \b IOVR_SW)
 !!\n IOVR=0: randomly overlapping vertical cloud layers
 !!\n IOVR=1: maximum-random overlapping vertical cloud layers
+!!\n IOVR=2: maximum overlapping vertical cloud layers
+!!\n IOVR=3: decorrelation length overlapping vertical cloud layers
+!!\n IOVR=4: exponential overlapping vertical cloud layers
+!!\n IOVR=5: exponential-random overlapping vertical cloud layers
 !!
 !! Sub-grid cloud approximation (namelist control parameter - \b ISUBC_LW=2, \b ISUBC_SW=2)
 !!\n ISUBC=0: grid averaged quantities, without sub-grid cloud approximation
@@ -244,7 +258,7 @@
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
      &                 cld_init, progcld5, progcld4o, gethml,           &
-     &     get_alpha_dcorr, get_alpha_exp
+     &                 get_alpha_dcorr, get_alpha_exp
 
 
 ! =================
@@ -303,6 +317,8 @@
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
 !                     =3: decorrelation-length overlap (mcica only)     !
+!                     =4: exponential cloud overlap  (AER; mcica only)  !
+!                     =5: exponential-random overlap (AER; mcica only)  !
 !   ivflip          : control flag for direction of vertical index      !
 !                     =0: index from toa to surface                     !
 !                     =1: index from surface to toa                     !
@@ -418,6 +434,10 @@
 !!\param effrr       effective radius for rain water
 !!\param effrs       effective radius for snow water
 !!\param effr_in     logical, if .true. use input effective radii
+!!\param dzlay(ix,nlay) distance between model layer centers
+!!\param latdeg(ix)  latitude (in degrees 90 -> -90)
+!!\param julian      day of the year (fractional julian day)
+!!\param yearlen     current length of the year (365/366 days)
 !!\param clouds      (IX,NLAY,NF_CLDS), cloud profiles
 !!\n                 (:,:,1) - layer total cloud fraction
 !!\n                 (:,:,2) - layer cloud liq water path \f$(g/m^2)\f$
@@ -431,7 +451,8 @@
 !!\param clds        (IX,5), fraction of clouds for low, mid, hi, tot, bl
 !!\param mtop        (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot        (IX,3), vertical indices for low, mid, hi cloud bases
-!!\param de_lgth    (IX),   clouds decorrelation length (km)
+!!\param de_lgth     (IX),   clouds decorrelation length (km)
+!!\param alpha       (IX,NLAY), alpha decorrelation parameter
 !>\section gen_progcld1 progcld1 General Algorithm
 !> @{
       subroutine progcld1                                               &
@@ -439,7 +460,8 @@
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1,                   &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &
      &       effrl,effri,effrr,effrs,effr_in,                           &
-     &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
+     &       dzlay, latdeg, julian, yearlen,                            &
+     &       clouds,clds,mtop,mbot,de_lgth,alpha                        &    !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -486,6 +508,10 @@
 !   lmfshal         : logical - true for mass flux shallow convection   !
 !   lmfdeep2        : logical - true for mass flux deep convection      !
 !   cldcov          : layer cloud fraction (used when uni_cld=.true.    !
+!   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
+!   julian          : day of the year (fractional julian day)           !
+!   yearlen         : current length of the year (365/366 days)         !
 !                                                                       !
 ! output variables:                                                     !
 !   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !
@@ -503,6 +529,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !                                                                       !
 ! module variables:                                                     !
 !   ivflip          : control flag of vertical index direction          !
@@ -528,16 +555,21 @@
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr,  tvly,  qlyr,  qstl, rhly, clw, cldcov, delp, dz,    &
-     &       effrl, effri, effrr, effrs
+     &       effrl, effri, effrr, effrs, dzlay
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
+
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: julian
+      integer, intent(in)              :: yearlen
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
 
       real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
       real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
@@ -805,6 +837,16 @@
         enddo
       endif
 
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+      if ( iovr == 4 .or. iovr == 5 ) then 
+        call get_alpha_exp                                              &
+!  ---  inputs:
+     &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
+!  ---  outputs:
+     &        alpha                                                     &
+     &      )
+      endif
+
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
 !!    cloud fractions and clouds top/bottom layer indices for low, mid,
 !!    and high clouds. The three cloud domain boundaries are defined by 
@@ -812,7 +854,7 @@
 !!    'iovr', which may be different for lw and sw radiation programs.
       call gethml                                                       &
 !  ---  inputs:
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
      &       IX,NLAY,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
@@ -851,6 +893,10 @@
 !!\param NLAY,NLP1    vertical layer/level dimensions
 !!\param lmfshal     flag for mass-flux shallow convection scheme in the cloud fraction calculation    
 !!\param lmfdeep2    flag for mass-flux deep convection scheme in the cloud fraction calculation
+!!\param dzlay(ix,nlay) distance between model layer centers
+!!\param latdeg(ix)  latitude (in degrees 90 -> -90)
+!!\param julian      day of the year (fractional julian day)
+!!\param yearlen     current length of the year (365/366 days)
 !!\param clouds      (IX,NLAY,NF_CLDS), cloud profiles
 !!\n                 (:,:,1) - layer total cloud fraction
 !!\n                 (:,:,2) - layer cloud liq water path  \f$(g/m^2)\f$
@@ -865,13 +911,15 @@
 !!\param mtop        (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot        (IX,3), vertical indices for low, mid, hi cloud bases
 !!\param de_lgth   (IX),   clouds decorrelation length (km)
+!!\param alpha       (IX,NLAY), alpha decorrelation parameter
 !>\section gen_progcld2 progcld2 General Algorithm
 !> @{
       subroutine progcld2                                               &
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,                    &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, f_ice,f_rain,r_rime,flgmin,       &
      &       IX, NLAY, NLP1, lmfshal, lmfdeep2,                         &
-     &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
+     &       dzlay, latdeg, julian, yearlen,                            &
+     &       clouds,clds,mtop,mbot,de_lgth,alpha                        &    !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -918,6 +966,10 @@
 !   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !
 !   IX              : horizontal dimention                              !
 !   NLAY,NLP1       : vertical layer/level dimensions                   !
+!   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
+!   julian          : day of the year (fractional julian day)           !
+!   yearlen         : current length of the year (365/366 days)         !
 !                                                                       !
 ! output variables:                                                     !
 !   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !
@@ -935,6 +987,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !                                                                       !
 ! external module variables:                                            !
 !   ivflip          : control flag of vertical index direction          !
@@ -965,17 +1018,22 @@
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, tvly, qlyr, qstl, rhly, clw, f_ice, f_rain, r_rime,  &
-     &       dz, delp
+     &       dz, delp, dzlay
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
       real (kind=kind_phys), dimension(:), intent(in) :: flgmin
+
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: julian
+      integer, intent(in)              :: yearlen
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
 
       real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
       real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
@@ -1251,6 +1309,16 @@
         enddo
       endif
 
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+      if ( iovr == 4 .or. iovr == 5 ) then 
+        call get_alpha_exp                                              &
+!  ---  inputs:
+     &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
+!  ---  outputs:
+     &        alpha                                                     &
+     &      )
+      endif
+
 !> - Call gethml(), to compute low, mid, high, total, and boundary
 !! layer cloud fractions and clouds top/bottom layer indices for low,
 !! mid, and high clouds.
@@ -1260,7 +1328,7 @@
 
       call gethml                                                       &
 !  ---  inputs:
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
      &       IX,NLAY,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
@@ -1299,6 +1367,10 @@
 !!\param sup        supersaturation
 !!\param kdt           
 !!\param me         print control flag
+!!\param dzlay(ix,nlay) distance between model layer centers
+!!\param latdeg(ix)  latitude (in degrees 90 -> -90)
+!!\param julian      day of the year (fractional julian day)
+!!\param yearlen     current length of the year (365/366 days)
 !!\param clouds     (ix,nlay,nf_clds), cloud profiles
 !!\n                (:,:,1) - layer total cloud fraction
 !!\n                (:,:,2) - layer cloud liq water path (g/m**2)
@@ -1313,6 +1385,7 @@
 !!\param mtop       (ix,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot       (ix,3), vertical indices for low, mid, hi cloud bases
 !!\param de_lgth   (ix),   clouds decorrelation length (km)
+!!\param alpha      (IX,NLAY), alpha decorrelation parameter
 !>\section gen_progcld3 progcld3 General Algorithm
 !! @{
       subroutine progcld3                                               &
@@ -1320,7 +1393,8 @@
      &       xlat,xlon,slmsk, dz, delp,                                 &
      &       ix, nlay, nlp1,                                            &
      &       deltaq,sup,kdt,me,                                         &
-     &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
+     &       dzlay, latdeg, julian, yearlen,                            &
+     &       clouds,clds,mtop,mbot,de_lgth,alpha                        &    !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -1367,6 +1441,10 @@
 !   cnvc  (ix,nlay) : layer convective cloud cover                      !
 !   deltaq(ix,nlay) : half total water distribution width               !
 !   sup             : supersaturation                                   !
+!   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
+!   julian          : day of the year (fractional julian day)           !
+!   yearlen         : current length of the year (365/366 days)         !
 
 !                                                                       !
 ! output variables:                                                     !
@@ -1385,6 +1463,7 @@
 !   mtop  (ix,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (ix,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !                                                                       !
 ! module variables:                                                     !
 !   ivflip          : control flag of vertical index direction          !
@@ -1405,7 +1484,7 @@
       integer,  intent(in) :: ix, nlay, nlp1,kdt
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,    &
-     &       tlyr, tvly, qlyr, qstl, rhly, clw, dz, delp
+     &       tlyr, tvly, qlyr, qstl, rhly, clw, dz, delp, dzlay
 !     &       tlyr, tvly, qlyr, qstl, rhly, clw, cnvw, cnvc
 !      real (kind=kind_phys), dimension(:,:), intent(in) :: deltaq
       real (kind=kind_phys), dimension(:,:) :: deltaq, cnvw, cnvc
@@ -1417,11 +1496,16 @@
      &       slmsk
       integer :: me
 
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: julian
+      integer, intent(in)              :: yearlen
+
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
 
       real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
       real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
@@ -1648,6 +1732,16 @@
         enddo
       endif
 
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+      if ( iovr == 4 .or. iovr == 5 ) then 
+        call get_alpha_exp                                              &
+!  ---  inputs:
+     &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
+!  ---  outputs:
+     &        alpha                                                     &
+     &      )
+      endif
+
 !> -# Call gethml() to compute low,mid,high,total, and boundary layer
 !! cloud fractions and clouds top/bottom layer indices for low, mid,
 !! and high clouds.
@@ -1658,7 +1752,7 @@
 
       call gethml                                                       &
 !  ---  inputs:
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
      &       ix,nlay,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
@@ -1697,6 +1791,10 @@
 !!\param  ix      horizontal dimension
 !!\param  nlay    vertical layer dimension
 !!\param  nlp1    vertical level dimension
+!!\param  dzlay(ix,nlay) distance between model layer centers
+!!\param  latdeg(ix)  latitude (in degrees 90 -> -90)
+!!\param  julian      day of the year (fractional julian day)
+!!\param  yearlen     current length of the year (365/366 days)
 !!\param  clouds  (ix,nlay,nf_clds), cloud profiles
 !!\n              clouds(:,:,1) - layer total cloud fraction 
 !!\n              clouds(:,:,2) - layer cloud liquid water path (\f$g m^{-2}\f$)
@@ -1711,13 +1809,15 @@
 !!\param  mtop    vertical indices for low, mid, hi cloud tops
 !!\param  mbot    vertical indices for low, mid, hi cloud bases
 !!\param  de_lgth clouds decorrelation length (km)
+!!\param alpha       (IX,NLAY), alpha decorrelation parameter
 !>\section gen_progcld4  progcld4 General Algorithm
 !! @{
       subroutine progcld4                                               & 
      &     ( plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,clw,cnvw,cnvc,          & !  ---  inputs:
      &       xlat,xlon,slmsk,cldtot, dz, delp,                          &
      &       IX, NLAY, NLP1,                                            & 
-     &       clouds,clds,mtop,mbot,de_lgth                              & !  ---  outputs:
+     &       dzlay, latdeg, julian, yearlen,                            &
+     &       clouds,clds,mtop,mbot,de_lgth,alpha                        & !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -1762,6 +1862,10 @@
 !   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !
 !   IX              : horizontal dimention                              !
 !   NLAY,NLP1       : vertical layer/level dimensions                   !
+!   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
+!   julian          : day of the year (fractional julian day)           !
+!   yearlen         : current length of the year (365/366 days)         !
 !                                                                       !
 ! output variables:                                                     !
 !   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !
@@ -1779,6 +1883,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !                                                                       !
 ! module variables:                                                     !
 !   ivflip          : control flag of vertical index direction          !
@@ -1801,16 +1906,21 @@
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
      &       tlyr, tvly, qlyr, qstl, rhly, clw, cldtot, cnvw, cnvc,     &
-     &       delp, dz
+     &       delp, dz, dzlay
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
+
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: julian
+      integer, intent(in)              :: yearlen
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
 
       real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
       real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
@@ -1985,6 +2095,16 @@
         enddo
       endif
 
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+      if ( iovr == 4 .or. iovr == 5 ) then 
+        call get_alpha_exp                                              &
+!  ---  inputs:
+     &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
+!  ---  outputs:
+     &        alpha                                                     &
+     &      )
+      endif
+
 !  ---  compute low, mid, high, total, and boundary layer cloud fractions
 !       and clouds top/bottom layer indices for low, mid, and high clouds.
 !       The three cloud domain boundaries are defined by ptopc.  The cloud
@@ -1993,7 +2113,7 @@
 
       call gethml                                                       &
 !  ---  inputs:
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
      &       IX,NLAY,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
@@ -2037,6 +2157,10 @@
 !>\param ix        horizontal dimension
 !>\param nlay      vertical layer dimension
 !>\param nlp1      vertical level dimension
+!!\param dzlay(ix,nlay) distance between model layer centers
+!!\param latdeg(ix)  latitude (in degrees 90 -> -90)
+!!\param julian      day of the year (fractional julian day)
+!!\param yearlen     current length of the year (365/366 days)
 !>\param clouds    (ix,nlay,nf_clds),  cloud profiles
 !!\n               clouds(:,:,1) - layer totoal cloud fraction
 !!\n               clouds(:,:,2) - layer cloud liquid water path (\f$g m^{-2}\f$)
@@ -2051,6 +2175,7 @@
 !>\param mtop      (ix,3), vertical indices for low, mid, hi cloud tops 
 !>\param mbot      (ix,3), vertical indices for low, mid, hi cloud bases
 !>\param de_lgth   clouds decorrelation length (km)  
+!!\param alpha       (IX,NLAY), alpha decorrelation parameter
 !>\section gen_progcld4o progcld4o General Algorithm
 !! @{
       subroutine progcld4o                                              &
@@ -2058,7 +2183,8 @@
      &       xlat,xlon,slmsk, dz, delp,                                 &
      &       ntrac,ntcw,ntiw,ntrw,ntsw,ntgl,ntclamt,                    &
      &       IX, NLAY, NLP1,                                            &
-     &       clouds,clds,mtop,mbot,de_lgth                              & !  ---  outputs:
+     &       dzlay, latdeg, julian, yearlen,                            &
+     &       clouds,clds,mtop,mbot,de_lgth,alpha                        & !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -2102,6 +2228,10 @@
 !   delp  (ix,nlay) : model layer pressure thickness in mb (100Pa)      !
 !   IX              : horizontal dimention                              !
 !   NLAY,NLP1       : vertical layer/level dimensions                   !
+!   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
+!   julian          : day of the year (fractional julian day)           !
+!   yearlen         : current length of the year (365/366 days)         !
 !                                                                       !
 ! output variables:                                                     !
 !   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !
@@ -2119,6 +2249,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !                                                                       !
 ! module variables:                                                     !
 !   ivflip          : control flag of vertical index direction          !
@@ -2142,18 +2273,23 @@
      &		 		ntclamt
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
-     &       tlyr, tvly, qlyr, qstl, rhly, delp, dz
+     &       tlyr, tvly, qlyr, qstl, rhly, delp, dz, dzlay
 
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: clw
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
 
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: julian
+      integer, intent(in)              :: yearlen
+
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
 
       real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
       real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
@@ -2313,6 +2449,16 @@
         enddo
       endif
 
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+      if ( iovr == 4 .or. iovr == 5 ) then 
+        call get_alpha_exp                                              &
+!  ---  inputs:
+     &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
+!  ---  outputs:
+     &        alpha                                                     &
+     &      )
+      endif
+
 !> - Call gethml() to compute low, mid, high, total, and boundary layer cloud fractions
 !! and clouds top/bottom layer indices for low, mid, and high clouds.
 !! The three cloud domain boundaries are defined by ptopc.  The cloud
@@ -2321,7 +2467,7 @@
 
       call gethml                                                       &
 !  ---  inputs:
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
      &       IX,NLAY,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
@@ -2346,7 +2492,8 @@
      &       IX, NLAY, NLP1,                                            &
      &       uni_cld, lmfshal, lmfdeep2, cldcov,                        &    
      &       re_cloud,re_ice,re_snow,                                   & 
-     &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
+     &       dzlay, latdeg, julian, yearlen,                            &
+     &       clouds,clds,mtop,mbot,de_lgth,alpha                        &    !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -2393,6 +2540,10 @@
 !   lmfshal         : logical - true for mass flux shallow convection   !
 !   lmfdeep2        : logical - true for mass flux deep convection      !
 !   cldcov          : layer cloud fraction (used when uni_cld=.true.    !
+!   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
+!   julian          : day of the year (fractional julian day)           !
+!   yearlen         : current length of the year (365/366 days)         !
 !                                                                       !
 ! output variables:                                                     !
 !   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !
@@ -2410,6 +2561,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !                                                                       !
 ! module variables:                                                     !
 !   ivflip          : control flag of vertical index direction          !
@@ -2435,7 +2587,7 @@
       logical, intent(in)  :: uni_cld, lmfshal, lmfdeep2
 
       real (kind=kind_phys), dimension(:,:), intent(in) :: plvl, plyr,  &
-     &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz,                  &
+     &       tlyr, qlyr, qstl, rhly, cldcov, delp, dz, dzlay,           &
      &       re_cloud, re_ice, re_snow 
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: clw
@@ -2443,11 +2595,16 @@
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
 
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: julian
+      integer, intent(in)              :: yearlen
+
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
 
       real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
       real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
@@ -2660,6 +2817,16 @@
         enddo
       endif
 
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+      if ( iovr == 4 .or. iovr == 5 ) then 
+        call get_alpha_exp                                              &
+!  ---  inputs:
+     &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
+!  ---  outputs:
+     &        alpha                                                     &
+     &      )
+      endif
+
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
 !! cloud fractions and clouds top/bottom layer indices for low, mid,
 !! and high clouds.
@@ -2671,7 +2838,7 @@
 
       call gethml                                                       &
 !  ---  inputs:
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
      &       IX,NLAY,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
@@ -2707,6 +2874,10 @@
 !!\param effrr       (IX,NLAY), effective radius for rain water
 !!\param effrs       (IX,NLAY), effective radius for snow water
 !!\param effr_in      logical - if .true. use input effective radii
+!!\param dzlay(ix,nlay) distance between model layer centers
+!!\param latdeg(ix)  latitude (in degrees 90 -> -90)
+!!\param julian      day of the year (fractional julian day)
+!!\param yearlen     current length of the year (365/366 days)
 !!\param clouds      (IX,NLAY,NF_CLDS), cloud profiles
 !!\n                 (:,:,1) - layer total cloud fraction
 !!\n                 (:,:,2) - layer cloud liq water path \f$(g/m^2)\f$
@@ -2721,13 +2892,15 @@
 !!\param mtop       (IX,3), vertical indices for low, mid, hi cloud tops
 !!\param mbot       (IX,3), vertical indices for low, mid, hi cloud bases
 !!\param de_lgth    (IX),   clouds decorrelation length (km)
+!!\param alpha       (IX,NLAY), alpha decorrelation parameter
 !>\section gen_progclduni progclduni General Algorithm
 !> @{
       subroutine progclduni                                             &
      &     ( plyr,plvl,tlyr,tvly,ccnd,ncnd,                             &    !  ---  inputs:
      &       xlat,xlon,slmsk,dz,delp, IX, NLAY, NLP1, cldtot,           &
      &       effrl,effri,effrr,effrs,effr_in,                           &
-     &       clouds,clds,mtop,mbot,de_lgth                              &    !  ---  outputs:
+     &       dzlay, latdeg, julian, yearlen,                            &
+     &       clouds,clds,mtop,mbot,de_lgth,alpha                        &    !  ---  outputs:
      &      )
 
 ! =================   subprogram documentation block   ================ !
@@ -2775,6 +2948,10 @@
 !   effr_in              : logical - if .true. use input effective radii     !
 !   dz    (ix,nlay)      : layer thickness (km)                              !
 !   delp  (ix,nlay)      : model layer pressure thickness in mb (100Pa)      !
+!   dzlay(ix,nlay)  : thickness between model layer centers (km)        !
+!   latdeg(ix)      : latitude (in degrees 90 -> -90)                   !
+!   julian          : day of the year (fractional julian day)           !
+!   yearlen         : current length of the year (365/366 days)         !
 !                                                                       !
 ! output variables:                                                     !
 !   clouds(IX,NLAY,NF_CLDS) : cloud profiles                            !
@@ -2792,6 +2969,7 @@
 !   mtop  (IX,3)    : vertical indices for low, mid, hi cloud tops      !
 !   mbot  (IX,3)    : vertical indices for low, mid, hi cloud bases     !
 !   de_lgth(ix)     : clouds decorrelation length (km)                  !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !                                                                       !
 ! module variables:                                                     !
 !   ivflip          : control flag of vertical index direction          !
@@ -2816,10 +2994,15 @@
 
       real (kind=kind_phys), dimension(:,:,:), intent(in) :: ccnd
       real (kind=kind_phys), dimension(:,:),   intent(in) :: plvl, plyr,&
-     &       tlyr, tvly, cldtot, effrl, effri, effrr, effrs, dz, delp
+     &       tlyr, tvly, cldtot, effrl, effri, effrr, effrs, dz, delp,  &
+     &       dzlay
 
       real (kind=kind_phys), dimension(:),   intent(in) :: xlat, xlon,  &
      &       slmsk
+
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: julian
+      integer, intent(in)              :: yearlen
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:,:), intent(out) :: clouds
@@ -2827,6 +3010,8 @@
       real (kind=kind_phys), dimension(:,:),   intent(out) :: clds
 
       real (kind=kind_phys), dimension(:),     intent(out) :: de_lgth
+
+      real (kind=kind_phys), dimension(:,:),   intent(out) :: alpha
 
       integer,               dimension(:,:),   intent(out) :: mtop,mbot
 
@@ -3027,6 +3212,16 @@
         enddo
       endif
 
+!>  - Call subroutine get_alpha_exp to define alpha parameter for EXP and ER cloud overlap options
+      if ( iovr == 4 .or. iovr == 5 ) then 
+        call get_alpha_exp                                              &
+!  ---  inputs:
+     &       (ix, nlay, dzlay, iovr, latdeg, julian, yearlen, cldtot,   &
+!  ---  outputs:
+     &        alpha                                                     &
+     &      )
+      endif
+
 !> - Call gethml() to compute low,mid,high,total, and boundary layer
 !!    cloud fractions and clouds top/bottom layer indices for low, mid,
 !!    and high clouds.
@@ -3038,7 +3233,7 @@
 
       call gethml                                                       &
 !  ---  inputs:
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &
      &       IX,NLAY,                                                   &
 !  ---  outputs:
      &       clds, mtop, mbot                                           &
@@ -3065,6 +3260,7 @@
 !> \param cldcnv  (IX,NLAY), convective cloud (for diagnostic scheme only)
 !> \param dz      (IX,NLAY), layer thickness (km)
 !> \param de_lgth (IX),  clouds decorrelation length (km)
+!> \param alpha   (IX,NLAY), alpha decorrelation parameter
 !> \param IX      horizontal dimension
 !> \param NLAY    vertical layer dimensions
 !> \param clds   (IX,5), fraction of clouds for low, mid, hi, tot, bl
@@ -3074,7 +3270,7 @@
 !>\section detail Detailed Algorithm
 !! @{
       subroutine gethml                                                 &
-     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &       !  ---  inputs:
+     &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth, alpha,           &       !  ---  inputs:
      &       IX, NLAY,                                                  &
      &       clds, mtop, mbot                                           &       !  ---  outputs:
      &     )
@@ -3106,6 +3302,7 @@
 !   cldcnv(IX,NLAY) : convective cloud (for diagnostic scheme only)     !
 !   dz    (ix,nlay) : layer thickness (km)                              !
 !   de_lgth(ix)     : clouds vertical de-correlation length (km)        !
+!   alpha(ix,nlay)  : alpha decorrelation parameter
 !   IX              : horizontal dimention                              !
 !   NLAY            : vertical layer dimensions                         !
 !                                                                       !
@@ -3125,6 +3322,8 @@
 !                     =1 max/ran overlapping clouds                     !
 !                     =2 maximum overlapping  ( for mcica only )        !
 !                     =3 decorr-length ovlp   ( for mcica only )        !
+!                     =4: exponential cloud overlap  (AER; mcica only)  !
+!                     =5: exponential-random overlap (AER; mcica only)  !
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
@@ -3136,6 +3335,7 @@
       real (kind=kind_phys), dimension(:,:), intent(in) :: plyr, ptop1, &
      &       cldtot, cldcnv, dz
       real (kind=kind_phys), dimension(:),   intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(:,:), intent(in) :: alpha
 
 !  ---  outputs
       real (kind=kind_phys), dimension(:,:), intent(out) :: clds
@@ -3257,6 +3457,33 @@
               cl1(i) = cl1(i) * cl2(i)
               cl2(i) = 1.0
               if (k /= kend) dz1(i) = -dz(i,k+kinc)
+            endif
+          enddo
+
+          if (k == llyr) then
+            do i = 1, ix
+              clds(i,5) = 1.0 - cl1(i) * cl2(i) ! save bl cloud
+            enddo
+          endif
+        enddo
+
+        do i = 1, ix
+          clds(i,4) = 1.0 - cl1(i) * cl2(i)     ! save total cloud
+        enddo
+
+      elseif ( iovr == 4 .or. iovr == 5 ) then  ! exponential overlap (iovr=4), or
+                                                ! exponential-random  (iovr=5);
+                                                ! distinction defined by alpha
+
+        do k = kstr, kend, kinc
+          do i = 1, ix
+            ccur = min( ovcst, max( cldtot(i,k), cldcnv(i,k) ))
+            if (ccur >= climit) then                           ! cloudy layer
+              cl2(i) =   alpha(i,k) * min(cl2(i), (1.0 - ccur))          & ! maximum part
+     &               + (1.0 - alpha(i,k)) * (cl2(i) * (1.0 - ccur))        ! random part
+            else                                               ! clear layer
+              cl1(i) = cl1(i) * cl2(i)
+              cl2(i) = 1.0
             endif
           enddo
 
@@ -3487,7 +3714,7 @@
 !! This program derives the exponential transition, alpha, from maximum to
 !! random overlap needed to define the fractional cloud vertical correlation
 !! for the exponential (EXP, iovrlp=4) or the exponential-random (ER, iovrlp=5)
-!! cloud overlap options for RRTMGP. For exponential, the transition from
+!! cloud overlap options for RRTMG/RRTMGP. For exponential, the transition from
 !! maximum to random with distance through model layers occurs without regard
 !! to the configuration of clear and cloudy layers. For the ER method, each 
 !!  block of adjacent cloudy layers is treated with a separate transition from
@@ -3514,9 +3741,14 @@
 !!
 !>\section detail Detailed Algorithm
 !! @{
-      subroutine get_alpha_exp(nlon, nlay, dzlay, iovrlp, latdeg,       &
-     &     juldat, yearlen, cldf, alpha)
-!     ===================================================================  !
+      subroutine get_alpha_exp                                           &
+!  ---  inputs:
+     &      (nlon, nlay, dzlay, iovrlp, latdeg, juldat, yearlen, cldf,   &
+!  ---  outputs:
+     &       alpha                                                       &
+     &      )
+
+!  ===================================================================  !
 !                                                                       !
 ! abstract:  Derives the exponential transition, alpha, from maximum to !
 !  random overlap needed to define the fractional cloud vertical        !
@@ -3529,7 +3761,7 @@
 !  random, and blocks of cloudy layers separated by one or more         !
 !  clear layers are correlated randomly.                                !
 !                                                                       !
-! usage:        call get_alpha                                          !
+! usage:        call get_alpha_exp                                      !
 !                                                                       !
 ! subprograms called:  none                                             !
 !                                                                       !
@@ -3572,31 +3804,38 @@
 !                                                                       !
 !  ====================    end of description    =====================  !
 !
-      use physparam,        only: idcor
       use physcons,         only: decorr_con
+      use physparam,        only: idcor
+
       implicit none
-!     Input
+
+! Input
       integer, intent(in)              :: nlon, nlay
       integer, intent(in)              :: iovrlp
       integer, intent(in)              :: yearlen
-      real(kind_phys), dimension(:,:), intent(in) :: dzlay
-      real(kind_phys), dimension(:,:), intent(in) :: cldf
-      real(kind_phys), dimension(:), intent(in) :: latdeg
-      real(kind_phys), intent(in) :: juldat
+      real(kind=kind_phys), dimension(:,:), intent(in) :: dzlay
+      real(kind=kind_phys), dimension(:,:), intent(in) :: cldf
+      real(kind=kind_phys), dimension(:), intent(in) :: latdeg
+      real(kind=kind_phys), intent(in) :: juldat
+
 ! Output
-      real(kind_phys), dimension(:,:), intent(out):: alpha
+      real(kind=kind_phys), dimension(:,:), intent(out):: alpha
+
 ! Local
       integer              :: i, k
-      real(kind_phys) :: decorr_len(nlon)      ! Decorrelation length (km)
+      real(kind=kind_phys) :: decorr_len(nlon)      ! Decorrelation length (km)
+
 ! Constants for latitude and day-of-year dependent decorrlation length (Oreopoulos et al, 2012)
 ! Used when idcor = 1
-      real(kind_phys), parameter :: am1 = 1.4315_kind_phys
-      real(kind_phys), parameter :: am2 = 2.1219_kind_phys
-      real(kind_phys), parameter :: am4 = -25.584_kind_phys
-      real(kind_phys), parameter :: amr = 7.0_kind_phys
-      real(kind_phys) :: am3
-      real(kind_phys), parameter :: zero = 0.0d0
-      real(kind_phys), parameter :: one = 1.0d0
+      real(kind=kind_phys), parameter :: am1 = 1.4315_kind_phys
+      real(kind=kind_phys), parameter :: am2 = 2.1219_kind_phys
+      real(kind=kind_phys), parameter :: am4 = -25.584_kind_phys
+      real(kind=kind_phys), parameter :: amr = 7.0_kind_phys
+      real(kind=kind_phys) :: am3
+
+      real(kind=kind_phys), parameter :: zero = 0.0d0
+      real(kind=kind_phys), parameter :: one = 1.0d0
+
 !
 !===> ... begin here
 !
@@ -3607,20 +3846,21 @@
          if (iovrlp == 4 .or. iovrlp == 5) then
             if (idcor .eq. 1) then 
                if (juldat .gt. 181._kind_phys) then
-                  am3 = -4._kind_phys * amr * (juldat - 272._kind_phys)/&
-     &                 yearlen
+                  am3 = -4._kind_phys * amr * (juldat - 272._kind_phys)
+     &                   / yearlen
                else
-                  am3 = 4._kind_phys * amr * (juldat - 91._kind_phys) / &
-     &                 yearlen
+                  am3 = 4._kind_phys * amr * (juldat - 91._kind_phys) 
+     &                  / yearlen
                endif
 ! For latitude in degrees, decorr_len in km
-               decorr_len(i) = am1 + am2 * exp( -(latdeg(i) - am3)**2 / &
-     &              am4**2)
+               decorr_len(i) = am1 + am2 * exp( -(latdeg(i) - am3)**2 
+     &                       / am4**2)
             else
                decorr_len(i) = decorr_con
             endif
          endif
       enddo
+
 ! For atmospheric data defined from surface to toa; define alpha from surface to toa
 ! Exponential cloud overlap
       if (iovrlp == 4) then
@@ -3645,12 +3885,12 @@
             enddo
          enddo
       endif
-      
+
       return
-      end subroutine get_alpha_exp    
-      
 
-
+      end subroutine get_alpha_exp
+!-----------------------------------
+!! @}
 !
 !........................................!
       end module module_radiation_clouds !

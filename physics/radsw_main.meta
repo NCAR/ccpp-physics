@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = rrtmg_sw
+  type = scheme
+  dependencies = mersenne_twister.f,physcons.F90,physparam.f,radsw_datatb.f,radsw_param.f
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmg_sw_run
   type = scheme
@@ -230,6 +236,15 @@
   long_name = cloud decorrelation length
   units = km
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[alpha]
+  standard_name = cloud_overlap_decorrelation_parameter
+  long_name = cloud overlap decorrelation parameter
+  units = frac
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in

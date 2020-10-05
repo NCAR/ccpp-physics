@@ -27,8 +27,9 @@ contains
 !> \section arg_table_GFS_rrtmgp_sw_pre_run
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
-  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, nsfcpert, lsswr, do_sfcperts, solhr,     &
-       pertalb, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl, tsfc, hprime, alvsf,     &
+  subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
+       lndp_prt_list, lsswr, solhr,                                                         &
+       lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl, tsfc, hprime, alvsf,              &
        alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, lsmask, sfc_wts, p_lay, tv_lay,      &
        relhum, p_lev, sw_gas_props,                                                         &
        nday, idxday, alb1d, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,               &
@@ -39,14 +40,16 @@ contains
          me,                & ! Current MPI rank
          nCol,              & ! Number of horizontal grid points
          nLev,              & ! Number of vertical layers
-         nsfcpert             ! Number of surface perturbations
+         n_var_lndp,        &  ! Number of surface variables perturbed
+         lndp_type             ! Type of land perturbations scheme used
+    character(len=3), dimension(n_var_lndp), intent(in) ::  & 
+         lndp_var_list
+    real(kind_phys), dimension(n_var_lndp), intent(in) ::   &
+         lndp_prt_list
     logical,intent(in) :: &
-         lsswr,             & ! Call RRTMGP SW radiation?
-         do_sfcperts
+         lsswr             ! Call RRTMGP SW radiation?
     real(kind_phys), intent(in) :: &
-         solhr                ! Time in hours after 00z at the current timestep
-    real(kind_phys), dimension(5), intent(in) :: &
-         pertalb              ! Magnitude of surface albedo perturbation (frac)
+         solhr                 ! Time in hours after 00z at the current timestep
     real(kind_phys), dimension(nCol), intent(in) :: &
          lsmask,            & ! Landmask: sea/land/ice=0/1/2
          lon,               & ! Longitude
@@ -66,7 +69,7 @@ contains
          facwf,             & ! Fractional coverage with weak cosz dependency (frac)
          fice,              & ! Ice fraction over open water (frac)
          tisfc                ! Sea ice surface skin temperature (K)
-    real(kind_phys), dimension(nCol,nsfcpert), intent(in) :: &
+    real(kind_phys), dimension(nCol,n_var_lndp), intent(in) :: &
          sfc_wts              ! Weights for stochastic surface physics perturbation ()    
     real(kind_phys), dimension(nCol,nLev),intent(in) :: &
          p_lay,             & ! Layer pressure
@@ -100,6 +103,7 @@ contains
     ! Local variables
     integer :: i, j, iCol, iBand, iLay
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
+    real(kind_phys) :: lndp_alb
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -130,13 +134,17 @@ contains
     !  ---  turn vegetation fraction pattern into percentile pattern
     ! #######################################################################################
     alb1d(:) = 0.
-    if (do_sfcperts) then
-       if (pertalb(1) > 0.) then
+    lndp_alb = -999.
+    if (lndp_type ==1) then
+      do k =1,n_var_lndp
+       if (lndp_var_list(k) == 'alb') then
           do i=1,ncol
-             call cdfnor(sfc_wts(i,5),alb1d(i))
+            call cdfnor(sfc_wts(i,k),alb1d(i))
+            lndp_alb = lndp_prt_list(k)
           enddo
-       endif
-    endif  
+        endif
+      enddo
+    endif
     
     ! #######################################################################################
     ! Call module_radiation_surface::setalb() to setup surface albedo.

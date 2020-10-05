@@ -1,11 +1,7 @@
-[ccpp-arg-table]
-  name = cs_conv_pre_init
+[ccpp-table-properties]
+  name = cs_conv_pre
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = cs_conv_pre_finalize
-  type = scheme
+  dependencies = funcphys.f90,machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -179,14 +175,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = cs_conv_post_init
+[ccpp-table-properties]
+  name = cs_conv_post
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = cs_conv_post_finalize
-  type = scheme
+  dependencies = funcphys.f90,machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -253,14 +245,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = cs_conv_init
+[ccpp-table-properties]
+  name = cs_conv
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = cs_conv_finalize
-  type = scheme
+  dependencies = funcphys.f90,machine.F,physcons.F90
 
 ########################################################################
 [ccpp-arg-table]

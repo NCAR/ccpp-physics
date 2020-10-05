@@ -1,11 +1,7 @@
-[ccpp-arg-table]
-  name = sfc_nst_init
+[ccpp-table-properties]
+  name = sfc_nst
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = sfc_nst_finalize
-  type = scheme
+  dependencies = date_def.f,funcphys.f90,machine.F,module_nst_model.f90,module_nst_parameters.f90,module_nst_water_prop.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -650,14 +646,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = sfc_nst_init
+[ccpp-table-properties]
+  name = sfc_nst_pre
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = sfc_nst_finalize
-  type = scheme
+  dependencies = date_def.f,funcphys.f90,machine.F,module_nst_model.f90,module_nst_parameters.f90,module_nst_water_prop.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -768,6 +760,14 @@
   kind = kind_phys
   intent = in
   optional = F
+[nthreads]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -787,14 +787,10 @@
   optional = F
 
 ########################################################################
-[ccpp-arg-table]
-  name = sfc_nst_post_init
+[ccpp-table-properties]
+  name = sfc_nst_post
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = sfc_nst_post_finalize
-  type = scheme
+  dependencies = date_def.f,funcphys.f90,machine.F,module_nst_model.f90,module_nst_parameters.f90,module_nst_water_prop.f90
 
 ########################################################################
 [ccpp-arg-table]
@@ -955,6 +951,14 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[nthreads]
+  standard_name = omp_threads
+  long_name = number of OpenMP threads available for physics schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [dtzm]
   standard_name = mean_change_over_depth_in_sea_water_temperature
