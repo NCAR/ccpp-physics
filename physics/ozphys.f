@@ -31,13 +31,8 @@
 
       end subroutine ozphys_init
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_ozphys_finalize Argument Table
-!!
       subroutine ozphys_finalize()
       end subroutine ozphys_finalize
-
 
 !>\defgroup GFS_ozphys GFS ozphys Main
 !! \brief The operational GFS currently parameterizes ozone production and

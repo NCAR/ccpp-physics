@@ -91,7 +91,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step_and_radiation_levels
   long_name = total sky heating rate due to shortwave radiation
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -100,7 +100,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
   long_name = clear sky heating rates due to shortwave radiation
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = in
@@ -109,7 +109,7 @@
   standard_name = surface_albedo_due_to_near_IR_direct
   long_name = surface albedo due to near IR direct beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -118,7 +118,7 @@
   standard_name = surface_albedo_due_to_near_IR_diffused
   long_name = surface albedo due to near IR diffused beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -127,7 +127,7 @@
   standard_name = surface_albedo_due_to_UV_and_VIS_direct
   long_name = surface albedo due to UV+VIS direct beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -136,7 +136,7 @@
   standard_name = surface_albedo_due_to_UV_and_VIS_diffused
   long_name = surface albedo due to UV+VIS diffused beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -145,7 +145,7 @@
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
   intent = inout
   optional = F

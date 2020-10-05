@@ -6,8 +6,6 @@
       module rayleigh_damp
       contains
 
-!> \section arg_table_rayleigh_damp_init Argument Table
-!!
       subroutine rayleigh_damp_init ()
       end subroutine rayleigh_damp_init
 
@@ -135,11 +133,7 @@
       end subroutine rayleigh_damp_run
 !> @}
 
-
-!! \section arg_table_rayleigh_damp_finalize Argument Table
-!!
       subroutine rayleigh_damp_finalize ()
       end subroutine rayleigh_damp_finalize
-
 
       end module rayleigh_damp

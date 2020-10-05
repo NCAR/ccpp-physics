@@ -393,8 +393,6 @@ module mp_fer_hires
        end subroutine mp_fer_hires_run 
 
 
-!> \section arg_table_mp_fer_hires_finalize Argument Table
-!!
        subroutine mp_fer_hires_finalize ()
        end subroutine mp_fer_hires_finalize
 

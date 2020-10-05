@@ -6,7 +6,7 @@
 !!!!!               lw-rrtm3 radiation package description             !!!!!
 !!!!!  ==============================================================  !!!!!
 !                                                                          !
-!   this package includes ncep's modifications of the rrtm-lw radiation    !
+!   this package includes ncep's modifications of the rrtmg-lw radiation   !
 !   code from aer inc.                                                     !
 !                                                                          !
 !    the lw-rrtm3 package includes these parts:                            !
@@ -39,7 +39,7 @@
 !          inputs:                                                         !
 !           (plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                         !
 !            clouds,icseed,aerosols,sfemis,sfgtmp,                         !
-!            dzlyr,delpin,de_lgth,                                         !
+!            dzlyr,delpin,de_lgth,alpha,                                   !
 !            npts, nlay, nlp1, lprnt,                                      !
 !          outputs:                                                        !
 !            hlwc,topflx,sfcflx,cldtau,                                    !
@@ -93,17 +93,38 @@
 !                                                                          !
 !==========================================================================!
 !                                                                          !
-!    the original aer's program declarations:                              !
+!    the original aer program declarations:                                !
 !                                                                          !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!                                                                          |
-!  Copyright 2002-2007, Atmospheric & Environmental Research, Inc. (AER).  |
-!  This software may be used, copied, or redistributed as long as it is    |
-!  not sold and this copyright notice is reproduced on each copy made.     |
-!  This model is provided as is without any express or implied warranties. |
-!                       (http://www.rtweb.aer.com/)                        |
-!                                                                          |
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                              !
+! Copyright (c) 2002-2020, Atmospheric & Environmental Research, Inc. (AER)    !
+! All rights reserved.                                                         !
+!                                                                              !
+! Redistribution and use in source and binary forms, with or without           !
+! modification, are permitted provided that the following conditions are met:  !
+!  * Redistributions of source code must retain the above copyright            !
+!    notice, this list of conditions and the following disclaimer.             !
+!  * Redistributions in binary form must reproduce the above copyright         !
+!    notice, this list of conditions and the following disclaimer in the       !
+!    documentation and/or other materials provided with the distribution.      !
+!  * Neither the name of Atmospheric & Environmental Research, Inc., nor       !
+!    the names of its contributors may be used to endorse or promote products  !
+!    derived from this software without specific prior written permission.     !
+!                                                                              !
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"  !
+! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE    !
+! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL ATMOSPHERIC & ENVIRONMENTAL RESEARCH, INC.,!
+! BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR       !
+! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF         !
+! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS     !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN      !
+! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)      !
+! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF       !
+! THE POSSIBILITY OF SUCH DAMAGE.                                              !
+!                        (http://www.rtweb.aer.com/)                           !
+!                                                                              !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                          !
 ! ************************************************************************ !
 !                                                                          !
@@ -136,8 +157,14 @@
 ! ************************************************************************ !
 !                                                                          !
 !    references:                                                           !
-!    (rrtm_lw/rrtmg_lw):                                                   !
-!      clough, s.A., m.w. shephard, e.j. mlawer, j.s. delamere,            !
+!    (rrtmg_lw/rrtm_lw):                                                   !
+!      iacono, m.j., j.s. delamere, e.j. mlawer, m.w. shepard,             !
+!      s.a. clough, and w.d collins, radiative forcing by long-lived       !
+!      greenhouse gases: calculations with the aer radiative transfer      !
+!      models, j, geophys. res., 113, d13103, doi:10.1029/2008jd009944,    !
+!      2008.                                                               !
+!                                                                          !
+!      clough, s.a., m.w. shephard, e.j. mlawer, j.s. delamere,            !
 !      m.j. iacono, k. cady-pereira, s. boukabara, and p.d. brown:         !
 !      atmospheric radiative transfer modeling: a summary of the aer       !
 !      codes, j. quant. spectrosc. radiat. transfer, 91, 233-244, 2005.    !
@@ -234,12 +261,21 @@
 !       jun 2018,  h-m lin/y-t hou   -- added new option of cloud overlap  !
 !                     method 'de-correlation-length' for mcica application !
 !                                                                          !
+! ************************************************************************ !
+!                                                                          !
+!    additional aer revision history:                                      !
+!       jul 2020,  m.j. iacono   -- added new mcica cloud overlap options  !
+!                     exponential and exponential-random. each method can  !
+!                     use either a constant or a latitude-varying and      !
+!                     day-of-year varying decorrelation length selected    !
+!                     with parameter "idcor".                              !
+!                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
 !> This module contains the CCPP-compliant NCEP's modifications of the 
-!! rrtm-lw radiation code from aer inc.
+!! rrtmg-lw radiation code from aer inc.
       module rrtmg_lw 
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
@@ -360,7 +396,7 @@
 !! \brief This module includes NCEP's modifications of the RRTMG-LW radiation
 !! code from AER.
 !!
-!! The RRTM-LW package includes three files:
+!! The RRTMG-LW package includes three files:
 !! - radlw_param.f, which contains:
 !!  - module_radlw_parameters: band parameters set up
 !! - radlw_datatb.f, which contains modules:
@@ -389,7 +425,7 @@
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
-     &       dzlyr,delpin,de_lgth,                                      &
+     &       dzlyr,delpin,de_lgth,alpha,                                &
      &       npts, nlay, nlp1, lprnt, cld_cf, lslwr,                    &
      &       hlwc,topflx,sfcflx,cldtau,                                 &   !  ---  outputs
      &       HLW0,HLWB,FLXPRF,                                          &   !  ---  optional
@@ -444,6 +480,7 @@
 !     dzlyr(npts,nlay) : layer thickness (km)                           !
 !     delpin(npts,nlay): layer pressure thickness (mb)                  !
 !     de_lgth(npts)    : cloud decorrelation length (km)                !
+!     alpha(npts,nlay) : EXP/ER cloud overlap decorrelation parameter   !
 !     npts           : total number of horizontal points                !
 !     nlay, nlp1     : total number of vertical layers, levels          !
 !     lprnt          : cntl flag for diagnostic print out               !
@@ -492,6 +529,8 @@
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud (used for isubclw>0 only)         !
 !           =3: decorrelation-length overlap (for isubclw>0 only)       !
+!           =4: exponential cloud overlap (AER)                         !
+!           =5: exponential-random cloud overlap (AER)                  !
 !   ivflip  - control flag for vertical index direction                 !
 !           =0: vertical index from toa to surface                      !
 !           =1: vertical index from surface to toa                      !
@@ -589,6 +628,7 @@
 
       real (kind=kind_phys), dimension(npts), intent(in) :: sfemis,     &
      &       sfgtmp, de_lgth
+      real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
 
       real (kind=kind_phys), dimension(npts,nlay,nbands),intent(in)::   &
      &       aeraod, aerssa
@@ -650,6 +690,7 @@
 
       real (kind=kind_phys) :: tem0, tem1, tem2, pwvcm, summol, stemp,  &
      &                         delgth
+      real (kind=kind_phys), dimension(nlay) :: alph
 
       integer, dimension(npts) :: ipseed
       integer, dimension(nlay) :: jp, jt, jt1, indself, indfor, indminor
@@ -756,6 +797,7 @@
             tavel(k)= tlyr(iplon,k1)
             tz(k)   = tlvl(iplon,k1)
             dz(k)   = dzlyr(iplon,k1)
+            if (iovrlw == 4 .or. iovrlw == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !> -# Set absorber amount for h2o, co2, and o3.
 
@@ -868,6 +910,7 @@
             tavel(k)= tlyr(iplon,k)
             tz(k)   = tlvl(iplon,k+1)
             dz(k)   = dzlyr(iplon,k)
+            if (iovrlw == 4 .or. iovrlw == 5) alph(k) = alpha(iplon,k) ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -1017,7 +1060,7 @@
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
-     &       nlay, nlp1, ipseed(iplon), dz, delgth,                     &
+     &       nlay, nlp1, ipseed(iplon), dz, delgth, alph,               &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
@@ -1344,7 +1387,7 @@
 !
 !===> ... begin here
 !
-      if ( iovrlw<0 .or. iovrlw>3 ) then
+      if ( iovrlw<0 .or. iovrlw>5 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
      &          ' IOVRLW=',iovrlw,' in RLWINIT !!'
         stop
@@ -1486,13 +1529,14 @@
 !!\param ipseed          permutation seed for generating random numbers (isubclw>0)
 !!\param dz              layer thickness (km) 
 !!\param de_lgth         layer cloud decorrelation length (km)  
+!!\param alpha           EXP/ER cloud overlap decorrelation parameter
 !!\param cldfmc          cloud fraction for each sub-column
 !!\param taucld          cloud optical depth for bands (non-mcica)
 !!\section gen_cldprop cldprop General Algorithm
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth,                           &
+     &       nlay, nlp1, ipseed, dz, de_lgth, alpha,                    &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 
@@ -1528,6 +1572,7 @@
 !                                                                       !
 !    dz     - real, layer thickness (km)                           nlay !
 !    de_lgth- real, layer cloud decorrelation length (km)             1 !
+!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
 !    nlay  - integer, number of vertical layers                      1  !
 !    nlp1  - integer, number of vertical levels                      1  !
 !    ipseed- permutation seed for generating random numbers (isubclw>0) !
@@ -1598,6 +1643,7 @@
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
      &       reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4, dz
       real (kind=kind_phys),                    intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(nlay),   intent(in) :: alpha
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(ngptlw,nlay),intent(out):: cldfmc
@@ -1772,7 +1818,7 @@
 
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, de_lgth,                           &
+     &     ( cldf, nlay, ipseed, dz, de_lgth, alpha,                    &
 !  ---  output:
      &       lcloudy                                                    &
      &     )
@@ -1802,11 +1848,12 @@
 !!\param ipseed      permute seed for random num generator
 !!\param dz          layer thickness
 !!\param de_lgth     layer cloud decorrelation length (km)
+!!\param alpha       EXP/ER cloud overlap decorrelation parameter
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_subcol_gen mcica_subcol General Algorithm
 !! @{
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth,                            & !  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     & !  ---  inputs
      &      lcloudy                                                     & !  ---  outputs
      &    )
 
@@ -1821,6 +1868,7 @@
 !              for lw and sw, use values differ by the number of g-pts. !
 !   dz      - real, layer thickness (km)                           nlay !
 !   de_lgth - real, layer cloud decorrelation length (km)            1  !
+!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
 !                                                                       !
 !  output variables:                                                    !
 !   lcloudy - logical, sub-colum cloud profile flag array    ngptlw*nlay!
@@ -1838,6 +1886,7 @@
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys),                  intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(nlay), intent(in) :: alpha
 
 !  ---  outputs:
       logical, dimension(ngptlw,nlay), intent(out) :: lcloudy
@@ -1993,6 +2042,58 @@
             do n = 1, ngptlw
               if ( cdfun2(n,k) <= fac_lcf(k1) ) then
                 cdfunc(n,k) = cdfunc(n,k1)
+              endif
+            enddo
+          enddo
+
+        case( 4:5 )        ! exponential and exponential-random cloud overlap
+
+!  ---  Use previously derived decorrelation parameter, alpha, to specify
+!       the exponenential transition of cloud correlation in the vertical column.
+!
+!       For exponential cloud overlap, the correlation is applied across layers
+!       without regard to the configuration of clear and cloudy layers.
+
+!       For exponential-random cloud overlap, a new exponential transition is 
+!       performed within each group of adjacent cloudy layers and blocks of 
+!       cloudy layers with clear layers between them are correlated randomly. 
+!
+!       NOTE: The code below is identical for case (4) and (5) because the 
+!       distinction in the vertical correlation between EXP and ER is already 
+!       built into the specification of alpha (in subroutine get_alpha_exp). 
+
+!  ---  setup 2 sets of random numbers
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfunc(n,k) = rand2d(k1)
+            enddo
+          enddo
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do k = 1, nlay
+            do n = 1, ngptlw
+              k1 = k1 + 1
+              cdfun2(n,k) = rand2d(k1)
+            enddo
+          enddo
+
+!  ---  then working upward from the surface:
+!       if a random number (from an independent set: cdfun2) is smaller than 
+!       alpha, then use the previous layer's number, otherwise use a new random
+!       number (keep the originally assigned one in cdfunc for that layer).
+
+          do k = 2, nlay
+            k1 = k - 1
+            do n = 1, ngptlw
+              if ( cdfun2(n,k) < alpha(k) ) then
+                   cdfunc(n,k) = cdfunc(n,k1)
               endif
             enddo
           enddo
