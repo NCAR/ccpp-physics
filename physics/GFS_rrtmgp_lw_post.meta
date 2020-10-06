@@ -180,6 +180,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[fluxr]
+  standard_name = cumulative_radiation_diagnostic
+  long_name = time-accumulated 2D radiation-related diagnostic fields
+  units = various
+  dimensions = (horizontal_loop_extent,number_of_radiation_diagnostic_variables)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [sfcdlw]
   standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
   long_name = total sky sfc downward lw flux

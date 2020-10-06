@@ -105,8 +105,8 @@
   intent = inout
   optional = F
 [tp]
-  standard_name = air_temperature_two_time_steps_back
-  long_name = air temperature two time steps back
+  standard_name = air_temperature_two_timesteps_back
+  long_name = air temperature two timesteps back
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -114,8 +114,8 @@
   intent = inout
   optional = F
 [qp]
-  standard_name = water_vapor_specific_humidity_two_time_steps_back
-  long_name = water vapor specific humidity two time steps back
+  standard_name = water_vapor_specific_humidity_two_timesteps_back
+  long_name = water vapor specific humidity two timesteps back
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -123,8 +123,8 @@
   intent = inout
   optional = F
 [psp]
-  standard_name = surface_air_pressure_two_time_steps_back
-  long_name = surface air pressure two time steps back
+  standard_name = surface_air_pressure_two_timesteps_back
+  long_name = surface air pressure two timesteps back
   units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
@@ -132,8 +132,8 @@
   intent = inout
   optional = F
 [tp1]
-  standard_name = air_temperature_at_previous_time_step
-  long_name = air temperature at previous time step
+  standard_name = air_temperature_at_previous_timestep
+  long_name = air temperature at previous timestep
   units = K
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -141,8 +141,8 @@
   intent = inout
   optional = F
 [qp1]
-  standard_name = water_vapor_specific_humidity_at_previous_time_step
-  long_name = water vapor specific humidity at previous time step
+  standard_name = water_vapor_specific_humidity_at_previous_timestep
+  long_name = water vapor specific humidity at previous timestep
   units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
@@ -150,8 +150,8 @@
   intent = inout
   optional = F
 [psp1]
-  standard_name = surface_air_pressure_at_previous_time_step
-  long_name = surface air surface pressure at previous time step
+  standard_name = surface_air_pressure_at_previous_timestep
+  long_name = surface air surface pressure at previous timestep
   units = Pa
   dimensions = (horizontal_loop_extent)
   type = real
