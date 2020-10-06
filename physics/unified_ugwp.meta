@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = unified_ugwp
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = unified_ugwp_init
   type = scheme
