@@ -186,7 +186,7 @@
 [cld_reliq]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
-  units = micron
+  units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
@@ -202,7 +202,7 @@
 [cld_reice]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
-  units = micron
+  units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
@@ -218,7 +218,7 @@
 [cld_resnow]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow flake
-  units = micron
+  units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
@@ -234,7 +234,7 @@
 [cld_rerain]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain drop
-  units = micron
+  units = um
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in

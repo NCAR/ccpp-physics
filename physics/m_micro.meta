@@ -777,25 +777,25 @@
 [aerfld_i]
   standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
   long_name = GOCART aerosol climatology number concentration
-  units = kg-1?
+  units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [naai_i]
-  standard_name = in_number_concentration
-  long_name = IN number concentration
-  units = kg-1?
+  standard_name = ice_nucleation_number
+  long_name = ice nucleation number in MG MP
+  units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
   optional = F
 [npccn_i]
-  standard_name = ccn_number_concentration
-  long_name = CCN number concentration
-  units = kg-1?
+  standard_name = tendency_of_ccn_activated_number
+  long_name = tendency of ccn activated number
+  units = kg-1 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
