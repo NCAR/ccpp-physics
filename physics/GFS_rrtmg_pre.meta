@@ -321,6 +321,23 @@
   type = integer
   intent = in
   optional = F
+[julian]
+  standard_name = julian_day
+  long_name = julian day
+  units = days
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[yearlen]
+  standard_name = number_of_days_in_year
+  long_name = number of days in a year
+  units = days
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [lndp_var_list]
   standard_name = variables_to_be_perturbed_for_landperts
   long_name = variables to be perturbed for landperts
@@ -488,6 +505,15 @@
   long_name = ideal gas constant for dry air
   units = J kg-1 K-1
   dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[xlat_d]
+  standard_name = latitude_in_degree
+  long_name = latitude in degree north
+  units = degree_north
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
