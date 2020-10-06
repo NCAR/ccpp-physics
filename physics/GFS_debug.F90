@@ -762,8 +762,8 @@
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%skebu_wts', Coupling%skebu_wts )
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%skebv_wts', Coupling%skebv_wts )
                      end if
-                     if (Model%lndp_type /= 0) then
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%sfc_wts'  , Coupling%sfc_wts   )
+                     if (Model%do_sfcperts) then
+                         call print_var(mpirank,omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%sfc_wts'  , Coupling%sfc_wts   )
                      end if
                      if (Model%do_ca) then
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Coupling%ca1      ', Coupling%ca1       )
