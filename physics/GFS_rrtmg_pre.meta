@@ -220,7 +220,7 @@
 [nleffr]
   standard_name = index_for_cloud_liquid_water_effective_radius
   long_name = the index of cloud liquid water effective radius in phy_f3d
-  units = 
+  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -228,7 +228,7 @@
 [nieffr]
   standard_name = index_for_ice_effective_radius
   long_name = the index of ice effective radius in phy_f3d
-  units = 
+  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -236,7 +236,7 @@
 [nseffr]
   standard_name = index_for_snow_effective_radius
   long_name = the index of snow effective radius in phy_f3d
-  units = 
+  units = index
   dimensions = ()
   type = integer
   intent = in
@@ -390,7 +390,7 @@
 [effr_in]
   standard_name = flag_for_cloud_effective_radii
   long_name = flag for cloud effective radii calculations in GFDL microphysics
-  units = 
+  units = flag
   dimensions = ()
   type = logical
   intent = in
@@ -665,7 +665,7 @@
 [aer_nm]
   standard_name = aerosol_number_concentration_from_gocart_aerosol_climatology
   long_name = GOCART aerosol climatology number concentration
-  units = kg-1?
+  units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_aerosol_tracers_MG)
   type = real
   kind = kind_phys
