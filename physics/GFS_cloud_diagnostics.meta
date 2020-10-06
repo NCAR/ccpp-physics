@@ -1,3 +1,7 @@
+[ccpp-table-properties]
+  name = GFS_cloud_diagnostics
+  type = scheme
+
 ########################################################################
 [ccpp-arg-table]
   name = GFS_cloud_diagnostics_run

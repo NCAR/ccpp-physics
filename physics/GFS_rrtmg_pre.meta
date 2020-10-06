@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = GFS_rrtmg_pre_init
+[ccpp-table-properties]
+  name = GFS_rrtmg_pre
   type = scheme
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,module_mp_radar.F90,module_mp_thompson.F90,module_mp_thompson_make_number_concentrations.F90,physcons.F90,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radlw_param.f,radsw_param.f,surface_perturbation.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -529,6 +530,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[cldfra]
+  standard_name = instantaneous_3d_cloud_fraction
+  long_name = instantaneous 3D cloud fraction for all MPs
+  units = frac
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [mtopa]
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
@@ -550,6 +560,15 @@
   long_name = cloud decorrelation length
   units = km
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[alpha]
+  standard_name = cloud_overlap_decorrelation_parameter
+  long_name = cloud overlap decorrelation parameter
+  units = frac
+  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out
@@ -581,7 +600,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = GFS_rrtmg_pre_finalize
-  type = scheme

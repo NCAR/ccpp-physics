@@ -9,13 +9,12 @@
 !! This module contain some utility functions for saturation vapor pressure.
       module wv_saturation
 #ifdef GEOS5
-       use MAPL_ConstantsMod, r8 => MAPL_R8
+       use MAPL_ConstantsMod, kp => MAPL_R8
 #endif
 #ifdef NEMS_GSM
        use funcphys,  only : fpvsl, fpvsi, fpvs    ! saturation vapor pressure for water & ice
+       use machine,   only : kp => kind_phys
 #endif
-       use machine,   only : r8 => kind_phys
-
 
 !++jtb (comm out)
 
@@ -61,37 +60,37 @@
 ! to tmax+1 degrees k in one degree increments.  ttrice defines the
 ! transition region where es is a combination of ice & water values
 !
-       real(r8) estbl(plenest)
-       real(r8) tmin
-       real(r8) tmax
-       real(r8) ttrice
-       real(r8) pcf(6)
-       real(r8) epsqs
-       real(r8) rgasv
-       real(r8) hlatf
-       real(r8) hlatv
-       real(r8) cp
-       real(r8) tmelt
+       real(kp) estbl(plenest)
+       real(kp) tmin
+       real(kp) tmax
+       real(kp) ttrice
+       real(kp) pcf(6)
+       real(kp) epsqs
+       real(kp) rgasv
+       real(kp) hlatf
+       real(kp) hlatv
+       real(kp) cp
+       real(kp) tmelt
        logical icephs
 
        integer, parameter :: iulog=6
 
        contains
 
-       real(r8) function estblf( td )
+       real(kp) function estblf( td )
 !
 ! Saturation vapor pressure table lookup
 !
-       real(r8), intent(in) :: td
+       real(kp), intent(in) :: td
 !
-       real(r8) :: e
-       real(r8) :: ai
+       real(kp) :: e
+       real(kp) :: ai
        integer :: i
 !
        e = max(min(td,tmax),tmin)
        i = int(e-tmin)+1
        ai = aint(e-tmin)
-       estblf = (tmin+ai-e+1._r8)* estbl(i)-(tmin+ai-e)* estbl(i+1)
+       estblf = (tmin+ai-e+1._kp)* estbl(i)-(tmin+ai-e)* estbl(i+1)
        end function estblf
 
 !>\ingroup wv_saturation_mod
@@ -110,19 +109,19 @@
 !
 ! Input arguments
 !
-       real(r8), intent(in) :: tmn
-       real(r8), intent(in) :: tmx
-       real(r8), intent(in) :: epsil
-       real(r8), intent(in) :: trice
-       real(r8), intent(in) :: latvap
-       real(r8), intent(in) :: latice
-       real(r8), intent(in) :: rh2o
-       real(r8), intent(in) :: cpair
-       real(r8), intent(in) :: tmeltx
+       real(kp), intent(in) :: tmn
+       real(kp), intent(in) :: tmx
+       real(kp), intent(in) :: epsil
+       real(kp), intent(in) :: trice
+       real(kp), intent(in) :: latvap
+       real(kp), intent(in) :: latice
+       real(kp), intent(in) :: rh2o
+       real(kp), intent(in) :: cpair
+       real(kp), intent(in) :: tmeltx
 !
 !---------------------------Local variables-----------------------------
 !
-       real(r8) t
+       real(kp) t
        integer n
        integer lentbl
        integer itype
@@ -148,7 +147,7 @@
        cp    = cpair
        tmelt = tmeltx
 !
-       lentbl = INT(tmax-tmin+2.000001_r8)
+       lentbl = INT(tmax-tmin+2.000001_kp)
        if (lentbl .gt. plenest) then
 
 
@@ -162,7 +161,7 @@
 ! If so, set appropriate transition range for temperature
 !
        if (icephs) then
-         if (ttrice /= 0.0_r8) then
+         if (ttrice /= 0.0_kp) then
            itype = -ttrice
          else
            itype = 1
@@ -171,14 +170,14 @@
          itype = 0
        end if
 !
-       t = tmin - 1.0_r8
+       t = tmin - 1.0_kp
        do n=1,lentbl
-         t = t + 1.0_r8
+         t = t + 1.0_kp
          call gffgch(t,estbl(n),tmelt,itype)
        end do
 !
        do n=lentbl+1,plenest
-         estbl(n) = -99999.0_r8
+         estbl(n) = -99999.0_kp
        end do
 !
 ! Table complete -- Set coefficients for polynomial approximation of
@@ -188,11 +187,11 @@
 !
 !                  --- Degree 5 approximation ---
 !
-       pcf(1) = 5.04469588506e-01_r8
-       pcf(2) = -5.47288442819e+00_r8
-       pcf(3) = -3.67471858735e-01_r8
-       pcf(4) = -8.95963532403e-03_r8
-       pcf(5) = -7.78053686625e-05_r8
+       pcf(1) = 5.04469588506e-01_kp
+       pcf(2) = -5.47288442819e+00_kp
+       pcf(3) = -3.67471858735e-01_kp
+       pcf(4) = -8.95963532403e-03_kp
+       pcf(5) = -7.78053686625e-05_kp
 !
 !                  --- Degree 6 approximation ---
 !
@@ -235,35 +234,35 @@
        integer,  intent(in) :: ilen
        integer,  intent(in) :: kstart
        integer,  intent(in) :: kend
-       real(r8), intent(in) :: t(ii,kk)
-       real(r8), intent(in) :: p(ii,kk)
+       real(kp), intent(in) :: t(ii,kk)
+       real(kp), intent(in) :: p(ii,kk)
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es(ii,kk)
-       real(r8), intent(out) :: qs(ii,kk)
+       real(kp), intent(out) :: es(ii,kk)
+       real(kp), intent(out) :: qs(ii,kk)
 !
 !---------------------------Local workspace-----------------------------
 !
-       real(r8) omeps
+       real(kp) omeps
        integer i, k
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
        do k=kstart,kend
          do i=1,ilen
            es(i,k) = min(estblf(t(i,k)),p(i,k))
 !
 ! Saturation specific humidity
 !
-           qs(i,k) = min(1.0_r8, epsqs*es(i,k)/(p(i,k)-omeps*es(i,k)))
+           qs(i,k) = min(1.0_kp, epsqs*es(i,k)/(p(i,k)-omeps*es(i,k)))
 !
 ! The following check is to avoid the generation of negative values
 ! that can occur in the upper stratosphere and mesosphere
 !
-!      if (qs(i,k) < 0.0_r8) then
-!      qs(i,k) = 1.0_r8
+!      if (qs(i,k) < 0.0_kp) then
+!      qs(i,k) = 1.0_kp
 !      es(i,k) = p(i,k)
 !      end if
 
@@ -291,22 +290,22 @@
        integer,  intent(in) :: ilen
        integer,  intent(in) :: kstart
        integer,  intent(in) :: kend
-       real(r8), intent(in) :: t(ii,kk)
-       real(r8), intent(in) :: p(ii,kk)
+       real(kp), intent(in) :: t(ii,kk)
+       real(kp), intent(in) :: p(ii,kk)
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es(ii,kk)
-       real(r8), intent(out) :: qs(ii,kk)
+       real(kp), intent(out) :: es(ii,kk)
+       real(kp), intent(out) :: qs(ii,kk)
 !
 !---------------------------Local workspace-----------------------------
 !
-       real(r8) omeps
+       real(kp) omeps
        integer i, k
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
        do k=kstart,kend
          do i=1,ilen
 !          es(i,k) = estblf(t(i,k))
@@ -319,13 +318,13 @@
 !
 ! Saturation specific humidity
 !
-           qs(i,k) = min(1.0_r8, epsqs*es(i,k)/(p(i,k)-omeps*es(i,k)))
+           qs(i,k) = min(1.0_kp, epsqs*es(i,k)/(p(i,k)-omeps*es(i,k)))
 !
 ! The following check is to avoid the generation of negative values
 ! that can occur in the upper stratosphere and mesosphere
 !
-!          if (qs(i,k) < 0.0_r8) then
-!            qs(i,k) = 1.0_r8
+!          if (qs(i,k) < 0.0_kp) then
+!            qs(i,k) = 1.0_kp
 !            es(i,k) = p(i,k)
 !          end if
          end do
@@ -357,48 +356,48 @@
        integer,  intent(in) :: kstart
        integer,  intent(in) :: kend
 
-       real(r8), intent(in) :: t(ii,kk)
-       real(r8), intent(in) :: p(ii,kk)
+       real(kp), intent(in) :: t(ii,kk)
+       real(kp), intent(in) :: p(ii,kk)
 
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es(ii,kk)
-       real(r8), intent(out) :: qs(ii,kk)
-       real(r8), intent(out) :: gam(ii,kk)
+       real(kp), intent(out) :: es(ii,kk)
+       real(kp), intent(out) :: qs(ii,kk)
+       real(kp), intent(out) :: gam(ii,kk)
 !
 !---------------------------Local workspace-----------------------------
 !
        logical lflg
        integer i
        integer k
-       real(r8) omeps
-       real(r8) trinv
-       real(r8) tc
-       real(r8) weight
-       real(r8) hltalt
-       real(r8) hlatsb
-       real(r8) hlatvp
-       real(r8) tterm
-       real(r8) desdt
+       real(kp) omeps
+       real(kp) trinv
+       real(kp) tc
+       real(kp) weight
+       real(kp) hltalt
+       real(kp) hlatsb
+       real(kp) hlatvp
+       real(kp) tterm
+       real(kp) desdt
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
        do k=kstart,kend
          do i=1,ilen
            es(i,k) = min(p(i,k), estblf(t(i,k)))
 !
 ! Saturation specific humidity
 !
-           qs(i,k) = min(1.0_r8, epsqs*es(i,k)/(p(i,k)-omeps*es(i,k)))
+           qs(i,k) = min(1.0_kp, epsqs*es(i,k)/(p(i,k)-omeps*es(i,k)))
 !
 ! The following check is to avoid the generation of negative qs
 ! values which can occur in the upper stratosphere and mesosphere
 !
 !
-!          if (qs(i,k) < 0.0_r8) then
-!            qs(i,k) = 1.0_r8
+!          if (qs(i,k) < 0.0_kp) then
+!            qs(i,k) = 1.0_kp
 !            es(i,k) = p(i,k)
 !          end if
          end do
@@ -407,9 +406,9 @@
 ! "generalized" analytic expression for t derivative of es
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
-       trinv = 0.0_r8
-       if ((.not. icephs) .or. (ttrice == 0.0_r8)) go to 10
-       trinv = 1.0_r8/ttrice
+       trinv = 0.0_kp
+       if ((.not. icephs) .or. (ttrice == 0.0_kp)) go to 10
+       trinv = 1.0_kp/ttrice
 !
        do k=kstart,kend
          do i=1,ilen
@@ -422,10 +421,10 @@
 ! above freezing where constant slope is given by -2369 j/(kg c) =cpv - cw
 !
            tc     = t(i,k) - tmelt
-           lflg   = (tc >= -ttrice .and. tc < 0.0_r8)
-           weight = min(-tc*trinv,1.0_r8)
+           lflg   = (tc >= -ttrice .and. tc < 0.0_kp)
+           weight = min(-tc*trinv,1.0_kp)
            hlatsb = hlatv + weight*hlatf
-           hlatvp = hlatv - 2369.0_r8*tc
+           hlatvp = hlatv - 2369.0_kp*tc
            if (t(i,k) < tmelt) then
              hltalt = hlatsb
            else
@@ -435,12 +434,12 @@
              tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)      &
      &                      + tc*pcf(5))))
            else
-             tterm = 0.0_r8
+             tterm = 0.0_kp
            end if
              desdt = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k)) + tterm*trinv
              gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/(cp*es(i,k)*(p(i,k) &
      &                  - omeps*es(i,k)))
-           if (qs(i,k) == 1.0_r8) gam(i,k) = 0.0_r8
+           if (qs(i,k) == 1.0_kp) gam(i,k) = 0.0_kp
          end do
        end do
 !
@@ -454,7 +453,7 @@
 ! Account for change of hlatv with t above freezing where
 ! constant slope is given by -2369 j/(kg c) = cpv - cw
 !
-           hlatvp = hlatv - 2369.0_r8*(t(i,k)-tmelt)
+           hlatvp = hlatv - 2369.0_kp*(t(i,k)-tmelt)
            if (icephs) then
              hlatsb = hlatv + hlatf
            else
@@ -468,7 +467,7 @@
            desdt    = hltalt*es(i,k)/(rgasv*t(i,k)*t(i,k))
            gam(i,k) = hltalt*qs(i,k)*p(i,k)*desdt/(cp*es(i,k)*(p(i,k)   &
      &                  - omeps*es(i,k)))
-           if (qs(i,k) == 1.0_r8) gam(i,k) = 0.0_r8
+           if (qs(i,k) == 1.0_kp) gam(i,k) = 0.0_kp
          end do
        end do
 !
@@ -488,14 +487,14 @@
 ! Input arguments
 !
        integer,  intent(in) :: len
-       real(r8), intent(in) :: t(len)
-       real(r8), intent(in) :: p(len)
+       real(kp), intent(in) :: t(len)
+       real(kp), intent(in) :: p(len)
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es(len)
-       real(r8), intent(out) :: qs(len)
-       real(r8), intent(out) :: gam(len)
+       real(kp), intent(out) :: es(len)
+       real(kp), intent(out) :: qs(len)
+       real(kp), intent(out) :: gam(len)
 !
 !--------------------------Local Variables------------------------------
 !
@@ -503,20 +502,20 @@
 !
        integer i
 !
-       real(r8) omeps
-       real(r8) trinv
-       real(r8) tc
-       real(r8) weight
-       real(r8) hltalt
+       real(kp) omeps
+       real(kp) trinv
+       real(kp) tc
+       real(kp) weight
+       real(kp) hltalt
 !
-       real(r8) hlatsb
-       real(r8) hlatvp
-       real(r8) tterm
-       real(r8) desdt
+       real(kp) hlatsb
+       real(kp) hlatvp
+       real(kp) tterm
+       real(kp) desdt
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
        do i=1,len
          es(i) = min(estblf(t(i)), p(i))
 !
@@ -527,10 +526,10 @@
 ! The following check is to avoid the generation of negative
 ! values that can occur in the upper stratosphere and mesosphere
 !
-         qs(i) = min(1.0_r8,qs(i))
+         qs(i) = min(1.0_kp,qs(i))
 !
-!        if (qs(i) < 0.0_r8) then
-!          qs(i) = 1.0_r8
+!        if (qs(i) < 0.0_kp) then
+!          qs(i) = 1.0_kp
 !          es(i) = p(i)
 !        end if
 
@@ -539,9 +538,9 @@
 ! "generalized" analytic expression for t derivative of es
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
-       trinv = 0.0_r8
-       if ((.not. icephs) .or. (ttrice.eq.0.0_r8)) go to 10
-       trinv = 1.0_r8/ttrice
+       trinv = 0.0_kp
+       if ((.not. icephs) .or. (ttrice.eq.0.0_kp)) go to 10
+       trinv = 1.0_kp/ttrice
        do i=1,len
 !
 ! Weighting of hlat accounts for transition from water to ice
@@ -552,10 +551,10 @@
 ! above freezing where const slope is given by -2369 j/(kg c) = cpv - cw
 !
        tc = t(i) - tmelt
-       lflg = (tc >= -ttrice .and. tc < 0.0_r8)
-       weight = min(-tc*trinv,1.0_r8)
+       lflg = (tc >= -ttrice .and. tc < 0.0_kp)
+       weight = min(-tc*trinv,1.0_kp)
        hlatsb = hlatv + weight*hlatf
-       hlatvp = hlatv - 2369.0_r8*tc
+       hlatvp = hlatv - 2369.0_kp*tc
        if (t(i) < tmelt) then
        hltalt = hlatsb
        else
@@ -565,11 +564,11 @@
        tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)            &
      &                + tc*pcf(5))))
        else
-       tterm = 0.0_r8
+       tterm = 0.0_kp
        end if
        desdt = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
        gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_r8) gam(i) = 0.0_r8
+       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
        end do
        return
 !
@@ -580,7 +579,7 @@
 ! Account for change of hlatv with t above freezing where
 ! constant slope is given by -2369 j/(kg c) = cpv - cw
 !
-       hlatvp = hlatv - 2369.0_r8*(t(i)-tmelt)
+       hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
        if (icephs) then
        hlatsb = hlatv + hlatf
        else
@@ -593,7 +592,7 @@
        end if
        desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
        gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_r8) gam(i) = 0.0_r8
+       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
        end do
 !
        return
@@ -610,15 +609,15 @@
 ! Input arguments
 !
        integer,  intent(in) :: len
-       real(r8), intent(in) :: t(len)
-       real(r8), intent(in) :: p(len)
+       real(kp), intent(in) :: t(len)
+       real(kp), intent(in) :: p(len)
 
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es(len)
-       real(r8), intent(out) :: qs(len)
-       real(r8), intent(out) :: gam(len)
+       real(kp), intent(out) :: es(len)
+       real(kp), intent(out) :: qs(len)
+       real(kp), intent(out) :: gam(len)
 
 !
 !--------------------------Local Variables------------------------------
@@ -626,16 +625,16 @@
 !
        integer i
 !
-       real(r8) omeps
-       real(r8) hltalt
+       real(kp) omeps
+       real(kp) hltalt
 !
-       real(r8) hlatsb
-       real(r8) hlatvp
-       real(r8) desdt
+       real(kp) hlatsb
+       real(kp) hlatvp
+       real(kp) desdt
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
        do i=1,len
 #ifdef NEMS_GSM
          es(i) = min(fpvsl(t(i)), p(i))
@@ -645,15 +644,15 @@
 !
 ! Saturation specific humidity
 !
-         qs(i) = min(1.0_r8, epsqs*es(i) / (p(i)-omeps*es(i)))
+         qs(i) = min(1.0_kp, epsqs*es(i) / (p(i)-omeps*es(i)))
 !
 ! The following check is to avoid the generation of negative
 ! values that can occur in the upper stratosphere and mesosphere
 !
-!        qs(i) = min(1.0_r8,qs(i))
+!        qs(i) = min(1.0_kp,qs(i))
 !
-!        if (qs(i) < 0.0_r8) then
-!          qs(i) = 1.0_r8
+!        if (qs(i) < 0.0_kp) then
+!          qs(i) = 1.0_kp
 !          es(i) = p(i)
 !        end if
 
@@ -666,7 +665,7 @@
 ! Account for change of hlatv with t above freezing where
 ! constant slope is given by -2369 j/(kg c) = cpv - cw
 !
-       hlatvp = hlatv - 2369.0_r8*(t(i)-tmelt)
+       hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
        hlatsb = hlatv
        if (t(i) < tmelt) then
          hltalt = hlatsb
@@ -675,7 +674,7 @@
        end if
        desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
        gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_r8) gam(i) = 0.0_r8
+       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
        end do
 !
        return
@@ -693,9 +692,9 @@
 !!DONIFF Changed to Murphy and Koop (2005) (03/04/14)
 
 
-       real(r8) dum
+       real(kp) dum
 
-       real(r8) t,polysvp
+       real(kp) t,polysvp
 
        integer typ
 
@@ -716,19 +715,19 @@
 
 
 
-       polysvp = 10._r8**(-9.09718_r8*(273.16_r8/t-1._r8)-3.56654_r8*   &
-     & log10(273.16_r8/t)+0.876793_r8*(1._r8-t/273.16_r8)+              &
-     & log10(6.1071_r8))*100._r8
+       polysvp = 10._kp**(-9.09718_kp*(273.16_kp/t-1._kp)-3.56654_kp*   &
+     & log10(273.16_kp/t)+0.876793_kp*(1._kp-t/273.16_kp)+              &
+     & log10(6.1071_kp))*100._kp
 
        end if
 
 
 
        if (typ.eq.0) then
-       polysvp = 10._r8**(-7.90298_r8*(373.16_r8/t-1._r8)+ 5.02808_r8*   &
-     &log10(373.16_r8/t)- 1.3816e-7_r8*(10._r8**(11.344_r8*(1._r8-t/     &
-     &373.16_r8))-1._r8)+ 8.1328e-3_r8*(10._r8**(-3.49149_r8*(373.16_r8/ &
-     &t-1._r8))-1._r8)+ log10(1013.246_r8))*100._r8
+       polysvp = 10._kp**(-7.90298_kp*(373.16_kp/t-1._kp)+ 5.02808_kp*   &
+     &log10(373.16_kp/t)- 1.3816e-7_kp*(10._kp**(11.344_kp*(1._kp-t/     &
+     &373.16_kp))-1._kp)+ 8.1328e-3_kp*(10._kp**(-3.49149_kp*(373.16_kp/ &
+     &t-1._kp))-1._kp)+ log10(1013.246_kp))*100._kp
        end if
 
        end if
@@ -745,40 +744,40 @@
 
 
        integer, intent(in) :: len
-       real(r8), intent(in) :: t(len)
-       real(r8), intent(in) :: p(len)
+       real(kp), intent(in) :: t(len)
+       real(kp), intent(in) :: p(len)
 
-       real(r8), intent(out) :: es(len)
-       real(r8), intent(out) :: qs(len)
-       real(r8), intent(out) :: gam(len)
+       real(kp), intent(out) :: es(len)
+       real(kp), intent(out) :: qs(len)
+       real(kp), intent(out) :: gam(len)
 
        call vqsatd(t ,p ,es ,qs ,gam , len )
        fqsatd = 1
        return
       end function fqsatd
 
-      real(r8) function qsat_water(t,p)
+      real(kp) function qsat_water(t,p)
 
-       real(r8) t
-       real(r8) p
-       real(r8) es
-       real(r8) ps, ts, e1, e2, f1, f2, f3, f4, f5, f
-
-
+       real(kp) t
+       real(kp) p
+       real(kp) es
+       real(kp) ps, ts, e1, e2, f1, f2, f3, f4, f5, f
 
 
 
-       ps = 1013.246_r8
-       ts = 373.16_r8
-       e1 = 11.344_r8*(1.0_r8 - t/ts)
-       e2 = -3.49149_r8*(ts/t - 1.0_r8)
-       f1 = -7.90298_r8*(ts/t - 1.0_r8)
-       f2 = 5.02808_r8*log10(ts/t)
-       f3 = -1.3816_r8*(10.0_r8**e1 - 1.0_r8)/10000000.0_r8
-       f4 = 8.1328_r8*(10.0_r8**e2 - 1.0_r8)/1000.0_r8
+
+
+       ps = 1013.246_kp
+       ts = 373.16_kp
+       e1 = 11.344_kp*(1.0_kp - t/ts)
+       e2 = -3.49149_kp*(ts/t - 1.0_kp)
+       f1 = -7.90298_kp*(ts/t - 1.0_kp)
+       f2 = 5.02808_kp*log10(ts/t)
+       f3 = -1.3816_kp*(10.0_kp**e1 - 1.0_kp)/10000000.0_kp
+       f4 = 8.1328_kp*(10.0_kp**e2 - 1.0_kp)/1000.0_kp
        f5 = log10(ps)
        f = f1 + f2 + f3 + f4 + f5
-       es = (10.0_r8**f)*100.0_r8
+       es = (10.0_kp**f)*100.0_kp
 
        qsat_water = epsqs*es/(p-(1.-epsqs)*es)
        if(qsat_water < 0.) qsat_water = 1.
@@ -790,17 +789,17 @@
       subroutine vqsat_water(t,p,qsat_water,len)
 
        integer, intent(in) :: len
-       real(r8) t(len)
-       real(r8) p(len)
-       real(r8) qsat_water(len)
-       real(r8) es
-       real(r8), parameter :: t0inv = 1._r8/273._r8
-       real(r8) coef
+       real(kp) t(len)
+       real(kp) p(len)
+       real(kp) qsat_water(len)
+       real(kp) es
+       real(kp), parameter :: t0inv = 1._kp/273._kp
+       real(kp) coef
        integer :: i
 
        coef = hlatv/rgasv
        do i=1,len
-       es = 611._r8*exp(coef*(t0inv-1./t(i)))
+       es = 611._kp*exp(coef*(t0inv-1./t(i)))
        qsat_water(i) = epsqs*es/(p(i)-(1.-epsqs)*es)
        if(qsat_water(i) < 0.) qsat_water(i) = 1.
        enddo
@@ -810,12 +809,12 @@
       end subroutine vqsat_water
 
 !>\ingroup wv_saturation_mod
-      real(r8) function qsat_ice(t,p)
+      real(kp) function qsat_ice(t,p)
 
-       real(r8) t
-       real(r8) p
-       real(r8) es
-       real(r8), parameter :: t0inv = 1._r8/273._r8
+       real(kp) t
+       real(kp) p
+       real(kp) es
+       real(kp), parameter :: t0inv = 1._kp/273._kp
        es = 611.*exp((hlatv+hlatf)/rgasv*(t0inv-1./t))
        qsat_ice = epsqs*es/(p-(1.-epsqs)*es)
        if(qsat_ice < 0.) qsat_ice = 1.
@@ -826,12 +825,12 @@
       subroutine vqsat_ice(t,p,qsat_ice,len)
 
        integer,intent(in) :: len
-       real(r8) t(len)
-       real(r8) p(len)
-       real(r8) qsat_ice(len)
-       real(r8) es
-       real(r8), parameter :: t0inv = 1._r8/273._r8
-       real(r8) coef
+       real(kp) t(len)
+       real(kp) p(len)
+       real(kp) qsat_ice(len)
+       real(kp) es
+       real(kp), parameter :: t0inv = 1._kp/273._kp
+       real(kp) coef
        integer :: i
 
        coef = (hlatv+hlatf)/rgasv
@@ -858,17 +857,17 @@
 ! Input arguments
 !
        integer, intent(in) :: len
-       real(r8), intent(in) :: t(len)
-       real(r8), intent(in) :: p(len)
+       real(kp), intent(in) :: t(len)
+       real(kp), intent(in) :: p(len)
 
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es(len)
-       real(r8), intent(out) :: qs(len)
+       real(kp), intent(out) :: es(len)
+       real(kp), intent(out) :: qs(len)
 
 
-       real(r8), intent(out) :: dqsdt(len)
+       real(kp), intent(out) :: dqsdt(len)
 
 
 !
@@ -877,21 +876,21 @@
 !
        integer i
 !
-       real(r8) omeps
-       real(r8) hltalt
+       real(kp) omeps
+       real(kp) hltalt
 !
-       real(r8) hlatsb
-       real(r8) hlatvp
-       real(r8) desdt
+       real(kp) hlatsb
+       real(kp) hlatvp
+       real(kp) desdt
 
 
-       real(r8) gam(len)
+       real(kp) gam(len)
 
 
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
        do i=1,len
 #ifdef GEOS5
        es(i) = min(polysvp(t(i),0), p(i))
@@ -907,10 +906,10 @@
 ! The following check is to avoid the generation of negative
 ! values that can occur in the upper stratosphere and mesosphere
 !
-       qs(i) = min(1.0_r8,qs(i))
+       qs(i) = min(1.0_kp,qs(i))
 !
-!      if (qs(i) < 0.0_r8) then
-!        qs(i) = 1.0_r8
+!      if (qs(i) < 0.0_kp) then
+!        qs(i) = 1.0_kp
 !        es(i) = p(i)
 !      end if
 
@@ -923,7 +922,7 @@
 ! Account for change of hlatv with t above freezing where
 ! constant slope is given by -2369 j/(kg c) = cpv - cw
 !
-       hlatvp = hlatv - 2369.0_r8*(t(i)-tmelt)
+       hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
        hlatsb = hlatv
        if (t(i) < tmelt) then
          hltalt = hlatsb
@@ -932,7 +931,7 @@
        end if
        desdt  = hltalt*es(i)/(rgasv*t(i)*t(i))
        gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_r8) gam(i) = 0.0_r8
+       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
 
        dqsdt(i) = (cp/hltalt)*gam(i)
 
@@ -950,22 +949,22 @@
 ! Input arguments
 !
 
-       real(r8), intent(in) :: t, p
+       real(kp), intent(in) :: t, p
 
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es, qs, dqsdt
+       real(kp), intent(out) :: es, qs, dqsdt
 !
 !--------------------------Local Variables------------------------------
 !
 !      integer i
 !
-       real(r8) omeps, hltalt, hlatsb, hlatvp, desdt, gam
+       real(kp) omeps, hltalt, hlatsb, hlatvp, desdt, gam
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
 !  do i=1,len
 #ifdef GEOS5
        es = min(p, polysvp(t,0))
@@ -976,13 +975,13 @@
 !
 ! Saturation specific humidity
 !
-       qs = min(1.0_r8, epsqs*es/(p-omeps*es))
+       qs = min(1.0_kp, epsqs*es/(p-omeps*es))
 !
 ! The following check is to avoid the generation of negative
 ! values that can occur in the upper stratosphere and mesosphere
 !
-!      if (qs < 0.0_r8) then
-!      qs = 1.0_r8
+!      if (qs < 0.0_kp) then
+!      qs = 1.0_kp
 !      es = p
 !      end if
 !  end do
@@ -994,7 +993,7 @@
 ! Account for change of hlatv with t above freezing where
 ! constant slope is given by -2369 j/(kg c) = cpv - cw
 !
-       hlatvp = hlatv - 2369.0_r8*(t-tmelt)
+       hlatvp = hlatv - 2369.0_kp*(t-tmelt)
        hlatsb = hlatv
        if (t < tmelt) then
          hltalt = hlatsb
@@ -1003,7 +1002,7 @@
        end if
        desdt = hltalt*es/(rgasv*t*t)
        gam   = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
-       if (qs >= 1.0_r8) gam = 0.0_r8
+       if (qs >= 1.0_kp) gam = 0.0_kp
 
        dqsdt = (cp/hltalt)*gam
 
@@ -1035,16 +1034,16 @@
 ! Input arguments
 !
        integer, intent(in) :: len
-       real(r8), intent(in) :: t(len)
-       real(r8), intent(in) :: p(len)
+       real(kp), intent(in) :: t(len)
+       real(kp), intent(in) :: p(len)
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es(len)
-       real(r8), intent(out) :: qs(len)
+       real(kp), intent(out) :: es(len)
+       real(kp), intent(out) :: qs(len)
 
 
-       real(r8), intent(out) :: dqsdt(len)
+       real(kp), intent(out) :: dqsdt(len)
 
 
 !
@@ -1054,24 +1053,24 @@
 !
        integer i
 !
-       real(r8) omeps
-       real(r8) trinv
-       real(r8) tc
-       real(r8) weight
-       real(r8) hltalt
+       real(kp) omeps
+       real(kp) trinv
+       real(kp) tc
+       real(kp) weight
+       real(kp) hltalt
 !
-       real(r8) hlatsb
-       real(r8) hlatvp
-       real(r8) tterm
-       real(r8) desdt
+       real(kp) hlatsb
+       real(kp) hlatvp
+       real(kp) tterm
+       real(kp) desdt
 
 
-       real(r8) gam(len)
+       real(kp) gam(len)
 
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
        do i=1,len
 #ifdef GEOS5
          es(i) = min(p(i), estblf(t(i)))
@@ -1087,10 +1086,10 @@
 ! The following check is to avoid the generation of negative
 ! values that can occur in the upper stratosphere and mesosphere
 !
-         qs(i) = min(1.0_r8,qs(i))
+         qs(i) = min(1.0_kp,qs(i))
 !
-!        if (qs(i) < 0.0_r8) then
-!        qs(i) = 1.0_r8
+!        if (qs(i) < 0.0_kp) then
+!        qs(i) = 1.0_kp
 !        es(i) = p(i)
 !        end if
        end do
@@ -1098,9 +1097,9 @@
 ! "generalized" analytic expression for t derivative of es
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
-       trinv = 0.0_r8
-       if ((.not. icephs) .or. (ttrice == 0.0_r8)) go to 10
-       trinv = 1.0_r8/ttrice
+       trinv = 0.0_kp
+       if ((.not. icephs) .or. (ttrice == 0.0_kp)) go to 10
+       trinv = 1.0_kp/ttrice
        do i=1,len
 !
 ! Weighting of hlat accounts for transition from water to ice
@@ -1111,10 +1110,10 @@
 ! above freezing where const slope is given by -2369 j/(kg c) = cpv - cw
 !
        tc = t(i) - tmelt
-       lflg = (tc >= -ttrice .and. tc < 0.0_r8)
-       weight = min(-tc*trinv,1.0_r8)
+       lflg = (tc >= -ttrice .and. tc < 0.0_kp)
+       weight = min(-tc*trinv,1.0_kp)
        hlatsb = hlatv + weight*hlatf
-       hlatvp = hlatv - 2369.0_r8*tc
+       hlatvp = hlatv - 2369.0_kp*tc
        if (t(i) < tmelt) then
          hltalt = hlatsb
        else
@@ -1124,11 +1123,11 @@
          tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)          &
      &                  + tc*pcf(5))))
        else
-         tterm = 0.0_r8
+         tterm = 0.0_kp
        end if
        desdt  = hltalt*es(i)/(rgasv*t(i)*t(i)) + tterm*trinv
        gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_r8) gam(i) = 0.0_r8
+       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
 
        dqsdt(i) = (cp/hltalt)*gam(i)
 
@@ -1142,7 +1141,7 @@
 ! Account for change of hlatv with t above freezing where
 ! constant slope is given by -2369 j/(kg c) = cpv - cw
 !
-       hlatvp = hlatv - 2369.0_r8*(t(i)-tmelt)
+       hlatvp = hlatv - 2369.0_kp*(t(i)-tmelt)
        if (icephs) then
        hlatsb = hlatv + hlatf
        else
@@ -1155,7 +1154,7 @@
        end if
        desdt = hltalt*es(i)/(rgasv*t(i)*t(i))
        gam(i) = hltalt*qs(i)*p(i)*desdt/(cp*es(i)*(p(i) - omeps*es(i)))
-       if (qs(i) == 1.0_r8) gam(i) = 0.0_r8
+       if (qs(i) == 1.0_kp) gam(i) = 0.0_kp
 
        dqsdt(i) = (cp/hltalt)*gam(i)
 
@@ -1189,11 +1188,11 @@
 !
 ! Input arguments
 !
-       real(r8), intent(in) :: t, p
+       real(kp), intent(in) :: t, p
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es, qs, dqsdt
+       real(kp), intent(out) :: es, qs, dqsdt
 !
 !--------------------------Local Variables------------------------------
 !
@@ -1201,23 +1200,23 @@
 !
 !  integer i      ! index for vector calculations
 !
-       real(r8) omeps
-       real(r8) trinv
-       real(r8) tc
-       real(r8) weight
-       real(r8) hltalt
+       real(kp) omeps
+       real(kp) trinv
+       real(kp) tc
+       real(kp) weight
+       real(kp) hltalt
 !
-       real(r8) hlatsb
-       real(r8) hlatvp
-       real(r8) tterm
-       real(r8) desdt
+       real(kp) hlatsb
+       real(kp) hlatvp
+       real(kp) tterm
+       real(kp) desdt
 
-       real(r8) gam
+       real(kp) gam
 
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
 
 !  do i=1,len
 
@@ -1235,10 +1234,10 @@
 ! The following check is to avoid the generation of negative
 ! values that can occur in the upper stratosphere and mesosphere
 !
-       qs = min(1.0_r8,qs)
+       qs = min(1.0_kp,qs)
 !
-!      if (qs < 0.0_r8) then
-!        qs = 1.0_r8
+!      if (qs < 0.0_kp) then
+!        qs = 1.0_kp
 !        es = p
 !      end if
 
@@ -1247,9 +1246,9 @@
 ! "generalized" analytic expression for t derivative of es
 ! accurate to within 1 percent for 173.16 < t < 373.16
 !
-       trinv = 0.0_r8
-       if ((.not. icephs) .or. (ttrice == 0.0_r8)) go to 10
-       trinv = 1.0_r8/ttrice
+       trinv = 0.0_kp
+       if ((.not. icephs) .or. (ttrice == 0.0_kp)) go to 10
+       trinv = 1.0_kp/ttrice
 
 !  do i=1,len
 !
@@ -1261,10 +1260,10 @@
 ! above freezing where const slope is given by -2369 j/(kg c) = cpv - cw
 !
        tc = t - tmelt
-       lflg = (tc >= -ttrice .and. tc < 0.0_r8)
-       weight = min(-tc*trinv,1.0_r8)
+       lflg = (tc >= -ttrice .and. tc < 0.0_kp)
+       weight = min(-tc*trinv,1.0_kp)
        hlatsb = hlatv + weight*hlatf
-       hlatvp = hlatv - 2369.0_r8*tc
+       hlatvp = hlatv - 2369.0_kp*tc
        if (t < tmelt) then
          hltalt = hlatsb
        else
@@ -1274,11 +1273,11 @@
          tterm = pcf(1) + tc*(pcf(2) + tc*(pcf(3) + tc*(pcf(4)          &
      &                  + tc*pcf(5))))
        else
-         tterm = 0.0_r8
+         tterm = 0.0_kp
        end if
        desdt = hltalt*es/(rgasv*t*t) + tterm*trinv
        gam = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
-       if (qs == 1.0_r8) gam = 0.0_r8
+       if (qs == 1.0_kp) gam = 0.0_kp
 
        dqsdt = (cp/hltalt)*gam
 
@@ -1295,7 +1294,7 @@
 ! Account for change of hlatv with t above freezing where
 ! constant slope is given by -2369 j/(kg c) = cpv - cw
 !
-       hlatvp = hlatv - 2369.0_r8*(t-tmelt)
+       hlatvp = hlatv - 2369.0_kp*(t-tmelt)
        if (icephs) then
          hlatsb = hlatv + hlatf
        else
@@ -1308,7 +1307,7 @@
        end if
        desdt = hltalt*es/(rgasv*t*t)
        gam = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
-       if (qs == 1.0_r8) gam = 0.0_r8
+       if (qs == 1.0_kp) gam = 0.0_kp
 
        dqsdt = (cp/hltalt)*gam
 
@@ -1360,33 +1359,33 @@
 !
 ! Input arguments
 !
-       real(r8), intent(in) :: t ,tmelt
+       real(kp), intent(in) :: t ,tmelt
 !
 ! Output arguments
 !
        integer, intent(inout) :: itype
 
-       real(r8), intent(out) :: es
+       real(kp), intent(out) :: es
 !
 !---------------------------Local variables-----------------------------
 !
-       real(r8) e1
-       real(r8) e2
-       real(r8) eswtr
-       real(r8) f
-       real(r8) f1
-       real(r8) f2
-       real(r8) f3
-       real(r8) f4
-       real(r8) f5
-       real(r8) ps
-       real(r8) t0
-       real(r8) term1
-       real(r8) term2
-       real(r8) term3
-       real(r8) tr
-       real(r8) ts
-       real(r8) weight
+       real(kp) e1
+       real(kp) e2
+       real(kp) eswtr
+       real(kp) f
+       real(kp) f1
+       real(kp) f2
+       real(kp) f3
+       real(kp) f4
+       real(kp) f5
+       real(kp) ps
+       real(kp) t0
+       real(kp) term1
+       real(kp) term2
+       real(kp) term3
+       real(kp) tr
+       real(kp) ts
+       real(kp) weight
        integer itypo
 !
 !-----------------------------------------------------------------------
@@ -1394,14 +1393,14 @@
 ! Check on whether there is to be a transition region for es
 !
        if (itype < 0) then
-       tr = abs(real(itype,r8))
+       tr = abs(real(itype,kp))
        itypo = itype
        itype = 1
        else
-       tr = 0.0_r8
+       tr = 0.0_kp
        itypo = itype
        end if
-       if (tr > 40.0_r8) then
+       if (tr > 40.0_kp) then
        write(iulog,900) tr
 
        end if
@@ -1410,17 +1409,17 @@
 !
 ! Water
 !
-       ps = 1013.246_r8
-       ts = 373.16_r8
-       e1 = 11.344_r8*(1.0_r8 - t/ts)
-       e2 = -3.49149_r8*(ts/t - 1.0_r8)
-       f1 = -7.90298_r8*(ts/t - 1.0_r8)
-       f2 = 5.02808_r8*log10(ts/t)
-       f3 = -1.3816_r8*(10.0_r8**e1 - 1.0_r8)/10000000.0_r8
-       f4 = 8.1328_r8*(10.0_r8**e2 - 1.0_r8)/1000.0_r8
+       ps = 1013.246_kp
+       ts = 373.16_kp
+       e1 = 11.344_kp*(1.0_kp - t/ts)
+       e2 = -3.49149_kp*(ts/t - 1.0_kp)
+       f1 = -7.90298_kp*(ts/t - 1.0_kp)
+       f2 = 5.02808_kp*log10(ts/t)
+       f3 = -1.3816_kp*(10.0_kp**e1 - 1.0_kp)/10000000.0_kp
+       f4 = 8.1328_kp*(10.0_kp**e2 - 1.0_kp)/1000.0_kp
        f5 = log10(ps)
        f = f1 + f2 + f3 + f4 + f5
-       es = (10.0_r8**f)*100.0_r8
+       es = (10.0_kp**f)*100.0_kp
        eswtr = es
 !
        if(t >= tmelt .or. itype == 0) go to 20
@@ -1429,17 +1428,17 @@
 !
 10     continue
        t0 = tmelt
-       term1 = 2.01889049_r8/(t0/t)
-       term2 = 3.56654_r8*log(t0/t)
-       term3 = 20.947031_r8*(t0/t)
-       es = 575.185606e10_r8*exp(-(term1 + term2 + term3))
+       term1 = 2.01889049_kp/(t0/t)
+       term2 = 3.56654_kp*log(t0/t)
+       term3 = 20.947031_kp*(t0/t)
+       es = 575.185606e10_kp*exp(-(term1 + term2 + term3))
 !
        if (t < (tmelt - tr)) go to 20
 !
 ! Weighted transition between water and ice
 !
-       weight = min((tmelt - t)/tr,1.0_r8)
-       es = weight*es + (1.0_r8 - weight)*eswtr
+       weight = min((tmelt - t)/tr,1.0_kp)
+       es = weight*es + (1.0_kp - weight)*eswtr
 !
 20     continue
        itype = itypo
@@ -1455,31 +1454,31 @@
 !>\ingroup wv_saturation_mod
 !!DONIF USe Murphy and Koop (2005) (Written by Andrew Gettelman)
        function MurphyKoop_svp_water(tx) result(es)
-       real(r8), intent(in) :: tx
-       real(r8) :: es
-       real(r8):: t
+       real(kp), intent(in) :: tx
+       real(kp) :: es
+       real(kp):: t
 
-       t=min(tx, 332.0_r8)
-       t=max(123.0_r8, tx)
+       t=min(tx, 332.0_kp)
+       t=max(123.0_kp, tx)
 
-       es = exp(54.842763_r8 - (6763.22_r8 / t) - (4.210_r8 * log(t)) + &
-     & (0.000367_r8 * t) + (tanh(0.0415_r8 * (t - 218.8_r8)) *          &
-     & (53.878_r8 - (1331.22_r8 / t) - (9.44523_r8 * log(t)) +          &
-     & 0.014025_r8 * t)))
+       es = exp(54.842763_kp - (6763.22_kp / t) - (4.210_kp * log(t)) + &
+     & (0.000367_kp * t) + (tanh(0.0415_kp * (t - 218.8_kp)) *          &
+     & (53.878_kp - (1331.22_kp / t) - (9.44523_kp * log(t)) +          &
+     & 0.014025_kp * t)))
 
       end function MurphyKoop_svp_water
 
        function MurphyKoop_svp_ice(tx) result(es)
-       real(r8), intent(in) :: tx
-       real(r8) :: t
-       real(r8) :: es
+       real(kp), intent(in) :: tx
+       real(kp) :: t
+       real(kp) :: es
 
-       t=max(100.0_r8, tx)
-       t=min(274.0_r8, tx)
+       t=max(100.0_kp, tx)
+       t=min(274.0_kp, tx)
 
 
-       es = exp(9.550426_r8 - (5723.265_r8 / t) + (3.53068_r8 *         &
-     & log(t)) - (0.00728332_r8 * t))
+       es = exp(9.550426_kp - (5723.265_kp / t) + (3.53068_kp *         &
+     & log(t)) - (0.00728332_kp * t))
 
       end function MurphyKoop_svp_ice
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -1490,22 +1489,22 @@
 !
 ! Input arguments
 !
-       real(r8), intent(in) :: t, p
+       real(kp), intent(in) :: t, p
 !
 ! Output arguments
 !
-       real(r8), intent(out) :: es, qs, dqsdt
+       real(kp), intent(out) :: es, qs, dqsdt
 
 !
 !--------------------------Local Variables------------------------------
 !
 !      integer i
 !
-       real(r8) omeps, hltalt, hlatsb, hlatvp, desdt, gam
+       real(kp) omeps, hltalt, hlatsb, hlatvp, desdt, gam
 !
 !-----------------------------------------------------------------------
 !
-       omeps = 1.0_r8 - epsqs
+       omeps = 1.0_kp - epsqs
 !  do i=1,len
 #ifdef GEOS5
        es = min(polysvp(t,1),p)
@@ -1516,13 +1515,13 @@
 !
 ! Saturation specific humidity
 !
-       qs = min(1.0_r8, epsqs*es/(p-omeps*es))
+       qs = min(1.0_kp, epsqs*es/(p-omeps*es))
 !
 ! The following check is to avoid the generation of negative
 ! values that can occur in the upper stratosphere and mesosphere
 !
-!      if (qs < 0.0_r8) then
-!        qs = 1.0_r8
+!      if (qs < 0.0_kp) then
+!        qs = 1.0_kp
 !        es = p
 !      end if
 !  end do
@@ -1536,10 +1535,10 @@
 !
        hltalt = hlatv + hlatf
        desdt  = hltalt*es/(rgasv*t*t)
-       if (qs < 1.0_r8) then
+       if (qs < 1.0_kp) then
          gam = hltalt*qs*p*desdt/(cp*es*(p - omeps*es))
        else
-         gam = 0.0_r8
+         gam = 0.0_kp
        endif
 
        dqsdt = (cp/hltalt)*gam

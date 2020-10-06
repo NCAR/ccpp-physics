@@ -1,3 +1,10 @@
+[ccpp-table-properties]
+  name = tracer_sanitizer
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
+
 [ccpp-arg-table]
   name = tracer_sanitizer_run
   type = scheme

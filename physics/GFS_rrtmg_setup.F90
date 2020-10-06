@@ -400,7 +400,7 @@ module GFS_rrtmg_setup
 !                                                                       !
 ! attributes:                                                           !
 !   language:  fortran 90                                               !
-!   machine:   wcoss                                                   !
+!   machine:   wcoss                                                    !
 !                                                                       !
 !  ====================  definition of variables  ====================  !
 !                                                                       !
@@ -683,7 +683,7 @@ module GFS_rrtmg_setup
 !   solcon         : sun-earth distance adjusted solar constant (w/m2)  !
 !                                                                       !
 !  external module variables:                                           !
-!   isolar   : solar constant cntrl  (in module physparam)               !
+!   isolar   : solar constant cntrl  (in module physparam)              !
 !              = 0: use the old fixed solar constant in "physcon"       !
 !              =10: use the new fixed solar constant in "physcon"       !
 !              = 1: use noaa ann-mean tsi tbl abs-scale with cycle apprx!

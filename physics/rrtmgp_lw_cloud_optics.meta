@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = rrtmgp_lw_cloud_optics
+  type = scheme
+  dependencies = machine.F,rrtmg_lw_cloud_optics.F90,rrtmgp_aux.F90
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_optics_init
   type = scheme
@@ -328,7 +334,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmgp_lw_cloud_optics_finalize
-  type = scheme

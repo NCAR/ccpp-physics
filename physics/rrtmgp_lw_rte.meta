@@ -1,3 +1,10 @@
+[ccpp-table-properties]
+  name = rrtmgp_lw_rte
+  type = scheme
+  dependencies = machine.F,rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90,rrtmgp_aux.F90
+  dependencies = rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90,rte-rrtmgp/extensions/mo_fluxes_byband.F90,rte-rrtmgp/extensions/mo_fluxes_byband_kernels.F90
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_rte_run
   type = scheme

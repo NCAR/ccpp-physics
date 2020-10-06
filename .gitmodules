@@ -1,4 +1,4 @@
 [submodule "physics/rte-rrtmgp"]
 	path = physics/rte-rrtmgp
-	url = https://github.com/RobertPincus/rte-rrtmgp
+	url = https://github.com/earth-system-radiation/rte-rrtmgp
 	branch = dtc/ccpp

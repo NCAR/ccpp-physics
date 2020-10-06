@@ -324,7 +324,7 @@ subroutine micro_mg_init(                                         &
 
   !-----------------------------------------------------------------------
 
-  dcs       = micro_mg_dcs * 1.0e-6
+  dcs       = micro_mg_dcs * 1.0e-6_r8
   ts_au_min = ts_auto(1)
   ts_au     = ts_auto(2)
   qcvar     = mg_qcvar
@@ -611,7 +611,6 @@ subroutine micro_mg_tend (                                       &
   real(r8), intent(in) :: qsatfac(mgncol,nlev)    !< subgrid cloud water saturation scaling factor (no units)
   logical, intent(in)  :: lprnt                   !< control flag for diagnostic print out 
   integer, intent(in)  :: iccn                    !< flag for IN and CCN forcing for Morrison-Gettelman microphysics 
-
 
 
   ! used for scavenging
@@ -1091,7 +1090,7 @@ subroutine micro_mg_tend (                                       &
 ! logical, parameter  :: do_ice_gmao=.true.,  do_liq_liu=.false.
 ! real(r8), parameter :: qimax=0.010, qimin=0.001, qiinv=one/(qimax-qimin), &
 ! real(r8), parameter :: qimax=0.010, qimin=0.001, qiinv=one/(qimax-qimin), &
-  real(r8), parameter :: qimax=0.010, qimin=0.005, qiinv=one/(qimax-qimin)
+  real(r8), parameter :: qimax=0.010_r8, qimin=0.005_r8, qiinv=one/(qimax-qimin)
 !                        ts_au_min=180.0
 
   !cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -3194,9 +3193,9 @@ subroutine micro_mg_tend (                                       &
 !++ag Add graupel
           dumg(i,k)  = (qg(i,k)+qgtend(i,k)*deltat) * tx1
 !  Moorthi testing
-          if (dumg(i,k) > 0.01) then
-            tx2 = dumg(i,k) - 0.01
-            dumg(i,k) = 0.01
+          if (dumg(i,k) > 0.01_r8) then
+            tx2 = dumg(i,k) - 0.01_r8
+            dumg(i,k) = 0.01_r8
             dums(i,k) = dums(i,k) + tx2
             qstend(i,k) = (dums(i,k)*precip_frac(i,k) - qs(i,k)) * oneodt
             qgtend(i,k) = (dumg(i,k)*precip_frac(i,k) - qg(i,k)) * oneodt
@@ -3798,9 +3797,9 @@ subroutine micro_mg_tend (                                       &
 !++ag
         dumg(i,k)  = max(qg(i,k)+qgtend(i,k)*deltat, zero)
 !  Moorthi testing
-        if (dumg(i,k) > 0.01) then
-          tx2 = dumg(i,k) - 0.01
-          dumg(i,k) = 0.01
+        if (dumg(i,k) > 0.01_r8) then
+          tx2 = dumg(i,k) - 0.01_r8
+          dumg(i,k) = 0.01_r8
           dums(i,k) = dums(i,k) + tx2
           qstend(i,k) = (dums(i,k) - qs(i,k)) * oneodt
           qgtend(i,k) = (dumg(i,k) - qg(i,k)) * oneodt
@@ -4049,7 +4048,7 @@ subroutine micro_mg_tend (                                       &
 !          qvn = epsqs*esn/(p(i,k)-omeps*esn)
 
 
-           if (qtmp > qvn .and. qvn > 0 .and. allow_sed_supersat) then
+           if (qtmp > qvn .and. qvn > zero .and. allow_sed_supersat) then
               ! expression below is approximate since there may be ice deposition
               dum = (qtmp-qvn)/(one+xxlv_squared*qvn/(cpp*rv*ttmp*ttmp)) * oneodt
               ! add to output cme

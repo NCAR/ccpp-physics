@@ -251,7 +251,7 @@
 !!\n =0:use constant decorrelation length defined by decorr_con (in module physcons)
 !!\n =1:use day-of-year and latitude-varying decorrelation length
       integer, save :: idcor   = 1
-      
+
 !> sub-column cloud approx flag in SW radiation
 !!\n =0:no McICA approximation in SW radiation
 !!\n =1:use McICA with precribed permutation seeds (test mode)
