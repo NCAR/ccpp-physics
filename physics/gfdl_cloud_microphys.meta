@@ -427,7 +427,7 @@
 [effr_in]
   standard_name = flag_for_cloud_effective_radii
   long_name = flag for cloud effective radii calculations in GFDL microphysics
-  units = 
+  units = flag
   dimensions = ()
   type = logical
   intent = in

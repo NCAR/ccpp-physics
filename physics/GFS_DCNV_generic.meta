@@ -445,7 +445,7 @@
 [upd_mf]
   standard_name = cumulative_atmosphere_updraft_convective_mass_flux
   long_name = cumulative updraft mass flux
-  units = Pa
+  units = kg m-1 s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
@@ -454,7 +454,7 @@
 [dwn_mf]
   standard_name = cumulative_atmosphere_downdraft_convective_mass_flux
   long_name = cumulative downdraft mass flux
-  units = Pa
+  units = kg m-1 s-2 
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
@@ -463,7 +463,7 @@
 [det_mf]
   standard_name = cumulative_atmosphere_detrainment_convective_mass_flux
   long_name = cumulative detrainment mass flux
-  units = Pa
+  units = kg m-1 s-2
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
