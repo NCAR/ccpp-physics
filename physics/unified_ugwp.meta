@@ -1,7 +1,10 @@
 [ccpp-table-properties]
   name = unified_ugwp
   type = scheme
-  dependencies = machine.F
+  dependencies = machine.F,cires_ugwp_module.F90,cires_ugwp_module_v1.F90,gwdps.f,drag_suite.F90
+  dependencies = cires_ugwp_orolm97_v1.F90,cires_ugwp_triggers_v1.F90,cires_ugwp_solv2_v1_mod.F90
+  dependencies = cires_ugwp_module.F90,cires_ugwp_module_v1.F90,cires_ugwp_initialize_v1.F90
+  dependencies = cires_ugwp_initialize.F90,cires_orowam2017.F90,cires_vert_orodis_v1.F90
 
 ########################################################################
 [ccpp-arg-table]
