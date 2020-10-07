@@ -26,9 +26,9 @@
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
         lmfdeep2, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,                 &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
-        prsi, prsl, prslk, tgrs, sfc_wts, phy_f3d_mg_cld, phy_f3d_reffr,       &
-        phy_f3d_cnvw, phy_f3d_cnvc, qgrs, aer_nm,                              & !inputs from here and above
-        coszen, coszdg, phy_f3d_leffr, phy_f3d_ieffr, phy_f3d_seffr,           &
+        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in,                    &
+        cnvw_in, cnvc_in, qgrs, aer_nm,                                        & !inputs from here and above
+        coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
         plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
@@ -101,18 +101,16 @@
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
                                                           tgrs, sfc_wts,       &
-                                                          phy_f3d_mg_cld,      &
-                                                          phy_f3d_reffr,       &
-                                                          phy_f3d_cnvw,        &
-                                                          phy_f3d_cnvc
+                                                          mg_cld, effrr_in,    &
+                                                          cnvw_in, cnvc_in
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
 
       real(kind=kind_phys), dimension(:),   intent(inout) :: coszen, coszdg
 
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: phy_f3d_leffr,    &
-                                                             phy_f3d_ieffr,    &
-                                                             phy_f3d_seffr
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: effrl_inout,      &
+                                                             effri_inout,      &
+                                                             effrs_inout
       real(kind=kind_phys), dimension(im,lm+LTP), intent(inout) :: clouds1,    &
                                                              clouds2, clouds3, &
                                                              clouds4, clouds5
@@ -683,18 +681,18 @@
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                cldcov(i,k1) = phy_f3d_mg_cld(i,k)
-                effrl(i,k1)  = phy_f3d_leffr(i,k)
-                effri(i,k1)  = phy_f3d_ieffr(i,k)
-                effrr(i,k1)  = phy_f3d_reffr(i,k)
-                effrs(i,k1)  = phy_f3d_seffr(i,k)
+                cldcov(i,k1) = mg_cld(i,k)
+                effrl(i,k1)  = effrl_inout(i,k)
+                effri(i,k1)  = effri_inout(i,k)
+                effrr(i,k1)  = effrr_in(i,k)
+                effrs(i,k1)  = effrs_inout(i,k)
               enddo
             enddo
           else
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                cldcov(i,k1) = phy_f3d_mg_cld(i,k)
+                cldcov(i,k1) = mg_cld(i,k)
               enddo
             enddo
           endif
@@ -720,10 +718,10 @@
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                effrl(i,k1) = phy_f3d_leffr(i,k)
-                effri(i,k1) = phy_f3d_ieffr(i,k)
-                effrr(i,k1) = phy_f3d_reffr(i,k)
-                effrs(i,k1) = phy_f3d_seffr(i,k)
+                effrl(i,k1) = effrl_inout(i,k)
+                effri(i,k1) = effri_inout(i,k)
+                effrr(i,k1) = effrr_in(i,k)
+                effrs(i,k1) = effrs_inout(i,k)
 !                if(me==0) then
 !                  if(effrl(i,k1)> 5.0) then
 !                    write(6,*) 'rad driver:cloud radii:',kdt, i,k1,       &
@@ -783,9 +781,9 @@
           do k=1,lm
             k1 = k + kd
             do i=1,im
-              phy_f3d_leffr(i,k) = effrl(i,k1)
-              phy_f3d_ieffr(i,k) = effri(i,k1)
-              phy_f3d_seffr(i,k) = effrs(i,k1)
+              effrl_inout(i,k) = effrl(i,k1)
+              effri_inout(i,k) = effri(i,k1)
+              effrs_inout(i,k) = effrs(i,k1)
             enddo
           enddo
         else                                                           ! all other cases
@@ -806,8 +804,8 @@
               !GJF: this is not consistent with GFS_typedefs,
               !     but it looks like the Zhao-Carr-PDF scheme is not in the CCPP
               deltaq(i,k1) = 0.0!Tbd%phy_f3d(i,k,5)      !GJF: this variable is not in phy_f3d anymore
-              cnvw  (i,k1) = phy_f3d_cnvw(i,k)
-              cnvc  (i,k1) = phy_f3d_cnvc(i,k)
+              cnvw  (i,k1) = cnvw_in(i,k)
+              cnvc  (i,k1) = cnvc_in(i,k)
             enddo
           enddo
         elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! same as imp_physics=99
@@ -815,7 +813,7 @@
             k1 = k + kd
             do i=1,im
               deltaq(i,k1) = 0.0
-              cnvw  (i,k1) = phy_f3d_cnvw(i,k)
+              cnvw  (i,k1) = cnvw_in(i,k)
               cnvc  (i,k1) = 0.0
             enddo
           enddo
@@ -904,9 +902,9 @@
 
         elseif(imp_physics == imp_physics_wsm6 .or. imp_physics == imp_physics_fer_hires) then
           if (kdt == 1) then
-            phy_f3d_leffr(:,:) = 10.
-            phy_f3d_ieffr(:,:) = 50.
-            phy_f3d_seffr(:,:) = 250.
+            effrl_inout(:,:) = 10.
+            effri_inout(:,:) = 50.
+            effrs_inout(:,:) = 250.
           endif
 
           call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,     &  !  --- inputs
@@ -914,8 +912,8 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK),phy_f3d_leffr(:,:),        &
-                         phy_f3d_ieffr(:,:), phy_f3d_seffr(:,:),    &
+                         cldcov(:,1:LMK),effrl_inout(:,:),          &
+                         effri_inout(:,:), effrs_inout(:,:),        &
                          dzb, xlat_d, julian, yearlen,              &
                          clouds,cldsa,mtopa,mbota, de_lgth, alpha)     !  --- outputs
 
@@ -946,8 +944,8 @@
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
                          im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
-                         cldcov(:,1:LMK), phy_f3d_leffr(:,:),       &
-                         phy_f3d_ieffr(:,:), phy_f3d_seffr(:,:),    &
+                         cldcov(:,1:LMK), effrl_inout(:,:),         &
+                         effri_inout(:,:), effrs_inout(:,:),        &
                          dzb, xlat_d, julian, yearlen,              &
                          clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
           endif ! MYNN PBL or GF

@@ -617,7 +617,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[phy_f3d_mg_cld]
+[mg_cld]
   standard_name = cloud_fraction_for_MG
   long_name = cloud fraction used by Morrison-Gettelman MP
   units = frac
@@ -626,7 +626,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[phy_f3d_reffr]
+[effrr_in]
   standard_name = effective_radius_of_stratiform_cloud_rain_particle_in_um
   long_name = effective radius of cloud rain particle in micrometers
   units = um
@@ -635,7 +635,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[phy_f3d_cnvw]
+[cnvw_in]
   standard_name = convective_cloud_water_mixing_ratio_in_phy_f3d
   long_name = convective cloud water mixing ratio in the phy_f3d array
   units = kg kg-1
@@ -644,7 +644,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[phy_f3d_cnvc]
+[cnvc_in]
   standard_name = convective_cloud_cover_in_phy_f3d
   long_name = convective cloud cover in the phy_f3d array
   units = frac
@@ -689,7 +689,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[phy_f3d_leffr]
+[effrl_inout]
   standard_name = effective_radius_of_stratiform_cloud_liquid_water_particle_in_um
   long_name = eff. radius of cloud liquid water particle in micrometer
   units = um
@@ -698,7 +698,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[phy_f3d_ieffr]
+[effri_inout]
   standard_name = effective_radius_of_stratiform_cloud_ice_particle_in_um
   long_name = eff. radius of cloud ice water particle in micrometer
   units = um
@@ -707,7 +707,7 @@
   kind = kind_phys
   intent = inout
   optional = F
-[phy_f3d_seffr]
+[effrs_inout]
   standard_name = effective_radius_of_stratiform_cloud_snow_particle_in_um
   long_name = effective radius of cloud snow particle in micrometers
   units = um
