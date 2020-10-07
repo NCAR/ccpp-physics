@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_noah_wrfv4_pre
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_noah_wrfv4_pre_init
   type = scheme
@@ -683,7 +689,13 @@
   type = integer
   intent = out
   optional = F
-  
+
+########################################################################
+[ccpp-table-properties]
+  name = sfc_noah_wrfv4_post
+  type = scheme
+  dependencies = machine.F
+
 ########################################################################
 [ccpp-arg-table]
   name = sfc_noah_wrfv4_post_run

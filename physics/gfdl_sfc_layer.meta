@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = gfdl_sfc_layer
+  type = scheme
+  dependencies = machine.F,module_sf_exchcoef.f90,namelist_soilveg_ruc.F90,noahmp_tables.f90
+
+########################################################################
 [ccpp-arg-table]
   name = gfdl_sfc_layer_init
   type = scheme
@@ -98,7 +104,7 @@
 [xlat]
   standard_name = latitude
   long_name = latitude
-  units = radians
+  units = radian
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
@@ -107,7 +113,7 @@
 [xlon]
   standard_name = longitude
   long_name = longitude
-  units = radians
+  units = radian
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys

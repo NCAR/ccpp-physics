@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_noah_wrfv4
+  type = scheme
+  dependencies = machine.F,module_sf_noahlsm_glacial_only.F90,module_sf_noahlsm.F90
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_noah_wrfv4_init
   type = scheme
