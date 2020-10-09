@@ -47,7 +47,7 @@
   standard_name = sine_of_latitude
   long_name = sine of latitude
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -56,7 +56,7 @@
   standard_name = cosine_of_latitude
   long_name = cosine of latitude
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -65,7 +65,7 @@
   standard_name = longitude
   long_name = longitude of grid box
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -74,7 +74,7 @@
   standard_name = cosine_of_zenith_angle
   long_name = average of cosine of zenith angle over daytime shortwave call time interval
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -83,7 +83,7 @@
   standard_name = surface_skin_temperature_over_land_interstitial
   long_name = surface skin temperature over land  (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -92,7 +92,7 @@
   standard_name = surface_skin_temperature_over_ocean_interstitial
   long_name = surface skin temperature over ocean (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -101,7 +101,7 @@
   standard_name = surface_skin_temperature_over_ice_interstitial
   long_name = surface skin temperature over ice   (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -110,7 +110,7 @@
   standard_name = air_temperature_at_lowest_model_layer
   long_name = air temperature at lowest model layer
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -119,7 +119,7 @@
   standard_name = surface_midlayer_air_temperature_in_longwave_radiation
   long_name = surface (first layer) air temperature saved in longwave radiation call
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -128,7 +128,7 @@
   standard_name = surface_longwave_emissivity_over_land_interstitial
   long_name = surface lw emissivity in fraction over land (temporary use as interstitial)
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -137,7 +137,7 @@
   standard_name = surface_longwave_emissivity_over_ice_interstitial
   long_name = surface lw emissivity in fraction over ice (temporary use as interstitial)
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -146,7 +146,7 @@
   standard_name = surface_longwave_emissivity_over_ocean_interstitial
   long_name = surface lw emissivity in fraction over ocean (temporary use as interstitial)
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -155,7 +155,7 @@
   standard_name = surface_downwelling_shortwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -164,7 +164,7 @@
   standard_name = surface_net_downwelling_shortwave_flux_on_radiation_time_step
   long_name = total sky surface net downwelling shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -173,7 +173,7 @@
   standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling longwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -182,7 +182,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky shortwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -191,7 +191,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step
   long_name = clear sky shortwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -200,7 +200,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky longwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -209,7 +209,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
   long_name = clear sky longwave heating rate on radiation time step
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -218,7 +218,7 @@
   standard_name = surface_upwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
   long_name = total sky surface upwelling beam near-infrared shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -227,7 +227,7 @@
   standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
   long_name = total sky surface upwelling diffuse near-infrared shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -236,7 +236,7 @@
   standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
   long_name = total sky surface upwelling beam ultraviolet plus visible shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -245,7 +245,7 @@
   standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
   long_name = total sky surface upwelling diffuse ultraviolet plus visible shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -254,7 +254,7 @@
   standard_name = surface_downwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling beam near-infrared shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -263,7 +263,7 @@
   standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling diffuse near-infrared shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -272,7 +272,7 @@
   standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling beam ultraviolet plus visible shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -281,7 +281,7 @@
   standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling diffuse ultraviolet plus visible shortwave flux on radiation time step
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -324,7 +324,7 @@
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -332,7 +332,7 @@
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -340,7 +340,7 @@
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -348,7 +348,7 @@
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = total radiative heating rate at current time
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -357,7 +357,7 @@
   standard_name = tendency_of_air_temperature_due_to_radiative_heating_assuming_clear_sky
   long_name = clear sky radiative (shortwave + longwave) heating rate at current time
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -366,7 +366,7 @@
   standard_name = surface_downwelling_shortwave_flux
   long_name = surface downwelling shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -375,7 +375,7 @@
   standard_name = surface_net_downwelling_shortwave_flux
   long_name = surface net downwelling shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -384,7 +384,7 @@
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -393,7 +393,7 @@
   standard_name = surface_upwelling_longwave_flux_over_land_interstitial
   long_name = surface upwelling longwave flux at current time over land (temporary use as interstitial)
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -402,7 +402,7 @@
   standard_name = surface_upwelling_longwave_flux_over_ice_interstitial
   long_name = surface upwelling longwave flux at current time over ice (temporary use as interstitial)
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -411,7 +411,7 @@
   standard_name = surface_upwelling_longwave_flux_over_ocean_interstitial
   long_name = surface upwelling longwave flux at current time over ocean (temporary use as interstitial)
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -420,7 +420,7 @@
   standard_name = zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes
   long_name = zenith angle temporal adjustment factor for shortwave fluxes
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -429,7 +429,7 @@
   standard_name = instantaneous_cosine_of_zenith_angle
   long_name = cosine of zenith angle at current time
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -438,7 +438,7 @@
   standard_name = surface_upwelling_direct_near_infrared_shortwave_flux
   long_name = surface upwelling beam near-infrared shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -447,7 +447,7 @@
   standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux
   long_name = surface upwelling diffuse near-infrared shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -456,7 +456,7 @@
   standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux
   long_name = surface upwelling beam ultraviolet plus visible shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -465,7 +465,7 @@
   standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux
   long_name = surface upwelling diffuse ultraviolet plus visible shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -474,7 +474,7 @@
   standard_name = surface_downwelling_direct_near_infrared_shortwave_flux
   long_name = surface downwelling beam near-infrared shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -483,7 +483,7 @@
   standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux
   long_name = surface downwelling diffuse near-infrared shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -492,7 +492,7 @@
   standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux
   long_name = surface downwelling beam ultraviolet plus visible shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -501,7 +501,7 @@
   standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux
   long_name = surface downwelling diffuse ultraviolet plus visible shortwave flux at current time
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
