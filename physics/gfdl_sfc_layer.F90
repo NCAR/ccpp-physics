@@ -617,6 +617,9 @@
               !GJF: or WRF module_sf_gfdl.F:
               !tstrc(i) = tskin_ocn(i)
               
+              ! DH* 20201009: these bounds on ocean roughness lengths are from Chunxi Zhang's module_sf_sfclayrev.f90 (in cm)
+              znt_ocn(i)=min(2.85e-1,max(znt_ocn(i),1.27e-5))
+
               !GJF: from WRF's module_sf_gfdl.F
               if (wind10(i) <= 1.0e-10 .or. wind10(i) > 150.0) then
                  wind10(i)=wspd(i)*alog(10.0/(0.01*znt_ocn(i)))/alog(z1(i)/(0.01*znt_ocn(i)))
