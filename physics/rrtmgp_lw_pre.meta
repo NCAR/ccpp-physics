@@ -27,7 +27,7 @@
   standard_name = longitude
   long_name = longitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -36,7 +36,7 @@
   standard_name = latitude
   long_name = latitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -45,7 +45,7 @@
   standard_name = sea_land_ice_mask_real
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -54,7 +54,7 @@
   standard_name = surface_roughness_length
   long_name = surface roughness length
   units = cm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -63,7 +63,7 @@
   standard_name = surface_snow_thickness_water_equivalent
   long_name = water equivalent snow depth
   units = mm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -72,7 +72,7 @@
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -81,7 +81,7 @@
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -90,7 +90,7 @@
   standard_name = standard_deviation_of_subgrid_orography
   long_name = standard deviation of subgrid orography
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -107,7 +107,7 @@
   standard_name = surface_longwave_emissivity
   long_name = surface lw emissivity in fraction
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -116,7 +116,7 @@
   standard_name = surface_emissivity_in_each_RRTMGP_LW_band
   long_name = surface emissivity in each RRTMGP LW band
   units = none
-  dimensions = (number_of_lw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_lw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out

@@ -129,11 +129,6 @@ contains
 
       end subroutine cu_ntiedtke_init
 
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_cu_ntiedtke_finalize Argument Table
-!!
       subroutine cu_ntiedtke_finalize()
       end subroutine cu_ntiedtke_finalize
 !

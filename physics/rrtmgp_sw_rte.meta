@@ -52,7 +52,7 @@
   standard_name = daytime_points
   long_name = daytime points
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -60,7 +60,7 @@
   standard_name = cosine_of_zenith_angle
   long_name = mean cos of zenith angle over rad call period
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -69,7 +69,7 @@
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure layer
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -78,7 +78,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -87,7 +87,7 @@
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature layer
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -128,7 +128,7 @@
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -137,7 +137,7 @@
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -146,7 +146,7 @@
   standard_name =  surface_albedo_uvvis_dir
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -155,7 +155,7 @@
   standard_name =  surface_albedo_uvvis_dif
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -164,7 +164,7 @@
   standard_name = toa_incident_sw_flux_by_spectral_point
   long_name = TOA shortwave incident flux at each spectral points
   units = W m-2
-  dimensions = (horizontal_dimension,number_of_sw_spectral_points_rrtmgp)
+  dimensions = (horizontal_loop_extent,number_of_sw_spectral_points_rrtmgp)
   type = real
   kind = kind_phys
   intent = in
@@ -190,7 +190,7 @@
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
   intent = inout
   optional = T
@@ -198,7 +198,7 @@
   standard_name = RRTMGP_sw_flux_profile_upward_allsky
   long_name = RRTMGP upward shortwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = inout
@@ -207,7 +207,7 @@
   standard_name = RRTMGP_sw_flux_profile_downward_allsky
   long_name = RRTMGP downward shortwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = inout
@@ -216,7 +216,7 @@
   standard_name = RRTMGP_sw_flux_profile_upward_clrsky
   long_name = RRTMGP upward shortwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = inout
@@ -225,7 +225,7 @@
   standard_name = RRTMGP_sw_flux_profile_downward_clrsky
   long_name = RRTMGP downward shortwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = inout

@@ -44,11 +44,7 @@
 !
       end subroutine sascnvn_init
 
-! \brief This subroutine is empty since there are no procedures that need to be done to finalize the sascnvn code.
-!!
-!! \section arg_table_sascnvn_finalize Argument Table
-!!
-      subroutine sascnvn_finalize
+      subroutine sascnvn_finalize()
       end subroutine sascnvn_finalize
 
 !>  \brief This subroutine contains the entirety of the SAS deep convection scheme.
