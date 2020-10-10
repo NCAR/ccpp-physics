@@ -1213,8 +1213,10 @@
           call cldprmc(nlay, inflglw, iceflglw, liqflglw,               &
      &                 cldfmc, ciwpmc,                                  &
      &                 clwpmc, cswpmc, reicmc, relqmc, resnmc,          &
-     &                 ncbands, taucmc)
-        endif              
+     &                 ncbands, taucmc, errmsg, errflg)
+          ! return immediately if cldprmc throws an error
+          if (errflg/=0) return
+        endif
 
 !     if (lprnt) then
 !      print *,' after cldprop'
@@ -7959,7 +7961,7 @@
 
 ! ------------------------------------------------------------------------------
       subroutine cldprmc(nlayers, inflag, iceflag, liqflag, cldfmc,     &
-     &  ciwpmc, clwpmc, cswpmc, reicmc, relqmc, resnmc, ncbands, taucmc)
+     &  ciwpmc, clwpmc, cswpmc, reicmc, relqmc, resnmc, ncbands, taucmc, errmsg, errflg)
 ! ------------------------------------------------------------------------------
 
 ! Purpose:  Compute the cloud optical depth(s) for each cloudy layer.
@@ -7998,9 +8000,11 @@
 
 ! ------- Output -------
 
-      integer(kind=im), intent(out) :: ncbands        ! number of cloud spectral bands
-      real(kind=rb), intent(inout) :: taucmc(:,:)     ! cloud optical depth [mcica]
+      integer(kind=im), intent(out)   :: ncbands      ! number of cloud spectral bands
+      real(kind=rb),    intent(inout) :: taucmc(:,:)  ! cloud optical depth [mcica]
                                                       !    Dimensions: (ngptlw,nlayers)
+      character(len=*), intent(inout) :: errmsg
+      integer,          intent(inout) :: errflg
 
 ! ------- Local -------
 
@@ -8027,7 +8031,6 @@
       real(kind=rb) :: radsno                         ! cloud snow effective size (microns)                         
       real(kind=rb), parameter :: eps = 1.e-6_rb      ! epsilon                                                     
       real(kind=rb), parameter :: cldmin = 1.e-20_rb  ! minimum value for cloud quantities                          
-      character*80 errmess                                                                                          
                                                                                                                     
 ! ------- Definitions -------                                                                                       
                                                                                                                     
@@ -8784,10 +8787,11 @@
 
                elseif (iceflag .ge. 3) then
                   if (radice .lt. 5.0_rb .or. radice .gt. 140.0_rb) then
-                         write(errmess,'(A,i5,i5,f8.2,f8.2)' )          &
+                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
      &         'ERROR: ICE GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'    &
-     &          ,ig, lay, ciwpmc(ig,lay), radice  
-     !mz                   call wrf_error_fatal(errmess)                                           
+     &          ,ig, lay, ciwpmc(ig,lay), radice
+                         errflg = 1
+                         return
                      end if                                                                      
                      ncbands = 16                                                                
                      factor = (radice - 2._rb)/3._rb                                             
@@ -8806,10 +8810,11 @@
                if (cswpmc(ig,lay).gt.0.0_rb .and. iceflag .eq. 5) then                           
                   radsno = resnmc(lay)                                                           
                   if (radsno .lt. 5.0_rb .or. radsno .gt. 140.0_rb) then                         
-                         write(errmess,'(A,i5,i5,f8.2,f8.2)' )          &
+                         write(errmsg,'(a,i5,i5,f8.2,f8.2)' )           &
      &         'ERROR: SNOW GENERALIZED EFFECTIVE SIZE OUT OF BOUNDS'   &                        
      &         ,ig, lay, cswpmc(ig,lay), radsno                                                  
-     !mz                    call wrf_error_fatal(errmess)                                           
+                         errflg = 1
+                         return
                      end if                                                                      
                      ncbands = 16                                                                
                      factor = (radsno - 2._rb)/3._rb                                             
@@ -8833,8 +8838,13 @@
                                                                                                  
                elseif (liqflag .eq. 1) then                                                      
                   radliq = relqmc(lay)                        
-                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) stop  &
-     &                 'LIQUID EFFECTIVE RADIUS OUT OF BOUNDS'                                   
+                  if (radliq .lt. 2.5_rb .or. radliq .gt. 60._rb) then
+                     write(errmsg,'(a,i5,i5,f8.2,f8.2)' )              &
+&                         'ERROR: LIQUID EFFECTIVE SIZE OUT OF BOUNDS' &
+&                         ,ig, lay, clwpmc(ig,lay), radliq
+                     errflg = 1
+                     return
+                  end if
                   index = int(radliq - 1.5_rb)                                                   
                   if (index .eq. 0) index = 1                                                    
                   if (index .eq. 58) index = 57                                                  
