@@ -4,14 +4,14 @@ module unified_ugwp_post
 
 contains
 
-!>\defgroup unified_ugwp_post CIRES UGWP Scheme Post
+!>\defgroup unified_ugwp_post unified_UGWP Scheme Post
 !! @{
 !> \section arg_table_unified_ugwp_post_init Argument Table
 !!
     subroutine unified_ugwp_post_init ()
     end subroutine unified_ugwp_post_init
 
-!>@brief The subroutine initializes the CIRES UGWP
+!>@brief The subroutine initializes the unified UGWP
 #if 0
 !> \section arg_table_unified_ugwp_post_run Argument Table
 !! \htmlinclude unified_ugwp_post_run.html

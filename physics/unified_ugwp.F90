@@ -1,5 +1,16 @@
 !>  \file unified_ugwp.F90
-!! This file contains the Unified Gravity Wave Physics (UGWP) scheme by Valery Yudin (University of Colorado, CIRES)
+!! This file combines three gravity wave drag schemes under one ("unified_ugwp") suite:
+!!      1) The "V0 CIRES UGWP" scheme (cires_ugwp.F90) as implemented in the FV3GFSv16 atmosphere model, which includes:
+!!            a) the "traditional" EMC orograhic gravity wave drag and flow blocking scheme of gwdps.f
+!!            b) the v0 cires ugwp non-stationary GWD scheme
+!!      2) The GSL orographic drag suite (drag_suite.F90), as implmeneted in the RAP/HRRR, which includes:
+!!            a) large-scale gravity wave drag and low-level flow blocking -- active at horizontal scales
+!!               down to ~5km (Kim and Arakawa, 1995 \cite kim_and_arakawa_1995; Kim and Doyle, 2005 \cite kim_and_doyle_2005)
+!!            b) small-scale gravity wave drag scheme -- active typically in stable PBL at horizontal grid resolutions down to ~1km
+!!               (Steeneveld et al, 2008 \cite steeneveld_et_al_2008; Tsiringakis et al, 2017 \cite tsiringakis_et_al_2017)
+!!            c) turbulent orographic form drag -- active at horizontal grid ersolutions down to ~1km
+!!               (Beljaars et al, 2004 \cite beljaars_et_al_2004)
+!!      3) The "V1 CIRES UGWP" scheme developed by Valery Yudin (University of Colorado, CIRES)
 !! See Valery Yudin's presentation at 2017 NGGPS PI meeting:
 !! Gravity waves (GWs): Mesoscale GWs transport momentum, energy (heat) , and create eddy mixing in the whole atmosphere domain; Breaking and dissipating GWs deposit: (a) momentum; (b) heat (energy); and create (c) turbulent mixing of momentum, heat, and tracers
 !! To properly incorporate GW effects (a-c) unresolved by DYCOREs we need GW physics
@@ -9,6 +20,18 @@
 !! 2. GW Propagation: Unified solver for "propagation, dissipation and breaking" excited from all type of GW sources.
 !! 3. GW Effects: Unified representation of GW impacts on the "resolved" flow for all sources (energy-balanced schemes for momentum, heat and mixing).
 !! https://www.weather.gov/media/sti/nggps/Presentations%202017/02%20NGGPS_VYUDIN_2017_.pdf
+!!
+!! The unified_ugwp scheme is activated by gwd_opt = 2 in the namelist.
+!! The choice of schemes is activated at runtime by the following namelist options (boolean):
+!!       do_ugwp_v0           -- activates V0 CIRES UGWP scheme - both orographic and non-stationary GWD
+!!       do_ugwp_v0_orog_only -- activates V0 CIRES UGWP scheme - orographic GWD only
+!!       do_gsl_drag_ls_bl    -- activates RAP/HRRR (GSL) large-scale GWD and blocking
+!!       do_gsl_drag_ss       -- activates RAP/HRRR (GSL) small-scale GWD
+!!       do_gsl_drag_tofd     -- activates RAP/HRRR (GSL) turbulent orographic drag
+!!       do_ugwp_v1           -- activates V1 CIRES UGWP scheme - both orographic and non-stationary GWD
+!!       do_ugwp_v1_orog_only -- activates V1 CIRES UGWP scheme - orographic GWD only
+!! Note that only one "large-scale" scheme can be activated at a time.
+!!
 
 module unified_ugwp
 
@@ -43,7 +66,7 @@ contains
 ! ------------------------------------------------------------------------
 ! CCPP entry points for CIRES Unified Gravity Wave Physics (UGWP) scheme v0
 ! ------------------------------------------------------------------------
-!>@brief The subroutine initializes the CIRES UGWP
+!>@brief The subroutine initializes the unified UGWP
 !> \section arg_table_unified_ugwp_init Argument Table
 !! \htmlinclude unified_ugwp_init.html
 !!
