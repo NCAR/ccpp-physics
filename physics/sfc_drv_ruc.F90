@@ -419,7 +419,7 @@ module lsm_ruc
       if(flag_init .and. iter==1) then
       ! Initialize the RUC soil levels, needed for cold starts and warm starts
         CALL init_soil_depth_3 ( zs , dzs , lsoil_ruc )
-        if (.not. restart) !xlai = 0.
+        if (.not. restart) xlai = 0.
       endif ! flag_init=.true.,iter=1
 
       ims = 1
