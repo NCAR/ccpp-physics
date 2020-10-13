@@ -16,18 +16,11 @@
 
       contains
 
-!! \section arg_table_dcyc2t3_init Argument Table
-!!
       subroutine dcyc2t3_init()
       end subroutine dcyc2t3_init
 
-!! \section arg_table_dcyc2t3_finalize Argument Table
-!!
       subroutine dcyc2t3_finalize()
       end subroutine dcyc2t3_finalize
-
-
-
 
 ! ===================================================================== !
 !  description:                                                         !

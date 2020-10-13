@@ -33,7 +33,9 @@
                     landmask,heat,evap,wspd,br,                                &
                     g,rd,cp,rv,ep1,ep2,xlv,                                    &
                     dusfc,dvsfc,dtsfc,dqsfc,                                   &
-                    dt,kpbl1d,u10,v10,errmsg,errflg   )
+                    dt,kpbl1d,u10,v10,lssav,ldiag3d,qdiag3d,                   &
+                    flag_for_pbl_generic_tend,ntoz,du3dt_PBL,dv3dt_PBL,        &
+                    dt3dt_PBL,dq3dt_PBL,do3dt_PBL,errmsg,errflg   )
 
    use machine , only : kind_phys
 !
@@ -59,7 +61,7 @@
 !
 !-------------------------------------------------------------------------------------
 !  input variables
-   integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw
+   integer,  intent(in   )   ::     im,km,ntrac,ndiff,ntcw,ntiw,ntoz
    real(kind=kind_phys),     intent(in   )   ::     g,cp,rd,rv,ep1,ep2,xlv,dt
 
    real(kind=kind_phys),     dimension( im,km ),                                    &
@@ -76,6 +78,8 @@
                                                                    u10,v10,xmu
    integer,  dimension(im)                                                         ,&
              intent(in   )   ::                                      landmask
+   logical,  intent(in   )   :: lssav, ldiag3d, qdiag3d,                            &
+                                flag_for_pbl_generic_tend
 !
 !----------------------------------------------------------------------------------
 ! input/output variables
@@ -84,6 +88,8 @@
              intent(inout)   ::                                utnp,vtnp,ttnp
    real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
              intent(inout)   ::                                          qtnp
+   real(kind=kind_phys),     dimension(im,km)                                     , &
+             intent(inout)   :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
 !
 !---------------------------------------------------------------------------------
 ! output variables
@@ -847,6 +853,14 @@
        dtsfc(i) = dtsfc(i)+ttend*cont*del(i,k)
      enddo
    enddo
+   if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+     do k = km,1,-1
+       do i = 1,im
+         ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
+         dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*dtstep
+       enddo
+     enddo
+   endif
 !
 !     compute tridiagonal matrix elements for moisture, clouds, and gases
 !
@@ -955,6 +969,14 @@
        dqsfc(i) = dqsfc(i)+qtend*conq*del(i,k)
      enddo
    enddo
+   if(lssav .and. ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend) then
+     do k = km,1,-1
+       do i = 1,im
+         qtend = (f3(i,k,1)-qx(i,k,1))*rdt
+         dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*dtstep
+       enddo
+     enddo
+   endif
 !
    if(ndiff.ge.2) then
      do ic = 2,ndiff
@@ -965,6 +987,16 @@
          enddo
        enddo
      enddo
+     if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
+  &               .not. flag_for_pbl_generic_tend) then
+       ic = ntoz
+       do k = km,1,-1
+         do i = 1,im
+           qtend = f3(i,k,ic)-qx(i,k,ic)
+           do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
+         enddo
+       enddo
+     endif
    endif
 !
 !     compute tridiagonal matrix elements for momentum
@@ -1046,6 +1078,16 @@
        dvsfc(i) = dvsfc(i) + vtend*conwrc*del(i,k)
      enddo
    enddo
+   if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+     do k = km,1,-1
+       do i = 1,im
+         utend = (f1(i,k)-ux(i,k))*rdt
+         vtend = (f2(i,k)-vx(i,k))*rdt
+         du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*dtstep
+         dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*dtstep
+       enddo
+     enddo
+   endif
 !
 !---- end of vertical diffusion
 !

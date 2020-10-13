@@ -10,18 +10,9 @@
 
       contains
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfdeepcnv_init Argument Table
-!!
       subroutine samfdeepcnv_init()
       end subroutine samfdeepcnv_init
 
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfdeepcnv_finalize Argument Table
-!!
       subroutine samfdeepcnv_finalize()
       end subroutine samfdeepcnv_finalize
 

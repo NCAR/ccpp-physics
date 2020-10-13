@@ -357,6 +357,7 @@ module mp_fer_hires
 
 
 !> \section arg_table_mp_fer_hires_finalize Argument Table
+!! \htmlinclude mp_fer_hires_finalize.html
 !!
        subroutine mp_fer_hires_finalize (errmsg,errflg)
          implicit none
@@ -373,8 +374,6 @@ module mp_fer_hires
          call ferhires_finalize()
 
          is_initialized = .false.
-
-
        end subroutine mp_fer_hires_finalize
 
 end module mp_fer_hires
