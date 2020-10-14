@@ -31,7 +31,7 @@ module lsm_ruc
                                lsm_ruc, lsm, slmsk, stype, vtype,        & ! in 
                                tsfc_lnd, tsfc_wat,                       & ! in
                                tg3, smc, slc, stc,                       & ! in
-                               sh2o, smfrkeep, tslb, smois, wetness,     & ! out
+                               zs, sh2o, smfrkeep, tslb, smois, wetness, & ! out
                                tsice, errmsg, errflg)
 
       implicit none
@@ -47,12 +47,12 @@ module lsm_ruc
       integer,              intent(in)  :: lsm_ruc, lsm
 
 
-      real (kind=kind_phys), dimension(im), intent(in   ) :: slmsk
-      real (kind=kind_phys), dimension(im), intent(in   ) :: stype
-      real (kind=kind_phys), dimension(im), intent(in   ) :: vtype
-      real (kind=kind_phys), dimension(im), intent(in   ) :: tsfc_lnd
-      real (kind=kind_phys), dimension(im), intent(in   ) :: tsfc_wat
-      real (kind=kind_phys), dimension(im), intent(in)    :: tg3
+      real (kind=kind_phys), dimension(im), intent(in) :: slmsk
+      real (kind=kind_phys), dimension(im), intent(in) :: stype
+      real (kind=kind_phys), dimension(im), intent(in) :: vtype
+      real (kind=kind_phys), dimension(im), intent(in) :: tsfc_lnd
+      real (kind=kind_phys), dimension(im), intent(in) :: tsfc_wat
+      real (kind=kind_phys), dimension(im), intent(in) :: tg3
 
       real (kind=kind_phys), dimension(im,lsoil), intent(in) :: smc,slc,stc
 
@@ -60,14 +60,16 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im), intent(inout) :: wetness
 
 !  ---  out
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(out) :: sh2o, smfrkeep
-      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(out) :: tslb, smois
+      real (kind=kind_phys), dimension(:),            intent(out) :: zs
+      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: sh2o, smfrkeep
+      real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb, smois
       real (kind=kind_phys), dimension(im,kice),      intent(out) :: tsice
 
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 
 ! --- local
+      real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
       integer  :: ipr, i, k
       logical  :: debug_print
       integer, dimension(im) :: soiltyp, vegtype
@@ -125,14 +127,16 @@ module lsm_ruc
         endif
       enddo
 
+      call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
+
       !if( .not.  flag_restart) then
         call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
-                             me, master, lsm_ruc, lsm, slmsk,       & ! in
-                             soiltyp, vegtype,                      & ! in
-                             tsfc_lnd, tsfc_wat, tg3,               & ! in
-                             smc, slc, stc,                         & ! in
-                             sh2o, smfrkeep, tslb, smois,           & ! out
-                             wetness, errmsg, errflg)
+                        me, master, lsm_ruc, lsm, slmsk,            & ! in
+                        soiltyp, vegtype,                           & ! in
+                        tsfc_lnd, tsfc_wat, tg3,                    & ! in
+                        zs, dzs, smc, slc, stc,                     & ! in
+                        sh2o, smfrkeep, tslb, smois,                & ! out
+                        wetness, errmsg, errflg)
 
         do i  = 1, im ! i - horizontal loop
           do k = 1, min(kice,lsoil_ruc)
@@ -146,10 +150,10 @@ module lsm_ruc
       !-- end of initialization
 
       if ( debug_print) then
-        write (0,*) 'ruc soil tslb',tslb(:,1)
-        write (0,*) 'ruc soil tsice',tsice(:,1)
-        write (0,*) 'ruc soil smois',smois(:,1)
-        write (0,*) 'ruc wetness',wetness(:)
+        write (0,*) 'ruc soil tslb',tslb(ipr,:)
+        write (0,*) 'ruc soil tsice',tsice(ipr,:)
+        write (0,*) 'ruc soil smois',smois(ipr,:)
+        write (0,*) 'ruc wetness',wetness(ipr)
       endif
 
       end subroutine lsm_ruc_init
@@ -303,8 +307,7 @@ module lsm_ruc
 
 !  ---  in/out:
       integer, dimension(im), intent(inout) :: soiltyp, vegtype
-      real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
-      real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
+      real (kind=kind_phys), dimension(lsoil_ruc), intent(in) :: zs
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
      &       snwdph, tskin, tskin_wat,                                  &
      &       srflag, canopy, trans, tsurf, zorl, tsnow,                 &
@@ -415,12 +418,6 @@ module lsm_ruc
         write (0,*)'flag_init =',flag_init
         write (0,*)'flag_restart =',flag_restart
       endif
- 
-      if(flag_init .and. iter==1) then
-      ! Initialize the RUC soil levels, needed for cold starts and warm starts
-        CALL init_soil_depth_3 ( zs , dzs , lsoil_ruc )
-        if (.not. restart) xlai = 0.
-      endif ! flag_init=.true.,iter=1
 
       ims = 1
       its = 1
@@ -705,7 +702,11 @@ module lsm_ruc
         albbck(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
         alb(i,j)      = sfalb(i)
 
-        if(rdlai2d) xlai(i,j) = laixy(i)
+        if(rdlai2d) then
+          xlai(i,j) = laixy(i)
+        else
+          xlai(i,j) = 0.
+        endif
 
         tbot(i,j) = tg3(i)
 
@@ -1082,30 +1083,14 @@ module lsm_ruc
       deallocate(landusef)
 !
       !! Update standard (Noah LSM) soil variables for physics
-      !! that require these variables (e.g. sfc_sice), independent
-      !! of whether it is a land point or not
-      !do i  = 1, im
-      !  if (land(i)) then
-      !    do k = 1, lsoil
-      !      smc(i,k) = smois(i,k)
-      !      slc(i,k) = sh2o(i,k)
-      !      stc(i,k) = tslb(i,k)
-      !    enddo
-      !  endif
-      !enddo
-      !
-      !write(0,*) "DH DEBUG: i, k, land(i), smc(i,k), slc(i,k), stc(i,k):"
-      !do i  = 1, im
-      !  do k = 1, lsoil
-      !    write(0,'(2i5,1x,l,1x,3e20.10)'), i, k, land(i), smc(i,k), slc(i,k), stc(i,k)
-      !    smc(i,k) = smois(i,k)
-      !    slc(i,k) = sh2o(i,k)
-      !    stc(i,k) = tslb(i,k)
-      !  enddo
-      !enddo
-
-      !call sleep(20)
-      !stop
+      !! that require these variables and for debugging purposes
+      do i  = 1, im
+        do k = 1, lsoil
+          smc(i,k) = smois(i,k)
+          slc(i,k) = sh2o(i,k)
+          stc(i,k) = tslb(i,k)
+        enddo
+      enddo
 
       return
 !...................................
@@ -1118,24 +1103,26 @@ module lsm_ruc
                                  me, master, lsm_ruc, lsm, slmsk,       & ! in
                                  soiltyp, vegtype,                      & ! in
                                  tskin_lnd, tskin_wat, tg3,             & ! !in
-                                 smc, slc, stc,                         & ! in
+                                 zs, dzs, smc, slc, stc,                & ! in
                                  sh2o, smfrkeep, tslb, smois,           & ! out
                                  wetness, errmsg, errflg)
 
       implicit none
 
-      logical,                                 intent(in   ) :: restart
-      integer,                                 intent(in   ) :: lsm
-      integer,                                 intent(in   ) :: lsm_ruc
-      integer,                                 intent(in   ) :: im, nlev
-      integer,                                 intent(in   ) :: lsoil_ruc
-      integer,                                 intent(in   ) :: lsoil
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: slmsk
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tskin_lnd, tskin_wat
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
-      real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: smc !  Noah
-      real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: stc !  Noah
-      real (kind=kind_phys), dimension(im,lsoil),  intent(in   ) :: slc !  Noah
+      logical,                                        intent(in   ) :: restart
+      integer,                                        intent(in   ) :: lsm
+      integer,                                        intent(in   ) :: lsm_ruc
+      integer,                                        intent(in   ) :: im, nlev
+      integer,                                        intent(in   ) :: lsoil_ruc
+      integer,                                        intent(in   ) :: lsoil
+      real (kind=kind_phys), dimension(im),           intent(in   ) :: slmsk
+      real (kind=kind_phys), dimension(im),           intent(in   ) :: tskin_lnd, tskin_wat
+      real (kind=kind_phys), dimension(im),           intent(in   ) :: tg3
+      real (kind=kind_phys), dimension(1:lsoil_ruc),  intent(in   ) :: zs
+      real (kind=kind_phys), dimension(1:lsoil_ruc),  intent(in   ) :: dzs
+      real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: smc !  Noah
+      real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: stc !  Noah
+      real (kind=kind_phys), dimension(im,lsoil),     intent(in   ) :: slc !  Noah
 
       integer,               dimension(im),    intent(inout) :: soiltyp
       integer,               dimension(im),    intent(inout) :: vegtype
@@ -1157,7 +1144,6 @@ module lsm_ruc
 
       integer :: flag_soil_layers, flag_soil_levels, flag_sst
       real (kind=kind_phys),    dimension(1:lsoil_ruc)  :: factorsm
-      real (kind=kind_phys),    dimension(1:lsoil_ruc)  :: zs
       real (kind=kind_phys),    dimension(im)           :: smcref2
       real (kind=kind_phys),    dimension(im)           :: smcwlt2
 
@@ -1185,7 +1171,6 @@ module lsm_ruc
                                its,ite, jts,jte, kts,kte, &
                                i, j, k, l, num_soil_layers, ipr
 
-      real(kind=kind_phys), dimension(1:lsoil_ruc) :: zs2, dzs 
       integer,              dimension(1:lsoil)  :: st_levels_input ! 4 - for Noah lsm
       integer,              dimension(1:lsoil)  :: sm_levels_input ! 4 - for Noah lsm
 
@@ -1205,6 +1190,7 @@ module lsm_ruc
       else if (debug_print) then
         write (0,*) 'Start of RUC LSM initialization'
         write (0,*)'lsoil, lsoil_ruc =',lsoil, lsoil_ruc
+        write (0,*)'restart = ',restart
       endif
 
       ipr = 10
@@ -1228,9 +1214,6 @@ module lsm_ruc
       kde = nlev
       kme = nlev
       kte = nlev
-
-      ! Initialize the RUC soil levels, needed for cold starts and warm starts
-      CALL init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
       !! Check if RUC soil data (tslb, ...) is provided or not
       !if (minval(tslb)==maxval(tslb)) then

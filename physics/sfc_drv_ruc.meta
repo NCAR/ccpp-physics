@@ -200,6 +200,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[zs]
+  standard_name = depth_of_soil_levels_for_land_surface_model
+  long_name = depth of soil levels for land surface model
+  units = m
+  dimensions = (soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [sh2o]
   standard_name = volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model
   long_name = volume fraction of unfrozen soil moisture for lsm
@@ -207,7 +216,7 @@
   dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [smfrkeep]
   standard_name = volume_fraction_of_frozen_soil_moisture_for_land_surface_model
@@ -216,7 +225,7 @@
   dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [tslb]
   standard_name = soil_temperature_for_land_surface_model
@@ -225,7 +234,7 @@
   dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [smois]
   standard_name = volume_fraction_of_soil_moisture_for_land_surface_model
@@ -234,7 +243,7 @@
   dimensions = (horizontal_dimension,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [wetness]
   standard_name = normalized_soil_wetness_for_land_surface_model
@@ -243,7 +252,7 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [tsice]
   standard_name = internal_ice_temperature
@@ -369,7 +378,7 @@
   dimensions = (soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [t1]
   standard_name = air_temperature_at_lowest_model_layer
