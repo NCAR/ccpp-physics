@@ -1713,7 +1713,7 @@
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth, iovrlw, alpha             &
+     &       nlay, nlp1, ipseed, dz, de_lgth, iovrlw, alpha,            &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 

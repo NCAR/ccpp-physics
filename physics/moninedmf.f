@@ -65,7 +65,7 @@
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
-     &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,lsidea,ntoz,       &
+     &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,ntoz,              &
      &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
      &   flag_for_pbl_generic_tend,errmsg,errflg)
 !
@@ -82,7 +82,7 @@
 !     arguments
 !
       logical, intent(in) :: lprnt, hurr_pbl, lssav, ldiag3d, qdiag3d
-      logical, intent(in) :: lsidea, flag_for_pbl_generic_tend
+      logical, intent(in) :: flag_for_pbl_generic_tend
       integer, intent(in) :: ipr, islimsk(im)
       integer, intent(in) :: im, km, ntrac, ntcw, kinver(im), ntoz
       integer, intent(out) :: kpbl(im)

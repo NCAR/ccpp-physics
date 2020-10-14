@@ -27,7 +27,7 @@
         lmfdeep2, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,                 &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
         prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in,                    &
-        cnvw_in, cnvc_in, qgrs, aer_nm, dx,                                    & !inputs from here and above
+        cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,                            & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -91,7 +91,7 @@
                                            imp_physics_zhao_carr_pdf,          &
                                            imp_physics_mg, imp_physics_wsm6,   &
                                            imp_physics_fer_hires,              &
-                                           yearlen
+                                           yearlen, icloud
 
       character(len=3), dimension(:), intent(in) :: lndp_var_list
 
@@ -104,7 +104,7 @@
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
                                                         coslat, sinlat, tsfc,  &
-                                                        slmsk
+                                                        slmsk, dx
 
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
                                                           tgrs, sfc_wts,       &
@@ -846,7 +846,7 @@
         endif
 
         !mz HWRF physics: icloud=3
-        if(Model%icloud == 3) then
+        if(icloud == 3) then
 
           ! Set internal dimensions
           ids = 1
@@ -1023,7 +1023,7 @@
 
           else
             ! MYNN PBL or GF convective are not used
-            call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
+            call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
                          xlat,xlon,slmsk,dz,delp,                   &
                          ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
                          ntsw-1,ntgl-1,                             &
