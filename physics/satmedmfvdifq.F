@@ -66,7 +66,7 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
-     &     dkudiagnostic,errmsg,errflg)
+     &     errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -131,8 +131,7 @@
      &                     slx(im,km),  svx(im,km),   qtx(im,km),
      &                     tvx(im,km),  pix(im,km),   radx(im,km-1),
      &                     dku(im,km-1),dkt(im,km-1), dkq(im,km-1),
-     &                     cku(im,km-1),ckt(im,km-1), 
-     &                     dkudiagnostic(im,km-1)
+     &                     cku(im,km-1),ckt(im,km-1)
 !
       real(kind=kind_phys) plyr(im,km), rhly(im,km),  cfly(im,km),
      &                     qstl(im,km)
@@ -1537,12 +1536,6 @@ c
             endif
           endif
 !
-        enddo
-      enddo
-
-      do k = 1,km1
-        do i=1,im
-           dkudiagnostic(i,k) = dku(i,k)
         enddo
       enddo
 c
