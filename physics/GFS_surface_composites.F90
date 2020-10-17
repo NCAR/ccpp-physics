@@ -31,7 +31,7 @@ contains
                                  tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,              &
                                  weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,&
                                  tsfc_lnd, tsfc_ice, tisfc, tice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,       &
-                                 gflx_ice, tgice, islmsk, semis_rad, semis_wat, semis_lnd, semis_ice,           &
+                                 gflx_ice, tgice, islmsk, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice,           &
                                  qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,            &
                                  min_lakeice, min_seaice, errmsg, errflg)
 
@@ -57,7 +57,7 @@ contains
       real(kind=kind_phys),                intent(in   ) :: tgice
       integer,              dimension(im), intent(inout) :: islmsk
       real(kind=kind_phys), dimension(im), intent(in   ) :: semis_rad
-      real(kind=kind_phys), dimension(im), intent(inout) :: semis_wat, semis_lnd, semis_ice
+      real(kind=kind_phys), dimension(im), intent(inout) :: semis_wat, semis_lnd, semis_ice, slmsk
       real(kind=kind_phys),                intent(in   ) :: min_lakeice, min_seaice
 
       ! CCPP error handling
@@ -129,11 +129,12 @@ contains
                 islmsk(i)      = 0
               endif
             else
-              if (cice(i) > min_lakeice) then
+              if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
               else
                 cice(i)   = zero
                 islmsk(i) = 0
+                slmsk(i)  = 0
               endif
             endif
             if (cice(i) < one) then
@@ -548,7 +549,7 @@ contains
               tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
               zorl(i)  = cice(i) * zorl_ice(i)   + (one - cice(i)) * zorl_wat(i)
             elseif (wet(i)) then
-              if (cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
+              if (cice(i) >= min_seaice) then ! this was already done for lake ice in sfc_sice
                 txi = cice(i)
                 txo = one - txi
                 evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
