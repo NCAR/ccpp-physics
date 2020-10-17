@@ -670,15 +670,6 @@
   type = logical
   intent = inout
   optional = F
-[dkudiagnostic]
-  standard_name = atmosphere_momentum_diffusivity
-  long_name = diffusivity for momentum
-  units = m2 s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
