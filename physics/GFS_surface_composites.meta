@@ -508,6 +508,14 @@
   type = integer
   intent = in
   optional = F
+[islmsk_cice]
+  standard_name = sea_land_ice_mask_cice
+  long_name = sea/land/ice mask cice (=0/1/2)
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = out
+  optional = F
 [semis_rad]
   standard_name = surface_longwave_emissivity
   long_name = surface lw emissivity in fraction

@@ -109,25 +109,25 @@
         lndp_vgf=-999.
 
         if (lndp_type==1) then
-        do k =1,n_var_lndp
-           select case(lndp_var_list(k))
-           case ('rz0')
+          do k =1,n_var_lndp
+            select case(lndp_var_list(k))
+            case ('rz0')
                 z01d(:) = lndp_prt_list(k)* sfc_wts(:,k)
-           case ('rzt')
-                zt1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
-           case ('shc')
-                bexp1d(:) = lndp_prt_list(k) * sfc_wts(:,k)
-           case ('lai')
+            case ('rzt')
+                 zt1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
+            case ('shc')
+                 bexp1d(:) = lndp_prt_list(k) * sfc_wts(:,k)
+            case ('lai')
                 xlai1d(:) = lndp_prt_list(k)* sfc_wts(:,k)
-           case ('vgf')
+            case ('vgf')
         ! note that the pertrubed vegfrac is being used in sfc_drv, but not sfc_diff
               do i=1,im
                 call cdfnor(sfc_wts(i,k),cdfz)
                 vegf1d(i) = cdfz
               enddo
               lndp_vgf = lndp_prt_list(k)
-           end select
-        enddo
+            end select
+          enddo
         endif
 
         ! End of stochastic physics / surface perturbation
