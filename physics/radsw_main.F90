@@ -1012,14 +1012,16 @@
                enddo
             enddo
 
-          call mcica_subcol_sw (1, j1, nlay, iovrsw, permuteseed,    &
-     &                 irng, plyr, hgt,                                 &
-     &                 cld_cf, cld_iwp, cld_lwp,cld_swp,                &
-     &                 cld_ref_ice, cld_ref_liq,                        &
-     &                 cld_ref_snow, taucld3,ssacld3,asmcld3,fsfcld3,   &
-     &                 cldfmcl, ciwpmcl, clwpmcl, cswpmcl,              &  !--output
-     &                 reicmcl, relqmcl, resnmcl,                       &
-     &                 taucmcl, ssacmcl, asmcmcl, fsfcmcl)                 
+          call mcica_subcol_sw (1, 1, nlay, iovrsw, permuteseed,                      &
+     &                 irng, plyr(j1:j1,:), hgt(j1:j1,:),                             &
+     &                 cld_cf(j1:j1,:), cld_iwp(j1:j1,:), cld_lwp(j1:j1,:),           &
+     &                 cld_swp(j1:j1,:), cld_ref_ice(j1:j1,:), cld_ref_liq(j1:j1,:),  &
+     &                 cld_ref_snow(j1:j1,:), taucld3(:,j1:j1,:), ssacld3(:,j1:j1,:), &
+     &                 asmcld3(:,j1:j1,:), fsfcld3(:,j1:j1,:), cldfmcl(:,j1:j1,:),    &  !--output
+     &                 ciwpmcl(:,j1:j1,:), clwpmcl(:,j1:j1,:), cswpmcl(:,j1:j1,:),    &
+     &                 reicmcl(j1:j1,:), relqmcl(j1:j1,:), resnmcl(j1:j1,:),          &
+     &                 taucmcl(:,j1:j1,:), ssacmcl(:,j1:j1,:), asmcmcl(:,j1:j1,:),    &
+     &                 fsfcmcl(:,j1:j1,:))
 
        endif
 !mz* end
@@ -5769,7 +5771,7 @@
      &                 ssac, asmc, fsfc,                                &
      &                 cldfmcl, ciwpmcl, clwpmcl, cswpmcl, reicmcl,     &
      &                 relqmcl, resnmcl,                                &
-     &                 taucmcl, ssacmcl, asmcmcl, fsfcmcl)   
+     &                 taucmcl, ssacmcl, asmcmcl, fsfcmcl)
  
 ! ----- Input -----                                                                        
 ! Control                                                                                  
