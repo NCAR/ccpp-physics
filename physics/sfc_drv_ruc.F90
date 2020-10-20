@@ -258,7 +258,6 @@ module lsm_ruc
      &       rainnc, rainc, ice, snow, graupel,                         &
      &       prsl1, zf, wind, shdmin, shdmax, alvwf, alnwf,             &
      &       srflag, snoalb, isot, ivegsrc, fice, smcwlt2, smcref2,     &
-     &       smc, stc, slc,                                             &
      ! --- constants
      &       con_cp, con_rd, con_rv, con_g, con_pi, con_hvap,           &
      &       con_fvirt,                                                 &
@@ -303,8 +302,6 @@ module lsm_ruc
       integer, intent(in) :: im, nlev, iter, lsoil_ruc, lsoil, kdt, isot, ivegsrc
       integer, intent(in) :: lsm_ruc, lsm
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson
-
-      real (kind=kind_phys), dimension(im,lsoil), intent(inout) :: smc,stc,slc
 
       real (kind=kind_phys), dimension(im), intent(in) ::         &
      &       t1, sigmaf, laixy, dlwflx, dswsfc, snet, tg3,        &
@@ -1357,16 +1354,6 @@ module lsm_ruc
       deallocate(soilctop)
       deallocate(landusef)
 !
-      !! Update standard (Noah LSM) soil variables for physics
-      !! that require these variables and for debugging purposes
-      do i  = 1, im
-        do k = 1, lsoil
-          smc(i,k) = smois(i,k)
-          slc(i,k) = sh2o(i,k)
-          stc(i,k) = tslb(i,k)
-        enddo
-      enddo
-
       return
 !...................................
       end subroutine lsm_ruc_run
