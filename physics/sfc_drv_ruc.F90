@@ -129,7 +129,6 @@ module lsm_ruc
 
       call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
-      !if( .not.  flag_restart) then
         call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                         me, master, lsm_ruc, lsm, slmsk,            & ! in
                         soiltyp, vegtype,                           & ! in
@@ -146,7 +145,6 @@ module lsm_ruc
           enddo
         enddo ! i
 
-      !endif ! flag_restart
       !-- end of initialization
 
       if ( debug_print) then
@@ -491,6 +489,7 @@ module lsm_ruc
         write (0,*)'flag_restart =',flag_restart
       endif
  
+      !if( (flag_init .and. iter==1)) then
         do i  = 1, im ! n - horizontal loop
           ! - Initialize land and ice surface albedo
           if(land(i)) then
@@ -500,7 +499,9 @@ module lsm_ruc
               !- averaged of snow-free and snow-covered
               sfalb_lnd(i) = sfalb_lnd(i) * (1.-sncovr1_lnd(i)) + snoalb(i) * sncovr1_lnd(i)
             endif
-          elseif(icy(i)) then
+          endif
+
+          if(icy(i)) then
               ! snow-free ice
               sfalb_ice(i) = 0.55
             if (weasd_ice(i) > 0.) then
@@ -508,10 +509,9 @@ module lsm_ruc
               sfalb_ice(i) = sfalb_ice(i) * (1.-sncovr1_ice(i)) + 0.75 * sncovr1_ice(i)
             endif
           endif
+
         enddo ! i
-
-
-      endif ! flag_init=.true.,iter=1
+      !endif ! flag_init=.true.,iter=1
 
       ims = 1
       its = 1
@@ -805,19 +805,19 @@ module lsm_ruc
             xice_lnd(i,j) = 0.
           elseif(flag_ice_uncoupled(i)) then  ! some ice
             xland(i,j) = 1.
-            xice(i,j)  = 1. !fice(i)  ! fraction of sea-ice
+            xice(i,j)  = fice(i)  ! fraction of sea-ice
           endif
         else
           write (0,*)'MODIS landuse is not available'
         endif
+
+   if (land(i)) then ! at least some land in the grid cell
 
         if(rdlai2d) then
           xlai(i,j) = laixy(i)
         else
           xlai(i,j) = 0.
         endif
-
-   if (land(i)) then ! at least some land in the grid cell
 
 !>  -   4. history (state) variables (h):
 !!\n \a cmc        - canopy moisture content (\f$mm\f$)
@@ -1122,9 +1122,10 @@ module lsm_ruc
        write (0,*)'i,j,tsurf_lnd(i)',i,j,tsurf_lnd(i)
        write (0,*)'kdt,iter,stsoil(i,:,j)',kdt,iter,stsoil(i,:,j)
      endif
-   endif ! land
+   endif ! end of land
 
    if (flag_ice_uncoupled(i)) then ! at least some ice in the grid cell
+   !-- ice point
 
         solnet_ice(i,j) = dswsfc(i)*(1.-sfalb_ice(i))
         qvg_ice(i,j)    = sfcqv_ice(i)
