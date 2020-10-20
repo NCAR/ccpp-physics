@@ -735,33 +735,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[smc]
-  standard_name = volume_fraction_of_soil_moisture
-  long_name = total soil moisture
-  units = frac
-  dimensions = (horizontal_dimension,soil_vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[stc]
-  standard_name = soil_temperature
-  long_name = soil temperature
-  units = K
-  dimensions = (horizontal_dimension,soil_vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[slc]
-  standard_name = volume_fraction_of_unfrozen_soil_moisture
-  long_name = liquid soil moisture
-  units = frac
-  dimensions = (horizontal_dimension,soil_vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [con_cp]
   standard_name = specific_heat_of_dry_air_at_constant_pressure
   long_name = specific heat !of dry air at constant pressure
