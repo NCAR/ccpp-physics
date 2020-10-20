@@ -24,15 +24,15 @@ contains
 !> \section arg_table_GFS_surface_composites_pre_run Argument Table
 !! \htmlinclude GFS_surface_composites_pre_run.html
 !!
-   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                  &
-                                 landfrac, lakefrac, lakedepth, oceanfrac, frland,                                &
-                                 dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorli, zorl_wat,    &
-                                 zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,    &
-                                 tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                &
-                                 weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,  &
-                                 tsfc_lnd, tsfc_ice, tisfc, tice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,         &
-                                 gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd,    &
-                                 semis_ice, qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,   &
+   subroutine GFS_surface_composites_pre_run (im, lkm, frac_grid, flag_cice, cplflx, cplwav2atm,                          &
+                                 landfrac, lakefrac, lakedepth, oceanfrac, frland,                                        &
+                                 dry, icy, lake, ocean, wet, cice, cimin, zorl, zorlo, zorll, zorli, zorl_wat,            &
+                                 zorl_lnd, zorl_ice, snowd, snowd_wat, snowd_lnd, snowd_ice, tprcp, tprcp_wat,            &
+                                 tprcp_lnd, tprcp_ice, uustar, uustar_wat, uustar_lnd, uustar_ice,                        &
+                                 weasd, weasd_wat, weasd_lnd, weasd_ice, ep1d_ice, tsfc, tsfco, tsfcl, tsfc_wat,          &
+                                 tsfc_lnd, tsfc_ice, tisfc, tice, tsurf, tsurf_wat, tsurf_lnd, tsurf_ice,                 &
+                                 gflx_ice, tgice, islmsk, islmsk_cice, slmsk, semis_rad, semis_wat, semis_lnd, semis_ice, &
+                                 qss, qss_wat, qss_lnd, qss_ice, hflx, hflx_wat, hflx_lnd, hflx_ice,                      &
                                  min_lakeice, min_seaice, errmsg, errflg)
 
       implicit none
@@ -76,59 +76,31 @@ contains
           frland(i) = landfrac(i)
           if (frland(i) > zero) dry(i) = .true.
           if (frland(i) < one) then
-            if (flag_cice(i)) then
+            if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)  = .true.
-                if (cice(i) < one) then
-                  wet(i) = .true. ! some open ocean exists
-                  tsfco(i) = max(tsfco(i), tisfc(i), tgice)
-                endif
               else
                 cice(i)        = zero
                 flag_cice(i)   = .false.
                 islmsk_cice(i) = 0
                 islmsk(i)      = 0
-                wet(i) = .true. ! open ocean
               endif
             else
-              if (oceanfrac(i) > zero .and. .not. cplflx) then
-                if (cice(i) >= min_seaice) then
-                  icy(i) = .true.
-                  if (cice(i) < one) then
-                    wet(i) = .true. ! some open ocean exists
-                    tsfco(i) = max(tsfco(i), tisfc(i), tgice)
-                  endif
-                  islmsk_cice(i) = 2
-                  islmsk(i)      = 2
-                else
-                  cice(i)   = zero
-                  icy(i)  = .false.
-                  wet(i)  = .true. ! open ocean
-                  islmsk_cice(i) = 0
-                  islmsk(i)      = 0
-                endif
-              elseif (cice(i) >= min_lakeice) then
+              if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
-                if (cice(i) < one) then
-                  wet(i) = .true. ! some open lake exists
-                  tsfco(i) = max(tisfc(i), tgice)
-                endif
-                islmsk_cice(i) = 2
-                islmsk(i)      = 2
+                islmsk(i) = 2
               else
                 cice(i)   = zero
-                icy(i)    = .false.
-                wet(i)    = .true. ! open lake
-                islmsk_cice(i) = 0
-                islmsk(i)      = 0
+!               islmsk(i) = 0
               endif
+              islmsk_cice(i) = islmsk(i)
+            endif
+            if (cice(i) < one) then
+              wet(i) = .true. ! some open ocean/lake exists
+              if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
             endif
           else
             cice(i) = zero
-            icy(i)  = .false.
-            wet(i)  = .false.
-            islmsk_cice(i) = 0
-            islmsk(i)      = 0
           endif
         enddo  
 
@@ -136,60 +108,34 @@ contains
 
         do i = 1, IM
           if (islmsk(i) == 1) then
-!           tsfcl(i)  = tsfc(i)
+!           tsfcl(i) = tsfc(i)
             dry(i)    = .true.
             frland(i) = one
             cice(i)   = zero
-            icy(i)    = .false.
-            wet(i)    = .false.
-            islmsk_cice(i) = 1
           else
             frland(i) = zero
-            if (flag_cice(i)) then
-              if (cice(i) > min_seaice) then
+            if (oceanfrac(i) > zero) then
+              if (cice(i) >= min_seaice) then
                 icy(i) = .true.
               else
                 cice(i)        = zero
                 flag_cice(i)   = .false.
                 islmsk(i)      = 0
                 islmsk_cice(i) = 0
-                icy(i)         = .false.
-                wet(i)         = .true.
               endif
             else
-              if (oceanfrac(i) > zero .and. .not. cplflx) then
-                if (cice(i) > min_seaice) then
-                  icy(i) = .true.
-                  wet(i) = .false.
-                  if (cice(i) < one) then
-                    wet(i) = .true. ! some open ocean exists
-                    tsfco(i) = max(tisfc(i), tgice)
-                  endif
-                  islmsk(i)      = 2
-                  islmsk_cice(i) = 2
-                else
-                  cice(i)   = zero
-                  icy(i)    = .false.
-                  wet(i)    = .true.
-                  islmsk(i)      = 0
-                  islmsk_cice(i) = 0
-                endif
-              elseif (cice(i) >= min_lakeice) then
+              if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
-                wet(i) = .false.
-                if (cice(i) < one) then
-                  wet(i) = .true. ! some open lake exists
-                  tsfco(i) = max(tisfc(i), tgice)
-                endif
-                islmsk(i)      = 2
-                islmsk_cice(i) = 2
               else
                 cice(i)   = zero
-                icy(i)    = .false.
-                wet(i)    = .true.
-                islmsk(i)      = 0
-                islmsk_cice(i) = 0
+                flag_cice(i) = .false.
+                islmsk(i) = 0
               endif
+              islmsk_cice(i) = islmsk(i)
+            endif
+            if (cice(i) < one) then
+              wet(i) = .true. ! some open ocean/lake water exists
+              if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
             endif
           endif
         enddo
@@ -249,12 +195,12 @@ contains
              qss_ice(i) = qss(i)
             hflx_ice(i) = hflx(i)
         endif
-        slmsk(i) = islmsk(i)
+        slmsk(i)  = islmsk(i)
       enddo
 
 ! to prepare to separate lake from ocean under water category
       do i = 1, im
-        if (lkm == 1) then
+        if(lkm == 1) then
            if(lakefrac(i) >= 0.15 .and. lakedepth(i) > one) then
               lake(i) = .true.
            else
@@ -602,7 +548,7 @@ contains
               zorl(i)  = cice(i) * zorl_ice(i)   + (one - cice(i)) * zorl_wat(i)
               tsfc(i)  = tsfc_ice(i) ! over lake (and ocean when uncoupled)
             elseif (wet(i)) then
-              if (cice(i) >= min_seaice) then ! this was already done for lake ice in sfc_sice
+              if (cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
                 txi = cice(i)
                 txo = one - txi
                 evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
