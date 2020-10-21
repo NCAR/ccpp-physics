@@ -85,6 +85,10 @@ contains
                 islmsk_cice(i) = 0
                 islmsk(i)      = 0
               endif
+              if (cice(i) < one) then
+                wet(i) = .true. ! some open ocean/lake water exists
+                if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+              endif
             else
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
@@ -94,10 +98,10 @@ contains
 !               islmsk(i) = 0
               endif
               islmsk_cice(i) = islmsk(i)
-            endif
-            if (cice(i) < one) then
-              wet(i) = .true. ! some open ocean/lake exists
-              if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+              if (cice(i) < one) then
+                wet(i) = .true. ! some open ocean/lake exists
+                if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
+              endif
             endif
           else
             cice(i) = zero
@@ -123,6 +127,10 @@ contains
                 islmsk(i)      = 0
                 islmsk_cice(i) = 0
               endif
+              if (cice(i) < one) then
+                wet(i) = .true. ! some open ocean/lake water exists
+                if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+              endif
             else
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
@@ -132,10 +140,10 @@ contains
                 islmsk(i) = 0
               endif
               islmsk_cice(i) = islmsk(i)
-            endif
-            if (cice(i) < one) then
-              wet(i) = .true. ! some open ocean/lake water exists
-              if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
+              if (cice(i) < one) then
+                wet(i) = .true. ! some open ocean/lake water exists
+                if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
+              endif
             endif
           endif
         enddo
