@@ -1784,6 +1784,7 @@ MODULE module_mp_thompson
          rho(k) = 0.622*pres(k)/(R*temp(k)*(qv(k)+0.622))
          nwfa(k) = MAX(11.1E6, MIN(9999.E6, nwfa1d(k)*rho(k)))
          nifa(k) = MAX(naIN1*0.01, MIN(9999.E6, nifa1d(k)*rho(k)))
+         mvd_r(k) = D0r
 
          if (qc1d(k) .gt. R1) then
             no_micro = .false.
