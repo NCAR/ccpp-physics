@@ -11,8 +11,9 @@ contains
 !  they are out of given column
 !---------------------------------------------------
       subroutine cires_ugwp_solv2_v1(im, levs, dtp    ,          &
-                 tm , um, vm, qm, prsl, prsi, zmet,  zmeti,  &
+                 tm , um, vm, qm, prsl, prsi, zmet,  zmeti,      &
                  prslk, xlatd, sinlat, coslat,                   &
+                 grav, cpd, rd, rv, omega, pi, fv,               &
                  pdudt, pdvdt, pdtdt, dked, tauabs, wrms, trms,  &
                  tau_ngw, mpi_id, master, kdt)
 !
@@ -30,12 +31,7 @@ contains
       
       use cires_ugwp_module_v1,only :  knob_ugwp_doheat, knob_ugwp_dokdis, idebug_gwrms
       
-      use ugwp_common_v1 ,     only : rgrav,  grav,  cpd,    rd,  rv, rcpdl, grav2cpd,    &
-                                   omega2,  rcpd,   rcpd2,  pi,    pi2, fv,            &
-                                   rad_to_deg, deg_to_rad,                             &
-                                   rdi,        gor,    grcp,   gocp,                   &
-                                   bnv2min,  bnv2max,  dw2min, velmin, gr2,            &
-                                   hpscale, rhp, rh4, grav2, rgrav2, mkzmin, mkz2min
+      use ugwp_common_v1 ,     only : dw2min, velmin, hpscale, rhp, rh4
 !
       use ugwp_wmsdis_init_v1, only : v_kxw,  rv_kxw,   v_kxw2, tamp_mpa, tau_min, ucrit, &    
                                    maxdudt, gw_eff,  dked_min,  dked_max, maxdtdt,     &
@@ -67,6 +63,8 @@ contains
       real ,intent(in)   :: tau_ngw(im)
 
       integer, intent(in):: mpi_id, master, kdt
+
+      real ,intent(in)   :: grav, cpd, rd, rv, omega, pi, fv
 !  
 !
 ! out-gw effects
@@ -144,7 +142,10 @@ contains
        real  :: pwrms, ptrms
        real  :: zu, zcin, zcin2, zcin3, zcin4, zcinc
        real  :: zatmp, fluxs, zdep,  ze1, ze2
-
+!
+       real  :: rcpdl, grav2cpd, rcpd, rcpd2, pi2, rad_to_deg
+       real  :: deg_to_rad, rdi, gor, grcp, gocp, bnv2min, bnv2max, gr2
+       real  :: grav2, rgrav, rgrav2, mkzmin, mkz2min
 !  
        real  :: zdelp, zdelm, taud_min
        real  :: tvc,  tvm, ptc, ptm
@@ -192,9 +193,27 @@ contains
 	  tauabs=0.0; wrms =0.0 ; trms =0.0 
 	endif
 	
-!       grav2 = grav + grav	
-!       rgrav2 = rgrav*rgrav
-       
+      
+       grav2 = grav + grav
+       rgrav = 1.0/grav
+       rgrav2 = rgrav*rgrav
+       rdi = 1.0/rd
+       gor = grav/rd
+       gr2 = grav*gor
+       rcpd = 1.0/cpd
+       rcpd2 = 0.5/cpd
+       rcpdl = cpd*rgrav             ! 1/[g/cp]  == cp/g
+       pi2 = 2.0*pi
+       grcp = grav*rcpd
+       gocp = grcp
+       grav2cpd = grav*grcp          !  g*(g/cp)= g^2/cp
+       rad_to_deg=180.0/pi
+       deg_to_rad=pi/180.0
+       bnv2min = (pi2/1800.)*(pi2/1800.)
+       bnv2max = (pi2/30.)*(pi2/30.) 
+       mkzmin = pi2/80.0e3
+       mkz2min = mkzmin*mkzmin
+ 
        rci(:) = 1./zci(:)
        rdci(:) = 1./zdci(:)
           
@@ -224,7 +243,7 @@ contains
        DO j=1, im   
            
          jl =j
-	 tx1           = omega2 * sinlat(j) *rv_kxw        
+	 tx1           = 2*omega * sinlat(j) *rv_kxw        
 	 cf1 = abs(tx1)
          c2f2      = tx1 * tx1
 	 ucrit_max = max(ucrit, cf1)

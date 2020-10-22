@@ -6,11 +6,10 @@ contains
 
       subroutine oro_wam_2017(im, levs,npt,ipt, kref,kdt,me,master, &
      &   dtp,dxres, taub, u1, v1, t1, xn, yn, bn2, rho, prsi, prsL, &
-     &   del, sigma, hprime, gamma, theta,  &
+     &   grav, omega, con_rd, del, sigma, hprime, gamma, theta,  &
      &   sinlat, xlatd, taup, taud, pkdis)
 ! 
       USE MACHINE ,      ONLY : kind_phys
-      use ugwp_common_v1 ,  only : grav,  omega2
 !      
       implicit none
 
@@ -29,6 +28,7 @@ contains
 
       real(kind=kind_phys), intent(in), dimension(im, levs) ::   &
      &   u1, v1, t1,  bn2,  rho,   prsl, del
+      real(kind=kind_phys), intent(in) :: grav, omega, con_rd
  
       real(kind=kind_phys), intent(in), dimension(im, levs+1) :: prsi
 !
@@ -128,11 +128,12 @@ contains
            wkdis(:,:)    = kedmin
 
            call oro_meanflow(levs, nzi, u1(j,:), v1(j,:), t1(j,:),      &
-     &                       prsi(j,:), prsL(j,:), del(j,:), rho(i,:),  &
+     &                       prsi(j,:), prsL(j,:), grav, con_rd,        &
+     &                       del(j,:), rho(i,:),                        &
      &                       bn2(i,:), uzi, rhoi,ktur, kalp,dzi,        &
      &                       xn(i), yn(i))
 
-           fcor2 = (omega2*sinlat(j))*(omega2*sinlat(j))*fc_flag
+           fcor2 = (2*omega*sinlat(j))*(2*omega*sinlat(j))*fc_flag
 
            k = ksrc
 
@@ -282,9 +283,10 @@ contains
 !
 !-------------------------------------------------------------      
       subroutine oro_meanflow(nz, nzi, u1, v1, t1, pint, pmid,       &
+     &           grav, con_rd,                                       &
      &           delp, rho, bn2, uzi, rhoi, ktur, kalp, dzi, xn, yn)
 
-      use ugwp_common_v1 ,  only : grav, rgrav, rdi,  velmin, dw2min
+      use ugwp_common_v1 ,  only : velmin, dw2min
       implicit none
 
       integer :: nz, nzi
@@ -292,6 +294,7 @@ contains
       real, dimension(nz  ) ::  bn2  ! define at the interfaces
       real, dimension(nz+1) ::  pint
       real                  ::  xn, yn
+      real,intent(in) :: grav, con_rd
 ! output
  
       real, dimension(nz+1) ::  dzi,  uzi, rhoi, ktur, kalp
@@ -300,6 +303,7 @@ contains
       integer :: i, j, k
       real :: ui, vi, ti, uz, vz, shr2, rdz, kamp
       real :: zgrow, zmet, rdpm, ritur, kmol, w1
+      real :: rgrav, rdi
 ! paremeters
       real, parameter :: hps = 7000., rpspa = 1.e-5
       real, parameter :: rhps=1.0/hps
@@ -308,6 +312,9 @@ contains
       real, parameter :: lturb = 30. ,    uturb = 150.0
       real, parameter :: lsc2 = lturb*lturb,usc2 = uturb*uturb
       kalp(1:nzi) = 2.e-7        ! radiative damping
+
+      rgrav = 1.0/grav
+      rdi = 1.0/con_rd
 
       do k=2, nz
         rdpm    = grav/(pmid(k-1)-pmid(k))

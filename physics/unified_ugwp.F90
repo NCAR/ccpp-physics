@@ -74,10 +74,10 @@ contains
 !
     subroutine unified_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
-                pa_rf_in, tau_rf_in, con_p0, do_ugwp, do_ugwp_v0,              &
-                do_ugwp_v0_orog_only, do_gsl_drag_ls_bl, do_gsl_drag_ss,       &
-                do_gsl_drag_tofd, do_ugwp_v1, do_ugwp_v1_orog_only,            &
-                errmsg, errflg)
+                con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
+                do_ugwp_v0, do_ugwp_v0_orog_only, do_gsl_drag_ls_bl,           &
+                do_gsl_drag_ss, do_gsl_drag_tofd, do_ugwp_v1,                  &
+                do_ugwp_v1_orog_only, errmsg, errflg)
 
 !----  initialization of unified_ugwp
     implicit none
@@ -95,7 +95,7 @@ contains
     real(kind=kind_phys), intent (in) :: dtp
     real(kind=kind_phys), intent (in) :: cdmbgwd(4), cgwf(2) ! "scaling" controls for "old" GFS-GW schemes
     real(kind=kind_phys), intent (in) :: pa_rf_in, tau_rf_in
-    real(kind=kind_phys), intent (in) :: con_p0
+    real(kind=kind_phys), intent (in) :: con_p0, con_pi, con_rerth
     logical,              intent (in) :: do_ugwp
     logical,              intent (in) :: do_ugwp_v0, do_ugwp_v0_orog_only,  &
                                          do_gsl_drag_ls_bl, do_gsl_drag_ss, &
@@ -156,9 +156,10 @@ contains
 
 
     if ( do_ugwp_v1 ) then
-       call cires_ugwp_init_v1 (me, master, nlunit, logunit, jdat,              &
-                                fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
-                                cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
+       call cires_ugwp_init_v1 (me, master, nlunit, logunit, jdat, con_pi,      &
+                                con_rerth, fn_nml2, lonr, latr, levs, ak, bk,   &
+                                con_p0, dtp, cdmbgwd(1:2), cgwf, pa_rf_in,      &
+                                tau_rf_in, errmsg, errflg)
     end if
 
     is_initialized = .true.
@@ -171,11 +172,11 @@ contains
 ! -----------------------------------------------------------------------
 
 !>@brief The subroutine finalizes the CIRES UGWP
-#if 0
+
 !> \section arg_table_unified_ugwp_finalize Argument Table
 !! \htmlinclude unified_ugwp_finalize.html
 !!
-#endif
+
     subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v1,errmsg, errflg)
 
     implicit none
@@ -229,8 +230,8 @@ contains
          del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
          tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
          dudt_mtb,dudt_ogw, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                 &
-         dudt, dvdt, dtdt, rdxzb, con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt,    &
-         rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                                      &
+         dudt, dvdt, dtdt, rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,    &
+         con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
          ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
          ldiag3d, lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,  &
          do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, do_ugwp_v1,              &
@@ -288,7 +289,8 @@ contains
 
     real(kind=kind_phys),    intent(inout), dimension(im, levs):: dudt, dvdt, dtdt
 
-    real(kind=kind_phys),    intent(in) :: con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt
+    real(kind=kind_phys),    intent(in) :: con_g, con_omega, con_pi, con_cp, con_rd, &
+                                           con_rv, con_rerth, con_fvirt
 
     real(kind=kind_phys),    intent(in), dimension(im) :: rain
 
@@ -397,10 +399,11 @@ contains
                       ugrs , vgrs, tgrs, q1, KPBL, prsi,del,prsl,      &
                       prslk, zmeti, zmet, dtp, kdt, hprime, oc, oa4,   &
                       clx, theta, sigma, gamma, elvmax,                &
-                      sgh30,   DUSFCg, DVSFCg, xlat_d, sinlat, coslat, &
-                      area,cdmbgwd(1:2), me, master, rdxzb,            &
-                      zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,          &
-                      du3dt_mtb, du3dt_ogw, du3dt_tms)
+                      con_g, con_omega, con_rd, con_cp, con_rv,con_pi, &
+                      con_rerth, con_fvirt, sgh30, DUSFCg, DVSFCg,     &
+                      xlat_d, sinlat, coslat, area,cdmbgwd(1:2), me,   &
+                      master, rdxzb, zmtb, zogw, tau_mtb, tau_ogw,     &
+                      tau_tofd, du3dt_mtb, du3dt_ogw, du3dt_tms)
 
     end if
 
@@ -663,6 +666,8 @@ contains
        call cires_ugwp_solv2_v1(im,   levs,  dtp,                     &
                       tgrs, ugrs,  vgrs,   q1, prsl, prsi,            &
                       zmet, zmeti,prslk, xlat_d, sinlat, coslat,      &
+                      con_g, con_cp, con_rd, con_rv, con_omega,       &
+                      con_pi, con_fvirt,                              & 
                       gw_dudt, gw_dvdt, gw_dTdt, gw_kdis,             &
                       tauabs, wrms, trms,   tau_ngw, me, master, kdt)
 

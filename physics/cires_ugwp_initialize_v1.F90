@@ -54,15 +54,14 @@
 !Part-1 init =>   wave dissipation + RFriction
 !
 !===================================================
-     subroutine init_global_gwdis_v1(levs, zkm, pmb, kvg, ktg, krad, kion, pa_rf, tau_rf, me, master)
+     subroutine init_global_gwdis_v1(levs, zkm, pmb, kvg, ktg, krad, kion, con_pi,  &
+                                     pa_rf, tau_rf, me, master)
 
-     use ugwp_common_v1, only : pih 
       
-
      implicit none
      integer , intent(in)                 :: me, master
      integer , intent(in)                 :: levs
-     real, intent(in)                     :: pa_rf, tau_rf    
+     real, intent(in)                     :: con_pi, pa_rf, tau_rf    
      real, intent(in)                     :: zkm(levs), pmb(levs)    ! in km-Pa
      real, intent(out), dimension(levs+1) :: kvg, ktg, krad, kion
 !
@@ -91,6 +90,10 @@
      real ::   rf_fv3, rtau_fv3, ptop, pih_dlog       
 !
      real ::  ae1 ,ae2
+     real :: pih
+
+     pih = 0.5*con_pi
+
      pa_alp = pa_rf
      tau_alp = tau_rf
       
@@ -335,12 +338,13 @@
      contains
 !
      subroutine init_conv_gws(nwaves, nazdir, nstoch, effac, &
-                              lonr, kxw, cgwf)
-     use ugwp_common_v1,  only : pi2, arad
+                              con_pi, arad, lonr, kxw, cgwf)
+
      implicit none
  
       integer :: nwaves, nazdir, nstoch
       integer :: lonr
+      real    :: con_pi, arad
       real    :: cgwf(2)
       real    :: kxw,  effac
       real    :: work1 = 0.5
@@ -352,7 +356,7 @@
       nstcon   = nstoch
       eff_con  = effac
 
-      con_dlength = pi2*arad/float(lonr)
+      con_dlength = 2.0*con_pi*arad/float(lonr)
       con_cldf    = cgwf(1) * work1 + cgwf(2) *(1.-work1)
 !
 ! allocate & define spectra in "selected direction": "dc" "ch(nwaves)"
@@ -378,7 +382,7 @@
       snorm = sum(spf_conv)
       spf_conv = spf_conv/snorm*1.5
  
-      call init_nazdir(nazdir,  xaz_conv,  yaz_conv)
+      call init_nazdir(con_pi, nazdir,  xaz_conv,  yaz_conv)
      end subroutine init_conv_gws
 
 
@@ -405,12 +409,13 @@
       real, allocatable  :: ch_fjet(:) , spf_fjet(:)
       real, allocatable  :: xaz_fjet(:), yaz_fjet(:)
      contains
-     subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
-     use ugwp_common_v1,  only : pi2, arad
+     subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac, &
+                              con_pi, lonr, kxw)
      implicit none
 
       integer :: nwaves, nazdir, nstoch
       integer :: lonr
+      real    :: con_pi
       real    :: kxw,  effac , chk
  
       integer :: k
@@ -431,7 +436,7 @@
          ch_fjet(k)  =  chk
          spf_fjet(k) =  1.0
       enddo
-      call init_nazdir(nazdir,  xaz_fjet,  yaz_fjet)
+      call init_nazdir(con_pi, nazdir,  xaz_fjet,  yaz_fjet)
 
      end subroutine init_fjet_gws
 
@@ -459,13 +464,14 @@
 
      contains
 !
-     subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
+     subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, &
+                             con_pi, lonr, kxw)
 
-     use ugwp_common_v1,  only : pi2, arad
      implicit none
 
       integer :: nwaves, nazdir, nstoch
       integer :: lonr
+      real    :: con_pi
       real    :: kxw,  effac , chk
  
       integer :: k
@@ -486,7 +492,7 @@
          spf_okwp(k) = 1.
       enddo
 
-      call init_nazdir(nazdir,  xaz_okwp,  yaz_okwp)
+      call init_nazdir(con_pi, nazdir,  xaz_okwp,  yaz_okwp)
 
      end subroutine init_okw_gws
  

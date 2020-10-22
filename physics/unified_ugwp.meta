@@ -138,6 +138,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_rerth]
+  standard_name = radius_of_earth
+  long_name = radius of earth
+  units = m
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [pa_rf_in]
   standard_name = pressure_cutoff_for_rayleigh_damping
   long_name = pressure level from which Rayleigh Damping is applied
@@ -1067,6 +1085,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_omega]
+  standard_name = angular_velocity_of_earth
+  long_name = angular velocity of earth
+  units = s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -1098,6 +1125,15 @@
   standard_name = gas_constant_water_vapor
   long_name = ideal gas constant for water vapor
   units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_rerth]
+  standard_name = radius_of_earth
+  long_name = radius of earth
+  units = m
   dimensions = ()
   type = real
   kind = kind_phys

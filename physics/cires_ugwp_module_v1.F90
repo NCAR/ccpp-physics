@@ -39,12 +39,12 @@ module  cires_ugwp_module_v1
 !    integer               ::    curday_ugwp                !  yyyymmdd    20150101 
 !    integer               ::    ddd_ugwp                   !  ddd of year from 1-366
     
-    integer               :: knob_ugwp_solver=1            ! 1, 2, 3, 4 - (linsat, ifs_2010, ad_gfdl, dsp_dis)
-    integer, dimension(4) :: knob_ugwp_source              ! [1,1,1,0]  - (oro, fronts, conv, imbf-owp]
-    integer, dimension(4) :: knob_ugwp_wvspec              !  number of waves for- (oro, fronts, conv, imbf-owp]
-    integer, dimension(4) :: knob_ugwp_azdir               !   number of wave azimuths for- (oro, fronts, conv, imbf-owp]
-    integer, dimension(4) :: knob_ugwp_stoch               !  1 - deterministic ; 0 - stochastic
-    real,    dimension(4) :: knob_ugwp_effac               !  efficiency factors for- (oro, fronts, conv, imbf-owp]
+    integer               :: knob_ugwp_solver=1              ! 1, 2, 3, 4 - (linsat, ifs_2010, ad_gfdl, dsp_dis)
+    integer, dimension(4) :: knob_ugwp_source=(/1,0,1,0/)    ! [1,0,1,1]  - (oro, fronts, conv, imbf-owp]
+    integer, dimension(4) :: knob_ugwp_wvspec=(/1,32,32,32/) !  number of waves for- (oro, fronts, conv, imbf-owp]
+    integer, dimension(4) :: knob_ugwp_azdir=(/2,4,4,4/)     !   number of wave azimuths for- (oro, fronts, conv, imbf-owp]
+    integer, dimension(4) :: knob_ugwp_stoch=(/0,0,0,0/)     !  0 - deterministic ; 1 - stochastic
+    real,    dimension(4) :: knob_ugwp_effac=(/1.,1.,1.,1./) !  efficiency factors for- (oro, fronts, conv, imbf-owp]
 
     integer               :: knob_ugwp_doaxyz=1            ! 1 -gwdrag
     integer               :: knob_ugwp_doheat=1            ! 1 -gwheat
@@ -94,11 +94,6 @@ module  cires_ugwp_module_v1
     real     :: ugwp_effac
 
 !
-    data knob_ugwp_source / 1,0, 1, 0 /                    !  oro-conv-fjet-okw-taub_lat:      1-active 0-off
-    data knob_ugwp_wvspec /1,32,32,32/                     !  number of waves for- (oro, fronts, conv, imbf-owp, taulat]
-    data knob_ugwp_azdir  /2, 4, 4,4/                      !  number of wave azimuths for- (oro, fronts, conv, imbf-okwp]
-    data knob_ugwp_stoch  /0, 0, 0,0/                      !  0 - deterministic ; 1 - stochastic, non-activated option
-    data knob_ugwp_effac  /1.,1.,1.,1./                    !  efficiency factors for- (oro, fronts, conv, imbf-owp]
     integer  :: knob_ugwp_version = 0
     integer  :: launch_level = 55
 !
@@ -170,9 +165,9 @@ module  cires_ugwp_module_v1
 
 
 
-  subroutine cires_ugwp_init_v1 (me, master, nlunit, logunit, jdat_gfs, fn_nml2, &
-              lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,                &
-              pa_rf_in, tau_rf_in)
+  subroutine cires_ugwp_init_v1 (me, master, nlunit, logunit, jdat_gfs, con_pi,  &
+              con_rerth, fn_nml2, lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd,  &
+              cgwf, pa_rf_in, tau_rf_in, errmsg, errflg)
 !
 !  input_nml_file ='input.nml'=fn_nml   ..... OLD_namelist and cdmvgwd(4) Corrected Bug Oct 4
 !
@@ -201,10 +196,13 @@ module  cires_ugwp_module_v1
     real,    intent (in) :: ak(levs+1), bk(levs+1), pref
     real,    intent (in) :: dtp
     real,    intent (in) :: cdmvgwd(2), cgwf(2)             ! "scaling" controls for "old" GFS-GW  dims(2) !!!
-    real,    intent (in) :: pa_rf_in, tau_rf_in
+    real,    intent (in) :: pa_rf_in, tau_rf_in, con_pi, con_rerth
  
     character(len=64), intent (in) :: fn_nml2
     character(len=64), parameter   :: fn_nml='input.nml'
+
+    character(len=*), intent(out) :: errmsg
+    integer,          intent(out) :: errflg
 
 !    character,  intent (in) :: input_nml_file
 !    integer, parameter :: logunit =  6
@@ -215,8 +213,7 @@ module  cires_ugwp_module_v1
     integer :: ncid,  iernc, vid, dimid, status         
     integer :: k
     integer :: ddd_ugwp,    curday_ugwp 
-    real    :: avqbo(6)
-    avqbo = [0.05, 0.1, 0.25, 0.5, 0.75, 0.95]
+    real, dimension(6) :: avqbo = (/0.05, 0.1, 0.25, 0.5, 0.75, 0.95/)
 !
     if (me == master) print *, trim (fn_nml), ' GW-namelist file '
     inquire (file =trim (fn_nml) , exist = exists)
@@ -231,6 +228,12 @@ module  cires_ugwp_module_v1
     read   (nlunit, nml = cires_ugwp_nml)
     close  (nlunit)
 !
+
+    ! Initialize CCPP error handling variables
+    errmsg = ''
+    errflg = 0
+
+
     strsolver= knob_ugwp_orosolv     
     pa_rf   = pa_rf_in
     tau_rf  = tau_rf_in
@@ -304,7 +307,8 @@ module  cires_ugwp_module_v1
 !
 ! Part-1 :init_global_gwdis_v1
 !
-    call init_global_gwdis_v1(levs, zkm, pmb, kvg, ktg, krad, kion, pa_rf, tau_rf,  me,  master)
+    call init_global_gwdis_v1(levs, zkm, pmb, kvg, ktg, krad, kion, con_pi,     &
+                              pa_rf, tau_rf,  me,  master)
     call rf_damp_init_v1  (levs, pa_rf, tau_rf, dtp, pmb, rfdis, rfdist, levs_rf)
 !
 ! Part-2 :init_SOURCES_gws
@@ -326,21 +330,24 @@ module  cires_ugwp_module_v1
       if (knob_ugwp_wvspec(4) > 0) then
 ! okw
         call init_okw_gws(knob_ugwp_wvspec(4), knob_ugwp_azdir(4), &
-                          knob_ugwp_stoch(4), knob_ugwp_effac(4), lonr, kxw )
+                          knob_ugwp_stoch(4), knob_ugwp_effac(4),  &
+                          con_pi, lonr, kxw )
         if (me == master) print *, ' init_okw_gws '
       endif
 
       if (knob_ugwp_wvspec(3) > 0) then
 ! fronts
         call init_fjet_gws(knob_ugwp_wvspec(3), knob_ugwp_azdir(3), &
-                           knob_ugwp_stoch(3), knob_ugwp_effac(3), lonr, kxw )
+                           knob_ugwp_stoch(3), knob_ugwp_effac(3),  &
+                           con_pi, lonr, kxw )
         if (me == master) print *, ' init_fjet_gws '
       endif
 
       if (knob_ugwp_wvspec(2) > 0) then
 ! conv
         call init_conv_gws(knob_ugwp_wvspec(2), knob_ugwp_azdir(2), &
-                           knob_ugwp_stoch(2), knob_ugwp_effac(2), lonr, kxw, cgwf )
+                           knob_ugwp_stoch(2), knob_ugwp_effac(2),  &
+                           con_pi, con_rerth, lonr, kxw, cgwf )
         if (me == master)   &
            print *, ' init_convective GWs cgwf', knob_ugwp_wvspec(2), knob_ugwp_azdir(2)
 
@@ -356,10 +363,10 @@ module  cires_ugwp_module_v1
       iernc=NF90_OPEN(trim(ugwp_taufile), nf90_nowrite, ncid)
      
        if(iernc.ne.0) then         
-          write(6,*) 
-          write(6,*) ' cannot open file_limb_tab data-file',  trim(ugwp_taufile)  
-          write(6,*) 
-          stop	  
+          write(errmsg,'(*(a))') "Cannot open file_limb_tab data-file ",  &
+                                    trim(ugwp_taufile)
+          errflg = 1
+          return
         else
 
 
@@ -388,10 +395,10 @@ module  cires_ugwp_module_v1
        iernc=NF90_OPEN(trim(ugwp_qbofile), nf90_nowrite, ncid)
      
        if(iernc.ne.0) then         
-          write(6,*) 
-          write(6,*) ' cannot open qbofile data-file',  trim(ugwp_qbofile)  
-          write(6,*) 
-          stop	  
+          write(errmsg,'(*(a))') "Cannot open qbofile data-file ",  &
+                                    trim(ugwp_qbofile)
+          errflg = 1 
+          return
         else
 	
        status = nf90_inq_dimid(ncid, "lat", DimID)

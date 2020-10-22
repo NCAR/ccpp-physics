@@ -12,11 +12,11 @@ contains
     end subroutine unified_ugwp_post_init
 
 !>@brief The subroutine initializes the unified UGWP
-#if 0
+
 !> \section arg_table_unified_ugwp_post_run Argument Table
 !! \htmlinclude unified_ugwp_post_run.html
 !!
-#endif
+
 
 
      subroutine unified_ugwp_post_run (ldiag_ugwp, dtf, im, levs,     &

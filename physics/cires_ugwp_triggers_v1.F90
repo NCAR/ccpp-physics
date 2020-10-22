@@ -9,24 +9,25 @@ contains
         write(6,*) ' physics-based triggers for UGWP ' 
         end subroutine ugwp_triggers
 !	
-     SUBROUTINE  subs_diag_geo(nx, ny,  lat, lon, rlat, rlon, dy, dx,  &
+     SUBROUTINE  subs_diag_geo(nx, ny,  lat, lon, rlat, rlon, dy, dx, con_pi, earth_r, &
                                cosv, rlatc, brcos, brcos2, dlam1, dlam2, dlat, divJp, divJm)
-      use ugwp_common_v1 , only : deg_to_rad
       
       implicit none
        integer :: nx, ny
        real    :: lon(nx), lat(ny)
        real    :: rlon(nx), rlat(ny) , cosv(ny), tanlat(ny)  
        real    :: rlatc(ny-1), brcos(ny), brcos2(ny)              
-       real    :: earth_r, ra1, ra2, dx, dy, dlat
+       real    :: ra1, ra2, dx, dy, dlat
+       real    :: con_pi, earth_r
        real    :: dlam1(ny), dlam2(ny),  divJp(ny), divJm(ny)
        integer :: j
+       real    :: deg_to_rad
 !
 !    specify common constants and
 !    geometric factors to compute deriv-es etc ...
 !    coriolis coslat tan etc...
 !
-      earth_r = 6370.e3
+      deg_to_rad = con_pi/180.0
       ra1     = 1.0 / earth_r
       ra2     = ra1*ra1
 !
@@ -125,10 +126,12 @@ contains
 
       end  subroutine get_xyd_wind
 
-      subroutine trig3d_fjets( nx, ny, nz, U, V, T, Q, P3D, PS, delp, delz, lon, lat, pmid, trig3d_fgf)
+      subroutine trig3d_fjets( nx, ny, nz, U, V, T, Q, P3D, PS, delp, delz, lon, lat,  &
+                               con_pi, con_rerth, pmid, trig3d_fgf)
       implicit none
       integer ::  nx, ny, nz
       real    ::  lon(nx), lat(ny)
+      real    ::  con_pi, con_rerth
 !      
       real, dimension(nz)          :: pmid
       real, dimension(nx, ny, nz)  :: U, V, T, Q, delp, delz, p3d
@@ -150,7 +153,7 @@ contains
        real    :: dlam1(ny), dlam2(ny),  divJp(ny), divJm(ny)  
        
             
-      call subs_diag_geo(nx, ny,  lat, lon, rlat, rlon, dy, dx,  &
+      call subs_diag_geo(nx, ny,  lat, lon, rlat, rlon, dy, dx, con_pi, con_rerth, &
            cosv, rlatc, brcos, brcos2, dlam1, dlam2, dlat, divJp, divJm)
 
       do k=1, nz 
@@ -173,6 +176,7 @@ contains
       implicit none
       integer ::  nx, ny, nz
       real    ::  lon(nx), lat(ny)
+      real    ::  con_pi, con_rerth
 !      
       real, dimension(nz)          :: pmid
       real, dimension(nx, ny, nz)  :: U, V, T, Q, delp, delz, p3d
@@ -193,7 +197,7 @@ contains
       real    ::  dx, dy, dlat
       real    :: dlam1(ny), dlam2(ny),  divJp(ny), divJm(ny) 
              
-      call subs_diag_geo(nx, ny,  lat, lon, rlat, rlon, dy, dx,  &
+      call subs_diag_geo(nx, ny,  lat, lon, rlat, rlon, dy, dx, con_pi, con_rerth, &
            cosv, rlatc, brcos, brcos2, dlam1, dlam2, dlat, divJp, divJm)
 
       do k=1, nz 
@@ -238,12 +242,13 @@ contains
 
       subroutine cires_3d_triggers( nx, ny, nz, lon, lat, pmid,          &
         U, V, W, T, Q, delp, delz, p3d, PS, HS, Hyam, Hybm, Hyai, Hybi,  &
-        trig3d_okw, trig3d_fgf, trig3d_conv,                             &
+        con_pi, con_rerth, trig3d_okw, trig3d_fgf, trig3d_conv,          &
         dcheat3d, precip2d, cld_klevs2d, scheat3d) 
 
       implicit none
       integer ::  nx, ny, nz
       real    ::  lon(nx), lat(ny)
+      real    ::  con_pi, con_rerth
 !
 ! reversed ???  Hyai, Hybi , pmid
 !      
@@ -265,7 +270,8 @@ contains
 !
 !===================================================================================  
 
-      call trig3d_fjets( nx, ny, nz, U, V, T, Q, P3D, PS, delp, delz, lon, lat, pmid, trig3d_fgf) 
+      call trig3d_fjets( nx, ny, nz, U, V, T, Q, P3D, PS, delp, delz, lon, lat,  &
+                         con_pi, con_rerth, pmid, trig3d_fgf) 
       call trig3d_okubo( nx, ny, nz, U, V, T, Q, P3D, PS, delp, delz, lon, lat, pmid, trig3d_okw)
       call trig3d_dconv(nx, ny, nz, U, V, T, Q,   P3D, PS, delp, delz, lon, lat, pmid, trig3d_conv, &
          dcheat3d, precip2d, cld_klevs2d, scheat3d)  
@@ -544,13 +550,15 @@ contains
       enddo
 !      
       end subroutine slat_geos5
-      subroutine init_nazdir(naz,  xaz,  yaz)
-      use ugwp_common_v1 , only : pi2
+      subroutine init_nazdir(con_pi, naz,  xaz,  yaz)
       implicit none
+      real :: con_pi
       integer :: naz
       real, dimension(naz) :: xaz,  yaz
       integer :: idir
       real    :: phic, drad
+      real    :: pi2
+      pi2 = 2.0*con_pi
       drad  = pi2/float(naz)
       if (naz.ne.4) then     
         do idir =1, naz

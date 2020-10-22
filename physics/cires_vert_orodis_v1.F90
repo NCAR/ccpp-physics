@@ -766,15 +766,15 @@ contains
 !
 !--------------------------------------
 ! 
-!     call ugwp_oro_lsatdis( krefj, levs,  tauogw(j),  tautot(j), tau_src, kxw,      &
-!           fcor(j), c2f2(j), up, vp, tp, qp, dp, zpm, zpi, pmid1, pint1,            &
-!	   xn, yn, umag, drtau, kdis_oro)
+!     call ugwp_oro_lsatdis( krefj, levs,  tauogw(j),  tautot(j), tau_src,      &
+!           con_pi, con_g, kxw, fcor(j), c2f2(j), up, vp, tp, qp, dp, zpm, zpi, &
+!           pmid1, pint1, xn, yn, umag, drtau, kdis_oro)
  
       subroutine ugwp_oro_lsatdis( krefj, levs,  tauogw,  tautot,  tau_src,     &
-           kxw, fcor,  kxridge, up, vp, tp, qp, dp, zpm, zpi, pmid, pint,       &
-           xn, yn, umag, drtau, kdis)
+           pi, grav, kxw, fcor,  kxridge, up, vp, tp, qp, dp, zpm, zpi,        &
+           pmid, pint, xn, yn, umag, drtau, kdis)
 
-      use ugwp_common_v1,       only : bnv2min, grav, pi, pi2, dw2min, velmin, rgrav
+      use ugwp_common_v1,       only : dw2min, velmin
       use cires_ugwp_module_v1, only : frcrit, ricrit, linsat, hps, rhp1, rhp2
       use cires_ugwp_module_v1, only : kvg, ktg, krad, kion
       use ugwp_oro_init_v1,     only : coro , fcrit_sm , fcrit_sm2
@@ -786,6 +786,8 @@ contains
 
       real , dimension(levs+1)   ::  tau_src
 
+      real, intent(in)           ::  pi, grav
+
       real, dimension(levs) , intent(in)     ::  up, vp, tp, qp, dp, zpm
       real, dimension(levs+1), intent(in)    ::  zpi, pmid, pint
       real , intent(in)                      ::  xn, yn, umag
@@ -796,6 +798,7 @@ contains
 !
 ! locals
 !
+      real  :: bnv2min, pi2, rgrav
       real                       ::  uref, udir, uf2, ufd, uf2p
       real, dimension(levs+1)    ::  tauz
       real, dimension(levs)      ::  rho
@@ -808,6 +811,10 @@ contains
       real                       :: fdis, mkzi, keff_m, keff_t
       real                       :: betadis, betam, betat, cdfm, cdft
       real                       :: fsat, hsat, hsat2, kds , c2f2
+
+      pi2 = 2.0*pi
+      bnv2min = (pi2/1800.)*(pi2/1800.)
+      rgrav = 1.0/grav
 
       drtau(1:levs) =  0.0
       kdis (1:levs) =  0.0
@@ -931,15 +938,15 @@ contains
       end  subroutine ugwp_oro_lsatdis
 !
 !
-     subroutine ugwp_tofd(im, levs, sigflt, elvmax, zpbl,  u, v, zmid, &
+     subroutine ugwp_tofd(im, levs, con_cp, sigflt, elvmax, zpbl, u, v, zmid, &
                           utofd, vtofd, epstofd, krf_tofd)
        use machine ,      only : kind_phys 
-       use ugwp_common_v1  , only :  rcpd2         
        use ugwp_oro_init_v1, only : n_tofd, const_tofd, ze_tofd, a12_tofd, ztop_tofd
 !       
      implicit none
 !     
      integer ::  im, levs
+     real(kind_phys) :: con_cp
      real(kind_phys), dimension(im, levs)  ::  u, v, zmid
      real(kind_phys), dimension(im)        ::  sigflt, elvmax, zpbl
      real(kind_phys), dimension(im, levs)  ::  utofd, vtofd, epstofd, krf_tofd
@@ -947,10 +954,12 @@ contains
 ! locals
 !
      integer :: i, k
+     real    :: rcpd2
      real    :: sgh = 30.
      real    :: sgh2, ekin, zdec, rzdec, umag, zmet, zarg, zexp, krf
 !     
      utofd =0.0 ; vtofd = 0.0 ;  epstofd =0.0 ; krf_tofd =0.0    
+     rcpd2 = 0.5/con_cp
 !      
      
      do i=1, im 
@@ -979,14 +988,14 @@ contains
      end subroutine ugwp_tofd  
 !
 !     
-     subroutine ugwp_tofd1d(levs, sigflt, elvmax, zsurf, zpbl,  u, v, &
+     subroutine ugwp_tofd1d(levs, con_cp, sigflt, elvmax, zsurf, zpbl,  u, v, &
                             zmid, utofd, vtofd, epstofd, krf_tofd)
        use machine ,      only : kind_phys 
-       use ugwp_common_v1  , only :  rcpd2         
        use ugwp_oro_init_v1, only : n_tofd, const_tofd, ze_tofd, a12_tofd, ztop_tofd
 !       
      implicit none
       integer ::  levs
+      real(kind_phys) :: con_cp
       real(kind_phys), dimension(levs)  ::   u, v, zmid
       real(kind_phys)                   ::  sigflt, elvmax, zpbl, zsurf
       real(kind_phys), dimension(levs)  ::  utofd, vtofd, epstofd, krf_tofd
@@ -994,10 +1003,12 @@ contains
 ! locals
 !
      integer :: i, k
+     real    :: rcpd2
      real    :: sghmax = 5.
      real    :: sgh2, ekin, zdec, rzdec, umag, zmet, zarg, ztexp, krf
 !     
      utofd =0.0 ; vtofd = 0.0 ;  epstofd =0.0 ; krf_tofd =0.0    
+     rcpd2 = 0.5/con_cp
 !         
        zdec = max(n_tofd*sigflt, zpbl)          ! ntimes*sgh_turb or Zpbl
        zdec = min(ze_tofd, zdec)                ! cannot exceed 18 km

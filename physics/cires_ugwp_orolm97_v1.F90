@@ -8,7 +8,8 @@ contains
      subroutine gwdps_oro_v1(im,  km,    imx, do_tofd,           &
          pdvdt, pdudt, pdtdt, pkdis, u1,v1,t1,q1,kpbl,           &  
          prsi,del,prsl,prslk, zmeti, zmet, dtp, kdt, hprime,     &
-         oc, oa4, clx4, theta, sigmad, gammad, elvmaxd,  sgh30,  &
+         oc, oa4, clx4, theta, sigmad, gammad, elvmaxd,          &
+         grav, con_omega, rd, cpd, rv, pi, arad, fv, sgh30,      &
          dusfc, dvsfc,  xlatd, sinlat, coslat, sparea,           &
          cdmbgwd, me, master, rdxzb,                             &
          zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,                 &
@@ -23,10 +24,7 @@ contains
 !----------------------------------------    
 
       use machine ,      only : kind_phys
-      use ugwp_common_v1,  only : rgrav,   grav,  cpd, rd, rv, rcpd, rcpd2, &
-                                pi,      rad_to_deg, deg_to_rad, pi2,     &
-                                rdi,     gor,    grcp, gocp,  fv, gr2,    &
-                                bnv2min, dw2min, velmin, arad
+      use ugwp_common_v1,  only : dw2min, velmin
  
       use ugwp_oro_init_v1, only : rimin,  ric,     efmin,     efmax   ,  &
                                 hpmax,  hpmin,   sigfaci => sigfac  ,  &
@@ -70,6 +68,8 @@ contains
                                   clx4(im,4), theta(im), sigmad(im),        &
                                   gammad(im), elvmaxd(im)
 
+      real(kind=kind_phys), intent(in) :: grav, con_omega, rd, cpd, rv,     &
+                                          pi, arad, fv
       real(kind=kind_phys), intent(in) :: sgh30(im)       
       real(kind=kind_phys), intent(in), dimension(im,km) ::   &
                                   u1,  v1,   t1, q1,del, prsl, prslk, zmet
@@ -166,6 +166,10 @@ contains
 
       real(kind=kind_phys) ::   kxridge, inv_b2eff, zw1, zw2
       real(kind=kind_phys) ::   belps, aelps, nhills, selps
+
+      real(kind=kind_phys) ::   rgrav, rcpd, rcpd2, rad_to_deg, deg_to_rad
+      real(kind=kind_phys) ::   pi2, rdi, gor, grcp, gocp, gr2, bnv2min
+
 !      
 ! various integers
 !     
@@ -181,6 +185,19 @@ contains
 !
       rcpdt = 1.0 / (cpd*dtp)
       grav2 = grav + grav
+!
+      rgrav = 1.0/grav
+      rcpd = 1.0/cpd
+      rcpd2 = 0.5/cpd
+      rad_to_deg=180.0/pi
+      deg_to_rad=pi/180.0
+      pi2 = 2.*pi
+      rdi = 1.0/rd
+      gor = grav/rd
+      grcp = grav*rcpd
+      gocp = grcp
+      gr2  = grav*gor
+      bnv2min = (pi2/1800.)*(pi2/1800.)
 !       
 ! mtb-blocking  sigma_min and dxres => cires_initialize
 !  
@@ -813,6 +830,7 @@ contains
 	     
         call oro_wam_2017(im, km, npt, ipt, kref, kdt, me, master,             &
            dtp, dxres, taub, u1, v1, t1, xn, yn, bnv2, ro, prsi,prsl,          &
+           grav, con_omega, rd,                                                &
            del, sigma, hprime, gamma, theta, sinlat, xlatd, taup, taud, pkdis)
      
       endif            !  oro_wam_2017 - linsatdis-solver of wam-2017
@@ -840,7 +858,7 @@ contains
             vp1(k) = v1(j,k)
           enddo
  
-          call ugwp_tofd1d(km, sigflt, elvmaxd(j), zsurf, zpbl,    &
+          call ugwp_tofd1d(km, cpd, sigflt, elvmaxd(j), zsurf, zpbl,  &
                up1, vp1, zpm,  utofd1, vtofd1, epstofd1, krf_tofd1)
      
           do k=1,km
