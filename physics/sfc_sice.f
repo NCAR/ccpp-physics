@@ -219,7 +219,7 @@
             endif
             if (fice(i) > tem) then
               islmsk_local(i) = 2
-              tice(i) =min( tice(i), tgice)
+              tice(i) = min(tice(i), tgice)
             endif
           endif
         enddo
@@ -399,7 +399,6 @@
             print *,'fix layer 2 ice temp: reset it to:',stsice(i,2)
           endif
 
-          tskin(i) = tice(i)*fice(i) + tgice*ffw(i)
         endif
       enddo
 
@@ -424,6 +423,7 @@
 #endif
           hflx(i)  = fice(i)*hflxi    + ffw(i)*hflxw
           evap(i)  = fice(i)*evapi(i) + ffw(i)*evapw(i)
+          tskin(i) = fice(i)*tice(i)  + ffw(i)*tgice
 !
 !  --- ...  the rest of the output
 

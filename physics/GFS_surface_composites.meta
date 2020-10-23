@@ -508,6 +508,14 @@
   type = integer
   intent = inout
   optional = F
+[islmsk_cice]
+  standard_name = sea_land_ice_mask_cice
+  long_name = sea/land/ice mask cice (=0/1/2)
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+  optional = F
 [slmsk]
   standard_name = sea_land_ice_mask_real
   long_name = landmask: sea/land/ice=0/1/2
