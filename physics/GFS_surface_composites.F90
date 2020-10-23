@@ -79,29 +79,29 @@ contains
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)  = .true.
+                if (cice(i) < one) then
+                  wet(i) = .true. ! some open ocean
+                  if (.not. cplflx) tsfco(i) = max(tisfc(i), tgice)
+                endif
               else
                 cice(i)        = zero
                 flag_cice(i)   = .false.
                 islmsk_cice(i) = 0
                 islmsk(i)      = 0
               endif
-              if (cice(i) < one) then
-                wet(i) = .true. ! some open ocean
-                if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
-              endif
             else
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
                 islmsk(i) = 2
+                if (cice(i) < one) then
+                  wet(i) = .true. ! some open lake
+                  tsfco(i) = max(tisfc(i), tgice)
+                endif
               else
                 cice(i)   = zero
 !               islmsk(i) = 0
               endif
               islmsk_cice(i) = islmsk(i)
-              if (cice(i) < one) then
-                wet(i) = .true. ! some open lake
-                if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
-              endif
             endif
           else
             cice(i) = zero
@@ -121,29 +121,29 @@ contains
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i) = .true.
+                if (cice(i) < one) then
+                  wet(i) = .true. ! some open ocean
+                  tsfco(i) = max(tisfc(i), tgice)
+                endif
               else
                 cice(i)        = zero
                 flag_cice(i)   = .false.
                 islmsk(i)      = 0
                 islmsk_cice(i) = 0
               endif
-              if (cice(i) < one) then
-                wet(i) = .true. ! some open ocean
-                if (.not. cplflx .and. icy(i)) tsfco(i) = max(tisfc(i), tgice)
-              endif
             else
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
+                if (cice(i) < one) then
+                  wet(i) = .true. ! some open lake
+                  tsfco(i) = max(tisfc(i), tgice)
+                endif
               else
                 cice(i)   = zero
                 flag_cice(i) = .false.
                 islmsk(i) = 0
               endif
               islmsk_cice(i) = islmsk(i)
-              if (cice(i) < one) then
-                wet(i) = .true. ! some open lake
-                if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
-              endif
             endif
           endif
         enddo
