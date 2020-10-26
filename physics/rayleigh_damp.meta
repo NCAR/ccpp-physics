@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = rayleigh_damp_init
+[ccpp-table-properties]
+  name = rayleigh_damp
   type = scheme
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]
@@ -190,7 +191,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rayleigh_damp_finalize
-  type = scheme

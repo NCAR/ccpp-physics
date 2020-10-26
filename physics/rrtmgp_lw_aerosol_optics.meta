@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = rrtmgp_lw_aerosol_optics
+  type = scheme
+  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,rrtmgp_aux.F90
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_aerosol_optics_run
   type = scheme

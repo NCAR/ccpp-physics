@@ -1,11 +1,7 @@
-[ccpp-arg-table]
-  name = sgscloud_radpre_init
+[ccpp-table-properties]
+  name = sgscloud_radpre
   type = scheme
-
-########################################################################
-[ccpp-arg-table]
-  name = sgscloud_radpre_finalize
-  type = scheme
+  dependencies = funcphys.f90,iounitdef.f,machine.F,module_bfmicrophysics.f,physcons.F90,radcons.f90,radiation_clouds.f
 
 ########################################################################
 [ccpp-arg-table]
@@ -336,6 +332,14 @@
 [imp_physics_gfdl]
   standard_name = flag_for_gfdl_microphysics_scheme
   long_name = choice of GFDL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
   units = flag
   dimensions = ()
   type = integer

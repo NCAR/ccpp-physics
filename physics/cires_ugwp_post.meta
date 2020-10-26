@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = cires_ugwp_post_init
+[ccpp-table-properties]
+  name = cires_ugwp_post
   type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -309,7 +310,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = cires_ugwp_post_finalize
-  type = scheme

@@ -47,7 +47,7 @@
       errflg = 0
 
       do i=1,im
-        if (iter == 1 .and. wind(i) < 2.0) then
+        if (iter == 1 .and. wind(i) < 2.0d0) then
           flag_guess(i) = .true.
         endif
       enddo
@@ -110,7 +110,7 @@
         flag_iter(i)  = .false.
         flag_guess(i) = .false.
 
-        if (iter == 1 .and. wind(i) < 2.0) then
+        if (iter == 1 .and. wind(i) < 2.0d0) then
           !if (dry(i) .or. (wet(i) .and. .not.icy(i) .and. nstf_name1 > 0)) then
           if (dry(i) .or. (wet(i) .and. nstf_name1 > 0)) then
             flag_iter(i) = .true.
