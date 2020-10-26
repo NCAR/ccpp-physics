@@ -37,6 +37,9 @@ contains
 
       real, dimension(nz),    intent(in) :: up, vp, tp, qp, dp, zpm, pmid
       real, dimension(nz+1),  intent(in) :: zpi, pint
+
+      ! character(len=*), intent(out) :: errmsg
+      ! integer,          intent(out) :: errflg
 !
       real, dimension(nz+1)              :: zpi_zero
       real, dimension(nz)                :: zpm_zero
@@ -51,7 +54,12 @@ contains
                  phiang, ang, pe, ek,                     &
                  cang, sang, ss2, cs2, zlen,  dbtmp,      &
                  hamp, bgamm, cgamm      
-  
+ 
+
+    ! Initialize CCPP error handling variables
+    ! errmsg = ''
+    ! errflg = 0
+ 
 !==================================================
 !
 !     elvp + hprime <=>elvp + nridge*hprime, ns =2
@@ -77,11 +85,11 @@ contains
 
       mtb_fix = cdmb*sigma/hamp        !hamp  ~ 2*hprime and 1/sigfac = 0.25 is inside 1/hamp
 
-      if (mtb_fix == 0.) then
-        print *, cdmb, sigma, hamp
-        print *,  ' MTB == 0'
-           stop
-      endif
+      ! if (mtb_fix == 0.) then
+      !    write(errmsg,'(*(a))') cdmb, sigma, hamp, ' MTB == 0'
+      !    errflg = 1
+      !    return
+      ! endif
 
       if (strver == 'vay_2018')  then    
 
@@ -99,7 +107,14 @@ contains
              bn2, uhm, vhm, bn2hm, rhohm)   
      
         umag = max(sqrt(uhm*uhm + vhm*vhm), velmin)       !velmin=dw2min =1.0 m/s 
-        if (bn2hm .le. 0.0) then
+        ! if (bn2hm .le. 0.0) then
+        !    write(errmsg,'(*(a))') 'unstable MF for MTB  - RETURN '
+        !    errflg = 1
+        !    return
+        ! end if
+
+
+
          print *,  ' unstable MF for MTB  -RETURN '
          RETURN                        ! unstable PBL
         endif
