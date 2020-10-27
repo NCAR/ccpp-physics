@@ -47,8 +47,7 @@
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-     &       frac_grid, icy, islmsk_cice,                               &
-     &       min_lakeice, min_seaice, oceanfrac,                        &
+     &       islmsk_cice, min_lakeice, min_seaice, oceanfrac,           &
      &       errmsg, errflg
      &     )
 
@@ -152,7 +151,6 @@
 !  ---  inputs:
       integer, intent(in) :: im, kice, ipr
       logical, intent(in) :: lprnt
-      logical, intent(in) :: frac_grid
 
       real (kind=kind_phys), intent(in) :: sbc, hvap, tgice, cp, eps,   &
      &       epsm1, grav, rvrdm1, t0c, rd
@@ -166,7 +164,7 @@
       real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
      &                                            min_lakeice
 
-      logical, dimension(im), intent(in) :: flag_iter, icy
+      logical, dimension(im), intent(in) :: flag_iter
 
 !  ---  input/outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: hice,      &
@@ -193,7 +191,6 @@
       real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
 
       integer :: i, k
-      integer, dimension(im) :: islmsk_local
 
       logical :: flag(im)
 !
@@ -206,31 +203,12 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-
-      islmsk_local = islmsk_cice
-      if (frac_grid) then
-        do i=1,im
-          if (icy(i) .and. islmsk_local(i) < 2) then
-            if (oceanfrac(i) > zero) then
-              tem = min_seaice
-            else
-              tem = min_lakeice
-            endif
-            if (fice(i) > tem) then
-              islmsk_local(i) = 2
-              tice(i) = min(tice(i), tgice)
-            endif
-          endif
-        enddo
-      endif
-
 !
 !> - Set flag for sea-ice.
 
       do i = 1, im
-        flag(i) = (islmsk_local(i) == 2) .and. flag_iter(i)
-        if (flag_iter(i) .and. islmsk_local(i) < 2) then
+        flag(i) = (islmsk_cice(i) == 2) .and. flag_iter(i)
+        if (flag_iter(i) .and. islmsk_cice(i) < 2) then
           hice(i) = zero
           fice(i) = zero
         endif
