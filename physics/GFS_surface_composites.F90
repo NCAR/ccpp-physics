@@ -71,11 +71,6 @@ contains
       errmsg = ''
       errflg = 0
 
-     ! Assign sea ice temperature to interstitial variable
-      do i = 1, im
-        tice(i) = tisfc(i)
-      enddo
-
       if (frac_grid) then  ! cice is ice fraction wrt water area
         do i=1,im
           frland(i) = landfrac(i)
@@ -84,7 +79,7 @@ contains
             if (oceanfrac(i) > zero) then
               if (cice(i) >= min_seaice) then
                 icy(i)  = .true.
-                tice(i) = min(tisfc(i), tgice)
+                tisfc(i) = min(tisfc(i), tgice)
                 if (cplflx)  then
                   islmsk_cice(i) = 4
                   flag_cice(i)   = .true.
@@ -106,7 +101,7 @@ contains
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
                 islmsk(i) = 2
-                tice(i) = min(tisfc(i), tgice)
+                tisfc(i) = min(tisfc(i), tgice)
               else
                 cice(i)   = zero
                 islmsk(i) = 0
@@ -232,6 +227,11 @@ contains
         else
            lake(i) = .false.
         endif
+      enddo
+
+     ! Assign sea ice temperature to interstitial variable
+      do i = 1, im
+        tice(i) = tisfc(i)
       enddo
 
    end subroutine GFS_surface_composites_pre_run
