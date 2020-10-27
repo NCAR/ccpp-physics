@@ -110,14 +110,9 @@ contains
         ! if (bn2hm .le. 0.0) then
         !    write(errmsg,'(*(a))') 'unstable MF for MTB  - RETURN '
         !    errflg = 1
-        !    return
+        !    return    ! unstable PBL
         ! end if
 
-
-
-         print *,  ' unstable MF for MTB  -RETURN '
-         RETURN                        ! unstable PBL
-        endif
         bnmag =sqrt(bn2hm)
 
         frd_src  =  min(hamp*bnmag/umag, frmax)        ! frmax =10.
