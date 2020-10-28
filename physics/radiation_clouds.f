@@ -188,7 +188,7 @@
 !!\n IMP_PHYSICS =98/99: Zhao-Carr-Sundqvist MP - Xu-Randall diagnostic cloud fraction
 !!\n IMP_PHYSICS =11: GFDL MP - unified diagnostic cloud fraction provided by GFDL MP
 !!
-!! Cloud overlapping method (namelist control parameter - \b IOVR_LW, \b IOVR_SW)
+!! Cloud overlapping method (namelist control parameter - \b IOVR)
 !!\n IOVR=0: randomly overlapping vertical cloud layers
 !!\n IOVR=1: maximum-random overlapping vertical cloud layers
 !!\n IOVR=2: maximum overlapping vertical cloud layers
@@ -208,7 +208,7 @@
 !> This module computes cloud related quantities for radiation computations.
       module module_radiation_clouds     
 !
-      use physparam,           only : icldflg, iovrsw, iovrlw, idcor,   &
+      use physparam,           only : icldflg, iovr, idcor,             &
      &                                lcrick, lcnorm, lnoprec,          &
      &                                ivflip, kind_phys, kind_io4
       use physcons,            only : con_fvirt, con_ttp, con_rocp,     &
@@ -256,7 +256,6 @@
       real (kind=kind_phys), parameter :: cldasy_def = 0.84       !< default cld asymmetry factor
 
       integer  :: llyr   = 2                              !< upper limit of boundary layer clouds
-      integer  :: iovr   = 1                              !< maximum-random cloud overlapping method
 
       public progcld1, progcld2, progcld3, progcld4, progclduni,        &
      &                 cld_init, progcld5, progcld4o, gethml
@@ -313,7 +312,7 @@
 !                     =8: Thompson microphysics                         !
 !                     =6: WSM6 microphysics                             !
 !                     =10: MG microphysics                              !
-!   iovrsw/iovrlw   : sw/lw control flag for cloud overlapping scheme   !
+!   iovr            : control flag for cloud overlapping scheme         !
 !                     =0: random overlapping clouds                     !
 !                     =1: max/ran overlapping clouds                    !
 !                     =2: maximum overlap clouds       (mcica only)     !
@@ -345,8 +344,6 @@
 !===> ...  begin here
 !
 !  ---  set up module variables
-
-      iovr    = max( iovrsw, iovrlw )    !cld ovlp used for diag HML cld output
 
       if (me == 0) print *, VTAGCLD      !print out version tag
 

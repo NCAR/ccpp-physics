@@ -3,7 +3,6 @@ module rrtmgp_sw_cloud_optics
   use mo_rte_kind,              only: wl
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,          only: ty_cloud_optics
-  use physparam,                only: isubcsw, iovrsw
   use mo_optical_props,         only: ty_optical_props_2str
   use mo_rrtmg_sw_cloud_optics, only: rrtmg_sw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg

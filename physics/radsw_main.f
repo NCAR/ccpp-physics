@@ -305,7 +305,7 @@
       module rrtmg_sw 
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
+     &                             isubcsw, icldflg, iovr,  ivflip,     &
      &                             iswmode, kind_phys
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
@@ -627,7 +627,7 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovrsw  - cloud overlapping control flag                            !
+!   iovr    - cloud overlapping control flag                            !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
@@ -888,7 +888,7 @@
         cosz1  = cosz(j1)
         sntz1  = f_one / cosz(j1)
         ssolar = s0fac * cosz(j1)
-        if (iovrsw == 3) delgth = de_lgth(j1) ! clouds decorr-length
+        if (iovr == 3) delgth = de_lgth(j1) ! clouds decorr-length
 
 !> -# Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
         albbm(1) = sfcalb_nir_dir(j1)
@@ -910,7 +910,7 @@
             tavel(k) = tlyr(j1,kk)
             delp (k) = delpin(j1,kk)
             dz   (k) = dzlyr (j1,kk)
-            if (iovrsw == 4 .or. iovrsw == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
 
 !> -# Set absorber and gas column amount, convert from volume mixing
 !!    ratio to molec/cm2 based on coldry (scaled to 1.0e-20)
@@ -1001,7 +1001,7 @@
             tavel(k) = tlyr(j1,k)
             delp (k) = delpin(j1,k)
             dz   (k) = dzlyr (j1,k)
-            if (iovrsw == 4 .or. iovrsw == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -1092,11 +1092,11 @@
 
         zcf0   = f_one
         zcf1   = f_one
-        if (iovrsw == 0) then                    ! random overlapping
+        if (iovr == 0) then                    ! random overlapping
           do k = 1, nlay
             zcf0 = zcf0 * (f_one - cfrac(k))
           enddo
-        else if (iovrsw == 1) then               ! max/ran overlapping
+        else if (iovr == 1) then               ! max/ran overlapping
           do k = 1, nlay
             if (cfrac(k) > ftiny) then                ! cloudy layer
               zcf1 = min ( zcf1, f_one-cfrac(k) )
@@ -1106,7 +1106,7 @@
             endif
           enddo
           zcf0 = zcf0 * zcf1
-        else if (iovrsw >= 2) then
+        else if (iovr >= 2) then
           do k = 1, nlay
             zcf0 = min ( zcf0, f_one-cfrac(k) )  ! used only as clear/cloudy indicator
           enddo
@@ -1417,7 +1417,7 @@
 !   icldflg - cloud scheme control flag                                 !
 !           =0: diagnostic scheme gives cloud tau, omiga, and g.        !
 !           =1: prognostic scheme gives cloud liq/ice path, etc.        !
-!   iovrsw  - clouds vertical overlapping control flag                  !
+!   iovr    - clouds vertical overlapping control flag                  !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
@@ -1453,9 +1453,9 @@
 !
 !===> ... begin here
 !
-      if ( iovrsw<0 .or. iovrsw>5 ) then
+      if ( iovr<0 .or. iovr>5 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
-     &          ' IOVRSW=',iovrsw,' in RSWINIT !!'
+     &          ' IOVR=',iovr,' in RSWINIT !!'
         stop
       endif
 
@@ -1502,15 +1502,15 @@
         stop
       endif
 
-      if ( isubcsw==0 .and. iovrsw>2 ) then
+      if ( isubcsw==0 .and. iovr>2 ) then
         if (me == 0) then
-          print *,'  *** IOVRSW=',iovrsw,' is not available for',       &
+          print *,'  *** IOVR=',iovr,' is not available for',           &
      &            ' ISUBCSW=0 setting!!'
           print *,'      The program will use maximum/random overlap',  &
      &            ' instead.'
         endif
 
-        iovrsw = 1
+        iovr = 1
       endif
 
 !> -# Setup constant factors for heating rate
@@ -1994,7 +1994,7 @@
 !   lcloudy - logical, sub-colum cloud profile flag array    nlay*ngptsw!
 !                                                                       !
 !  other control flags from module variables:                           !
-!     iovrsw    : control flag for cloud overlapping method             !
+!     iovr      : control flag for cloud overlapping method             !
 !                 =0: random                                            !
 !                 =1: maximum/random overlapping clouds                 !
 !                 =2: maximum overlap cloud                             !
@@ -2038,7 +2038,7 @@
 
 !> -# Sub-column set up according to overlapping assumption.
 
-      select case ( iovrsw )
+      select case ( iovr )
 
         case( 0 )        ! random overlap, pick a random value at every level
 
