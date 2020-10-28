@@ -4,7 +4,7 @@ module GFS_rrtmgp_setup
 
    use physparam, only : &
         isolar,  ictmflg, ico2flg, ioznflg, iaerflg, iaermdl, icldflg, &
-        iovrsw,  iovrlw,  lcrick,  lcnorm,  lnoprec, ialbflg, iemsflg, & 
+        lcrick,  lcnorm,  lnoprec, ialbflg, iemsflg,   & 
         isubcsw, isubclw, ivflip , ipsd0,   iswcliq
    use machine, only: &
         kind_phys                  ! Working type
@@ -40,7 +40,7 @@ module GFS_rrtmgp_setup
    subroutine GFS_rrtmgp_setup_init(imp_physics, imp_physics_fer_hires, imp_physics_gfdl,&
         imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                   &
         imp_physics_zhao_carr_pdf, imp_physics_mg,  si, levr, ictm, isol, ico2, iaer,    &
-        ialb, iems, ntcw,  num_p3d,  ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,         &
+        ialb, iems, ntcw,  num_p3d,  ntoz, iovr, isubc_sw, isubc_lw,                     &
         icliq_sw, crick_proof, ccnorm, norad_precip, idate, iflip, me, errmsg, errflg)
      implicit none
 
@@ -57,7 +57,7 @@ module GFS_rrtmgp_setup
      real(kind_phys), dimension(levr+1), intent(in) :: &
           si
      integer, intent(in) :: levr, ictm, isol, ico2, iaer, ialb, iems,   & 
-          ntcw, num_p3d, ntoz, iovr_sw, iovr_lw, isubc_sw, isubc_lw,    &
+          ntcw, num_p3d, ntoz, iovr, isubc_sw, isubc_lw,                &
           icliq_sw, iflip, me 
      logical, intent(in) :: &
           crick_proof, ccnorm, norad_precip
@@ -78,8 +78,6 @@ module GFS_rrtmgp_setup
      ico2flg = ico2                     ! co2 data source control flag
      ioznflg = ntoz                     ! ozone data source control flag
      iswcliq = icliq_sw                 ! optical property for liquid clouds for sw
-     iovrsw  = iovr_sw                  ! cloud overlapping control flag for sw
-     iovrlw  = iovr_lw                  ! cloud overlapping control flag for lw
      lcrick  = crick_proof              ! control flag for eliminating CRICK 
      lcnorm  = ccnorm                   ! control flag for in-cld condensate 
      lnoprec = norad_precip             ! precip effect on radiation flag (ferrier microphysics)
@@ -117,8 +115,8 @@ module GFS_rrtmgp_setup
         print *,' si =',si
         print *,' levr=',levr,' ictm=',ictm,' isol=',isol,' ico2=',ico2,&
              ' iaer=',iaer,' ialb=',ialb,' iems=',iems,' ntcw=',ntcw
-        print *,' np3d=',num_p3d,' ntoz=',ntoz,' iovr_sw=',iovr_sw,     &
-             ' iovr_lw=',iovr_lw,' isubc_sw=',isubc_sw,              &
+        print *,' np3d=',num_p3d,' ntoz=',ntoz,' iovr=',iovr,        &
+             ' isubc_sw=',isubc_sw,                                  &
              ' isubc_lw=',isubc_lw,' icliq_sw=',icliq_sw,            &
              ' iflip=',iflip,'  me=',me
         print *,' crick_proof=',crick_proof,                            &
@@ -128,7 +126,7 @@ module GFS_rrtmgp_setup
 
      call radinit( si, levr, imp_physics, imp_physics_fer_hires, imp_physics_gfdl,       &
         imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr,                   &
-        imp_physics_zhao_carr_pdf, imp_physics_mg,  me, errflg )
+        imp_physics_zhao_carr_pdf, imp_physics_mg,  iovr, me, errflg )
      
      if ( me == 0 ) then
         print *,'  Radiation sub-cloud initial seed =',ipsd0,           &
@@ -206,7 +204,7 @@ module GFS_rrtmgp_setup
    
    subroutine radinit(si, NLAY, imp_physics, imp_physics_fer_hires, imp_physics_gfdl,    &
         imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, &
-        imp_physics_zhao_carr_pdf, imp_physics_mg, me, errflg )
+        imp_physics_zhao_carr_pdf, imp_physics_mg, iovr, me, errflg )
      !...................................
 
 !  ---  inputs:
@@ -291,10 +289,6 @@ module GFS_rrtmgp_setup
 !              =8 Thompson microphysics scheme                          !
 !              =6 WSM6 microphysics scheme                              !
 !              =10 MG microphysics scheme                               !
-!   iovrsw   : control flag for cloud overlap in sw radiation           !
-!   iovrlw   : control flag for cloud overlap in lw radiation           !
-!              =0: random overlapping clouds                            !
-!              =1: max/ran overlapping clouds                           !
 !   isubcsw  : sub-column cloud approx control flag in sw radiation     !
 !   isubclw  : sub-column cloud approx control flag in lw radiation     !
 !              =0: with out sub-column cloud approximation              !
@@ -331,6 +325,7 @@ module GFS_rrtmgp_setup
 
 !  ---  inputs:
      integer, intent(in) :: &
+          iovr,                      & ! 
           imp_physics,               & ! Flag for MP scheme
           imp_physics_fer_hires,     & ! Flag for fer-hires scheme
           imp_physics_gfdl,          & ! Flag for gfdl scheme
@@ -377,10 +372,8 @@ module GFS_rrtmgp_setup
      &    ' ISOLar =',isolar, ' ICO2flg=',ico2flg,' IAERflg=',iaerflg,  &
      &    ' IALBflg=',ialbflg,' IEMSflg=',iemsflg,' ICLDflg=',icldflg,  &
      &    ' IMP_PHYSICS=',imp_physics,' IOZNflg=',ioznflg
-        print *,' IVFLIP=',ivflip,' IOVRSW=',iovrsw,' IOVRLW=',iovrlw,  &
+        print *,' IVFLIP=',ivflip,' IOVR=',iovr,  &
      &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
-!       write(0,*)' IVFLIP=',ivflip,' IOVRSW=',iovrsw,' IOVRLW=',iovrlw,&
-!    &    ' ISUBCSW=',isubcsw,' ISUBCLW=',isubclw
         print *,' LCRICK=',lcrick,' LCNORM=',lcnorm,' LNOPREC=',lnoprec
 
         if ( ictmflg==0 .or. ictmflg==-2 ) then

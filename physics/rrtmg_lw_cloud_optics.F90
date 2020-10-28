@@ -1,6 +1,6 @@
 module mo_rrtmg_lw_cloud_optics
   use machine,          only: kind_phys
-  use physparam,        only: ilwcliq, ilwcice, iovrlw
+  use physparam,        only: ilwcliq, ilwcice
   use mersenne_twister, only: random_setseed, random_number, random_stat
 
   implicit none

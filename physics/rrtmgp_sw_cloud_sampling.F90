@@ -1,7 +1,7 @@
 module rrtmgp_sw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
-  use physparam,                only: isubcsw, iovrsw
+  use physparam,                only: isubcsw
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
@@ -44,7 +44,7 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_sampling_run
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
-  subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday,       &
+  subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday, iovr, &
        icseed_sw, cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,         &
        sw_gas_props, sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,          &
        sw_optical_props_clouds, sw_optical_props_precip, errmsg, errflg)
@@ -56,6 +56,7 @@ contains
          nCol,                            & ! Number of horizontal gridpoints
          nDay,                            & ! Number of daylit points.
          nLev,                            & ! Number of vertical layers
+         iovr,                            & ! Choice of cloud-overlap method
          ipsdsw0                            ! Initial permutation seed for McICA
     integer,intent(in),dimension(ncol) :: &
          idxday                             ! Indices for daylit points.
@@ -99,7 +100,7 @@ contains
     errflg = 0
     
     ! Only works w/ SDFs v15p2 and v16beta
-    if (iovrsw .ne. 1 .and. iovrsw .ne. 3 .and. iovrsw .ne. 4 .and. iovrsw .ne. 5) then
+    if (iovr .ne. 1 .and. iovr .ne. 3 .and. iovr .ne. 4 .and. iovr .ne. 5) then
        errmsg = 'Cloud overlap assumption not supported.'
        errflg = 1
        call check_error_msg('rrtmgp_sw_cloud_sampling',errmsg)
@@ -115,6 +116,9 @@ contains
        ! Allocate space RRTMGP DDTs [nday,nLev,nGpt]
        call check_error_msg('rrtmgp_sw_cloud_sampling_run', & 
             sw_optical_props_clouds%alloc_2str(nday, nLev, sw_gas_props))
+       sw_optical_props_clouds%tau(:,:,:) = 0._kind_phys
+       sw_optical_props_clouds%ssa(:,:,:) = 1._kind_phys
+       sw_optical_props_clouds%g(:,:,:)   = 0._kind_phys
  
        ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
        if(isubcsw == 1) then      ! advance prescribed permutation seed
@@ -137,11 +141,11 @@ contains
 
        ! Cloud overlap.
        ! Maximum-random overlap
-       if (iovrsw == 1) then
+       if (iovr == 1) then
           call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), cldfracMCICA)  
        endif
        ! Decorrelation-length overlap
-       if (iovrsw == 3) then
+       if (iovr == 3) then
           do iday=1,nday
              call random_setseed(ipseed_sw(iday),rng_stat)
              call random_number(rng1D,rng_stat)
@@ -152,7 +156,7 @@ contains
 	                        randoms2      = rng3D2)
        endif 
        ! Exponential overlap
-       if (iovrsw == 4 .or. iovrsw == 5) then
+       if (iovr == 4 .or. iovr == 5) then
           call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), cldfracMCICA, &
                             overlap_param = cloud_overlap_param(idxday(1:nDay),1:nLev-1))
        endif
@@ -193,11 +197,11 @@ contains
 
        ! Precipitation overlap
        ! Maximum-random
-       if (iovrsw == 1) then
+       if (iovr == 1) then
           call sampled_mask(rng3D, precip_frac(idxday(1:nDay),:), precipfracSAMP)       
        endif
    	   ! Exponential decorrelation length overlap
-   	   if (iovrsw == 3) then
+       if (iovr == 3) then
           !! Generate second RNG
           !do iday=1,nday
           !   call random_setseed(ipseed_sw(iday),rng_stat)
@@ -208,7 +212,7 @@ contains
                             overlap_param = precip_overlap_param(idxday(1:nDay),1:nLev-1),& 
                             randoms2 = rng3D2)
        endif
-       if (iovrsw == 4 .or. iovrsw == 5) then
+       if (iovr == 4 .or. iovr == 5) then
           call sampled_mask(rng3D, precip_frac(idxday(1:nDay),:),precipfracSAMP, &
                             overlap_param = precip_overlap_param(idxday(1:nDay),1:nLev-1))
        endif
@@ -218,42 +222,43 @@ contains
             draw_samples(precipfracSAMP,                    &
                          sw_optical_props_precipByBand,     &
                          sw_optical_props_precip))                  
-    endif
          
-    ! ####################################################################################        
-    ! Just add precipitation optics to cloud-optics
-    ! ####################################################################################        
-    do iGpt=1,sw_gas_props%get_ngpt()
-       do iday=1,nDay
-          do iLay=1,nLev
-             tauloc = sw_optical_props_clouds%tau(iday,iLay,iGpt) + &
-                      sw_optical_props_precip%tau(iday,iLay,iGpt)
-             if (sw_optical_props_precip%tau(iday,iLay,iGpt) > 0) then
-                ssaloc = (sw_optical_props_clouds%tau(iday,iLay,iGpt)  * &
-                          sw_optical_props_clouds%ssa(iday,iLay,iGpt)  + &
-                          sw_optical_props_precip%tau(iday,iLay,iGpt)  * &
-                          sw_optical_props_precip%ssa(iday,iLay,iGpt)) / &
-                         tauloc
-                if (ssaloc > 0) then
-                   asyloc = (sw_optical_props_clouds%tau(iday,iLay,iGpt) * &
-                             sw_optical_props_clouds%ssa(iday,iLay,iGpt) * &
-                             sw_optical_props_clouds%g(iday,iLay,iGpt)   + &
-                             sw_optical_props_precip%tau(iday,iLay,iGpt) * &
-                             sw_optical_props_precip%ssa(iday,iLay,iGpt) * &
-                             sw_optical_props_precip%g(iday,iLay,iGpt))  / &
-                            (tauloc*ssaloc)
-                else
-                   tauloc = sw_optical_props_clouds%tau(iday,iLay,iGpt) 
-                   ssaloc = sw_optical_props_clouds%ssa(iday,iLay,iGpt)
-                   asyloc = sw_optical_props_clouds%g(iday,iLay,iGpt)            
+       ! #################################################################################        
+       ! Just add precipitation optics to cloud-optics
+       ! #################################################################################        
+       do iGpt=1,sw_gas_props%get_ngpt()
+          do iday=1,nDay
+             do iLay=1,nLev
+                tauloc = sw_optical_props_clouds%tau(iday,iLay,iGpt) + &
+                         sw_optical_props_precip%tau(iday,iLay,iGpt)
+                if (sw_optical_props_precip%tau(iday,iLay,iGpt) > 0) then
+                   ssaloc = (sw_optical_props_clouds%tau(iday,iLay,iGpt)  * &
+                             sw_optical_props_clouds%ssa(iday,iLay,iGpt)  + &
+                             sw_optical_props_precip%tau(iday,iLay,iGpt)  * &
+                             sw_optical_props_precip%ssa(iday,iLay,iGpt)) / &
+                             tauloc
+                   if (ssaloc > 0) then
+                      asyloc = (sw_optical_props_clouds%tau(iday,iLay,iGpt) * &
+                                sw_optical_props_clouds%ssa(iday,iLay,iGpt) * &
+                                sw_optical_props_clouds%g(iday,iLay,iGpt)   + &
+                                sw_optical_props_precip%tau(iday,iLay,iGpt) * &
+                                sw_optical_props_precip%ssa(iday,iLay,iGpt) * &
+                                sw_optical_props_precip%g(iday,iLay,iGpt))  / &
+                                (tauloc*ssaloc)
+                   else
+                      tauloc = sw_optical_props_clouds%tau(iday,iLay,iGpt) 
+                      ssaloc = sw_optical_props_clouds%ssa(iday,iLay,iGpt)
+                      asyloc = sw_optical_props_clouds%g(iday,iLay,iGpt)            
+                   endif
+                   sw_optical_props_clouds%tau(iday,iLay,iGpt) = tauloc	
+                   sw_optical_props_clouds%ssa(iday,iLay,iGpt) = ssaloc   
+                   sw_optical_props_clouds%g(iday,iLay,iGpt)   = asyloc
                 endif
-                sw_optical_props_clouds%tau(iday,iLay,iGpt) = tauloc	
-                sw_optical_props_clouds%ssa(iday,iLay,iGpt) = ssaloc   
-                sw_optical_props_clouds%g(iday,iLay,iGpt)   = asyloc
-             endif
+             enddo
           enddo
        enddo
-    enddo
+    endif
+
   end subroutine rrtmgp_sw_cloud_sampling_run
 
   ! #########################################################################################

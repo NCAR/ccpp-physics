@@ -4,9 +4,9 @@
 ! ########################################################################################
 module GFS_rrtmgp_gfdlmp_pre
   use machine,      only: kind_phys
-  use physparam,    only: lcnorm, lcrick, idcor, iovrlw, iovrsw
+  use physparam,    only: lcnorm, lcrick, idcor, iovr
   use rrtmgp_aux,   only: check_error_msg
-  use module_radiation_clouds, only: get_alpha_exp, get_alpha_dcorr
+  !use module_radiation_clouds, only: get_alpha_exp, get_alpha_dcorr
   ! Parameters
   real(kind_phys), parameter :: &
        reliq_def  = 10.0 ,      & ! Default liq radius to 10 micron (used when effr_in=F)
@@ -101,7 +101,7 @@ contains
     ! Local variables
     real(kind_phys) :: tem1
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
-    integer :: iCol,iLay,l,ncndl,iovr
+    integer :: iCol,iLay,l,ncndl
     real(kind_phys), dimension(nCol,nLev) :: deltaP
     
     if (.not. (lsswr .or. lslwr)) return
@@ -200,8 +200,6 @@ contains
     ! ####################################################################################
     ! Cloud (and precipitation) overlap
     ! ####################################################################################
-
-    iovr = max(iovrsw,iovrlw)  
     
     ! Compute layer-thickness
     do iCol=1,nCol
@@ -214,10 +212,10 @@ contains
     ! Cloud overlap parameter
     !
     if (iovr == 3) then
-       call get_alpha_dcorr(nCol, nLev, lat, con_pi, deltaZ, de_lgth, cloud_overlap_param)
+!       call get_alpha_dcorr(nCol, nLev, lat, con_pi, deltaZ, de_lgth, cloud_overlap_param)
     endif
     if (iovr == 4 .or. iovr == 5) then 
-       call get_alpha_exp(nCol, nLev, deltaZ, iovr, lat, julian, yearlen, cld_frac, cloud_overlap_param)
+!       call get_alpha_exp(nCol, nLev, deltaZ, iovr, lat, julian, yearlen, cld_frac, cloud_overlap_param)
     endif
 
     ! 

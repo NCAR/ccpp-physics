@@ -5,7 +5,7 @@
 ! ########################################################################################
 module GFS_cloud_diagnostics
   use machine,                 only: kind_phys
-  use physparam,               only: iovrlw, iovrsw, ivflip, icldflg, idcor
+  use physparam,               only: iovr, ivflip, icldflg, idcor
   
   ! Module parameters (imported directly from radiation_cloud.f)
   integer, parameter :: &
@@ -23,7 +23,6 @@ module GFS_cloud_diagnostics
   
   ! Module variables
   integer :: &
-       iovr    = 1,        &  ! Cloud overlap used for diagnostic HML cloud outputs
        llyr    = 2            ! Upper limit of boundary layer clouds
      
   public GFS_cloud_diagnostics_run, GFS_cloud_diagnostics_init,&
@@ -145,11 +144,8 @@ contains
     ! Local variables
     integer :: iLay, kl
  
- 	! Initialize error flag
- 	errflg = 0
-    
-    ! Cloud overlap used for diagnostic HML cloud outputs      
-    iovr = max(iovrsw,iovrlw)  
+    ! Initialize error flag
+    errflg = 0
     
     if (mpi_rank == 0) print *, VTAGCLD      !print out version tag
     

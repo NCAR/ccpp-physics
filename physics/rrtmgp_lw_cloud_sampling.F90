@@ -1,7 +1,7 @@
 module rrtmgp_lw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
-  use physparam,                only: isubclw, iovrlw
+  use physparam,                only: isubclw
   use mo_optical_props,         only: ty_optical_props_1scl
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
@@ -45,7 +45,7 @@ contains
 !! \section arg_table_rrtmgp_lw_cloud_sampling_run
 !! \htmlinclude rrtmgp_lw_cloud_sampling_run.html
 !!
-  subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, ipsdlw0, icseed_lw,   &
+  subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, ipsdlw0, icseed_lw, iovr,    &
        cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param, lw_gas_props,      &
        lw_optical_props_cloudsByBand, lw_optical_props_precipByBand,                        &
        lw_optical_props_clouds, lw_optical_props_precip, errmsg, errflg)
@@ -56,6 +56,7 @@ contains
     integer, intent(in) :: &
          nCol,                             & ! Number of horizontal gridpoints
          nLev,                             & ! Number of vertical layers
+         iovr,                             & ! Choice of cloud-overlap method
          ipsdlw0                             ! Initial permutation seed for McICA
     integer,intent(in),dimension(ncol) :: &
          icseed_lw                           ! auxiliary special cloud related array when module 
@@ -96,7 +97,7 @@ contains
     errflg = 0
 
     ! 
-    if (iovrlw .ne. 1 .and. iovrlw .ne. 3 .and. iovrlw .ne. 4 .and. iovrlw .ne. 5) then
+    if (iovr .ne. 1 .and. iovr .ne. 3 .and. iovr .ne. 4 .and. iovr .ne. 5) then
        errmsg = 'Cloud overlap assumption not supported.'
        errflg = 1
        call check_error_msg('rrtmgp_lw_cloud_sampling',errmsg)
@@ -134,11 +135,11 @@ contains
 
     ! Cloud-overlap.
     ! Maximum-random
-    if (iovrlw == 1) then
+    if (iovr == 1) then
        call sampled_mask(rng3D, cld_frac, cldfracMCICA) 
     endif
 	!  Exponential decorrelation length overlap
-    if (iovrlw == 3) then
+    if (iovr == 3) then
        ! Generate second RNG
        do iCol=1,ncol
           call random_setseed(ipseed_lw(icol),rng_stat)
@@ -150,7 +151,7 @@ contains
                          randoms2      = rng3D2)
     endif
     ! Exponential or Exponential-random
-    if (iovrlw == 4 .or. iovrlw == 5) then
+    if (iovr == 4 .or. iovr == 5) then
        call sampled_mask(rng3D, cld_frac, cldfracMCICA,  &
                          overlap_param = cloud_overlap_param(:,1:nLev-1))    
     endif
@@ -191,11 +192,11 @@ contains
 
     ! Precipitation overlap.
 	! Maximum-random
-    if (iovrlw == 1) then
+    if (iovr == 1) then
         call sampled_mask(rng3D, precip_frac, precipfracSAMP)      
     endif 
 	!  Exponential decorrelation length overlap
-    if (iovrlw == 3) then
+    if (iovr == 3) then
        ! No need to call RNG second time for now, just use the same seeds for precip as clouds.
        !! Generate second RNG
        !do iCol=1,ncol
@@ -208,7 +209,7 @@ contains
                          randoms2      = rng3D2)
     endif
     ! Exponential or Exponential-random
-    if (iovrlw == 4 .or. iovrlw == 5) then
+    if (iovr == 4 .or. iovr == 5) then
        call sampled_mask(rng3D, precip_frac, precipfracSAMP,               &
                          overlap_param = precip_overlap_param(:,1:nLev-1))
     endif
