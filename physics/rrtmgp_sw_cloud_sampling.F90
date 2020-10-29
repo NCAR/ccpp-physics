@@ -139,8 +139,8 @@ contains
        enddo
 
        ! Cloud overlap.
-       ! Maximum-random overlap
-       if (iovr == iovr_maxrand) then
+       ! Maximum-random, random, or maximum cloud overlap
+       if (iovr == iovr_maxrand .or. iovr == iovr_max .or. iovr == iovr_rand) then
           call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), cldfracMCICA)  
        endif
        ! Decorrelation-length overlap
@@ -154,13 +154,15 @@ contains
 	                        overlap_param = cloud_overlap_param(idxday(1:nDay),1:nLev-1),&
 	                        randoms2      = rng3D2)
        endif 
-       ! Exponential overlap
+       ! Exponential or exponential-random cloud overlap
        if (iovr == iovr_exp .or. iovr == iovr_exprand) then
           call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), cldfracMCICA, &
                             overlap_param = cloud_overlap_param(idxday(1:nDay),1:nLev-1))
        endif
-       
+
+       !
        ! Sampling. Map band optical depth to each g-point using McICA
+       !
        call check_error_msg('rrtmgp_sw_cloud_sampling_run_draw_samples', & 
             draw_samples(cldfracMCICA,                      &
                          sw_optical_props_cloudsByBand,     &
@@ -195,11 +197,11 @@ contains
        !enddo
 
        ! Precipitation overlap
-       ! Maximum-random
-       if (iovr == iovr_maxrand) then
+       ! Maximum-random, random or maximum precipitation overlap
+       if (iovr == iovr_maxrand .or. iovr == iovr_max .or. iovr == iovr_rand) then
           call sampled_mask(rng3D, precip_frac(idxday(1:nDay),:), precipfracSAMP)       
        endif
-   	   ! Exponential decorrelation length overlap
+       ! Exponential decorrelation length overlap
        if (iovr == iovr_dcorr) then
           !! Generate second RNG
           !do iday=1,nday
@@ -216,7 +218,9 @@ contains
                             overlap_param = precip_overlap_param(idxday(1:nDay),1:nLev-1))
        endif
  
-       ! Map band optical depth to each g-point using McICA
+       !
+       ! Sampling. Map band optical depth to each g-point using McICA
+       !
        call check_error_msg('rrtmgp_sw_precip_sampling_run_draw_samples', & 
             draw_samples(precipfracSAMP,                    &
                          sw_optical_props_precipByBand,     &
