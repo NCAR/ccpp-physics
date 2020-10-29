@@ -1,5 +1,4 @@
 module rrtmgp_lw_pre
-  use physparam
   use machine, only: &
        kind_phys                   ! Working type
   use module_radiation_surface,  only: &

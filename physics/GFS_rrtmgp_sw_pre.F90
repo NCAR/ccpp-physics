@@ -1,5 +1,4 @@
 module GFS_rrtmgp_sw_pre
-  use physparam
   use machine, only: &
        kind_phys                   ! Working type
   use module_radiation_astronomy,only: &

@@ -4,7 +4,6 @@
 ! ########################################################################################
 module GFS_rrtmgp_gfdlmp_pre
   use machine,      only: kind_phys
-  use physparam,    only: lcnorm, lcrick
   use rrtmgp_aux,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
 
@@ -32,8 +31,8 @@ contains
 !! \htmlinclude GFS_rrtmgp_gfdlmp_pre_run.html
 !!  
   subroutine GFS_rrtmgp_gfdlmp_pre_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,   &
-       i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, yearlen, lsswr, lslwr, effr_in, julian,&
-       lat, p_lev, p_lay, tv_lay, effrin_cldliq, effrin_cldice, effrin_cldrain,          &
+       i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, yearlen, doSWrad, doLWrad, effr_in,    &
+       julian, lat, p_lev, p_lay, tv_lay, effrin_cldliq, effrin_cldice, effrin_cldrain,  &
        effrin_cldsnow, tracer, con_pi, con_g, con_rd, con_epsq, dcorr_con, idcor, iovr,  &
        iovr_dcorr, iovr_exprand, iovr_exp, idcor_con, idcor_hogan, idcor_oreopoulos,     &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
@@ -43,53 +42,53 @@ contains
     
     ! Inputs   
     integer, intent(in)    :: &
-         nCol,              & ! Number of horizontal grid points
-         nLev,              & ! Number of vertical layers
-         ncnd,              & ! Number of cloud condensation types.
-         nTracers,          & ! Number of tracers from model. 
-         i_cldliq,          & ! Index into tracer array for cloud liquid. 
-         i_cldice,          & ! Index into tracer array for cloud ice.
-         i_cldrain,         & ! Index into tracer array for cloud rain.
-         i_cldsnow,         & ! Index into tracer array for cloud snow.
-         i_cldgrpl,         & ! Index into tracer array for cloud groupel.
-         i_cldtot,          & ! Index into tracer array for cloud total amount.
-         yearlen,           & ! Length of current year (365/366) WTF?
-         iovr,              & ! Choice of cloud-overlap method                                                                                                                                
-         iovr_dcorr,        & ! Flag for decorrelation-length cloud overlap method                                                                                                            
-         iovr_exp,          & ! Flag for exponential cloud overlap method                                                                                                                     
-         iovr_exprand,      & ! Flag for exponential-random cloud overlap method                                                                                                              
-         idcor,             & ! Choice of method for decorrelation length computation                                                                                                         
-         idcor_con,         & ! Flag for decorrelation-length. Use constant value                                                                                                             
-         idcor_hogan,       & ! Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)                                                                
-         idcor_oreopoulos     ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
+         nCol,                 & ! Number of horizontal grid points
+         nLev,                 & ! Number of vertical layers
+         ncnd,                 & ! Number of cloud condensation types.
+         nTracers,             & ! Number of tracers from model. 
+         i_cldliq,             & ! Index into tracer array for cloud liquid. 
+         i_cldice,             & ! Index into tracer array for cloud ice.
+         i_cldrain,            & ! Index into tracer array for cloud rain.
+         i_cldsnow,            & ! Index into tracer array for cloud snow.
+         i_cldgrpl,            & ! Index into tracer array for cloud groupel.
+         i_cldtot,             & ! Index into tracer array for cloud total amount.
+         yearlen,              & ! Length of current year (365/366) WTF?
+         iovr,                 & ! Choice of cloud-overlap method
+         iovr_dcorr,           & ! Flag for decorrelation-length cloud overlap method
+         iovr_exp,             & ! Flag for exponential cloud overlap method
+         iovr_exprand,         & ! Flag for exponential-random cloud overlap method
+         idcor,                & ! Choice of method for decorrelation length computation
+         idcor_con,            & ! Flag for decorrelation-length. Use constant value
+         idcor_hogan,          & ! Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)
+         idcor_oreopoulos        ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012) 
     logical, intent(in) :: &
-    	 lsswr,             & ! Call SW radiation?
-    	 lslwr,             & ! Call LW radiation
-    	 effr_in              ! Provide hydrometeor radii from macrophysics?
+    	 doSWrad,              & ! Call SW radiation?
+    	 doLWrad,              & ! Call LW radiation
+    	 effr_in                 ! Provide hydrometeor radii from macrophysics?
     real(kind_phys), intent(in) :: &
-         julian,            & ! Julian day 
-         con_pi,            & ! Physical constant: pi
-         con_g,             & ! Physical constant: gravitational constant
-         con_rd,            & ! Physical constant: gas-constant for dry air
-         con_epsq,          & ! Physical constant(?): Minimum value for specific humidity
-         dcorr_con            ! Decorrelation-length (used if idcor = 0, default is idcor = 1)
+         julian,               & ! Julian day 
+         con_pi,               & ! Physical constant: pi
+         con_g,                & ! Physical constant: gravitational constant
+         con_rd,               & ! Physical constant: gas-constant for dry air
+         con_epsq,             & ! Physical constant(?): Minimum value for specific humidity
+         dcorr_con               ! Decorrelation-length (used if idcor = idcor_con)
     real(kind_phys), dimension(nCol), intent(in) :: &
-         lat                  ! Latitude             
+         lat                     ! Latitude             
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &         
-         tv_lay,            & ! Virtual temperature (K)
-         p_lay,             & ! Pressure at model-layers (Pa)
-         effrin_cldliq,     & ! Effective radius for liquid cloud-particles (microns)
-         effrin_cldice,     & ! Effective radius for ice cloud-particles (microns)
-         effrin_cldrain,    & ! Effective radius for rain cloud-particles (microns)
-         effrin_cldsnow       ! Effective radius for snow cloud-particles (microns)
+         tv_lay,               & ! Virtual temperature (K)
+         p_lay,                & ! Pressure at model-layers (Pa)
+         effrin_cldliq,        & ! Effective radius for liquid cloud-particles (microns)
+         effrin_cldice,        & ! Effective radius for ice cloud-particles (microns)
+         effrin_cldrain,       & ! Effective radius for rain cloud-particles (microns)
+         effrin_cldsnow          ! Effective radius for snow cloud-particles (microns)
     real(kind_phys), dimension(nCol,nLev+1), intent(in) :: &         
-         p_lev                ! Pressure at model-level interfaces (Pa)
+         p_lev                   ! Pressure at model-level interfaces (Pa)
     real(kind_phys), dimension(nCol, nLev, nTracers),intent(in) :: &
-         tracer               ! Cloud condensate amount in layer by type ()         
+         tracer                  ! Cloud condensate amount in layer by type ()         
     
     ! Outputs     
     real(kind_phys), dimension(nCol),intent(out) :: &
-         de_lgth              ! Decorrelation length     
+         de_lgth                 ! Decorrelation length     
     real(kind_phys), dimension(nCol,nLev),intent(out) :: &
          cld_frac,             & ! Total cloud fraction
          cld_lwp,              & ! Cloud liquid water path
@@ -105,9 +104,9 @@ contains
          precip_overlap_param, & ! Precipitation overlap parameter  
          deltaZb                 ! Layer thickness (km)          
     character(len=*), intent(out) :: &
-         errmsg               ! Error message
+         errmsg                  ! Error message
     integer, intent(out) :: &  
-         errflg               ! Error flag
+         errflg                  ! Error flag
     
     ! Local variables
     real(kind_phys) :: tem1,pfac
@@ -118,7 +117,7 @@ contains
     real(kind_phys), dimension(nCol,nLev) :: deltaP,deltaZ
     logical :: top_at_1
 
-    if (.not. (lsswr .or. lslwr)) return
+    if (.not. (doSWrad .or. doLWrad)) return
     
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -271,10 +270,15 @@ contains
        de_lgth(:) = dcorr_con
     endif
 
-    !                                                                                                                                                                                         
-    ! Cloud overlap parameter                                                                                                                                                                 
-    !                                                                                                                                                                                         
-    call get_alpha_exp(nCol, nLev, deltaZb, de_lgth, cloud_overlap_param)
+    !
+    ! Cloud overlap parameter
+    !
+    if (iovr == iovr_dcorr .or. iovr == iovr_exp .or. iovr == iovr_exprand) then
+       call get_alpha_exp(nCol, nLev, deltaZb, de_lgth, cloud_overlap_param)
+    else
+       de_lgth(:)               = 0.
+       cloud_overlap_param(:,:) = 0.
+    endif
 
     ! For exponential random overlap...                                                                                                                                                      
     ! Decorrelate layers when a clear layer follows a cloudy layer to enforce                                                                                                                 

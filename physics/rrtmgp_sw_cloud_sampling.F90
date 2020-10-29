@@ -1,7 +1,6 @@
 module rrtmgp_sw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
-  use physparam,                only: isubcsw
   use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
@@ -45,7 +44,7 @@ contains
 !! \htmlinclude rrtmgp_sw_cloud_sampling.html
 !!
   subroutine rrtmgp_sw_cloud_sampling_run(doSWrad, nCol, nDay, nLev, ipsdsw0, idxday, iovr, &
-       iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, &
+       iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_sw,     &
        icseed_sw, cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param,         &
        sw_gas_props, sw_optical_props_cloudsByBand, sw_optical_props_precipByBand,          &
        sw_optical_props_clouds, sw_optical_props_precip, errmsg, errflg)
@@ -64,14 +63,15 @@ contains
          iovr_rand,                       & ! Flag for random cloud overlap method                                                                                                           
          iovr_dcorr,                      & ! Flag for decorrelation-length cloud overlap method                                                                                             
          iovr_exp,                        & ! Flag for exponential cloud overlap method                                                                                                      
-         iovr_exprand                       ! Flag for exponential-random cloud overlap method 
+         iovr_exprand,                    & ! Flag for exponential-random cloud overlap method 
+         isubc_sw
     integer,intent(in),dimension(ncol) :: &
          idxday                             ! Indices for daylit points.
     integer,intent(in),dimension(ncol) :: &
          icseed_sw                          ! auxiliary special cloud related array when module 
-                                            ! variable isubcsw=2, it provides permutation seed 
+                                            ! variable isubc_sw=2, it provides permutation seed 
                                             ! for each column profile that are used for generating 
-                                            ! random numbers. when isubcsw /=2, it will not be used.
+                                            ! random numbers. when isubc_sw /=2, it will not be used.
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
          cld_frac,                        & ! Total cloud fraction by layer
          precip_frac                        ! Precipitation fraction by layer
@@ -119,12 +119,12 @@ contains
        sw_optical_props_clouds%ssa(:,:,:) = 1._kind_phys
        sw_optical_props_clouds%g(:,:,:)   = 0._kind_phys
  
-       ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
-       if(isubcsw == 1) then      ! advance prescribed permutation seed
+       ! Change random number seed value for each radiation invocation (isubc_sw =1 or 2).
+       if(isubc_sw == 1) then      ! advance prescribed permutation seed
           do iday = 1, nday
              ipseed_sw(iday) = ipsdsw0 + iday
           enddo
-       elseif (isubcsw == 2) then ! use input array of permutaion seeds
+       elseif (isubc_sw == 2) then ! use input array of permutaion seeds
           do iday = 1, nday
              ipseed_sw(iday) = icseed_sw(iday)
           enddo
@@ -174,12 +174,12 @@ contains
        call check_error_msg('rrtmgp_sw_cloud_sampling_run', &
            sw_optical_props_precip%alloc_2str( nday, nLev, sw_gas_props))
  
-       ! Change random number seed value for each radiation invocation (isubcsw =1 or 2).
-       if(isubcsw == 1) then      ! advance prescribed permutation seed
+       ! Change random number seed value for each radiation invocation (isubc_sw =1 or 2).
+       if(isubc_sw == 1) then      ! advance prescribed permutation seed
           do iday = 1, nday
              ipseed_sw(iday) = ipsdsw0 + iday
           enddo
-       elseif (isubcsw == 2) then ! use input array of permutaion seeds
+       elseif (isubc_sw == 2) then ! use input array of permutaion seeds
           do iday = 1, nday
              ipseed_sw(iday) = icseed_sw(iday)
           enddo

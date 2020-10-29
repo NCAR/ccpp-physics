@@ -77,6 +77,14 @@
   type = integer
   intent = in
   optional = F
+[isubc_sw]
+  standard_name = flag_for_sw_clouds_without_sub_grid_approximation
+  long_name = flag for sw clouds without sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ipsdsw0]
   standard_name = initial_permutation_seed_sw
   long_name = initial seed for McICA SW
