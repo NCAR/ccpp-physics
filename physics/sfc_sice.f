@@ -217,7 +217,7 @@
             else
               tem = min_lakeice
             endif
-            if (fice(i) > tem) then
+            if (fice(i) >= tem) then
               islmsk_local(i) = 2
               tice(i) =min( tice(i), tgice)
             endif

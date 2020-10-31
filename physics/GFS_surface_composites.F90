@@ -92,6 +92,7 @@ contains
                 icy(i) = .true.
                 if (cice(i) < one) wet(i) = .true. ! some open ocean/lake water exists
                 islmsk(i) = 2
+                 slmsk(i) = 2
               else
                 cice(i)   = zero
 !               islmsk(i) = 0
@@ -121,12 +122,13 @@ contains
           else
             frland(i) = zero
             if (flag_cice(i)) then
-              if (cice(i) > min_seaice) then
+              if (cice(i) >= min_seaice) then
                 icy(i) = .true.
               else
                 cice(i)        = zero
                 flag_cice(i)   = .false.
                 islmsk(i)      = 0
+                 slmsk(i)      = 0
               endif
             else
               if (cice(i) >= min_lakeice) then
@@ -134,7 +136,7 @@ contains
               else
                 cice(i)   = zero
                 islmsk(i) = 0
-                slmsk(i)  = 0
+                 slmsk(i) = 0
               endif
             endif
             if (cice(i) < one) then
