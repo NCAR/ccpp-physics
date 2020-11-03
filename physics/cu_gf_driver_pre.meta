@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = cu_gf_driver_pre
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = cu_gf_driver_pre_run
   type = scheme
@@ -47,7 +53,7 @@
   standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -56,7 +62,7 @@
   standard_name = water_vapor_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -65,7 +71,7 @@
   standard_name = temperature_from_previous_timestep
   long_name = temperature from previous time step
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -74,7 +80,7 @@
   standard_name = moisture_from_previous_timestep
   long_name = moisture from previous time step
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -83,7 +89,7 @@
   standard_name = temperature_tendency_due_to_dynamics
   long_name = temperature tendency due to dynamics only
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -92,7 +98,7 @@
   standard_name = moisture_tendency_due_to_dynamics
   long_name = moisture tendency due to dynamics only
   units = kg kg-1 s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -101,7 +107,7 @@
   standard_name = conv_activity_counter
   long_name = convective activity memory
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
   optional = F
@@ -109,7 +115,7 @@
   standard_name = gf_memory_counter
   long_name = Memory counter for GF
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in

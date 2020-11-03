@@ -1,14 +1,76 @@
+[ccpp-table-properties]
+  name = GFS_rrtmgp_setup
+  type = scheme
+  dependencies = iounitdef.f,machine.F,module_bfmicrophysics.f,physparam.f,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmgp_setup_init
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = instance of derived type GFS_control_type
-  units = DDT
+[imp_physics]
+  standard_name = flag_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
   dimensions = ()
-  type = GFS_control_type
+  type = integer
   intent = in
   optional = F
+[imp_physics_fer_hires]
+  standard_name = flag_for_fer_hires_microphysics_scheme
+  long_name = choice of Ferrier-Aligo microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_gfdl]
+  standard_name = flag_for_gfdl_microphysics_scheme
+  long_name = choice of GFDL microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_thompson]
+  standard_name = flag_for_thompson_microphysics_scheme
+  long_name = choice of Thompson microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+[imp_physics_wsm6]
+  intent = in
+  optional = F
+  standard_name = flag_for_wsm6_microphysics_scheme
+  long_name = choice of WSM6 microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_zhao_carr]
+  standard_name = flag_for_zhao_carr_microphysics_scheme
+  long_name = choice of Zhao-Carr microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_zhao_carr_pdf]
+  standard_name = flag_for_zhao_carr_pdf_microphysics_scheme
+  long_name = choice of Zhao-Carr microphysics scheme with PDF clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_mg]
+  standard_name = flag_for_morrison_gettelman_microphysics_scheme
+  long_name = choice of Morrison-Gettelman microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer 
+  intent = in
+  optional = F 
 [si]
   standard_name = vertical_sigma_coordinate_for_radiation_initialization
   long_name = vertical sigma coordinate for radiation initialization
@@ -99,7 +161,7 @@
   intent = in
   optional = F
 [iovr_sw]
-  standard_name = flag_for_max_random_overlap_clouds_for_shortwave_radiation
+  standard_name = flag_for_cloud_overlap_method_for_shortwave_radiation
   long_name = sw: max-random overlap clouds
   units = flag
   dimensions = ()
@@ -107,7 +169,7 @@
   intent = in
   optional = F
 [iovr_lw]
-  standard_name = flag_for_max_random_overlap_clouds_for_longwave_radiation
+  standard_name = flag_for_cloud_overlap_method_for_longwave_radiation
   long_name = lw: max-random overlap clouds
   units = flag
   dimensions = ()
@@ -152,14 +214,6 @@
   units = flag
   dimensions = ()
   type = logical
-  intent = in
-  optional = F
-[imp_physics]
-  standard_name = flag_for_microphysics_scheme
-  long_name = choice of microphysics scheme
-  units = flag
-  dimensions = ()
-  type = integer
   intent = in
   optional = F
 [norad_precip]

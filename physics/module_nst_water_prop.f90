@@ -60,8 +60,8 @@ contains
 
     tc = t - t0k
 
-    alpha =                                                        &
-         6.793952e-2                                              &
+    alpha =                                                         &
+         6.793952e-2                                                &
          - 2.0 * 9.095290e-3 * tc     +  3.0 * 1.001685e-4 * tc**2  &
          - 4.0 * 1.120083e-6 * tc**3  +  5.0 * 6.536332e-9 * tc**4  &
          - 4.0899e-3 * s                                            &
@@ -73,7 +73,7 @@ contains
     !
     alpha =  -alpha/rhoref
 
-    beta  =                                             &
+    beta  =                                              &
          8.24493e-1          -  4.0899e-3 * tc           &
          + 7.6438e-5 * tc**2 -  8.2467e-7 * tc**3        &
          + 5.3875e-9 * tc**4 -  1.5 * 5.72466e-3 * s**.5 &
@@ -109,10 +109,10 @@ contains
 
     !  effect of temperature on density (lines 1-3)
     !  effect of temperature and salinity on density (lines 4-8)
-    rho = &
-         999.842594                 +  6.793952e-2 * tc     &
-         - 9.095290e-3 * tc**2        +  1.001685e-4 * tc**3     &
-         - 1.120083e-6 * tc**4        +  6.536332e-9 * tc**5     &
+    rho =                                                        &
+         999.842594                +  6.793952e-2 * tc           &
+         - 9.095290e-3 * tc**2     +  1.001685e-4 * tc**3        &
+         - 1.120083e-6 * tc**4     +  6.536332e-9 * tc**5        &
          + 8.24493e-1 * s          -  4.0899e-3 * tc * s         &
          + 7.6438e-5 * tc**2 * s   -  8.2467e-7 * tc**3 * s      &
          + 5.3875e-9 * tc**4 * s   -  5.72466e-3 * s**1.5        &
@@ -415,9 +415,9 @@ contains
     real(kind=kind_phys),intent(out):: df_sol_z
     !
     if(z>0) then
-       df_sol_z=f_sol_0*(1.0 &
-            -(0.28*0.014*(1.-exp(-z/0.014)) &
-            +0.27*0.357*(1.-exp(-z/0.357)) &
+       df_sol_z=f_sol_0*(1.0                 &
+            -(0.28*0.014*(1.-exp(-z/0.014))  &
+            +0.27*0.357*(1.-exp(-z/0.357))   &
             +.45*12.82*(1.-exp(-z/12.82)))/z &
             )
     else
@@ -444,9 +444,9 @@ contains
     real(kind=kind_phys):: fxp
     !
     if(z>0) then
-       fxp=(1.0 &
-            -(0.28*0.014*(1.-exp(-z/0.014)) &
-            + 0.27*0.357*(1.-exp(-z/0.357)) &
+       fxp=(1.0                                &
+            -(0.28*0.014*(1.-exp(-z/0.014))    &
+            + 0.27*0.357*(1.-exp(-z/0.357))    &
             + 0.45*12.82*(1.-exp(-z/12.82)))/z &
             )
        aw=1.0-fxp-(0.28*exp(-z/0.014)+0.27*exp(-z/0.357)+0.45*exp(-z/12.82))
@@ -657,7 +657,7 @@ end subroutine solar_time_from_julian
  end subroutine get_dtzm_point
 
 !>\ingroup waterprop
- subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,z1,z2,nx,ny,dtm)
+ subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,z1,z2,nx,ny,nth,dtm)
 !subroutine get_dtzm_2d(xt,xz,dt_cool,zc,wet,icy,z1,z2,nx,ny,dtm)
 ! ===================================================================== !
 !                                                                       !
@@ -687,6 +687,7 @@ end subroutine solar_time_from_julian
 !     ny      - integer, dimension in y-direction (meridional)       1  !
 !     z1      - lower bound of depth of sea temperature              1  !
 !     z2      - upper bound of depth of sea temperature              1  !
+!     nth     - integer, num of openmp thread                        1  !
 !  outputs:                                                             !
 !     dtm   - mean of dT(z)  (z1 to z2)                              1  !
 !
@@ -694,7 +695,7 @@ end subroutine solar_time_from_julian
 
   implicit none
 
-  integer, intent(in) :: nx,ny
+  integer, intent(in) :: nx,ny, nth
   real (kind=kind_phys), dimension(nx,ny), intent(in)  :: xt,xz,dt_cool,zc
   logical, dimension(nx,ny), intent(in)  :: wet
 ! logical, dimension(nx,ny), intent(in)  :: wet,icy
@@ -702,69 +703,59 @@ end subroutine solar_time_from_julian
   real (kind=kind_phys), dimension(nx,ny), intent(out) :: dtm
 ! Local variables
   integer :: i,j
-  real (kind=kind_phys), dimension(nx,ny) :: dtw,dtc
-  real (kind=kind_phys) :: dt_warm
+  real (kind=kind_phys) :: dt_warm, dtw, dtc, xzi
+  real (kind=kind_phys), parameter :: zero=0.0, half=0.5, one=1.0
 
 
-!$omp parallel do private(j,i)
+!$omp parallel do num_threads (nth) private(j,i,dtw,dtc,xzi)
   do j = 1, ny
     do i= 1, nx
-!
-!     initialize dtw & dtc as zeros
-!
-      dtw(i,j) = 0.0
-      dtc(i,j) = 0.0
-!     if ( wet(i,j) .and. .not.icy(i,j) ) then
+
+      dtm(i,j) = zero      ! initialize dtm
+
       if ( wet(i,j) ) then
 !
 !       get the mean warming in the range of z=z1 to z=z2
 !
-        if ( xt(i,j) > 0.0 ) then
-          dt_warm = (xt(i,j)+xt(i,j))/xz(i,j)      ! Tw(0)
-          if ( z1 < z2) then
+        dtw = zero
+        if ( xt(i,j) > zero ) then
+          xzi = one / xz(i,j)
+          dt_warm = (xt(i,j)+xt(i,j)) * xzi      ! Tw(0)
+          if (z1 < z2) then
             if ( z2 < xz(i,j) ) then
-              dtw(i,j) = dt_warm*(1.0-(z1+z2)/(xz(i,j)+xz(i,j)))
-            elseif ( z1 < xz(i,j) .and. z2 >= xz(i,j) ) then
-              dtw(i,j) = 0.5*(1.0-z1/xz(i,j))*dt_warm*(xz(i,j)-z1)/(z2-z1)
+              dtw = dt_warm * (one-half*(z1+z2)*xzi)
+            elseif (z1 < xz(i,j) .and. z2 >= xz(i,j) ) then
+              dtw = half*(one-z1*xzi)*dt_warm*(xz(i,j)-z1)/(z2-z1)
             endif
-          elseif ( z1 == z2 ) then
-            if ( z1 < xz(i,j) ) then
-              dtw(i,j) = dt_warm*(1.0-z1/xz(i,j))
+          elseif (z1 == z2 ) then
+            if (z1 < xz(i,j) ) then
+              dtw = dt_warm * (one-z1*xzi)
             endif
           endif
         endif
 !
 !       get the mean cooling in the range of z=0 to z=zsea
 !
-        if ( zc(i,j) > 0.0 ) then
+        dtc = zero
+        if ( zc(i,j) > zero ) then
           if ( z1 < z2) then
             if ( z2 < zc(i,j) ) then
-              dtc(i,j) = dt_cool(i,j)*(1.0-(z1+z2)/(zc(i,j)+zc(i,j)))
+              dtc = dt_cool(i,j) * (one-(z1+z2)/(zc(i,j)+zc(i,j)))
             elseif ( z1 < zc(i,j) .and. z2 >= zc(i,j) ) then
-              dtc(i,j) = 0.5*(1.0-z1/zc(i,j))*dt_cool(i,j)*(zc(i,j)-z1)/(z2-z1)
+              dtc = half*(one-z1/zc(i,j))*dt_cool(i,j)*(zc(i,j)-z1)/(z2-z1)
             endif
           elseif ( z1 == z2 ) then
             if ( z1 < zc(i,j) ) then
-              dtc(i,j) = dt_cool(i,j)*(1.0-z1/zc(i,j))
+              dtc = dt_cool(i,j) * (one-z1/zc(i,j))
             endif
           endif
         endif
-      endif        ! if ( wet(i,j) .and. .not.icy(i,j) ) then
+! get the mean T departure from Tf in the range of z=z1 to z=z2
+        dtm(i,j) = dtw - dtc
+      endif        ! if ( wet(i,j)) then
     enddo
   enddo
 !
-! get the mean T departure from Tf in the range of z=z1 to z=z2
-
-! DH* NEED NTHREADS HERE! TODO
-!$omp parallel do private(j,i)
-  do j = 1, ny
-    do i= 1, nx
-!     if ( wet(i,j) .and. .not.icy(i,j)) then
-      if ( wet(i,j) ) then
-        dtm(i,j) = dtw(i,j) - dtc(i,j)
-      endif
-    enddo
-  enddo
 
  end subroutine get_dtzm_2d
 

@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = cnvc90_init
+[ccpp-table-properties]
+  name = cnvc90
   type = scheme
+  dependencies = 
 
 ########################################################################
 [ccpp-arg-table]
@@ -27,7 +28,7 @@
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
   long_name = convective rainfall amount on dynamics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -36,7 +37,7 @@
   standard_name = vertical_index_at_cloud_base
   long_name = vertical index at cloud base
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -44,7 +45,7 @@
   standard_name = vertical_index_at_cloud_top
   long_name = vertical index at cloud top
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -60,7 +61,7 @@
   standard_name = air_pressure_at_interface
   long_name = interface pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -69,7 +70,7 @@
   standard_name = accumulated_lwe_thickness_of_convective_precipitation_amount_cnvc90
   long_name = accumulated convective rainfall amount for cnvc90 only
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -78,7 +79,7 @@
   standard_name = smallest_cloud_base_vertical_index_encountered_thus_far
   long_name = smallest cloud base vertical index encountered thus far
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -87,7 +88,7 @@
   standard_name = largest_cloud_top_vertical_index_encountered_thus_far
   long_name = largest cloud top vertical index encountered thus far
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -96,7 +97,7 @@
   standard_name = fraction_of_convective_cloud
   long_name = fraction of convective cloud
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -105,7 +106,7 @@
   standard_name = pressure_at_bottom_of_convective_cloud
   long_name = pressure at bottom of convective cloud
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -114,7 +115,7 @@
   standard_name = pressure_at_top_of_convective_cloud
   long_name = pressure at top of convective cloud
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -137,7 +138,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = cnvc90_finalize
-  type = scheme

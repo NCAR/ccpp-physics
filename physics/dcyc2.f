@@ -16,18 +16,11 @@
 
       contains
 
-!! \section arg_table_dcyc2t3_init Argument Table
-!!
       subroutine dcyc2t3_init()
       end subroutine dcyc2t3_init
 
-!! \section arg_table_dcyc2t3_finalize Argument Table
-!!
       subroutine dcyc2t3_finalize()
       end subroutine dcyc2t3_finalize
-
-
-
 
 ! ===================================================================== !
 !  description:                                                         !
@@ -286,10 +279,10 @@
           istsun(i) = zero
         enddo
         do it=1,nstl
-          cns = solang + (float(it)-0.5)*anginc + slag
+          cns = solang + (float(it)-0.5_kind_phys)*anginc + slag
           do i = 1, IM
             coszn    = sdec*sinlat(i) + cdec*coslat(i)*cos(cns+xlon(i))
-            xcosz(i) = xcosz(i) + max(0.0, coszn)
+            xcosz(i) = xcosz(i) + max(zero, coszn)
             if (coszn > czlimt) istsun(i) = istsun(i) + 1
           enddo
         enddo
@@ -334,7 +327,7 @@
         if ( xcosz(i) > f_eps .and. coszen(i) > f_eps ) then
           xmu(i) = xcosz(i) / coszen(i)
         else
-          xmu(i) = 0.0
+          xmu(i) = zero
         endif
 
 !>  - adjust \a sfc net and downward SW fluxes for zenith angle changes.

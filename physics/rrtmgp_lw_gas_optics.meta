@@ -1,3 +1,10 @@
+[ccpp-table-properties]
+  name = rrtmgp_lw_gas_optics
+  type = scheme
+  dependencies = machine.F,rte-rrtmgp/extensions/mo_compute_bc.F90,rte-rrtmgp/rte/mo_fluxes.F90,rte-rrtmgp/rte/kernels/mo_fluxes_broadband_kernels.F90
+  dependencies = rte-rrtmgp/rte/mo_rte_lw.F90,rte-rrtmgp/rte/mo_rte_sw.F90,rte-rrtmgp/rte/kernels/mo_rte_solver_kernels.F90,rrtmgp_aux.F90
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_gas_optics_init
   type = scheme
@@ -126,7 +133,7 @@
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure layer
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -135,7 +142,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -144,7 +151,7 @@
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature layer
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -153,7 +160,7 @@
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature level
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -162,7 +169,7 @@
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in

@@ -1,6 +1,7 @@
-[ccpp-arg-table]
-  name = h2ophys_init
+[ccpp-table-properties]
+  name = h2ophys
   type = scheme
+  dependencies = machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -43,7 +44,7 @@
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -61,7 +62,7 @@
   standard_name = air_pressure
   long_name = mid-layer pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -70,7 +71,7 @@
   standard_name = h2o_forcing
   long_name = water forcing data
   units = various
-  dimensions = (horizontal_dimension,vertical_dimension_of_h2o_forcing_data,number_of_coefficients_in_h2o_forcing_data)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_h2o_forcing_data,number_of_coefficients_in_h2o_forcing_data)
   type = real
   kind = kind_phys
   intent = in
@@ -117,7 +118,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = h2ophys_finalize
-  type = scheme

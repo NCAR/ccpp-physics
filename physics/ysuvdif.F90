@@ -857,6 +857,14 @@
        dtsfc(i) = dtsfc(i)+ttend*cont*del(i,k)
      enddo
    enddo
+   if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+     do k = km,1,-1
+       do i = 1,im
+         ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
+         dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*dtstep
+       enddo
+     enddo
+   endif
 !
 !     compute tridiagonal matrix elements for moisture, clouds, and gases
 !
@@ -969,6 +977,14 @@
        dqsfc(i) = dqsfc(i)+qtend*conq*del(i,k)
      enddo
    enddo
+   if(lssav .and. ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend) then
+     do k = km,1,-1
+       do i = 1,im
+         qtend = (f3(i,k,1)-qx(i,k,1))*rdt
+         dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*dtstep
+       enddo
+     enddo
+   endif
 !
    if(ndiff.ge.2) then
      do ic = 2,ndiff
@@ -1075,6 +1091,16 @@
        endif
      enddo
    enddo
+   if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+     do k = km,1,-1
+       do i = 1,im
+         utend = (f1(i,k)-ux(i,k))*rdt
+         vtend = (f2(i,k)-vx(i,k))*rdt
+         du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*dtstep
+         dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*dtstep
+       enddo
+     enddo
+   endif
 !
 !---- end of vertical diffusion
 !

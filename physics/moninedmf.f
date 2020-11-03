@@ -64,7 +64,7 @@
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,                  &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
-     &   xkzminv,moninq_fac,lssav,ldiag3d,qdiag3d,lsidea,ntoz,          &
+     &   xkzminv,moninq_fac,lssav,ldiag3d,qdiag3d,ntoz,                 &
      &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
      &   flag_for_pbl_generic_tend, errmsg,errflg)
 !
@@ -76,7 +76,7 @@
 !
 !     arguments
 !
-      logical, intent(in) :: lprnt,lssav,ldiag3d,qdiag3d,lsidea
+      logical, intent(in) :: lprnt,lssav,ldiag3d,qdiag3d
       logical, intent(in) :: flag_for_pbl_generic_tend
       integer, intent(in) :: ipr
       integer, intent(in) :: im, km, ntrac, ntcw, kinver(im), ntoz
@@ -1043,13 +1043,7 @@ c
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
             if(lssav .and. ldiag3d .and. .not.                          &
      &                flag_for_pbl_generic_tend) then
-               if(lsidea) then
-                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
-               else
-                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
-!                  dt3dt_PBL(i,k) = dt3dt_PBL(i,k) +                     &
-!     &                 ((ttend-hlw(i,k)-swh(i,k)*xmu(i))*delt)
-               endif
+               dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
                if(qdiag3d) then
                   dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
                endif
