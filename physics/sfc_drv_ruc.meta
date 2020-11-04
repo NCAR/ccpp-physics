@@ -870,15 +870,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[sfalb_lnd]
-  standard_name = surface_diffused_shortwave_albedo_over_land
-  long_name = mean surface diffused sw albedo over land with snow effect
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [sncovr1_ice]
   standard_name = surface_snow_area_fraction_over_ice
   long_name = surface snow area fraction over ice
@@ -910,15 +901,6 @@
   standard_name = surface_skin_temperature_over_ice_interstitial
   long_name = surface skin temperature over ice   (temporary use as interstitial)
   units = K
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[sfalb_ice]
-  standard_name = surface_diffused_shortwave_albedo_over_ice
-  long_name = mean surface diffused sw albedo over ice with snow effect
-  units = frac
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys

@@ -204,8 +204,6 @@ module lsm_ruc
 !     shdmin   - real, min fractional coverage of green veg        im   !
 !     shdmax   - real, max fractnl cover of green veg (not used)   im   !
 !     snoalb   - real, upper bound on max albedo over deep snow    im   !
-!     sfalb    - real, mean sfc diffused sw albedo with effect          !
-!                      of snow (fractional)                        im   !
 !     flag_iter- logical,                                          im   !
 !     flag_guess-logical,                                          im   !
 !     isot     - integer, sfc soil type data source zobler or statsgo   !
@@ -265,8 +263,8 @@ module lsm_ruc
      &       ch_wat, tskin_wat,                                         &
      ! --- in/outs for ice and land
      &       semis_lnd, semis_ice,                                      &
-     &       sncovr1_lnd, weasd_lnd, snwdph_lnd, tskin_lnd, sfalb_lnd,  &
-     &       sncovr1_ice, weasd_ice, snwdph_ice, tskin_ice, sfalb_ice,  &
+     &       sncovr1_lnd, weasd_lnd, snwdph_lnd, tskin_lnd,             &
+     &       sncovr1_ice, weasd_ice, snwdph_ice, tskin_ice,             &
      ! for land
      &       smois, tsice, tslb, sh2o, keepfr, smfrkeep,                & ! on RUC levels
      &       canopy, trans, tsurf_lnd, tsnow_lnd, z0rl_lnd,             &
@@ -335,11 +333,11 @@ module lsm_ruc
      ! for land
      &       weasd_lnd, snwdph_lnd, tskin_lnd,                           &
      &       tsurf_lnd, z0rl_lnd, tsnow_lnd,                             &
-     &       sfcqc_lnd, sfcqv_lnd, sfcdew_lnd, sfalb_lnd,                &
+     &       sfcqc_lnd, sfcqv_lnd, sfcdew_lnd,                           &
      ! for ice
      &       weasd_ice, snwdph_ice, tskin_ice,                           &
      &       tsurf_ice, z0rl_ice, tsnow_ice,                             &
-     &       sfcqc_ice, sfcqv_ice, sfcdew_ice, fice, tice, sfalb_ice
+     &       sfcqc_ice, sfcqv_ice, sfcdew_ice, fice, tice
 
 !  ---  in
       real (kind=kind_phys), dimension(im), intent(in) ::               &
@@ -372,12 +370,12 @@ module lsm_ruc
      &       acsnow_old, wetness_old,                                   &
      ! for land
      &       weasd_lnd_old, snwdph_lnd_old, tskin_lnd_old,              &
-     &       tsnow_lnd_old, snowfallac_lnd_old, sfalb_lnd_old,          &
+     &       tsnow_lnd_old, snowfallac_lnd_old,                         &
      &       sfcqv_lnd_old, sfcqc_lnd_old, z0rl_lnd_old,                &
      &       sncovr1_lnd_old,                                           &
      ! for ice
      &       weasd_ice_old, snwdph_ice_old, tskin_ice_old,              &
-     &       tsnow_ice_old, snowfallac_ice_old, sfalb_ice_old,          &
+     &       tsnow_ice_old, snowfallac_ice_old,                         &
      &       sfcqv_ice_old, sfcqc_ice_old, z0rl_ice_old,                &
      &       sncovr1_ice_old
 
@@ -486,30 +484,6 @@ module lsm_ruc
         write (0,*)'flag_restart =',flag_restart
       endif
  
-      !if( (flag_init .and. iter==1)) then
-        do i  = 1, im ! n - horizontal loop
-          ! - Initialize land and ice surface albedo
-          if(land(i)) then
-              ! snow-free
-              sfalb_lnd(i) = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
-            if (weasd_lnd(i) > 0.) then
-              !- averaged of snow-free and snow-covered
-              sfalb_lnd(i) = sfalb_lnd(i) * (1.-sncovr1_lnd(i)) + snoalb(i) * sncovr1_lnd(i)
-            endif
-          endif
-
-          if(icy(i)) then
-              ! snow-free ice
-              sfalb_ice(i) = 0.55
-            if (weasd_ice(i) > 0.) then
-              ! averaged of snow-free and snow-covered ice
-              sfalb_ice(i) = sfalb_ice(i) * (1.-sncovr1_ice(i)) + 0.75 * sncovr1_ice(i)
-            endif
-          endif
-
-        enddo ! i
-      !endif ! flag_init=.true.,iter=1
-
       ims = 1
       its = 1
       ime = 1
@@ -586,7 +560,6 @@ module lsm_ruc
           tskin_lnd_old(i)       = tskin_lnd(i)
           tsnow_lnd_old(i)       = tsnow_lnd(i)
           snowfallac_lnd_old(i)  = snowfallac_lnd(i)
-          sfalb_lnd_old(i)       = sfalb_lnd(i)
           sfcqv_lnd_old(i)       = sfcqv_lnd(i)
           sfcqc_lnd_old(i)       = sfcqc_lnd(i)
           z0rl_lnd_old(i)        = z0rl_lnd(i)
@@ -597,7 +570,6 @@ module lsm_ruc
           tskin_ice_old(i)       = tskin_ice(i)
           tsnow_ice_old(i)       = tsnow_ice(i)
           snowfallac_ice_old(i)  = snowfallac_ice(i)
-          sfalb_ice_old(i)       = sfalb_ice(i)
           sfcqv_ice_old(i)       = sfcqv_ice(i)
           sfcqc_ice_old(i)       = sfcqc_ice(i)
           z0rl_ice_old(i)        = z0rl_ice(i)
@@ -778,7 +750,6 @@ module lsm_ruc
 !!\n \a sfcems  -  surface emmisivity                                   -> sfcemis
 !!\n \a 0.5*(alvwf + alnwf) - backround snow-free surface albedo (fraction)         -> albbck
 !!\n \a snoalb  - upper bound on maximum albedo over deep snow          -> snoalb1d
-!!\n \a sfalb  - surface albedo including snow effect (unitless fraction) -> alb
 
         if(ivegsrc == 1) then   ! IGBP - MODIS
             vtype_wat(i,j) = 17 ! 17 - water (oceans and lakes) in MODIS
@@ -837,16 +808,23 @@ module lsm_ruc
 !!\n \a qcg_lnd    - cloud water mixing ratio at surface (\f$kg kg^{-1}\f$)
 !!\n \a solnet_lnd - net sw radiation flux (dn-up) (\f$W m^{-2}\f$)
 
-        solnet_lnd(i,j) = dswsfc(i)*(1.-sfalb_lnd(i)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
         qvg_lnd(i,j)    = sfcqv_lnd(i)
         qsfc_lnd(i,j)   = sfcqv_lnd(i)/(1.+sfcqv_lnd(i))
         qsg_lnd(i,j)    = rslf(prsl1(i),tsurf_lnd(i))
         qcg_lnd(i,j)    = sfcqc_lnd(i) 
         sfcems_lnd(i,j) = semis_lnd(i)
+        sncovr_lnd(i,j) = sncovr1_lnd(i)
         snoalb1d_lnd(i,j) = snoalb(i)
         albbck_lnd(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
-        ! sfalb_lnd takes into account snow on the ground
-        alb_lnd(i,j)      = sfalb_lnd(i)
+        ! alb_lnd takes into account snow on the ground
+        if (sncovr_lnd(i,j) > 0.) then
+        !- averaged of snow-free and snow-covered
+          alb_lnd(i,j) = albbck_lnd(i,j) * (1.-sncovr_lnd(i,j)) + snoalb(i) * sncovr_lnd(i,j)
+        else
+          alb_lnd(i,j) = albbck_lnd(i,j)
+        endif
+        solnet_lnd(i,j) = dswsfc(i)*(1.-alb_lnd(i,j)) !snet(i) !..net sw rad flx (dn-up) at sfc in w/m2
+
         cmc(i,j) = canopy(i)            !  [mm] 
         soilt_lnd(i,j) = tsurf_lnd(i)            ! clu_q2m_iter
         tsnav_lnd(i,j) = 0.5*(soilt_lnd(i,j) + soilt1_lnd(i,j)) - 273.15
@@ -880,7 +858,6 @@ module lsm_ruc
         snowh_lnd(i,j) = snwdph_lnd(i) * 0.001         ! convert from mm to m
         sneqv_lnd(i,j) = weasd_lnd(i)                  ! [mm]
         snfallac_lnd(i,j) = snowfallac_lnd(i)
-        sncovr_lnd(i,j) = sncovr1_lnd(i)
         !> -- sanity checks on sneqv and snowh
         if (sneqv_lnd(i,j) /= 0.0 .and. snowh_lnd(i,j) == 0.0) then
           snowh_lnd(i,j) = 0.003 * sneqv_lnd(i,j) ! snow density ~300 kg m-3 
@@ -914,7 +891,6 @@ module lsm_ruc
             write (0,*)'znt(i,j) =',i,j,znt_lnd(i,j)
             write (0,*)'z0(i,j) =',i,j,z0_lnd(i,j)
             write (0,*)'snoalb1d(i,j) =',i,j,snoalb1d_lnd(i,j)
-            write (0,*)'alb(i,j) =',i,j,alb_lnd(i,j)
             write (0,*)'landusef(i,:,j) =',i,j,landusef(i,:,j)
             write (0,*)'soilctop(i,:,j) =',i,j,soilctop(i,:,j)
             write (0,*)'nlcat=',nlcat
@@ -1105,7 +1081,6 @@ module lsm_ruc
         !  ---- ... outside RUC LSM, roughness uses cm as unit 
         !  (update after snow's effect)
         z0rl_lnd(i) = znt_lnd(i,j)*100.
-        sfalb_lnd(i)= alb_lnd(i,j)
 
         do k = 1, lsoil_ruc
           smois(i,k)  = smsoil(i,k,j)
@@ -1124,15 +1099,23 @@ module lsm_ruc
    if (flag_ice_uncoupled(i)) then ! at least some ice in the grid cell
    !-- ice point
 
-        solnet_ice(i,j) = dswsfc(i)*(1.-sfalb_ice(i))
+        sncovr_ice(i,j)   = sncovr1_ice(i)
+        snoalb1d_ice(i,j) = 0.75 ! RAP value for max snow alb on ice
+        albbck_ice(i,j)   = 0.55 ! RAP value for ice alb
+        if (sncovr_ice(i,j) > 0.) then
+        !- averaged of snow-free and snow-covered ice
+          alb_ice(i,j) = albbck_ice(i,j) * (1.-sncovr_ice(i,j)) + snoalb1d_ice(i,j) * sncovr_ice(i,j)
+        else
+        ! snow-free ice
+          alb_ice(i,j) = albbck_ice(i,j)
+        endif
+
+        solnet_ice(i,j) = dswsfc(i)*(1.-alb_ice(i,j))
         qvg_ice(i,j)    = sfcqv_ice(i)
         qsfc_ice(i,j)   = sfcqv_ice(i)/(1.+sfcqv_ice(i))
         qsg_ice(i,j)    = rslf(prsl1(i),tsurf_ice(i))
         qcg_ice(i,j)    = sfcqc_ice(i)
         sfcems_ice(i,j) = semis_ice(i)
-        snoalb1d_ice(i,j) = 0.75 ! RAP value for max snow alb on ice
-        albbck_ice(i,j)   = 0.55 ! RAP value for ice alb
-        alb_ice(i,j)      = sfalb_ice(i)
         soilt_ice(i,j) = tsurf_ice(i)            ! clu_q2m_iter
         tsnav_ice(i,j) = 0.5*(soilt_ice(i,j) + soilt1_ice(i,j)) - 273.15
         if (tsnow_ice(i) > 0. .and. tsnow_ice(i) < 273.15) then
@@ -1157,7 +1140,6 @@ module lsm_ruc
         cmm_ice(i) = cm_ice (i) * wind(i)
         chh_ice(i) = chs_ice(i,j) * rho(i)
 
-        sncovr_ice(i,j) = sncovr1_ice(i)
 
         snowh_ice(i,j) = snwdph_ice(i) * 0.001         ! convert from mm to m
         sneqv_ice(i,j) = weasd_ice(i)                  ! [mm]
@@ -1238,7 +1220,6 @@ module lsm_ruc
         weasd_ice(i)   = sneqv_ice(i,j) ! mm
         sncovr1_ice(i) = sncovr_ice(i,j)
         z0rl_ice(i) = znt_ice(i,j)*100.
-        sfalb_ice(i)= alb_ice(i,j)
 
         do k = 1, lsoil_ruc
           tsice(i,k)  = stsice(i,k,j)
@@ -1315,7 +1296,6 @@ module lsm_ruc
             tsnow_lnd(i)       = tsnow_lnd_old(i)
             snowfallac_lnd(i)  = snowfallac_lnd_old(i)
             acsnow(i)          = acsnow_old(i)
-            sfalb_lnd(i)       = sfalb_lnd_old(i)
             sfcqv_lnd(i)       = sfcqv_lnd_old(i)
             sfcqc_lnd(i)       = sfcqc_lnd_old(i)
             wetness(i)         = wetness_old(i)
@@ -1327,7 +1307,6 @@ module lsm_ruc
             tskin_ice(i)       = tskin_ice_old(i)
             tsnow_ice(i)       = tsnow_ice_old(i)
             snowfallac_ice(i)  = snowfallac_ice_old(i)
-            sfalb_ice(i)       = sfalb_ice_old(i)
             sfcqv_ice(i)       = sfcqv_ice_old(i)
             sfcqc_ice(i)       = sfcqc_ice_old(i)
             z0rl_ice(i)        = z0rl_ice_old(i)
