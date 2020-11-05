@@ -9,21 +9,11 @@
 
       contains
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfshalcnv_init Argument Table
-!!
       subroutine samfshalcnv_init()
       end subroutine samfshalcnv_init
 
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfshalcnv_finalize Argument Table
-!!
       subroutine samfshalcnv_finalize()
       end subroutine samfshalcnv_finalize
-
 
 !> \defgroup SAMF_shal GFS Scale-Aware Mass-Flux Shallow Convection Scheme Module
 !! @{
@@ -49,39 +39,40 @@
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!  \section det_samfshalcnv GFS samfshalcnv Detailed Algorithm
 !!  @{
-      subroutine samfshalcnv_run(im,ix,km,itc,ntc,cliq,cp,cvap,         &
+      subroutine samfshalcnv_run(im,km,itc,ntc,cliq,cp,cvap,            &
      &     eps,epsm1,fv,grav,hvap,rd,rv,                                &
      &     t0c,delt,ntk,ntr,delp,                                       &
      &     prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                        &
      &     rn,kbot,ktop,kcnv,islimsk,garea,                             &
      &     dot,ncloud,hpbl,ud_mf,dt_mf,cnvw,cnvc,                       &
-     &     clam,c0s,c1,pgcon,asolfac,errmsg,errflg)
+     &     clam,c0s,c1,pgcon,asolfac,hwrf_samfshal,errmsg,errflg)
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
 
       implicit none
 !
-      integer, intent(in)  :: im, ix, km, itc, ntc, ntk, ntr, ncloud
+      integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap,               &
      &   eps, epsm1, fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
-     &   prslp(ix,km), garea(im), hpbl(im), dot(ix,km), phil(ix,km)
+      real(kind=kind_phys), intent(in) :: psp(im), delp(im,km),         &
+     &   prslp(im,km), garea(im), hpbl(im), dot(im,km), phil(im,km)
 !
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
-     &   q1(ix,km), t1(ix,km), u1(ix,km), v1(ix,km)
+      real(kind=kind_phys), intent(inout) ::   qtr(im,km,ntr+2),        &
+     &   q1(im,km), t1(im,km), u1(im,km), v1(im,km)
 !
       integer, intent(out) :: kbot(im), ktop(im)
       real(kind=kind_phys), intent(out) :: rn(im),                      &
-     &   cnvw(ix,km), cnvc(ix,km), ud_mf(im,km), dt_mf(im,km)
+     &   cnvw(im,km), cnvc(im,km), ud_mf(im,km), dt_mf(im,km)
 !
       real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
      &                     asolfac, pgcon
+      logical,          intent(in)  :: hwrf_samfshal      
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 !
@@ -119,7 +110,7 @@
 !
       real(kind=kind_phys) aa1(im),     cina(im),
      &                     tkemean(im), clamt(im),
-     &                     ps(im),      del(ix,km), prsl(ix,km),
+     &                     ps(im),      del(im,km), prsl(im,km),
      &                     umean(im),   tauadv(im), gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
@@ -140,8 +131,8 @@ c
 !
 !  parameters for updraft velocity calculation
       real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
-     &                     bb1,     bb2
-!    &                     bb1,     bb2,     wucb
+!     &                     bb1,     bb2
+     &                     bb1,     bb2,     wucb
 
 cc
 c  physical parameters
@@ -167,8 +158,7 @@ c  physical parameters
       parameter(dtke=tkemx-tkemn)
       parameter(dthk=25.)
       parameter(cinpcrmx=180.,cinpcrmn=120.)
-!     parameter(cinacrmx=-120.,cinacrmn=-120.)
-      parameter(cinacrmx=-120.,cinacrmn=-80.)
+      parameter(cinacrmx=-120.)
       parameter(crtlamd=3.e-4)
       parameter(dtmax=10800.,dtmin=600.)
       parameter(bet1=1.875,cd1=.506,f1=2.0,gam1=.5)
@@ -202,7 +192,8 @@ c  cloud water
 !
       real(kind=kind_phys) tf, tcr, tcrf
       parameter (tf=233.16, tcr=263.16, tcrf=1.0/(tcr-tf))
-!
+
+
 c-----------------------------------------------------------------------
 !
 ! Initialize CCPP error handling variables
@@ -215,10 +206,16 @@ c-----------------------------------------------------------------------
       fact1 = (cvap-cliq)/rv
       fact2 = hvap/rv-fact1*t0c
 
+      if (.not.hwrf_samfshal) then
+             cinacrmn=-80.
+      endif
+
 c-----------------------------------------------------------------------
+      if (.not.hwrf_samfshal) then
 !>  ## Determine whether to perform aerosol transport
-      do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
-      if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
+        do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
+        if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
+      endif
 !
 !************************************************************************
 !     convert input Pa terms to Cb terms  -- Moorthi
@@ -234,7 +231,8 @@ c
 c  initialize arrays
 c
 !>  - Initialize column-integrated and other single-value-per-column variable arrays.
-      do i=1,im
+      if(hwrf_samfshal) then
+       do i=1,im
         cnvflg(i) = .true.
         if(kcnv(i) == 1) cnvflg(i) = .false.
         if(cnvflg(i)) then
@@ -253,7 +251,32 @@ c
         cina(i) = 0.
         vshear(i) = 0.
         gdx(i) = sqrt(garea(i))
-      enddo
+          scaldfunc(i)=-1.0  ! wang initialized
+          sigmagfm(i)=-1.0
+       enddo
+
+      else !gfs_samfshal
+       do i=1,im
+        cnvflg(i) = .true.
+        if(kcnv(i) == 1) cnvflg(i) = .false.
+        if(cnvflg(i)) then
+          kbot(i)=km+1
+          ktop(i)=0
+        endif
+        rn(i)=0.
+        kbcon(i)=km
+        ktcon(i)=1
+        ktconn(i)=1
+        kb(i)=km
+        pdot(i) = 0.
+        qlko_ktcon(i) = 0.
+        edt(i)  = 0.
+        aa1(i)  = 0.
+        cina(i) = 0.
+        vshear(i) = 0.
+        gdx(i) = sqrt(garea(i))
+       enddo
+      endif
 !!
 !>  - Return to the calling routine if deep convection is present or the surface buoyancy flux is negative.
       totflg = .true.
@@ -303,15 +326,15 @@ c
       dt2   = delt
 !
 c  model tunable parameters are all here
-!     clam    = .3
-!     aafac   = .1
-      aafac   = .05
+      if (hwrf_samfshal) then
+        aafac   = .1
+      else
+        aafac   = .05
+      endif
 c     evef    = 0.07
       evfact  = 0.3
       evfactl = 0.3
 !
-!     pgcon   = 0.7     ! Gregory et al. (1997, QJRMS)
-!     pgcon   = 0.55    ! Zhang & Wu (2003,JAS)
       w1l     = -8.e-3
       w2l     = -4.e-2
       w3l     = -5.e-3
@@ -351,11 +374,23 @@ c
         enddo
       enddo
 !>  - Calculate interface height
-      do k = 1, km1
+      if(hwrf_samfshal) then
+       do k = 1, km1
+        do i=1,im
+          zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
+          xlamue(i,k) = clam / zi(i,k)
+        enddo
+       enddo
+       do i=1,im
+        xlamue(i,km) = xlamue(i,km1)
+       enddo
+      else
+       do k = 1, km1
         do i=1,im
           zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
         enddo
-      enddo
+       enddo
+      endif
 c
 c  pbl height
 c
@@ -410,8 +445,9 @@ c
 !
 !  initialize tracer variables
 !
-      do n = 3, ntr+2
-        kk = n-2
+      if (.not.hwrf_samfshal) then
+        do n = 3, ntr+2
+          kk = n-2
         do k = 1, km
           do i = 1, im
             if (cnvflg(i) .and. k <= kmax(i)) then
@@ -421,7 +457,8 @@ c
             endif
           enddo
         enddo
-      enddo
+        enddo
+      endif
 !>  - Calculate saturation specific humidity and enforce minimum moisture values.
       do k = 1, km
         do i=1,im
@@ -517,15 +554,18 @@ c
           endif
         enddo
       enddo
-      do n = 1, ntr
-      do k = 1, km1
+
+      if (.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 1, km1
         do i=1,im
           if (cnvflg(i) .and. k <= kmax(i)-1) then
             ctro(i,k,n) = .5 * (ctro(i,k,n) + ctro(i,k+1,n))
           endif
         enddo
-      enddo
-      enddo
+       enddo
+       enddo
+      endif
 c
 c  look for the level of free convection as cloud base
 c
@@ -597,6 +637,7 @@ c
           ptem1= .5*(cinpcrmx-cinpcrmn)
           cinpcr = cinpcrmx - ptem * ptem1
           tem1 = pfld(i,kb(i)) - pfld(i,kbcon(i))
+
           if(tem1 > cinpcr) then
              cnvflg(i) = .false.
           endif
@@ -612,14 +653,27 @@ c
 ! turbulent entrainment rate assumed to be proportional
 !   to subcloud mean TKE
 !
-      if(ntk > 0) then
 !
+
+!c
+!c  specify the detrainment rate for the updrafts
+!c
+      if (hwrf_samfshal) then
+       do i = 1, im
+        if(cnvflg(i)) then
+          xlamud(i) = xlamue(i,kbcon(i))
+!         xlamud(i) = crtlamd
+        endif
+       enddo
+      else
+      if(ntk > 0) then
         do i= 1, im
           if(cnvflg(i)) then
             sumx(i) = 0.
             tkemean(i) = 0.
           endif
         enddo
+
         do k = 1, km1
           do i = 1, im
             if(cnvflg(i)) then
@@ -687,6 +741,7 @@ c
           xlamud(i) = 0.001 * clamt(i)
         endif
       enddo
+      endif    ! hwrf_samfshal
 c
 c  determine updraft mass flux for the subcloud layers
 c
@@ -742,6 +797,7 @@ c
         endif
       enddo
 !  for tracers
+      if (.not. hwrf_samfshal) then
       do n = 1, ntr
         do i = 1, im
           if(cnvflg(i)) then
@@ -750,6 +806,7 @@ c
           endif
         enddo
       enddo
+      endif
 c
 !  cm is an enhancement factor in entrainment rates for momentum
 !
@@ -778,8 +835,10 @@ c
           endif
         enddo
       enddo
-      do n = 1, ntr
-      do k = 2, km1
+
+      if (.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k < kmax(i)) then
@@ -791,8 +850,9 @@ c
             endif
           endif
         enddo
-      enddo
-      enddo
+       enddo
+       enddo
+      endif
 c
 c   taking account into convection inhibition due to existence of
 c    dry layers below cloud base
@@ -859,9 +919,17 @@ c
         enddo
       enddo
 !> - Turn off convection if the CIN is less than a critical value (cinacr) which is inversely proportional to the large-scale vertical velocity.
-      do i = 1, im
+
+      if (hwrf_samfshal) then
+       do i = 1, im
         if(cnvflg(i)) then
-!
+          cinacr = cinacrmx
+          if(cina(i) < cinacr) cnvflg(i) = .false.
+        endif
+       enddo
+      else
+       do i = 1, im
+        if(cnvflg(i)) then
           if(islimsk(i) == 1) then
             w1 = w1l
             w2 = w2l
@@ -888,11 +956,10 @@ c
           tem = 1. - tem
           tem1= .5*(cinacrmx-cinacrmn)
           cinacr = cinacrmx - tem * tem1
-!
-!         cinacr = cinacrmx
           if(cina(i) < cinacr) cnvflg(i) = .false.
-        endif
-      enddo
+         endif
+       enddo
+      endif
 !!
       totflg = .true.
       do i=1,im
@@ -923,20 +990,23 @@ c
 c  specify upper limit of mass flux at cloud base
 c
 !> - Calculate the maximum value of the cloud base mass flux using the CFL-criterion-based formula of Han and Pan (2011) \cite han_and_pan_2011, equation 7.
-      do i = 1, im
+      if(hwrf_samfshal) then
+       do i = 1, im
         if(cnvflg(i)) then
-!         xmbmax(i) = .1
-!
+          k = kbcon(i)
+          dp = 1000. * del(i,k)
+          xmbmax(i) = dp / (grav * dt2)
+        endif
+       enddo
+      else
+       do i = 1, im
+        if(cnvflg(i)) then
           k = kbcon(i)
           dp = 1000. * del(i,k)
           xmbmax(i) = dp / (2. * grav * dt2)
-!
-!         xmbmax(i) = dp / (grav * dt2)
-!
-!         tem = dp / (grav * dt2)
-!         xmbmax(i) = min(tem, xmbmax(i))
         endif
-      enddo
+       enddo
+      endif
 c
 c  compute cloud moisture property and precipitation
 c
@@ -1157,30 +1227,23 @@ c
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
 !
-!     bb1 = 2. * (1.+bet1*cd1)
-!     bb2 = 2. / (f1*(1.+gam1))
-!
-!     bb1 = 3.9
-!     bb2 = 0.67
-!
-!     bb1 = 2.0
-!     bb2 = 4.0
-!
       bb1 = 4.0
       bb2 = 0.8
 !
-!     do i = 1, im
-!       if (cnvflg(i)) then
-!         k = kbcon1(i)
-!         tem = po(i,k) / (rd * to(i,k))
-!         wucb = -0.01 * dot(i,k) / (tem * grav)
-!         if(wucb > 0.) then
-!           wu2(i,k) = wucb * wucb
-!         else
-!           wu2(i,k) = 0.
-!         endif
-!       endif
-!     enddo
+      if (hwrf_samfshal) then
+      do i = 1, im
+       if (cnvflg(i)) then
+         k = kbcon1(i)
+         tem = po(i,k) / (rd * to(i,k))
+         wucb = -0.01 * dot(i,k) / (tem * grav)
+         if(wucb > 0.) then
+           wu2(i,k) = wucb * wucb
+         else
+           wu2(i,k) = 0.
+         endif
+       endif
+      enddo
+      endif
       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -1314,15 +1377,17 @@ c
           endif
         enddo
       enddo
-      do n = 1, ntr
-      do k = 1, km
+      if (.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 1, km
         do i = 1, im
           if(cnvflg(i) .and. k <= kmax(i)) then
             dellae(i,k,n) = 0.
           endif
         enddo
-      enddo
-      enddo
+       enddo
+       enddo
+      endif
 c
 c--- changed due to subsidence and entrainment
 c
@@ -1367,8 +1432,9 @@ cj
           endif
         enddo
       enddo
-      do n = 1, ntr
-      do k = 2, km1
+      if(.not.hwrf_samfshal) then
+       do n = 1, ntr
+       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k < ktcon(i)) then
@@ -1381,8 +1447,9 @@ cj
             endif
           endif
         enddo
-      enddo
-      enddo
+       enddo
+       enddo
+      endif
 c
 c------- cloud top
 c
@@ -1407,6 +1474,7 @@ c
      &                     qlko_ktcon(i) * grav / dp
         endif
       enddo
+      if (.not.hwrf_samfshal) then
       do n = 1, ntr
       do i = 1, im
         if(cnvflg(i)) then
@@ -1417,6 +1485,7 @@ c
         endif
       enddo
       enddo
+      endif
 !
 !  compute convective turn-over time
 !
@@ -1425,8 +1494,10 @@ c
         if(cnvflg(i)) then
           tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
           dtconv(i) = tem / wc(i)
-          tfac = 1. + gdx(i) / 75000.
-          dtconv(i) = tfac * dtconv(i)
+          if (.not.hwrf_samfshal) then
+            tfac = 1. + gdx(i) / 75000.
+            dtconv(i) = tfac * dtconv(i)
+          endif
           dtconv(i) = max(dtconv(i),dtmin)
           dtconv(i) = max(dtconv(i),dt2)
           dtconv(i) = min(dtconv(i),dtmax)
@@ -1503,13 +1574,15 @@ c
 !
 !> - Transport aerosols if present
 !
-      if (do_aerosols)
-     &  call samfshalcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
+      if (.not.hwrf_samfshal) then
+       if (do_aerosols)
+     &  call samfshalcnv_aerosols(im, im, km, itc, ntc, ntr, delt,
 !    &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
      &  cnvflg, kb, kmax, kbcon, ktcon, fscav,
 !    &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
      &  xmb, c0t, eta, zi, xlamue, xlamud, delp,
      &  qtr, qaero)
+      endif
 !
 !> ## For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !! - Recalculate saturation specific humidity.
@@ -1539,11 +1612,13 @@ c
         delvbar(i) = 0.
         qcond(i) = 0.
       enddo
-      do n = 1, ntr
-      do i = 1, im
+      if (.not. hwrf_samfshal) then
+       do n = 1, ntr
+       do i = 1, im
         delebar(i,n) = 0.
-      enddo
-      enddo
+       enddo
+       enddo
+      endif
       do k = 1, km
         do i = 1, im
           if (cnvflg(i)) then
@@ -1566,6 +1641,7 @@ c
           endif
         enddo
       enddo
+      if (.not.hwrf_samfshal) then
       do n = 1, ntr
          kk = n+2
       do k = 1, km
@@ -1580,6 +1656,7 @@ c
         enddo
       enddo
       enddo
+      endif
 !
 !> - Recalculate saturation specific humidity using the updated temperature.
       do k = 1, km
@@ -1750,7 +1827,8 @@ c
 !
       endif
 !> - Store aerosol concentrations if present
-      if (do_aerosols) then
+      if (.not. hwrf_samfshal) then
+       if (do_aerosols) then
         do n = 1, ntc
           kk = n + itc - 1
           do k = 1, km
@@ -1762,6 +1840,7 @@ c
           enddo
         enddo
        endif
+      endif
 !
 ! hchuang code change
 !
@@ -1787,6 +1866,7 @@ c
 !
 !   include TKE contribution from shallow convection
 !
+      if (.not.hwrf_samfshal) then
       if (ntk > 0) then
 !
       do k = 2, km1
@@ -1804,6 +1884,7 @@ c
       enddo
 !
       endif
+      endif
 !!
       return
       end subroutine samfshalcnv_run
@@ -1811,77 +1892,3 @@ c
 !! @}
       end module samfshalcnv
 
-!> This module contains the CCPP-compliant scale-aware mass-flux shallow convection
-!! post interstitial codes.
-      module samfshalcnv_post
-      contains
-
-!! \section arg_table_samfshalcnv_post_run Argument Table
-!! \htmlinclude samfshalcnv_post_run.html
-!!
-      subroutine samfshalcnv_post_run (im, levs, lssav, shcnvcw, frain,
-     &  rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,
-     &  rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,
-     &  errmsg, errflg)
-
-        use machine,               only: kind_phys
-
-        implicit none
-!
-        integer, intent(in) :: im, levs
-        integer, intent(in) :: npdf3d, num_p3d, ncnvcld3d
-        logical, intent(in) :: lssav, shcnvcw
-        real(kind=kind_phys), intent(in) :: frain
-        real(kind=kind_phys), dimension(im), intent(in) :: rain1
-        real(kind=kind_phys), dimension(im,levs), intent(in) :: cnvw,
-     &    cnvc
-
-        real(kind=kind_phys), dimension(im), intent(inout) :: rainc,
-     &    cnvprcp, cnvprcpb
-        ! The following arrays may not be allocated, depending on certain flags and microphysics schemes.
-        ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
-        ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
-        ! as long as these do not get used when not allocated.
-        real(kind=kind_phys), dimension(:,:), intent(inout) ::
-     &    cnvw_phy_f3d, cnvc_phy_f3d
-
-        character(len=*), intent(out) :: errmsg
-        integer,          intent(out) :: errflg
-
-        integer :: i, k
-
-        ! Initialize CCPP error handling variables
-        errmsg = ''
-        errflg = 0
-
-        do i=1,im
-          rainc(i) = rainc(i) + frain * rain1(i)
-        enddo
-! in  mfshalcnv,  'cnvw' and 'cnvc' are set to zero before computation starts:
-        if (shcnvcw .and. num_p3d == 4 .and. npdf3d == 3) then
-          do k=1,levs
-            do i=1,im
-              cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) + cnvw(i,k)
-              cnvc_phy_f3d(i,k) = cnvc_phy_f3d(i,k) + cnvc(i,k)
-            enddo
-          enddo
-        elseif (npdf3d == 0 .and. ncnvcld3d == 1) then
-          do k=1,levs
-            do i=1,im
-              cnvw_phy_f3d(i,k) = cnvw_phy_f3d(i,k) +  cnvw(i,k)
-            enddo
-          enddo
-        endif
-      end subroutine samfshalcnv_post_run
-
-!! \section arg_table_sasas_shal_post_init Argument Table
-!!
-      subroutine samfshalcnv_post_init ()
-      end subroutine samfshalcnv_post_init
-
-!! \section arg_table_sasas_shal_post_finalize Argument Table
-!!
-      subroutine samfshalcnv_post_finalize ()
-      end subroutine samfshalcnv_post_finalize
-
-      end module samfshalcnv_post

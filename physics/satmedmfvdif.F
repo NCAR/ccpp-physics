@@ -4,9 +4,30 @@
 !! eddy-diffusion mass-flux (TKE-EDMF) parameterization (by Jongil Han).
 
       module satmedmfvdif
+
       contains
 
-      subroutine satmedmfvdif_init ()
+!> \section arg_table_satmedmfvdif_init Argument Table
+!! \htmlinclude satmedmfvdif_init.html
+!!
+      subroutine satmedmfvdif_init (isatmedmf,isatmedmf_vdif,
+     &                              errmsg,errflg)
+
+      integer, intent(in) :: isatmedmf,isatmedmf_vdif
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not. isatmedmf==isatmedmf_vdif) then
+        write(errmsg,fmt='(*(a))') 'Logic error: satmedmfvdif is ',
+     &                    'called, but isatmedmf/=isatmedmf_vdif.'
+        errflg = 1
+        return
+      end if
+
       end subroutine satmedmfvdif_init
 
       subroutine satmedmfvdif_finalize ()
@@ -32,14 +53,16 @@
 !! (mfscu.f).
 !! \section detail_satmedmfvidf GFS satmedmfvdif Detailed Algorithm 
 !> @{
-      subroutine satmedmfvdif_run(ix,im,km,ntrac,ntcw,ntiw,ntke,        &
+      subroutine satmedmfvdif_run(im,km,ntrac,ntcw,ntiw,ntke,           &
      &     grav,rd,cp,rv,hvap,hfus,fv,eps,epsm1,                        &
      &     dv,du,tdt,rtg,u1,v1,t1,q1,swh,hlw,xmu,garea,                 &
      &     psk,rbsoil,zorl,u10m,v10m,fm,fh,                             &
      &     tsea,heat,evap,stress,spd1,kpbl,                             &
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
-     &     kinver,xkzm_m,xkzm_h,xkzm_s,errmsg,errflg)
+     &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
+     &     dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL,           &
+     &     gen_tend,ldiag3d,qdiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -47,9 +70,13 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: ix, im, km, ntrac, ntcw, ntiw, ntke
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
+!
+      logical, intent(in)  :: gen_tend, ldiag3d, qdiag3d
+      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
+     &  dt3dt_PBL,du3dt_PBL,dv3dt_PBL,dq3dt_PBL,do3dt_PBL
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -57,19 +84,19 @@
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
      &                     tdt(im,km),    rtg(im,km,ntrac)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     u1(ix,km),     v1(ix,km),                    &
-     &                     t1(ix,km),     q1(ix,km,ntrac),              &
-     &                     swh(ix,km),    hlw(ix,km),                   &
+     &                     u1(im,km),     v1(im,km),                    &
+     &                     t1(im,km),     q1(im,km,ntrac),              &
+     &                     swh(im,km),    hlw(im,km),                   &
      &                     xmu(im),       garea(im),                    &
-     &                     psk(ix),       rbsoil(im),                   &
+     &                     psk(im),       rbsoil(im),                   &
      &                     zorl(im),      tsea(im),                     &
      &                     u10m(im),      v10m(im),                     &
      &                     fm(im),        fh(im),                       &
      &                     evap(im),      heat(im),                     &
      &                     stress(im),    spd1(im),                     &
-     &                     prsi(ix,km+1), del(ix,km),                   &
-     &                     prsl(ix,km),   prslk(ix,km),                 &
-     &                     phii(ix,km+1), phil(ix,km)
+     &                     prsi(im,km+1), del(im,km),                   &
+     &                     prsl(im,km),   prslk(im,km),                 &
+     &                     phii(im,km+1), phil(im,km)
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -780,13 +807,13 @@
       enddo
 !>  - Call mfpblt(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
 !! to take into account nonlocal transport by large eddies. 
-      call mfpblt(im,ix,km,kmpbl,ntcw,ntrac1,dt2,
+      call mfpblt(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue)
 !>  - Call mfscu(), which is a new mass-flux parameterization for 
 !! stratocumulus-top-induced turbulence mixing.
-      call mfscu(im,ix,km,kmscu,ntcw,ntrac1,dt2,
+      call mfscu(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,radj,
      &    krad,mrad,radmin,buod,xmfd,
@@ -1372,6 +1399,22 @@
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
+      if (ldiag3d .and. .not. gen_tend) then
+        do  k = 1,km
+           do i = 1,im
+             ttend      = (f1(i,k)-t1(i,k))*rdt
+             dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*delt
+           enddo
+        enddo
+        if (qdiag3d) then
+          do  k = 1,km
+             do i = 1,im
+               qtend      = (f2(i,k)-q1(i,k,1))*rdt
+               dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*delt
+             enddo
+          enddo
+        endif
+      endif
 !
       if(ntrac1 >= 2) then
         do kk = 2, ntrac1
@@ -1472,6 +1515,16 @@
             dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
+      if (ldiag3d .and. .not. gen_tend) then
+        do k = 1,km
+           do i = 1,im
+             utend = (f1(i,k)-u1(i,k))*rdt
+             vtend = (f2(i,k)-v1(i,k))*rdt
+             du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*delt
+             dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*delt
+           enddo
+        enddo
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !> -# Save PBL height for diagnostic purpose
@@ -1484,69 +1537,6 @@
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       return
       end subroutine satmedmfvdif_run
-!> @}
-!
-!-----------------------------------------------------------------------
-!-----------------------------------------------------------------------
-!>\ingroup satmedmf
-!! This subroutine solves tridiagonal problem for TKE.
-      subroutine tridit(l,n,nt,cl,cm,cu,rt,au,at)
-!-----------------------------------------------------------------------
-!!
-      use machine     , only : kind_phys
-      implicit none
-      integer             is,k,kk,n,nt,l,i
-      real(kind=kind_phys) fk(l)
-!!
-      real(kind=kind_phys) cl(l,2:n), cm(l,n), cu(l,n-1),               &
-     &                     rt(l,n*nt),                                  &
-     &                     au(l,n-1), at(l,n*nt),                       &
-     &                     fkk(l,2:n-1)
-!-----------------------------------------------------------------------
-      do i=1,l
-        fk(i)   = 1./cm(i,1)
-        au(i,1) = fk(i)*cu(i,1)
-      enddo
-      do k = 1, nt
-        is = (k-1) * n
-        do i = 1, l
-          at(i,1+is) = fk(i) * rt(i,1+is)
-        enddo
-      enddo
-      do k=2,n-1
-        do i=1,l
-          fkk(i,k) = 1./(cm(i,k)-cl(i,k)*au(i,k-1))
-          au(i,k)  = fkk(i,k)*cu(i,k)
-        enddo
-      enddo
-      do kk = 1, nt
-        is = (kk-1) * n
-        do k=2,n-1
-          do i=1,l
-            at(i,k+is) = fkk(i,k)*(rt(i,k+is)-cl(i,k)*at(i,k+is-1))
-          enddo
-        enddo
-      enddo
-      do i=1,l
-        fk(i)   = 1./(cm(i,n)-cl(i,n)*au(i,n-1))
-      enddo
-      do k = 1, nt
-        is = (k-1) * n
-        do i = 1, l
-          at(i,n+is) = fk(i)*(rt(i,n+is)-cl(i,n)*at(i,n+is-1))
-        enddo
-      enddo
-      do kk = 1, nt
-        is = (kk-1) * n
-        do k=n-1,1,-1
-          do i=1,l
-            at(i,k+is) = at(i,k+is) - au(i,k)*at(i,k+is+1)
-          enddo
-        enddo
-      enddo
-!-----------------------------------------------------------------------
-      return
-      end subroutine tridit
 !> @}
 
       end module satmedmfvdif

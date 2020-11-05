@@ -5,40 +5,26 @@ if(NOT PROJECT)
 endif (NOT PROJECT)
 
 #------------------------------------------------------------------------------
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.0)
+
+project(ccppphys
+        VERSION 4.0.0
+        LANGUAGES C CXX Fortran)
 
 # Use rpaths on MacOSX
 set(CMAKE_MACOSX_RPATH 1)
-
-if(POLICY CMP0048)
-    cmake_policy(SET CMP0048 NEW)
-    project(ccppphys VERSION 3.0.0)
-else(POLICY CMP0048)
-    project(ccppphys)
-    set(PROJECT_VERSION 3.0.0)
-    set(PROJECT_VERSION_MAJOR 3)
-    set(PROJECT_VERSION_MINOR 0)
-    set(PROJECT_VERSION_PATCH 0)
-endif(POLICY CMP0048)
-
 if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif(POLICY CMP0042)
 
+# CMP0057: Support new IN_LIST if() operator
+if(POLICY CMP0057)
+    cmake_policy(SET CMP0057 NEW)
+endif(POLICY CMP0057)
+
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
-set(AUTHORS  "Grant J. Firl" "Dom Heinzeller")
-
-#------------------------------------------------------------------------------
-# Enable Fortran
-enable_language(Fortran)
-
-if (PROJECT STREQUAL "CCPP-SCM")
-  #------------------------------------------------------------------------------
-  # CMake Modules
-  # Set the CMake module path
-  list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/../framework/cmake")
-endif (PROJECT STREQUAL "CCPP-SCM")
+set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Laurie Carson")
 
 #------------------------------------------------------------------------------
 # Set OpenMP flags for C/C++/Fortran
@@ -77,41 +63,42 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 #------------------------------------------------------------------------------
-# By default we want a shared library (unless a static build is requested)
-if(STATIC)
-  option(BUILD_SHARED_LIBS "Build a static library" OFF)
-else(STATIC)
-  option(BUILD_SHARED_LIBS "Build a shared library" ON)
-endif(STATIC)
+# Request a static build
+option(BUILD_SHARED_LIBS "Build a shared library" OFF)
 
 #------------------------------------------------------------------------------
-# Add the CCPP include/module directory
-set(CCPP_INCLUDE_DIRS "" CACHE FILEPATH "Path to ccpp includes")
-set_property(DIRECTORY PROPERTY INCLUDE_DIRECTORIES ${CCPP_INCLUDE_DIRS})
+# Set the sources: physics type definitions
+set(TYPEDEFS $ENV{CCPP_TYPEDEFS})
+if(TYPEDEFS)
+  message(STATUS "Got CCPP TYPEDEFS from environment variable: ${TYPEDEFS}")
+else(TYPEDEFS)
+  include(./CCPP_TYPEDEFS.cmake)
+  message(STATUS "Got CCPP TYPEDEFS from cmakefile include file: ${TYPEDEFS}")
+endif(TYPEDEFS)
 
-#------------------------------------------------------------------------------
-# Add the CCPP library
-set(CCPP_LIB_DIRS "" CACHE FILEPATH "Path to ccpp library")
-link_directories(${CCPP_LIB_DIRS})
-list(APPEND LIBS "ccpp")
+# Generate list of Fortran modules from the CCPP type
+# definitions that need need to be installed
+foreach(typedef_module ${TYPEDEFS})
+    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${typedef_module})
+endforeach()
 
 #------------------------------------------------------------------------------
 # Set the sources: physics schemes
 set(SCHEMES $ENV{CCPP_SCHEMES})
 if(SCHEMES)
-  message(INFO "Got CCPP_SCHEMES from environment variable: ${SCHEMES}")
+  message(STATUS "Got CCPP SCHEMES from environment variable: ${SCHEMES}")
 else(SCHEMES)
   include(./CCPP_SCHEMES.cmake)
-  message(INFO "Got SCHEMES from cmakefile include file: ${SCHEMES}")
+  message(STATUS "Got CCPP SCHEMES from cmakefile include file: ${SCHEMES}")
 endif(SCHEMES)
 
 # Set the sources: physics scheme caps
 set(CAPS $ENV{CCPP_CAPS})
 if(CAPS)
-  message(INFO "Got CAPS from environment variable: ${CAPS}")
+  message(STATUS "Got CCPP CAPS from environment variable: ${CAPS}")
 else(CAPS)
   include(./CCPP_CAPS.cmake)
-  message(INFO "Got CAPS from cmakefile include file: ${CAPS}")
+  message(STATUS "Got CCPP CAPS from cmakefile include file: ${CAPS}")
 endif(CAPS)
 
 # Create empty lists for schemes with special compiler optimization flags
@@ -149,6 +136,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
     if (DYN32)
+      if (${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
       # Reduce floating point precision from 64-bit to 32-bit, if necessary
       set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
       string(REPLACE "-fdefault-real-8" ""
@@ -159,7 +147,8 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
                    APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ")
       # Add all of the above files to the list of schemes with special floating point precision flags
       list(APPEND SCHEMES_SFX_PREC ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
-    endif (DYN32)
+      endif()
+    endif()
 
     # Remove files with special floating point precision flags from list
     # of files with standard floating point precision flags flags
@@ -174,50 +163,36 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Adjust settings for bit-for-bit reproducibility of NEMSfv3gfs
   if (PROJECT STREQUAL "CCPP-FV3")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sflx.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cu_gf_deep.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cu_gf_sh.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bl_mynn.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNPBL_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNSFC_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNrad_pre.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNrad_post.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 -ftz")
 
-    # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
-    set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
-    string(REPLACE "-xHOST" "-xCORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT1
-           "${CMAKE_Fortran_FLAGS_LOPT1}")
-    string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT1
-           "${CMAKE_Fortran_FLAGS_LOPT1}")
-    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2,CORE-AVX512" "-axSSE4.2,AVX,CORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT1
-           "${CMAKE_Fortran_FLAGS_LOPT1}")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
-                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
-    # Add all of the above files to the list of schemes with special compiler flags
-    list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
+    if (${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90 IN_LIST SCHEMES)
+      # Reduce optimization for module_sf_mynn.F90 (to avoid an apparent compiler bug with Intel 18 on Hera)
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT} -O1")
+      list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
+    endif()
+
+    if (${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f IN_LIST SCHEMES)
+      # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
+      set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
+      string(REPLACE "-xHOST" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT1
+             "${CMAKE_Fortran_FLAGS_LOPT1}")
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT1
+             "${CMAKE_Fortran_FLAGS_LOPT1}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2,CORE-AVX512" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT1
+             "${CMAKE_Fortran_FLAGS_LOPT1}")
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
+      # Add all of the above files to the list of schemes with special compiler flags
+      list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
+    endif()
 
     # Remove files with special compiler flags from list of files with standard compiler flags
-    list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    if (SCHEMES_SFX_OPT)
+      list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    endif(SCHEMES_SFX_OPT)
     # Assign standard compiler flags to all remaining schemes and caps
     SET_SOURCE_FILES_PROPERTIES(${SCHEMES} ${CAPS}
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT}")
@@ -225,6 +200,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
     if (DYN32)
+      if (${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
       # Reduce floating point precision from 64-bit to 32-bit, if necessary
       set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
       string(REPLACE "-real-size 64" "-real-size 32"
@@ -233,7 +209,8 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                    APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ")
       # Add all of the above files to the list of schemes with special floating point precision flags
       list(APPEND SCHEMES_SFX_PREC ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
-    endif (DYN32)
+      endif()
+    endif()
 
     # Remove files with special floating point precision flags from list
     # of files with standard floating point precision flags flags
@@ -340,50 +317,18 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
   set_property(SOURCE ${CAPS} APPEND_STRING PROPERTY COMPILE_FLAGS " -Mnobounds ")
 endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 
-if (PROJECT STREQUAL "CCPP-SCM")
-  INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/ccpp/framework/src)
-endif (PROJECT STREQUAL "CCPP-SCM")
-
 #------------------------------------------------------------------------------
-
-if(STATIC)
-  add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
-  # Generate list of Fortran modules from defined sources
-  foreach(source_f90 ${CAPS})
-      get_filename_component(tmp_source_f90 ${source_f90} NAME)
-      string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${tmp_source_f90})
-      string(TOLOWER ${tmp_module_f90} module_f90)
-      list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
-  endforeach()
-else(STATIC)
-  add_library(ccppphys SHARED ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
-endif(STATIC)
-
-if (NOT STATIC)
-  target_link_libraries(ccppphys LINK_PUBLIC ${LIBS} ${BACIO_LIB4} ${SP_LIBd} ${W3NCO_LIBd})
-endif (NOT STATIC)
+add_library(ccppphys STATIC ${SCHEMES} ${SCHEMES_SFX_OPT} ${CAPS})
+# Generate list of Fortran modules from defined sources
+foreach(source_f90 ${CAPS})
+    get_filename_component(tmp_source_f90 ${source_f90} NAME)
+    string(REGEX REPLACE ".F90" ".mod" tmp_module_f90 ${tmp_source_f90})
+    string(TOLOWER ${tmp_module_f90} module_f90)
+    list(APPEND MODULES_F90 ${CMAKE_CURRENT_BINARY_DIR}/${module_f90})
+endforeach()
 
 set_target_properties(ccppphys PROPERTIES VERSION ${PROJECT_VERSION}
                                      SOVERSION ${PROJECT_VERSION_MAJOR})
-
-# DH* Hack for PGI compiler: rename objects in scheme cap object files for ISO_C compliancy,
-# this is only needed for dynamics builds - static build generates plain Fortran code.
-if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-  if (NOT STATIC)
-  set(CAPOBJS)
-  foreach(cap ${CAPS})
-      string(REPLACE "_cap.F90" "_cap.F90.o" capobj "./${CMAKE_FILES_DIRECTORY}/ccppphys.dir/${cap}")
-      list(APPEND CAPOBJS ${capobj})
-  endforeach(cap)
-  
-  add_custom_command(TARGET ccppphys
-                     PRE_LINK
-                     COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/pgifix.py --cmake ${CAPOBJS}
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-                     COMMENT "Running pgifix_wrapper.py over all scheme caps")
-  endif (NOT STATIC)
-endif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "PGI")
-# *DH end hack for PGI compiler
 
 if (PROJECT STREQUAL "CCPP-FV3")
   # Define where to install the library
@@ -398,9 +343,7 @@ if (PROJECT STREQUAL "CCPP-FV3")
           FILE ccppphys-config.cmake
           DESTINATION lib/cmake
   )
-  if(STATIC)
-    # Define where to install the C headers and Fortran modules
-    #install(FILES ${HEADERS_C} DESTINATION include)
-    install(FILES ${MODULES_F90} DESTINATION include)
-  endif(STATIC)
+  # Define where to install the C headers and Fortran modules
+  #install(FILES ${HEADERS_C} DESTINATION include)
+  install(FILES ${MODULES_F90} DESTINATION include)
 endif (PROJECT STREQUAL "CCPP-FV3")

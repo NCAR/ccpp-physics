@@ -1,3 +1,9 @@
+!>\file sfc_ocean.F
+!! This file contains an alternative GFS near-surface sea temperature
+!! scheme when the model is initialized from GRIB2 data.
+
+!> This module contains the CCPP-compliant GFS near-surface sea temperature
+!! scheme when the model is initialized from GRIB2 data.
       module sfc_ocean
       implicit none
       private
@@ -5,29 +11,25 @@
 
       contains
 
-!! \section arg_table_sfc_ocean_init  Argument Table
-!!
       subroutine sfc_ocean_init()
       end subroutine sfc_ocean_init
 
-!! \section arg_table_sfc_ocean_finalize  Argument Table
-!!
       subroutine sfc_ocean_finalize()
       end subroutine sfc_ocean_finalize
 
-#if 0
+!>\defgroup gfs_ocean_main GFS Simple Ocean Scheme Module
+!! This subroutine calculates thermodynamical properties over
+!! open water.
 !! \section arg_table_sfc_ocean_run Argument Table
 !! \htmlinclude sfc_ocean_run.html
 !!
-#endif
       subroutine sfc_ocean_run                                          &
 !...................................
 !  ---  inputs:
-     &     ( im, cp, rd, eps, epsm1, hvap, rvrdm1, ps, t1, q1,          &
-     &       tskin, cm, ch, prsl1, prslki, wet, wind,                   &
+     &     ( im, rd, eps, epsm1, rvrdm1, ps, t1, q1,                    &
+     &       tskin, cm, ch, prsl1, prslki, wet, lake, wind,             &,  ! --- inputs
      &       flag_iter,                                                 &
-!  ---  outputs:
-     &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &
+     &       qsurf, cmm, chh, gflux, evap, hflx, ep,                    &   ! --- outputs
      &       errmsg, errflg                                             &
      &     )
 
@@ -40,7 +42,7 @@
 !       inputs:                                                         !
 !          ( im, ps, t1, q1, tskin, cm, ch,                             !
 !!         ( im, ps, u1, v1, t1, q1, tskin, cm, ch,                     !
-!            prsl1, prslki, wet, wind, flag_iter,                       !
+!            prsl1, prslki, wet, lake, wind, flag_iter,                 !
 !       outputs:                                                        !
 !            qsurf, cmm, chh, gflux, evap, hflx, ep )                   !
 !                                                                       !
@@ -90,15 +92,17 @@
 !
       implicit none
 
+!  ---  constant parameters:
+      real (kind=kind_phys), parameter :: one  = 1.0_kind_phys, zero = 0.0_kind_phys    &
+     &,                                   qmin = 1.0e-8_kind_phys
 !  ---  inputs:
       integer, intent(in) :: im
-      real (kind=kind_phys), intent(in) :: cp, rd, eps, epsm1, hvap,    &
-     &      rvrdm1
+      real (kind=kind_phys), intent(in) :: rd, eps, epsm1, rvrdm1
 
       real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &      t1, q1, tskin, cm, ch, prsl1, prslki, wind
 
-      logical, dimension(im), intent(in) :: flag_iter, wet
+      logical, dimension(im), intent(in) :: flag_iter, wet, lake
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(im), intent(inout) :: qsurf,     &
@@ -109,17 +113,11 @@
 
 !  ---  locals:
 
-      real (kind=kind_phys) :: q0, qss, rch, rho, tem, cpinv,           &
-     &      hvapi, elocp
+      real (kind=kind_phys) :: q0, qss, rch, rho, tem
 
       integer :: i
 
-      logical :: flag(im)
-!
 !===> ...  begin here
-      cpinv  = 1.0/cp
-      hvapi  = 1.0/hvap
-      elocp  = hvap/cp
 !
 !  -- ...  initialize CCPP error handling variables
       errmsg = ''
@@ -127,40 +125,33 @@
 !
 !  --- ...  flag for open water
       do i = 1, im
-        flag(i) = (wet(i) .and. flag_iter(i))
 
 !  --- ...  initialize variables. all units are supposedly m.k.s. unless specified
 !           ps is in pascals, wind is wind speed,
 !           rho is density, qss is sat. hum. at surface
 
-        if ( flag(i) ) then
-          q0       = max( q1(i), 1.0e-8 )
-          rho      = prsl1(i) / (rd*t1(i)*(1.0 + rvrdm1*q0))
+        if (wet(i) .and. flag_iter(i) .and. .not. lake(i)) then
+          q0       = max( q1(i), qmin )
+          rho      = prsl1(i) / (rd*t1(i)*(one + rvrdm1*q0))
 
           qss      = fpvs( tskin(i) )
           qss      = eps*qss / (ps(i) + epsm1*qss)
 
-          evap(i)  = 0.0
-          hflx(i)  = 0.0
-          ep(i)    = 0.0
-          gflux(i) = 0.0
-
 !  --- ...    rcp  = rho cp ch v
 
-          rch      = rho * cp * ch(i) * wind(i)
+          tem      = ch(i) * wind(i)
           cmm(i)   = cm(i) * wind(i)
-          chh(i)   = rho * ch(i) * wind(i)
+          chh(i)   = rho * tem
 
 !  --- ...  sensible and latent heat flux over open water
 
-          hflx(i)  = rch * (tskin(i) - t1(i) * prslki(i))
+          hflx(i)  = tem * (tskin(i) - t1(i) * prslki(i))
 
-          evap(i)  = elocp*rch * (qss - q0)
+          evap(i)  = tem * (qss - q0)
+
+          ep(i)    = evap(i)
           qsurf(i) = qss
-
-          tem      = 1.0 / rho
-          hflx(i)  = hflx(i) * tem * cpinv
-          evap(i)  = evap(i) * tem * hvapi
+          gflux(i) = zero
         endif
       enddo
 !

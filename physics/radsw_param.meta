@@ -1,18 +1,38 @@
+[ccpp-table-properties]
+  name = topfsw_type
+  type = ddt
+  dependencies = 
+
 [ccpp-arg-table]
   name = topfsw_type
   type = ddt
 
 ########################################################################
+[ccpp-table-properties]
+  name = sfcfsw_type
+  type = ddt
+  dependencies = 
+
 [ccpp-arg-table]
   name = sfcfsw_type
   type = ddt
 
 ########################################################################
+[ccpp-table-properties]
+  name = cmpfsw_type
+  type = ddt
+  dependencies = 
+
 [ccpp-arg-table]
   name = cmpfsw_type
   type = ddt
 
 ########################################################################
+[ccpp-table-properties]
+  name = module_radsw_parameters
+  type = module
+  dependencies = 
+
 [ccpp-arg-table]
   name = module_radsw_parameters
   type = module
@@ -34,3 +54,9 @@
   units = DDT
   dimensions = ()
   type = cmpfsw_type
+[profsw_type]
+  standard_name = profsw_type
+  long_name = definition of type profsw_type
+  units = DDT
+  dimensions = ()
+  type = profsw_type

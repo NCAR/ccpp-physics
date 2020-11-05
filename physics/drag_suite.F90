@@ -2,113 +2,11 @@
 !! This file is the  parameterization of orographic gravity wave
 !! drag, mountain blocking, and form drag.
 
-!> This module contains the CCPP-compliant orographic gravity wave 
-!! drag pre interstitial codes.
-      module drag_suite_pre
-
-      contains
-
-!> \section arg_table_drag_suite_pre_init Argument Table
-!!
-      subroutine drag_suite_pre_init()
-      end subroutine drag_suite_pre_init
-
-!> \section arg_table_drag_suite_pre_run Argument Table
-!! \htmlinclude drag_suite_pre_run.html
-!!
-!!  \section general General Algorithm
-!!  \section detailed Detailed Algorithm
-!!  @{
-      subroutine drag_suite_pre_run(                                    &
-     &           im, nmtvr, mntvar,                                     &
-     &           hprime, oc, oa4, clx, theta,                           &
-     &           sigma, gamma, elvmax, errmsg, errflg)
-
-      use machine, only : kind_phys
-      implicit none
-
-      integer, intent(in) :: im, nmtvr
-      real(kind=kind_phys), intent(in) :: mntvar(im,nmtvr)
-
-      real(kind=kind_phys), intent(out) ::                              &
-     &  hprime(im), oc(im), oa4(im,4), clx(im,4),                       &
-     &  theta(im), sigma(im), gamma(im), elvmax(im)
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      if (nmtvr == 14) then  ! current operational - as of 2014
-        hprime(:) = mntvar(:,1)
-        oc(:)     = mntvar(:,2)
-        oa4(:,1)  = mntvar(:,3)
-        oa4(:,2)  = mntvar(:,4)
-        oa4(:,3)  = mntvar(:,5)
-        oa4(:,4)  = mntvar(:,6)
-        clx(:,1)  = mntvar(:,7)
-        clx(:,2)  = mntvar(:,8)
-        clx(:,3)  = mntvar(:,9)
-        clx(:,4)  = mntvar(:,10)
-        theta(:)  = mntvar(:,11)
-        gamma(:)  = mntvar(:,12)
-        sigma(:)  = mntvar(:,13)
-        elvmax(:) = mntvar(:,14)
-      elseif (nmtvr == 10) then
-        hprime(:) = mntvar(:,1)
-        oc(:)     = mntvar(:,2)
-        oa4(:,1)  = mntvar(:,3)
-        oa4(:,2)  = mntvar(:,4)
-        oa4(:,3)  = mntvar(:,5)
-        oa4(:,4)  = mntvar(:,6)
-        clx(:,1)  = mntvar(:,7)
-        clx(:,2)  = mntvar(:,8)
-        clx(:,3)  = mntvar(:,9)
-        clx(:,4)  = mntvar(:,10)
-      elseif (nmtvr == 6) then
-        hprime(:) = mntvar(:,1)
-        oc(:)     = mntvar(:,2)
-        oa4(:,1)  = mntvar(:,3)
-        oa4(:,2)  = mntvar(:,4)
-        oa4(:,3)  = mntvar(:,5)
-        oa4(:,4)  = mntvar(:,6)
-        clx(:,1)  = 0.0
-        clx(:,2)  = 0.0
-        clx(:,3)  = 0.0
-        clx(:,4)  = 0.0
-      else
-        hprime = 0
-        oc = 0
-        oa4 = 0
-        clx = 0
-        theta = 0
-        gamma = 0
-        sigma = 0
-        elvmax = 0
-      endif   ! end if_nmtvr
-
-      end subroutine drag_suite_pre_run
-!> @}
-
-! \ingroup GFS_ogwd
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_drag_suite_pre_finalize Argument Table
-!!
-      subroutine drag_suite_pre_finalize()
-      end subroutine drag_suite_pre_finalize
-
-      end module drag_suite_pre
-
 !> This module contains the CCPP-compliant orographic gravity wave dray scheme.
       module drag_suite
 
       contains
 
-!> \section arg_table_drag_suite_init Argument Table
-!!
       subroutine drag_suite_init()
       end subroutine drag_suite_init
 
@@ -190,7 +88,7 @@
 !! the GWD scheme has the same physical basis as in Alpert (1987) with the addition
 !! of enhancement factors for the amplitude, G, and mountain shape details
 !! in G(Fr) to account for effects from the mountain blocking.  A factor,
-!! E m’, is an enhancement factor on the stress in the Alpert '87 scheme.
+!! E m', is an enhancement factor on the stress in the Alpert '87 scheme.
 !!  The E ranges from no enhancement to an upper limit of 3, E=E(OA)[1-3],
 !!  and is a function of OA, the Orographic Asymmetry defined in KA (1995) as
 !!
@@ -205,9 +103,9 @@
 !!
 !!
 !! where Nx is the number of grid intervals for the large scale domain being
-!! considered. So the term, E(OA)m’/  \f$ \Delta X \f$ in Kim's scheme represents
-!! a multiplier on G shown in Alpert's eq (1), where m’ is the number of mountains
-!! in a sub-grid scale box. Kim increased the complexity of m’ making it a
+!! considered. So the term, E(OA)m'/  \f$ \Delta X \f$ in Kim's scheme represents
+!! a multiplier on G shown in Alpert's eq (1), where m' is the number of mountains
+!! in a sub-grid scale box. Kim increased the complexity of m' making it a
 !! function of the fractional area of the sub-grid mountain and the asymmetry
 !! and convexity statistics which are found from running a gravity wave
 !!  model for a large number of cases:
@@ -294,10 +192,10 @@
 !     &           nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, errmsg, errflg)
 !
    subroutine drag_suite_run(                                           &
-     &           IM,IX,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,              &
+     &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
-     &           VAR,oc1,oa4,ol4,                                       &
-!     &           varss,oc1ss,oa4ss,ol4ss,                               &
+     &           var,oc1,oa4,ol4,                                       &
+     &           varss,oc1ss,oa4ss,ol4ss,                               &
      &           THETA,SIGMA,GAMMA,ELVMAX,                              &
      &           dtaux2d_ls,dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,           &
      &           dtaux2d_ss,dtauy2d_ss,dtaux2d_fd,dtauy2d_fd,           &
@@ -395,7 +293,7 @@
    implicit none
 
    ! Interface variables
-   integer, intent(in) :: im, ix, km, imx, kdt, ipr, me, master
+   integer, intent(in) :: im, km, imx, kdt, ipr, me, master
    integer, intent(in) :: gwd_opt
    logical, intent(in) :: lprnt
    integer, intent(in) :: KPBL(im)
@@ -407,9 +305,10 @@
    real(kind=kind_phys) ::  rcl, cdmb
    real(kind=kind_phys) ::  g_inv
 
-   real(kind=kind_phys), intent(out) ::                          &
+   real(kind=kind_phys), intent(inout) ::                        &
      &                   dudt(im,km),dvdt(im,km),                &
-     &                   dtdt(im,km), rdxzb(im)
+     &                   dtdt(im,km)
+   real(kind=kind_phys), intent(out) :: rdxzb(im)
    real(kind=kind_phys), intent(in) ::                           &
      &                            u1(im,km),v1(im,km),           &
      &                            t1(im,km),q1(im,km),           &
@@ -420,8 +319,7 @@
    real(kind=kind_phys), intent(in) ::   var(im),oc1(im),        &
      &                                   oa4(im,4),ol4(im,4),    &
      &                                   dx(im)
-   !real(kind=kind_phys), intent(in) ::   varss(im),oc1ss(im),   &
-   real(kind=kind_phys)             ::   varss(im),oc1ss(im),    &
+   real(kind=kind_phys), intent(in) ::   varss(im),oc1ss(im),    &
      &                              oa4ss(im,4),ol4ss(im,4)
    real(kind=kind_phys), intent(in) :: THETA(im),SIGMA(im),      &
      &                                 GAMMA(im),ELVMAX(im)
@@ -432,11 +330,11 @@
      &                                     hpbl(im),             &
      &                                     slmsk(im)
    real(kind=kind_phys), dimension(im)    :: govrth,xland
-   real(kind=kind_phys), dimension(im,km) :: dz2
+   !real(kind=kind_phys), dimension(im,km) :: dz2
    real(kind=kind_phys)                   :: tauwavex0,tauwavey0,  &
      &                                     XNBV,density,tvcon,hpbl2
    integer                          ::     kpbl2,kvar
-   real(kind=kind_phys), dimension(im,km+1)         ::     zq      ! = PHII/g
+   !real(kind=kind_phys), dimension(im,km+1)         ::     zq      ! = PHII/g
    real(kind=kind_phys), dimension(im,km)           ::     zl      ! = PHIL/g
 
 !SPP
@@ -513,10 +411,10 @@
 !  local variables
 !
    integer              ::  i,j,k,lcap,lcapp1,nwd,idir,           &
-                            klcap,kp1,ikount,kk
+                            klcap,kp1
 !
-   real(kind=kind_phys) ::  rcs,rclcs,csg,fdir,cleff,cleff_ss,cs, &
-                            rcsks,wdir,ti,rdz,temp,tem2,dw2,shr2, &
+   real(kind=kind_phys) ::  rcs,csg,fdir,cleff,cleff_ss,cs,       &
+                            rcsks,wdir,ti,rdz,tem2,dw2,shr2,      &
                             bvf2,rdelks,wtkbj,tem,gfobnv,hd,fro,  &
                             rim,temc,tem1,efact,temv,dtaux,dtauy, &
                             dtauxb,dtauyb,eng0,eng1
@@ -542,7 +440,6 @@
                             coefm(im),coefm_ss(im)
 !
    integer              ::  kbl(im),klowtop(im)
-   logical :: iope
    integer,parameter    ::  mdir=8
    !integer              ::  nwdir(mdir)
    !data nwdir/6,7,5,8,2,3,1,4/
@@ -574,8 +471,9 @@
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
+   var_temp2 = 0.
 
-if (me==master) print *,"Running drag suite"
+
 !--------------------------------------------------------------------
 ! SCALE-ADPTIVE PARAMETER FROM GFS GWD SCHEME
 !--------------------------------------------------------------------
@@ -628,14 +526,14 @@ if (me==master) print *,"Running drag suite"
    enddo
 
 !temporary use of large-scale data:
-   do i=1,im
-      varss(i)=var(i)
-      oc1ss(i)=oc1(i)
-      do j=1,4
-         oa4ss(i,j)=oa4(i,j)
-         ol4ss(i,j)=ol4(i,j)
-      enddo
-   enddo
+!   do i=1,im
+!      varss(i)=var(i)
+!      oc1ss(i)=oc1(i)
+!      do j=1,4
+!         oa4ss(i,j)=oa4(i,j)
+!         ol4ss(i,j)=ol4(i,j)
+!      enddo
+!   enddo
 !
 !--- calculate scale-aware tapering factors
 !NOTE: if dx(1) is not representative of most/all dx, this needs to change...
@@ -649,7 +547,7 @@ else
                                 (dxmax_ls-dxmin_ls)) + 1. )
    end if
 end if
-if (me==master) print *,"in Drag Suite, dx(1:2):",dx(1),dx(2)
+! if (me==master) print *,"in Drag Suite, dx(1:2):",dx(1),dx(2)
 if ( dx(1) .ge. dxmax_ss ) then
    ss_taper = 1.
 else
@@ -659,7 +557,7 @@ else
       ss_taper = dxmax_ss * (1. - dxmin_ss/dx(1))/(dxmax_ss-dxmin_ss)
    end if
 end if
-if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
+! if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
 
 !--- calculate length of grid for flow-blocking drag
 !
@@ -696,6 +594,7 @@ if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
      olss(i)       = 0.0
      ulow (i)      = 0.0
      dtfac(i)      = 1.0
+     rstoch(i)     = 0.0
      ldrag(i)      = .false.
      icrilv(i)     = .false.
      flag(i)       = .true.
@@ -757,6 +656,17 @@ if (me==master) print *,"in Drag Suite, ss_taper:",ss_taper
        vtj(i,k)  = t1(i,k)  * (1.+fv*q1(i,k))
        vtk(i,k)  = vtj(i,k) / prslk(i,k)
        ro(i,k)   = 1./rd * prsl(i,k) / vtj(i,k) ! density kg/m**3
+     enddo
+   enddo
+!
+!  calculate mid-layer height (zl), interface height (zq), and layer depth (dz2).
+!
+   !zq=0.
+   do k = kts,km
+     do i = its,im
+       !zq(i,k+1) = PHII(i,k+1)*g_inv
+       !dz2(i,k)  = (PHII(i,k+1)-PHII(i,k))*g_inv
+       zl(i,k)   = PHIL(i,k)*g_inv
      enddo
    enddo
 !
@@ -994,10 +904,9 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
   density=1.2
   utendwave=0.
   vtendwave=0.
-  zq=0.
 !
   IF ( (gwd_opt_ss .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
-    if (me==master) print *,"in Drag Suite: Running small-scale gravity wave drag"
+    ! if (me==master) print *,"in Drag Suite: Running small-scale gravity wave drag"
 !
 ! declaring potential temperature
 !
@@ -1011,14 +920,6 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
       do i = its,im
         tvcon = (1.+fv*q1(i,k))
         thvx(i,k) = thx(i,k)*tvcon
-      enddo
-    enddo
-    ! Calculate mid-layer height (zl), interface height (zq), and layer depth (dz2).
-    do k = kts,km
-      do i = its,im
-        zq(i,k+1) = PHII(i,k+1)*g_inv
-        dz2(i,k)  = (PHII(i,k+1)-PHII(i,k))*g_inv
-        zl(i,k)   = PHIL(i,k)*g_inv
       enddo
     enddo
 
@@ -1041,11 +942,11 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
        enddo
        if((xland(i)-1.5).le.0. .and. 2.*varss(i).le.hpbl(i))then
           if(br1(i).gt.0. .and. thvx(i,kpbl2)-thvx(i,kts) > 0.)then
-!WRF            cleff_ss    = sqrt(dxy(i)**2 + dxyp(i)**2)
+            cleff_ss    = sqrt(dxy(i)**2 + dxyp(i)**2)   ! WRF
 !            cleff_ss    = 3. * max(dx(i),cleff_ss)
 !            cleff_ss    = 10. * max(dxmax_ss,cleff_ss)
-!WRF            cleff_ss    = 0.1 * max(dxmax_ss,cleff_ss)
-            cleff_ss    = 0.1 * 12000.
+            cleff_ss    = 0.1 * max(dxmax_ss,cleff_ss)  ! WRF
+!             cleff_ss    = 0.1 * 12000.
             coefm_ss(i) = (1. + olss(i)) ** (oass(i)+1.)
             xlinv(i) = coefm_ss(i) / cleff_ss
             !govrth(i)=g/(0.5*(thvx(i,kpbl(i))+thvx(i,kts)))
@@ -1122,23 +1023,10 @@ ENDIF  ! end if gwd_opt_ss == 1
 ! Topographic Form Drag from Beljaars et al. (2004, QJRMS, equ. 16):
 !================================================================
 IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
-    if (me==master) print *,"in Drag Suite: Running form drag"
+    ! if (me==master) print *,"in Drag Suite: Running form drag"
 
    utendform=0.
    vtendform=0.
-   zq=0.
-
-   IF ( (gwd_opt_ss .NE. 1).and.(ss_taper.GT.1.E-02) ) THEN
-     ! Defining mid-layer height (zl), interface height (zq), and layer depth (dz2). 
-     ! This is already done above if the small-scale GWD is activated.
-     do k = kts,km
-       do i = its,im
-         zq(i,k+1) = PHII(i,k+1)*g_inv
-         dz2(i,k)  = (PHII(i,k+1)-PHII(i,k))*g_inv
-         zl(i,k)   = PHIL(i,k)*g_inv
-       enddo
-     enddo
-   ENDIF
 
    DO i=its,im
       IF ((xland(i)-1.5) .le. 0.) then
@@ -1191,7 +1079,7 @@ ENDIF  ! end if gwd_opt_fd == 1
 !=======================================================
 ! More for the large-scale gwd component
 IF ( (gwd_opt_ls .EQ. 1).and.(ls_taper.GT.1.E-02) ) THEN
-    if (me==master) print *,"in Drag Suite: Running large-scale gravity wave drag"
+    ! if (me==master) print *,"in Drag Suite: Running large-scale gravity wave drag"
 !
 !   now compute vertical structure of the stress.
    do k = kts,kpblmax
@@ -1259,7 +1147,7 @@ ENDIF !END LARGE-SCALE TAU CALCULATION
 !COMPUTE BLOCKING COMPONENT                                     
 !===============================================================
 IF ( (gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
-   if (me==master) print *,"in Drag Suite: Running blocking drag"
+   ! if (me==master) print *,"in Drag Suite: Running blocking drag"
 
    do i = its,im
       if(.not.ldrag(i)) then
@@ -1409,65 +1297,8 @@ endif
    end subroutine drag_suite_run
 !-------------------------------------------------------------------
 !
-!> \section arg_table_drag_suite_finalize Argument Table
-!!
+
       subroutine drag_suite_finalize()
       end subroutine drag_suite_finalize
 
       end module drag_suite
-
-!> This module contains the CCPP-compliant orographic gravity wave drag post
-!! interstitial codes.
-      module drag_suite_post
-
-      contains
-
-!> \section arg_table_drag_suite_post_init Argument Table
-!!
-      subroutine drag_suite_post_init()
-      end subroutine drag_suite_post_init
-
-!> \section arg_table_drag_suite_post_run Argument Table
-!! \htmlinclude drag_suite_post_run.html
-!!
-      subroutine drag_suite_post_run(                                        &
-     &  lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
-     &  dugwd, dvgwd, du3dt, dv3dt, dt3dt, errmsg, errflg)
-
-      use machine, only : kind_phys
-      implicit none
-
-      logical, intent(in) :: lssav, ldiag3d
-      real(kind=kind_phys), intent(in) :: dtf
-      real(kind=kind_phys), intent(in) ::                               &
-     &  dusfcg(:), dvsfcg(:), dudt(:,:), dvdt(:,:), dtdt(:,:)
-
-      real(kind=kind_phys), intent(inout) ::                            &
-     &  dugwd(:), dvgwd(:), du3dt(:,:), dv3dt(:,:), dt3dt(:,:)
-
-      character(len=*), intent(out) :: errmsg
-      integer,          intent(out) :: errflg
-
-      ! Initialize CCPP error handling variables
-      errmsg = ''
-      errflg = 0
-
-      if (lssav) then
-        dugwd(:) = dugwd(:) + dusfcg(:)*dtf
-        dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
-
-        if (ldiag3d) then
-          du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
-          dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
-          dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf
-        endif
-      endif
-
-      end subroutine drag_suite_post_run
-
-!> \section arg_table_drag_suite_post_finalize Argument Table
-!!
-      subroutine drag_suite_post_finalize()
-      end subroutine drag_suite_post_finalize
-
-      end module drag_suite_post

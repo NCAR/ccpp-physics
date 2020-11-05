@@ -21,17 +21,18 @@ contains
 !! \htmlinclude lsm_ruc_sfc_sice_pre_run.html
 !!
 #endif
-   subroutine lsm_ruc_sfc_sice_pre_run(im, lsoil_ruc, lsoil, land, stc, tslb, errmsg, errflg)
+   subroutine lsm_ruc_sfc_sice_pre_run(im, lsoil_ruc, lsoil, kice, land, icy, stc, tslb, tiice, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
-      integer, intent(in) :: im, lsoil_ruc, lsoil
-      logical, dimension(im), intent(in) :: land
+      integer, intent(in) :: im, lsoil_ruc, lsoil, kice
+      logical, dimension(im), intent(in) :: land, icy
 !  --- on Noah levels
       real (kind=kind_phys), dimension(im,lsoil), intent(inout) :: stc
 !  --- on RUC levels
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(in) :: tslb
+      real (kind=kind_phys), dimension(im,kice), intent(inout) :: tiice
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -44,7 +45,11 @@ contains
       errflg = 0
 
       do i=1,im
-        if (.not.land(i)) then
+        if (icy(i)) then
+          do k=1,kice
+            tiice(i,k) = tslb(i,k)
+          end do
+        else if (.not.land(i)) then
           do k=1,min(lsoil,lsoil_ruc)
             stc(i,k) = tslb(i,k)
           end do
@@ -78,15 +83,16 @@ contains
 !! \htmlinclude lsm_ruc_sfc_sice_post_run.html
 !!
 #endif
-   subroutine lsm_ruc_sfc_sice_post_run(im, lsoil_ruc, lsoil, land, stc, tslb, errmsg, errflg)
+   subroutine lsm_ruc_sfc_sice_post_run(im, lsoil_ruc, lsoil, kice, land, icy, stc, tslb, tiice, errmsg, errflg)
 
       implicit none
 
       ! Interface variables
-      integer, intent(in) :: im, lsoil_ruc, lsoil
-      logical, dimension(im), intent(in) :: land
+      integer, intent(in) :: im, lsoil_ruc, lsoil, kice
+      logical, dimension(im), intent(in) :: land, icy
 !  --- on Noah levels
       real (kind=kind_phys), dimension(im,lsoil), intent(in) :: stc
+      real (kind=kind_phys), dimension(im,kice),  intent(in) :: tiice
 !  --- on RUC levels
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb
 
@@ -101,7 +107,11 @@ contains
       errflg = 0
 
       do i=1,im
-        if (.not.land(i)) then
+        if (icy(i)) then
+          do k=1,kice
+            tslb(i,k) = tiice(i,k)
+          end do
+        else if (.not.land(i)) then
           do k=1,min(lsoil,lsoil_ruc)
             tslb(i,k) = stc(i,k)
           end do

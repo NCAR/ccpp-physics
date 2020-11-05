@@ -95,7 +95,6 @@ module micro_mg2_0
 ! 2) saturation vapor pressure and specific humidity over water
 ! 3) svp over ice
 use machine,        only : r8    => kind_phys
-use physcons,       only : epsqs => con_eps, fv => con_fvirt
 use funcphys,       only : fpvsl, fpvsi
 
 !use wv_sat_methods, only: &
@@ -183,7 +182,7 @@ real(r8) :: rainfrze    ! what temp to freeze all rain: currently -5 degrees C
 real(r8) :: gamma_br_plus1, gamma_bs_plus1, gamma_bi_plus1, gamma_bj_plus1
 real(r8) :: gamma_br_plus4, gamma_bs_plus4, gamma_bi_plus4, gamma_bj_plus4
 real(r8) :: xxlv_squared,   xxls_squared
-real(r8) :: omeps
+real(r8) :: omeps, epsqs
 
 character(len=16)  :: micro_mg_precip_frac_method  ! type of precipitation fraction method
 real(r8)           :: micro_mg_berg_eff_factor     ! berg efficiency factor
@@ -200,7 +199,7 @@ contains
 !>\ingroup mg2_0_mp
 !! This subroutine calculates
 subroutine micro_mg_init(                                         &
-     kind, gravit, rair, rh2o, cpair,                             &
+     kind, gravit, rair, rh2o, cpair, eps,                        &
      tmelt_in, latvap, latice,                                    &
      rhmini_in, micro_mg_dcs,ts_auto, mg_qcvar,                   &
      microp_uniform_in, do_cldice_in, use_hetfrz_classnuc_in,     &
@@ -226,6 +225,8 @@ subroutine micro_mg_init(                                         &
   real(r8), intent(in)  :: rair
   real(r8), intent(in)  :: rh2o
   real(r8), intent(in)  :: cpair
+  real(r8), intent(in)  :: eps
+! real(r8), intent(in)  :: fv
   real(r8), intent(in)  :: tmelt_in     !< Freezing point of water (K)
   real(r8), intent(in)  :: latvap
   real(r8), intent(in)  :: latice
@@ -321,6 +322,7 @@ subroutine micro_mg_init(                                         &
 
   xxlv_squared = xxlv * xxlv
   xxls_squared = xxls * xxls
+  epsqs = eps
   omeps = one - epsqs
   tmn   = 173.16_r8
   tmx   = 375.16_r8
@@ -393,7 +395,7 @@ subroutine micro_mg_tend (                                       &
      drout2,                       dsout2,                       &
      freqs,                        freqr,                        &
      nfice,                        qcrat,                        &
-     prer_evap, xlat, xlon, lprnt, iccn, aero_in, nlball)
+     prer_evap, xlat, xlon, lprnt, iccn,  nlball)
 
   ! Constituent properties.
   use micro_mg_utils, only: mg_liq_props,  &
@@ -464,7 +466,8 @@ subroutine micro_mg_tend (                                       &
   real(r8), intent(in) :: liqcldf(mgncol,nlev)    ! liquid cloud fraction (no units)
   real(r8), intent(in) :: icecldf(mgncol,nlev)    ! ice cloud fraction (no units)
   real(r8), intent(in) :: qsatfac(mgncol,nlev)    ! subgrid cloud water saturation scaling factor (no units)
-  logical, intent(in)  :: lprnt, iccn, aero_in
+  logical, intent(in)  :: lprnt
+  integer, intent(in)  :: iccn
 
 
   ! used for scavenging
@@ -1113,7 +1116,7 @@ subroutine micro_mg_tend (                                       &
     enddo
   enddo
 
-  if(iccn) then
+  if(iccn == 1) then
     do k=1,nlev
       do i=1,mgncol
         npccn(i,k) = npccnin(i,k)
@@ -1152,7 +1155,7 @@ subroutine micro_mg_tend (                                       &
      ncal = zero
   end where
 
-  if (iccn) then
+  if (iccn == 1) then
     do k=1,nlev
       do i=1,mgncol
         if (t(i,k) < icenuct) then
@@ -1167,7 +1170,7 @@ subroutine micro_mg_tend (                                       &
         endif
       enddo
     enddo
-  elseif (aero_in) then
+  elseif (iccn == 2) then
     do k=1,nlev
       do i=1,mgncol
         if (t(i,k) < icenuct) then

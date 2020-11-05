@@ -7,23 +7,17 @@
 
       contains
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_pre_init Argument Table
-!!
       subroutine m_micro_pre_init()
       end subroutine m_micro_pre_init
 
 ! \brief Brief description of the subroutine
 !!
-#if 0
 !! \section arg_table_m_micro_pre_run Argument Table
 !! \htmlinclude m_micro_pre_run.html
 !!
-#endif
       subroutine m_micro_pre_run (im, levs, do_shoc, skip_macro, fprcp, mg3_as_mg2, gq0_ice, gq0_water, gq0_rain,  &
         gq0_snow, gq0_graupel, gq0_rain_nc, gq0_snow_nc, gq0_graupel_nc, cld_shoc, cnvc, cnvw, tcr, tcrf, gt0,     &
-        qrn, qsnw, qgl, ncpr, ncps, ncgl, cld_frc_MG, qlcn, qicn, cf_upi, clw_water, clw_ice, clcn, errmsg, errflg )
+        qrn, qsnw, qgl, ncpr, ncps, ncgl, cld_frc_MG, clw_water, clw_ice, clcn, errmsg, errflg )
 
       use machine, only : kind_phys
       implicit none
@@ -41,7 +35,7 @@
 
       real(kind=kind_phys), intent(inout) ::                              &
           qrn(:,:), qsnw(:,:), qgl(:,:), ncpr(:,:), ncps(:,:), ncgl(:,:), &
-          cld_frc_MG(:,:), cf_upi(:,:), qlcn(:,:), qicn(:,:)
+          cld_frc_MG(:,:)
 
       real(kind=kind_phys), intent(out) :: clw_ice(:,:), clw_water(:,:)
 
@@ -62,39 +56,39 @@
       !       in other procceses too.  August 28/2015; Hope that can be done next
       !       year. I believe this will make the physical interaction more reasonable
       !       Anning 12/5/2015 changed ntcw hold liquid only
+      skip_macro = do_shoc
       if (do_shoc) then
-        skip_macro = do_shoc
         if (fprcp == 0) then
           do k=1,levs
             do i=1,im
-              clw_ice(i,k) = gq0_ice(i,k)
-              clw_water(i,k) = gq0_water(i,k)
+              clw_ice(i,k)    = gq0_ice(i,k)
+              clw_water(i,k)  = gq0_water(i,k)
               cld_frc_MG(i,k) = cld_shoc(i,k)
             enddo
           enddo
         else if ((abs(fprcp) == 1) .or. mg3_as_mg2) then
           do k=1,levs
             do i=1,im
-              clw_ice(i,k) = gq0_ice(i,k)
-              clw_water(i,k) = gq0_water(i,k)
-              qrn(i,k)   = gq0_rain(i,k)
-              qsnw(i,k)  = gq0_snow(i,k)
-              ncpr(i,k)  = gq0_rain_nc(i,k)
-              ncps(i,k)  = gq0_snow_nc(i,k)
+              clw_ice(i,k)    = gq0_ice(i,k)
+              clw_water(i,k)  = gq0_water(i,k)
+              qrn(i,k)        = gq0_rain(i,k)
+              qsnw(i,k)       = gq0_snow(i,k)
+              ncpr(i,k)       = gq0_rain_nc(i,k)
+              ncps(i,k)       = gq0_snow_nc(i,k)
               cld_frc_MG(i,k) = cld_shoc(i,k)
             enddo
           enddo
         else
           do k=1,levs
             do i=1,im
-              clw_ice(i,k) = gq0_ice(i,k)
-              clw_water(i,k) = gq0_water(i,k)
-              qrn(i,k)   = gq0_rain(i,k)
-              qsnw(i,k)  = gq0_snow(i,k)
-              qgl(i,k)   = gq0_graupel(i,k)
-              ncpr(i,k)  = gq0_rain_nc(i,k)
-              ncps(i,k)  = gq0_snow_nc(i,k)
-              ncgl(i,k)  = gq0_graupel_nc(i,k)
+              clw_ice(i,k)    = gq0_ice(i,k)
+              clw_water(i,k)  = gq0_water(i,k)
+              qrn(i,k)        = gq0_rain(i,k)
+              qsnw(i,k)       = gq0_snow(i,k)
+              qgl(i,k)        = gq0_graupel(i,k)
+              ncpr(i,k)       = gq0_rain_nc(i,k)
+              ncps(i,k)       = gq0_snow_nc(i,k)
+              ncgl(i,k)       = gq0_graupel_nc(i,k)
               cld_frc_MG(i,k) = cld_shoc(i,k)
             enddo
           enddo
@@ -103,32 +97,32 @@
         if (fprcp == 0 ) then
           do k=1,levs
             do i=1,im
-              clw_ice(i,k) = gq0_ice(i,k)
+              clw_ice(i,k)   = gq0_ice(i,k)
               clw_water(i,k) = gq0_water(i,k)
             enddo
           enddo
         elseif (abs(fprcp) == 1 .or. mg3_as_mg2) then
           do k=1,levs
             do i=1,im
-              clw_ice(i,k) = gq0_ice(i,k)
+              clw_ice(i,k)   = gq0_ice(i,k)
               clw_water(i,k) = gq0_water(i,k)
-              qrn(i,k)   = gq0_rain(i,k)
-              qsnw(i,k)  = gq0_snow(i,k)
-              ncpr(i,k)  = gq0_rain_nc(i,k)
-              ncps(i,k)  = gq0_snow_nc(i,k)
+              qrn(i,k)       = gq0_rain(i,k)
+              qsnw(i,k)      = gq0_snow(i,k)
+              ncpr(i,k)      = gq0_rain_nc(i,k)
+              ncps(i,k)      = gq0_snow_nc(i,k)
             enddo
           enddo
         else
           do k=1,levs
             do i=1,im
-              clw_ice(i,k) = gq0_ice(i,k)
+              clw_ice(i,k)   = gq0_ice(i,k)
               clw_water(i,k) = gq0_water(i,k)
-              qrn(i,k)   = gq0_rain(i,k)
-              qsnw(i,k)  = gq0_snow(i,k)
-              qgl(i,k)   = gq0_graupel(i,k)
-              ncpr(i,k)  = gq0_rain_nc(i,k)
-              ncps(i,k)  = gq0_snow_nc(i,k)
-              ncgl(i,k)  = gq0_graupel_nc(i,k)
+              qrn(i,k)       = gq0_rain(i,k)
+              qsnw(i,k)      = gq0_snow(i,k)
+              qgl(i,k)       = gq0_graupel(i,k)
+              ncpr(i,k)      = gq0_rain_nc(i,k)
+              ncps(i,k)      = gq0_snow_nc(i,k)
+              ncgl(i,k)      = gq0_graupel_nc(i,k)
             enddo
           enddo
         endif
@@ -143,10 +137,6 @@
 
       end subroutine m_micro_pre_run
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_pre_finalize Argument Table
-!!
       subroutine m_micro_pre_finalize ()
       end subroutine m_micro_pre_finalize
 
@@ -160,10 +150,6 @@
 
       contains
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_post_init Argument Table
-!!
       subroutine m_micro_post_init()
       end subroutine m_micro_post_init
 
@@ -243,8 +229,8 @@
           do i=1,im
             if (abs(qrn(i,k))  < qsmall) qrn(i,k)  = 0.0
             if (abs(qsnw(i,k)) < qsmall) qsnw(i,k) = 0.0
-            gq0_rain(i,k)  = qrn(i,k)
-            gq0_snow(i,k)  = qsnw(i,k)
+            gq0_rain(i,k)    = qrn(i,k)
+            gq0_snow(i,k)    = qsnw(i,k)
             gq0_rain_nc(i,k) = ncpr(i,k)
             gq0_snow_nc(i,k) = ncps(i,k)
           enddo
@@ -259,11 +245,11 @@
             if (abs(qrn(i,k))  < qsmall) qrn(i,k)  = 0.0
             if (abs(qsnw(i,k)) < qsmall) qsnw(i,k) = 0.0
             if (abs(qgl(i,k))  < qsmall) qgl(i,k)  = 0.0
-            gq0_rain(i,k)  = qrn(i,k)
-            gq0_snow(i,k)  = qsnw(i,k)
-            gq0_graupel(i,k)  = qgl(i,k)
-            gq0_rain_nc(i,k) = ncpr(i,k)
-            gq0_snow_nc(i,k) = ncps(i,k)
+            gq0_rain(i,k)       = qrn(i,k)
+            gq0_snow(i,k)       = qsnw(i,k)
+            gq0_graupel(i,k)    = qgl(i,k)
+            gq0_rain_nc(i,k)    = ncpr(i,k)
+            gq0_snow_nc(i,k)    = ncps(i,k)
             gq0_graupel_nc(i,k) = ncgl(i,k)
           enddo
         enddo
@@ -285,10 +271,6 @@
 
       end subroutine m_micro_post_run
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_m_micro_post_finalize Argument Table
-!!
       subroutine m_micro_post_finalize()
       end subroutine m_micro_post_finalize
 

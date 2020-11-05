@@ -106,12 +106,10 @@ module  cires_ugwp_module
 ! init  of cires_ugwp   (_init)  called from GFS_driver.F90
 !
 ! -----------------------------------------------------------------------
-   subroutine cires_ugwp_mod_init (me, master, nlunit, logunit, fn_nml2, &
-              lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
+   subroutine cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
+              fn_nml, lonr, latr, levs, ak, bk, pref, dtp, cdmvgwd, cgwf,    &
               pa_rf_in, tau_rf_in)
-!
-!  input_nml_file ='input.nml'=fn_nml
-!
+
     use  ugwp_oro_init,     only :  init_oro_gws
     use  ugwp_conv_init,    only :  init_conv_gws
     use  ugwp_fjet_init,    only :  init_fjet_gws
@@ -120,31 +118,33 @@ module  cires_ugwp_module
     use  ugwp_lsatdis_init, only :  initsolv_lsatdis
     implicit none
 
-    integer, intent (in) :: me
-    integer, intent (in) :: master
-    integer, intent (in) :: nlunit
-    integer, intent (in) :: logunit
-    integer, intent (in) :: lonr
-    integer, intent (in) :: levs
-    integer, intent (in) :: latr
-    real,    intent (in) :: ak(levs+1), bk(levs+1), pref
-    real,    intent (in) :: dtp
-    real,    intent (in) :: cdmvgwd(2), cgwf(2)             ! "scaling" controls for "old" GFS-GW schemes
-    real,    intent (in) :: pa_rf_in, tau_rf_in
- 
-    character(len=64), intent (in) :: fn_nml2
-    character(len=64), parameter   :: fn_nml='input.nml'
+    integer,              intent (in) :: me
+    integer,              intent (in) :: master
+    integer,              intent (in) :: nlunit
+    character (len = *),  intent (in) :: input_nml_file(:)
+    integer,              intent (in) :: logunit
+    character(len=64),    intent (in) :: fn_nml
+    integer,              intent (in) :: lonr
+    integer,              intent (in) :: levs
+    integer,              intent (in) :: latr
+    real,                 intent (in) :: ak(levs+1), bk(levs+1), pref
+    real,                 intent (in) :: dtp
+    real,                 intent (in) :: cdmvgwd(2), cgwf(2)             ! "scaling" controls for "old" GFS-GW schemes
+    real,                 intent (in) :: pa_rf_in, tau_rf_in
 
-!    character,  intent (in) :: input_nml_file
 !    integer, parameter :: logunit =  6
     integer :: ios
     logical :: exists
     real    :: dxsg
     integer :: k
-!
+
+#ifdef INTERNAL_FILE_NML
+    read (input_nml_file, nml = cires_ugwp_nml)
+#else
     if (me == master) print *, trim (fn_nml), ' GW-namelist file '
+    
     inquire (file =trim (fn_nml) , exist = exists)
-!
+
     if (.not. exists) then
        if (me == master) &
         write (6, *) 'separate ugwp :: namelist file: ', trim (fn_nml), ' does not exist'
@@ -154,6 +154,10 @@ module  cires_ugwp_module
     rewind (nlunit)
     read   (nlunit, nml = cires_ugwp_nml)
     close  (nlunit)
+#endif
+
+    
+    
 !
     ilaunch = launch_level
     pa_rf   = pa_rf_in

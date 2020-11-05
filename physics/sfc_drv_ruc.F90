@@ -36,6 +36,17 @@ module lsm_ruc
       errmsg = ''
       errflg = 0 
 
+      if (ivegsrc /= 1) then
+        errmsg = 'The RUC LSM expects that the ivegsrc physics namelist parameter is 1. Exiting...'
+        errflg = 1
+        return
+      end if
+      if (isot > 1) then
+        errmsg = 'The RUC LSM expects that the isot physics namelist parameter is 0, or 1. Exiting...'
+        errflg = 1
+        return
+      end if
+
       !--- initialize soil vegetation
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
 
@@ -130,24 +141,21 @@ module lsm_ruc
 !> \defgroup lsm_ruc_group GSD RUC LSM Model
 !! This module contains the RUC Land Surface Model developed by NOAA/GSD
 !! (Smirnova et al. 2016 \cite Smirnova_2016).
-#if 0
 !> \section arg_table_lsm_ruc_run Argument Table
 !! \htmlinclude lsm_ruc_run.html
 !!
-#endif
 !>\section gen_lsmruc GSD RUC LSM General Algorithm
-! DH* TODO - make order of arguments the same as in the metadata table
       subroutine lsm_ruc_run                                            & ! inputs
      &     ( iter, me, master, kdt, im, nlev, lsoil_ruc, lsoil, zs,     &
-     &       t1, q1, qc, soiltyp, vegtype, sigmaf,                      &
+     &       t1, q1, qc, soiltyp, vegtype, sigmaf, laixy,               &
      &       sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,          &
      &       prsl1, zf, wind, shdmin, shdmax, alvwf, alnwf,             &
      &       snoalb, sfalb, flag_iter, flag_guess, isot, ivegsrc, fice, &
-     &       smc, stc, slc, lsm_ruc, lsm, land, islimsk,                &
+     &       smc, stc, slc, lsm_ruc, lsm, land, islimsk, rdlai,         &
      &       imp_physics, imp_physics_gfdl, imp_physics_thompson,       &
      &       smcwlt2, smcref2, do_mynnsfclay,                           &
      &       con_cp, con_rv, con_rd, con_g, con_pi, con_hvap, con_fvirt,& !  constants
-     &       weasd, snwdph, tskin, tskin_ocn,                           & !  in/outs
+     &       weasd, snwdph, tskin, tskin_wat,                           & !  in/outs
      &       rainnc, rainc, ice, snow, graupel,                         & ! in
      &       srflag, smois, tslb, sh2o, keepfr, smfrkeep,               & ! in/outs, on RUC levels
      &       canopy, trans, tsurf, tsnow, zorl,                         &
@@ -178,6 +186,8 @@ module lsm_ruc
      &       ch, prsl1, wind, shdmin, shdmax,                           &
      &       snoalb, alvwf, alnwf, zf, qc, q1
 
+      real (kind=kind_phys), dimension(:), intent(in) :: laixy
+
       real (kind=kind_phys),  intent(in) :: delt
       real (kind=kind_phys),  intent(in) :: con_cp, con_rv, con_g,      &
                                             con_pi, con_rd,             &
@@ -187,12 +197,14 @@ module lsm_ruc
       integer, dimension(im), intent(in) :: islimsk ! sea/land/ice mask (=0/1/2)
       logical,                intent(in) :: do_mynnsfclay
 
+      logical,                intent(in) :: rdlai
+
 !  ---  in/out:
       integer, dimension(im), intent(inout) :: soiltyp, vegtype
       real (kind=kind_phys), dimension(lsoil_ruc) :: dzs
       real (kind=kind_phys), dimension(lsoil_ruc), intent(inout   ) :: zs
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
-     &       snwdph, tskin, tskin_ocn,                                  &
+     &       snwdph, tskin, tskin_wat,                                  &
      &       srflag, canopy, trans, tsurf, zorl, tsnow,                 &
      &       sfcqc, sfcqv, sfcdew, fice, tice, sfalb, smcwlt2, smcref2
 !  ---  in
@@ -310,12 +322,14 @@ module lsm_ruc
 
         call rucinit          (flag_restart, im, lsoil_ruc, lsoil, nlev, & ! in
                                isot, soiltyp, vegtype, fice,             & ! in
-                               land, tskin, tskin_ocn, tg3,              & ! in
+                               land, tskin, tskin_wat, tg3,              & ! in
                                smc, slc, stc,                            & ! in
                                smcref2, smcwlt2,                         & ! inout
                                lsm_ruc, lsm,                             & ! in
                                zs, sh2o, smfrkeep, tslb, smois, wetness, & ! out
                                me, master, errmsg, errflg)
+
+        xlai = 0.
 
       endif ! flag_init=.true.,iter=1
 !-- end of initialization
@@ -508,10 +522,10 @@ module lsm_ruc
           ffrozp(i,j) = real(nint(srflag(i)),kind_phys)
         endif
 
-        !tgs - for now set rdlai2d to .false., WRF has LAI maps, and RUC LSM
-        !      uses rdlai2d = .true.
-        rdlai2d = .false.
-        !if( .not. rdlai2d) xlai = lai_data(vtype)
+        !tgs - rdlai is .false. when the LAI data is not available in the
+        !    - INPUT/sfc_data.nc
+
+        rdlai2d = rdlai
 
         conflx2(i,1,j)  = zf(i) * 2. ! factor 2. is needed to get the height of
                                      ! atm. forcing inside RUC LSM (inherited
@@ -552,13 +566,15 @@ module lsm_ruc
         !prcp(i,j)       = rhoh2o * tprcp(i)                   ! tprcp in [m] - convective plus explicit
         !raincv(i,j)     = rhoh2o * rainc(i)                   ! total time-step convective precip
         !rainncv(i,j)    = rhoh2o * max(rain(i)-rainc(i),0.0)  ! total time-step explicit precip 
-        !graupelncv(i,j) = rhoh2o * graupel(i)
-        !snowncv(i,j)    = rhoh2o * snow(i)
-        prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! tprcp in [m] - convective plus explicit
-        raincv(i,j)     = rhoh2o * rainc(i)                    ! total time-step convective precip
-        rainncv(i,j)    = rhoh2o * rainnc(i)                   ! total time-step explicit precip 
+        prcp(i,j)       = rhoh2o * (rainc(i)+rainnc(i))        ! [mm] - convective plus explicit
+        raincv(i,j)     = rhoh2o * rainc(i)                    ! [mm] - total time-step convective precip
+        rainncv(i,j)    = rhoh2o * rainnc(i)                   ! [mm] - total time-step explicit precip 
         graupelncv(i,j) = rhoh2o * graupel(i)
         snowncv(i,j)    = rhoh2o * snow(i)
+    !if(prcp(i,j) > 0. .and. i==21) then
+    !print *,'prcp(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)',i,j, &
+    !    prcp(i,j),rainncv(i,j),graupelncv(i,j),snowncv(i,j),ffrozp(i,j)
+    !endif
         ! ice not used
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
 
@@ -600,6 +616,8 @@ module lsm_ruc
         snoalb1d(i,j) = snoalb(i)
         albbck(i,j)   = max(0.01, 0.5 * (alvwf(i) + alnwf(i))) 
         alb(i,j)      = sfalb(i)
+
+        if(rdlai2d) xlai(i,j) = laixy(i)
 
         tbot(i,j) = tg3(i)
 
@@ -686,7 +704,7 @@ module lsm_ruc
         znt(i,j) = zorl(i)/100.
 
         if(debug_print) then
-          !if(me==0 .and. i==ipr) then
+          if(me==0 .and. i==ipr) then
             write (0,*)'before RUC smsoil = ',smsoil(i,:,j), i,j
             write (0,*)'stsoil = ',stsoil(i,:,j), i,j
             write (0,*)'soilt = ',soilt(i,j), i,j
@@ -780,7 +798,7 @@ module lsm_ruc
             write (0,*)'shdmin1d(i,j) =',i,j,shdmin1d(i,j)
             write (0,*)'shdmax1d(i,j) =',i,j,shdmax1d(i,j)
             write (0,*)'rdlai2d =',rdlai2d
-          !endif
+          endif
         endif
 
 !> - Call RUC LSM lsmruc(). 
@@ -796,8 +814,7 @@ module lsm_ruc
      &          chs(i,j), flqc(i,j), flhc(i,j),                              &
 !  ---  input/outputs:
      &          wet(i,j), cmc(i,j), shdfac(i,j), alb(i,j), znt(i,j),         &
-     &          z0(i,j), snoalb1d(i,j), albbck(i,j),                         &
-!     &          z0, snoalb1d, alb, xlai,                                     &
+     &          z0(i,j), snoalb1d(i,j), albbck(i,j), xlai(i,j),              &
      &          landusef(i,:,j), nlcat,                                      &
 !  --- mosaic_lu and mosaic_soil are moved to the namelist
 !     &          mosaic_lu, mosaic_soil,                                      &
@@ -1031,7 +1048,7 @@ module lsm_ruc
 !! This subroutine contains RUC LSM initialization.
       subroutine rucinit      (restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                                isot, soiltyp, vegtype, fice,          & ! in
-                               land, tsurf, tsurf_ocn,                & ! in
+                               land, tsurf, tsurf_wat,                & ! in
                                tg3, smc, slc, stc,                    & ! in
                                smcref2, smcwlt2,                      & ! inout
                                lsm_ruc, lsm,                          & ! in
@@ -1048,7 +1065,7 @@ module lsm_ruc
       integer,                                 intent(in   ) :: lsoil_ruc
       integer,                                 intent(in   ) :: lsoil
       logical,               dimension(im),    intent(in   ) :: land
-      real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf, tsurf_ocn
+      real (kind=kind_phys), dimension(im),    intent(in   ) :: tsurf, tsurf_wat
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcref2
       real (kind=kind_phys), dimension(im),    intent(inout) :: smcwlt2
       real (kind=kind_phys), dimension(im),    intent(in   ) :: tg3
@@ -1207,7 +1224,7 @@ module lsm_ruc
          ! land only version
           if (land(i)) then
             tsk(i,j) = tsurf(i)
-            sst(i,j) = tsurf_ocn(i)
+            sst(i,j) = tsurf_wat(i)
             tbot(i,j)= tg3(i)
             ivgtyp(i,j)=vegtype(i)
             isltyp(i,j)=soiltyp(i)

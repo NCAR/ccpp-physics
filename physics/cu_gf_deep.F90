@@ -14,7 +14,7 @@ module cu_gf_deep
 !> tuning constant for cloudwater/ice detrainment
      real(kind=kind_phys), parameter:: c1= 0.003 !.002 ! .0005
 !> parameter to turn on or off evaporation of rainwater as done in sas
-     integer, parameter :: irainevap=0
+     integer, parameter :: irainevap=1
 !> max allowed fractional coverage (frh_thresh)
      real(kind=kind_phys), parameter::frh_thresh = .9
 !> rh threshold. if fractional coverage ~ frh_thres, do not use cupa any further
@@ -362,7 +362,7 @@ contains
       c1_max=c1
       elocp=xlv/cp
       el2orc=xlv*xlv/(r_v*cp)
-      evfact=.2
+      evfact=.4 ! .2
       evfactl=.2
      !evfact=.0   ! for 4F5f
      !evfactl=.4 
@@ -1923,6 +1923,13 @@ contains
             ichoice,imid,ipr,itf,ktf,                                    &
             its,ite, kts,kte,                                            &
             dicycle,xf_dicycle )
+
+!---------------evap below cloud base
+
+      call rain_evap_below_cloudbase(itf,ktf,its,ite,                    &
+           kts,kte,ierr,kbcon,xmb,psur,xland,qo_cup,                     &
+           po_cup,qes_cup,pwavo,edto,pwevo,pre,outt,outq)      !,outbuoy)
+
       k=1
       do i=its,itf
           if(ierr(i).eq.0 .and.pre(i).gt.0.) then
@@ -1971,7 +1978,7 @@ contains
          do k = ktop(i), 1, -1
               rain =  pwo(i,k) + edto(i) * pwdo(i,k)
               rn(i) = rn(i) + rain * xmb(i) * .001 * dtime
-            !if(po(i,k).gt.700.)then
+            if(po(i,k).gt.400.)then
               if(flg(i))then
               q1=qo(i,k)+(outq(i,k))*dtime
               t1=tn(i,k)+(outt(i,k))*dtime
@@ -1996,7 +2003,7 @@ contains
                 pre(i)=max(pre(i),0.)
                 delqev(i) = delqev(i) + .001*dp*qevap(i)/g
               endif
-            !endif ! 700mb
+            endif ! 400mb
           endif
         enddo
 !       pre(i)=1000.*rn(i)/dtime
@@ -2035,6 +2042,271 @@ contains
 !> @}
 
 !>\ingroup cu_gf_deep_group
+
+
+   subroutine fct1d3 (ktop,n,dt,z,tracr,massflx,trflx_in,dellac,g)
+
+! --- modify a 1-D array of tracer fluxes for the purpose of maintaining
+! --- monotonicity (including positive-definiteness) in the tracer field
+! --- during tracer transport.
+
+! --- the underlying transport equation is   (d tracr/dt) = - (d trflx/dz)
+! --- where  dz = |z(k+1)-z(k)| (k=1,...,n) and  trflx = massflx * tracr
+! --- physical dimensions of tracr,trflx,dz are arbitrary to some extent
+! --- but are subject to the constraint dim[trflx] = dim[tracr*(dz/dt)].
+
+! --- note: tracr is carried in grid cells while z and fluxes are carried on
+! --- interfaces. interface variables at index k are at grid location k-1/2.
+! --- sign convention: mass fluxes are considered positive in +k direction.
+
+! --- massflx and trflx_in  must be provided independently to allow the
+! --- algorithm to generate an auxiliary low-order (diffusive) tracer flux
+! --- as a stepping stone toward the final product trflx_out.
+
+   implicit none
+   integer,intent(in) :: n,ktop                                 ! number of grid cells
+   real(kind=kind_phys)   ,intent(in) :: dt,g                   ! transport time step
+   real(kind=kind_phys)   ,intent(in) :: z(n+0)                 ! location of cell interfaces
+   real(kind=kind_phys)   ,intent(in) :: tracr(n)               ! the transported variable
+   real(kind=kind_phys)   ,intent(in) :: massflx(n+0)           ! mass flux across interfaces
+   real(kind=kind_phys)   ,intent(in) :: trflx_in(n+0)          ! original tracer flux
+   real(kind=kind_phys)   ,intent(out):: dellac(n+0)            ! modified tracr flux
+   real(kind=kind_phys)   :: trflx_out(n+0)                     ! modified tracr flux
+   integer k,km1,kp1
+   logical :: NaN, error=.false., vrbos=.true.
+   real(kind=kind_phys) dtovdz(n),trmax(n),trmin(n),flx_lo(n+0),antifx(n+0),clipped(n+0),  &
+        soln_hi(n),totlin(n),totlout(n),soln_lo(n),clipin(n),clipout(n),arg
+   real(kind=kind_phys),parameter :: epsil=1.e-22               ! prevent division by zero
+   real(kind=kind_phys),parameter :: damp=1.                    ! damper of antidff flux (1=no damping)
+   NaN(arg) = .not. (arg.ge.0. .or. arg.le.0.)                  ! NaN detector
+   dtovdz(:)=0.
+   soln_lo(:)=0.
+   antifx(:)=0.
+   clipin(:)=0.
+   totlin(:)=0.
+   totlout(:)=0.
+   clipout(:)=0.
+   flx_lo(:)=0.
+   trmin(:)=0.
+   trmax(:)=0.
+   clipped(:)=0.
+   trflx_out(:)=0.
+   do k=1,ktop
+     dtovdz(k)=.01*dt/abs(z(k+1)-z(k))*g                        ! time step / grid spacing
+     if (z(k).eq.z(k+1)) error=.true.
+   end do
+!  if (vrbos .or. error) print '(a/(8es10.3))','(fct1d) dtovdz =',dtovdz
+
+   do k=2,ktop
+     if (massflx(k).ge.0.) then
+       flx_lo(k)=massflx(k)*tracr(k-1)          ! low-order flux, upstream
+     else
+       flx_lo(k)=massflx(k)*tracr(k)            ! low-order flux, upstream
+     end if
+     antifx(k)=trflx_in(k)-flx_lo(k)            ! antidiffusive flux
+   end do
+   flx_lo(     1)=trflx_in(  1)
+   flx_lo(ktop+1)=trflx_in(ktop+1)
+   antifx(     1)=0.
+   antifx(ktop+1)=0.
+! --- clip low-ord fluxes to make sure they don't violate positive-definiteness
+   do k=1,ktop
+     totlout(k)=max(0.,flx_lo(k+1))-min(0.,flx_lo(k  ))         ! total flux out
+     clipout(k)=min(1.,tracr(k)/max(epsil,totlout(k))/ (1.0001*dtovdz(k)))
+   end do
+
+   do k=2,ktop
+    if (massflx(k).ge.0.)  then
+      flx_lo(k)=flx_lo(k)*clipout(k-1)
+    else
+      flx_lo(k)=flx_lo(k)*clipout(k)
+    end if
+   end do
+   if (massflx(  1).lt.0.) flx_lo(  1)=flx_lo(  1)*clipout(1)
+   if (massflx(ktop+1).gt.0.)flx_lo(ktop+1)=flx_lo(ktop+1)*clipout(ktop)
+
+! --- a positive-definite low-order (diffusive) solution can now be  constructed
+
+   do k=1,ktop
+     soln_lo(k)=tracr(k)-(flx_lo(k+1)-flx_lo(k))*dtovdz(k)      ! low-ord solutn
+     dellac(k)=-(flx_lo(k+1)-flx_lo(k))*dtovdz(k)/dt
+    !dellac(k)=soln_lo(k)
+   end do
+   return
+   do k=1,ktop
+     km1=max(1,k-1)
+     kp1=min(ktop,k+1)
+     trmax(k)=       max(soln_lo(km1),soln_lo(k),soln_lo(kp1),  &
+                         tracr  (km1),tracr  (k),tracr  (kp1))  ! upper bound
+     trmin(k)=max(0.,min(soln_lo(km1),soln_lo(k),soln_lo(kp1),  &
+                         tracr  (km1),tracr  (k),tracr  (kp1))) ! lower bound
+   end do
+
+   do k=1,ktop
+     totlin (k)=max(0.,antifx(k  ))-min(0.,antifx(k+1))         ! total flux in
+     totlout(k)=max(0.,antifx(k+1))-min(0.,antifx(k  ))         ! total flux out
+
+     clipin (k)=min(damp,(trmax(k)-soln_lo(k))/max(epsil,totlin (k))    &
+       / (1.0001*dtovdz(k)))
+     clipout(k)=min(damp,(soln_lo(k)-trmin(k))/max(epsil,totlout(k))    &
+       / (1.0001*dtovdz(k)))
+
+     if (NaN(clipin(k)))  print *,'(fct1d) error: clipin is NaN,  k=',k
+     if (NaN(clipout(k))) print *,'(fct1d) error: clipout is NaN,  k=',k
+
+     if (clipin(k).lt.0.) then
+!       print 100,'(fct1d) error: clipin < 0 at k =',k,			&
+!       'clipin',clipin(k),'trmax',trmax(k),'soln_lo',soln_lo(k),	&
+!       'totlin',totlin(k),'dt/dz',dtovdz(k)
+       error=.true.
+     end if
+     if (clipout(k).lt.0.) then
+!       print 100,'(fct1d) error: clipout < 0 at k =',k,			&
+!       'clipout',clipout(k),'trmin',trmin(k),'soln_lo',soln_lo(k),	&
+!       'totlout',totlout(k),'dt/dz',dtovdz(k)
+       error=.true.
+     end if
+! 100 format (a,i3/(4(a10,"=",es9.2)))
+   end do
+
+   do k=2,ktop
+     if (antifx(k).gt.0.)  then
+       clipped(k)=antifx(k)*min(clipout(k-1),clipin(k))
+     else
+       clipped(k)=antifx(k)*min(clipout(k),clipin(k-1))
+     end if
+     trflx_out(k)=flx_lo(k)+clipped(k)
+     if (NaN(trflx_out(k)))  then
+       print *,'(fct1d) error: trflx_out is NaN,  k=',k
+       error=.true.
+     end if
+   end do
+   trflx_out(     1)=trflx_in(     1)
+   trflx_out(ktop+1)=trflx_in(ktop+1)
+   do k=1,ktop
+     soln_hi(k)=tracr(k)-(trflx_out(k+1)-trflx_out(k))*dtovdz(k)
+     dellac(k)=-g*(trflx_out(k+1)-trflx_out(k))*dtovdz(k)/dt
+     !dellac(k)=soln_hi(k)
+   end do
+
+   if (vrbos .or. error) then
+!     do k=2,ktop
+!       write(32,99)k,						&
+!       'tracr(k)', tracr(k),					&
+!       'flx_in(k)', trflx_in(k),				&
+!       'flx_in(k+1)', trflx_in(k+1),				&
+!       'flx_lo(k)', flx_lo(k),					&
+!       'flx_lo(k+1)', flx_lo(k+1),				&
+!       'soln_lo(k)', soln_lo(k),				&
+!       'trmin(k)', trmin(k),					&
+!       'trmax(k)', trmax(k),					&
+!       'totlin(k)', totlin(k),					&
+!       'totlout(k)', totlout(k),				&
+!       'clipin(k-1)', clipin(k-1),				&
+!       'clipin(k)', clipin(k),					&
+!       'clipout(k-1)', clipout(k-1),				&
+!       'clipout(k)', clipout(k),				&
+!       'antifx(k)', antifx(k),					&
+!       'antifx(k+1)', antifx(k+1),				&
+!       'clipped(k)', clipped(k),				&
+!       'clipped(k+1)', clipped(k+1),				&
+!       'flx_out(k)', trflx_out(k),				&
+!       'flx_out(k+1)', trflx_out(k+1),				&
+!       'dt/dz(k)', dtovdz(k),					&
+!       'final', tracr(k)-(trflx_out(k+1)-trflx_out(k))*dtovdz(k)
+! 99    format ('(trc1d)   k =',i4/(3(a13,'=',es13.6)))
+!     end do
+     if (error) stop '(fct1d error)'
+   end if
+
+   return
+   end subroutine fct1d3
+
+   subroutine rain_evap_below_cloudbase(itf,ktf, its,ite, kts,kte,ierr,    &
+                   kbcon,xmb,psur,xland,qo_cup,                            &
+                   po_cup,qes_cup,pwavo,edto,pwevo,pre,outt,outq) !,outbuoy)
+
+   implicit none
+   real(kind=kind_phys), parameter :: alp1=5.44e-4 & !1/sec
+                     ,alp2=5.09e-3 & !unitless
+                     ,alp3=0.5777  & !unitless
+                     ,c_conv=0.05    !conv fraction area, unitless
+
+
+   integer                           ,intent(in)    :: itf,ktf, its,ite, kts,kte
+   integer, dimension(its:ite)       ,intent(in)    :: ierr,kbcon
+   real(kind=kind_phys), dimension(its:ite)        ,intent(in)    ::psur,xland,pwavo,edto,pwevo,xmb
+   real(kind=kind_phys), dimension(its:ite,kts:kte),intent(in)    :: po_cup,qo_cup,qes_cup
+   real(kind=kind_phys), dimension(its:ite)        ,intent(inout) :: pre
+   real(kind=kind_phys), dimension(its:ite,kts:kte),intent(inout) :: outt,outq  !,outbuoy
+
+  !real,    dimension(its:ite)        ,intent(out)      :: tot_evap_bcb
+  !real,    dimension(its:ite,kts:kte),intent(out) :: evap_bcb,net_prec_bcb
+
+  !-- locals
+   integer :: i,k
+   real(kind=kind_phys) :: RH_cr , del_t,del_q,dp,q_deficit
+   real(kind=kind_phys),  dimension(its:ite,kts:kte) :: evap_bcb,net_prec_bcb
+   real(kind=kind_phys),  dimension(its:ite)         :: tot_evap_bcb
+
+   do i=its,itf
+     evap_bcb    (i,:)= 0.0
+     net_prec_bcb(i,:)= 0.0
+     tot_evap_bcb(i)  = 0.0
+     if(ierr(i) /= 0) cycle
+
+    !-- critical rel humidity
+     RH_cr=0.9*xland(i)+0.7*(1-xland(i))
+    !RH_cr=1.
+
+     !-- net precipitation (after downdraft evap) at cloud base, available to
+     !evap
+     k=kbcon(i)
+    !net_prec_bcb(i,k) = xmb(i)*(pwavo(i)+edto(i)*pwevo(i)) !-- pwevo<0.
+     net_prec_bcb(i,k) = pre(i)
+
+     do k=kbcon(i)-1, kts, -1
+
+       q_deficit = max(0.,(RH_cr*qes_cup(i,k) -qo_cup(i,k)))
+
+       if(q_deficit < 1.e-6) then
+          net_prec_bcb(i,k)= net_prec_bcb(i,k+1)
+          cycle
+       endif
+
+       dp = 100.*(po_cup(i,k)-po_cup(i,k+1))
+
+      !--units here: kg[water]/kg[air}/sec
+       evap_bcb(i,k) = c_conv * alp1 * q_deficit * &
+                      ( sqrt(po_cup(i,k)/psur(i))/alp2 *net_prec_bcb(i,k+1)/c_conv )**alp3
+
+      !--units here: kg[water]/kg[air}/sec * kg[air]/m3 * m = kg[water]/m2/sec
+       evap_bcb(i,k)= evap_bcb(i,k)*dp/g
+
+       if((net_prec_bcb(i,k+1) - evap_bcb(i,k)).lt.0.) cycle
+       if((pre(i) - evap_bcb(i,k)).lt.0.) cycle
+       net_prec_bcb(i,k)= net_prec_bcb(i,k+1) - evap_bcb(i,k)
+
+       tot_evap_bcb(i) = tot_evap_bcb(i)+evap_bcb(i,k)
+
+      !-- feedback
+       del_q =  evap_bcb(i,k)*g/dp          ! > 0., units: kg[water]/kg[air}/sec
+       del_t = -evap_bcb(i,k)*g/dp*(xlv/cp) ! < 0., units: K/sec
+
+!       print*,"ebcb2",k,del_q*86400,del_t*86400
+
+       outq   (i,k) = outq   (i,k) + del_q
+       outt   (i,k) = outt   (i,k) + del_t
+      !outbuoy(i,k) = outbuoy(i,k) + cp*del_t+xlv*del_q
+
+       pre(i) = pre(i) - evap_bcb(i,k)
+      enddo
+    enddo
+
+   end subroutine rain_evap_below_cloudbase
+
+
+
    subroutine cup_dd_edt(ierr,us,vs,z,ktop,kbcon,edt,p,pwav, &
               pw,ccn,pwev,edtmax,edtmin,edtc,psum2,psumh,    &
               rho,aeroevap,itf,ktf,                          &
@@ -2747,9 +3019,8 @@ contains
                      xff_ens3(12)=0.
                      xff_ens3(13)= 0.
                      xff_ens3(16)= 0.
-!                     closure_n(i)=12.
-! hli 05/01/2018                     closure_n(i)=12.
-!                     xff_dicycle = 0.
+!                    closure_n(i)=12.
+!                    xff_dicycle = 0.
                 endif  !xff0
              endif ! ichoice
 
@@ -3682,7 +3953,7 @@ endif
         prop_b(kts:kte)=0
         iall=0
         c0=.002
-        clwdet=100.
+        clwdet=50.
         bdsp=bdispm
 !
 !--- no precip for small clouds

@@ -113,6 +113,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
                           pdftxt/GFS_HEDMF.txt    \
                           pdftxt/GFS_SATMEDMF.txt    \
+                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
                           pdftxt/GFS_GWDPS.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
@@ -120,6 +121,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMF.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_GWDC.txt     \
+                          pdftxt/UGWPv0.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
 ###                          pdftxt/GFS_SURFACE_PERT.txt    \
@@ -131,9 +133,11 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GSD_CU_GF_deep.txt      \
                           pdftxt/GSD_RUCLSM.txt          \
                           pdftxt/GSD_THOMPSON.txt        \
+                          pdftxt/HWRF_FAMP.txt          \
 ###                          pdftxt/GFSphys_namelist.txt    \
 ###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
+                          pdftxt/NoahMP.txt \
 ### in-core MP
                         ../gfdl_fv_sat_adj.F90    \
 ### time_vary
@@ -172,6 +176,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../sflx.f    \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
+                        ../sfc_noahmp_drv.f \
+                        ../module_sf_noahmplsm.f90 \
+                        ../module_sf_noahmp_glacier.f90 \
+                        ../noahmp_tables.f90 \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL
@@ -182,6 +190,11 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../satmedmfvdif.F \
                         ../mfpblt.f         \
                         ../mfscu.f          \
+                        ../tridi.f          \
+### satmedmfvdifq
+                        ../satmedmfvdifq.F \
+                        ../mfpbltq.f         \
+                        ../mfscuq.f          \
                         ../tridi.f          \
 ### Orographic Gravity Wave
                         ../gwdps.f \
@@ -199,6 +212,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Shallow Convection
                         ../samfshalcnv.f \
                         ../cnvc90.f \
+### Unified Gravity Wave
+                        ../cires_ugwp.F90 \
+                        ../ugwp_driver_v0.F \
+                        ../cires_ugwp_triggers.F90 \
 ### Microphysics
 ###                        ../gscond.f \
 ###                        ../precpd.f \
@@ -245,6 +262,9 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_mp_thompson.F90 \
                         ../module_mp_radar.F90 \
                         ../mp_thompson_post.F90  \
+### HAFS
+                        ../mp_fer_hires.F90   \
+                        ../module_MP_FER_HIRES.F90 \
 ### utils
                         ../funcphys.f90     \
                         ../physparam.f      \

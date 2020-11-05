@@ -1,7 +1,13 @@
 !>  \file sfc_noahmp_drv.f
 !!  This file contains the NoahMP land surface scheme driver.
 
-!> This module contains the CCPP-compliant NoahMP land surface scheme driver.
+!>\defgroup NoahMP_LSM NoahMP LSM Model
+!! \brief This is the NoahMP LSM driver module, with the functionality of 
+!! preparing variables to run the NoahMP LSM subroutine noahmp_sflx(), calling NoahMP LSM and post-processing
+!! variables for return to the parent model suite including unit conversion, as well
+!! as diagnotics calculation.
+
+!> This module contains the CCPP-compliant NoahMP land surface model driver.
       module noahmpdrv
 
       implicit none
@@ -12,6 +18,9 @@
 
       contains
 
+!> \ingroup NoahMP_LSM
+!! \brief This subroutine is called during the CCPP initialization phase and calls set_soilveg() to 
+!! initialize soil and vegetation parameters for the chosen soil and vegetation data sources.
 !! \section arg_table_noahmpdrv_init Argument Table
 !! \htmlinclude noahmpdrv_init.html
 !!
@@ -30,6 +39,19 @@
         errmsg = ''
         errflg = 0
 
+        if (ivegsrc /= 1) then
+          errmsg = 'The NOAHMP LSM expects that the ivegsrc physics '//
+     &             'namelist parameter is 1. Exiting...'
+          errflg = 1
+          return
+        end if
+        if (isot /= 1) then
+          errmsg = 'The NOAHMP LSM expects that the isot physics '//
+     &             'namelist parameter is 1. Exiting...'
+          errflg = 1
+          return
+        end if
+
         !--- initialize soil vegetation
         call set_soilveg(me, isot, ivegsrc, nlunit)
       
@@ -38,12 +60,27 @@
       subroutine noahmpdrv_finalize
       end subroutine noahmpdrv_finalize
 
-!> \section arg_table_noahmpdrv_run Argument Table
+!> \ingroup NoahMP_LSM
+!! \brief This subroutine is the main CCPP entry point for the NoahMP LSM.
+!! \section arg_table_noahmpdrv_run Argument Table
 !! \htmlinclude noahmpdrv_run.html
 !!
-!                                                                       !
-!     lheatstrg- logical, flag for canopy heat storage             1    !
-!                         parameterization                              !
+!! \section general_noahmpdrv NoahMP Driver General Algorithm
+!!  @{
+!!    - Initialize CCPP error handling variables.
+!!    - Set a flag to only continue with each grid cell if the fraction of land is non-zero.
+!!    - This driver may be called as part of an iterative loop. If called as the first "guess" run, 
+!!        save land-related prognostic fields to restore.
+!!    - Initialize output variables to zero and prepare variables for input into the NoahMP LSM.
+!!    - Call transfer_mp_parameters() to fill a derived datatype for input into the NoahMP LSM.
+!!    - Call noahmp_options() to set module-level scheme options for the NoahMP LSM.
+!!    - If the vegetation type is ice for the grid cell, call noahmp_options_glacier() to set 
+!!        module-level scheme options for NoahMP Glacier and call noahmp_glacier().
+!!    - For other vegetation types, call noahmp_sflx(), the entry point of the NoahMP LSM.
+!!    - Set output variables from the output of noahmp_glacier() and/or noahmp_sflx().
+!!    - Call penman() to calculate potential evaporation.
+!!    - Calculate the surface specific humidity and convert surface sensible and latent heat fluxes in W m-2 from their kinematic values.
+!!    - If a "guess" run, restore the land-related prognostic fields.
 !                                                                       !
 !-----------------------------------
       subroutine noahmpdrv_run                                          &
@@ -53,7 +90,6 @@
      &       sigmaf, sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
      &       prsl1, prslki, zf, dry, wind, slopetyp,                    &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
-     &       lheatstrg,                                                 &
      &       idveg, iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,   &
      &       iopt_inf, iopt_rad, iopt_alb, iopt_snf, iopt_tbot,         &
      &       iopt_stc, xlatin, xcoszin, iyrlen, julian,                 &
@@ -141,8 +177,6 @@
 
       real (kind=kind_phys),  intent(in) :: delt
       logical, dimension(im), intent(in) :: flag_iter, flag_guess
-
-      logical, intent(in) :: lheatstrg
 
       real (kind=kind_phys),  intent(in) :: con_hvap, con_cp, con_jcal, &
      &                      rhoh2o, con_eps, con_epsm1, con_fvirt,      &
@@ -242,8 +276,6 @@
      &                         shg,shc,shb,evg,evb,ghv,ghb,irg,irc,     &
      &                         irb,tr,evc,chleaf,chuc,chv2,chb2,        &
      &                         fpice,pahv,pahg,pahb,pah,co2pp,o2pp,ch2b
-
-      real (kind=kind_phys) :: cpfac
 
       integer :: i, k, ice, stype, vtype ,slope,nroot,couple
       logical :: flag(im)
@@ -633,11 +665,6 @@
        call noahmp_options(idveg ,iopt_crs,iopt_btr,iopt_run,iopt_sfc,  &
      & iopt_frz,iopt_inf,iopt_rad,iopt_alb,iopt_snf,iopt_tbot,iopt_stc)
 
-!
-!  initialize heat capacity enhancement factor for heat storage parameterization
-!
-       cpfac = 1.0
-
         if ( vtype == isice_table )  then
 
           ice = -1
@@ -725,7 +752,6 @@
      &        qc      , swdn    , lwdn                                 ,& ! in : forcing
      &        pconv   , pnonc   , pshcv   , psnow   , pgrpl   , phail  ,& ! in : forcing
      &        tbot    , co2pp   , o2pp    , foln    , ficeold , zlvl   ,& ! in : forcing
-     &        lheatstrg                                                ,& ! in : canopy heat storage
      &        alboldx , sneqvox                                        ,& ! in/out : 
      &        tsnsox  , slsoil  , smsoil  , tahx    , eahx    , fwetx  ,& ! in/out : 
      &        canliqx , canicex , tvx     , tgx     , qsfc1d  , qsnowx ,& ! in/out : 
@@ -733,7 +759,7 @@
      &        zwtx    , wax     , wtx     , wslakex , lfmassx , rtmassx,& ! in/out : 
      &        stmassx , woodx   , stblcpx , fastcpx , xlaix   ,xsaix   ,& ! in/out : 
      &        cmx     , chx     , taussx                               ,& ! in/out : 
-     &        smcwtdx ,deeprechx, rechx   , cpfac                      ,& ! in/out :
+     &        smcwtdx ,deeprechx, rechx                                ,& ! in/out :
      &        z0wrf                                                    ,& ! out
      &        fsa     , fsr     , fira    , fsh     , ssoil   , fcev   ,& ! out : 
      &        fgev    , fctr    , ecan    , etran   , edir    , trad   ,& ! out :
@@ -874,7 +900,7 @@
 !         ssoil     = -1.0 *ssoil
 
        call penman (sfctmp,sfcprs,chx,t2v,th2,prcp,fdown,ssoil,         &
-     &   cpfac,q2,q2sat,etp,snowng,frzgra,ffrozp,dqsdt2,emissi,fsno)
+     &   q2,q2sat,etp,snowng,frzgra,ffrozp,dqsdt2,emissi,fsno)
 
           ep(i) = etp
 
@@ -968,8 +994,12 @@
       return
 !...................................
       end subroutine noahmpdrv_run
+!> @}
 !-----------------------------------
 
+!> \ingroup NoahMP_LSM
+!! \brief This subroutine fills in a derived data type of type noahmp_parameters with data
+!! from the module \ref noahmp_tables.
       subroutine transfer_mp_parameters (vegtype,soiltype,slopetype,    &
      &                                          soilcolor,parameters)
      
@@ -1134,9 +1164,12 @@
 
 !-----------------------------------------------------------------------&
 
-
+!> \ingroup NoahMP_LSM
+!! brief Calculate potential evaporation for the current point. Various
+!! partial sums/products are also calculated and passed back to the
+!! calling routine for later use.
       subroutine penman (sfctmp,sfcprs,ch,t2v,th2,prcp,fdown,ssoil,     &
-     &                   cpfac,q2,q2sat,etp,snowng,frzgra,ffrozp,       &
+     &                   q2,q2sat,etp,snowng,frzgra,ffrozp,             &
      &                   dqsdt2,emissi_in,sncovr)
  
 ! etp is calcuated right after ssoil
@@ -1144,19 +1177,14 @@
 ! ----------------------------------------------------------------------
 ! subroutine penman
 ! ----------------------------------------------------------------------
-! calculate potential evaporation for the current point.  various
-! partial sums/products are also calculated and passed back to the
-! calling routine for later use.
-! ----------------------------------------------------------------------
       implicit none
       logical, intent(in)     :: snowng, frzgra
       real, intent(in)        :: ch, dqsdt2,fdown,prcp,ffrozp,          &
-     &                           q2, q2sat,ssoil,cpfac, sfcprs, sfctmp, &
+     &                           q2, q2sat,ssoil, sfcprs, sfctmp,       &
      &                           t2v, th2,emissi_in,sncovr
       real, intent(out)       :: etp
       real                    :: epsca,flx2,rch,rr,t24
       real                    :: a, delta, fnet,rad,rho,emissi,elcp1,lvs
-      real                    :: elcpx
 
       real, parameter :: elcp = 2.4888e+3, lsubc = 2.501000e+6,cp = 1004.6
       real, parameter :: lsubs = 2.83e+6, rd = 287.05, cph2o = 4.1855e+3
@@ -1170,12 +1198,11 @@
 ! prepare partial quantities for penman equation.
 ! ----------------------------------------------------------------------
         emissi=emissi_in
-        elcpx = elcp / cpfac
-!       elcp1  = (1.0-sncovr)*elcpx  + sncovr*elcpx*lsubs/lsubc
+!       elcp1  = (1.0-sncovr)*elcp  + sncovr*elcp*lsubs/lsubc
         lvs    = (1.0-sncovr)*lsubc + sncovr*lsubs
 
       flx2 = 0.0
-      delta = elcpx * dqsdt2
+      delta = elcp * dqsdt2
 !     delta = elcp1 * dqsdt2
       t24 = sfctmp * sfctmp * sfctmp * sfctmp
        rr = t24 * 6.48e-8 / (sfcprs * ch) + 1.0
@@ -1186,7 +1213,7 @@
 ! adjust the partial sums / products with the latent heat
 ! effects caused by falling precipitation.
 ! ----------------------------------------------------------------------
-      rch = rho * cp * cpfac * ch
+      rch = rho * cp * ch
       if (.not. snowng) then
          if (prcp >  0.0) rr = rr + cph2o * prcp / rch
       else
@@ -1209,7 +1236,7 @@
 ! ----------------------------------------------------------------------
       end if
       rad = fnet / rch + th2- sfctmp
-       a = elcpx * (q2sat - q2)
+       a = elcp * (q2sat - q2)
 !     a = elcp1 * (q2sat - q2)
       epsca = (a * rr + rad * delta) / (delta + rr)
        etp = epsca * rch / lsubc

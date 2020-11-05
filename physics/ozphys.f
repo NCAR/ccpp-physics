@@ -10,17 +10,29 @@
 ! \brief Brief description of the subroutine
 !
 !> \section arg_table_ozphys_init Argument Table
+!! \htmlinclude ozphys_init.html
 !!
-      subroutine ozphys_init()
+      subroutine ozphys_init(oz_phys, errmsg, errflg)
+
+      implicit none
+      logical,          intent(in)  :: oz_phys
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not.oz_phys) then
+        write (errmsg,'(*(a))') 'Logic error: oz_phys == .false.'
+        errflg = 1
+        return
+      endif
+
       end subroutine ozphys_init
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_ozphys_finalize Argument Table
-!!
       subroutine ozphys_finalize()
       end subroutine ozphys_finalize
-
 
 !>\defgroup GFS_ozphys GFS ozphys Main
 !! \brief The operational GFS currently parameterizes ozone production and
@@ -33,8 +45,8 @@
 !> \section genal_ozphys GFS ozphys_run General Algorithm
 !> @{
       subroutine ozphys_run (                                           &
-     &  ix, im, levs, ko3, dt, oz, tin, po3,                            &
-     &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
+     &  im, levs, ko3, dt, oz, tin, po3,                                &
+     &  prsl, prdout, oz_coeff, delp, ldiag3d, qdiag3d,                 &
      &  ozp1, ozp2, ozp3, ozp4, con_g, me, errmsg, errflg)
 !
 !     this code assumes that both prsl and po3 are from bottom to top
@@ -44,18 +56,18 @@
       implicit none
 !
       ! Interface variables
-      integer, intent(in) :: im, ix, levs, ko3, oz_coeff, me
+      integer, intent(in) :: im, levs, ko3, oz_coeff, me
       real(kind=kind_phys), intent(inout) ::                            &
-     &                     oz(ix,levs)
+     &                     oz(im,levs)
       ! These arrays may not be allocated and need assumed array sizes
       real(kind=kind_phys), intent(inout) ::                            &
      &                     ozp1(:,:), ozp2(:,:), ozp3(:,:), ozp4(:,:)
       real(kind=kind_phys), intent(in) ::                               &
-     &                     dt, po3(ko3), prdout(ix,ko3,oz_coeff),       &
-     &                     prsl(ix,levs), tin(ix,levs), delp(ix,levs),  &
+     &                     dt, po3(ko3), prdout(im,ko3,oz_coeff),       &
+     &                     prsl(im,levs), tin(im,levs), delp(im,levs),  &
      &                     con_g
       real :: gravi
-      logical, intent(in) :: ldiag3d
+      logical, intent(in) :: ldiag3d, qdiag3d
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -65,7 +77,7 @@
       logical flg(im)
       real(kind=kind_phys) pmax, pmin, tem, temp
       real(kind=kind_phys) wk1(im), wk2(im), wk3(im), prod(im,oz_coeff),
-     &                     ozib(im),  colo3(im,levs+1), ozi(ix,levs)
+     &                     ozib(im),  colo3(im,levs+1), ozi(im,levs)
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -140,12 +152,12 @@
             oz(i,l)   = (ozib(i) + prod(i,1)*dt) / (1.0 + prod(i,2)*dt)
           enddo
 !
-          !if (ldiag3d) then     !     ozone change diagnostics
-          !  do i=1,im
-          !    ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
-          !    ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-          !  enddo
-          !endif
+          if (ldiag3d .and. qdiag3d) then     !     ozone change diagnostics
+            do i=1,im
+              ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
+              ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
+            enddo
+          endif
         endif
 !> - Calculate the 4 terms of prognostic ozone change during time \a dt:  
 !!  - ozp1(:,:) - Ozone production from production/loss ratio 
@@ -161,14 +173,14 @@
 !    &,' ozib=',ozib(i),' l=',l,' tin=',tin(i,l),'colo3=',colo3(i,l+1)
             oz(i,l) = (ozib(i)  + tem*dt) / (1.0 + prod(i,2)*dt)
           enddo
-          !if (ldiag3d) then     !     ozone change diagnostics
-          !  do i=1,im
-          !    ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
-          !    ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
-          !    ozp3(i,l) = ozp3(i,l) + prod(i,3)*tin(i,l)*dt
-          !    ozp4(i,l) = ozp4(i,l) + prod(i,4)*colo3(i,l+1)*dt
-          !  enddo
-          !endif
+          if(ldiag3d .and. qdiag3d) then
+            do i=1,im
+              ozp1(i,l) = ozp1(i,l) + prod(i,1)*dt
+              ozp2(i,l) = ozp2(i,l) + (oz(i,l) - ozib(i))
+              ozp3(i,l) = ozp3(i,l) + prod(i,3)*tin(i,l)*dt
+              ozp4(i,l) = ozp4(i,l) + prod(i,4)*colo3(i,l+1)*dt
+            enddo
+          endif
         endif
 
       enddo                                ! vertical loop
