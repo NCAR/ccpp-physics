@@ -547,6 +547,7 @@ contains
             if (.not. flag_cice(i)) then
               tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
               zorl(i)  = cice(i) * zorl_ice(i)   + (one - cice(i)) * zorl_wat(i)
+              tsfc(i)  = tsfc_ice(i)
             elseif (wet(i)) then
               if (cice(i) > min_seaice) then ! this was already done for lake ice in sfc_sice
                 txi = cice(i)

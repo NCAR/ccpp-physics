@@ -671,6 +671,23 @@
   kind = kind_phys
   intent = in
   optional = F
+[dx]
+  standard_name = cell_size
+  long_name = relative dx for the grid cell
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[icloud]
+  standard_name = cloud_effect_to_optical_depth_and_cloud_fraction
+  long_name = cloud effect to the optical depth and cloud fraction in radiation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [coszen]
   standard_name = cosine_of_zenith_angle
   long_name = mean cos of zenith angle over rad call period
