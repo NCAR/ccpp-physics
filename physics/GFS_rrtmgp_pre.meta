@@ -328,6 +328,24 @@
   kind = kind_phys
   intent = out
   optional = F
+[qs_lay]
+  standard_name = saturation_vapor_pressure
+  long_name = saturation vapor pressure
+  units = Pa
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[q_lay]
+  standard_name = water_vapor_mixing_ratio
+  long_name = water vaport mixing ratio
+  units = kg/kg
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F 
 [tracer]
   standard_name = chemical_tracers
   long_name = chemical tracers

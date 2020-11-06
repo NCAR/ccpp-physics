@@ -143,10 +143,10 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr, &
-       fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array,      &
-       con_eps, con_epsm1, con_fvirt, con_epsqs,                                         &
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, tv_lay, relhum, tracer,            &
+  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr,    &
+       fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array, con_eps,&
+       con_epsm1, con_fvirt, con_epsqs,                                                     &
+       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,&
        gas_concentrations,  errmsg, errflg)
     
     ! Inputs   
@@ -195,8 +195,10 @@ contains
     real(kind_phys), dimension(nCol,nLev), intent(out) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
+         q_lay,             & ! Water-vapor mixing ratio (kg/kg)
          tv_lay,            & ! Virtual temperature at model-layers 
-         relhum               ! Relative-humidity at model-layers          
+         relhum,            & ! Relative-humidity at model-layers   
+	 qs_lay               ! Saturation vapor pressure at model-layers
     real(kind_phys), dimension(nCol,nLev+1), intent(out) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
@@ -209,8 +211,8 @@ contains
     integer :: i, j, iCol, iBand, iSFC, iTOA, iLay
     logical :: top_at_1
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
-    real(kind_phys) :: es, qs, tem1, tem2
-    real(kind_phys), dimension(nCol,nLev) :: o3_lay, q_lay
+    real(kind_phys) :: es, tem1, tem2
+    real(kind_phys), dimension(nCol,nLev) :: o3_lay
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
 
     ! Initialize CCPP error handling variables
@@ -265,8 +267,8 @@ contains
     do iCol=1,NCOL
        do iLay=1,nLev
           es                = min( p_lay(iCol,iLay),  fpvs( t_lay(iCol,iLay) ) )  ! fpvs and prsl in pa
-          qs                = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
-          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs ) )
+          qs_lay(iCol,iLay) = max( con_epsqs, con_eps * es / (p_lay(iCol,iLay) + con_epsm1*es) )
+          relhum(iCol,iLay) = max( 0._kind_phys, min( 1._kind_phys, max(con_epsqs, q_lay(iCol,iLay))/qs_lay(iCol,iLay) ) )
           tv_lay(iCol,iLay) = t_lay(iCol,iLay) * (1._kind_phys + con_fvirt*q_lay(iCol,iLay)) 
        enddo
     enddo
