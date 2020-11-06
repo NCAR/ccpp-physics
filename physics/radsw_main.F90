@@ -982,7 +982,7 @@
 
 
 ! mz*: HWRF
-        if (iovrsw == 4 ) then
+        if (iovr == 4 ) then
 
 
 !Add layer height needed for exponential (icld=4) and
@@ -993,7 +993,7 @@
          permuteseed = 1
 
 !mz* Derive height of each layer mid-point from layer thickness.
-! Needed for exponential (iovrsw=4) and exponential-random overlap
+! Needed for exponential (iovr=4) and exponential-random overlap
 ! option (iovr=5)only.
          dzsum =0.0
          do k = 1,nlay
@@ -1012,7 +1012,7 @@
                enddo
             enddo
 
-          call mcica_subcol_sw (1, 1, nlay, iovrsw, permuteseed,                      &
+          call mcica_subcol_sw (1, 1, nlay, iovr, permuteseed,                        &
      &                 irng, plyr(j1:j1,:), hgt(j1:j1,:),                             &
      &                 cld_cf(j1:j1,:), cld_iwp(j1:j1,:), cld_lwp(j1:j1,:),           &
      &                 cld_swp(j1:j1,:), cld_ref_ice(j1:j1,:), cld_ref_liq(j1:j1,:),  &
@@ -1111,7 +1111,7 @@
               cdat3(k) = cld_swp(j1,kk)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,kk)  ! snow partical effctive radius
             enddo
-            if (iovrsw == 4) then !mz* HWRF
+            if (iovr == 4) then !mz* HWRF
                do k = 1, nlay
                   kk = nlp1 - k
                do ig = 1, ngptsw
@@ -1226,7 +1226,7 @@
               cdat3(k) = cld_swp(j1,k)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,k)  ! snow partical effctive radius
             enddo
-            if (iovrsw == 4) then     !mz* HWRF
+            if (iovr == 4) then     !mz* HWRF
 !mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
 !For GCM input, incoming reicmcl is defined based on selected 
 !ice parameterization (inflglw)
@@ -1299,7 +1299,7 @@
         if (zcf1 > f_zero) then     ! cloudy sky column
 
           !mz* for HWRF, save cldfmc with mcica
-          if (iovrsw == 4) then
+          if (iovr == 4) then
                do k = 1, nlay
                do ig = 1, ngptsw
                   cldfmc_save(k,ig)=cldfmc (k,ig)
@@ -1315,7 +1315,7 @@
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &
      &     )
 
-          if (iovrsw == 4) then                                                  
+          if (iovr == 4) then                                                  
           !mz for HWRF, still using mcica cldfmc                                  
                do k = 1, nlay                                                     
                do ig = 1, ngptsw                                                  
@@ -2116,7 +2116,7 @@
 !> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
-      if ( isubcsw > 0 .and. iovrsw /= 4 ) then      ! mcica sub-col clouds approx
+      if ( isubcsw > 0 .and. iovr /= 4 ) then      ! mcica sub-col clouds approx
 
         cldf(:) = cfrac(:)
         where (cldf(:) < ftiny)

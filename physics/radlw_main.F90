@@ -852,7 +852,7 @@
         if (iovr == 3) delgth= de_lgth(iplon)    ! clouds decorr-length
 
 ! mz*: HWRF
-        if (iovrlw == 4 ) then
+        if (iovr == 4 ) then
 
 !Add layer height needed for exponential (icld=4) and
 ! exponential-random (icld=5) overlap options  
@@ -876,7 +876,7 @@
                enddo
             enddo
 
-          call mcica_subcol_lw(1, iplon, nlay, iovrlw, permuteseed,     &
+          call mcica_subcol_lw(1, iplon, nlay, iovr, permuteseed,       &
      &                 irng, plyr, hgt,                                 &
      &                 cld_cf, cld_iwp, cld_lwp,cld_swp,                &
      &                 cld_ref_ice, cld_ref_liq,                        &
@@ -989,7 +989,7 @@
               cda4(k)  = cld_ref_snow(iplon,k1)
             enddo
             ! HWRF RRMTG
-            if (iovrlw == 4) then   !mz  HWRF 
+            if (iovr == 4) then   !mz  HWRF 
                do k = 1, nlay
                   k1 = nlp1 - k
                do ig = 1, ngptlw
@@ -1112,7 +1112,7 @@
               cda3(k)  = cld_swp(iplon,k)
               cda4(k)  = cld_ref_snow(iplon,k)
             enddo
-            if (iovrlw == 4) then
+            if (iovr == 4) then
 !mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
 !For GCM input, incoming reicmcl is defined based on selected 
 !ice parameterization (inflglw)
@@ -1206,7 +1206,7 @@
         if ( lcf1 ) then
 
           !mz* for HWRF, save cldfmc with mcica
-          if (iovrlw == 4) then
+          if (iovr == 4) then
                do k = 1, nlay
                do ig = 1, ngptlw
                   cldfmc_save(ig,k)=cldfmc (ig,k)
@@ -1217,12 +1217,12 @@
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cldfrc,clwp,relw,ciwp,reiw,cda1,cda2,cda3,cda4,            &
-     &       nlay, nlp1, ipseed(iplon), dz, delgth, iovrlw, alph,       &
+     &       nlay, nlp1, ipseed(iplon), dz, delgth, iovr, alph,         &
 !  ---  outputs:
      &       cldfmc, taucld                                             &
      &     )
 
-          if (iovrlw == 4) then
+          if (iovr == 4) then
           !mz for HWRF, still using mcica cldfmc
                do k = 1, nlay
                do ig = 1, ngptlw
@@ -1251,7 +1251,7 @@
         endif
 
 !mz* HWRF: calculate taucmc with mcica
-        if (iovrlw == 4) then 
+        if (iovr == 4) then 
           call cldprmc(nlay, inflglw, iceflglw, liqflglw,               &
      &                 cldfmc, ciwpmc,                                  &
      &                 clwpmc, cswpmc, reicmc, relqmc, resnmc,          &
@@ -1713,7 +1713,7 @@
 !> @{
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     & !  ---  inputs
-     &       nlay, nlp1, ipseed, dz, de_lgth, iovrlw, alpha,            &
+     &       nlay, nlp1, ipseed, dz, de_lgth, iovr, alpha,              &
      &       cldfmc, taucld                                             & !  ---  outputs
      &     )
 
@@ -1814,7 +1814,7 @@
       use module_radlw_cldprlw
 
 !  ---  inputs:
-      integer, intent(in) :: nlay, nlp1, ipseed, iovrlw
+      integer, intent(in) :: nlay, nlp1, ipseed, iovr
 
       real (kind=kind_phys), dimension(0:nlp1), intent(in) :: cfrac
       real (kind=kind_phys), dimension(nlay),   intent(in) :: cliqp,    &
@@ -1994,7 +1994,7 @@
 !  --- ...  call sub-column cloud generator
 
 !mz*
-      if (iovrlw .ne. 4) then
+      if (iovr .ne. 4) then
         call mcica_subcol                                               &
 !  ---  inputs:
      &     ( cldf, nlay, ipseed, dz, de_lgth, alpha,                    &
@@ -2011,7 +2011,7 @@
             endif
           enddo
         enddo
-      endif  !iovrlw
+      endif  !iovr
 
       endif   ! end if_isubclw_block
 
