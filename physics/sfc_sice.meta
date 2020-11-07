@@ -433,33 +433,6 @@
   type = integer
   intent = in
   optional = F
-[min_lakeice]
-  standard_name = lake_ice_minimum
-  long_name = minimum lake ice value
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[min_seaice]
-  standard_name = sea_ice_minimum
-  long_name = minimum sea ice value
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[oceanfrac]
-  standard_name = sea_area_fraction
-  long_name = fraction of horizontal grid area occupied by ocean
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

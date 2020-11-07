@@ -47,7 +47,8 @@
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
      &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-     &       islmsk_cice, min_lakeice, min_seaice, oceanfrac,           &
+     &       islmsk_cice,                                               &
+!    &       islmsk_cice, min_lakeice, min_seaice, oceanfrac,           &
      &       errmsg, errflg
      &     )
 
@@ -70,21 +71,21 @@
 !  subprogram called:  ice3lay.                                         !
 !                                                                       !
 !>  program history log:                                                 
-!!-         2005  --  xingren wu created  from original progtm and added  
-!!                     two-layer ice model                               
-!!-         200x  -- sarah lu    added flag_iter           
-!!-    oct  2006  -- h. wei      added cmm and chh to output     
+!!-         2005  --  xingren wu created  from original progtm and added 
+!!                     two-layer ice model
+!!-         200x  -- sarah lu    added flag_iter
+!!-    oct  2006  -- h. wei      added cmm and chh to output
 !!-         2007  -- x. wu modified for mom4 coupling (i.e. cpldice)
 !!                                    (not used anymore)
-!!-         2007  -- s. moorthi micellaneous changes   
-!!-    may  2009  -- y.-t. hou   modified to include surface emissivity  
-!!                     effect on lw radiation. replaced the confusing  
+!!-         2007  -- s. moorthi micellaneous changes
+!!-    may  2009  -- y.-t. hou   modified to include surface emissivity
+!!                     effect on lw radiation. replaced the confusing
 !!                     slrad with sfc net sw sfcnsw (dn-up). reformatted
-!!                     the code and add program documentation block. 
-!!-    sep  2009 -- s. moorthi removed rcl, changed pressure units and 
-!!                     further optimized    
-!!-    jan  2015 -- x. wu change "cimin = 0.15" for both  
-!!                              uncoupled and coupled case 
+!!                     the code and add program documentation block.
+!!-    sep  2009 -- s. moorthi removed rcl, changed pressure units and
+!!                     further optimized
+!!-    jan  2015 -- x. wu change "cimin = 0.15" for both
+!!                              uncoupled and coupled case
 !                                                                       !
 !                                                                       !
 !  ====================  defination of variables  ====================  !
@@ -157,12 +158,14 @@
 
       real (kind=kind_phys), dimension(im), intent(in) :: ps,           &
      &       t1, q1, sfcemis, dlwflx, sfcnsw, sfcdsw, srflag, cm, ch,   &
-     &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
+     &       prsl1, prslki, prsik1, prslk1, wind
+!    &       prsl1, prslki, prsik1, prslk1, wind, oceanfrac
 
 !     integer, dimension(im), intent(in) :: islimsk
       integer, dimension(im), intent(in) :: islmsk_cice
-      real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
-     &                                            min_lakeice
+      real (kind=kind_phys), intent(in)  :: delt
+!     real (kind=kind_phys), intent(in)  :: delt, min_seaice,           &
+!    &                                            min_lakeice
 
       logical, dimension(im), intent(in) :: flag_iter
 
@@ -188,7 +191,8 @@
 
       real (kind=kind_phys) :: t12, t14, tem, stsice(im,kice)
      &,                        hflxi, hflxw, q0, qs1, qssi, qssw
-      real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
+      real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw
+!     real (kind=kind_phys) :: cpinv, hvapi, elocp, snetw, cimin
 
       integer :: i, k
 
@@ -208,10 +212,10 @@
 
       do i = 1, im
         flag(i) = (islmsk_cice(i) == 2) .and. flag_iter(i)
-        if (flag_iter(i) .and. islmsk_cice(i) < 2) then
-          hice(i) = zero
-          fice(i) = zero
-        endif
+!       if (flag_iter(i) .and. islmsk_cice(i) < 2) then
+!         hice(i) = zero
+!         fice(i) = zero
+!       endif
       enddo
 
       do i = 1, im
@@ -241,11 +245,11 @@
 
       do i = 1, im
         if (flag(i)) then
-          if (oceanfrac(i) > zero) then
-            cimin = min_seaice
-          else
-            cimin = min_lakeice
-          endif
+!         if (oceanfrac(i) > zero) then
+!           cimin = min_seaice
+!         else
+!           cimin = min_lakeice
+!         endif
 !         psurf(i) = 1000.0 * ps(i)
 !         ps1(i)   = 1000.0 * prsl1(i)
 
@@ -264,13 +268,13 @@
           qs1       = max(eps*qs1 / (prsl1(i) + epsm1*qs1), qmin)
           q0        = min(qs1, q0)
 
-          if (fice(i) < cimin) then
-            print *,'warning: ice fraction is low:', fice(i)
-            fice(i) = cimin
-            tice(i) = tgice
-            tskin(i)= tgice
-            print *,'fix ice fraction: reset it to:', fice(i)
-          endif
+!         if (fice(i) < cimin) then
+!           print *,'warning: ice fraction is low:', fice(i)
+!           fice(i) = cimin
+!           tice(i) = tgice
+!           tskin(i)= tgice
+!           print *,'fix ice fraction: reset it to:', fice(i)
+!         endif
           ffw(i)    = one - fice(i)
 
           qssi = fpvs(tice(i))
@@ -350,7 +354,7 @@
 !> - Call the three-layer thermodynamics sea ice model ice3lay().
       call ice3lay
 !  ---  inputs:                                                         !
-     &     ( im, kice, fice, flag, hfi, hfd, sneti, focn, delt,          !
+     &     ( im, kice, fice, flag, hfi, hfd, sneti, focn, delt,         !
      &       lprnt, ipr,
 !  ---  outputs:                                                        !
      &       snowd, hice, stsice, tice, snof, snowmt, gflux )           !
@@ -359,14 +363,14 @@
         if (flag(i)) then
           if (tice(i) < timin) then
             print *,'warning: snow/ice temperature is too low:',tice(i)
-     &,' i=',i
+     &,             ' i=',i
             tice(i) = timin
             print *,'fix snow/ice temperature: reset it to:',tice(i)
           endif
 
           if (stsice(i,1) < timin) then
             print *,'warning: layer 1 ice temp is too low:',stsice(i,1)
-     &,' i=',i
+     &,             ' i=',i
             stsice(i,1) = timin
             print *,'fix layer 1 ice temp: reset it to:',stsice(i,1)
           endif
