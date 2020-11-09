@@ -17,6 +17,7 @@ module GFS_rrtmgp_thompsonmp_pre
   	 make_IceNumber,      &
      make_DropletNumber, &
      make_RainNumber
+  implicit none
   
   ! Parameters specific to THOMPSONMP scheme.
   real(kind_phys), parameter :: &
@@ -44,6 +45,7 @@ contains
        lat, p_lev, p_lay, tv_lay, t_lay, effrin_cldliq, effrin_cldice, effrin_cldsnow, tracer,   &
        qs_lay, q_lay, relhum, cld_frac_mg, con_pi, con_g, con_rd, con_epsq, iovr, iovr_dcorr, uni_cld, lmfshal, lmfdeep2, ltaerosol,      &
        iovr_exp,iovr_exprand, idcor, dcorr_con, idcor_con, idcor_hogan, idcor_oreopoulos, &
+       do_mynnedmf, imfdeepcnv, imfdeepcnv_gf, &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,    &
        cld_rerain, precip_frac, cloud_overlap_param, precip_overlap_param, de_lgth,       &
        deltaZb, errmsg, errflg)
@@ -72,7 +74,9 @@ contains
          idcor,             & ! Choice of method for decorrelation length computation
          idcor_con,         & ! Flag for decorrelation-length. Use constant value
          idcor_hogan,       & ! Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)
-         idcor_oreopoulos     ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012)
+         idcor_oreopoulos,  & ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012)
+         imfdeepcnv,        & ! Choice of mass-flux deep convection scheme
+         imfdeepcnv_gf        ! Flag for Grell-Freitas deep convection scheme
     logical, intent(in) :: &
     	 doSWrad,           & ! Call SW radiation?
     	 doLWrad,           & ! Call LW radiation
@@ -80,7 +84,8 @@ contains
          uni_cld,           & !
          lmfshal,           & !
          lmfdeep2,          & !
-         ltaerosol            !
+         ltaerosol,         & !
+         do_mynnedmf          ! Flag to activate MYNN-EDMF
     real(kind_phys), intent(in) :: &
          julian,            & ! Julian day 
          con_pi,            & ! Physical constant: pi
@@ -104,7 +109,12 @@ contains
          tracer               ! Cloud condensate amount in layer by type ()         
 
 	! In/Outs
-    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &         
+    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &  
+         cld_frac,          & ! Total cloud fraction
+         cld_lwp,           & ! Cloud liquid water path
+         cld_reliq,         & ! Cloud liquid effective radius
+         cld_iwp,           & ! Cloud ice water path
+         cld_reice,         & ! Cloud ice effecive radius
          effrin_cldliq,     & ! Effective radius for liquid cloud-particles (microns)
          effrin_cldice,     & ! Effective radius for ice cloud-particles (microns)
          effrin_cldsnow       ! Effective radius for snow cloud-particles (microns)	         
@@ -113,11 +123,6 @@ contains
     real(kind_phys), dimension(nCol),intent(out) :: &
          de_lgth                 ! Decorrelation length     
     real(kind_phys), dimension(nCol,nLev),intent(out) :: &
-         cld_frac,             & ! Total cloud fraction
-         cld_lwp,              & ! Cloud liquid water path
-         cld_reliq,            & ! Cloud liquid effective radius
-         cld_iwp,              & ! Cloud ice water path
-         cld_reice,            & ! Cloud ice effecive radius
          cld_swp,              & ! Cloud snow water path
          cld_resnow,           & ! Cloud snow effective radius
          cld_rwp,              & ! Cloud rain water path
@@ -132,7 +137,7 @@ contains
          errflg               ! Error flag
     
     ! Local variables
-    real(kind_phys) :: tem0, tem1, tem2, pfac, clwt, clwm, onemrh, xrc3
+    real(kind_phys) :: tem0, tem1, tem2, pfac, clwt, clwm, onemrh, clwmin, clwf
     real(kind_phys), dimension(nLev+1) :: hgtb
     real(kind_phys), dimension(nLev)   :: hgtc
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
@@ -156,16 +161,6 @@ contains
        iSFC = 1
        iTOA = nLev
     endif
-
-    ! Initialize outputs
-    cld_lwp(:,:)    = 0.0
-    cld_reliq(:,:)  = 0.0
-    cld_iwp(:,:)    = 0.0
-    cld_reice(:,:)  = 0.0
-    cld_rwp(:,:)    = 0.0
-    cld_rerain(:,:) = 0.0
-    cld_swp(:,:)    = 0.0
-    cld_resnow(:,:) = 0.0
     
     ! ####################################################################################
     ! Pull out cloud information for THOMPSON MP scheme.
@@ -177,11 +172,20 @@ contains
     cld_condensate(1:nCol,1:nLev,3) = tracer(1:nCol,1:nLev,i_cldrain)    ! -rain water
     cld_condensate(1:nCol,1:nLev,4) = tracer(1:nCol,1:nLev,i_cldsnow) + &! -snow + grapuel
                                       tracer(1:nCol,1:nLev,i_cldgrpl) 
-        
-	!
-    ! Compute effective radii for liquid/ice/snow using subgrid scale clouds
-	!
-	
+                                      
+    ! Cloud particle size
+    deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  
+    do iLay = 1, nLev
+       do iCol = 1, nCol
+          ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
+          tem1                = (1.0e5/con_g) * deltaP(iCol,iLay)
+          cld_lwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,1) * tem1)
+          cld_iwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,2) * tem1)
+          cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1)
+          cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1) 
+       enddo
+    enddo                                      
+        	
     ! First, prepare cloud mixing-ratios and number concentrations for Calc_Re
     rho  = p_lay(1:nCol,1:nLev)/(con_rd*t_lay(1:nCol,1:nLev))    
     orho = 1./rho    
@@ -214,6 +218,7 @@ contains
        enddo
     enddo
 
+    ! Compute effective radii for liquid/ice/snow using subgrid scale clouds
     ! Call Thompson's subroutine to compute effective radii
     do iCol=1,nCol
        call calc_effectRad (t_lay(iCol,:), p_lay(iCol,:), qv_mp(iCol,:), qc_mp(iCol,:),  &
@@ -225,42 +230,61 @@ contains
     effrin_cldliq(1:nCol,1:nLev)  = re_cloud(1:nCol,1:nLev)*1.e6
     effrin_cldice(1:nCol,1:nLev)  = re_ice(1:nCol,1:nLev)*1.e6
     effrin_cldsnow(1:nCol,1:nLev) = re_snow(1:nCol,1:nLev)*1.e6
-    
-    if (uni_cld) then
-       if (effr_in) then    
-          cld_reliq(1:nCol,1:nLev)  = effrin_cldliq(1:nCol,1:nLev)
-          cld_reice(1:nCol,1:nLev)  = effrin_cldice(1:nCol,1:nLev)
-          cld_rerain(1:nCol,1:nLev) = rerain_def
-          cld_resnow(1:nCol,1:nLev) = effrin_cldsnow(1:nCol,1:nLev)
+    cld_reliq(1:nCol,1:nLev)      = effrin_cldliq(1:nCol,1:nLev)
+    cld_reice(1:nCol,1:nLev)      = effrin_cldice(1:nCol,1:nLev)
+    cld_resnow(1:nCol,1:nLev)     = effrin_cldsnow(1:nCol,1:nLev)
+    cld_rerain(1:nCol,1:nLev)     = rerain_def
+
+	! Compute cloud-fraction. The logic is a mess here. I don't have any idea where these
+	! magic numbers are coming from.
+    if(.not. do_mynnedmf .or. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv   	
+	   ! Cloud-fraction
+	   if (uni_cld) then
+          cld_frac(1:nCol,1:nLev) = cld_frac_mg(1:nCol,1:nLev)    
+       else
+         clwmin = 0.0
+         if (.not. lmfshal) then
+            do iLay = 1, nLev
+               do iCol = 1, nCol         
+                  clwf = tracer(iCol,iLay,i_cldliq) + tracer(iCol,iLay,i_cldice) + &
+                         tracer(iCol,iLay,i_cldsnow)
+                  clwt = 1.0e-6 * (p_lay(iCol,iLay)*0.001)
+                  if (clwf > clwt) then
+                     onemrh= max( 1.e-10, 1.0-relhum(iCol,iLay) )
+                     clwm  = clwmin / max( 0.01, p_lay(iCol,iLay)*0.001 )
+                     tem1  = 2000.0 / min(max(sqrt(sqrt(onemrh*qs_lay(iCol,iLay))),0.0001),1.0)
+                     tem1  = max( min( tem1*(clwf-clwm), 50.0 ), 0.0 )
+                     tem2  = sqrt( sqrt(relhum(iCol,iLay)) )
+                     !
+                     cld_frac(iCol,iLay) = max( tem2*(1.0-exp(-tem1)), 0.0 )
+                   endif
+               enddo
+          enddo
         else
-          cld_reliq(1:nCol,1:nLev)  = reliq_def
-          cld_reice(1:nCol,1:nLev)  = reice_def
-          cld_rerain(1:nCol,1:nLev) = rerain_def
-          cld_resnow(1:nCol,1:nLev) = resnow_def
-        endif ! effr_in
-    endif     ! uni_cld    
+           do iLay = 1, nLev
+              do iCol = 1, nCol              
+                 clwf = tracer(iCol,iLay,i_cldliq) + tracer(iCol,iLay,i_cldice) + &
+                         tracer(iCol,iLay,i_cldsnow)              	 
+                 clwt = 1.0e-6 * (p_lay(iCol,iLay)*0.001)
 
-    ! Cloud-fraction
-    cld_frac(1:nCol,1:nLev) = cld_frac_mg(1:nCol,1:nLev)
-
+                 if (clwf > clwt) then
+                    onemrh= max( 1.e-10, 1.0-relhum(iCol,iLay) )
+                    clwm  = clwmin / max( 0.01, p_lay(iCol,iLay)*0.001 )
+                    tem1  = 100.0 / min(max((onemrh*qs_lay(iCol,iLay))**0.49,0.0001),1.0)  !jhan
+                    tem1  = max( min( tem1*(clwf-clwm), 50.0 ), 0.0 )
+                    tem2  = sqrt( sqrt(relhum(iCol,iLay)) )
+                    !
+                    cld_frac(iCol,iLay) = max( tem2*(1.0-exp(-tem1)), 0.0 )
+                  endif
+               enddo
+             enddo
+          endif     
+       endif  
+    endif     
+        
     ! Precipitation fraction (Hack. For now use cloud-fraction)
     precip_frac(1:nCol,1:nLev) = cld_frac(1:nCol,1:nLev)
-    
-    ! Condensate and effective size
-    deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  
-    do iLay = 1, nLev
-       do iCol = 1, nCol
-          ! Compute liquid/ice condensate path from mixing ratios (kg/kg)->(g/m2)   
-          if (cld_frac(iCol,iLay) .ge. cllimit) then         
-             tem1                = (1.0e5/con_g) * deltaP(iCol,iLay)
-             cld_lwp(iCol,iLay)  = cld_condensate(iCol,iLay,1) * tem1
-             cld_iwp(iCol,iLay)  = cld_condensate(iCol,iLay,2) * tem1
-             cld_rwp(iCol,iLay)  = cld_condensate(iCol,iLay,3) * tem1
-             cld_swp(iCol,iLay)  = cld_condensate(iCol,iLay,4) * tem1  
-          endif    
-        enddo
-    enddo
-    
+        
     ! ####################################################################################
     ! Cloud (and precipitation) overlap
     ! ####################################################################################

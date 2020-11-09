@@ -1,11 +1,11 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_thompsonmp_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90
+  dependencies = rrtmgp_aux.F90, radiation_cloud_overlap.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmgp_thompspnmp_pre_run
+  name = GFS_rrtmgp_thompsonmp_pre_run
   type = scheme
 [nCol]
   standard_name = horizontal_loop_extent
@@ -212,7 +212,7 @@
   intent = in
   optional = F  
 [iovr]
-  standard_name = flag_for_cloud_overlap_method
+  standard_name = flag_for_cloud_overlap_method_for_radiation
   long_name = flag for cloud overlap method used by radiation scheme
   units = flag
   dimensions = ()
@@ -302,6 +302,30 @@
   type = integer    
   intent = in
   optional = F 
+[do_mynnedmf]
+  standard_name = do_mynnedmf
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[imfdeepcnv]
+  standard_name = flag_for_mass_flux_deep_convection_scheme
+  long_name = flag for mass-flux deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imfdeepcnv_gf]
+  standard_name = flag_for_gf_deep_convection_scheme
+  long_name = flag for Grell-Freitas deep convection scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F  
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
@@ -426,7 +450,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_lwp]
   standard_name = cloud_liquid_water_path
@@ -435,16 +459,16 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_reliq]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_iwp]
   standard_name = cloud_ice_water_path
@@ -453,16 +477,16 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_reice]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_swp]
   standard_name = cloud_snow_water_path
@@ -476,7 +500,7 @@
 [cld_resnow]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow cloud
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
@@ -494,7 +518,7 @@
 [cld_rerain]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain cloud
-  units = micron
+  units = um
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
