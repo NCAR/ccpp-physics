@@ -268,18 +268,18 @@ module lsm_ruc
      ! for land
      &       smois, tsice, tslb, sh2o, keepfr, smfrkeep,                & ! on RUC levels
      &       canopy, trans, tsurf_lnd, tsnow_lnd, z0rl_lnd,             &
-     &       sfcqc_lnd, sfcdew_lnd, sfcqv_lnd,                          &
+     &       sfcqc_lnd, sfcqv_lnd,                                      &
      &       qsurf_lnd, gflux_lnd, evap_lnd, hflx_lnd,                  &
      &       runof, runoff, srunoff, drain,                             &
      &       cm_lnd, ch_lnd, evbs, evcw, stm, wetness,                  &
      &       snowfallac_lnd,                                            &
      ! for ice
-     &       sfcqc_ice, sfcdew_ice, sfcqv_ice,                          &
+     &       sfcqc_ice, sfcqv_ice,                                      &
      &       tice, tsurf_ice, tsnow_ice, z0rl_ice,                      &
      &       qsurf_ice, gflux_ice, evap_ice, ep1d_ice, hflx_ice,        &
      &       cm_ice, ch_ice, snowfallac_ice,                            &
      ! --- out
-     &       acsnow, rhosnf, sbsno,                                     & 
+     &       rhosnf, sbsno,                                             &
      &       cmm_lnd, chh_lnd, cmm_ice, chh_ice,                        &
      !
      &       flag_iter, flag_guess, flag_init, flag_restart,            &
@@ -333,14 +333,14 @@ module lsm_ruc
      ! for land
      &       weasd_lnd, snwdph_lnd, tskin_lnd,                           &
      &       tsurf_lnd, z0rl_lnd, tsnow_lnd,                             &
-     &       sfcqc_lnd, sfcqv_lnd, sfcdew_lnd,                           &
+     &       sfcqc_lnd, sfcqv_lnd,                                       &
      ! for ice
      &       weasd_ice, snwdph_ice, tskin_ice,                           &
      &       tsurf_ice, z0rl_ice, tsnow_ice,                             &
-     &       sfcqc_ice, sfcqv_ice, sfcdew_ice, fice, tice
+     &       sfcqc_ice, sfcqv_ice, fice, tice
 
 !  ---  in
-      real (kind=kind_phys), dimension(im), intent(in) ::               &
+      real (kind=kind_phys), dimension(im), intent(in) ::                &
      &       rainnc, rainc, ice, snow, graupel
 !  ---  in/out:
 !  --- on RUC levels
@@ -348,7 +348,7 @@ module lsm_ruc
      &       smois, tsice, tslb, sh2o, keepfr, smfrkeep
 
 !  ---  output:
-      real (kind=kind_phys), dimension(im), intent(inout) ::  acsnow,    &
+      real (kind=kind_phys), dimension(im), intent(inout) ::             &
      &       rhosnf, runof, drain, runoff, srunoff, evbs, evcw,          &
      &       stm, wetness, semis_lnd, semis_ice,                         &
      ! for land
@@ -366,8 +366,7 @@ module lsm_ruc
 !  ---  locals:
       real (kind=kind_phys), dimension(im) :: rho,                      &
      &       q0, qs1,                                                   &
-     &       tprcp_old, srflag_old, sr_old, canopy_old,                 &
-     &       acsnow_old, wetness_old,                                   &
+     &       tprcp_old, srflag_old, sr_old, canopy_old, wetness_old,    &
      ! for land
      &       weasd_lnd_old, snwdph_lnd_old, tskin_lnd_old,              &
      &       tsnow_lnd_old, snowfallac_lnd_old,                         &
@@ -553,7 +552,7 @@ module lsm_ruc
           wetness_old(i)         = wetness(i)
           canopy_old(i)          = canopy(i)
           !srflag_old(i)          = srflag(i)
-          acsnow_old(i)          = acsnow(i)
+          !acsnow_old(i)          = acsnow(i)
           ! for land
           weasd_lnd_old(i)       = weasd_lnd(i)
           snwdph_lnd_old(i)      = snwdph_lnd(i)
@@ -600,8 +599,6 @@ module lsm_ruc
           gflux_ice(i)  = 0.0
           drain(i)  = 0.0
           canopy(i) = max(canopy(i), 0.0)
-          sfcdew_lnd(i) = 0.0
-          sfcdew_ice(i) = 0.0
 
           evbs (i)  = 0.0
           evcw (i)  = 0.0
@@ -735,7 +732,8 @@ module lsm_ruc
 
         ! ice not used
         ! precipfr(i,j)   = rainncv(i,j) * ffrozp(i,j)
-        acsn(i,j)         = acsnow(i)
+        !acsn(i,j)         = acsnow(i)
+        acsn(i,j) = 0.0
 
         ! --- units %
         shdfac(i,j) = sigmaf(i)*100.
@@ -1049,7 +1047,6 @@ module lsm_ruc
         evap_lnd(i)   = qfx_lnd(i,j) / rho(i)           ! kinematic
         hflx_lnd(i)   = hfx_lnd(i,j) / (con_cp*rho(i))  ! kinematic
         gflux_lnd(i)  = ssoil_lnd(i,j)
-        sfcdew_lnd(i)  = dew_lnd(i,j)
         qsurf_lnd(i)   = qsfc_lnd(i,j)
         tsurf_lnd(i)   = soilt_lnd(i,j)
         stm(i)         = soilm(i,j) * 1.e-3 ! convert to [m]
@@ -1064,7 +1061,7 @@ module lsm_ruc
         sfcqc_lnd(i)  = qcg_lnd(i,j)
         !  --- ...  units [m/s] = [g m-2 s-1] 
         rhosnf(i) = rhosnfr(i,j)
-        acsnow(i) = acsn(i,j)     ! kg m-2
+        !acsnow(i) = acsn(i,j)     ! kg m-2
 
         ! --- ... accumulated total runoff and surface runoff
         runoff(i)  = runoff(i)  + (drain(i)+runof(i)) * delt * 0.001 ! kg m-2
@@ -1207,7 +1204,6 @@ module lsm_ruc
         hflx_ice(i)   = hfx_ice(i,j) / (con_cp*rho(i))  ! kinematic
         gflux_ice(i)  = ssoil_ice(i,j)
 
-        sfcdew_ice(i)  = dew_ice(i,j)
         qsurf_ice(i)   = qsfc_ice(i,j)
         tsurf_ice(i)   = soilt_ice(i,j)
 
@@ -1295,7 +1291,7 @@ module lsm_ruc
             !srflag(i)          = srflag_old(i)
             tsnow_lnd(i)       = tsnow_lnd_old(i)
             snowfallac_lnd(i)  = snowfallac_lnd_old(i)
-            acsnow(i)          = acsnow_old(i)
+            !acsnow(i)          = acsnow_old(i)
             sfcqv_lnd(i)       = sfcqv_lnd_old(i)
             sfcqc_lnd(i)       = sfcqc_lnd_old(i)
             wetness(i)         = wetness_old(i)
