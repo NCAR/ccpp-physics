@@ -306,7 +306,7 @@
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
      &                             isubcsw, icldflg, iovr,  ivflip,     &
-     &                             iswmode, kind_phys
+     &                             iswmode
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use machine,          only : rb => kind_phys, im => kind_io4,     &

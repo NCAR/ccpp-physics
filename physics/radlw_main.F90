@@ -279,8 +279,7 @@
       module rrtmg_lw 
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
-     &                             isubclw, icldflg, iovr,  ivflip,     &
-     &                             kind_phys
+     &                             isubclw, icldflg, iovr,  ivflip
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
       use mersenne_twister, only : random_setseed, random_number,       &
