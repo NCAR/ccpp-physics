@@ -1006,25 +1006,16 @@
   intent = inout
   optional = F
 [sfcqc_lnd]
-  standard_name = cloud_condensed_water_mixing_ratio_at_surface
-  long_name = moist cloud water mixing ratio at surface
+  standard_name = cloud_condensed_water_mixing_ratio_at_surface_over_land
+  long_name = moist cloud water mixing ratio at surface over land
   units = kg kg-1
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
-[sfcdew_lnd]
-  standard_name = surface_condensation_mass_over_land
-  long_name = surface condensation mass over land
-  units = kg m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [sfcqv_lnd]
-  standard_name = water_vapor_mixing_ratio_at_surface
+  standard_name = water_vapor_mixing_ratio_at_surface_over_land
   long_name = water vapor mixing ratio at surface over land
   units = kg kg-1
   dimensions = (horizontal_dimension)
@@ -1176,15 +1167,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[sfcdew_ice]
-  standard_name = surface_condensation_mass_over_ice
-  long_name = surface condensation mass over ice
-  units = kg m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
 [sfcqv_ice]
   standard_name = water_vapor_mixing_ratio_at_surface_over_ice
   long_name = water vapor mixing ratio at surface over ice
@@ -1296,15 +1278,6 @@
 [snowfallac_ice]
   standard_name = total_accumulated_snowfall_over_ice
   long_name = run-total snow accumulation on the ground over ice
-  units = kg m-2
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[acsnow]
-  standard_name = accumulated_water_equivalent_of_frozen_precip
-  long_name = snow water equivalent of run-total frozen precip
   units = kg m-2
   dimensions = (horizontal_dimension)
   type = real
