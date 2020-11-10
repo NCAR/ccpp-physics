@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_thompsonmp_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90, radiation_cloud_overlap.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90
+  dependencies = rrtmgp_aux.F90, module_mp_thompson_make_number_concentrations.F90, module_mp_thompson.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -203,105 +203,6 @@
   kind = kind_phys
   intent = in
   optional = F   
-[yearlen]
-  standard_name = number_of_days_in_year
-  long_name = number of days in a year
-  units = days
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F  
-[iovr]
-  standard_name = flag_for_cloud_overlap_method_for_radiation
-  long_name = flag for cloud overlap method used by radiation scheme
-  units = flag
-  dimensions = ()
-  type = integer  
-  intent = in
-  optional = F  
-[iovr_dcorr]
-  standard_name	= flag_for_decorrelation_length_cloud_overlap_method
-  long_name = choice of	decorrelation-length cloud overlap method
-  units	        = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[iovr_exp]
-  standard_name	= flag_for_exponential_cloud_overlap_method
-  long_name = choice of	exponential cloud overlap method
-  units	        = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[iovr_exprand]
-  standard_name = flag_for_exponential_random_cloud_overlap_method
-  long_name = choice of exponential-random cloud overlap method
-  units     = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F      
-[julian]
-  standard_name = julian_day
-  long_name = julian day
-  units = days
-  dimensions = ()
-  type = real
-  kind = kind_phys  
-  intent = in
-  optional = F   
-[lat]
-  standard_name = latitude
-  long_name = latitude
-  units = radian
-  dimensions = (horizontal_dimension)
-  type = real
-  intent = in
-  kind = kind_phys 
-  optional = F     
-[idcor]
-  standard_name = flag_for_decorrelation_length_method
-  long_name = flag for decorrelation length method used in cloud overlap method (iovr)
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F    
-[dcorr_con]  
-  standard_name = decorreltion_length_used_by_overlap_method
-  long_name = decorrelation length (default) used by cloud overlap method (iovr)
-  units = km
-  dimensions = ()
-  type = real
-  intent = in
-  kind = kind_phys 
-  optional = F 
-[idcor_con]
-  standard_name = flag_for_constant_decorrelation_length_method
-  long_name = choice of decorrelation length computation (costant)
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F   
-[idcor_hogan]
-  standard_name = flag_for_hogan_decorrelation_length_method
-  long_name = choice of decorrelation length computation (hogan)
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F 
-[idcor_oreopoulos]
-  standard_name = flag_for_oreopoulos_decorrelation_length_method
-  long_name = choice of decorrelation length computation (oreopoulos)
-  units = flag
-  dimensions = ()
-  type = integer    
-  intent = in
-  optional = F 
 [do_mynnedmf]
   standard_name = do_mynnedmf
   long_name = flag to activate MYNN-EDMF
@@ -398,15 +299,6 @@
   kind = kind_phys
   intent = in
   optional = F  
-[con_pi]
-  standard_name = pi
-  long_name = ratio of a circle's circumference to its diameter
-  units = none
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F 
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -424,25 +316,7 @@
   type = real
   kind = kind_phys      
   intent = in
-  optional = F   
-[con_epsq]
-  standard_name = minimum_value_of_specific_humidity
-  long_name = floor value for specific humidity
-  units = kg kg-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F       
-[de_lgth]
-  standard_name = cloud_decorrelation_length
-  long_name = cloud decorrelation length
-  units = km
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F  
+  optional = F         
 [cld_frac]
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
@@ -532,34 +406,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = F   
-[cloud_overlap_param]
-  standard_name = cloud_overlap_param
-  long_name = cloud overlap parameter
-  units = km
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
-[precip_overlap_param]
-  standard_name = precip_overlap_param
-  long_name = precipitation overlap parameter
-  units = km
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F  
-[deltaZb]
-  standard_name = layer_thickness
-  long_name = layer_thickness
-  units = m
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F    
+  optional = F      
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

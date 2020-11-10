@@ -7,9 +7,6 @@ module GFS_rrtmgp_thompsonmp_pre
        kind_phys
   use rrtmgp_aux, only: &
        check_error_msg
-  use module_radiation_cloud_overlap, only: &
-       cmp_dcorr_lgth, &
-       get_alpha_exp  
   use module_mp_thompson, only: &
        calc_effectRad, &
        Nt_c
@@ -40,16 +37,14 @@ contains
 !! \section arg_table_GFS_rrtmgp_thompsonmp_pre_run
 !! \htmlinclude GFS_rrtmgp_thompsonmp_pre_run.html
 !!  
-  subroutine GFS_rrtmgp_thompsonmp_pre_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,&
-       i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc, i_cldice_nc, i_twa,        &
-       yearlen, doSWrad, doLWrad, effr_in, julian, lat, p_lev, p_lay, tv_lay, t_lay,      &
-       effrin_cldliq, effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum,       &
-       cld_frac_mg, con_pi, con_g, con_rd, con_epsq, iovr, iovr_dcorr, uni_cld, lmfshal,  &
-       lmfdeep2, ltaerosol, iovr_exp,iovr_exprand, idcor, dcorr_con, idcor_con,           &
-       idcor_hogan, idcor_oreopoulos, do_mynnedmf, imfdeepcnv, imfdeepcnv_gf,             &
-       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,    &
-       cld_rerain, precip_frac, cloud_overlap_param, precip_overlap_param, de_lgth,       &
-       deltaZb, errmsg, errflg)
+  subroutine GFS_rrtmgp_thompsonmp_pre_run(nCol, nLev, nTracers, ncnd, doSWrad, doLWrad, &
+       i_cldliq, i_cldice, i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, i_cldliq_nc,       &
+       i_cldice_nc, i_twa, effr_in, p_lev, p_lay, tv_lay, t_lay, effrin_cldliq,          &
+       effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, cld_frac_mg, con_g, &
+       con_rd, uni_cld, lmfshal, lmfdeep2, ltaerosol, do_mynnedmf, imfdeepcnv,           &
+       imfdeepcnv_gf,                                                                    &
+       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
+       cld_rerain, precip_frac, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -66,15 +61,6 @@ contains
          i_cldliq_nc,       & !                             cloud liquid number concentration.
          i_cldice_nc,       & !                             cloud ice number concentration.
          i_twa,             & !                             water friendly aerosol.
-         yearlen,           & ! Length of current year (365/366) WTF?             
-         iovr,              & ! Choice of cloud-overlap method
-         iovr_dcorr,        & ! Flag for decorrelation-length cloud overlap method
-         iovr_exp,          & ! Flag for exponential cloud overlap method
-         iovr_exprand,      & ! Flag for exponential-random cloud overlap method
-         idcor,             & ! Choice of method for decorrelation length computation
-         idcor_con,         & ! Flag for decorrelation-length. Use constant value
-         idcor_hogan,       & ! Flag for decorrelation-length. (https://rmets.onlinelibrary.wiley.com/doi/full/10.1002/qj.647)
-         idcor_oreopoulos,  & ! Flag for decorrelation-length. (10.5194/acp-12-9097-2012)
          imfdeepcnv,        & ! Choice of mass-flux deep convection scheme
          imfdeepcnv_gf        ! Flag for Grell-Freitas deep convection scheme
     logical, intent(in) :: &
@@ -87,14 +73,9 @@ contains
          ltaerosol,         & !
          do_mynnedmf          ! Flag to activate MYNN-EDMF
     real(kind_phys), intent(in) :: &
-         julian,            & ! Julian day 
-         con_pi,            & ! Physical constant: pi
          con_g,             & ! Physical constant: gravitational constant
-         con_rd,            & ! Physical constant: gas-constant for dry air
-         con_epsq,          & ! Physical constant(?): Minimum value for specific humidity
-         dcorr_con            ! Decorrelation-length (used if idcor = 0, default is idcor = 1)
-    real(kind_phys), dimension(nCol), intent(in) :: &
-         lat                  ! Latitude (radians)      
+         con_rd               ! Physical constant: gas-constant for dry air
+
     real(kind_phys), dimension(nCol,nLev), intent(in) :: &         
          tv_lay,            & ! Virtual temperature (K)
          t_lay,             & ! Temperature (K)
@@ -120,28 +101,21 @@ contains
          effrin_cldsnow       ! Effective radius for snow cloud-particles (microns)	         
     
     ! Outputs     
-    real(kind_phys), dimension(nCol),intent(out) :: &
-         de_lgth                 ! Decorrelation length     
     real(kind_phys), dimension(nCol,nLev),intent(out) :: &
-         cld_swp,              & ! Cloud snow water path
-         cld_resnow,           & ! Cloud snow effective radius
-         cld_rwp,              & ! Cloud rain water path
-         cld_rerain,           & ! Cloud rain effective radius       
-         precip_frac,          & ! Precipitation fraction
-         cloud_overlap_param,  & ! Cloud-overlap parameter
-         precip_overlap_param, & ! Precipitation overlap parameter  
-         deltaZb                 ! Layer thickness (km)          
+         cld_swp,           & ! Cloud snow water path
+         cld_resnow,        & ! Cloud snow effective radius
+         cld_rwp,           & ! Cloud rain water path
+         cld_rerain,        & ! Cloud rain effective radius       
+         precip_frac          ! Precipitation fraction         
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag
     
     ! Local variables
-    real(kind_phys) :: tem0, tem1, tem2, pfac, clwt, clwm, onemrh, clwmin, clwf
-    real(kind_phys), dimension(nLev+1) :: hgtb
-    real(kind_phys), dimension(nLev)   :: hgtc
+    real(kind_phys) :: alpha0, pfac, tem1, cld_mr
     real(kind_phys), dimension(nCol, nLev, min(4,ncnd)) :: cld_condensate
-    integer :: iCol,iLay,l,iSFC,iTOA
+    integer :: iCol,iLay,l
     real(kind_phys), dimension(nCol,nLev) :: deltaP, deltaZ, rho, orho, re_cloud, re_ice,&
          re_snow, qv_mp, qc_mp, qi_mp, qs_mp, nc_mp, ni_mp, nwfa
     logical :: top_at_1
@@ -151,21 +125,7 @@ contains
     errflg = 0
     
     if (.not. (doSWrad .or. doLWrad)) return
-    
-    ! What is vertical ordering?
-    top_at_1 = (p_lev(1,1) .lt.  p_lev(1, nLev))
-    if (top_at_1) then 
-       iSFC = nLev
-       iTOA = 1
-    else
-       iSFC = 1
-       iTOA = nLev
-    endif
-    
-    ! ####################################################################################
-    ! Pull out cloud information for THOMPSON MP scheme.
-    ! ####################################################################################
-    
+
     ! Cloud condensate
     cld_condensate(1:nCol,1:nLev,1) = tracer(1:nCol,1:nLev,i_cldliq)     ! -liquid water
     cld_condensate(1:nCol,1:nLev,2) = tracer(1:nCol,1:nLev,i_cldice)     ! -ice water
@@ -235,147 +195,74 @@ contains
     cld_resnow(1:nCol,1:nLev)     = effrin_cldsnow(1:nCol,1:nLev)
     cld_rerain(1:nCol,1:nLev)     = rerain_def
     
-    ! Compute cloud-fraction. The logic is a mess here. I don't have any idea where these
-    ! magic numbers are coming from.
+    ! Compute cloud-fraction. Else, use value provided
     if(.not. do_mynnedmf .or. imfdeepcnv .ne. imfdeepcnv_gf ) then ! MYNN PBL or GF conv   	
        ! Cloud-fraction
        if (uni_cld) then
           cld_frac(1:nCol,1:nLev) = cld_frac_mg(1:nCol,1:nLev)    
        else
-          clwmin = 0.0
-          if (.not. lmfshal) then
-             do iLay = 1, nLev
-                do iCol = 1, nCol         
-                   clwf = tracer(iCol,iLay,i_cldliq) + tracer(iCol,iLay,i_cldice) + &
-                          tracer(iCol,iLay,i_cldsnow)
-                   clwt = 1.0e-6 * (p_lay(iCol,iLay)*0.001)
-                   if (clwf > clwt) then
-                      onemrh= max( 1.e-10, 1.0-relhum(iCol,iLay) )
-                      clwm  = clwmin / max( 0.01, p_lay(iCol,iLay)*0.001 )
-                      tem1  = 2000.0 / min(max(sqrt(sqrt(onemrh*qs_lay(iCol,iLay))),0.0001),1.0)
-                      tem1  = max( min( tem1*(clwf-clwm), 50.0 ), 0.0 )
-                      tem2  = sqrt( sqrt(relhum(iCol,iLay)) )
-                      !
-                      cld_frac(iCol,iLay) = max( tem2*(1.0-exp(-tem1)), 0.0 )
-                   endif
-                enddo
+          if(      lmfshal) alpha0 = 100. ! Default
+          if(.not. lmfshal) alpha0 = 2000.
+		  ! Xu-Randall (1996) cloud-fraction 
+          do iLay = 1, nLev
+             do iCol = 1, nCol
+                cld_mr = cld_condensate(iCol,iLay,1) + cld_condensate(iCol,iLay,2) +  &
+                         cld_condensate(iCol,iLay,4)
+			    cld_frac(iCol,iLay) = cld_frac_XuRandall(p_lay(iCol,iLay),            &
+			       qs_lay(iCol,iLay), relhum(iCol,iLay), cld_mr, alpha0) 
              enddo
-          else
-             do iLay = 1, nLev
-                do iCol = 1, nCol              
-                   clwf = tracer(iCol,iLay,i_cldliq) + tracer(iCol,iLay,i_cldice) + &
-                          tracer(iCol,iLay,i_cldsnow)              	 
-                   clwt = 1.0e-6 * (p_lay(iCol,iLay)*0.001)
-                   if (clwf > clwt) then
-                      onemrh= max( 1.e-10, 1.0-relhum(iCol,iLay) )
-                      clwm  = clwmin / max( 0.01, p_lay(iCol,iLay)*0.001 )
-                      tem1  = 100.0 / min(max((onemrh*qs_lay(iCol,iLay))**0.49,0.0001),1.0)  !jhan
-                      tem1  = max( min( tem1*(clwf-clwm), 50.0 ), 0.0 )
-                      tem2  = sqrt( sqrt(relhum(iCol,iLay)) )
-                      !
-                      cld_frac(iCol,iLay) = max( tem2*(1.0-exp(-tem1)), 0.0 )
-                   endif
-                enddo
-             enddo
-          endif
+          enddo
        endif
     endif
     
     ! Precipitation fraction (Hack. For now use cloud-fraction)
     precip_frac(1:nCol,1:nLev) = cld_frac(1:nCol,1:nLev)
         
-    ! ####################################################################################
-    ! Cloud (and precipitation) overlap
-    ! ####################################################################################
-    
-    !
-    ! Compute layer-thickness between layer boundaries (deltaZ) and layer centers (deltaZc)
-    !
-    do iCol=1,nCol
-       if (top_at_1) then
-          ! Layer thickness (km)
-          do iLay=1,nLev
-             deltaZ(iCol,iLay) = ((con_rd/con_g)*0.001) * abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay))) * tv_lay(iCol,iLay)
-          enddo
-          ! Height at layer boundaries
-          hgtb(nLev+1) = 0._kind_phys
-          do iLay=nLev,1,-1 
-             hgtb(iLay)= hgtb(iLay+1) + deltaZ(iCol,iLay)
-          enddo
-          ! Height at layer centers
-          do iLay = nLev, 1, -1
-             pfac = abs(log(p_lev(iCol,iLay+1)) - log(p_lay(iCol,iLay))) /  &
-                  abs(log(p_lev(iCol,iLay+1)) - log(p_lev(iCol,iLay)))
-             hgtc(iLay) = hgtb(iLay+1) + pfac * (hgtb(iLay) - hgtb(iLay+1))
-          enddo
-          ! Layer thickness between centers
-          do iLay = nLev-1, 1, -1
-             deltaZb(iCol,iLay) = hgtc(iLay) - hgtc(iLay+1)
-          enddo
-          deltaZb(iCol,nLev) = hgtc(nLev) - hgtb(nLev+1)
-       else
-          do iLay=nLev,1,-1
-             deltaZ(iCol,iLay) = ((con_rd/con_g)*0.001) * abs(log(p_lev(iCol,iLay))  - log(p_lev(iCol,iLay+1))) * tv_lay(iCol,iLay)
-          enddo
-          ! Height at layer boundaries
-          hgtb(1) = 0._kind_phys
-          do iLay=1,nLev 
-             hgtb(iLay+1)= hgtb(iLay) + deltaZ(iCol,iLay)
-          enddo
-          ! Height at layer centers
-          do iLay = 1, nLev
-             pfac = abs(log(p_lev(iCol,iLay)) - log(p_lay(iCol,iLay)  )) /  &
-                  abs(log(p_lev(iCol,iLay)) - log(p_lev(iCol,iLay+1)))           
-             hgtc(iLay) = hgtb(iLay) + pfac * (hgtb(iLay+1) - hgtb(iLay))
-          enddo
-          ! Layer thickness between centers
-          do iLay = 2, nLev
-             deltaZb(iCol,iLay) = hgtc(iLay) - hgtc(iLay-1)
-          enddo
-          deltaZb(iCol,1) = hgtc(1) - hgtb(1)
-       endif
-    enddo
-    
-    !
-    ! Cloud decorrelation length
-    !
-    if (idcor == idcor_hogan) then
-       call cmp_dcorr_lgth(nCol, abs(lat/con_pi), con_pi, de_lgth)      
-    endif
-    if (idcor == idcor_oreopoulos) then 
-       call cmp_dcorr_lgth(nCol, lat*(180._kind_phys/con_pi), julian, yearlen, de_lgth)      
-    endif
-    if (idcor == idcor_con) then
-       de_lgth(:) = dcorr_con
-    endif
-    
-    !
-    ! Cloud overlap parameter
-    !
-    call get_alpha_exp(nCol, nLev, deltaZb, de_lgth, cloud_overlap_param)
-    
-    ! For exponential random overlap...
-    ! Decorrelate layers when a clear layer follows a cloudy layer to enforce
-    ! random correlation between non-adjacent blocks of cloudy layers
-    if (iovr == iovr_exprand) then 
-       do iLay = 1, nLev
-          do iCol = 1, nCol
-             if (cld_frac(iCol,iLay) .eq. 0. .and. cld_frac(iCol,iLay-1) .gt. 0.) then
-                cloud_overlap_param(iCol,iLay) = 0._kind_phys
-             endif
-          enddo
-       enddo
-    endif
-
-    ! 
-    ! Compute precipitation overlap parameter (Hack. Using same as cloud for now)
-    !
-    precip_overlap_param = cloud_overlap_param    
-    
   end subroutine GFS_rrtmgp_thompsonmp_pre_run
   
-  ! #########################################################################################
-  ! #########################################################################################
+  ! ######################################################################################
+  ! ######################################################################################
   subroutine GFS_rrtmgp_thompsonmp_pre_finalize()
   end subroutine GFS_rrtmgp_thompsonmp_pre_finalize
+
+  ! ######################################################################################
+  ! This function computes the cloud-fraction following.
+  ! Xu-Randall(1996) A Semiempirical Cloudiness Parameterization for Use in Climate Models
+  ! https://doi.org/10.1175/1520-0469(1996)053<3084:ASCPFU>2.0.CO;2
+  !
+  ! cld_frac = {1-exp[-alpha*cld_mr/((1-relhum)*qs_lay)**lambda]}*relhum**P 
+  !
+  ! ######################################################################################
+  function cld_frac_XuRandall(p_lay, qs_lay, relhum, cld_mr, alpha)
+  
+    ! Inputs
+    real(kind_phys), intent(in) :: &
+       p_lay,    & ! Pressure (Pa)
+       qs_lay,   & ! Saturation vapor-pressure (Pa)
+       relhum,   & ! Relative humidity
+       cld_mr,   & ! Total cloud mixing ratio
+       alpha       ! Scheme parameter (default=100)
+    ! Outputs
+    real(kind_phys) :: cld_frac_XuRandall
+    ! Locals
+    real(kind_phys) :: clwt, clwm, onemrh, tem1, tem2, tem3
+    ! Parameters
+    real(kind_phys) :: &
+       lambda = 0.50, & ! 
+       P      = 0.25
+  
+    clwt = 1.0e-6 * (p_lay*0.001)
+    if (cld_mr > clwt) then
+       onemrh = max(1.e-10, 1.0 - relhum)
+       tem1   = alpha / min(max((onemrh*qs_lay)**lambda,0.0001),1.0)
+       tem2   = max(min(tem1*(cld_mr - clwt), 50.0 ), 0.0 )
+       tem3   = sqrt(sqrt(relhum)) ! This assumes "p" = 0.25. Identical, but cheaper than relhum**p
+       !  
+       cld_frac_XuRandall = max( tem3*(1.0-exp(-tem2)), 0.0 )
+    else
+       cld_frac_XuRandall = 0.0
+    endif
+    
+    return
+  end function
 end module GFS_rrtmgp_thompsonmp_pre
