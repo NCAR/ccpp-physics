@@ -46,7 +46,7 @@
      &       cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
      &       flag_iter, lprnt, ipr,                                     &
      &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
+     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        &
      &       islmsk_cice,                                               &
 !    &       islmsk_cice, min_lakeice, min_seaice, oceanfrac,           &
      &       errmsg, errflg

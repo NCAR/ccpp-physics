@@ -118,6 +118,8 @@ contains
           else            ! all land
             cice(i) = zero
             hice(i) = zero
+            islmsk_cice(i) = 1
+            islmsk(i)      = 1
           endif
         enddo  
 
@@ -185,7 +187,7 @@ contains
         tprcp_lnd(i) = tprcp(i)
         tprcp_ice(i) = tprcp(i)
         if (wet(i)) then                   ! Water
-          uustar_wat(i) = uustar(i)
+!         uustar_wat(i) = uustar(i)
             zorl_wat(i) = zorlo(i)
             tsfc_wat(i) = tsfco(i)
            tsurf_wat(i) = tsfco(i)
@@ -193,9 +195,9 @@ contains
 !          snowd_wat(i) = snowd(i)
            weasd_wat(i) = zero
            snowd_wat(i) = zero
-           semis_wat(i) = 0.984d0
-             qss_wat(i) = qss(i)
-            hflx_wat(i) = hflx(i)
+           semis_wat(i) = 0.984_kind_phys
+!            qss_wat(i) = qss(i)
+!           hflx_wat(i) = hflx(i)
         endif
         if (dry(i)) then                   ! Land
           uustar_lnd(i) = uustar(i)
@@ -205,8 +207,8 @@ contains
            tsurf_lnd(i) = tsfcl(i)
            snowd_lnd(i) = snowd(i)
            semis_lnd(i) = semis_rad(i)
-             qss_lnd(i) = qss(i)
-            hflx_lnd(i) = hflx(i)
+!            qss_lnd(i) = qss(i)
+!           hflx_lnd(i) = hflx(i)
         end if
         if (icy(i)) then                   ! Ice
           uustar_ice(i) = uustar(i)
@@ -218,8 +220,8 @@ contains
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
            semis_ice(i) = 0.95_kind_phys
-             qss_ice(i) = qss(i)
-            hflx_ice(i) = hflx(i)
+!            qss_ice(i) = qss(i)
+!           hflx_ice(i) = hflx(i)
         endif
         if (nint(slmsk(i)) /= 1) slmsk(i)  = islmsk(i)
       enddo
@@ -404,7 +406,7 @@ contains
           txl   = landfrac(i)            ! land fraction
           wfrac = one - txl              ! ocean fraction
           txi   = cice(i) * wfrac        ! txi = ice fraction wrt whole cell
-          txo   = max(zero, wfrac - txi) ! txo = open water fraction
+          txo   = max(zero, wfrac-txi)   ! txo = open water fraction
 
           zorl(i)   = txl*zorl_lnd(i)   + txi*zorl_ice(i)   + txo*zorl_wat(i)
           cd(i)     = txl*cd_lnd(i)     + txi*cd_ice(i)     + txo*cd_wat(i)
