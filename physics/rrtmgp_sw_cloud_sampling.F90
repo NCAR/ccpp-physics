@@ -99,7 +99,8 @@ contains
     type(random_stat) :: rng_stat
     real(kind_phys) :: tauloc,asyloc,ssaloc
     real(kind_phys), dimension(sw_gas_props%get_ngpt(),nLev,nday) :: rng3D,rng3D2
-    real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLev) :: rng1D
+    real(kind_phys), dimension(sw_gas_props%get_ngpt()*nLev) :: rng2D
+    real(kind_phys), dimension(sw_gas_props%get_ngpt()) :: rng1D
     logical, dimension(nday,nLev,sw_gas_props%get_ngpt()) :: cldfracMCICA,precipfracSAMP
 
     ! Initialize CCPP error handling variables
@@ -134,8 +135,24 @@ contains
        ! and layers. ([nGpts,nLev,nDayumn]-> [nGpts*nLev]*nDayumn)
        do iday=1,nday
           call random_setseed(ipseed_sw(iday),rng_stat)
-          call random_number(rng1D,rng_stat)
-          rng3D(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+          ! Use same rng for each layer
+          if (iovr == iovr_max) then
+             call random_number(rng1D,rng_stat)
+             do iLay=1,nLev
+                rng3D(:,iLay,iday) = rng1D
+             enddo
+          else
+             do iLay=1,nLev
+                call random_number(rng1D,rng_stat)
+                rng3D(:,iLay,iday) = rng1D
+             enddo
+          endif
+       enddo
+
+       do iday=1,nday
+          call random_setseed(ipseed_sw(iday),rng_stat)
+          call random_number(rng2D,rng_stat)
+          rng3D(:,:,iday) = reshape(source = rng2D,shape=[sw_gas_props%get_ngpt(),nLev])
        enddo
 
        ! Cloud overlap.
@@ -147,8 +164,8 @@ contains
        if (iovr == iovr_dcorr) then
           do iday=1,nday
              call random_setseed(ipseed_sw(iday),rng_stat)
-             call random_number(rng1D,rng_stat)
-             rng3D2(:,:,iday) = reshape(source = rng1D,shape=[sw_gas_props%get_ngpt(),nLev])
+             call random_number(rng2D,rng_stat)
+             rng3D2(:,:,iday) = reshape(source = rng2D,shape=[sw_gas_props%get_ngpt(),nLev])
           enddo
           call sampled_mask(rng3D, cld_frac(idxday(1:nDay),:), cldfracMCICA,             &
 	                        overlap_param = cloud_overlap_param(idxday(1:nDay),1:nLev-1),&

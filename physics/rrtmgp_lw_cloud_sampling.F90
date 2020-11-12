@@ -96,7 +96,8 @@ contains
     integer,dimension(ncol) :: ipseed_lw
     type(random_stat) :: rng_stat
     real(kind_phys), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
-    real(kind_phys), dimension(lw_gas_props%get_ngpt()*nLev) :: rng1D
+    real(kind_phys), dimension(lw_gas_props%get_ngpt()) :: rng1D
+    real(kind_phys), dimension(lw_gas_props%get_ngpt()*nLev) :: rng2D
     logical, dimension(ncol,nLev,lw_gas_props%get_ngpt()) :: cldfracMCICA,precipfracSAMP
 
     ! Initialize CCPP error handling variables
@@ -152,8 +153,8 @@ contains
        ! Generate second RNG
        do iCol=1,ncol
           call random_setseed(ipseed_lw(icol),rng_stat)
-          call random_number(rng1D,rng_stat)
-          rng3D2(:,:,iCol) = reshape(source = rng1D,shape=[lw_gas_props%get_ngpt(),nLev])
+          call random_number(rng2D,rng_stat)
+          rng3D2(:,:,iCol) = reshape(source = rng2D,shape=[lw_gas_props%get_ngpt(),nLev])
        enddo
        call sampled_mask(rng3D, cld_frac, cldfracMCICA,                    &
                          overlap_param = cloud_overlap_param(:,1:nLev-1),  &
