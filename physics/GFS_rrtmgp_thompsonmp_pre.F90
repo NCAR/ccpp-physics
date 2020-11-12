@@ -16,13 +16,9 @@ module GFS_rrtmgp_thompsonmp_pre
        make_RainNumber
   implicit none
   
-  ! Parameters specific to THOMPSONMP scheme.
+  ! Parameters specific to THOMPSON MP scheme.
   real(kind_phys), parameter :: &
-       reliq_def  = 10.0 ,      & ! Default liq radius to 10 micron (used when effr_in=F)
-       reice_def  = 50.0,       & ! Default ice radius to 50 micron (used when effr_in=F)
-       rerain_def = 1000.0,     & ! Default rain radius to 1000 micron (used when effr_in=F)
-       resnow_def = 250.0,      & ! Default snow radius to 250 micron (used when effr_in=F)  
-       cllimit    = 0.001         ! Lowest cloud fraction in GFDL MP scheme
+       rerain_def = 1000.0 ! Default rain radius to 1000 microns
   
   public GFS_rrtmgp_thompsonmp_pre_init, GFS_rrtmgp_thompsonmp_pre_run, GFS_rrtmgp_thompsonmp_pre_finalize
   
@@ -67,10 +63,10 @@ contains
     	 doSWrad,           & ! Call SW radiation?
     	 doLWrad,           & ! Call LW radiation
     	 effr_in,           & ! Use cloud effective radii provided by model?
-         uni_cld,           & !
-         lmfshal,           & !
-         lmfdeep2,          & !
-         ltaerosol,         & !
+         uni_cld,           & ! Use provided cloud-fraction?
+         lmfshal,           & ! Flag for mass-flux shallow convection scheme used by Xu-Randall
+         lmfdeep2,          & ! Flag for some scale-aware mass-flux convection scheme active
+         ltaerosol,         & ! Flag for aerosol option
          do_mynnedmf          ! Flag to activate MYNN-EDMF
     real(kind_phys), intent(in) :: &
          con_g,             & ! Physical constant: gravitational constant
@@ -133,7 +129,7 @@ contains
     cld_condensate(1:nCol,1:nLev,4) = tracer(1:nCol,1:nLev,i_cldsnow) + &! -snow + grapuel
                                       tracer(1:nCol,1:nLev,i_cldgrpl) 
                                       
-    ! Cloud particle size
+    ! Cloud water path (g/m2)
     deltaP = abs(p_lev(:,2:nLev+1)-p_lev(:,1:nLev))/100.  
     do iLay = 1, nLev
        do iCol = 1, nCol
@@ -146,22 +142,23 @@ contains
        enddo
     enddo                                      
         	
+    ! Cloud particle sizes and number concentrations...
+    
     ! First, prepare cloud mixing-ratios and number concentrations for Calc_Re
     rho  = p_lay(1:nCol,1:nLev)/(con_rd*t_lay(1:nCol,1:nLev))    
     orho = 1./rho    
     do iLay = 1, nLev
        do iCol = 1, nCol    
           qv_mp(iCol,iLay) = q_lay(iCol,iLay)/(1.-q_lay(iCol,iLay))
-          qc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq)       / (1.-q_lay(iCol,iLay))
-          qi_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice)       / (1.-q_lay(iCol,iLay))
-          qs_mp(iCol,iLay) = tracer(iCol,iLay,i_cldsnow)      / (1.-q_lay(iCol,iLay))
-          nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc)    / (1.-q_lay(iCol,iLay))
+          qc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq)    / (1.-q_lay(iCol,iLay))
+          qi_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice)    / (1.-q_lay(iCol,iLay))
+          qs_mp(iCol,iLay) = tracer(iCol,iLay,i_cldsnow)   / (1.-q_lay(iCol,iLay))
+          nc_mp(iCol,iLay) = tracer(iCol,iLay,i_cldliq_nc) / (1.-q_lay(iCol,iLay))
+          ni_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice_nc) / (1.-q_lay(iCol,iLay))
           if (ltaerosol) then
-             ni_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice_nc) / (1.-q_lay(iCol,iLay))
              nwfa(iCol,iLay)  = tracer(iCol,iLay,i_twa)
           else
              nc_mp(iCol,iLay) = nt_c*orho(iCol,iLay)
-             ni_mp(iCol,iLay) = tracer(iCol,iLay,i_cldice_nc) / (1.-q_lay(iCol,iLay)) 
           endif
        enddo
     enddo
@@ -201,7 +198,7 @@ contains
        if (uni_cld) then
           cld_frac(1:nCol,1:nLev) = cld_frac_mg(1:nCol,1:nLev)    
        else
-          if(      lmfshal) alpha0 = 100. ! Default
+          if(      lmfshal) alpha0 = 100. ! Default (from GATE simulations)
           if(.not. lmfshal) alpha0 = 2000.
 		  ! Xu-Randall (1996) cloud-fraction 
           do iLay = 1, nLev
@@ -242,10 +239,13 @@ contains
        relhum,   & ! Relative humidity
        cld_mr,   & ! Total cloud mixing ratio
        alpha       ! Scheme parameter (default=100)
+       
     ! Outputs
     real(kind_phys) :: cld_frac_XuRandall
+
     ! Locals
     real(kind_phys) :: clwt, clwm, onemrh, tem1, tem2, tem3
+
     ! Parameters
     real(kind_phys) :: &
        lambda = 0.50, & ! 
