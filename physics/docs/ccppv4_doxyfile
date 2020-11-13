@@ -177,13 +177,13 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../dcyc2.f        \
 ### Land Surface
                         ../sfc_diff.f \
-                        ../sfc_nst.f \
-                        ../sfc_ocean.F  \
-                        ../module_nst_model.f90 \
-                        ../module_nst_parameters.f90 \
+                        ../sfc_nst.f                  \
+                        ../sfc_ocean.F                \
+                        ../module_nst_model.f90       \
+                        ../module_nst_parameters.f90  \
                         ../module_nst_water_prop.f90  \
-                        ../sfc_drv.f \
-                        ../sflx.f    \
+                        ../sfc_drv.f                  \
+                        ../sflx.f                     \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
 ### Sea Ice Surface

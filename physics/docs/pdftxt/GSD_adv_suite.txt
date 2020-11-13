@@ -32,7 +32,7 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_GSD_v1" lib="ccppphys" ver="4">
+<suite name="SCM_GSD_v1" lib="ccppphys" ver="5">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">

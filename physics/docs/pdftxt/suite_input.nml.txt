@@ -21,7 +21,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 
 <table>
 <caption id="multi_row">NML Description</caption>
-<tr><th>option          <th>DDT in Host Model                       <th>Description                <th>Default Value
+<tr><th>Option          <th>Option Sources                       <th>Description                <th>Default Value
 <tr><td colspan="4" align= center>\b &gfs_physics_nml 
 <tr><td>fhzero          <td>gfs_control_type          <td>hour between clearing of diagnostic buckets     <td>0.0     
 <tr><td>h2o_phys        <td>gfs_control_type          <td>flag for stratosphere h2o scheme                <td>.false. 
@@ -68,6 +68,8 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 1: max/ran overlapping clouds
                                                       <li> 2: maximum overlap clouds (mcica only)
                                                       <li> 3: decorrelation-length overlap (mcica only)
+                                                      <li> 4: exponential overlapping method
+                                                      <li> 5: exponential-random overlapping method
                                                       </ul>
                                                       <td>1
 <tr><td>iovr_lw         <td>gfs_control_type          <td>control flag for cloud overlap in LW radiation \n
@@ -76,6 +78,14 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 1: max/ran overlapping clouds
                                                       <li> 2: maximum overlap clouds (mcica only)
                                                       <li> 3: decorrelation-length overlap (mcica only)
+                                                      <li> 4: exponential overlapping method
+                                                      <li> 5: exponential-random overlapping method
+                                                      </ul>
+                                                      <td>1
+<tr><td>idcor           <td>gfs_control_type          <td>decorrelation length type for iovr_lw/iovr_sw =4 or 5  \n
+                                                      <ul>
+                                                      <li> 0: use constant decorrelation length defined by decorr_con
+                                                      <li> 1: use day-of-year and latitude-varying decorrelation length
                                                       </ul>
                                                       <td>1
 <tr><td>ictm            <td>gfs_control_type          <td> external data time/date control flag    \n

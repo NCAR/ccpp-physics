@@ -2,7 +2,7 @@
 !! This file contains 
 !WRF:MODEL_LAYER:PHYSICS
 !
-!>\ingroup gsd_mynn_sfc
+!>\ingroup rrfs_mynn_sfc
 !>\defgroup module_sf_mynn_mod GSD MYNN SFC Module
 MODULE module_sf_mynn
 
@@ -122,13 +122,12 @@ MODULE module_sf_mynn
 CONTAINS
 
 !-------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> Fill the PSIM and PSIH tables. The subroutine "psi_init" was leveraged from
 !! module_sf_sfclayrev.F, leveraging the work from Pedro Jimenez.
 !! This subroutine returns a blended form from Dyer and Hicks (1974)
 !! and Grachev et al (2000) for unstable conditions and the form
 !! from Cheng and Brutsaert (2005) for stable conditions.
-
   SUBROUTINE mynn_sf_init_driver(allowed_to_read)
 
     LOGICAL, INTENT(in) :: allowed_to_read
@@ -138,7 +137,7 @@ CONTAINS
   END SUBROUTINE mynn_sf_init_driver
 
 !-------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !! This subroutine
    SUBROUTINE SFCLAY_mynn(                           &
               U3D,V3D,T3D,QV3D,P3D,dz8w,             & !in
@@ -495,7 +494,7 @@ CONTAINS
     END SUBROUTINE SFCLAY_MYNN
 
 !-------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !! This subroutine calculates u*, z/L, and the exchange coefficients
 !! which are passed to subsequent scheme to calculate the fluxes.
 !! This scheme has options to calculate the fluxes and near-surface
@@ -2138,7 +2137,7 @@ IF ( debug_code == 2) THEN
 
 END SUBROUTINE SFCLAY1D_mynn
 !-------------------------------------------------------------------          
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This subroutine returns the thermal and moisture roughness lengths
 !! from Zilitinkevich (1995) and Zilitinkevich et al. (2001) over
 !! land and water, respectively. 
@@ -2210,6 +2209,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE zilitinkevich_1995
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
    SUBROUTINE davis_etal_2008(Z_0,ustar)
 
     !a.k.a. : Donelan et al. (2004)
@@ -2240,7 +2240,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE davis_etal_2008
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !>This formulation for roughness length was designed account for.
 !!wave steepness.
    SUBROUTINE Taylor_Yelland_2001(Z_0,ustar,wsp10)
@@ -2266,7 +2266,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE Taylor_Yelland_2001
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !>This version of Charnock's relation employs a varying
 !! Charnock parameter, similar to COARE3.0 [Fairall et al. (2003)].
 !! The Charnock parameter CZC is varied from .011 to .018.
@@ -2291,7 +2291,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE charnock_1955
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This version of Charnock's relation employs a varying
 !!Charnock parameter, taken from COARE 3.5 [Edson et al. (2001, JPO)].
 !!The Charnock parameter CZC is varied from about .005 to .028
@@ -2319,7 +2319,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
    END SUBROUTINE edson_etal_2013
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This formulation for the thermal and moisture roughness lengths
 !! (Zt and Zq) relates them to Z0 via the roughness Reynolds number (Ren).
 !!This formula comes from Fairall et al. (2003). It is modified from
@@ -2352,7 +2352,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE garratt_1992
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !>This formulation for thermal and moisture roughness length (Zt and Zq)
 !! as a function of the roughness Reynolds number (Ren) comes from the
 !! COARE3.0 formulation, empirically derived from COARE and HEXMAX data
@@ -2400,7 +2400,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE fairall_etal_2003
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This formulation for thermal and moisture roughness length (Zt and Zq)
 !! as a function of the roughness Reynolds number (Ren) comes from the
 !! COARE 3.5/4.0 formulation, empirically derived from COARE and HEXMAX data
@@ -2429,7 +2429,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE fairall_etal_2014
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This is a modified version of Yang et al (2002 QJRMS, 2008 JAMC) 
 !! and Chen et al (2010, J of Hydromet). Although it was originally 
 !! designed for arid regions with bare soil, it is modified 
@@ -2487,6 +2487,7 @@ END SUBROUTINE SFCLAY1D_mynn
     END SUBROUTINE Yang_2008
 !--------------------------------------------------------------------
 !  Taken from the GFS (sfc_diff.f) for comparison
+!>\ingroup rrfs_mynn_sfc
     SUBROUTINE GFS_z0_lnd(z0max,shdmax,z1,vegtype,ivegsrc,z0pert)
 
         REAL, INTENT(OUT)  :: z0max
@@ -2546,6 +2547,7 @@ END SUBROUTINE SFCLAY1D_mynn
     END SUBROUTINE GFS_z0_lnd
 !--------------------------------------------------------------------
 !  Taken from the GFS (sfc_diff.f) for comparison
+!>\ingroup rrfs_mynn_sfc
     SUBROUTINE GFS_zt_lnd(ztmax,z0max,sigmaf,ztpert,ustar_lnd)
 
         REAL, INTENT(OUT)  :: ztmax
@@ -2573,6 +2575,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE GFS_zt_lnd
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
     SUBROUTINE GFS_z0_ocn(z0rl_ocn,ustar_ocn,WSPD,z1,sfc_z0_type,redrag)
 
         REAL, INTENT(OUT)  :: z0rl_ocn
@@ -2625,6 +2628,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE GFS_z0_ocn
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
     SUBROUTINE GFS_zt_ocn(ztmax,z0rl_ocn,restar,WSPD,z1,sfc_z0_type)
 
         REAL, INTENT(OUT)  :: ztmax
@@ -2667,9 +2671,9 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE GFS_zt_ocn
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
 !! add fitted z0,zt curves for hurricane application (used in HWRF/HMON)
 !! Weiguo Wang, 2019-0425
-
       SUBROUTINE znot_m_v6(uref, znotm)
       use machine , only : kind_phys
       IMPLICIT NONE
@@ -2716,6 +2720,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
       END SUBROUTINE znot_m_v6
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
       SUBROUTINE znot_t_v6(uref, znott)
 
       IMPLICIT NONE
@@ -2780,7 +2785,7 @@ END SUBROUTINE SFCLAY1D_mynn
       END SUBROUTINE znot_t_v6
 
 !-------------------------------------------------------------------
-
+!>\ingroup rrfs_mynn_sfc
       SUBROUTINE znot_m_v7(uref, znotm)
 
       IMPLICIT NONE
@@ -2828,6 +2833,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
       END SUBROUTINE znot_m_v7
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
       SUBROUTINE znot_t_v7(uref, znott)
 
       IMPLICIT NONE
@@ -2894,7 +2900,7 @@ END SUBROUTINE SFCLAY1D_mynn
         END SUBROUTINE znot_t_v7
 
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This is taken from Andreas (2002; J. of Hydromet) and 
 !! Andreas et al. (2005; BLM).
 !!
@@ -2945,7 +2951,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE Andreas_2002
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This subroutine returns the stability functions based off
 !! of Hogstrom (1996).
     SUBROUTINE PSI_Hogstrom_1996(psi_m, psi_h, zL, Zt, Z_0, Za)
@@ -2981,7 +2987,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Hogstrom_1996
 !--------------------------------------------------------------------
-!> \ingroup module_sf_mynn_mod
+!> \ingroup rrfs_mynn_sfc
 !> This subroutine returns the stability functions based off
 !! of Hogstrom (1996), but with different constants compatible
 !! with Dyer and Hicks (1970/74?). This formulation is used for
@@ -3020,7 +3026,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_DyerHicks
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This subroutine returns the stability functions based off
 !! of Beljaar and Holtslag 1991, which is an extension of Holtslag
 !! and Debruin 1989.
@@ -3051,7 +3057,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Beljaars_Holtslag_1991
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This subroutine returns the stability functions come from
 !! Zilitinkevich and Esau (2007, BM), which are formulatioed from the
 !! "generalized similarity theory" and tuned to the LES DATABASE64
@@ -3082,7 +3088,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Zilitinkevich_Esau_2007
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This subroutine returns the flux-profile relationships
 !! of Businger el al. 1971.
     SUBROUTINE PSI_Businger_1971(psi_m, psi_h, zL)
@@ -3114,7 +3120,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Businger_1971
 !--------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
+!>\ingroup rrfs_mynn_sfc
 !> This subroutine returns flux-profile relatioships based off
 !!of Lobocki (1993), which is derived from the MY-level 2 model.
 !!Suselj and Sood (2010) applied the surface layer length scales
@@ -3147,11 +3153,11 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_Suselj_Sood_2010
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
+!! This subroutine returns the stability functions based off
+!! of Cheng and Brutseart (2005, BLM), for use in stable conditions only.
+!! The returned values are the combination of psi((za+zo)/L) - psi(z0/L)
     SUBROUTINE PSI_CB2005(psim1,psih1,zL,z0L)
-
-    ! This subroutine returns the stability functions based off
-    ! of Cheng and Brutseart (2005, BLM), for use in stable conditions only.
-    ! The returned values are the combination of psi((za+zo)/L) - psi(z0/L)
 
        IMPLICIT NONE
        REAL, INTENT(IN)  :: zL,z0L
@@ -3166,11 +3172,11 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE PSI_CB2005
 !--------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
+!! This subroutine returns a more robust z/L that best matches
+!! the z/L from Hogstrom (1996) for unstable conditions and Beljaars
+!! and Holtslag (1991) for stable conditions.
     SUBROUTINE Li_etal_2010(zL, Rib, zaz0, z0zt)
-
-    !This subroutine returns a more robust z/L that best matches
-    !the z/L from Hogstrom (1996) for unstable conditions and Beljaars
-    !and Holtslag (1991) for stable conditions.
 
        IMPLICIT NONE
        REAL, INTENT(OUT)  :: zL
@@ -3227,13 +3233,13 @@ END SUBROUTINE SFCLAY1D_mynn
 
     END SUBROUTINE Li_etal_2010
 !-------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
+!! This iterative algorithm was taken from the revised sufacelayer
+!! scheme in WRF-ARW, written by Pedro Jimenez and Jimy Dudhia and
+!! summarized in Jimenez et al. (2012, MWR). This function was adapted
+!! to input the thermal roughness length, zt, (as well as z0) because
+!! zt is necessary input for the Dyer-Hicks functions used in MYNN.
       REAL function zolri(ri,za,z0,zt,zol1)
-
-      ! This iterative algorithm was taken from the revised surface layer 
-      ! scheme in WRF-ARW, written by Pedro Jimenez and Jimy Dudhia and 
-      ! summarized in Jimenez et al. (2012, MWR). This function was adapted
-      ! to input the thermal roughness length, zt, (as well as z0) because
-      ! zt is necessary input for the Dyer-Hicks functions used in MYNN.
 
       IMPLICIT NONE
       REAL, INTENT(IN) :: ri,za,z0,zt,zol1
@@ -3281,6 +3287,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
       end function
 !-------------------------------------------------------------------
+!>\ingroup rrfs_mynn_sfc
       REAL function zolri2(zol2,ri2,za,z0,zt)
 
       ! INPUT: =================================
@@ -3322,6 +3329,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
       end function
 !====================================================================
+!>\ingroup rrfs_mynn_sfc
    SUBROUTINE psi_init
 
     INTEGER                   ::      N
@@ -3342,7 +3350,8 @@ END SUBROUTINE SFCLAY1D_mynn
    END SUBROUTINE psi_init
 ! ==================================================================
 ! ... integrated similarity functions ...
-!                                                                                                                                                 
+!
+!>\ingroup rrfs_mynn_sfc
    REAL function psim_stable_full(zolf)
         REAL :: zolf   
 
@@ -3352,6 +3361,7 @@ END SUBROUTINE SFCLAY1D_mynn
         return
    end function
 
+!>\ingroup rrfs_mynn_sfc
    REAL function psih_stable_full(zolf)
         REAL :: zolf
 
@@ -3361,6 +3371,7 @@ END SUBROUTINE SFCLAY1D_mynn
         return
    end function
 
+!>\ingroup rrfs_mynn_sfc
    REAL function psim_unstable_full(zolf)
         REAL :: zolf,x,ym,psimc,psimk
 
@@ -3377,6 +3388,7 @@ END SUBROUTINE SFCLAY1D_mynn
         return
    end function
 
+!>\ingroup rrfs_mynn_sfc
    REAL function psih_unstable_full(zolf)
         REAL :: zolf,y,yh,psihc,psihk
 
@@ -3395,6 +3407,7 @@ END SUBROUTINE SFCLAY1D_mynn
 !=================================================================
 ! look-up table functions
 !=================================================================
+!>\ingroup rrfs_mynn_sfc
    REAL function psim_stable(zolf)
         integer :: nzol
         real    :: rzol,zolf
@@ -3410,6 +3423,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
    end function
 
+!>\ingroup rrfs_mynn_sfc
    REAL function psih_stable(zolf)
         integer :: nzol
         real    :: rzol,zolf
@@ -3425,6 +3439,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
    end function
 
+!>\ingroup rrfs_mynn_sfc
    REAL function psim_unstable(zolf)
         integer :: nzol
         real    :: rzol,zolf
@@ -3440,6 +3455,7 @@ END SUBROUTINE SFCLAY1D_mynn
       return
    end function
 
+!>\ingroup rrfs_mynn_sfc
    REAL function psih_unstable(zolf)
         integer :: nzol
         real    :: rzol,zolf
