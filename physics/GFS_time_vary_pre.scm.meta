@@ -212,7 +212,7 @@
 [ipt]
   standard_name = index_for_diagnostic_printout
   long_name = horizontal index for point used for diagnostic printout
-  units = 
+  units = index 
   dimensions = ()
   type = integer
   intent = out

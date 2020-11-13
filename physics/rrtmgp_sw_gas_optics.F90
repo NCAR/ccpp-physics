@@ -374,6 +374,8 @@ contains
           toa_src_sw(idxday(ij),:) = toa_src_sw(idxday(ij),:)*solcon/ &
                                      sum(toa_src_sw(idxday(ij),:))
        enddo
+    else
+       toa_src_sw(:,:) = 0.
     endif
 
   end subroutine rrtmgp_sw_gas_optics_run
