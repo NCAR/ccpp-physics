@@ -30,7 +30,6 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>cplflx          <td>gfs_control_type          <td>logical flag for cplflx collection              <td>.false.
 <tr><td>cplwav          <td>gfs_control_type          <td>logical flag for cplwav collection              <td>.false.
 <tr><td>cplchm          <td>gfs_control_type          <td>logical flag for chemistry collection           <td>.false.
-<tr><td>lsidea          <td>gfs_control_type          <td>logical flag for idealized physics              <td>.false.
 <tr><td>oz_phys         <td>gfs_control_type          <td>flag for old (2006) ozone physics               <td>.true.  
 <tr><td>oz_phys_2015    <td>gfs_control_type          <td>flag for new (2015) ozone physics               <td>.false.
 <tr><td>fhcyc           <td>gfs_control_type          <td>frequency for surface data cycling in hours     <td>0.0 
