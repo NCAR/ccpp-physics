@@ -368,20 +368,20 @@
         do i=1,im
           hflxq(i) = hflx(i)
           evapq(i) = evap(i)
-          hffac(i) = 1.0
-          hefac(i) = 1.0
+          hffac(i) = one
+          hefac(i) = one
         enddo
         if (lheatstrg) then
           do i=1,im
-            tem = 0.01 * zorl(i)     ! change unit from cm to m
+            tem = 0.01_kind_phys * zorl(i)     ! change unit from cm to m
             tem1 = (tem - z0min) / (z0max - z0min)
-            hffac(i) = z0fac * min(max(tem1, 0.0), 1.0)
-            tem = sqrt(u10m(i)**2+v10m(i)**2)
+            hffac(i) = z0fac * min(max(tem1, zero), one)
+            tem  = sqrt(u10m(i)*u10m(i)+v10m(i)*v10m(i))
             tem1 = (tem - u10min) / (u10max - u10min)
-            tem2 = 1.0 - min(max(tem1, 0.0), 1.0)
+            tem2 = one - min(max(tem1, zero), one)
             hffac(i) = tem2 * hffac(i)
-            hefac(i) = 1. + e0fac * hffac(i)
-            hffac(i) = 1. + hffac(i)
+            hefac(i) = one + e0fac * hffac(i)
+            hffac(i) = one + hffac(i)
             hflxq(i) = hflx(i) / hffac(i)
             evapq(i) = evap(i) / hefac(i)
           enddo
