@@ -1,7 +1,7 @@
 module rrtmgp_lw_cloud_sampling
   use machine,                  only: kind_phys
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
-  use mo_optical_props,         only: ty_optical_props_1scl
+  use mo_optical_props,         only: ty_optical_props_2str
   use rrtmgp_sampling,          only: sampled_mask, draw_samples
   use mersenne_twister,         only: random_setseed, random_number, random_stat  
   use rrtmgp_aux,               only: check_error_msg
@@ -47,12 +47,13 @@ contains
   subroutine rrtmgp_lw_cloud_sampling_run(doLWrad, nCol, nLev, ipsdlw0, icseed_lw, iovr,    &
        iovr_max, iovr_maxrand, iovr_rand, iovr_dcorr, iovr_exp, iovr_exprand, isubc_lw,     &
        cld_frac, precip_frac, cloud_overlap_param, precip_overlap_param, lw_gas_props,      &
-       lw_optical_props_cloudsByBand, lw_optical_props_precipByBand,                        &
+       doGP_lwscat, lw_optical_props_cloudsByBand, lw_optical_props_precipByBand,           &
        lw_optical_props_clouds, lw_optical_props_precip, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
-         doLWrad                             ! Logical flag for shortwave radiation call
+         doLWrad,                          & ! Logical flag for shortwave radiation call
+         doGP_lwscat                         ! Include scattering in LW cloud-optics?
     integer, intent(in) :: &
          nCol,                             & ! Number of horizontal gridpoints
          nLev,                             & ! Number of vertical layers
@@ -78,7 +79,7 @@ contains
          precip_overlap_param                ! Precipitation overlap parameter 
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props                        ! RRTMGP DDT: K-distribution data
-    type(ty_optical_props_1scl),intent(in) :: &
+    type(ty_optical_props_2str),intent(in) :: &
          lw_optical_props_cloudsByBand,    & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
          lw_optical_props_precipByBand       ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
 
@@ -87,7 +88,7 @@ contains
          errmsg                         ! CCPP error message
     integer,          intent(out) :: &
          errflg                         ! CCPP error code
-    type(ty_optical_props_1scl),intent(out) :: &
+    type(ty_optical_props_2str),intent(out) :: &
          lw_optical_props_clouds,     & ! RRTMGP DDT: Shortwave optical properties by spectral point (clouds)
          lw_optical_props_precip        ! RRTMGP DDT: Shortwave optical properties by spectral point (precipitation)
 
@@ -112,7 +113,7 @@ contains
 
     ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
     call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
-         lw_optical_props_clouds%alloc_1scl(nCol, nLev, lw_gas_props))
+         lw_optical_props_clouds%alloc_2str(nCol, nLev, lw_gas_props))
     
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
@@ -170,7 +171,7 @@ contains
     ! Sampling. Map band optical depth to each g-point using McICA
     !
     call check_error_msg('rrtmgp_lw_cloud_sampling_run_draw_samples',&
-         draw_samples(cldfracMCICA,                                  &
+         draw_samples(cldfracMCICA, doGP_lwscat,                     &
                       lw_optical_props_cloudsByBand,                 &
                       lw_optical_props_clouds))
 
@@ -180,7 +181,7 @@ contains
     
     ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
     call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
-         lw_optical_props_precip%alloc_1scl(nCol, nLev, lw_gas_props))
+         lw_optical_props_precip%alloc_2str(nCol, nLev, lw_gas_props))
     
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
@@ -230,7 +231,7 @@ contains
     ! Sampling. Map band optical depth to each g-point using McICA
     !
     call check_error_msg('rrtmgp_lw_precip_sampling_run_draw_samples',&
-         draw_samples(precipfracSAMP,                                 &
+         draw_samples(precipfracSAMP, doGP_lwscat,                    &
                       lw_optical_props_precipByBand,                  &
                       lw_optical_props_precip))
          

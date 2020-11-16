@@ -5,7 +5,7 @@ module rrtmgp_lw_rte
   use mo_rte_kind,            only: wl
   use mo_gas_optics_rrtmgp,   only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,        only: ty_cloud_optics
-  use mo_optical_props,       only: ty_optical_props_1scl
+  use mo_optical_props,       only: ty_optical_props_1scl, ty_optical_props_2str
   use mo_rte_lw,              only: rte_lw
   use mo_fluxes_byband,       only: ty_fluxes_byband
   use mo_source_functions,    only: ty_source_func_lw
@@ -28,17 +28,18 @@ contains
 !! \section arg_table_rrtmgp_lw_rte_run
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
-  subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, nCol, nLev, p_lay,    &
-       t_lay, p_lev, skt, lw_gas_props, sfc_emiss_byband, sources, lw_optical_props_clrsky,&
-       lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,  &
-       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac,                &
-       fluxlwDOWN_jac, errmsg, errflg)
+  subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,    &
+       nLev, p_lay, t_lay, p_lev, skt, lw_gas_props, sfc_emiss_byband, sources,            &
+       lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_aerosol,         &
+       nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,                 &
+       fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwDOWN_jac, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
          doLWrad,                 & ! Logical flag for longwave radiation call
          doLWclrsky,              & ! Compute clear-sky fluxes for clear-sky heating-rate?
-         use_LW_jacobian            ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
+         use_LW_jacobian,         & ! Compute Jacobian of LW to update radiative fluxes between radiation calls?
+         doGP_lwscat                ! Include scattering in LW cloud-optics?
     integer, intent(in) :: &
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
@@ -57,10 +58,11 @@ contains
     type(ty_source_func_lw),intent(in) :: &
          sources                    ! RRTMGP DDT: longwave source functions
     type(ty_optical_props_1scl),intent(inout) :: &
+         lw_optical_props_aerosol, &! RRTMGP DDT: longwave aerosol radiative properties
          lw_optical_props_clrsky    ! RRTMGP DDT: longwave clear-sky radiative properties 
-    type(ty_optical_props_1scl),intent(in) :: &
-         lw_optical_props_clouds, & ! RRTMGP DDT: longwave cloud radiative properties 
-         lw_optical_props_aerosol   ! RRTMGP DDT: longwave aerosol radiative properties
+    type(ty_optical_props_2str),intent(inout) :: &
+         lw_optical_props_clouds    ! RRTMGP DDT: longwave cloud radiative properties          
+         
     ! Outputs
     real(kind_phys), dimension(ncol,nLev+1), intent(out) :: &
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
@@ -106,6 +108,7 @@ contains
     !
     ! Add aerosol optics to gas optics
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%increment(lw_optical_props_clrsky))
+    !call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%finalize()) 
 
     ! Call RTE solver
     if (doLWclrsky) then
@@ -128,31 +131,61 @@ contains
     !
     ! All-sky fluxes
     !
-    ! Add cloud optics to clear-sky optics
-    call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%increment(lw_optical_props_clrsky))
 
-    ! Call RTE solver
-    if (use_LW_jacobian) then
-       ! Compute LW Jacobians
-       call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-            lw_optical_props_clrsky,         & ! IN  - optical-properties
-            top_at_1,                        & ! IN  - veritcal ordering flag
-            sources,                         & ! IN  - source function
-            sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
-            flux_allsky,                     & ! OUT - Flxues 
-            n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
-            flux_up_Jac    = fluxlwUP_jac,   & ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
-            flux_dn_Jac    = fluxlwDOWN_jac))  ! OUT - surface temperature flux (downward) Jacobian (W/m2/K)
+    ! Include LW cloud-scattering?
+    if (doGP_lwscat) then 
+       ! Add clear-sky optics to cloud-optics (2-stream)
+       call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clrsky%increment(lw_optical_props_clouds))
+       !call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clrsky%finalize()) 
+       
+       if (use_LW_jacobian) then
+          ! Compute LW Jacobians
+          call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+               lw_optical_props_clouds,         & ! IN  - optical-properties
+               top_at_1,                        & ! IN  - veritcal ordering flag
+               sources,                         & ! IN  - source function
+               sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+               flux_allsky,                     & ! OUT - Flxues 
+               n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
+               flux_up_Jac    = fluxlwUP_jac,   & ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
+               flux_dn_Jac    = fluxlwDOWN_jac))  ! OUT - surface temperature flux (downward) Jacobian (W/m2/K)
+       else
+          call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+               lw_optical_props_clouds,         & ! IN  - optical-properties
+               top_at_1,                        & ! IN  - veritcal ordering flag
+               sources,                         & ! IN  - source function
+               sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+               flux_allsky,                     & ! OUT - Flxues 
+               n_gauss_angles = nGauss_angles))   ! IN  - Number of angles in Gaussian quadrature    
+       end if
+    ! No scattering in LW clouds.   
     else
-       call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
-            lw_optical_props_clrsky,         & ! IN  - optical-properties
-            top_at_1,                        & ! IN  - veritcal ordering flag
-            sources,                         & ! IN  - source function
-            sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
-            flux_allsky,                     & ! OUT - Flxues 
-            n_gauss_angles = nGauss_angles))   ! IN  - Number of angles in Gaussian quadrature    
-    end if
-            
+       ! Add cloud optics to clear-sky optics (scalar)
+       call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%increment(lw_optical_props_clrsky))
+       !call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%finalize()) 
+    
+       if (use_LW_jacobian) then
+          ! Compute LW Jacobians
+          call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+               lw_optical_props_clrsky,         & ! IN  - optical-properties
+               top_at_1,                        & ! IN  - veritcal ordering flag
+               sources,                         & ! IN  - source function
+               sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+               flux_allsky,                     & ! OUT - Flxues 
+               n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
+               flux_up_Jac    = fluxlwUP_jac,   & ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
+               flux_dn_Jac    = fluxlwDOWN_jac))  ! OUT - surface temperature flux (downward) Jacobian (W/m2/K)
+       else
+          call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
+               lw_optical_props_clrsky,         & ! IN  - optical-properties
+               top_at_1,                        & ! IN  - veritcal ordering flag
+               sources,                         & ! IN  - source function
+               sfc_emiss_byband,                & ! IN  - surface emissivity in each LW band
+               flux_allsky,                     & ! OUT - Flxues 
+               n_gauss_angles = nGauss_angles))   ! IN  - Number of angles in Gaussian quadrature    
+       end if    
+    endif
+    
     ! Store fluxes
     fluxlwUP_allsky   = sum(flux_allsky%bnd_flux_up,dim=3)
     fluxlwDOWN_allsky = sum(flux_allsky%bnd_flux_dn,dim=3) 

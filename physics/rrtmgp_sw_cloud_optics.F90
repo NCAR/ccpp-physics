@@ -1,8 +1,8 @@
 module rrtmgp_sw_cloud_optics
   use machine,                  only: kind_phys
   use mo_rte_kind,              only: wl
-  use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,          only: ty_cloud_optics
+  use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_optical_props,         only: ty_optical_props_2str
   use mo_rrtmg_sw_cloud_optics, only: rrtmg_sw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg
@@ -20,15 +20,15 @@ module rrtmgp_sw_cloud_optics
   real(kind_phys),dimension(:),allocatable :: b0r,b0s,b1s,c0r,c0s
 
 contains
-  ! #########################################################################################
+  ! ######################################################################################
   ! SUBROUTINE sw_cloud_optics_init
-  ! #########################################################################################
+  ! ######################################################################################
 !! \section arg_table_rrtmgp_sw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE, doGP_cldoptics_LUT, &
-       nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm, mpirank, mpiroot, sw_cloud_props,&
-       errmsg, errflg)
+  subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE,             &
+       doGP_cldoptics_LUT, nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm,     &
+       mpirank, mpiroot, sw_cloud_props, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -53,7 +53,7 @@ contains
     integer,          intent(out) :: &
          errflg                ! CCPP error code
     
-    ! Variables that will be passed to cloud_optics%load()
+    ! Local variables that will be passed to cloud_optics%load()
     real(kind_phys) :: &
          radliq_lwr,          & ! Liquid particle size lower bound for LUT interpolation   
          radliq_upr,          & ! Liquid particle size upper bound for LUT interpolation
@@ -276,7 +276,7 @@ contains
     c0r = (/0.980, 0.975,   0.965,   0.960, 0.955, 0.952, 0.950,    &
             0.944, 0.894,   0.884,   0.883, 0.883, 0.883, 0.883/)
     c0s = (/0.970, 0.970,   0.970,   0.970, 0.970, 0.970, 0.970,    &
-            0.970, 0.970,   0.970,   0.700, 0.700, 0.700, 0.700/)
+            0.970, 0.970,   0.970,   0.700, 0.700, 0.700, 0.700/)    
     
   end subroutine rrtmgp_sw_cloud_optics_init
 
