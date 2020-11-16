@@ -40,6 +40,7 @@ contains
          snowd,         & ! water equivalent snow depth (mm)
          sncovr,        & ! Surface snow are fraction (1)
          tsfc,          & ! Surface skin temperature (K)
+         emiss,         & ! Surface emissivity from Noah MP 
          hprime           ! Standard deviation of subgrid orography
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props     ! RRTMGP DDT: spectral information for LW calculation
@@ -66,7 +67,7 @@ contains
     ! #######################################################################################
     ! Call module_radiation_surface::setemis(),to setup surface emissivity for LW radiation.
     ! #######################################################################################
-    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfc, tsfc, hprime, nCol, semis)
+    call setemis (xlon, xlat, slmsk, snowd, sncovr, zorl, tsfc, tsfc, hprime, emiss,nCol, semis)
 
     ! Assign same emissivity to all bands
     do iBand=1,lw_gas_props%get_nband()

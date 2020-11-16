@@ -29,8 +29,8 @@ contains
   subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
        lndp_prt_list, doSWrad, solhr,                                                       &
        lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl, tsfc, hprime, alvsf,              &
-       alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, lsmask, sfc_wts, p_lay, tv_lay,      &
-       relhum, p_lev, sw_gas_props,                                                         &
+       alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis, albinir,  &
+       lsmask, sfc_wts, p_lay, tv_lay, relhum, p_lev, sw_gas_props,                         &
        nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,                      &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, errmsg, errflg)
     
@@ -67,7 +67,12 @@ contains
          facsf,             & ! Fractional coverage with strong cosz dependency (frac)
          facwf,             & ! Fractional coverage with weak cosz dependency (frac)
          fice,              & ! Ice fraction over open water (frac)
-         tisfc                ! Sea ice surface skin temperature (K)
+         tisfc,             & ! Sea ice surface skin temperature (K)
+         albdvis,           & ! surface albedo from lsm (direct,vis) (frac)
+         albdnir,           & ! surface albedo from lsm (direct,nir) (frac)
+         albivis,           & ! surface albedo from lsm (diffuse,vis) (frac)
+         albinir              ! surface albedo from lsm (diffuse,nir) (frac)
+         
     real(kind_phys), dimension(nCol,n_var_lndp), intent(in) :: &
          sfc_wts              ! Weights for stochastic surface physics perturbation ()    
     real(kind_phys), dimension(nCol,nLev),intent(in) :: &
@@ -133,7 +138,8 @@ contains
        alb1d(:) = 0.
        lndp_alb = -999.
        call setalb (lsmask, snowd, sncovr, snoalb, zorl, coszen, tsfc, tsfc, hprime, alvsf, &
-            alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, NCOL, alb1d, lndp_alb, sfcalb)
+            alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, albdvis, albdnir, albivis,      &
+            albinir, NCOL, alb1d, lndp_alb, sfcalb)
        
        ! Approximate mean surface albedo from vis- and nir-  diffuse values.
        sfc_alb_dif(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))

@@ -1002,6 +1002,42 @@
   kind = kind_phys
   intent = inout
   optional = F
+[albdvis]
+  standard_name =  surface_albedo_dir_vis
+  long_name = surface albedo from lsm (direct,vis)
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albdnir]
+  standard_name =  surface_albedo_dir_nir
+  long_name = surface albedo from lsm (direct,nir)
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albivis]
+  standard_name =  surface_albedo_dif_vis
+  long_name = surface albedo from lsm (diffuse,vis)
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[albinir]
+  standard_name =  surface_albedo_dif_nir
+  long_name = surface albedo from lsm (diffuse,nir)
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [sncovr1]
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction

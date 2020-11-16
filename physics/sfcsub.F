@@ -7337,7 +7337,7 @@ cjfe
             call fixrdc_tile(fnalbc2, tile_num_ch, i_index, j_index,
      &                       kpdalf(1), alf(:,1), 1, len, me)
           endif
-        else
+        elseif (ialb == 0) then
           call fixrdc(lugb,fnalbc,kpdalf(1),kpd7,kpd9,slmask
      &,               alf,len,iret
      &,               imsk, jmsk, slmskh, gaus,blno, blto
@@ -8115,7 +8115,7 @@ cjfe
             albclm(i,k) = wei1m * alb(i,k,k1) + wei2m * alb(i,k,k2)
           enddo
         enddo
-      else
+      elseif (ialb == 0) then
         do k=1,4
           do i=1,len
             albclm(i,k) = wei1s * alb(i,k,m1) + wei2s * alb(i,k,m2)
