@@ -437,7 +437,7 @@ contains
                              imelt  ,snicev ,snliqv ,epore  ,qmelt  ,ponding, & !out
                              sag    ,fsa    ,fsr    ,fira   ,fsh    ,fgev   , & !out
                              trad   ,t2m    ,ssoil  ,lathea ,q2e    ,emissi,  & !out
-                             ch2b   ,albsnd ,albsni                         ) ) !out
+                             ch2b   ,albsnd ,albsni                         )   !out
 
 ! --------------------------------------------------------------------------------------------------
 ! --------------------------------------------------------------------------------------------------
