@@ -1003,8 +1003,8 @@
   intent = inout
   optional = F
 [albdvis]
-  standard_name =  surface_albedo_dir_vis
-  long_name = surface albedo from lsm (direct,vis)
+  standard_name = surface_albedo_direct_visible
+  long_name = direct surface albedo visible band
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1012,8 +1012,8 @@
   intent = out
   optional = F
 [albdnir]
-  standard_name =  surface_albedo_dir_nir
-  long_name = surface albedo from lsm (direct,nir)
+  standard_name = surface_albedo_direct_NIR
+  long_name = direct surface albedo NIR band
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1021,8 +1021,8 @@
   intent = out
   optional = F
 [albivis]
-  standard_name =  surface_albedo_dif_vis
-  long_name = surface albedo from lsm (diffuse,vis)
+  standard_name = surface_albedo_diffuse_visible
+  long_name = diffuse surface albedo visible band
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
@@ -1030,8 +1030,8 @@
   intent = out
   optional = F
 [albinir]
-  standard_name =  surface_albedo_dif_nir
-  long_name = surface albedo from lsm (diffuse,nir)
+  standard_name = surface_albedo_diffuse_NIR
+  long_name = diffuse surface albedo NIR band
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real

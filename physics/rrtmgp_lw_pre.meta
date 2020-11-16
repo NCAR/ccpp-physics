@@ -122,8 +122,8 @@
   intent = out
   optional = F
 [emiss]
-  standard_name = surface_longwave_emissivity_from_lsm
-  long_name = surface lw emissivity from lsm in fraction
+  standard_name = surface_emissivity_lsm
+  long_name = surface emissivity from lsm
   units = frac
   dimensions = (horizontal_loop_extent)
   type = real
