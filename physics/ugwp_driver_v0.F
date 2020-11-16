@@ -1,4 +1,4 @@
-!!23456	
+!
        module sso_coorde
 !
 ! specific to COORDE-2019 project OGW switches/sensitivity
@@ -289,8 +289,7 @@
      &    PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT,
      &    sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD,
      &    DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea,
-     &    cdmbgwd, me, master, rdxzb,
-     &    con_g, con_omega,
+     &    cdmbgwd, me, master, rdxzb, con_g, con_omega,
      &    zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,
      &    dudt_mtb, dudt_ogw, dudt_tms)
 !----------------------------------------

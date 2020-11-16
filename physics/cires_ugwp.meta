@@ -806,6 +806,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_omega]
+  standard_name = angular_velocity_of_earth
+  long_name = angular velocity of earth
+  units = s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [rain]
   standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total rain at this time step
