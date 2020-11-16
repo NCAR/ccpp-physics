@@ -1593,6 +1593,8 @@ contains
   real (kind=kind_phys)                              , intent(out)   :: t2mb   !2-m air temperature over bare ground part [k]
   real (kind=kind_phys)                              , intent(out)   :: bgap
   real (kind=kind_phys)                              , intent(out)   :: wgap
+  real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albd !albedo (direct)
+  real (kind=kind_phys), dimension(1:2)              , intent(out)   :: albi !albedo (diffuse)
 !jref:end
 
 ! input & output
