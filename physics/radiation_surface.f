@@ -205,6 +205,12 @@
           print *,' - Using MODIS based land surface albedo for sw'
         endif
 
+      elseif ( ialbflg == 2 ) then      ! use albedo from land model
+
+        if ( me == 0 ) then
+          print *,' - Using Albedo From Land Model'
+        endif
+
       else
         print *,' !! ERROR in Albedo Scheme Setting, IALB=',ialbflg
         stop
@@ -520,7 +526,7 @@
         enddo    ! end_do_i_loop
 
 !> - If use modis based albedo for land area:
-      else
+      elseif ( ialbflg == 1 ) then
 
         do i = 1, IMAX
 
@@ -866,7 +872,7 @@
         sfcemis(:) = f_one
         return
 
-      else                           ! emiss set by sfc type and condition
+      elseif ( iemslw == 1 ) then  ! emiss set by sfc type and condition
 
         dltg = 360.0 / float(IMXEMS)
         hdlt = 0.5 * dltg
