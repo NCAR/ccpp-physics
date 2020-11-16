@@ -78,8 +78,8 @@
   intent = in
   optional = F
 [isubc_sw]
-  standard_name = flag_for_sw_clouds_without_sub_grid_approximation
-  long_name = flag for sw clouds without sub-grid approximation
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
   units = flag
   dimensions = ()
   type = integer

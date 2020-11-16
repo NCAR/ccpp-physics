@@ -1,9 +1,9 @@
 !>\file module_MP_FER_HIRES.F90
 !! "Modified" fer_hires microphysics - 11 July 2016 version
 !!
-! (1) Ice nucleation: Fletcher (1962) replaces Meyers et al. (1992)
-! (2) Cloud ice is a simple function of the number concentration from (1), and it
-!     is no longer a fractional function of the large ice.  Thus, the FLARGE &
+!! (1) Ice nucleation: Fletcher (1962) replaces Meyers et al. (1992)
+!! (2) Cloud ice is a simple function of the number concentration from (1), and it
+!!     is no longer a fractional function of the large ice.  Thus, the FLARGE &
 !     FSMALL parameters are no longer used.
 ! (3) T_ICE_init=-12 deg C provides a slight delay in the initial onset of ice.
 ! (4) NLImax is a function of rime factor (RF) and temperature.  
@@ -148,23 +148,23 @@
       INTEGER, PRIVATE,PARAMETER :: MY_T1=1, MY_T2=35
       REAL,PRIVATE,DIMENSION(MY_T1:MY_T2),SAVE :: MY_GROWTH_NMM
 !
-      REAL, PRIVATE,PARAMETER :: DMImin=.05e-3, DMImax=1.e-3,            &
+      REAL, PRIVATE,PARAMETER :: DMImin=.05e-3, DMImax=1.e-3,           &
      &      DelDMI=1.e-6,XMImin=1.e6*DMImin
       REAL, PUBLIC,PARAMETER :: XMImax=1.e6*DMImax, XMIexp=.0536
       INTEGER, PUBLIC,PARAMETER :: MDImin=XMImin, MDImax=XMImax
-      REAL, PRIVATE,DIMENSION(MDImin:MDImax) ::                          &
+      REAL, ALLOCATABLE, DIMENSION(:) ::                                &
      &      ACCRI,VSNOWI,VENTI1,VENTI2
       REAL, PUBLIC,DIMENSION(MDImin:MDImax) :: SDENS    !-- For RRTM
 !
-      REAL, PRIVATE,PARAMETER :: DMRmin=.05e-3, DMRmax=1.0e-3,           &
+      REAL, PRIVATE,PARAMETER :: DMRmin=.05e-3, DMRmax=1.0e-3,          &
      &      DelDMR=1.e-6, XMRmin=1.e6*DMRmin, XMRmax=1.e6*DMRmax
       INTEGER, PUBLIC,PARAMETER :: MDRmin=XMRmin, MDRmax=XMRmax
 !
-      REAL, PRIVATE,DIMENSION(MDRmin:MDRmax)::                           &
+       REAL, ALLOCATABLE, DIMENSION(:)::                                &
      &      ACCRR,MASSR,RRATE,VRAIN,VENTR1,VENTR2
 !
       INTEGER, PRIVATE,PARAMETER :: Nrime=40
-      REAL, DIMENSION(2:9,0:Nrime),PRIVATE,SAVE :: VEL_RF
+      REAL, ALLOCATABLE, DIMENSION(:,:) :: VEL_RF
 !
       INTEGER,PARAMETER :: NX=7501
       REAL, PARAMETER :: XMIN=180.0,XMAX=330.0
@@ -226,7 +226,7 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
      !HWRF & ,NCW=300.E6           !- 100.e6 (maritime), 500.e6 (continental)
 
 !--- Other public variables passed to other routines:
-      REAL, PUBLIC,DIMENSION(MDImin:MDImax) :: MASSI
+        REAL, ALLOCATABLE ,DIMENSION(:) :: MASSI
 !
 
      CONTAINS
@@ -242,37 +242,41 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !! version, and QRIMEF is only in the advected version. The innards
 !! are all the same.
       SUBROUTINE FER_HIRES (DT,RHgrd,                                   &
-     &                      dz8w,rho_phy,p_phy,pi_phy,th_phy,t_phy,     &
+     &                      prsi,p_phy,t_phy,                           &
      &                      q,qt,                                       &
-     &                      LOWLYR,SR,                                  &
+     &                      LOWLYR,SR,TRAIN_PHY,                        &
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY,           &
      &                      QC,QR,QS,                                   & 
      &                      RAINNC,RAINNCV,                             &
      &                      threads,                                    &
-     &                      ims,ime, jms,jme, lm,                       &
+     &                      ims,ime, lm,                                &
      &                      d_ss,                                       &
      &                      refl_10cm,DX1 )
 !-----------------------------------------------------------------------
       IMPLICIT NONE
 !-----------------------------------------------------------------------
-      INTEGER,INTENT(IN) :: D_SS,IMS,IME,JMS,JME,LM,DX1    
+      INTEGER,INTENT(IN) :: D_SS,IMS,IME,LM,DX1    
       REAL, INTENT(IN) 	    :: DT,RHgrd
       INTEGER,   INTENT(IN) :: THREADS
-      REAL, INTENT(IN),     DIMENSION(ims:ime, jms:jme, lm)::           &
-     &                      dz8w,p_phy,pi_phy,rho_phy
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme, lm)::           &
-     &                      th_phy,t_phy,q,qt
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme, lm ) ::          &
+      REAL, INTENT(IN),     DIMENSION(ims:ime,  lm+1)::                 &
+     &                      prsi
+      REAL, INTENT(IN),     DIMENSION(ims:ime,  lm)::                   &
+     &                      p_phy
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm)::                   &
+     &                      q,qt,t_phy
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm )::                  &    !Aligo Oct 23,2019: dry mixing ratio for cloud species
      &                      qc,qr,qs
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime, jms:jme,lm) ::           &
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime,  lm) ::                  &
      &                      F_ICE_PHY,F_RAIN_PHY,F_RIMEF_PHY
-      REAL, INTENT(OUT),    DIMENSION(ims:ime, jms:jme,lm) ::           & 
+      REAL, INTENT(OUT),    DIMENSION(ims:ime,  lm) ::                  & 
      &                      refl_10cm               
-      REAL, INTENT(INOUT),  DIMENSION(ims:ime,jms:jme)           ::     &
+      REAL, INTENT(INOUT),  DIMENSION(ims:ime)      ::                  &
      &                                                   RAINNC,RAINNCV
-      REAL, INTENT(OUT),    DIMENSION(ims:ime,jms:jme):: SR
+      REAL, INTENT(OUT),    DIMENSION(ims:ime):: SR
+      REAL, INTENT(OUT),    DIMENSION( ims:ime, lm ) ::                 &
+     &                      TRAIN_PHY
 !
-      INTEGER, DIMENSION( ims:ime, jms:jme ),INTENT(INOUT) :: LOWLYR
+      INTEGER, DIMENSION( ims:ime ),INTENT(INOUT) :: LOWLYR
 
 !-----------------------------------------------------------------------
 !     LOCAL VARS
@@ -282,34 +286,32 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !     the microphysics scheme. Instead, they will be used by Eta precip 
 !     assimilation.
 
-      REAL,  DIMENSION( ims:ime, jms:jme,lm ) ::                  &
-     &       TLATGS_PHY,TRAIN_PHY
-      REAL,  DIMENSION(ims:ime,jms:jme):: APREC,PREC,ACPREC
+      REAL,  DIMENSION(ims:ime):: APREC,PREC,ACPREC
 
-      INTEGER :: I,J,K,KK
-      REAL :: wc
+      INTEGER :: I,K,KK
+      REAL :: wc, RDIS, BETA6
 !------------------------------------------------------------------------
 ! For subroutine EGCP01COLUMN_hr
 !-----------------------------------------------------------------------
       INTEGER :: LSFC,I_index,J_index,L
-      INTEGER,DIMENSION(ims:ime,jms:jme) :: LMH
+      INTEGER,DIMENSION(ims:ime) :: LMH
       REAL :: TC,QI,QRdum,QW,Fice,Frain,DUM,ASNOW,ARAIN
       REAL,DIMENSION(lm) :: P_col,Q_col,T_col,WC_col,                   &
          RimeF_col,QI_col,QR_col,QW_col, THICK_col,DPCOL,pcond1d,       &
          pidep1d,piacw1d,piacwi1d,piacwr1d,piacr1d,picnd1d,pievp1d,     &
          pimlt1d,praut1d,pracw1d,prevp1d,pisub1d,pevap1d,DBZ_col,       & 
          NR_col,NS_col,vsnow1d,vrain11d,vrain21d,vci1d,NSmICE1d,        &
-         INDEXS1d,INDEXR1d,RFlag1d,RHC_col   
+         INDEXS1d,INDEXR1d,RFlag1d,RHC_col 
 !
 !-----------------------------------------------------------------------
 !**********************************************************************
 !-----------------------------------------------------------------------
 !
 
-! MZ: HWRF practice start 
+! MZ: HWRF start
 !----------
 !2015-03-30, recalculate some constants which may depend on phy time step
-          CALL MY_GROWTH_RATES_NMM_hr  (DT)
+        CALL MY_GROWTH_RATES_NMM_hr  (DT)
 
 !--- CIACW is used in calculating riming rates
 !      The assumed effective collection efficiency of cloud water rimed onto
@@ -329,95 +331,87 @@ INTEGER, PARAMETER :: MAX_ITERATIONS=10
 !
 !-- See comments in subroutine etanewhr_init starting with variable RDIS=
 !
+!-- Relative dispersion == standard deviation of droplet spectrum / mean radius
+!   (see pp 1542-1543, Liu & Daum, JAS, 2004)
+        RDIS=0.5  !-- relative dispersion of droplet spectrum
+        BETA6=( (1.+3.*RDIS*RDIS)*(1.+4.*RDIS*RDIS)*(1.+5.*RDIS*RDIS)/  &
+     &         ((1.+RDIS*RDIS)*(1.+2.*RDIS*RDIS) ) )
+
         BRAUT=DT*1.1E10*BETA6/NCW
 
-       !write(*,*)'dt=',dt
-       !write(*,*)'pi=',pi
-       !write(*,*)'c1=',c1
-       !write(*,*)'ciacw=',ciacw 
-       !write(*,*)'ciacr=',ciacr 
-       !write(*,*)'cracw=',cracw 
-       !write(*,*)'araut=',araut
-       !write(*,*)'braut=',braut
 !! END OF adding, 2015-03-30
 !-----------
-! MZ: HWRF practice end
+! MZ: HWRF end
 !
 
-      DO j = jms,jme
        DO i = ims,ime
-         ACPREC(i,j)=0.
-         APREC (i,j)=0.
-         PREC  (i,j)=0.
-         SR    (i,j)=0.
+         ACPREC(i)=0.
+         APREC (i)=0.
+         PREC  (i)=0.
+         SR    (i)=0.
        ENDDO
+
        DO k = 1,lm
        DO i = ims,ime
-	 TLATGS_PHY (i,j,k)=0.
-	 TRAIN_PHY  (i,j,k)=0.
+         TRAIN_PHY  (i,k)=0.
        ENDDO
        ENDDO
-      ENDDO
 
 !-----------------------------------------------------------------------
 !-- Start of original driver for EGCP01COLUMN_hr
 !-----------------------------------------------------------------------
 !
-       DO J=JMS,JME    
-        DO I=IMS,IME  
-          LSFC=LM-LOWLYR(I,J)+1                      ! "L" of surface
-          DO K=1,LM
-            DPCOL(K)=RHO_PHY(I,J,K)*GRAV*dz8w(I,J,K)
-          ENDDO
+     DO I=IMS,IME  
+         LSFC=LM-LOWLYR(I)+1                      ! "L" of surface
+         DO K=1,LM
+           DPCOL(K)=prsi(I,K)-prsi(I,K+1)
+         ENDDO
 !
 !--- Initialize column data (1D arrays)
 !
-           L=LM
+        L=LM
 !-- qt = CWM, total condensate
-        IF (qt(I,J,L) .LE. EPSQ) qt(I,J,L)=EPSQ
-          F_ice_phy(I,J,L)=1.
-          F_rain_phy(I,J,L)=0.
-          F_RimeF_phy(I,J,L)=1.
+        IF (qt(I,L) .LE. EPSQ) qt(I,L)=EPSQ
+          F_ice_phy(I,L)=1.
+          F_rain_phy(I,L)=0.
+          F_RimeF_phy(I,L)=1.
           do L=LM,1,-1
-!
-!--- Pressure (Pa) = (Psfc-Ptop)*(ETA/ETA_sfc)+Ptop
-!
-            P_col(L)=P_phy(I,J,L)
+            P_col(L)=P_phy(I,L)
 !
 !--- Layer thickness = RHO*DZ = -DP/G = (Psfc-Ptop)*D_ETA/(G*ETA_sfc)
 !
             THICK_col(L)=DPCOL(L)*RGRAV
-            T_col(L)=T_phy(I,J,L)
+            T_col(L)=T_phy(I,L)
             TC=T_col(L)-T0C
-            Q_col(L)=max(EPSQ, q(I,J,L))
-            IF (qt(I,J,L) .LE. EPSQ1) THEN
+            Q_col(L)=max(EPSQ, q(I,L))
+            IF (qt(I,L) .LE. EPSQ1) THEN
               WC_col(L)=0.
               IF (TC .LT. T_ICE) THEN
-                F_ice_phy(I,J,L)=1.
+                F_ice_phy(I,L)=1.
               ELSE
-                F_ice_phy(I,J,L)=0.
+                F_ice_phy(I,L)=0.
               ENDIF
-              F_rain_phy(I,J,L)=0.
-              F_RimeF_phy(I,J,L)=1.
+              F_rain_phy(I,L)=0.
+              F_RimeF_phy(I,L)=1.
             ELSE
-              WC_col(L)=qt(I,J,L)
+              WC_col(L)=qt(I,L)
 
 !-- Debug 20120111
 !   TC==TC will fail if NaN, preventing unnecessary error messages
 IF (WC_col(L)>QTwarn .AND. P_col(L)<Pwarn .AND. TC==TC) THEN
-   WRITE(0,*) 'WARN4: >1 g/kg condensate in stratosphere; I,J,L,TC,P,QT=',   &
-              I,J,L,TC,.01*P_col(L),1000.*WC_col(L)
+   WRITE(0,*) 'WARN4: >1 g/kg condensate in stratosphere; I,L,TC,P,QT=',   &
+              I,L,TC,.01*P_col(L),1000.*WC_col(L)
    QTwarn=MAX(WC_col(L),10.*QTwarn)
    Pwarn=MIN(P_col(L),0.5*Pwarn)
 ENDIF
 !-- TC/=TC will pass if TC is NaN
 IF (WARN5 .AND. TC/=TC) THEN
-   WRITE(0,*) 'WARN5: NaN temperature; I,J,L,P=',I,J,L,.01*P_col(L)
+   WRITE(0,*) 'WARN5: NaN temperature; I,L,P=',I,L,.01*P_col(L)
    WARN5=.FALSE.
 ENDIF
 
             ENDIF
-            IF (T_ICE<=-100.) F_ice_phy(I,J,L)=0.
+            IF (T_ICE<=-100.) F_ice_phy(I,L)=0.
 !     !
 !     !--- Determine composition of condensate in terms of 
 !     !      cloud water, ice, & rain
@@ -426,8 +420,8 @@ ENDIF
             QI=0.
             QRdum=0.
             QW=0.
-            Fice=F_ice_phy(I,J,L)
-            Frain=F_rain_phy(I,J,L)
+            Fice=F_ice_phy(I,L)
+            Frain=F_rain_phy(I,L)
 !
             IF (Fice .GE. 1.) THEN
               QI=WC
@@ -447,16 +441,17 @@ ENDIF
                 QW=QW-QRdum
               ENDIF
             ENDIF
-            IF (QI .LE. 0.) F_RimeF_phy(I,J,L)=1.
-            RimeF_col(L)=F_RimeF_phy(I,J,L)               ! (real)
+            IF (QI .LE. 0.) F_RimeF_phy(I,L)=1.
+            RimeF_col(L)=F_RimeF_phy(I,L)               ! (real)
             QI_col(L)=QI
             QR_col(L)=QRdum
             QW_col(L)=QW
 !GFDL => New.  Added RHC_col to allow for height- and grid-dependent values for
 !GFDL          the relative humidity threshold for condensation ("RHgrd")
 !6/11/2010 mod - Use lower RHgrd_out threshold for < 850 hPa
+!mz 05/06/2020 - 10km
 !------------------------------------------------------------
-            IF(DX1 .GE. 10 .AND. P_col(L)<P_RHgrd_out) THEN  ! gopal's doing based on GFDL
+            IF(DX1 .GE. 10000 .AND. P_col(L)<P_RHgrd_out) THEN  ! gopal's doing based on GFDL
               RHC_col(L)=RHgrd
             ELSE
               RHC_col(L)=RHgrd_in
@@ -469,8 +464,8 @@ ENDIF
 !--- Perform the microphysical calculations in this column
 !
           I_index=I
-          J_index=J
-       CALL EGCP01COLUMN_hr ( ARAIN, ASNOW, DT, RHC_col,                  &
+          J_index=1
+       CALL EGCP01COLUMN_hr ( ARAIN, ASNOW, DT, RHC_col,                &
      & I_index, J_index, LSFC,                                          &
      & P_col, QI_col, QR_col, Q_col, QW_col, RimeF_col, T_col,          &
      & THICK_col, WC_col,LM,pcond1d,pidep1d,                            &
@@ -483,11 +478,10 @@ ENDIF
 !--- Update storage arrays
 !
           do L=LM,1,-1
-            TRAIN_phy(I,J,L)=(T_col(L)-T_phy(I,J,L))/DT
-            TLATGS_phy(I,J,L)=T_col(L)-T_phy(I,J,L)
-            T_phy(I,J,L)=T_col(L)
-            q(I,J,L)=Q_col(L)
-            qt(I,J,L)=WC_col(L)
+            TRAIN_phy(I,L)=(T_col(L)-T_phy(I,L))/DT
+            T_phy(I,L)=T_col(L)
+            q(I,L)=Q_col(L)
+            qt(I,L)=WC_col(L)
 !---convert 1D source/sink terms to one 4D array
 !---d_ss is the total number of source/sink terms in the 4D mprates array
 !---if d_ss=1, only 1 source/sink term is used
@@ -496,20 +490,20 @@ ENDIF
 !--- REAL*4 array storage
 !
             IF (QI_col(L) .LE. EPSQ) THEN
-              F_ice_phy(I,J,L)=0.
-              IF (T_col(L) .LT. T_ICEK) F_ice_phy(I,J,L)=1.
-              F_RimeF_phy(I,J,L)=1.
+              F_ice_phy(I,L)=0.
+              IF (T_col(L) .LT. T_ICEK) F_ice_phy(I,L)=1.
+              F_RimeF_phy(I,L)=1.
             ELSE
-              F_ice_phy(I,J,L)=MAX( 0., MIN(1., QI_col(L)/WC_col(L)) )
-              F_RimeF_phy(I,J,L)=MAX(1., RimeF_col(L))
+              F_ice_phy(I,L)=MAX( 0., MIN(1., QI_col(L)/WC_col(L)) )
+              F_RimeF_phy(I,L)=MAX(1., RimeF_col(L))
             ENDIF
             IF (QR_col(L) .LE. EPSQ) THEN
               DUM=0
             ELSE
               DUM=QR_col(L)/(QR_col(L)+QW_col(L))
             ENDIF
-            F_rain_phy(I,J,L)=DUM
-            REFL_10CM(I,J,L)=DBZ_col(L)   !jul28
+            F_rain_phy(I,L)=DUM
+            REFL_10CM(I,L)=DBZ_col(L)   !jul28
           ENDDO
 !
 !--- Update accumulated precipitation statistics
@@ -517,63 +511,57 @@ ENDIF
 !--- Surface precipitation statistics; SR is fraction of surface 
 !    precipitation (if >0) associated with snow
 !
-        APREC(I,J)=(ARAIN+ASNOW)*RRHOL       ! Accumulated surface precip (depth in m)  !<--- Ying
-        PREC(I,J)=PREC(I,J)+APREC(I,J)
-        ACPREC(I,J)=ACPREC(I,J)+APREC(I,J)
-        IF(APREC(I,J) .LT. 1.E-8) THEN
-          SR(I,J)=0.
+        APREC(I)=(ARAIN+ASNOW)*RRHOL       ! Accumulated surface precip (depth in m)  !<--- Ying
+        PREC(I)=PREC(I)+APREC(I)
+        ACPREC(I)=ACPREC(I)+APREC(I)
+        IF(APREC(I) .LT. 1.E-8) THEN
+          SR(I)=0.
         ELSE
-          SR(I,J)=RRHOL*ASNOW/APREC(I,J)
+          SR(I)=RRHOL*ASNOW/APREC(I)
         ENDIF
 !
 !#######################################################################
 !#######################################################################
 !
     enddo                          ! End "I" loop
-    enddo                          ! End "J" loop
 !
 !-----------------------------------------------------------------------
 !-- End of original driver for EGCP01COLUMN_hr
 !-----------------------------------------------------------------------
 !
-     DO j = jms,jme
         do k = lm, 1, -1
 	DO i = ims,ime
-           th_phy(i,j,k) = t_phy(i,j,k)/pi_phy(i,j,k)
-           WC=qt(I,J,K)
-           QS(I,J,K)=0.
-           QR(I,J,K)=0.
-           QC(I,J,K)=0.
+           WC=qt(I,K)
+           QS(I,K)=0.
+           QR(I,K)=0.
+           QC(I,K)=0.
 !
-           IF(F_ICE_PHY(I,J,K)>=1.)THEN
-             QS(I,J,K)=WC
-           ELSEIF(F_ICE_PHY(I,J,K)<=0.)THEN
-             QC(I,J,K)=WC
+           IF(F_ICE_PHY(I,K)>=1.)THEN
+             QS(I,K)=WC
+           ELSEIF(F_ICE_PHY(I,K)<=0.)THEN
+             QC(I,K)=WC
            ELSE
-             QS(I,J,K)=F_ICE_PHY(I,J,K)*WC
-             QC(I,J,K)=WC-QS(I,J,K)
+             QS(I,K)=F_ICE_PHY(I,K)*WC
+             QC(I,K)=WC-QS(I,K)
            ENDIF
 !
-           IF(QC(I,J,K)>0..AND.F_RAIN_PHY(I,J,K)>0.)THEN
-             IF(F_RAIN_PHY(I,J,K).GE.1.)THEN
-               QR(I,J,K)=QC(I,J,K)
-               QC(I,J,K)=0.
+           IF(QC(I,K)>0..AND.F_RAIN_PHY(I,K)>0.)THEN
+             IF(F_RAIN_PHY(I,K).GE.1.)THEN
+               QR(I,K)=QC(I,K)
+               QC(I,K)=0.
              ELSE
-               QR(I,J,K)=F_RAIN_PHY(I,J,K)*QC(I,J,K)
-               QC(I,J,K)=QC(I,J,K)-QR(I,J,K)
+               QR(I,K)=F_RAIN_PHY(I,K)*QC(I,K)
+               QC(I,K)=QC(I,K)-QR(I,K)
              ENDIF
            ENDIF
           ENDDO   !- i
         ENDDO     !- k
-     ENDDO        !- j
 ! 
 !- Update rain (convert from m to kg/m**2, which is also equivalent to mm depth)
 ! 
-       DO j=jms,jme
        DO i=ims,ime
-          RAINNC(i,j)=APREC(i,j)*1000.+RAINNC(i,j)
-          RAINNCV(i,j)=APREC(i,j)*1000.
-       ENDDO
+          RAINNC(i)=APREC(i)*1000.+RAINNC(i)
+          RAINNCV(i)=APREC(i)*1000.
        ENDDO
 !
 !-----------------------------------------------------------------------
@@ -639,16 +627,38 @@ ENDIF
 !!\param qi_col    vertical column of model ice mixing ratio (kg/kg)
 !!\param qr_col    vertical column of model rain ratio (kg/kg)
 !!\param q_col     vertical column of model water vapor specific humidity (kg/kg)
-!!\param qw_col
-!!\param rimef_col
-!!\param t_col
-!!\param thick_col
-!!\param wc_col
-!!\param lm
-!!\param pcond1d
-!!\param pidep1d
-!!\param piacw1d
-!!\param piacwi1d
+!!\param qw_col    vertical column of model cloud water mixing ratio (kg/kg) 
+!!\param rimef_col vertical column of rime factor for ice in model (ratio, defined below)
+!!\param t_col     vertical column of model temperature (deg K) 
+!!\param thick_col vertical column of model mass thickness (density*height increment)
+!!\param wc_col    vertical column of model mixing ratio of total condensate (kg/kg)
+!!\param lm        vertical dimension
+!!\param pcond1d   net cloud water condensation (>0) or evaporation (<0) (kg/kg)
+!!\param pidep1d   net ice deposition (>0) or sublimation (<0) (kg/kg)
+!!\param piacw1d   cloud water collection by precipitation ice (kg/kg)
+!!\param piacwi1d  cloud water riming onto precipitation ice at <0 (kg/kg)
+!!\param piacwr1d  accreted cloud water shed to form rain at >0 (kg/kg)
+!!\param piacr1d   freezing of supercooled rain to precipitation ice (kg/kg)
+!!\param picnd1d   condensation onto wet, melting ice (kg/kg)
+!!\param pievp1d   evaporation from wet, melting ice (kg/kg)
+!!\param pimlt1d   melting of precipitation ice to form rain (kg/kg)   
+!!\param praut1d   droplet self_collection (autoconversion) to form rain (kg/kg)
+!!\param pracw1d   cloud water collection (accretion) by rain (kg/kg)
+!!\param prevp1d   rain evaporation (kg/kg)
+!!\param pisub1d
+!!\param pevap1d 
+!!\param DBZ_col   vertical column of radar reflectivity (dBZ)
+!!\param NR_col    vertical column of rain number concentration (m^-3)
+!!\param NS_col    vertical column of snow number concentration (m^-3)
+!!\param vsnow1d   fall speed of rimed snow w/ air resistance correction
+!!\param vrain11d  fall speed of rain into grid from above (m/s)
+!!\param vrain21d  fall speed of rain out of grid box to the level below (m/s)
+!!\param vci1d     Fall speed of 50-micron ice crystals w/ air resistance correction
+!!\param NSmICE1d  number concentration of small ice crystals at current level
+!!\param INDEXS1d
+!!\param INDEXR1d
+!!\param RFlag1d
+!!\param DX1
       SUBROUTINE EGCP01COLUMN_hr ( ARAIN, ASNOW, DTPH, RHC_col,          &
      & I_index, J_index, LSFC,                                           &
      & P_col, QI_col, QR_col, Q_col, QW_col, RimeF_col, T_col,           &
@@ -2395,7 +2405,7 @@ ENDIF
 
 !-----------------------------------------------------------------------
 !>\ingroup hafs_famp
-      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,mpiroot,THREADS, &
+      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MPIRANK,MPIROOT,THREADS, &
         errmsg,errflg)
 !-----------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -2436,6 +2446,9 @@ ENDIF
 !
 !-----------------------------------------------------------------------
 !
+#ifdef MPI
+      use mpi
+#endif
       IMPLICIT NONE
 !
 !------------------------------------------------------------------------- 
@@ -2450,7 +2463,7 @@ ENDIF
 !
 !     VARIABLES PASSED IN
       REAL,             INTENT(IN) :: GSMDT
-      INTEGER,          INTENT(IN) :: MYPE 
+      INTEGER,          INTENT(IN) :: MPIRANK 
       INTEGER,          INTENT(IN) :: MPIROOT
       INTEGER,          INTENT(IN) :: MPI_COMM_COMP
       INTEGER,          INTENT(IN) :: THREADS
@@ -2464,72 +2477,110 @@ ENDIF
       INTEGER :: I,J,L,K
       INTEGER :: etampnew_unit1
       LOGICAL :: opened
-      INTEGER :: IRTN,rc !MYPE,mpi_comm_comp
+      INTEGER :: IRTN,rc 
       CHARACTER*80 errmess
+      INTEGER :: ierr, good
+      LOGICAL :: lexist,lopen, force_read_ferhires
 !
 !-----------------------------------------------------------------------
 !
-        DTPH=GSMDT     !-- Time step in s
+      DTPH=GSMDT     !-- Time step in s
 !
 !--- Create lookup tables for saturation vapor pressure w/r/t water & ice
 
        
 !
-        CALL GPVS_hr
+      CALL GPVS_hr
 !
-!--- Read in various lookup tables
+!zhang: 
+      if (.NOT. ALLOCATED(ventr1)) ALLOCATE(ventr1(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(ventr2)) ALLOCATE(ventr2(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(accrr)) ALLOCATE(accrr(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(massr)) ALLOCATE(massr(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(vrain)) ALLOCATE(vrain(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(rrate)) ALLOCATE(rrate(MDRmin:MDRmax))
+      if (.NOT. ALLOCATED(venti1)) ALLOCATE(venti1(MDImin:MDImax))
+      if (.NOT. ALLOCATED(venti2)) ALLOCATE(venti2(MDImin:MDImax))
+      if (.NOT. ALLOCATED(accri)) ALLOCATE(accri(MDImin:MDImax))
+      if (.NOT. ALLOCATED(massi)) ALLOCATE(massi(MDImin:MDImax))
+      if (.NOT. ALLOCATED(vsnowi)) ALLOCATE(vsnowi(MDImin:MDImax))
+      if (.NOT. ALLOCATED(vel_rf)) ALLOCATE(vel_rf(2:9,0:Nrime))
+
+#ifdef MPI
+      call MPI_BARRIER(MPI_COMM_COMP,ierr)
+#endif
+
+      only_root_reads: if (MPIRANK==MPIROOT) then
+        force_read_ferhires = .true.
+        good = 0
+        INQUIRE(FILE="DETAMPNEW_DATA.expanded_rain_LE",EXIST=lexist)
+
+        IF (lexist) THEN
+          OPEN(63,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
+     &        FORM="UNFORMATTED",STATUS="OLD",ERR=1234)
 !
-        IF(MYPE==0)THEN
-          etampnew_unit1 = -1
-          DO i = 31,99
-            INQUIRE ( i , OPENED = opened )
-            IF ( .NOT. opened ) THEN
-              etampnew_unit1 = i
-              EXIT
+!sms$serial begin
+          READ(63, err=1234) VENTR1
+          READ(63, err=1234) VENTR2
+          READ(63, err=1234) ACCRR
+          READ(63, err=1234) MASSR
+          READ(63, err=1234) VRAIN
+          READ(63, err=1234) RRATE
+          READ(63, err=1234) VENTI1
+          READ(63, err=1234) VENTI2
+          READ(63, err=1234) ACCRI
+          READ(63, err=1234) MASSI
+          READ(63, err=1234) VSNOWI
+          READ(63, err=1234) VEL_RF
+!sms$serial end
+          good = 1
+1234      CONTINUE
+          IF ( good .NE. 1 ) THEN
+            INQUIRE(63,opened=lopen)
+            IF (lopen) THEN
+              IF( force_read_ferhires ) THEN
+                errmsg = "Error reading DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                errflg = 1
+                return
+              ENDIF
+              CLOSE(63)
+            ELSE
+              IF( force_read_ferhires ) THEN
+                errmsg = "Error opening DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                errflg = 1
+                return
+              ENDIF
             ENDIF
-          ENDDO
-          IF (etampnew_unit1<0) THEN
-            errmsg = 'FERRIER_INIT_hr: Can not find unused fortran &
-                     &unit to read in lookup tables'
-            errmsg = trim(errmsg)//NEW_LINE('A')//' ABORTING!'
+          ELSE
+            INQUIRE(63,opened=lopen)
+            IF (lopen) THEN
+              CLOSE(63)
+            ENDIF
+          ENDIF
+        ELSE
+          IF( force_read_ferhires ) THEN
+            errmsg = "Non-existent DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
             errflg = 1
-            RETURN 
+            return
           ENDIF
         ENDIF
-!
-        IF(MYPE==0)THEN
-          OPEN(UNIT=etampnew_unit1,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
-     &        FORM="UNFORMATTED",STATUS="OLD",ERR=9061)
-!
-          READ(etampnew_unit1) VENTR1
-          READ(etampnew_unit1) VENTR2
-          READ(etampnew_unit1) ACCRR
-          READ(etampnew_unit1) MASSR
-          READ(etampnew_unit1) VRAIN
-          READ(etampnew_unit1) RRATE
-          READ(etampnew_unit1) VENTI1
-          READ(etampnew_unit1) VENTI2
-          READ(etampnew_unit1) ACCRI
-          READ(etampnew_unit1) MASSI
-          READ(etampnew_unit1) VSNOWI
-          READ(etampnew_unit1) VEL_RF
-          CLOSE (etampnew_unit1)
-        ENDIF
+      endif only_root_reads
 !
 #ifdef MPI
-        CALL MPI_BCAST(VENTR1,SIZE(VENTR1),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VENTR2,SIZE(VENTR2),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(ACCRR,SIZE(ACCRR)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(MASSR,SIZE(MASSR)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VRAIN,SIZE(VRAIN)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(RRATE,SIZE(RRATE)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VENTI1,SIZE(VENTI1),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VENTI2,SIZE(VENTI2),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(ACCRI,SIZE(ACCRI)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(MASSI,SIZE(MASSI)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VSNOWI,SIZE(VSNOWI),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VEL_RF,SIZE(VEL_RF),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTR1,SIZE(VENTR1),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTR2,SIZE(VENTR2),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(ACCRR, SIZE(ACCRR), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(MASSR, SIZE(MASSR), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VRAIN, SIZE(VRAIN), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(RRATE, SIZE(RRATE), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTI1,SIZE(VENTI1),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTI2,SIZE(VENTI2),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(ACCRI, SIZE(ACCRI), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(MASSI, SIZE(MASSI), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VSNOWI,SIZE(VSNOWI),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VEL_RF,SIZE(VEL_RF),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
 #endif
+
 !
 !--- Calculates coefficients for growth rates of ice nucleated in water
 !    saturated conditions, scaled by physics time step (lookup table)
@@ -2668,12 +2719,6 @@ ENDIF
 !
 
       RETURN
-!
-!-----------------------------------------------------------------------
-!
-9061 CONTINUE
-      WRITE(0,*)' module_mp_etanew: error opening ETAMPNEW_DATA.expanded_rain on unit ',etampnew_unit1
-      STOP
 !
 !-----------------------------------------------------------------------
       END SUBROUTINE FERRIER_INIT_hr
@@ -2924,6 +2969,25 @@ ENDIF
       FPVSX0=PSATK*(TR**XA)*EXP(XB*(1.-TR))
 !
       END FUNCTION FPVSX0
+
+      SUBROUTINE ferhires_finalize()
+      
+      IMPLICIT NONE
+
+      if (ALLOCATED(ventr1)) DEALLOCATE(ventr1)
+      if (ALLOCATED(ventr2)) DEALLOCATE(ventr2)
+      if (ALLOCATED(accrr))  DEALLOCATE(accrr)
+      if (ALLOCATED(massr))  DEALLOCATE(massr)
+      if (ALLOCATED(vrain))  DEALLOCATE(vrain)
+      if (ALLOCATED(rrate))  DEALLOCATE(rrate)
+      if (ALLOCATED(venti1)) DEALLOCATE(venti1)
+      if (ALLOCATED(venti2)) DEALLOCATE(venti2)
+      if (ALLOCATED(accri))  DEALLOCATE(accri)
+      if (ALLOCATED(massi))  DEALLOCATE(massi)
+      if (ALLOCATED(vsnowi)) DEALLOCATE(vsnowi)
+      if (ALLOCATED(vel_rf)) DEALLOCATE(vel_rf)
+      
+      END SUBROUTINE ferhires_finalize
 
 !
       END MODULE module_mp_fer_hires

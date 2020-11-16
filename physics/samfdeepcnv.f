@@ -414,10 +414,10 @@ c
         cxlamu  = 1.0e-3
       else
         aafac   = .05
-        crtlame = 1.0e-4
         cxlame  = 1.0e-4
       endif
       crtlamd = 1.0e-4
+      crtlame = 1.0e-4
       cxlamd  = 1.0e-4
       xlamde  = 1.0e-4
       xlamdd  = 1.0e-4
