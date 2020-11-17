@@ -108,7 +108,7 @@ contains
     !
     ! Add aerosol optics to gas optics
     call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%increment(lw_optical_props_clrsky))
-    !call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_aerosol%finalize()) 
+    call lw_optical_props_aerosol%finalize()
 
     ! Call RTE solver
     if (doLWclrsky) then
@@ -136,7 +136,7 @@ contains
     if (doGP_lwscat) then 
        ! Add clear-sky optics to cloud-optics (2-stream)
        call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clrsky%increment(lw_optical_props_clouds))
-       !call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clrsky%finalize()) 
+       call lw_optical_props_clrsky%finalize() 
        
        if (use_LW_jacobian) then
           ! Compute LW Jacobians
@@ -162,7 +162,7 @@ contains
     else
        ! Add cloud optics to clear-sky optics (scalar)
        call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%increment(lw_optical_props_clrsky))
-       !call check_error_msg('rrtmgp_lw_rte_run',lw_optical_props_clouds%finalize()) 
+       call lw_optical_props_clouds%finalize() 
     
        if (use_LW_jacobian) then
           ! Compute LW Jacobians
