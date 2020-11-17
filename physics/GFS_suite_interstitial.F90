@@ -245,10 +245,10 @@
         if (use_GP_jacobian) then
            ! Compute adjustment to the surface flux using Jacobian.
           if(linit_mod) then
-            dT(:)        = (skt(:) - sktp1r(:)) 
+            dT(:)        = (sktp1r(:) - skt(:)) 
             adjsfculw(:) = fluxlwUP(:,1) + fluxlwUP_jac(:,1)  * dT(:)
           else
-            adjsfculw(:) = 0.
+            adjsfculw(:) = fluxlwUP(:,1)
             linit_mod    = .true.
           endif
   
