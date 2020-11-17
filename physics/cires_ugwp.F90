@@ -155,7 +155,7 @@ contains
          tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
          dudt_mtb,dudt_ogw, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                 &
          dudt, dvdt, dtdt, rdxzb, con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt,    &
-         rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                                      &
+         con_omega, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                           &
          ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
          ldiag3d, lssav, flag_for_gwd_generic_tend, errmsg, errflg)
 
@@ -192,7 +192,7 @@ contains
 
     real(kind=kind_phys),    intent(inout), dimension(im, levs):: dudt, dvdt, dtdt
 
-    real(kind=kind_phys),    intent(in) :: con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt
+    real(kind=kind_phys),    intent(in) :: con_g, con_pi, con_cp, con_rd, con_rv, con_fvirt, con_omega
 
     real(kind=kind_phys),    intent(in), dimension(im) :: rain
 
@@ -245,8 +245,8 @@ contains
           ugrs, vgrs, tgrs, qgrs(:,:,1), kpbl, prsi,del,prsl, prslk, phii, phil, &
           dtp, kdt, sgh30, hprime, oc, oa4, clx, theta, sigma, gamma, elvmax,    &
           dusfcg, dvsfcg, xlat_d, sinlat, coslat, area, cdmbgwd(1:2),            &
-          me, master, rdxzb, zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,             &
-          dudt_mtb, dudt_ogw, dudt_tms)
+          me, master, rdxzb, con_g, con_omega, zmtb, zogw, tau_mtb, tau_ogw,     &
+          tau_tofd, dudt_mtb, dudt_ogw, dudt_tms)
 
     else                                    ! calling old GFS gravity wave drag as is
 

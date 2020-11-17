@@ -591,6 +591,30 @@
   type = integer
   intent = in
   optional = F
+[do_gsl_drag_ls_bl]
+  standard_name = do_gsl_drag_ls_bl
+  long_name = flag to activate GSL drag suite - large-scale GWD and blocking
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_ss]
+  standard_name = do_gsl_drag_ss
+  long_name = flag to activate GSL drag suite - small-scale GWD
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_tofd]
+  standard_name = do_gsl_drag_tofd
+  long_name = flag to activate GSL drag suite - turb orog form drag
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

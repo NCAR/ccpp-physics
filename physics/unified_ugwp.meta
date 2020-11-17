@@ -1,12 +1,17 @@
 [ccpp-table-properties]
-  name = cires_ugwp
+  name = unified_ugwp
   type = scheme
-# DH* 20200804 - this is a result of the nasty hack to call gwdps from within ugwp!
-  dependencies = cires_ugwp_triggers.F90,cires_ugwp_initialize.F90,cires_ugwp_solvers.F90,cires_ugwp_utils.F90,cires_orowam2017.f,cires_vert_lsatdis.F90,cires_vert_orodis.F90,cires_vert_wmsdis.F90,cires_ugwp_module.F90,gwdps.f,machine.F,ugwp_driver_v0.F
+  dependencies = machine.F,cires_ugwp_module.F90,ugwp_driver_v0.F,cires_ugwp_triggers.F90
+  dependencies = cires_ugwp_initialize.F90,cires_ugwp_solvers.F90,cires_ugwp_utils.F90
+  dependencies = cires_orowam2017.f,cires_vert_lsatdis.F90,cires_vert_orodis.F90
+  dependencies = cires_vert_wmsdis.F90,cires_ugwp_module_v1.F90,cires_ugwp_triggers_v1.F90
+  dependencies = cires_ugwp_initialize_v1.F90,cires_ugwp_solv2_v1_mod.F90
+  dependencies = cires_ugwp_orolm97_v1.F90,cires_orowam2017.F90,cires_vert_orodis_v1.F90
+  dependencies = gwdps.f,drag_suite.F90
 
 ########################################################################
 [ccpp-arg-table]
-  name = cires_ugwp_init
+  name = unified_ugwp_init
   type = scheme
 [me]
   standard_name = mpi_rank
@@ -58,6 +63,12 @@
   kind = len=*
   intent = in
   optional = F
+[jdat]
+  standard_name = forecast_date_and_time
+  long_name = current forecast date and time
+  units = none
+  dimensions = (8)
+  type = integer
 [lonr]
   standard_name = number_of_equatorial_longitude_points
   long_name = number of global points in x-dir (i) along the equator
@@ -127,6 +138,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_pi]
+  standard_name = pi
+  long_name = ratio of a circle's circumference to its diameter
+  units = none
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[con_rerth]
+  standard_name = radius_of_earth
+  long_name = radius of earth
+  units = m
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [pa_rf_in]
   standard_name = pressure_cutoff_for_rayleigh_damping
   long_name = pressure level from which Rayleigh Damping is applied
@@ -162,58 +191,122 @@
   type = logical
   intent = in
   optional = F
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-  optional = F
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = cires_ugwp_finalize
-  type = scheme
-[errmsg]
-  standard_name = ccpp_error_message
-  long_name = error message for error handling in CCPP
-  units = none
-  dimensions = ()
-  type = character
-  kind = len=*
-  intent = out
-  optional = F
-[errflg]
-  standard_name = ccpp_error_flag
-  long_name = error flag for error handling in CCPP
-  units = flag
-  dimensions = ()
-  type = integer
-  intent = out
-  optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = cires_ugwp_run
-  type = scheme
-[do_ugwp]
-  standard_name = do_ugwp
-  long_name = flag to activate CIRES UGWP
+[do_ugwp_v0]
+  standard_name = do_ugwp_v0
+  long_name = flag to activate ver 0 CIRES UGWP
   units = flag
   dimensions = ()
   type = logical
   intent = in
   optional = F
+[do_ugwp_v0_orog_only]
+  standard_name = do_ugwp_v0_orog_only
+  long_name = flag to activate ver 0 CIRES UGWP - orographic GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_ls_bl]
+  standard_name = do_gsl_drag_ls_bl
+  long_name = flag to activate GSL drag suite - large-scale GWD and blocking
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_ss]
+  standard_name = do_gsl_drag_ss
+  long_name = flag to activate GSL drag suite - small-scale GWD
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_tofd]
+  standard_name = do_gsl_drag_tofd
+  long_name = flag to activate GSL drag suite - turb orog form drag
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v1]
+  standard_name = do_ugwp_v1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v1_orog_only]
+  standard_name = do_ugwp_v1_orog_only
+  long_name = flag to activate ver 1 CIRES UGWP - orographic GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = unified_ugwp_finalize
+  type = scheme
+[do_ugwp_v0]
+  standard_name = do_ugwp_v0
+  long_name = flag to activate ver 0 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v1]
+  standard_name = do_ugwp_v1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
+  name = unified_ugwp_run
+  type = scheme
 [me]
   standard_name = mpi_rank
   long_name = MPI rank of current process
@@ -263,6 +356,13 @@
   kind = kind_phys
   intent = in
   optional = F
+[fhzero]
+  standard_name = hours_between_clearing_of_diagnostic_buckets
+  long_name = hours between clearing of diagnostic buckets
+  units = h
+  dimensions = ()
+  type = real
+  kind = kind_phys
 [kdt]
   standard_name = index_of_time_step
   long_name = current forecast iteration
@@ -377,6 +477,222 @@
   kind = kind_phys
   intent = in
   optional = F
+[varss]
+  standard_name = standard_deviation_of_subgrid_orography_small_scale
+  long_name = standard deviation of subgrid orography small scale
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oc1ss]
+  standard_name = convexity_of_subgrid_orography_small_scale
+  long_name = convexity of subgrid orography small scale
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[oa4ss]
+  standard_name = asymmetry_of_subgrid_orography_small_scale
+  long_name = asymmetry of subgrid orography small scale
+  units = none
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ol4ss]
+  standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
+  long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height small scale
+  units = frac
+  dimensions = (horizontal_dimension,4)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dx]
+  standard_name = cell_size
+  long_name = size of the grid cell
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dusfc_ls]
+  standard_name = integrated_x_momentum_flux_from_large_scale_gwd
+  long_name = integrated x momentum flux from large scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_ls]
+  standard_name = integrated_y_momentum_flux_from_large_scale_gwd
+  long_name = integrated y momentum flux from large scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfc_bl]
+  standard_name = integrated_x_momentum_flux_from_blocking_drag
+  long_name = integrated x momentum flux from blocking drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_bl]
+  standard_name = integrated_y_momentum_flux_from_blocking_drag
+  long_name = integrated y momentum flux from blocking drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfc_ss]
+  standard_name = integrated_x_momentum_flux_from_small_scale_gwd
+  long_name = integrated x momentum flux from small scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_ss]
+  standard_name = integrated_y_momentum_flux_from_small_scale_gwd
+  long_name = integrated y momentum flux from small scale gwd
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dusfc_fd]
+  standard_name = integrated_x_momentum_flux_from_form_drag
+  long_name = integrated x momentum flux from form drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc_fd]
+  standard_name = integrated_y_momentum_flux_from_form_drag
+  long_name = integrated y momentum flux from form drag
+  units = Pa s
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtaux2d_ls]
+  standard_name = x_momentum_tendency_from_large_scale_gwd
+  long_name = x momentum tendency from large scale gwd
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtauy2d_ls]
+  standard_name = y_momentum_tendency_from_large_scale_gwd
+  long_name = y momentum tendency from large scale gwd
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtaux2d_bl]
+  standard_name = x_momentum_tendency_from_blocking_drag
+  long_name = x momentum tendency from blocking drag
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtauy2d_bl]
+  standard_name = y_momentum_tendency_from_blocking_drag
+  long_name = y momentum tendency from blocking drag
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtaux2d_ss]
+  standard_name = x_momentum_tendency_from_small_scale_gwd
+  long_name = x momentum tendency from small scale gwd
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtauy2d_ss]
+  standard_name = y_momentum_tendency_from_small_scale_gwd
+  long_name = y momentum tendency from small scale gwd
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtaux2d_fd]
+  standard_name = x_momentum_tendency_from_form_drag
+  long_name = x momentum tendency from form drag
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtauy2d_fd]
+  standard_name = y_momentum_tendency_from_form_drag
+  long_name = y momentum tendency from form drag
+  units = m s-2
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[br1]
+  standard_name = bulk_richardson_number_at_lowest_model_level
+  long_name = bulk Richardson number at the surface
+  units = none
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hpbl]
+  standard_name = atmosphere_boundary_layer_thickness
+  long_name = PBL thickness
+  units = m
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[slmsk]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [do_tofd]
   standard_name = turb_oro_form_drag_flag
   long_name = flag for turbulent orographic form drag
@@ -402,6 +718,12 @@
   kind = kind_phys
   intent = in
   optional = F
+[jdat]
+  standard_name = forecast_date_and_time
+  long_name = current forecast date and time
+  units = none
+  dimensions = (8)
+  type = integer
 [xlat]
   standard_name = latitude
   long_name = grid latitude
@@ -474,11 +796,11 @@
   kind = kind_phys
   intent = in
   optional = F
-[qgrs]
-  standard_name = tracer_concentration
-  long_name = model layer mean tracer concentration
+[q1]
+  standard_name = water_vapor_specific_humidity
+  long_name = mid-layer specific humidity of water vapor
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -561,6 +883,8 @@
   dimensions = (horizontal_dimension)
   type = real
   kind = kind_phys
+  intent = out
+  optional = F
   intent = out
   optional = F
 [gw_dudt]
@@ -761,6 +1085,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_omega]
+  standard_name = angular_velocity_of_earth
+  long_name = angular velocity of earth
+  units = s-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [con_pi]
   standard_name = pi
   long_name = ratio of a circle's circumference to its diameter
@@ -797,19 +1130,19 @@
   kind = kind_phys
   intent = in
   optional = F
-[con_fvirt]
-  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
-  long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
-  units = none
+[con_rerth]
+  standard_name = radius_of_earth
+  long_name = radius of earth
+  units = m
   dimensions = ()
   type = real
   kind = kind_phys
   intent = in
   optional = F
-[con_omega]
-  standard_name = angular_velocity_of_earth
-  long_name = angular velocity of earth
-  units = s-1
+[con_fvirt]
+  standard_name = ratio_of_vapor_to_dry_air_gas_constants_minus_one
+  long_name = rv/rd - 1 (rv = ideal gas constant for water vapor)
+  units = none
   dimensions = ()
   type = real
   kind = kind_phys
@@ -942,6 +1275,70 @@
   units = flag
   dimensions = ()
   type = logical
+  intent = in
+  optional = F
+[do_ugwp_v0]
+  standard_name = do_ugwp_v0
+  long_name = flag to activate ver 0 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v0_orog_only]
+  standard_name = do_ugwp_v0_orog_only
+  long_name = flag to activate ver 0 CIRES UGWP - orographic GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_ls_bl]
+  standard_name = do_gsl_drag_ls_bl
+  long_name = flag to activate GSL drag suite - large-scale GWD and blocking
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_ss]
+  standard_name = do_gsl_drag_ss
+  long_name = flag to activate GSL drag suite - small-scale GWD
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_gsl_drag_tofd]
+  standard_name = do_gsl_drag_tofd
+  long_name = flag to activate GSL drag suite - turb orog form drag
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v1]
+  standard_name = do_ugwp_v1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v1_orog_only]
+  standard_name = do_ugwp_v1_orog_only
+  long_name = flag to activate ver 1 CIRES UGWP - orographic GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[gwd_opt]
+  standard_name = gwd_opt
+  long_name = flag to choose gwd scheme
+  units = flag
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [errmsg]
