@@ -3,21 +3,21 @@
 
 \section RRFS_v1beta_suite_overview Overview
 
-Suite RRFS_v1beta contains the parameterizations provided in the UFS Short-Range Weather Application
-(UFS SR Wx App). These models runs at 3-km resolution.
+Suite RRFS_v1beta contains the parameterizations used in the UFS Short-Range Weather Application
+(UFS SRW App). This model runs at 3-km resolution.
 
 The RRFS_v1beta physics suite uses the parameterizations in the following order:
- - \ref RRFS_SGSCLOUD_page
+ - \ref SGSCLOUD_page
  - \ref GFS_RRTMG
  - \ref RRFS_MYNNSFL
  - \ref GFS_NSST
  - \ref NoahMP
- - \ref GSD_MYNNEDMF
+ - \ref MYNNEDMF
  - \ref GFS_UGWP_v0
  - \ref GFS_RAYLEIGH
  - \ref GFS_OZPHYS
  - \ref GFS_H2OPHYS
- - \ref GSD_THOMPSON
+ - \ref THOMPSON
 
 \section sdf_rrfssuite Suite Definition File 
 \code

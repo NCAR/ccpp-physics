@@ -4,7 +4,7 @@
   <navindex>
     <tab type="mainpage" visible="yes" title="CCPP v5.0 Scientific Documentation"/>
     <tab type="pages" visible="yes" title="" intro=""/>
-    <tab type="modules" visible="yes" title="CCPP Modules" intro=""/>
+    <tab type="modules" visible="yes" title="CCPP-Physics Modules" intro=""/>
     <tab type="examples" visible="yes" title="" intro=""/>  
   </navindex>
 

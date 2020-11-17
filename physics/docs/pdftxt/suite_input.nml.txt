@@ -375,14 +375,14 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       </ul>
                                                       <td>1
 <tr><td>lsoil_lsm         <td>gfs_control_type  <td>number of soil layers internal to land surface model   <td>-1
-<tr><td>ldiag_ugwp        <td>GFS_control_type           <td>flag for CIRES UGWP diagnostics               <td>.false.           
-<tr><td>do_ugwp           <td>GFS_control_type           <td>flag for CIRES UGWP revised OGW  
+<tr><td>ldiag_ugwp        <td>gfs_control_type           <td>flag for CIRES UGWP diagnostics               <td>.false.           
+<tr><td>do_ugwp           <td>gfs_control_type           <td>flag for CIRES UGWP revised OGW  
                                                          <ul>
                                                          <li> .T.: revised gwdps_v0
                                                          <li> .F.: GFS operational orographic gwdps 
                                                          </ul>
                                                          <td>.false.
-<tr><td>do_tofd           <td>GFS_control_type           <td>flag for turbulent orographic form drag       <td>.false.
+<tr><td>do_tofd           <td>gfs_control_type           <td>flag for turbulent orographic form drag       <td>.false.
 <tr><td>do_sppt           <td>gfs_control_type  <td>flag for stochastic SPPT option                        <td>.false.
 <tr><td>do_shum           <td>gfs_control_type  <td>flag for stochastic SHUM option                        <td>.false.
 <tr><td>do_skeb           <td>gfs_control_type  <td>flag for stochastic SKEB option                        <td>.false.

@@ -1,5 +1,5 @@
 /**
-\page GSD_CU_GF Grell-Freitas Scale and Aerosol Aware Convection Scheme
+\page CU_GF Grell-Freitas Scale and Aerosol Aware Convection Scheme
 \section gfcu_descrip  Description
 
 The Grell-Freitas (GF) scheme as described in Grell and Freitas (2014, GF1) \cite grell_and_freitas_2014 and 

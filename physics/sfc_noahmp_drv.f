@@ -68,12 +68,8 @@
 !!    - Call penman() to calculate potential evaporation.
 !!    - Calculate the surface specific humidity and convert surface sensible and latent heat fluxes in W m-2 from their kinematic values.
 !!    - If a "guess" run, restore the land-related prognostic fields.
-!                                                                       !
-!-----------------------------------
       subroutine noahmpdrv_run                                          &
-!...................................
-!  ---  inputs:
-     &     ( im, km, itime, ps, u1, v1, t1, q1, soiltyp, vegtype,       &
+     &     ( im, km, itime, ps, u1, v1, t1, q1, soiltyp, vegtype,       &   !--- inputs
      &       sigmaf, sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
      &       prsl1, prslki, zf, dry, wind, slopetyp,                    &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
@@ -83,21 +79,14 @@
      &       rainn_mp, rainc_mp, snow_mp, graupel_mp, ice_mp,           &
      &       con_hvap, con_cp, con_jcal, rhoh2o, con_eps, con_epsm1,    &
      &       con_fvirt, con_rd, con_hfus,                               &
-
-!  ---  in/outs:
-     &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &
+     &       weasd, snwdph, tskin, tprcp, srflag, smc, stc, slc,        &   !--- in/outs
      &       canopy, trans, tsurf, zorl,                                &
-
-! --- Noah MP specific
-
-     &       snowxy, tvxy, tgxy, canicexy, canliqxy, eahxy, tahxy, cmxy,&
+     &       snowxy, tvxy, tgxy, canicexy, canliqxy, eahxy, tahxy, cmxy,&   !--- Noah MP specific
      &       chxy, fwetxy, sneqvoxy, alboldxy, qsnowxy, wslakexy, zwtxy,&
      &       waxy, wtxy, tsnoxy, zsnsoxy, snicexy, snliqxy, lfmassxy,   &
      &       rtmassxy, stmassxy, woodxy, stblcpxy, fastcpxy, xlaixy,    &
      &       xsaixy, taussxy, smoiseq, smcwtdxy, deeprechxy, rechxy,    &
-
-!  ---  outputs:
-     &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
+     &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &   !--- outputs
      &       cmm, chh, evbs, evcw, sbsno, snowc, stm, snohf,            &
      &       smcwlt2, smcref2, wet1, t2mmp, q2mp, errmsg, errflg)     
 !

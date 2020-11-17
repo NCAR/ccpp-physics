@@ -1,6 +1,6 @@
 /**
-\page GSD_RUCLSM GSD RUC Land Surface Model
-\section ruclsm_descrip  Description
+\page RUCLSM RUC Land Surface Model
+\section ruclsm_descrip Description
 
 The land surface model (LSM) was originally developed as part of the NOAA Rapid Update Cycle (RUC) model development effort; with ongoing modifications, it is now used as an option for the WRF community model. The RUC model and its WRF-based NOAA successor, the Rapid Refresh (RAP) and High-Resolution Rapid Refresh (HRRR), are hourly updated and have an emphasis on short-range, near-surface forecasts including aviation-impact variables and pre-convective environment. Therefore, coupling to this LSM (hereafter the RUC LSM) has been critical to provide more accurate lower boundary conditions. 
 

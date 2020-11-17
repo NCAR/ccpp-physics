@@ -1,9 +1,9 @@
 /**
-\page GSD_THOMPSON Thompson Aerosol-Aware Microphysics Scheme
+\page THOMPSON Thompson Aerosol-Aware Microphysics Scheme
 \section thompson_descrp Description
 
 
-The GSD RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
+The RAP/HRRR microphysics implementation represents the most aggressive attempt to include explicit prediction of
 cloud and precipitation microphysical processes in the NCEP operational forecast model suite. The RAP and HRRR are
 important guidance to NWS aviation forecasts, and any microphysics improvements are aimed at least in part, to improve 
 that guidance. The scheme is particularly beneficial for aircraft icing forecasts.
@@ -50,7 +50,7 @@ precipitation particles, and fall speeds of precipitation hydrometeors. The rain
 with small values associated with fall speeds (and allowing the model to parameterize the behavior) of drizzle. The forecast precipitation 
 type is based on what prognostic precipitation type actually reaches the surface (Benjamin et al.(2016) \cite Benjamin_2016b )
 
-# Advantages of the GSD Thompson Scheme and  Updating Cloud Fields
+# Advantages of the Thompson Scheme and  Updating Cloud Fields
 Some of the more general advantages of the upgraded MP scheme implementation in the RAP on the model's cloud and precipitation 
 forecasts are listed below.
 

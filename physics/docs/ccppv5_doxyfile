@@ -104,10 +104,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/all_shemes_list.txt     \
                           pdftxt/GFSv15p2_suite.txt \
 ###                          pdftxt/GFSv15p2_no_nsst_suite.txt    \              
-                          pdftxt/suite_FV3_GFS_v15p2.xml.txt \
+###                          pdftxt/suite_FV3_GFS_v15p2.xml.txt \
                           pdftxt/GFSv16beta_suite.txt \
 ###                          pdftxt/GFSv16beta_no_nsst_suite.txt \
-                          pdftxt/suite_FV3_GFS_v16beta.xml.txt   \
+###                          pdftxt/suite_FV3_GFS_v16beta.xml.txt   \
                           pdftxt/GSD_adv_suite.txt \
                           pdftxt/CPT_adv_suite.txt   \
                           pdftxt/RRFS_v1beta_suite.txt  \
@@ -127,7 +127,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
                           pdftxt/GFS_RAYLEIGH.txt \
-                          pdftxt/GFS_SAMF.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
