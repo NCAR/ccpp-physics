@@ -65,7 +65,7 @@
   kind = len=3
   intent = in
   optional = F
-[lsswr]
+[doSWrad]
   standard_name = flag_to_calc_sw
   long_name = logical flags for sw radiation calls
   units = flag
@@ -296,15 +296,6 @@
   dimensions = ()
   type = ty_gas_optics_rrtmgp
   intent = in
-  optional = F
-[alb1d]
-  standard_name = surface_albedo_perturbation
-  long_name = surface albedo perturbation
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = out
   optional = F
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_nearIR_direct
