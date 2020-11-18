@@ -64,38 +64,11 @@
   type = integer
   intent = in
   optional = F
-[p_lay]
-  standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
-  long_name = air pressure layer
-  units = hPa
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
   units = hPa
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[t_lay]
-  standard_name = air_temperature_at_layer_for_RRTMGP
-  long_name = air temperature layer
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[skt]
-  standard_name = surface_ground_temperature_for_radiation
-  long_name = surface ground temperature for radiation
-  units = K
-  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in

@@ -29,10 +29,10 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,    &
-       nLev, p_lay, t_lay, p_lev, skt, lw_gas_props, sfc_emiss_byband, sources,            &
-       lw_optical_props_clrsky, lw_optical_props_clouds, lw_optical_props_aerosol,         &
-       nGauss_angles, fluxlwUP_allsky, fluxlwDOWN_allsky, fluxlwUP_clrsky,                 &
-       fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwDOWN_jac, errmsg, errflg)
+       nLev, p_lev, lw_gas_props, sfc_emiss_byband, sources, lw_optical_props_clrsky,      &
+       lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,  &
+       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwDOWN_jac,&
+       errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -44,13 +44,8 @@ contains
          nCol,                    & ! Number of horizontal gridpoints
          nLev,                    & ! Number of vertical levels
          nGauss_angles              ! Number of angles used in Gaussian quadrature
-    real(kind_phys), dimension(ncol,nLev), intent(in) :: &
-         p_lay,                   & ! Pressure @ model layer-centers (hPa)
-         t_lay                      ! Temperature (K)
     real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
          p_lev                      ! Pressure @ model layer-interfaces (hPa)
-    real(kind_phys), dimension(ncol), intent(in) :: &
-         skt                        ! Surface(skin) temperature (K)
     type(ty_gas_optics_rrtmgp),intent(in) :: &
          lw_gas_props               ! RRTMGP DDT: longwave spectral information
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
@@ -79,8 +74,6 @@ contains
          fluxlwDOWN_jac              ! Jacobian of downward LW flux (W/m2/K)         
 
     ! Local variables
-    integer :: &
-         iCol, iBand, iLay
     type(ty_fluxes_byband) :: &
          flux_allsky, flux_clrsky
     real(kind_phys), dimension(ncol,nLev+1,lw_gas_props%get_nband()),target :: &
