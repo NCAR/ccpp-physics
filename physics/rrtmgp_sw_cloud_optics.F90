@@ -18,6 +18,11 @@ module rrtmgp_sw_cloud_optics
        a0s = 0.0,     & !
        a1s = 1.5        !  
   real(kind_phys),dimension(:),allocatable :: b0r,b0s,b1s,c0r,c0s
+  real(kind_phys) :: &
+       radliq_lwr,         & ! Liquid particle size lower bound for LUT interpolation   
+       radliq_upr,         & ! Liquid particle size upper bound for LUT interpolation
+       radice_lwr,         & ! Ice particle size upper bound for LUT interpolation  
+       radice_upr            ! Ice particle size lower bound for LUT interpolation
 
 contains
   ! ######################################################################################
@@ -55,11 +60,11 @@ contains
     
     ! Local variables that will be passed to cloud_optics%load()
     real(kind_phys) :: &
-         radliq_lwr,          & ! Liquid particle size lower bound for LUT interpolation   
-         radliq_upr,          & ! Liquid particle size upper bound for LUT interpolation
+         !radliq_lwr,          & ! Liquid particle size lower bound for LUT interpolation   
+         !radliq_upr,          & ! Liquid particle size upper bound for LUT interpolation
          radliq_fac,          & ! Factor for calculating LUT interpolation indices for liquid   
-         radice_lwr,          & ! Ice particle size upper bound for LUT interpolation  
-         radice_upr,          & ! Ice particle size lower bound for LUT interpolation
+         !radice_lwr,          & ! Ice particle size upper bound for LUT interpolation  
+         !radice_upr,          & ! Ice particle size lower bound for LUT interpolation
          radice_fac             ! Factor for calculating LUT interpolation indices for ice  
     real(kind_phys), dimension(:,:), allocatable :: &
          lut_extliq,          & ! LUT shortwave liquid extinction coefficient  

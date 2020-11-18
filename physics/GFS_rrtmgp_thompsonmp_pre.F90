@@ -14,6 +14,7 @@ module GFS_rrtmgp_thompsonmp_pre
        make_IceNumber,      &
        make_DropletNumber, &
        make_RainNumber
+  use rrtmgp_lw_cloud_optics, only: radliq_lwr, radliq_upr, radice_lwr, radice_upr
   implicit none
   
   ! Parameters specific to THOMPSON MP scheme.
@@ -183,10 +184,18 @@ contains
                             re_cloud(iCol,:), re_ice(iCol,:), re_snow(iCol,:), 1, nLev )
     enddo
     
-    ! Scale Thompson's effective radii from meter to micron and update global effective radii.
+    ! Scale Thompson's effective radii from meter to micron 
     effrin_cldliq(1:nCol,1:nLev)  = re_cloud(1:nCol,1:nLev)*1.e6
     effrin_cldice(1:nCol,1:nLev)  = re_ice(1:nCol,1:nLev)*1.e6
     effrin_cldsnow(1:nCol,1:nLev) = re_snow(1:nCol,1:nLev)*1.e6
+    
+    ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from 
+    !   2.5 - 21.5 microns for liquid clouds, 
+    !   10  - 180  microns for ice-clouds
+    effrin_cldliq = max(radliq_lwr, effrin_cldliq, radliq_upr)
+    effrin_cldice = max(radice_lwr, effrin_cldice, radice_upr)    
+    
+    ! Update global effective radii arrays.
     cld_reliq(1:nCol,1:nLev)      = effrin_cldliq(1:nCol,1:nLev)
     cld_reice(1:nCol,1:nLev)      = effrin_cldice(1:nCol,1:nLev)
     cld_resnow(1:nCol,1:nLev)     = effrin_cldsnow(1:nCol,1:nLev)
