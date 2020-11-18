@@ -70,6 +70,15 @@
   type = integer
   intent = in
   optional = F
+[con_rd]
+  standard_name = gas_constant_dry_air
+  long_name = ideal gas constant for dry air
+  units = J kg-1 K-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [dv]
   standard_name = tendency_of_y_wind_due_to_model_physics
   long_name = updated tendency of the y wind
@@ -433,6 +442,15 @@
   long_name = diffusivity for momentum
   units = m2 s-1
   dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[mflx_pbl]
+  standard_name = upward_mass_flux_of_air_due_to_subgrid_scale_vertical_mixing
+  long_name = upward mass flux calculated in the mass flux-based PBL scheme
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out

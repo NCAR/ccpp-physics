@@ -57,12 +57,12 @@
 !!  -# Solve for the horizontal momentum tendencies and add them to output tendency terms.
 !!  \section detailed_hedmf  GFS Hybrid HEDMF Detailed Algorithm
 !!  @{
-      subroutine hedmf_run (im,km,ntrac,ntcw,dv,du,tau,rtg,             &
+      subroutine hedmf_run (im,km,ntrac,ntcw,con_rd,dv,du,tau,rtg,      &
      &   u1,v1,t1,q1,swh,hlw,xmu,                                       &
      &   psk,rbsoil,zorl,u10m,v10m,fm,fh,                               &
      &   tsea,heat,evap,stress,spd1,kpbl,                               &
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
-     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,dku,              &
+     &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,dku,mflx_pbl,     &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
      &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
      &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,ntoz,              &
@@ -74,7 +74,7 @@
       !GJF: Note that sending these constants through the argument list
       !results in regression test failures with "PROD" mode compilation
       !flags (specifically, grav and cp)
-      use physcons, grav => con_g, cp => con_cp,
+      use physcons, only : grav => con_g, cp => con_cp,
      &              hvap => con_hvap, fv => con_fvirt
 
       implicit none
@@ -88,7 +88,8 @@
       integer, intent(out) :: kpbl(im)
 
 !
-      real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s
+      real(kind=kind_phys), intent(in) :: delt, xkzm_m, xkzm_h, xkzm_s, &
+     &                                    con_rd
       real(kind=kind_phys), intent(in) :: xkzminv, moninq_fac, var_ric, &
      &                     coef_ric_l, coef_ric_s
       real(kind=kind_phys), intent(inout) :: dv(im,km),     du(im,km),  &
@@ -115,7 +116,7 @@
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
      &                     hpbl(im),      dkt(im,km-1),                 &
-     &                     dku(im,km-1)
+     &                     dku(im,km-1),  mflx_pbl(im,km)
       real(kind=kind_phys), intent(inout) ::                            &
      &                     hgamt(im),     hgamq(im)
 !
@@ -193,7 +194,7 @@
      &                     ptem,    ptem1,  ptem2, tx1(im), tx2(im)
 !
       real(kind=kind_phys) zstblmax,h1,     h2,     qlcr,  actei,
-     &                     cldtime
+     &                     cldtime, rho
       real :: ttend_fac
       
       !! for hurricane application
@@ -1071,6 +1072,7 @@ c
             vcko(i,k) = v1(i,k)
             xmf(i,k) = 0.
           endif
+          mflx_pbl(i,k) = 0.
         enddo
       enddo
       do kk = 1, ntrac
@@ -1086,6 +1088,15 @@ c
       call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
      &       zl,zi,thvx,q1,t1,u1,v1,hpbl,kpbl,
      &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
+      do k = 1, km
+        do i = 1, im
+          !convert mass flux into kg m-2 s-1
+          if (pcnvflg(i)) then
+            rho = prsl(i,k)/(con_rd*t1(i,k)*(1.+fv*max(q1(i,k,1),qmin)))
+            mflx_pbl(i,k) = rho*xmf(i,k)
+          end if
+        enddo
+      enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  compute diffusion coefficients for cloud-top driven diffusion
