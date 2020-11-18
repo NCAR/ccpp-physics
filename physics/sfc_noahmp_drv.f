@@ -87,7 +87,7 @@
 !...................................
 !  ---  inputs:
      &     ( im, km, itime, ps, u1, v1, t1, q1, soiltyp, vegtype,       &
-     &       sigmaf, sfcemis, dlwflx, dswsfc, snet, delt, tg3, cm, ch,  &
+     &       sigmaf, dlwflx, dswsfc, snet, delt, tg3, cm, ch,           &
      &       prsl1, prslki, zf, dry, wind, slopetyp,                    &
      &       shdmin, shdmax, snoalb, sfalb, flag_iter, flag_guess,      &
      &       idveg, iopt_crs, iopt_btr, iopt_run, iopt_sfc, iopt_frz,   &
@@ -108,7 +108,7 @@
      &       waxy, wtxy, tsnoxy, zsnsoxy, snicexy, snliqxy, lfmassxy,   &
      &       rtmassxy, stmassxy, woodxy, stblcpxy, fastcpxy, xlaixy,    &
      &       xsaixy, taussxy, smoiseq, smcwtdxy, deeprechxy, rechxy,    &
-     &       albdvis, albdnir,  albivis,  albinir,                      &
+     &       albdvis, albdnir,  albivis,  albinir,emiss,                &
 
 !  ---  outputs:
      &       sncovr1, qsurf, gflux, drain, evap, hflx, ep, runoff,      &
@@ -186,7 +186,7 @@
 !  ---  in/out:
       real (kind=kind_phys), dimension(im), intent(inout) :: weasd,     &
      &       snwdph, tskin, tprcp, srflag, canopy, trans, tsurf, zorl,  &
-     &       sfcemis, sfalb
+     &       sfalb
 
       real (kind=kind_phys), dimension(im,km), intent(inout) ::         &
      &       smc, stc, slc
@@ -213,7 +213,7 @@
       real (kind=kind_phys), dimension(im), intent(out) :: sncovr1,     &
      &       qsurf, gflux, drain, evap, hflx, ep, runoff, cmm, chh,     &
      &    evbs, evcw, sbsno, snowc, stm, snohf, smcwlt2, smcref2, wet1, &
-     &    albdvis,albdnir,  albivis,  albinir
+     &    albdvis,albdnir,  albivis,  albinir, emiss
       real (kind=kind_phys), dimension(:), intent(out) :: t2mmp, q2mp
 
 ! error messages
@@ -473,7 +473,7 @@
           lwdn   = dlwflx(i)         !..downward lw flux at sfc in w/m2
           swdn   = dswsfc(i)         !..downward sw flux at sfc in w/m2
           solnet = snet(i)           !..net sw rad flx (dn-up) at sfc in w/m2
-          sfcems = sfcemis(i)
+          sfcems = emiss(i)
 
           sfctmp = t1(i)  
           sfcprs = prsl1(i) 
@@ -895,7 +895,7 @@
 !         write(*,*) 'snowc',fsno
 
           tsurf(i)   = trad
-          sfcemis(i) = emissi
+          emiss(i) = emissi
           if(albedo .gt. 0.0) then
             sfalb(i)   = albedo
             albdvis(i) = albd(1)

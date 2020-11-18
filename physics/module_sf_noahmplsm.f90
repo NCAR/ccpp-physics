@@ -1812,7 +1812,7 @@ contains
                    albold  ,tauss   ,                            & !inout
                    fsun    ,laisun  ,laisha  ,parsun  ,parsha  , & !out
                    sav     ,sag     ,fsr     ,fsa     ,fsrv    , & 
-                   fsrg    ,bgap    ,wgap    )            !out
+                   fsrg    ,albd    ,albi    ,bgap    ,wgap    )   ! out
 
 ! vegetation and ground emissivity
 
@@ -2386,7 +2386,7 @@ contains
                         albold  ,tauss   ,                            & !inout
                         fsun    ,laisun  ,laisha  ,parsun  ,parsha  , & !out
                         sav     ,sag     ,fsr     ,fsa     ,fsrv    , &
-                        fsrg    ,bgap    ,wgap)            !out
+                        fsrg    ,albd    ,albi    ,bgap    ,wgap)       !out
 ! --------------------------------------------------------------------------------------------------
   implicit none
 ! --------------------------------------------------------------------------------------------------
