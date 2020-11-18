@@ -192,9 +192,11 @@ contains
     ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from 
     !   2.5 - 21.5 microns for liquid clouds, 
     !   10  - 180  microns for ice-clouds
-    effrin_cldliq = max(radliq_lwr, effrin_cldliq, radliq_upr)
-    effrin_cldice = max(radice_lwr, effrin_cldice, radice_upr)    
-    
+    where(effrin_cldliq .lt. radliq_lwr) effrin_cldliq = radliq_lwr
+    where(effrin_cldliq .gt. radliq_upr) effrin_cldliq = radliq_upr
+    where(effrin_cldice .lt. radice_lwr) effrin_cldice = radice_lwr
+    where(effrin_cldice .gt. radice_upr) effrin_cldice = radice_upr
+
     ! Update global effective radii arrays.
     cld_reliq(1:nCol,1:nLev)      = effrin_cldliq(1:nCol,1:nLev)
     cld_reice(1:nCol,1:nLev)      = effrin_cldice(1:nCol,1:nLev)
