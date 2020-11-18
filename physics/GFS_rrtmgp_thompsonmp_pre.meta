@@ -226,7 +226,23 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F  
+  optional = F
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F 
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F      
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation

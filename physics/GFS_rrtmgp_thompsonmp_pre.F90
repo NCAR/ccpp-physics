@@ -39,7 +39,7 @@ contains
        i_cldice_nc, i_twa, effr_in, p_lev, p_lay, tv_lay, t_lay, effrin_cldliq,          &
        effrin_cldice, effrin_cldsnow, tracer, qs_lay, q_lay, relhum, cld_frac_mg, con_g, &
        con_rd, uni_cld, lmfshal, lmfdeep2, ltaerosol, do_mynnedmf, imfdeepcnv,           &
-       imfdeepcnv_gf,                                                                    &
+       imfdeepcnv_gf, doGP_cldoptics_PADE, doGP_cldoptics_LUT,                           &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, errmsg, errflg)
     
@@ -68,7 +68,9 @@ contains
          lmfshal,           & ! Flag for mass-flux shallow convection scheme used by Xu-Randall
          lmfdeep2,          & ! Flag for some scale-aware mass-flux convection scheme active
          ltaerosol,         & ! Flag for aerosol option
-         do_mynnedmf          ! Flag to activate MYNN-EDMF
+         do_mynnedmf,       & ! Flag to activate MYNN-EDMF
+         doGP_cldoptics_LUT,& ! Flag to do GP cloud-optics (LUTs)
+         doGP_cldoptics_PADE  !                            (PADE approximation)
     real(kind_phys), intent(in) :: &
          con_g,             & ! Physical constant: gravitational constant
          con_rd               ! Physical constant: gas-constant for dry air
@@ -192,10 +194,12 @@ contains
     ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from 
     !   2.5 - 21.5 microns for liquid clouds, 
     !   10  - 180  microns for ice-clouds
-    where(effrin_cldliq .lt. radliq_lwr) effrin_cldliq = radliq_lwr
-    where(effrin_cldliq .gt. radliq_upr) effrin_cldliq = radliq_upr
-    where(effrin_cldice .lt. radice_lwr) effrin_cldice = radice_lwr
-    where(effrin_cldice .gt. radice_upr) effrin_cldice = radice_upr
+    if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
+       where(effrin_cldliq .lt. radliq_lwr) effrin_cldliq = radliq_lwr
+       where(effrin_cldliq .gt. radliq_upr) effrin_cldliq = radliq_upr
+       where(effrin_cldice .lt. radice_lwr) effrin_cldice = radice_lwr
+       where(effrin_cldice .gt. radice_upr) effrin_cldice = radice_upr
+    endif
 
     ! Update global effective radii arrays.
     cld_reliq(1:nCol,1:nLev)      = effrin_cldliq(1:nCol,1:nLev)
