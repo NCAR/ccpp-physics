@@ -140,6 +140,15 @@
   type = logical
   intent = inout
   optional = F
+[hice]
+  standard_name = sea_ice_thickness
+  long_name = sea ice thickness
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [cice]
   standard_name = sea_ice_concentration
   long_name = ice fraction over open water
@@ -148,15 +157,6 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = F
-[cimin]
-  standard_name = minimum_sea_ice_concentration
-  long_name = minimum sea ice concentration
-  units = frac
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
   optional = F
 [zorl]
   standard_name = surface_roughness_length
@@ -506,7 +506,24 @@
   units = flag
   dimensions = (horizontal_loop_extent)
   type = integer
-  intent = in
+  intent = inout
+  optional = F
+[islmsk_cice]
+  standard_name = sea_land_ice_mask_cice
+  long_name = sea/land/ice mask cice (=0/1/2)
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+  optional = F
+[slmsk]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [semis_rad]
   standard_name = surface_longwave_emissivity
