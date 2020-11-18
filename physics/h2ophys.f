@@ -12,10 +12,6 @@
 
       contains
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_h2ophys_init Argument Table
-!!
       subroutine h2ophys_init()
       end subroutine h2ophys_init
 
@@ -136,10 +132,6 @@
       end subroutine h2ophys_run
 !> @}
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_h2ophys_finalize Argument Table
-!!
       subroutine h2ophys_finalize()
       end subroutine h2ophys_finalize
 

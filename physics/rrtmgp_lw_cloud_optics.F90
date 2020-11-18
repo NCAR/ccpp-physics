@@ -270,11 +270,11 @@ contains
 !! \section arg_table_rrtmgp_lw_cloud_optics_run
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_lw_cloud_optics_run(doLWrad, doG_cldoptics, doGP_cldoptics_PADE,        &
-       doGP_cldoptics_LUT, nCol, nLev, nrghice, p_lay, cld_frac, cld_lwp, cld_reliq,        &
-       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,           &
-       lw_cloud_props, lw_gas_props, lon, lat, cldtaulw, lw_optical_props_cloudsByBand,     &
-       lw_optical_props_precipByBand, errmsg, errflg)
+  subroutine rrtmgp_lw_cloud_optics_run(doLWrad, doG_cldoptics, icliq_lw, icice_lw,         &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nCol, nLev, nrghice, p_lay, cld_frac,       &
+       cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
+       precip_frac, lw_cloud_props, lw_gas_props, lon, lat, cldtaulw,                       &
+       lw_optical_props_cloudsByBand, lw_optical_props_precipByBand, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -285,7 +285,9 @@ contains
     integer, intent(in) ::    &
          nCol,                & ! Number of horizontal gridpoints
          nLev,                & ! Number of vertical levels
-         nrghice                ! Number of ice-roughness categories
+         nrghice,             & ! Number of ice-roughness categories
+         icliq_lw,            & ! Choice of treatment of liquid cloud optical properties (RRTMG legacy)
+         icice_lw               ! Choice of treatment of ice cloud optical properties (RRTMG legacy) 
     real(kind_phys), dimension(nCol), intent(in) :: &
          lon,                 & ! Longitude
          lat                    ! Latitude
@@ -378,7 +380,7 @@ contains
        if (any(cld_frac .gt. 0)) then
           call rrtmg_lw_cloud_optics(ncol, nLev, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, &
-               cld_frac, tau_cld, tau_precip)
+               cld_frac, icliq_lw, icice_lw, tau_cld, tau_precip)
        endif
        lw_optical_props_cloudsByBand%tau = tau_cld
        lw_optical_props_precipByBand%tau = tau_precip

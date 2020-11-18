@@ -28,7 +28,7 @@ contains
        save_diag, fhswr,  coszen, coszdg, t_lay, p_lev, sfc_alb_nir_dir, sfc_alb_nir_dif,   &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sw_gas_props, fluxswUP_allsky,                 &
        fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, raddt, aerodp, cldsa, mbota,  &
-       mtopa, cld_frac, cldtausw,                                                           &
+       mtopa, cld_frac, cldtausw, fluxr,                                                    &
        nirbmdi, nirdfdi, visbmdi, visdfdi, nirbmui, nirdfui, visbmui, visdfui, sfcnsw,      &
        sfcdsw, htrsw, sfcfsw, topfsw, htrswc, flxprf_sw, scmpsw, errmsg, errflg)
 
@@ -85,7 +85,9 @@ contains
                           ! nirdf - downward nir diffused flux       (W/m2)
                           ! visbm - downward uv+vis direct beam flux (W/m2)
                           ! visdf - downward uv+vis diffused flux    (W/m2)           
-
+    
+    real(kind=kind_phys), dimension(:,:), intent(inout) :: fluxr
+    
     ! Outputs (mandatory)
     real(kind_phys), dimension(nCol), intent(out) :: &
          nirbmdi,           & ! sfc nir beam sw downward flux    (W/m2)
@@ -253,62 +255,62 @@ contains
     ! - Collect the fluxr data for wrtsfc
     ! #######################################################################################
     if (save_diag) then
-!       do i=1,nCol
-!          Diag%fluxr(i,34) = Diag%fluxr(i,34) + fhswr*aerodp(i,1)  ! total aod at 550nm
-!          Diag%fluxr(i,35) = Diag%fluxr(i,35) + fhswr*aerodp(i,2)  ! DU aod at 550nm
-!          Diag%fluxr(i,36) = Diag%fluxr(i,36) + fhswr*aerodp(i,3)  ! BC aod at 550nm
-!          Diag%fluxr(i,37) = Diag%fluxr(i,37) + fhswr*aerodp(i,4)  ! OC aod at 550nm
-!          Diag%fluxr(i,38) = Diag%fluxr(i,38) + fhswr*aerodp(i,5)  ! SU aod at 550nm
-!          Diag%fluxr(i,39) = Diag%fluxr(i,39) + fhswr*aerodp(i,6)  ! SS aod at 550nm
-!          if (coszen(i) > 0.) then
-!             ! SW all-sky fluxes
-!             tem0d = fhswr * coszdg(i) / coszen(i)
-!             Diag%fluxr(i,2 ) = Diag%fluxr(i,2)  + topfsw(i)%upfxc * tem0d  ! total sky top sw up
-!             Diag%fluxr(i,3 ) = Diag%fluxr(i,3)  + sfcfsw(i)%upfxc * tem0d  
-!             Diag%fluxr(i,4 ) = Diag%fluxr(i,4)  + sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
-!             ! SW uv-b fluxes
-!             Diag%fluxr(i,21) = Diag%fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
-!             Diag%fluxr(i,22) = Diag%fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
-!             ! SW TOA incoming fluxes
-!             Diag%fluxr(i,23) = Diag%fluxr(i,23) + topfsw(i)%dnfxc * tem0d     ! top sw dn 
-!             ! SW SFC flux components
-!             Diag%fluxr(i,24) = Diag%fluxr(i,24) + visbmdi(i) * tem0d          ! uv/vis beam sw dn
-!             Diag%fluxr(i,25) = Diag%fluxr(i,25) + visdfdi(i) * tem0d          ! uv/vis diff sw dn
-!             Diag%fluxr(i,26) = Diag%fluxr(i,26) + nirbmdi(i) * tem0d          ! nir beam sw dn
-!             Diag%fluxr(i,27) = Diag%fluxr(i,27) + nirdfdi(i) * tem0d          ! nir diff sw dn
-!             ! SW clear-sky fluxes
-!             Diag%fluxr(i,29) = Diag%fluxr(i,29) + topfsw(i)%upfx0 * tem0d
-!             Diag%fluxr(i,31) = Diag%fluxr(i,31) + sfcfsw(i)%upfx0 * tem0d 
-!             Diag%fluxr(i,32) = Diag%fluxr(i,32) + sfcfsw(i)%dnfx0 * tem0d
-!          endif
-!       enddo
-!       
-!       ! Save total and boundary-layer clouds
-!       do i=1,nCol
-!          Diag%fluxr(i,17) = Diag%fluxr(i,17) + raddt * cldsa(i,4)
-!          Diag%fluxr(i,18) = Diag%fluxr(i,18) + raddt * cldsa(i,5)
-!       enddo
-!       
-!       ! Save cld frac,toplyr,botlyr and top temp, note that the order of h,m,l cloud 
-!       ! is reversed for the fluxr output. save interface pressure (pa) of top/bot
-!       do j = 1, 3
-!          do i = 1, nCol
-!             tem0d = raddt * cldsa(i,j)
-!             itop  = mtopa(i,j)
-!             ibtc  = mbota(i,j)
-!             Diag%fluxr(i, 8-j) = Diag%fluxr(i, 8-j) + tem0d
-!             Diag%fluxr(i,11-j) = Diag%fluxr(i,11-j) + tem0d * p_lev(i,itop)
-!             Diag%fluxr(i,14-j) = Diag%fluxr(i,14-j) + tem0d * p_lev(i,ibtc)
-!             Diag%fluxr(i,17-j) = Diag%fluxr(i,17-j) + tem0d * p_lev(i,itop)
-!             
-!             ! Add optical depth and emissivity output
-!             tem1 = 0.
-!             do k=ibtc,itop
-!                tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
-!             enddo
-!             Diag%fluxr(i,43-j) = Diag%fluxr(i,43-j) + tem0d * tem1
-!          enddo
-!       enddo
+       do i=1,nCol
+          fluxr(i,34) = fluxr(i,34) + fhswr*aerodp(i,1)  ! total aod at 550nm
+          fluxr(i,35) = fluxr(i,35) + fhswr*aerodp(i,2)  ! DU aod at 550nm
+          fluxr(i,36) = fluxr(i,36) + fhswr*aerodp(i,3)  ! BC aod at 550nm
+          fluxr(i,37) = fluxr(i,37) + fhswr*aerodp(i,4)  ! OC aod at 550nm
+          fluxr(i,38) = fluxr(i,38) + fhswr*aerodp(i,5)  ! SU aod at 550nm
+          fluxr(i,39) = fluxr(i,39) + fhswr*aerodp(i,6)  ! SS aod at 550nm
+          if (coszen(i) > 0.) then
+             ! SW all-sky fluxes
+             tem0d = fhswr * coszdg(i) / coszen(i)
+             fluxr(i,2 ) = fluxr(i,2)  + topfsw(i)%upfxc * tem0d  ! total sky top sw up
+             fluxr(i,3 ) = fluxr(i,3)  + sfcfsw(i)%upfxc * tem0d  
+             fluxr(i,4 ) = fluxr(i,4)  + sfcfsw(i)%dnfxc * tem0d  ! total sky sfc sw dn
+             ! SW uv-b fluxes
+             fluxr(i,21) = fluxr(i,21) + scmpsw(i)%uvbfc * tem0d          ! total sky uv-b sw dn
+             fluxr(i,22) = fluxr(i,22) + scmpsw(i)%uvbf0 * tem0d          ! clear sky uv-b sw dn
+             ! SW TOA incoming fluxes
+             fluxr(i,23) = fluxr(i,23) + topfsw(i)%dnfxc * tem0d     ! top sw dn 
+             ! SW SFC flux components
+             fluxr(i,24) = fluxr(i,24) + visbmdi(i) * tem0d          ! uv/vis beam sw dn
+             fluxr(i,25) = fluxr(i,25) + visdfdi(i) * tem0d          ! uv/vis diff sw dn
+             fluxr(i,26) = fluxr(i,26) + nirbmdi(i) * tem0d          ! nir beam sw dn
+             fluxr(i,27) = fluxr(i,27) + nirdfdi(i) * tem0d          ! nir diff sw dn
+             ! SW clear-sky fluxes
+             fluxr(i,29) = fluxr(i,29) + topfsw(i)%upfx0 * tem0d
+             fluxr(i,31) = fluxr(i,31) + sfcfsw(i)%upfx0 * tem0d 
+             fluxr(i,32) = fluxr(i,32) + sfcfsw(i)%dnfx0 * tem0d
+          endif
+       enddo
+
+       ! Save total and boundary-layer clouds
+       do i=1,nCol
+          fluxr(i,17) = fluxr(i,17) + raddt * cldsa(i,4)
+          fluxr(i,18) = fluxr(i,18) + raddt * cldsa(i,5)
+       enddo
+
+       ! Save cld frac,toplyr,botlyr and top temp, note that the order of h,m,l cloud 
+       ! is reversed for the fluxr output. save interface pressure (pa) of top/bot
+       do j = 1, 3
+          do i = 1, nCol
+             tem0d = raddt * cldsa(i,j)
+             itop  = mtopa(i,j)
+             ibtc  = mbota(i,j)
+             fluxr(i, 8-j) = fluxr(i, 8-j) + tem0d
+             fluxr(i,11-j) = fluxr(i,11-j) + tem0d * p_lev(i,itop)
+             fluxr(i,14-j) = fluxr(i,14-j) + tem0d * p_lev(i,ibtc)
+             fluxr(i,17-j) = fluxr(i,17-j) + tem0d * p_lev(i,itop)
+
+             ! Add optical depth and emissivity output
+             tem1 = 0.
+             do k=ibtc,itop
+                tem1 = tem1 + cldtausw(i,k)      ! approx .55 mu channel
+             enddo
+             fluxr(i,43-j) = fluxr(i,43-j) + tem0d * tem1
+          enddo
+       enddo
     endif
   end subroutine GFS_rrtmgp_sw_post_run
 

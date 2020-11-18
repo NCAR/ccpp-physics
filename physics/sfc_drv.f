@@ -31,7 +31,20 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
+      if (ivegsrc > 2) then
+        errmsg = 'The NOAH LSM expects that the ivegsrc physics '//
+     &            'namelist parameter is 0, 1, or 2. Exiting...'
+        errflg = 1
+        return
+      end if
+      if (isot > 1) then
+        errmsg = 'The NOAH LSM expects that the isot physics '//
+     &           'namelist parameter is 0, or 1. Exiting...'
+        errflg = 1
+        return
+      end if
+      
       !--- initialize soil vegetation
       call set_soilveg(me, isot, ivegsrc, nlunit)
 

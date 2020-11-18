@@ -69,6 +69,14 @@
   type = integer
   intent = in
   optional = F
+[isubc_lw]
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [ipsdlw0]
   standard_name = initial_permutation_seed_lw
   long_name = initial seed for McICA LW
@@ -77,11 +85,67 @@
   type = integer
   intent = in
   optional = F
+[iovr]
+  standard_name = flag_for_cloud_overlap_method_for_radiation
+  long_name = max-random overlap clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_maxrand]
+  standard_name = flag_for_maximum_random_cloud_overlap_method
+  long_name = choice of maximum-random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_dcorr]
+  standard_name = flag_for_decorrelation_length_cloud_overlap_method
+  long_name = choice of decorrelation-length cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_exp]
+  standard_name = flag_for_exponential_cloud_overlap_method
+  long_name = choice of exponential cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_exprand]
+  standard_name = flag_for_exponential_random_cloud_overlap_method
+  long_name = choice of exponential-random cloud overlap method
+  units     = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_rand]
+  standard_name = flag_for_random_cloud_overlap_method
+  long_name = choice of random cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[iovr_max]
+  standard_name = flag_for_maximum_cloud_overlap_method
+  long_name = choice of maximum cloud overlap method
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [icseed_lw]
   standard_name = seed_random_numbers_lw
   long_name = seed for random number generation for longwave radiation
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -89,7 +153,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -98,7 +162,7 @@
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -107,7 +171,7 @@
   standard_name = cloud_overlap_param
   long_name = cloud overlap parameter
   units = km
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -116,7 +180,7 @@
   standard_name = precip_overlap_param
   long_name = precipitation overlap parameter
   units = km
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
