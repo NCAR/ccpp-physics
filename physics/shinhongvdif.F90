@@ -36,7 +36,7 @@
                   u10,v10,                                                     &
                   dx,lssav,ldiag3d,qdiag3d,                                    &
                   flag_for_pbl_generic_tend,ntoz,du3dt_PBL,dv3dt_PBL,          &
-                  dt3dt_PBL,dq3dt_PBL,do3dt_PBL,errmsg,errflg )
+                  dt3dt_PBL,dq3dt_PBL,do3dt_PBL,xkzh,xkzm,errmsg,errflg )
 
    use machine , only : kind_phys
 !
@@ -160,7 +160,9 @@
                                                                         dvsfc, &
                                                                         dtsfc, &
                                                                         dqsfc
-
+! 3D: out
+   real(kind=kind_phys),     dimension(im,km)                                , &
+             intent(out)     :: xkzh, xkzm
 ! error messages
    character(len=*), intent(out)    ::                                 errmsg
    integer,          intent(out)    ::                                 errflg
@@ -226,8 +228,7 @@
                                                                        epshol, &
                                                                            ct
 !
-   real(kind=kind_phys),     dimension(im,km)   ::                                             &                
-                                                                    xkzm,xkzh, &
+   real(kind=kind_phys),     dimension(im,km)   ::                                             &
                                                                         f1,f2, &
                                                                         r1,r2, &
                                                                         ad,au, &

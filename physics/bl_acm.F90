@@ -59,7 +59,7 @@ module bl_acm
                            phii, phil, pbl, klpbl, utnp, vtnp, ttnp, qtnp,     &
                            lssav, ldiag3d, qdiag3d,                                    &
                            flag_for_pbl_generic_tend, du3dt_PBL, dv3dt_PBL,             &
-                           dt3dt_PBL, dq3dt_PBL, do3dt_PBL, errmsg, errflg)
+                           dt3dt_PBL, dq3dt_PBL, do3dt_PBL, eddyz, eddyzm, errmsg, errflg)
       
       implicit none
       
@@ -77,6 +77,7 @@ module bl_acm
       real(kind=kind_phys), dimension(im,km), intent(inout) :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
 
       integer, dimension(im), intent(out) :: klpbl
+      real(kind=kind_phys), dimension(im,km), intent(out) :: eddyz, eddyzm
       
       ! error messages
       character(len=*),                               intent(out)     ::  errmsg
@@ -90,7 +91,7 @@ module bl_acm
       
       real(kind=kind_phys) :: tmpvtcon, thv1, gravi, th1, zh1, uh1, vh1, wss, tconv, dtmp, fintt, zmix, umix, vmix, tog, wssq, rdt
       real(kind=kind_phys), dimension(im) :: cpair, tst, qst, ustm, tstv, mol, rmol, wst, fint
-      real(kind=kind_phys), dimension(im,km) :: theta, thetax, thetav, ux, vx, za, dzh, dzhi, dzfi, rib, cld_water, eddyz, eddyzm
+      real(kind=kind_phys), dimension(im,km) :: theta, thetax, thetav, ux, vx, za, dzh, dzhi, dzfi, rib, cld_water
       real(kind=kind_phys), dimension(im,km+1) :: zf
       real(kind=kind_phys), dimension(im,km,nvdiff) :: qxx
       

@@ -489,6 +489,22 @@
   type = real
   kind = kind_phys
   intent = inout
+[xkzh]
+  standard_name = atmosphere_heat_diffusivity
+  long_name = diffusivity for heat
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
+[xkzm]
+  standard_name = atmosphere_momentum_diffusivity
+  long_name = diffusivity for momentum
+  units = m2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
+  type = real
+  kind = kind_phys
+  intent = out
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

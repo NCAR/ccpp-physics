@@ -35,7 +35,7 @@
                     dusfc,dvsfc,dtsfc,dqsfc,                                   &
                     dt,kpbl1d,u10,v10,lssav,ldiag3d,qdiag3d,                   &
                     flag_for_pbl_generic_tend,ntoz,du3dt_PBL,dv3dt_PBL,        &
-                    dt3dt_PBL,dq3dt_PBL,do3dt_PBL,errmsg,errflg   )
+                    dt3dt_PBL,dq3dt_PBL,do3dt_PBL,xkzh,xkzm,errmsg,errflg   )
 
    use machine , only : kind_phys
 !
@@ -96,7 +96,8 @@
    integer,  dimension( im ), intent(out  )   ::                       kpbl1d
    real(kind=kind_phys),     dimension( im ),                                       &
              intent(out)   ::                                            hpbl
-
+   real(kind=kind_phys),     dimension(im,km) :: xkzh, xkzm
+   
    ! error messages
    character(len=*), intent(out)    ::                                 errmsg
    integer,          intent(out)    ::                                 errflg
@@ -130,8 +131,7 @@
                                                                         prpbl, &
                                                               wspd1,thermalli
 !
-   real(kind=kind_phys),    dimension( im, km )    ::                     xkzm,xkzh, &
-                                                                        f1,f2, &
+   real(kind=kind_phys),    dimension( im, km )    ::                   f1,f2, &
                                                                         r1,r2, &
                                                                         ad,au, &
                                                                            cu, &
