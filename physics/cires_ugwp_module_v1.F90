@@ -59,7 +59,6 @@ module  cires_ugwp_module_v1
     real                  :: knob_ugwp_taumin = 0.25e-3
     real                  :: knob_ugwp_tauamp = 7.75e-3    ! range from 30.e-3 to 3.e-3 ( space-borne values)
     real                  :: knob_ugwp_lhmet  = 200.e3     ! 200 km
-    real                  :: knob_ugwp_tlimb  = .true.    
 !
     real                  :: kxw = pi2/200.e3              ! single horizontal wavenumber of ugwp schemes
 !
@@ -102,7 +101,7 @@ module  cires_ugwp_module_v1
             knob_ugwp_ndx4lh, knob_ugwp_version, knob_ugwp_palaunch, knob_ugwp_nslope,  knob_ugwp_lzmax, &
 	    knob_ugwp_lzmin,  knob_ugwp_lzstar, knob_ugwp_lhmet, knob_ugwp_tauamp, knob_ugwp_taumin,  &
 	    knob_ugwp_qbolev, knob_ugwp_qbosin, knob_ugwp_qbotav, knob_ugwp_qboamp, knob_ugwp_qbotau, &
-	    knob_ugwp_qbolat, knob_ugwp_qbowid, knob_ugwp_tlimb, knob_ugwp_orosolv  
+	    knob_ugwp_qbolat, knob_ugwp_qbowid, knob_ugwp_orosolv
 
 !&cires_ugwp_nml
 ! knob_ugwp_solver=2
