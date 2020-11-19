@@ -74,8 +74,7 @@ contains
        end do
        do k = km-1, 1, -1
          do i = 1, im
-           !positive sign since dz is positive
-           write(*,*) i,k,dz(i,k)
+           !addition instead of subtraction since dz is defined as positive above
            sgs_vert_flx_th(i,k) = sgs_vert_flx_th(i,k+1) + dthdt(i,k)*dz(i,k)
            sgs_vert_flx_q(i,k) = sgs_vert_flx_q(i,k+1) + dqdt(i,k)*dz(i,k)
            sgs_vert_flx_u(i,k) = sgs_vert_flx_u(i,k+1) + dudt(i,k)*dz(i,k)

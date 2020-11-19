@@ -66,7 +66,7 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
-     &     errmsg,errflg)
+     &     dkt,dku,mflx_pbl,ele,elm,buop,shrp,diss,errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -109,6 +109,9 @@
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
      &                     hpbl(im)
+      real(kind=kind_phys), intent(out) ::                              &
+     &                     dkt(:,:), dku(:,:), mflx_pbl(:,:), ele(:,:), &
+     &                     elm(:,:), buop(:,:), shrp(:,:), diss(:,:)
 !
       logical, intent(in)  :: dspheat
       character(len=*), intent(out) :: errmsg
@@ -130,7 +133,7 @@
      &                     qlx(im,km),  thetae(im,km),thlx(im,km),
      &                     slx(im,km),  svx(im,km),   qtx(im,km),
      &                     tvx(im,km),  pix(im,km),   radx(im,km-1),
-     &                     dku(im,km-1),dkt(im,km-1), dkq(im,km-1),
+     &                     dkq(im,km-1),
      &                     cku(im,km-1),ckt(im,km-1)
 !
       real(kind=kind_phys) plyr(im,km), rhly(im,km),  cfly(im,km),
@@ -156,9 +159,8 @@
      &                     al(im,km-1),  ad(im,km),   au(im,km-1),
      &                     f1(im,km),    f2(im,km*(ntrac-1))
 !
-      real(kind=kind_phys) elm(im,km),   ele(im,km),
-     &                     ckz(im,km),   chz(im,km),  frik(im),
-     &                     diss(im,km-1),prod(im,km-1), 
+      real(kind=kind_phys) ckz(im,km),   chz(im,km),  frik(im),
+     &                     prod(im,km-1), 
      &                     bf(im,km-1),  shr2(im,km-1),
      &                     xlamue(im,km-1), xlamde(im,km-1),
      &                     gotvx(im,km), rlam(im,km-1)
@@ -189,7 +191,7 @@
      &                     dsig,    dt2,    dtodsd,
      &                     dtodsu,  g,      factor, dz,
      &                     gocp,    gravi,  zol1,   zolcru,
-     &                     buop,    shrp,   dtn,
+     &                     dtn,
      &                     prnum,   prmax,  prmin,  prtke,
      &                     prscu,   pr0,    ri,
      &                     dw2,     dw2min, zk,
@@ -208,7 +210,8 @@
      &                     tkmin,   tkminx, xkzinv, xkgdx,
      &                     zlup,    zldn,   bsum,
      &                     tem,     tem1,   tem2,
-     &                     ptem,    ptem0,  ptem1,  ptem2
+     &                     ptem,    ptem0,  ptem1,  ptem2,
+     &                     rho
 !
       real(kind=kind_phys)       xkzm_mp, xkzm_hp
 !
@@ -803,6 +806,20 @@
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,xmfd,
      &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
+      do k = 1, km
+        do i = 1, im
+          !convert mass flux into kg m-2 s-1
+          if (pcnvflg(i) .or. scuflg(i)) then
+            rho = prsl(i,k)/(rd*t1(i,k)*(1.+fv*max(q1(i,k,1),qmin)))
+            if (pcnvflg(i)) then
+              mflx_pbl(i,k) = rho*xmf(i,k)
+            end if
+            if (scuflg(i)) then
+              mflx_pbl(i,k) = mflx_pbl(i,k) + rho*xmfd(i,k)
+            end if
+          end if
+        enddo
+      enddo
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -1072,7 +1089,7 @@
               ptem2 = 0.
             endif
             tem = tem + ptem1 + ptem2
-            buop = 0.5 * (gotvx(i,1) * sflux(i) + tem)
+            buop(i,k) = 0.5 * (gotvx(i,1) * sflux(i) + tem)
 !
             tem1 = dku(i,1) * shr2(i,1)
 !
@@ -1108,7 +1125,7 @@
 !
 !           tem2 = stress(i)*spd1(i)/zl(i,1)
             tem2 = stress(i)*ustar(i)*phim(i)/(vk*zl(i,1))
-            shrp = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
+            shrp(i,k) = 0.5 * (tem1 + ptem1 + ptem2 + tem2)
           else
             tem1 = -dkt(i,k-1) * bf(i,k-1)
             tem2 = -dkt(i,k) * bf(i,k)
@@ -1129,7 +1146,7 @@
             else
               ptem2 = 0.
             endif
-            buop = tem + ptem1 + ptem2
+            buop(i,k) = tem + ptem1 + ptem2
 !
             tem1 = dku(i,k-1) * shr2(i,k-1)
             tem2 = dku(i,k) * shr2(i,k)
@@ -1152,7 +1169,7 @@
             else
               ptem2 = 0.
             endif
-            shrp = tem + ptem1 + ptem2
+            shrp(i,k) = tem + ptem1 + ptem2
             tem1 = (v1(i,k+1)-v1(i,k))*rdzt(i,k)
             tem2 = (v1(i,k)-v1(i,k-1))*rdzt(i,k-1)
             if(pcnvflg(i) .and. k <= kpbl(i)) then
@@ -1171,9 +1188,9 @@
             else
               ptem2 = 0.
             endif
-            shrp = shrp + ptem1 + ptem2
+            shrp(i,k) = shrp(i,k) + ptem1 + ptem2
           endif
-          prod(i,k) = buop + shrp
+          prod(i,k) = buop(i,k) + shrp(i,k)
         enddo
       enddo
 !
@@ -1195,6 +1212,9 @@
         enddo
       enddo
       enddo
+      do i=1,im
+        diss(i,km) = 0.0
+      end do
 !
 !>  - Compute updraft & downdraft properties for TKE
 !
