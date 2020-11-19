@@ -789,6 +789,17 @@
         abssmx = 1.0
         abssmn = .01
         abslmn = .01
+      elseif (ialb ==2) then
+        kpdabs = kpdabs_1
+        kpdalb = kpdalb_1
+        alblmx = .99
+        albsmx = .99
+        alblmn = .01
+        albsmn = .01
+        abslmx = 1.0
+        abssmx = 1.0
+        abssmn = .01
+        abslmn = .01
       else
         kpdabs = kpdabs_0
         kpdalb = kpdalb_0
@@ -7326,7 +7337,7 @@ cjfe
 cjfe
 
         kpd7=-1
-        if (ialb == 1) then
+        if (ialb == 1 .or. ialb == 2) then
 !cbosu    still need facsf and facwf.  read them from the production file
           if ( index(fnalbc2, "tileX.nc") == 0) then ! grib file
             call fixrdc(lugb,fnalbc2,kpdalf(1),kpd7,kpd9,slmask
@@ -7337,7 +7348,7 @@ cjfe
             call fixrdc_tile(fnalbc2, tile_num_ch, i_index, j_index,
      &                       kpdalf(1), alf(:,1), 1, len, me)
           endif
-        elseif (ialb == 0) then
+        else
           call fixrdc(lugb,fnalbc,kpdalf(1),kpd7,kpd9,slmask
      &,               alf,len,iret
      &,               imsk, jmsk, slmskh, gaus,blno, blto
@@ -7515,7 +7526,7 @@ cjfe
           if (nn .eq. 2) mon = mon2
 !cbosu
 !cbosu  new snowfree albedo database is monthly.  
-          if (ialb == 1) then
+          if (ialb == 1 .or. ialb == 2) then
             if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
               kpd7=-1
               do k = 1, 4
@@ -7799,7 +7810,7 @@ cjfe
           mon = mon2
           nn  = k2
 !cbosu
-          if (ialb == 1) then
+          if (ialb == 1 .or. ialb == 2) then
             if (me == 0) print*,'bosu 2nd time in clima for month ',
      &                   mon, k1,k2
             if ( index(fnalbc, "tileX.nc") == 0) then ! grib file
@@ -8109,13 +8120,13 @@ cjfe
       if (me == 0) print*,'monthly albedo weights are ', 
      &             wei1m,' for k', k1, wei2m, ' for k', k2
 
-      if (ialb == 1) then
+      if (ialb == 1 .or. ialb == 2) then
         do k=1,4
           do i=1,len
             albclm(i,k) = wei1m * alb(i,k,k1) + wei2m * alb(i,k,k2)
           enddo
         enddo
-      elseif (ialb == 0) then
+      else
         do k=1,4
           do i=1,len
             albclm(i,k) = wei1s * alb(i,k,m1) + wei2s * alb(i,k,m2)
