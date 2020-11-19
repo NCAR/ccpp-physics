@@ -807,6 +807,15 @@
   kind = kind_phys
   intent = inout
   optional = F
+[mflx_pbl]
+  standard_name = upward_mass_flux_of_air_due_to_subgrid_scale_vertical_mixing
+  long_name = upward mass flux calculated in the mass flux-based PBL scheme
+  units = kg m-2 s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [edmf_qt]
   standard_name = emdf_updraft_total_water
   long_name = updraft total water from mass flux scheme
@@ -1260,6 +1269,33 @@
   dimensions = ()
   type = logical
   intent = in
+  optional = F
+[buop]
+  standard_name = turbulent_kinetic_energy_buoyancy_production_term
+  long_name = buoyancy term in the TKE prognostic equation
+  units = m2 s-3
+  dimensions = (horizontal_loop_extent, vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[shrp]
+  standard_name = turbulent_kinetic_energy_shear_production_term
+  long_name = shear term in the TKE prognostic equation
+  units = m2 s-3
+  dimensions = (horizontal_loop_extent, vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[diss]
+  standard_name = turbulent_kinetic_energy_dissipation_term
+  long_name = dissipation term in the TKE prognostic term
+  units = m2 s-3
+  dimensions = (horizontal_loop_extent, vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

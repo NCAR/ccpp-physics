@@ -73,7 +73,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  el_pbl,sh3d,exch_h,exch_m,      &
      &  Pblh,kpbl,                      &
      &  qc_bl,qi_bl,cldfra_bl,          &
-     &  edmf_a,edmf_w,edmf_qt,          &
+     &  edmf_a,edmf_w,mflx_pbl,edmf_qt, &
      &  edmf_thl,edmf_ent,edmf_qc,      &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
      &  nupdraft,maxMF,ktop_plume,      &
@@ -94,7 +94,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  icloud_bl, do_mynnsfclay,                          &
      &  imp_physics, imp_physics_gfdl,                     &
      &  imp_physics_thompson, imp_physics_wsm6,            &
-     &  ltaerosol, lprnt, errmsg, errflg  )
+     &  ltaerosol, lprnt, buop, shrp, diss, errmsg, errflg  )
 
 ! should be moved to inside the mynn:
       use machine , only : kind_phys
@@ -250,6 +250,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        edmf_a,edmf_w,edmf_qt,                                     &
      &        edmf_thl,edmf_ent,edmf_qc,                                 &
      &        sub_thl,sub_sqv,det_thl,det_sqv
+      real(kind=kind_phys), dimension(:,:), intent(out) :: mflx_pbl
      real(kind=kind_phys), dimension(im,levs), intent(in) ::             &
     &        u,v,omega,t3d,                                              &
     &        exner,prsl,                                                 &
@@ -262,7 +263,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        qgrs_water_aer_num_conc,                                    &
     &        qgrs_ice_aer_num_conc
      real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
-    &        Tsq, Qsq, Cov, exch_h, exch_m
+    &        Tsq, Qsq, Cov, exch_h, exch_m, buop, shrp, diss
      real(kind=kind_phys), dimension(:,:), intent(inout) ::              &
     &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,               &
     &        do3dt_PBL, dq3dt_PBL, dt3dt_PBL
@@ -839,7 +840,16 @@ SUBROUTINE mynnedmf_wrapper_run(        &
            enddo
          enddo
        endif
-
+       
+       do k=1,levs
+         do i=1,im
+           mflx_pbl(i,k) = rho(i,k)*edmf_w(i,k)
+           buop(i,k) = qbuoy(i,k)/delt
+           shrp(i,k) = qshear(i,k)/delt
+           diss(i,k) = qdiss(i,k)/delt
+         end do
+       end do
+       
        if (lprnt) then
           print*
           print*,"===Finished with mynn_bl_driver; output:"
