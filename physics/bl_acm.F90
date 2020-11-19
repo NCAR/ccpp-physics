@@ -54,20 +54,21 @@ module bl_acm
 !! \htmlinclude bl_acm_run.html
 !!
 ! -------------------------------------------------------------------------------------------
-    subroutine bl_acm_run (im, km, nvdiff, ntqvx, ntcwx, ntiwx, ntozx, xtime, dt, cpd, ep1, g, rd, qxs,&
-                           tt, us, vs, ust, hfx, qfx, exner,    &
+    subroutine bl_acm_run (im, km, nvdiff, ntqvx, ntcwx, ntiwx, ntozx, xtime, dt, cpd, ep1, g, rd, hvap, del, &
+                           qxs, tt, us, vs, ust, hfx, qfx, exner,    &
                            phii, phil, pbl, klpbl, utnp, vtnp, ttnp, qtnp,     &
                            lssav, ldiag3d, qdiag3d,                                    &
                            flag_for_pbl_generic_tend, du3dt_PBL, dv3dt_PBL,             &
-                           dt3dt_PBL, dq3dt_PBL, do3dt_PBL, eddyz, eddyzm, errmsg, errflg)
+                           dt3dt_PBL, dq3dt_PBL, do3dt_PBL, dusfc, dvsfc, dtsfc, dqsfc, &
+                           eddyz, eddyzm, errmsg, errflg)
       
       implicit none
       
       integer, intent(in) :: im, km, nvdiff, ntqvx, ntcwx, ntiwx, ntozx, xtime
       logical, intent(in) ::  lssav, ldiag3d, qdiag3d, flag_for_pbl_generic_tend
-      real(kind=kind_phys), intent(in) :: dt, cpd, ep1, g, rd
+      real(kind=kind_phys), intent(in) :: dt, cpd, ep1, g, rd, hvap
       real(kind=kind_phys), dimension(im), intent(in) :: ust, hfx, qfx
-      real(kind=kind_phys), dimension(im,km), intent(in) :: tt, exner, phil, us, vs
+      real(kind=kind_phys), dimension(im,km), intent(in) :: tt, exner, phil, us, vs, del
       real(kind=kind_phys), dimension(im,km+1), intent(in) :: phii
       real(kind=kind_phys), dimension(im,km,nvdiff), intent(in) :: qxs
 
@@ -77,6 +78,7 @@ module bl_acm
       real(kind=kind_phys), dimension(im,km), intent(inout) :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
 
       integer, dimension(im), intent(out) :: klpbl
+      real(kind=kind_phys), dimension(im), intent(out) :: dusfc, dvsfc, dtsfc, dqsfc
       real(kind=kind_phys), dimension(im,km), intent(out) :: eddyz, eddyzm
       
       ! error messages
@@ -89,7 +91,7 @@ module bl_acm
       
       integer, dimension(im) :: kpblh, noconv
       
-      real(kind=kind_phys) :: tmpvtcon, thv1, gravi, th1, zh1, uh1, vh1, wss, tconv, dtmp, fintt, zmix, umix, vmix, tog, wssq, rdt
+      real(kind=kind_phys) :: tmpvtcon, thv1, gravi, th1, zh1, uh1, vh1, wss, tconv, dtmp, fintt, zmix, umix, vmix, tog, wssq, rdt, cont, conq
       real(kind=kind_phys), dimension(im) :: cpair, tst, qst, ustm, tstv, mol, rmol, wst, fint
       real(kind=kind_phys), dimension(im,km) :: theta, thetax, thetav, ux, vx, za, dzh, dzhi, dzfi, rib, cld_water
       real(kind=kind_phys), dimension(im,km+1) :: zf
@@ -100,6 +102,8 @@ module bl_acm
       real(kind=kind_phys), parameter :: tstv_min = 1.0e-6
       
       gravi = 1.0/g
+      cont = cpd/g
+      conq = hvap/g
       
       do k=1, km
         do i=1,im
@@ -294,6 +298,12 @@ module bl_acm
                   1, im, 1, km, 1, im, 1, km, 1, im, 1, km)
 
 !... Calculate tendency due to PBL parameterization
+      do i = 1, im
+        dusfc(i) = 0.
+        dvsfc(i) = 0.
+        dtsfc(i) = 0.
+        dqsfc(i) = 0.
+      end do
       rdt = 1.0 / dt
       do k = 1, km
         do i = 1, im
@@ -313,6 +323,10 @@ module bl_acm
             qtnp(i,k,l) = qtnp(i,k,l) + (qxx(i,k,l) - qxs(i,k,l)) * rdt
           end do
 !          write(*,*) i,k,utnp(i,k),vtnp(i,k),ttnp(i,k),qtnp(i,k,1)
+          dusfc(i) = dusfc(i) + gravi*del(i,k)*(ux(i,k) - us(i,k)) * rdt
+          dvsfc(i) = dvsfc(i) + gravi*del(i,k)*(vx(i,k) - vs(i,k)) * rdt
+          dtsfc(i) = dtsfc(i) + cont*del(i,k)*(thetax(i,k) - theta(i,k)) * exner(i,k) * rdt
+          dqsfc(i) = dqsfc(i) + conq*del(i,k)*(qxx(i,k,ntqvx) - qxs(i,k,ntqvx))*rdt
           if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
             dt3dt_pbl(i,k) = dt3dt_pbl(i,k) + (thetax(i,k) - theta(i,k)) * exner(i,k)
             du3dt_pbl(i,k) = du3dt_pbl(i,k) + (ux(i,k) - us(i,k))

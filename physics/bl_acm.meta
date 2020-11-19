@@ -116,6 +116,24 @@
   kind = kind_phys
   intent = in
   optional = F
+[hvap]
+  standard_name = latent_heat_of_vaporization_of_water_at_0C
+  long_name = latent heat of evaporation/sublimation
+  units = J kg-1
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[del]
+  standard_name = air_pressure_difference_between_midlayers
+  long_name = pres(k) - pres(k+1)
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [qxs]
   standard_name = vertically_diffused_tracer_concentration
   long_name = tracer concentration diffused by PBL scheme
@@ -327,6 +345,42 @@
   type = real
   kind = kind_phys
   intent = inout
+[dusfc]
+  standard_name = instantaneous_surface_x_momentum_flux
+  long_name = x momentum flux
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dvsfc]
+  standard_name = instantaneous_surface_y_momentum_flux
+  long_name = y momentum flux
+  units = Pa
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dtsfc]
+  standard_name = instantaneous_surface_upward_sensible_heat_flux
+  long_name = surface upward sensible heat flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
+[dqsfc]
+  standard_name = instantaneous_surface_upward_latent_heat_flux
+  long_name = surface upward latent heat flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [eddyz]
   standard_name = atmosphere_heat_diffusivity
   long_name = diffusivity for heat
