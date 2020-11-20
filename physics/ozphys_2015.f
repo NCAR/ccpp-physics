@@ -29,13 +29,8 @@
 
       end subroutine ozphys_2015_init
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_ozphys_2015_finalize Argument Table
-!!
       subroutine ozphys_2015_finalize()
       end subroutine ozphys_2015_finalize
-
 
 !>\defgroup GFS_ozphys_2015 GFS Ozone Photochemistry (2015) Scheme Module
 !! \brief The operational GFS currently parameterizes ozone production and

@@ -6,9 +6,6 @@
 
       contains
 
-
-!! \section arg_table_cnvc90_init Argument Table
-!!
       subroutine cnvc90_init()
       end subroutine cnvc90_init
 
@@ -130,12 +127,8 @@
       END SUBROUTINE cnvc90_run
 !> @}
 
-
-!! \section arg_table_cnvc90_finalize Argument Table
-!!
       subroutine cnvc90_finalize()
       end subroutine cnvc90_finalize
-
 
       end module cnvc90
 

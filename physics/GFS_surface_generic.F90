@@ -141,10 +141,14 @@
             else
               soiltyp(i)  = 9
             endif
-            if (ivegsrc == 1) then
+            if (ivegsrc == 0 .or. ivegsrc == 4) then
+              vegtype(i)  = 24
+            elseif (ivegsrc == 1) then
               vegtype(i)  = 15
-            elseif(ivegsrc == 2) then
+            elseif (ivegsrc == 2) then
               vegtype(i)  = 13
+            elseif (ivegsrc == 3 .or. ivegsrc == 5) then
+              vegtype(i)  = 15
             endif
             slopetyp(i) = 9
           else

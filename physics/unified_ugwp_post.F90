@@ -6,8 +6,7 @@ contains
 
 !>\defgroup unified_ugwp_post unified_UGWP Scheme Post
 !! @{
-!> \section arg_table_unified_ugwp_post_init Argument Table
-!!
+
     subroutine unified_ugwp_post_init ()
     end subroutine unified_ugwp_post_init
 
@@ -16,9 +15,6 @@ contains
 !> \section arg_table_unified_ugwp_post_run Argument Table
 !! \htmlinclude unified_ugwp_post_run.html
 !!
-
-
-
      subroutine unified_ugwp_post_run (ldiag_ugwp, dtf, im, levs,     &
          gw_dtdt, gw_dudt, gw_dvdt, tau_tofd, tau_mtb, tau_ogw,     &
          tau_ngw, zmtb, zlwb, zogw, dudt_mtb, dudt_ogw, dudt_tms,   &
@@ -74,8 +70,6 @@ contains
 
       end subroutine unified_ugwp_post_run
 
-!> \section arg_table_unified_ugwp_post_finalize Argument Table
-!!
       subroutine unified_ugwp_post_finalize ()
       end subroutine unified_ugwp_post_finalize
 
