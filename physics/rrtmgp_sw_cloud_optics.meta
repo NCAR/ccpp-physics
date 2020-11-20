@@ -143,6 +143,22 @@
   type = logical
   intent = in
   optional = F  
+[icliq_sw]
+  standard_name = flag_for_optical_property_for_liquid_clouds_for_shortwave_radiation
+  long_name = sw optical property for liquid clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[icice_sw]
+  standard_name = flag_for_optical_property_for_ice_clouds_for_shortwave_radiation
+  long_name = sw optical property for ice clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [doGP_cldoptics_PADE]
   standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
   long_name = logical flag to control cloud optics scheme.
@@ -171,7 +187,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -180,7 +196,7 @@
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -188,8 +204,8 @@
 [cld_reliq]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -198,7 +214,7 @@
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -206,8 +222,8 @@
 [cld_reice]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -216,7 +232,7 @@
   standard_name = cloud_snow_water_path
   long_name = layer cloud snow water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -224,8 +240,8 @@
 [cld_resnow]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -234,7 +250,7 @@
   standard_name = cloud_rain_water_path
   long_name = layer cloud rain water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -242,8 +258,8 @@
 [cld_rerain]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -252,7 +268,7 @@
   standard_name = precipitation_fraction_by_layer
   long_name = precipitation fraction in each layer
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -285,7 +301,7 @@
   standard_name = daytime_points
   long_name = daytime points
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -309,7 +325,7 @@
   standard_name = RRTMGP_cloud_optical_depth_layers_at_0_55mu_band
   long_name = approx .55mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out

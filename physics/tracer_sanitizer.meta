@@ -12,7 +12,7 @@
   standard_name = tracer_concentration_updated_by_physics
   long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout

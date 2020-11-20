@@ -8,8 +8,6 @@
 
 !> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
 !! @{
-!! \section arg_table_GFS_rrtmg_pre_init Argument Table
-!!
       subroutine GFS_rrtmg_pre_init ()
       end subroutine GFS_rrtmg_pre_init
 
@@ -18,57 +16,54 @@
 !!
       ! Attention - the output arguments lm, im, lmk, lmp must not be set
       ! in the CCPP version - they are defined in the interstitial_create routine
-      subroutine GFS_rrtmg_pre_run (Model, Grid, Sfcprop, Statein,   & ! input
-          Tbd, Cldprop, Coupling,                                    &
-          Radtend,                                                   & ! input/output
-          imfdeepcnv, imfdeepcnv_gf,                                 &
-          f_ice, f_rain, f_rimef, flgmin, cwm,                       & ! F-A mp scheme only
-          lm, im, lmk, lmp,                                          & ! input
-          kd, kt, kb, raddt, delp, dz, plvl, plyr,                   & ! output
-          tlvl, tlyr, tsfg, tsfa, qlyr, olyr,                        &
-          gasvmr_co2,   gasvmr_n2o,   gasvmr_ch4,   gasvmr_o2,       &
-          gasvmr_co,    gasvmr_cfc11, gasvmr_cfc12,                  &
-          gasvmr_cfc22, gasvmr_ccl4,  gasvmr_cfc113,                 &
-          faersw1,  faersw2,  faersw3,                               &
-          faerlw1, faerlw2, faerlw3, aerodp,                         &
-          clouds1, clouds2, clouds3, clouds4, clouds5, clouds6,      &
-          clouds7, clouds8, clouds9, cldsa, cldfra,                  &
-          mtopa, mbota, de_lgth, alpha, alb1d, errmsg, errflg)
+      subroutine GFS_rrtmg_pre_run (im, levs, lm, lmk, lmp, n_var_lndp,        &
+        imfdeepcnv, imfdeepcnv_gf, me, ncnd, ntrac, num_p3d, npdf3d, ncnvcld3d,&
+        ntqv, ntcw,ntiw, ntlnc, ntinc, ncld, ntrw, ntsw, ntgl, ntwa, ntoz,     &
+        ntclamt, nleffr, nieffr, nseffr, lndp_type, kdt, imp_physics,          &
+        imp_physics_thompson, imp_physics_gfdl, imp_physics_zhao_carr,         &
+        imp_physics_zhao_carr_pdf, imp_physics_mg, imp_physics_wsm6,           &
+        imp_physics_fer_hires, julian, yearlen, lndp_var_list, lsswr, lslwr,   &
+        ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
+        lmfdeep2, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,                 &
+        rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
+        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in,                    &
+        cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,                            & !inputs from here and above
+        coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
+        clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
+        kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
+        plvl, plyr, tlvl, tlyr, qlyr, olyr, gasvmr_co2, gasvmr_n2o, gasvmr_ch4,&
+        gasvmr_o2, gasvmr_co, gasvmr_cfc11, gasvmr_cfc12, gasvmr_cfc22,        &
+        gasvmr_ccl4,  gasvmr_cfc113, aerodp, clouds6, clouds7, clouds8,        &
+        clouds9, cldsa, cldfra, faersw1, faersw2, faersw3, faerlw1, faerlw2,   &
+        faerlw3, alpha, errmsg, errflg)
 
       use machine,                   only: kind_phys
-      use GFS_typedefs,              only: GFS_statein_type,   &
-                                           GFS_stateout_type,  &
-                                           GFS_sfcprop_type,   &
-                                           GFS_coupling_type,  &
-                                           GFS_control_type,   &
-                                           GFS_grid_type,      &
-                                           GFS_tbd_type,       &
-                                           GFS_cldprop_type,   &
-                                           GFS_radtend_type,   &
-                                           GFS_diag_type
+
       use physparam
-      use physcons,                  only: eps   => con_eps,         &
-     &                                     epsm1 => con_epsm1,       &
-     &                                     fvirt => con_fvirt        &
-     &,                                    rog   => con_rog          &
-     &,                                    rocp  => con_rocp         &
-     &,                                    con_rd
+
       use radcons,                   only: itsfc,ltp, lextop, qmin,  &
                                            qme5, qme6, epsq, prsmin
       use funcphys,                  only: fpvs
 
-      use module_radiation_astronomy,only: coszmn                         ! sol_init, sol_update
-      use module_radiation_gases,    only: NF_VGAS, getgases, getozn      ! gas_init, gas_update,
-      use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer,   &  ! aer_init, aer_update,
+      use module_radiation_astronomy,only: coszmn                      ! sol_init, sol_update
+      use module_radiation_gases,    only: NF_VGAS, getgases, getozn   ! gas_init, gas_update,
+      use module_radiation_aerosols, only: NF_AESW, NF_AELW, setaer, & ! aer_init, aer_update,
      &                                     NSPC1
-      use module_radiation_clouds,   only: NF_CLDS,                    &  ! cld_init
-     &                                     progcld1, progcld3,         &
-     &                                     progcld2,                   &
-     &                                     progcld4, progcld5,         &
-     &                                     progclduni
-      use module_radsw_parameters,   only: topfsw_type, sfcfsw_type,   &
+      use module_radiation_clouds,   only: NF_CLDS,                  & ! cld_init
+     &                                     progcld1, progcld3,       &
+     &                                     progcld2,                 &
+     &                                     progcld4, progcld5,       &
+     &                                     progcld6,                 &
+     &                                     progclduni,               &
+     &                                     cal_cldfra3,              &
+     &                                     find_cloudLayers,         &
+     &                                     adjust_cloudIce,          &
+     &                                     adjust_cloudH2O,          &
+     &                                     adjust_cloudFinal
+
+      use module_radsw_parameters,   only: topfsw_type, sfcfsw_type, &
      &                                     profsw_type, NBDSW
-      use module_radlw_parameters,   only: topflw_type, sfcflw_type,   &
+      use module_radlw_parameters,   only: topflw_type, sfcflw_type, &
      &                                     proflw_type, NBDLW
       use surface_perturbation,      only: cdfnor
 
@@ -81,86 +76,135 @@
 
       implicit none
 
-      type(GFS_control_type),              intent(in)    :: Model
-      type(GFS_grid_type),                 intent(in)    :: Grid
-      type(GFS_sfcprop_type),              intent(in)    :: Sfcprop
-      type(GFS_statein_type),              intent(in)    :: Statein
-      type(GFS_radtend_type),              intent(inout) :: Radtend
-      type(GFS_tbd_type),                  intent(in)    :: Tbd
-      type(GFS_cldprop_type),              intent(in)    :: Cldprop
-      type(GFS_coupling_type),             intent(in)    :: Coupling
+      integer,              intent(in)  :: im, levs, lm, lmk, lmp, n_var_lndp, &
+                                           imfdeepcnv,                         &
+                                           imfdeepcnv_gf, me, ncnd, ntrac,     &
+                                           num_p3d, npdf3d, ncnvcld3d, ntqv,   &
+                                           ntcw, ntiw, ntlnc, ntinc, ncld,     &
+                                           ntrw, ntsw, ntgl, ntwa, ntoz,       &
+                                           ntclamt, nleffr, nieffr, nseffr,    &
+                                           lndp_type,                          &
+                                           kdt, imp_physics,                   &
+                                           imp_physics_thompson,               &
+                                           imp_physics_gfdl,                   &
+                                           imp_physics_zhao_carr,              &
+                                           imp_physics_zhao_carr_pdf,          &
+                                           imp_physics_mg, imp_physics_wsm6,   &
+                                           imp_physics_fer_hires,              &
+                                           yearlen, icloud
 
-      integer,              intent(in)  :: im, lm, lmk, lmp
-      integer,              intent(in)  :: imfdeepcnv, imfdeepcnv_gf
-      integer,              intent(out) :: kd, kt, kb
+      character(len=3), dimension(:), intent(in) :: lndp_var_list
 
-! F-A mp scheme only
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(in) :: f_ice, &
-                                                                       f_rain, f_rimef
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP), intent(out) :: cwm
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),        intent(in)  :: flgmin
-      real(kind=kind_phys), intent(out) :: raddt
+      logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
+                                          uni_cld, effr_in, do_mynnedmf,       &
+                                          lmfshal, lmfdeep2
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),   intent(out) :: delp, &
-                                                            dz, plyr, tlyr, qlyr, olyr
+      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian
+      real(kind=kind_phys), intent(in) :: eps, epsm1, fvirt, rog, rocp, con_rd
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+1+LTP), intent(out) :: plvl, tlvl
+      real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
+                                                        coslat, sinlat, tsfc,  &
+                                                        slmsk, dx
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),          intent(out) :: tsfg, tsfa
+      real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
+                                                          tgrs, sfc_wts,       &
+                                                          mg_cld, effrr_in,    &
+                                                          cnvw_in, cnvc_in
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),   intent(out) :: gasvmr_co2, &
-                                  gasvmr_n2o, gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11, &
-                                  gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4, gasvmr_cfc113
+      real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NBDSW), intent(out) :: faersw1, &
-                                                                             faersw2, faersw3
+      real(kind=kind_phys), dimension(:),   intent(inout) :: coszen, coszdg
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NBDLW), intent(out) :: faerlw1, &
-                                                                             faerlw2, faerlw3
+      real(kind=kind_phys), dimension(:,:), intent(inout) :: effrl_inout,      &
+                                                             effri_inout,      &
+                                                             effrs_inout
+      real(kind=kind_phys), dimension(im,lm+LTP), intent(inout) :: clouds1,    &
+                                                             clouds2, clouds3, &
+                                                             clouds4, clouds5
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),NSPC1),        intent(out) :: aerodp
+      integer,                                      intent(out) :: kd, kt, kb
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(inout) :: clouds1, &
-                                                             clouds2, clouds3, clouds4, clouds5
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(out)   :: clouds6, &
-                                                             clouds7, clouds8, clouds9, cldfra
+      integer, dimension(im,3),                     intent(out) :: mbota, mtopa
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),5),            intent(out) :: cldsa
-      integer,              dimension(size(Grid%xlon,1),3),            intent(out) :: mbota, mtopa
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)),              intent(out) :: de_lgth, alb1d
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP),       intent(out) :: alpha
+      real(kind=kind_phys),                         intent(out) :: raddt
+
+      real(kind=kind_phys), dimension(im),          intent(out) :: tsfg, tsfa
+      real(kind=kind_phys), dimension(im),          intent(out) :: de_lgth,    &
+                                                                   alb1d
+
+      real(kind=kind_phys), dimension(im,lm+LTP),   intent(out) :: delp, dz,   &
+                                                                   plyr, tlyr, &
+                                                                   qlyr, olyr
+
+      real(kind=kind_phys), dimension(im,lm+1+LTP), intent(out) :: plvl, tlvl
+
+
+
+      real(kind=kind_phys), dimension(im,lm+LTP),   intent(out) :: gasvmr_co2, &
+                                                                   gasvmr_n2o, &
+                                                                   gasvmr_ch4, &
+                                                                   gasvmr_o2,  &
+                                                                   gasvmr_co,  &
+                                                                   gasvmr_cfc11,&
+                                                                   gasvmr_cfc12,&
+                                                                   gasvmr_cfc22,&
+                                                                   gasvmr_ccl4,&
+                                                                   gasvmr_cfc113
+      real(kind=kind_phys), dimension(im,NSPC1),     intent(out) :: aerodp
+      real(kind=kind_phys), dimension(im,lm+LTP),    intent(out) :: clouds6,   &
+                                                                    clouds7,   &
+                                                                    clouds8,   &
+                                                                    clouds9,   &
+                                                                    cldfra
+      real(kind=kind_phys), dimension(im,5),            intent(out) :: cldsa
+
+      real(kind=kind_phys), dimension(im,lm+LTP,NBDSW), intent(out) :: faersw1,&
+                                                                       faersw2,&
+                                                                       faersw3
+
+      real(kind=kind_phys), dimension(im,lm+LTP,NBDLW), intent(out) :: faerlw1,&
+                                                                       faerlw2,&
+                                                                       faerlw3
+      real(kind=kind_phys), dimension(im,lm+LTP),       intent(out) :: alpha
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
       ! Local variables
-      integer :: me, nfxr, ntrac, ntcw, ntiw, ncld, ntrw, ntsw, ntgl, ncndl, ntlnc, ntinc, ntwa
+      integer :: ncndl
 
-      integer :: i, j, k, k1, k2, lsk, lv, n, itop, ibtc, LP1, lla, llb, lya, lyb
+      integer :: i, j, k, k1, k2, lsk, lv, n, itop, ibtc, LP1, lla, llb, lya,lyb
 
-      real(kind=kind_phys) :: es, qs, delt, tem0d, pfac
+      real(kind=kind_phys) :: es, qs, delt, tem0d, gridkm, pfac
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1)) :: cvt1, cvb1, tem1d, tskn
+      real(kind=kind_phys), dimension(im) :: cvt1, cvb1, tem1d, tskn, xland
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP) ::         &
+      real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                           htswc, htlwc, gcice, grain, grime, htsw0, htlw0, &
                           rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
                           dzb, hzb, cldcov, deltaq, cnvc, cnvw,            &
-                          effrl, effri, effrr, effrs, rho, orho
+                          effrl, effri, effrr, effrs, rho, orho, plyrpa
+
       ! for Thompson MP
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP) ::         &
+      real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                                   re_cloud, re_ice, re_snow, qv_mp, qc_mp, &
                                   qi_mp, qs_mp, nc_mp, ni_mp, nwfa
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP+1) :: tem2db, hz
+      ! for F-A MP
+      real(kind=kind_phys), dimension(im,lm+LTP)   :: qc_save, qi_save, qs_save
+      real(kind=kind_phys), dimension(im,lm+LTP+1) :: tem2db, hz
 
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,min(4,Model%ncnd)) :: ccnd
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,2:Model%ntrac) :: tracer1
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NF_CLDS)       :: clouds
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NF_VGAS)       :: gasvmr
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NBDSW,NF_AESW) ::faersw
-      real(kind=kind_phys), dimension(size(Grid%xlon,1),lm+LTP,NBDLW,NF_AELW) ::faerlw
- 
+      real(kind=kind_phys), dimension(im,lm+LTP,min(4,ncnd))   :: ccnd
+      real(kind=kind_phys), dimension(im,lm+LTP,2:ntrac)       :: tracer1
+      real(kind=kind_phys), dimension(im,lm+LTP,NF_CLDS)       :: clouds
+      real(kind=kind_phys), dimension(im,lm+LTP,NF_VGAS)       :: gasvmr
+      real(kind=kind_phys), dimension(im,lm+LTP,NBDSW,NF_AESW) :: faersw
+      real(kind=kind_phys), dimension(im,lm+LTP,NBDLW,NF_AELW) :: faerlw
+
+      integer :: ids, ide, jds, jde, kds, kde, &
+                 ims, ime, jms, jme, kms, kme, &
+                 its, ite, jts, jte, kts, kte
+
       real(kind=kind_phys) :: qvs
 !
 !===> ...  begin here
@@ -169,22 +213,10 @@
       errmsg = ''
       errflg = 0
 
-      if (.not. (Model%lsswr .or. Model%lslwr)) return
+      if (.not. (lsswr .or. lslwr)) return
 
       !--- set commonly used integers
-      me    = Model%me
-      NFXR  = Model%nfxr
-      NTRAC = Model%ntrac        ! tracers in grrad strip off sphum - start tracer1(2:NTRAC)
-      ntcw  = Model%ntcw
-      ntiw  = Model%ntiw
-      ntlnc = Model%ntlnc
-      ntinc = Model%ntinc
-      ncld  = Model%ncld
-      ntrw  = Model%ntrw
-      ntsw  = Model%ntsw
-      ntgl  = Model%ntgl
-      ntwa  = Model%ntwa
-      ncndl = min(Model%ncnd,4)
+      ncndl = min(ncnd,4)
 
       LP1 = LM + 1               ! num of in/out levels
 
@@ -221,7 +253,7 @@
         endif                      ! end if_ivflip_block
       endif   ! end if_lextop_block
 
-      raddt = min(Model%fhswr, Model%fhlwr)
+      raddt = min(fhswr, fhlwr)
 !     print *,' in grrad : raddt=',raddt
 
 
@@ -230,13 +262,13 @@
 
       if ( itsfc == 0 ) then            ! use same sfc skin-air/ground temp
         do i = 1, IM
-          tskn(i) = Sfcprop%tsfc(i)
-          tsfg(i) = Sfcprop%tsfc(i)
+          tskn(i) = tsfc(i)
+          tsfg(i) = tsfc(i)
         enddo
       else                              ! use diff sfc skin-air/ground temp
         do i = 1, IM
-          tskn(i) = Sfcprop%tsfc(i)
-          tsfg(i) = Sfcprop%tsfc(i)
+          tskn(i) = tsfc(i)
+          tsfg(i) = tsfc(i)
         enddo
       endif
 
@@ -245,34 +277,34 @@
 !
 
       lsk = 0
-      if (ivflip == 0 .and. lm < Model%levs) lsk = Model%levs - lm
+      if (ivflip == 0 .and. lm < levs) lsk = levs - lm
 
 !     convert pressure unit from pa to mb
       do k = 1, LM
         k1 = k + kd
         k2 = k + lsk
         do i = 1, IM
-          plvl(i,k1+kb) = Statein%prsi(i,k2+kb) * 0.01   ! pa to mb (hpa)
-          plyr(i,k1)    = Statein%prsl(i,k2)    * 0.01   ! pa to mb (hpa)
-          tlyr(i,k1)    = Statein%tgrs(i,k2)
-          prslk1(i,k1)  = Statein%prslk(i,k2)
+          plvl(i,k1+kb) = prsi(i,k2+kb) * 0.01   ! pa to mb (hpa)
+          plyr(i,k1)    = prsl(i,k2)    * 0.01   ! pa to mb (hpa)
+          tlyr(i,k1)    = tgrs(i,k2)
+          prslk1(i,k1)  = prslk(i,k2)
           rho(i,k1)     = plyr(i,k1)/(con_rd*tlyr(i,k1))
-          orho(i,k1)    = 1.0/rho(i,k1) 
+          orho(i,k1)    = 1.0/rho(i,k1)
 
 !>  - Compute relative humidity.
-          es  = min( Statein%prsl(i,k2),  fpvs( Statein%tgrs(i,k2) ) )  ! fpvs and prsl in pa
-          qs  = max( QMIN, eps * es / (Statein%prsl(i,k2) + epsm1*es) )
-          rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, Statein%qgrs(i,k2,1))/qs ) )
+          es  = min( prsl(i,k2),  fpvs( tgrs(i,k2) ) )  ! fpvs and prsl in pa
+          qs  = max( QMIN, eps * es / (prsl(i,k2) + epsm1*es) )
+          rhly(i,k1) = max( 0.0, min( 1.0, max(QMIN, qgrs(i,k2,ntqv))/qs ) )
           qstl(i,k1) = qs
         enddo
       enddo
 
       !--- recast remaining all tracers (except sphum) forcing them all to be positive
-      do j = 2, NTRAC
+      do j = 2, ntrac
         do k = 1, LM
           k1 = k + kd
           k2 = k + lsk
-          tracer1(:,k1,j) = max(0.0, Statein%qgrs(:,k2,j))
+          tracer1(:,k1,j) = max(0.0, qgrs(:,k2,j))
         enddo
       enddo
 !
@@ -281,28 +313,28 @@
           k1 = 1 + kd
           k2 = k1 + kb
           do i = 1, IM
-            plvl(i,k2)   = 0.01 * Statein%prsi(i,1+kb)          ! pa to mb (hpa)
+            plvl(i,k2)   = 0.01 * prsi(i,1+kb)          ! pa to mb (hpa)
             plyr(i,k1)   = 0.5 * (plvl(i,k2+1) + plvl(i,k2))
             prslk1(i,k1) = (plyr(i,k1)*0.001) ** rocp
           enddo
         else
           k1 = 1 + kd
           do i = 1, IM
-            plvl(i,k1) = Statein%prsi(i,1) * 0.01   ! pa to mb (hpa)
+            plvl(i,k1) = prsi(i,1) * 0.01   ! pa to mb (hpa)
           enddo
         endif
       else                                                 ! input data from sfc to top
-        if (Model%levs > lm) then
+        if (levs > lm) then
           k1 = lm + kd
           do i = 1, IM
-            plvl(i,k1+1) = 0.01 * Statein%prsi(i,Model%levs+1)  ! pa to mb (hpa)
+            plvl(i,k1+1) = 0.01 * prsi(i,levs+1)  ! pa to mb (hpa)
             plyr(i,k1)   = 0.5 * (plvl(i,k1+1) + plvl(i,k1))
             prslk1(i,k1) = (plyr(i,k1)*0.001) ** rocp
           enddo
         else
           k1 = lp1 + kd
           do i = 1, IM
-            plvl(i,k1) = Statein%prsi(i,lp1) * 0.01   ! pa to mb (hpa)
+            plvl(i,k1) = prsi(i,lp1) * 0.01   ! pa to mb (hpa)
           enddo
         endif
       endif
@@ -326,22 +358,21 @@
 !>  - Get layer ozone mass mixing ratio (if use ozone climatology data,
 !!    call getozn()).
 
-      if (Model%ntoz > 0) then            ! interactive ozone generation
+      if (ntoz > 0) then            ! interactive ozone generation
         do k=1,lmk
           do i=1,im
-            olyr(i,k) = max( QMIN, tracer1(i,k,Model%ntoz) )
+            olyr(i,k) = max( QMIN, tracer1(i,k,ntoz) )
           enddo
         enddo
       else                                ! climatological ozone
-        call getozn (prslk1, Grid%xlat, IM, LMK,    &     !  ---  inputs
-                     olyr)                                !  ---  outputs
+        call getozn (prslk1, xlat, im, lmk,    &     !  ---  inputs
+                     olyr)                           !  ---  outputs
       endif                               ! end_if_ntoz
 
 !>  - Call coszmn(), to compute cosine of zenith angle (only when SW is called)
-      if (Model%lsswr) then
-        call coszmn (Grid%xlon,Grid%sinlat,           &     !  ---  inputs
-                     Grid%coslat,Model%solhr, IM, me, &
-                     Radtend%coszen, Radtend%coszdg)        !  --- outputs
+      if (lsswr) then
+        call coszmn (xlon,sinlat,coslat,solhr,im,me, &     !  ---  inputs
+                     coszen, coszdg)                       !  ---  outputs
       endif
 
 !>  - Call getgases(), to set up non-prognostic gas volume mixing
@@ -359,8 +390,8 @@
 
 !  --- ...  set up non-prognostic gas volume mixing ratioes
 
-      call getgases (plvl, Grid%xlon, Grid%xlat, IM, LMK,  & !  --- inputs
-                     gasvmr)                                 !  --- outputs
+      call getgases (plvl, xlon, xlat, IM, LMK, & !  --- inputs
+                     gasvmr)                      !  --- outputs
 
 !CCPP: re-assign gasvmr(:,:,NF_VGAS) to gasvmr_X(:,:)
       do k = 1, LMK
@@ -400,9 +431,9 @@
         do k = 1, LM
           k1 = k + kd
           do i = 1, IM
-            qlyr(i,k1) = max( tem1d(i), Statein%qgrs(i,k,1) )
+            qlyr(i,k1) = max( tem1d(i), qgrs(i,k,ntqv) )
             tem1d(i)   = min( QME5, qlyr(i,k1) )
-            tvly(i,k1) = Statein%tgrs(i,k) * (1.0 + fvirt*qlyr(i,k1)) ! virtual T (K)
+            tvly(i,k1) = tgrs(i,k) * (1.0 + fvirt*qlyr(i,k1)) ! virtual T (K)
             delp(i,k1) = plvl(i,k1+1) - plvl(i,k1)
           enddo
         enddo
@@ -465,9 +496,9 @@
 
         do k = LM, 1, -1
           do i = 1, IM
-            qlyr(i,k) = max( tem1d(i), Statein%qgrs(i,k,1) )
+            qlyr(i,k) = max( tem1d(i), qgrs(i,k,ntqv) )
             tem1d(i)  = min( QME5, qlyr(i,k) )
-            tvly(i,k) = Statein%tgrs(i,k) * (1.0 + fvirt*qlyr(i,k)) ! virtual T (K)
+            tvly(i,k) = tgrs(i,k) * (1.0 + fvirt*qlyr(i,k)) ! virtual T (K)
             delp(i,k) = plvl(i,k) - plvl(i,k+1)
           enddo
         enddo
@@ -523,11 +554,10 @@
 
 !check  print *,' in grrad : calling setaer '
 
-      call setaer (plvl, plyr, prslk1, tvly, rhly, Sfcprop%slmsk, & !  ---  inputs
-                   tracer1, Tbd%aer_nm,                            &
-                   Grid%xlon, Grid%xlat, IM, LMK, LMP,             &
-                   Model%lsswr,Model%lslwr,                        &
-                   faersw,faerlw,aerodp)                              !  ---  outputs
+      call setaer (plvl, plyr, prslk1, tvly, rhly, slmsk,    & !  ---  inputs
+                   tracer1, aer_nm, xlon, xlat, IM, LMK, LMP,&
+                   lsswr,lslwr,                              &
+                   faersw,faerlw,aerodp)                       !  ---  outputs
 
 ! CCPP
       do j = 1,NBDSW
@@ -565,20 +595,20 @@
 
 !      if (ntcw > 0) then                            ! prognostic cloud schemes
         ccnd = 0.0_kind_phys
-        if (Model%ncnd == 1) then                                 ! Zhao_Carr_Sundqvist
+        if (ncnd == 1) then                          ! Zhao_Carr_Sundqvist
           do k=1,LMK
             do i=1,IM
-              ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water/ice
+              ccnd(i,k,1) = tracer1(i,k,ntcw)        ! liquid water/ice
             enddo
           enddo
-        elseif (Model%ncnd == 2) then                             ! MG or F-A
+        elseif (ncnd == 2) then                      ! MG
           do k=1,LMK
             do i=1,IM
-              ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
-              ccnd(i,k,2) = tracer1(i,k,ntiw)                     ! ice water
+              ccnd(i,k,1) = tracer1(i,k,ntcw)        ! liquid water
+              ccnd(i,k,2) = tracer1(i,k,ntiw)        ! ice water
             enddo
           enddo
-        elseif (Model%ncnd == 4) then                             ! MG2
+        elseif (ncnd == 4) then                      ! MG2
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
@@ -587,20 +617,24 @@
               ccnd(i,k,4) = tracer1(i,k,ntsw)                     ! snow water
             enddo
           enddo
-        elseif (Model%ncnd == 5) then                             ! GFDL MP, Thompson, MG3
+        elseif (ncnd == 5) then                         ! GFDL MP, Thompson, MG3, FA
           do k=1,LMK
             do i=1,IM
               ccnd(i,k,1) = tracer1(i,k,ntcw)                     ! liquid water
               ccnd(i,k,2) = tracer1(i,k,ntiw)                     ! ice water
               ccnd(i,k,3) = tracer1(i,k,ntrw)                     ! rain water
-              ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) ! snow + graupel
+              if (imp_physics == imp_physics_fer_hires ) then
+                  ccnd(i,k,4) = 0.0
+              else
+                  ccnd(i,k,4) = tracer1(i,k,ntsw) + tracer1(i,k,ntgl) ! snow + graupel
+              endif
             enddo
           enddo
           ! for Thompson MP - prepare variables for calc_effr
-          if (Model%imp_physics == Model%imp_physics_thompson .and. Model%ltaerosol) then
+          if (imp_physics == imp_physics_thompson .and. ltaerosol) then
             do k=1,LMK
               do i=1,IM
-                qvs = Statein%qgrs(i,k,1)
+                qvs = qgrs(i,k,ntqv)
                 qv_mp (i,k) = qvs/(1.-qvs)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
@@ -610,10 +644,10 @@
                 nwfa  (i,k) = tracer1(i,k,ntwa)
               enddo
             enddo
-          elseif (Model%imp_physics == Model%imp_physics_thompson) then
+          elseif (imp_physics == imp_physics_thompson) then
             do k=1,LMK
               do i=1,IM
-                qvs = Statein%qgrs(i,k,1)
+                qvs = qgrs(i,k,ntqv)
                 qv_mp (i,k) = qvs/(1.-qvs)
                 qc_mp (i,k) = tracer1(i,k,ntcw)/(1.-qvs)
                 qi_mp (i,k) = tracer1(i,k,ntiw)/(1.-qvs)
@@ -631,17 +665,17 @@
             enddo
           enddo
         enddo
-        if (Model%imp_physics == Model%imp_physics_gfdl ) then
-          if (.not. Model%lgfdlmprad) then
+        if (imp_physics == imp_physics_gfdl ) then
+          if (.not. lgfdlmprad) then
 
 
 ! rsun the  summation methods and order make the difference in calculation
 
-!            clw(:,:) = clw(:,:) + tracer1(:,1:LMK,Model%ntcw)   &
-!                                + tracer1(:,1:LMK,Model%ntiw)   &
-!                                + tracer1(:,1:LMK,Model%ntrw)   &
-!                                + tracer1(:,1:LMK,Model%ntsw)   &
-!                                + tracer1(:,1:LMK,Model%ntgl)
+!            clw(:,:) = clw(:,:) + tracer1(:,1:LMK,ntcw)   &
+!                                + tracer1(:,1:LMK,ntiw)   &
+!                                + tracer1(:,1:LMK,ntrw)   &
+!                                + tracer1(:,1:LMK,ntsw)   &
+!                                + tracer1(:,1:LMK,ntgl)
             ccnd(:,:,1) =               tracer1(:,1:LMK,ntcw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntrw)
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntiw)
@@ -649,7 +683,7 @@
             ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntgl)
 
 !          else
-!            do j=1,Model%ncld
+!            do j=1,ncld
 !              ccnd(:,:,1) = ccnd(:,:,1) + tracer1(:,1:LMK,ntcw+j-1) ! cloud condensate amount
 !            enddo
           endif
@@ -660,34 +694,34 @@
           enddo
         endif
 !
-        if (Model%uni_cld) then
-          if (Model%effr_in) then
+        if (uni_cld) then
+          if (effr_in) then
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
-                effrl(i,k1)  = Tbd%phy_f3d(i,k,2)
-                effri(i,k1)  = Tbd%phy_f3d(i,k,3)
-                effrr(i,k1)  = Tbd%phy_f3d(i,k,4)
-                effrs(i,k1)  = Tbd%phy_f3d(i,k,5)
+                cldcov(i,k1) = mg_cld(i,k)
+                effrl(i,k1)  = effrl_inout(i,k)
+                effri(i,k1)  = effri_inout(i,k)
+                effrr(i,k1)  = effrr_in(i,k)
+                effrs(i,k1)  = effrs_inout(i,k)
               enddo
             enddo
           else
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                cldcov(i,k1) = Tbd%phy_f3d(i,k,Model%indcld)
+                cldcov(i,k1) = mg_cld(i,k)
               enddo
             enddo
           endif
-        elseif (Model%imp_physics == Model%imp_physics_gfdl) then                          ! GFDL MP
-          if (Model%do_mynnedmf .and. Model%kdt>1) THEN
+        elseif (imp_physics == imp_physics_gfdl) then            ! GFDL MP
+          if (do_mynnedmf .and. kdt>1) THEN
             do k=1,lm
               k1 = k + kd
               do i=1,im
                 if (tracer1(i,k1,ntrw)>1.0e-7 .OR. tracer1(i,k1,ntsw)>1.0e-7) then
                 ! GFDL cloud fraction
-                  cldcov(i,k1) = tracer1(I,k1,Model%ntclamt)           
+                  cldcov(i,k1) = tracer1(I,k1,ntclamt)
                 else
                 ! MYNN sub-grid cloud fraction
                   cldcov(i,k1) = clouds1(i,k1)
@@ -696,37 +730,37 @@
             enddo
           else
             ! GFDL cloud fraction
-            cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,Model%ntclamt)
+            cldcov(1:IM,1+kd:LM+kd) = tracer1(1:IM,1:LM,ntclamt)
           endif
-          if(Model%effr_in) then
+          if(effr_in) then
             do k=1,lm
               k1 = k + kd
               do i=1,im
-                effrl(i,k1) = Tbd%phy_f3d(i,k,1)
-                effri(i,k1) = Tbd%phy_f3d(i,k,2)
-                effrr(i,k1) = Tbd%phy_f3d(i,k,3)
-                effrs(i,k1) = Tbd%phy_f3d(i,k,4)
-!                if(Model%me==0) then
+                effrl(i,k1) = effrl_inout(i,k)
+                effri(i,k1) = effri_inout(i,k)
+                effrr(i,k1) = effrr_in(i,k)
+                effrs(i,k1) = effrs_inout(i,k)
+!                if(me==0) then
 !                  if(effrl(i,k1)> 5.0) then
-!                    write(6,*) 'rad driver:cloud radii:',Model%kdt, i,k1,       &
+!                    write(6,*) 'rad driver:cloud radii:',kdt, i,k1,       &
 !                    effrl(i,k1)
 !                  endif
 !                  if(effrs(i,k1)==0.0) then
-!                    write(6,*) 'rad driver:snow mixing ratio:',Model%kdt, i,k1,        &
+!                    write(6,*) 'rad driver:snow mixing ratio:',kdt, i,k1, &
 !                    tracer1(i,k,ntsw)
 !                  endif
 !                endif
               enddo
             enddo
           endif
-        elseif (Model%imp_physics == Model%imp_physics_thompson) then                     !  Thompson MP
+        elseif (imp_physics == imp_physics_thompson) then       !  Thompson MP
           !
           ! Compute effective radii for QC, QI, QS with (GF, MYNN) or without (all others) sub-grid clouds
           !
           ! Update number concentration, consistent with sub-grid clouds (GF, MYNN) or without (all others)
           do k=1,lm
             do i=1,im
-              if (Model%ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
+              if (ltaerosol .and. qc_mp(i,k)>1.e-12 .and. nc_mp(i,k)<100.) then
                 nc_mp(i,k) = make_DropletNumber(qc_mp(i,k)*rho(i,k), nwfa(i,k)) * orho(i,k)
               endif
               if (qi_mp(i,k)>1.e-12 .and. ni_mp(i,k)<100.) then
@@ -765,9 +799,9 @@
           do k=1,lm
             k1 = k + kd
             do i=1,im
-              Tbd%phy_f3d(i,k,Model%nleffr) = effrl(i,k1)
-              Tbd%phy_f3d(i,k,Model%nieffr) = effri(i,k1)
-              Tbd%phy_f3d(i,k,Model%nseffr) = effrs(i,k1)
+              effrl_inout(i,k) = effrl(i,k1)
+              effri_inout(i,k) = effri(i,k1)
+              effrs_inout(i,k) = effrs(i,k1)
             enddo
           enddo
         else                                                           ! all other cases
@@ -781,25 +815,27 @@
 !      for zhao/moorthi's (imp_phys=99) &
 !          ferrier's (imp_phys=5) microphysics schemes
 
-        if ((Model%num_p3d == 4) .and. (Model%npdf3d == 3)) then       ! same as Model%imp_physics = 99
+        if ((num_p3d == 4) .and. (npdf3d == 3)) then       ! same as imp_physics = 98
           do k=1,lm
             k1 = k + kd
             do i=1,im
-              deltaq(i,k1) = Tbd%phy_f3d(i,k,5)
-              cnvw  (i,k1) = Tbd%phy_f3d(i,k,6)
-              cnvc  (i,k1) = Tbd%phy_f3d(i,k,7)
+              !GJF: this is not consistent with GFS_typedefs,
+              !     but it looks like the Zhao-Carr-PDF scheme is not in the CCPP
+              deltaq(i,k1) = 0.0!Tbd%phy_f3d(i,k,5)      !GJF: this variable is not in phy_f3d anymore
+              cnvw  (i,k1) = cnvw_in(i,k)
+              cnvc  (i,k1) = cnvc_in(i,k)
             enddo
           enddo
-        elseif ((Model%npdf3d == 0) .and. (Model%ncnvcld3d == 1)) then ! same as MOdel%imp_physics=98
+        elseif ((npdf3d == 0) .and. (ncnvcld3d == 1)) then ! same as imp_physics=99
           do k=1,lm
             k1 = k + kd
             do i=1,im
               deltaq(i,k1) = 0.0
-              cnvw  (i,k1) = Tbd%phy_f3d(i,k,Model%num_p3d+1)
+              cnvw  (i,k1) = cnvw_in(i,k)
               cnvc  (i,k1) = 0.0
             enddo
           enddo
-        else                                                           ! all the rest
+        else                                                      ! all the rest
           do k=1,lmk
             do i=1,im
               deltaq(i,k) = 0.0
@@ -809,6 +845,72 @@
           enddo
         endif
 
+        !mz HWRF physics: icloud=3
+        if(icloud == 3) then
+
+          ! Set internal dimensions
+          ids = 1
+          ims = 1
+          its = 1
+          ide = size(xlon,1)
+          ime = size(xlon,1)
+          ite = size(xlon,1)
+          jds = 1
+          jms = 1
+          jts = 1
+          jde = 1
+          jme = 1
+          jte = 1
+          kds = 1
+          kms = 1
+          kts = 1
+          kde = lm+LTP ! should this be lmk instead of lm? no, or?
+          kme = lm+LTP
+          kte = lm+LTP
+
+          do k = 1, LMK
+            do i = 1, IM
+              rho(i,k)=plyr(i,k)*100./(con_rd*tlyr(i,k))
+              plyrpa(i,k)=plyr(i,k)*100.    !hPa->Pa
+            end do
+          end do
+
+          do i=1,im
+            if (slmsk(i)==1. .or. slmsk(i)==2.) then ! sea/land/ice mask (=0/1/2) in FV3
+               xland(i)=1.0                          ! but land/water = (1/2) in HWRF
+            else
+               xland(i)=2.0
+            endif
+          enddo
+
+          gridkm = sqrt(2.0)*sqrt(dx(1)*0.001*dx(1)*0.001)
+
+          do i =1, im
+            do k =1, lmk
+               qc_save(i,k) = ccnd(i,k,1)  
+               qi_save(i,k) = ccnd(i,k,2) 
+               qs_save(i,k) = ccnd(i,k,4)
+            enddo
+          enddo
+
+
+          call cal_cldfra3(cldcov,qlyr,ccnd(:,:,1),ccnd(:,:,2),      &
+                           ccnd(:,:,4),plyrpa,tlyr,rho,xland,gridkm, &
+                           ids,ide,jds,jde,kds,kde,                  &
+                           ims,ime,jms,jme,kms,kme,                  &
+                           its,ite,jts,jte,kts,kte)
+
+          !mz* back to micro-only qc  qi,qs
+          do i =1, im
+            do k =1, lmk
+              ccnd(i,k,1) = qc_save(i,k)
+              ccnd(i,k,2) = qi_save(i,k)
+              ccnd(i,k,4) = qs_save(i,k)
+            enddo
+          enddo
+
+        endif ! icloud == 3
+
         if (lextop) then
           do i=1,im
             cldcov(i,lyb) = cldcov(i,lya)
@@ -816,7 +918,7 @@
             cnvw  (i,lyb) = cnvw  (i,lya)
             cnvc  (i,lyb) = cnvc  (i,lya)
           enddo
-          if (Model%effr_in) then
+          if (effr_in) then
             do i=1,im
               effrl(i,lyb) = effrl(i,lya)
               effri(i,lyb) = effri(i,lya)
@@ -826,93 +928,82 @@
           endif
         endif
 
-        if (Model%imp_physics == 99) then
+        if (imp_physics == imp_physics_zhao_carr) then
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
 
-        if (Model%imp_physics == 99 .or. Model%imp_physics == 10) then           ! zhao/moorthi's prognostic cloud scheme
+        if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg) then ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
 
-          if (Model%uni_cld .and. Model%ncld >= 2) then
-            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,           & !  ---  inputs
-                             Grid%xlat, Grid%xlon, Sfcprop%slmsk,dz,delp,   &
-                             IM, LMK, LMP, cldcov,                          &
-                             effrl, effri, effrr, effrs, Model%effr_in,     &
-                             dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
-                             clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
+          if (uni_cld .and. ncld >= 2) then
+            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         & !  ---  inputs
+                             xlat, xlon, slmsk, dz, delp,                 &
+                             IM, LMK, LMP, cldcov,                        &
+                             effrl, effri, effrr, effrs, effr_in,         &
+                             dzb, xlat_d, julian, yearlen,                &
+                             clouds, cldsa, mtopa, mbota, de_lgth, alpha)   !  ---  outputs
           else
-            call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl, rhly,        & !  ---  inputs
-                           ccnd(1:IM,1:LMK,1), Grid%xlat,Grid%xlon,         &
-                           Sfcprop%slmsk, dz, delp, IM, LMK, LMP,           &
-                           Model%uni_cld, Model%lmfshal,                    &
-                           Model%lmfdeep2, cldcov,                          &
-                           effrl, effri, effrr, effrs, Model%effr_in,       &
-                           dzb, Grid%xlat_d, Model%julian, Model%yearlen,   &
-                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)       !  ---  outputs
+            call progcld1 (plyr ,plvl, tlyr, tvly, qlyr, qstl, rhly,      & !  ---  inputs
+                           ccnd(1:IM,1:LMK,1), xlat, xlon, slmsk, dz,     &
+                           delp, IM, LMK, LMP, uni_cld, lmfshal, lmfdeep2,&
+                           cldcov, effrl, effri, effrr, effrs, effr_in,   &
+                           dzb, xlat_d, julian, yearlen,                  &
+                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 98) then      ! zhao/moorthi's prognostic cloud+pdfcld
+        elseif(imp_physics == imp_physics_zhao_carr_pdf) then      ! zhao/moorthi's prognostic cloud+pdfcld
 
-          call progcld3 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,      &    !  ---  inputs
-                         ccnd(1:IM,1:LMK,1),                            &
-                         cnvw, cnvc, Grid%xlat, Grid%xlon,              &
-                         Sfcprop%slmsk, dz, delp, im, lmk, lmp, deltaq, &
-                         Model%sup, Model%kdt, me,                      &
-                         dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
+          call progcld3 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,        &  !  ---  inputs
+                         ccnd(1:IM,1:LMK,1), cnvw, cnvc, xlat, xlon,      &
+                         slmsk, dz, delp, im, lmk, lmp, deltaq, sup, kdt, &
+                         me, dzb, xlat_d, julian, yearlen,                &
                          clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
 
+        elseif (imp_physics == imp_physics_gfdl) then           ! GFDL cloud scheme
 
-        elseif (Model%imp_physics == 11) then           ! GFDL cloud scheme
-
-          if (.not.Model%lgfdlmprad) then
+          if (.not. lgfdlmprad) then
             call progcld4 (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,      &    !  ---  inputs
-                           ccnd(1:IM,1:LMK,1), cnvw, cnvc,                &
-                           Grid%xlat, Grid%xlon, Sfcprop%slmsk,           &
-                           cldcov, dz, delp, im, lmk, lmp,                &
-                           dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
+                           ccnd(1:IM,1:LMK,1), cnvw, cnvc, xlat, xlon,    &
+                           slmsk, cldcov, dz, delp, im, lmk, lmp,         &
+                           dzb, xlat_d, julian, yearlen,                  &
                            clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
           else
 
-            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,         &    !  ---  inputs
-                            Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp, &
-                            IM, LMK, LMP, cldcov,                         &
-                            effrl, effri, effrr, effrs, Model%effr_in,    &
-                            dzb, Grid%xlat_d, Model%julian, Model%yearlen,&
-                            clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
+            call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl, xlat,   &    !  ---  inputs
+                            xlon, slmsk, dz,delp, IM, LMK, LMP, cldcov,   &
+                            effrl, effri, effrr, effrs, effr_in,          &
+                            dzb, xlat_d, julian, yearlen,                 &
+                            clouds, cldsa, mtopa, mbota, de_lgth, alpha)       !  ---  outputs
 !           call progcld4o (plyr, plvl, tlyr, tvly, qlyr, qstl, rhly,       &   !  ---  inputs
-!                           tracer1, Grid%xlat, Grid%xlon, Sfcprop%slmsk,   &
-!                           dz, delp,                                       &
-!                           ntrac-1, Model%ntcw-1,Model%ntiw-1,Model%ntrw-1,&
-!                           Model%ntsw-1,Model%ntgl-1,Model%ntclamt-1,      &
+!                           tracer1, xlat, xlon, slmsk, dz, delp,           &
+!                           ntrac-1, ntcw-1,ntiw-1,ntrw-1,                  &
+!                           ntsw-1,ntgl-1,ntclamt-1,                        &
 !                           im, lmk, lmp,                                   &
-!                           dzb, Grid%xlat_d, Model%julian, Model%yearlen,  &
+!                           dzb, xlat_d, julian, yearlen,                   &
 !                           clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
           endif
 
-        elseif(Model%imp_physics == 6 .or. Model%imp_physics == 15) then
-          if (Model%kdt == 1) then
-            Tbd%phy_f3d(:,:,Model%nleffr) = 10.
-            Tbd%phy_f3d(:,:,Model%nieffr) = 50.
-            Tbd%phy_f3d(:,:,Model%nseffr) = 250.
+        elseif(imp_physics == imp_physics_fer_hires) then
+          if (kdt == 1) then
+            effrl_inout(:,:) = 10.
+            effri_inout(:,:) = 50.
+            effrs_inout(:,:) = 250.
           endif
 
-          call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,        &  !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,    &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                &
-                         ntsw-1,ntgl-1,                                &
-                         im, lmk, lmp, Model%uni_cld,                  &
-                         Model%lmfshal,Model%lmfdeep2,                 &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),           &
-                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),       &
-                         dzb, Grid%xlat_d, Model%julian, Model%yearlen,&
-                         clouds,cldsa,mtopa,mbota, de_lgth, alpha)        !  --- outputs
+          call progcld5 (plyr,plvl,tlyr,tvly,qlyr,qstl,rhly,tracer1,       &  !  --- inputs
+                         xlat,xlon,slmsk,dz,delp,                          &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                    &
+!mz                       ntsw-1,ntgl-1,                                   &
+                         im, lmk, lmp, icloud, uni_cld, lmfshal, lmfdeep2, &
+                         cldcov(:,1:LMK),effrl_inout(:,:),                 &
+                         effri_inout(:,:), effrs_inout(:,:),               &
+                         dzb, xlat_d, julian, yearlen,                     &
+                         clouds,cldsa,mtopa,mbota, de_lgth, alpha)            !  --- outputs
 
+        elseif(imp_physics == imp_physics_thompson) then                              ! Thompson MP
 
-        elseif(Model%imp_physics == Model%imp_physics_thompson) then                              ! Thompson MP
-
-          if(Model%do_mynnedmf .or.                                 & 
-                           Model%imfdeepcnv == Model%imfdeepcnv_gf ) then ! MYNN PBL or GF conv
+          if(do_mynnedmf .or. imfdeepcnv == imfdeepcnv_gf ) then ! MYNN PBL or GF conv
               !-- MYNN PBL or convective GF
               !-- use cloud fractions with SGS clouds
               do k=1,lmk
@@ -924,29 +1015,28 @@
                 ! --- use clduni as with the GFDL microphysics.
                 ! --- make sure that effr_in=.true. in the input.nml!
                 call progclduni (plyr, plvl, tlyr, tvly, ccnd, ncndl,   & !  ---  inputs
-                         Grid%xlat, Grid%xlon, Sfcprop%slmsk, dz,delp,  &
-                         IM, LMK, LMP, clouds(:,1:LMK,1),               &
-                         effrl, effri, effrr, effrs, Model%effr_in ,    &
-                         dzb, Grid%xlat_d, Model%julian, Model%yearlen, &
-                         clouds, cldsa, mtopa, mbota, de_lgth, alpha)        !  ---  outputs
+                         xlat, xlon, slmsk, dz, delp, IM, LMK, LMP,     &
+                         clouds(:,1:LMK,1),                             &
+                         effrl, effri, effrr, effrs, effr_in ,          &
+                         dzb, xlat_d, julian, yearlen,                  &
+                         clouds, cldsa, mtopa, mbota, de_lgth, alpha)     !  ---  outputs
 
           else
             ! MYNN PBL or GF convective are not used
-            call progcld5 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,      & !  --- inputs
-                         Grid%xlat,Grid%xlon,Sfcprop%slmsk,dz,delp,    &
-                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,                &
-                         ntsw-1,ntgl-1,                                &
-                         im, lmk, lmp, Model%uni_cld,                  &
-                         Model%lmfshal,Model%lmfdeep2,                 &
-                         cldcov(:,1:LMK),Tbd%phy_f3d(:,:,1),           &
-                         Tbd%phy_f3d(:,:,2), Tbd%phy_f3d(:,:,3),       &
-                         dzb, Grid%xlat_d, Model%julian, Model%yearlen,&
-                         clouds,cldsa,mtopa,mbota, de_lgth, alpha)        !  --- outputs
+            call progcld6 (plyr,plvl,tlyr,qlyr,qstl,rhly,tracer1,   & !  --- inputs
+                         xlat,xlon,slmsk,dz,delp,                   &
+                         ntrac-1, ntcw-1,ntiw-1,ntrw-1,             &
+                         ntsw-1,ntgl-1,                             &
+                         im, lmk, lmp, uni_cld, lmfshal, lmfdeep2,  &
+                         cldcov(:,1:LMK), effrl_inout(:,:),         &
+                         effri_inout(:,:), effrs_inout(:,:),        &
+                         dzb, xlat_d, julian, yearlen,              &
+                         clouds, cldsa, mtopa ,mbota, de_lgth, alpha) !  --- outputs
           endif ! MYNN PBL or GF
 
         endif                            ! end if_imp_physics
 
-!      endif                                ! end_if_ntcw
+!      endif                             ! end_if_ntcw
 
        do k = 1, LMK
          do i = 1, IM
@@ -968,12 +1058,12 @@
 !  perturbation size
 !  ---  turn vegetation fraction pattern into percentile pattern
       alb1d(:) = 0.
-      if (Model%lndp_type==1) then
-          do k =1,Model%n_var_lndp
-            if (Model%lndp_var_list(k) == 'alb') then
+      if (lndp_type==1) then
+          do k =1,n_var_lndp
+            if (lndp_var_list(k) == 'alb') then
               do i=1,im
-                call cdfnor(Coupling%sfc_wts(i,k),alb1d(i)) 
-                !lndp_alb = Model%lndp_prt_list(k)
+                call cdfnor(sfc_wts(i,k),alb1d(i))
+                !lndp_alb = lndp_prt_list(k)
               enddo
             endif
           enddo
@@ -982,8 +1072,6 @@
 
       end subroutine GFS_rrtmg_pre_run
 
-!> \section arg_table_GFS_rrtmg_pre_finalize Argument Table
-!!
       subroutine GFS_rrtmg_pre_finalize ()
       end subroutine GFS_rrtmg_pre_finalize
 

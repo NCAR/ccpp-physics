@@ -1,13 +1,6 @@
 module rrtmgp_lw_pre
-  use physparam
   use machine, only: &
        kind_phys                   ! Working type
-  use GFS_typedefs, only:        &
-       GFS_control_type,         & !
-       GFS_sfcprop_type,         & ! Surface fields
-       GFS_grid_type,            & ! Grid and interpolation related data
-       GFS_statein_type,         & !
-       GFS_radtend_type            ! Radiation tendencies needed in physics
   use module_radiation_surface,  only: &
        setemis                     ! Routine to compute surface-emissivity
   use mo_gas_optics_rrtmgp,  only: &

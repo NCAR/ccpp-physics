@@ -60,7 +60,7 @@
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -69,7 +69,7 @@
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -78,7 +78,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure level
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -87,7 +87,7 @@
   standard_name = RRTMGP_lw_flux_profile_upward_allsky
   long_name = RRTMGP upward longwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -96,7 +96,7 @@
   standard_name = RRTMGP_lw_flux_profile_downward_allsky
   long_name = RRTMGP downward longwave all-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -105,7 +105,7 @@
   standard_name = RRTMGP_lw_flux_profile_upward_clrsky
   long_name = RRTMGP upward longwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -114,7 +114,7 @@
   standard_name = RRTMGP_lw_flux_profile_downward_clrsky
   long_name = RRTMGP downward longwave clr-sky flux profile
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -132,7 +132,7 @@
   standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
   long_name = vertical integrated optical depth for various aerosol species
   units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
+  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
   type = real
   kind = kind_phys
   intent = in
@@ -141,7 +141,7 @@
   standard_name = cloud_area_fraction_for_radiation
   long_name = fraction of clouds for low, middle, high, total and BL
   units = frac
-  dimensions = (horizontal_dimension,5)
+  dimensions = (horizontal_loop_extent,5)
   type = real
   kind = kind_phys
   intent = in
@@ -150,7 +150,7 @@
   standard_name = model_layer_number_at_cloud_top
   long_name = vertical indices for low, middle and high cloud tops
   units = index
-  dimensions = (horizontal_dimension,3)
+  dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = in
   optional = F
@@ -158,7 +158,7 @@
   standard_name = model_layer_number_at_cloud_base
   long_name = vertical indices for low, middle and high cloud bases
   units = index
-  dimensions = (horizontal_dimension,3)
+  dimensions = (horizontal_loop_extent,3)
   type = integer
   intent = in
   optional = F
@@ -166,7 +166,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -175,16 +175,25 @@
   standard_name = RRTMGP_cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[fluxr]
+  standard_name = cumulative_radiation_diagnostic
+  long_name = time-accumulated 2D radiation-related diagnostic fields
+  units = various
+  dimensions = (horizontal_loop_extent,number_of_radiation_diagnostic_variables)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [sfcdlw]
   standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
   long_name = total sky sfc downward lw flux
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out  
@@ -193,7 +202,7 @@
   standard_name = lw_fluxes_sfc
   long_name = lw radiation fluxes at sfc
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = sfcflw_type
   intent = out  
   optional = F
@@ -201,7 +210,7 @@
   standard_name = surface_midlayer_air_temperature_in_longwave_radiation
   long_name = surface air temp during lw calculation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out  
@@ -210,7 +219,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out  
@@ -219,7 +228,7 @@
   standard_name = lw_fluxes_top_atmosphere
   long_name = lw radiation fluxes at top
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = topflw_type
   intent = out  
   optional = F      
@@ -227,7 +236,7 @@
   standard_name = RRTMGP_lw_fluxes
   long_name = lw fluxes total sky / csk and up / down at levels
   units = W m-2
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = proflw_type
   intent = out
   optional = T
@@ -235,7 +244,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
   long_name = longwave clear sky heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
   intent = out

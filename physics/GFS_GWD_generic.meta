@@ -35,7 +35,7 @@
   standard_name = statistical_measures_of_subgrid_orography
   long_name = array of statistical measures of subgrid orography
   units = various
-  dimensions = (horizontal_dimension,number_of_statistical_measures_of_subgrid_orography)
+  dimensions = (horizontal_loop_extent,number_of_statistical_measures_of_subgrid_orography)
   type = real
   kind = kind_phys
   intent = in
@@ -44,7 +44,7 @@
   standard_name = convexity_of_subgrid_orography
   long_name = convexity of subgrid orography
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -53,7 +53,7 @@
   standard_name = asymmetry_of_subgrid_orography
   long_name = asymmetry of subgrid orography
   units = none
-  dimensions = (horizontal_dimension,4)
+  dimensions = (horizontal_loop_extent,4)
   type = real
   kind = kind_phys
   intent = out
@@ -62,7 +62,7 @@
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height
   long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height
   units = frac
-  dimensions = (horizontal_dimension,4)
+  dimensions = (horizontal_loop_extent,4)
   type = real
   kind = kind_phys
   intent = out
@@ -71,7 +71,7 @@
   standard_name = angle_from_east_of_maximum_subgrid_orographic_variations
   long_name = angle with_respect to east of maximum subgrid orographic variations
   units = degree
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -80,7 +80,7 @@
   standard_name = standard_deviation_of_subgrid_orography_small_scale
   long_name = standard deviation of subgrid orography small scale
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -89,7 +89,7 @@
   standard_name = convexity_of_subgrid_orography_small_scale
   long_name = convexity of subgrid orography small scale
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -98,7 +98,7 @@
   standard_name = asymmetry_of_subgrid_orography_small_scale
   long_name = asymmetry of subgrid orography small scale
   units = none
-  dimensions = (horizontal_dimension,4)
+  dimensions = (horizontal_loop_extent,4)
   type = real
   kind = kind_phys
   intent = out
@@ -107,7 +107,7 @@
   standard_name = fraction_of_grid_box_with_subgrid_orography_higher_than_critical_height_small_scale
   long_name = horizontal fraction of grid box covered by subgrid orography higher than critical height small scale
   units = frac
-  dimensions = (horizontal_dimension,4)
+  dimensions = (horizontal_loop_extent,4)
   type = real
   kind = kind_phys
   intent = out
@@ -116,7 +116,7 @@
   standard_name = slope_of_subgrid_orography
   long_name = slope of subgrid orography
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -125,7 +125,7 @@
   standard_name = anisotropy_of_subgrid_orography
   long_name = anisotropy of subgrid orography
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -134,7 +134,7 @@
   standard_name = maximum_subgrid_orography
   long_name = maximum of subgrid orography
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -159,7 +159,7 @@
   standard_name = tendency_of_x_wind_due_to_model_physics
   long_name = zonal wind tendency due to model physics
   units = m s-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -168,7 +168,7 @@
   standard_name = tendency_of_y_wind_due_to_model_physics
   long_name = meridional wind tendency due to model physics
   units = m s-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -177,7 +177,7 @@
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = updated tendency of the temperature
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -186,7 +186,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in x wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -195,7 +195,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in y wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -204,7 +204,7 @@
   standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in temperature due to orographic gravity wave drag
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -283,7 +283,7 @@
   standard_name = instantaneous_x_stress_due_to_gravity_wave_drag
   long_name = zonal surface stress due to orographic gravity wave drag
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -292,7 +292,7 @@
   standard_name = instantaneous_y_stress_due_to_gravity_wave_drag
   long_name = meridional surface stress due to orographic gravity wave drag
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -301,7 +301,7 @@
   standard_name = tendency_of_x_wind_due_to_model_physics
   long_name = zonal wind tendency due to model physics
   units = m s-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -310,7 +310,7 @@
   standard_name = tendency_of_y_wind_due_to_model_physics
   long_name = meridional wind tendency due to model physics
   units = m s-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -319,7 +319,7 @@
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = air temperature tendency due to model physics
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -328,7 +328,7 @@
   standard_name = time_integral_of_x_stress_due_to_gravity_wave_drag
   long_name = integral over time of zonal stress due to gravity wave drag
   units = Pa s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -337,7 +337,7 @@
   standard_name = time_integral_of_y_stress_due_to_gravity_wave_drag
   long_name = integral over time of meridional stress due to gravity wave drag
   units = Pa s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -346,7 +346,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in zonal wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -355,7 +355,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in meridional wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -364,7 +364,7 @@
   standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in temperature due to orographic gravity wave drag
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
