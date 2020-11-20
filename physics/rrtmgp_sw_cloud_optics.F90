@@ -3,7 +3,6 @@ module rrtmgp_sw_cloud_optics
   use mo_rte_kind,              only: wl
   use mo_gas_optics_rrtmgp,     only: ty_gas_optics_rrtmgp
   use mo_cloud_optics,          only: ty_cloud_optics
-  use physparam,                only: isubcsw, iovrsw
   use mo_optical_props,         only: ty_optical_props_2str
   use mo_rrtmg_sw_cloud_optics, only: rrtmg_sw_cloud_optics   
   use rrtmgp_aux,               only: check_error_msg
@@ -287,10 +286,10 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_optics_run
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
-  subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, doGP_cldoptics_PADE,        &
-       doGP_cldoptics_LUT, nCol, nLev, nDay, idxday, nrghice, cld_frac, cld_lwp, cld_reliq, &
-       cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain, precip_frac,           &
-       sw_cloud_props, sw_gas_props, sw_optical_props_cloudsByBand,                         &
+  subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, icliq_sw, icice_sw,         &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nCol, nLev, nDay, idxday, nrghice, cld_frac,&
+       cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
+       precip_frac, sw_cloud_props, sw_gas_props, sw_optical_props_cloudsByBand,            &
        sw_optical_props_precipByBand, cldtausw, errmsg, errflg)
     
     ! Inputs
@@ -303,7 +302,9 @@ contains
          nCol,                & ! Number of horizontal gridpoints
          nLev,                & ! Number of vertical levels
          nday,                & ! Number of daylit points.
-         nrghice                ! Number of ice-roughness categories
+         nrghice,             & ! Number of ice-roughness categories
+         icliq_sw,            & ! Choice of treatment of liquid cloud optical properties (RRTMG legacy)
+         icice_sw               ! Choice of treatment of ice cloud optical properties (RRTMG legacy) 
     integer,intent(in),dimension(ncol) :: &
          idxday                 ! Indices for daylit points.
     real(kind_phys), dimension(ncol,nLev),intent(in) :: &
@@ -417,7 +418,7 @@ contains
                   cld_iwp(idxday(1:nday),:), cld_reice(idxday(1:nday),:),           &
                   cld_rwp(idxday(1:nday),:), cld_rerain(idxday(1:nday),:),          &
                   cld_swp(idxday(1:nday),:), cld_resnow(idxday(1:nday),:),          &
-                  cld_frac(idxday(1:nday),:),                                       &
+                  cld_frac(idxday(1:nday),:), icliq_sw, icice_sw,                   &
                   tau_cld,    ssa_cld,    asy_cld,                                  &
                   tau_precip, ssa_precip, asy_precip)
           
