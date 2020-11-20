@@ -64,7 +64,7 @@
      &   prsi,del,prsl,prslk,phii,phil,delt,dspheat,                    &
      &   dusfc,dvsfc,dtsfc,dqsfc,hpbl,hgamt,hgamq,dkt,dku,mflx_pbl,     &
      &   kinver,xkzm_m,xkzm_h,xkzm_s,lprnt,ipr,                         &
-     &   xkzminv,moninq_fac,hurr_pbl,islimsk,var_ric,                   &
+     &   xkzminv,moninq_fac,hurr_pbl,pbl_mass_flux,islimsk,var_ric,     &
      &   coef_ric_l,coef_ric_s,lssav,ldiag3d,qdiag3d,ntoz,              &
      &   du3dt_PBL,dv3dt_PBL,dt3dt_PBL,dq3dt_PBL,do3dt_PBL,             &
      &   flag_for_pbl_generic_tend,errmsg,errflg)
@@ -81,7 +81,8 @@
 !
 !     arguments
 !
-      logical, intent(in) :: lprnt, hurr_pbl, lssav, ldiag3d, qdiag3d
+      logical, intent(in) :: lprnt, hurr_pbl, pbl_mass_flux, lssav,     &
+     &                       ldiag3d, qdiag3d
       logical, intent(in) :: flag_for_pbl_generic_tend
       integer, intent(in) :: ipr, islimsk(im)
       integer, intent(in) :: im, km, ntrac, ntcw, kinver(im), ntoz
@@ -1085,18 +1086,21 @@ c
       enddo
       enddo
 !>  For details of the mfpbl subroutine, step into its documentation ::mfpbl
-      call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
+      if (pbl_mass_flux) then
+        call mfpbl(im,im,km,ntrac,dt2,pcnvflg,
      &       zl,zi,thvx,q1,t1,u1,v1,hpbl,kpbl,
      &       sflux,ustar,wstar,xmf,tcko,qcko,ucko,vcko)
-      do k = 1, km
-        do i = 1, im
-          !convert mass flux into kg m-2 s-1
-          if (pcnvflg(i)) then
-            rho = prsl(i,k)/(con_rd*t1(i,k)*(1.+fv*max(q1(i,k,1),qmin)))
-            mflx_pbl(i,k) = rho*xmf(i,k)
-          end if
+        do k = 1, km
+          do i = 1, im
+            !convert mass flux into kg m-2 s-1
+            if (pcnvflg(i)) then
+              rho = prsl(i,k)/
+     &              (con_rd*t1(i,k)*(1.+fv*max(q1(i,k,1),qmin)))
+              mflx_pbl(i,k) = rho*xmf(i,k)
+            end if
+          enddo
         enddo
-      enddo
+      end if
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !  compute diffusion coefficients for cloud-top driven diffusion

@@ -65,8 +65,9 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
-     &     dkt,dku,mflx_pbl,ele,elm,buop,shrp,diss,errmsg,errflg)
+     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,pbl_mass_flux,   &
+     &     ldiag3d,qdiag3d,dkt,dku,mflx_pbl,ele,elm,buop,shrp,diss,     &
+     &     errmsg,errflg)
 !
       use machine  , only : kind_phys
       use funcphys , only : fpvs
@@ -78,7 +79,7 @@
       integer, intent(in)  :: kinver(im)
       integer, intent(in)  :: islimsk(im)
       integer, intent(out) :: kpbl(im)
-      logical, intent(in)  :: gen_tend,ldiag3d,qdiag3d
+      logical, intent(in)  :: gen_tend,pbl_mass_flux,ldiag3d,qdiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -795,31 +796,41 @@
       enddo
 !>  - Call mfpbltq(), which is an EDMF parameterization (Siebesma et al.(2007) \cite Siebesma_2007)
 !!    to take into account nonlocal transport by large eddies. For details of the mfpbltq subroutine, step into its documentation ::mfpbltq
-      call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
+      if (pbl_mass_flux) then
+        call mfpbltq(im,im,km,kmpbl,ntcw,ntrac1,dt2,
      &    pcnvflg,zl,zm,q1,t1,u1,v1,plyr,pix,thlx,thvx,
      &    gdx,hpbl,kpbl,vpert,buou,xmf,
      &    tcko,qcko,ucko,vcko,xlamue,bl_upfr)
-!>  - Call mfscuq(), which is a new mass-flux parameterization for 
-!!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
-      call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
+  !>  - Call mfscuq(), which is a new mass-flux parameterization for 
+  !!    stratocumulus-top-induced turbulence mixing. For details of the mfscuq subroutine, step into its documentation ::mfscuq
+        call mfscuq(im,im,km,kmscu,ntcw,ntrac1,dt2,
      &    scuflg,zl,zm,q1,t1,u1,v1,plyr,pix,
      &    thlx,thvx,thlvx,gdx,thetae,
      &    krad,mrad,radmin,buod,xmfd,
      &    tcdo,qcdo,ucdo,vcdo,xlamde,bl_dnfr)
-      do k = 1, km
-        do i = 1, im
-          !convert mass flux into kg m-2 s-1
-          if (pcnvflg(i) .or. scuflg(i)) then
-            rho = prsl(i,k)/(rd*t1(i,k)*(1.+fv*max(q1(i,k,1),qmin)))
-            if (pcnvflg(i)) then
-              mflx_pbl(i,k) = rho*xmf(i,k)
+        do k = 1, km
+          do i = 1, im
+            !convert mass flux into kg m-2 s-1
+            if (pcnvflg(i) .or. scuflg(i)) then
+              rho = prsl(i,k)/(rd*t1(i,k)*(1.+fv*max(q1(i,k,1),qmin)))
+              if (pcnvflg(i)) then
+                mflx_pbl(i,k) = rho*xmf(i,k)
+              end if
+              if (scuflg(i)) then
+                mflx_pbl(i,k) = mflx_pbl(i,k) + rho*xmfd(i,k)
+              end if
             end if
-            if (scuflg(i)) then
-              mflx_pbl(i,k) = mflx_pbl(i,k) + rho*xmfd(i,k)
-            end if
-          end if
+          enddo
         enddo
-      enddo
+      else
+        !initialize variables that had required mfpbltq or mfscuq to be initialized
+        do k=1,km-1
+          do i=1,im
+            xlamue(i,k) = 0.0
+            xlamde(i,k) = 0.0
+          end do
+        end do
+      end if
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
