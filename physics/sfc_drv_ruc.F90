@@ -777,13 +777,13 @@ module lsm_ruc
           write (0,*)'MODIS landuse is not available'
         endif
 
-   if (land(i)) then ! at least some land in the grid cell
-
         if(rdlai2d) then
           xlai(i,j) = laixy(i)
         else
           xlai(i,j) = 0.
         endif
+
+   if (land(i)) then ! at least some land in the grid cell
 
 !>  -   4. history (state) variables (h):
 !!\n \a cmc        - canopy moisture content (\f$mm\f$)
@@ -825,13 +825,13 @@ module lsm_ruc
 
         cmc(i,j) = canopy(i)            !  [mm] 
         soilt_lnd(i,j) = tsurf_lnd(i)            ! clu_q2m_iter
-        tsnav_lnd(i,j) = 0.5*(soilt_lnd(i,j) + soilt1_lnd(i,j)) - 273.15
         ! sanity check for snow temperature tsnow
         if (tsnow_lnd(i) > 0. .and. tsnow_lnd(i) < 273.15) then
           soilt1_lnd(i,j) = tsnow_lnd(i)
         else
           soilt1_lnd(i,j) = tsurf_lnd(i)
         endif
+        tsnav_lnd(i,j) = 0.5*(soilt_lnd(i,j) + soilt1_lnd(i,j)) - 273.15
         do k = 1, lsoil_ruc
           smsoil  (i,k,j) = smois(i,k)
           slsoil  (i,k,j) = sh2o(i,k)
@@ -1113,13 +1113,15 @@ module lsm_ruc
         qsg_ice(i,j)    = rslf(prsl1(i),tsurf_ice(i))
         qcg_ice(i,j)    = sfcqc_ice(i)
         sfcems_ice(i,j) = semis_ice(i)
+
+        cmc(i,j) = canopy(i)                     ! [mm]
         soilt_ice(i,j) = tsurf_ice(i)            ! clu_q2m_iter
-        tsnav_ice(i,j) = 0.5*(soilt_ice(i,j) + soilt1_ice(i,j)) - 273.15
         if (tsnow_ice(i) > 0. .and. tsnow_ice(i) < 273.15) then
           soilt1_ice(i,j) = tsnow_ice(i)
         else
           soilt1_ice(i,j) = tsurf_ice(i)
         endif
+        tsnav_ice(i,j) = 0.5*(soilt_ice(i,j) + soilt1_ice(i,j)) - 273.15
         do k = 1, lsoil_ruc
           stsice  (i,k,j) = tsice(i,k)
           smsoil  (i,k,j) = 1.
@@ -1132,7 +1134,7 @@ module lsm_ruc
 
         chs_ice (i,j)   = ch_ice(i) * wind(i) ! compute conductance 
         flhc_ice(i,j)   = chs_ice(i,j) * rho(i) * con_cp ! * (1. + 0.84*q2(i,1,j))
-        flqc_ice(i,j)   = chs_ice(i,j) * rho(i) * wet(i,j)
+        flqc_ice(i,j)   = chs_ice(i,j) * rho(i) * wet_ice(i,j)
         ! for output
         cmm_ice(i) = cm_ice (i) * wind(i)
         chh_ice(i) = chs_ice(i,j) * rho(i)

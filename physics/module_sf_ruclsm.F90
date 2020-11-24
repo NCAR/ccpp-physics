@@ -506,7 +506,14 @@ CONTAINS
            soilice(k)=0.
            soiliqw(k)=0.
         enddo
-     endif ! init=.true., iter=1
+     else ! .not. init==true.
+       DO J=jts,jte
+         DO i=its,ite
+           SFCRUNOFF(i,j) = 0.
+           UDRUNOFF(i,j) = 0.
+         ENDDO
+       ENDDO
+     endif ! init==.true.
 
 !-----------------------------------------------------------------
 
@@ -6518,7 +6525,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
    REAL    ::  F1,T1,T2,RN
    INTEGER ::  I,I1
-     
+
        I=(TN-1.7315E2)/.05+1
        T1=173.1+FLOAT(I)*.05
        F1=T1+D1*TT(I)-D2
@@ -6529,7 +6536,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        T1=173.1+FLOAT(I)*.05
        F1=T1+D1*TT(I)-D2
        RN=F1/(.05+D1*(TT(I+1)-TT(I)))
-       I=I-INT(RN)                      
+       I=I-INT(RN)
        IF(I.GT.5000.OR.I.LT.1) GOTO 1
        IF(I1.NE.I) GOTO 10
        TS=T1-.05*RN

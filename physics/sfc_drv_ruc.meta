@@ -1267,8 +1267,8 @@
   intent = in
   optional = F
 [ch_ice]
-  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air
-  long_name = surface exchange coeff heat & moisture
+  standard_name = surface_drag_coefficient_for_heat_and_moisture_in_air_over_ice
+  long_name = surface exchange coeff heat & moisture over ice
   units = none
   dimensions = (horizontal_dimension)
   type = real
