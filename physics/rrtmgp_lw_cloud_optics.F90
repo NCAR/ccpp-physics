@@ -347,14 +347,14 @@ contains
     call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_cloudsByBand%alloc_2str(&
          ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
     lw_optical_props_cloudsByBand%tau(:,:,:) = 0._kind_phys    
-    lw_optical_props_cloudsByBand%ssa(:,:,:) = 0._kind_phys    
+    lw_optical_props_cloudsByBand%ssa(:,:,:) = 1._kind_phys    
     lw_optical_props_cloudsByBand%g(:,:,:)   = 0._kind_phys    
        
     ! Precipitation optics [nCol,nLev,nBands]
     call check_error_msg('rrtmgp_lw_cloud_optics_run',lw_optical_props_precipByBand%alloc_2str(&
         ncol, nLev, lw_gas_props%get_band_lims_wavenumber()))
     lw_optical_props_precipByBand%tau(:,:,:) = 0._kind_phys    
-    lw_optical_props_precipByBand%ssa(:,:,:) = 0._kind_phys    
+    lw_optical_props_precipByBand%ssa(:,:,:) = 1._kind_phys    
     lw_optical_props_precipByBand%g(:,:,:)   = 0._kind_phys  
 
     ! Compute cloud-optics for RTE.
@@ -393,9 +393,9 @@ contains
           call rrtmg_lw_cloud_optics(ncol, nLev, lw_gas_props%get_nband(), cld_lwp,     &
                cld_reliq, cld_iwp, cld_reice, cld_rwp, cld_rerain, cld_swp, cld_resnow, &
                cld_frac, icliq_lw, icice_lw, tau_cld, tau_precip)
-       endif
-       lw_optical_props_cloudsByBand%tau = tau_cld
-       lw_optical_props_precipByBand%tau = tau_precip
+          lw_optical_props_cloudsByBand%tau = tau_cld
+          lw_optical_props_precipByBand%tau = tau_precip
+        endif
     endif
     
     ! All-sky LW optical depth ~10microns (DJS asks: Same as SW, move to cloud-diagnostics?)

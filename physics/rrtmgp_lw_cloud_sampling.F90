@@ -12,7 +12,7 @@ module rrtmgp_lw_cloud_sampling
 contains
 
   ! #########################################################################################
-  ! SUBROUTINE mcica_init
+  ! SUBROUTINE rrtmgp_lw_cloud_sampling_init()
   ! #########################################################################################
 !! \section arg_table_rrtmgp_lw_cloud_sampling_init
 !! \htmlinclude rrtmgp_lw_cloud_sampling_init.html
@@ -97,8 +97,8 @@ contains
     integer,dimension(ncol) :: ipseed_lw
     type(random_stat) :: rng_stat
     real(kind_phys), dimension(lw_gas_props%get_ngpt(),nLev,ncol) :: rng3D,rng3D2
-    real(kind_phys), dimension(lw_gas_props%get_ngpt()) :: rng1D
     real(kind_phys), dimension(lw_gas_props%get_ngpt()*nLev) :: rng2D
+    real(kind_phys), dimension(lw_gas_props%get_ngpt()) :: rng1D
     logical, dimension(ncol,nLev,lw_gas_props%get_ngpt()) :: cldfracMCICA,precipfracSAMP
 
     ! Initialize CCPP error handling variables
@@ -114,6 +114,8 @@ contains
     ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
     call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
          lw_optical_props_clouds%alloc_2str(nCol, nLev, lw_gas_props))
+    lw_optical_props_clouds%tau(:,:,:) = 0._kind_phys
+    lw_optical_props_clouds%ssa(:,:,:) = 0._kind_phys
     
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed
@@ -182,6 +184,8 @@ contains
     ! Allocate space RRTMGP DDTs [nCol,nLev,nGpt]
     call check_error_msg('rrtmgp_lw_cloud_sampling_run',&
          lw_optical_props_precip%alloc_2str(nCol, nLev, lw_gas_props))
+    lw_optical_props_precip%tau(:,:,:) = 0._kind_phys
+    lw_optical_props_precip%ssa(:,:,:) = 0._kind_phys
     
     ! Change random number seed value for each radiation invocation (isubc_lw =1 or 2).
     if(isubc_lw == 1) then      ! advance prescribed permutation seed

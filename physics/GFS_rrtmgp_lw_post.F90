@@ -65,12 +65,12 @@ contains
     real(kind=kind_phys), dimension(:,:), intent(inout) :: fluxr
     
     ! Outputs (mandatory)
-	real(kind_phys), dimension(nCol), intent(out) :: &
+	real(kind_phys), dimension(nCol), intent(inout) :: &
 	     sfcdlw,            & ! Total sky sfc downward lw flux (W/m2)
 	     tsflw                ! surface air temp during lw calculation (K)
-	type(sfcflw_type), dimension(nCol), intent(out) :: &
+	type(sfcflw_type), dimension(nCol), intent(inout) :: &
 	     sfcflw               ! LW radiation fluxes at sfc    
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          htrlw                ! LW all-sky heating rate
     type(topflw_type), dimension(nCol), intent(out) :: &
          topflw               ! lw_fluxes_top_atmosphere
@@ -80,13 +80,13 @@ contains
          errflg
                   
     ! Outputs (optional)
-    type(proflw_type), dimension(nCol, nLev+1), optional, intent(out) :: &
+    type(proflw_type), dimension(nCol, nLev+1), optional, intent(inout) :: &
          flxprf_lw            ! 2D radiative fluxes, components:
                               ! upfxc - total sky upward flux (W/m2)
                               ! dnfxc - total sky dnward flux (W/m2)
                               ! upfx0 - clear sky upward flux (W/m2)
                               ! dnfx0 - clear sky dnward flux (W/m2)
-    real(kind_phys),dimension(nCol, nLev),intent(out),optional  :: &
+    real(kind_phys),dimension(nCol, nLev),intent(inout),optional  :: &
          htrlwc               ! Longwave clear-sky heating-rate (K/sec)
          
     ! Local variables

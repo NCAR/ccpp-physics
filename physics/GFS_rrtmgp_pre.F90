@@ -145,7 +145,7 @@ contains
 !!
   subroutine GFS_rrtmgp_pre_run(nCol, nLev, nGases, nTracers, i_o3, lsswr, lslwr, fhswr,    &
        fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, active_gases_array, con_eps,&
-       con_epsm1, con_fvirt, con_epsqs,                                                     &
+       con_epsm1, con_fvirt, con_epsqs, lw_gas_props,                                       &
        raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,&
        gas_concentrations,  errmsg, errflg)
     
@@ -181,6 +181,8 @@ contains
          prsi                 ! Pressure at model-interfaces (Pa)
     real(kind_phys), dimension(nCol,nLev,nTracers) :: & 
          qgrs                 ! Tracer concentrations (kg/kg)
+    type(ty_gas_optics_rrtmgp),intent(in) :: &
+         lw_gas_props            ! RRTMGP DDT:         
 
     ! Outputs
     character(len=*), intent(out) :: &
@@ -198,7 +200,7 @@ contains
          q_lay,             & ! Water-vapor mixing ratio (kg/kg)
          tv_lay,            & ! Virtual temperature at model-layers 
          relhum,            & ! Relative-humidity at model-layers   
-	 qs_lay               ! Saturation vapor pressure at model-layers
+	     qs_lay               ! Saturation vapor pressure at model-layers
     real(kind_phys), dimension(nCol,nLev+1), intent(out) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
@@ -212,7 +214,7 @@ contains
     logical :: top_at_1
     real(kind_phys),dimension(nCol,nLev) :: vmr_o3, vmr_h2o
     real(kind_phys) :: es, tem1, tem2
-    real(kind_phys), dimension(nCol,nLev) :: o3_lay
+    real(kind_phys), dimension(nCol,nLev) :: o3_lay, tem2da, tem2db
     real(kind_phys), dimension(nCol,nLev, NF_VGAS) :: gas_vmr
 
     ! Initialize CCPP error handling variables
@@ -250,14 +252,44 @@ contains
     ! Temperature at layer-center
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
-    ! Temperature at layer-interfaces
+    ! Temperature at layer-interfaces          
     if (top_at_1) then
+       tem2da(1:nCol,2:iSFC) = log(p_lay(1:nCol,2:iSFC))
+       tem2db(1:nCol,2:iSFC) = log(p_lev(1:nCol,2:iSFC)) 
+       do iCol = 1, nCol
+           tem2da(iCol,1)    = log(p_lay(iCol,1) )
+           tem2db(iCol,1)    = log(max(lw_gas_props%get_press_min(), p_lev(iCol,1)) )
+           tem2db(iCol,iSFC) = log(p_lev(iCol,iSFC) )    
+       enddo
+       !
        t_lev(1:NCOL,1)      = t_lay(1:NCOL,iTOA)
-       t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
+       do iLay = 2, iSFC
+          do iCol = 1, nCol
+            t_lev(iCol,iLay) = t_lay(iCol,iLay) + (t_lay(iCol,iLay-1) - t_lay(iCol,iLay))&
+                     * (tem2db(iCol,iLay)   - tem2da(iCol,iLay))                   &
+                     / (tem2da(iCol,iLay-1) - tem2da(iCol,iLay))
+           enddo
+        enddo       
+       !t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
        t_lev(1:NCOL,iSFC+1) = tsfc(1:NCOL)
     else
+       tem2da(1:nCol,2:iTOA) = log(p_lay(1:nCol,2:iTOA))
+       tem2db(1:nCol,2:iTOA) = log(p_lev(1:nCol,2:iTOA))     
+       do iCol = 1, nCol
+           tem2da(iCol,1)    = log(p_lay(iCol,1))
+           tem2db(iCol,1)    = log(p_lev(iCol,1))    
+           tem2db(iCol,iTOA) = log(max(lw_gas_props%get_press_min(), p_lev(iCol,iTOA)) )
+       enddo    
+       !
        t_lev(1:NCOL,1)      = tsfc(1:NCOL)
-       t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
+       do iLay = 1, iTOA-1
+          do iCol = 1, nCol
+            t_lev(iCol,iLay+1) = t_lay(iCol,iLay) + (t_lay(iCol,iLay+1) - t_lay(iCol,iLay))&
+                     * (tem2db(iCol,iLay+1) - tem2da(iCol,iLay))                   &
+                     / (tem2da(iCol,iLay+1) - tem2da(iCol,iLay))
+           enddo
+        enddo 
+	   !t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
        t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
     endif
 
@@ -321,7 +353,7 @@ contains
     ! Setup surface ground temperature and ground/air skin temperature if required.
     ! #######################################################################################
     tsfg(1:NCOL) = tsfc(1:NCOL)
-    tsfa(1:NCOL) = tsfc(1:NCOL)
+    tsfa(1:NCOL) =  t_lay(1:NCOL,iSFC)!tsfc(1:NCOL)
 
   end subroutine GFS_rrtmgp_pre_run
   
