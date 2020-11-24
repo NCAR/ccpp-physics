@@ -1,70 +1,31 @@
-[ccpp-arg-table]
-  name = GFS_rrtmg_post_init
+[ccpp-table-properties]
+  name = GFS_rrtmg_post
   type = scheme
+  dependencies = iounitdef.f,machine.F,radiation_aerosols.f,radlw_param.f,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]
   name = GFS_rrtmg_post_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = Fortran DDT containing FV3-GFS model control parameters
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[Grid]
-  standard_name = GFS_grid_type_instance
-  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
-  units = DDT
-  dimensions = ()
-  type = GFS_grid_type
-  intent = in
-  optional = F
-[Diag]
-  standard_name = GFS_diag_type_instance
-  long_name = Fortran DDT containing FV3-GFS diagnotics data
-  units = DDT
-  dimensions = ()
-  type = GFS_diag_type
-  intent = inout
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = Fortran DDT containing FV3-GFS radiation tendencies
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = in
-  optional = F
-[Statein]
-  standard_name = GFS_statein_type_instance
-  long_name = Fortran DDT containing FV3-GFS prognostic state data in from dycore
-  units = DDT
-  dimensions = ()
-  type = GFS_statein_type
-  intent = in
-  optional = F
-[Coupling]
-  standard_name = GFS_coupling_type_instance
-  long_name = Fortran DDT containing FV3-GFS fields to/from coupling with other components
-  units = DDT
-  dimensions = ()
-  type = GFS_coupling_type
-  intent = inout
-  optional = F
-[scmpsw]
-  standard_name = components_of_surface_downward_shortwave_fluxes
-  long_name = derived type for special components of surface downward shortwave fluxes
-  units = W m-2
-  dimensions = (horizontal_dimension)
-  type = cmpfsw_type
-  intent = in
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[km]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[kmp1]
+  standard_name = vertical_dimension_plus_one
+  long_name = number of vertical levels plus one
   units = count
   dimensions = ()
   type = integer
@@ -110,74 +71,20 @@
   type = integer
   intent = in
   optional = F
-[raddt]
-  standard_name = time_step_for_radiation
-  long_name = radiation time step
-  units = s
+[nspc1]
+  standard_name = number_of_species_for_aerosol_optical_depth
+  long_name = number of species for output aerosol optical depth plus total
+  units = count
   dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[aerodp]
-  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
-  long_name = vertical integrated optical depth for various aerosol species
-  units = none
-  dimensions = (horizontal_dimension,number_of_species_for_aerosol_optical_depth)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[cldsa]
-  standard_name = cloud_area_fraction_for_radiation
-  long_name = fraction of clouds for low, middle, high, total and BL
-  units = frac
-  dimensions = (horizontal_dimension,5)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[mtopa]
-  standard_name = model_layer_number_at_cloud_top
-  long_name = vertical indices for low, middle and high cloud tops
-  units = index
-  dimensions = (horizontal_dimension,3)
   type = integer
   intent = in
   optional = F
-[mbota]
-  standard_name = model_layer_number_at_cloud_base
-  long_name = vertical indices for low, middle and high cloud bases
-  units = index
-  dimensions = (horizontal_dimension,3)
+[nfxr]
+  standard_name = number_of_radiation_diagnostic_variables
+  long_name = number of variables stored in the fluxr array
+  units = count
+  dimensions = ()
   type = integer
-  intent = in
-  optional = F
-[clouds1]
-  standard_name = total_cloud_fraction
-  long_name = layer total cloud fraction
-  units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[cldtaulw]
-  standard_name = cloud_optical_depth_layers_at_10mu_band
-  long_name = approx 10mu band layer cloud optical depth
-  units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[cldtausw]
-  standard_name = cloud_optical_depth_layers_at_0p55mu_band
-  long_name = approx .55mu band layer cloud optical depth
-  units = none
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
-  type = real
-  kind = kind_phys
   intent = in
   optional = F
 [nday]
@@ -187,6 +94,203 @@
   dimensions = ()
   type = integer
   intent = in
+  optional = F
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lslwr]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[fhlwr]
+  standard_name = frequency_for_longwave_radiation
+  long_name = frequency for longwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[fhswr]
+  standard_name = frequency_for_shortwave_radiation
+  long_name = frequency for shortwave radiation
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[raddt]
+  standard_name = time_step_for_radiation
+  long_name = radiation time step
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[coszen]
+  standard_name = cosine_of_zenith_angle
+  long_name = mean cos of zenith angle over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[coszdg]
+  standard_name = daytime_mean_cosz_over_rad_call_period
+  long_name = daytime mean cosz over rad call period
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[prsi]
+  standard_name = air_pressure_at_interface
+  long_name = air pressure at model layer interfaces
+  units = Pa
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[tgrs]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[aerodp]
+  standard_name = atmosphere_optical_thickness_due_to_ambient_aerosol_particles
+  long_name = vertical integrated optical depth for various aerosol species
+  units = none
+  dimensions = (horizontal_loop_extent,number_of_species_for_aerosol_optical_depth)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cldsa]
+  standard_name = cloud_area_fraction_for_radiation
+  long_name = fraction of clouds for low, middle, high, total and BL
+  units = frac
+  dimensions = (horizontal_loop_extent,5)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[mtopa]
+  standard_name = model_layer_number_at_cloud_top
+  long_name = vertical indices for low, middle and high cloud tops
+  units = index
+  dimensions = (horizontal_loop_extent,3)
+  type = integer
+  intent = in
+  optional = F
+[mbota]
+  standard_name = model_layer_number_at_cloud_base
+  long_name = vertical indices for low, middle and high cloud bases
+  units = index
+  dimensions = (horizontal_loop_extent,3)
+  type = integer
+  intent = in
+  optional = F
+[clouds1]
+  standard_name = total_cloud_fraction
+  long_name = layer total cloud fraction
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cldtaulw]
+  standard_name = cloud_optical_depth_layers_at_10mu_band
+  long_name = approx 10mu band layer cloud optical depth
+  units = none
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[cldtausw]
+  standard_name = cloud_optical_depth_layers_at_0p55mu_band
+  long_name = approx .55mu band layer cloud optical depth
+  units = none
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfcflw]
+  standard_name = lw_fluxes_sfc
+  long_name = lw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = sfcflw_type
+  intent = in
+  optional = F
+[sfcfsw]
+  standard_name = sw_fluxes_sfc
+  long_name = sw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = sfcfsw_type
+  intent = in
+  optional = F
+[topflw]
+  standard_name = lw_fluxes_top_atmosphere
+  long_name = lw radiation fluxes at top
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = topflw_type
+  intent = in
+  optional = F
+[topfsw]
+  standard_name = sw_fluxes_top_atmosphere
+  long_name = sw radiation fluxes at toa
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = topfsw_type
+  intent = in
+  optional = F
+[scmpsw]
+  standard_name = components_of_surface_downward_shortwave_fluxes
+  long_name = derived type for special components of surface downward shortwave fluxes
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = cmpfsw_type
+  intent = in
+  optional = F
+[fluxr]
+  standard_name = cumulative_radiation_diagnostic
+  long_name = time-accumulated 2D radiation-related diagnostic fields
+  units = various
+  dimensions = (horizontal_loop_extent,number_of_radiation_diagnostic_variables)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -205,8 +309,3 @@
   type = integer
   intent = out
   optional = F
-
-########################################################################
-[ccpp-arg-table]
-  name = GFS_rrtmg_post_finalize
-  type = scheme

@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_PBL_generic_pre
+  type = scheme
+  dependencies = GFS_PBL_generic.F90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_PBL_generic_pre_run
   type = scheme
@@ -293,7 +299,7 @@
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -302,7 +308,7 @@
   standard_name = vertically_diffused_tracer_concentration
   long_name = tracer concentration diffused by PBL scheme
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_vertical_diffusion_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
   intent = inout
@@ -311,7 +317,7 @@
   standard_name = x_wind_save
   long_name = x-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -320,7 +326,7 @@
   standard_name = y_wind_save
   long_name = y-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -329,7 +335,7 @@
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -338,7 +344,7 @@
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = out
@@ -371,7 +377,7 @@
   standard_name = x_wind
   long_name = zonal wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -380,7 +386,7 @@
   standard_name = y_wind
   long_name = meridional wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -389,7 +395,7 @@
   standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -411,6 +417,12 @@
   type = integer
   intent = out
   optional = F
+
+########################################################################
+[ccpp-table-properties]
+  name = GFS_PBL_generic_post
+  type = scheme
+  dependencies = GFS_PBL_generic.F90,machine.F
 
 ########################################################################
 [ccpp-arg-table]
@@ -772,7 +784,7 @@
   standard_name = tendency_of_vertically_diffused_tracer_concentration
   long_name = updated tendency of the tracers due to vertical diffusion in PBL scheme
   units = kg kg-1 s-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_vertical_diffusion_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_vertical_diffusion_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -781,7 +793,7 @@
   standard_name = instantaneous_surface_x_momentum_flux
   long_name = surface momentum flux in the x-direction valid for current call
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -790,7 +802,7 @@
   standard_name = instantaneous_surface_y_momentum_flux
   long_name = surface momentum flux in the y-direction valid for current call
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -799,7 +811,7 @@
   standard_name = instantaneous_surface_upward_sensible_heat_flux
   long_name = surface upward sensible heat flux valid for current call
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -808,7 +820,7 @@
   standard_name = instantaneous_surface_upward_latent_heat_flux
   long_name = surface upward latent heat flux valid for current call
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -826,7 +838,7 @@
   standard_name = tendency_of_x_wind_due_to_model_physics
   long_name = updated tendency of the x wind
   units = m s-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -835,7 +847,7 @@
   standard_name = tendency_of_y_wind_due_to_model_physics
   long_name = updated tendency of the y wind
   units = m s-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -844,7 +856,7 @@
   standard_name = tendency_of_air_temperature_due_to_model_physics
   long_name = updated tendency of the temperature
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -853,7 +865,7 @@
   standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
   long_name = total sky sw heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -862,7 +874,7 @@
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
   long_name = total sky lw heating rate
   units = K s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -871,7 +883,7 @@
   standard_name = zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes
   long_name = zenith angle temporal adjustment factor for shortwave
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -880,7 +892,7 @@
   standard_name = tendency_of_tracers_due_to_model_physics
   long_name = updated tendency of the tracers due to model physics
   units = kg kg-1 s-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout
@@ -889,7 +901,7 @@
   standard_name = cumulative_surface_x_momentum_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc u momentum flux multiplied by timestep
   units = Pa s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -898,7 +910,7 @@
   standard_name = cumulative_surface_y_momentum_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc v momentum flux multiplied by timestep
   units = Pa s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -907,7 +919,7 @@
   standard_name = cumulative_surface_upward_sensible_heat_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc sensible heat flux multiplied by timestep
   units = W m-2 s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -916,7 +928,7 @@
   standard_name = cumulative_surface_upward_latent_heat_flux_for_coupling_multiplied_by_timestep
   long_name = cumulative sfc latent heat flux multiplied by timestep
   units = W m-2 s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -925,7 +937,7 @@
   standard_name = instantaneous_surface_x_momentum_flux_for_coupling
   long_name = instantaneous sfc u momentum flux
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -934,7 +946,7 @@
   standard_name = instantaneous_surface_y_momentum_flux_for_coupling
   long_name = instantaneous sfc v momentum flux
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -943,7 +955,7 @@
   standard_name = instantaneous_surface_upward_sensible_heat_flux_for_coupling
   long_name = instantaneous sfc sensible heat flux
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -952,7 +964,7 @@
   standard_name = instantaneous_surface_upward_latent_heat_flux_for_coupling
   long_name = instantaneous sfc latent heat flux
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -961,7 +973,7 @@
   standard_name = cumulative_surface_x_momentum_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc x momentum flux multiplied by timestep
   units = Pa s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -970,7 +982,7 @@
   standard_name = cumulative_surface_y_momentum_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc y momentum flux multiplied by timestep
   units = Pa s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -979,7 +991,7 @@
   standard_name = cumulative_surface_upward_sensible_heat_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc sensible heat flux multiplied by timestep
   units = W m-2 s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -988,7 +1000,7 @@
   standard_name = cumulative_surface_upward_latent_heat_flux_for_diag_multiplied_by_timestep
   long_name = cumulative sfc latent heat flux multiplied by timestep
   units = W m-2 s
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -997,7 +1009,7 @@
   standard_name = instantaneous_surface_x_momentum_flux_for_diag
   long_name = instantaneous sfc x momentum flux multiplied by timestep
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -1006,7 +1018,7 @@
   standard_name = instantaneous_surface_y_momentum_flux_for_diag
   long_name = instantaneous sfc y momentum flux multiplied by timestep
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -1015,7 +1027,7 @@
   standard_name = instantaneous_surface_upward_sensible_heat_flux_for_diag
   long_name = instantaneous sfc sensible heat flux multiplied by timestep
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -1024,7 +1036,7 @@
   standard_name = instantaneous_surface_upward_latent_heat_flux_for_diag
   long_name = instantaneous sfc latent heat flux multiplied by timestep
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -1033,7 +1045,7 @@
   standard_name = cumulative_change_in_temperature_due_to_PBL
   long_name = cumulative change in temperature due to PBL
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1042,7 +1054,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_PBL
   long_name = cumulative change in x wind due to PBL
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1051,7 +1063,7 @@
   standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in x wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1060,7 +1072,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_PBL
   long_name = cumulative change in y wind due to PBL
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1069,7 +1081,7 @@
   standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
   long_name = cumulative change in y wind due to orographic gravity wave drag
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1078,7 +1090,7 @@
   standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
   long_name = cumulative change in water vapor specific humidity due to PBL
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1087,7 +1099,7 @@
   standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
   long_name = cumulative change in ozone mixing ratio due to PBL
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1132,7 +1144,7 @@
   standard_name = air_temperature_at_lowest_model_layer_for_diag
   long_name = layer 1 temperature for diag
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1141,7 +1153,7 @@
   standard_name = water_vapor_specific_humidity_at_lowest_model_layer_for_diag
   long_name = layer 1 specific humidity for diag
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1150,7 +1162,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1159,7 +1171,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux
   long_name = kinematic surface upward sensible heat flux
   units = K m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1168,7 +1180,7 @@
   standard_name = instantaneous_surface_upward_sensible_heat_flux_for_chemistry_coupling
   long_name = instantaneous upward sensible heat flux for chemistry coupling
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -1177,7 +1189,7 @@
   standard_name = sea_area_fraction
   long_name = fraction of horizontal grid area occupied by ocean
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1186,7 +1198,7 @@
   standard_name = flag_for_cice
   long_name = flag for cice
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -1194,7 +1206,7 @@
   standard_name = surface_x_momentum_flux_for_coupling
   long_name = sfc x momentum flux for coupling
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1203,7 +1215,7 @@
   standard_name = surface_y_momentum_flux_for_coupling
   long_name = sfc y momentum flux for coupling
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1212,7 +1224,7 @@
   standard_name = surface_upward_sensible_heat_flux_for_coupling
   long_name = sfc sensible heat flux for coupling
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1221,7 +1233,7 @@
   standard_name = surface_upward_latent_heat_flux_for_coupling
   long_name = sfc latent heat flux for coupling
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1230,7 +1242,7 @@
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating presence of some ocean or lake surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -1238,7 +1250,7 @@
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -1246,7 +1258,7 @@
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating presence of some sea ice surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -1254,7 +1266,7 @@
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1263,7 +1275,7 @@
   standard_name = surface_wind_stress_over_ocean
   long_name = surface wind stress over ocean
   units = m2 s-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1272,7 +1284,7 @@
   standard_name = kinematic_surface_upward_sensible_heat_flux_over_ocean
   long_name = kinematic surface upward sensible heat flux over ocean
   units = K m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1281,7 +1293,7 @@
   standard_name = kinematic_surface_upward_latent_heat_flux_over_ocean
   long_name = kinematic surface upward latent heat flux over ocean
   units = kg kg-1 m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1290,7 +1302,7 @@
   standard_name = x_wind_at_lowest_model_layer
   long_name = zonal wind at lowest model layer
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1299,7 +1311,7 @@
   standard_name = y_wind_at_lowest_model_layer
   long_name = meridional wind at lowest model layer
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1308,7 +1320,7 @@
   standard_name = instantaneous_atmosphere_heat_diffusivity
   long_name = instantaneous atmospheric heat diffusivity
   units = m2 s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -1317,7 +1329,7 @@
   standard_name = atmosphere_heat_diffusivity
   long_name = diffusivity for heat
   units = m2 s-1
-  dimensions = (horizontal_dimension,vertical_dimension_minus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_minus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -1326,7 +1338,7 @@
   standard_name = surface_upward_latent_heat_flux_reduction_factor
   long_name = surface upward latent heat flux reduction factor from canopy heat storage
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1335,7 +1347,7 @@
   standard_name = surface_upward_sensible_heat_flux_reduction_factor
   long_name = surface upward sensible heat flux reduction factor from canopy heat storage
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -1344,7 +1356,7 @@
   standard_name = x_wind
   long_name = zonal wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1353,7 +1365,7 @@
   standard_name = y_wind
   long_name = meridional wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1362,7 +1374,7 @@
   standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1371,7 +1383,7 @@
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in
@@ -1380,7 +1392,7 @@
   standard_name = x_wind_save
   long_name = x-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1389,7 +1401,7 @@
   standard_name = y_wind_save
   long_name = y-wind before entering a physics scheme
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1398,7 +1410,7 @@
   standard_name = air_temperature_save
   long_name = air temperature before entering a physics scheme
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -1407,7 +1419,7 @@
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = in

@@ -7,8 +7,6 @@
 
       contains
 
-!> \section arg_table_drag_suite_init Argument Table
-!!
       subroutine drag_suite_init()
       end subroutine drag_suite_init
 
@@ -473,6 +471,7 @@
    ! Initialize CCPP error handling variables
    errmsg = ''
    errflg = 0
+   var_temp2 = 0.
 
 
 !--------------------------------------------------------------------
@@ -1298,8 +1297,7 @@ endif
    end subroutine drag_suite_run
 !-------------------------------------------------------------------
 !
-!> \section arg_table_drag_suite_finalize Argument Table
-!!
+
       subroutine drag_suite_finalize()
       end subroutine drag_suite_finalize
 

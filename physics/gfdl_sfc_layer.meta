@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = gfdl_sfc_layer
+  type = scheme
+  dependencies = machine.F,module_sf_exchcoef.f90,namelist_soilveg_ruc.F90,noahmp_tables.f90
+
+########################################################################
 [ccpp-arg-table]
   name = gfdl_sfc_layer_init
   type = scheme
@@ -436,7 +442,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F  
 [glw]
   standard_name = surface_downwelling_longwave_flux
   long_name = surface downwelling longwave flux at current time

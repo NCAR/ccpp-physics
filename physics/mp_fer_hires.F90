@@ -1,9 +1,9 @@
 !>\file  mp_fer_hires.F90
-!! This file contains the Ferrier-Aligo microphysics scheme driver. 
+!! This file contains the Ferrier-Aligo microphysics scheme driver.
 
 !
 module mp_fer_hires
-     
+
       use machine, only : kind_phys
 
       use module_mp_fer_hires, only : ferrier_init_hr, FER_HIRES,       &
@@ -12,11 +12,11 @@ module mp_fer_hires
       implicit none
 
       public :: mp_fer_hires_init, mp_fer_hires_run, mp_fer_hires_finalize
-    
+
       private
 
       logical :: is_initialized = .False.
-      
+
       ! * T_ICE - temperature (C) threshold at which all remaining liquid water
       !           is glaciated to ice
       ! * T_ICE_init - maximum temperature (C) at which ice nucleation occurs
@@ -66,7 +66,7 @@ module mp_fer_hires
       ! Initialize the CCPP error handling variables
       errmsg = ''
       errflg = 0
-     
+
       if (is_initialized) return
 
       ! Set internal dimensions
@@ -74,7 +74,7 @@ module mp_fer_hires
       ime = ncol
       lm  = nlev
 
-       ! MZ* temporary 
+       ! MZ* temporary
        if (mpirank==mpiroot) then
          write(0,*) ' -----------------------------------------------'
          write(0,*) ' ---            !!! WARNING !!!              ---'
@@ -90,9 +90,9 @@ module mp_fer_hires
           errflg = 1
           return
        end if
-          
+
      !MZ: fer_hires_init() in HWRF
-        if (mpirank==mpiroot) write (0,*) 'F-A: F_ICE,F_RAIN AND F_RIMEF IS REINITIALIZED'
+        if (mpirank==mpiroot) write (0,*) 'F-A: F_ICE, F_RAIN AND F_RIMEF ARE REINITIALIZED'
         DO K = 1,lm
         DO I= ims,ime
           F_ICE(i,k)=0.
@@ -101,16 +101,16 @@ module mp_fer_hires
         ENDDO
         ENDDO
       !MZ: fer_hires_init() in HWRF
-       
+
         if (mpirank==mpiroot) write (0,*) 'F-A: calling FERRIER_INIT_HR ...'
        CALL FERRIER_INIT_HR(dtp,mpicomm,mpirank,mpiroot,threads,errmsg,errflg)
 
        if (mpirank==mpiroot) write (0,*)'F-A: FERRIER_INIT_HR finished ...'
        if (errflg /= 0 ) return
-       
+
        is_initialized = .true.
 
- 
+
      end subroutine mp_fer_hires_init
 
 !>\defgroup hafs_famp HWRF Ferrier-Aligo Microphysics Scheme
@@ -124,8 +124,8 @@ module mp_fer_hires
                          ,T,Q,CWM                                       &
                          ,TRAIN,SR                                      &
                          ,F_ICE,F_RAIN,F_RIMEF                          &
-                         ,QC,QR,QI,QG                                   & 
-                         ,PREC                                          & 
+                         ,QC,QR,QI,QG                                   &
+                         ,PREC                                          &
                          ,mpirank, mpiroot, threads                     &
                          ,refl_10cm                                     &
                          ,RHGRD,dx                                      &
@@ -162,7 +162,7 @@ module mp_fer_hires
       real(kind_phys),   intent(inout) :: train(1:ncol,1:nlev)
       real(kind_phys),   intent(out  ) :: sr(1:ncol)
       real(kind_phys),   intent(inout) :: f_ice(1:ncol,1:nlev)
-      real(kind_phys),   intent(inout) :: f_rain(1:ncol,1:nlev) 
+      real(kind_phys),   intent(inout) :: f_rain(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: f_rimef(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qc(1:ncol,1:nlev)
       real(kind_phys),   intent(inout) :: qr(1:ncol,1:nlev)
@@ -205,7 +205,7 @@ module mp_fer_hires
          write(errmsg, fmt='((a))') 'mp_fer_hires_run called before mp_fer_hires_init'
          errflg = 1
          return
-      end if 
+      end if
 
 ! Set internal dimensions
       ims = 1
@@ -248,7 +248,7 @@ module mp_fer_hires
 !-----------------------------------------------------------------------
 !
         DO K=LM,1,-1   !mz* We are moving down from the top in the flipped arrays
-         
+
 !***  CALL MICROPHYSICS
 
 !MZ* in HWRF
@@ -274,8 +274,8 @@ module mp_fer_hires
 
 !---------------------------------------------------------------------
 !aligo
-       DO K = 1, LM                                                                                                    
-       DO I= IMS, IME  
+       DO K = 1, LM
+       DO I= IMS, IME
          cwm(i,k) = cwm(i,k)/(1.0_kind_phys-q(i,k))
          qr(i,k) = qr(i,k)/(1.0_kind_phys-q(i,k))
          qi(i,k) = qi(i,k)/(1.0_kind_phys-q(i,k))
@@ -284,7 +284,7 @@ module mp_fer_hires
        ENDDO
 !aligo
 !---------------------------------------------------------------------
-        
+
             CALL FER_HIRES(                                             &
                    DT=DT,RHgrd=RHGRD                                    &
                   ,PRSI=prsi,P_PHY=p_phy,T_PHY=t                        &
@@ -311,7 +311,7 @@ module mp_fer_hires
         qi(i,k) = qi(i,k)/(1.0_kind_phys+q(i,k))
         qr(i,k) = qr(i,k)/(1.0_kind_phys+q(i,k))
      ENDDO
-    ENDDO 
+    ENDDO
 
 !-----------------------------------------------------------
       DO K=1,LM
@@ -321,7 +321,7 @@ module mp_fer_hires
 !*** Calculate graupel from total ice array and rime factor
 !---------------------------------------------------------------------
 
-!MZ            
+!MZ
             IF (SPEC_ADV) then
                 QG(I,K)=QI(I,K)*F_RIMEF(I,K)
             ENDIF
@@ -345,7 +345,7 @@ module mp_fer_hires
       DO I=IMS,IME
         PCPCOL=RAINNCV(I)*1.E-3        !MZ:unit:m
         PREC(I)=PREC(I)+PCPCOL
-!MZ        ACPREC(I)=ACPREC(I)+PCPCOL     !MZ: not used 
+!MZ        ACPREC(I)=ACPREC(I)+PCPCOL     !MZ: not used
 !
 ! NOTE: RAINNC IS ACCUMULATED INSIDE MICROPHYSICS BUT NMM ZEROES IT OUT ABOVE
 !       SINCE IT IS ONLY A LOCAL ARRAY FOR NOW
@@ -353,10 +353,11 @@ module mp_fer_hires
       ENDDO
 !-----------------------------------------------------------------------
 !
-       end subroutine mp_fer_hires_run 
+       end subroutine mp_fer_hires_run
 
 
 !> \section arg_table_mp_fer_hires_finalize Argument Table
+!! \htmlinclude mp_fer_hires_finalize.html
 !!
        subroutine mp_fer_hires_finalize (errmsg,errflg)
          implicit none
@@ -373,8 +374,6 @@ module mp_fer_hires
          call ferhires_finalize()
 
          is_initialized = .false.
-
-
        end subroutine mp_fer_hires_finalize
 
 end module mp_fer_hires

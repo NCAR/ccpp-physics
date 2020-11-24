@@ -66,7 +66,7 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
      &     dkudiagnostic,                                               &
-     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,ldiag3d,qdiag3d,          &
+     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
      &     errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -79,7 +79,7 @@
       integer, intent(in)  :: kinver(im)
       integer, intent(in)  :: islimsk(im)
       integer, intent(out) :: kpbl(im)
-      logical, intent(in)  :: ldiag3d,qdiag3d
+      logical, intent(in)  :: gen_tend,ldiag3d,qdiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -132,7 +132,7 @@
      &                     slx(im,km),  svx(im,km),   qtx(im,km),
      &                     tvx(im,km),  pix(im,km),   radx(im,km-1),
      &                     dku(im,km-1),dkt(im,km-1), dkq(im,km-1),
-     &                     cku(im,km-1),ckt(im,km-1), 
+     &                     cku(im,km-1),ckt(im,km-1),
      &                     dkudiagnostic(im,km-1)
 !
       real(kind=kind_phys) plyr(im,km), rhly(im,km),  cfly(im,km),
@@ -1423,18 +1423,18 @@ c
             dqsfc(i)   = dqsfc(i)+conq*del(i,k)*qtend
          enddo
       enddo
-      if(ldiag3d) then
+      if(ldiag3d .and. .not. gen_tend) then
         do  k = 1,km
           do i = 1,im
             ttend      = (f1(i,k)-t1(i,k))*rdt
-            dt3dt(i,k) = dt3dt(i,k)+dspfac*ttend*delt
+            dt3dt(i,k) = dt3dt(i,k)+ttend*delt
           enddo
         enddo
         if(qdiag3d) then
           do  k = 1,km
             do i = 1,im
               qtend      = (f2(i,k)-q1(i,k,1))*rdt
-              dq3dt(i,k) = dq3dt(i,k)+dspfac*qtend*delt
+              dq3dt(i,k) = dq3dt(i,k)+qtend*delt
             enddo
           enddo
         endif
@@ -1450,7 +1450,7 @@ c
             enddo
           enddo
         enddo
-        if(ldiag3d .and. qdiag3d .and. ntoz>0) then
+        if(ldiag3d .and. .not. gen_tend .and. qdiag3d .and. ntoz>0) then
           kk=ntoz
           is = (kk-1) * km
           do k = 1, km
@@ -1473,7 +1473,7 @@ c
             tdt(i,k) = tdt(i,k) + dspfac * ttend
           enddo
         enddo
-        if(ldiag3d) then
+        if(ldiag3d .and. .not. gen_tend) then
           do k = 1,km1
             do i = 1,im
               ttend = diss(i,k) / cp
@@ -1563,7 +1563,7 @@ c
             dvsfc(i) = dvsfc(i)+conw*del(i,k)*vtend
          enddo
       enddo
-      if(ldiag3d) then
+      if(ldiag3d .and. .not. gen_tend) then
         do k = 1,km
           do i = 1,im
             utend = (f1(i,k)-u1(i,k))*rdt

@@ -47,11 +47,7 @@
 !
       end subroutine shalcnv_init
 
-! \brief This subroutine is empty since there are no procedures that need to be done to finalize the shalcnv code.
-!!
-!! \section arg_table_shalcnv_finalize Argument Table
-!!
-      subroutine shalcnv_finalize
+      subroutine shalcnv_finalize()
       end subroutine shalcnv_finalize
 
 !>  \brief This subroutine contains the entirety of the SAS shallow convection scheme.

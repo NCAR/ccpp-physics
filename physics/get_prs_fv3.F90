@@ -8,16 +8,12 @@ module get_prs_fv3
 
 !--- local variables
    real(kind=kind_phys), parameter :: zero = 0.0_kind_phys
-   real(kind=kind_phys), parameter :: half = 0.5_kind_phys
+   real(kind=kind_phys), parameter :: one  = 1.0_kind_phys
 
 contains
 
-
-!! \section arg_table_get_prs_fv3_init Argument Table
-!!
    subroutine get_prs_fv3_init()
    end subroutine get_prs_fv3_init
-
 
 !! \section arg_table_get_prs_fv3_run Argument Table
 !! \htmlinclude get_prs_fv3_run.html
@@ -50,21 +46,16 @@ contains
        do i=1,ix
             del(i,k) = prsi(i,k) - prsi(i,k+1)
          del_gz(i,k) = (phii(i,k+1) - phii(i,k)) /                    &
-                        (tgrs(i,k)*(1.+con_fvirt*max(zero,qgrs1(i,k))))
+                        (tgrs(i,k)*(one + con_fvirt*max(zero,qgrs1(i,k))))
        enddo
      enddo
 
    end subroutine get_prs_fv3_run
 
-
-!! \section arg_table_get_prs_fv3_finalize Argument Table
-!!
    subroutine get_prs_fv3_finalize()
    end subroutine get_prs_fv3_finalize
 
-
 end module get_prs_fv3
-
 
 
 module get_phi_fv3
@@ -78,14 +69,12 @@ module get_phi_fv3
 !--- local variables
    real(kind=kind_phys), parameter :: zero = 0.0_kind_phys
    real(kind=kind_phys), parameter :: half = 0.5_kind_phys
+   real(kind=kind_phys), parameter :: one  = 1.0_kind_phys
 
 contains
 
-!! \section arg_table_get_phi_fv3_init Argument Table
-!!
    subroutine get_phi_fv3_init()
    end subroutine get_phi_fv3_init
-
 
 !! \section arg_table_get_phi_fv3_run Argument Table
 !! \htmlinclude get_phi_fv3_run.html
@@ -118,7 +107,7 @@ contains
      do k=1,levs
        do i=1,ix
          del_gz(i,k) = del_gz(i,k)*gt0(i,k) *                          &
-     &                 (1.+con_fvirt*max(zero,gq01(i,k)))
+     &                 (one + con_fvirt*max(zero,gq01(i,k)))
          phii(i,k+1) = phii(i,k) + del_gz(i,k)
          phil(i,k)   = half*(phii(i,k) + phii(i,k+1))
        enddo
@@ -126,12 +115,8 @@ contains
 
    end subroutine get_phi_fv3_run
 
-
-!! \section arg_table_get_phi_fv3_finalize Argument Table
-!!
    subroutine get_phi_fv3_finalize()
    end subroutine get_phi_fv3_finalize
-
 
 end module get_phi_fv3
 

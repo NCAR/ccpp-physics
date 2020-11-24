@@ -3,10 +3,10 @@
 !ckay=KIRAN ALAPATY @ US EPA -- November 01, 2015
 !
 ! Tim Glotfelty@CNSU; AJ Deng@PSU
-!modified for use with FASDAS
-!Flux Adjusting Surface Data Assimilation System to assimilate
+!modified for use with FASDAS 
+!Flux Adjusting Surface Data Assimilation System to assimilate 
 !surface layer and soil layers temperature and moisture using
-! surfance reanalsys
+! surfance reanalsys 
 !Reference: Alapaty et al., 2008: Development of the flux-adjusting surface
 ! data assimilation system for mesoscale models. JAMC, 47, 2331-2350
 !
@@ -70,7 +70,7 @@
                        EC,EDIR,ET,ETT,ESNOW,DRIP,DEW,                   &    !O
                        BETA,ETP,SSOIL,                                  &    !O
                        FLX1,FLX2,FLX3,                                  &    !O
-                       FLX4,FVB,FBUR,FGSN,UA_PHYS,                      &    !UA
+                       FLX4,FVB,FBUR,FGSN,UA_PHYS,                      &    !UA 
                        SNOMLT,SNCOVR,                                   &    !O
                        RUNOFF1,RUNOFF2,RUNOFF3,                         &    !O
                        RC,PC,RSMIN,XLAI,RCS,RCT,RCQ,RCSOIL,             &    !O
@@ -388,7 +388,7 @@
 ! ----------------------------------------------------------------------
       errmsg = ''
       errflg = 0
-
+      
       ILOC = IILOC
       JLOC = JJLOC
 
@@ -585,7 +585,7 @@
               CH = CH/(1.+RU*CH)
             ENDIF
 
-            SNCOVR = MIN(SNCOVR,0.98)
+            SNCOVR = MIN(SNCOVR,0.98) 
 
             CALL ALCALC (ALB,SNOALB,EMBRD,SHDFAC,SHDMIN,SNCOVR,T1, &
                  ALBEDO,EMISSI,DT,SNOWNG,SNOTIME1,LVCOEF)
@@ -774,7 +774,7 @@
                             BETA,DRIP,DEW,FLX1,FLX3,VEGTYP,ISURBAN,      &
                             SFHEAD1RT,INFXS1RT,ETPND1,SOILTYP,OPT_THCND  &
                            ,XSDA_QFX,QFX_PHY,XQNORM,fasdas,HCPCT_FASDAS, & !fasdas
-                            SIGMA,CPH2O)
+                            SIGMA,CPH2O) 
             ETA_KINEMATIC = ETA
          ELSE
             CALL SNOPAC (ETP,ETA,PRCP,PRCPF,SNOWNG,SMC,SMCMAX,SMCWLT,    &
@@ -793,7 +793,7 @@
                          ETPN,FLX4,UA_PHYS,                              &
                          SFHEAD1RT,INFXS1RT,ETPND1,SOILTYP,OPT_THCND     &
                         ,QFX_PHY,fasdas,HCPCT_FASDAS,SIGMA,CPH2O,CPICE,  & !fasdas
-                         LSUBF)
+                         LSUBF) 
             ETA_KINEMATIC =  ESNOW + ETNS - 1000.0*DEW
          END IF
 
@@ -807,7 +807,7 @@
 ! ----------------------------------------------------------------------
 
          SHEAT = - (CH * CP * SFCPRS)/ (R * T2V) * ( TH2- T1 )
-         IF(UA_PHYS) SHEAT = SHEAT + FLX4
+         IF(UA_PHYS) SHEAT = SHEAT + FLX4   
 !
 ! FASDAS
 !
@@ -826,7 +826,7 @@
       ET(K) = ET(K) * LVH2O
       ENDDO
       ETT = ETT * LVH2O
-
+      
       ETPND1=ETPND1 * LVH2O
 
       ESNOW = ESNOW * LSUBS
@@ -1425,7 +1425,7 @@
 ! ----------------------------------------------------------------------
 
       SUBROUTINE FAC2MIT(SMCMAX,FLIMIT)
-      IMPLICIT NONE
+      IMPLICIT NONE		
       REAL, INTENT(IN)  :: SMCMAX
       REAL, INTENT(OUT) :: FLIMIT
 
@@ -2025,7 +2025,7 @@
        EFDIR = EFDIR * wetty(1)
           !TWG2015 Bugfix Flip Sign to conform to Net upward Flux
            EDIR1 = EDIR1 + EFDIR    ! new value
-
+       
        EFC = (EC1/EALL_now)*XSDA_QFX*1.0E-03*XQNORM
        !TWG2015 Bugfix Flip Sign to conform to Net upward Flux
        EC1 = EC1 + EFC         ! new value
@@ -2264,11 +2264,11 @@
       FLX4 = 0.0
       IF(UA_PHYS) THEN
         IF(SNEQV > 0. .AND. FNET > 0. .AND. SOLDN > 0. ) THEN
-         TOTABS = (1.-ALBEDO)*SOLDN*FVB           ! solar radiation absorbed
+         TOTABS = (1.-ALBEDO)*SOLDN*FVB           ! solar radiation absorbed 
                                                   ! by vegetated fraction
          UCABS = MIN(TOTABS,((1.0-ALGDSN)*(1.0-ALVGSN)*SOLDN*GAMA)*FVB)
 !         print*,'penman',UCABS,TOTABS,SOLDN,GAMA,FVB
-!         UCABS = MIN(TOTABS,(0.44*SOLDN*GAMA)*FVB)
+!         UCABS = MIN(TOTABS,(0.44*SOLDN*GAMA)*FVB)  
                                                   ! UCABS -> solar radiation
 						  ! absorbed under canopy
          FLX4 = MIN(TOTABS - UCABS, MIN(250., 0.5*(1.-ALBEDO)*SOLDN))
@@ -2431,11 +2431,11 @@
       REAL                   :: FRZFACT,FRZK,REFDK
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-
+      
       CHARACTER*256  :: err_message
       errmsg = ''
       errflg = 0
-
+      
 !      SAVE
 ! ----------------------------------------------------------------------
 !
@@ -2656,14 +2656,14 @@
 ! ----------------------------------------------------------------------
 ! HRT ROUTINE CALCS THE RIGHT HAND SIDE OF THE SOIL TEMP DIF EQN
 ! ----------------------------------------------------------------------
-
+      
       IF (TIME_AVERAGE_T_UPDATE) THEN
         OLDT1 = T1
         DO I = 1, NSOIL
            OLDSTC(I) = STC(I)
         ENDDO
       ENDIF
-
+      
       ! Land case
 
       CALL HRT (RHSTS,STC,SMC,SMCMAX,NSOIL,ZSOIL,YY,ZZ1,TBOT,     &
@@ -2688,15 +2688,15 @@
 ! CALCULATE SURFACE SOIL HEAT FLUX
 ! ----------------------------------------------------------------------
       T1 = (YY + (ZZ1- 1.0) * STC (1)) / ZZ1
-
-      !GJF: Following the GFS version of Noah, time average the updating of skin temperature and soil temperature
+      
+      !GJF: Following the GFS version of Noah, time average the updating of skin temperature and soil temperature 
       IF (TIME_AVERAGE_T_UPDATE) THEN
         T1 = CTFIL1*T1 + CTFIL2*OLDT1
         DO I = 1, NSOIL
           STC(I) = CTFIL1*STC(I) + CTFIL2*OLDSTC(I)
         ENDDO
       ENDIF
-
+      
       SSOIL = DF1 * (STC (1) - T1) / (0.5 * ZSOIL (1))
 
 ! ----------------------------------------------------------------------
@@ -2907,7 +2907,7 @@
         END IF
 !------------------------------------------------------------------
 ! FBUR: VERTICAL FRACTION OF VEGETATION COVERED BY SNOW
-! GRASS, CROP, AND SHRUB: MULTIPLY 0.4 BY ZTOPV AND ZBOTV BECAUSE
+! GRASS, CROP, AND SHRUB: MULTIPLY 0.4 BY ZTOPV AND ZBOTV BECAUSE 
 ! THEY WILL BE PRESSED DOWN BY THE SNOW.
 ! FOREST: DON'T NEED TO CHANGE ZTOPV AND ZBOTV.
 
@@ -3620,10 +3620,10 @@
           BURIAL = 7.0*Z0BRD - SNOWH
           IF(BURIAL.LE.0.0007) THEN
               Z0EFF = Z0S
-          ELSE
+          ELSE      
               Z0EFF = BURIAL/7.0
           ENDIF
-
+      
           Z0 = (1.- SNCOVR)* Z0BRD + SNCOVR * Z0EFF
 
       ENDIF
@@ -3853,7 +3853,7 @@
          INFMAX = MAX (INFMAX,WCND)
 
          INFMAX = MIN (INFMAX,PX/DT)
-#ifdef WRF_HYDRO
+#ifdef WRF_HYDRO 
 !DJG NDHMS/WRF-Hydro edit...
 !DJG       IF (PCPDRP >  INFMAX) THEN
          IF (SFCWATR > INFMAX) THEN
@@ -4167,12 +4167,12 @@
 ! June 2001 CHANGES: FROZEN SOIL CONDITION.
 ! ----------------------------------------------------------------------
       IMPLICIT NONE
-      INTEGER, INTENT(IN)       :: SOILTYP, OPT_THCND
+      INTEGER, INTENT(IN)       :: SOILTYP, OPT_THCND  
       REAL, INTENT(IN)          :: QZ,  SMC, SMCMAX, SH2O, BEXP, PSISAT
       REAL, INTENT(OUT)         :: DF
       REAL                      :: AKE, GAMMD, THKDRY, THKICE, THKO,    &
                                    THKQTZ,THKSAT,THKS,THKW,SATRATIO,XU, &
-                                   XUNFROZ,AKEI,AKEL,PSIF,PF
+                                   XUNFROZ,AKEI,AKEL,PSIF,PF  
 
 ! ----------------------------------------------------------------------
 ! WE NOW GET QUARTZ AS AN INPUT ARGUMENT (SET IN ROUTINE REDPRM):
@@ -4276,7 +4276,7 @@ IF ( OPT_THCND == 1 .OR. ( OPT_THCND == 2 .AND. (SOILTYP /= 4 .AND. SOILTYP /= 3
            DF=.1744
          END IF
 
-      ENDIF  ! for OPT_THCND OPTIONS
+      ENDIF  ! for OPT_THCND OPTIONS             
 ! ----------------------------------------------------------------------
       END SUBROUTINE TDFCND
 ! ----------------------------------------------------------------------

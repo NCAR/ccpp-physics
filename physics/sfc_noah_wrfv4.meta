@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_noah_wrfv4
+  type = scheme
+  dependencies = machine.F,module_sf_noahlsm_glacial_only.F90,module_sf_noahlsm.F90
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_noah_wrfv4_init
   type = scheme
@@ -133,7 +139,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F  
 [isurban]
   standard_name = urban_vegetation_category
   long_name = index of the urban vegetation category in the chosen vegetation dataset
@@ -200,7 +206,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F  
 [nsoil]
   standard_name = soil_vertical_dimension
   long_name = soil vertical layer dimension
@@ -208,7 +214,7 @@
   dimensions = ()
   type = integer
   intent = in
-  optional = F
+  optional = F  
 [sthick]
   standard_name = soil_layer_thickness
   long_name = soil layer thickness
@@ -217,7 +223,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F  
 [lwdn]
   standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
   long_name = total sky surface downward longwave flux absorbed by the ground over land
@@ -226,7 +232,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
+  optional = F  
 [soldn]
   standard_name = surface_downwelling_shortwave_flux
   long_name = total sky surface downward shortwave flux

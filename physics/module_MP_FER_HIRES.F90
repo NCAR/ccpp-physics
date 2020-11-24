@@ -2405,7 +2405,7 @@ ENDIF
 
 !-----------------------------------------------------------------------
 !>\ingroup hafs_famp
-      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MYPE,mpiroot,THREADS, &
+      SUBROUTINE FERRIER_INIT_hr (GSMDT,MPI_COMM_COMP,MPIRANK,MPIROOT,THREADS, &
         errmsg,errflg)
 !-----------------------------------------------------------------------
 !-------------------------------------------------------------------------------
@@ -2463,7 +2463,7 @@ ENDIF
 !
 !     VARIABLES PASSED IN
       REAL,             INTENT(IN) :: GSMDT
-      INTEGER,          INTENT(IN) :: MYPE 
+      INTEGER,          INTENT(IN) :: MPIRANK 
       INTEGER,          INTENT(IN) :: MPIROOT
       INTEGER,          INTENT(IN) :: MPI_COMM_COMP
       INTEGER,          INTENT(IN) :: THREADS
@@ -2479,21 +2479,18 @@ ENDIF
       LOGICAL :: opened
       INTEGER :: IRTN,rc 
       CHARACTER*80 errmess
-      INTEGER :: mpi_communicator,ierr
-      INTEGER :: good
+      INTEGER :: ierr, good
       LOGICAL :: lexist,lopen, force_read_ferhires
 !
 !-----------------------------------------------------------------------
 !
-        ! Assign mpicomm to module variable
-        mpi_communicator= mpi_comm_comp
-        DTPH=GSMDT     !-- Time step in s
+      DTPH=GSMDT     !-- Time step in s
 !
 !--- Create lookup tables for saturation vapor pressure w/r/t water & ice
 
        
 !
-        CALL GPVS_hr
+      CALL GPVS_hr
 !
 !zhang: 
       if (.NOT. ALLOCATED(ventr1)) ALLOCATE(ventr1(MDRmin:MDRmax))
@@ -2509,15 +2506,14 @@ ENDIF
       if (.NOT. ALLOCATED(vsnowi)) ALLOCATE(vsnowi(MDImin:MDImax))
       if (.NOT. ALLOCATED(vel_rf)) ALLOCATE(vel_rf(2:9,0:Nrime))
 
+#ifdef MPI
+      call MPI_BARRIER(MPI_COMM_COMP,ierr)
+#endif
 
-
+      only_root_reads: if (MPIRANK==MPIROOT) then
         force_read_ferhires = .true.
         good = 0
         INQUIRE(FILE="DETAMPNEW_DATA.expanded_rain_LE",EXIST=lexist)
-
-#ifdef MPI
-        call MPI_BARRIER(mpi_communicator,ierr)
-#endif
 
         IF (lexist) THEN
           OPEN(63,FILE="DETAMPNEW_DATA.expanded_rain_LE",  &
@@ -2543,17 +2539,19 @@ ENDIF
             INQUIRE(63,opened=lopen)
             IF (lopen) THEN
               IF( force_read_ferhires ) THEN
-                write(0,*) "Error reading DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                errmsg = "Error reading DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                errflg = 1
                 return
               ENDIF
               CLOSE(63)
             ELSE
               IF( force_read_ferhires ) THEN
-                write(0,*) "Error opening DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                errmsg = "Error opening DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+                errflg = 1
                 return
               ENDIF
             ENDIF
-         ELSE
+          ELSE
             INQUIRE(63,opened=lopen)
             IF (lopen) THEN
               CLOSE(63)
@@ -2561,25 +2559,26 @@ ENDIF
           ENDIF
         ELSE
           IF( force_read_ferhires ) THEN
-            write(0,*) "Non-existent DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+            errmsg = "Non-existent DETAMPNEW_DATA.expanded_rain_LE. Aborting because force_read_ferhires is .true."
+            errflg = 1
             return
           ENDIF
         ENDIF
-
+      endif only_root_reads
 !
 #ifdef MPI
-        CALL MPI_BCAST(VENTR1,SIZE(VENTR1),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VENTR2,SIZE(VENTR2),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(ACCRR,SIZE(ACCRR)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(MASSR,SIZE(MASSR)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VRAIN,SIZE(VRAIN)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(RRATE,SIZE(RRATE)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VENTI1,SIZE(VENTI1),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VENTI2,SIZE(VENTI2),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(ACCRI,SIZE(ACCRI)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(MASSI,SIZE(MASSI)  ,MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VSNOWI,SIZE(VSNOWI),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
-        CALL MPI_BCAST(VEL_RF,SIZE(VEL_RF),MPI_DOUBLE_PRECISION,0,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTR1,SIZE(VENTR1),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTR2,SIZE(VENTR2),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(ACCRR, SIZE(ACCRR), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(MASSR, SIZE(MASSR), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VRAIN, SIZE(VRAIN), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(RRATE, SIZE(RRATE), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTI1,SIZE(VENTI1),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VENTI2,SIZE(VENTI2),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(ACCRI, SIZE(ACCRI), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(MASSI, SIZE(MASSI), MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VSNOWI,SIZE(VSNOWI),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
+        CALL MPI_BCAST(VEL_RF,SIZE(VEL_RF),MPI_DOUBLE_PRECISION,MPIROOT,MPI_COMM_COMP,IRTN)
 #endif
 
 !
@@ -2720,12 +2719,6 @@ ENDIF
 !
 
       RETURN
-!
-!-----------------------------------------------------------------------
-!
-9061 CONTINUE
-      WRITE(0,*)' module_mp_etanew: error opening ETAMPNEW_DATA.expanded_rain on unit ',etampnew_unit1
-      STOP
 !
 !-----------------------------------------------------------------------
       END SUBROUTINE FERRIER_INIT_hr

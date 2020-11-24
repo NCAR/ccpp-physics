@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_stochastics
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_stochastics_run
   type = scheme
@@ -26,8 +32,8 @@
   intent = in
   optional = F
 [do_sppt]
-  standard_name = flag_for_stochastic_surface_physics_perturbations
-  long_name = flag for stochastic surface physics perturbations
+  standard_name = flag_for_stochastic_physics_perturbations
+  long_name = flag for stochastic physics perturbations
   units = flag
   dimensions = ()
   type = logical
@@ -77,7 +83,7 @@
   standard_name = cellular_automata_global_pattern
   long_name = cellular automata global pattern
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -104,7 +110,7 @@
   standard_name = level_of_dividing_streamline
   long_name = level of the dividing streamline
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -113,7 +119,7 @@
   standard_name = weights_for_stochastic_sppt_perturbation
   long_name = weights for stochastic sppt perturbation
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -122,7 +128,7 @@
   standard_name = weights_for_stochastic_skeb_perturbation_of_x_wind
   long_name = weights for stochastic skeb perturbation of x wind
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -131,7 +137,7 @@
   standard_name = weights_for_stochastic_skeb_perturbation_of_y_wind
   long_name = weights for stochastic skeb perturbation of y wind
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -140,7 +146,7 @@
   standard_name = weights_for_stochastic_shum_perturbation
   long_name = weights for stochastic shum perturbation
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -149,7 +155,7 @@
   standard_name = weights_for_stochastic_sppt_perturbation_flipped
   long_name = weights for stochastic sppt perturbation, flipped
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -158,7 +164,7 @@
   standard_name = weights_for_stochastic_skeb_perturbation_of_x_wind_flipped
   long_name = weights for stochastic skeb perturbation of x wind, flipped
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -167,7 +173,7 @@
   standard_name = weights_for_stochastic_skeb_perturbation_of_y_wind_flipped
   long_name = weights for stochastic skeb perturbation of y wind, flipped
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -176,7 +182,7 @@
   standard_name = weights_for_stochastic_shum_perturbation_flipped
   long_name = weights for stochastic shum perturbation, flipped
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -185,7 +191,7 @@
   standard_name = dissipation_estimate_of_air_temperature_at_model_layers
   long_name = dissipation estimate model layer mean temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -194,7 +200,7 @@
   standard_name = x_wind
   long_name = zonal wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -203,7 +209,7 @@
   standard_name = y_wind
   long_name = meridional wind
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -212,7 +218,7 @@
   standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -221,7 +227,7 @@
   standard_name = water_vapor_specific_humidity
   long_name = water vapor specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -230,7 +236,7 @@
   standard_name = x_wind_updated_by_physics
   long_name = zonal wind updated by physics
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -239,7 +245,7 @@
   standard_name = y_wind_updated_by_physics
   long_name = meridional wind updated by physics
   units = m s-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -248,7 +254,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -257,7 +263,7 @@
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -266,7 +272,7 @@
   standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
   long_name = temp. change due to radiative heating per time step
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -275,7 +281,7 @@
   standard_name = lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total rain at this time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -284,7 +290,7 @@
   standard_name = lwe_thickness_of_convective_precipitation_amount_on_dynamics_timestep
   long_name = convective rain at this time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -293,7 +299,7 @@
   standard_name = nonnegative_lwe_thickness_of_precipitation_amount_on_dynamics_timestep
   long_name = total precipitation amount in each time step
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -302,7 +308,7 @@
   standard_name = accumulated_lwe_thickness_of_precipitation_amount
   long_name = accumulated total precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -311,7 +317,7 @@
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount
   long_name = cumulative convective precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -320,7 +326,7 @@
   standard_name = accumulated_lwe_thickness_of_precipitation_amount_in_bucket
   long_name = accumulated total precipitation in bucket
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -329,7 +335,7 @@
   standard_name = cumulative_lwe_thickness_of_convective_precipitation_amount_in_bucket
   long_name = cumulative convective precipitation in bucket
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -346,7 +352,7 @@
   standard_name = lwe_thickness_of_precipitation_amount_for_coupling
   long_name = total rain precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -355,7 +361,7 @@
   standard_name = lwe_thickness_of_snow_amount_for_coupling
   long_name = total snow precipitation
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -364,7 +370,7 @@
   standard_name = tendency_of_lwe_thickness_of_precipitation_amount_for_coupling
   long_name = change in rain_cpl (coupling_type)
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -373,7 +379,7 @@
   standard_name = tendency_of_lwe_thickness_of_snow_amount_for_coupling
   long_name = change in show_cpl (coupling_type)
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in

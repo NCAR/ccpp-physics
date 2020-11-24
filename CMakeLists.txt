@@ -17,6 +17,11 @@ if(POLICY CMP0042)
     cmake_policy(SET CMP0042 NEW)
 endif(POLICY CMP0042)
 
+# CMP0057: Support new IN_LIST if() operator
+if(POLICY CMP0057)
+    cmake_policy(SET CMP0057 NEW)
+endif(POLICY CMP0057)
+
 #------------------------------------------------------------------------------
 set(PACKAGE "ccpp-physics")
 set(AUTHORS "Grant Firl" "Dom Heinzeller" "Man Zhang" "Laurie Carson")
@@ -131,6 +136,7 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
     if (DYN32)
+      if (${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
       # Reduce floating point precision from 64-bit to 32-bit, if necessary
       set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
       string(REPLACE "-fdefault-real-8" ""
@@ -141,7 +147,8 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
                    APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ")
       # Add all of the above files to the list of schemes with special floating point precision flags
       list(APPEND SCHEMES_SFX_PREC ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
-    endif (DYN32)
+      endif()
+    endif()
 
     # Remove files with special floating point precision flags from list
     # of files with standard floating point precision flags flags
@@ -156,52 +163,36 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Adjust settings for bit-for-bit reproducibility of NEMSfv3gfs
   if (PROJECT STREQUAL "CCPP-FV3")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sflx.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cu_gf_deep.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cu_gf_sh.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bl_mynn.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNPBL_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNSFC_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 -ftz")
 
-    # Reduce optimization for module_sf_mynn.F90 (to avoid an apparent compiler bug with Intel 18 on Hera)
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
-                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT} -O1")
-    list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
+    if (${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90 IN_LIST SCHEMES)
+      # Reduce optimization for module_sf_mynn.F90 (to avoid an apparent compiler bug with Intel 18 on Hera)
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT} -O1")
+      list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90)
+    endif()
 
-    # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
-    set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
-    string(REPLACE "-xHOST" "-xCORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT1
-           "${CMAKE_Fortran_FLAGS_LOPT1}")
-    string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT1
-           "${CMAKE_Fortran_FLAGS_LOPT1}")
-    string(REPLACE "-axSSE4.2,AVX,CORE-AVX2,CORE-AVX512" "-axSSE4.2,AVX,CORE-AVX-I"
-           CMAKE_Fortran_FLAGS_LOPT1
-           "${CMAKE_Fortran_FLAGS_LOPT1}")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
-                                PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
-    # Add all of the above files to the list of schemes with special compiler flags
-    list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
+    if (${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f IN_LIST SCHEMES)
+      # Replace -xHost or -xCORE-AVX2 with -xCORE-AVX-I for certain files
+      set(CMAKE_Fortran_FLAGS_LOPT1 ${CMAKE_Fortran_FLAGS_OPT})
+      string(REPLACE "-xHOST" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT1
+             "${CMAKE_Fortran_FLAGS_LOPT1}")
+      string(REPLACE "-xCORE-AVX2" "-xCORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT1
+             "${CMAKE_Fortran_FLAGS_LOPT1}")
+      string(REPLACE "-axSSE4.2,AVX,CORE-AVX2,CORE-AVX512" "-axSSE4.2,AVX,CORE-AVX-I"
+             CMAKE_Fortran_FLAGS_LOPT1
+             "${CMAKE_Fortran_FLAGS_LOPT1}")
+      SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
+                                  PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_LOPT1}")
+      # Add all of the above files to the list of schemes with special compiler flags
+      list(APPEND SCHEMES_SFX_OPT ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f)
+    endif()
 
     # Remove files with special compiler flags from list of files with standard compiler flags
-    list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    if (SCHEMES_SFX_OPT)
+      list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    endif(SCHEMES_SFX_OPT)
     # Assign standard compiler flags to all remaining schemes and caps
     SET_SOURCE_FILES_PROPERTIES(${SCHEMES} ${CAPS}
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT}")
@@ -209,6 +200,7 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     # Set 32-bit floating point precision flags for certain files
     # that are executed in the dynamics (fast physics part)
     if (DYN32)
+      if (${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90 IN_LIST SCHEMES)
       # Reduce floating point precision from 64-bit to 32-bit, if necessary
       set(CMAKE_Fortran_FLAGS_PREC32 ${CMAKE_Fortran_FLAGS_DEFAULT_PREC})
       string(REPLACE "-real-size 64" "-real-size 32"
@@ -217,7 +209,8 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
                    APPEND_STRING PROPERTY COMPILE_FLAGS " ${CMAKE_Fortran_FLAGS_PREC32} ")
       # Add all of the above files to the list of schemes with special floating point precision flags
       list(APPEND SCHEMES_SFX_PREC ${CMAKE_CURRENT_SOURCE_DIR}/physics/gfdl_fv_sat_adj.F90)
-    endif (DYN32)
+      endif()
+    endif()
 
     # Remove files with special floating point precision flags from list
     # of files with standard floating point precision flags flags

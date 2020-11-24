@@ -1,14 +1,36 @@
+[ccpp-table-properties]
+  name = rrtmgp_lw_cloud_optics
+  type = scheme
+  dependencies = machine.F,rrtmg_lw_cloud_optics.F90,rrtmgp_aux.F90
+
+########################################################################
 [ccpp-arg-table]
   name = rrtmgp_lw_cloud_optics_init
   type = scheme
-[cld_optics_scheme]
-  standard_name = rrtmgp_cloud_optics_flag
-  long_name = Flag to control which RRTMGP cloud-optics scheme
+[doG_cldoptics]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMG
+  long_name = logical flag to control cloud optics scheme.
   units = flag
-  dimensions =  ()
-  type = integer
+  dimensions = ()
+  type = logical
   intent = in
-  optional = F
+  optional = F  
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F 
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F      
 [nrghice]
   standard_name = number_of_rrtmgp_ice_roughness
   long_name = number of ice-roughness categories in RRTMGP calculation
@@ -97,6 +119,46 @@
   type = logical
   intent = in
   optional = F
+[doG_cldoptics]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMG
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F  
+[icliq_lw]
+  standard_name = flag_for_optical_property_for_liquid_clouds_for_longwave_radiation
+  long_name = lw optical property for liquid clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[icice_lw]
+  standard_name = flag_for_optical_property_for_ice_clouds_for_longwave_radiation
+  long_name = lw optical property for ice clouds
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F 
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F   
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -113,14 +175,6 @@
   type = integer
   intent = in
   optional = F
-[cld_optics_scheme]
-  standard_name = rrtmgp_cloud_optics_flag
-  long_name = Flag to control which RRTMGP cloud-optics scheme
-  units = flag
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
 [nrghice]
   standard_name = number_of_rrtmgp_ice_roughness
   long_name = number of ice-roughness categories in RRTMGP calculation
@@ -133,7 +187,7 @@
   standard_name = total_cloud_fraction
   long_name = layer total cloud fraction
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -141,15 +195,15 @@
   standard_name = cloud_liquid_water_path
   long_name = layer cloud liquid water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
 [cld_reliq]
   standard_name = mean_effective_radius_for_liquid_cloud
   long_name = mean effective radius for liquid cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -157,15 +211,15 @@
   standard_name = cloud_ice_water_path
   long_name = layer cloud ice water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
 [cld_reice]
   standard_name = mean_effective_radius_for_ice_cloud
   long_name = mean effective radius for ice cloud
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -173,15 +227,15 @@
   standard_name = cloud_snow_water_path
   long_name = cloud snow water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
 [cld_resnow]
   standard_name = mean_effective_radius_for_snow_flake
   long_name = mean effective radius for snow flake
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
@@ -189,23 +243,32 @@
   standard_name = cloud_rain_water_path
   long_name = cloud rain water path
   units = g m-2
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
 [cld_rerain]
   standard_name = mean_effective_radius_for_rain_drop
   long_name = mean effective radius for rain drop
-  units = micron
-  dimensions = (horizontal_dimension,vertical_dimension)
+  units = um
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   intent = in
   kind = kind_phys
+[precip_frac]
+  standard_name = precipitation_fraction_by_layer
+  long_name = precipitation fraction in each layer
+  units = frac
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F   
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure layer
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -230,7 +293,7 @@
   standard_name = longitude
   long_name = longitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -239,7 +302,7 @@
   standard_name = latitude
   long_name = latitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -248,7 +311,7 @@
   standard_name = RRTMGP_cloud_optical_depth_layers_at_10mu_band
   long_name = approx 10mu band layer cloud optical depth
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -261,6 +324,14 @@
   type = ty_optical_props_1scl
   intent = out
   optional = F
+[lw_optical_props_precipByBand]
+  standard_name = longwave_optical_properties_for_precipitation_by_band
+  long_name = Fortran DDT containing RRTMGP optical properties
+  units = DDT
+  dimensions = ()
+  type = ty_optical_props_1scl
+  intent = out
+  optional = F  
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -279,7 +350,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmgp_lw_cloud_optics_finalize
-  type = scheme

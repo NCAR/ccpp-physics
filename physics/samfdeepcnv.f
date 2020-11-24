@@ -10,18 +10,9 @@
 
       contains
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfdeepcnv_init Argument Table
-!!
       subroutine samfdeepcnv_init()
       end subroutine samfdeepcnv_init
 
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfdeepcnv_finalize Argument Table
-!!
       subroutine samfdeepcnv_finalize()
       end subroutine samfdeepcnv_finalize
 
@@ -425,8 +416,8 @@ c
         aafac   = .05
         cxlame  = 1.0e-4
       endif
-      crtlame = 1.0e-4
       crtlamd = 1.0e-4
+      crtlame = 1.0e-4
       cxlamd  = 1.0e-4
       xlamde  = 1.0e-4
       xlamdd  = 1.0e-4

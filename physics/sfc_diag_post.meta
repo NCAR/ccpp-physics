@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = sfc_diag_post
+  type = scheme
+  dependencies = machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = sfc_diag_post_run
   type = scheme
@@ -29,7 +35,7 @@
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating presence of some land surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -72,7 +78,7 @@
   standard_name = surface_air_pressure
   long_name = surface pressure
   units = Pa
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -81,7 +87,7 @@
   standard_name = temperature_at_2m_from_noahmp
   long_name = 2 meter temperature from noahmp
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -90,7 +96,7 @@
   standard_name = specific_humidity_at_2m_from_noahmp
   long_name = 2 meter specific humidity from noahmp
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -99,7 +105,7 @@
   standard_name = temperature_at_2m
   long_name = 2 meter temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -108,7 +114,7 @@
   standard_name = specific_humidity_at_2m
   long_name = 2 meter specific humidity
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -117,7 +123,7 @@
   standard_name = x_wind_at_10m
   long_name = 10 meter u wind speed
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -126,7 +132,7 @@
   standard_name = y_wind_at_10m
   long_name = 10 meter v wind speed
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -135,7 +141,7 @@
   standard_name = minimum_temperature_at_2m
   long_name = min temperature at 2m height
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -144,7 +150,7 @@
   standard_name = maximum_temperature_at_2m
   long_name = max temperature at 2m height
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -153,7 +159,7 @@
   standard_name = minimum_specific_humidity_at_2m
   long_name = minimum specific humidity at 2m height
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -162,7 +168,7 @@
   standard_name = maximum_specific_humidity_at_2m
   long_name = maximum specific humidity at 2m height
   units = kg kg-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -171,7 +177,7 @@
   standard_name = maximum_wind_at_10m
   long_name = maximum wind speed at 10 m
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -180,7 +186,7 @@
   standard_name = maximum_x_wind_at_10m
   long_name = maximum x wind at 10 m
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -189,7 +195,7 @@
   standard_name = maximum_y_wind_at_10m
   long_name = maximum y wind at 10 m
   units = m s-1
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -198,7 +204,7 @@
   standard_name = dewpoint_temperature_at_2m
   long_name = 2 meter dewpoint temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout

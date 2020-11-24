@@ -1,7 +1,7 @@
 !>  \file sfc_noah_wrfv4.F90
 !!  This file contains the Noah land surface scheme driver for the version of the scheme found in WRF v4.0.
 
-!> This module contains the CCPP-compliant Noah land surface scheme driver for
+!> This module contains the CCPP-compliant Noah land surface scheme driver for 
 !! the version found in WRF v4.0.
       module sfc_noah_wrfv4
 
@@ -20,9 +20,9 @@
       subroutine sfc_noah_wrfv4_init(lsm, lsm_noah_wrfv4, nsoil, ua_phys, fasdas, restart, errmsg, errflg)
 
       use machine, only : kind_phys
-
+      
       implicit none
-
+      
       integer,              intent(in)  :: lsm, lsm_noah_wrfv4, nsoil, fasdas
       logical,              intent(in)  :: ua_phys, restart
 
@@ -32,32 +32,32 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
       if (lsm/=lsm_noah_wrfv4) then
         write(errmsg,'(*(a))') "Logic error: namelist choice of LSM is different from NOAH WRFv4"
         errflg = 1
         return
       end if
-
+      
       if (nsoil < 2) then
         write(errmsg,'(*(a))') "The NOAH WRFv4 scheme expects at least 2 soil layers."
         errflg = 1
         return
       end if
-
+      
       if (ua_phys) then
         write(errmsg,'(*(a))') "The NOAH WRFv4 scheme has not been tested with ua_phys = T"
         errflg = 1
         return
       end if
-
-
+      
+      
       if (fasdas > 0) then
         write(errmsg,'(*(a))') "The NOAH WRFv4 scheme has not been tested with fasdas > 0"
         errflg = 1
         return
       end if
-
+      
       if (restart) then
         !GJF: for restart functionality, the host model will need to write/read snotime (time_since_last_snowfall (s))
         write(errmsg,'(*(a))') "The NOAH WRFv4 scheme has not been configured for restarts."
@@ -67,7 +67,7 @@
 
       !GJF: check for rdlai != F?
       !GJF: check for usemonalb != T?
-
+      
       end subroutine sfc_noah_wrfv4_init
 
 
@@ -103,19 +103,19 @@
         lsubf, sheat, eta, ec, edir, ett, esnow, etp, ssoil,            &
         flx1, flx2, flx3, sncovr, runoff1, runoff2, soilm, qsurf, ribb, &
         smcwlt, smcref, smcmax, opt_thcnd, snotime, errmsg, errflg)
-
+        
       use machine , only : kind_phys
       use module_sf_noahlsm, only: sflx, lutype, sltype
       use module_sf_noahlsm_glacial_only, only: sflx_glacial
 
       implicit none
-
+      
       integer,                             intent(in) :: im, isice, isurban, nsoil, opt_thcnd, fasdas
       logical,                             intent(in) :: rdlai, ua_phys, usemonalb
       !GJF: usemonalb = True if the surface diffused shortwave albedo is EITHER read from input OR
       !  provided by a previous scheme (like radiation: as is done in GFS_rrtmgp_sw_pre)
       real(kind=kind_phys),                intent(in) :: aoasis
-
+      
       real(kind=kind_phys),                intent(in) :: dt, cp, rd, sigma, cph2o, cpice, lsubf
 
       integer, dimension(im),              intent(in) :: vegtyp, soiltyp, slopetyp
@@ -129,7 +129,7 @@
                                                             cmc, t1, snowhk, sneqv, chk, flx1, &
                                                             flx2, flx3, ribb, snotime
       real(kind=kind_phys), dimension(im,nsoil), intent(inout) :: stc, smc, swc
-
+      
       !variables that are intent(out) in module_sf_noahlsm, but are inout here due to being set within an IF statement
       real(kind=kind_phys), dimension(im), intent(inout) :: embrd, sheat, eta, ec, &
                                                             edir, ett, esnow, etp, ssoil, sncovr, &
@@ -138,28 +138,28 @@
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
-
+      
       !GJF: There is some confusion regarding specific humidities vs mixing ratios in NOAH LSM.
       ! Looking at module_sf_noahlsm.F, sometimes the comments say mixing ratio and sometimes
-      ! specific humidity. The WRF code (module_sf_noahdrv.F) specifically converts from mixing
+      ! specific humidity. The WRF code (module_sf_noahdrv.F) specifically converts from mixing 
       ! ratio to specific humidity in preparation for calling SFLX, so I am assuming that
-      ! all inputs/outputs into SFLX should be specific humidities, despite some comments in
+      ! all inputs/outputs into SFLX should be specific humidities, despite some comments in 
       ! module_sf_noahdrv.F describing arguments saying "mixing ratios". This applies to many
       ! arguments into SFLX (q1k, qs1, dqsdt2, eta, qsurf, etc.).
-
+      
 !     local Variables
       integer :: i, k
       logical, parameter :: local = .false.  !(not actually used in SFLX) described in module_sf_noahlsm as:
       ! Flag for local-site simulation (where there is no maps for albedo, veg fraction, and roughness
       !   true:  all LSM parameters (inluding albedo, veg fraction and roughness length) will be defined by three tables
 
-      real(kind=kind_phys) :: dummy
-
+      real(kind=kind_phys) :: dummy 
+      
       !GJF: The following variables are part of the interface to SFLX but not required as diagnostic
-      ! output or otherwise outside of this subroutine (at least as part of a GFS-based suite).
-      ! If any of these variables are needed by other schemes or diagnostics, one needs to add it to
+      ! output or otherwise outside of this subroutine (at least as part of a GFS-based suite). 
+      ! If any of these variables are needed by other schemes or diagnostics, one needs to add it to 
       ! the host model and CCPP metadata. Alternatively, none of these variables NEED to be allocated
-      ! and one could also just pass in dummy arguments.
+      ! and one could also just pass in dummy arguments. 
       !
       ! The variables descriptions are from module_sf_noahlsm.F:
       !
@@ -187,7 +187,7 @@
       ! smcdry (output from SFLX): dry soil moisture threshold where direct evap frm top layer ends (volumetric)
       ! smcmax (output from SFLX): porosity, i.e. saturated value of soil moisture (volumetric)
       ! nroot (output from SFLX): number of root layers, a function of veg type, determined in subroutine redprm.
-
+      
       integer :: nroot
       real(kind=kind_phys) :: albedok, eta_kinematic, fdown, drip, dew, beta, snomlt, &
                               runoff3, rc, pc, rsmin, xlai, rcs, rct, rcq,  &
@@ -195,15 +195,15 @@
       real (kind=kind_phys), dimension(nsoil) :: et, smav
       real(kind=kind_phys) :: sfcheadrt, infxsrt, etpnd1 !don't appear to be used unless WRF_HYDRO preprocessor directive is defined and no documentation
       real(kind=kind_phys) :: xsda_qfx, hfx_phy, qfx_phy, xqnorm, hcpct_fasdas !only used if fasdas = 1
-
+      
       !variables associated with UA_PHYS (not used for now)
       real(kind=kind_phys) :: flx4, fvb, fbur, fgsn
 
       errmsg = ''
       errflg = 0
-
+      
       do i=1, im
-        if (flag_lsm(i)) then
+        if (flag_lsm(i)) then  
           !GJF: Why do LSMs want the dynamics time step instead of the physics time step?
           call sflx (i, 1, srflag(i), &
                   isurban, dt, zlvl(i), nsoil, sthick,              &    !c
@@ -222,7 +222,7 @@
                   eta(i), sheat(i), eta_kinematic, fdown,           &    !O
                   ec(i), edir(i), et, ett(i), esnow(i), drip, dew,  &    !O
                   beta, etp(i), ssoil(i), flx1(i), flx2(i), flx3(i),&    !O
-                  flx4, fvb, fbur, fgsn, ua_phys,                   &    !UA
+                  flx4, fvb, fbur, fgsn, ua_phys,                   &    !UA 
                   snomlt, sncovr(i), runoff1(i), runoff2(i),runoff3,&    !O
                   rc, pc, rsmin, xlai, rcs, rct, rcq, rcsoil,       &    !O
                   soilw, soilm(i), qsurf(i), smav,                  &    !D
@@ -239,7 +239,7 @@
           runoff2(i) = 0.0
           swc(i,:) = 1.0
           smc(i,:) = 1.0
-
+          
           call sflx_glacial (i, 1, isice, srflag(i), dt, zlvl(i),   &
                   nsoil, sthick, lwdn(i), solnet(i), sfcprs(i),     &
                   prcp(i), sfctmp(i), q1k(i), th1(i), qs1(i),       &
@@ -254,7 +254,7 @@
           if (errflg > 0) return
         end if
       end do
-
+      
       end subroutine sfc_noah_wrfv4_run
 !> @}
 
