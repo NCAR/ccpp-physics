@@ -149,7 +149,7 @@ CONTAINS
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
               ISFFLX,isftcflx,lsm,iz0tlnd,psi_opt,   & !in
-     &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)                                   
+     &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
      &        z0pert,ztpert,                         & !intent(in)
      &        redrag,sfc_z0_type,                    & !intent(in)
               itimestep,iter,                        & !in
@@ -351,7 +351,8 @@ CONTAINS
       REAL, DIMENSION( ims:ime ), INTENT(IN)    ::                 &
      &                    tskin_ocn, tskin_lnd, tskin_ice,         &
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,         &
-     &                    snowh_ocn, snowh_lnd, snowh_ice
+     &                    snowh_ocn, snowh_lnd, snowh_ice,         &
+     &                    qsfc_ruc
 
       REAL, DIMENSION( ims:ime), INTENT(INOUT) ::                  &
      &                      ZNT_ocn,   ZNT_lnd,   ZNT_ice,         &
@@ -366,8 +367,7 @@ CONTAINS
      &                      fh2_ocn,   fh2_lnd,   fh2_ice,         &
      &                     HFLX_ocn,  HFLX_lnd,  HFLX_ice,         &
      &                     QFLX_ocn,  QFLX_lnd,  QFLX_ice,         &
-     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice,         &
-     &                                qsfc_ruc
+     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
 
 !ADDITIONAL OUTPUT
 !JOE-begin
