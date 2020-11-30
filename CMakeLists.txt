@@ -163,28 +163,6 @@ if (${CMAKE_Fortran_COMPILER_ID} STREQUAL "GNU")
 elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
   # Adjust settings for bit-for-bit reproducibility of NEMSfv3gfs
   if (PROJECT STREQUAL "CCPP-FV3")
-    SET_SOURCE_FILES_PROPERTIES(${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bfmicrophysics.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sflx.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diff.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/sfc_diag.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_model.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/calpreciptype.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/mersenne_twister.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_nst_water_prop.f90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/aer_cloud.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/wv_saturation.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cldwat2m_micro.F
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/surface_perturbation.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/radiation_aerosols.f
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cu_gf_deep.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/cu_gf_sh.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_bl_mynn.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNPBL_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_MYNNSFC_wrapper.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_mp_thompson_make_number_concentrations.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_SF_JSFC.F90
-                                ${CMAKE_CURRENT_SOURCE_DIR}/physics/module_BL_MYJPBL.F90
-                                PROPERTIES COMPILE_FLAGS "-r8 -ftz")
 
     if (${CMAKE_CURRENT_SOURCE_DIR}/physics/module_sf_mynn.F90 IN_LIST SCHEMES)
       # Reduce optimization for module_sf_mynn.F90 (to avoid an apparent compiler bug with Intel 18 on Hera)
@@ -212,7 +190,9 @@ elseif (${CMAKE_Fortran_COMPILER_ID} STREQUAL "Intel")
     endif()
 
     # Remove files with special compiler flags from list of files with standard compiler flags
-    list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    if (SCHEMES_SFX_OPT)
+      list(REMOVE_ITEM SCHEMES ${SCHEMES_SFX_OPT})
+    endif(SCHEMES_SFX_OPT)
     # Assign standard compiler flags to all remaining schemes and caps
     SET_SOURCE_FILES_PROPERTIES(${SCHEMES} ${CAPS}
                                 PROPERTIES COMPILE_FLAGS "${CMAKE_Fortran_FLAGS_OPT}")

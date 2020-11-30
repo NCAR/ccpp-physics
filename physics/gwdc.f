@@ -7,10 +7,6 @@
       module gwdc_pre
       contains
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_gwdc_pre_init Argument Table
-!!
       subroutine gwdc_pre_init()
       end subroutine gwdc_pre_init
 
@@ -22,7 +18,7 @@
       subroutine gwdc_pre_run (                                         &
      &  im, cgwf, dx, work1, work2, dlength, cldf,                      &
      &  levs, kbot, ktop, dtp, gt0, gt0_init, del, cumabs,              &
-     &  do_cnvgwd, errmsg, errflg )
+     &  errmsg, errflg )
 
       use machine, only : kind_phys
       implicit none
@@ -38,7 +34,6 @@
       real(kind=kind_phys), intent(out) ::                              &
      &  dlength(:), cldf(:), cumabs(:)
 
-      logical,          intent(in)  :: do_cnvgwd
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
@@ -49,14 +44,6 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
-      ! DH*
-      if (.not. do_cnvgwd) then
-          write(0,*) "ERROR: , GWDC_PRE CALLED BUT DO_CNVGWD FALSE"
-          call sleep(5)
-          stop
-      end if
-      ! *DH
 
       do i = 1, im
         tem1       = dx(i)
@@ -85,10 +72,6 @@
 
       end subroutine gwdc_pre_run
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_gwdc_pre_finalize Argument Table
-!!
       subroutine gwdc_pre_finalize ()
       end subroutine gwdc_pre_finalize
 
@@ -103,8 +86,26 @@
 ! \brief Brief description of the subroutine
 !
 !> \section arg_table_gwdc_init Argument Table
+!! \htmlinclude gwdc_init.html
 !!
-      subroutine gwdc_init()
+      subroutine gwdc_init(do_cnvgwd, errmsg, errflg)
+
+      implicit none
+
+      logical,          intent(in)  :: do_cnvgwd
+      character(len=*), intent(out) :: errmsg
+      integer,          intent(out) :: errflg
+
+      ! Initialize CCPP error handling variables
+      errmsg = ''
+      errflg = 0
+
+      if (.not. do_cnvgwd) then
+          errmsg = "Logic error: gwdc called but do_cnvgwd is false"
+          errflg = 1 
+          return
+      end if
+
       end subroutine gwdc_init
 
 !> \defgroup GFS_gwdc_run GFS Convective Gravity Wave Drag Scheme Module
@@ -1437,10 +1438,6 @@
       end subroutine gwdc_run
 !> @}
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_gwdc_finalize Argument Table
-!!
       subroutine gwdc_finalize()
       end subroutine gwdc_finalize
 
@@ -1452,10 +1449,6 @@
 
       contains
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_gwdc_post_init Argument Table
-!!
       subroutine gwdc_post_init()
       end subroutine gwdc_post_init
 
@@ -1522,10 +1515,6 @@
 
       end subroutine gwdc_post_run
 
-! \brief Brief description of the subroutine
-!
-!> \section arg_table_gwdc_post_finalize Argument Table
-!!
       subroutine gwdc_post_finalize()
       end subroutine gwdc_post_finalize
 

@@ -7,8 +7,6 @@
 
       contains
 
-!> \section arg_table_drag_suite_init Argument Table
-!!
       subroutine drag_suite_init()
       end subroutine drag_suite_init
 
@@ -186,13 +184,6 @@
 !!
 !> \section det_drag_suite GFS Orographic GWD Scheme Detailed Algorithm
 !> @{
-!      subroutine drag_suite_run(                                             &
-!     &           IM,IX,KM,A,B,C,U1,V1,T1,Q1,KPBL,                       &
-!     &           PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DELTIM,KDT,             &
-!     &           HPRIME,OC,OA4,CLX4,THETA,SIGMA,GAMMA,ELVMAX,           &
-!     &           DUSFC,DVSFC,G, CP, RD, RV, IMX,                        &
-!     &           nmtvr, cdmbgwd, me, lprnt, ipr, rdxzb, errmsg, errflg)
-!
    subroutine drag_suite_run(                                           &
      &           IM,KM,dvdt,dudt,dtdt,U1,V1,T1,Q1,KPBL,                 &
      &           PRSI,DEL,PRSL,PRSLK,PHII,PHIL,DELTIM,KDT,              &
@@ -206,7 +197,9 @@
      &           dusfc_ss,dvsfc_ss,dusfc_fd,dvsfc_fd,                   &
      &           slmsk,br1,hpbl,                                        &
      &           g, cp, rd, rv, fv, pi, imx, cdmbgwd, me, master,       &
-     &           lprnt, ipr, rdxzb, dx, gwd_opt, errmsg, errflg     )
+     &           lprnt, ipr, rdxzb, dx, gwd_opt,                        &
+     &           do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,   &
+     &           errmsg, errflg     )
 
 !   ********************************************************************
 ! ----->  I M P L E M E N T A T I O N    V E R S I O N   <----------
@@ -243,6 +236,15 @@
 !    2017-09-25  Michael Toy (from NCEP GFS model) added dissipation heating
 !                    gsd_diss_ht_opt = 0: dissipation heating off
 !                    gsd_diss_ht_opt = 1: dissipation heating on
+!    2020-08-25  Michael Toy changed logic control for drag component selection
+!                    for CCPP.
+!                    Namelist options:
+!                    do_gsl_drag_ls_bl - logical flag for large-scale GWD + blocking
+!                    do_gsl_drag_ss - logical flag for small-scale GWD
+!                    do_gsl_drag_tofd - logical flag for turbulent form drag
+!                    Compile-time options (same as before):
+!                    gwd_opt_ls = 0 or 1: large-scale GWD
+!                    gwd_opt_bl = 0 or 1: blocking drag
 !
 !  References:
 !        Hong et al. (2008), wea. and forecasting
@@ -363,12 +365,16 @@
 !-------------------------------------------------------------------------
 ! Flags to regulate the activation of specific components of drag suite:
 ! Each component is tapered off automatically as a function of dx, so best to
-! keep them activated (=1).
-      integer, parameter ::      &
-      gwd_opt_ls      = 1,       & ! large-scale gravity wave drag
-      gwd_opt_bl      = 1,       & ! blocking drag
-      gwd_opt_ss      = 1,       & ! small-scale gravity wave drag (Steeneveld et al. 2008)
-      gwd_opt_fd      = 1,       & ! form drag (Beljaars et al. 2004, QJRMS)
+! keep them activated (.true.).
+      logical, intent(in) ::   &
+      do_gsl_drag_ls_bl,       & ! large-scale gravity wave drag and blocking
+      do_gsl_drag_ss,          & ! small-scale gravity wave drag (Steeneveld et al. 2008)
+      do_gsl_drag_tofd           ! form drag (Beljaars et al. 2004, QJRMS)
+
+! Additional flags
+      integer, parameter ::    &
+      gwd_opt_ls      = 1,     & ! large-scale gravity wave drag
+      gwd_opt_bl      = 1,     & ! blocking drag
       gsd_diss_ht_opt = 0
 
 ! Parameters for bounding the scale-adaptive variability:
@@ -616,7 +622,7 @@ end if
      enddo
    enddo
 !
-   if (gwd_opt == 33) then
+   if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
      do i = its,im
        dusfc_ls(i) = 0.0
        dvsfc_ls(i) = 0.0
@@ -759,7 +765,8 @@ end if
 !
 ! END INITIALIZATION; BEGIN GWD CALCULATIONS:
 !
-IF ( ((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)).and.   &
+IF ( (do_gsl_drag_ls_bl).and.                            &
+     ((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)).and.   &
                (ls_taper .GT. 1.E-02) ) THEN   !====
 !
 !---  saving richardson number in usqj for migwdi
@@ -895,7 +902,7 @@ IF ( ((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)).and.   &
      endif
    enddo
 
-ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
+ENDIF   ! (do_gsl_drag_ls_bl).and.((gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1))
 
 !=========================================================
 ! add small-scale wavedrag for stable boundary layer
@@ -907,7 +914,7 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
   utendwave=0.
   vtendwave=0.
 !
-  IF ( (gwd_opt_ss .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
+  IF ( (do_gsl_drag_ss).and.(ss_taper.GT.1.E-02) ) THEN
     ! if (me==master) print *,"in Drag Suite: Running small-scale gravity wave drag"
 !
 ! declaring potential temperature
@@ -1008,7 +1015,7 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
          dvsfc(i)   = dvsfc(i) + vtendwave(i,k) * del(i,k)
        enddo
     enddo
-    if (gwd_opt == 33) then
+    if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
       do k = kts,km
         do i = its,im
           dusfc_ss(i) = dusfc_ss(i) + utendwave(i,k) * del(i,k)
@@ -1019,12 +1026,12 @@ ENDIF   ! (gwd_opt_ls .EQ. 1).or.(gwd_opt_bl .EQ. 1)
       enddo
     endif
 
-ENDIF  ! end if gwd_opt_ss == 1
+ENDIF  ! if (do_gsl_drag_ss)
 
 !================================================================
 ! Topographic Form Drag from Beljaars et al. (2004, QJRMS, equ. 16):
 !================================================================
-IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
+IF ( (do_gsl_drag_tofd).and.(ss_taper.GT.1.E-02) ) THEN
     ! if (me==master) print *,"in Drag Suite: Running form drag"
 
    utendform=0.
@@ -1066,7 +1073,7 @@ IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
          dvsfc(i)   = dvsfc(i) + vtendform(i,k) * del(i,k)
       enddo
    enddo
-   if (gwd_opt == 33) then
+   if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
      do k = kts,km
        do i = its,im
          dtaux2d_fd(i,k) = utendform(i,k)
@@ -1077,10 +1084,11 @@ IF ( (gwd_opt_fd .EQ. 1).and.(ss_taper.GT.1.E-02) ) THEN
      enddo
    endif
 
-ENDIF  ! end if gwd_opt_fd == 1
+ENDIF  ! if (do_gsl_drag_tofd)
 !=======================================================
 ! More for the large-scale gwd component
-IF ( (gwd_opt_ls .EQ. 1).and.(ls_taper.GT.1.E-02) ) THEN
+IF ( (do_gsl_drag_ls_bl).and.                                        &
+     (gwd_opt_ls .EQ. 1).and.(ls_taper.GT.1.E-02) ) THEN
     ! if (me==master) print *,"in Drag Suite: Running large-scale gravity wave drag"
 !
 !   now compute vertical structure of the stress.
@@ -1148,7 +1156,8 @@ ENDIF !END LARGE-SCALE TAU CALCULATION
 !===============================================================
 !COMPUTE BLOCKING COMPONENT                                     
 !===============================================================
-IF ( (gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
+IF ( (do_gsl_drag_ls_bl) .and.                                       &
+     (gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
    ! if (me==master) print *,"in Drag Suite: Running blocking drag"
 
    do i = its,im
@@ -1194,7 +1203,8 @@ IF ( (gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
 
 ENDIF   ! end blocking drag
 !===========================================================
-IF ( (gwd_opt_ls .EQ. 1 .OR. gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
+IF ( (do_gsl_drag_ls_bl) .and.                                       &
+     (gwd_opt_ls .EQ. 1 .OR. gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) THEN
 !
 !  calculate - (g)*d(tau)/d(pressure) and deceleration terms dtaux, dtauy
 !
@@ -1264,7 +1274,7 @@ IF ( (gwd_opt_ls .EQ. 1 .OR. gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) T
     dvsfc(i) = (-1./g*rcs) * dvsfc(i)
    enddo
 
-   if (gwd_opt == 33) then
+   if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
      do k = kts,km
        do i = its,im
          dtaux2d_ls(i,k) = taud_ls(i,k) * xn(i)
@@ -1279,9 +1289,9 @@ IF ( (gwd_opt_ls .EQ. 1 .OR. gwd_opt_bl .EQ. 1) .and. (ls_taper .GT. 1.E-02) ) T
      enddo
    endif
 
-ENDIF
+ENDIF  ! (do_gsl_drag_ls_bl).and.(gwd_opt_ls.EQ.1 .OR. gwd_opt_bl.EQ.1)
 
-if (gwd_opt == 33) then
+if ( (gwd_opt == 33).or.(gwd_opt == 22) ) then
   !  Finalize dusfc and dvsfc diagnostics
   do i = its,im
     dusfc_ls(i) = (-1./g*rcs) * dusfc_ls(i)
@@ -1299,8 +1309,7 @@ endif
    end subroutine drag_suite_run
 !-------------------------------------------------------------------
 !
-!> \section arg_table_drag_suite_finalize Argument Table
-!!
+
       subroutine drag_suite_finalize()
       end subroutine drag_suite_finalize
 

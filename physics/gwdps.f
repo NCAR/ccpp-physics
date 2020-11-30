@@ -7,8 +7,6 @@
 
       contains
 
-!> \section arg_table_gwdps_init Argument Table
-!!
       subroutine gwdps_init()
       end subroutine gwdps_init
 
@@ -1309,9 +1307,6 @@
       end subroutine gwdps_run
 !> @}
 
-!
-!> \section arg_table_gwdps_finalize Argument Table
-!!
       subroutine gwdps_finalize()
       end subroutine gwdps_finalize
 

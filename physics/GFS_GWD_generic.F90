@@ -86,7 +86,7 @@ contains
         clx(:,2)  = 0.0
         clx(:,3)  = 0.0
         clx(:,4)  = 0.0
-      elseif (nmtvr == 24) then   ! GSD_drag_suite
+      elseif (nmtvr == 24) then   ! GSD_drag_suite and unified_ugwp
         oc(:)       = mntvar(:,2)
         oa4(:,1)    = mntvar(:,3)
         oa4(:,2)    = mntvar(:,4)
@@ -96,6 +96,10 @@ contains
         clx(:,2)    = mntvar(:,8)
         clx(:,3)    = mntvar(:,9)
         clx(:,4)    = mntvar(:,10)
+        theta(:)    = mntvar(:,11)
+        gamma(:)    = mntvar(:,12)
+        sigma(:)    = mntvar(:,13)
+        elvmax(:)   = mntvar(:,14)
         varss(:)    = mntvar(:,15)
         ocss(:)     = mntvar(:,16)
         oa4ss(:,1)  = mntvar(:,17)

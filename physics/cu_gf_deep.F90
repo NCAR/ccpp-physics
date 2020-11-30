@@ -338,6 +338,7 @@ contains
      integer :: turn,pmin_lev(its:ite),start_level(its:ite),ktopkeep(its:ite)
      real(kind=kind_phys),    dimension (its:ite,kts:kte) :: dtempdz
      integer, dimension (its:ite,kts:kte) ::  k_inv_layers 
+     real(kind=kind_phys) :: c0    ! HCB
  
 ! rainevap from sas
      real(kind=kind_phys) zuh2(40)
@@ -383,6 +384,14 @@ contains
 ! sas
 !     lambau=0.
 !     pgcon=-.55
+!
+!---------------------------------------------------- ! HCB
+! Set cloud water to rain water conversion rate (c0)
+      c0=0.004
+      if(imid.eq.1)then
+        c0=0.002
+      endif
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       ztexec(:)     = 0.
       zqexec(:)     = 0.
@@ -937,14 +946,14 @@ contains
       if(imid.eq.1)then
         call cup_up_moisture('mid',ierr,zo_cup,qco,qrco,pwo,pwavo,               &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,                              &
+             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
              zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
       else
          call cup_up_moisture('deep',ierr,zo_cup,qco,qrco,pwo,pwavo,             &
              p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,                              &
+             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
              zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
              1,itf,ktf,                                                          &
              its,ite, kts,kte)
@@ -1266,14 +1275,14 @@ contains
 !      if(imid.eq.1)then
 !        call cup_up_moisture('mid',ierr,zo_cup,qco,qrco,pwo,pwavo,               &
 !             p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-!             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,                              &
+!             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
 !             zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
 !             1,itf,ktf,                                                          &
 !             its,ite, kts,kte)
 !      else
 !         call cup_up_moisture('deep',ierr,zo_cup,qco,qrco,pwo,pwavo,             &
 !             p_cup,kbcon,ktop,dbyo,clw_all,xland1,                               &
-!             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,                              &
+!             qo,gammao_cup,zuo,qeso_cup,k22,qo_cup,c0,                           &
 !             zqexec,ccn,rho,c1d,tn_cup,up_massentr,up_massdetr,psum,psumh,       &
 !             1,itf,ktf,                                                          &
 !             its,ite, kts,kte)
@@ -3865,7 +3874,7 @@ endif
 !>\ingroup cu_gf_deep_group
    subroutine cup_up_moisture(name,ierr,z_cup,qc,qrc,pw,pwav,     &
               p_cup,kbcon,ktop,dby,clw_all,xland1,                &
-              q,gamma_cup,zu,qes_cup,k22,qe_cup,                  &
+              q,gamma_cup,zu,qes_cup,k22,qe_cup,c0,               &
               zqexec,ccn,rho,c1d,t,                               &
               up_massentr,up_massdetr,psum,psumh,                 &
               itest,itf,ktf,                                      &
@@ -3904,6 +3913,8 @@ endif
      integer, dimension (its:ite)                                 &
         ,intent (in   )                   ::                      &
         kbcon,ktop,k22,xland1
+     real(kind=kind_phys),    intent (in  ) ::                    & ! HCB
+        c0
 !
 ! input and output
 !
@@ -3944,7 +3955,7 @@ endif
      integer :: start_level(its:ite)
      real(kind=kind_phys)                                 ::                       &
         prop_ave,qrcb_h,bdsp,dp,rhoc,qrch,qaver,clwdet,                   &
-        c0,dz,berryc0,q1,berryc
+        dz,berryc0,q1,berryc
      real(kind=kind_phys)                                 ::                       &
         denom, c0t
      real(kind=kind_phys),    dimension (kts:kte)         ::                       &
@@ -3952,7 +3963,6 @@ endif
 !
         prop_b(kts:kte)=0
         iall=0
-        c0=.002
         clwdet=50.
         bdsp=bdispm
 !
@@ -3999,7 +4009,7 @@ endif
       enddo
 
        do 100 i=its,itf
-        c0=.004
+         !c0=.004 HCB tuning
          if(ierr(i).eq.0)then
 
 ! below lfc, but maybe above lcl
@@ -4031,8 +4041,8 @@ endif
 !now do the rest
 !
             do k=kbcon(i)+1,ktop(i)
-               c0=.004
-               if(t(i,k).lt.270.)c0=.002
+               !c0=.004 HCB tuning
+               !if(t(i,k).lt.270.)c0=.002 HCB tuning
                if(t(i,k) > 273.16) then
                   c0t = c0
                else

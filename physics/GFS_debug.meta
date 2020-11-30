@@ -5,6 +5,52 @@
 
 ########################################################################
 [ccpp-arg-table]
+  name = GFS_diagtoscreen_init
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Data]
+  standard_name = GFS_data_type_instance_all_blocks
+  long_name = instance of derived type GFS_data_type
+  units = DDT
+  dimensions = (ccpp_block_count)
+  type = GFS_data_type
+  intent = in
+  optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance_all_threads
+  long_name = instance of derived type GFS_interstitial_type
+  units = DDT
+  dimensions = (omp_threads)
+  type = GFS_interstitial_type
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
+
+########################################################################
+[ccpp-arg-table]
   name = GFS_diagtoscreen_run
   type = scheme
 [Model]
@@ -134,6 +180,52 @@
   name = GFS_interstitialtoscreen
   type = scheme
   dependencies = machine.F
+
+########################################################################
+[ccpp-arg-table]
+  name = GFS_interstitialtoscreen_init
+  type = scheme
+[Model]
+  standard_name = GFS_control_type_instance
+  long_name = instance of derived type GFS_control_type in FV3
+  units = DDT
+  dimensions = ()
+  type = GFS_control_type
+  intent = in
+  optional = F
+[Data]
+  standard_name = GFS_data_type_instance_all_blocks
+  long_name = instance of derived type GFS_data_type
+  units = DDT
+  dimensions = (ccpp_block_count)
+  type = GFS_data_type
+  intent = in
+  optional = F
+[Interstitial]
+  standard_name = GFS_interstitial_type_instance_all_threads
+  long_name = instance of derived type GFS_interstitial_type
+  units = DDT
+  dimensions = (omp_threads)
+  type = GFS_interstitial_type
+  intent = in
+  optional = F
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
 
 ########################################################################
 [ccpp-arg-table]
@@ -367,7 +459,7 @@
   standard_name = flag_for_iteration
   long_name = flag for iteration
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -375,7 +467,7 @@
   standard_name = flag_for_guess_run
   long_name = flag for guess run
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -423,7 +515,7 @@
   standard_name = soil_type_classification_real
   long_name = soil type for lsm
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -432,7 +524,7 @@
   standard_name = vegetation_type_classification_real
   long_name = vegetation type for lsm
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -441,7 +533,7 @@
   standard_name = surface_slope_classification_real
   long_name = sfc slope type for lsm
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -450,7 +542,7 @@
   standard_name = soil_type_classification
   long_name = soil type at each grid cell
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -458,7 +550,7 @@
   standard_name = vegetation_type_classification
   long_name = vegetation type at each grid cell
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -466,7 +558,7 @@
   standard_name = surface_slope_classification
   long_name = surface slope type at each grid cell
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -474,7 +566,7 @@
   standard_name = flag_nonzero_land_surface_fraction
   long_name = flag indicating some land surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -482,7 +574,7 @@
   standard_name = flag_nonzero_sea_ice_surface_fraction
   long_name = flag indicating some sea ice surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -490,7 +582,7 @@
   standard_name = flag_nonzero_wet_surface_fraction
   long_name = flag indicating some ocean or lake surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -498,7 +590,7 @@
   standard_name = flag_nonzero_lake_surface_fraction
   long_name = flag indicating some lake surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -506,7 +598,7 @@
   standard_name = flag_nonzero_ocean_surface_fraction
   long_name = flag indicating some ocean surface area fraction
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = logical
   intent = in
   optional = F
@@ -514,7 +606,7 @@
   standard_name = sea_area_fraction
   long_name = fraction of horizontal grid area occupied by ocean
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -523,7 +615,7 @@
   standard_name = land_area_fraction
   long_name = fraction of horizontal grid area occupied by land
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -532,7 +624,7 @@
   standard_name = lake_area_fraction
   long_name = fraction of horizontal grid area occupied by lake
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -541,7 +633,7 @@
   standard_name = sea_land_ice_mask_real
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -550,7 +642,7 @@
   standard_name = sea_land_ice_mask
   long_name = sea/land/ice mask (=0/1/2)
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F

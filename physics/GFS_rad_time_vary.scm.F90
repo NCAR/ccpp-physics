@@ -13,8 +13,6 @@
 !>\defgroup GFS_rad_time_vary GFS RRTMG Update
 !!\ingroup RRTMG
 !! @{
-!! \section arg_table_GFS_rad_time_vary_init Argument Table
-!!
       subroutine GFS_rad_time_vary_init
       end subroutine GFS_rad_time_vary_init
 
@@ -86,8 +84,6 @@
 
   end subroutine GFS_rad_time_vary_run
 
-!> \section arg_table_GFS_rad_time_vary_finalize Argument Table
-!!
   subroutine GFS_rad_time_vary_finalize()
   end subroutine GFS_rad_time_vary_finalize
 !! @}

@@ -6,19 +6,13 @@ contains
 
 !>\defgroup cires_ugwp_post CIRES UGWP Scheme Post
 !! @{
-!> \section arg_table_cires_ugwp_post_init Argument Table
-!!
     subroutine cires_ugwp_post_init ()
     end subroutine cires_ugwp_post_init
 
 !>@brief The subroutine initializes the CIRES UGWP
-#if 0
 !> \section arg_table_cires_ugwp_post_run Argument Table
 !! \htmlinclude cires_ugwp_post_run.html
 !!
-#endif
-
-
      subroutine cires_ugwp_post_run (ldiag_ugwp, dtf, im, levs,     &
          gw_dtdt, gw_dudt, gw_dvdt, tau_tofd, tau_mtb, tau_ogw,     &
          tau_ngw, zmtb, zlwb, zogw, dudt_mtb, dudt_ogw, dudt_tms,   &
@@ -74,8 +68,6 @@ contains
 
       end subroutine cires_ugwp_post_run
 
-!> \section arg_table_cires_ugwp_post_finalize Argument Table
-!!
       subroutine cires_ugwp_post_finalize ()
       end subroutine cires_ugwp_post_finalize
 
