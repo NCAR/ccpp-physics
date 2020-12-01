@@ -63,6 +63,14 @@
   type = integer
   intent = in
   optional = F
+[lsm_ruc]
+  standard_name = flag_for_ruc_land_surface_scheme
+  long_name = flag for RUC land surface model
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [sigmaf]
   standard_name = bounded_vegetation_area_fraction
   long_name = areal fractional cover of green vegetation bounded on the bottom
@@ -713,14 +721,23 @@
   kind = kind_phys
   intent = inout
   optional = F
-[qsfc_ruc]
-  standard_name = water_vapor_mixing_ratio_at_surface
-  long_name = water vapor mixing ratio at surface
+[qsfc_lnd_ruc]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_land
+  long_name = water vapor mixing ratio at surface over land
   units = kg kg-1
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
+  optional = F
+[qsfc_ice_ruc]
+  standard_name = water_vapor_mixing_ratio_at_surface_over_ice
+  long_name = water vapor mixing ratio at surface over ice
+  units = kg kg-1
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = F
 [ustm]
   standard_name = surface_friction_velocity_drag
