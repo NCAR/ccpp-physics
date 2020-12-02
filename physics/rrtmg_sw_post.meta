@@ -1,54 +1,31 @@
-[ccpp-arg-table]
-  name = rrtmg_sw_post_init
+[ccpp-table-properties]
+  name = rrtmg_sw_post
   type = scheme
+  dependencies = machine.F,radsw_param.f
 
 ########################################################################
 [ccpp-arg-table]
   name = rrtmg_sw_post_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = Fortran DDT containing FV3-GFS model control parameters
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[Grid]
-  standard_name = GFS_grid_type_instance
-  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
-  units = DDT
-  dimensions = ()
-  type = GFS_grid_type
-  intent = in
-  optional = F
-[Diag]
-  standard_name = GFS_diag_type_instance
-  long_name = Fortran DDT containing FV3-GFS diagnotics data
-  units = DDT
-  dimensions = ()
-  type = GFS_diag_type
-  intent = inout
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = Fortran DDT containing FV3-GFS fields targetted for diagnostic output
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = inout
-  optional = F
-[Coupling]
-  standard_name = GFS_coupling_type_instance
-  long_name = Fortran DDT containing FV3-GFS fields to/from coupling with other components
-  units = DDT
-  dimensions = ()
-  type = GFS_coupling_type
-  intent = inout
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
+  long_name = horizontal loop extents
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levr]
+  standard_name = adjusted_vertical_layer_dimension_for_radiation
+  long_name = adjusted number of vertical layers for radiation
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[levs]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
   units = count
   dimensions = ()
   type = integer
@@ -86,29 +63,27 @@
   type = integer
   intent = in
   optional = F
-[htswc]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step_and_radiation_levels
-  long_name = total sky heating rate due to shortwave radiation
-  units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
-  type = real
-  kind = kind_phys
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
-[htsw0]
-  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
-  long_name = clear sky heating rates due to shortwave radiation
-  units = K s-1
-  dimensions = (horizontal_dimension,adjusted_vertical_layer_dimension_for_radiation)
-  type = real
-  kind = kind_phys
+[swhtr]
+  standard_name = flag_for_output_of_shortwave_heating_rate
+  long_name = flag to output sw heating rate (Radtend%swhc)
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [sfcalb1]
   standard_name = surface_albedo_due_to_near_IR_direct
   long_name = surface albedo due to near IR direct beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -117,7 +92,7 @@
   standard_name = surface_albedo_due_to_near_IR_diffused
   long_name = surface albedo due to near IR diffused beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -126,7 +101,7 @@
   standard_name = surface_albedo_due_to_UV_and_VIS_direct
   long_name = surface albedo due to UV+VIS direct beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -135,17 +110,159 @@
   standard_name = surface_albedo_due_to_UV_and_VIS_diffused
   long_name = surface albedo due to UV+VIS diffused beam
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[htswc]
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step_and_radiation_levels
+  long_name = total sky heating rate due to shortwave radiation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[htsw0]
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step_and_radiation_levels
+  long_name = clear sky heating rates due to shortwave radiation
+  units = K s-1
+  dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[nirbmdi]
+  standard_name = surface_downwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
+  long_name = sfc nir beam sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nirdfdi]
+  standard_name = surface_downwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
+  long_name = sfc nir diff sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[visbmdi]
+  standard_name = surface_downwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  long_name = sfc uv+vis beam sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[visdfdi]
+  standard_name = surface_downwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  long_name = sfc uv+vis diff sw downward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nirbmui]
+  standard_name = surface_upwelling_direct_near_infrared_shortwave_flux_on_radiation_time_step
+  long_name = sfc nir beam sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[nirdfui]
+  standard_name = surface_upwelling_diffuse_near_infrared_shortwave_flux_on_radiation_time_step
+  long_name = sfc nir diff sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[visbmui]
+  standard_name = surface_upwelling_direct_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  long_name = sfc uv+vis beam sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[visdfui]
+  standard_name = surface_upwelling_diffuse_ultraviolet_and_visible_shortwave_flux_on_radiation_time_step
+  long_name = sfc uv+vis diff sw upward flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sfcdsw]
+  standard_name = surface_downwelling_shortwave_flux_on_radiation_time_step
+  long_name = total sky sfc downward sw flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sfcnsw]
+  standard_name = surface_net_downwelling_shortwave_flux_on_radiation_time_step
+  long_name = total sky sfc netsw flx into ground
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[htrsw]
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_on_radiation_time_step
+  long_name = total sky sw heating rate
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[swhc]
+  standard_name = tendency_of_air_temperature_due_to_shortwave_heating_assuming_clear_sky_on_radiation_time_step
+  long_name = clear sky sw heating rates
+  units = K s-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes
   units = W m-2
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = cmpfsw_type
+  intent = inout
+  optional = F
+[sfcfsw]
+  standard_name = sw_fluxes_sfc
+  long_name = sw radiation fluxes at sfc
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = sfcfsw_type
+  intent = inout
+  optional = F
+[topfsw]
+  standard_name = sw_fluxes_top_atmosphere
+  long_name = sw radiation fluxes at toa
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = topfsw_type
   intent = inout
   optional = F
 [errmsg]
@@ -166,7 +283,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmg_sw_post_finalize
-  type = scheme

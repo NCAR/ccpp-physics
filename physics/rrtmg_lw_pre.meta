@@ -1,43 +1,12 @@
-[ccpp-arg-table]
-  name = rrtmg_lw_pre_init
+[ccpp-table-properties]
+  name = rrtmg_lw_pre
   type = scheme
+  dependencies = iounitdef.f,machine.F,radiation_surface.f
 
 ########################################################################
 [ccpp-arg-table]
   name = rrtmg_lw_pre_run
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = Fortran DDT containing FV3-GFS model control parameters
-  units = DDT
-  dimensions = ()
-  type = GFS_control_type
-  intent = in
-  optional = F
-[Grid]
-  standard_name = GFS_grid_type_instance
-  long_name = Fortran DDT containing FV3-GFS grid and interpolation related data
-  units = DDT
-  dimensions = ()
-  type = GFS_grid_type
-  intent = in
-  optional = F
-[Sfcprop]
-  standard_name = GFS_sfcprop_type_instance
-  long_name = Fortran DDT containing FV3-GFS surface fields
-  units = DDT
-  dimensions = ()
-  type = GFS_sfcprop_type
-  intent = in
-  optional = F
-[Radtend]
-  standard_name = GFS_radtend_type_instance
-  long_name = Fortran DDT containing FV3-GFS radiation tendencies
-  units = DDT
-  dimensions = ()
-  type = GFS_radtend_type
-  intent = inout
-  optional = F
 [im]
   standard_name = horizontal_loop_extent
   long_name = horizontal loop extent
@@ -46,11 +15,82 @@
   type = integer
   intent = in
   optional = F
+[lslwr]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[xlat]
+  standard_name = latitude
+  long_name = latitude
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[xlon]
+  standard_name = longitude
+  long_name = longitude
+  units = radian
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[slmsk]
+  standard_name = sea_land_ice_mask_real
+  long_name = landmask: sea/land/ice=0/1/2
+  units = flag
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[snowd]
+  standard_name = surface_snow_thickness_water_equivalent
+  long_name = water equivalent snow depth
+  units = mm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sncovr]
+  standard_name = surface_snow_area_fraction_over_land
+  long_name = surface snow area fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[zorl]
+  standard_name = surface_roughness_length
+  long_name = surface roughness length
+  units = cm
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[hprime]
+  standard_name = standard_deviation_of_subgrid_orography
+  long_name = standard deviation of subgrid orography
+  units = m
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -59,10 +99,19 @@
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
+  optional = F
+[semis]
+  standard_name = surface_longwave_emissivity
+  long_name = surface lw emissivity in fraction
+  units = frac
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -82,7 +131,3 @@
   intent = out
   optional = F
 
-########################################################################
-[ccpp-arg-table]
-  name = rrtmg_lw_pre_finalize
-  type = scheme

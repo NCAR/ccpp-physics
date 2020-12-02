@@ -31,7 +31,20 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
+      if (ivegsrc > 2) then
+        errmsg = 'The NOAH LSM expects that the ivegsrc physics '//
+     &            'namelist parameter is 0, 1, or 2. Exiting...'
+        errflg = 1
+        return
+      end if
+      if (isot > 1) then
+        errmsg = 'The NOAH LSM expects that the isot physics '//
+     &           'namelist parameter is 0, or 1. Exiting...'
+        errflg = 1
+        return
+      end if
+      
       !--- initialize soil vegetation
       call set_soilveg(me, isot, ivegsrc, nlunit)
 
@@ -194,20 +207,24 @@
       implicit none
 
 !  ---  constant parameters:
-      real(kind=kind_phys), parameter :: rhoh2o  = 1000.0
-      real(kind=kind_phys), parameter :: a2      = 17.2693882
-      real(kind=kind_phys), parameter :: a3      = 273.16
-      real(kind=kind_phys), parameter :: a4      = 35.86
+      real(kind=kind_phys), parameter :: zero    = 0.0_kind_phys
+      real(kind=kind_phys), parameter :: one     = 1.0_kind_phys
+      real(kind=kind_phys), parameter :: rhoh2o  = 1000.0_kind_phys
+      real(kind=kind_phys), parameter :: a2      = 17.2693882_kind_phys
+      real(kind=kind_phys), parameter :: a3      = 273.16_kind_phys
+      real(kind=kind_phys), parameter :: a4      = 35.86_kind_phys
       real(kind=kind_phys), parameter :: a23m4   = a2*(a3-a4)
+      real(kind=kind_phys), parameter :: qmin    = 1.0e-8_kind_phys
 
       real(kind=kind_phys), save         :: zsoil_noah(4)
-      data zsoil_noah / -0.1, -0.4, -1.0, -2.0 /
+      data zsoil_noah / -0.1_kind_phys, -0.4_kind_phys,                 &
+     &                  -1.0_kind_phys, -2.0_kind_phys /
 
 !  ---  input:
       integer, intent(in) :: im, km, isot, ivegsrc
       real (kind=kind_phys), intent(in) :: grav, cp, hvap, rd, eps,     &
      &       epsm1, rvrdm1
-      real (kind=kind_phys), dimension(5), intent(in) :: pertvegf
+      real (kind=kind_phys), intent(in) :: pertvegf
 
       integer, dimension(im), intent(in) :: soiltyp, vegtype, slopetyp
 
@@ -266,9 +283,9 @@
 !
 !===> ...  begin here
 !
-      cpinv   = 1.0/cp
-      hvapi   = 1.0/hvap
-      elocp   = hvap/cp
+      cpinv = one/cp
+      hvapi = one/hvap
+      elocp = hvap/cp
 
 !> - Initialize CCPP error handling variables
 
@@ -298,46 +315,33 @@
 
       do i = 1, im
         if (flag_iter(i) .and. land(i)) then
-          ep(i)     = 0.0
-          evap (i)  = 0.0
-          hflx (i)  = 0.0
-          gflux(i)  = 0.0
-          drain(i)  = 0.0
-          canopy(i) = max(canopy(i), 0.0)
+          ep(i)     = zero
+          evap (i)  = zero
+          hflx (i)  = zero
+          gflux(i)  = zero
+          drain(i)  = zero
+          canopy(i) = max(canopy(i), zero)
 
-          evbs (i)  = 0.0
-          evcw (i)  = 0.0
-          trans(i)  = 0.0
-          sbsno(i)  = 0.0
-          snowc(i)  = 0.0
-          snohf(i)  = 0.0
-        endif   ! flag_iter & land
-      enddo
+          evbs (i)  = zero
+          evcw (i)  = zero
+          trans(i)  = zero
+          sbsno(i)  = zero
+          snowc(i)  = zero
+          snohf(i)  = zero
 
 !> - initialize variables wind, q, and rh at level 1.
 
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
-          q0(i)   = max(q1(i), 1.e-8)   !* q1=specific humidity at level 1 (kg/kg)
+          q0(i)   = max(q1(i), qmin)   !* q1=specific humidity at level 1 (kg/kg)
           theta1(i) = t1(i) * prslki(i) !* adiabatic temp at level 1 (k)
 
-          rho(i) = prsl1(i) / (rd*t1(i)*(1.0+rvrdm1*q0(i)))
+          rho(i) = prsl1(i) / (rd*t1(i)*(one+rvrdm1*q0(i)))
           qs1(i) = fpvs( t1(i) )        !* qs1=sat. humidity at level 1 (kg/kg)
-          qs1(i) = max(eps*qs1(i) / (prsl1(i)+epsm1*qs1(i)), 1.e-8)
+          qs1(i) = max(eps*qs1(i) / (prsl1(i)+epsm1*qs1(i)), qmin)
           q0 (i) = min(qs1(i), q0(i))
-        endif   ! flag_iter & land
-      enddo
 
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
           do k = 1, km
             zsoil(i,k) = zsoil_noah(k)
           enddo
-        endif   ! flag_iter & land
-      enddo
-
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
 
 !> - Prepare variables to run Noah LSM:
 !!  -   1. configuration information (c):
@@ -422,12 +426,12 @@
 !! 0.5 and the perturbations go to zero as vegetation fraction  approaches its upper
 !! or lower bound.
         vegfp  = vegfpert(i)                    ! sfc-perts, mgehne
-        if (pertvegf(1)>0.0) then
+        if (pertvegf>zero) then
                 ! compute beta distribution parameters for vegetation fraction
                 mv = shdfac
-                sv = pertvegf(1)*mv*(1.-mv)
-                alphav = mv*mv*(1.0-mv)/(sv*sv)-mv
-                betav  = alphav*(1.0-mv)/mv
+                sv = pertvegf*mv*(one-mv)
+                alphav = mv*mv*(one-mv)/(sv*sv)-mv
+                betav  = alphav*(one-mv)/mv
                 ! compute beta distribution value corresponding
                 ! to the given percentile albPpert to use as new albedo
                 call ppfbet(vegfp,alphav,betav,iflag,vegftmp)
@@ -439,7 +443,7 @@
           shdmax1d = shdmax(i)
           snoalb1d = snoalb(i)
 
-          ptu  = 0.0
+          ptu  = zero
           alb  = sfalb(i)
           tbot = tg3(i)
 
@@ -456,8 +460,8 @@
 ! cm         - surface exchange coefficient for momentum (\f$m s^{-1}\f$)          -> cmx
 ! z0         - surface roughness (\f$m\f$)     -> zorl(\f$cm\f$)
 
-          cmc = canopy(i) * 0.001            ! convert from mm to m
-          tsea = tsurf(i)                    ! clu_q2m_iter
+          cmc = canopy(i) * 0.001_kind_phys      ! convert from mm to m
+          tsea = tsurf(i)                        ! clu_q2m_iter
 
           do k = 1, km
             stsoil(k) = stc(i,k)
@@ -465,10 +469,10 @@
             slsoil(k) = slc(i,k)
           enddo
 
-          snowh = snwdph(i) * 0.001         ! convert from mm to m
-          sneqv = weasd(i)  * 0.001         ! convert from mm to m
-          if (sneqv /= 0.0 .and. snowh == 0.0) then
-            snowh = 10.0 * sneqv
+          snowh = snwdph(i) * 0.001_kind_phys    ! convert from mm to m
+          sneqv = weasd(i)  * 0.001_kind_phys    ! convert from mm to m
+          if (sneqv /= zero .and. snowh == zero) then
+            snowh = 10.0_kind_phys * sneqv
           endif
 
           chx    = ch(i)  * wind(i)              ! compute conductance
@@ -477,7 +481,7 @@
           cmm(i) = cmx
 
 !  ---- ... outside sflx, roughness uses cm as unit
-          z0 = zorl(i)/100.
+          z0 = zorl(i) * 0.01_kind_phys
 !  ---- mgehne, sfc-perts
 !  - Apply perturbation of soil type b parameter and leave area index.
           bexpp  = bexppert(i)                   ! sfc perts, mgehne
@@ -522,7 +526,7 @@
           trans(i) = ett
           sbsno(i) = esnow
           snowc(i) = sncovr
-          stm(i)   = soilm * 1000.0 ! unit conversion (from m to kg m-2)
+          stm(i)   = soilm * 1000.0_kind_phys ! unit conversion (from m to kg m-2)
           snohf(i) = flx1 + flx2 + flx3
 
           smcwlt2(i) = smcwlt
@@ -539,17 +543,17 @@
           wet1(i) = smsoil(1) / smcmax !Sarah Lu added 09/09/2010 (for GOCART)
 
 !  --- ...  unit conversion (from m s-1 to mm s-1 and kg m-2 s-1)
-          runoff(i)  = runoff1 * 1000.0
-          drain (i)  = runoff2 * 1000.0
+          runoff(i)  = runoff1 * 1000.0_kind_phys
+          drain (i)  = runoff2 * 1000.0_kind_phys
 
 !  --- ...  unit conversion (from m to mm)
-          canopy(i)  = cmc   * 1000.0
-          snwdph(i)  = snowh * 1000.0
-          weasd(i)   = sneqv * 1000.0
+          canopy(i)  = cmc   * 1000.0_kind_phys
+          snwdph(i)  = snowh * 1000.0_kind_phys
+          weasd(i)   = sneqv * 1000.0_kind_phys
           sncovr1(i) = sncovr
 !  ---- ... outside sflx, roughness uses cm as unit (update after snow's
 !  effect)
-          zorl(i) = z0*100.
+          zorl(i) = z0*100.0_kind_phys
 
 !>  - Do not return the following output fields to parent model:
 !!\n  ec      - canopy water evaporation (m s-1)
@@ -590,25 +594,20 @@
 !!\n  nroot   - number of root layers, a function of veg type, determined
 !!              in subroutine redprm.
 
-        endif   ! end if flag_iter and flag
-      enddo   ! end do_i_loop
+!       endif   ! end if flag_iter and flag
+!     enddo   ! end do_i_loop
 
 !> - Compute specific humidity at surface (\a qsurf).
 
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
           rch(i)   = rho(i) * cp * ch(i) * wind(i)
           qsurf(i) = q1(i)  + evap(i) / (elocp * rch(i))
-        endif   ! flag_iter & land
-      enddo
 
 !> - Compute surface upward sensible heat flux (\a hflx) and evaporation
 !! flux (\a evap).
-      do i = 1, im
-        if (flag_iter(i) .and. land(i)) then
-          tem     = 1.0 / rho(i)
+          tem     = one / rho(i)
           hflx(i) = hflx(i) * tem * cpinv
           evap(i) = evap(i) * tem * hvapi
+
         endif   ! flag_iter & land
       enddo
 

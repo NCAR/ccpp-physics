@@ -10,18 +10,9 @@
 
       contains
 
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfdeepcnv_init Argument Table
-!!
       subroutine samfdeepcnv_init()
       end subroutine samfdeepcnv_init
 
-
-!> \brief Brief description of the subroutine
-!!
-!! \section arg_table_samfdeepcnv_finalize Argument Table
-!!
       subroutine samfdeepcnv_finalize()
       end subroutine samfdeepcnv_finalize
 
@@ -63,15 +54,15 @@
 !!        + 2) For the "dynamic control", using a reference cloud work function, estimate the change in cloud work function due to the large-scale dynamics. Following the quasi-equilibrium assumption, calculate the cloud base mass flux required to keep the large-scale convective destabilization in balance with the stabilization effect of the convection.
 !!  -# For grid sizes smaller than the threshold value (currently 8 km):
 !!        + 1) compute the cloud base mass flux using the cumulus updraft velocity averaged ove the whole cloud depth.
-!!  -# For scale awareness, the updraft fraction (sigma) is obtained as a function of cloud base entrainment. Then, the final cloud base mass flux is obtained by the original mass flux multiplied by the (1−sigma) 2  .
+!!  -# For scale awareness, the updraft fraction (sigma) is obtained as a function of cloud base entrainment. Then, the final cloud base mass flux is obtained by the original mass flux multiplied by the (1-sigma) 2.
 !!  -# For the "feedback control", calculate updated values of the state variables by multiplying the cloud base mass flux and the tendencies calculated per unit cloud base mass flux from the static control.
 !!
 !!  \section samfdeep_detailed GFS samfdeepcnv Detailed Algorithm
 !!  @{
-      subroutine samfdeepcnv_run (im,ix,km,itc,ntc,cliq,cp,cvap,        &
+      subroutine samfdeepcnv_run (im,km,itc,ntc,cliq,cp,cvap,           &
      &    eps,epsm1,fv,grav,hvap,rd,rv,                                 &
      &    t0c,delt,ntk,ntr,delp,                                        &
-     &    prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,                         &
+     &    prslp,psp,phil,qtr,q1,t1,u1,v1,fscav,hwrf_samfdeep,           &
      &    cldwrk,rn,kbot,ktop,kcnv,islimsk,garea,                       &
      &    dot,ncloud,ud_mf,dd_mf,dt_mf,cnvw,cnvc,                       &
      &    QLCN, QICN, w_upi, cf_upi, CNV_MFD,                           &
@@ -86,24 +77,25 @@
 
       implicit none
 !
-      integer, intent(in)  :: im, ix, km, itc, ntc, ntk, ntr, ncloud
+      integer, intent(in)  :: im, km, itc, ntc, ntk, ntr, ncloud
       integer, intent(in)  :: islimsk(im)
       real(kind=kind_phys), intent(in) :: cliq, cp, cvap, eps, epsm1,   &
      &   fv, grav, hvap, rd, rv, t0c
       real(kind=kind_phys), intent(in) ::  delt
-      real(kind=kind_phys), intent(in) :: psp(im), delp(ix,km),         &
-     &   prslp(ix,km),  garea(im), dot(ix,km), phil(ix,km)
+      real(kind=kind_phys), intent(in) :: psp(im), delp(im,km),         &
+     &   prslp(im,km),  garea(im), dot(im,km), phil(im,km)
       real(kind=kind_phys), dimension(:), intent(in) :: fscav
+      logical, intent(in)  :: hwrf_samfdeep
       real(kind=kind_phys), intent(in) :: nthresh
-      real(kind=kind_phys), intent(in) :: ca_deep(ix)
-      real(kind=kind_phys), intent(out) :: rainevap(ix)
+      real(kind=kind_phys), intent(in) :: ca_deep(im)
+      real(kind=kind_phys), intent(out) :: rainevap(im)
       logical, intent(in)  :: do_ca,ca_closure,ca_entr,ca_trigger
 
       integer, intent(inout)  :: kcnv(im)
       ! DH* TODO - check dimensions of qtr, ntr+2 correct?  *DH
-      real(kind=kind_phys), intent(inout) ::   qtr(ix,km,ntr+2),        &
-     &   q1(ix,km), t1(ix,km),   u1(ix,km), v1(ix,km),                  &
-     &   cnvw(ix,km),  cnvc(ix,km)
+      real(kind=kind_phys), intent(inout) ::   qtr(im,km,ntr+2),        &
+     &   q1(im,km), t1(im,km),   u1(im,km), v1(im,km),                  &
+     &   cnvw(im,km),  cnvc(im,km)
 
       integer, intent(out) :: kbot(im), ktop(im)
       real(kind=kind_phys), intent(out) :: cldwrk(im),                  &
@@ -119,7 +111,7 @@
       ! *GJF
       integer :: mp_phys, mp_phys_mg
 
-      real(kind=kind_phys), intent(in) :: clam,    c0s,     c1,         &
+      real(kind=kind_phys), intent(in) :: clam,  c0s,  c1,              &
      &                     betal,   betas,   asolfac,                   &
      &                     evfact,  evfactl, pgcon
       character(len=*), intent(out) :: errmsg
@@ -132,8 +124,10 @@
       real(kind=kind_phys) clamd,   tkemx,   tkemn,   dtke,
      &                     beta,    dbeta,   betamx,  betamn,
      &                     cxlame,  cxlamd,
+     &                     cxlamu,  
      &                     xlamde,  xlamdd,
-     &                     crtlame, crtlamd
+     &                     crtlamd,
+     &                     crtlame
 !
 !     real(kind=kind_phys) detad
       real(kind=kind_phys) adw,     aup,     aafac,   d0,
@@ -141,7 +135,7 @@
      &                     dh,      dhh,     dp,
      &                     dq,      dqsdp,   dqsdt,   dt,
      &                     dt2,     dtmax,   dtmin,
-     &                     dxcrtas, dxcrtuf,
+     &                     dxcrtas, dxcrtuf, 
      &                     dv1h,    dv2h,    dv3h,
      &                     dv1q,    dv2q,    dv3q,
      &                     dz,      dz1,     e1,      edtmax,
@@ -169,7 +163,7 @@
 !
 !     real(kind=kind_phys) aa1(im),     acrt(im),   acrtfct(im),
       real(kind=kind_phys) aa1(im),     tkemean(im),clamt(im),
-     &                     ps(im),      del(ix,km), prsl(ix,km),
+     &                     ps(im),      del(im,km), prsl(im,km),
      &                     umean(im),   tauadv(im), gdx(im),
      &                     delhbar(im), delq(im),   delq2(im),
      &                     delqbar(im), delqev(im), deltbar(im),
@@ -184,8 +178,8 @@
      &                     rntot(im),   vshear(im), xaa0(im),
      &                     xlamd(im),   xk(im),     cina(im),
      &                     xmb(im),     xmbmax(im), xpwav(im),
-!    &                     xpwev(im),   xlamx(im),  delebar(im,ntr),
-     &                     xpwev(im),   delebar(im,ntr),
+     &                     xpwev(im),   xlamx(im),  delebar(im,ntr),
+!     &                     xpwev(im),   delebar(im,ntr),
      &                     delubar(im), delvbar(im)
 !
       real(kind=kind_phys) c0(im)
@@ -196,12 +190,11 @@ cj
 !
 !  parameters for updraft velocity calculation
       real(kind=kind_phys) bet1,    cd1,     f1,      gam1,
-     &                     bb1,     bb2
-!    &                     bb1,     bb2,     wucb
+!     &                     bb1,     bb2
+     &                     bb1,     bb2,     wucb
 !
 c  physical parameters
 !     parameter(grav=grav,asolfac=0.958)
-!     parameter(grav=grav)
 !     parameter(elocp=hvap/cp,el2orc=hvap*hvap/(rv*cp))
 !     parameter(c0s=.002,c1=.002,d0=.01)
 !     parameter(d0=.01)
@@ -220,7 +213,7 @@ c  physical parameters
       parameter(clamd=0.03,tkemx=0.65,tkemn=0.05)
       parameter(dtke=tkemx-tkemn)
       parameter(dbeta=0.1)
-      parameter(cthk=200.,dthk=25.)
+      parameter(cthk=150.,dthk=25.)
       parameter(cinpcrmx=180.,cinpcrmn=120.)
 !     parameter(cinacrmx=-120.,cinacrmn=-120.)
       parameter(cinacrmx=-120.,cinacrmn=-80.)
@@ -276,16 +269,20 @@ c    &            .743,.813,.886,.947,1.138,1.377,1.896/
       errmsg = ''
       errflg = 0
 
+
       elocp = hvap/cp
       el2orc = hvap*hvap/(rv*cp)
 
       fact1 = (cvap-cliq)/rv
       fact2 = hvap/rv-fact1*t0c
-!
 c-----------------------------------------------------------------------
 !>  ## Determine whether to perform aerosol transport
-      do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
-      if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
+      if(hwrf_samfdeep) then
+        do_aerosols = .false.
+      else
+        do_aerosols = (itc > 0) .and. (ntc > 0) .and. (ntr > 0)
+        if (do_aerosols) do_aerosols = (ntr >= itc + ntc - 3)
+      endif
 !
 c-----------------------------------------------------------------------
 !>  ## Compute preliminary quantities needed for static, dynamic, and feedback control portions of the algorithm.
@@ -335,6 +332,14 @@ c
         rainevap(i) = 0.
         gdx(i) = sqrt(garea(i))
       enddo
+!
+      if (hwrf_samfdeep) then
+        do i=1,im
+          scaldfunc(i)=-1.0
+          sigmagfm(i)=-1.0
+!         sigmuout(i)=-1.0
+        enddo
+      endif
 !
 !>  - determine aerosol-aware rain conversion parameter over land
       do i=1,im
@@ -404,22 +409,15 @@ c
 !  model tunable parameters are all here
       edtmaxl = .3
       edtmaxs = .3
-!     clam    = .1
-!     aafac   = .1
-      aafac   = .05
-!     betal   = .15
-!     betas   = .15
-!     betal   = .05
-!     betas   = .05
-!     evef    = 0.07
-!     evfact  = 0.3
-!     evfactl = 0.3
-!
-      crtlame = 1.0e-4
+      if (hwrf_samfdeep) then
+        aafac   = .1
+        cxlamu  = 1.0e-3
+      else
+        aafac   = .05
+        cxlame  = 1.0e-4
+      endif
       crtlamd = 1.0e-4
-!
-!     cxlame  = 1.0e-3
-      cxlame  = 1.0e-4
+      crtlame = 1.0e-4
       cxlamd  = 1.0e-4
       xlamde  = 1.0e-4
       xlamdd  = 1.0e-4
@@ -471,10 +469,17 @@ c
       enddo
 !>  - Calculate interface height
       do k = 1, km1
-        do i=1,im
-          zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
-        enddo
+      do i=1,im
+        zi(i,k) = 0.5*(zo(i,k)+zo(i,k+1))
       enddo
+      enddo
+      if (hwrf_samfdeep) then
+        do k = 1, km1
+        do i=1,im
+          xlamue(i,k) = clam / zi(i,k)
+        enddo
+        enddo
+      endif
 c
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c   convert surface pressure to mb from cb
@@ -520,6 +525,7 @@ c
 !
 !  initialize tracer variables
 !
+      if(.not.hwrf_samfdeep) then
       do n = 3, ntr+2
         kk = n-2
         do k = 1, km
@@ -533,6 +539,7 @@ c
           enddo
         enddo
       enddo
+      endif
 !
 !>  - Calculate saturation specific humidity and enforce minimum moisture values.
       do k = 1, km
@@ -629,6 +636,7 @@ c
           endif
         enddo
       enddo
+      if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do k = 1, km1
         do i=1,im
@@ -638,6 +646,7 @@ c
         enddo
       enddo
       enddo
+      endif
 c
 c  look for the level of free convection as cloud base
 c
@@ -739,7 +748,7 @@ c
 ! turbulent entrainment rate assumed to be proportional
 !   to subcloud mean TKE
 !
-      if(ntk > 0) then
+      if(.not. hwrf_samfdeep .and. ntk > 0) then
 !
         do i= 1, im
           if(cnvflg(i)) then
@@ -795,7 +804,7 @@ c
             enddo
          endif
 !
-      endif
+      endif !(.not. hwrf_samfdeep .and. ntk > 0)
 !
 !  also initially assume updraft entrainment rate
 !     is an inverse function of height
@@ -812,39 +821,49 @@ c
 c  assume that updraft entrainment rate above cloud base is
 c    same as that at cloud base
 c
-!> - Calculate the entrainment rate according to Han and Pan (2011) \cite han_and_pan_2011 , equation 8, after Bechtold et al. (2008) \cite bechtold_et_al_2008, equation 2 given by:
+!> - In HWRF samfdeep, calculate the entrainment rate according to Han and Pan (2011) \cite han_and_pan_2011 , equation 8, after Bechtold et al. (2008) \cite bechtold_et_al_2008, equation 2 given by:
 !!  \f[
 !!  \epsilon = \epsilon_0F_0 + d_1\left(1-RH\right)F_1
 !!  \f]
 !!  where \f$\epsilon_0\f$ is the cloud base entrainment rate, \f$d_1\f$ is a tunable constant, and \f$F_0=\left(\frac{q_s}{q_{s,b}}\right)^2\f$ and \f$F_1=\left(\frac{q_s}{q_{s,b}}\right)^3\f$ where \f$q_s\f$ and \f$q_{s,b}\f$ are the saturation specific humidities at a given level and cloud base, respectively. The detrainment rate in the cloud is assumed to be equal to the entrainment rate at cloud base.
-!     do i=1,im
-!       if(cnvflg(i)) then
-!         xlamx(i) = xlamue(i,kbcon(i))
-!       endif
-!     enddo
-!     do k = 2, km1
-!       do i=1,im
-!         if(cnvflg(i).and.
-!    &      (k > kbcon(i) .and. k < kmax(i))) then
-!             xlamue(i,k) = xlamx(i)
-!         endif
-!       enddo
-!     enddo
+      if (hwrf_samfdeep) then
+      do i=1,im
+       if(cnvflg(i)) then
+         xlamx(i) = xlamue(i,kbcon(i))
+       endif
+      enddo
+      do k = 2, km1
+       do i=1,im
+         if(cnvflg(i).and.                                              &
+     &      (k > kbcon(i) .and. k < kmax(i))) then
+             xlamue(i,k) = xlamx(i)
+         endif
+       enddo
+      enddo
+      endif
 c
 c  specify detrainment rate for the updrafts
 c
 !! (The updraft detrainment rate is set constant and equal to the entrainment rate at cloud base.)
 !!
 !> - The updraft detrainment rate is vertically constant and proportional to clamt
-      do k = 1, km1
+      if (hwrf_samfdeep) then
+       do k = 1, km1
         do i=1,im
           if(cnvflg(i) .and. k < kmax(i)) then
-!           xlamud(i,k) = xlamx(i)
-!           xlamud(i,k) = crtlamd
-            xlamud(i,k) = 0.001 * clamt(i)
+                xlamud(i,k) = xlamx(i)
           endif
         enddo
-      enddo
+       enddo
+      else
+       do k = 1, km1
+        do i=1,im
+          if(cnvflg(i) .and. k < kmax(i)) then
+                xlamud(i,k) = 0.001 * clamt(i)
+          endif
+        enddo
+       enddo
+      endif
 c
 c  entrainment functions decreasing with height (fent),
 c    mimicking a cloud ensemble
@@ -865,7 +884,18 @@ c  final entrainment and detrainment rates as the sum of turbulent part and
 c    organized one depending on the environmental relative humidity
 c    (Bechtold et al., 2008; Derbyshire et al., 2011)
 c
-      do k = 2, km1
+      if (hwrf_samfdeep) then
+        do k = 2, km1
+        do i=1,im
+          if(cnvflg(i) .and.
+     &      (k > kbcon(i) .and. k < kmax(i))) then
+              tem = cxlamu * frh(i,k) * fent2(i,k)
+              xlamue(i,k) = xlamue(i,k)*fent1(i,k) + tem
+          endif
+        enddo
+        enddo
+      else
+        do k = 2, km1
         do i=1,im
           if(cnvflg(i) .and.
      &      (k > kbcon(i) .and. k < kmax(i))) then
@@ -875,7 +905,8 @@ c
               xlamud(i,k) = xlamud(i,k) + tem1
           endif
         enddo
-      enddo
+        enddo
+      endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c
@@ -934,15 +965,17 @@ c
           pwavo(i)     = 0.
         endif
       enddo
+      if (.not.hwrf_samfdeep) then
 !  for tracers
-      do n = 1, ntr
+       do n = 1, ntr
         do i = 1, im
           if(cnvflg(i)) then
             indx = kb(i)
             ecko(i,indx,n) = ctro(i,indx,n)
           endif
         enddo
-      enddo
+       enddo
+      endif
 c
 c  cloud property is modified by the entrainment process
 c
@@ -973,8 +1006,9 @@ c
           endif
         enddo
       enddo
-      do n = 1, ntr
-      do k = 2, km1
+      if (.not.hwrf_samfdeep) then
+       do n = 1, ntr
+       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
             if(k > kb(i) .and. k < kmax(i)) then
@@ -986,8 +1020,9 @@ c
             endif
           endif
         enddo
-      enddo
-      enddo
+       enddo
+       enddo
+      endif
 c
 c   taking account into convection inhibition due to existence of
 c    dry layers below cloud base
@@ -1062,9 +1097,16 @@ c
         enddo
       enddo
 !> - Turn off convection if the CIN is less than a critical value (cinacr) which is inversely proportional to the large-scale vertical velocity.
-      do i = 1, im
+      if(hwrf_samfdeep) then
+       do i = 1, im
         if(cnvflg(i)) then
-!
+          cinacr = cinacrmx
+          if(cina(i) < cinacr) cnvflg(i) = .false.
+        endif
+       enddo
+      else   !gfs_samfdeep
+       do i = 1, im
+        if(cnvflg(i)) then
           if(islimsk(i) == 1) then
             w1 = w1l
             w2 = w2l
@@ -1091,11 +1133,10 @@ c
           tem = 1. - tem
           tem1= .5*(cinacrmx-cinacrmn)
           cinacr = cinacrmx - tem * tem1
-!
-!         cinacr = cinacrmx
           if(cina(i) < cinacr) cnvflg(i) = .false.
         endif
-      enddo
+       enddo
+      endif !hwrf_samfdeep
 !!
       if(do_ca .and. ca_trigger)then
       do i=1,im
@@ -1191,18 +1232,9 @@ c
 !> - Calculate the maximum value of the cloud base mass flux using the CFL-criterion-based formula of Han and Pan (2011) \cite han_and_pan_2011, equation 7.
       do i = 1, im
         if(cnvflg(i)) then
-!         xmbmax(i) = .1
-!
           k = kbcon(i)
           dp = 1000. * del(i,k)
-          xmbmax(i) = dp / (2. * grav * dt2)
-!
-!         xmbmax(i) = dp / (grav * dt2)
-!
-!         mbdt(i) = 0.1 * dp / grav
-!
-!         tem = dp / (grav * dt2)
-!         xmbmax(i) = min(tem, xmbmax(i))
+          xmbmax(i) = dp / (grav * dt2)
         endif
       enddo
 c
@@ -1437,30 +1469,23 @@ c
 !  compute updraft velocity square(wu2)
 !> - Calculate updraft velocity square(wu2) according to Han et al.'s (2017) \cite han_et_al_2017 equation 7.
 !
-!     bb1 = 2. * (1.+bet1*cd1)
-!     bb2 = 2. / (f1*(1.+gam1))
-!
-!     bb1 = 3.9
-!     bb2 = 0.67
-!
-!     bb1 = 2.0
-!     bb2 = 4.0
-!
       bb1 = 4.0
       bb2 = 0.8
+      if (hwrf_samfdeep) then
+      do i = 1, im
+        if (cnvflg(i)) then
+          k = kbcon1(i)
+          tem = po(i,k) / (rd * to(i,k))
+          wucb = -0.01 * dot(i,k) / (tem * grav)
+          if(wucb.gt.0.) then
+            wu2(i,k) = wucb * wucb
+          else
+            wu2(i,k) = 0.
+          endif
+        endif
+      enddo
+      endif
 !
-!     do i = 1, im
-!       if (cnvflg(i)) then
-!         k = kbcon1(i)
-!         tem = po(i,k) / (rd * to(i,k))
-!         wucb = -0.01 * dot(i,k) / (tem * grav)
-!         if(wucb > 0.) then
-!           wu2(i,k) = wucb * wucb
-!         else
-!           wu2(i,k) = 0.
-!         endif
-!       endif
-!     enddo
       do k = 2, km1
         do i = 1, im
           if (cnvflg(i)) then
@@ -1611,28 +1636,41 @@ c
         endif
       enddo
       enddo
-      do i = 1, im
+
+      if (hwrf_samfdeep) then
+       do i = 1, im
+        beta = betas
+        if(islimsk(i) == 1) beta = betal
         if(cnvflg(i)) then
-          betamn = betas
-          if(islimsk(i) == 1) betamn = betal
-          if(ntk > 0) then
-            betamx = betamn + dbeta
-            if(tkemean(i) > tkemx) then
-              beta = betamn
-            else if(tkemean(i) < tkemn) then
-              beta = betamx
-            else
-              tem = (betamx - betamn) * (tkemean(i) - tkemn)
-              beta = betamx - tem  / dtke
-            endif
-          else
-            beta = betamn
-          endif
           dz  = (sumx(i)+zi(i,1))/float(kbcon(i))
           tem = 1./float(kbcon(i))
           xlamd(i) = (1.-beta**tem)/dz
         endif
-      enddo
+       enddo
+      else
+        do i = 1, im
+          if(cnvflg(i)) then
+            betamn = betas
+            if(islimsk(i) == 1) betamn = betal
+            if(ntk > 0) then
+              betamx = betamn + dbeta
+              if(tkemean(i) > tkemx) then
+                beta = betamn
+              else if(tkemean(i) < tkemn) then
+                beta = betamx
+              else
+                tem = (betamx - betamn) * (tkemean(i) - tkemn)
+                beta = betamx - tem  / dtke
+              endif
+            else
+              beta = betamn
+            endif
+            dz  = (sumx(i)+zi(i,1))/float(kbcon(i))
+            tem = 1./float(kbcon(i))
+            xlamd(i) = (1.-beta**tem)/dz
+          endif
+        enddo
+      endif
 c
 c  determine downdraft mass flux
 c
@@ -1668,6 +1706,7 @@ c
         endif
       enddo
 ! for tracers
+      if (.not.hwrf_samfdeep) then
       do n = 1, ntr
         do i = 1, im
           if(cnvflg(i)) then
@@ -1676,6 +1715,7 @@ c
           endif
         enddo
       enddo
+      endif
 cj
 !> - Calculate the cloud properties as a parcel descends, modified by entrainment and detrainment. Discretization follows Appendix B of Grell (1993) \cite grell_1993 .
       do k = km1, 1, -1
@@ -1705,6 +1745,7 @@ cj
           endif
         enddo
       enddo
+      if(.not.hwrf_samfdeep) then
       do n = 1, ntr
       do k = km1, 1, -1
         do i = 1, im
@@ -1718,6 +1759,7 @@ cj
         enddo
       enddo
       enddo
+      endif
 c
 !> - Compute the amount of moisture that is necessary to keep the downdraft saturated.
       do k = km1, 1, -1
@@ -1820,6 +1862,7 @@ c
           endif
         enddo
       enddo
+      if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do k = 1, km
         do i = 1, im
@@ -1829,6 +1872,7 @@ c
         enddo
       enddo
       enddo
+      endif
       do i = 1, im
         if(cnvflg(i)) then
           dp = 1000. * del(i,1)
@@ -1842,6 +1886,7 @@ c
      &                   - vo(i,1)) * grav / dp
         endif
       enddo
+      if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do i = 1, im
         if(cnvflg(i)) then
@@ -1851,6 +1896,7 @@ c
         endif
       enddo
       enddo
+      endif
 c
 c--- changed due to subsidence and entrainment
 c
@@ -1915,6 +1961,7 @@ cj
           endif
         enddo
       enddo
+      if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do k = 2, km1
         do i = 1, im
@@ -1936,6 +1983,7 @@ cj
         enddo
       enddo
       enddo
+      endif
 c
 c------- cloud top
 c
@@ -1960,6 +2008,7 @@ c
      &                     qlko_ktcon(i) * grav / dp
         endif
       enddo
+      if (.not.hwrf_samfdeep) then
       do n = 1, ntr
       do i = 1, im
         if(cnvflg(i)) then
@@ -1970,6 +2019,7 @@ c
         endif
       enddo
       enddo
+      endif
 c
 c------- final changed variable per unit mass flux
 c
@@ -2336,7 +2386,17 @@ c
 !  compute convective turn-over time
 !
 !> - Following Bechtold et al. (2008) \cite bechtold_et_al_2008, the convective adjustment time (dtconv) is set to be proportional to the convective turnover time, which is computed using the mean updraft velocity (wc) and the cloud depth. It is also proportional to the grid size (gdx).
-      do i= 1, im
+      if(hwrf_samfdeep) then
+       do i= 1, im
+        if(cnvflg(i)) then
+          tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
+          dtconv(i) = tem / wc(i)
+          dtconv(i) = max(dtconv(i),dtmin)
+          dtconv(i) = min(dtconv(i),dtmax)
+        endif
+       enddo
+      else
+       do i= 1, im
         if(cnvflg(i)) then
           tem = zi(i,ktcon1(i)) - zi(i,kbcon1(i))
           dtconv(i) = tem / wc(i)
@@ -2345,7 +2405,8 @@ c
           dtconv(i) = max(dtconv(i),dtmin)
           dtconv(i) = min(dtconv(i),dtmax)
         endif
-      enddo
+       enddo
+      endif
 !
 !> - Calculate advective time scale (tauadv) using a mean cloud layer wind speed.
       do i= 1, im
@@ -2424,7 +2485,6 @@ c
           tfac = tauadv(i) / dtconv(i)
           tfac = min(tfac, 1.)
           xmb(i) = -tfac * fld(i) / xk(i)
-!         xmb(i) = min(xmb(i),xmbmax(i))
         endif
       enddo
 !!
@@ -2438,6 +2498,18 @@ c
 !!
 !
 !> - For scale-aware parameterization, the updraft fraction (sigmagfm) is first computed as a function of the lateral entrainment rate at cloud base (see Han et al.'s (2017) \cite han_et_al_2017 equation 4 and 5), following the study by Grell and Freitas (2014) \cite grell_and_freitas_2014.
+      if(hwrf_samfdeep) then
+      do i = 1, im
+        if(cnvflg(i)) then
+          tem = min(max(xlamx(i), 7.e-5), 3.e-4)
+          tem = 0.2 / tem
+          tem1 = 3.14 * tem * tem
+          sigmagfm(i) = tem1 / garea(i)
+          sigmagfm(i) = max(sigmagfm(i), 0.001)
+          sigmagfm(i) = min(sigmagfm(i), 0.999)
+        endif
+      enddo
+      else
       do i = 1, im
         if(cnvflg(i)) then
           tem = min(max(xlamue(i,kbcon(i)), 7.e-5), 3.e-4)
@@ -2448,6 +2520,7 @@ c
           sigmagfm(i) = min(sigmagfm(i), 0.999)
         endif
       enddo
+      endif
 !
 !> - Then, calculate the reduction factor (scaldfunc) of the vertical convective eddy transport of mass flux as a function of updraft fraction from the studies by Arakawa and Wu (2013) \cite arakawa_and_wu_2013 (also see Han et al.'s (2017) \cite han_et_al_2017 equation 1 and 2). The final cloud base mass flux with scale-aware parameterization is obtained from the mass flux when sigmagfm << 1, multiplied by the reduction factor (Han et al.'s (2017) \cite han_et_al_2017 equation 2).
       do i = 1, im
@@ -2476,7 +2549,7 @@ c
 !> - Transport aerosols if present
 
       if (do_aerosols)
-     &  call samfdeepcnv_aerosols(im, ix, km, itc, ntc, ntr, delt,
+     &  call samfdeepcnv_aerosols(im, im, km, itc, ntc, ntr, delt,
      &  xlamde, xlamdd, cnvflg, jmin, kb, kmax, kbcon, ktcon, fscav,
      &  edto, xlamd, xmb, c0t, eta, etad, zi, xlamue, xlamud, delp,
      &  qtr, qaero)
@@ -2498,15 +2571,17 @@ c
           endif
         enddo
       enddo
-      do n = 1, ntr
-      do k = 1, km
+      if (.not.hwrf_samfdeep) then
+        do n = 1, ntr
+        do k = 1, km
         do i = 1, im
           if (cnvflg(i) .and. k <= kmax(i)) then
             ctro(i,k,n) = ctr(i,k,n)
           endif
         enddo
-      enddo
-      enddo
+        enddo
+        enddo
+      endif
 c!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 c
 c--- feedback: simply the changes from the cloud with unit mass flux
@@ -2525,11 +2600,13 @@ c
         delvbar(i) = 0.
         qcond(i) = 0.
       enddo
-      do n = 1, ntr
-      do i = 1, im
-        delebar(i,n) = 0.
-      enddo
-      enddo
+      if (.not.hwrf_samfdeep) then
+        do n = 1, ntr
+        do i = 1, im
+          delebar(i,n) = 0.
+        enddo
+        enddo
+      endif
       do k = 1, km
         do i = 1, im
           if (cnvflg(i) .and. k <= kmax(i)) then
@@ -2552,9 +2629,10 @@ c
           endif
         enddo
       enddo
-      do n = 1, ntr
-         kk = n+2
-      do k = 1, km
+      if (.not.hwrf_samfdeep) then
+       do n = 1, ntr
+        kk = n+2
+        do k = 1, km
         do i = 1, im
           if (cnvflg(i) .and. k <= kmax(i)) then
             if(k <= ktcon(i)) then
@@ -2564,8 +2642,9 @@ c
             endif
           endif
         enddo
-      enddo
-      enddo
+        enddo
+       enddo
+      endif
 !> - Recalculate saturation specific humidity using the updated temperature.
       do k = 1, km
         do i = 1, im
@@ -2757,6 +2836,7 @@ c
           endif
         enddo
       enddo
+      if (.not.hwrf_samfdeep) then
       do n = 1, ntr
          kk = n+2
       do k = 1, km
@@ -2784,6 +2864,7 @@ c
           enddo
         enddo
        endif
+      endif
 !
 ! hchuang code change
 !
@@ -2819,6 +2900,7 @@ c
 !
 !   include TKE contribution from deep convection
 !
+      if (.not.hwrf_samfdeep) then
       if (ntk > 0) then
 !
       do k = 2, km1
@@ -2866,6 +2948,7 @@ c
           enddo
         enddo
       endif
+      endif ! (.not.hwrf_samfdeep)
       return
       end subroutine samfdeepcnv_run
 

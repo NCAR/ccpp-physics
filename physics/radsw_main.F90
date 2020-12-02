@@ -6,7 +6,7 @@
 !             sw-rrtm3 radiation package description              !!!!!
 !  ==============================================================  !!!!!
 !                                                                          !
-!   this package includes ncep's modifications of the rrtm-sw radiation    !
+!   this package includes ncep's modifications of the rrtmg-sw radiation   !
 !   code from aer inc.                                                     !
 !                                                                          !
 !   the sw-rrtm3 package includes these parts:                             !
@@ -38,7 +38,7 @@
 !         inputs:                                                          !
 !           (plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr,                         !
 !            clouds,icseed,aerosols,sfcalb,                                !
-!            dzlyr,delpin,de_lgth,                                         !
+!            dzlyr,delpin,de_lgth,alpha,                                   !
 !            cosz,solcon,NDAY,idxday,                                      !
 !            npts, nlay, nlp1, lprnt,                                      !
 !         outputs:                                                         !
@@ -104,17 +104,38 @@
 !                                                                          !
 !==========================================================================!
 !                                                                          !
-!   the original program declarations:                                     !
+!   the original aer program declarations:                                 !
 !                                                                          !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!                                                                          !
-!  Copyright 2002-2007, Atmospheric & Environmental Research, Inc. (AER).  !
-!  This software may be used, copied, or redistributed as long as it is    !
-!  not sold and this copyright notice is reproduced on each copy made.     !
-!  This model is provided as is without any express or implied warranties. !
-!                       (http://www.rtweb.aer.com/)                        !
-!                                                                          !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!                                                                              !
+! Copyright (c) 2002-2020, Atmospheric & Environmental Research, Inc. (AER)    !
+! All rights reserved.                                                         !
+!                                                                              !
+! Redistribution and use in source and binary forms, with or without           !
+! modification, are permitted provided that the following conditions are met:  !
+!  * Redistributions of source code must retain the above copyright            !
+!    notice, this list of conditions and the following disclaimer.             !
+!  * Redistributions in binary form must reproduce the above copyright         !
+!    notice, this list of conditions and the following disclaimer in the       !
+!    documentation and/or other materials provided with the distribution.      !
+!  * Neither the name of Atmospheric & Environmental Research, Inc., nor       !
+!    the names of its contributors may be used to endorse or promote products  !
+!    derived from this software without specific prior written permission.     !
+!                                                                              !
+! THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"  !
+! AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE    !
+! IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE   !
+! ARE DISCLAIMED. IN NO EVENT SHALL ATMOSPHERIC & ENVIRONMENTAL RESEARCH, INC.,!
+! BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR       !
+! CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF         !
+! SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS     !
+! INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN      !
+! CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)      !
+! ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF       !
+! THE POSSIBILITY OF SUCH DAMAGE.                                              !
+!                        (http://www.rtweb.aer.com/)                           !
+!                                                                              !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !                                                                          !
 ! ************************************************************************ !
 !                                                                          !
@@ -144,7 +165,13 @@
 ! ************************************************************************ !
 !                                                                          !
 !    references:                                                           !
-!    (rrtm_sw/rrtmg_sw):                                                   !
+!    (rrtmg_sw/rrtm_sw):                                                   !
+!      iacono, m.j., j.s. delamere, e.j. mlawer, m.w. shepard,             !
+!      s.a. clough, and w.d collins, radiative forcing by long-lived       !
+!      greenhouse gases: calculations with the aer radiative transfer      !
+!      models, j, geophys. res., 113, d13103, doi:10.1029/2008jd009944,    !
+!      2008.                                                               !
+!                                                                          !
 !      clough, s.a., m.w. shephard, e.j. mlawer, j.s. delamere,            !
 !      m.j. iacono, k. cady-pereira, s. boukabara, and p.d. brown:         !
 !      atmospheric radiative transfer modeling: a summary of the aer       !
@@ -189,7 +216,7 @@
 !                                                                          !
 !   ncep modifications history log:                                        !
 !                                                                          !
-!       sep 2003,  yu-tai hou        -- received aer's rrtm-sw gcm version !
+!       sep 2003,  yu-tai hou        -- received aer's rrtmg-sw gcm version!
 !                    code (v224)                                           !
 !       nov 2003,  yu-tai hou        -- corrected errors in direct/diffuse !
 !                    surface alabedo components.                           !
@@ -260,19 +287,30 @@
 !                      scheme. (used if iswcliq=2); added new option of    !
 !                      cloud overlap method 'de-correlation-length'.       !
 !                                                                          !
+! ************************************************************************ !
+!                                                                          !
+!    additional aer revision history:                                      !
+!       jul 2020,  m.j. iacono   -- added new mcica cloud overlap options  !
+!                     exponential and exponential-random. each method can  !
+!                     use either a constant or a latitude-varying and      !
+!                     day-of-year varying decorrelation length selected    !
+!                     with parameter "idcor".                              !
+!                                                                          !
 !!!!!  ==============================================================  !!!!!
 !!!!!                         end descriptions                         !!!!!
 !!!!!  ==============================================================  !!!!!
 
-!> This module contains the CCPP-compliant NCEP's modifications of the rrtm-sw radiation 
-!! code from aer inc.     
+!> This module contains the CCPP-compliant NCEP's modifications of the 
+!! rrtmg-sw radiation code from aer inc.     
       module rrtmg_sw 
 !
       use physparam,        only : iswrate, iswrgas, iswcliq, iswcice,  &
-     &                             isubcsw, icldflg, iovrsw,  ivflip,   &
-     &                             iswmode, kind_phys
+     &                             isubcsw, icldflg, iovr,  ivflip,     &
+     &                             iswmode
       use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
      &                             con_amw, con_amo3
+      use machine,          only : rb => kind_phys, im => kind_io4,     &
+     &                             kind_phys
 
       use module_radsw_parameters
       use mersenne_twister, only : random_setseed, random_number,       &
@@ -366,7 +404,8 @@
 
 !  ---  public accessable subprograms
 
-      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit 
+      public rrtmg_sw_init, rrtmg_sw_run, rrtmg_sw_finalize, rswinit,   &
+     &        kissvec, generate_stochastic_clouds_sw, mcica_subcol_sw  
 
 
 ! =================
@@ -422,7 +461,7 @@
 !! |  29  |      820-2600    |H2O             |CO2               |CO2              |H2O                |
 !!\tableofcontents
 !!
-!! The RRTM-SW package includes three files:
+!! The RRTMG-SW package includes three files:
 !! - radsw_param.f, which contains:
 !!  - module_radsw_parameters: specifies major parameters of the spectral
 !!    bands and defines the construct structures of derived-type variables
@@ -467,7 +506,7 @@
      &       icseed, aeraod, aerssa, aerasy,                            &
      &       sfcalb_nir_dir, sfcalb_nir_dif,                            &
      &       sfcalb_uvis_dir, sfcalb_uvis_dif,                          &
-     &       dzlyr,delpin,de_lgth,                                      &
+     &       dzlyr,delpin,de_lgth,alpha,                                &
      &       cosz,solcon,NDAY,idxday,                                   &
      &       npts, nlay, nlp1, lprnt,                                   &
      &       cld_cf, lsswr,                                             &
@@ -475,7 +514,7 @@
      &       HSW0,HSWB,FLXPRF,FDNCMP,                                   &   ! ---  optional
      &       cld_lwp, cld_ref_liq, cld_iwp, cld_ref_ice,                &
      &       cld_rwp,cld_ref_rain, cld_swp, cld_ref_snow,               &
-     &       cld_od, cld_ssa, cld_asy, errmsg, errflg
+     &       cld_od, cld_ssa, cld_asy, errmsg, errflg                   &
      &     )
 
 !  ====================  defination of variables  ====================  !
@@ -528,6 +567,7 @@
 !   dzlyr(npts,nlay) : layer thickness in km                            !
 !   delpin(npts,nlay): layer pressure thickness (mb)                    !
 !   de_lgth(npts)    : clouds decorrelation length (km)                 !
+!   alpha(npts,nlay) : EXP/ER cloud overlap decorrelation parameter     !
 !   cosz  (npts)     : cosine of solar zenith angle                     !
 !   solcon           : solar constant                      (w/m**2)     !
 !   NDAY             : num of daytime points                            !
@@ -590,11 +630,13 @@
 !           =0: no sub-col cld treatment, use grid-mean cld quantities  !
 !           =1: mcica sub-col, prescribed seeds to get random numbers   !
 !           =2: mcica sub-col, providing array icseed for random numbers!
-!   iovrsw  - cloud overlapping control flag                            !
+!   iovr    - cloud overlapping control flag                            !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
 !           =3: decorrelation-length overlap clouds                     !
+!           =4: exponential cloud overlap (AER)                         !
+!           =5: exponential-random cloud overlap (AER)                  !
 !   ivflip  - control flg for direction of vertical index               !
 !           =0: index from toa to surface                               !
 !           =1: index from surface to toa                               !
@@ -691,6 +733,7 @@
 
       real (kind=kind_phys), intent(in) :: cosz(npts), solcon,          &
      &       de_lgth(npts)
+      real (kind=kind_phys), dimension(npts,nlay), intent(in) :: alpha
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(npts,nlay), intent(inout) :: hswc
@@ -715,7 +758,76 @@
      &       intent(inout) :: fdncmp
 
 !  ---  locals:
-      real (kind=kind_phys), dimension(nlay,ngptsw) :: cldfmc,          &
+!mz* HWRF -- input of mcica_subcol_sw
+      real(kind=kind_phys),dimension(npts,nlay) :: hgt
+      real(kind=kind_phys) :: dzsum
+      real(kind=kind_phys),dimension( nbdsw, npts, nlay )  ::  taucld3, &
+                                                               ssacld3, &
+                                                               asmcld3, &
+                                                               fsfcld3
+
+!mz* HWRF -- OUTPUT from mcica_subcol_sw
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay)  :: cldfmcl     ! Cloud fraction
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay)  :: ciwpmcl     ! In-cloud ice water path (g/m2)
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay)  :: clwpmcl     ! In-cloud liquid water path (g/m2)
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay)  :: cswpmcl     ! In-cloud snow   water path (g/m2)
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)
+      real(kind=kind_phys),dimension(npts,nlay) :: relqmcl             ! Cloud water drop  effective radius (microns)
+                                                                       !    Dimensions: (ncol,nlay)
+      real(kind=kind_phys),dimension(npts,nlay) :: reicmcl             ! Cloud ice  effective size (microns)
+                                                                       !    Dimensions: (ncol,nlay)
+      real(kind=kind_phys),dimension(npts,nlay) :: resnmcl             ! Snow effective size (microns)
+                                                                       !    Dimensions: (ncol,nlay)
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay) :: taucmcl      ! In-cloud optical depth
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay) :: ssacmcl      ! in-cloud single scattering albedo [mcica]
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay) :: asmcmcl      ! in-cloud asymmetry parameter [mcica]
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=kind_phys),dimension(ngptsw,npts,nlay) :: fsfcmcl      ! in-cloud forward scattering fraction [mcica]     
+                                                                       !    Dimensions: (ngptsw,ncol,nlay)  
+!HWRF cldprmc_sw input
+!      real(kind=kind_phys),dimension(ngptsw,nlay) :: cldfmc,cldfmc_save! cloud fraction [mcica]
+!                                                                       !    Dimensions: (ngptsw,nlayers)
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: ciwpmc            ! cloud ice water path [mcica]
+                                                                       !    Dimensions: (ngptsw,nlayers)
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: clwpmc            ! cloud liquid water path [mcica]
+                                                                       !    Dimensions: (ngptsw,nlayers)
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: cswpmc            ! cloud snow water path [mcica]
+                                                                       !    Dimensions: (ngptsw,nlayers)
+      real(kind=kind_phys),dimension(nlay) :: resnmc                   ! cloud snow particle effective radius (microns)
+                                                                       !    Dimensions: (nlayers)
+      real(kind=kind_phys),dimension(nlay) :: relqmc                   ! cloud liquid particle effective radius (microns)             
+                                                                       !    Dimensions: (nlayers)                                     
+      real(kind=kind_phys),dimension(nlay) :: reicmc                   ! cloud ice particle effective radius (microns)                
+                                                                       !    Dimensions: (nlayers)                                     
+                                                                       ! specific definition of reicmc depends on setting of iceflag: 
+                                                                       ! iceflag = 1: ice effective radius, r_ec, (Ebert and Curry, 1992),
+                                                                       !              r_ec range is limited to 13.0 to 130.0 microns  
+                                                                       ! iceflag = 2: ice effective radius, r_k, (Key, Streamer Ref. Manual, 1996)  
+                                                                       !              r_k range is limited to 5.0 to 131.0 microns    
+                                                                       ! iceflag = 3: generalized effective size, dge, (Fu, 1996),    
+                                                                       !              dge range is limited to 5.0 to 140.0 microns    
+                                                                       !              [dge = 1.0315 * r_ec]                           
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: fsfcmc            ! cloud forward scattering fraction                            
+                                                                       !    Dimensions: (ngptsw,nlayers)                              
+
+!mz* HWRF cldprmc_sw output (delta scaled)
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: taucmc            ! cloud optical depth (delta scaled)                           
+                                                                       !    Dimensions: (ngptsw,nlayers)                              
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: ssacmc            ! single scattering albedo (delta scaled)                      
+                                                                       !    Dimensions: (ngptsw,nlayers)                              
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: asmcmc            ! asymmetry parameter (delta scaled)                           
+                                                                       !    Dimensions: (ngptsw,nlayers)                              
+      real(kind=kind_phys),dimension(ngptsw,nlay) :: taormc            ! cloud optical depth (non-delta scaled)                       
+                                                                       !    Dimensions: (ngptsw,nlayers)                     
+!mz*
+
+      real (kind=kind_phys), dimension(nlay,ngptsw) ::   cldfmc,        &
+     &                                             cldfmc_save,         &
      &       taug, taur
       real (kind=kind_phys), dimension(nlp1,nbdsw):: fxupc, fxdnc,      &
      &       fxup0, fxdn0
@@ -740,6 +852,7 @@
       real (kind=kind_phys) :: cosz1, sntz1, tem0, tem1, tem2, s0fac,   &
      &       ssolar, zcf0, zcf1, ftoau0, ftoauc, ftoadc,                &
      &       fsfcu0, fsfcuc, fsfcd0, fsfcdc, suvbfc, suvbf0, delgth
+      real (kind=kind_phys), dimension(nlay) :: alph
 
 !  ---  column amount of absorbing gases:
 !       (:,m) m = 1-h2o, 2-co2, 3-o3, 4-n2o, 5-ch4, 6-o2, 7-co
@@ -748,13 +861,25 @@
       integer, dimension(npts) :: ipseed
       integer, dimension(nlay) :: indfor, indself, jp, jt, jt1
 
-      integer :: i, ib, ipt, j1, k, kk, laytrop, mb
+      integer :: i, ib, ipt, j1, k, kk, laytrop, mb, ig
+      integer :: inflgsw, iceflgsw, liqflgsw
+      integer :: irng, permuteseed
 !
 !===> ... begin here
 !
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
+
+! Select cloud liquid and ice optics parameterization options
+! For passing in cloud optical properties directly:
+!     inflgsw  = 0
+!     iceflgsw = 0
+!     liqflgsw = 0
+! For passing in cloud physical properties; cloud optics parameterized in RRTMG:
+      inflgsw  = 2
+      iceflgsw = 3
+      liqflgsw = 1
 !
       if (.not. lsswr) return
       if (nday <= 0) return
@@ -847,13 +972,59 @@
         cosz1  = cosz(j1)
         sntz1  = f_one / cosz(j1)
         ssolar = s0fac * cosz(j1)
-        if (iovrsw == 3) delgth = de_lgth(j1) ! clouds decorr-length
+        if (iovr == 3) delgth = de_lgth(j1) ! clouds decorr-length
 
 !> -# Prepare surface albedo: bm,df - dir,dif; 1,2 - nir,uvv.
         albbm(1) = sfcalb_nir_dir(j1)
         albdf(1) = sfcalb_nir_dif(j1)
         albbm(2) = sfcalb_uvis_dir(j1)
         albdf(2) = sfcalb_uvis_dif(j1)
+
+
+! mz*: HWRF
+        if (iovr == 4 ) then
+
+
+!Add layer height needed for exponential (icld=4) and
+! exponential-random (icld=5) overlap options  
+
+         !iplon = 1
+         irng = 0
+         permuteseed = 1
+
+!mz* Derive height of each layer mid-point from layer thickness.
+! Needed for exponential (iovr=4) and exponential-random overlap
+! option (iovr=5)only.
+         dzsum =0.0
+         do k = 1,nlay
+         hgt(j1,k)= dzsum+0.5*dzlyr(j1,k)*1000.   !km->m
+         dzsum =  dzsum+ dzlyr(j1,k)*1000.
+         enddo
+
+! Zero out cloud optical properties here; not used when passing physical properties
+! to radiation and taucld is calculated in radiation 
+            do k = 1, nlay
+               do ib = 1, nbdsw
+                  taucld3(ib,j1,k) = 0.0
+                  ssacld3(ib,j1,k) = 1.0
+                  asmcld3(ib,j1,k) = 0.0
+                  fsfcld3(ib,j1,k) = 0.0
+               enddo
+            enddo
+
+          call mcica_subcol_sw (1, 1, nlay, iovr, permuteseed,                        &
+     &                 irng, plyr(j1:j1,:), hgt(j1:j1,:),                             &
+     &                 cld_cf(j1:j1,:), cld_iwp(j1:j1,:), cld_lwp(j1:j1,:),           &
+     &                 cld_swp(j1:j1,:), cld_ref_ice(j1:j1,:), cld_ref_liq(j1:j1,:),  &
+     &                 cld_ref_snow(j1:j1,:), taucld3(:,j1:j1,:), ssacld3(:,j1:j1,:), &
+     &                 asmcld3(:,j1:j1,:), fsfcld3(:,j1:j1,:), cldfmcl(:,j1:j1,:),    &  !--output
+     &                 ciwpmcl(:,j1:j1,:), clwpmcl(:,j1:j1,:), cswpmcl(:,j1:j1,:),    &
+     &                 reicmcl(j1:j1,:), relqmcl(j1:j1,:), resnmcl(j1:j1,:),          &
+     &                 taucmcl(:,j1:j1,:), ssacmcl(:,j1:j1,:), asmcmcl(:,j1:j1,:),    &
+     &                 fsfcmcl(:,j1:j1,:))
+
+       endif
+!mz* end
 
 !> -# Prepare atmospheric profile for use in rrtm.
 !           the vertical index of internal array is from surface to top
@@ -869,6 +1040,8 @@
             tavel(k) = tlyr(j1,kk)
             delp (k) = delpin(j1,kk)
             dz   (k) = dzlyr (j1,kk)
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k) ! alpha decorrelation
+
 !> -# Set absorber and gas column amount, convert from volume mixing
 !!    ratio to molec/cm2 based on coldry (scaled to 1.0e-20)
 !!    - colamt(nlay,maxgas):column amounts of absorbing gases 1 to
@@ -938,6 +1111,28 @@
               cdat3(k) = cld_swp(j1,kk)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,kk)  ! snow partical effctive radius
             enddo
+            if (iovr == 4) then !mz* HWRF
+               do k = 1, nlay
+                  kk = nlp1 - k
+               do ig = 1, ngptsw
+                   cldfmc(k,ig) = cldfmcl(ig,j1,kk)
+                   taucmc(ig,k) = taucmcl(ig,j1,kk)
+                   ssacmc(ig,k) = ssacmcl(ig,j1,kk)
+                   asmcmc(ig,k) = asmcmcl(ig,j1,kk)
+                   fsfcmc(ig,k) = fsfcmcl(ig,j1,kk)
+                   ciwpmc(ig,k) = ciwpmcl(ig,j1,kk)
+                   clwpmc(ig,k) = clwpmcl(ig,j1,kk)
+                   if (iceflgsw.eq.5) then
+                      cswpmc(ig,k) = cswpmcl(ig,j1,kk)
+                   endif
+               enddo
+                   reicmc(k) = reicmcl(j1,kk)
+                   relqmc(k) = relqmcl(j1,kk)
+                   if (iceflgsw.eq.5) then
+                        resnmc(k) = resnmcl(j1,kk)
+                   endif
+               enddo
+            endif
           else                     ! use diagnostic cloud method
             do k = 1, nlay
               kk = nlp1 - k
@@ -958,6 +1153,7 @@
             tavel(k) = tlyr(j1,k)
             delp (k) = delpin(j1,k)
             dz   (k) = dzlyr (j1,k)
+            if (iovr == 4 .or. iovr == 5) alph(k) = alpha(j1,k)   ! alpha decorrelation
 
 !  --- ...  set absorber amount
 !test use
@@ -1030,6 +1226,31 @@
               cdat3(k) = cld_swp(j1,k)       ! cloud snow path
               cdat4(k) = cld_ref_snow(j1,k)  ! snow partical effctive radius
             enddo
+            if (iovr == 4) then     !mz* HWRF
+!mz* Move incoming GCM cloud arrays to RRTMG cloud arrays.
+!For GCM input, incoming reicmcl is defined based on selected 
+!ice parameterization (inflglw)
+            do k = 1, nlay
+            do ig = 1, ngptsw
+               cldfmc(k,ig) = cldfmcl(ig,j1,k)
+               taucmc(ig,k) = taucmcl(ig,j1,k)
+               ssacmc(ig,k) = ssacmcl(ig,j1,k)
+               asmcmc(ig,k) = asmcmcl(ig,j1,k)
+               fsfcmc(ig,k) = fsfcmcl(ig,j1,k)
+               ciwpmc(ig,k) = ciwpmcl(ig,j1,k)
+               clwpmc(ig,k) = clwpmcl(ig,j1,k)
+               if (iceflgsw .eq. 5) then
+                  cswpmc(ig,k) = cswpmcl(ig,j1,k)
+               endif
+            enddo
+               reicmc(k) = reicmcl(j1,k)
+               relqmc(k) = relqmcl(j1,k)
+               if (iceflgsw .eq. 5) then
+                   resnmc(k) = resnmcl(j1,k)
+               endif
+            enddo
+
+            end if
           else                     ! use diagnostic cloud method
             do k = 1, nlay
               cfrac(k) = cld_cf(j1,k)        ! cloud fraction
@@ -1048,11 +1269,11 @@
 
         zcf0   = f_one
         zcf1   = f_one
-        if (iovrsw == 0) then                    ! random overlapping
+        if (iovr == 0) then                    ! random overlapping
           do k = 1, nlay
             zcf0 = zcf0 * (f_one - cfrac(k))
           enddo
-        else if (iovrsw == 1) then               ! max/ran overlapping
+        else if (iovr == 1 .or. iovr == 4) then ! max/ran/exp overlapping
           do k = 1, nlay
             if (cfrac(k) > ftiny) then                ! cloudy layer
               zcf1 = min ( zcf1, f_one-cfrac(k) )
@@ -1062,7 +1283,7 @@
             endif
           enddo
           zcf0 = zcf0 * zcf1
-        else if (iovrsw >= 2) then
+        else if (iovr >= 2 .and. iovr /= 4) then
           do k = 1, nlay
             zcf0 = min ( zcf0, f_one-cfrac(k) )  ! used only as clear/cloudy indicator
           enddo
@@ -1077,13 +1298,31 @@
 
         if (zcf1 > f_zero) then     ! cloudy sky column
 
+          !mz* for HWRF, save cldfmc with mcica
+          if (iovr == 4) then
+               do k = 1, nlay
+               do ig = 1, ngptsw
+                  cldfmc_save(k,ig)=cldfmc (k,ig)
+               enddo                                                              
+               enddo
+          endif
+
           call cldprop                                                  &
 !  ---  inputs:
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &
-     &       zcf1, nlay, ipseed(j1), dz, delgth,                        &
+     &       zcf1, nlay, ipseed(j1), dz, delgth, alph,                  &
 !  ---  outputs:
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &
      &     )
+
+          if (iovr == 4) then                                                  
+          !mz for HWRF, still using mcica cldfmc                                  
+               do k = 1, nlay                                                     
+               do ig = 1, ngptsw                                                  
+                  cldfmc(k,ig)=cldfmc_save(k,ig)                                  
+               enddo                                                              
+               enddo                                                              
+          endif             
 
 !  --- ...  save computed layer cloud optical depth for output
 !           rrtm band 10 is approx to the 0.55 mu spectrum
@@ -1373,7 +1612,7 @@
 !   icldflg - cloud scheme control flag                                 !
 !           =0: diagnostic scheme gives cloud tau, omiga, and g.        !
 !           =1: prognostic scheme gives cloud liq/ice path, etc.        !
-!   iovrsw  - clouds vertical overlapping control flag                  !
+!   iovr    - clouds vertical overlapping control flag                  !
 !           =0: random overlapping clouds                               !
 !           =1: maximum/random overlapping clouds                       !
 !           =2: maximum overlap cloud                                   !
@@ -1409,9 +1648,9 @@
 !
 !===> ... begin here
 !
-      if ( iovrsw<0 .or. iovrsw>3 ) then
+      if ( iovr<0 .or. iovr>4 ) then
         print *,'  *** Error in specification of cloud overlap flag',   &
-     &          ' IOVRSW=',iovrsw,' in RSWINIT !!'
+     &          ' IOVR=',iovr,' in RSWINIT !!'
         stop
       endif
 
@@ -1458,15 +1697,15 @@
         stop
       endif
 
-      if ( isubcsw==0 .and. iovrsw>2 ) then
+      if ( isubcsw==0 .and. iovr>2 ) then
         if (me == 0) then
-          print *,'  *** IOVRSW=',iovrsw,' is not available for',       &
+          print *,'  *** IOVR=',iovr,' is not available for',           &
      &            ' ISUBCSW=0 setting!!'
           print *,'      The program will use maximum/random overlap',  &
      &            ' instead.'
         endif
 
-        iovrsw = 1
+        iovr = 1
       endif
 
 !> -# Setup constant factors for heating rate
@@ -1530,6 +1769,7 @@
 !!                      (isubcsw>0)
 !!\param dz             layer thickness (km)
 !!\param delgth         layer cloud decorrelation length (km)
+!!\param alpha          EXP/ER cloud overlap decorrelation parameter
 !!\param taucw          cloud optical depth, w/o delta scaled
 !!\param ssacw          weighted cloud single scattering albedo
 !!                      (ssa = ssacw / taucw)
@@ -1542,7 +1782,7 @@
 !-----------------------------------
       subroutine cldprop                                                &
      &     ( cfrac,cliqp,reliq,cicep,reice,cdat1,cdat2,cdat3,cdat4,     &   !  ---  inputs
-     &       cf1, nlay, ipseed, dz, delgth,                             &
+     &       cf1, nlay, ipseed, dz, delgth, alpha,                      &
      &       taucw, ssacw, asycw, cldfrc, cldfmc                        &   !  ---  output
      &     )
 
@@ -1557,7 +1797,7 @@
 !                                                                       !
 !  inputs:                                                        size  !
 !    cfrac - real, layer cloud fraction                            nlay !
-!        .....  for  iswcliq > 0 (prognostic cloud sckeme)  - - -       !
+!        .....  for  iswcliq > 0 (prognostic cloud scheme)  - - -       !
 !    cliqp - real, layer in-cloud liq water path (g/m**2)          nlay !
 !    reliq - real, mean eff radius for liq cloud (micron)          nlay !
 !    cicep - real, layer in-cloud ice water path (g/m**2)          nlay !
@@ -1566,7 +1806,7 @@
 !    cdat2 - real, effective radius for rain drop (micron)         nlay !
 !    cdat3 - real, layer snow flake water path(g/m**2)             nlay !
 !    cdat4 - real, mean eff radius for snow flake(micron)          nlay !
-!        .....  for iswcliq = 0  (diagnostic cloud sckeme)  - - -       !
+!        .....  for iswcliq = 0  (diagnostic cloud scheme)  - - -       !
 !    cdat1 - real, layer cloud optical depth                       nlay !
 !    cdat2 - real, layer cloud single scattering albedo            nlay !
 !    cdat3 - real, layer cloud asymmetry factor                    nlay !
@@ -1581,6 +1821,7 @@
 !    ipseed- permutation seed for generating random numbers (isubcsw>0) !
 !    dz    - real, layer thickness (km)                            nlay !
 !    delgth- real, layer cloud decorrelation length (km)            1   !
+!    alpha - real, EXP/ER decorrelation parameter                  nlay !
 !                                                                       !
 !  outputs:                                                             !
 !    taucw  - real, cloud optical depth, w/o delta scaled    nlay*nbdsw !
@@ -1633,6 +1874,7 @@
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cliqp,      &
      &       reliq, cicep, reice, cdat1, cdat2, cdat3, cdat4, cfrac, dz
+      real (kind=kind_phys), dimension(nlay), intent(in) :: alpha
 
 !  ---  outputs:
       real (kind=kind_phys), dimension(nlay,ngptsw), intent(out) ::     &
@@ -1874,7 +2116,7 @@
 !> -# if physparam::isubcsw > 0, call mcica_subcol() to distribute
 !!    cloud properties to each g-point.
 
-      if ( isubcsw > 0 ) then      ! mcica sub-col clouds approx
+      if ( isubcsw > 0 .and. iovr /= 4 ) then      ! mcica sub-col clouds approx
 
         cldf(:) = cfrac(:)
         where (cldf(:) < ftiny)
@@ -1885,7 +2127,7 @@
 
         call mcica_subcol                                               &
 !  ---  inputs:
-     &     ( cldf, nlay, ipseed, dz, delgth,                            &
+     &     ( cldf, nlay, ipseed, dz, delgth, alpha,                     &
 !  ---  outputs:
      &       lcloudy                                                    &
      &     )
@@ -1920,12 +2162,13 @@
 !!\param ipseed      permute seed for random num generator
 !!\param dz          layer thickness (km)
 !!\param de_lgth     layer cloud decorrelation length (km)
+!!\param alpha       EXP/ER cloud overlap decorrelation parameter
 !!\param lcloudy     sub-colum cloud profile flag array
 !!\section mcica_sw_gen mcica_subcol General Algorithm
 !> @{
 ! ----------------------------------
       subroutine mcica_subcol                                           &
-     &    ( cldf, nlay, ipseed, dz, de_lgth,                            &       !  ---  inputs
+     &    ( cldf, nlay, ipseed, dz, de_lgth, alpha,                     &       !  ---  inputs
      &      lcloudy                                                     &       !  ---  outputs
      &    )
 
@@ -1940,16 +2183,19 @@
 !              for lw and sw, use values differ by the number of g-pts. !
 !    dz    - real, layer thickness (km)                            nlay !
 !    de_lgth-real, layer cloud decorrelation length (km)            1   !
+!    alpha  - real, EXP/ER decorrelation parameter                 nlay !
 !                                                                       !
 !  output variables:                                                    !
 !   lcloudy - logical, sub-colum cloud profile flag array    nlay*ngptsw!
 !                                                                       !
 !  other control flags from module variables:                           !
-!     iovrsw    : control flag for cloud overlapping method             !
+!     iovr      : control flag for cloud overlapping method             !
 !                 =0: random                                            !
 !                 =1: maximum/random overlapping clouds                 !
 !                 =2: maximum overlap cloud                             !
 !                 =3: cloud decorrelation-length overlap method         !
+!                 =4: exponential cloud overlap method (AER)            !
+!                 =5: exponential-random cloud overlap method (AER)     !
 !                                                                       !
 !  =====================    end of definitions    ====================  !
 
@@ -1960,6 +2206,7 @@
 
       real (kind=kind_phys), dimension(nlay), intent(in) :: cldf, dz
       real (kind=kind_phys), intent(in) :: de_lgth
+      real (kind=kind_phys), dimension(nlay), intent(in) :: alpha
 
 !  ---  outputs:
       logical, dimension(nlay,ngptsw), intent(out):: lcloudy
@@ -1986,7 +2233,7 @@
 
 !> -# Sub-column set up according to overlapping assumption.
 
-      select case ( iovrsw )
+      select case ( iovr )
 
         case( 0 )        ! random overlap, pick a random value at every level
 
@@ -2110,6 +2357,58 @@
             do k = nlay-1, 1, -1
               k1 = k + 1
               if ( cdfun2(k,n) <= fac_lcf(k1) ) then
+                   cdfunc(k,n) = cdfunc(k1,n)
+              endif
+            enddo
+          enddo
+
+        case( 4:5 )        ! exponential and exponential-random cloud overlap
+
+!  ---  Use previously derived decorrelation parameter, alpha, to specify
+!       the exponenential transition of cloud correlation in the vertical column.
+!
+!       For exponential cloud overlap, the correlation is applied across layers
+!       without regard to the configuration of clear and cloudy layers.
+
+!       For exponential-random cloud overlap, a new exponential transition is 
+!       performed within each group of adjacent cloudy layers and blocks of 
+!       cloudy layers with clear layers between them are correlated randomly. 
+!
+!       NOTE: The code below is identical for case (4) and (5) because the 
+!       distinction in the vertical correlation between EXP and ER is already 
+!       built into the specification of alpha (in subroutine get_alpha_exp). 
+
+!  ---  setup 2 sets of random numbers
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do n = 1, ngptsw
+            do k = 1, nlay
+              k1 = k1 + 1
+              cdfunc(k,n) = rand2d(k1)
+            enddo
+          enddo
+
+          call random_number ( rand2d, stat )
+
+          k1 = 0
+          do n = 1, ngptsw
+            do k = 1, nlay
+              k1 = k1 + 1
+              cdfun2(k,n) = rand2d(k1)
+            enddo
+          enddo
+
+!  ---  then working upward from the surface:
+!       if a random number (from an independent set: cdfun2) is smaller than 
+!       alpha, then use the previous layer's number, otherwise use a new random
+!       number (keep the originally assigned one in cdfunc for that layer).
+
+          do n = 1, ngptsw
+            do k = 2, nlay
+              k1 = k - 1
+              if ( cdfun2(k,n) < alpha(k) ) then
                    cdfunc(k,n) = cdfunc(k1,n)
               endif
             enddo
@@ -5464,6 +5763,576 @@
 !...................................
       end subroutine taumol
 !-----------------------------------
+
+!mz* HWRF subroutines
+      subroutine mcica_subcol_sw(iplon, ncol, nlay, icld, permuteseed,  &
+     &                 irng, play, hgt,                                 &
+     &                 cldfrac, ciwp, clwp, cswp, rei, rel, res, tauc,  &
+     &                 ssac, asmc, fsfc,                                &
+     &                 cldfmcl, ciwpmcl, clwpmcl, cswpmcl, reicmcl,     &
+     &                 relqmcl, resnmcl,                                &
+     &                 taucmcl, ssacmcl, asmcmcl, fsfcmcl)
+ 
+! ----- Input -----                                                                        
+! Control                                                                                  
+      integer(kind=im), intent(in) :: iplon           ! column/longitude dimension         
+      integer(kind=im), intent(in) :: ncol            ! number of columns                  
+      integer(kind=im), intent(in) :: nlay            ! number of model layers             
+      integer(kind=im), intent(in) :: icld            ! clear/cloud, cloud overlap flag    
+      integer(kind=im), intent(in) :: permuteseed     ! if the cloud generator is called multiple times, 
+                                                      ! permute the seed between each call;
+                                                      ! between calls for LW and SW, recommended
+                                                      ! permuteseed differs by 'ngpt'      
+      integer(kind=im), intent(inout) :: irng         ! flag for random number generator   
+                                                      !  0 = kissvec                       
+                                                      !  1 = Mersenne Twister              
+
+! Atmosphere                                                                               
+      real(kind=rb), intent(in) :: play(:,:)          ! layer pressures (mb)               
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: hgt(:,:)           ! layer height (m)                   
+                                                      !    Dimensions: (ncol,nlay)         
+
+! Atmosphere/clouds - cldprop                                                              
+      real(kind=rb), intent(in) :: cldfrac(:,:)       ! layer cloud fraction               
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: tauc(:,:,:)        ! in-cloud optical depth             
+                                                      !    Dimensions: (nbndsw,ncol,nlay)  
+      real(kind=rb), intent(in) :: ssac(:,:,:)        ! in-cloud single scattering albedo (non-delta scaled)
+                                                      !    Dimensions: (nbndsw,ncol,nlay)  
+      real(kind=rb), intent(in) :: asmc(:,:,:)        ! in-cloud asymmetry parameter (non-delta scaled)  
+                                                      !    Dimensions: (nbndsw,ncol,nlay)  
+      real(kind=rb), intent(in) :: fsfc(:,:,:)        ! in-cloud forward scattering fraction (non-delta scaled)
+                                                      !    Dimensions: (nbndsw,ncol,nlay)  
+      real(kind=rb), intent(in) :: ciwp(:,:)          ! in-cloud ice water path            
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: clwp(:,:)          ! in-cloud liquid water path         
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: cswp(:,:)          ! in-cloud snow water path           
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: rei(:,:)           ! cloud ice particle size            
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: rel(:,:)           ! cloud liquid particle size         
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: res(:,:)           ! cloud snow particle size           
+                                                      !    Dimensions: (ncol,nlay)         
+
+! ----- Output -----                                                                       
+! Atmosphere/clouds - cldprmc [mcica]                                                      
+      real(kind=rb), intent(out) :: cldfmcl(:,:,:)    ! cloud fraction [mcica]             
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: ciwpmcl(:,:,:)    ! in-cloud ice water path [mcica]    
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: clwpmcl(:,:,:)    ! in-cloud liquid water path [mcica] 
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: cswpmcl(:,:,:)    ! in-cloud snow water path [mcica]   
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: relqmcl(:,:)      ! liquid particle size (microns)     
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(out) :: reicmcl(:,:)      ! ice partcle size (microns)         
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(out) :: resnmcl(:,:)      ! snow partcle size (microns)        
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(out) :: taucmcl(:,:,:)    ! in-cloud optical depth [mcica]     
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: ssacmcl(:,:,:)    ! in-cloud single scattering albedo [mcica]
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: asmcmcl(:,:,:)    ! in-cloud asymmetry parameter [mcica]
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: fsfcmcl(:,:,:)    ! in-cloud forward scattering fraction [mcica]     
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+
+! ----- Local -----                                                                        
+
+! Stochastic cloud generator variables [mcica]                                             
+      integer(kind=im), parameter :: nsubcsw = ngptsw ! number of sub-columns (g-point intervals)
+      integer(kind=im) :: ilev                        ! loop index                         
+
+      real(kind=rb) :: pmid(ncol,nlay)                ! layer pressures (Pa)               
+!      real(kind=rb) :: pdel(ncol,nlay)               ! layer pressure thickness (Pa)      
+!      real(kind=rb) :: qi(ncol,nlay)                 ! ice water (specific humidity)      
+!      real(kind=rb) :: ql(ncol,nlay)                 ! liq water (specific humidity)      
+
+! Return if clear sky                                                                      
+      if (icld.eq.0) return  
+
+! NOTE: For GCM mode, permuteseed must be offset between LW and SW by at least number of subcolumns      
+
+! Pass particle sizes to new arrays, no subcolumns for these properties yet                
+! Convert pressures from mb to Pa                                                          
+
+      reicmcl(:ncol,:nlay) = rei(:ncol,:nlay)                             
+      relqmcl(:ncol,:nlay) = rel(:ncol,:nlay)                                              
+      resnmcl(:ncol,:nlay) = res(:ncol,:nlay)
+      pmid(:ncol,:nlay) = play(:ncol,:nlay)*1.e2_rb                                        
+                                                                                           
+! Convert input ice and liquid cloud water paths to specific humidity ice and liquid components 
+
+!      cwp =  (q * pdel * 1000.) / gravit)                                                 
+!           = (kg/kg * kg m-1 s-2 *1000.) / m s-2                                          
+!           = (g m-2)                                                                      
+!                                                                                          
+!      q  = (cwp * gravit) / (pdel *1000.)                                                 
+!         = (g m-2 * m s-2) / (kg m-1 s-2 * 1000.)                                         
+!         =  kg/kg                                                                         
+
+!      do ilev = 1, nlay                                                                   
+!         qi(ilev) = (ciwp(ilev) * grav) / (pdel(ilev) * 1000._rb)                         
+!         ql(ilev) = (clwp(ilev) * grav) / (pdel(ilev) * 1000._rb)                         
+!      enddo                                                                               
+
+      call generate_stochastic_clouds_sw (ncol, nlay, nsubcsw, icld,    &
+     &                      irng, pmid, hgt, cldfrac, clwp, ciwp, cswp, &
+     &                      tauc, ssac, asmc, fsfc, cldfmcl, clwpmcl,   &
+     &                      ciwpmcl, cswpmcl,                           &
+     &              taucmcl, ssacmcl, asmcmcl, fsfcmcl, permuteseed) 
+
+      end subroutine mcica_subcol_sw 
+
+!-------------------------------------------------------------------------------------------------
+      subroutine generate_stochastic_clouds_sw(ncol, nlay, nsubcol,     &
+     &                    icld, irng, pmid, hgt, cld, clwp, ciwp, cswp, &
+     &                   tauc, ssac, asmc, fsfc, cld_stoch, clwp_stoch, &
+     &                   ciwp_stoch, cswp_stoch,                        &
+     &     tauc_stoch, ssac_stoch, asmc_stoch, fsfc_stoch, changeSeed) 
+!-------------------------------------------------------------------------------------------------       
+! Contact: Cecile Hannay (hannay@ucar.edu)                                               
+!                                                                                        
+! Original code: Based on Raisanen et al., QJRMS, 2004.                                  
+!                                                                                        
+! Modifications: Generalized for use with RRTMG and added Mersenne Twister as the default
+!   random number generator, which can be changed to the optional kissvec random number generator      
+!   with flag 'irng'. Some extra functionality has been commented or removed.            
+!   Michael J. Iacono, AER, Inc., February 2007                                          
+!                                                                                        
+! Given a profile of cloud fraction, cloud water and cloud ice, we produce a set of subcolumns.        
+! Each layer within each subcolumn is homogeneous, with cloud fraction equal to zero or one 
+! and uniform cloud liquid and cloud ice concentration.                                  
+! The ensemble as a whole reproduces the probability function of cloud liquid and ice within each layer 
+! and obeys an overlap assumption in the vertical.                                       
+!                                                                                        
+! Overlap assumption:                                                                    
+!  The cloud are consistent with 4 overlap assumptions: random, maximum, maximum-random and exponential. 
+!  The default option is maximum-random (option 3)                                       
+!  The options are: 1=random overlap, 2=max/random, 3=maximum overlap, 4=exponential overlap
+!  This is set with the variable "overlap"                                               
+!mji - Exponential overlap option (overlap=4) has been deactivated in this version       
+!  The exponential overlap uses also a length scale, Zo. (real,    parameter  :: Zo = 2500. ) 
+!                                                                                        
+! Seed:                                                                                  
+!  If the stochastic cloud generator is called several times during the same timestep,   
+!  one should change the seed between the call to insure that the subcolumns are different.
+!  This is done by changing the argument 'changeSeed'                                    
+!  For example, if one wants to create a set of columns for the shortwave and another set for the longwave ,
+!  use 'changeSeed = 1' for the first call and'changeSeed = 2' for the second call       
+!                                                                                        
+! PDF assumption:                                                                        
+!  We can use arbitrary complicated PDFS.                                                
+!  In the present version, we produce homogeneuous clouds (the simplest case).           
+!  Future developments include using the PDF scheme of Ben Johnson.                      
+!                                                                                        
+! History file:                                                                          
+!  Option to add diagnostics variables in the history file. (using FINCL in the namelist)
+!  nsubcol = number of subcolumns                                                        
+!  overlap = overlap type (1-3)                                                          
+!  Zo = length scale
+!  CLOUD_S = mean of the subcolumn cloud fraction ('_S" means Stochastic)                
+!  CLDLIQ_S = mean of the subcolumn cloud water
+!  CLDICE_S = mean of the subcolumn cloud ice                                            
+!                                                                                        
+!                                                                                        
+! Note:                                                                                  
+!   Here: we force that the cloud condensate to be consistent with the cloud fraction    
+!   i.e we only have cloud condensate when the cell is cloudy.                           
+!   In CAM: The cloud condensate and the cloud fraction are obtained from 2 different equations        
+!   and the 2 quantities can be inconsistent (i.e. CAM can produce cloud fraction        
+!   without cloud condensate or the opposite).                                           
+!----------------------------------------------------------------------
+                                                                                           
+      use mcica_random_numbers
+! The Mersenne Twister random number engine                                                
+      use MersenneTwister, only: randomNumberSequence, &   
+                                 new_RandomNumberSequence, getRandomReal                   
+                                                                                           
+      type(randomNumberSequence) :: randomNumbers                                          
+                                                                                           
+! -- Arguments
+                                                                                           
+      integer(kind=im), intent(in) :: ncol            ! number of layers                   
+      integer(kind=im), intent(in) :: nlay            ! number of layers                   
+      integer(kind=im), intent(in) :: icld            ! clear/cloud, cloud overlap flag    
+      integer(kind=im), intent(inout) :: irng         ! flag for random number generator   
+                                                      !  0 = kissvec                       
+                                                      !  1 = Mersenne Twister              
+      integer(kind=im), intent(in) :: nsubcol         ! number of sub-columns (g-point intervals)
+      integer(kind=im), optional, intent(in) :: changeSeed     ! allows permuting seed     
+                                                                                           
+! Column state (cloud fraction, cloud water, cloud ice) + variables needed to read physics state 
+      real(kind=rb), intent(in) :: pmid(:,:)          ! layer pressure (Pa)                
+                                                      !    Dimensions: (ncol,nlay)         
+! mji - Add height                                                                         
+      real(kind=rb), intent(in) :: hgt(:,:)           ! layer height (m)                   
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: cld(:,:)           ! cloud fraction                     
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: clwp(:,:)          ! in-cloud liquid water path (g/m2)  
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: ciwp(:,:)          ! in-cloud ice water path (g/m2)     
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: cswp(:,:)          ! in-cloud snow water path (g/m2)    
+                                                      !    Dimensions: (ncol,nlay)         
+      real(kind=rb), intent(in) :: tauc(:,:,:)        ! in-cloud optical depth (non-delta scaled)
+                                                      !    Dimensions: (nbndsw,ncol,nlay)  
+      real(kind=rb), intent(in) :: ssac(:,:,:)        ! in-cloud single scattering albedo (non-delta scaled)
+                                                      !    Dimensions: (nbndsw,ncol,nlay)  
+      real(kind=rb), intent(in) :: asmc(:,:,:)        ! in-cloud asymmetry parameter (non-delta scaled)  
+                                                      !    Dimensions: (nbndsw,ncol,nlay)
+      real(kind=rb), intent(in) :: fsfc(:,:,:)        ! in-cloud forward scattering fraction (non-delta scaled)
+                                                      !    Dimensions: (nbndsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: cld_stoch(:,:,:)  ! subcolumn cloud fraction           
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: clwp_stoch(:,:,:) ! subcolumn in-cloud liquid water path
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: ciwp_stoch(:,:,:) ! subcolumn in-cloud ice water path  
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: cswp_stoch(:,:,:) ! subcolumn in-cloud snow water path 
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: tauc_stoch(:,:,:) ! subcolumn in-cloud optical depth   
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: ssac_stoch(:,:,:) ! subcolumn in-cloud single scattering albedo      
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: asmc_stoch(:,:,:) ! subcolumn in-cloud asymmetry parameter
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+      real(kind=rb), intent(out) :: fsfc_stoch(:,:,:) ! subcolumn in-cloud forward scattering fraction   
+                                                      !    Dimensions: (ngptsw,ncol,nlay)  
+                                                                                           
+! -- Local variables                                                                       
+      real(kind=rb) :: cldf(ncol,nlay)                ! cloud fraction                     
+                                                      !    Dimensions: (ncol,nlay)
+                                                                                           
+! Mean over the subcolumns (cloud fraction, cloud water , cloud ice) - inactive            
+!      real(kind=rb) :: mean_cld_stoch(ncol,nlay)     ! cloud fraction                     
+!      real(kind=rb) :: mean_clwp_stoch(ncol,nlay)    ! cloud water                        
+!      real(kind=rb) :: mean_ciwp_stoch(ncol,nlay)    ! cloud ice                          
+!      real(kind=rb) :: mean_tauc_stoch(ncol,nlay)    ! cloud optical depth                
+!      real(kind=rb) :: mean_ssac_stoch(ncol,nlay)    ! cloud single scattering albedo     
+!      real(kind=rb) :: mean_asmc_stoch(ncol,nlay)    ! cloud asymmetry parameter          
+!      real(kind=rb) :: mean_fsfc_stoch(ncol,nlay)    ! cloud forward scattering fraction  
+                                                                                           
+! Set overlap                                                                              
+      integer(kind=im) :: overlap                     ! 1 = random overlap, 2 = maximum-random,
+                                                      ! 3 = maximum overlap, 4 = exponential,
+                                                      ! 5 = exponential-random             
+      real(kind=rb), parameter  :: Zo = 2500._rb      ! length scale (m)                   
+      real(kind=rb), dimension(ncol,nlay) :: alpha    ! overlap parameter                  
+                                                                                           
+! Constants (min value for cloud fraction and cloud water and ice)                         
+      real(kind=rb), parameter :: cldmin = 1.0e-20_rb ! min cloud fraction                 
+!      real(kind=rb), parameter :: qmin   = 1.0e-10_rb   ! min cloud water and cloud ice (not used)      
+                                                                                           
+! Variables related to random number and seed                                              
+      real(kind=rb), dimension(nsubcol, ncol, nlay) :: CDF, CDF2       ! random numbers    
+      integer(kind=im), dimension(ncol) :: seed1, seed2, seed3, seed4  ! seed to create random number    
+      real(kind=rb), dimension(ncol) :: rand_num       ! random number (kissvec)           
+      integer(kind=im) :: iseed                        ! seed to create random number (Mersenne Twister) 
+      real(kind=rb) :: rand_num_mt                     ! random number (Mersenne Twister)  
+                                                                                           
+! Flag to identify cloud fraction in subcolumns                                            
+      logical,  dimension(nsubcol, ncol, nlay) :: isCloudy   ! flag that says whether a gridbox is cloudy
+                                                                                           
+! Indices                                                                                  
+      integer(kind=im) :: ilev, isubcol, i, n, ngbm    ! indices                           
+                                                                                           
+!------------------------------------------------------------------------------------------ 
+                                                                                           
+! Check that irng is in bounds; if not, set to default                                     
+      if (irng .ne. 0) irng = 1                                                            
+                                                                                           
+! Pass input cloud overlap setting to local variable                                       
+      overlap = icld
+                                                                                           
+! Ensure that cloud fractions are in bounds                                                
+      do ilev = 1, nlay                                                                    
+         do i = 1, ncol                                                                    
+            cldf(i,ilev) = cld(i,ilev)                                                     
+            if (cldf(i,ilev) < cldmin) then                                                
+               cldf(i,ilev) = 0._rb                                                        
+            endif                                                                          
+         enddo                                                                             
+      enddo                                                                                
+                                                                                           
+! ----- Create seed  --------                                                              
+                                                                                           
+! Advance randum number generator by changeseed values                                     
+      if (irng.eq.0) then                                                                  
+! For kissvec, create a seed that depends on the state of the columns. Maybe not the best way, but it works. 
+ 
+! Must use pmid from bottom four layers.                                                   
+         do i=1,ncol                                                                       
+            if (pmid(i,1).lt.pmid(i,2)) then                                               
+               stop 'MCICA_SUBCOL: KISSVEC SEED GENERATOR REQUIRES PMID FROM BOTTOM FOUR LAYERS.'
+            endif                                                                          
+            seed1(i) = (pmid(i,1) - int(pmid(i,1)))  * 1000000000_im                       
+            seed2(i) = (pmid(i,2) - int(pmid(i,2)))  * 1000000000_im                       
+            seed3(i) = (pmid(i,3) - int(pmid(i,3)))  * 1000000000_im                       
+            seed4(i) = (pmid(i,4) - int(pmid(i,4)))  * 1000000000_im                       
+          enddo                                                                            
+         do i=1,changeSeed                                                                 
+            call kissvec(seed1, seed2, seed3, seed4, rand_num)                             
+         enddo                                                                             
+      elseif (irng.eq.1) then                                                              
+         randomNumbers = new_RandomNumberSequence(seed = changeSeed)                       
+      endif                                                                                
+                                                                                           
+                                                                                           
+! ------ Apply overlap assumption --------                                                 
+                                                                                           
+! generate the random numbers                                                              
+                                                                                           
+      select case (overlap)                                                                
+                                                
+                                                                                          
+      case(1)                                                                              
+! Random overlap                                                                           
+! i) pick a random value at every level                                                    
+                                                                                           
+         if (irng.eq.0) then                                                               
+            do isubcol = 1,nsubcol                                                         
+               do ilev = 1,nlay                                                            
+                  call kissvec(seed1, seed2, seed3, seed4, rand_num)                       
+                  CDF(isubcol,:,ilev) = rand_num                                           
+               enddo                                                                       
+            enddo                                                                          
+         elseif (irng.eq.1) then                                                           
+            do isubcol = 1, nsubcol                                                        
+               do i = 1, ncol                                                              
+                  do ilev = 1, nlay                                                        
+                     rand_num_mt = getRandomReal(randomNumbers)                            
+                     CDF(isubcol,i,ilev) = rand_num_mt                                     
+                  enddo                                                                    
+               enddo                                                                       
+             enddo                                                                         
+         endif                                                                             
+                                                                                           
+      case(2)                                                                              
+! Maximum-Random overlap                                                                   
+! i) pick  a random number for top layer.                                                  
+! ii) walk down the column:                                                                
+!    - if the layer above is cloudy, we use the same random number than in the layer above 
+!    - if the layer above is clear, we use a new random number                             
+                                                                                           
+         if (irng.eq.0) then                                                               
+            do isubcol = 1,nsubcol                                                         
+               do ilev = 1,nlay                                                            
+                  call kissvec(seed1, seed2, seed3, seed4, rand_num)                       
+                  CDF(isubcol,:,ilev) = rand_num                                           
+               enddo                                                                       
+            enddo                                                                          
+         elseif (irng.eq.1) then                                                           
+            do isubcol = 1, nsubcol                                                        
+               do i = 1, ncol
+                  do ilev = 1, nlay                                                        
+                     rand_num_mt = getRandomReal(randomNumbers)                            
+                     CDF(isubcol,i,ilev) = rand_num_mt                                     
+                  enddo                                                                    
+               enddo                                                                       
+             enddo                                                                         
+         endif                                                                             
+                                                                                           
+         do ilev = 2,nlay                                                                  
+            do i = 1, ncol                                                                 
+               do isubcol = 1, nsubcol                                                     
+                  if (CDF(isubcol, i, ilev-1) > 1._rb - cldf(i,ilev-1) ) then              
+                     CDF(isubcol,i,ilev) = CDF(isubcol,i,ilev-1)                           
+                  else                                                                     
+                     CDF(isubcol,i,ilev) = CDF(isubcol,i,ilev) * (1._rb - cldf(i,ilev-1))  
+                  endif                                                                    
+               enddo                                                                       
+            enddo                                                                          
+         enddo                                                                             
+                                                                               
+
+      case(3)
+! Maximum overlap
+! i) pick same random numebr at every level  
+
+         if (irng.eq.0) then                                                               
+            do isubcol = 1,nsubcol                                                         
+               call kissvec(seed1, seed2, seed3, seed4, rand_num)                          
+               do ilev = 1,nlay                                                            
+                  CDF(isubcol,:,ilev) = rand_num                                           
+               enddo                                                                       
+            enddo                                                                          
+         elseif (irng.eq.1) then                                                           
+            do isubcol = 1, nsubcol                                                        
+               do i = 1, ncol                                                              
+                  rand_num_mt = getRandomReal(randomNumbers)                               
+                  do ilev = 1, nlay                                                        
+                     CDF(isubcol,i,ilev) = rand_num_mt                                     
+                  enddo                                                                    
+               enddo                                                                       
+             enddo                                                                         
+         endif                                                                             
+                                                                                           
+                                                                                           
+! mji - Activate exponential cloud overlap option                                          
+         case(4)                                                                           
+            ! Exponential overlap: weighting between maximum and random overlap increases with the distance.
+            ! The random numbers for exponential overlap verify:                           
+            ! j=1   RAN(j)=RND1                                                            
+            ! j>1   if RND1 < alpha(j,j-1) => RAN(j) = RAN(j-1)                            
+            !                                 RAN(j) = RND2                                
+            ! alpha is obtained from the equation                                          
+            ! alpha = exp(-(Z(j)-Z(j-1))/Zo) where Zo is a characteristic length scale     
+                                                                                           
+            ! compute alpha                                                                
+            do i = 1, ncol                                                                 
+               alpha(i, 1) = 0._rb                                                         
+               do ilev = 2,nlay                                                            
+                  alpha(i, ilev) = exp( -( hgt (i, ilev) -  hgt (i, ilev-1)) / Zo)         
+               enddo                                                                       
+            enddo                                                                          
+                                                                                           
+            ! generate 2 streams of random numbers                                         
+            if (irng.eq.0) then                                                            
+               do isubcol = 1,nsubcol                                                      
+                  do ilev = 1,nlay                                                         
+                     call kissvec(seed1, seed2, seed3, seed4, rand_num)                    
+                     CDF(isubcol, :, ilev) = rand_num                                      
+                     call kissvec(seed1, seed2, seed3, seed4, rand_num)                    
+                     CDF2(isubcol, :, ilev) = rand_num                                     
+                  enddo                                                                    
+               enddo                                                                       
+            elseif (irng.eq.1) then                                                        
+            do isubcol = 1, nsubcol                                                        
+               do i = 1, ncol                                                              
+                  do ilev = 1, nlay                                                        
+                     rand_num_mt = getRandomReal(randomNumbers)                            
+                     CDF(isubcol,i,ilev) = rand_num_mt                                     
+                     rand_num_mt = getRandomReal(randomNumbers)                            
+                     CDF2(isubcol,i,ilev) = rand_num_mt                                    
+                  enddo                                                                    
+               enddo                                                                       
+            enddo                                                                          
+         endif                                                                             
+                                                                                           
+         ! generate random numbers                                                         
+         do ilev = 2,nlay                                                                  
+            where (CDF2(:, :, ilev) < spread(alpha (:,ilev), dim=1, nCopies=nsubcol) )     
+               CDF(:,:,ilev) = CDF(:,:,ilev-1)                                             
+            end where                                                                      
+         end do                                                                            
+                                                                                           
+! mji - Activate exponential-random cloud overlap option                                   
+         case(5)                                                                           
+            ! Exponential-random overlap:                                                  
+!            call wrf_error_fatal("Cloud Overlap case 5: ER has not yet been implemented. Stopping...")   
+                                                                                           
+      end select                                                                           
+                                                                                           
+                                                                                           
+! -- generate subcolumns for homogeneous clouds -----                                      
+      do ilev = 1, nlay                                                                    
+         isCloudy(:,:,ilev) = (CDF(:,:,ilev) >= 1._rb - spread(cldf(:,ilev), dim=1, nCopies=nsubcol) )   
+      enddo                                                                                
+                                                                                           
+! where the subcolumn is cloudy, the subcolumn cloud fraction is 1;                        
+! where the subcolumn is not cloudy, the subcolumn cloud fraction is 0;                    
+! where there is a cloud, define the subcolumn cloud properties,                           
+! otherwise set these to zero                                                              
+                                                                                           
+      ngbm = ngb(1) - 1                                                                    
+      do ilev = 1,nlay                                                                     
+         do i = 1, ncol                                                                    
+            do isubcol = 1, nsubcol                                                        
+               if ( iscloudy(isubcol,i,ilev) ) then                                        
+                  cld_stoch(isubcol,i,ilev) = 1._rb                                        
+                  clwp_stoch(isubcol,i,ilev) = clwp(i,ilev)                                
+                  ciwp_stoch(isubcol,i,ilev) = ciwp(i,ilev)                                
+                  cswp_stoch(isubcol,i,ilev) = cswp(i,ilev)                                
+                  n = ngb(isubcol) - ngbm                                                  
+                  tauc_stoch(isubcol,i,ilev) = tauc(n,i,ilev)                              
+                  ssac_stoch(isubcol,i,ilev) = ssac(n,i,ilev)                              
+                  asmc_stoch(isubcol,i,ilev) = asmc(n,i,ilev)                              
+                  fsfc_stoch(isubcol,i,ilev) = fsfc(n,i,ilev)                              
+               else                                                                        
+                  cld_stoch(isubcol,i,ilev) = 0._rb                                        
+                  clwp_stoch(isubcol,i,ilev) = 0._rb                                       
+                  ciwp_stoch(isubcol,i,ilev) = 0._rb                                       
+                  cswp_stoch(isubcol,i,ilev) = 0._rb                                       
+                  tauc_stoch(isubcol,i,ilev) = 0._rb                                       
+                  ssac_stoch(isubcol,i,ilev) = 1._rb                                       
+                  asmc_stoch(isubcol,i,ilev) = 0._rb                                       
+                  fsfc_stoch(isubcol,i,ilev) = 0._rb                                       
+               endif                                                                       
+            enddo                                                                          
+         enddo                                                                             
+      enddo                                                                                
+                                                                 
+                                                                                           
+! -- compute the means of the subcolumns ---                                               
+!      mean_cld_stoch(:,:) = 0._rb                                                         
+!      mean_clwp_stoch(:,:) = 0._rb                                                        
+!      mean_ciwp_stoch(:,:) = 0._rb                                                        
+!      mean_tauc_stoch(:,:) = 0._rb                                                        
+!      mean_ssac_stoch(:,:) = 0._rb                                                        
+!      mean_asmc_stoch(:,:) = 0._rb                                                        
+!      mean_fsfc_stoch(:,:) = 0._rb                                                        
+!      do i = 1, nsubcol                                                                   
+!         mean_cld_stoch(:,:) =  cld_stoch(i,:,:) + mean_cld_stoch(:,:)                    
+!         mean_clwp_stoch(:,:) =  clwp_stoch( i,:,:) + mean_clwp_stoch(:,:)                
+!         mean_ciwp_stoch(:,:) =  ciwp_stoch( i,:,:) + mean_ciwp_stoch(:,:)                
+!         mean_tauc_stoch(:,:) =  tauc_stoch( i,:,:) + mean_tauc_stoch(:,:)                
+!         mean_ssac_stoch(:,:) =  ssac_stoch( i,:,:) + mean_ssac_stoch(:,:)                
+!         mean_asmc_stoch(:,:) =  asmc_stoch( i,:,:) + mean_asmc_stoch(:,:)                
+!         mean_fsfc_stoch(:,:) =  fsfc_stoch( i,:,:) + mean_fsfc_stoch(:,:)                
+!      end do                                                                              
+!      mean_cld_stoch(:,:) = mean_cld_stoch(:,:) / nsubcol                                 
+!      mean_clwp_stoch(:,:) = mean_clwp_stoch(:,:) / nsubcol                               
+!      mean_ciwp_stoch(:,:) = mean_ciwp_stoch(:,:) / nsubcol                               
+!      mean_tauc_stoch(:,:) = mean_tauc_stoch(:,:) / nsubcol                               
+!      mean_ssac_stoch(:,:) = mean_ssac_stoch(:,:) / nsubcol                               
+!      mean_asmc_stoch(:,:) = mean_asmc_stoch(:,:) / nsubcol                               
+!      mean_fsfc_stoch(:,:) = mean_fsfc_stoch(:,:) / nsubcol                               
+
+      end subroutine generate_stochastic_clouds_sw
+                                                                                           
+                                                                                           
+!--------------------------------------------------------------------------------------------------      
+      subroutine kissvec(seed1,seed2,seed3,seed4,ran_arr)                                  
+!--------------------------------------------------------------------------------------------------      
+
+! public domain code  made available from http://www.fortran.com/
+! downloaded by pjr on 03/16/04 for NCAR CAM                                    
+! converted to vector form, functions inlined by pjr,mvr on 05/10/2004                     
+                                                                                           
+! The  KISS (Keep It Simple Stupid) random number generator. Combines:                     
+! (1) The congruential generator x(n)=69069*x(n-1)+1327217885, period 2^32.                
+! (2) A 3-shift shift-register generator, period 2^32-1,                                   
+! (3) Two 16-bit multiply-with-carry generators, period 597273182964842497>2^59            
+!  Overall period>2^123;                                                                   
+
+!                                                                                          
+      real(kind=rb), dimension(:), intent(inout)  :: ran_arr                               
+      integer(kind=im), dimension(:), intent(inout) :: seed1,seed2,seed3,seed4             
+      integer(kind=im) :: i,sz,kiss                                                        
+      integer(kind=im) :: m, k, n                                                          
+                                                                                           
+! inline function                                                                          
+      m(k, n) = ieor (k, ishft (k, n) )                                                    
+                                                                                           
+      sz = size(ran_arr)                                                                   
+      do i = 1, sz                                                                         
+         seed1(i) = 69069_im * seed1(i) + 1327217885_im                                    
+         seed2(i) = m (m (m (seed2(i), 13_im), - 17_im), 5_im)                             
+         seed3(i) = 18000_im * iand (seed3(i), 65535_im) + ishft (seed3(i), - 16_im)       
+         seed4(i) = 30903_im * iand (seed4(i), 65535_im) + ishft (seed4(i), - 16_im)       
+         kiss = seed1(i) + seed2(i) + ishft (seed3(i), 16_im) + seed4(i)                   
+         ran_arr(i) = kiss*2.328306e-10_rb + 0.5_rb                                        
+      end do                                                                               
+                                                                                           
+      end subroutine kissvec                                                               
+                                             
 !! @}
 
 !

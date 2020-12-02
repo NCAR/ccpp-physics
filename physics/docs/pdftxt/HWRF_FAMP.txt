@@ -1,0 +1,91 @@
+/**
+\page HWRF_famp HWRF Ferrier-Aligo (FA) Microphysics Scheme
+\section des_famp Description
+
+The Ferrier-Aligo (FA) microphysics (Aligo et al. 2018 \cite aligo_et_al_2018) is a single
+moment scheme predicting mass mixing ratios of rain water (\f$q_r\f$), cloud water (\f$q_c\f$),
+cloud ice (\f$q_i\f$), and snow-graupel (\f$q_s\f$). The FA scheme is currently used operationally
+in the North American Mesoscale Forecast System (NAM; including the parent 12-km domain, the 3-km
+NAM nests, and the 1.5km fire weather nest), the Hurricane Weather Research and Forecasting Model (HWRF),
+the Hurricanes in a Multi-scale Ocean-coupled Non-hydrostatic Model (HMON), and the High-Resolution
+Window (HiResW) Non-dydrostatic Multiscale Model on the B grid (NMMB). The FA scheme advects each 
+species separately in the NAM nests, and advects the total condensate in the 12-km parent NAM,HiResW NMMB,
+HWRF, and HMON.
+
+Unique to the FA scheme is the calculation of a diagnostic array called the "rime factor" (RF), which
+represents the degree of riming onto snow-graupel, and takes into account the temperature of the ice particle, 
+the impact velocity of the cloud droplet on the ice particle, and the size of the cloud droplet. For all
+practical purposes, one can categorize precipitation ice as snow, graupel, or hail, similar to the ice
+species predicted in other microphysical schemes based on the value of the RF. For example, an RF = 1 
+represents unrimed snow; lightly rimed snow occurs when 1 < RF < 2; heavily rimed snow when 2< RF \f$\leq\f$ 5;
+graupel when 5 < RF < 10; and frozen drops or hail when RF \f$geqslant\f$ 10. In reality, the RF knows 
+no arbitrary cutoff between different ice categories, and the categorizations above are somewhat subjective.
+Figure 1 is a schematic illustration of the FA scheme processes and each process is described in Table 1.
+
+\image html FA_MP_schematic.png "Figure 1: Schematic illustration of FA scheme processes with a description of each process in Table 1." width=10cm
+
+Table 1. List of microphysical processes and their description. All processes are in units of \f$kg kg^{-1}\f$.
+\tableofcontents
+|   Microphysical Source/Sinks     |      Description                                       | 
+|----------------------------------|--------------------------------------------------------|
+|             PIHOM                | Homogeneous freezing of cloud water to ice.            | 
+|             PIDEP                | Net ice deposition (> 0) or sublimation (< 0).         |
+|             PINIT                | Initiation (nucleation) of cloud ice.                  |
+|             PIACW                | Cloud water collection by precipitation ice.           |
+|             PIACWI               | Cloud water riming onto precipitation ice at < 0       |
+|             PIACR                | Freezing of supercooled rain to precipitation ice.     |
+|             PIMLT                | Melting of precipitation ice to form rain.             |
+|             PICND                | Condensation onto wet, melting ice.                    |
+|             PIEVP                | Evaporation from wet, melting ice.                     |
+|             PCOND                | Net cloud water condensation (> 0) or evaporation (< 0)|
+|             PRAUT                | Droplet self-collection (Autoconversion) to form rain. |
+|             PRACW                | Cloud water collection (Accretion) by rain.            |
+|             PREVP                | Rain evaporation.                                      |
+|             PIACWR               | Accreted cloud water shed to form rain at > 0          |
+\tableofcontents
+
+Owing to operational computation constraints, and unique to the FA scheme, the sedimentation process 
+does not use finite differencing of precipitation fluxes in the vertical in order to circumvent the 
+requirement that small time steps be used in order to maintain numerical stability, particularly since 
+the vertical resolution often increases dramatically near the ground. The algorithm is instead based upon
+a partitioning of precipitation already present in the grid box at the beginning of the time step and the
+precipitation entering the grid box from above at the end of the time step. A more detailed description 
+of the sedimentation algorithm can be found in Aligo et al. (2018, appendix D).
+
+An algorithm was developed in FA to improve stratiform rainfall by allowing the rain intercept parameter,
+\f$N_{or}\f$, to vary with height and the mean drop diameter to be fixed below melting layers. This is 
+different from other single-moment microphysics schemes (WSM6 and Lin) that assume a constant value for
+\f$N_{or}\f$. The algorithm in the FA scheme, simular to what is done in the Thompson scheme \cite Thompson_2008,
+assumes that a snow-graupel particle about to enter the melting layer from above has the same mean mass
+as a drop formed from melting below the melting layer. The mean drop diameter calculated below the melting layer
+acts as the lower limit for the mean drop sizes as the rain descends to lower levels. This algorithm is only
+active if 1) the snow-graupel density above the melting level (i.e.\f$T_c<0^{o}C\f$) is \f$<225kg m^{-3}\f$ 
+(which corresponds to an RF=10), 2) the rain content does not exceed \f$1gm^{-3}\f$, and 3) there is vertical
+continuity of the rain at lower levels with the rain that formed from melting ice.
+
+The FA scheme also uses a drizzle parameterization in order to minimize the spatial extent of light (<20dBZ)
+reflectivity echoes that developed at the top of moist boundary layers, over the Southeastern U.S., within
+warm conveyor belts, and over ocean areas covered by stratocumulus in the NMMB. The drizzle parameterization
+uses a variable \f$N_{or}\f$ following Westbrook et al. (2010) \cite westbrook_et_al_2010, and approach 
+conceptually similar to that described in Thompson et al.(2008) \cite Thompson_2008 for drizzle. Figure 2a
+shows an example of drizzle forming in a single low-level liquid cloud layer above \f$0^oC\f$, in which the
+smaller, more numerous drizzle drops produce lower radar reflectivities, compared to rain, with \f$N_{or}=8\times10^6m\f$,
+for example. For multiple cloud layers, drizzle from low clouds must be completely disconnected from rain formed
+aloft from melting ice, such that a rain-free layer must seperate any stratiform rain layer aloft from drizzle formed 
+within liquid clouds at lower levels.Supercooled drizzle is also allowed to form from warm-rain processes below \f$0^oC\f$.
+The quantity \f$N_{or}\f$ is modified only when the rainwater content is \f$< 0.5 gm^{-3}\f$, such that \f$N_{or}\f$ is
+assumed to vary (red line in Fig.2b) with rain content (\f$\rho_\alpha\times q_r\f$) as
+
+\image html FA_NOR_EQ.png " " width=10cm
+
+\image html FA_DRI.png " Figure 2. (a) Schematic illustration of the drizzle parameterization for a single cloud layer in which drizzle forms from a low-level liquid water cloud at > 0C only when it is completely disconnected from rain formed from melting ice aloft. (b) The scatterplot from Westbrook at al.(2010) shows retrieved rain rate (R,mm/h) vs the mornalized rain intercept paramter (Nl in 1/m^4, where Nl=Nor for exponential distributions) based on lidar observations of drizzle. The different values of Nor described in (1) are overlaid on the figure with the red line showing the variation of Nor as a funciton of rain rate for rain contents between 0.02 and 0.5 g/m^3. " width=10cm
+
+
+\section intra_famp Intraphysics Communication
+\ref arg_table_mp_fer_hires_run 
+
+\section gen_famp  General Algorithm
+\ref gen_al_famp
+
+
+*/

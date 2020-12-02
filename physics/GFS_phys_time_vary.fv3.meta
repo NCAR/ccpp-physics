@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_phys_time_vary
+  type = scheme
+  dependencies = aerclm_def.F,aerinterp.F90,gcycle.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f,namelist_soilveg.f,ozinterp.f90,ozne_def.f,sfcsub.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_phys_time_vary_init
   type = scheme
@@ -5,7 +11,7 @@
   standard_name = GFS_data_type_instance_all_blocks
   long_name = Fortran DDT containing FV3-GFS data
   units = DDT
-  dimensions = (ccpp_block_number)
+  dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = inout
   optional = F
@@ -21,7 +27,7 @@
   standard_name = GFS_interstitial_type_instance_all_threads
   long_name = Fortran DDT containing FV3-GFS interstitial data
   units = DDT
-  dimensions = (ccpp_thread_number)
+  dimensions = (omp_threads)
   type = GFS_interstitial_type
   intent = inout
   optional = F
@@ -81,7 +87,7 @@
   standard_name = GFS_data_type_instance_all_blocks
   long_name = Fortran DDT containing FV3-GFS data
   units = DDT
-  dimensions = (ccpp_block_number)
+  dimensions = (ccpp_block_count)
   type = GFS_data_type
   intent = inout
   optional = F

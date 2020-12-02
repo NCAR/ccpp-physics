@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = machine
+  type = module
+  dependencies = 
+
+########################################################################
 [ccpp-arg-table]
   name = machine
   type = module

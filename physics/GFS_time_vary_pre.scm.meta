@@ -1,3 +1,9 @@
+[ccpp-table-properties]
+  name = GFS_time_vary_pre
+  type = scheme
+  dependencies = funcphys.f90,machine.F
+
+########################################################################
 [ccpp-arg-table]
   name = GFS_time_vary_pre_init
   type = scheme
@@ -137,7 +143,7 @@
 [nscyc]
   standard_name = number_of_timesteps_between_surface_cycling_calls
   long_name = number of timesteps between surface cycling calls
-  units = 
+  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -206,7 +212,7 @@
 [ipt]
   standard_name = index_for_diagnostic_printout
   long_name = horizontal index for point used for diagnostic printout
-  units = 
+  units = index 
   dimensions = ()
   type = integer
   intent = out

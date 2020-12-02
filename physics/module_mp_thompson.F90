@@ -43,9 +43,16 @@
 !!\author Greg Thompson, NCAR-RAL, gthompsn@ucar.edu, 303-497-2805
 !!
 !! - Last modified: 24 Jan 2018   Aerosol additions to v3.5.1 code 9/2013
-!!                 Cloud fraction additions 11/2014 part of pre-v3.7
+!!                  Cloud fraction additions 11/2014 part of pre-v3.7
 !! - Imported in CCPP by: Dom Heinzeller, NOAA/ESRL/GSD, dom.heinzeller@noaa.gov
 !! - Last modified:  6 Aug 2018   Update of initial import to WRFV4.0
+!! - Last modified: 13 Mar 2020   Add logic to turtn on/off the calculation
+!!                    of melting layer in radar reflectivity routine
+!! - Last modified:  2 Jun 2020   Add option to rollback to version 3.8.1
+!!                  used in RAPv5/HRRRv4, include stochastic physics
+!!                  perturbations to the graupel intercept parameter,
+!!                  the cloud water shape parameter, and the number
+!!                  concentration of nucleated aerosols.
 MODULE module_mp_thompson
 
       USE machine, only : kind_phys
@@ -80,7 +87,7 @@ MODULE module_mp_thompson
 !.. scheme.  In 2-moment cloud water, Nt_c represents a maximum of
 !.. droplet concentration and nu_c is also variable depending on local
 !.. droplet number concentration.
-      REAL, PARAMETER, PRIVATE:: Nt_c = 100.E6
+      REAL, PARAMETER :: Nt_c = 100.E6
       REAL, PARAMETER, PRIVATE:: Nt_c_max = 1999.E6
 
 !..Declaration of constants for assumed CCN/IN aerosols when none in
@@ -410,23 +417,16 @@ MODULE module_mp_thompson
 !! lookup tables in Thomspson scheme.
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
-      SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa,  &
-                          ids, ide, jds, jde, kds, kde,     &
-                          ims, ime, jms, jme, kms, kme,     &
-                          its, ite, jts, jte, kts, kte,     &
-                          mpicomm, mpirank, mpiroot,        &
-                          threads, errmsg, errflg)
+      SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa, &
+                               mpicomm, mpirank, mpiroot,  &
+                               threads, errmsg, errflg)
 
       IMPLICIT NONE
 
-      INTEGER, INTENT(IN):: ids,ide, jds,jde, kds,kde, &
-                            ims,ime, jms,jme, kms,kme, &
-                            its,ite, jts,jte, kts,kte
-
 !..OPTIONAL variables that control application of aerosol-aware scheme
 
-      REAL, DIMENSION(ims:ime,kms:kme,jms:jme), OPTIONAL, INTENT(IN) :: nwfa, nifa
-      REAL, DIMENSION(ims:ime,jms:jme),         OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
+      REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: nwfa, nifa
+      REAL, DIMENSION(:),   OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
@@ -968,14 +968,6 @@ MODULE module_mp_thompson
 
       end if precomputed_tables_2
 
-      ! DH* TEMPORARY GUARD 20181203
-      if (minval(tnccn_act)==maxval(tnccn_act)) then
-        write(0,*) "TEMPORARY GUARD: abort model because table_ccnact seems to be faulty."
-        call sleep(5)
-        stop
-      end if
-      ! *DH
-
       endif if_not_iiwarm
 
       if (mpirank==mpiroot) write(0,*) ' ... DONE microphysical lookup tables'
@@ -1004,6 +996,9 @@ MODULE module_mp_thompson
                               vt_dbz_wt, first_time_step,             &
                               re_cloud, re_ice, re_snow,              &
                               has_reqc, has_reqi, has_reqs,           &
+                              rand_perturb_on,                        &
+                              kme_stoch,                              &
+                              rand_pert,                              &
                               ids,ide, jds,jde, kds,kde,              &  ! domain dims
                               ims,ime, jms,jme, kms,kme,              &  ! memory dims
                               its,ite, jts,jte, kts,kte,              &  ! tile dims
@@ -1026,6 +1021,10 @@ MODULE module_mp_thompson
       REAL, DIMENSION(ims:ime, jms:jme), OPTIONAL, INTENT(IN):: nwfa2d, nifa2d
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), OPTIONAL, INTENT(OUT):: &
                           re_cloud, re_ice, re_snow
+      INTEGER, INTENT(IN) :: rand_perturb_on, kme_stoch
+      REAL, DIMENSION(ims:ime,kms:kme_stoch,jms:jme), INTENT(IN), OPTIONAL:: &
+                          rand_pert
+
       INTEGER, INTENT(IN):: has_reqc, has_reqi, has_reqs
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(ims:ime, kms:kme, jms:jme), INTENT(INOUT):: &
@@ -1061,7 +1060,8 @@ MODULE module_mp_thompson
       REAL:: dt, pptrain, pptsnow, pptgraul, pptice
       REAL:: qc_max, qr_max, qs_max, qi_max, qg_max, ni_max, nr_max
       REAL:: nwfa1
-      INTEGER:: i, j, k
+      REAL:: rand1, rand2, rand3, min_rand
+      INTEGER:: i, j, k, m
       INTEGER:: imax_qc,imax_qr,imax_qi,imax_qs,imax_qg,imax_ni,imax_nr
       INTEGER:: jmax_qc,jmax_qr,jmax_qi,jmax_qs,jmax_qg,jmax_ni,jmax_nr
       INTEGER:: kmax_qc,kmax_qr,kmax_qi,kmax_qs,kmax_qg,kmax_ni,kmax_nr
@@ -1077,6 +1077,24 @@ MODULE module_mp_thompson
       ! CCPP
       if (present(errmsg)) errmsg = ''
       if (present(errflg)) errflg = 0
+
+      ! DH* 2020-06-05: The stochastic perturbations code was retrofitted
+      ! from a newer version of the Thompson MP scheme, but it has not been
+      ! tested yet.
+      if (rand_perturb_on .ne. 0) then
+        errmsg = 'Logic error in mp_gt_driver: the stochastic perturbations code ' // &
+                 'has not been tested yet with this version of the Thompson scheme'
+        errflg = 1
+        return
+      end if
+      ! Activate this code when removing the guard above
+      !if (rand_perturb_on .ne. 0 .and. .not. present(rand_pert)) then
+      !  errmsg = 'Logic error in mp_gt_driver: random perturbations are on, ' // &
+      !           'but optional argument rand_pert is not present'
+      !  errflg = 1
+      !  return
+      !end if
+      ! *DH 2020-06-05
 
       if ( (present(tt) .and. (present(th) .or. present(pii))) .or. &
            (.not.present(tt) .and. .not.(present(th) .and. present(pii))) ) then
@@ -1167,6 +1185,32 @@ MODULE module_mp_thompson
       j_loop:  do j = j_start, j_end
       i_loop:  do i = i_start, i_end
 
+!+---+-----------------------------------------------------------------+
+!..Introduce stochastic parameter perturbations by creating as many scalar rand1, rand2, ...
+!.. variables as needed to perturb different pieces of microphysics. gthompsn  21Mar2018
+! Setting spp_mp to 1 gives graupel Y-intercept pertubations (2^0)
+!                   2 gives cloud water distribution gamma shape parameter perturbations (2^1)
+!                   4 gives CCN & IN activation perturbations (2^2)
+!                   3 gives both 1+2
+!                   5 gives both 1+4
+!                   6 gives both 2+4
+!                   7 gives all 1+2+4
+! For now (22Mar2018), standard deviation should be only 0.25 and cut-off at 1.5
+! in order to constrain the various perturbations from being too extreme.
+!+---+-----------------------------------------------------------------+
+         rand1 = 0.0
+         rand2 = 0.0
+         rand3 = 0.0
+         if (rand_perturb_on .ne. 0) then
+            if (MOD(rand_perturb_on,2) .ne. 0) rand1 = rand_pert(i,1,j)
+            m = RSHIFT(ABS(rand_perturb_on),1)
+            if (MOD(m,2) .ne. 0) rand2 = rand_pert(i,1,j)*2.
+            m = RSHIFT(ABS(rand_perturb_on),2)
+            if (MOD(m,2) .ne. 0) rand3 = 0.1*(rand_pert(i,1,j)+ABS(min_rand))
+            m = RSHIFT(ABS(rand_perturb_on),3)
+         endif
+!+---+-----------------------------------------------------------------+
+
          pptrain = 0.
          pptsnow = 0.
          pptgraul = 0.
@@ -1225,6 +1269,7 @@ MODULE module_mp_thompson
 #if ( WRF_CHEM == 1 )
                       rainprod1d, evapprod1d, &
 #endif
+                      rand1, rand2, rand3, &
                       kts, kte, dt, i, j)
 
          pcp_ra(i,j) = pptrain
@@ -1377,13 +1422,13 @@ MODULE module_mp_thompson
             endif
 !
           if (present(vt_dbz_wt) .and. present(first_time_step)) then
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                t1d, p1d, dBZ, kts, kte, i, j,      & 
-                                melti, vt_dbz_wt(i,:,j),            &
+            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
+                                melti, vt_dbz_wt(i,:,j),              &
                                 first_time_step)
           else
-            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-                                t1d, p1d, dBZ, kts, kte, i, j,      &
+            call calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d,   &
+                                t1d, p1d, dBZ, rand1, kts, kte, i, j, &
                                 melti)
           end if
           do k = kts, kte
@@ -1394,17 +1439,17 @@ MODULE module_mp_thompson
 
          IF (has_reqc.ne.0 .and. has_reqi.ne.0 .and. has_reqs.ne.0) THEN
           do k = kts, kte
-             re_qc1d(k) = 2.49E-6
-             re_qi1d(k) = 4.99E-6
-             re_qs1d(k) = 9.99E-6
+             re_qc1d(k) = 2.50E-6 ! 2.49E-6
+             re_qi1d(k) = 5.00E-6 ! 4.99E-6
+             re_qs1d(k) = 1.00E-5 ! 9.99E-6
           enddo
 !> - Call calc_effectrad()
           call calc_effectRad (t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d,  &
                       re_qc1d, re_qi1d, re_qs1d, kts, kte)
           do k = kts, kte
-             re_cloud(i,k,j) = MAX(2.49E-6, MIN(re_qc1d(k), 50.E-6))
-             re_ice(i,k,j)   = MAX(4.99E-6, MIN(re_qi1d(k), 125.E-6))
-             re_snow(i,k,j)  = MAX(9.99E-6, MIN(re_qs1d(k), 999.E-6))
+             re_cloud(i,k,j) = MAX(2.50E-6, MIN(re_qc1d(k), 50.E-6))  ! MAX(2.49E-6, MIN(re_qc1d(k), 50.E-6))
+             re_ice(i,k,j)   = MAX(5.00E-6, MIN(re_qi1d(k), 125.E-6)) ! MAX(4.99E-6, MIN(re_qi1d(k), 125.E-6))
+             re_snow(i,k,j)  = MAX(1.00E-5, MIN(re_qs1d(k), 999.E-6)) ! MAX(9.99E-6, MIN(re_qs1d(k), 999.E-6))
           enddo
          ENDIF
 
@@ -1492,6 +1537,7 @@ MODULE module_mp_thompson
 #if ( WRF_CHEM == 1 )
                           rainprod, evapprod, &
 #endif
+                          rand1, rand2, rand3, &
                           kts, kte, dt, ii, jj)
 #ifdef MPI
       use mpi
@@ -1506,6 +1552,8 @@ MODULE module_mp_thompson
       REAL, DIMENSION(kts:kte), INTENT(IN):: p1d, w1d, dzq
       REAL, INTENT(INOUT):: pptrain, pptsnow, pptgraul, pptice
       REAL, INTENT(IN):: dt
+      REAL, INTENT(IN):: rand1, rand2, rand3
+
 #if ( WRF_CHEM == 1 )
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: &
                           rainprod, evapprod
@@ -1736,13 +1784,19 @@ MODULE module_mp_thompson
          rho(k) = 0.622*pres(k)/(R*temp(k)*(qv(k)+0.622))
          nwfa(k) = MAX(11.1E6, MIN(9999.E6, nwfa1d(k)*rho(k)))
          nifa(k) = MAX(naIN1*0.01, MIN(9999.E6, nifa1d(k)*rho(k)))
+         mvd_r(k) = D0r
 
          if (qc1d(k) .gt. R1) then
             no_micro = .false.
             rc(k) = qc1d(k)*rho(k)
             nc(k) = MAX(2., MIN(nc1d(k)*rho(k), Nt_c_max))
             L_qc(k) = .true.
-            nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+            if (rand2 .eq. 0.0) then
+             nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+            else
+             nu_c = NINT(1000.E6/nc(k)) + 2
+             nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
+            endif
             lamc = (nc(k)*am_r*ccg(2,nu_c)*ocg1(nu_c)/rc(k))**obmr
             xDc = (bm_r + nu_c + 1.) / lamc
             if (xDc.lt. D0c) then
@@ -1991,7 +2045,10 @@ MODULE module_mp_thompson
             xslw1 = 0.01
          endif
          ygra1 = 4.31 + alog10(max(5.E-5, rg(k)))
-         zans1 = 3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))
+         zans1 = (3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))) + rand1
+         if (rand1 .ne. 0.0) then
+          zans1 = MAX(2., MIN(zans1, 7.))
+         endif
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          N0_min = MIN(N0_exp, N0_min)
@@ -2032,7 +2089,12 @@ MODULE module_mp_thompson
 
          mvd_c(k) = D0c
          if (L_qc(k)) then
-          nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+          if (rand2 .eq. 0.0) then
+           nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+          else
+           nu_c = NINT(1000.E6/nc(k)) + 2
+           nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
+          endif
           xDc = MAX(D0c*1.E6, ((rc(k)/(am_r*nc(k)))**obmr) * 1.E6)
           lamc = (nc(k)*am_r* ccg(2,nu_c) * ocg1(nu_c) / rc(k))**obmr
           mvd_c(k) = (3.0+nu_c+0.672) / lamc
@@ -2434,6 +2496,7 @@ MODULE module_mp_thompson
                                 .and. temp(k).lt.253.15) ) then
            if (dustyIce .AND. is_aerosol_aware) then
             xnc = iceDeMott(tempc,qv(k),qvs(k),qvsi(k),rho(k),nifa(k))
+            xnc = xnc*(1.0 + 3.*rand3)
            else
             xnc = MIN(250.E3, TNO*EXP(ATO*(T_0-temp(k))))
            endif
@@ -2772,7 +2835,12 @@ MODULE module_mp_thompson
          xrc=MAX(R1, (qc1d(k) + qcten(k)*dtsave)*rho(k))
          xnc=MAX(2., (nc1d(k) + ncten(k)*dtsave)*rho(k))
          if (xrc .gt. R1) then
-          nu_c = MIN(15, NINT(1000.E6/xnc) + 2)
+          if (rand2 .eq. 0.0) then
+           nu_c = MIN(15, NINT(1000.E6/xnc) + 2)
+          else
+           nu_c = NINT(1000.E6/xnc) + 2
+           nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
+          endif
           lamc = (xnc*am_r*ccg(2,nu_c)*ocg1(nu_c)/rc(k))**obmr
           xDc = (bm_r + nu_c + 1.) / lamc
           if (xDc.lt. D0c) then
@@ -3062,7 +3130,10 @@ MODULE module_mp_thompson
             xslw1 = 0.01
          endif
          ygra1 = 4.31 + alog10(max(5.E-5, rg(k)))
-         zans1 = 3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))
+         zans1 = (3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))) + rand1
+         if (rand1 .ne. 0.0) then
+          zans1 = MAX(2., MIN(zans1, 7.))
+         endif
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          N0_min = MIN(N0_exp, N0_min)
@@ -3110,7 +3181,7 @@ MODULE module_mp_thompson
 !+---+-----------------------------------------------------------------+ !  DROPLET NUCLEATION
            if (clap .gt. eps) then
             if (is_aerosol_aware) then
-               xnc = MAX(2., activ_ncloud(temp(k), w1d(k), nwfa(k)))
+               xnc = MAX(2., activ_ncloud(temp(k), w1d(k)+rand3, nwfa(k)))
             else
                xnc = Nt_c
             endif
@@ -3349,7 +3420,12 @@ MODULE module_mp_thompson
       do k = ksed1(5), kts, -1
          vtc = 0.
          if (rc(k) .gt. R1 .and. w1d(k) .lt. 1.E-1) then
-          nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+          if (rand2 .eq. 0.0) then
+           nu_c = MIN(15, NINT(1000.E6/nc(k)) + 2)
+          else
+           nu_c = NINT(1000.E6/nc(k)) + 2
+           nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
+          endif
           lamc = (nc(k)*am_r*ccg(2,nu_c)*ocg1(nu_c)/rc(k))**obmr
           ilamc = 1./lamc
           vtc = rhof(k)*av_c*ccg(5,nu_c)*ocg2(nu_c) * ilamc**bv_c
@@ -3415,7 +3491,12 @@ MODULE module_mp_thompson
            vts = rhof(k)*av_s * (t1_vts+t2_vts)/(t3_vts+t4_vts)
            if (temp(k).gt. (T_0+0.1)) then
             vtsk(k) = MAX(vts*vts_boost(k),                             &
-     &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0)))
+     &                vts*((vtrk(k)-vts*vts_boost(k))/(temp(k)-T_0))) !
+! DH* The version below is supposed to be a better formulation,
+! but gave worse results in RAPv5/HRRRv4 than the line above.
+                      ! this formulation for RAPv5/HRRRv4, reverted 20 Feb 2020
+     !       SR = rs(k)/(rs(k)+rr(k)) ! bug fix from G. Thompson, 10 May 2019
+     !       vtsk(k) = vts*SR + (1.-SR)*vtrk(k)
            else
             vtsk(k) = vts*vts_boost(k)
            endif
@@ -3466,6 +3547,10 @@ MODULE module_mp_thompson
 !>  - Sedimentation of mixing ratio is the integral of v(D)*m(D)*N(D)*dD,
 !! whereas neglect m(D) term for number concentration.  Therefore,
 !! cloud ice has proper differential sedimentation.
+!.. New in v3.0+ is computing separate for rain, ice, snow, and
+!.. graupel species thus making code faster with credit to J. Schmidt.
+!.. Bug fix, 2013Nov01 to tendencies using rho(k+1) correction thanks to
+!.. Eric Skyllingstad.
 !+---+-----------------------------------------------------------------+
 
       if (ANY(L_qr .eqv. .true.)) then
@@ -3495,7 +3580,11 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(1))
          enddo
 
+#if 1
+         if (rr(kts).gt.R1*10.) &
+#else
          if (rr(kts).gt.R1*1000.) &
+#endif
          pptrain = pptrain + sed_r(kts)*DT*onstep(1)
       enddo
       endif
@@ -3546,7 +3635,11 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(2))
          enddo
 
+#if 1
+         if (ri(kts).gt.R1*10.) &
+#else
          if (ri(kts).gt.R1*1000.) &
+#endif
          pptice = pptice + sed_i(kts)*DT*onstep(2)
       enddo
       endif
@@ -3573,7 +3666,11 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(3))
          enddo
 
+#if 1
+         if (rs(kts).gt.R1*10.) &
+#else
          if (rs(kts).gt.R1*1000.) &
+#endif
          pptsnow = pptsnow + sed_s(kts)*DT*onstep(3)
       enddo
       endif
@@ -3600,7 +3697,11 @@ MODULE module_mp_thompson
                                            *odzq*DT*onstep(4))
          enddo
 
+#if 1
+         if (rg(kts).gt.R1*10.) &
+#else
          if (rg(kts).gt.R1*1000.) &
+#endif
          pptgraul = pptgraul + sed_g(kts)*DT*onstep(4)
       enddo
       endif
@@ -3641,16 +3742,20 @@ MODULE module_mp_thompson
          qv1d(k) = MAX(1.E-10, qv1d(k) + qvten(k)*DT)
          qc1d(k) = qc1d(k) + qcten(k)*DT
          nc1d(k) = MAX(2./rho(k), MIN(nc1d(k) + ncten(k)*DT, Nt_c_max))
-         nwfa1d(k) = MAX(11.1E6, MIN(9999.E6,                           &
+         nwfa1d(k) = MAX(11.1E6/rho(k), MIN(9999.E6/rho(k),             &
                        (nwfa1d(k)+nwfaten(k)*DT)))
-         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6,                       &
+         nifa1d(k) = MAX(naIN1*0.01, MIN(9999.E6/rho(k),                &
                        (nifa1d(k)+nifaten(k)*DT)))
-
          if (qc1d(k) .le. R1) then
            qc1d(k) = 0.0
            nc1d(k) = 0.0
          else
-           nu_c = MIN(15, NINT(1000.E6/(nc1d(k)*rho(k))) + 2)
+           if (rand2 .eq. 0.0) then
+             nu_c = MIN(15, NINT(1000.E6/(nc1d(k)*rho(k))) + 2)
+           else
+             nu_c = NINT(1000.E6/(nc1d(k)*rho(k))) + 2
+             nu_c = MAX(2, MIN(nu_c+NINT(rand2), 15))
+           endif
            lamc = (am_r*ccg(2,nu_c)*ocg1(nu_c)*nc1d(k)/qc1d(k))**obmr
            xDc = (bm_r + nu_c + 1.) / lamc
            if (xDc.lt. D0c) then
@@ -5112,7 +5217,7 @@ MODULE module_mp_thompson
       INTEGER, INTENT(IN):: kts, kte
       REAL, DIMENSION(kts:kte), INTENT(IN)::                            &
      &                    t1d, p1d, qv1d, qc1d, nc1d, qi1d, ni1d, qs1d
-      REAL, DIMENSION(kts:kte), INTENT(INOUT):: re_qc1d, re_qi1d, re_qs1d
+      REAL, DIMENSION(kts:kte), INTENT(OUT):: re_qc1d, re_qi1d, re_qs1d
 !..Local variables
       INTEGER:: k
       REAL, DIMENSION(kts:kte):: rho, rc, nc, ri, ni, rs
@@ -5127,6 +5232,23 @@ MODULE module_mp_thompson
       has_qc = .false.
       has_qi = .false.
       has_qs = .false.
+
+! DH* 2020-06-08 Moved the initial values and bounds from
+! the calling routines into calc_effectRad (to prevent
+! multiple definitions that may be inconsistent). The
+! initial values and bounds from the calling routines were
+!
+!    re_cloud(i,k) = MAX(2.49, MIN(re_cloud(i,k)*1.e6, 50.))
+!    re_ice(i,k)   = MAX(4.99, MIN(re_ice(i,k)*1.e6, 125.))
+!    re_snow(i,k)  = MAX(9.99, MIN(re_snow(i,k)*1.e6, 999.))
+!
+! independent of the version of Thompson MP. These values
+! are consistent with the WRFv3.8.1 settings, but inconsistent
+! with the WRFv4+ settings. In order to apply the same bounds
+! as before this change, use the WRF v3.8.1 settings throughout.
+      re_qc1d(:) = 2.50E-6 ! 2.49E-6
+      re_qi1d(:) = 5.00E-6 ! 4.99E-6
+      re_qs1d(:) = 1.00E-5 ! 9.99E-6
 
       do k = kts, kte
          rho(k) = 0.622*p1d(k)/(R*t1d(k)*(qv1d(k)+0.622))
@@ -5143,7 +5265,6 @@ MODULE module_mp_thompson
 
       if (has_qc) then
       do k = kts, kte
-         re_qc1d(k) = 2.49E-6
          if (rc(k).le.R1 .or. nc(k).le.R2) CYCLE
          if (nc(k).lt.100) then
             inu_c = 15
@@ -5159,16 +5280,14 @@ MODULE module_mp_thompson
 
       if (has_qi) then
       do k = kts, kte
-         re_qi1d(k) = 2.49E-6
          if (ri(k).le.R1 .or. ni(k).le.R2) CYCLE
          lami = (am_i*cig(2)*oig1*ni(k)/ri(k))**obmi
-         re_qi1d(k) = MAX(2.51E-6, MIN(SNGL(0.5D0 * DBLE(3.+mu_i)/lami), 125.E-6))
+         re_qi1d(k) = MAX(5.01E-6, MIN(SNGL(0.5D0 * DBLE(3.+mu_i)/lami), 125.E-6))
       enddo
       endif
 
       if (has_qs) then
       do k = kts, kte
-         re_qs1d(k) = 4.99E-6
          if (rs(k).le.R1) CYCLE
          tc0 = MIN(-0.1, t1d(k)-273.15)
          smob = rs(k)*oams
@@ -5203,7 +5322,7 @@ MODULE module_mp_thompson
      &        + sb(7)*tc0*tc0*cse(1) + sb(8)*tc0*cse(1)*cse(1) &
      &        + sb(9)*tc0*tc0*tc0 + sb(10)*cse(1)*cse(1)*cse(1)
          smoc = a_ * smo2**b_
-         re_qs1d(k) = MAX(5.01E-6, MIN(0.5*(smoc/smob), 999.E-6))
+         re_qs1d(k) = MAX(1.01E-5, MIN(0.5*(smoc/smob), 999.E-6))
       enddo
       endif
 
@@ -5218,13 +5337,14 @@ MODULE module_mp_thompson
 !! of frozen species remaining from what initially existed at the
 !! melting level interface.
       subroutine calc_refl10cm (qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, &
-               t1d, p1d, dBZ, kts, kte, ii, jj, melti, vt_dBZ,      &
-               first_time_step)
+               t1d, p1d, dBZ, rand1, kts, kte, ii, jj, melti,       &
+               vt_dBZ, first_time_step)
 
       IMPLICIT NONE
 
 !..Sub arguments
       INTEGER, INTENT(IN):: kts, kte, ii, jj
+      REAL, INTENT(IN):: rand1
       REAL, DIMENSION(kts:kte), INTENT(IN)::                            &
                           qv1d, qc1d, qr1d, nr1d, qs1d, qg1d, t1d, p1d
       REAL, DIMENSION(kts:kte), INTENT(INOUT):: dBZ
@@ -5390,7 +5510,10 @@ MODULE module_mp_thompson
             xslw1 = 0.01
          endif
          ygra1 = 4.31 + alog10(max(5.E-5, rg(k)))
-         zans1 = 3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))
+         zans1 = (3.1 + (100./(300.*xslw1*ygra1/(10./xslw1+1.+0.25*ygra1)+30.+10.*ygra1))) + rand1
+         if (rand1 .ne. 0.0) then
+          zans1 = MAX(2., MIN(zans1, 7.))
+         endif
          N0_exp = 10.**(zans1)
          N0_exp = MAX(DBLE(gonv_min), MIN(N0_exp, DBLE(gonv_max)))
          N0_min = MIN(N0_exp, N0_min)

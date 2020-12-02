@@ -1,9 +1,15 @@
+[ccpp-table-properties]
+  name = mp_fer_hires
+  type = scheme
+  dependencies = machine.F,module_MP_FER_HIRES.F90
+
+########################################################################
 [ccpp-arg-table]
   name = mp_fer_hires_init
   type = scheme
 [ncol]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal loop extent
+  standard_name = horizontal_dimension
+  long_name = horizontal dimension
   units = count
   dimensions = ()
   type = integer
@@ -130,6 +136,23 @@
 [ccpp-arg-table]
   name = mp_fer_hires_finalize
   type = scheme
+[errmsg]
+  standard_name = ccpp_error_message
+  long_name = error message for error handling in CCPP
+  units = none
+  dimensions = ()
+  type = character
+  kind = len=*
+  intent = out
+  optional = F
+[errflg]
+  standard_name = ccpp_error_flag
+  long_name = error flag for error handling in CCPP
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = out
+  optional = F
 ########################################################################
 [ccpp-arg-table]
   name = mp_fer_hires_run
@@ -171,7 +194,7 @@
   standard_name = sea_land_ice_mask_real
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind= kind_phys
   intent = in
@@ -180,7 +203,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -189,7 +212,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -198,7 +221,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -207,7 +230,7 @@
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -216,7 +239,7 @@
   standard_name = total_cloud_condensate_mixing_ratio_updated_by_physics
   long_name = total cloud condensate mixing ratio (except water vapor) updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -225,7 +248,7 @@
   standard_name = accumulated_change_of_air_temperature_due_to_FA_scheme
   long_name = accumulated change of air temperature due to FA MP scheme
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -234,7 +257,7 @@
   standard_name = ratio_of_snowfall_to_rainfall
   long_name = snow ratio: ratio of snow to total precipitation (explicit only)
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -243,7 +266,7 @@
   standard_name = fraction_of_ice_water_cloud
   long_name = fraction of ice water cloud
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -252,7 +275,7 @@
   standard_name = fraction_of_rain_water_cloud
   long_name = fraction of rain water cloud
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -261,7 +284,7 @@
   standard_name = rime_factor
   long_name = rime factor
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -270,7 +293,7 @@
   standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
   long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -279,7 +302,7 @@
   standard_name = ice_water_mixing_ratio_updated_by_physics
   long_name = ratio of mass of ice water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -288,7 +311,7 @@
   standard_name = rain_water_mixing_ratio_updated_by_physics
   long_name = ratio of mass of rain water to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -297,7 +320,7 @@
   standard_name = mass_weighted_rime_factor_updated_by_physics
   long_name = mass weighted rime factor updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -306,7 +329,7 @@
   standard_name = lwe_thickness_of_explicit_precipitation_amount
   long_name = explicit precipitation ( rain, ice, snow, graupel, ...) on physics timestep
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
@@ -339,7 +362,7 @@
   standard_name = radar_reflectivity_10cm
   long_name = instantaneous refl_10cm
   units = dBZ
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -357,7 +380,7 @@
   standard_name = cell_size
   long_name = relative dx for the grid cell
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
