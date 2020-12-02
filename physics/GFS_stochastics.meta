@@ -248,7 +248,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = T
 [ggrs_iw]
   standard_name = ice_water_mixing_ratio
@@ -257,7 +257,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = T
 [ggrs_sw]
   standard_name = snow_water_mixing_ratio
@@ -266,7 +266,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = T
 [qgrs_gl]
   standard_name = graupel_mixing_ratio
@@ -275,7 +275,52 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
+  optional = T
+[qgrs_ni]
+  standard_name = ice_number_concentration
+  long_name = ice number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T
+[gqrs_nr]
+  standard_name = rain_number_concentration
+  long_name = rain number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T
+[gqrs_nc]
+  standard_name = cloud_droplet_number_concentration
+  long_name = cloud droplet number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T
+[qgrs_nwfa]
+  standard_name = water_friendly_aerosol_number_concentration
+  long_name = number concentration of water-friendly aerosols
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T
+[qgrs_nifa]
+  standard_name = ice_friendly_aerosol_number_concentration
+  long_name = number concentration of ice-friendly aerosols
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
   optional = T
 [gu0]
   standard_name = x_wind_updated_by_physics
@@ -353,6 +398,51 @@
   standard_name = graupel_mixing_ratio_updated_by_physics
   long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
   units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_ni]
+  standard_name = ice_number_concentration_updated_by_physics
+  long_name = ice number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_nr]
+  standard_name = rain_number_concentration_updated_by_physics
+  long_name = rain number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_nc]
+  standard_name = cloud_droplet_number_concentration_updated_by_physics
+  long_name = cloud droplet number concentration
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_nwfa]
+  standard_name = water_friendly_aerosol_number_concentration_updated_by_physics
+  long_name = number concentration of water-friendly aerosols
+  units = kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_nifa]
+  standard_name = ice_friendly_aerosol_number_concentration_updated_by_physics
+  long_name = number concentration of ice-friendly aerosols
+  units = kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
