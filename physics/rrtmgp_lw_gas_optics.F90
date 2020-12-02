@@ -331,8 +331,8 @@ contains
          tsfg,                    & ! IN  - Skin-temperature (K)
          gas_concentrations,      & ! IN  - RRTMGP DDT: trace gas volumne mixing-ratios
          lw_optical_props_clrsky, & ! OUT - RRTMGP DDT: longwave optical properties
-         sources))!,                 & ! OUT - RRTMGP DDT: source functions
-         !tlev=t_lev))               ! IN  - Temperature @ layer-interfaces (K) (optional)
+         sources,                 & ! OUT - RRTMGP DDT: source functions
+         tlev=t_lev))               ! IN  - Temperature @ layer-interfaces (K) (optional)
 
   end subroutine rrtmgp_lw_gas_optics_run
 

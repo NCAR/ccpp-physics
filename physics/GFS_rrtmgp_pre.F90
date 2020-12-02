@@ -269,8 +269,7 @@ contains
                      * (tem2db(iCol,iLay)   - tem2da(iCol,iLay))                   &
                      / (tem2da(iCol,iLay-1) - tem2da(iCol,iLay))
            enddo
-        enddo       
-       !t_lev(1:NCOL,2:iSFC) = (t_lay(1:NCOL,2:iSFC)+t_lay(1:NCOL,1:iSFC-1))/2._kind_phys
+        enddo
        t_lev(1:NCOL,iSFC+1) = tsfc(1:NCOL)
     else
        tem2da(1:nCol,2:iTOA) = log(p_lay(1:nCol,2:iTOA))
@@ -288,8 +287,7 @@ contains
                      * (tem2db(iCol,iLay+1) - tem2da(iCol,iLay))                   &
                      / (tem2da(iCol,iLay+1) - tem2da(iCol,iLay))
            enddo
-        enddo 
-	   !t_lev(1:NCOL,2:iTOA) = (t_lay(1:NCOL,2:iTOA)+t_lay(1:NCOL,1:iTOA-1))/2._kind_phys
+        enddo
        t_lev(1:NCOL,iTOA+1) = t_lay(1:NCOL,iTOA)
     endif
 
