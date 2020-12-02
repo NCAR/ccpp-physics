@@ -30,8 +30,10 @@
                                       do_skeb, do_ca,ca_global,ca1,si,vfact_ca,          &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
                                       sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
-                                      shum_wts_inv, diss_est,                            &
-                                      ugrs, vgrs, tgrs, qgrs, gu0, gv0, gt0, gq0, dtdtr, &
+                                      shum_wts_inv, diss_est, ugrs, vgrs, tgrs,          &
+                                      qgrs, qgrs_cw, qgrs_rw, qgrs_sw, qgrs_iw, qgrs_gl, &
+                                      gu0, gv0, gt0, gq0,                                &
+                                      qg0_cw, qg0_rw, qg0_sw, qg0_iw, qg0_gl, dtdtr,     &
                                       rain, rainc, tprcp, totprcp, cnvprcp,              &
                                       totprcpb, cnvprcpb, cplflx,                        &
                                       rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,          &
@@ -68,10 +70,20 @@
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: vgrs
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: tgrs
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: qgrs
+         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_cw
+         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_rw
+         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_sw
+         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_iw
+         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_gl
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gu0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gv0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gt0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gq0
+         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_cw
+         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_rw
+         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_sw
+         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_iw
+         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_gl
          ! dtdtr only allocated if do_sppt == .true.
          real(kind_phys), dimension(:,:),       intent(in)    :: dtdtr
          real(kind_phys), dimension(1:im),      intent(in)    :: rain
@@ -141,6 +153,47 @@
                if (qnew >= 1.0e-10) then
                   gq0(i,k) = qnew
                   gt0(i,k) = tgrs(i,k) + tpert + dtdtr(i,k)
+               endif
+               if (present(gq0_cw) .AND. present(qgrs_cw)) then
+                  qpert = gq0_cw(i,k) - qgrs_cw(i,k) * sppt_wts(i,k)
+                  qnew = qgrs_cw(i,k,l+1)+qpert
+                  gq0_cw(i,k) = qnew
+                  if (qnew < 0.0) then
+                     gq0_cw(i,k) = 0.0
+                  endif
+               endif
+               if (present(gq0_rw) .AND. present(qgrs_rw)) then
+                  qpert = gq0_rw(i,k) - qgrs_rw(i,k) * sppt_wts(i,k)
+                  qnew = qgrs_rw(i,k,l+1)+qpert
+                  gq0_rw(i,k) = qnew
+                  if (qnew < 0.0) then
+                     gq0_rw(i,k) = 0.0
+                  endif
+               endif
+               if (present(gq0_sw) .AND. present(qgrs_sw)) then
+                  qpert = gq0_sw(i,k) - qgrs_sw(i,k) * sppt_wts(i,k)
+                  qnew = qgrs_sw(i,k,l+1)+qpert
+                  gq0_sw(i,k) = qnew
+                  if (qnew < 0.0) then
+                     gq0_sw(i,k) = 0.0
+                  endif
+               endif
+               if (present(gq0_iw) .AND. present(qgrs_iw)) then
+                  qpert = gq0_iw(i,k) - qgrs_iw(i,k) * sppt_wts(i,k)
+                  qnew = qgrs_iw(i,k,l+1)+qpert
+                  gq0_iw(i,k) = qnew
+                  if (qnew < 0.0) then
+                     gq0_iw(i,k) = 0.0
+                  endif
+               endif
+             enddo
+               if (present(gq0_gl) .AND. present(qgrs_gl)) then
+                  qpert = gq0_gl(i,k) - qgrs_gl(i,k) * sppt_wts(i,k)
+                  qnew = qgrs_gl(i,k,l+1)+qpert
+                  gq0_gl(i,k) = qnew
+                  if (qnew < 0.0) then
+                     gq0_gl(i,k) = 0.0
+                  endif
                endif
              enddo
            enddo

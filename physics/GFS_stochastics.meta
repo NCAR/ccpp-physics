@@ -232,6 +232,51 @@
   kind = kind_phys
   intent = in
   optional = F
+[qgrs_cw]
+  standard_name = cloud_condensed_water_mixing_ratio
+  long_name = ratio of mass of cloud water to mass of dry air plus vapor (without condensates)
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = T
+[ggrs_rw]
+  standard_name = rain_water_mixing_ratio
+  long_name = moist mixing ratio of rain
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[ggrs_iw]
+  standard_name = ice_water_mixing_ratio
+  long_name = moist mixing ratio of cloud ice
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[ggrs_sw]
+  standard_name = snow_water_mixing_ratio
+  long_name = moist mixing ratio of snow
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[qgrs_gl]
+  standard_name = graupel_mixing_ratio
+  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) 
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
 [gu0]
   standard_name = x_wind_updated_by_physics
   long_name = zonal wind updated by physics
@@ -268,6 +313,51 @@
   kind = kind_phys
   intent = inout
   optional = F
+[gq0_cw]
+  standard_name = cloud_condensed_water_mixing_ratio_updated_by_physics
+  long_name = cloud condensed water mixing ratio updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_rw]
+  standard_name = rain_water_mixing_ratio_updated_by_physics
+  long_name = moist mixing ratio of rain updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_iw]
+  standard_name = ice_water_mixing_ratio_updated_by_physics
+  long_name = moist mixing ratio of cloud ice updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_sw]
+  standard_name = snow_water_mixing_ratio_updated_by_physics
+  long_name = moist mixing ratio of snow updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
+[gq0_gl]
+  standard_name = graupel_mixing_ratio_updated_by_physics
+  long_name = moist ratio of mass of graupel to mass of dry air plus vapor (without condensates) updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = T
 [dtdtr]
   standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
   long_name = temp. change due to radiative heating per time step
