@@ -121,7 +121,8 @@
 
 !> minimum aerosol concentration
   real(kind=kind_phys),parameter:: qamin = 1.e-16_kind_phys
-
+!> minimum rain amount
+  real(kind=kind_phys),parameter:: rainmin = 1.e-13_kind_phys
 !> \name Miscellaneous physics related constants (For WSM6; Moorthi - Jul 2014)
 ! integer, parameter :: max_lon=16000, max_lat=8000, min_lon=192, min_lat=94
 ! integer, parameter :: max_lon=5000,  max_lat=2500, min_lon=192, min_lat=94 ! current opr

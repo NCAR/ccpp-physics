@@ -113,7 +113,7 @@ contains
 !! \htmlinclude gfdl_cloud_microphys_run.html
 !!
    subroutine gfdl_cloud_microphys_run(                                       &
-      levs, im, con_g, con_fvirt, con_rd, frland, garea, islmsk,              &
+      levs, im, rainmin,con_g, con_fvirt, con_rd, frland, garea, islmsk,  &
       gq0, gq0_ntcw, gq0_ntrw, gq0_ntiw, gq0_ntsw, gq0_ntgl, gq0_ntclamt,     &
       gt0, gu0, gv0, vvl, prsl, phii, del,                                    &
       rain0, ice0, snow0, graupel0, prcp0, sr,                                &
@@ -129,7 +129,7 @@ contains
       real(kind=kind_phys), parameter :: one = 1.0d0
       real(kind=kind_phys), parameter :: con_p001= 0.001d0
       real(kind=kind_phys), parameter :: con_day = 86400.d0
-      real(kind=kind_phys), parameter :: rainmin = 1.0d-13
+      !real(kind=kind_phys), parameter :: rainmin = 1.0d-13
       ! *DH
 
       ! interface variables
