@@ -119,7 +119,7 @@ end subroutine m_micro_init
      &,                         qi_o,     t_io,    rn_o, sr_o           &
      &,                         ncpl_io,  ncpi_io, fprcp, rnw_io, snw_io&
      &,                         qgl_io,   ncpr_io, ncps_io, ncgl_io     &
-     &,                         CLLS_io,  KCBL                          &
+     &,                         CLLS_io,  KCBL, rainmin                 &
      &,                         CLDREFFL, CLDREFFI, CLDREFFR, CLDREFFS  &
      &,                         CLDREFFG, aerfld_i                      &
      &,                         naai_i, npccn_i, iccn                   &
@@ -129,7 +129,7 @@ end subroutine m_micro_init
      &                          errmsg, errflg)
 
        use machine ,      only: kind_phys
-       use physcons,           grav   => con_g,    pi     => con_pi,    &
+       use physcons,      only: grav   => con_g,    pi     => con_pi,   &
      &                         rgas   => con_rd,   cp     => con_cp,    &
      &                         hvap   => con_hvap, hfus   => con_hfus,  &
      &                         ttp    => con_ttp,  tice   => con_t0c,   &
@@ -164,11 +164,12 @@ end subroutine m_micro_init
 !   input
 !      real,   parameter  :: r_air = 3.47d-3
        integer, parameter :: kp = kind_phys
+       real(kind=kind_phys), intent(in   ) :: rainmin
        real,   parameter  :: one=1.0_kp, oneb3=one/3.0_kp, onebcp=one/cp,    &
                              zero=0.0_kp, half=0.5_kp, onebg=one/grav,       &
      &                       kapa=rgas*onebcp,  cpbg=cp/grav,                &
      &                       lvbcp=hvap*onebcp, lsbcp=(hvap+hfus)*onebcp,    &
-     &                       qsmall=1.0e-14_kp, rainmin = 1.0e-13_kp,        &
+     &                       qsmall=1.0e-14_kp,                              &
      &                       fourb3=4.0_kp/3.0_kp, RL_cub=1.0e-15_kp,        &
      &                       nmin=1.0_kp
 
