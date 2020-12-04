@@ -309,11 +309,19 @@
 !      note: sfc emiss effect is not appied here, and will be dealt in other place
 
 		if (use_LW_Jacobian) then
-			! Change in surface air-temperature since last radiation call.
- 		    tem1 = tsflw(i) - tf(i) 
- 		    adjsfculw_lnd(i)  = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * tem1
- 		    adjsfculw_ice(i)  = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * tem1
- 		    adjsfculw_wat(i)  = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * tem1		
+		   ! F_adj = F_o + (dF/dT) * dT
+           if (dry(i)) then			
+ 		      adjsfculw_lnd(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
+     & 		                     (tsflw(i) - tsfc_lnd(i))
+ 		   endif
+           if (icy(i)) then
+ 		      adjsfculw_ice(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
+     & 		                     (tsflw(i) - tsfc_ice(i))
+           endif
+           if (wet(i)) then
+ 		      adjsfculw_wat(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
+     &             		         (tsflw(i) - tsfc_wat(i))
+           endif
 		else
            if (dry(i)) then
              tem2 = tsfc_lnd(i) * tsfc_lnd(i)
