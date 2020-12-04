@@ -184,7 +184,7 @@
 !  ---  input/output:
      &       dtdt,dtdtc,                                                &
 !  ---  outputs:
-     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,                             &
+     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
@@ -244,7 +244,7 @@
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
       real(kind=kind_phys), dimension(im), intent(out) ::               &
-     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
+     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat, adjsfculw
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -309,19 +309,9 @@
 !      note: sfc emiss effect is not appied here, and will be dealt in other place
 
 		if (use_LW_Jacobian) then
-		   ! F_adj = F_o + (dF/dT) * dT
-           if (dry(i)) then			
- 		      adjsfculw_lnd(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
-     & 		                     (tsflw(i) - tsfc_lnd(i))
- 		   endif
-           if (icy(i)) then
- 		      adjsfculw_ice(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
-     & 		                     (tsflw(i) - tsfc_ice(i))
-           endif
-           if (wet(i)) then
- 		      adjsfculw_wat(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
-     &             		         (tsflw(i) - tsfc_wat(i))
-           endif
+		   ! F_adj = F_o + (dF/dT) * dT		
+ 		   adjsfculw(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
+     & 		                     (tsflw(i) - tf(i))
 		else
            if (dry(i)) then
              tem2 = tsfc_lnd(i) * tsfc_lnd(i)
