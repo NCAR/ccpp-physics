@@ -233,7 +233,7 @@
 
 !  --- ... when using RRTMGP w/ use_GP_jacobian, these adjustment factors are pre-computed
 !  --- ... and provided as inputs in this routine.
-        if (.not. use_LW_jacobian)
+        if (.not. use_LW_jacobian) then
           if (frac_grid) then
             do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
@@ -271,6 +271,7 @@
               endif
             enddo
           endif
+        endif
 
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf
