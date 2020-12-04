@@ -163,7 +163,7 @@
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_GP_jacobian, skt, sktp1r, fluxlwUP, fluxlwUP_jac, errmsg, errflg)
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, errmsg, errflg)
 
       implicit none
 
@@ -184,17 +184,6 @@
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
       real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
       real(kind=kind_phys), intent(  out), dimension(im) :: adjsfculw
-      
-      ! RRTMGP	
-      logical,              intent(in   ) :: &
-           use_GP_jacobian   ! Use RRTMGP LW Jacobian of upwelling to adjust the surface flux?
-      real(kind=kind_phys), intent(in   ), dimension(im) :: &
-           skt               ! Skin temperature
-      real(kind=kind_phys), intent(inout), dimension(im) :: &
-           sktp1r            ! Skin temperature at previous timestep
-      real(kind=kind_phys), intent(in   ), dimension(im,levs+1), optional :: &
-           fluxlwUP,       & ! Upwelling LW flux (W/m2)
-           fluxlwUP_jac      ! Jacobian of upwelling LW flux (W/m2/K)
 
       ! These arrays are only allocated if ldiag3d is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
@@ -211,7 +200,7 @@
       integer :: i, k
       real(kind=kind_phys) :: tem1, tem2, tem, hocp
       logical, dimension(im) :: invrsn
-      real(kind=kind_phys), dimension(im) :: tx1, tx2, dT
+      real(kind=kind_phys), dimension(im) :: tx1, tx2
 
       real(kind=kind_phys), parameter :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       real(kind=kind_phys), parameter :: qmin = 1.0e-10_kind_phys, epsln=1.0e-10_kind_phys
@@ -241,20 +230,7 @@
 
 !  --- ... when using RRTMGP w/ use_GP_jacobian, these adjustment factors are pre-computed
 !  --- ... and provided as inputs in this routine.
-        
-        if (use_GP_jacobian) then
-           ! Compute adjustment to the surface flux using Jacobian.
-          if(linit_mod) then
-            dT(:)        = (sktp1r(:) - skt(:)) 
-            adjsfculw(:) = fluxlwUP(:,1) + fluxlwUP_jac(:,1)  * dT(:)
-          else
-            adjsfculw(:) = fluxlwUP(:,1)
-            linit_mod    = .true.
-          endif
-  
-          ! Store surface temperature for next iteration
-          sktp1r(:) = skt(:)       
-        else
+
           if (frac_grid) then
             do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
@@ -292,7 +268,6 @@
               endif
             enddo
           endif
-        endif
 
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf

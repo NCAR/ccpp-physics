@@ -179,6 +179,7 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
+     &       use_LW_jacobian, fluxlwUP, fluxlwUP_jac,                   &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtc,                                                &
@@ -210,6 +211,7 @@
 !     integer, intent(in) :: ipr
 !     logical lprnt
       logical, dimension(im), intent(in) :: dry, icy, wet
+      logical, intent(in) :: use_LW_jacobian
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &                                      deltim, fhswr
 
@@ -227,6 +229,9 @@
 
       real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
      &,                                                       swhc, hlwc
+      real(kind=kind_phys), dimension(im,levs+1), intent(in) ::         &
+     &      fluxlwUP,                                                   &
+     &      fluxlwUP_jac
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
@@ -303,21 +308,29 @@
 !!  - compute \a sfc upward LW flux from current \a sfc temperature.
 !      note: sfc emiss effect is not appied here, and will be dealt in other place
 
-        if (dry(i)) then
-          tem2 = tsfc_lnd(i) * tsfc_lnd(i)
-          adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
-     &                     + (one - sfcemis_lnd(i)) * adjsfcdlw(i)
-        endif
-        if (icy(i)) then
-          tem2 = tsfc_ice(i) * tsfc_ice(i)
-          adjsfculw_ice(i) =  sfcemis_ice(i) * con_sbc * tem2 * tem2
-     &                     + (one - sfcemis_ice(i)) * adjsfcdlw(i)
-        endif
-        if (wet(i)) then
-          tem2 = tsfc_wat(i) * tsfc_wat(i)
-          adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * tem2 * tem2
-     &                     + (one - sfcemis_wat(i)) * adjsfcdlw(i)
-        endif
+		if (use_LW_Jacobian) then
+			! Change in surface air-temperature since last radiation call.
+ 		    tem1 = tsflw(i) - tf(i) 
+ 		    adjsfculw_lnd(i)  = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * tem1
+ 		    adjsfculw_ice(i)  = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * tem1
+ 		    adjsfculw_wat(i)  = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * tem1		
+		else
+           if (dry(i)) then
+             tem2 = tsfc_lnd(i) * tsfc_lnd(i)
+             adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
+     &                        + (one - sfcemis_lnd(i)) * adjsfcdlw(i)
+           endif
+           if (icy(i)) then
+             tem2 = tsfc_ice(i) * tsfc_ice(i)
+             adjsfculw_ice(i) =  sfcemis_ice(i) * con_sbc * tem2 * tem2
+     &                        + (one - sfcemis_ice(i)) * adjsfcdlw(i)
+           endif
+           if (wet(i)) then
+             tem2 = tsfc_wat(i) * tsfc_wat(i)
+             adjsfculw_wat(i) =  sfcemis_wat(i) * con_sbc * tem2 * tem2
+     &                        + (one - sfcemis_wat(i)) * adjsfcdlw(i)
+          endif
+        endif  
 !     if (lprnt .and. i == ipr) write(0,*)' in dcyc3: dry==',dry(i)
 !    &,' wet=',wet(i),' icy=',icy(i),' tsfc3=',tsfc3(i,:)
 !    &,' sfcemis=',sfcemis(i,:),' adjsfculw=',adjsfculw(i,:)

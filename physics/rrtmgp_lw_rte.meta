@@ -166,7 +166,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = T
+  optional = F
 [fluxlwDOWN_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_profile_downward
   long_name = RRTMGP Jacobian downward of longwave flux profile
@@ -175,7 +175,7 @@
   type = real
   kind = kind_phys
   intent = out
-  optional = T 
+  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

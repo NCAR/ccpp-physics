@@ -63,15 +63,13 @@ contains
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
          fluxlwDOWN_allsky,        & ! All-sky flux (W/m2)
          fluxlwUP_clrsky,          & ! Clear-sky flux (W/m2)
-         fluxlwDOWN_clrsky           ! All-sky flux (W/m2)
+         fluxlwDOWN_clrsky,        & ! All-sky flux (W/m2)
+         fluxlwUP_jac,             & ! Jacobian of upward LW flux (W/m2/K)         
+         fluxlwDOWN_jac              ! Jacobian of downward LW flux (W/m2/K)
     character(len=*), intent(out) :: & 
          errmsg                      ! CCPP error message
     integer, intent(out) :: & 
-         errflg                      ! CCPP error flag
-    ! Outputs (optional)
-    real(kind_phys), dimension(ncol,nLev+1), intent(out), optional :: &
-         fluxlwUP_jac,             & ! Jacobian of upward LW flux (W/m2/K)
-         fluxlwDOWN_jac              ! Jacobian of downward LW flux (W/m2/K)         
+         errflg                      ! CCPP error flag         
 
     ! Local variables
     type(ty_fluxes_byband) :: &
