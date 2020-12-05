@@ -205,7 +205,7 @@ contains
             zorl_lnd(i) = zorll(i)
             tsfc_lnd(i) = tsfcl(i)
            tsurf_lnd(i) = tsfcl(i)
-           snowd_lnd(i) = snowd(i)
+!          snowd_lnd(i) = snowd(i) / frland(i)
            semis_lnd(i) = semis_rad(i)
 !            qss_lnd(i) = qss(i)
 !           hflx_lnd(i) = hflx(i)
@@ -216,7 +216,7 @@ contains
             zorl_ice(i) = zorli(i)
             tsfc_ice(i) = tisfc(i)
            tsurf_ice(i) = tisfc(i)
-           snowd_ice(i) = snowd(i)
+!          snowd_ice(i) = snowd(i) / cice(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
            semis_ice(i) = 0.95_kind_phys
@@ -238,6 +238,33 @@ contains
            lake(i) = .false.
         endif
       enddo
+!
+      if (frac_grid) then
+        do i=1,im
+          if (dry(i)) then
+            if (icy(i)) then
+              snowd_lnd(i) = snowd(i) / (frland(i) + cice(i))
+              snowd_ice(i) = snowd_lnd(i)
+            else
+              snowd_lnd(i) = snowd(i) / frland(i)
+              snowd_ice(i) = zero
+            endif
+          elseif (icy(i)) then
+            snowd_lnd(i) = zero
+            snowd_ice(i) = snowd(i) / cice(i)
+          endif
+        enddo
+      else
+        do i=1,im
+          if (dry(i)) then
+            snowd_lnd(i) = snowd(i)
+            snowd_ice(i) = zero
+          elseif (icy(i)) then
+            snowd_lnd(i) = zero
+            snowd_ice(i) = snowd(i) / cice(i)
+          endif
+        enddo
+      endif
 
      ! Assign sea ice temperature to interstitial variable
       do i = 1, im
@@ -590,6 +617,7 @@ contains
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
                 zorl(i)   = txi * zorl_ice(i)   + txo * zorl_wat(i)
+                snowd(i)  = txi * snowd_ice(i)
               else
                 evap(i)   = evap_wat(i)
                 hflx(i)   = hflx_wat(i)
