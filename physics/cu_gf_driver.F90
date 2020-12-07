@@ -5,7 +5,7 @@
 module cu_gf_driver
 
    ! DH* TODO: replace constants with arguments to cu_gf_driver_run
-   use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
+   !use physcons  , g => con_g, cp => con_cp, xlv => con_hvap, r_v => con_rv
    use machine   , only: kind_phys
    use cu_gf_deep, only: cu_gf_deep_run,neg_check,autoconv,aeroevap,fct1d3
    use cu_gf_sh  , only: cu_gf_sh_run
@@ -63,7 +63,7 @@ contains
 !!
 !>\section gen_gf_driver GSD GF Cumulus Scheme General Algorithm
 !> @{
-      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,cactiv,                &
+      subroutine cu_gf_driver_run(ntracer,garea,im,km,dt,cactiv,g,cp,xlv,r_v,   &
                forcet,forceqv_spechum,phil,raincv,qv_spechum,t,cld1d,           &
                us,vs,t2di,w,qv2di_spechum,p2di,psuri,                           &
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
@@ -95,7 +95,7 @@ contains
    integer, intent(in   ) :: im,km,ntracer
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
    logical, intent(in   ) :: ldiag3d,qdiag3d
-
+   real (kind=kind_phys),  intent(in) :: g,cp,xlv,r_v
    real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: qci_conv
