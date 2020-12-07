@@ -636,15 +636,7 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[use_LW_jacobian]
-  standard_name = flag_to_calc_RRTMGP_LW_jacobian
-  long_name = logical flag to control RRTMGP LW calculation
-  units = flag
-  dimensions = ()
-  type = logical  
-  intent = in
-  optional = F     
+  optional = F 
 [dlwsfc]
   standard_name = cumulative_surface_downwelling_longwave_flux_multiplied_by_timestep
   long_name = cumulative surface downwelling LW flux multiplied by timestep

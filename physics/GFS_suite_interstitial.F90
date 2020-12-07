@@ -163,7 +163,7 @@
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, errmsg, errflg)
 
       implicit none
 
@@ -184,9 +184,6 @@
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
       real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
       real(kind=kind_phys), intent(  out), dimension(im) :: adjsfculw
-      
-      ! RRTMGP inputs
-      logical,              intent(in   ) :: use_LW_jacobian
 
       ! These arrays are only allocated if ldiag3d is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
@@ -231,9 +228,6 @@
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
 
-!  --- ... when using RRTMGP w/ use_GP_jacobian, these adjustment factors are pre-computed
-!  --- ... and provided as inputs in this routine.
-        if (.not. use_LW_jacobian) then
           if (frac_grid) then
             do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
@@ -271,7 +265,6 @@
               endif
             enddo
           endif
-        endif
 
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf

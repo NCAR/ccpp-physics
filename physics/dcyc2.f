@@ -179,12 +179,13 @@
      &       sfcnirbmd,sfcnirdfd,sfcvisbmd,sfcvisdfd,                   &
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
-     &       use_LW_jacobian, fluxlwUP, fluxlwUP_jac,                   &
+     &       use_LW_jacobian, doLWrad, fluxlwUP, fluxlwUP_jac,          &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
+     &       tsfc_lnd_radt , tsfc_ice_radt , tsfc_wat_radt,             &
      &       dtdt,dtdtc,                                                &
 !  ---  outputs:
-     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,adjsfculw,                   &
+     &       adjsfcdsw,adjsfcnsw,adjsfcdlw,                             &
      &       adjsfculw_lnd,adjsfculw_ice,adjsfculw_wat,xmu,xcosz,       &
      &       adjnirbmu,adjnirdfu,adjvisbmu,adjvisdfu,                   &
      &       adjnirbmd,adjnirdfd,adjvisbmd,adjvisdfd,                   &
@@ -211,7 +212,7 @@
 !     integer, intent(in) :: ipr
 !     logical lprnt
       logical, dimension(im), intent(in) :: dry, icy, wet
-      logical, intent(in) :: use_LW_jacobian
+      logical, intent(in) :: use_LW_jacobian, doLWrad
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &                                      deltim, fhswr
 
@@ -229,6 +230,9 @@
 
       real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
      &,                                                       swhc, hlwc
+
+      real(kind=kind_phys), dimension(im), intent(inout) ::             &
+     &                    tsfc_lnd_radt , tsfc_ice_radt , tsfc_wat_radt                 
       real(kind=kind_phys), dimension(im,levs+1), intent(in) ::         &
      &      fluxlwUP,                                                   &
      &      fluxlwUP_jac
@@ -244,7 +248,7 @@
      &      adjnirbmd, adjnirdfd, adjvisbmd, adjvisdfd
 
       real(kind=kind_phys), dimension(im), intent(out) ::               &
-     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat, adjsfculw
+     &      adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
@@ -309,9 +313,26 @@
 !      note: sfc emiss effect is not appied here, and will be dealt in other place
 
 		if (use_LW_Jacobian) then
-		   ! F_adj = F_o + (dF/dT) * dT		
- 		   adjsfculw(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
-     & 		                     (tsflw(i) - tf(i))
+		   ! Update temperature for LW flux adjustment at radiation calls.
+		   if (doLWrad) then
+		      tsfc_lnd_radt(i) = tsfc_lnd(i)
+		      tsfc_wat_radt(i) = tsfc_wat(i)
+		      tsfc_ice_radt(i) = tsfc_ice(i)
+		   endif
+		
+		   ! F_adj = F_o + (dF/dT) * dT	
+           if (dry(i)) then		   	
+ 		      adjsfculw_lnd(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
+     & 		                     (tsfc_lnd_radt(i) - tsfc_lnd(i))
+           endif
+           if (icy(i)) then		   	
+ 		      adjsfculw_ice(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
+     & 		                     (tsfc_ice_radt(i) - tsfc_ice(i))
+           endif           
+           if (wet(i)) then		   	
+ 		      adjsfculw_wat(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
+     & 		                     (tsfc_wat_radt(i) - tsfc_wat(i))
+           endif          
 		else
            if (dry(i)) then
              tem2 = tsfc_lnd(i) * tsfc_lnd(i)
