@@ -171,7 +171,7 @@
 !> @{
       subroutine dcyc2t3_run                                            &
 !  ---  inputs:
-     &     ( solhr,slag,sdec,cdec,sinlat,coslat,                        &
+     &     ( solhr,slag,sdec,cdec,sinlat,coslat,con_pi, con_sbc,        &
      &       xlon,coszen,tsfc_lnd,tsfc_ice,tsfc_wat,tf,tsflw,           &
      &       sfcemis_lnd, sfcemis_ice, sfcemis_wat,                     &
      &       sfcdsw,sfcnsw,sfcdlw,swh,swhc,hlw,hlwc,                    &
@@ -191,7 +191,6 @@
      &     )
 !
       use machine,         only : kind_phys
-      use physcons,        only : con_pi, con_sbc
 
       implicit none
 !
@@ -227,6 +226,9 @@
 
       real(kind=kind_phys), dimension(im,levs), intent(in) :: swh,  hlw &
      &,                                                       swhc, hlwc
+
+      real(kind_phys),           intent(in   ) :: con_pi, con_sbc
+
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
