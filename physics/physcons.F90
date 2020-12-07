@@ -115,6 +115,7 @@
   real(kind=kind_phys),parameter:: con_amch4  =16.043_kind_phys                    !< molecular wght of ch4 (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_amn2o  =44.013_kind_phys                    !< molecular wght of n2o (\f$g/mol\f$)
   real(kind=kind_phys),parameter:: con_thgni  =-38.15_kind_phys                    !< temperature the H.G.Nuc. ice starts
+  real(kind=kind_phys),parameter:: karman     =0.4_kind_phys                       !< Von Karman constant
 
 !> minimum ice concentration
   real(kind=kind_phys),parameter:: cimin      =0.15                                !< minimum ice concentration
