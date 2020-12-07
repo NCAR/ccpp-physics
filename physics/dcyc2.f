@@ -311,10 +311,14 @@
 
       ! Update temperature for LW flux adjustment at radiation calls.
       if (doLWrad) then
-         tsfc_lnd_radt(1:im) = tsfc_lnd(1:im)
-         tsfc_wat_radt(1:im) = tsfc_wat(1:im)
-         tsfc_ice_radt(1:im) = tsfc_ice(1:im)
+      	 do i = 1, im
+            tsfc_lnd_radt(i) = minval([tsfc_lnd(i),tsfc_wat(i),
+     &                                  tsfc_ice(i)])
+         enddo
+         !tsfc_wat_radt(1:im) = tsfc_wat(1:im)
+         !tsfc_ice_radt(1:im) = tsfc_ice(1:im)
       endif
+      
 
       write(93,*) "#######",doLWrad
       write(93,*) tsfc_lnd
@@ -339,11 +343,11 @@
             endif
             if (icy(i)) then		   	
                adjsfculw_ice(i) = fluxlwUP(i,1) + fluxlwUP_jac(i,1) * 
-     &              (tsfc_ice_radt(i) - tsfc_ice(i))
+     &              (tsfc_lnd_radt(i) - tsfc_ice(i))
             endif           
             if (wet(i)) then		   	
                adjsfculw_wat(i) = fluxlwUP(i,1) + fluxlwUP_jac(i,1) * 
-     &              (tsfc_wat_radt(i) - tsfc_wat(i))
+     &              (tsfc_lnd_radt(i) - tsfc_wat(i))
             endif          
          else
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
