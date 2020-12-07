@@ -150,9 +150,17 @@
   contains
 
     subroutine GFS_suite_interstitial_2_init ()
+      open(97,file='dump97.txt',status='unknown')
+      open(98,file='dump98.txt',status='unknown')
+      open(99,file='dump99.txt',status='unknown')
+      open(100,file='dump100.txt',status='unknown')
     end subroutine GFS_suite_interstitial_2_init
 
     subroutine GFS_suite_interstitial_2_finalize()
+      close(97)
+      close(98)
+      close(99)
+      close(100)
     end subroutine GFS_suite_interstitial_2_finalize
 #if 0
 !> \section arg_table_GFS_suite_interstitial_2_run Argument Table
@@ -228,43 +236,52 @@
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
 
-          if (frac_grid) then
-            do i=1,im
+        if (frac_grid) then
+           do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
               if (flag_cice(i)) then
-                adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                             + ulwsfc_cice(i)   * tem                     &
-                             + adjsfculw_wat(i) * (one - frland(i) - tem)
+                 adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                              + ulwsfc_cice(i)   * tem                     &
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
               else
-                adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
-                             + adjsfculw_ice(i) * tem                     &
-                             + adjsfculw_wat(i) * (one - frland(i) - tem)
+                 adjsfculw(i) = adjsfculw_lnd(i) * frland(i)               &
+                              + adjsfculw_ice(i) * tem                     &
+                              + adjsfculw_wat(i) * (one - frland(i) - tem)
               endif
-            enddo
-          else
-            do i=1,im
+           enddo
+        else
+           do i=1,im
               if (dry(i)) then                     ! all land
-                adjsfculw(i) = adjsfculw_lnd(i)
+                 adjsfculw(i) = adjsfculw_lnd(i)
               elseif (icy(i)) then                 ! ice (and water)
-                tem = one - cice(i)
-                if (flag_cice(i)) then
-                  if (wet(i) .and. adjsfculw_wat(i) /= huge) then
-                    adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_wat(i)*tem
-                  else
-                    adjsfculw(i) = ulwsfc_cice(i)
-                  endif
-                else
-                  if (wet(i) .and. adjsfculw_wat(i) /= huge) then
-                    adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_wat(i)*tem
-                  else
-                    adjsfculw(i) = adjsfculw_ice(i)
-                  endif
-                endif
+                 tem = one - cice(i)
+                 if (flag_cice(i)) then
+                    if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                       adjsfculw(i) = ulwsfc_cice(i)*cice(i) + adjsfculw_wat(i)*tem
+                    else
+                       adjsfculw(i) = ulwsfc_cice(i)
+                    endif
+                 else
+                    if (wet(i) .and. adjsfculw_wat(i) /= huge) then
+                       adjsfculw(i) = adjsfculw_ice(i)*cice(i) + adjsfculw_wat(i)*tem
+                    else
+                       adjsfculw(i) = adjsfculw_ice(i)
+                    endif
+                 endif
               else                                 ! all water
-                adjsfculw(i) = adjsfculw_wat(i)
+                 adjsfculw(i) = adjsfculw_wat(i)
               endif
-            enddo
-          endif
+           enddo
+        endif
+
+        write(97,*) "#####"
+        write(97,*) adjsfculw
+        write(98,*) "#####"
+        write(98,*) adjsfculw_lnd
+        write(99,*) "#####"
+        write(99,*) adjsfculw_wat
+        write(100,*) "#####"
+        write(100,*) adjsfculw_ice
 
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf

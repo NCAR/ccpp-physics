@@ -17,9 +17,17 @@
       contains
 
       subroutine dcyc2t3_init()
+         open(93,file='dumpLND.txt',status='unknown')
+         open(94,file='dumpWAT.txt',status='unknown')
+         open(95,file='dumpICE.txt',status='unknown')
+         open(96,file='dumpFLUX.txt',status='unknown')
       end subroutine dcyc2t3_init
 
       subroutine dcyc2t3_finalize()
+         close(93)
+         close(94)
+         close(95)
+         close(96)
       end subroutine dcyc2t3_finalize
 
 ! ===================================================================== !
@@ -232,10 +240,10 @@
      &,                                                       swhc, hlwc
 
       real(kind=kind_phys), dimension(im), intent(inout) ::             &
-     &                    tsfc_lnd_radt , tsfc_ice_radt , tsfc_wat_radt                 
+     &     tsfc_lnd_radt , tsfc_ice_radt , tsfc_wat_radt                 
       real(kind=kind_phys), dimension(im,levs+1), intent(in) ::         &
-     &      fluxlwUP,                                                   &
-     &      fluxlwUP_jac
+     &     fluxlwUP,                                                    &
+     &     fluxlwUP_jac
 
 !  ---  input/output:
       real(kind=kind_phys), dimension(im,levs), intent(inout) :: dtdt   &
@@ -300,40 +308,49 @@
         enddo
       endif
 !
-      do i = 1, im
 
+      ! Update temperature for LW flux adjustment at radiation calls.
+      if (doLWrad) then
+         tsfc_lnd_radt(1:im) = tsfc_lnd(1:im)
+         tsfc_wat_radt(1:im) = tsfc_wat(1:im)
+         tsfc_ice_radt(1:im) = tsfc_ice(1:im)
+      endif
+
+      write(93,*) "#######",doLWrad
+      write(93,*) tsfc_lnd
+      write(93,*) "-"
+      write(93,*) tsfc_lnd_radt
+      write(94,*) "#######"
+      write(94,*) tsfc_wat - tsfc_wat_radt
+      write(95,*) "#######"
+      write(95,*) tsfc_ice - tsfc_ice_radt
+      write(96,*) "#######"
+      write(96,*) fluxlwUP(:,1)
+      write(96,*) "-"
+      write(96,*) fluxlwUP_jac(:,1)
+
+      do i = 1, im
 !> - LW time-step adjustment:
+         if (use_LW_Jacobian) then
+            ! F_adj = F_o + (dF/dT) * dT	
+            if (dry(i)) then		   	
+               adjsfculw_lnd(i) = fluxlwUP(i,1) + fluxlwUP_jac(i,1) * 
+     &              (tsfc_lnd_radt(i) - tsfc_lnd(i))
+            endif
+            if (icy(i)) then		   	
+               adjsfculw_ice(i) = fluxlwUP(i,1) + fluxlwUP_jac(i,1) * 
+     &              (tsfc_ice_radt(i) - tsfc_ice(i))
+            endif           
+            if (wet(i)) then		   	
+               adjsfculw_wat(i) = fluxlwUP(i,1) + fluxlwUP_jac(i,1) * 
+     &              (tsfc_wat_radt(i) - tsfc_wat(i))
+            endif          
+         else
 !!  - adjust \a sfc downward LW flux to account for t changes in the lowest model layer.
 !! compute 4th power of the ratio of \c tf in the lowest model layer over the mean value \c tsflw.
-        tem1 = tf(i) / tsflw(i)
-        tem2 = tem1 * tem1
-        adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
-
-!!  - compute \a sfc upward LW flux from current \a sfc temperature.
-!      note: sfc emiss effect is not appied here, and will be dealt in other place
-
-		if (use_LW_Jacobian) then
-		   ! Update temperature for LW flux adjustment at radiation calls.
-		   if (doLWrad) then
-		      tsfc_lnd_radt(i) = tsfc_lnd(i)
-		      tsfc_wat_radt(i) = tsfc_wat(i)
-		      tsfc_ice_radt(i) = tsfc_ice(i)
-		   endif
-		
-		   ! F_adj = F_o + (dF/dT) * dT	
-           if (dry(i)) then		   	
- 		      adjsfculw_lnd(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
-     & 		                     (tsfc_lnd_radt(i) - tsfc_lnd(i))
-           endif
-           if (icy(i)) then		   	
- 		      adjsfculw_ice(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
-     & 		                     (tsfc_ice_radt(i) - tsfc_ice(i))
-           endif           
-           if (wet(i)) then		   	
- 		      adjsfculw_wat(i) = fluxlwUP(im,1) + fluxlwUP_jac(im,1) * 
-     & 		                     (tsfc_wat_radt(i) - tsfc_wat(i))
-           endif          
-		else
+           tem1 = tf(i) / tsflw(i)
+           tem2 = tem1 * tem1
+           adjsfcdlw(i) = sfcdlw(i) * tem2 * tem2
            if (dry(i)) then
              tem2 = tsfc_lnd(i) * tsfc_lnd(i)
              adjsfculw_lnd(i) =  sfcemis_lnd(i) * con_sbc * tem2 * tem2
