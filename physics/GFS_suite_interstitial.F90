@@ -150,17 +150,9 @@
   contains
 
     subroutine GFS_suite_interstitial_2_init ()
-      open(97,file='dump97.txt',status='unknown')
-      open(98,file='dump98.txt',status='unknown')
-      open(99,file='dump99.txt',status='unknown')
-      open(100,file='dump100.txt',status='unknown')
     end subroutine GFS_suite_interstitial_2_init
 
     subroutine GFS_suite_interstitial_2_finalize()
-      close(97)
-      close(98)
-      close(99)
-      close(100)
     end subroutine GFS_suite_interstitial_2_finalize
 #if 0
 !> \section arg_table_GFS_suite_interstitial_2_run Argument Table
@@ -274,14 +266,10 @@
            enddo
         endif
 
-        write(97,*) "#####"
-        write(97,*) adjsfculw
-        write(98,*) "#####"
-        write(98,*) adjsfculw_lnd
-        write(99,*) "#####"
-        write(99,*) adjsfculw_wat
-        write(100,*) "#####"
-        write(100,*) adjsfculw_ice
+        print*, 'adjsfculw:     ',adjsfculw
+        print*, 'adjsfculw_lnd: ',adjsfculw_lnd
+        print*, 'adjsfculw_wat: ',adjsfculw_wat
+        print*, 'adjsfculw_ice: ',adjsfculw_ice
 
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf

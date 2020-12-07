@@ -17,17 +17,9 @@
       contains
 
       subroutine dcyc2t3_init()
-         open(93,file='dumpLND.txt',status='unknown')
-         open(94,file='dumpWAT.txt',status='unknown')
-         open(95,file='dumpICE.txt',status='unknown')
-         open(96,file='dumpFLUX.txt',status='unknown')
       end subroutine dcyc2t3_init
 
       subroutine dcyc2t3_finalize()
-         close(93)
-         close(94)
-         close(95)
-         close(96)
       end subroutine dcyc2t3_finalize
 
 ! ===================================================================== !
@@ -315,23 +307,14 @@
             tsfc_lnd_radt(i) = minval([tsfc_lnd(i),tsfc_wat(i),
      &                                  tsfc_ice(i)])
          enddo
-         !tsfc_wat_radt(1:im) = tsfc_wat(1:im)
-         !tsfc_ice_radt(1:im) = tsfc_ice(1:im)
       endif
-      
 
-      write(93,*) "#######",doLWrad
-      write(93,*) tsfc_lnd
-      write(93,*) "-"
-      write(93,*) tsfc_lnd_radt
-      write(94,*) "#######"
-      write(94,*) tsfc_wat - tsfc_wat_radt
-      write(95,*) "#######"
-      write(95,*) tsfc_ice - tsfc_ice_radt
-      write(96,*) "#######"
-      write(96,*) fluxlwUP(:,1)
-      write(96,*) "-"
-      write(96,*) fluxlwUP_jac(:,1)
+      print*, 'tsfc_lnd_radt:            ',tsfc_lnd
+      print*, 'tsfc_lnd:                 ',tsfc_lnd_radt
+      print*, 'tsfc_wat:                 ',tsfc_wat
+      print*, 'tsfc_ice:                 ',tsfc_ice
+      print*, 'fluxlwUP(:,1):            ',fluxlwUP(:,1)
+      print*, 'fluxlwUP_jac(:,1):        ',fluxlwUP_jac(:,1)
 
       do i = 1, im
 !> - LW time-step adjustment:
