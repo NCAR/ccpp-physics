@@ -1,7 +1,7 @@
 module get_prs_fv3
 
    use machine,  only: kind_phys
-   use physcons, only: con_fvirt
+!   use physcons, only: con_fvirt
 
 !--- public declarations
    public get_prs_fv3_init, get_prs_fv3_run, get_prs_fv3_finalize
@@ -18,12 +18,13 @@ contains
 !! \section arg_table_get_prs_fv3_run Argument Table
 !! \htmlinclude get_prs_fv3_run.html
 !!
-   subroutine get_prs_fv3_run(ix, levs, phii, prsi, tgrs, qgrs1, del, del_gz, errmsg, errflg)
+   subroutine get_prs_fv3_run(ix, levs, con_fvirt, phii, prsi, tgrs, qgrs1, del, del_gz, errmsg, errflg)
 
      implicit none
 
      ! Interface variables
      integer, intent(in) :: ix, levs
+     real(kind=kind_phys), intent(in) :: con_fvirt
      real(kind=kind_phys), dimension(ix,levs+1),     intent(in)    :: phii
      real(kind=kind_phys), dimension(ix,levs+1),     intent(in)    :: prsi
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: tgrs
@@ -79,12 +80,13 @@ contains
 !! \section arg_table_get_phi_fv3_run Argument Table
 !! \htmlinclude get_phi_fv3_run.html
 !!
-   subroutine get_phi_fv3_run(ix, levs, gt0, gq01, del_gz, phii, phil, errmsg, errflg)
+   subroutine get_phi_fv3_run(ix, levs, con_fvirt, gt0, gq01, del_gz, phii, phil, errmsg, errflg)
 
      implicit none
 
      ! Interface variables
      integer, intent(in) :: ix, levs
+     real(kind=kind_phys), intent(in) :: con_fvirt
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gt0
      real(kind=kind_phys), dimension(ix,levs),       intent(in)    :: gq01
      real(kind=kind_phys), dimension(ix,levs+1),     intent(inout) :: del_gz
