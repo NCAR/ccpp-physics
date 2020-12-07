@@ -129,7 +129,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [fluxlwDOWN_allsky]
   standard_name = RRTMGP_lw_flux_profile_downward_allsky
@@ -138,7 +138,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [fluxlwUP_clrsky]
   standard_name = RRTMGP_lw_flux_profile_upward_clrsky
@@ -147,7 +147,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [fluxlwDOWN_clrsky]
   standard_name = RRTMGP_lw_flux_profile_downward_clrsky
@@ -156,7 +156,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [fluxlwUP_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
@@ -165,7 +165,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [fluxlwDOWN_jac]
   standard_name = RRTMGP_jacobian_of_lw_flux_profile_downward
@@ -174,7 +174,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

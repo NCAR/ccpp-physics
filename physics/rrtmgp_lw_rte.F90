@@ -59,7 +59,7 @@ contains
          lw_optical_props_clouds    ! RRTMGP DDT: longwave cloud radiative properties          
          
     ! Outputs
-    real(kind_phys), dimension(ncol,nLev+1), intent(out) :: &
+    real(kind_phys), dimension(ncol,nLev+1), intent(inout) :: &
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
          fluxlwDOWN_allsky,        & ! All-sky flux (W/m2)
          fluxlwUP_clrsky,          & ! Clear-sky flux (W/m2)
