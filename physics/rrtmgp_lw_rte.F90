@@ -31,8 +31,7 @@ contains
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,    &
        nLev, p_lev, lw_gas_props, sfc_emiss_byband, sources, lw_optical_props_clrsky,      &
        lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,  &
-       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, fluxlwUP_jac, fluxlwDOWN_jac,&
-       errmsg, errflg)
+       fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, sfculw_jac, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -59,13 +58,13 @@ contains
          lw_optical_props_clouds    ! RRTMGP DDT: longwave cloud radiative properties          
          
     ! Outputs
+    real(kind_phys), dimension(ncol), intent(inout) :: &
+         sfculw_jac                  ! Jacobian of upwelling LW surface radiation (W/m2/K)
     real(kind_phys), dimension(ncol,nLev+1), intent(inout) :: &
          fluxlwUP_allsky,          & ! All-sky flux (W/m2)
          fluxlwDOWN_allsky,        & ! All-sky flux (W/m2)
          fluxlwUP_clrsky,          & ! Clear-sky flux (W/m2)
-         fluxlwDOWN_clrsky,        & ! All-sky flux (W/m2)
-         fluxlwUP_jac,             & ! Jacobian of upward LW flux (W/m2/K)         
-         fluxlwDOWN_jac              ! Jacobian of downward LW flux (W/m2/K)
+         fluxlwDOWN_clrsky           ! All-sky flux (W/m2)
     character(len=*), intent(out) :: & 
          errmsg                      ! CCPP error message
     integer, intent(out) :: & 
@@ -76,8 +75,10 @@ contains
          flux_allsky, flux_clrsky
     real(kind_phys), dimension(ncol,nLev+1,lw_gas_props%get_nband()),target :: &
          fluxLW_up_allsky, fluxLW_up_clrsky, fluxLW_dn_allsky, fluxLW_dn_clrsky
+    real(kind_phys), dimension(nCol,nLev+1) :: fluxlwUP_jac,fluxlwDOWN_jac
     logical :: &
          top_at_1
+    integer :: iSFC, iTOA
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -87,7 +88,14 @@ contains
 
     ! Vertical ordering?
     top_at_1 = (p_lev(1,1) .lt. p_lev(1, nLev))
-    
+    if (top_at_1) then
+       iSFC = nLev+1
+       iTOA = 1
+    else
+       iSFC = 1
+       iTOA = nLev+1
+    endif
+
     ! Initialize RRTMGP DDT containing 2D(3D) fluxes
     flux_allsky%bnd_flux_up => fluxLW_up_allsky
     flux_allsky%bnd_flux_dn => fluxLW_dn_allsky
@@ -140,6 +148,7 @@ contains
                n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
                flux_up_Jac    = fluxlwUP_jac,   & ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
                flux_dn_Jac    = fluxlwDOWN_jac))  ! OUT - surface temperature flux (downward) Jacobian (W/m2/K)
+          sfculw_jac = fluxlwUP_jac(:,iSFC)
        else
           call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
                lw_optical_props_clouds,         & ! IN  - optical-properties
@@ -166,6 +175,7 @@ contains
                n_gauss_angles = nGauss_angles,  & ! IN  - Number of angles in Gaussian quadrature
                flux_up_Jac    = fluxlwUP_jac,   & ! OUT - surface temperature flux (upward) Jacobian (W/m2/K)
                flux_dn_Jac    = fluxlwDOWN_jac))  ! OUT - surface temperature flux (downward) Jacobian (W/m2/K)
+          sfculw_jac = fluxlwUP_jac(:,iSFC)
        else
           call check_error_msg('rrtmgp_lw_rte_run',rte_lw(           &
                lw_optical_props_clrsky,         & ! IN  - optical-properties

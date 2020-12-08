@@ -601,6 +601,14 @@
   kind = kind_phys
   intent = inout
   optional = F
+[use_LW_jacobian]
+  standard_name = flag_to_calc_RRTMGP_LW_jacobian
+  long_name = logical flag to control RRTMGP LW calculation
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [adjsfculw]
   standard_name = surface_upwelling_longwave_flux
   long_name = surface upwelling longwave flux at current time
@@ -608,7 +616,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [adjsfculw_lnd]
   standard_name = surface_upwelling_longwave_flux_over_land_interstitial

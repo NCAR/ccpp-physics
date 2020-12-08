@@ -198,6 +198,15 @@
   kind = kind_phys
   intent = inout  
   optional = F
+[sfculw]
+  standard_name = surface_upwelling_longwave_flux_on_radiation_time_step
+  long_name = total sky sfc upward lw flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
 [sfcflw]
   standard_name = lw_fluxes_sfc
   long_name = lw radiation fluxes at sfc

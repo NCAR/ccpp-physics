@@ -105,33 +105,6 @@
   type = real
   kind = kind_phys
   intent = in
-  optional = F
-[tsfc_lnd_radt]
-  standard_name = surface_skin_temperature_over_land_interstitial_at_radiation_timestep
-  long_name = surface skin temperature over land at first call to radiation
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsfc_wat_radt]
-  standard_name = surface_skin_temperature_over_ocean_interstitial_at_radiation_timestep
-  long_name = surface skin temperature over ocean at first call to radiation
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[tsfc_ice_radt]
-  standard_name = surface_skin_temperature_over_ice_interstitial_at_radiation_timestep
-  long_name = surface skin temperature over ice at first call to radiation
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
   optional = F  
 [tf]
   standard_name = air_temperature_at_lowest_model_layer
@@ -199,6 +172,15 @@
 [sfcdlw]
   standard_name = surface_downwelling_longwave_flux_on_radiation_time_step
   long_name = total sky surface downwelling longwave flux on radiation time step
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[sfculw]
+  standard_name = surface_upwelling_longwave_flux_on_radiation_time_step
+  long_name = total sky sfc upward lw flux
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = real
@@ -443,6 +425,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[adjsfculw]
+  standard_name = surface_upwelling_longwave_flux
+  long_name = surface upwelling longwave flux at current time
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 [xmu]
   standard_name = zenith_angle_temporal_adjustment_factor_for_shortwave_fluxes
   long_name = zenith angle temporal adjustment factor for shortwave fluxes
@@ -541,28 +532,11 @@
   type = logical  
   intent = in
   optional = F  
-[doLWrad]
-  standard_name = flag_to_calc_lw
-  long_name = logical flags for lw radiation calls
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F    
-[fluxlwUP]
-  standard_name = RRTMGP_lw_flux_profile_upward_allsky
-  long_name = RRTMGP upward longwave all-sky flux profile
-  units = W m-2
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F   
-[fluxlwUP_jac]
-  standard_name = RRTMGP_jacobian_of_lw_flux_profile_upward
-  long_name = RRTMGP Jacobian upward longwave flux profile
+[sfculw_jac]
+  standard_name = RRTMGP_jacobian_of_lw_flux_upward_at_surface
+  long_name = RRTMGP Jacobian upward longwave flux at surface
   units = W m-2 K-1
-  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in

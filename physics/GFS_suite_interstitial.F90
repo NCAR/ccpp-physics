@@ -163,14 +163,14 @@
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
       adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
-      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, errmsg, errflg)
+      ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_LW_jacobian, errmsg, errflg)
 
       implicit none
 
       ! interface variables
       integer,              intent(in   ) :: im, levs, imfshalcnv
       logical,              intent(in   ) :: lssav, ldiag3d, lsidea, cplflx, shal_cnv
-      logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid
+      logical,              intent(in   ) :: old_monin, mstrat, do_shoc, frac_grid, use_LW_jacobian
       real(kind=kind_phys), intent(in   ) :: dtf, cp, hvap
 
       logical,              intent(in   ), dimension(im) :: flag_cice
@@ -183,7 +183,7 @@
       integer,              intent(inout), dimension(im) :: kinver
       real(kind=kind_phys), intent(inout), dimension(im) :: suntim, dlwsfc, ulwsfc, psmean, ctei_rml, ctei_r
       real(kind=kind_phys), intent(in   ), dimension(im) :: adjsfculw_lnd, adjsfculw_ice, adjsfculw_wat
-      real(kind=kind_phys), intent(  out), dimension(im) :: adjsfculw
+      real(kind=kind_phys), intent(inout), dimension(im) :: adjsfculw
 
       ! These arrays are only allocated if ldiag3d is .true.
       real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
@@ -227,7 +227,7 @@
         enddo
 
 !  --- ...  sfc lw fluxes used by atmospheric model are saved for output
-
+        if (.not. use_LW_jacobian) then
         if (frac_grid) then
            do i=1,im
               tem = (one - frland(i)) * cice(i) ! tem = ice fraction wrt whole cell
@@ -265,11 +265,7 @@
               endif
            enddo
         endif
-
-        print*, 'adjsfculw:     ',adjsfculw
-        print*, 'adjsfculw_lnd: ',adjsfculw_lnd
-        print*, 'adjsfculw_wat: ',adjsfculw_wat
-        print*, 'adjsfculw_ice: ',adjsfculw_ice
+        endif
 
         do i=1,im
           dlwsfc(i) = dlwsfc(i) + adjsfcdlw(i)*dtf
