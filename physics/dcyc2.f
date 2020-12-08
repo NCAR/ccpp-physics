@@ -200,8 +200,7 @@
      &                                   hour12 = 12.0_kind_phys,       &
      &                                   f3600  = one/3600.0_kind_phys, &
      &                                   f7200  = one/7200.0_kind_phys, &
-     &                                   czlimt = 0.0001_kind_phys,     &    ! ~ cos(89.99427)
-     &                                   pid12  = con_pi / hour12
+     &                                   czlimt = 0.0001_kind_phys        ! ~ cos(89.99427)
 
 !  ---  inputs:
       integer, intent(in) :: im, levs
@@ -228,6 +227,7 @@
      &,                                                       swhc, hlwc
 
       real(kind_phys),           intent(in   ) :: con_pi, con_sbc
+      real(kind_phys)  :: pid12
 
 
 !  ---  input/output:
@@ -260,6 +260,7 @@
       tem1 = fhswr / deltim
       nstp = max(6, nint(tem1))
       nstl = max(1, nint(nstp/tem1))
+      pid12  = con_pi / hour12
 !
 !  --- ...  sw time-step adjustment for current cosine of zenith angle
 !           ----------------------------------------------------------
