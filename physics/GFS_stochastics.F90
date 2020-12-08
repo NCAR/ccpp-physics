@@ -26,19 +26,18 @@
 !! -# defines random seed indices for radiation (in a reproducible way)
 !! -# interpolates coefficients for prognostic ozone calculation
 !! -# performs surface data cycling via the GFS gcycle routine
-      subroutine GFS_stochastics_run (im, km, kdt, do_sppt, use_zmtnblck, do_shum,       &
-                                      do_skeb, do_ca,ca_global,ca1,si,vfact_ca,          &
+      subroutine GFS_stochastics_run (im, km, kdt, do_sppt, do_pertmp, use_zmtnblck,     &
+                                      do_shum ,do_skeb, do_ca,ca_global,ca1,si,vfact_ca, &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
                                       sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
-                                      shum_wts_inv, diss_est, ugrs, vgrs, tgrs,          &
-                                      qgrs, qgrs_cw, qgrs_rw, qgrs_sw, qgrs_iw, qgrs_gl, &
-                                      qgrs_ni, qgrs_nr, qgrs_nc, qgrs_nwfa, qgrs_nifa,   &
-                                      gu0, gv0, gt0, gq0, dtdtr,                         &
+                                      shum_wts_inv, diss_est, ugrs, vgrs, tgrs, qgrs_wv, &
+                                      qgrs_cw, qgrs_rw, qgrs_sw, qgrs_iw, qgrs_gl,       &
+                                      gu0, gv0, gt0, gq0_wv, dtdtr,                      &
                                       gq0_cw, gq0_rw, gq0_sw, gq0_iw, gq0_gl,            &
-                                      gq0_ni, gq0_nr, gq0_nc, gq0_nwfa, gq0_nifa,        &
                                       rain, rainc, tprcp, totprcp, cnvprcp,              &
                                       totprcpb, cnvprcpb, cplflx,                        &
                                       rain_cpl, snow_cpl, drain_cpl, dsnow_cpl,          &
+                                      ntcw,ntrw,ntsw,ntiw,ntgl,                          &
                                       errmsg, errflg)
 
          use machine,               only: kind_phys
@@ -49,6 +48,7 @@
          integer,                               intent(in)    :: km
          integer,                               intent(in)    :: kdt
          logical,                               intent(in)    :: do_sppt
+         logical,                               intent(in)    :: do_pertmp
          logical,                               intent(in)    :: do_ca
          logical,                               intent(in)    :: ca_global
          logical,                               intent(in)    :: use_zmtnblck
@@ -71,31 +71,26 @@
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: ugrs
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: vgrs
          real(kind_phys), dimension(1:im,1:km), intent(in)    :: tgrs
-         real(kind_phys), dimension(1:im,1:km), intent(in)    :: qgrs
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_cw
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_rw
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_sw
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_iw
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_gl
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_ni
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_nr
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_nc
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_nwfa
-         real(kind_phys), dimension(1:im,1:km), intent(in),optional    :: qgrs_nifa
+         real(kind_phys), dimension(1:im,1:km), intent(in)    :: qgrs_wv
+         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_cw
+         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_rw
+         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_sw
+         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_iw
+         real(kind_phys), dimension(:,:), intent(in)    :: qgrs_gl
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gu0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gv0
          real(kind_phys), dimension(1:im,1:km), intent(inout) :: gt0
-         real(kind_phys), dimension(1:im,1:km), intent(inout) :: gq0
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_cw
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_rw
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_sw
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_iw
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_gl
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_ni
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_nr
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_nc
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_nwfa
-         real(kind_phys), dimension(1:im,1:km), intent(inout),optional :: gq0_nifa
+         real(kind_phys), dimension(1:im,1:km), intent(inout) :: gq0_wv
+         real(kind_phys), dimension(:,:), intent(inout) :: gq0_cw
+         real(kind_phys), dimension(:,:), intent(inout) :: gq0_rw
+         real(kind_phys), dimension(:,:), intent(inout) :: gq0_sw
+         real(kind_phys), dimension(:,:), intent(inout) :: gq0_iw
+         real(kind_phys), dimension(:,:), intent(inout) :: gq0_gl
+         integer, intent(in) ::      ntcw
+         integer, intent(in) ::      ntrw
+         integer, intent(in) ::      ntsw
+         integer, intent(in) ::      ntiw
+         integer, intent(in) ::      ntgl
          ! dtdtr only allocated if do_sppt == .true.
          real(kind_phys), dimension(:,:),       intent(in)    :: dtdtr
          real(kind_phys), dimension(1:im),      intent(in)    :: rain
@@ -155,96 +150,57 @@
                upert = (gu0(i,k) - ugrs(i,k))   * sppt_wts(i,k)
                vpert = (gv0(i,k) - vgrs(i,k))   * sppt_wts(i,k)
                tpert = (gt0(i,k) - tgrs(i,k) - dtdtr(i,k)) * sppt_wts(i,k)
-               qpert = (gq0(i,k) - qgrs(i,k)) * sppt_wts(i,k)
+               qpert = (gq0_wv(i,k) - qgrs_wv(i,k)) * sppt_wts(i,k)
 
                gu0(i,k)  = ugrs(i,k)+upert
                gv0(i,k)  = vgrs(i,k)+vpert
 
                !negative humidity check
-               qnew = qgrs(i,k)+qpert
+               qnew = qgrs_wv(i,k)+qpert
                if (qnew >= 1.0e-10) then
-                  gq0(i,k) = qnew
+                  gq0_wv(i,k) = qnew
                   gt0(i,k) = tgrs(i,k) + tpert + dtdtr(i,k)
                endif
-               if (present(gq0_cw) .AND. present(qgrs_cw)) then
-                  qpert = gq0_cw(i,k) - qgrs_cw(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_cw(i,k,l+1)+qpert
-                  gq0_cw(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_cw(i,k) = 0.0
+               if (do_pertmp) then
+                  if (ntcw>0) then
+                     qpert = gq0_cw(i,k) - qgrs_cw(i,k) * sppt_wts(i,k)
+                     qnew = qgrs_cw(i,k)+qpert
+                     gq0_cw(i,k) = qnew
+                     if (qnew < 0.0) then
+                        gq0_cw(i,k) = 0.0
+                     endif
                   endif
-               endif
-               if (present(gq0_rw) .AND. present(qgrs_rw)) then
-                  qpert = gq0_rw(i,k) - qgrs_rw(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_rw(i,k,l+1)+qpert
-                  gq0_rw(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_rw(i,k) = 0.0
+                  if (ntrw>0) then
+                     qpert = gq0_rw(i,k) - qgrs_rw(i,k) * sppt_wts(i,k)
+                     qnew = qgrs_rw(i,k)+qpert
+                     gq0_rw(i,k) = qnew
+                     if (qnew < 0.0) then
+                        gq0_rw(i,k) = 0.0
+                     endif
                   endif
-               endif
-               if (present(gq0_sw) .AND. present(qgrs_sw)) then
-                  qpert = gq0_sw(i,k) - qgrs_sw(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_sw(i,k,l+1)+qpert
-                  gq0_sw(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_sw(i,k) = 0.0
+                  if (ntsw>0) then
+                     qpert = gq0_sw(i,k) - qgrs_sw(i,k) * sppt_wts(i,k)
+                     qnew = qgrs_sw(i,k)+qpert
+                     gq0_sw(i,k) = qnew
+                     if (qnew < 0.0) then
+                        gq0_sw(i,k) = 0.0
+                     endif
                   endif
-               endif
-               if (present(gq0_iw) .AND. present(qgrs_iw)) then
-                  qpert = gq0_iw(i,k) - qgrs_iw(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_iw(i,k,l+1)+qpert
-                  gq0_iw(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_iw(i,k) = 0.0
+                  if (ntiw>0) then
+                     qpert = gq0_iw(i,k) - qgrs_iw(i,k) * sppt_wts(i,k)
+                     qnew = qgrs_iw(i,k)+qpert
+                     gq0_iw(i,k) = qnew
+                     if (qnew < 0.0) then
+                        gq0_iw(i,k) = 0.0
+                     endif
                   endif
-               endif
-               if (present(gq0_gl) .AND. present(qgrs_gl)) then
-                  qpert = gq0_gl(i,k) - qgrs_gl(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_gl(i,k,l+1)+qpert
-                  gq0_gl(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_gl(i,k) = 0.0
-                  endif
-               endif
-               if (present(gq0_ni) .AND. present(qgrs_ni)) then
-                  qpert = gq0_ni(i,k) - qgrs_ni(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_ni(i,k,l+1)+qpert
-                  gq0_ni(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_ni(i,k) = 0.0
-                  endif
-               endif
-               if (present(gq0_nr) .AND. present(qgrs_nr)) then
-                  qpert = gq0_nr(i,k) - qgrs_nr(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_nr(i,k,l+1)+qpert
-                  gq0_nr(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_nr(i,k) = 0.0
-                  endif
-               endif
-               if (present(gq0_nnc .AND. present(qgrs_nc)) then
-                  qpert = gq0_nc(i,k) - qgrs_nc(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_nc(i,k,l+1)+qpert
-                  gq0_nc(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_nc(i,k) = 0.0
-                  endif
-               endif
-               if (present(gq0_nwfa) .AND. present(qgrs_nwfa)) then
-                  qpert = gq0_nwfa(i,k) - qgrs_nwfa(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_nwfa(i,k,l+1)+qpert
-                  gq0_nwfa(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_nwfa(i,k) = 0.0
-                  endif
-               endif
-             enddo
-               if (present(gq0_nifa) .AND. present(qgrs_nifa)) then
-                  qpert = gq0_nifa(i,k) - qgrs_nifa(i,k) * sppt_wts(i,k)
-                  qnew = qgrs_nifa(i,k,l+1)+qpert
-                  gq0_nifa(i,k) = qnew
-                  if (qnew < 0.0) then
-                     gq0_nifa(i,k) = 0.0
+                  if (ntgl>0) then
+                     qpert = gq0_gl(i,k) - qgrs_gl(i,k) * sppt_wts(i,k)
+                     qnew = qgrs_gl(i,k)+qpert
+                     gq0_gl(i,k) = qnew
+                     if (qnew < 0.0) then
+                        gq0_gl(i,k) = 0.0
+                     endif
                   endif
                endif
              enddo
@@ -307,13 +263,13 @@
                   upert = (gu0(i,k)   - ugrs(i,k))   * ca(i,k)
                   vpert = (gv0(i,k)   - vgrs(i,k))   * ca(i,k)
                   tpert = (gt0(i,k)   - tgrs(i,k) - dtdtr(i,k)) * ca(i,k)
-                  qpert = (gq0(i,k)   - qgrs(i,k)) * ca(i,k)
+                  qpert = (gq0_wv(i,k)   - qgrs_wv(i,k)) * ca(i,k)
                   gu0(i,k)  = ugrs(i,k)+upert
                   gv0(i,k)  = vgrs(i,k)+vpert
                   !negative humidity check                                                                                                                                                                                                                     
-                  qnew = qgrs(i,k)+qpert
+                  qnew = qgrs_wv(i,k)+qpert
                   if (qnew >= 1.0e-10) then
-                     gq0(i,k) = qnew
+                     gq0_wv(i,k) = qnew
                      gt0(i,k)   = tgrs(i,k) + tpert + dtdtr(i,k)
                   endif
                enddo
@@ -338,7 +294,7 @@
 
          if (do_shum) then
            do k=1,km
-             gq0(:,k) = gq0(:,k)*(1.0 + shum_wts(:,k))
+             gq0_wv(:,k) = gq0_wv(:,k)*(1.0 + shum_wts(:,k))
              shum_wts_inv(:,k) = shum_wts(:,k)
            end do
          endif
