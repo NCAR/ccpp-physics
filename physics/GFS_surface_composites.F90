@@ -544,7 +544,6 @@ contains
             ep1d(i)   = ep1d_lnd(i)
             weasd(i)  = weasd_lnd(i)
             snowd(i)  = snowd_lnd(i)
-           !tprcp(i)  = tprcp_lnd(i)
             evap(i)   = evap_lnd(i)
             hflx(i)   = hflx_lnd(i)
             qss(i)    = qss_lnd(i)
@@ -572,7 +571,6 @@ contains
             ep1d(i)   = ep1d_wat(i)
             weasd(i)  = weasd_wat(i)
             snowd(i)  = snowd_wat(i)
-           !tprcp(i)  = tprcp_wat(i)
             evap(i)   = evap_wat(i)
             hflx(i)   = hflx_wat(i)
             qss(i)    = qss_wat(i)
@@ -596,47 +594,40 @@ contains
             ep1d(i)   = ep1d_ice(i)
             weasd(i)  = weasd_ice(i)
             snowd(i)  = snowd_ice(i)
-           !tprcp(i)  = cice(i)*tprcp_ice(i) + (one-cice(i))*tprcp_wat(i)
             qss(i)    = qss_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
-            tisfc(i)  = tice(i)
-            if (.not. flag_cice(i)) then
-!             tisfc(i) = tice(i) ! over lake ice (and sea ice when uncoupled)
-              zorl(i)  = cice(i) * zorl_ice(i)   + (one - cice(i)) * zorl_wat(i)
-              tsfc(i)  = tsfc_ice(i) ! over lake (and ocean when uncoupled)
-            elseif (wet(i)) then
-              if (cice(i) >= min_seaice) then ! this was already done for lake ice in sfc_sice
+            tisfc(i)  = tice(i)     ! over lake ice (and sea ice when uncoupled)
+            tsfc(i)   = tsfc_ice(i) ! over lake (and ocean when uncoupled)
+!
+            if (flag_cice(i)) then
+              if (wet(i) .and. cice(i) > min_seaice) then  ! this was already done for lake ice in sfc_sice
                 txi = cice(i)
                 txo = one - txi
                 evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
                 hflx(i)   = txi * hflx_ice(i)   + txo * hflx_wat(i)
                 tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_wat(i)
-                stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
+                stress(i) = txi  *stress_ice(i) + txo * stress_wat(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
                 zorl(i)   = txi * zorl_ice(i)   + txo * zorl_wat(i)
                 snowd(i)  = txi * snowd_ice(i)
-              else
-                evap(i)   = evap_wat(i)
-                hflx(i)   = hflx_wat(i)
-                tsfc(i)   = tsfc_wat(i)
-                stress(i) = stress_wat(i)
-                qss(i)    = qss_wat(i)
-                ep1d(i)   = ep1d_wat(i)
-                zorl(i)   = zorl_wat(i)
               endif
+            elseif (wet(i)) then  ! return updated lake ice thickness & concentration to global array
+              zorl(i)  = cice(i)*zorl_ice(i) + (one-cice(i))*zorl_wat(i)
             endif
+!
             if (wet(i)) then
               tsfco(i) = tsfc_wat(i)
             else
               tsfco(i) = tsfc(i)
             endif
-            tsfcl(i)  = tsfc(i)
+            tsfcl(i) = tsfc(i)
+
             do k=1,kice ! store tiice in stc to reduce output in the nonfrac grid case
               stc(i,k) = tiice(i,k)
-            end do
+            enddo
           endif
 
           zorll(i) = zorl_lnd(i)

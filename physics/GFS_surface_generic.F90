@@ -30,7 +30,7 @@
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
                           lndp_var_list, lndp_prt_list,                                                    &
                           z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf,                                    &
-                          cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
+                          cplflx, flag_cice, islmsk_cice, slimskin_cpl,                                    &
                           wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
         use surface_perturbation,  only: cdfnor
@@ -73,8 +73,6 @@
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
         logical, dimension(im), intent(inout) :: flag_cice
         integer, dimension(im), intent(out) :: islmsk_cice
-        real(kind=kind_phys), dimension(im), intent(in) :: &
-             tisfc, tsfco, fice, hice
 
         real(kind=kind_phys), dimension(im), intent(out) :: wind
         real(kind=kind_phys), dimension(im), intent(in ) :: u1, v1

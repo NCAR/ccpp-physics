@@ -379,42 +379,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[tisfc]
-  standard_name = sea_ice_temperature
-  long_name = sea-ice surface temperature
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[tsfco]
-  standard_name = sea_surface_temperature
-  long_name = sea surface temperature
-  units = K
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[fice]
-  standard_name = sea_ice_concentration
-  long_name = sea-ice concentration [0,1]
-  units = frac
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[hice]
-  standard_name = sea_ice_thickness
-  long_name = sea-ice thickness
-  units = m
-  dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [wind]
   standard_name = wind_speed_at_lowest_model_layer
   long_name = wind speed at lowest model level
