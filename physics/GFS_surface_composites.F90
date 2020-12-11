@@ -602,13 +602,13 @@ contains
             tsfc(i)   = tsfc_ice(i) ! over lake (and ocean when uncoupled)
 !
             if (flag_cice(i)) then
-              if (wet(i) .and. cice(i) > min_seaice) then  ! this was already done for lake ice in sfc_sice
+              if (wet(i) .and. cice(i) >= min_seaice) then  ! this was already done for lake ice in sfc_sice
                 txi = cice(i)
                 txo = one - txi
                 evap(i)   = txi * evap_ice(i)   + txo * evap_wat(i)
                 hflx(i)   = txi * hflx_ice(i)   + txo * hflx_wat(i)
                 tsfc(i)   = txi * tsfc_ice(i)   + txo * tsfc_wat(i)
-                stress(i) = txi  *stress_ice(i) + txo * stress_wat(i)
+                stress(i) = txi * stress_ice(i) + txo * stress_wat(i)
                 qss(i)    = txi * qss_ice(i)    + txo * qss_wat(i)
                 ep1d(i)   = txi * ep1d_ice(i)   + txo * ep1d_wat(i)
                 zorl(i)   = txi * zorl_ice(i)   + txo * zorl_wat(i)
