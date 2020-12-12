@@ -5,12 +5,16 @@
 
           USE module_sf_mynn
 
+          !Global variables:
+          INTEGER, PARAMETER :: psi_opt = 0   !0: MYNN
+                                              !1: GFS
+
       contains
 
-      subroutine mynnsfc_wrapper_init ()
+      subroutine mynnsfc_wrapper_init()
 
           ! initialize tables for psih and psim (stable and unstable)
-          CALL PSI_INIT
+          CALL PSI_INIT(psi_opt)
 
       end subroutine mynnsfc_wrapper_init
 
@@ -100,10 +104,10 @@ SUBROUTINE mynnsfc_wrapper_run(            &
   integer, intent(out) :: errflg
 
 !MISC CONFIGURATION OPTIONS
-      INTEGER, PARAMETER ::                                 &
-     &       spp_pbl  = 0,                                  &
-     &       isftcflx = 0,                                  &
-     &       iz0tlnd  = 0,                                  &
+      INTEGER, PARAMETER ::       &
+     &       spp_pbl  = 0,        &
+     &       isftcflx = 0,        & !control: 0
+     &       iz0tlnd  = 0,        & !control: 0
      &       isfflx   = 1
 
       integer, intent(in) :: ivegsrc
@@ -166,7 +170,7 @@ SUBROUTINE mynnsfc_wrapper_run(            &
      &        lh, wstar
      !LOCAL
       real, dimension(im) ::                                &
-     &        hfx, znt, ts, psim, psih,                     &
+     &        hfx, znt, psim, psih,                         &
      &        chs, ck, cd, mavail, xland, GZ1OZ0,           &
      &        cpm, qgh, qfx
 
@@ -199,14 +203,11 @@ SUBROUTINE mynnsfc_wrapper_run(            &
             xland(i)=2.0
           endif
           qgh(i)=0.0
+          mavail(i)=1.0
           !snowh(i)=snowd(i)*800. !mm -> m
           !znt_lnd(i)=znt_lnd(i)*0.01  !cm -> m
           !znt_ocn(i)=znt_ocn(i)*0.01  !cm -> m
           !znt_ice(i)=znt_ice(i)*0.01  !cm -> m
-          ! DH* do the following line only if wet(i)?
-          ts(i)=tskin_ocn(i)/exner(i,1)  !theta
-          ! *DH
-          mavail(i)=1.0  !????
           cpm(i)=cp
       enddo
 
@@ -251,7 +252,8 @@ SUBROUTINE mynnsfc_wrapper_run(            &
              CP=cp,G=g,ROVCP=rcp,R=r_d,XLV=xlv,                               &
              SVP1=svp1,SVP2=svp2,SVP3=svp3,SVPT0=svpt0,                       &
              EP1=ep_1,EP2=ep_2,KARMAN=karman,                                 &
-             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,iz0tlnd=iz0tlnd,         &
+             ISFFLX=isfflx,isftcflx=isftcflx,LSM=lsm,                         &
+             iz0tlnd=iz0tlnd,psi_opt=psi_opt,                                 &
     &        sigmaf=sigmaf,vegtype=vegtype,shdmax=shdmax,ivegsrc=ivegsrc,     & !intent(in)
     &        z0pert=z0pert,ztpert=ztpert,                                     & !intent(in)
     &        redrag=redrag,sfc_z0_type=sfc_z0_type,                           & !intent(in)
