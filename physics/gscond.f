@@ -43,6 +43,7 @@
 !> @{
         subroutine zhaocarr_gscond_run (im,km,dt,dtf,prsl,ps,q,clw1     &
      &,                  clw2, cwm, t, tp, qp, psp                      &
+     &,                  psat,hvap,grav,hfus,ttp,rd,cp,eps,epsm1,rv     &
      &,                  tp1, qp1, psp1, u, lprnt, ipr, errmsg, errflg)
 
 !
@@ -63,10 +64,6 @@
 !
       use machine , only : kind_phys
       use funcphys , only : fpvs
-      use physcons, psat => con_psat, hvap => con_hvap, grav => con_g
-     &,             hfus => con_hfus, ttp => con_ttp, rd => con_rd
-     &,             cp => con_cp, eps => con_eps, epsm1 => con_epsm1
-     &,             rv => con_rv
 !      use namelist_def, only: nsdfi,fhdfi
       implicit none
 !
@@ -82,6 +79,8 @@
      &,                     tp1(im,km),  qp1(im,km),  psp1(im)
       real(kind=kind_phys), intent(in)    :: u(im,km)
       logical,              intent(in)    :: lprnt
+      real(kind=kind_phys), intent(in)    :: psat, hvap, grav, hfus     &
+     &,                     ttp, rd, cp, eps, epsm1, rv
 !
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
