@@ -29,7 +29,7 @@
                           sigmaf, soiltyp, vegtype, slopetyp, work3, tsurf, zlvl, do_sppt, ca_global,dtdtr,&
                           drain_cpl, dsnow_cpl, rain_cpl, snow_cpl, lndp_type, n_var_lndp, sfc_wts,        &
                           lndp_var_list, lndp_prt_list,                                                    &
-                          z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf,                                    &
+                          z01d, zt1d, bexp1d, xlai1d, vegf1d, lndp_vgf, sfc_wts_inv,                       &
                           cplflx, flag_cice, islmsk_cice, slimskin_cpl, tisfc, tsfco, fice, hice,          &
                           wind, u1, v1, cnvwind, smcwlt2, smcref2, errmsg, errflg)
 
@@ -68,6 +68,7 @@
         real(kind=kind_phys), dimension(im),          intent(out) :: xlai1d
         real(kind=kind_phys), dimension(im),          intent(out) :: vegf1d
         real(kind=kind_phys),                         intent(out) :: lndp_vgf
+        real(kind=kind_phys), dimension(im,n_var_lndp), intent(inout)  :: sfc_wts_inv
 
         logical, intent(in) :: cplflx
         real(kind=kind_phys), dimension(im), intent(in) :: slimskin_cpl
@@ -108,6 +109,9 @@
         ! Turn vegetation fraction pattern into percentile pattern
         lndp_vgf=-999.
 
+        if (lndp_type>0) then
+           sfc_wts_inv(:,:)=sfc_wts(:,:)
+        endif
         if (lndp_type==1) then
         do k =1,n_var_lndp
            select case(lndp_var_list(k))
