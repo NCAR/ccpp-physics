@@ -39,6 +39,8 @@
 SUBROUTINE mynnedmf_wrapper_run(        &
      &  im,levs,                        &
      &  flag_init,flag_restart,         &
+     &  cp, g, r_d, r_v, cpv, cliq,Cice,&
+     &  rcp, XLV, XLF, EP_1, EP_2,      &
      &  lssav, ldiag3d, qdiag3d,        &
      &  lsidea, cplflx,                 &
      &  delt,dtf,dx,zorl,               &
@@ -100,19 +102,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       use machine , only : kind_phys
 !      use funcphys, only : fpvs
 
-      use physcons, only : cp     => con_cp,              &
-     &                     g      => con_g,               &
-     &                     r_d    => con_rd,              &
-     &                     r_v    => con_rv,              &
-     &                     cpv    => con_cvap,            &
-     &                     cliq   => con_cliq,            &
-     &                     Cice   => con_csol,            &
-     &                     rcp    => con_rocp,            &
-     &                     XLV    => con_hvap,            &
-     &                     XLF    => con_hfus,            &
-     &                     EP_1   => con_fvirt,           &
-     &                     EP_2   => con_eps
-
       USE module_bl_mynn, only : mynn_bl_driver
 
 !------------------------------------------------------------------- 
@@ -172,8 +161,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !   REAL    , PARAMETER :: EP_1         = R_v/R_d-1.
 !   REAL    , PARAMETER :: EP_2         = R_d/R_v
 !
+  
+  real(kind=kind_phys), intent(in) :: cp, g, r_d, r_v, cpv, &
+                      & cliq, Cice, rcp, XLV, XLF, EP_1, EP_2
 
-  REAL, PARAMETER :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
+  REAL :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
        &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2
 
   REAL, PARAMETER :: tref=300.0     !< reference temperature (K)
