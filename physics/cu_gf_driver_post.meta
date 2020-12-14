@@ -19,7 +19,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -28,7 +28,7 @@
   standard_name = water_vapor_specific_humidity_updated_by_physics
   long_name = water vapor specific humidity updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -37,7 +37,7 @@
   standard_name = temperature_from_previous_timestep
   long_name = temperature from previous time step
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -46,7 +46,7 @@
   standard_name = moisture_from_previous_timestep
   long_name = moisture from previous time step
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -55,7 +55,7 @@
   standard_name = conv_activity_counter
   long_name = convective activity memory
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = in
   optional = F
@@ -63,7 +63,7 @@
   standard_name = gf_memory_counter
   long_name = Memory counter for GF
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out

@@ -1,5 +1,4 @@
 module GFS_rrtmgp_sw_pre
-  use physparam
   use machine, only: &
        kind_phys                   ! Working type
   use module_radiation_astronomy,only: &
@@ -28,11 +27,11 @@ contains
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
   subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
-       lndp_prt_list, lsswr, solhr,                                                         &
+       lndp_prt_list, doSWrad, solhr,                                                       &
        lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl, tsfc, hprime, alvsf,              &
        alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, lsmask, sfc_wts, p_lay, tv_lay,      &
        relhum, p_lev, sw_gas_props,                                                         &
-       nday, idxday, alb1d, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,               &
+       nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,                      &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, errmsg, errflg)
     
     ! Inputs   
@@ -47,7 +46,7 @@ contains
     real(kind_phys), dimension(n_var_lndp), intent(in) ::   &
          lndp_prt_list
     logical,intent(in) :: &
-         lsswr             ! Call RRTMGP SW radiation?
+         doSWrad            ! Call RRTMGP SW radiation?
     real(kind_phys), intent(in) :: &
          solhr                 ! Time in hours after 00z at the current timestep
     real(kind_phys), dimension(nCol), intent(in) :: &
@@ -86,7 +85,6 @@ contains
     integer, dimension(ncol), intent(out) :: &
          idxday               ! Indices for daylit points
     real(kind_phys), dimension(ncol), intent(out) :: &
-         alb1d,             & ! Surface albedo pertubation
          coszen,            & ! Cosine of SZA
          coszdg,            & ! Cosine of SZA, daytime
          sfc_alb_dif          ! Mean surface diffused (nIR+uvvis) sw albedo
@@ -103,65 +101,62 @@ contains
     ! Local variables
     integer :: i, j, iCol, iBand, iLay
     real(kind_phys), dimension(ncol, NF_ALBD) :: sfcalb
+    real(kind_phys), dimension(ncol) :: alb1d
     real(kind_phys) :: lndp_alb
 
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
-    
-    if (.not. lsswr) return
-    
-    ! #######################################################################################
-    ! Compute cosine of zenith angle (only when SW is called)
-    ! #######################################################################################
-    call coszmn (lon, sinlat, coslat, solhr, nCol, me, coszen, coszdg)
 
-    ! #######################################################################################
-    ! For SW gather daylit points
-    ! #######################################################################################
-    nday   = 0
-    idxday = 0
-    do i = 1, NCOL
-       if (coszen(i) >= 0.0001) then
-          nday = nday + 1
-          idxday(nday) = i
-       endif
-    enddo
+    if (doSWrad) then
 
-    ! #######################################################################################
-    ! mg, sfc-perts
-    !  ---  scale random patterns for surface perturbations with perturbation size
-    !  ---  turn vegetation fraction pattern into percentile pattern
-    ! #######################################################################################
-    alb1d(:) = 0.
-    lndp_alb = -999.
-    if (lndp_type ==1) then
-      do k =1,n_var_lndp
-       if (lndp_var_list(k) == 'alb') then
-          do i=1,ncol
-            call cdfnor(sfc_wts(i,k),alb1d(i))
-            lndp_alb = lndp_prt_list(k)
-          enddo
-        endif
-      enddo
-    endif
-    
-    ! #######################################################################################
-    ! Call module_radiation_surface::setalb() to setup surface albedo.
-    ! #######################################################################################
-    call setalb (lsmask, snowd, sncovr, snoalb, zorl, coszen, tsfc, tsfc, hprime, alvsf,    &
-         alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, NCOL, alb1d, pertalb, sfcalb)
+       ! ####################################################################################
+       ! Compute cosine of zenith angle (only when SW is called)
+       ! ####################################################################################
+       call coszmn (lon, sinlat, coslat, solhr, nCol, me, coszen, coszdg)
+
+       ! ####################################################################################
+       ! For SW gather daylit points
+       ! ####################################################################################
+       nday   = 0
+       idxday = 0
+       do i = 1, NCOL
+          if (coszen(i) >= 0.0001) then
+             nday = nday + 1
+             idxday(nday) = i
+          endif
+       enddo
        
-    ! Approximate mean surface albedo from vis- and nir-  diffuse values.
-    sfc_alb_dif(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
+       ! ####################################################################################
+       ! Call module_radiation_surface::setalb() to setup surface albedo.
+       ! ####################################################################################
+       alb1d(:) = 0.
+       lndp_alb = -999.
+       call setalb (lsmask, snowd, sncovr, snoalb, zorl, coszen, tsfc, tsfc, hprime, alvsf, &
+            alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, NCOL, alb1d, lndp_alb, sfcalb)
+       
+       ! Approximate mean surface albedo from vis- and nir-  diffuse values.
+       sfc_alb_dif(:) = max(0.01, 0.5 * (sfcalb(:,2) + sfcalb(:,4)))
   
-    ! Spread across all SW bands
-    do iBand=1,sw_gas_props%get_nband()
-       sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
-       sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
-       sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
-       sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
-    enddo 
+       ! Spread across all SW bands
+       do iBand=1,sw_gas_props%get_nband()
+          sfc_alb_nir_dir(iBand,1:NCOL)   = sfcalb(1:NCOL,1)
+          sfc_alb_nir_dif(iBand,1:NCOL)   = sfcalb(1:NCOL,2)
+          sfc_alb_uvvis_dir(iBand,1:NCOL) = sfcalb(1:NCOL,3)
+          sfc_alb_uvvis_dif(iBand,1:NCOL) = sfcalb(1:NCOL,4)
+       enddo
+    else
+       nday                        = 0
+       idxday                      = 0
+       coszen(1:nCol)              = 0.
+       coszdg(1:nCol)              = 0.
+       sfc_alb_nir_dir(:,1:nCol)   = 0.
+       sfc_alb_nir_dif(:,1:nCol)   = 0.
+       sfc_alb_uvvis_dir(:,1:nCol) = 0.
+       sfc_alb_uvvis_dif(:,1:nCol) = 0.
+       sfc_alb_dif(1:nCol)         = 0.
+    endif
+
 
   end subroutine GFS_rrtmgp_sw_pre_run
   

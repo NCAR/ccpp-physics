@@ -134,7 +134,7 @@
   standard_name = latitude
   long_name = latitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -143,7 +143,7 @@
   standard_name = longitude
   long_name = longitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys  
   intent = in
@@ -152,7 +152,7 @@
   standard_name = air_pressure_at_interface
   long_name = air pressure at model layer interfaces
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys  
   intent = in
@@ -161,7 +161,7 @@
   standard_name = dimensionless_exner_function_at_model_layers
   long_name = dimensionless Exner function at model layer centers
   units = none
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys    
   intent = in
@@ -170,7 +170,7 @@
   standard_name = air_pressure
   long_name = mean layer pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -179,7 +179,7 @@
   standard_name = air_temperature
   long_name = model layer mean temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -188,7 +188,7 @@
   standard_name = tracer_concentration
   long_name = model layer mean tracer concentration
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys  
   intent = in
@@ -197,7 +197,7 @@
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -260,7 +260,7 @@
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -269,7 +269,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = out
@@ -278,7 +278,7 @@
   standard_name = air_temperature_at_layer_for_RRTMGP
   long_name = air temperature at vertical layer for radiation calculation
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -287,7 +287,7 @@
   standard_name = air_temperature_at_interface_for_RRTMGP
   long_name = air temperature  at vertical interface for radiation calculation
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = out
@@ -296,7 +296,7 @@
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -305,7 +305,7 @@
   standard_name = surface_air_temperature_for_radiation
   long_name = lowest model layer air temperature for radiation
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -314,7 +314,7 @@
   standard_name = virtual_temperature
   long_name = layer virtual temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -323,7 +323,7 @@
   standard_name = relative_humidity
   long_name = layer relative humidity
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = out
@@ -332,7 +332,7 @@
   standard_name = chemical_tracers
   long_name = chemical tracers
   units = g g-1
-  dimensions = (horizontal_dimension,vertical_dimension,number_of_tracers)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = out

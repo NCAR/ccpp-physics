@@ -65,7 +65,7 @@
   kind = len=3
   intent = in
   optional = F
-[lsswr]
+[doSWrad]
   standard_name = flag_to_calc_sw
   long_name = logical flags for sw radiation calls
   units = flag
@@ -86,7 +86,7 @@
   standard_name = longitude
   long_name = longitude
   units = radian
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -95,7 +95,7 @@
   standard_name = cosine_of_latitude
   long_name = cosine of latitude
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -104,7 +104,7 @@
   standard_name = sine_of_latitude
   long_name = sine of latitude
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -113,7 +113,7 @@
   standard_name = sea_land_ice_mask_real
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -122,7 +122,7 @@
   standard_name = surface_snow_thickness_water_equivalent
   long_name = water equivalent snow depth
   units = mm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -131,7 +131,7 @@
   standard_name = surface_snow_area_fraction_over_land
   long_name = surface snow area fraction
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -140,7 +140,7 @@
   standard_name = upper_bound_on_max_albedo_over_deep_snow
   long_name = maximum snow albedo
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -149,7 +149,7 @@
   standard_name = surface_roughness_length
   long_name = surface roughness length
   units = cm
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -158,7 +158,7 @@
   standard_name = surface_skin_temperature
   long_name = surface skin temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -167,7 +167,7 @@
   standard_name = standard_deviation_of_subgrid_orography
   long_name = standard deviation of subgrid orography
   units = m
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -176,7 +176,7 @@
   standard_name = mean_vis_albedo_with_strong_cosz_dependency
   long_name = mean vis albedo with strong cosz dependency
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -185,7 +185,7 @@
   standard_name = mean_nir_albedo_with_strong_cosz_dependency
   long_name = mean nir albedo with strong cosz dependency
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -194,7 +194,7 @@
   standard_name = mean_vis_albedo_with_weak_cosz_dependency
   long_name = mean vis albedo with weak cosz dependency
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -203,7 +203,7 @@
   standard_name = mean_nir_albedo_with_weak_cosz_dependency
   long_name = mean nir albedo with weak cosz dependency
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -212,7 +212,7 @@
   standard_name =fractional_coverage_with_strong_cosz_dependency
   long_name = fractional coverage with strong cosz dependency
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -221,7 +221,7 @@
   standard_name = fractional_coverage_with_weak_cosz_dependency
   long_name = fractional coverage with weak cosz dependency
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -230,7 +230,7 @@
   standard_name = sea_ice_concentration
   long_name = ice fraction over open water
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -239,7 +239,7 @@
   standard_name = sea_ice_temperature
   long_name = sea ice surface skin temperature
   units = K
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = in
@@ -248,7 +248,7 @@
   standard_name = weights_for_stochastic_surface_physics_perturbation
   long_name = weights for stochastic surface physics perturbation
   units = none
-  dimensions = (horizontal_dimension,number_of_surface_perturbations)
+  dimensions = (horizontal_loop_extent,number_of_surface_perturbations)
   type = real
   kind = kind_phys
   intent = in
@@ -257,7 +257,7 @@
   standard_name = virtual_temperature
   long_name = layer virtual temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -266,7 +266,7 @@
   standard_name = relative_humidity
   long_name = layer relative humidity
   units = frac
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -275,7 +275,7 @@
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
   long_name = air pressure at vertical layer for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -284,7 +284,7 @@
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
   long_name = air pressure at vertical interface for radiation calculation
   units = hPa
-  dimensions = (horizontal_dimension,vertical_dimension_plus_one)
+  dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
   intent = in
@@ -297,20 +297,11 @@
   type = ty_gas_optics_rrtmgp
   intent = in
   optional = F
-[alb1d]
-  standard_name = surface_albedo_perturbation
-  long_name = surface albedo perturbation
-  units = frac
-  dimensions = (horizontal_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [sfc_alb_nir_dir]
   standard_name = surface_albedo_nearIR_direct
   long_name = near-IR (direct) surface albedo (sfc_alb_nir_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -319,7 +310,7 @@
   standard_name = surface_albedo_nearIR_diffuse
   long_name = near-IR (diffuse) surface albedo (sfc_alb_nir_dif) 
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -328,7 +319,7 @@
   standard_name =  surface_albedo_uvvis_dir
   long_name = UVVIS (direct) surface albedo (sfc_alb_uvvis_dir)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -337,7 +328,7 @@
   standard_name =  surface_albedo_uvvis_dif
   long_name = UVVIS (diffuse) surface albedo (sfc_alb_uvvis_dif)
   units = none
-  dimensions = (number_of_sw_bands_rrtmgp,horizontal_dimension)
+  dimensions = (number_of_sw_bands_rrtmgp,horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -354,7 +345,7 @@
   standard_name = daytime_points
   long_name = daytime points
   units = index
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = integer
   intent = out
   optional = F
@@ -362,7 +353,7 @@
   standard_name = cosine_of_zenith_angle
   long_name = mean cos of zenith angle over rad call period
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -371,7 +362,7 @@
   standard_name = daytime_mean_cosz_over_rad_call_period
   long_name = daytime mean cosz over rad call period
   units = none
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = out
@@ -380,7 +371,7 @@
   standard_name = surface_diffused_shortwave_albedo
   long_name = mean surface diffused sw albedo
   units = frac
-  dimensions = (horizontal_dimension)
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys  
   intent = out

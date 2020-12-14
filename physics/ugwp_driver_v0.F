@@ -1,4 +1,4 @@
-!!23456	
+!
        module sso_coorde
 !
 ! specific to COORDE-2019 project OGW switches/sensitivity
@@ -31,7 +31,8 @@
 !         (similar to WAM-2017)
 !----------------------------------------------------------- 
        use machine,          only : kind_phys
-       use physcons,         only : con_cp, con_g, con_rd, con_rv
+       use physcons,         only : con_cp, con_g, con_rd, con_rv, &
+                                    con_omega
 
        use ugwp_wmsdis_init, only : tamp_mpa, ilaunch
        use sso_coorde,       only : pgwd, pgwd4, debugprint
@@ -121,6 +122,7 @@
      &                 SIGMA, GAMM,   ELVMAX,
      &                 DUSFCg, DVSFCg, xlatd, sinlat, coslat, spgrid,
      &                 cdmbgwd(1:2), me, master, rdxzb,
+     &                 con_g, con_omega,
      &                 zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,
      &                 du3dt_mtb, du3dt_ogw, du3dt_tms)
 !
@@ -287,7 +289,7 @@
      &    PRSI,DEL,PRSL,PRSLK,PHII, PHIL,DTP,KDT,
      &    sgh30, HPRIME,OC,OA4,CLX4,THETA,vSIGMA,vGAMMA,ELVMAXD,
      &    DUSFC, DVSFC,  xlatd, sinlat, coslat, sparea,
-     $    cdmbgwd, me, master, rdxzb,
+     &    cdmbgwd, me, master, rdxzb, con_g, con_omega,
      &    zmtb, zogw, tau_mtb, tau_ogw, tau_tofd,
      &    dudt_mtb, dudt_ogw, dudt_tms)
 !----------------------------------------
@@ -341,6 +343,8 @@
       real(kind=kind_phys), intent(in) :: ELVMAXD(IM), THETA(IM)
       real(kind=kind_phys), intent(in) :: vSIGMA(IM),  vGAMMA(IM)
       real(kind=kind_phys)             :: SIGMA(IM),   GAMMA(IM)
+
+      real(kind=kind_phys), intent(in) :: con_g, con_omega
       
 !output -phys-tend
       real(kind=kind_phys),dimension(im,km),intent(out) ::
@@ -1066,6 +1070,7 @@
        
         call oro_wam_2017(im, km, npt, ipt, kref, kdt, me, master,
      &       dtp, dxres, taub, u1, v1, t1, xn, yn, bnv2, ro, prsi,prsL,
+     &       con_g, con_omega,
      &       del, sigma, hprime, gamma, theta,
      &       sinlat, xlatd, taup, taud, pkdis)
      

@@ -74,7 +74,7 @@
   standard_name = ozone_concentration_updated_by_physics
   long_name = ozone concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -83,7 +83,7 @@
   standard_name = air_temperature_updated_by_physics
   long_name = updated air temperature
   units = K
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -101,7 +101,7 @@
   standard_name = air_pressure
   long_name = mid-layer pressure
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -110,7 +110,7 @@
   standard_name = ozone_forcing
   long_name = ozone forcing data
   units = various
-  dimensions = (horizontal_dimension,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
+  dimensions = (horizontal_loop_extent,vertical_dimension_of_ozone_forcing_data,number_of_coefficients_in_ozone_forcing_data)
   type = real
   kind = kind_phys
   intent = in
@@ -127,7 +127,7 @@
   standard_name = air_pressure_difference_between_midlayers
   long_name = difference between mid-layer pressures
   units = Pa
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = in
@@ -152,7 +152,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_production_and_loss_rate
   long_name = cumulative change in ozone concentration due to production and loss rate
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -161,7 +161,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_ozone_mixing_ratio
   long_name = cumulative change in ozone concentration due to ozone mixing ratio
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -170,7 +170,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_temperature
   long_name = cumulative change in ozone concentration due to temperature
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -179,7 +179,7 @@
   standard_name = cumulative_change_in_ozone_concentration_due_to_overhead_ozone_column
   long_name = cumulative change in ozone concentration due to overhead ozone column
   units = kg kg-1
-  dimensions = (horizontal_dimension,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
