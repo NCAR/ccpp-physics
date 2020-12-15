@@ -403,7 +403,6 @@
 !
 !  coefficients of blending forecast and interpolated clim
 !  (or analyzed) fields over sea or land(l) (not for clouds)
-!tgs -- important
 !  1.0 = use of forecast
 !  0.0 = replace with interpolated analysis
 !
@@ -415,8 +414,8 @@
 !   surface temperature        forecast             forecast (over sea ice)
 !   albedo                     forecast/analysis    analysis
 !   sea-ice                    analysis             analysis
-!   snow                       forecast/analysis             forecast (over sea ice)
-!   roughness                  forecast/analysis             forecast
+!   snow                       forecast/analysis    forecast (over sea ice)
+!   roughness                  forecast/analysis    forecast
 !   plant resistance           analysis             analysis
 !   soil wetness (layer)       weighted average     analysis
 !   soil temperature           forecast             analysis
@@ -2173,10 +2172,12 @@
         call monitr('snoanl',snoanl,slianl,snoanl,len)
         do k=1,lsoil
           call monitr(message('smcanl',k),smcanl(1,k),slianl,snoanl,len)
-          call monitr('stcanl',stcanl(1,k),slianl,snoanl,len)
+          call monitr(message('stcanl',k),stcanl(1,k),slianl,snoanl,len)
         enddo
-        call monitr('tg3anl',tg3anl,slianl,snoanl,len)
-        call monitr('zoranl',zoranl,slianl,snoanl,len)
+        if (lsoil > 2) then
+          call monitr('tg3anl',tg3anl,slianl,snoanl,len)
+          call monitr('zoranl',zoranl,slianl,snoanl,len)
+        endif
 !       if (gaus) then
           call monitr('cvaanl',cvanl ,slianl,snoanl,len)
           call monitr('cvbanl',cvbanl,slianl,snoanl,len)
@@ -2252,7 +2253,7 @@
         call monitr('snodif',snofcs,slianl,snoanl,len)
         do k=1,lsoil
           call monitr(message('smcanl',k),smcfcs(1,k),slianl,snoanl,len)
-          call monitr('stcanl(k)',stcfcs(1,k),slianl,snoanl,len)
+          call monitr(message('stcanl',k),stcfcs(1,k),slianl,snoanl,len)
         enddo
         call monitr('tg3dif',tg3fcs,slianl,snoanl,len)
         call monitr('zordif',zorfcs,slianl,snoanl,len)
