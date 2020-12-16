@@ -407,7 +407,7 @@
   kind = kind_phys
   intent = in
   optional = F 
-[t0c]
+[tice]
   standard_name = temperature_at_zero_celsius
   long_name = temperature at 0 degree Celsius
   units = K

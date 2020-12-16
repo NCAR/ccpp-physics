@@ -110,7 +110,7 @@ end subroutine m_micro_init
       subroutine m_micro_run(   im,       lm,     flipv, dt_i           &
      &,                         grav,     pi,     rgas,  cp             &
      &,                         hvap,     hfus,   ttp,   tice           &
-     &,                         eps,      epsm1, VIREPS,latvap,         &
+     &,                         eps,      epsm1, VIREPS                 &
      &,                         prsl_i,   prsi_i, phil,   phii          &
      &,                         omega_i,  QLLS_i, QLCN_i, QILS_i, QICN_i&
      &,                         lwheat_i, swheat_i, w_upi, cf_upi       &
@@ -161,16 +161,14 @@ end subroutine m_micro_init
 !      real,   parameter  :: r_air = 3.47d-3
        integer, parameter :: kp = kind_phys
        real(kind=kind_phys), intent(in   ) :: rainmin, grav, pi, rgas, cp,   &
-    &                        hvap, hfus, ttp, tice, eps, epsm1, VIREPS,      &
-    &                        latvap
-       real,   parameter  :: one=1.0_kp, oneb3=one/3.0_kp, onebcp=one/cp,    &
-                             zero=0.0_kp, half=0.5_kp, onebg=one/grav,       &
-     &                       kapa=rgas*onebcp,  cpbg=cp/grav,                &
-     &                       lvbcp=hvap*onebcp, lsbcp=(hvap+hfus)*onebcp,    &
+    &                        hvap, hfus, ttp, tice, eps, epsm1, VIREPS
+    
+       real,   parameter  :: one=1.0_kp, oneb3=one/3.0_kp,                   &
+                             zero=0.0_kp, half=0.5_kp,                       &
      &                       qsmall=1.0e-14_kp,                              &
      &                       fourb3=4.0_kp/3.0_kp, RL_cub=1.0e-15_kp,        &
      &                       nmin=1.0_kp
-
+       real(kind=kind_phys) ::  onebcp, onebg, kapa, cpbg, lvbcp, lsbcp
        integer, parameter :: ncolmicro = 1
        integer,intent(in) :: im, lm, kdt, fprcp, pdfflag, iccn
        logical,intent(in) :: flipv, skip_macro
@@ -403,6 +401,14 @@ end subroutine m_micro_init
        ipr   = 1
 
 !      rhr8 = 1.0
+       
+       onebcp=one/cp
+       onebg=one/grav
+       kapa=rgas*onebcp
+       cpbg=cp/grav
+       lvbcp=hvap*onebcp
+       lsbcp=(hvap+hfus)*onebcp
+
        if(flipv) then
          DO K=1, LM
            ll = lm-k+1
