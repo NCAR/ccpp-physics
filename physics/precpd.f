@@ -97,7 +97,7 @@
 ! Interface variables
       integer, intent(in) :: im, km, jpr
       real (kind=kind_phys), intent(in) :: grav, hvap, hfus, ttp, cp,   &
-                                           eps, epsm1
+     &                                      eps, epsm1
       real (kind=kind_phys), intent(in) :: dt
       real (kind=kind_phys), intent(in) :: del(im,km), prsl(im,km)
       real (kind=kind_phys), intent(inout) :: q(im,km), t(im,km),       &
@@ -116,14 +116,13 @@
      &,                     elwv,   eliv,  row
      &,                     epsq,   eliw
      &,                     rcp,    rrow
-      real(kind=kind_phys) (g=grav,         h1=1.e0,     h1000=1000.0
-     &,           d00=0.e0
-     &,           elwv=hvap,      eliv=hvap+hfus,   row=1.e3
-     &,           epsq=2.e-12
-     &,           eliw=eliv-elwv, rcp=h1/cp,   rrow=h1/row)
-!
-      real(kind=kind_phys), parameter :: cons_0=0.0,     cons_p01=0.01
-     &,                                  cons_20=20.0
+      parameter (                h1=1.e0,     h1000=1000.0              &
+     &,           d00=0.e0,      row=1.e3                               &
+     &,           epsq=2.e-12)
+!     
+
+      real(kind=kind_phys), parameter :: cons_0=0.0,     cons_p01=0.01  &  
+     &,                                  cons_20=20.0                   &
      &,                                  cons_m30=-30.0, cons_50=50.0
 !
       real (kind=kind_phys) rnp(im),    psautco_l(im), prautco_l(im)    &
@@ -172,6 +171,12 @@
 !       enddo
 !     enddo
 !
+      g=grav
+      elwv=hvap
+      eliv=hvap+hfus
+      eliw=eliv-elwv
+      rcp=h1/cp
+      rrow=h1/row
       rdt     = h1 / dt
 !     ke      = 2.0e-5  ! commented on 09/10/99  -- opr value
 !     ke      = 2.0e-6

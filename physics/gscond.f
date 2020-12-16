@@ -90,10 +90,10 @@
      &,                     d00,  elwv, eliv
      &,                     epsq
      &,                     r,     cpr,  rcp
-      parameter (h1=1.e0,       d00=0.e0
-     &,          elwv=hvap,     eliv=hvap+hfus
-     &,          epsq=2.e-12,   r=rd
-     &,          cpr=cp*r,      rcp=h1/cp)
+      
+      parameter (h1=1.e0,       d00=0.e0                                &           
+     &,          epsq=2.e-12)                               
+                                   
 !
       real(kind=kind_phys), parameter :: cons_0=0.0, cons_m15=-15.0
 !
@@ -121,6 +121,12 @@
        enddo
 !-----------------prepare constants for later uses-----------------
 !
+      elwv=hvap
+      eliv=hvap+hfus
+      r=rd
+      cpr=cp*r
+      rcp=h1/cp
+      
       el2orc = hvap*hvap / (rv*cp)
       albycp = hvap / cp
 !     write(0,*)' in gscond im=',im
