@@ -262,7 +262,7 @@
   dimensions = ()
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [p_lay]
   standard_name = air_pressure_at_layer_for_RRTMGP_in_hPa
@@ -271,7 +271,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [p_lev]
   standard_name = air_pressure_at_interface_for_RRTMGP_in_hPa
@@ -280,7 +280,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [t_lay]
   standard_name = air_temperature_at_layer_for_RRTMGP
@@ -289,7 +289,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [t_lev]
   standard_name = air_temperature_at_interface_for_RRTMGP
@@ -298,7 +298,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [tsfg]
   standard_name = surface_ground_temperature_for_radiation
@@ -307,7 +307,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [tsfa]
   standard_name = surface_air_temperature_for_radiation
@@ -316,7 +316,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [tv_lay]
   standard_name = virtual_temperature
@@ -325,7 +325,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [relhum]
   standard_name = relative_humidity
@@ -334,7 +334,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [qs_lay]
   standard_name = saturation_vapor_pressure
@@ -343,7 +343,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [q_lay]
   standard_name = water_vapor_mixing_ratio
@@ -352,7 +352,7 @@
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F 
 [tracer]
   standard_name = chemical_tracers
@@ -361,7 +361,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [gas_concentrations]
   standard_name = Gas_concentrations_for_RRTMGP_suite
@@ -369,7 +369,7 @@
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = out
+  intent = inout
   optional = F
 [errmsg]
   standard_name = ccpp_error_message

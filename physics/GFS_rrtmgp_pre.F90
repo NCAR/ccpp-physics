@@ -189,24 +189,24 @@ contains
          errmsg               ! Error message
     integer, intent(out) :: &  
          errflg               ! Error flag    
-    real(kind_phys), intent(out) :: &
+    real(kind_phys), intent(inout) :: &
          raddt                ! Radiation time-step
-    real(kind_phys), dimension(ncol), intent(out) :: &
+    real(kind_phys), dimension(ncol), intent(inout) :: &
          tsfg,              & ! Ground temperature
          tsfa                 ! Skin temperature    
-    real(kind_phys), dimension(nCol,nLev), intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev), intent(inout) :: &
          p_lay,             & ! Pressure at model-layer
          t_lay,             & ! Temperature at model layer
          q_lay,             & ! Water-vapor mixing ratio (kg/kg)
          tv_lay,            & ! Virtual temperature at model-layers 
          relhum,            & ! Relative-humidity at model-layers   
-	     qs_lay               ! Saturation vapor pressure at model-layers
-    real(kind_phys), dimension(nCol,nLev+1), intent(out) :: &
+         qs_lay               ! Saturation vapor pressure at model-layers
+    real(kind_phys), dimension(nCol,nLev+1), intent(inout) :: &
          p_lev,             & ! Pressure at model-interface
          t_lev                ! Temperature at model-interface
-    real(kind_phys), dimension(nCol, nLev, nTracers),intent(out) :: &
+    real(kind_phys), dimension(nCol, nLev, nTracers),intent(inout) :: &
          tracer               ! Array containing trace gases
-    type(ty_gas_concs),intent(out) :: &
+    type(ty_gas_concs),intent(inout) :: &
          gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
          
     ! Local variables

@@ -322,7 +322,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [lw_optical_props_cloudsByBand]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band

@@ -78,11 +78,11 @@ contains
     real(kind_phys), dimension(nCol,nLev) :: deltaZ
     logical :: top_at_1
 
-    if (.not. (doSWrad .or. doLWrad)) return
-    
     ! Initialize CCPP error handling variables
     errmsg = ''
     errflg = 0
+
+    if (.not. (doSWrad .or. doLWrad)) return
 
     ! What is vertical ordering?                                                                                                                                                              
     top_at_1 = (p_lev(1,1) .lt.  p_lev(1, nLev))

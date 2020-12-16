@@ -95,17 +95,16 @@ contains
          cld_reliq,         & ! Cloud liquid effective radius
          cld_iwp,           & ! Cloud ice water path
          cld_reice,         & ! Cloud ice effecive radius
+         cld_swp,           & ! Cloud snow water path
+         cld_resnow,        & ! Cloud snow effective radius
+         cld_rwp,           & ! Cloud rain water path 
+         cld_rerain,        & ! Cloud rain effective radius
+         precip_frac,       & ! Precipitation fraction
          effrin_cldliq,     & ! Effective radius for liquid cloud-particles (microns)
          effrin_cldice,     & ! Effective radius for ice cloud-particles (microns)
          effrin_cldsnow       ! Effective radius for snow cloud-particles (microns)	         
     
     ! Outputs     
-    real(kind_phys), dimension(nCol,nLev),intent(out) :: &
-         cld_swp,           & ! Cloud snow water path
-         cld_resnow,        & ! Cloud snow effective radius
-         cld_rwp,           & ! Cloud rain water path
-         cld_rerain,        & ! Cloud rain effective radius       
-         precip_frac          ! Precipitation fraction         
     character(len=*), intent(out) :: &
          errmsg               ! Error message
     integer, intent(out) :: &  

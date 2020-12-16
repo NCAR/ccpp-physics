@@ -323,7 +323,7 @@ contains
     type(ty_optical_props_2str),intent(inout) :: &
          lw_optical_props_cloudsByBand,   & ! RRTMGP DDT: Longwave optical properties in each band (clouds)
          lw_optical_props_precipByBand      ! RRTMGP DDT: Longwave optical properties in each band (precipitation)
-    real(kind_phys), dimension(ncol,nLev), intent(out) :: &
+    real(kind_phys), dimension(ncol,nLev), intent(inout) :: &
          cldtaulw                           ! Approx 10.mu band layer cloud optical depth  
          
     ! Local variables
