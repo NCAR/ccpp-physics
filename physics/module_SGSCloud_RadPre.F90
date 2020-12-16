@@ -63,7 +63,7 @@
 !------------------------------------------------------------------- 
       ! Interface variables
       real(kind=kind_phys), intent(in) :: con_g, con_pi, eps, epsm1 
-      real (kind=kind_phys)         :: gfac=1.0e5/con_g
+      real (kind=kind_phys)         :: gfac
       integer,          intent(in)  :: im, levs, imfdeepcnv, imfdeepcnv_gf, &
            &               nlay, imp_physics, imp_physics_gfdl
       logical,          intent(in)  :: flag_init, flag_restart, do_mynnedmf
@@ -108,7 +108,7 @@
 
       !write(0,*)"=============================================="
       !write(0,*)"in SGSCLoud_RadPre"
-
+      gfac=1.0e5/con_g
       if (flag_init .and. (.not. flag_restart)) then
         !write (0,*) 'Skip this flag_init = ', flag_init
         ! return
