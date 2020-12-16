@@ -165,12 +165,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
   real(kind=kind_phys), intent(in) :: cp, g, r_d, r_v, cpv, &
                       & cliq, Cice, rcp, XLV, XLF, EP_1, EP_2
 
-  REAL :: xlvcp=xlv/cp, xlscp=(xlv+xlf)/cp, ev=xlv, rd=r_d, &
-       &rk=cp/rd, svp11=svp1*1.e3, p608=ep_1, ep_3=1.-ep_2
+  real(kind=kind_phys) :: xlvcp, xlscp, ev, rd,             &
+       &     rk, svp11, p608, ep_3,tv0, tv1, gtr,g_inv
 
   REAL, PARAMETER :: tref=300.0     !< reference temperature (K)
   REAL, PARAMETER :: TKmin=253.0    !< for total water conversion, Tripoli and Cotton (1981)
-  REAL, PARAMETER :: tv0=p608*tref, tv1=(1.+p608)*tref, gtr=g/tref, g_inv=1./g
 
   REAL, PARAMETER :: zero=0.0d0, one=1.0d0
   REAL, PARAMETER :: huge=9.9692099683868690E36 ! NetCDF float FillValue, same as in GFS_typedefs.F90
@@ -322,7 +321,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          write(0,*)"flag_init=",flag_init
          write(0,*)"flag_restart=",flag_restart
       endif
-
+      
       ! DH* TODO: Use flag_restart to distinguish which fields need
       ! to be initialized and which are read from restart files
       if (flag_init) then
@@ -332,6 +331,19 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          initflag=0
          !print*,"in MYNN, initflag=",initflag
       endif
+      
+      xlvcp=xlv/cp
+      xlscp=(xlv+xlf)/cp
+      ev=xlv
+      rd=r_d
+      rk=cp/rd
+      svp11=svp1*1.e3
+      p608=ep_1
+      ep_3=1.-ep_2
+      tv0=p608*tref
+      tv1=(1.+p608)*tref
+      gtr=g/tref
+      g_inv=1./g
 
   ! Assign variables for each microphysics scheme
         if (imp_physics == imp_physics_wsm6) then
