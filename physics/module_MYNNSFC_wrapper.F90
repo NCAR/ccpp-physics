@@ -11,10 +11,29 @@
 
       contains
 
-      subroutine mynnsfc_wrapper_init()
+!! \section arg_table_mynnsfc_wrapper_init Argument Table
+!! \htmlinclude mynnsfc_wrapper_init.html
 
-          ! initialize tables for psih and psim (stable and unstable)
-          CALL PSI_INIT(psi_opt)
+!!
+      subroutine mynnsfc_wrapper_init(errmsg, errflg)
+
+         character(len=*), intent(out) :: errmsg
+         integer, intent(out) :: errflg
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         ! initialize tables for psih and psim (stable and unstable)
+         CALL PSI_INIT(psi_opt,errmsg,errflg)
+
+         IF (debug_code >= 1) THEN
+           print*,"CHECK INITIALIZATION OF PSI:"
+           print*,"psim_stab(0-1):",psim_stab(0),psim_stab(1)
+           print*,"psih_stab(0-1):",psih_stab(0),psih_stab(1)
+           print*,"psim_unstab(0-1):",psim_unstab(0),psim_unstab(1)
+           print*,"psih_unstab(0-1):",psih_unstab(0),psih_unstab(1)
+         ENDIF
 
       end subroutine mynnsfc_wrapper_init
 
