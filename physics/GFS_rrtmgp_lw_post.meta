@@ -196,7 +196,16 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out  
+  intent = inout  
+  optional = F
+[sfculw]
+  standard_name = surface_upwelling_longwave_flux_on_radiation_time_step
+  long_name = total sky sfc upward lw flux
+  units = W m-2
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
   optional = F
 [sfcflw]
   standard_name = lw_fluxes_sfc
@@ -204,7 +213,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent)
   type = sfcflw_type
-  intent = out  
+  intent = inout  
   optional = F
 [tsflw]
   standard_name = surface_midlayer_air_temperature_in_longwave_radiation
@@ -213,7 +222,7 @@
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = out  
+  intent = inout  
   optional = F  
 [htrlw]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_on_radiation_time_step
@@ -222,7 +231,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out  
+  intent = inout  
   optional = F
 [topflw]
   standard_name = lw_fluxes_top_atmosphere
@@ -238,7 +247,7 @@
   units = W m-2
   dimensions = (horizontal_loop_extent,vertical_dimension_plus_one)
   type = proflw_type
-  intent = out
+  intent = inout
   optional = T
 [htrlwc]
   standard_name = tendency_of_air_temperature_due_to_longwave_heating_assuming_clear_sky_on_radiation_time_step
@@ -247,7 +256,7 @@
   dimensions = (horizontal_loop_extent,adjusted_vertical_layer_dimension_for_radiation)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = T
 [errmsg]
   standard_name = ccpp_error_message
