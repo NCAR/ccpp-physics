@@ -1260,7 +1260,7 @@ IF ( (do_gsl_drag_ls_bl) .and.                                       &
             eng1 = 0.5*( (rcs*(u1(i,k)+(dtaux+dtauxb)*deltim))**2 + &
                          (rcs*(v1(i,k)+(dtauy+dtauyb)*deltim))**2 )
             ! Modify theta tendency
-            dtdt(i,k) = dtdt(i,k) + max((eng0-eng1),0.0)/cp/deltim/prslk(i,k)
+            dtdt(i,k) = dtdt(i,k) + max((eng0-eng1),0.0)/cp/deltim
          end if
 
          dusfc(i)   = dusfc(i) + taud_ls(i,k)*xn(i)*del(i,k) + taud_bl(i,k)*xn(i)*del(i,k)
