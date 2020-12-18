@@ -76,16 +76,17 @@ contains
 !
 !     Local variables
 !     ---------------
-    real(kind=kind_phys) ::   &
-        SLMASK (nx*ny),       &
-        TSFFCS (nx*ny),       &
-        ZORFCS (nx*ny),       &
-        AISFCS (nx*ny),       &
-        ALFFC1 (nx*ny*2),     &
-        ALBFC1 (nx*ny*4),     &
-        SMCFC1 (nx*ny*lsoil), &
-        STCFC1 (nx*ny*lsoil), &
-        SLCFC1 (nx*ny*lsoil)
+    real(kind=kind_phys) ::                  &
+        SLMASK (nx*ny),                      &
+        TSFFCS (nx*ny),                      &
+        ZORFCS (nx*ny),                      &
+        AISFCS (nx*ny),                      &
+        ALFFC1 (nx*ny*2),                    &
+        ALBFC1 (nx*ny*4),                    &
+        SMCFC1 (nx*ny*max(lsoil,lsoil_lsm)), &
+        STCFC1 (nx*ny*max(lsoil,lsoil_lsm)), &
+        SLCFC1 (nx*ny*max(lsoil,lsoil_lsm))
+
 
     logical              :: lake(nx*ny)
     character(len=6)     :: tile_num_ch
@@ -136,11 +137,17 @@ contains
         ALBFC1(ix + npts*2) = alnsf(ix)
         ALBFC1(ix + npts*3) = alnwf(ix)
         !
-        do ls = 1,lsoil
+        do ls = 1,max(lsoil,lsoil_lsm)
           ll = ix + (ls-1)*npts
-          SMCFC1(ll) = smc(ix,ls)
-          STCFC1(ll) = stc(ix,ls)
-          SLCFC1(ll) = slc(ix,ls)
+          if (lsoil == lsoil_lsm) then
+            SMCFC1(ll) = smc(ix,ls)
+            STCFC1(ll) = stc(ix,ls)
+            SLCFC1(ll) = slc(ix,ls)
+          else
+            SMCFC1(ll) = smois(ix,ls)
+            STCFC1(ll) = tslb(ix,ls)
+            SLCFC1(ll) = sh2o(ix,ls)
+          endif
         enddo
         !
         IF (slmsk(ix) < 0.1_kind_phys .OR. slmsk(ix) > 1.5_kind_phys) THEN
@@ -166,19 +173,19 @@ contains
         rewind (Model%nlunit)
       endif
 #endif
-      CALL SFCCYCLE (9998, npts, lsoil, sig1t, fhcyc,             &
-                     idate(4), idate(2), idate(3), idate(1),      &
-                     phour, xlat_d, xlon_d, slmask,               &
-                     oro, oro_uf, use_ufo, nst_anl,               &
-                     hice, fice, tisfc, snowd, slcfc1,            &
-                     shdmin, shdmax, slope, snoalb, tsffcs,       &
-                     weasd, zorfcs, albfc1, tg3, canopy,          &
-                     smcfc1, stcfc1, slmsk, aisfcs,               &
-                     vfrac, vtype, stype, alffc1, cv,             &
-                     cvb, cvt, me, nthrds,                        &
-                     nlunit, size(input_nml_file), input_nml_file,&
-                     lake, min_lakeice, min_seaice,               &
-                     ialb, isot, ivegsrc,                         &
+      CALL SFCCYCLE (9998, npts, max(lsoil,lsoil_lsm), sig1t, fhcyc, &
+                     idate(4), idate(2), idate(3), idate(1),         &
+                     phour, xlat_d, xlon_d, slmask,                  &
+                     oro, oro_uf, use_ufo, nst_anl,                  &
+                     hice, fice, tisfc, snowd, slcfc1,               &
+                     shdmin, shdmax, slope, snoalb, tsffcs,          &
+                     weasd, zorfcs, albfc1, tg3, canopy,             &
+                     smcfc1, stcfc1, slmsk, aisfcs,                  &
+                     vfrac, vtype, stype, alffc1, cv,                &
+                     cvb, cvt, me, nthrds,                           &
+                     nlunit, size(input_nml_file), input_nml_file,   &
+                     lake, min_lakeice, min_seaice,                  &
+                     ialb, isot, ivegsrc,                            &
                      trim(tile_num_ch), imap, jmap)
 #ifndef INTERNAL_FILE_NML
       close (Model%nlunit)
@@ -207,11 +214,17 @@ contains
         alnsf(ix) = ALBFC1(ix + npts*2)
         alnwf(ix) = ALBFC1(ix + npts*3)
         !
-        do ls = 1,lsoil
+        do ls = 1,max(lsoil,lsoil_lsm)
           ll = ix + (ls-1)*npts
-          smc(ix,ls) = SMCFC1(ll)
-          stc(ix,ls) = STCFC1(ll)
-          slc(ix,ls) = SLCFC1(ll)
+          if(lsoil == lsoil_lsm) then
+            smc(ix,ls) = SMCFC1(ll)
+            stc(ix,ls) = STCFC1(ll)
+            slc(ix,ls) = SLCFC1(ll)
+          else
+            smois(ix,ls) = SMCFC1(ll)
+            tslb(ix,ls) = STCFC1(ll)
+            sh2o(ix,ls) = SLCFC1(ll)
+          endif
           if (ls<=kice) tiice(ix,ls) = STCFC1(ll)
         enddo
       enddo

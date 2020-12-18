@@ -311,7 +311,37 @@
 
       contains
 
-      subroutine GFS_diagtoscreen_init ()
+!> \section arg_table_GFS_diagtoscreen_init Argument Table
+!! \htmlinclude GFS_diagtoscreen_init.html
+!!
+      subroutine GFS_diagtoscreen_init (Model, Data, Interstitial, errmsg, errflg)
+
+         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
+                                          GFS_interstitial_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),      intent(in)  :: Model
+         type(GFS_data_type),         intent(in)  :: Data(:)
+         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
+         character(len=*),            intent(out) :: errmsg
+         integer,                     intent(out) :: errflg
+
+         !--- local variables
+         integer :: i
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+         do i=1,size(Data)
+           call GFS_diagtoscreen_run (Model, Data(i)%Statein, Data(i)%Stateout, Data(i)%Sfcprop,    &
+                                      Data(i)%Coupling, Data(i)%Grid, Data(i)%Tbd, Data(i)%Cldprop, &
+                                      Data(i)%Radtend, Data(i)%Intdiag, Interstitial(1),            &
+                                      size(Interstitial), i, errmsg, errflg)
+         end do
+
       end subroutine GFS_diagtoscreen_init
 
       subroutine GFS_diagtoscreen_finalize ()
@@ -330,7 +360,6 @@
 #ifdef OPENMP
          use omp_lib
 #endif
-         use machine,               only: kind_phys
          use GFS_typedefs,          only: GFS_control_type, GFS_statein_type,  &
                                           GFS_stateout_type, GFS_sfcprop_type, &
                                           GFS_coupling_type, GFS_grid_type,    &
@@ -462,10 +491,10 @@
                      end if
                      ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%zs',             Model%zs)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%sh2o',         Sfcprop%sh2o)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%smois',        Sfcprop%smois)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tslb',         Sfcprop%tslb)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%zs',           Sfcprop%zs)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%clw_surf',     Sfcprop%clw_surf)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%qwv_surf',     Sfcprop%qwv_surf)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%cndm_surf',    Sfcprop%cndm_surf)
@@ -831,7 +860,35 @@
 
       contains
 
-      subroutine GFS_interstitialtoscreen_init ()
+      subroutine GFS_interstitialtoscreen_init (Model, Data, Interstitial, errmsg, errflg)
+
+         use GFS_typedefs,          only: GFS_control_type, GFS_data_type, &
+                                          GFS_interstitial_type
+
+         implicit none
+
+         !--- interface variables
+         type(GFS_control_type),      intent(in)  :: Model
+         type(GFS_data_type),         intent(in)  :: Data(:)
+         type(GFS_interstitial_type), intent(in)  :: Interstitial(:)
+         character(len=*),            intent(out) :: errmsg
+         integer,                     intent(out) :: errflg
+
+         !--- local variables
+         integer :: i
+
+         ! Initialize CCPP error handling variables
+         errmsg = ''
+         errflg = 0
+
+
+         do i=1,size(Interstitial)
+           call GFS_interstitialtoscreen_run (Model, Data(1)%Statein, Data(1)%Stateout, Data(1)%Sfcprop,    &
+                                              Data(1)%Coupling, Data(1)%Grid, Data(1)%Tbd, Data(1)%Cldprop, &
+                                              Data(1)%Radtend, Data(1)%Intdiag, Interstitial(i),            &
+                                              size(Interstitial), -999, errmsg, errflg)
+         end do
+
       end subroutine GFS_interstitialtoscreen_init
 
       subroutine GFS_interstitialtoscreen_finalize ()
