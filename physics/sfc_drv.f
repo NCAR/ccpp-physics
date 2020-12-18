@@ -4,7 +4,9 @@
 !> This module contains the CCPP-compliant Noah land surface scheme driver.
       module lsm_noah
 
+      use machine,          only: kind_phys
       use set_soilveg_mod,  only: set_soilveg
+      use namelist_soilveg
 
       implicit none
 
@@ -20,11 +22,14 @@
 !! \htmlinclude lsm_noah_init.html
 !!
       subroutine lsm_noah_init(me, isot, ivegsrc, nlunit,
-     &                         errmsg, errflg)
+     &                         pores, resid, errmsg, errflg)
 
       implicit none
 
       integer,              intent(in)  :: me, isot, ivegsrc, nlunit
+
+      real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
+
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
 
@@ -47,6 +52,9 @@
       
       !--- initialize soil vegetation
       call set_soilveg(me, isot, ivegsrc, nlunit)
+
+      pores (:) = maxsmc (:)
+      resid (:) = drysmc (:)
 
       end subroutine lsm_noah_init
 
@@ -199,7 +207,7 @@
      &       smcwlt2, smcref2, wet1, errmsg, errflg                     &
      &     )
 !
-      use machine , only : kind_phys
+      !use machine , only : kind_phys
       use funcphys, only : fpvs
 
       use surface_perturbation, only : ppfbet

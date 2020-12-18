@@ -32,7 +32,7 @@ module lsm_ruc
                                tsfc_lnd, tsfc_wat,                       & ! in
                                tg3, smc, slc, stc,                       & ! in
                                zs, sh2o, smfrkeep, tslb, smois, wetness, & ! out
-                               tsice, errmsg, errflg)
+                               tsice, pores, resid, errmsg, errflg)
 
       implicit none
 !  ---  in
@@ -64,6 +64,8 @@ module lsm_ruc
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: sh2o, smfrkeep
       real (kind=kind_phys), dimension(im,lsoil_ruc), intent(inout) :: tslb, smois
       real (kind=kind_phys), dimension(im,kice),      intent(out) :: tsice
+
+      real (kind=kind_phys), dimension(:), intent(out) :: pores, resid
 
       character(len=*),     intent(out) :: errmsg
       integer,              intent(out) :: errflg
@@ -113,6 +115,9 @@ module lsm_ruc
       !--- initialize soil vegetation
       call set_soilveg_ruc(me, isot, ivegsrc, nlunit)
 
+      pores (:) = maxsmc (:)
+      resid (:) = drysmc (:)
+
       soiltyp(:) = 0
       vegtype(:) = 0
 
@@ -138,7 +143,7 @@ module lsm_ruc
         endif
       enddo
 
-      call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
+        call init_soil_depth_3 ( zs , dzs , lsoil_ruc )
 
         call rucinit   (flag_restart, im, lsoil_ruc, lsoil, nlev,   & ! in
                         me, master, lsm_ruc, lsm, slmsk,            & ! in
