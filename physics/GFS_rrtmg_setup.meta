@@ -255,7 +255,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmg_setup_run
+  name = GFS_rrtmg_setup_timestep_init
   type = scheme
 [idate]
   standard_name = date_and_time_at_model_initialization
