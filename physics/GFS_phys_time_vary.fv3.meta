@@ -847,6 +847,14 @@
   type = integer
   intent = in
   optional = F
+[lsoil_lsm]
+  standard_name = soil_vertical_dimension_for_land_surface_model
+  long_name = number of soil layers internal to land surface model
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [kice]
   standard_name = ice_vertical_dimension
   long_name = vertical loop extent for ice levels, start at 1
@@ -980,6 +988,33 @@
   long_name = soil temperature
   units = K
   dimensions = (horizontal_dimension,soil_vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[smois]
+  standard_name = volume_fraction_of_soil_moisture_for_land_surface_model
+  long_name = volumetric fraction of soil moisture for lsm
+  units = frac
+  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[sh2o]
+  standard_name = volume_fraction_of_unfrozen_soil_moisture_for_land_surface_model
+  long_name = volume fraction of unfrozen soil moisture for lsm
+  units = frac
+  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_land_surface_model)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[tslb]
+  standard_name = soil_temperature_for_land_surface_model
+  long_name = soil temperature for land surface model
+  units = K
+  dimensions = (horizontal_loop_extent,soil_vertical_dimension_for_land_surface_model)
   type = real
   kind = kind_phys
   intent = inout

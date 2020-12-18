@@ -264,11 +264,11 @@
             jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,                   &
             jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,               &
             jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, in_nm, ccn_nm,              &
-            imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, kice,     &
-            ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,         &
-            lakefrac, min_seaice, min_lakeice, smc, slc, stc, tiice, tg3, tref, tsfc, tsfco, tisfc, &
-            hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, zorlo, weasd,       &
-            slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,                      &
+            imap, jmap, prsl, seed0, rann, nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, lsoil_lsm,&
+            kice, ialb, isot, ivegsrc, input_nml_file, use_ufo, nst_anl, frac_grid, fhcyc, phour,   &
+            lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
+            tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
+            zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, errmsg, errflg)
 
          implicit none
@@ -294,15 +294,15 @@
          integer,              intent(in)    :: seed0
          real(kind_phys),      intent(out)   :: rann(:,:)
          ! For gcycle only
-         integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil, kice
-         integer,              intent(in)    :: ialb, isot, ivegsrc
+         integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil
+         integer,              intent(in)    :: lsoil_lsm, kice, ialb, isot, ivegsrc
          character(len=*),     intent(in)    :: input_nml_file(:)
          logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
          real(kind_phys),      intent(in)    :: fhcyc, phour, lakefrac(:), min_seaice, min_lakeice,  &
                                                 xlat_d(:), xlon_d(:)
-         !
-         real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), tiice(:,:), tg3(:),    &
-                                      tref(:), tsfc(:), tsfco(:), tisfc(:), hice(:), fice(:),        &
+         real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), smois(:,:), sh2o(:,:), &
+                                      tslb(:,:), tiice(:,:), tg3(:), tref(:),                        &
+                                      tsfc(:), tsfco(:), tisfc(:), hice(:), fice(:),                 &
                                       facsf(:), facwf(:), alvsf(:), alvwf(:), alnsf(:), alnwf(:),    &
                                       zorli(:), zorll(:), zorlo(:), weasd(:), slope(:), snoalb(:),   &
                                       canopy(:), vfrac(:), vtype(:), stype(:), shdmin(:), shdmax(:), &
@@ -405,12 +405,13 @@
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
              call gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit,       &
-                 input_nml_file, lsoil, kice, idate, ialb, isot, ivegsrc, use_ufo,    &
-                 nst_anl, fhcyc, phour, lakefrac, min_seaice, min_lakeice, frac_grid, &
-                 smc, slc, stc, tiice, tg3, tref, tsfc, tsfco, tisfc, hice, fice,     &
-                 facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, zorlo, weasd,&
-                 slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,   &
-                 cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, imap, jmap)
+                 input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,  &
+                 use_ufo, nst_anl, fhcyc, phour, lakefrac, min_seaice, min_lakeice,   &
+                 frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc, &
+                 tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,  &
+                 zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,     &
+                 stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             &
+                 xlat_d, xlon_d, slmsk, imap, jmap)
            endif
          endif
 

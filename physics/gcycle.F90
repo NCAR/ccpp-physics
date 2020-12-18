@@ -16,19 +16,20 @@ contains
 !! This subroutine repopulates specific time-varying surface properties for
 !! atmospheric forecast runs.
   subroutine gcycle (me, nthrds, nx, ny, isc, jsc, nsst, tile_num, nlunit, &
-      input_nml_file, lsoil, kice, idate, ialb, isot, ivegsrc, use_ufo,    &
-      nst_anl, fhcyc, phour, lakefrac, min_seaice, min_lakeice, frac_grid, &
-      smc, slc, stc, tiice, tg3, tref, tsfc, tsfco, tisfc, hice, fice,     &
-      facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, zorlo, weasd,&
-      slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,   &
-      cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, imap, jmap)
+      input_nml_file, lsoil, lsoil_lsm, kice, idate, ialb, isot, ivegsrc,  &
+      use_ufo, nst_anl, fhcyc, phour, lakefrac, min_seaice, min_lakeice,   &
+      frac_grid, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref, tsfc, &
+      tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf,  &
+      zorli, zorll, zorlo, weasd, slope, snoalb, canopy, vfrac, vtype,     &
+      stype, shdmin, shdmax, snowd, cv, cvb, cvt, oro, oro_uf,             &
+      xlat_d, xlon_d, slmsk, imap, jmap)
 !
 !
     use machine,      only: kind_phys
     implicit none
 
     integer,              intent(in)    :: me, nthrds, nx, ny, isc, jsc, nsst, &
-                                           tile_num, nlunit, lsoil, kice
+                                           tile_num, nlunit, lsoil, lsoil_lsm, kice
     integer,              intent(in)    :: idate(:), ialb, isot, ivegsrc
     character(len=*),     intent(in)    :: input_nml_file(:)
     logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
@@ -38,6 +39,9 @@ contains
     real(kind=kind_phys), intent(inout) :: smc(:,:),   &
                                            slc(:,:),   &
                                            stc(:,:),   &
+                                           smois(:,:), &
+                                           sh2o(:,:),  &
+                                           tslb(:,:),  &
                                            tiice(:,:), &
                                            tg3(:),     &
                                            tref(:),    &
