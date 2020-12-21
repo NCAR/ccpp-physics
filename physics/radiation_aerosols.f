@@ -4446,6 +4446,8 @@
            asy1 = f_zero
            sca1 = f_zero
            ssa1 = f_zero
+           asy = f_zero
+           ssa = f_zero
            do m = 1, kcm1
             cm =  max(aerms(k,m),0.0) * dz1(k)
             ext1 = ext1 + cm*extrhi_grt(m,ib)
