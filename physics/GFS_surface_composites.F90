@@ -86,6 +86,7 @@ contains
                   flag_cice(i)   = .true.
                 else
                   islmsk_cice(i) = 2
+                  flag_cice(i)   = .false.
                 endif
                 islmsk(i) = 2
               else
@@ -101,15 +102,16 @@ contains
               endif
             else
               if (cice(i) >= min_lakeice) then
-                icy(i) = .true.
+                icy(i)    = .true.
                 islmsk(i) = 2
-                tisfc(i) = max(timin, min(tisfc(i), tgice))
+                tisfc(i)  = max(timin, min(tisfc(i), tgice))
               else
                 cice(i)   = zero
                 hice(i)   = zero
                 islmsk(i) = 0
               endif
               islmsk_cice(i) = islmsk(i)
+              flag_cice(i)   = .false.
               if (cice(i) < one) then
                 wet(i) = .true. ! some open lake
                 if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
@@ -138,6 +140,14 @@ contains
               if (cice(i) >= min_seaice) then
                 icy(i)   = .true.
                 tisfc(i) = max(timin, min(tisfc(i), tgice))
+                if (cplflx)  then
+                  islmsk_cice(i) = 4
+                  flag_cice(i)   = .true.
+                else
+                  islmsk_cice(i) = 2
+                  flag_cice(i)   = .false.
+                endif
+                islmsk(i) = 2
               else
                 cice(i)        = zero
                 hice(i)        = zero
@@ -153,13 +163,14 @@ contains
               if (cice(i) >= min_lakeice) then
                 icy(i) = .true.
                 tisfc(i) = max(timin, min(tisfc(i), tgice))
+                islmsk(i) = 2
               else
                 cice(i)   = zero
                 hice(i)   = zero
-                flag_cice(i) = .false.
                 islmsk(i) = 0
               endif
               islmsk_cice(i) = islmsk(i)
+              flag_cice(i)   = .false.
               if (cice(i) < one) then
                 wet(i) = .true. ! some open lake
                 if (icy(i)) tsfco(i) = max(tisfc(i), tgice)
@@ -195,7 +206,8 @@ contains
 !          snowd_wat(i) = snowd(i)
            weasd_wat(i) = zero
            snowd_wat(i) = zero
-           semis_wat(i) = 0.984_kind_phys
+           semis_wat(i) = 0.97_kind_phys
+!          semis_wat(i) = 0.984_kind_phys
 !            qss_wat(i) = qss(i)
 !           hflx_wat(i) = hflx(i)
         endif
@@ -219,7 +231,8 @@ contains
 !          snowd_ice(i) = snowd(i) / cice(i)
             ep1d_ice(i) = zero
             gflx_ice(i) = zero
-           semis_ice(i) = 0.95_kind_phys
+           semis_ice(i) = 0.96_kind_phys
+!          semis_ice(i) = 0.95_kind_phys
 !            qss_ice(i) = qss(i)
 !           hflx_ice(i) = hflx(i)
         endif
