@@ -608,6 +608,7 @@ contains
             weasd(i)  = weasd_ice(i)
             snowd(i)  = snowd_ice(i)
             qss(i)    = qss_ice(i)
+            tsfc(i)   = tsfc_ice(i)
             evap(i)   = evap_ice(i)
             hflx(i)   = hflx_ice(i)
             qss(i)    = qss_ice(i)
