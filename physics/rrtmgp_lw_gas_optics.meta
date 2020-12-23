@@ -165,7 +165,7 @@
   kind = kind_phys
   intent = in
   optional = F
-[skt]
+[tsfg]
   standard_name = surface_ground_temperature_for_radiation
   long_name = surface ground temperature for radiation
   units = K
