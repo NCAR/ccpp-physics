@@ -671,14 +671,14 @@
   type = logical
   intent = in
   optional = F
-[tsfc_wat]
-  standard_name = surface_skin_temperature_over_ocean_interstitial
-  long_name = surface skin temperature over ocean (temporary use as interstitial)
+[tsfco]
+  standard_name = sea_surface_temperature
+  long_name = sea surface temperature
   units = K
   dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [tsurf_wat]
   standard_name = surface_skin_temperature_after_iteration_over_ocean

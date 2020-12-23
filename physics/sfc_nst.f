@@ -668,7 +668,7 @@ cc
 !> \section NSST_general_pre_algorithm General Algorithm
 !! @{
       subroutine sfc_nst_pre_run
-     &    (im, wet, tsfc_wat, tsurf_wat, tseal, xt, xz, dt_cool,
+     &    (im, wet, tsfco, tsurf_wat, tseal, xt, xz, dt_cool,
      &     z_c, tref, cplflx, oceanfrac, nthreads, errmsg, errflg)
 
       use machine , only : kind_phys
@@ -682,7 +682,7 @@ cc
       integer, intent(in) :: im, nthreads
       logical, dimension(im), intent(in) :: wet
       real (kind=kind_phys), dimension(im), intent(in) ::
-     &      tsfc_wat, xt, xz, dt_cool, z_c, oceanfrac
+     &      tsfco, xt, xz, dt_cool, z_c, oceanfrac
       logical, intent(in) :: cplflx
 
 !  ---  input/outputs:
@@ -711,8 +711,8 @@ cc
 !          tem         = (oro(i)-oro_uf(i)) * rlapse
           ! DH* 20190927 simplyfing this code because tem is zero
           !tem          = zero
-          !tseal(i)     = tsfc_wat(i)  + tem
-          tseal(i)      = tsfc_wat(i)
+          !tseal(i)     = tsfco(i)  + tem
+          tseal(i)      = tsfco(i)
           !tsurf_wat(i) = tsurf_wat(i) + tem
           ! *DH
         endif
@@ -727,7 +727,7 @@ cc
         do i=1,im
           if (wet(i) .and. oceanfrac(i) > zero) then
 !           dnsst   = tsfc_wat(i) - tref(i)          !  retrive/get difference of Ts and Tf
-            tref(i) = tsfc_wat(i) - dtzm(i)          !  update Tf with T1 and NSST T-Profile
+            tref(i) = tsfco(i) - dtzm(i)             !  update Tf with T1 and NSST T-Profile
 !           tsfc_wat(i) = max(271.2,tref(i) + dnsst) !  get Ts updated due to Tf update
 !           tseal(i)    = tsfc_wat(i)
             if (abs(xz(i)) > zero) then
