@@ -164,18 +164,18 @@
   intent = inout
   optional = F
 [t_1delt]
-  standard_name = water_vapor_specific_humidity_two_timesteps_back
-  long_name = water vapor specific humidity two timesteps back
-  units = kg kg-1
+  standard_name = air_temperature_at_previous_timestep
+  long_name = air temperature at previous timestep
+  units = K
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
   optional = F
 [qv_2delt]
-  standard_name = air_temperature_at_previous_timestep
-  long_name = air temperature at previous timestep
-  units = K
+  standard_name = water_vapor_specific_humidity_two_timesteps_back
+  long_name = water vapor specific humidity two timesteps back
+  units = kg kg-1
   dimensions = (horizontal_dimension,vertical_dimension)
   type = real
   kind = kind_phys

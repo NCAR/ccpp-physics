@@ -92,7 +92,7 @@
          if (is_initialized) return
 
 !$OMP parallel num_threads(nthrds) default(none)                                    &
-!$OMP          shared (me,master,ntoz,h2o_phys,im)                                  &
+!$OMP          shared (me,master,ntoz,h2o_phys,im,nx,ny,idate)                      &
 !$OMP          shared (xlat_d,xlon_d,imap,jmap,errmsg,errflg)                       &
 !$OMP          shared (levozp,oz_coeff,oz_pres,ozpl)                                &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres,h2opl)                             &
@@ -177,7 +177,11 @@
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
          endif
 
-!$OMP barrier
+!$OMP end sections
+
+! Need an OpenMP barrier here (implicit in "end sections")
+
+!$OMP sections
 
 !$OMP section
 !> - Call setindxoz() to initialize ozone data
