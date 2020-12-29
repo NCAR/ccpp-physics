@@ -80,14 +80,6 @@
   type = integer
   intent = in
   optional = F
-[num_p2d]
-  standard_name = array_dimension_of_2d_arrays_for_microphysics
-  long_name = number of 2D arrays needed for microphysics
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [num_p3d]
   standard_name = array_dimension_of_3d_arrays_for_microphysics
   long_name = number of 3D arrays needed for microphysics

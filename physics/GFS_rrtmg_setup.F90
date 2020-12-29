@@ -43,13 +43,13 @@ module GFS_rrtmg_setup
 !! \section arg_table_GFS_rrtmg_setup_init Argument Table
 !! \htmlinclude GFS_rrtmg_setup_init.html
 !!
-   subroutine GFS_rrtmg_setup_init (                                    &
-          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw,  num_p2d, &
-          num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,              &
-          icliq_sw, crick_proof, ccnorm,                                &
-          imp_physics,                                                  &
-          norad_precip, idate, iflip,                                   &
-          im, faerlw, faersw, aerodp,                                   & ! for consistency checks
+   subroutine GFS_rrtmg_setup_init (                          &
+          si, levr, ictm, isol, ico2, iaer, ialb, iems, ntcw, &
+          num_p3d, npdf3d, ntoz, iovr, isubc_sw, isubc_lw,    &
+          icliq_sw, crick_proof, ccnorm,                      &
+          imp_physics,                                        &
+          norad_precip, idate, iflip,                         &
+          im, faerlw, faersw, aerodp,                         & ! for consistency checks
           me, errmsg, errflg)
 ! =================   subprogram documentation block   ================ !
 !                                                                       !
@@ -174,7 +174,6 @@ module GFS_rrtmg_setup
       integer, intent(in) :: ialb
       integer, intent(in) :: iems
       integer, intent(in) :: ntcw
-      integer, intent(in) :: num_p2d
       integer, intent(in) :: num_p3d
       integer, intent(in) :: npdf3d
       integer, intent(in) :: ntoz
