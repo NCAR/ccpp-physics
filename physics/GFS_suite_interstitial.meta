@@ -15,14 +15,6 @@
   type = GFS_interstitial_type
   intent = inout
   optional = F
-[Diag]
-  standard_name = GFS_diag_type_instance
-  long_name = derived type GFS_diag_type in FV3
-  units = DDT
-  dimensions = ()
-  type = GFS_diag_type
-  intent = inout
-  optional = F
 [Model]
   standard_name = GFS_control_type_instance
   long_name = Fortran DDT containing FV3-GFS model control parameters
@@ -65,14 +57,6 @@
   units = DDT
   dimensions = ()
   type = GFS_interstitial_type
-  intent = inout
-  optional = F
-[Diag]
-  standard_name = GFS_diag_type_instance
-  long_name = derived type GFS_diag_type in FV3
-  units = DDT
-  dimensions = ()
-  type = GFS_diag_type
   intent = inout
   optional = F
 [Model]

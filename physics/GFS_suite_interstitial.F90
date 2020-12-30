@@ -14,42 +14,23 @@
 !> \section arg_table_GFS_suite_interstitial_rad_reset_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_rad_reset_run.html
 !!
-    subroutine GFS_suite_interstitial_rad_reset_run (Interstitial, Diag, Model, errmsg, errflg)
+    subroutine GFS_suite_interstitial_rad_reset_run (Interstitial, Model, errmsg, errflg)
 
       use machine,      only: kind_phys
-      use GFS_typedefs, only: GFS_control_type, GFS_diag_type, GFS_interstitial_type
+      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
 
       implicit none
 
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
-      type(GFS_diag_type),         intent(inout) :: Diag
       type(GFS_control_type),      intent(in)    :: Model
       character(len=*),            intent(out)   :: errmsg
       integer,                     intent(out)   :: errflg
-
-      ! local variables
-      real(kind_phys), parameter :: con_hr = 3600.0_kind_phys
-      real(kind_phys)            :: sec_zero
-      integer                    :: kdt_rad
 
       errmsg = ''
       errflg = 0
 
       call Interstitial%rad_reset(Model)
-
-      !--- determine if radiation diagnostics buckets need to be cleared
-      sec_zero = nint(Model%fhzero*con_hr)
-      if (sec_zero >= nint(max(Model%fhswr,Model%fhlwr))) then
-        if (mod(Model%kdt,Model%nszero) == 1) then
-          call Diag%rad_zero(Model)
-        endif
-      else
-        kdt_rad = nint(min(Model%fhswr,Model%fhlwr)/Model%dtp)
-        if (mod(Model%kdt,kdt_rad) == 1) then
-          call Diag%rad_zero(Model)
-        endif
-      endif
 
     end subroutine GFS_suite_interstitial_rad_reset_run
 
@@ -69,16 +50,15 @@
 !> \section arg_table_GFS_suite_interstitial_phys_reset_run Argument Table
 !! \htmlinclude GFS_suite_interstitial_phys_reset_run.html
 !!
-    subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Diag, Model, errmsg, errflg)
+    subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
 
       use machine,      only: kind_phys
-      use GFS_typedefs, only: GFS_control_type, GFS_diag_type, GFS_interstitial_type
+      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
 
       implicit none
 
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
-      type(GFS_diag_type),         intent(inout) :: Diag
       type(GFS_control_type),      intent(in)    :: Model
       character(len=*),            intent(out)   :: errmsg
       integer,                     intent(out)   :: errflg
@@ -87,11 +67,6 @@
       errflg = 0
 
       call Interstitial%phys_reset(Model)
-
-      !--- determine if physics diagnostics buckets need to be cleared
-      if (mod(Model%kdt,Model%nszero) == 1) then
-        call Diag%phys_zero(Model)
-      endif
 
     end subroutine GFS_suite_interstitial_phys_reset_run
 
