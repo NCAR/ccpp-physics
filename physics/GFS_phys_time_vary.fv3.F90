@@ -296,7 +296,7 @@
          integer,              intent(in)    :: imap(:), jmap(:)
          real(kind_phys),      intent(in)    :: prsl(:,:)
          integer,              intent(in)    :: seed0
-         real(kind_phys),      intent(out)   :: rann(:,:)
+         real(kind_phys),      intent(inout) :: rann(:,:)
          ! For gcycle only
          integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil
          integer,              intent(in)    :: lsoil_lsm, kice, ialb, isot, ivegsrc

@@ -789,7 +789,7 @@
   dimensions = (horizontal_dimension,array_dimension_of_random_number)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [nthrds]
   standard_name = omp_threads
