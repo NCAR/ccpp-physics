@@ -177,6 +177,7 @@ use machine ,   only : kind_phys
     real (kind=kind_phys) :: den                !tree density (no. of trunks per m2)
     real (kind=kind_phys) :: rc                 !tree crown radius (m)
     real (kind=kind_phys) :: mfsno              !snowmelt m parameter ()
+    real (kind=kind_phys) :: scffac             !snow cover factor (m)
     real (kind=kind_phys) :: saim(12)           !monthly stem area index, one-sided
     real (kind=kind_phys) :: laim(12)           !monthly leaf area index, one-sided
     real (kind=kind_phys) :: sla                !single-side leaf area per kg [m2/kg]
@@ -1759,7 +1760,7 @@ contains
      if(snowh.gt.0.)  then
          bdsno    = sneqv / snowh
          fmelt    = (bdsno/100.)**parameters%mfsno
-         fsno     = tanh( snowh /(2.5* z0 * fmelt))
+         fsno     = tanh( snowh /(parameters%scffac * fmelt))
      endif
 
 ! ground roughness length
