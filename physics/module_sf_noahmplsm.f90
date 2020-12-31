@@ -250,6 +250,7 @@ use machine ,   only : kind_phys
      real (kind=kind_phys) :: z0sno        !snow surface roughness length (m) (0.002)
      real (kind=kind_phys) :: ssi          !liquid water holding capacity for snowpack (m3/m3)
      real (kind=kind_phys) :: swemx        !new snow mass to fully cover old snow (mm)
+     real (kind=kind_phys) :: snow_emis    !snow emissivity
 
 !------------------------------------------------------------------------------------------!
 ! from the soilparm.tbl tables, as functions of soil category.
@@ -1818,9 +1819,9 @@ contains
 
      emv = 1. - exp(-(elai+esai)/1.0)
      if (ice == 1) then
-       emg = 0.98*(1.-fsno) + 1.0*fsno
+       emg = 0.98*(1.-fsno) + parameters%snow_emis*fsno
      else
-       emg = parameters%eg(ist)*(1.-fsno) + 1.0*fsno
+       emg = parameters%eg(ist)*(1.-fsno) + parameters%snow_emis*fsno
      end if
 
 ! soil moisture factor controlling stomatal resistance

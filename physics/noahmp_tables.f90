@@ -767,6 +767,7 @@ module noahmp_tables
     real :: ssi_table = 0.03         !liquid water holding capacity for snowpack (m3/m3) (0.03)
     real :: swemx_table = 1.00       !new snow mass to fully cover old snow (mm)
     real :: rsurf_snow_table = 50.0   !surface resistance for snow(s/m)
+    real :: snow_emis_table = 0.95   !surface emissivity
 
 
 ! Noah mp crops

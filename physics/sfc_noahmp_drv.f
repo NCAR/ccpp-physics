@@ -1129,6 +1129,7 @@
          parameters%z0sno     =  z0sno_table
          parameters%ssi       =    ssi_table
          parameters%swemx     =  swemx_table
+         parameters%snow_emis = snow_emis_table
       
 ! ----------------------------------------------------------------------
 !  transfer soil parameters
