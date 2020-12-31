@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_rrtmgp_gfdlmp_pre
   type = scheme
-  dependencies = rrtmgp_aux.F90, radiation_cloud_overlap.F90
+  dependencies = rrtmgp_aux.F90, radiation_cloud_overlap.F90, rrtmgp_lw_cloud_optics.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -62,7 +62,39 @@
   dimensions = ()
   type = logical  
   intent = in
-  optional = F   
+  optional = F
+[doGP_cldoptics_PADE]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_PADE
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[doGP_cldoptics_LUT]
+  standard_name = flag_to_calc_lw_cld_optics_using_RRTMGP_LUT
+  long_name = logical flag to control cloud optics scheme.
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_mynnedmf]
+  standard_name = do_mynnedmf
+  long_name = flag to activate MYNN-EDMF
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
 [i_cldliq]
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
@@ -208,7 +240,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_lwp]
   standard_name = cloud_liquid_water_path
@@ -217,7 +249,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_reliq]
   standard_name = mean_effective_radius_for_liquid_cloud
@@ -226,7 +258,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_iwp]
   standard_name = cloud_ice_water_path
@@ -235,7 +267,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_reice]
   standard_name = mean_effective_radius_for_ice_cloud
@@ -244,7 +276,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_swp]
   standard_name = cloud_snow_water_path
@@ -253,7 +285,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_resnow]
   standard_name = mean_effective_radius_for_snow_flake
@@ -262,7 +294,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_rwp]
   standard_name = cloud_rain_water_path
@@ -271,7 +303,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [cld_rerain]
   standard_name = mean_effective_radius_for_rain_drop
@@ -280,7 +312,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [precip_frac]
   standard_name = precipitation_fraction_by_layer
@@ -289,7 +321,7 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F      
 [errmsg]
   standard_name = ccpp_error_message
