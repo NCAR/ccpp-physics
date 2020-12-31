@@ -3817,7 +3817,7 @@ contains
 
      if(opt_stc == 1 .or. opt_stc == 3) then
      if (snowh > 0.05 .and. tg > tfrz) then
-        tg  = tfrz
+        if(opt_stc == 1) tg  = tfrz
         if(opt_stc == 3) tg  = (1.-fsno)*tg + fsno*tfrz   ! mb: allow tg>0c during melt v3.7
         irg = cir*tg**4 - emg*(1.-emv)*lwdn - emg*emv*sb*tv**4
         shg = csh * (tg         - tah)
@@ -4151,7 +4151,7 @@ contains
 
      if(opt_stc == 1 .or. opt_stc == 3) then
      if (snowh > 0.05 .and. tgb > tfrz) then
-          tgb = tfrz
+          if(opt_stc == 1) tgb = tfrz
           if(opt_stc == 3) tgb  = (1.-fsno)*tgb + fsno*tfrz  ! mb: allow tg>0c during melt v3.7
           irb = cir * tgb**4 - emg*lwdn
           shb = csh * (tgb        - sfctmp)
@@ -5084,7 +5084,7 @@ contains
        err_est = err_est + (stc(iz)-tbeg(iz)) * dzsnso(iz) * hcpct(iz) / dt
     enddo
 
-    if (opt_stc == 1) then   ! semi-implicit
+    if (opt_stc == 1 .or. opt_stc == 3) then   ! semi-implicit
        err_est = err_est - (ssoil +eflxb)
     else                     ! full-implicit
        ssoil2 = df(isnow+1)*(tg-stc(isnow+1))/(0.5*dzsnso(isnow+1))   !m. barlage
@@ -5193,7 +5193,7 @@ contains
         if (k == isnow+1) then
            ai(k)    =   0.0
            ci(k)    = - df(k)   * ddz(k) / denom(k)
-           if (opt_stc == 1) then
+           if (opt_stc == 1 .or. opt_stc == 3) then
               bi(k) = - ci(k)
            end if                                        
            if (opt_stc == 2) then
