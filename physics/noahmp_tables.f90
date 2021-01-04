@@ -88,11 +88,19 @@ module noahmp_tables
      &                               0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 
     real :: mfsno_table(mvt)       !snowmelt curve parameter ()
-      data  ( mfsno_table(i),i=1,mvt) /  2.50, 2.50, 2.50, 2.50, 2.50, 2.50, &
-     &                               2.50, 2.50, 2.50, 2.50, 2.50, 2.50,     &
-     &                               2.50, 2.50, 2.50, 2.50, 2.50, 2.50,     &
-     &                               2.50, 2.50, 0.00, 0.00, 0.00, 0.00,     &
+      data  ( mfsno_table(i),i=1,mvt) /  1.00, 1.00, 1.00, 1.00, 1.00, 2.00, &
+     &                               2.00, 2.00, 2.00, 2.00, 3.00, 3.00,     &
+     &                               4.00, 4.00, 2.50, 3.00, 3.00, 3.50,     &
+     &                               3.50, 3.50, 0.00, 0.00, 0.00, 0.00,     &
      &                               0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
+
+    real :: scffac_table(mvt)      !snow cover factor (m)
+      data (scffac_table(i),i=1,mvt) / 0.005, 0.005, 0.005, 0.005, 0.005,    &
+     &                               0.008, 0.008, 0.010, 0.010, 0.010,      &
+     &                               0.010, 0.007, 0.021, 0.013, 0.015,      &
+     &                               0.008, 0.015, 0.015, 0.015, 0.015,      &
+     &                               0.000, 0.000, 0.000, 0.000, 0.000,      &
+     &                               0.000, 0.000, 0.000, 0.000, 0.000 /
 
 !
 
@@ -501,10 +509,10 @@ module noahmp_tables
 
 !
     real :: cwpvt_table(mvt)       !empirical canopy wind parameter
-      data ( cwpvt_table (i),i=1,mvt) / 0.18, 0.18, 0.18, 0.18, 0.18, 0.18,  &
-     &                            0.18, 0.18, 0.18, 0.18, 0.18, 0.18,        &
-     &                            0.18, 0.18, 0.18, 0.18, 0.18, 0.18,        &
-     &                            0.18, 0.18, 0.00, 0.00, 0.00, 0.00,        &
+      data ( cwpvt_table (i),i=1,mvt) / 0.18, 0.67, 0.18, 0.67, 0.29, 1.00,  &
+     &                            2.00, 1.30, 1.00, 5.00, 1.17, 1.67,        &
+     &                            1.67, 1.67, 0.18, 0.18, 0.18, 0.67,        &
+     &                            1.00, 0.18, 0.00, 0.00, 0.00, 0.00,        &
      &                            0.00, 0.00, 0.00, 0.00, 0.00, 0.00 /
 
 
@@ -767,6 +775,7 @@ module noahmp_tables
     real :: ssi_table = 0.03         !liquid water holding capacity for snowpack (m3/m3) (0.03)
     real :: swemx_table = 1.00       !new snow mass to fully cover old snow (mm)
     real :: rsurf_snow_table = 50.0   !surface resistance for snow(s/m)
+    real :: snow_emis_table = 0.95   !surface emissivity
 
 
 ! Noah mp crops

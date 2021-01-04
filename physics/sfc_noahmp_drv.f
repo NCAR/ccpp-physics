@@ -1059,6 +1059,7 @@
         parameters%den    =    den_table(vegtype)       !tree density (no. of trunks per m2)
         parameters%rc     =     rc_table(vegtype)       !tree crown radius (m)
         parameters%mfsno  =  mfsno_table(vegtype)       !snowmelt m parameter ()
+	parameters%scffac = scffac_table(vegtype)       !snow cover factor
         parameters%saim   =   saim_table(vegtype,:)     !monthly stem area index, one-sided
         parameters%laim   =   laim_table(vegtype,:)     !monthly leaf area index, one-sided
         parameters%sla    =    sla_table(vegtype)       !single-side leaf area per kg [m2/kg]
@@ -1129,6 +1130,7 @@
          parameters%z0sno     =  z0sno_table
          parameters%ssi       =    ssi_table
          parameters%swemx     =  swemx_table
+         parameters%snow_emis = snow_emis_table
       
 ! ----------------------------------------------------------------------
 !  transfer soil parameters

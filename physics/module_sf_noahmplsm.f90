@@ -177,6 +177,7 @@ use machine ,   only : kind_phys
     real (kind=kind_phys) :: den                !tree density (no. of trunks per m2)
     real (kind=kind_phys) :: rc                 !tree crown radius (m)
     real (kind=kind_phys) :: mfsno              !snowmelt m parameter ()
+    real (kind=kind_phys) :: scffac             !snow cover factor (m)
     real (kind=kind_phys) :: saim(12)           !monthly stem area index, one-sided
     real (kind=kind_phys) :: laim(12)           !monthly leaf area index, one-sided
     real (kind=kind_phys) :: sla                !single-side leaf area per kg [m2/kg]
@@ -250,6 +251,7 @@ use machine ,   only : kind_phys
      real (kind=kind_phys) :: z0sno        !snow surface roughness length (m) (0.002)
      real (kind=kind_phys) :: ssi          !liquid water holding capacity for snowpack (m3/m3)
      real (kind=kind_phys) :: swemx        !new snow mass to fully cover old snow (mm)
+     real (kind=kind_phys) :: snow_emis    !snow emissivity
 
 !------------------------------------------------------------------------------------------!
 ! from the soilparm.tbl tables, as functions of soil category.
@@ -1758,7 +1760,7 @@ contains
      if(snowh.gt.0.)  then
          bdsno    = sneqv / snowh
          fmelt    = (bdsno/100.)**parameters%mfsno
-         fsno     = tanh( snowh /(2.5* z0 * fmelt))
+         fsno     = tanh( snowh /(parameters%scffac * fmelt))
      endif
 
 ! ground roughness length
@@ -1818,9 +1820,9 @@ contains
 
      emv = 1. - exp(-(elai+esai)/1.0)
      if (ice == 1) then
-       emg = 0.98*(1.-fsno) + 1.0*fsno
+       emg = 0.98*(1.-fsno) + parameters%snow_emis*fsno
      else
-       emg = parameters%eg(ist)*(1.-fsno) + 1.0*fsno
+       emg = parameters%eg(ist)*(1.-fsno) + parameters%snow_emis*fsno
      end if
 
 ! soil moisture factor controlling stomatal resistance
