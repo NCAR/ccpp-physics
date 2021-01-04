@@ -162,7 +162,8 @@
     subroutine GFS_suite_interstitial_2_run (im, levs, lssav, ldiag3d, lsidea, cplflx, flag_cice, shal_cnv, old_monin, mstrat,    &
       do_shoc, frac_grid, imfshalcnv, dtf, xcosz, adjsfcdsw, adjsfcdlw, cice, pgr, ulwsfc_cice, lwhd, htrsw, htrlw, xmu, ctei_rm, &
       work1, work2, prsi, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, cp, hvap, prslk, suntim, adjsfculw, adjsfculw_lnd,      &
-      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp,      &
+      adjsfculw_ice, adjsfculw_wat, dlwsfc, ulwsfc, psmean, dtend, dtidx, index_for_cause_longwave, index_for_cause_shortwave,    &
+      index_for_cause_pbl, index_for_cause_dcnv, index_for_cause_scnv, index_for_cause_mp, index_for_temperature,                 &
       ctei_rml, ctei_r, kinver, dry, icy, wet, frland, huge, use_GP_jacobian, skt, sktp1r, fluxlwUP, fluxlwUP_jac, errmsg, errflg)
 
       implicit none
@@ -196,8 +197,12 @@
            fluxlwUP,       & ! Upwelling LW flux (W/m2)
            fluxlwUP_jac      ! Jacobian of upwelling LW flux (W/m2/K)
 
-      ! These arrays are only allocated if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout), dimension(:,:) :: dt3dt_lw, dt3dt_sw, dt3dt_pbl, dt3dt_dcnv, dt3dt_scnv, dt3dt_mp
+      ! dtend is only allocated if ldiag3d is .true.
+      real(kind=kind_phys), optional, intent(inout), dimension(:,:,:) :: dtend
+      integer,              intent(in),    dimension(:,:) :: dtidx
+      integer, intent(in) :: index_for_cause_longwave, index_for_cause_shortwave, &
+           index_for_cause_pbl, index_for_cause_dcnv, index_for_cause_scnv,       &
+           index_for_cause_mp, index_for_temperature
 
       logical,              intent(in   ), dimension(im) :: dry, icy, wet
       real(kind=kind_phys), intent(in   ), dimension(im) :: frland
@@ -208,7 +213,7 @@
 
       ! local variables
       real(kind=kind_phys), parameter :: czmin   = 0.0001_kind_phys      ! cos(89.994)
-      integer :: i, k
+      integer :: i, k, idtend
       real(kind=kind_phys) :: tem1, tem2, tem, hocp
       logical, dimension(im) :: invrsn
       real(kind=kind_phys), dimension(im) :: tx1, tx2, dT
@@ -302,23 +307,47 @@
 
         if (ldiag3d) then
           if (lsidea) then
-            do k=1,levs
-              do i=1,im
-                dt3dt_lw(i,k)   = dt3dt_lw(i,k)   + lwhd(i,k,1)*dtf
-                dt3dt_sw(i,k)   = dt3dt_sw(i,k)   + lwhd(i,k,2)*dtf
-                dt3dt_pbl(i,k)  = dt3dt_pbl(i,k)  + lwhd(i,k,3)*dtf
-                dt3dt_dcnv(i,k) = dt3dt_dcnv(i,k) + lwhd(i,k,4)*dtf
-                dt3dt_scnv(i,k) = dt3dt_scnv(i,k) + lwhd(i,k,5)*dtf
-                dt3dt_mp(i,k)   = dt3dt_mp(i,k)   + lwhd(i,k,6)*dtf
-              enddo
-            enddo
+            idtend = dtidx(index_for_temperature,index_for_cause_lw)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,1)*dtf
+            endif
+
+            idtend = dtidx(index_for_temperature,index_for_cause_sw)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,2)*dtf
+            endif
+
+            idtend = dtidx(index_for_temperature,index_for_cause_pbl)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,3)*dtf
+            endif
+
+            idtend = dtidx(index_for_temperature,index_for_cause_dcnv)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,4)*dtf
+            endif
+
+            idtend = dtidx(index_for_temperature,index_for_cause_scnv)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,5)*dtf
+            endif
+
+            idtend = dtidx(index_for_temperature,index_for_cause_mp)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,6)*dtf
+            endif
           else
-            do k=1,levs
-              do i=1,im
-                dt3dt_lw(i,k) = dt3dt_lw(i,k) + htrlw(i,k)*dtf
-                dt3dt_sw(i,k) = dt3dt_sw(i,k) + htrsw(i,k)*dtf*xmu(i)
-              enddo
-            enddo
+            idtend = dtidx(index_for_temperature,index_for_cause_lw)
+            if(idtend>1) then
+               dtend(:,:,idtend) = dtend(:,:,idtend) + htrlw(:,:)*dtf
+            endif
+
+            idtend = dtidx(index_for_temperature,index_for_cause_sw)
+            if(idtend>1) then
+               do k=1,levs
+                  dtend(:,k,idtend) = dtend(:,k,idtend) + htrlw(:,k)*dtf*xmu(:)
+               enddo
+            endif
           endif
         endif
       endif    ! end if_lssav_block

@@ -20,7 +20,9 @@ contains
      &           oc, oa4, clx, theta,                                   &
      &           varss, ocss, oa4ss, clxss,                             &
      &           sigma, gamma, elvmax, lssav, ldiag3d,                  &
-     &           dudt, dvdt, dtdt, du3dt, dv3dt, dt3dt, dtf,            &
+     &           dtend, dtidx, index_for_temperature, index_for_x_wind, &
+     &           index_for_y_wind, index_for_cause_orographic_gwd,      &
+     &           dudt, dvdt, dtdt, dtf,                                 &
      &           flag_for_gwd_generic_tend, errmsg, errflg)
 
       use machine, only : kind_phys
@@ -36,14 +38,16 @@ contains
 
       logical, intent(in) :: lssav, ldiag3d, flag_for_gwd_generic_tend
       real(kind=kind_phys), intent(in) :: dtdt(im,levs), dudt(im,levs), dvdt(im,levs)
-      ! dt3dt only allocated only if ldiag3d is .true.
-      real(kind=kind_phys), intent(inout) :: dt3dt(:,:), du3dt(:,:), dv3dt(:,:)
+      ! dtend only allocated only if ldiag3d is .true.
+      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:), index_for_temperature,         &
+     &  index_for_x_wind, index_for_y_wind, index_for_cause_orographic_gwd
       real(kind=kind_phys), intent(in) :: dtf
 
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
 
-      integer :: i, k
+      integer :: i, k, idtend
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -117,15 +121,20 @@ contains
         elvmax = 0
       endif   ! end if_nmtvr
 
-      if (lssav) then
-        if (ldiag3d .and. flag_for_gwd_generic_tend) then
-          do k=1,levs
-            do i=1,im
-              dt3dt(i,k) = dt3dt(i,k) - dtdt(i,k)*dtf
-              du3dt(i,k) = du3dt(i,k) - dudt(i,k)*dtf
-              dv3dt(i,k) = dv3dt(i,k) - dvdt(i,k)*dtf
-            enddo
-          enddo
+      if (lssav .and. ldiag3d .and. flag_for_gwd_generic_tend) then
+        idtend = dtidx(index_for_temperature, index_for_cause_orographic_gwd)
+        if(idtend>1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) - dtdt*dtf
+        endif
+
+        idtend = dtidx(index_for_x_wind, index_for_cause_orographic_gwd)
+        if(idtend>1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) - dudt*dtf
+        endif
+
+        idtend = dtidx(index_for_y_wind, index_for_cause_orographic_gwd)
+        if(idtend>1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) - dvdt*dtf
         endif
       endif
 
@@ -154,7 +163,8 @@ contains
 !!  \section detailed Detailed Algorithm
 !!  @{
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
-      &  dugwd, dvgwd, du3dt, dv3dt, dt3dt, flag_for_gwd_generic_tend, errmsg, errflg)
+      &  dugwd, dvgwd, flag_for_gwd_generic_tend, dtend, dtidx, index_for_temperature, index_for_x_wind,  &
+      &  index_for_y_wind, index_for_cause_orographic_gwd, errmsg, errflg
 
       use machine, only : kind_phys
       implicit none
@@ -166,10 +176,16 @@ contains
       real(kind=kind_phys), intent(in) :: dtf
       
       real(kind=kind_phys), intent(inout) :: dugwd(:), dvgwd(:)
-      real(kind=kind_phys), intent(inout) :: du3dt(:,:), dv3dt(:,:), dt3dt(:,:)
+
+      ! dtend only allocated only if ldiag3d is .true.
+      real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:), index_for_temperature,         &
+     &  index_for_x_wind, index_for_y_wind, index_for_cause_orographic_gwd
       
       character(len=*), intent(out) :: errmsg
       integer,          intent(out) :: errflg
+
+      integer :: idtend
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -180,9 +196,20 @@ contains
         dvgwd(:) = dvgwd(:) + dvsfcg(:)*dtf
 
         if (ldiag3d .and. flag_for_gwd_generic_tend) then
-          du3dt(:,:) = du3dt(:,:) + dudt(:,:) * dtf
-          dv3dt(:,:) = dv3dt(:,:) + dvdt(:,:) * dtf
-          dt3dt(:,:) = dt3dt(:,:) + dtdt(:,:) * dtf
+          idtend = dtidx(index_for_temperature, index_for_cause_orographic_gwd)
+          if(idtend>1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + dtdt*dtf
+          endif
+
+          idtend = dtidx(index_for_x_wind, index_for_cause_orographic_gwd)
+          if(idtend>1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + dudt*dtf
+          endif
+
+          idtend = dtidx(index_for_y_wind, index_for_cause_orographic_gwd)
+          if(idtend>1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + dvdt*dtf
+          endif
         endif
       endif
 

@@ -98,15 +98,6 @@
   kind = kind_phys
   intent = inout
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = out
-  optional = F
 [save_q]
   standard_name = tracer_concentration_save
   long_name = tracer concentration before entering a physics scheme
@@ -251,30 +242,6 @@
 [cal_pre]
   standard_name = flag_for_precipitation_type_algorithm
   long_name = flag controls precip type algorithm
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[lssav]
-  standard_name = flag_diagnostics
-  long_name = logical flag for storing diagnostics
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[ldiag3d]
-  standard_name = flag_diagnostics_3D
-  long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
-  long_name = logical flag for 3D tracer diagnostics
   units = flag
   dimensions = ()
   type = logical
@@ -458,14 +425,14 @@
   kind = kind_phys
   intent = in
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = in
+  intent = inout
   optional = F
 [rain0]
   standard_name = lwe_thickness_of_explicit_rain_amount
@@ -670,24 +637,6 @@
   long_name = accumulated graupel precipitation in bucket
   units = kg m-2
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_microphysics
-  long_name = cumulative change in temperature due to microphysics
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_microphysics
-  long_name = cumulative change in water vapor specific humidity due to microphysics
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout
@@ -901,6 +850,71 @@
   dimensions = ()
   type = real
   kind = kind_phys
+  intent = in
+  optional = F
+[dtend]
+  standard_name = diagnostic_3d_tendencies
+  long_name = diagnostic 3d tendencies for tracers and other fields
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_causes)
+  type = integer
+  intent = in
+  optional = F
+[ncause]
+  standard_name = number_of_possible_causes_of_tracer_changes
+  long_name = number of possible causes of tracer changes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_temperature]
+  standard_name = index_for_temperature
+  long_name = index in dtidx first dimension of temperature field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_cause_mp]
+  standard_name = index_for_cause_mp
+  long_name = tracer changes caused by microphysics scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ldiag3d]
+  standard_name = flag_diagnostics_3D
+  long_name = flag for 3d diagnostic fields
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[qdiag3d]
+  standard_name = flag_tracer_diagnostics_3D
+  long_name = logical flag for 3D tracer diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[lssav]
+  standard_name = flag_diagnostics
+  long_name = logical flag for storing diagnostics
+  units = flag
+  dimensions = ()
+  type = logical
   intent = in
   optional = F
 [errmsg]

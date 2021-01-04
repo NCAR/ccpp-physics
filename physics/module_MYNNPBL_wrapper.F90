@@ -83,9 +83,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    &
      &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    &
      &  flag_for_pbl_generic_tend,                         &
-     &  du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,      &
-     &  do3dt_PBL, dq3dt_PBL, dt3dt_PBL,                   &
-     &  htrsw, htrlw, xmu,                                 &
+     &  ntqv, dtend, dtidx, index_for_temperature,         &
+     &  index_for_x_wind, index_for_y_wind,                &
+     &  index_for_cause_pbl, htrsw, htrlw, xmu,            &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
      &  bl_mynn_edmf, bl_mynn_edmf_mom, bl_mynn_edmf_tke,  &
@@ -209,6 +209,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &       imp_physics, imp_physics_wsm6,                 &
      &       imp_physics_thompson, imp_physics_gfdl
 
+!TENDENCY DIAGNOSTICS
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_for_temperature, index_for_x_wind, ntqv, &
+        index_for_y_wind, index_for_cause_pbl
+
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
      &       spp_pbl=0,                                     &
@@ -263,9 +269,6 @@ SUBROUTINE mynnedmf_wrapper_run(        &
     &        qgrs_ice_aer_num_conc
      real(kind=kind_phys), dimension(im,levs), intent(out) ::            &
     &        Tsq, Qsq, Cov, exch_h, exch_m
-     real(kind=kind_phys), dimension(:,:), intent(inout) ::              &
-    &        du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD,               &
-    &        do3dt_PBL, dq3dt_PBL, dt3dt_PBL
     real(kind=kind_phys), dimension(im), intent(in) :: xmu
     real(kind=kind_phys), dimension(im, levs), intent(in) :: htrsw, htrlw
      !LOCAL
@@ -317,7 +320,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
       real, dimension(im) ::                                             &
      &        WSTAR,DELTA,qcg,hfx,qfx,rmol,xland,                        &
      &        uoce,voce,vdfg,znt,ts
-
+      integer :: idtend
       real, dimension(im) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
 
       ! Initialize CCPP error handling variables
@@ -703,20 +706,16 @@ SUBROUTINE mynnedmf_wrapper_run(        &
         enddo
         accum_duvt3dt: if(lssav) then
           if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-            do k = 1, levs
-              do i = 1, im
-                du3dt_PBL(i,k) = du3dt_PBL(i,k) + RUBLTEN(i,k)*dtf
-                dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + RVBLTEN(i,k)*dtf
-              enddo
-            enddo
+            idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
+            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RUBLTEN(i,k)*dtf
+
+            idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
+            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RVBLTEN(i,k)*dtf
           endif
           
           if (lsidea .or. (ldiag3d .and. .not. flag_for_pbl_generic_tend)) then
-            do k = 1, levs
-               do i = 1, im
-                 dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + RTHBLTEN(i,k)*exner(i,k)*dtf
-               enddo
-            enddo   
+            idtend=dtidx(index_for_temperature,index_for_cause_pbl)
+            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RTHBLTEN(i,k)*exner(i,k)*dtf
           endif
         endif accum_duvt3dt
         !Update T, U and V:
@@ -833,11 +832,8 @@ SUBROUTINE mynnedmf_wrapper_run(        &
        endif
        
        if(lssav .and. (ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend)) then
-         do k=1,levs
-           do i=1,im
-             dq3dt_PBL(i,k)  = dq3dt_PBL(i,k) + dqdt_water_vapor(i,k)*dtf
-           enddo
-         enddo
+         idtend=dtidx(100+ntqv,index_for_cause_pbl)
+         if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + dqdt_water_vapor*dtf
        endif
 
        if (lprnt) then

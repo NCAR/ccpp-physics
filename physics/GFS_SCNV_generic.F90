@@ -71,25 +71,28 @@
 !! \htmlinclude GFS_SCNV_generic_post_run.html
 !!
       subroutine GFS_SCNV_generic_post_run (im, levs, nn, lssav, ldiag3d, qdiag3d, cplchm, &
-        frain, gu0, gv0, gt0, gq0_water_vapor, save_u, save_v, save_t, save_qv, dqdti, du3dt, dv3dt, dt3dt, dq3dt, clw,   &
+        frain, gu0, gv0, gt0, gq0_water_vapor, save_u, save_v, save_t, save_qv, dqdti, clw,   &
         shcnvcw, rain1, npdf3d, num_p3d, ncnvcld3d, cnvc, cnvw,                   &
         rainc, cnvprcp, cnvprcpb, cnvw_phy_f3d, cnvc_phy_f3d,                     &
-        flag_for_scnv_generic_tend,                                               &
+        dtend, dtidx, index_for_temperature, index_for_x_wind, index_for_y_wind,  &
+        index_for_cause_scnv, ntqv, flag_for_scnv_generic_tend,                   &
         imfshalcnv, imfshalcnv_sas, imfshalcnv_samf, errmsg, errflg)
 
       use machine,               only: kind_phys
 
       implicit none
 
-      integer, intent(in) :: im, levs, nn
+      integer, intent(in) :: im, levs, nn, ntqv
       logical, intent(in) :: lssav, ldiag3d, qdiag3d, cplchm, flag_for_scnv_generic_tend
       real(kind=kind_phys),                     intent(in) :: frain
       real(kind=kind_phys), dimension(im,levs), intent(in) :: gu0, gv0, gt0, gq0_water_vapor
       real(kind=kind_phys), dimension(im,levs), intent(in) :: save_u, save_v, save_t, save_qv
 
-      ! dqdti, dt3dt, dq3dt, only allocated if ldiag3d == .true.
+      ! dtend only allocated if ldiag3d == .true.
       real(kind=kind_phys), dimension(:,:), intent(inout) :: dqdti
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: du3dt, dv3dt, dt3dt, dq3dt
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_for_temperature, index_for_x_wind, index_for_y_wind, index_for_cause_scnv
       real(kind=kind_phys), dimension(im,levs,nn), intent(inout) :: clw
 
       ! Post code for SAS/SAMF
@@ -108,7 +111,7 @@
       character(len=*),              intent(out) :: errmsg
       integer,                       intent(out) :: errflg
 
-      integer :: i, k
+      integer :: i, k, idtend
       real(kind=kind_phys) :: tem
 
       ! Initialize CCPP error handling variables
@@ -138,19 +141,24 @@
 
       if (lssav .and. flag_for_scnv_generic_tend) then
         if (ldiag3d) then
-          do k=1,levs
-            do i=1,im
-              du3dt(i,k) = du3dt(i,k) + (gu0(i,k) - save_u(i,k)) * frain
-              dv3dt(i,k) = dv3dt(i,k) + (gv0(i,k) - save_v(i,k)) * frain
-              dt3dt(i,k) = dt3dt(i,k) + (gt0(i,k) - save_t(i,k)) * frain
-            enddo
-          enddo
-          if (qdiag3d) then
-             do k=1,levs
-                do i=1,im
-                   dq3dt(i,k) = dq3dt(i,k) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
-                enddo
-             enddo
+          idtend = dtidx(index_for_temperature, index_for_cause_scnv)
+          if(idtend>1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0(i,k) - save_t(i,k)) * frain
+          endif
+
+          idtend = dtidx(index_for_x_wind, index_for_cause_scnv)
+          if(idtend>1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0(i,k) - save_u(i,k)) * frain
+          endif
+
+          idtend = dtidx(index_for_y_wind, index_for_cause_scnv)
+          if(idtend>1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0(i,k) - save_v(i,k)) * frain
+          endif
+
+          idtend = dtidx(100+ntqv, index_for_cause_scnv)
+          if(idtend>1) then
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
           endif
         endif
       endif

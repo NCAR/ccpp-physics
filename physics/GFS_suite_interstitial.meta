@@ -664,59 +664,70 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dt3dt_lw]
-  standard_name = cumulative_change_in_temperature_due_to_longwave_radiation
-  long_name = cumulative change in temperature due to longwave radiation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+[dtend]
+  standard_name = diagnostic_3d_tendencies
+  long_name = diagnostic 3d tendencies for tracers and other fields
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
+  optional = T
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  type = integer
+  intent = in
   optional = F
-[dt3dt_sw]
-  standard_name = cumulative_change_in_temperature_due_to_shortwave_radiation
-  long_name = cumulative change in temperature due to shortwave radiation
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_cause_longwave]
+  standard_name = index_for_cause_longwave
+  long_name = tracer changes caused by long wave radiation
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt_pbl]
-  standard_name = cumulative_change_in_temperature_due_to_PBL
-  long_name = cumulative change in temperature due to PBL
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_cause_shortwave]
+  standard_name = index_for_cause_shortwave
+  long_name = tracer changes caused by short wave radiation
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt_dcnv]
-  standard_name = cumulative_change_in_temperature_due_to_deep_convection
-  long_name = cumulative change in temperature due to deep conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_cause_pbl]
+  standard_name = index_for_cause_pbl
+  long_name = tracer changes caused by PBL scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt_scnv]
-  standard_name = cumulative_change_in_temperature_due_to_shallow_convection
-  long_name = cumulative change in temperature due to shal conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_cause_dcnv]
+  standard_name = index_for_cause_dcnv
+  long_name = tracer changes caused by deep convection scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt_mp]
-  standard_name = cumulative_change_in_temperature_due_to_microphysics
-  long_name = cumulative change in temperature due to microphysics
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_cause_scnv]
+  standard_name = index_for_cause_scnv
+  long_name = tracer changes caused by shallow convection scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_cause_mp]
+  standard_name = index_for_cause_mp
+  long_name = tracer changes caused by microphysics scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [ctei_rml]
   standard_name = grid_sensitive_critical_cloud_top_entrainment_instability_criteria

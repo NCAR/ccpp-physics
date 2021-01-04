@@ -34,8 +34,9 @@
                     g,rd,cp,rv,ep1,ep2,xlv,                                    &
                     dusfc,dvsfc,dtsfc,dqsfc,                                   &
                     dt,kpbl1d,u10,v10,lssav,ldiag3d,qdiag3d,                   &
-                    flag_for_pbl_generic_tend,ntoz,du3dt_PBL,dv3dt_PBL,        &
-                    dt3dt_PBL,dq3dt_PBL,do3dt_PBL,errmsg,errflg   )
+                    flag_for_pbl_generic_tend,ntoz,ntqv,dtend,dtidx,           &
+                    index_for_temperature,index_for_x_wind,index_for_y_wind,   &
+                    index_for_cause_pbl,errmsg,errflg   )
 
    use machine , only : kind_phys
 !
@@ -88,8 +89,9 @@
              intent(inout)   ::                                utnp,vtnp,ttnp
    real(kind=kind_phys),     dimension( im,km,ntrac )                             , &
              intent(inout)   ::                                          qtnp
-   real(kind=kind_phys),     dimension(im,km)                                     , &
-             intent(inout)   :: du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL, do3dt_PBL
+   real(kind=kind_phys), optional, intent(inout) :: dtend(:,:,:)
+   integer, intent(in) :: dtidx(:,:), ntqv, index_for_temperature,                  &
+        index_for_x_wind, index_for_y_wind, index_for_cause_pbl
 !
 !---------------------------------------------------------------------------------
 ! output variables
@@ -854,12 +856,10 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = km,1,-1
-       do i = 1,im
-         ttend = (f1(i,k)-thx(i,k)+300.)*rdt*pi2d(i,k)
-         dt3dt_PBL(i,k) = dt3dt_PBL(i,k) + ttend*dtstep
-       enddo
-     enddo
+     idtend = dtidx(index_for_temperature,index_for_cause_pbl)
+     if(idtend>1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-thx+300.)*rdt*pi2d
+     endif
    endif
 !
 !     compute tridiagonal matrix elements for moisture, clouds, and gases
@@ -970,12 +970,10 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = km,1,-1
-       do i = 1,im
-         qtend = (f3(i,k,1)-qx(i,k,1))*rdt
-         dq3dt_PBL(i,k) = dq3dt_PBL(i,k) + qtend*dtstep
-       enddo
-     enddo
+     idtend = dtidx(ntqv+100,index_for_cause_pbl)
+     if(idtend>1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f3(:,:,1)-qx(:,:,1))*rdt
+     endif
    endif
 !
    if(ndiff.ge.2) then
@@ -989,13 +987,10 @@
      enddo
      if(lssav .and. ldiag3d .and. ntoz>0 .and. qdiag3d .and.         &
   &               .not. flag_for_pbl_generic_tend) then
-       ic = ntoz
-       do k = km,1,-1
-         do i = 1,im
-           qtend = f3(i,k,ic)-qx(i,k,ic)
-           do3dt_PBL(i,k) = do3dt_PBL(i,k)+qtend
-         enddo
-       enddo
+       idtend = dtidx(100+ntoz,index_for_cause_pbl)
+       if(idtend>1) then
+         dtend(:,:,idtend) = dtend(:,:,idtend) + f3(:,:,ntoz)-qx(:,:,ntoz)
+       endif
      endif
    endif
 !
@@ -1079,14 +1074,15 @@
      enddo
    enddo
    if(lssav .and. ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-     do k = km,1,-1
-       do i = 1,im
-         utend = (f1(i,k)-ux(i,k))*rdt
-         vtend = (f2(i,k)-vx(i,k))*rdt
-         du3dt_PBL(i,k) = du3dt_PBL(i,k) + utend*dtstep
-         dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + vtend*dtstep
-       enddo
-     enddo
+     idtend = dtidx(index_for_x_wind,index_for_cause_pbl)
+     if(idtend>1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f1-ux)*rdt
+     endif
+
+     idtend = dtidx(index_for_y_wind,index_for_cause_pbl)
+     if(idtend>1) then
+       dtend(:,:,idtend) = dtend(:,:,idtend) + dtstep*(f2-vx)*rdt
+     endif
    endif
 !
 !---- end of vertical diffusion

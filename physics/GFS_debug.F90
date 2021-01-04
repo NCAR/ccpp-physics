@@ -387,7 +387,7 @@
          integer,                    intent(out) :: errflg
 
          !--- local variables
-         integer :: impi, iomp, ierr, n
+         integer :: impi, iomp, ierr, n, idtend, icause, itracer
          integer :: mpirank, mpisize, mpicomm
          integer :: omprank, ompsize
 
@@ -631,22 +631,16 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%shum_wts    ',    Diag%shum_wts)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%zmtnblck    ',    Diag%zmtnblck)
                      if (Model%ldiag3d) then
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%du3dt       ',    Diag%du3dt)
-                       do n=1,size(Diag%du3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%du3dt_n     ',  Diag%du3dt(:,:,n))
-                       end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dv3dt       ',    Diag%dv3dt)
-                       do n=1,size(Diag%dv3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dv3dt_n     ',  Diag%dv3dt(:,:,n))
-                       end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dt3dt       ',    Diag%dt3dt)
-                       do n=1,size(Diag%dt3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dt3dt_n     ',  Diag%dt3dt(:,:,n))
-                       end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dq3dt       ',    Diag%dq3dt)
-                       do n=1,size(Diag%dq3dt(1,1,:))
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dq3dt_n     ',  Diag%dq3dt(:,:,n))
-                       end do
+                       do itracer=2,Model%ntracp100
+                          do icause=1,Model%ncause
+                             idtend = Model%dtidx(itracer,icause)
+                             if(idtend>1) then
+                                call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, &
+                                     'dtend_'//Model%dtend_tracer_labels(itracer)//'_' &
+                                     //Model%dtend_cause_labels(icause), Diag%dtend(1,1,idtend))
+                             endif
+                          enddo
+                       enddo
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%upd_mf      ',    Diag%upd_mf)
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dwn_mf      ',    Diag%dwn_mf)
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%det_mf      ',    Diag%det_mf)

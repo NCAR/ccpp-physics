@@ -69,9 +69,11 @@ contains
                hbot,htop,kcnv,xland,hfx2,qfx2,cliw,clcw,                        &
                pbl,ud_mf,dd_mf,dt_mf,cnvw_moist,cnvc,imfshalcnv,                &
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
-               du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
-               du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
-               ldiag3d,qdiag3d,qci_conv,errmsg,errflg)
+! fixme: delete               ! du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
+               ! du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
+               dtend,dtidx,ntqv,index_for_temperature,index_for_x_wind,         &
+               index_for_y_wind,index_for_cause_scnv,index_for_cause_dcnv,      &
+               ldiag3d,qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
       implicit none
       integer, parameter :: maxiens=1
@@ -94,8 +96,14 @@ contains
    integer      :: its,ite, jts,jte, kts,kte 
    integer, intent(in   ) :: im,km,ntracer
    logical, intent(in   ) :: flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend
-   logical, intent(in   ) :: ldiag3d,qdiag3d
+   logical, intent(in   ) :: ldiag3d
 
+   ! dtend is only allocated if ldiag=.true.
+   real(kind=kind_phys), optional, intent(in)               :: dtend(:,:,:)
+   integer, intent(in)                                      :: dtidx(:,:), &
+        index_for_x_wind, index_for_y_wind, index_for_temperature,         &
+        index_for_cause_scnv, index_for_cause_dcnv, ntqv
+   
    real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: qci_conv
@@ -168,7 +176,7 @@ contains
    real(kind=kind_phys), dimension (im)    :: umean,vmean,pmean
    real(kind=kind_phys), dimension (im)    :: xmbs,xmbs2,xmb,xmbm,xmb_dumm,mconv
 
-   integer :: i,j,k,icldck,ipr,jpr,jpr_deep,ipr_deep
+   integer :: i,j,k,icldck,ipr,jpr,jpr_deep,ipr_deep,uidx,vidx,tidx,qidx
    integer :: itf,jtf,ktf,iss,jss,nbegin,nend
    integer :: high_resolution
    real(kind=kind_phys)    :: clwtot,clwtot1,excess,tcrit,tscl_kf,dp,dq,sub_spread,subcenter
@@ -861,32 +869,64 @@ contains
 !
         if(ldiag3d) then
           if(ishallow_g3.eq.1 .and. .not.flag_for_scnv_generic_tend) then
-            do k=kts,ktf
-              do i=its,itf
-                du3dt_SCNV(i,k) = du3dt_SCNV(i,k) + cutens(i)*outus(i,k) * dt
-                dv3dt_SCNV(i,k) = dv3dt_SCNV(i,k) + cutens(i)*outvs(i,k) * dt
-                dt3dt_SCNV(i,k) = dt3dt_SCNV(i,k) + cutens(i)*outts(i,k) * dt
-                if(qdiag3d) then
+            uidx=dtidx(index_for_x_wind,index_for_cause_scnv)
+            vidx=dtidx(index_for_v_wind,index_for_cause_scnv)
+            tidx=dtidx(index_for_temperature,index_for_cause_scnv)
+            qidx=dtidx(100+ntqv,index_for_cause_scnv)
+            if(uidx>1) then
+              do k=kts,ktf
+                dtend(:,k,uidx) = dtend(:,k,uidx) + cutens(:)*outus(:,k) * dt
+              enddo
+            endif
+            if(vidx>1) then
+              do k=kts,ktf
+                dtend(:,k,vidx) = dtend(:,k,vidx) + cutens(:)*outvs(:,k) * dt
+              enddo
+            endif
+            if(tidx>1) then
+              do k=kts,ktf
+                dtend(:,k,tidx) = dtend(:,k,tidx) + cutens(i)*outts(i,k) * dt
+              enddo
+            endif
+            if(qidx>1) then
+              do k=kts,ktf
+                do i=its,itf
                   tem = cutens(i)*outqs(i,k)* dt
                   tem = tem/(1.0_kind_phys+tem)
-                  dq3dt_SCNV(i,k) = dq3dt_SCNV(i,k) + tem
-                endif
+                  dtend(i,k,qidx) = dtend(i,k,qidx) + tem
+                enddo
               enddo
-            enddo
+            endif
           endif
           if((ideep.eq.1. .or. imid_gf.eq.1) .and. .not.flag_for_dcnv_generic_tend) then
-            do k=kts,ktf
-              do i=its,itf
-                du3dt_DCNV(i,k) = du3dt_DCNV(i,k) + (cuten(i)*outu(i,k)+cutenm(i)*outum(i,k)) * dt
-                dv3dt_DCNV(i,k) = dv3dt_DCNV(i,k) + (cuten(i)*outv(i,k)+cutenm(i)*outvm(i,k)) * dt
-                dt3dt_DCNV(i,k) = dt3dt_DCNV(i,k) + (cuten(i)*outt(i,k)+cutenm(i)*outtm(i,k)) * dt
-                if(qdiag3d) then
+            uidx=dtidx(index_for_x_wind,index_for_cause_dcnv)
+            vidx=dtidx(index_for_v_wind,index_for_cause_dcnv)
+            tidx=dtidx(index_for_temperature,index_for_cause_dcnv)
+            qidx=dtidx(100+ntqv,index_for_cause_dcnv)
+            if(uidx>1) then
+              do k=kts,ktf
+                dtend(:,k,uidx) = dtend(:,k,uidx) + (cuten(i)*outu(i,k)+cutenm(i)*outum(i,k)) * dt
+              enddo
+            endif
+            if(vidx>1) then
+              do k=kts,ktf
+                dtend(:,k,vidx) = dtend(:,k,vidx) + (cuten(i)*outv(i,k)+cutenm(i)*outvm(i,k)) * dt
+              enddo
+            endif
+            if(tidx>1) then
+              do k=kts,ktf
+                dtend(:,k,tidx) = dtend(:,k,tidx) + (cuten(i)*outt(i,k)+cutenm(i)*outtm(i,k)) * dt
+              enddo
+            endif
+            if(qidx>1) then
+              do k=kts,ktf
+                do i=its,itf
                   tem = (cuten(i)*outq(i,k) + cutenm(i)*outqm(i,k))* dt
                   tem = tem/(1.0_kind_phys+tem)
-                  dq3dt_DCNV(i,k) = dq3dt_DCNV(i,k) + tem
-                endif
+                  dtend(i,k,qidx) = dtend(i,k,qidx) + tem
+                enddo
               enddo
-            enddo
+            endif
           endif
         endif
    end subroutine cu_gf_driver_run

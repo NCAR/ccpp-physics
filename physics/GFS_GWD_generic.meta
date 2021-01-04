@@ -182,32 +182,54 @@
   kind = kind_phys
   intent = in
   optional = F
-[du3dt]
-  standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in x wind due to orographic gravity wave drag
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+[dtend]
+  standard_name = diagnostic_3d_tendencies
+  long_name = diagnostic 3d tendencies for tracers and other fields
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
+  optional = T
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  type = integer
+  intent = in
   optional = F
-[dv3dt]
-  standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in y wind due to orographic gravity wave drag
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_temperature]
+  standard_name = index_for_temperature
+  long_name = index in dtidx first dimension of temperature field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in temperature due to orographic gravity wave drag
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_x_wind]
+  standard_name = index_for_x_wind
+  long_name = index in dtidx first dimension of x wind field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_y_wind]
+  standard_name = index_for_y_wind
+  long_name = index in dtidx first dimension of x wind field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_cause_orographic_gwd]
+  standard_name = index_for_cause_orographic_gwd
+  long_name = tracer changes caused by orographic gravity wave drag
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [dtf]
   standard_name = time_step_for_dynamics
@@ -342,32 +364,54 @@
   kind = kind_phys
   intent = inout
   optional = F
-[du3dt]
-  standard_name = cumulative_change_in_x_wind_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in zonal wind due to orographic gravity wave drag
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+[dtend]
+  standard_name = diagnostic_3d_tendencies
+  long_name = diagnostic 3d tendencies for tracers and other fields
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
   type = real
   kind = kind_phys
   intent = inout
+  optional = T
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  type = integer
+  intent = in
   optional = F
-[dv3dt]
-  standard_name = cumulative_change_in_y_wind_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in meridional wind due to orographic gravity wave drag
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_temperature]
+  standard_name = index_for_temperature
+  long_name = index in dtidx first dimension of temperature field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_orographic_gravity_wave_drag
-  long_name = cumulative change in temperature due to orographic gravity wave drag
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_x_wind]
+  standard_name = index_for_x_wind
+  long_name = index in dtidx first dimension of x wind field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_y_wind]
+  standard_name = index_for_y_wind
+  long_name = index in dtidx first dimension of x wind field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_cause_orographic_gwd]
+  standard_name = index_for_cause_orographic_gwd
+  long_name = tracer changes caused by orographic gravity wave drag
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [flag_for_gwd_generic_tend]
   standard_name = flag_for_generic_gravity_wave_drag_tendency

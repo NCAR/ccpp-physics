@@ -311,12 +311,12 @@
         trans_aero, ntchs, ntchm,                                                                                              &
         imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6, imp_physics_zhao_carr, imp_physics_mg,          &
         imp_physics_fer_hires,                                                                                                 &
-        ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, qdiag3d, lsidea, hybedmf, do_shoc, satmedmf,     &
+        ltaerosol, cplflx, cplchm, lssav, flag_for_pbl_generic_tend, ldiag3d, lsidea, hybedmf, do_shoc, satmedmf,     &
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
-        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl,                                                                                 &
-        dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag,             &
-        dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag, dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt,        &
-        dq3dt_ozone, rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          &
+        dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_for_temperature, index_for_x_wind, index_for_y_wind,        &
+        index_for_cause_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,    &
+        dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                    
+        rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          &
         dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
 
@@ -331,7 +331,7 @@
       logical, intent(in) :: trans_aero
       integer, intent(in) :: imp_physics, imp_physics_gfdl, imp_physics_thompson, imp_physics_wsm6
       integer, intent(in) :: imp_physics_zhao_carr, imp_physics_mg, imp_physics_fer_hires
-      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, qdiag3d, lsidea
+      logical, intent(in) :: ltaerosol, cplflx, cplchm, lssav, ldiag3d, lsidea
       logical, intent(in) :: hybedmf, do_shoc, satmedmf, shinhong, do_ysu
       logical, dimension(:), intent(in) :: flag_cice
 
@@ -359,9 +359,11 @@
       ! Since Intel 15 crashes when passing unallocated arrays to arrays defined with explicit shape,
       ! use assumed-shape arrays. Note that Intel 18 and GNU 6.2.0-8.1.0 tolerate explicit-shape arrays
       ! as long as these do not get used when not allocated.
-      real(kind=kind_phys), dimension(:,:), intent(inout) :: dt3dt, du3dt_PBL, du3dt_OGWD, dv3dt_PBL, dv3dt_OGWD, dq3dt, dq3dt_ozone
       real(kind=kind_phys), dimension(:),   intent(inout) :: dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, &
         dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag, dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_for_temperature, index_for_x_wind, index_for_y_wind, index_for_cause_pbl
 
       logical, dimension(:),intent(in) :: wet, dry, icy
       real(kind=kind_phys), dimension(:), intent(out) ::  ushfsfci
@@ -609,27 +611,31 @@
 
         if (ldiag3d .and. flag_for_pbl_generic_tend .and. lssav) then
           if (lsidea) then
-            dt3dt(1:im,:) = dt3dt(1:im,:) + dtdt(1:im,:)*dtf
+            idtend = dtidx(index_for_temperature, index_for_cause_pbl)
+            if(idtend>1) then
+              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + dtdt(1:im,1:levs)*dtf
+            endif
           else
-            do k=1,levs
-              do i=1,im
-                dt3dt(i,k) = dt3dt(i,k) + (tgrs(i,k) - save_t(i,k))
-              enddo
-            enddo
+            idtend = dtidx(index_for_temperature, index_for_cause_pbl)
+            if(idtend>1) then
+              dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (tgrs(1:im,1:levs) - save_t(1:im,1:levs))
+            endif
           endif
-          do k=1,levs
-            do i=1,im
-              du3dt_PBL(i,k) = du3dt_PBL(i,k) + (ugrs(i,k) - save_u(i,k))
-              dv3dt_PBL(i,k) = dv3dt_PBL(i,k) + (vgrs(i,k) - save_v(i,k))
-            enddo
-          enddo
-          if(qdiag3d) then
-            do k=1,levs
-              do i=1,im
-                dq3dt      (i,k) = dq3dt      (i,k) + (qgrs(i,k,ntqv)-save_q(i,k,ntqv))
-                dq3dt_ozone(i,k) = dq3dt_ozone(i,k) + (qgrs(i,k,ntoz)-save_q(i,k,ntoz))
-              enddo
-            enddo
+          idtend = dtidx(index_for_x_wind, index_for_cause_pbl)
+          if(idtend>1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (ugrs(1:im,1:levs) - save_u(1:im,1:levs)
+          endif
+          idtend = dtidx(index_for_y_wind, index_for_cause_pbl)
+          if(idtend>1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (vgrs(1:im,1:levs) - save_v(1:im,1:levs)
+          endif
+          idtend = dtidx(100+ntqv, index_for_cause_pbl)
+          if(idtend>1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntqv) - save_q(1:im,1:levs,ntqv)
+          endif
+          idtend = dtidx(100+ntoz, index_for_cause_pbl)
+          if(idtend>1) then
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + qgrs(1:im,1:levs,ntoz) - save_q(1:im,1:levs,ntoz)
           endif
         endif
 

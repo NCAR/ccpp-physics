@@ -40,9 +40,10 @@
      &  dusfc,dvsfc,dtsfc,dqsfc,                    &
      &  dkt,xkzm_m, xkzm_h,xkzm_s, gamt,gamq,       &
      &  con_cp,con_g,con_rd,                        &
-     &  me, lprnt, dt3dt_PBL, du3dt_PBL, dv3dt_PBL, &
-     &  dq3dt_PBL, gen_tend, ldiag3d, qdiag3d,      &
-     &  errmsg, errflg )
+     &  me, lprnt, gen_tend, ldiag3d, dtend, dtidx, &
+     &  index_for_temperature, index_for_x_wind,    &
+     &  index_for_y_wind, index_for_cause_pbl,      &
+     &  ntqv, errmsg, errflg )
 
 !
 
@@ -76,6 +77,11 @@
 
       character(len=*), intent(out) :: errmsg
       integer, intent(out) :: errflg
+
+      real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
+      integer, intent(in) :: dtidx(:,:)
+      integer, intent(in) :: index_for_temperature, index_for_x_wind, &
+     &                       index_for_y_wind, index_for_cause_pbl, ntqv
 
 !MYJ-1D
       integer,intent(in) :: im, levs
@@ -113,8 +119,6 @@
              dudt, dvdt, dtdt
       real(kind=kind_phys),dimension(im,levs-1),intent(out) :: &
              dkt
-      real(kind=kind_phys),dimension(:,:),intent(inout)     :: &
-             du3dt_PBL, dv3dt_PBL, dt3dt_PBL, dq3dt_PBL
 
 !MYJ-4D
       real(kind=kind_phys),dimension(im,levs,ntrac),intent(inout) ::  &
@@ -158,6 +162,7 @@
 !      real(kind=kind_phys), dimension(im,levs,ntrac) ::    &
 !     &        qgrs_myj
       real(kind=kind_phys),dimension(im,levs) :: dkt2
+      integer :: uidx, vidx, tidx, qidx
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -581,21 +586,18 @@
          end do
       end do
       if (ldiag3d .and. .not. gen_tend) then
+        uidx = dtidx(index_for_x_wind,index_for_cause_pbl)
+        vidx = dtidx(index_for_y_wind,index_for_cause_pbl)
+        tidx = dtidx(index_for_temperature,index_for_cause_pbl)
+        qidx = dtidx(ntqv+100,index_for_cause_pbl)
+        ! NOTE: The code that was here before was wrong. It replaced the
+        ! cumulative value with the instantaneous value.
         do k=1,levs
            k1=levs+1-k
-           do i=1,im
-             du3dt_PBL(i,k) = rublten(i,k1)*dt_phs
-             dv3dt_PBL(i,k) = rvblten(i,k1)*dt_phs
-             dt3dt_PBL(i,k) = rthblten(i,k1)*exner(i,k1)*dt_phs
-           end do
-        end do
-        if (qdiag3d) then
-          do k=1,levs
-             k1=levs+1-k
-             do i=1,im
-               dq3dt_PBL(i,k) = rqvblten(i,k1)*dt_phs
-             end do
-          end do
+           if(uidx>1) dtend(:,k,uidx)=dtend(:,k,uidx)+rublten(:,k1)*dt_phs
+           if(vidx>1) dtend(:,k,vidx)=dtend(:,k,vidx)+rvblten(:,k1)*dt_phs
+           if(tidx>1) dtend(:,k,tidx)=dtend(:,k,tidx)+rthblten(:,k1)*exner(:,k1)*dt_phs
+           if(qidx>1) dtend(:,k,qidx)=dtend(:,k,qidx)+rqvblten(:,k1)*dt_phs
         end if
       end if
 
