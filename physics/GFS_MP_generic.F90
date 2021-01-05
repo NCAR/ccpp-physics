@@ -112,28 +112,35 @@
       real(kind=kind_phys), dimension(im),      intent(in   ) :: sr
       real(kind=kind_phys), dimension(im),      intent(inout) :: rain, domr_diag, domzr_diag, domip_diag, doms_diag, tprcp,  &
                                                                  srflag, cnvprcp, totprcp, totice, totsnw, totgrp, cnvprcpb, &
-                                                                 totprcpb, toticeb, totsnwb, totgrpb, rain_cpl, rainc_cpl,   &
-                                                                 snow_cpl, pwat
+                                                                 totprcpb, toticeb, totsnwb, totgrpb, pwat
+      real(kind=kind_phys), dimension(:),       intent(inout) :: rain_cpl, rainc_cpl, snow_cpl
 
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: dt3dt ! only if ldiag3d
       real(kind=kind_phys), dimension(:,:),     intent(inout) :: dq3dt ! only if ldiag3d and qdiag3d
 
       ! Stochastic physics / surface perturbations
+<<<<<<< HEAD
       real(kind=kind_phys), dimension(im),      intent(inout) :: drain_cpl
       real(kind=kind_phys), dimension(im),      intent(inout) :: dsnow_cpl
+=======
+      logical, intent(in) :: do_sppt, ca_global
+      real(kind=kind_phys), dimension(:,:),     intent(inout) :: dtdtr
+      real(kind=kind_phys), dimension(:,:),     intent(in)    :: dtdtc
+      real(kind=kind_phys), dimension(:),       intent(inout) :: drain_cpl, dsnow_cpl
+>>>>>>> 3f240db... Merge pull request #540 from climbfuji/release_public_v2_gnu10_crashes
 
       ! Rainfall variables previous time step
       integer, intent(in) :: lsm, lsm_ruc, lsm_noahmp
-      real(kind=kind_phys), dimension(im),      intent(inout) :: raincprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: rainncprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: iceprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: snowprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: graupelprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: draincprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: drainncprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: diceprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dsnowprv
-      real(kind=kind_phys), dimension(im),      intent(inout) :: dgraupelprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: raincprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: rainncprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: iceprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: snowprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: graupelprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: draincprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: drainncprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: diceprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: dsnowprv
+      real(kind=kind_phys), dimension(:),       intent(inout) :: dgraupelprv
 
       real(kind=kind_phys),                     intent(in)    :: dtp
 
