@@ -181,7 +181,7 @@ contains
        ! Sampling. Map band optical depth to each g-point using McICA
        !
        call check_error_msg('rrtmgp_sw_cloud_sampling_run_draw_samples', & 
-            draw_samples(cldfracMCICA,                      &
+            draw_samples(cldfracMCICA, .true.,              &
                          sw_optical_props_cloudsByBand,     &
                          sw_optical_props_clouds))
          
@@ -239,7 +239,7 @@ contains
        ! Sampling. Map band optical depth to each g-point using McICA
        !
        call check_error_msg('rrtmgp_sw_precip_sampling_run_draw_samples', & 
-            draw_samples(precipfracSAMP,                    &
+            draw_samples(precipfracSAMP, .true.,            &
                          sw_optical_props_precipByBand,     &
                          sw_optical_props_precip))                  
          
