@@ -491,10 +491,10 @@
                      end if
                      ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%zs',             Model%zs)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%sh2o',         Sfcprop%sh2o)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%smois',        Sfcprop%smois)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tslb',         Sfcprop%tslb)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%zs',           Sfcprop%zs)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%clw_surf',     Sfcprop%clw_surf)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%qwv_surf',     Sfcprop%qwv_surf)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%cndm_surf',    Sfcprop%cndm_surf)

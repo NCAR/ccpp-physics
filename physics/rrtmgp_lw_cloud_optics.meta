@@ -159,6 +159,14 @@
   type = logical
   intent = in
   optional = F   
+[doGP_lwscat] 
+  standard_name = flag_to_include_longwave_scattering_in_cloud_optics
+  long_name = logical flag to control the addition of LW scattering in RRTMGP 
+  units = flag
+  dimensions = ()
+  type = logical  
+  intent = in
+  optional = F    
 [ncol]
   standard_name = horizontal_loop_extent
   long_name = horizontal dimension
@@ -314,14 +322,14 @@
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
-  intent = out
+  intent = inout
   optional = F
 [lw_optical_props_cloudsByBand]
   standard_name = longwave_optical_properties_for_cloudy_atmosphere_by_band
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = out
   optional = F
 [lw_optical_props_precipByBand]
@@ -329,7 +337,7 @@
   long_name = Fortran DDT containing RRTMGP optical properties
   units = DDT
   dimensions = ()
-  type = ty_optical_props_1scl
+  type = ty_optical_props_2str
   intent = out
   optional = F  
 [errmsg]
