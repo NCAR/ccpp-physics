@@ -26,13 +26,13 @@
 !! -# defines random seed indices for radiation (in a reproducible way)
 !! -# interpolates coefficients for prognostic ozone calculation
 !! -# performs surface data cycling via the GFS gcycle routine
-      subroutine GFS_stochastics_run (im, km, kdt, do_sppt, do_pertmp, use_zmtnblck,     &
+      subroutine GFS_stochastics_run (im, km, kdt, delt, do_sppt, pert_mp, use_zmtnblck, &
                                       do_shum ,do_skeb, do_ca,ca_global,ca1,si,vfact_ca, &
                                       zmtnblck, sppt_wts, skebu_wts, skebv_wts, shum_wts,&
                                       sppt_wts_inv, skebu_wts_inv, skebv_wts_inv,        &
                                       shum_wts_inv, diss_est, ugrs, vgrs, tgrs, qgrs_wv, &
                                       qgrs_cw, qgrs_rw, qgrs_sw, qgrs_iw, qgrs_gl,       &
-                                      gu0, gv0, gt0, gq0_wv, dtdtr,                      &
+                                      gu0, gv0, gt0, gq0_wv, dtdtnp,                     &
                                       gq0_cw, gq0_rw, gq0_sw, gq0_iw, gq0_gl,            &
                                       rain, rainc, tprcp, totprcp, cnvprcp,              &
                                       totprcpb, cnvprcpb, cplflx,                        &
@@ -47,8 +47,9 @@
          integer,                               intent(in)    :: im
          integer,                               intent(in)    :: km
          integer,                               intent(in)    :: kdt
+         real(kind_phys),                       intent(in)    :: delt     
          logical,                               intent(in)    :: do_sppt
-         logical,                               intent(in)    :: do_pertmp
+         logical,                               intent(in)    :: pert_mp
          logical,                               intent(in)    :: do_ca
          logical,                               intent(in)    :: ca_global
          logical,                               intent(in)    :: use_zmtnblck
@@ -91,8 +92,7 @@
          integer, intent(in) ::      ntsw
          integer, intent(in) ::      ntiw
          integer, intent(in) ::      ntgl
-         ! dtdtr only allocated if do_sppt == .true.
-         real(kind_phys), dimension(:,:),       intent(in)    :: dtdtr
+         real(kind_phys), dimension(1:im,1:km), intent(inout)    :: dtdtnp
          real(kind_phys), dimension(1:im),      intent(in)    :: rain
          real(kind_phys), dimension(1:im),      intent(in)    :: rainc
          real(kind_phys), dimension(1:im),      intent(inout) :: tprcp
@@ -149,7 +149,7 @@
 
                upert = (gu0(i,k) - ugrs(i,k))   * sppt_wts(i,k)
                vpert = (gv0(i,k) - vgrs(i,k))   * sppt_wts(i,k)
-               tpert = (gt0(i,k) - tgrs(i,k) - dtdtr(i,k)) * sppt_wts(i,k)
+               tpert = (gt0(i,k) - tgrs(i,k) - (delt*dtdtnp(i,k))) * sppt_wts(i,k)
                qpert = (gq0_wv(i,k) - qgrs_wv(i,k)) * sppt_wts(i,k)
 
                gu0(i,k)  = ugrs(i,k)+upert
@@ -159,11 +159,11 @@
                qnew = qgrs_wv(i,k)+qpert
                if (qnew >= 1.0e-10) then
                   gq0_wv(i,k) = qnew
-                  gt0(i,k) = tgrs(i,k) + tpert + dtdtr(i,k)
+                  gt0(i,k) = tgrs(i,k) + tpert + (delt*dtdtnp(i,k))
                endif
-               if (do_pertmp) then
+               if (pert_mp) then
                   if (ntcw>0) then
-                     qpert = gq0_cw(i,k) - qgrs_cw(i,k) * sppt_wts(i,k)
+                     qpert = (gq0_cw(i,k) - qgrs_cw(i,k)) * sppt_wts(i,k)
                      qnew = qgrs_cw(i,k)+qpert
                      gq0_cw(i,k) = qnew
                      if (qnew < 0.0) then
@@ -171,7 +171,7 @@
                      endif
                   endif
                   if (ntrw>0) then
-                     qpert = gq0_rw(i,k) - qgrs_rw(i,k) * sppt_wts(i,k)
+                     qpert = (gq0_rw(i,k) - qgrs_rw(i,k)) * sppt_wts(i,k)
                      qnew = qgrs_rw(i,k)+qpert
                      gq0_rw(i,k) = qnew
                      if (qnew < 0.0) then
@@ -179,7 +179,7 @@
                      endif
                   endif
                   if (ntsw>0) then
-                     qpert = gq0_sw(i,k) - qgrs_sw(i,k) * sppt_wts(i,k)
+                     qpert = (gq0_sw(i,k) - qgrs_sw(i,k)) * sppt_wts(i,k)
                      qnew = qgrs_sw(i,k)+qpert
                      gq0_sw(i,k) = qnew
                      if (qnew < 0.0) then
@@ -187,7 +187,7 @@
                      endif
                   endif
                   if (ntiw>0) then
-                     qpert = gq0_iw(i,k) - qgrs_iw(i,k) * sppt_wts(i,k)
+                     qpert = (gq0_iw(i,k) - qgrs_iw(i,k)) * sppt_wts(i,k)
                      qnew = qgrs_iw(i,k)+qpert
                      gq0_iw(i,k) = qnew
                      if (qnew < 0.0) then
@@ -195,7 +195,7 @@
                      endif
                   endif
                   if (ntgl>0) then
-                     qpert = gq0_gl(i,k) - qgrs_gl(i,k) * sppt_wts(i,k)
+                     qpert = (gq0_gl(i,k) - qgrs_gl(i,k)) * sppt_wts(i,k)
                      qnew = qgrs_gl(i,k)+qpert
                      gq0_gl(i,k) = qnew
                      if (qnew < 0.0) then
@@ -219,6 +219,8 @@
                rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
                snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
             endif
+!zero out radiative heating tendency for next physics step
+           dtdtnp(:,:)=0.0
 
          endif
 
@@ -262,7 +264,7 @@
 
                   upert = (gu0(i,k)   - ugrs(i,k))   * ca(i,k)
                   vpert = (gv0(i,k)   - vgrs(i,k))   * ca(i,k)
-                  tpert = (gt0(i,k)   - tgrs(i,k) - dtdtr(i,k)) * ca(i,k)
+                  tpert = (gt0(i,k)   - tgrs(i,k) - (delt*dtdtnp(i,k))) * ca(i,k)
                   qpert = (gq0_wv(i,k)   - qgrs_wv(i,k)) * ca(i,k)
                   gu0(i,k)  = ugrs(i,k)+upert
                   gv0(i,k)  = vgrs(i,k)+vpert
@@ -270,7 +272,7 @@
                   qnew = qgrs_wv(i,k)+qpert
                   if (qnew >= 1.0e-10) then
                      gq0_wv(i,k) = qnew
-                     gt0(i,k)   = tgrs(i,k) + tpert + dtdtr(i,k)
+                     gt0(i,k)   = tgrs(i,k) + tpert + (delt*dtdtnp(i,k))
                   endif
                enddo
             enddo

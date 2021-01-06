@@ -85,7 +85,7 @@
 !! \htmlinclude GFS_suite_interstitial_1_run.html
 !!
     subroutine GFS_suite_interstitial_1_run (im, levs, ntrac, dtf, dtp, slmsk, area, dxmin, dxinv, pgr, &
-      islmsk, work1, work2, psurf, dudt, dvdt, dtdt, dtdtc, dqdt, errmsg, errflg)
+      islmsk, work1, work2, psurf, dudt, dvdt, dtdt, dqdt, errmsg, errflg)
 
       use machine,               only: kind_phys
 
@@ -98,7 +98,7 @@
 
       integer,              intent(out), dimension(im) :: islmsk
       real(kind=kind_phys), intent(out), dimension(im) :: work1, work2, psurf
-      real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt, dtdtc
+      real(kind=kind_phys), intent(out), dimension(im,levs) :: dudt, dvdt, dtdt
       real(kind=kind_phys), intent(out), dimension(im,levs,ntrac) ::  dqdt
       real(kind=kind_phys), parameter   :: zero = 0.0_kind_phys, one = 1.0_kind_phys
       character(len=*),     intent(out) :: errmsg
@@ -125,7 +125,6 @@
           dudt(i,k)  = zero
           dvdt(i,k)  = zero
           dtdt(i,k)  = zero
-          dtdtc(i,k) = zero
         enddo
       enddo
       do n=1,ntrac

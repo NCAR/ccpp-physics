@@ -26,8 +26,8 @@
         ltaerosol, lgfdlmprad, uni_cld, effr_in, do_mynnedmf, lmfshal,         &
         lmfdeep2, fhswr, fhlwr, solhr, sup, eps, epsm1, fvirt,                 &
         rog, rocp, con_rd, xlat_d, xlat, xlon, coslat, sinlat, tsfc, slmsk,    &
-        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in,                    &
-        cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,                            & !inputs from here and above
+        prsi, prsl, prslk, tgrs, sfc_wts, mg_cld, effrr_in, pert_clds,sppt_wts,&
+        sppt_amp, cnvw_in, cnvc_in, qgrs, aer_nm, dx, icloud,                  & !inputs from here and above
         coszen, coszdg, effrl_inout, effri_inout, effrs_inout,                 &
         clouds1, clouds2, clouds3, clouds4, clouds5,                           & !in/out from here and above
         kd, kt, kb, mtopa, mbota, raddt, tsfg, tsfa, de_lgth, alb1d, delp, dz, & !output from here and below
@@ -65,7 +65,7 @@
      &                                     profsw_type, NBDSW
       use module_radlw_parameters,   only: topflw_type, sfcflw_type, &
      &                                     proflw_type, NBDLW
-      use surface_perturbation,      only: cdfnor
+      use surface_perturbation,      only: cdfnor,ppfbet
 
       ! For Thompson MP
       use module_mp_thompson,        only: calc_effectRad, Nt_c
@@ -97,9 +97,9 @@
 
       logical,              intent(in) :: lsswr, lslwr, ltaerosol, lgfdlmprad, &
                                           uni_cld, effr_in, do_mynnedmf,       &
-                                          lmfshal, lmfdeep2
+                                          lmfshal, lmfdeep2, pert_clds
 
-      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian
+      real(kind=kind_phys), intent(in) :: fhswr, fhlwr, solhr, sup, julian, sppt_amp
       real(kind=kind_phys), intent(in) :: eps, epsm1, fvirt, rog, rocp, con_rd
 
       real(kind=kind_phys), dimension(:), intent(in) :: xlat_d, xlat, xlon,    &
@@ -109,7 +109,8 @@
       real(kind=kind_phys), dimension(:,:), intent(in) :: prsi, prsl, prslk,   &
                                                           tgrs, sfc_wts,       &
                                                           mg_cld, effrr_in,    &
-                                                          cnvw_in, cnvc_in
+                                                          cnvw_in, cnvc_in,    &
+                                                          sppt_wts
 
       real(kind=kind_phys), dimension(:,:,:), intent(in) :: qgrs, aer_nm
 
@@ -182,7 +183,7 @@
       real(kind=kind_phys), dimension(im,lm+LTP) ::         &
                           htswc, htlwc, gcice, grain, grime, htsw0, htlw0, &
                           rhly, tvly,qstl, vvel, clw, ciw, prslk1, tem2da, &
-                          dzb, hzb, cldcov, deltaq, cnvc, cnvw,            &
+                          dzb, hzb, cldcov, deltaq, cnvc, cnvw,   &
                           effrl, effri, effrr, effrs, rho, orho, plyrpa
 
       ! for Thompson MP
@@ -200,6 +201,11 @@
       real(kind=kind_phys), dimension(im,lm+LTP,NF_VGAS)       :: gasvmr
       real(kind=kind_phys), dimension(im,lm+LTP,NBDSW,NF_AESW) :: faersw
       real(kind=kind_phys), dimension(im,lm+LTP,NBDLW,NF_AELW) :: faerlw
+      
+      ! for stochastic cloud perturbations
+      real(kind=kind_phys), dimension(im) :: cldp1d
+      real (kind=kind_phys) :: alpha0,beta0,m,s,cldtmp,tmp_wt,cdfz
+      integer  :: iflag
 
       integer :: ids, ide, jds, jde, kds, kde, &
                  ims, ime, jms, jme, kms, kme, &
@@ -932,6 +938,34 @@
           ccnd(1:IM,1:LMK,1) = ccnd(1:IM,1:LMK,1) + cnvw(1:IM,1:LMK)
         endif
 
+! perturb cld cover
+        !if (pert_clds) then
+        !   cldp1d(:) = 0.
+        !   do i=1,im
+        !      tmp_wt= -1*log( ( 2.0 / ( sppt_wts(i,38) ) ) - 1 )
+        !       call cdfnor(tmp_wt,cdfz)
+        !       cldp1d(i) = cdfz
+        !   enddo
+        !   do i = 1, IM
+        !      do k = 1, LM
+        !         ! compute beta distribution parameters
+        !         m = cldcov(i,k+kd)
+        !         if (m<0.99 .AND. m > 0.01) then
+        !            s = sppt_amp*m*(1.-m)
+        !            alpha0 = m*m*(1.-m)/(s*s)-m
+        !            beta0  = alpha0*(1.-m)/m
+        !    ! compute beta distribution value corresponding
+        !    ! to the given percentile albPpert to use as new albedo
+        !            call ppfbet(cldp1d(i),alpha0,beta0,iflag,cldtmp)
+        !            cldcov(i,k+kd) = cldtmp
+        !         else
+        !            cldcov(i,k+kd) = m
+        !         endif
+        !      enddo     ! end_do_i_loop
+        !   enddo     ! end_do_k_loop
+        !endif
+        !print*,'after cld perts',minval(cldcov),maxval(cldcov)
+
 
         if (imp_physics == imp_physics_zhao_carr .or. imp_physics == imp_physics_mg) then ! zhao/moorthi's prognostic cloud scheme
                                          ! or unified cloud and/or with MG microphysics
@@ -1038,6 +1072,31 @@
 
 !      endif                             ! end_if_ntcw
 
+! perturb cld cover
+       if (pert_clds) then
+          do i=1,im
+             tmp_wt= -1*log( ( 2.0 / ( sppt_wts(i,38) ) ) - 1 )
+              call cdfnor(tmp_wt,cdfz)
+              cldp1d(i) = cdfz
+          enddo
+          do k = 1, LMK
+             do i = 1, IM
+                ! compute beta distribution parameters
+                m = clouds(i,k,1)
+                if (m<0.99 .AND. m > 0.01) then
+                   s = sppt_amp*m*(1.-m)
+                   alpha0 = m*m*(1.-m)/(s*s)-m
+                   beta0  = alpha0*(1.-m)/m
+           ! compute beta distribution value corresponding
+           ! to the given percentile albPpert to use as new albedo
+                   call ppfbet(cldp1d(i),alpha0,beta0,iflag,cldtmp)
+                   clouds(i,k,1) = cldtmp
+                else
+                   clouds(i,k,1) = m
+                endif
+             enddo     ! end_do_i_loop
+          enddo     ! end_do_k_loop
+       endif
        do k = 1, LMK
          do i = 1, IM
             clouds1(i,k)  = clouds(i,k,1)

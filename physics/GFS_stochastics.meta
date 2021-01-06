@@ -31,6 +31,15 @@
   type = integer
   intent = in
   optional = F
+[delt]
+  standard_name = time_step_for_physics
+  long_name = physics timestep
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [ntcw]
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
@@ -79,7 +88,7 @@
   type = logical
   intent = in
   optional = F
-[do_pertmp]
+[pert_mp]
   standard_name = flag_for_stochastic_microphysics_perturbations
   long_name = flag for stochastic microphysics physics perturbations
   units = flag
@@ -406,10 +415,10 @@
   kind = kind_phys
   intent = inout
   optional = F
-[dtdtr]
-  standard_name = tendency_of_air_temperature_due_to_radiative_heating_on_physics_time_step
-  long_name = temp. change due to radiative heating per time step
-  units = K
+[dtdtnp]
+  standard_name = tendency_of_air_temperature_to_withold_from_sppt
+  long_name = temp. change from physics that should not be perturbed by sppt
+  units = K s-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
