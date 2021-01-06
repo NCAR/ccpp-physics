@@ -6,16 +6,19 @@ module GFS_rrtmgp_gfdlmp_pre
   use machine,      only: kind_phys
   use rrtmgp_aux,   only: check_error_msg
   use module_radiation_cloud_overlap, only: cmp_dcorr_lgth, get_alpha_exp  
+  use rrtmgp_lw_cloud_optics, only: radliq_lwr, radliq_upr, radice_lwr, radice_upr
 
   ! Parameters
   real(kind_phys), parameter :: &
        reliq_def  = 10.0 ,      & ! Default liq radius to 10 micron (used when effr_in=F)
        reice_def  = 50.0,       & ! Default ice radius to 50 micron (used when effr_in=F)
        rerain_def = 1000.0,     & ! Default rain radius to 1000 micron (used when effr_in=F)
-       resnow_def = 250.0,      & ! Default snow radius to 250 micron (used when effr_in=F)    
-       reice_min  = 10.0,       & ! Minimum ice size allowed by scheme
-       reice_max  = 150.0         ! Maximum ice size allowed by scheme
-         
+       resnow_def = 250.0,      & ! Default snow radius to 250 micron (used when effr_in=F)
+       reice_min  = 10.0,       & ! Minimum ice size allowed by GFDL MP scheme
+       reice_max  = 150.0         ! Maximum ice size allowed by GFDL MP scheme
+  ! NOTE: When using RRTMGP cloud-optics, the min/max particle size allowed are imported 
+  !       from initialization.
+
    public GFS_rrtmgp_gfdlmp_pre_init, GFS_rrtmgp_gfdlmp_pre_run, GFS_rrtmgp_gfdlmp_pre_finalize
 
 contains  
@@ -30,9 +33,9 @@ contains
 !! \htmlinclude GFS_rrtmgp_gfdlmp_pre_run.html
 !!  
   subroutine GFS_rrtmgp_gfdlmp_pre_run(nCol, nLev, nTracers, ncnd, i_cldliq, i_cldice,   &
-       i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, doSWrad, doLWrad, effr_in,    &
-       p_lev, p_lay, tv_lay, effrin_cldliq, effrin_cldice, effrin_cldrain,  &
-       effrin_cldsnow, tracer, con_g, con_rd, &
+       i_cldrain, i_cldsnow, i_cldgrpl, i_cldtot, doSWrad, doLWrad, effr_in, kdt,        &
+       do_mynnedmf, p_lev, p_lay, tv_lay, effrin_cldliq, effrin_cldice, effrin_cldrain,  &
+       effrin_cldsnow, tracer, con_g, con_rd, doGP_cldoptics_PADE, doGP_cldoptics_LUT,   &
        cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,   &
        cld_rerain, precip_frac, errmsg, errflg)
     implicit none
@@ -48,11 +51,15 @@ contains
          i_cldrain,            & ! Index into tracer array for cloud rain.
          i_cldsnow,            & ! Index into tracer array for cloud snow.
          i_cldgrpl,            & ! Index into tracer array for cloud groupel.
-         i_cldtot                ! Index into tracer array for cloud total amount.
+         i_cldtot,             & ! Index into tracer array for cloud total amount.
+         kdt                     ! Current forecast iteration
     logical, intent(in) :: &
     	 doSWrad,              & ! Call SW radiation?
     	 doLWrad,              & ! Call LW radiation
-    	 effr_in                 ! Provide hydrometeor radii from macrophysics?
+    	 effr_in,              & ! Provide hydrometeor radii from macrophysics?
+         do_mynnedmf,          & ! Flag to activate MYNN-EDMF 
+         doGP_cldoptics_LUT,   & ! Flag to do GP cloud-optics (LUTs)
+         doGP_cldoptics_PADE     !                            (PADE approximation)
     real(kind_phys), intent(in) :: &
          con_g,                & ! Physical constant: gravitational constant
          con_rd                  ! Physical constant: gas-constant for dry air
@@ -69,7 +76,7 @@ contains
          tracer                  ! Cloud condensate amount in layer by type ()         
     
     ! Outputs     
-    real(kind_phys), dimension(nCol,nLev),intent(out) :: &
+    real(kind_phys), dimension(nCol,nLev),intent(inout) :: &
          cld_frac,             & ! Total cloud fraction
          cld_lwp,              & ! Cloud liquid water path
          cld_reliq,            & ! Cloud liquid effective radius
@@ -106,14 +113,10 @@ contains
        return
     endif
 
-    ! Initialize outputs                                                                                                                                                                      
-    cld_lwp(:,:)    = 0.0
+    ! Initialize outputs
     cld_reliq(:,:)  = reliq_def
-    cld_iwp(:,:)    = 0.0
     cld_reice(:,:)  = reice_def
-    cld_rwp(:,:)    = 0.0
     cld_rerain(:,:) = rerain_def
-    cld_swp(:,:)    = 0.0
     cld_resnow(:,:) = resnow_def
     
     ! ####################################################################################
@@ -137,8 +140,8 @@ contains
           cld_rwp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,3) * tem1)
           cld_swp(iCol,iLay)  = max(0., cld_condensate(iCol,iLay,4) * tem1) 
        enddo
-    enddo      
-    
+    enddo
+
     ! Particle size
     do iLay = 1, nLev
        do iCol = 1, nCol
@@ -151,12 +154,32 @@ contains
           endif
        enddo
     enddo
+
+    ! Bound effective radii for RRTMGP, LUT's for cloud-optics go from 
+    !   2.5 - 21.5 microns for liquid clouds,
+    !   10  - 180  microns for ice-clouds    
+    if (doGP_cldoptics_PADE .or. doGP_cldoptics_LUT) then
+       where(cld_reliq .lt. radliq_lwr) cld_reliq = radliq_lwr
+       where(cld_reliq .gt. radliq_upr) cld_reliq = radliq_upr
+       where(cld_reice .lt. radice_lwr) cld_reice = radice_lwr
+       where(cld_reice .gt. radice_upr) cld_reice = radice_upr
+    endif
     
     ! Cloud-fraction
-    cld_frac(1:nCol,1:nLev)   = tracer(1:nCol,1:nLev,i_cldtot)
+    if (do_mynnedmf .and. kdt .gt. 1) then
+       do iLay = 1, nLev
+          do iCol = 1, nCol
+             if (tracer(iCol,iLay,i_cldrain) > 1.0e-7 .OR. tracer(iCol,iLay,i_cldsnow)>1.0e-7) then
+                cld_frac(iCol,iLay) = tracer(iCol,iLay,i_cldtot)
+             endif
+          enddo
+       enddo
+    else
+       cld_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,i_cldtot)
+    endif
     
     ! Precipitation fraction (Hack. For now use cloud-fraction)
-    precip_frac(1:nCol,1:nLev) = tracer(1:nCol,1:nLev,i_cldtot)    
+    precip_frac(1:nCol,1:nLev) = cld_frac(1:nCol,1:nLev)
 
   end subroutine GFS_rrtmgp_gfdlmp_pre_run
   
