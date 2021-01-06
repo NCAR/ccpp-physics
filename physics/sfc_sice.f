@@ -14,9 +14,6 @@
 
 !>\defgroup gfs_sice_main GFS Three-layer Thermodynomics Sea-Ice Scheme Module
 !!  \brief  This is three-layer thermodynomics sea-ice model based on Winton (2000) \cite winton_2000.
-!! \section arg_table_sfc_sice_run Argument Table
-!! \htmlinclude sfc_sice_run.html
-!!
 !>  \section general_sice_run GFS Sea Ice Driver General Algorithm
 !!The model has four prognostic variables: the snow layer thickness \f$h_s\f$, the ice layer thickness
 !! \f$h_i\f$, the upper and lower ice layer temperatures located at the midpoints of the layers
@@ -38,19 +35,22 @@
 !! the water line to ice, and 3) to equalize the thickness of the two
 !! ice layers.
 !>  \section detailed_sice_run GFS Sea Ice Driver Detailed Algorithm
+!!
+!! \section arg_table_sfc_sice_run Argument Table
+!! \htmlinclude sfc_sice_run.html
+!!
 !>  @{
       subroutine sfc_sice_run                                           &
-     &     ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,  & !  ---  inputs:
-     &       t0c, rd, ps, t1, q1, delt,                                 &
-     &       sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
-     &       cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
-     &       flag_iter, lprnt, ipr,                                     &
-     &       hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
-     &       snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
-     &       frac_grid, icy, islmsk_cice,                               &
-     &       min_lakeice, min_seaice, oceanfrac,                        &
-     &       errmsg, errflg
-     &     )
+          ( im, kice, sbc, hvap, tgice, cp, eps, epsm1, rvrdm1, grav,  & !  ---  inputs:
+            t0c, rd, ps, t1, q1, delt,                                 &
+            sfcemis, dlwflx, sfcnsw, sfcdsw, srflag,                   &
+            cm, ch, prsl1, prslki, prsik1, prslk1, wind,               &
+            flag_iter, lprnt, ipr,                                     &
+            hice, fice, tice, weasd, tskin, tprcp, tiice, ep,          & !  ---  input/outputs:
+            snwdph, qsurf, snowmt, gflux, cmm, chh, evap, hflx,        & !  
+            frac_grid, icy, islmsk_cice,                               &
+            min_lakeice, min_seaice, oceanfrac,                        &
+            errmsg, errflg )
 
 ! ===================================================================== !
 !  description:                                                         !
