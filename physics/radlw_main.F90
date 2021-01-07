@@ -280,8 +280,7 @@
 !
       use physparam,        only : ilwrate, ilwrgas, ilwcliq, ilwcice,  &
      &                             isubclw, icldflg, iovr,  ivflip
-      use physcons,         only : con_g, con_cp, con_avgd, con_amd,    &
-     &                             con_amw, con_amo3
+
       use mersenne_twister, only : random_setseed, random_number,       &
      &                             random_stat
 !mz
@@ -320,8 +319,8 @@
       real (kind=kind_phys), parameter :: f_one   = 1.0
 
 !  ...  atomic weights for conversion from mass to volume mixing ratios
-      real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
-      real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
+      ! real (kind=kind_phys), parameter :: amdw    = con_amd/con_amw
+      ! real (kind=kind_phys), parameter :: amdo3   = con_amd/con_amo3
 
 !  ...  band indices
       integer, dimension(nbands) :: nspa, nspb
@@ -385,7 +384,9 @@
 !  ---  public accessable subprograms
 
       public rrtmg_lw_init, rrtmg_lw_run, rrtmg_lw_finalize, rlwinit
-
+      
+      real(kind=kind_phys), public :: con_g, con_cp,                       &
+     &       con_avgd, con_amd, con_amw, con_amo3
 
 ! ================
       contains
@@ -423,7 +424,8 @@
 !> \section gen_lwrad RRTMG Longwave Radiation Scheme General Algorithm
 !> @{
       subroutine rrtmg_lw_run                                           &
-     &     ( plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   !  ---  inputs
+     &     ( con_g,con_cp,con_avgd,con_amd,con_amw,con_amo3,            &   !  ---  inputs
+     &	     plyr,plvl,tlyr,tlvl,qlyr,olyr,gasvmr_co2, gasvmr_n2o,      &   
      &       gasvmr_ch4, gasvmr_o2, gasvmr_co, gasvmr_cfc11,            &
      &       gasvmr_cfc12, gasvmr_cfc22, gasvmr_ccl4,                   &
      &       icseed,aeraod,aerssa,sfemis,sfgtmp,                        &
@@ -613,6 +615,12 @@
 
       logical,  intent(in) :: lprnt
 
+      real(kind=kind_phys),intent(in) :: con_g, con_cp,                &
+     &       con_avgd, con_amd, con_amw, con_amo3
+      
+
+      real (kind=kind_phys) :: amdw,  amdo3
+
       real (kind=kind_phys), dimension(npts,nlp1), intent(in) :: plvl,  &
      &       tlvl
       real (kind=kind_phys), dimension(npts,nlay), intent(in) :: plyr,  &
@@ -767,7 +775,9 @@
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
-
+      
+      amdw    = con_amd/con_amw
+      amdo3   = con_amd/con_amo3
 !mz*
 ! For passing in cloud physical properties; cloud optics parameterized
 ! in RRTMG:
