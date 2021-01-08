@@ -1,0 +1,111 @@
+/**
+\page RRFS_v1alpha_page  RRFS_v1alpha Suite 
+
+\section RRFS_v1alpha_suite_overview Overview
+
+Suite RRFS_v1alpha contains the parameterizations used in the UFS Short-Range Weather Application
+(UFS SRW App). This model runs at 3-km resolution.
+
+The RRFS_v1alpha physics suite uses the parameterizations in the following order:
+ - \ref SGSCLOUD_page
+ - \ref GFS_RRTMG
+ - \ref GFS_SFCLYR
+ - \ref GFS_NSST
+ - \ref NoahMP
+ - \ref MYNNEDMF
+ - \ref GFS_UGWP_v0
+ - \ref GFS_RAYLEIGH
+ - \ref GFS_OZPHYS
+ - \ref GFS_H2OPHYS
+ - \ref THOMPSON
+
+\section sdf_rrfssuite Suite Definition File 
+You can find SDF here:
+https://github.com/NOAA-EMC/fv3atm/blob/release/public-v2/ccpp/suites/suite_FV3_RRFS_v1alpha.xml
+
+\section rrfs_nml_option Namelist 
+\code
+&gfs_physics_nml
+    bl_mynn_edmf         = 1
+    bl_mynn_edmf_mom     = 1
+    bl_mynn_tkeadvect    = .true.
+    cal_pre              = .false.
+    cdmbgwd              = 3.5,0.25
+    cnvcld               = .true.
+    cnvgwd               = .true.
+    cplflx               = .false.
+    debug                = .false.
+    do_mynnedmf          = .true.
+    do_mynnsfclay        = .false.
+    do_sfcperts          = .false.
+    do_shum              = .false.
+    do_skeb              = .false.
+    do_sppt              = .false.
+    dspheat              = .true.
+    fhcyc                = 0.0        ????
+    fhlwr                = 1200.0
+    fhswr                = 1200.0
+    fhzero               = 1.0
+    h2o_phys             = .true.
+    hybedmf              = .false.
+    iaer                 = 111
+    ialb                 = 1
+    iau_delthrs          = 6
+    iau_inc_files        = ''
+    iaufhrs              = 30
+    icloud_bl            = 1
+    ico2                 = 2
+    iems                 = 1
+    imfdeepcnv           = 3
+    imfshalcnv           = 3
+    imp_physics          = 8
+    isol                 = 2
+    isot                 = 1
+    isubc_lw             = 2
+    isubc_sw             = 2
+    ivegsrc              = 1
+    ldiag3d              = .false.
+    lheatstrg            = .false.
+    lradar               = .true.
+    lsm                  = 3        ????
+    lsoil_lsm            = 9        ????
+    ltaerosol            = .true.
+    lwhtr                = .true.
+    ncld                 = 5
+    nst_anl              = .true.
+    nstf_name            = 2,1,1,0,5
+    oz_phys              = .false.
+    oz_phys_2015         = .true.
+    pdfcld               = .false.
+    pre_rad              = .false.
+    prslrd0              = 0.0
+    random_clds          = .false.
+    redrag               = .true.
+    satmedmf             = .false.
+    shal_cnv             = .true.
+    swhtr                = .true.
+    trans_trac           = .true.
+    ttendlim             = 50.0
+    use_ufo              = .true.
+
+/
+
+&cires_ugwp_nml
+    knob_ugwp_azdir      = 2,4,4,4
+    knob_ugwp_doaxyz     = 1
+    knob_ugwp_doheat     = 1
+    knob_ugwp_dokdis     = 1
+    knob_ugwp_effac      = 1,1,1,1
+    knob_ugwp_ndx4lh     = 1
+    knob_ugwp_solver     = 2
+    knob_ugwp_source     = 1,1,0,0
+    knob_ugwp_stoch      = 0,0,0,0
+    knob_ugwp_version    = 0
+    knob_ugwp_wvspec     = 1,25,25,25
+    launch_level         = 25
+
+/
+\endcode
+
+
+*/

@@ -110,7 +110,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                          pdftxt/suite_FV3_GFS_v16beta.xml.txt   \
                           pdftxt/GSD_adv_suite.txt \
                           pdftxt/CPT_adv_suite.txt   \
-                          pdftxt/RRFS_v1beta_suite.txt  \
+                          pdftxt/RRFS_v1alpha_suite.txt  \
                           pdftxt/RRFS_SGSCLOUD.txt   \
                           pdftxt/GFS_RRTMG.txt    \
                           pdftxt/GFS_SFCLYR.txt   \
@@ -134,10 +134,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                          pdftxt/rad_cld.txt             \
                           pdftxt/CPT_CSAW.txt            \
                           pdftxt/CPT_MG3.txt             \
-                          pdftxt/GSD_MYNN_EDMF.txt       \
-                          pdftxt/GSD_CU_GF_deep.txt      \
-                          pdftxt/GSD_RUCLSM.txt          \
-                          pdftxt/GSD_THOMPSON.txt        \
+                          pdftxt/MYNN_EDMF.txt       \
+                          pdftxt/CU_GF_deep.txt      \
+                          pdftxt/RUCLSM.txt          \
+                          pdftxt/THOMPSON.txt        \
 ###                          pdftxt/GFSphys_namelist.txt    \
 ###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
@@ -190,7 +190,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../sflx.f                     \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
-### Noah-MP
                         ../sfc_noahmp_drv.f           \
                         ../module_sf_noahmplsm.f90    \
                         ../module_sf_noahmp_glacier.f90  \
@@ -260,7 +259,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../wv_saturation.F   \
                         ../cs_conv_aw_adj.F90 \
                         ../cs_conv.F90       \
-### GSD
                         ../cu_gf_driver.F90 \
                         ../cu_gf_deep.F90   \
                         ../cu_gf_sh.F90     \

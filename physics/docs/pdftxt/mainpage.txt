@@ -9,7 +9,7 @@ Community Physics Package (CCPP) v5 and the suites that can be configured using 
 The CCPP-Physics is envisioned to contain parameterizations used in NOAA's Unified Forecast System (UFS) 
 applications for weather through seasonal prediction timescales, encompassing the current operational GFS schemes as well as 
 developmental schemes under consideration for upcoming operational implementations. New in this release is 
-suite RRFS_v1beta, which is being tested in the UFS Short-Range Weather Application for future use 
+suite RRFS_v1alpha, which is being tested in the UFS Short-Range Weather Application for future use 
 in the convective-allowing Rapid Refresh Forecast System (RRFS), slated for operational implementation
 in 2023. Convection-allowing models allow us to begin to resolve the fine details within storm systems that are
 necessary for the accurate predition of high-impact events such as tornadoes, flash floods, and winter weather.
@@ -19,14 +19,14 @@ System (NAM) nests, the NSSL Experimental Warn-on-Forecast System for ensembles 
 CAM ensemble, and GFDL's FV3-based CAM efforts, guide this process.
 
 The CCPP parameterizations are aggregated in suites by the host models. The CCPP Single Column Model (SCM), developed 
-by the Development Testbed Center, supports suites GFS_v15p2, GFS_v16beta, GSD_v1, csawmg, and RRFS_v1beta, while the 
-UFS Short-Range Weather Application supports suites GFS_v15p2 and RRFS_v1beta. The UFS Medium-Range Weather Application
+by the Development Testbed Center, supports suites GFS_v15p2, GFS_v16beta, GSD_v1, csawmg, and RRFS_v1alpha, while the 
+UFS Short-Range Weather Application supports suites GFS_v15p2 and RRFS_v1alpha. The UFS Medium-Range Weather Application
 is not intended for use with CCPP v5.  
 
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 5.0 (December 2020), and more details on it may be found on the
+The latest CCPP public release is Version 5.0 (Feburary 2021), and more details on it may be found on the
 <a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP website </a> hosted by
 the Developmental Testbed Center (DTC).
 
