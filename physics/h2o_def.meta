@@ -1,0 +1,29 @@
+[ccpp-table-properties]
+  name = h2o_def
+  type = module
+  dependencies = machine.F
+
+[ccpp-arg-table]
+  name = h2o_def
+  type = module
+
+[levh2o]
+  standard_name = vertical_dimension_of_h2o_forcing_data
+  long_name = number of vertical layers in h2o forcing data
+  units = count
+  dimensions = ()
+  type = integer
+[h2o_coeff]
+  standard_name = number_of_coefficients_in_h2o_forcing_data
+  long_name = number of coefficients in h2o forcing data
+  units = index
+  dimensions = ()
+  type = integer
+[h2o_pres]
+  standard_name = natural_log_of_h2o_forcing_data_pressure_levels
+  long_name = natural log of h2o forcing data pressure levels
+  units = log(Pa)
+  dimensions = (vertical_dimension_of_h2o_forcing_data)
+  type = real
+  kind = kind_phys
+  active = (flag_for_stratospheric_water_vapor_physics)
