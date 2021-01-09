@@ -263,6 +263,22 @@
   kind = kind_phys
   intent = out
   optional = F
+[pores]
+  standard_name = maximum_soil_moisture_content_for_land_surface_model
+  long_name = maximum soil moisture for a given soil type for land surface model
+  units = m
+  dimensions = (30)
+  type = real
+  intent = out
+  kind = kind_phys
+[resid]
+  standard_name = minimum_soil_moisture_content_for_land_surface_model
+  long_name = minimum soil moisture for a given soil type for land surface model
+  units = m
+  dimensions = (30)
+  type = real
+  intent = out
+  kind = kind_phys
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
