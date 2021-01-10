@@ -491,10 +491,10 @@
                      end if
                      ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%zs',             Model%zs)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%sh2o',         Sfcprop%sh2o)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%smois',        Sfcprop%smois)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tslb',         Sfcprop%tslb)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%zs',           Sfcprop%zs)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%clw_surf',     Sfcprop%clw_surf)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%qwv_surf',     Sfcprop%qwv_surf)
                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%cndm_surf',    Sfcprop%cndm_surf)
@@ -972,14 +972,10 @@
              do iomp=0,ompsize-1
                  if (mpirank==impi .and. omprank==iomp) then
                      ! Print static variables
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%h2o_coeff           ', Interstitial%h2o_coeff               )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%h2o_pres            ', Interstitial%h2o_pres                )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ipr                 ', Interstitial%ipr                     )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%itc                 ', Interstitial%itc                     )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%latidxprnt          ', Interstitial%latidxprnt              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%levi                ', Interstitial%levi                    )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%levh2o              ', Interstitial%levh2o                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%levozp              ', Interstitial%levozp                  )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmk                 ', Interstitial%lmk                     )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%lmp                 ', Interstitial%lmp                     )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nbdlw               ', Interstitial%nbdlw                   )
@@ -991,8 +987,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nspc1               ', Interstitial%nspc1                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ntiwx               ', Interstitial%ntiwx                   )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%nvdiff              ', Interstitial%nvdiff                  )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%oz_coeff            ', Interstitial%oz_coeff                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'sum(Interstitial%oz_pres)        ', Interstitial%oz_pres                 )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%phys_hydrostatic    ', Interstitial%phys_hydrostatic        )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%skip_macro          ', Interstitial%skip_macro              )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%trans_aero          ', Interstitial%trans_aero              )

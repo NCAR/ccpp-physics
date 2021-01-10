@@ -244,7 +244,8 @@ contains
     integer,                 intent(in) :: gwd_opt
     integer,                 intent(in), dimension(im)       :: kpbl
     real(kind=kind_phys),    intent(in), dimension(im)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
-    real(kind=kind_phys),    intent(in), dimension(im)       :: varss,oc1ss,oa4ss,ol4ss,dx
+    real(kind=kind_phys),    intent(in), dimension(im)       :: varss,oc1ss,dx
+    real(kind=kind_phys),    intent(in), dimension(im,4)     :: oa4ss,ol4ss
     logical,                 intent(in)                      :: flag_for_gwd_generic_tend
     ! elvmax is intent(in) for CIRES UGWP, but intent(inout) for GFS GWDPS
     real(kind=kind_phys),    intent(inout), dimension(im)    :: elvmax

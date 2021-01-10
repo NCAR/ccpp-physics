@@ -5,30 +5,216 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rad_time_vary_run
+  name = GFS_rad_time_vary_timestep_init
   type = scheme
-[Model]
-  standard_name = GFS_control_type_instance
-  long_name = Fortran DDT containing FV3-GFS model control parameters
-  units = DDT
+[lslwr]
+  standard_name = flag_to_calc_lw
+  long_name = logical flags for lw radiation calls
+  units = flag
   dimensions = ()
-  type = GFS_control_type
+  type = logical
+  intent = in
+  optional = F
+[lsswr]
+  standard_name = flag_to_calc_sw
+  long_name = logical flags for sw radiation calls
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[isubc_lw]
+  standard_name = flag_for_lw_clouds_sub_grid_approximation
+  long_name = flag for lw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isubc_sw]
+  standard_name = flag_for_sw_clouds_grid_approximation
+  long_name = flag for sw clouds sub-grid approximation
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[icsdsw]
+  standard_name = seed_random_numbers_sw
+  long_name = random seeds for sub-column cloud generators sw
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
   intent = inout
   optional = F
-[Data]
-  standard_name = GFS_data_type_instance_all_blocks
-  long_name = Fortran DDT containing FV3-GFS data
-  units = DDT
-  dimensions = (ccpp_block_number)
-  type = GFS_data_type
+[icsdlw]
+  standard_name = seed_random_numbers_lw
+  long_name = random seeds for sub-column cloud generators lw
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
   intent = inout
   optional = F
-[nthrds]
-  standard_name = omp_threads
-  long_name = number of OpenMP threads available for physics schemes
+[cnx]
+  standard_name = number_of_points_in_x_direction_for_this_cubed_sphere_face
+  long_name = number of points in x direction for this cubed sphere face
   units = count
   dimensions = ()
   type = integer
+  intent = in
+  optional = F
+[cny]
+  standard_name = number_of_points_in_y_direction_for_this_cubed_sphere_face
+  long_name = number of points in y direction for this cubed sphere face
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[isc]
+  standard_name = starting_x_index_for_this_MPI_rank
+  long_name = starting index in the x direction for this MPI rank
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[jsc]
+  standard_name = starting_y_index_for_this_MPI_rank
+  long_name = starting index in the y direction for this MPI rank
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imap]
+  standard_name = map_of_block_column_number_to_global_i_index
+  long_name = map of local index ix to global index i for this block
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[jmap]
+  standard_name = map_of_block_column_number_to_global_j_index
+  long_name = map of local index ix to global index j for this block
+  units = none
+  dimensions = (horizontal_dimension)
+  type = integer
+  intent = in
+  optional = F
+[sec]
+  standard_name = seconds_elapsed_since_model_initialization
+  long_name = seconds elapsed since model initialization
+  units = s
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[kdt]
+  standard_name = index_of_time_step
+  long_name = current forecast iteration
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics]
+  standard_name = flag_for_microphysics_scheme
+  long_name = choice of microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[imp_physics_zhao_carr]
+  standard_name = flag_for_zhao_carr_microphysics_scheme
+  long_name = choice of Zhao-Carr microphysics scheme
+  units = flag
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ps_2delt]
+  standard_name = surface_air_pressure_two_timesteps_back
+  long_name = surface air pressure two timesteps back
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[ps_1delt]
+  standard_name = surface_air_pressure_at_previous_timestep
+  long_name = surface air pressure at previous timestep
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[t_2delt]
+  standard_name = air_temperature_two_timesteps_back
+  long_name = air temperature two timesteps back
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[t_1delt]
+  standard_name = air_temperature_at_previous_timestep
+  long_name = air temperature at previous timestep
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qv_2delt]
+  standard_name = water_vapor_specific_humidity_two_timesteps_back
+  long_name = water vapor specific humidity two timesteps back
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[qv_1delt]
+  standard_name = water_vapor_specific_humidity_at_previous_timestep
+  long_name = water vapor specific humidity at previous timestep
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[t]
+  standard_name = air_temperature
+  long_name = model layer mean temperature
+  units = K
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[qv]
+  standard_name = water_vapor_specific_humidity
+  long_name = water vapor specific humidity
+  units = kg kg-1
+  dimensions = (horizontal_dimension,vertical_dimension)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[ps]
+  standard_name = air_pressure_at_lowest_model_interface
+  long_name = air pressure at lowest model interface
+  units = Pa
+  dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
   intent = in
   optional = F
 [errmsg]
