@@ -4,6 +4,11 @@
 !>\ingroup mod_GFS_phys_time_vary
 !! This module defines arrays in Ozone scheme.
       module ozne_def
+
+!> \section arg_table_ozne_def
+!! \htmlinclude ozne_def.html
+!!
+
       use machine , only : kind_phys
       implicit none
       
