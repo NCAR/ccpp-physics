@@ -4811,8 +4811,8 @@
       if (me == 0) then
       write(6,100) rtsfl,ralbl,raisl,rsnol,rsmcl,rzorl,rvegl
   100 format('rtsfl,ralbl,raisl,rsnol,rsmcl,rzorl,rvegl=',10f7.3)
-      write(6,101) rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs
-  101 format('rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs=',10f7.3)
+      write(6,101) rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics
+  101 format('rtsfs,ralbs,raiss,rsnos,rsmcs,rzors,rvegs,rsics=',11f7.3)
 !     print *,' ralfl=',ralfl,' ralfs=',ralfs,' rsotl=',rsotl
 !    *,' rsots=',rsots,' rvetl=',rvetl,' rvets=',rvets
       endif
