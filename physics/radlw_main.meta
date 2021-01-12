@@ -7,60 +7,6 @@
 [ccpp-arg-table]
   name = rrtmg_lw_run
   type = scheme
-[con_g]
-  standard_name = gravitational_acceleration
-  long_name = gravitational acceleration
-  units = m s-2
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[con_cp]
-  standard_name = specific_heat_of_dry_air_at_constant_pressure
-  long_name = specific heat of dry air at constant pressure
-  units = J kg-1 K-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[con_avgd]
-  standard_name = avogadro_constant
-  long_name = avogadro constant
-  units = mol-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[con_amd]
-  standard_name = molecular_weight_of_dry_air
-  long_name = molecular weight of dry air
-  units = g mol-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[con_amw]
-  standard_name = molecular_weight_of_water_vapor
-  long_name = molecular weight of water vapor
-  units = g mol-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[con_amo3]
-  standard_name = molecular_weight_of_o3
-  long_name = molecular weight of o3
-  units = g mol-1
-  dimensions = ()
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [plyr]
   standard_name = air_pressure_at_layer_for_radiation_in_hPa
   long_name = air pressure layer
