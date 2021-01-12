@@ -164,7 +164,7 @@ contains
 !!  @{
       subroutine GFS_GWD_generic_post_run(lssav, ldiag3d, dtf, dusfcg, dvsfcg, dudt, dvdt, dtdt,          &
       &  dugwd, dvgwd, flag_for_gwd_generic_tend, dtend, dtidx, index_for_temperature, index_for_x_wind,  &
-      &  index_for_y_wind, index_for_cause_orographic_gwd, errmsg, errflg
+      &  index_for_y_wind, index_for_cause_orographic_gwd, errmsg, errflg)
 
       use machine, only : kind_phys
       implicit none

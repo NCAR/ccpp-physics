@@ -1027,7 +1027,7 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = T
+  optional = F
 [dtidx]
   standard_name = dtend_outer_index
   long_name = index in outer dimension of dtend of a tracer-cause pair

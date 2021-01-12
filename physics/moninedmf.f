@@ -98,7 +98,7 @@
       real(kind=kind_phys), intent(inout) :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
       integer, intent(in) :: index_for_x_wind, index_for_y_wind,        &
-               index_for_cause_pbl, index_for_temperature, ntqv, ntoz
+     &         index_for_cause_pbl, index_for_temperature, ntqv, ntoz
       real(kind=kind_phys), intent(in) ::                               &
      &                     u1(im,km),     v1(im,km),                    &
      &                     t1(im,km),     q1(im,km,ntrac),              &

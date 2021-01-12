@@ -571,7 +571,7 @@
   kind = kind_phys
   active = (flag_diagnostics_3D)
   intent = inout
-  optional = T
+  optional = F
 [dtidx]
   standard_name = dtend_outer_index
   long_name = index in outer dimension of dtend of a tracer-cause pair
@@ -612,7 +612,6 @@
   type = integer
   intent = in
   optional = F
-
 [flag_for_pbl_generic_tend]
   standard_name = flag_for_generic_planetary_boundary_layer_tendency
   long_name = true if GFS_PBL_generic should calculate tendencies

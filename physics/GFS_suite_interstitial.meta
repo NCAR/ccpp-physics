@@ -672,7 +672,7 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = T
+  optional = F
 [dtidx]
   standard_name = dtend_outer_index
   long_name = index in outer dimension of dtend of a tracer-cause pair
@@ -724,6 +724,14 @@
 [index_for_cause_mp]
   standard_name = index_for_cause_mp
   long_name = tracer changes caused by microphysics scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_temperature]
+  standard_name = index_for_temperature
+  long_name = index in dtidx first dimension of temperature field
   units = index
   dimensions = ()
   type = integer

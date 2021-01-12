@@ -143,22 +143,22 @@
         if (ldiag3d) then
           idtend = dtidx(index_for_temperature, index_for_cause_scnv)
           if(idtend>1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0(i,k) - save_t(i,k)) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gt0 - save_t) * frain
           endif
 
           idtend = dtidx(index_for_x_wind, index_for_cause_scnv)
           if(idtend>1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0(i,k) - save_u(i,k)) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gu0 - save_u) * frain
           endif
 
           idtend = dtidx(index_for_y_wind, index_for_cause_scnv)
           if(idtend>1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0(i,k) - save_v(i,k)) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gv0 - save_v) * frain
           endif
 
           idtend = dtidx(100+ntqv, index_for_cause_scnv)
           if(idtend>1) then
-             dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0_water_vapor(i,k) - save_qv(i,k)) * frain
+             dtend(:,:,idtend) = dtend(:,:,idtend) + (gq0_water_vapor - save_qv) * frain
           endif
         endif
       endif

@@ -185,7 +185,7 @@ contains
     real(kind=kind_phys),    intent(out), dimension(im, levs):: dudt_mtb, dudt_ogw, dudt_tms
 
     ! dtend is only allocated if ldiag=.true.
-    real(kind=kind_phys), optional, intent(in)               :: dtend(:,:,:)
+    real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
     integer, intent(in)                                      :: dtidx(:,:), &
          index_for_x_wind, index_for_y_wind, index_for_temperature,         &
          index_for_cause_orographic_gwd, index_for_cause_convective_gwd

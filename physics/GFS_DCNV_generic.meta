@@ -355,7 +355,7 @@
   type = real
   kind = kind_phys
   intent = inout
-  optional = T
+  optional = F
 [dtidx]
   standard_name = dtend_outer_index
   long_name = index in outer dimension of dtend of a tracer-cause pair
@@ -451,42 +451,6 @@
   long_name = cumulative cloud work function (valid only with sas)
   units = m2 s-1
   dimensions = (horizontal_loop_extent)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_deep_convection
-  long_name = cumulative change in temperature due to deep conv.
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_deep_convection
-  long_name = cumulative change in water vapor specific humidity due to deep conv.
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[du3dt]
-  standard_name = cumulative_change_in_x_wind_due_to_deep_convection
-  long_name = cumulative change in x wind due to deep convection
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
-  optional = F
-[dv3dt]
-  standard_name = cumulative_change_in_y_wind_due_to_deep_convection
-  long_name = cumulative change in y wind due to deep convection
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
   intent = inout

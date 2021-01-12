@@ -118,7 +118,7 @@
                                                                  snow_cpl, pwat
 
       real(kind=kind_phys), dimension(:,:,:),   intent(inout) :: dtend ! only if ldiag3d
-      integer,         dimension(ntrac,ncause), intent(in)    :: dtidx
+      integer,         dimension(:,:), intent(in)    :: dtidx
 
       ! Stochastic physics / surface perturbations
       logical, intent(in) :: do_sppt, ca_global

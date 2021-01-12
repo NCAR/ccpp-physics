@@ -47,7 +47,7 @@
       subroutine ozphys_run (                                           &
      &  im, levs, ko3, dt, oz, tin, po3,                                &
      &  prsl, prdout, oz_coeff, delp, ldiag3d,                          &
-     &  ntoz, index_for_cause_prod_loss,                                &
+     &  ntoz, dtend, dtidx, index_for_cause_prod_loss,                  &
      &  index_for_cause_ozmix, index_for_cause_temp,                    &
      &  index_for_cause_overhead_ozone, con_g, me, errmsg, errflg)
 !
@@ -191,19 +191,19 @@
             oz(i,l) = (ozib(i)  + tem*dt) / (1.0 + prod(i,2)*dt)
           enddo
           if(idtend(1)>1) then
-            dtend(:,l,idtend(1)) = idtend(:,l,idtend(1)) +              ! was ozp1
+            dtend(:,l,idtend(1)) = dtend(:,l,idtend(1)) +              ! was ozp1
      &            prod(:,1)*dt
           endif
           if(idtend(2)>1) then
-            dtend(:,l,idtend(2)) = idtend(:,l,idtend(2)) +              ! was ozp2
+            dtend(:,l,idtend(2)) = dtend(:,l,idtend(2)) +              ! was ozp2
      &            (oz(:,l)-ozib(:))
           endif
           if(idtend(3)>1) then
-            dtend(:,l,idtend(3)) = idtend(:,l,idtend(3)) +              ! was ozp3
+            dtend(:,l,idtend(3)) = dtend(:,l,idtend(3)) +              ! was ozp3
      &            prod(:,3)*tin(:,l)*dt
           endif
           if(idtend(4)>1) then
-            dtend(:,l,idtend(4)) = idtend(:,l,idtend(4)) +              ! was ozp4
+            dtend(:,l,idtend(4)) = dtend(:,l,idtend(4)) +              ! was ozp4
      &            prod(:,4)*colo3(:,l+1)*dt
           endif
         endif

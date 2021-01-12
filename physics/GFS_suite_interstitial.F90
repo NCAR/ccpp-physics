@@ -307,12 +307,12 @@
 
         if (ldiag3d) then
           if (lsidea) then
-            idtend = dtidx(index_for_temperature,index_for_cause_lw)
+            idtend = dtidx(index_for_temperature,index_for_cause_longwave)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,1)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_sw)
+            idtend = dtidx(index_for_temperature,index_for_cause_shortwave)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,2)*dtf
             endif
@@ -337,12 +337,12 @@
                dtend(:,:,idtend) = dtend(:,:,idtend) + lwhd(:,:,6)*dtf
             endif
           else
-            idtend = dtidx(index_for_temperature,index_for_cause_lw)
+            idtend = dtidx(index_for_temperature,index_for_cause_longwave)
             if(idtend>1) then
                dtend(:,:,idtend) = dtend(:,:,idtend) + htrlw(:,:)*dtf
             endif
 
-            idtend = dtidx(index_for_temperature,index_for_cause_sw)
+            idtend = dtidx(index_for_temperature,index_for_cause_shortwave)
             if(idtend>1) then
                do k=1,levs
                   dtend(:,k,idtend) = dtend(:,k,idtend) + htrlw(:,k)*dtf*xmu(:)

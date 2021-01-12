@@ -315,7 +315,7 @@
         shinhong, do_ysu, dvdftra, dusfc1, dvsfc1, dtsfc1, dqsfc1, dtf, dudt, dvdt, dtdt, htrsw, htrlw, xmu,                   &
         dqdt, dusfc_cpl, dvsfc_cpl, dtsfc_cpl, dtend, dtidx, index_for_temperature, index_for_x_wind, index_for_y_wind,        &
         index_for_cause_pbl, dqsfc_cpl, dusfci_cpl, dvsfci_cpl, dtsfci_cpl, dqsfci_cpl, dusfc_diag, dvsfc_diag, dtsfc_diag,    &
-        dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                    
+        dqsfc_diag, dusfci_diag, dvsfci_diag, dtsfci_diag, dqsfci_diag,                                                        &
         rd, cp, fvirt, hvap, t1, q1, prsl, hflx, ushfsfci, oceanfrac, flag_cice, dusfc_cice, dvsfc_cice,          &
         dtsfc_cice, dqsfc_cice, wet, dry, icy, wind, stress_wat, hflx_wat, evap_wat, ugrs1, vgrs1, dkt_cpl, dkt, hffac, hefac, &
         ugrs, vgrs, tgrs, qgrs, save_u, save_v, save_t, save_q, errmsg, errflg)
@@ -382,7 +382,8 @@
       real(kind=kind_phys), parameter :: qmin  = 1.0e-8_kp
       integer :: i, k, kk, k1, n
       real(kind=kind_phys) :: tem, rho
-
+      integer :: idtend
+      
       ! Initialize CCPP error handling variables
       errmsg = ''
       errflg = 0
@@ -623,11 +624,11 @@
           endif
           idtend = dtidx(index_for_x_wind, index_for_cause_pbl)
           if(idtend>1) then
-            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (ugrs(1:im,1:levs) - save_u(1:im,1:levs)
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (ugrs(1:im,1:levs) - save_u(1:im,1:levs))
           endif
           idtend = dtidx(index_for_y_wind, index_for_cause_pbl)
           if(idtend>1) then
-            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (vgrs(1:im,1:levs) - save_v(1:im,1:levs)
+            dtend(1:im,1:levs,idtend) = dtend(1:im,1:levs,idtend) + (vgrs(1:im,1:levs) - save_v(1:im,1:levs))
           endif
           idtend = dtidx(100+ntqv, index_for_cause_pbl)
           if(idtend>1) then
