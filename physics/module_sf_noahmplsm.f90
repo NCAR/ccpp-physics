@@ -72,23 +72,23 @@ module module_sf_noahmplsm
 ! =====================================options for different schemes================================
 ! **recommended
 
-  integer :: dveg     ! options for dynamic vegetation: 
+  integer :: dveg     !< options for dynamic vegetation: 
                       !   1 -> off (use table lai; use fveg = shdfac from input)
                       !   2 -> on  (together with opt_crs = 1)
                       !   3 -> off (use table lai; calculate fveg)
                       ! **4 -> off (use table lai; use maximum vegetation fraction)
                       ! **5 -> on  (use maximum vegetation fraction)
 
-  integer :: opt_crs  ! options for canopy stomatal resistance
+  integer :: opt_crs  !< options for canopy stomatal resistance
                       ! **1 -> ball-berry
 		      !   2 -> jarvis
 
-  integer :: opt_btr  ! options for soil moisture factor for stomatal resistance
+  integer :: opt_btr  !< options for soil moisture factor for stomatal resistance
                       ! **1 -> noah (soil moisture) 
                       !   2 -> clm  (matric potential)
                       !   3 -> ssib (matric potential)
 
-  integer :: opt_run  ! options for runoff and groundwater
+  integer :: opt_run  !< options for runoff and groundwater
                       ! **1 -> topmodel with groundwater (niu et al. 2007 jgr) ;
                       !   2 -> topmodel with an equilibrium water table (niu et al. 2005 jgr) ;
                       !   3 -> original surface and subsurface runoff (free drainage)
@@ -96,39 +96,39 @@ module module_sf_noahmplsm
                       !   5 -> miguez-macho&fan groundwater scheme (miguez-macho et al. 2007 jgr; fan et al. 2007 jgr)
 		      !          (needs further testing for public use)
 
-  integer :: opt_sfc  ! options for surface layer drag coeff (ch & cm)
+  integer :: opt_sfc  !< options for surface layer drag coeff (ch & cm)
                       ! **1 -> m-o
 		      ! **2 -> original noah (chen97)
 		      ! **3 -> myj consistent; 4->ysu consistent. mb: removed in v3.7 for further testing
 
-  integer :: opt_frz  ! options for supercooled liquid water (or ice fraction)
+  integer :: opt_frz  !< options for supercooled liquid water (or ice fraction)
                       ! **1 -> no iteration (niu and yang, 2006 jhm)
 		      !   2 -> koren's iteration 
 
-  integer :: opt_inf  ! options for frozen soil permeability
+  integer :: opt_inf  !< options for frozen soil permeability
                       ! **1 -> linear effects, more permeable (niu and yang, 2006, jhm)
                       !   2 -> nonlinear effects, less permeable (old)
 
-  integer :: opt_rad  ! options for radiation transfer
+  integer :: opt_rad  !< options for radiation transfer
                       !   1 -> modified two-stream (gap = f(solar angle, 3d structure ...)<1-fveg)
                       !   2 -> two-stream applied to grid-cell (gap = 0)
                       ! **3 -> two-stream applied to vegetated fraction (gap=1-fveg)
 
-  integer :: opt_alb  ! options for ground snow surface albedo
+  integer :: opt_alb  !< options for ground snow surface albedo
                       !   1 -> bats
 		      ! **2 -> class
 
-  integer :: opt_snf  ! options for partitioning  precipitation into rainfall & snowfall
+  integer :: opt_snf  !< options for partitioning  precipitation into rainfall & snowfall
                       ! **1 -> jordan (1991)
 		      !   2 -> bats: when sfctmp<tfrz+2.2 
 		      !   3 -> sfctmp < tfrz
 		      !   4 -> use wrf microphysics output
 
-  integer :: opt_tbot ! options for lower boundary condition of soil temperature
+  integer :: opt_tbot !< options for lower boundary condition of soil temperature
                       !   1 -> zero heat flux from bottom (zbot and tbot not used)
                       ! **2 -> tbot at zbot (8m) read from a file (original noah)
 
-  integer :: opt_stc  ! options for snow/soil temperature time scheme (only layer 1)
+  integer :: opt_stc  !< options for snow/soil temperature time scheme (only layer 1)
                       ! **1 -> semi-implicit; flux top boundary condition
 		      !   2 -> full implicit (original noah); temperature top boundary condition
                       !   3 -> same as 1, but fsno for ts calculation (generally improves snow; v3.7)
@@ -137,23 +137,23 @@ module module_sf_noahmplsm
 ! physical constants:                                                                      !
 !------------------------------------------------------------------------------------------!
 
-  real, parameter :: grav   = 9.80616   !acceleration due to gravity (m/s2)
-  real, parameter :: sb     = 5.67e-08  !stefan-boltzmann constant (w/m2/k4)
-  real, parameter :: vkc    = 0.40      !von karman constant
-  real, parameter :: tfrz   = 273.16    !freezing/melting point (k)
-  real, parameter :: hsub   = 2.8440e06 !latent heat of sublimation (j/kg)
-  real, parameter :: hvap   = 2.5104e06 !latent heat of vaporization (j/kg)
-  real, parameter :: hfus   = 0.3336e06 !latent heat of fusion (j/kg)
-  real, parameter :: cwat   = 4.188e06  !specific heat capacity of water (j/m3/k)
-  real, parameter :: cice   = 2.094e06  !specific heat capacity of ice (j/m3/k)
-  real, parameter :: cpair  = 1004.64   !heat capacity dry air at const pres (j/kg/k)
-  real, parameter :: tkwat  = 0.6       !thermal conductivity of water (w/m/k)
-  real, parameter :: tkice  = 2.2       !thermal conductivity of ice (w/m/k)
-  real, parameter :: tkair  = 0.023     !thermal conductivity of air (w/m/k) (not used mb: 20140718)
-  real, parameter :: rair   = 287.04    !gas constant for dry air (j/kg/k)
-  real, parameter :: rw     = 461.269   !gas constant for  water vapor (j/kg/k)
-  real, parameter :: denh2o = 1000.     !density of water (kg/m3)
-  real, parameter :: denice = 917.      !density of ice (kg/m3)
+  real, parameter :: grav   = 9.80616   !< acceleration due to gravity (m/s2)
+  real, parameter :: sb     = 5.67e-08  !< stefan-boltzmann constant (w/m2/k4)
+  real, parameter :: vkc    = 0.40      !< von karman constant
+  real, parameter :: tfrz   = 273.16    !< freezing/melting point (k)
+  real, parameter :: hsub   = 2.8440e06 !< latent heat of sublimation (j/kg)
+  real, parameter :: hvap   = 2.5104e06 !< latent heat of vaporization (j/kg)
+  real, parameter :: hfus   = 0.3336e06 !< latent heat of fusion (j/kg)
+  real, parameter :: cwat   = 4.188e06  !< specific heat capacity of water (j/m3/k)
+  real, parameter :: cice   = 2.094e06  !< specific heat capacity of ice (j/m3/k)
+  real, parameter :: cpair  = 1004.64   !< heat capacity dry air at const pres (j/kg/k)
+  real, parameter :: tkwat  = 0.6       !< thermal conductivity of water (w/m/k)
+  real, parameter :: tkice  = 2.2       !< thermal conductivity of ice (w/m/k)
+  real, parameter :: tkair  = 0.023     !< thermal conductivity of air (w/m/k) (not used mb: 20140718)
+  real, parameter :: rair   = 287.04    !< gas constant for dry air (j/kg/k)
+  real, parameter :: rw     = 461.269   !< gas constant for  water vapor (j/kg/k)
+  real, parameter :: denh2o = 1000.     !< density of water (kg/m3)
+  real, parameter :: denice = 917.      !< density of ice (kg/m3)
 
   integer, private, parameter :: mband = 2
 
@@ -169,21 +169,21 @@ module module_sf_noahmplsm
     integer :: isice
     integer :: eblforest
 
-    real :: ch2op              !maximum intercepted h2o per unit lai+sai (mm)
-    real :: dleaf              !characteristic leaf dimension (m)
-    real :: z0mvt              !momentum roughness length (m)
-    real :: hvt                !top of canopy (m)
-    real :: hvb                !bottom of canopy (m)
-    real :: den                !tree density (no. of trunks per m2)
-    real :: rc                 !tree crown radius (m)
-    real :: mfsno              !snowmelt m parameter ()
-    real :: saim(12)           !monthly stem area index, one-sided
-    real :: laim(12)           !monthly leaf area index, one-sided
-    real :: sla                !single-side leaf area per kg [m2/kg]
-    real :: dilefc             !coeficient for leaf stress death [1/s]
-    real :: dilefw             !coeficient for leaf stress death [1/s]
-    real :: fragr              !fraction of growth respiration  !original was 0.3 
-    real :: ltovrc             !leaf turnover [1/s]
+    real :: ch2op              !< maximum intercepted h2o per unit lai+sai (mm)
+    real :: dleaf              !< characteristic leaf dimension (m)
+    real :: z0mvt              !< momentum roughness length (m)
+    real :: hvt                !< top of canopy (m)
+    real :: hvb                !< bottom of canopy (m)
+    real :: den                !< tree density (no. of trunks per m2)
+    real :: rc                 !< tree crown radius (m)
+    real :: mfsno              !< snowmelt m parameter ()
+    real :: saim(12)           !< monthly stem area index, one-sided
+    real :: laim(12)           !< monthly leaf area index, one-sided
+    real :: sla                !< single-side leaf area per kg [m2/kg]
+    real :: dilefc             !< coeficient for leaf stress death [1/s]
+    real :: dilefw             !< coeficient for leaf stress death [1/s]
+    real :: fragr              !< fraction of growth respiration  !original was 0.3 
+    real :: ltovrc             !< leaf turnover [1/s]
 
     real :: c3psn              !photosynthetic pathway: 0. = c4, 1. = c3
     real :: kc25               !co2 michaelis-menten constant at 25c (pa)
@@ -755,6 +755,7 @@ contains
 !== begin atm ======================================================================================
 
 !>\ingroup NoahMP_LSM
+!> re-process atmospheric forcing
   subroutine atm (parameters,sfcprs  ,sfctmp   ,q2      ,                             &
                   prcpconv,prcpnonc ,prcpshcv,prcpsnow,prcpgrpl,prcphail , &
                   soldn   ,cosz     ,thair   ,qair    ,                    & 
@@ -902,6 +903,7 @@ contains
 !== begin phenology ================================================================================
 
 !>\ingroup NoahMP_LSM
+!> vegetation phenology considering vegeation canopy being buries by snow and evolution in time
   subroutine phenology (parameters,vegtyp , snowh  , tv     , lat   , yearlen , julian , & !in
                         lai    , sai    , troot  , elai    , esai   , igs)
 
@@ -997,6 +999,7 @@ contains
 !== begin precip_heat ==============================================================================
 
 !>\ingroup NoahMP_LSM
+!>
   subroutine precip_heat (parameters,iloc   ,jloc   ,vegtyp ,dt     ,uu     ,vv     , & !in
                           elai   ,esai   ,fveg   ,ist    ,                 & !in
                           bdfall ,rain   ,snow   ,fp     ,                 & !in
@@ -1227,6 +1230,7 @@ contains
 !== begin error ====================================================================================
 
 !>\ingroup NoahMP_LSM
+!> check surface energy balance and water balance
   subroutine error (parameters,swdown ,fsa    ,fsr    ,fira   ,fsh    ,fcev   , &
                     fgev   ,fctr   ,ssoil  ,beg_wb ,canliq ,canice , &
                     sneqv  ,wa     ,smc    ,dzsnso ,prcp   ,ecan   , &
@@ -1421,6 +1425,12 @@ contains
 !== begin energy ===================================================================================
 
 !>\ingroup NoahMP_LSM
+!> we use different approaches to deal with subgrid features of radiation transfer and turbulent
+!! transfer. we use 'tile' approach to compute turbulent fluxes, while we use modified two-
+!! stream to compute radiation transfer. tile approach, assemblying vegetation canopies together,
+!! may expose too much ground surfaces (either covered by snow or grass) to solar radiation. the
+!! modified two-stream assumes vegetation covers fully the gridcell but with gaps between tree
+!! crowns.
   subroutine energy (parameters,ice    ,vegtyp ,ist    ,nsnow  ,nsoil  , & !in
                      isnow  ,dt     ,rhoair ,sfcprs ,qair   , & !in
                      sfctmp ,thair  ,lwdn   ,uu     ,vv     ,zref   , & !in
@@ -6909,14 +6919,14 @@ contains
                         runsrf ,qdrain ,runsub ,wcnd   ,fcrmax )   !out
 
 ! ----------------------------------------------------------------------
-! calculate surface runoff and soil moisture.
+!> calculate surface runoff and soil moisture.
 ! ----------------------------------------------------------------------
 ! ----------------------------------------------------------------------
   implicit none
 ! ----------------------------------------------------------------------
 ! input
   type (noahmp_parameters), intent(in) :: parameters
-  integer,                     intent(in) :: iloc   !grid index
+  integer,                     intent(in) :: iloc   !< grid index
   integer,                     intent(in) :: jloc   !grid index
   integer,                     intent(in) :: nsoil  !no. of soil layers
   integer,                     intent(in) :: nsnow  !maximum no. of snow layers
@@ -7165,22 +7175,22 @@ contains
 !>\ingroup NoahMP_LSM
   subroutine zwteq (parameters,nsoil  ,nsnow  ,zsoil  ,dzsnso ,sh2o   ,zwt)
 ! ----------------------------------------------------------------------
-! calculate equilibrium water table depth (niu et al., 2005)
+!> calculate equilibrium water table depth (niu et al., 2005 \cite niu_et_al_2005)
 ! ----------------------------------------------------------------------
   implicit none
 ! ----------------------------------------------------------------------
 ! input
 
   type (noahmp_parameters), intent(in) :: parameters
-  integer,                         intent(in) :: nsoil  !no. of soil layers
-  integer,                         intent(in) :: nsnow  !maximum no. of snow layers
-  real, dimension(1:nsoil),        intent(in) :: zsoil  !depth of soil layer-bottom [m]
-  real, dimension(-nsnow+1:nsoil), intent(in) :: dzsnso !snow/soil layer depth [m]
-  real, dimension(1:nsoil),        intent(in) :: sh2o   !soil liquid water content [m3/m3]
+  integer,                         intent(in) :: nsoil  !< no. of soil layers
+  integer,                         intent(in) :: nsnow  !< maximum no. of snow layers
+  real, dimension(1:nsoil),        intent(in) :: zsoil  !< depth of soil layer-bottom [m]
+  real, dimension(-nsnow+1:nsoil), intent(in) :: dzsnso !< snow/soil layer depth [m]
+  real, dimension(1:nsoil),        intent(in) :: sh2o   !< soil liquid water content [m3/m3]
 
 ! output
 
-  real,                           intent(out) :: zwt    !water table depth [m]
+  real,                           intent(out) :: zwt    !< water table depth [m]
 
 ! locals
 
@@ -7224,7 +7234,7 @@ contains
                     sicemax,qinsur ,                         & !in
                     pddum  ,runsrf )                           !out
 ! --------------------------------------------------------------------------------
-! compute inflitration rate at soil surface and surface runoff
+!> compute inflitration rate at soil surface and surface runoff
 ! --------------------------------------------------------------------------------
     implicit none
 ! --------------------------------------------------------------------------------
@@ -7327,9 +7337,9 @@ contains
                   rhstt  ,ai     ,bi     ,ci     ,qdrain , & !out
                   wcnd   )                                   !out
 ! ----------------------------------------------------------------------
-! calculate the right hand side of the time tendency term of the soil
-! water diffusion equation.  also to compute ( prepare ) the matrix
-! coefficients for the tri-diagonal matrix of the implicit time scheme.
+!> calculate the right hand side of the time tendency term of the soil
+!! water diffusion equation.  also to compute ( prepare ) the matrix
+!! coefficients for the tri-diagonal matrix of the implicit time scheme.
 ! ----------------------------------------------------------------------
     implicit none
 ! ----------------------------------------------------------------------
@@ -7462,7 +7472,7 @@ contains
                     wplus  )                                   !out
 
 ! ----------------------------------------------------------------------
-! calculate/update soil moisture content values 
+!> calculate/update soil moisture content values 
 ! ----------------------------------------------------------------------
     implicit none
 ! ----------------------------------------------------------------------
@@ -7569,7 +7579,7 @@ contains
 !>\ingroup NoahMP_LSM
   subroutine wdfcnd1 (parameters,wdf,wcnd,smc,fcr)
 ! ----------------------------------------------------------------------
-! calculate soil water diffusivity and soil hydraulic conductivity.
+!> calculate soil water diffusivity and soil hydraulic conductivity.
 ! ----------------------------------------------------------------------
     implicit none
 ! ----------------------------------------------------------------------
@@ -7608,7 +7618,7 @@ contains
 !>\ingroup NoahMP_LSM
   subroutine wdfcnd2 (parameters,wdf,wcnd,smc,sice)
 ! ----------------------------------------------------------------------
-! calculate soil water diffusivity and soil hydraulic conductivity.
+!> calculate soil water diffusivity and soil hydraulic conductivity.
 ! ----------------------------------------------------------------------
     implicit none
 ! ----------------------------------------------------------------------
@@ -7836,6 +7846,8 @@ contains
 !== begin shallowwatertable ========================================================================
 
 !>\ingroup NoahMP_LSM
+!>diagnoses water table depth and computes recharge when the water table is within the resolved soil layers,
+!!according to the miguez-macho&fan scheme
   subroutine shallowwatertable (parameters,nsnow  ,nsoil  ,zsoil, dt    , & !in
                          dzsnso ,smceq ,iloc   ,jloc         , & !in
                          smc    ,wtd   ,smcwtd ,rech, qdrain  )  !inout
@@ -8099,7 +8111,7 @@ end  subroutine shallowwatertable
                       gpp    ,npp    ,nee    ,autors ,heters , & !out
                       totsc  ,totlb  )                           !out
 ! -----------------------------------------------------------------------------------------
-! the original code is from re dickinson et al.(1998), modifed by guo-yue niu, 2004
+!> the original code is from re dickinson et al.(1998), modifed by guo-yue niu, 2004
 ! -----------------------------------------------------------------------------------------
   implicit none
 ! -----------------------------------------------------------------------------------------
@@ -8464,20 +8476,20 @@ end  subroutine shallowwatertable
 
   implicit none
 
-  integer,  intent(in) :: idveg     !dynamic vegetation (1 -> off ; 2 -> on) with opt_crs = 1
-  integer,  intent(in) :: iopt_crs  !canopy stomatal resistance (1-> ball-berry; 2->jarvis)
-  integer,  intent(in) :: iopt_btr  !soil moisture factor for stomatal resistance (1-> noah; 2-> clm; 3-> ssib)
-  integer,  intent(in) :: iopt_run  !runoff and groundwater (1->simgm; 2->simtop; 3->schaake96; 4->bats)
-  integer,  intent(in) :: iopt_sfc  !surface layer drag coeff (ch & cm) (1->m-o; 2->chen97)
-  integer,  intent(in) :: iopt_frz  !supercooled liquid water (1-> ny06; 2->koren99)
-  integer,  intent(in) :: iopt_inf  !frozen soil permeability (1-> ny06; 2->koren99)
-  integer,  intent(in) :: iopt_rad  !radiation transfer (1->gap=f(3d,cosz); 2->gap=0; 3->gap=1-fveg)
-  integer,  intent(in) :: iopt_alb  !snow surface albedo (1->bats; 2->class)
-  integer,  intent(in) :: iopt_snf  !rainfall & snowfall (1-jordan91; 2->bats; 3->noah)
-  integer,  intent(in) :: iopt_tbot !lower boundary of soil temperature (1->zero-flux; 2->noah)
+  integer,  intent(in) :: idveg     !< dynamic vegetation (1 -> off ; 2 -> on) with opt_crs = 1
+  integer,  intent(in) :: iopt_crs  !< canopy stomatal resistance (1-> ball-berry; 2->jarvis)
+  integer,  intent(in) :: iopt_btr  !< soil moisture factor for stomatal resistance (1-> noah; 2-> clm; 3-> ssib)
+  integer,  intent(in) :: iopt_run  !< runoff and groundwater (1->simgm; 2->simtop; 3->schaake96; 4->bats)
+  integer,  intent(in) :: iopt_sfc  !< surface layer drag coeff (ch & cm) (1->m-o; 2->chen97)
+  integer,  intent(in) :: iopt_frz  !< supercooled liquid water (1-> ny06; 2->koren99)
+  integer,  intent(in) :: iopt_inf  !< frozen soil permeability (1-> ny06; 2->koren99)
+  integer,  intent(in) :: iopt_rad  !< radiation transfer (1->gap=f(3d,cosz); 2->gap=0; 3->gap=1-fveg)
+  integer,  intent(in) :: iopt_alb  !< snow surface albedo (1->bats; 2->class)
+  integer,  intent(in) :: iopt_snf  !< rainfall & snowfall (1-jordan91; 2->bats; 3->noah)
+  integer,  intent(in) :: iopt_tbot !< lower boundary of soil temperature (1->zero-flux; 2->noah)
 
-  integer,  intent(in) :: iopt_stc  !snow/soil temperature time scheme (only layer 1)
-                                    ! 1 -> semi-implicit; 2 -> full implicit (original noah)
+  integer,  intent(in) :: iopt_stc  !<snow/soil temperature time scheme (only layer 1)
+                                    !! 1 -> semi-implicit; 2 -> full implicit (original noah)
 
 ! -------------------------------------------------------------------------------------------------
 

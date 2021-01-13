@@ -4,8 +4,8 @@
 The SCM and the UFS Atmosphere access runtime configurations from file \c input.nml. This file contains
 various namelists records that control aspects of the I/O, dynamics, physics etc. Most physics-related options are in
 reords \b &gfs_physics_nml and \b &cires_ugwp_nml. When using the GFDL microphysics scheme, variables in namelist 
-\b &gfdl_cloud_microphysics_nml are also used. Additional specifications for stochastic physics are in
-namelists \b &stochy_nam and \b &nam_sfcperts.
+\b &gfdl_cloud_microphysics_nml are also used. Additional specifications for surface property perturbation are in
+namelist \b &nam_sfcperts.
 
 - Namelist \b &gfdl_cloud_microphysics_nml is only relevant when the GFDL microphysics is used, and its variables are defined in
 module_gfdl_cloud_microphys.F90.
@@ -15,16 +15,15 @@ module_gfdl_cloud_microphys.F90.
 - Namelist \b &gfs_physics_nml pertains to all of the suites used, but some of the variables are only relevant for specific 
 parameterizations. Its variables are defined in file GFS_typedefs.F90 in the host model.
 
-- Namelist \b &stochy_nam specifies options for the use of SPPT, SKEB and SHUM, while namelist \b &nam_sfcperts specifies whether
-and how stochastic perturbations are used in the Noah Land Surface Model.
+- Namelist \b &nam_sfcperts specifies whether and how stochastic perturbations are used in the Noah Land Surface Model.
 
 
 <table>
 <caption id="multi_row">NML Description</caption>
 <tr><th>Option          <th>Scheme                       <th>Description                <th>Default Value
-<tr><td colspan="4" align= center>\b &gfs_physics_nml 
+<tr><td colspan="4" align= center>\b General \b options 
 <tr><td>fhzero          <td>gfs_control_type          <td>hour between clearing of diagnostic buckets     <td>0.0     
-<tr><td>h2o_phys        <td>h2ophys                   <td>flag for stratosphere h2o scheme                <td>.false. 
+<tr><td>h2o_phys        <td>h2ophys*                   <td>flag for stratosphere h2o scheme                <td>.false.; set to .T. for all suites 
 <tr><td>ldiag3d         <td>gfs_control_type          <td>flag for 3D diagnostic fields                   <td>.false. 
 <tr><td>qdiag3d         <td>gfs_control_type          <td>flag for 3D tracer diagnostic fields            <td>.false
 <tr><td>lssav           <td>gfs_control_type          <td>logical flag for storing diagnostics            <td>.false.
@@ -33,19 +32,20 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>cplchm          <td>gfs_control_type          <td>logical flag for chemistry collection           <td>.false.
 <tr><td>cplwav2atm      <td>gfs_control_type          <td>logical flag for wave to atm coupling           <td>.false.
 <tr><td>lsidea          <td>gfs_control_type          <td>logical flag for idealized physics              <td>.false.
-<tr><td>oz_phys         <td>ozphys                    <td>flag for old (2006) ozone physics               <td>.true.  
-<tr><td>oz_phys_2015    <td>ozphys_2015               <td>flag for new (2015) ozone physics               <td>.false.
+<tr><td>oz_phys_2015    <td>ozphys_2015*               <td>flag for new (2015) ozone physics               <td>.false.; set to .T. for all suites
 <tr><td>fhcyc           <td>gfs_control_type          <td>frequency for surface data cycling in hours     <td>0.0 
 <tr><td>use_ufo         <td>gfs_control_type          <td>flag for using unfiltered orography surface option <td>.false.
 <tr><td>pre_rad         <td>gfs_control_type          <td>flag for testing purpose                        <td>.false.
 <tr><td>ncld            <td>gfs_control_type          <td>number of hydrometeors                          <td>1
-<tr><td>imp_physics     <td>gfs_control_type          <td>choice of microphysics scheme: \n                
+<tr><td>do_mynnsfclay   <td>gfs_control_type          <td>flag to activate MYNN-SFCLAY scheme     
+<tr><td>imp_physics     <td>choice of microphysics scheme*      <td>choice of microphysics scheme: \n                
                                                       <ul>
                                                       <li> 11: GFDL microphysics scheme 
                                                       <li> 8: Thompson microphysics scheme   
                                                       <li> 10: Morrison-Gettelman microphysics scheme
                                                       </ul>
                                                       <td>99
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b radiation \b scheme \b options
 <tr><td>pdfcld          <td>gfs_control_type          <td>flag for PDF clouds                             <td>.false.
 <tr><td>fhswr           <td>gfs_control_type          <td>frequency for shortwave radiation (secs)        <td>3600.
 <tr><td>fhlwr           <td>gfs_control_type          <td>frequency for longwave radiation (secs)         <td>3600.
@@ -149,14 +149,14 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 2: monthly 15 degree horizontal resolution from observations
                                                       </ul>
                                                       <td>0
-<tr><td>isubc_sw        <td>gfs_control_type          <td>subgrid cloud approximation control flag in SW radiation: \n 
+<tr><td>isubc_sw        <td>rrtmg_sw          <td>subgrid cloud approximation control flag in SW radiation: \n 
                                                       <ul> 
                                                       <li> 0: no McICA approximation in SW radiation 
                                                       <li> 1: use McICA with prescribed permutation seeds (test mode)
                                                       <li> 2: use McICA with randomly generated permutation seeds
                                                       </ul>
                                                       <td>0
-<tr><td>isubc_lw        <td>gfs_control_type          <td>subgrid cloud approximation control flag in LW radiation: \n 
+<tr><td>isubc_lw        <td>rrtmg_lw          <td>subgrid cloud approximation control flag in LW radiation: \n 
                                                       <ul>
                                                       <li> 0: no McICA approximation in LW radiation 
                                                       <li> 1: use McICA with prescribed permutatition seeds (test mode)
@@ -176,32 +176,8 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>lwhtr           <td>rrtmg_lw                  <td>logical flag for output of longwave heating rate       <td>.true.
 <tr><td>swhtr           <td>rrtmg_sw                  <td>logical flag for output of shortwave heating rate      <td>.true.
 <tr><td>nhfrad          <td>GFS_time_vary_pre         <td>number of timesteps for which to call radiation on physics timestep (coldstarts)     <td>0
-<tr><td>do_deep         <td>gfs_control_type          <td>consistency check for deep convection     <td>.true.
-<tr><td>shal_cnv        <td>gfs_control_type          <td>logical flag for calling shallow convection            <td>.false.
-<tr><td>lmfshal         <td>gfs_control_type          <td>flag for mass-flux shallow convection scheme in the cloud fraction calculation  <td>shal_cnv .and. (imfshalcnv > 0) 
-<tr><td>lmfdeep2        <td>gfs_control_type          <td>flag for mass-flux deep convection scheme in the cloud fraction calculation <td>imfdeepcnv == 2 .or. 3 .or.4
-<tr><td>cal_pre         <td>gfs_control_type          <td>logical flag for calling precipitation type algorithm  <td>.false.
-<tr><td>redrag          <td>gfs_control_type          <td>logical flag for applying reduced drag coefficient for high wind over sea in GFS surface layer scheme  <td>.false.
-<tr><td>dspheat         <td>gfs_control_type          <td>logical flag for using TKE dissipative heating to temperature tendency in hybrid EDMF and TKE-EDMF schemes <td>.false.
-<tr><td>hybedmf         <td>gfs_control_type          <td>logical flag for calling hybrid EDMF PBL scheme        <td>.false.   
-<tr><td>satmedmf        <td>gfs_control_type          <td>logical flag for calling TKE EDMF PBL scheme           <td>.false.
-<tr><td>isatmedmf       <td>gfs_control_type          <td>flag for scale-aware TKE-based moist EDMF scheme \n
-                                                      <ul>
-                                                      <li> 0: initial version of satmedmf (Nov.2018)
-                                                      <li> 1: updated version of satmedmf (as of May 2019)
-                                                      </ul>
-                                                      <td> 0
-<tr><td>do_mynnedmf     <td>gfs_control_type          <td>flag to activate MYNN-EDMF scheme                      <td>.false.
-<tr><td>random_clds     <td>gfs_control_type          <td>logical flag for whether clouds are random             <td>.false.
-<tr><td>ras
-<tr><td>trans_trac      <td>gfs_control_type          <td>logical flag for convective transport of tracers       <td>.false.
-<tr><td>lheatstrg       <td>GFS_surface_generic_post          <td>logical flag for canopy heat storage parameterization    <td>.false.
-<tr><td>z0fac           <td>GFS_surface_generic_post          <td>surface roughness fraction factor          <td>0.3
-<tr><td>e0fac           <td>GFS_surface_generic_post          <td>latent heat flux fraction factor relative to sensible heat flux,e.g., e0fac=0.5 indicates that canopy heat storage for latent heat flux is 50% of that for sensible heat flux  <td>0.5
-<tr><td>shinhong        <td>gfs_control_type          <td>flag for scale-aware Shinhong PBL scheme                 <td>.false.
-<tr><td>do_ysu          <td>gfs_control_type          <td>flag for YSU PBL scheme                                  <td>.false.
-<tr><td>cnvcld          <td>gfs_control_type          <td>logical flag for convective cloud                      <td>.false.
-<tr><td>imfshalcnv      <td>gfs_control_type          <td>flag for mass flux shallow convective scheme:\n 
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b cumulus \b schemes
+<tr><td>imfshalcnv      <td>choice of shallow convective scheme*          <td>flag for mass flux shallow convective scheme:\n 
                                                       <ul>
                                                       <li> 1:July 2010 version of mass-flux shallow convective scheme (operational as of 2016) 
                                                       <li> 2: scale- & aerosol-aware mass-flux shallow convective scheme (2017) 
@@ -210,8 +186,8 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 0: modified Tiedtke's eddy-diffusion shallow convective scheme 
                                                       <li> -1: no shallow convection used 
                                                       </ul> 
-                                                      <td>1
-<tr><td>imfdeepcnv      <td>gfs_control_type          <td>flag for mass-flux deep convective scheme:\n 
+                                                      <td>1; set to 2 for GFSv15p2 and GFSv16beta; set to 3 for GSD_v1
+<tr><td>imfdeepcnv      <td>choice of deep convective scheme*          <td>flag for mass-flux deep convective scheme:\n 
                                                       <ul>
                                                       <li>-1: Chikira-Sugiyama deep convection (with \b cscnv = .T.)
                                                       <li> 1: July 2010 version of SAS convective scheme (operational version as of 2016) 
@@ -219,107 +195,43 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 3: scale- & aerosol-aware Grell-Freitas scheme (GSD)
                                                       <li> 4: new Tiedtke scheme (CAPS)
                                                       </ul>
-                                                      <td>1
-<tr><td>lgfdlmprad      <td>gfs_control_type          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
-<tr><td>avg_max_length
-<tr><td>prslrd0         <td>gfs_control_type          <td>pressure level above which to apply Rayleigh damping    <td>0.0d0
-<tr><td>ral_ts
-<tr><td>lsm             <td>gfs_control_type          <td>flag for land surface model to use    \n
-                                                      <ul>
-                                                      <li> 1: Noah LSM
-                                                      <li> 2: NoahMP LSM
-                                                      <li> 3: RUC LSM
-                                                      </ul>
-                                                      <td>1
-<tr><td>lsoil           <td>sfc_drv                   <td>number of soil layers           <td>4
-<tr><td>rdlai           <rd>sfc_drv_ruc               <td>flag to read leaf area index from input files    <td>.false.
-<tr><td>ivegsrc         <td>gfs_control_type          <td>flag for vegetation type dataset choice: \n 
-                                                      <ul>
-                                                      <li> 0: USGS 
-                                                      <li> 1: IGBP(20 category): IGBP must be selected if NoahMP is used 
-                                                      <li> 2: UMD (13 category) 
-                                                      </ul>
-                                                      <td>2
-<tr><td>isot            <td>gfs_control_type          <td>flag for soil type dataset choice:\n 
-                                                      <ul> 
-                                                      <li> 0: Zobler soil type (9 category) 
-                                                      <li> 1: STATSGO soil type (19 category): STATSGO must be selected if NoahMP is used
-                                                      </ul>
-                                                      <td>0
-<tr><td>debug           <td>gfs_control_type          <td>flag for debug printout                             <td>.false.
-<tr><td>nstf_name(5)    <td>sfc_nst                   <td>NSST related paramters:\n 
-                                                      <ul>
-                                                      <li> nstf_name(1): 0=NSST off, 1= NSST on but uncoupled, 2= NSST on and coupled 
-                                                      <li> nstf_name(2): 1=NSST spin up on, 0=NSST spin up off 
-                                                      <li> nstf_name(3): 1=NSST analysis on, 0=NSST analysis off 
-                                                      <li> nstf_name(4): zsea1 in mm 
-                                                      <li> nstf_name(5): zesa2 in mm 
-                                                      </ul>
-                                                      <td>/0,0,1,0,5/
-<tr><td>nst_anl         <td>GFS_phys_time_vary          <td>flag for NSST analysis in gcycle/sfcsub            <td>.false.
-<tr><td>effr_in         <td>gfdl_cloud_microphys,mp_thompson,m_micro          <td>logical flag for using input cloud effective radii calculation    <td>.false.
-<tr><td>frac_grid       <td>sfc_sice,sfc_nst,GFS_suite_interstitial_2     <td>flag for fractional grid         <td>.false.
-<tr><td>min_lakeice     <td>gfs_control_type                              <td>minimum lake ice value           <td>0.15d0    
-<tr><td>min_seaice      <td>gfs_control_type                              <td>minimum sea ice value            <td>1.0d-11
-<tr><td>min_lake_height <td>gfs_control_type                              <td>minimum lake height value        <td>250.0
-<tr><td>sfc_z0_type     <td>sfc_diff                                      <td>surface roughness options over ocean   \n
-                                                                          <ul>
-                                                                          <li>0: no change
-                                                                          <li>6: areodynamical roughness over water with input 10-m wind
-                                                                          <li>7: slightly decrease Cd for higher wind speed compared to 6
-                                                                          <li>negative when cplwav2atm=.true. - i.e. two way wave coupling
-                                                                          </ul>
-                                                                          <td>0
-                                                                          <tr><td>shcnvcw         <td>samfshalcnv          <td>logical flag for shallow convective cloud           <td>.false.
-<tr><td>xkzm_h          <td>satmedmfvdifq,satmedmfvdif,moninshoc,hedmf,myjpbl_wrapper          <td>background vertical diffusion for heat and q        <td>1.0d0
-<tr><td>xkzm_m          <td>satmedmfvdifq,satmedmfvdif,moninshoc,hedmf,myjpbl_wrapper           <td>background vertical diffusion for momentum          <td>1.0d0
-<tr><td>xkzm_s          <td>satmedmfvdifq,satmedmfvdif,moninshoc,hedmf,myjpbl_wrapper           <td>sigma threshold for background mom. diffusion       <td>1.0d0
-<tr><td>xkzminv         <td>moninshoc,hedmf          <td>maximum background value of heat diffusivity in the inversion layer    <td>0.3
-<tr><td>moninq_fac      <td>hedmf                     <td>atmosphere diffusivity coefficient factor           <td>1.0
-<tr><td>dspfac          <td>satmedmfvdifq,satmedmfvdif  <td>TKE dissipative heating factor                    <td>1.0
-<tr><td>bl_upfr         <td>satmedmfvdifq             <td>updraft fraction in boundary layer mass flux scheme       <td>0.13
-<tr><td>bl_dnfr         <td>satmedmfvdifq             <td>downdraft fraction in boundary layer mass flux scheme     <td>0.1
-<tr><td colspan="4" align= center>\b Parameters \b Specific \b to \b csawmg \b Suite 
-<tr><td>cscnv           <td>cs_conv                    <td>logical flag for Chikira-Sugiyama deep convection   <td>.false.
-<tr><td>do_aw           <td>cs_conv                    <td>flag for Arakawa-Wu scale-awere adjustment          <td>.false.
+                                                      <td>1; set to 2 for GFSv15p2 and GFSv16beta; set to 3 for GSD_v1
+<tr><td>do_deep         <td>gfs_control_type          <td>consistency check for deep convection     <td>.true.
+<tr><td>shal_cnv        <td>gfs_control_type          <td>logical flag for calling shallow convection            <td>.false.
+<tr><td>lmfshal         <td>gfs_control_type          <td>flag for mass-flux shallow convection scheme in the cloud fraction calculation  <td>shal_cnv .and. (imfshalcnv > 0) 
+<tr><td>lmfdeep2        <td>gfs_control_type          <td>flag for mass-flux deep convection scheme in the cloud fraction calculation <td>imfdeepcnv == 2 .or. 3 .or.4
+<tr><td>random_clds     <td>gfs_control_type          <td>logical flag for whether clouds are random             <td>.false.
+<tr><td>trans_trac      <td>gfs_control_type          <td>logical flag for convective transport of tracers       <td>.false.
+<tr><td>cal_pre         <td>gfs_control_type          <td>logical flag for calling precipitation type algorithm  <td>.false.
+<tr><td>shcnvcw         <td>samfshalcnv          <td>logical flag for shallow convective cloud           <td>.false.
+<tr><td>cscnv           <td>cs_conv                    <td>logical flag for Chikira-Sugiyama deep convection   <td>.false.; set to .T. for csawmg
+<tr><td>do_aw           <td>cs_conv                    <td>flag for Arakawa-Wu scale-awere adjustment          <td>.false.; set to .T. for csawmg
 <tr><td>do_shoc         <td>cs_conv                    <td>flag for Simplified Hihger-order Closure (SHOC)     <td>.false.
 <tr><td>do_awdd         <td>cs_conv                    <td>flag to enable treating convective tendencies following Arakwaw-Wu for downdrafts (2013)  <td>.false.
 <tr><td>cs_parm(10)     <td>cs_conv          <td>tunable parameters for Chikira-Sugiyama convection           <td>8.0,4.0,1.0e3,3.5e3,20.0,1.0,-999.,1.,0.6,0. 
-<tr><td>do_sb_physics   <td>m_micro                   <td>logical flag for SB2001 autoconversion or accretion   <td>.true.
-<tr><td>do_cldice       <td>m_micro                   <td>flag for cloud ice processes for MG microphysics      <td>.true.
-<tr><td>hetfrz_classnuc <td>m_micro          <td>flag for heterogeneous freezing for MG microphysics            <td>.false.
-<tr><td>mg_nccons       <td>m_micro          <td>flag for constant droplet concentration for MG microphysics    <td>.false.
-<tr><td>mg_nicons       <td>m_micro          <td>flag for constant ice concentration for MG microphysics        <td>.false.
-<tr><td>mg_ngcons       <td>m_micro          <td>flag for constant graupel concentration for MG microphysics    <td>.false.
-<tr><td>sed_supersat    <td>m_micro          <td>flag for allowing supersaturation after sedimentation for MG microphysics      <td>.true.
-<tr><td>mg_do_graupel   <td>m_micro          <td>flag for turning on prognostic graupel (with fprcp=2)          <td>.true.
-<tr><td>mg_do_hail      <td>m_micro          <td>flag for turning on prognostic hail (with fprcp=2)             <td>.false.
-<tr><td>microp_uniform  <td>m_micro          <td>logical flag for uniform subcolumns for MG microphysics  <td>.true.
-<tr><td>mg_do_ice_gmao  <td>m_micro          <td>logical flag for turning on gmao ice autoconversion in MG microphysics  <td>.false.
-<tr><td>mg_do_liq_liu   <td>m_micro          <td>logical flag for turning on Liu liquid treatment in MG  microphysics    <td>.true.
-<tr><td>mg_dcs          <td>m_micro          <td>autoconversion size threshold for cloud ice to snow in MG microphysics  <td>200.0
-<tr><td>mg_ts_auto_ice(2)  <td>m_micro       <td>autoconversion time scale for ice in MG microphysics                    <td>180.0,180.0
-<tr><td>mg_qcvar        <td>m_micro          <td>cloud water relative variance in MG microphysics                        <td>1.0
-<tr><td>mg_rhmini       <td>m_micro          <td>relative humidity threshold parameter for nucleating ice                <td>1.01
-<tr><td>mg_ncnst        <td>m_micro                   <td>constant droplet num concentration \f$m^{-3}\f$                         <td>100.e6
-<tr><td>mg_ninst        <td>m_micro                   <td>constant ice num concentration \f$m^{-3}\f$                             <td>0.15e6
-<tr><td>mg_ngnst        <td>m_micro                   <td>constant graupel/hail num concertration \f$m^{-3}\f$                    <td>0.10e6
-<tr><td>mg_berg_eff_factor   <td>m_micro     <td>berg efficiency factor                              <td>2.0
-<tr><td>mg_precip_frac_method   <td>m_micro  <td>type of precipitation fraction method                                   <td>'max_overlap'
-<tr><td>fprcp           <td>m_micro          <td>number of frozen precipitation species in MG microphysics \n 
+<tr><td colspan="4"  align= center>\b Parameters \b related \b to \b PBL \b scheme \b options
+<tr><td>do_mynnedmf     <td>mynnedmf_wrapper*         <td>flag to activate MYNN-EDMF scheme                      <td>.false. for GFSv15p2 and GFSv16beta
+<tr><td>do_myjsfc       <td>myjpbl_wrapper            <td>flag for MYJ surface layer scheme                      <td>.false
+<tr><td>dspheat         <td>gfs_control_type          <td>logical flag for using TKE dissipative heating to temperature tendency in hybrid EDMF and TKE-EDMF schemes <td>.false.
+<tr><td>satmedmf        <td>gfs_control_type          <td>logical flag for calling scale-ware TKE-based EDMF PBL scheme           <td>.false.; set to .T. for GFSv15p2 and GFSv16beta
+<tr><td>isatmedmf       <td>gfs_control_type          <td>flag for scale-aware TKE-based moist EDMF scheme \n
                                                       <ul>
-                                                      <li> 0: no prognostic rain and snow
-                                                      <li> 1: MG2
-                                                      <li> 2: MG3
+                                                      <li> 0: initial version of satmedmf (Nov.2018)
+                                                      <li> 1: updated version of satmedmf (as of May 2019)
                                                       </ul>
-                                                      <td>0
-<tr><td>pdfflag         <td>m_micro          <td>pdf flag for MG macro physics        <td>4
-<tr><td>iccn            <td>m_micro          <td>flag for using IN and CCN forcing in MG2/3 microphysics      <td>.false.
-<tr><td>iaerclm         <td>m_micro                  <td>flag for initializing aerosol data                      <td>.false.
-<tr><td>rhcmax          <td>m_micro          <td>maximum critical relative humidity                           <td>0.9999999 
-<tr><td>aero_in         <td>m_micro          <td>logical flag for using aerosols in Morrison-Gettelman microphysics   <td>.false.
-<tr><td colspan="4"  align= center>\b Parameters \b Specific \b to \b GSD_v0 \b Suite 
-<tr><td>do_mynnsfclay   <td>gfs_control_type          <td>flag to activate MYNN-SFCLAY scheme                                       <td>.false.
+                                                      <td> 0; set to 0 for GFSv15p2 and csawmg; 1 for GFSv16beta
+<tr><td>hybedmf         <td>gfs_control_type          <td>logical flag for calling hybrid EDMF PBL scheme        <td>.false.; set to .T. for GFSv15p2 and csawmg   
+<tr><td>shinhong        <td>gfs_control_type          <td>flag for scale-aware Shinhong PBL scheme                 <td>.false.
+<tr><td>do_ysu          <td>gfs_control_type          <td>flag for YSU PBL scheme                                  <td>.false.
+<tr><td>debug           <td>gfs_control_type          <td>flag for debug printout                             <td>.false.
+<tr><td>xkzm_h          <td>satmedmfvdifq, hedmf          <td>background vertical diffusion for heat and q        <td>1.0d0
+<tr><td>xkzm_m          <td>satmedmfvdifq, hedmf           <td>background vertical diffusion for momentum          <td>1.0d0
+<tr><td>xkzm_s          <td>satmedmfvdifq, hedmf           <td>sigma threshold for background mom. diffusion       <td>1.0d0
+<tr><td>xkzminv         <td>hedmf          <td>maximum background value of heat diffusivity in the inversion layer    <td>0.3
+<tr><td>moninq_fac      <td>hedmf                     <td>atmosphere diffusivity coefficient factor           <td>1.0
+<tr><td>dspfac          <td>satmedmfvdifq     <td>TKE dissipative heating factor                    <td>1.0
+<tr><td>bl_upfr         <td>satmedmfvdifq             <td>updraft fraction in boundary layer mass flux scheme       <td>0.13
+<tr><td>bl_dnfr         <td>satmedmfvdifq             <td>downdraft fraction in boundary layer mass flux scheme     <td>0.1                                  <td>.false.
 <tr><td>grav_settling   <td>mynnedmf_wrapper          <td>flag to activate gravitational settling of cloud droplets as described in Nakanishi (2000) \cite nakanishi_2000 <td>0
 <tr><td>bl_mynn_mixlength    <td>mynnedmf_wrapper     <td>flag for different version of mixing length formulation \n 
                                                       <ul>
@@ -379,20 +291,11 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                       <li> 1: activate subgrid cloud coupling to radiation (highly suggested) 
                                                       </ul>
                                                       <td>1
-<tr><td>do_gwd            <td>gfs_control_type     <td>logical for gravity wave drag   <td>maxval(cdmbgwd) > 0.0 
-<tr><td>gwd_opt           <td>gfs_control_type     <td>flag for GWD scheme   \n
-                                                   <ul>
-                                                   <li>1: original GFS GWD
-                                                   <li>3: GSL drag suite
-                                                   <li>33: GSL drag suite with extra output
-                                                   <li>
-                                                   </ul>
-                                                   <td>1
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b surface \b perturbation \b options
 <tr><td>do_sppt           <td>gfs_control_type  <td>flag for stochastic SPPT option                        <td>.false.
 <tr><td>do_shum           <td>gfs_control_type  <td>flag for stochastic SHUM option                        <td>.false.
 <tr><td>do_skeb           <td>gfs_control_type  <td>flag for stochastic SKEB option                        <td>.false.
 <tr><td>do_sfcperts       <td>gfs_control_type  <td>flag for stochastic surface perturbations option       <td>.false.
-<tr><td colspan="4" align= center>\b &nam_sfcperts
 <tr><td>nsfcpert          <td>gfs_control_type  <td>number of weights for stochastic surface perturbation  <td>0
 <tr><td>pertz0            <td>gfs_control_type  <td>magnitude of perturbation of momentum roughness length <td>-999.
 <tr><td>pertzt            <td>gfs_control_type  <td>magnitude of perturbation of heat to momentum roughness length ratio   <td>-999.
@@ -400,39 +303,8 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>pertlai           <td>gfs_control_type  <td>magnitude of perturbation of leaf area index           <td>-999.
 <tr><td>pertalb           <td>gfs_control_type  <td>magnitude of surface albedo perturbation               <td>-999.
 <tr><td>pertvegf          <td>gfs_control_type  <td>magnitude of perturbation of vegetation fraction       <td>-999.
-<tr><td>iseed_sfc         <td>compns_stochy_mod  <td>random seeds (if 0 use system clock)                  <td>0
-<tr><td>sfc_tau           <td>compns_stochy_mod  <td>time scales                                           <td>-999.
-<tr><td>sfc_lscale        <td>compns_stochy_mod  <td>length scales                                         <td>-999.
-<tr><td>sppt_land         <td>compns_stochy_mod  <td>                                                      <td>.false.
-<tr><td colspan="4" align= center>\b &stochy_nam
-<tr><td>use_zmtnblck      <td>compns_stochy_mod      <td>flag for mountain blocking. .T. = do not apply perturbations below the dividing streamline that is diagnosed by the gravity wave drag, mountain blocking scheme  <td>.false.
-<tr><td>ntrunc            <td>compns_stochy_mod      <td>spectral resolution (e.g. T126) of random patterns              <td>-999
-<tr><td>lon_s, lat_s      <td>compns_stochy_mod      <td>number of longitude and latitude point for the Gaussian grid    <td>-999          
-<tr><td>fhstoch           <td>compns_stochy_mod      <td>forecast hour to write out random pattern in order to restart the pattern for a different forecast (used in DA), file is stoch_out.F<HHH>  <td>-999.0
-<tr><td>stochini          <td>compns_stochy_mod      <td>set to true if wanting to read in a previous random pattern (input file need to be named \c stoch_ini)   <td>.false.
-<tr><td>sppt              <td>compns_stochy_mod      <td>amplitude of random patterns                                     <td>-999.
-<tr><td>sppt_tau          <td>compns_stochy_mod      <td>decorrelation timescales in seconds                              <td>-999.
-<tr><td>sppt_lscale       <td>compns_stochy_mod      <td>decorrelation spatial scales in meters                           <td>-999.
-<tr><td>sppt_logit        <td>compns_stochy_mod      <td>logit transform for SPPT to bounded interval [-1,+1]             <td>.false.
-<tr><td>iseed_sppt        <td>compns_stochy_mod      <td>seeds for setting the random number sequence (ignored if \c stochini is true)  <td>0
-<tr><td>sppt_sigtop1, sppt_sigtop2   <td>compns_stochy_mod    <td>sigma levels to taper perturbations to zeros                          <td>0.1, 0.025
-<tr><td>sppt_sfclimit     <td>compns_stochy_mod      <td>reduce amplitude of SPPT near surface (lowest 2 levels)                        <td>.false.
-<tr><td>shum              <td>compns_stochy_mod      <td>amplitude of stochastic boundary layer specific humidity perturbations         <td>-999.
-<tr><td>shum_tau          <td>compns_stochy_mod      <td>decorrelation time scales in seconds                                           <td>-999.
-<tr><td>shum_lscale       <td>compns_stochy_mod      <td>decorrelation spatial scales in meters                                         <td>-999.
-<tr><td>shum_sigefold     <td>compns_stochy_mod      <td>e-folding lengthscale (in units of sigma) of specific humidity perturbations   <td>0.2
-<tr><td>skeb              <td>compns_stochy_mod      <td>stochastic KE backscatter amplitude                                            <td>-999.
-<tr><td>skeb_tau          <td>compns_stochy_mod      <td>decorrelation timescales in seconds                                            <td>-999.
-<tr><td>skeb_lscale       <td>compns_stochy_mod      <td>decorrelation spatial scales in meter                                          <td>-999.
-<tr><td>iseed_skeb        <td>compns_stochy_mod      <td>seeds for setting the random number sequnce (ignored if \c stochini is true)   <td>0
-<tr><td>skeb_vfilt        <td>compns_stochy_mod      <td>                                                                               <td>0
-<tr><td>skebnorm          <td>compns_stochy_mod      <td>0: random pattern is stream function,1: pattern is kenorm, 2: pattern is vorticity  <td>0
-<tr><td>skeb_varspect_opt   <td>compns_stochy_mod    <td>Gaussian or power law variance spectrum for SKEB (0: Gaussian, 1: power law)   <td>0
-<tr><td>skeb_npass        <td>compns_stochy_mod      <td>number of passes of smoother for dissipation estimate                          <td>11
-<tr><td>skeb_vdof         <td>compns_stochy_mod      <td>the number of degrees of freedom in the vertical for the SKEB random pattern   <td>5
-<tr><td>skeb_sigtop1, skeb_sigtop2   <td>compns_stochy_mod          <td>sigma levels to taper perturbations to zeros                    <td>0.1, 0.025
-<tr><td>skebint           <td>compns_stochy_mod      <td>                                                                               <td>0
-<tr><td>lradar           <td>gfdl_cloud_microphys      <td>logical flag for computing radar reflectivity in Thompson MP scheme       <td>.false.
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b microphysics \b scheme \b options
+<tr><td>lradar            <td>gfdl_cloud_microphys      <td>logical flag for computing radar reflectivity in Thompson MP scheme       <td>.false.
 <tr><td>sedi_transport    <td>gfdl_cloud_microphys       <td>logical flag for turning on horizontal momentum transport during sedimentation     <td>.true.
 <tr><td>do_sedi_w         <td>gfdl_cloud_microphys       <td>\a .true. to turn on vertical motion transport during sedimentation. (not supported in GFS physics)   <td>.false.      
 <tr><td>do_sedi_heat      <td>gfdl_cloud_microphys       <td>logical flag for turning on horizontal heat transport during sedimentation         <td>.true.
@@ -506,6 +378,43 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
 <tr><td>mp_print          <td>gfdl_cloud_microphys       <td>\a .true. to turn on GFDL cloud microphysics debugging print out. (not supported in GFS physics)       <td>.false.
 <tr><td>ltaerosol       <td>mp_thompson               <td>logical flag for using aerosol climotology in Thompson MP scheme          <td>.false.
 <tr><td>ttendlim        <td>mp_thompson               <td>temperature tendency limiter per time step in K/s, set to < 0 to deactivate   <td>-999.0
+<tr><td>effr_in         <td>gfdl_cloud_microphys ,mp_thompson ,m_micro          <td>logical flag for using input cloud effective radii calculation    <td>.false.
+<tr><td>cnvcld          <td>gfs_control_type          <td>logical flag for convective cloud                      <td>.false.
+<tr><td>lgfdlmprad      <td>gfs_control_type          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
+<tr><td>do_sb_physics   <td>m_micro                   <td>logical flag for SB2001 autoconversion or accretion   <td>.true.
+<tr><td>do_cldice       <td>m_micro                   <td>flag for cloud ice processes for MG microphysics      <td>.true.
+<tr><td>hetfrz_classnuc <td>m_micro          <td>flag for heterogeneous freezing for MG microphysics            <td>.false.
+<tr><td>mg_nccons       <td>m_micro          <td>flag for constant droplet concentration for MG microphysics    <td>.false.
+<tr><td>mg_nicons       <td>m_micro          <td>flag for constant ice concentration for MG microphysics        <td>.false.
+<tr><td>mg_ngcons       <td>m_micro          <td>flag for constant graupel concentration for MG microphysics    <td>.false.
+<tr><td>sed_supersat    <td>m_micro          <td>flag for allowing supersaturation after sedimentation for MG microphysics      <td>.true.
+<tr><td>mg_do_graupel   <td>m_micro          <td>flag for turning on prognostic graupel (with fprcp=2)          <td>.true.
+<tr><td>mg_do_hail      <td>m_micro          <td>flag for turning on prognostic hail (with fprcp=2)             <td>.false.
+<tr><td>microp_uniform  <td>m_micro          <td>logical flag for uniform subcolumns for MG microphysics  <td>.true.
+<tr><td>mg_do_ice_gmao  <td>m_micro          <td>logical flag for turning on gmao ice autoconversion in MG microphysics  <td>.false.
+<tr><td>mg_do_liq_liu   <td>m_micro          <td>logical flag for turning on Liu liquid treatment in MG  microphysics    <td>.true.
+<tr><td>mg_dcs          <td>m_micro          <td>autoconversion size threshold for cloud ice to snow in MG microphysics  <td>200.0
+<tr><td>mg_ts_auto_ice(2)  <td>m_micro       <td>autoconversion time scale for ice in MG microphysics                    <td>180.0,180.0
+<tr><td>mg_qcvar        <td>m_micro          <td>cloud water relative variance in MG microphysics                        <td>1.0
+<tr><td>mg_rhmini       <td>m_micro          <td>relative humidity threshold parameter for nucleating ice                <td>1.01
+<tr><td>mg_ncnst        <td>m_micro                   <td>constant droplet num concentration \f$m^{-3}\f$                         <td>100.e6
+<tr><td>mg_ninst        <td>m_micro                   <td>constant ice num concentration \f$m^{-3}\f$                             <td>0.15e6
+<tr><td>mg_ngnst        <td>m_micro                   <td>constant graupel/hail num concertration \f$m^{-3}\f$                    <td>0.10e6
+<tr><td>mg_berg_eff_factor   <td>m_micro     <td>berg efficiency factor                              <td>2.0
+<tr><td>mg_precip_frac_method   <td>m_micro  <td>type of precipitation fraction method                                   <td>'max_overlap'
+<tr><td>fprcp           <td>m_micro          <td>number of frozen precipitation species in MG microphysics \n 
+                                                      <ul>
+                                                      <li> 0: no prognostic rain and snow
+                                                      <li> 1: MG2
+                                                      <li> 2: MG3
+                                                      </ul>
+                                                      <td>0
+<tr><td>pdfflag         <td>m_micro          <td>pdf flag for MG macro physics        <td>4
+<tr><td>iccn            <td>m_micro          <td>flag for using IN and CCN forcing in MG2/3 microphysics      <td>.false.
+<tr><td>iaerclm         <td>m_micro                  <td>flag for initializing aerosol data                      <td>.false.
+<tr><td>rhcmax          <td>m_micro          <td>maximum critical relative humidity                           <td>0.9999999 
+<tr><td>aero_in         <td>m_micro          <td>logical flag for using aerosols in Morrison-Gettelman microphysics   <td>.false.
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b gravity \b drag \b scheme \b options
 <tr><td>knob_ugwp_version <td>cires_ugwp                 <td>parameter selects a version of the UGWP implementation in FV3GFS-127L  \n       
                                                          <ul>
                                                          <li> 0: default version delivered to EMC in Jan 2019 for implementation
@@ -567,7 +476,7 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                    <li> .T.: revised gwdps_v0
                                                    <li> .F.: GFS operational orographic gwdps 
                                                    </ul>
-                                                   <td>.false.
+                                                   <td>.false.; The CIRES Unified Gravity Wave Physics (cires_ugwp) scheme is used in GFSv15p2 and GFSv16beta SDFs with do_ugwp=F in the namelist. In this setting, the cires_ugwp calls the operational GFS v15.2 orographic gravity wave drag (gwdps) scheme. When do_ugwp=.T., the cires_ugwp scheme calls an experimental orographic gravity wave (gwdps_v0)
 <tr><td>do_tofd           <td>cires_ugwp           <td>flag for turbulent orographic form drag       <td>.false.
 <tr><td>cnvgwd            <td>cires_ugwp           <td>logical flag for convective gravity wave drag scheme dependent on maxval(cdmbgwd(3:4) == 0.0)   <td>.false.
 <tr><td>cdmbgwd(4)        <td>cires_ugwp           <td>multiplication factors for mountain blocking(1), orographic gravity wave drag(2)
@@ -578,10 +487,42 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                    <li> [4]: TKE for future tests and applications
                                                    </ul>
                                                    <td>2.0,0.25,1.0,1.0
-<tr><td>do_cnvgwd         <td>gwdc                 <td>logical for convective GWD      <td>cnvgwd .and. maxval(cdmbgwd(3:4)) == 0.0                                                    
-<tr><td>nmtvr           <rd>cires_ugwp                <td>number of topographic variables such as variance etc used in the GWD parameterization-10 more added if GSL orographic drag scheme is used <td>14
-<tr><td>cgwf            <td>cires_ugwp,gwdc      <td>multiplication factor for convective GWD                     <td>0.5d0,0.05d0
-<tr><td colspan="4" align= center>\ref NoahMP
+<tr><td>do_cnvgwd         <td>gwdc                 <td>logical for convective GWD      <td>cnvgwd .and. maxval(cdmbgwd(3:4)) == 0.0
+<tr><td>nmtvr           <td>cires_ugwp             <td>number of topographic variables such as variance etc used in the GWD parameterization-10 more added if GSL orographic drag scheme is used <td>14
+<tr><td>cgwf            <td>cires_ugwp ,gwdc      <td>multiplication factor for convective GWD                     <td>0.5d0,0.05d0
+<tr><td>do_gwd            <td>gfs_control_type     <td>logical for gravity wave drag   <td>maxval(cdmbgwd) > 0.0 
+<tr><td>gwd_opt           <td>gfs_control_type     <td>flag for GWD scheme   \n
+                                                   <ul>
+                                                   <li>1: original GFS GWD
+                                                   <li>3: GSL drag suite
+                                                   <li>33: GSL drag suite with extra output
+                                                   <li>
+                                                   </ul>
+                                                   <td>1
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b LSM \b options
+<tr><td>lsm             <td>gfs_control_type          <td>flag for land surface model to use    \n
+                                                      <ul>
+                                                      <li> 1: Noah LSM
+                                                      <li> 2: NoahMP LSM
+                                                      <li> 3: RUC LSM
+                                                      </ul>
+                                                      <td>1; set to 2 for RRFS_v1alpha;3 for GSD_v1
+<tr><td>lsoil           <td>sfc_drv                   <td>number of soil layers           <td>4; set to 9 for GSD_v1
+<tr><td>rdlai           <td>sfc_drv_ruc               <td>flag to read leaf area index from input files    <td>.false.
+<tr><td>ivegsrc         <td>gfs_control_type          <td>flag for vegetation type dataset choice: \n 
+                                                      <ul>
+                                                      <li> 0: USGS 
+                                                      <li> 1: IGBP(20 category): IGBP must be selected if NoahMP is used 
+                                                      <li> 2: UMD (13 category) 
+                                                      </ul>
+                                                      <td>2
+<tr><td>isot            <td>gfs_control_type          <td>flag for soil type dataset choice:\n 
+                                                      <ul> 
+                                                      <li> 0: Zobler soil type (9 category) 
+                                                      <li> 1: STATSGO soil type (19 category): STATSGO must be selected if NoahMP is used
+                                                      </ul>
+                                                      <td>0
+
 <tr><td>iopt_dveg         <td>noahmpdrv                  <td>options for dynamic vegetation  \n
                                                          <ul>
                                                          <li>1: off (use table LAI; use FVEG = SHDFAC from input)
@@ -669,5 +610,35 @@ and how stochastic perturbations are used in the Noah Land Surface Model.
                                                          <li>3: same as 1, but fsno for ts calculation (generally improve snow; v3.7)
                                                          </ul>
                                                          <td>1
+                                                         
+                                                         <tr><td>nstf_name(5)    <td>sfc_nst                   <td>NSST related paramters:\n 
+                                                      <ul>
+                                                      <li> nstf_name(1): 0=NSST off, 1= NSST on but uncoupled, 2= NSST on and coupled 
+                                                      <li> nstf_name(2): 1=NSST spin up on, 0=NSST spin up off 
+                                                      <li> nstf_name(3): 1=NSST analysis on, 0=NSST analysis off 
+                                                      <li> nstf_name(4): zsea1 in mm 
+                                                      <li> nstf_name(5): zesa2 in mm 
+                                                      </ul>
+                                                      <td>/0,0,1,0,5/
+<tr><td colspan="4" align= center>\b Parameters \b related \b to \b other \b surface \b scheme \b options
+<tr><td>nst_anl         <td>GFS_phys_time_vary          <td>flag for NSST analysis in gcycle/sfcsub            <td>.false.
+<tr><td>frac_grid       <td>fractional grid     <td>flag for fractional grid         <td>.false.
+<tr><td>min_lakeice     <td>fractional grid                              <td>minimum lake ice value           <td>0.15d0    
+<tr><td>min_seaice      <td>fractional grid                              <td>minimum sea ice value            <td>1.0d-11
+<tr><td>min_lake_height <td>fractional grid                              <td>minimum lake height value        <td>250.0
+<tr><td>sfc_z0_type     <td>sfc_diff                                      <td>surface roughness options over ocean   \n
+                                                                          <ul>
+                                                                          <li>0: no change
+                                                                          <li>6: areodynamical roughness over water with input 10-m wind
+                                                                          <li>7: slightly decrease Cd for higher wind speed compared to 6
+                                                                          <li>negative when cplwav2atm=.true. - i.e. two way wave coupling
+                                                                          </ul>
+                                                                          <td>0
+<tr><td>redrag          <td>sfc_diff          <td>logical flag for applying reduced drag coefficient for high wind over sea in GFS surface layer scheme  <td>.false.
+<tr><td>prslrd0         <td>rayleigh_damp             <td>pressure level above which to apply Rayleigh damping    <td>0.0d0
+<tr><td>ral_ts          <td>rayleigh_damp             <td>time scale for Rayleigh damping in days                <td>0.0d0
+<tr><td>lheatstrg       <td>GFS_surface_generic_post          <td>logical flag for canopy heat storage parameterization    <td>.false.
+<tr><td>z0fac           <td>GFS_surface_generic_post          <td>surface roughness fraction factor          <td>0.3
+<tr><td>e0fac           <td>GFS_surface_generic_post          <td>latent heat flux fraction factor relative to sensible heat flux,e.g., e0fac=0.5 indicates that canopy heat storage for latent heat flux is 50% of that for sensible heat flux  <td>0.5
 </table>
 */

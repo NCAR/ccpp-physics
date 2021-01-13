@@ -201,7 +201,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../mfpbl.f \
                         ../tridi.f \
 ### satmedmf
-                        ../satmedmfvdif.F \
+###                     ../satmedmfvdif.F \
                         ../satmedmfvdifq.F  \
                         ../mfpbltq.f         \
                         ../mfscuq.f          \
@@ -230,7 +230,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Deep Convection
                         ../samfdeepcnv.f \
 ### Convective Gravity Wave
-###                        ../gwdc.f \
+                        ../gwdc.f \
 ### Shallow Convection
                         ../samfshalcnv.f \
                         ../cnvc90.f \
