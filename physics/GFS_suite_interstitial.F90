@@ -175,7 +175,8 @@
 
       logical,              intent(in   ), dimension(im) :: flag_cice
       real(kind=kind_phys), intent(in   ), dimension(2) :: ctei_rm
-      real(kind=kind_phys), intent(in   ), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, ulwsfc_cice, work1, work2
+      real(kind=kind_phys), intent(in   ), dimension(im) :: xcosz, adjsfcdsw, adjsfcdlw, pgr, xmu, work1, work2
+      real(kind=kind_phys), intent(in   ), dimension(:)  :: ulwsfc_cice
       real(kind=kind_phys), intent(in   ), dimension(im) :: cice
       real(kind=kind_phys), intent(in   ), dimension(im, levs) :: htrsw, htrlw, tgrs, prsl, qgrs_water_vapor, qgrs_cloud_water, prslk
       real(kind=kind_phys), intent(in   ), dimension(im, levs+1) :: prsi

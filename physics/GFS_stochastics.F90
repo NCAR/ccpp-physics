@@ -90,7 +90,7 @@
          real(kind_phys), dimension(:),         intent(in)    :: dsnow_cpl
          real(kind_phys), dimension(1:km),      intent(in)    :: si
          real(kind_phys), dimension(1:km),      intent(inout) :: vfact_ca
-         real(kind_phys), dimension(1:im),      intent(in)    :: ca1
+         real(kind_phys), dimension(:),         intent(in)    :: ca1
          character(len=*),                      intent(out)   :: errmsg
          integer,                               intent(out)   :: errflg
 
