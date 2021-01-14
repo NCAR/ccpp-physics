@@ -533,6 +533,13 @@
 !
       logical icefl1(len), icefl2(len)
 !
+      real (kind=kind_io8), allocatable, dimension(:) ::                &
+     &     tsffcsd, snofcsd, tg3fcsd, zorfcsd, slifcsd, aisfcsd,        &
+     &     cnpfcsd, vegfcsd, vetfcsd, sotfcsd, sihfcsd, sicfcsd,        &
+     &     vmnfcsd, vmxfcsd, slpfcsd, absfcsd
+      real (kind=kind_io8), allocatable, dimension(:,:) ::              &
+     &                                        smcfcsd, stcfcsd, albfcsd
+!
 !  input and output surface fields (bges) file names
 !
 !
@@ -2202,37 +2209,45 @@
       endif
 !
       if (mondif) then
+        allocate (tsffcsd(len), snofcsd(len), tg3fcsd(len),             &
+     &            zorfcsd(len), slifcsd(len), aisfcsd(len),             &
+     &            cnpfcsd(len), vegfcsd(len), vetfcsd(len),             &
+     &            sotfcsd(len), sihfcsd(len), sicfcsd(len),             &
+     &            vmnfcsd(len), vmxfcsd(len), slpfcsd(len),             &
+     &            absfcsd(len))
+         allocate (smcfcsd(len,lsoil), stcfcsd(len,lsoil),              &
+     &             albfcsd(len,4))
         do i=1,len
-          tsffcs(i) = tsfanl(i) - tsffcs(i)
-          snofcs(i) = snoanl(i) - snofcs(i)
-          tg3fcs(i) = tg3anl(i) - tg3fcs(i)
-          zorfcs(i) = zoranl(i) - zorfcs(i)
+          tsffcsd(i) = tsfanl(i) - tsffcs(i)
+          snofcsd(i) = snoanl(i) - snofcs(i)
+          tg3fcsd(i) = tg3anl(i) - tg3fcs(i)
+          zorfcsd(i) = zoranl(i) - zorfcs(i)
 !         plrfcs(i) = plranl(i) - plrfcs(i)
 !         albfcs(i) = albanl(i) - albfcs(i)
-          slifcs(i) = slianl(i) - slifcs(i)
-          aisfcs(i) = aisanl(i) - aisfcs(i)
-          cnpfcs(i) = cnpanl(i) - cnpfcs(i)
-          vegfcs(i) = veganl(i) - vegfcs(i)
-          vetfcs(i) = vetanl(i) - vetfcs(i)
-          sotfcs(i) = sotanl(i) - sotfcs(i)
+          slifcsd(i) = slianl(i) - slifcs(i)
+          aisfcsd(i) = aisanl(i) - aisfcs(i)
+          cnpfcsd(i) = cnpanl(i) - cnpfcs(i)
+          vegfcsd(i) = veganl(i) - vegfcs(i)
+          vetfcsd(i) = vetanl(i) - vetfcs(i)
+          sotfcsd(i) = sotanl(i) - sotfcs(i)
 !clu [+2l] add sih, sic
-          sihfcs(i) = sihanl(i) - sihfcs(i)
-          sicfcs(i) = sicanl(i) - sicfcs(i)
+          sihfcsd(i) = sihanl(i) - sihfcs(i)
+          sicfcsd(i) = sicanl(i) - sicfcs(i)
 !clu [+4l] add vmn, vmx, slp, abs
-          vmnfcs(i) = vmnanl(i) - vmnfcs(i)
-          vmxfcs(i) = vmxanl(i) - vmxfcs(i)
-          slpfcs(i) = slpanl(i) - slpfcs(i)
-          absfcs(i) = absanl(i) - absfcs(i)
+          vmnfcsd(i) = vmnanl(i) - vmnfcs(i)
+          vmxfcsd(i) = vmxanl(i) - vmxfcs(i)
+          slpfcsd(i) = slpanl(i) - slpfcs(i)
+          absfcsd(i) = absanl(i) - absfcs(i)
         enddo
         do j = 1,lsoil
           do i = 1,len
-            smcfcs(i,j) = smcanl(i,j) - smcfcs(i,j)
-            stcfcs(i,j) = stcanl(i,j) - stcfcs(i,j)
+            smcfcsd(i,j) = smcanl(i,j) - smcfcs(i,j)
+            stcfcsd(i,j) = stcanl(i,j) - stcfcs(i,j)
           enddo
         enddo
         do j = 1,4
           do i = 1,len
-            albfcs(i,j) = albanl(i,j) - albfcs(i,j)
+            albfcsd(i,j) = albanl(i,j) - albfcs(i,j)
           enddo
         enddo
 !
@@ -2243,40 +2258,45 @@
         print *,'monitor of difference'
         print *,'   (includes angulation correction)'
         print *,' '
-        call monitr('tsfdif',tsffcs,slianl,snoanl,len)
-        call monitr('albdif',albfcs,slianl,snoanl,len)
-        call monitr('albdif1',albfcs,slianl,snoanl,len)
-        call monitr('albdif2',albfcs(1,2),slianl,snoanl,len)
-        call monitr('albdif3',albfcs(1,3),slianl,snoanl,len)
-        call monitr('albdif4',albfcs(1,4),slianl,snoanl,len)
-        call monitr('aisdif',aisfcs,slianl,snoanl,len)
-        call monitr('snodif',snofcs,slianl,snoanl,len)
+        call monitr('tsfdif', tsffcsd,slianl,snoanl,len)
+        call monitr('albdif', albfcsd,slianl,snoanl,len)
+        call monitr('albdif1',albfcsd,slianl,snoanl,len)
+        call monitr('albdif2',albfcsd(1,2),slianl,snoanl,len)
+        call monitr('albdif3',albfcsd(1,3),slianl,snoanl,len)
+        call monitr('albdif4',albfcsd(1,4),slianl,snoanl,len)
+        call monitr('aisdif', aisfcsd,slianl,snoanl,len)
+        call monitr('snodif', snofcsd,slianl,snoanl,len)
         do k=1,lsoil
-          call monitr(message('smcanl',k),smcfcs(1,k),slianl,snoanl,len)
-          call monitr(message('stcanl',k),stcfcs(1,k),slianl,snoanl,len)
+         call monitr(message('smcanl',k),smcfcsd(1,k),slianl,snoanl,len)
+         call monitr(message('stcanl',k),stcfcsd(1,k),slianl,snoanl,len)
         enddo
-        call monitr('tg3dif',tg3fcs,slianl,snoanl,len)
-        call monitr('zordif',zorfcs,slianl,snoanl,len)
+        call monitr('tg3dif',tg3fcsd,slianl,snoanl,len)
+        call monitr('zordif',zorfcsd,slianl,snoanl,len)
 !       if (gaus) then
           call monitr('cvadif',cvfcs ,slianl,snoanl,len)
           call monitr('cvbdif',cvbfcs,slianl,snoanl,len)
           call monitr('cvtdif',cvtfcs,slianl,snoanl,len)
 !       endif
-        call monitr('slidif',slifcs,slianl,snoanl,len)
+        call monitr('slidif',slifcsd,slianl,snoanl,len)
 !       call monitr('plrdif',plrfcs,slianl,snoanl,len)
-        call monitr('cnpdif',cnpfcs,slianl,snoanl,len)
-        call monitr('vegdif',vegfcs,slianl,snoanl,len)
-        call monitr('vetdif',vetfcs,slianl,snoanl,len)
-        call monitr('sotdif',sotfcs,slianl,snoanl,len)
+        call monitr('cnpdif',cnpfcsd,slianl,snoanl,len)
+        call monitr('vegdif',vegfcsd,slianl,snoanl,len)
+        call monitr('vetdif',vetfcsd,slianl,snoanl,len)
+        call monitr('sotdif',sotfcsd,slianl,snoanl,len)
 !cwu [+2l] add sih, sic
-        call monitr('sihdif',sihfcs,slianl,snoanl,len)
-        call monitr('sicdif',sicfcs,slianl,snoanl,len)
+        call monitr('sihdif',sihfcsd,slianl,snoanl,len)
+        call monitr('sicdif',sicfcsd,slianl,snoanl,len)
 !clu [+4l] add vmn, vmx, slp, abs
-        call monitr('vmndif',vmnfcs,slianl,snoanl,len)
-        call monitr('vmxdif',vmxfcs,slianl,snoanl,len)
-        call monitr('slpdif',slpfcs,slianl,snoanl,len)
-        call monitr('absdif',absfcs,slianl,snoanl,len)
+        call monitr('vmndif',vmnfcsd,slianl,snoanl,len)
+        call monitr('vmxdif',vmxfcsd,slianl,snoanl,len)
+        call monitr('slpdif',slpfcsd,slianl,snoanl,len)
+        call monitr('absdif',absfcsd,slianl,snoanl,len)
        endif
+       deallocate (tsffcsd, snofcsd, tg3fcsd, zorfcsd, slifcsd,         &
+     &             aisfcsd, cnpfcsd, vegfcsd, vetfcsd, sotfcsd,         &
+     &             sihfcsd, sicfcsd, vmnfcsd, vmxfcsd, slpfcsd,         &
+     &             absfcsd)
+        deallocate (smcfcsd, stcfcsd, albfcsd)
       endif
 !
 !
