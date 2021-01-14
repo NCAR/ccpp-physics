@@ -1282,7 +1282,7 @@ c
 !     recover tendencies of heat and moisture
 !
 !>  After returning with the solution, the tendencies for temperature and moisture are recovered.
-      if(flag_for_pbl_generic_tend) then
+      if(.not.flag_for_pbl_generic_tend) then
         idtend1=dtidx(index_for_temperature,index_for_cause_pbl)
         idtend2=dtidx(ntqv+100,index_for_cause_pbl)
       endif
@@ -1312,7 +1312,7 @@ c
             enddo
           enddo
         enddo
-        if(flag_for_pbl_generic_tend) then
+        if(.not.flag_for_pbl_generic_tend) then
           idtend1 = dtidx(100+ntoz,index_for_cause_pbl)
           if(idtend1>1) then
             kk = ntoz
@@ -1424,7 +1424,7 @@ c
 !     recover tendencies of momentum
 !
 !>  Finally, the tendencies are recovered from the tridiagonal solutions.
-      if(flag_for_pbl_generic_tend) then
+      if(.not.flag_for_pbl_generic_tend) then
          idtend1 = dtidx(index_for_x_wind,index_for_cause_pbl)
          idtend2 = dtidx(index_for_y_wind,index_for_cause_pbl)
       endif

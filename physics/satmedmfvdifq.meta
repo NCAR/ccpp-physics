@@ -601,50 +601,62 @@
   type = integer
   intent = in
   optional = F
-[du3dt]
-  standard_name = cumulative_change_in_x_wind_due_to_PBL
-  long_name = cumulative change in x wind due to PBL
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[ntqv]
+  standard_name = index_for_water_vapor
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[dv3dt]
-  standard_name = cumulative_change_in_y_wind_due_to_PBL
-  long_name = cumulative change in y wind due to PBL
-  units = m s-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+[dtend]
+  standard_name = diagnostic_3d_tendencies
+  long_name = diagnostic 3d tendencies for tracers and other fields
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
-[dt3dt]
-  standard_name = cumulative_change_in_temperature_due_to_PBL
-  long_name = cumulative change in temperature due to PBL
-  units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  type = integer
+  intent = in
   optional = F
-[dq3dt]
-  standard_name = cumulative_change_in_water_vapor_specific_humidity_due_to_PBL
-  long_name = cumulative change in water vapor specific humidity due to PBL
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_temperature]
+  standard_name = index_for_temperature
+  long_name = index in dtidx first dimension of temperature field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
-[do3dt]
-  standard_name = cumulative_change_in_ozone_mixing_ratio_due_to_PBL
-  long_name = cumulative change in ozone mixing ratio due to PBL
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = inout
+[index_for_x_wind]
+  standard_name = index_for_x_wind
+  long_name = index in dtidx first dimension of x wind field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_y_wind]
+  standard_name = index_for_y_wind
+  long_name = index in dtidx first dimension of x wind field
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[index_for_cause_pbl]
+  standard_name = index_for_cause_pbl
+  long_name = tracer changes caused by PBL scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [gen_tend]
   standard_name = flag_for_generic_planetary_boundary_layer_tendency
@@ -657,14 +669,6 @@
 [ldiag3d]
   standard_name = flag_diagnostics_3D
   long_name = flag for 3d diagnostic fields
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = inout
-  optional = F
-[qdiag3d]
-  standard_name = flag_tracer_diagnostics_3D
-  long_name = flag for 3d tracer diagnostic fields
   units = flag
   dimensions = ()
   type = logical

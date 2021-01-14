@@ -345,7 +345,9 @@
             idtend = dtidx(index_for_temperature,index_for_cause_shortwave)
             if(idtend>1) then
                do k=1,levs
-                  dtend(:,k,idtend) = dtend(:,k,idtend) + htrlw(:,k)*dtf*xmu(:)
+                  do i=1,im
+                     dtend(i,k,idtend) = dtend(i,k,idtend) + htrsw(i,k)*dtf*xmu(i)
+                  enddo
                enddo
             endif
           endif

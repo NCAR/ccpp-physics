@@ -62,9 +62,8 @@
      &  tau
       real(kind=kind_phys), dimension(im,km,ntrac), intent(inout) :: rtg
 
-      real(kind=kind_phys), intent(inout) :: 
       real(kind=kind_phys), dimension(:,:,:),   intent(inout) :: dtend
-      integer,              dimension(:,:,:),   intent(in)    :: dtidx
+      integer,              dimension(:,:),     intent(in)    :: dtidx
       integer, intent(in) :: index_for_temperature, index_for_x_wind,
      &  index_for_y_wind, index_for_cause_pbl, ntqv
       logical,                                  intent(in) :: ldiag3d, 

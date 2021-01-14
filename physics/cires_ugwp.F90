@@ -287,15 +287,15 @@ contains
     if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
       idtend = dtidx(index_for_x_wind,index_for_cause_orographic_gwd)
       if(idtend>1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt(i,k)*dtp
+         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdudt*dtp
       endif
       idtend = dtidx(index_for_y_wind,index_for_cause_orographic_gwd)
       if(idtend>1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt(i,k)*dtp
+         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdvdt*dtp
       endif
       idtend = dtidx(index_for_temperature,index_for_cause_orographic_gwd)
       if(idtend>1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt(i,k)*dtp
+         dtend(:,:,idtend) = dtend(:,:,idtend) + Pdtdt*dtp
       endif
     endif
     
@@ -399,15 +399,15 @@ contains
     if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
       idtend = dtidx(index_for_x_wind,index_for_cause_convective_gwd)
       if(idtend>1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dudt(i,k) - Pdudt(i,k))*dtp
+         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dudt - Pdudt)*dtp
       endif
       idtend = dtidx(index_for_y_wind,index_for_cause_convective_gwd)
       if(idtend>1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dvdt(i,k) - Pdvdt(i,k))*dtp
+         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dvdt - Pdvdt)*dtp
       endif
       idtend = dtidx(index_for_temperature,index_for_cause_convective_gwd)
       if(idtend>1) then
-         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dtdt(i,k) - Pdtdt(i,k))*dtp
+         dtend(:,:,idtend) = dtend(:,:,idtend) + (gw_dtdt - Pdtdt)*dtp
       endif
     endif
 

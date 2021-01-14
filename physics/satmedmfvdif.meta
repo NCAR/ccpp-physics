@@ -549,6 +549,23 @@
   kind = kind_phys
   intent = in
   optional = F
+[dtend]
+  standard_name = diagnostic_3d_tendencies
+  long_name = diagnostic 3d tendencies for tracers and other fields
+  units = various
+  dimensions = (horizontal_loop_extent,vertical_dimension,dtend_outer_index_max)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  type = integer
+  intent = in
+  optional = F
 [index_for_temperature]
   standard_name = index_for_temperature
   long_name = index in dtidx first dimension of temperature field

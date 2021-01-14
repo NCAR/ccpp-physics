@@ -99,7 +99,7 @@ contains
    logical, intent(in   ) :: ldiag3d
 
    ! dtend is only allocated if ldiag=.true.
-   real(kind=kind_phys), optional, intent(in)               :: dtend(:,:,:)
+   real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
    integer, intent(in)                                      :: dtidx(:,:), &
         index_for_x_wind, index_for_y_wind, index_for_temperature,         &
         index_for_cause_scnv, index_for_cause_dcnv, ntqv
@@ -112,10 +112,6 @@ contains
    real(kind=kind_phys),  dimension( im , km, 11 ) :: gdc,gdc2
    real(kind=kind_phys),  dimension( im , km ),     intent(out ) :: cnvw_moist,cnvc
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: cliw, clcw
-
-   real(kind=kind_phys),  dimension(  : ,  : ), intent(inout ) :: &
-               du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV, &
-               du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV
 
    integer, dimension (im), intent(inout) :: hbot,htop,kcnv
    integer,    dimension (im), intent(in) :: xland
@@ -870,7 +866,7 @@ contains
         if(ldiag3d) then
           if(ishallow_g3.eq.1 .and. .not.flag_for_scnv_generic_tend) then
             uidx=dtidx(index_for_x_wind,index_for_cause_scnv)
-            vidx=dtidx(index_for_v_wind,index_for_cause_scnv)
+            vidx=dtidx(index_for_y_wind,index_for_cause_scnv)
             tidx=dtidx(index_for_temperature,index_for_cause_scnv)
             qidx=dtidx(100+ntqv,index_for_cause_scnv)
             if(uidx>1) then
@@ -900,7 +896,7 @@ contains
           endif
           if((ideep.eq.1. .or. imid_gf.eq.1) .and. .not.flag_for_dcnv_generic_tend) then
             uidx=dtidx(index_for_x_wind,index_for_cause_dcnv)
-            vidx=dtidx(index_for_v_wind,index_for_cause_dcnv)
+            vidx=dtidx(index_for_y_wind,index_for_cause_dcnv)
             tidx=dtidx(index_for_temperature,index_for_cause_dcnv)
             qidx=dtidx(100+ntqv,index_for_cause_dcnv)
             if(uidx>1) then

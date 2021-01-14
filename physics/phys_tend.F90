@@ -25,8 +25,9 @@ contains
 
        ! Interface variables
        logical, intent(in) :: ldiag3d
-       real(kind=kind_phys), optional, intent(inout) :: dtend
-       integer, intent(in) :: dtidx(:,:), index_for_cause_physics, index_for_cause_non_physics, ntracp100
+       real(kind=kind_phys), optional, intent(inout) :: dtend(:,:,:)
+       integer, intent(in) :: dtidx(:,:), index_for_cause_physics, &
+            index_for_cause_non_physics, ntracp100, ncause
        character(len=*), intent(out) :: errmsg
        integer, intent(out)          :: errflg
 
@@ -49,7 +50,7 @@ contains
           endif
           do icause=1,ncause
              if(icause==index_for_cause_physics .or. &
-                  icuase==index_for_cause_non_physics) then
+                  icause==index_for_cause_non_physics) then
                 cycle ! Don't sum up the sums.
              endif
              idtend = dtidx(itrac,icause)

@@ -62,7 +62,7 @@
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,                                 &
      &     index_for_temperature,index_for_x_wind,index_for_y_wind,     &
-     &     index_for_cause_pbl,ntqv,ntoz,dtidx,                         &
+     &     index_for_cause_pbl,ntqv,ntoz,dtend,dtidx,                   &
      &     gen_tend,ldiag3d,errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -75,8 +75,8 @@
       integer, intent(in)  :: kinver(im)
       integer, intent(out) :: kpbl(im)
 !
-      logical, intent(in)  :: gen_tend, ldiag3d, qdiag3d
-      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend    &
+      logical, intent(in)  :: gen_tend, ldiag3d
+      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
       integer, intent(in) :: index_for_temperature,index_for_x_wind,    &
      &  index_for_y_wind, ntqv, ntoz, dtidx(:,:), index_for_cause_pbl
 !
@@ -1409,7 +1409,7 @@
         endif
         idtend = dtidx(100+ntqv,index_for_cause_pbl)
         if(idtend>1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f2-q1(:,:,1))
+          dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
         endif
       endif
 !

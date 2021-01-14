@@ -93,7 +93,7 @@
 
 
       if(ldiag3d) then
-         idtend(1) = dtidx(100+ntoz,index_for_cause_overhead_ozone)     ! was ozp1
+         idtend(1) = dtidx(100+ntoz,index_for_cause_prod_loss)          ! was ozp1
          idtend(2) = dtidx(100+ntoz,index_for_cause_ozmix)              ! was ozp2
          idtend(3) = dtidx(100+ntoz,index_for_cause_temp)               ! was ozp3
          idtend(4) = dtidx(100+ntoz,index_for_cause_overhead_ozone)     ! was ozp4

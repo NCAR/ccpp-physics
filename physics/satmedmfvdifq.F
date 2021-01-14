@@ -65,7 +65,8 @@
      &     prsi,del,prsl,prslk,phii,phil,delt,                          &
      &     dspheat,dusfc,dvsfc,dtsfc,dqsfc,hpbl,                        &
      &     kinver,xkzm_m,xkzm_h,xkzm_s,dspfac,bl_upfr,bl_dnfr,          &
-     &     ntoz,du3dt,dv3dt,dt3dt,dq3dt,do3dt,gen_tend,ldiag3d,qdiag3d, &
+     &     ntoz,ntqv,dtend,dtidx,index_for_temperature,index_for_x_wind,&
+     &     index_for_y_wind,index_for_cause_pbl,gen_tend,ldiag3d,       &
      &     errmsg,errflg)
 !
       use machine  , only : kind_phys
@@ -74,11 +75,11 @@
       implicit none
 !
 !----------------------------------------------------------------------
-      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz
+      integer, intent(in)  :: im, km, ntrac, ntcw, ntiw, ntke, ntoz,ntqv
       integer, intent(in)  :: kinver(im)
       integer, intent(in)  :: islimsk(im)
       integer, intent(out) :: kpbl(im)
-      logical, intent(in)  :: gen_tend,ldiag3d,qdiag3d
+      logical, intent(in)  :: gen_tend,ldiag3d
 !
       real(kind=kind_phys), intent(in) :: grav,rd,cp,rv,hvap,hfus,fv,   &
      &                                    eps,epsm1
@@ -101,10 +102,10 @@
      &                     prsi(im,km+1), del(im,km),                   &
      &                     prsl(im,km),   prslk(im,km),                 &
      &                     phii(im,km+1), phil(im,km)
-      real(kind=kind_phys), intent(inout), dimension(:,:) ::            &
-     &                     du3dt(:,:),    dv3dt(:,:),                   &
-     &                     dt3dt(:,:),    dq3dt(:,:),                   &
-     &                     do3dt(:,:)
+      real(kind=kind_phys), intent(inout), dimension(:,:,:) :: dtend
+      integer, intent(in) :: dtidx(:,:), index_for_temperature, index_f &
+     &                     or_x_wind, index_for_y_wind, index_for_cause &
+     &                     _pbl
       real(kind=kind_phys), intent(out) ::                              &
      &                     dusfc(im),     dvsfc(im),                    &
      &                     dtsfc(im),     dqsfc(im),                    &
@@ -120,7 +121,7 @@
 !***
 !***  local variables
 !***
-      integer i,is,k,kk,n,ndt,km1,kmpbl,kmscu,ntrac1
+      integer i,is,k,kk,n,ndt,km1,kmpbl,kmscu,ntrac1,idtend
       integer lcld(im),kcld(im),krad(im),mrad(im)
       integer kx1(im), kpblx(im)
 !
@@ -1422,19 +1423,13 @@ c
          enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
-        do  k = 1,km
-          do i = 1,im
-            ttend      = (f1(i,k)-t1(i,k))*rdt
-            dt3dt(i,k) = dt3dt(i,k)+ttend*delt
-          enddo
-        enddo
-        if(qdiag3d) then
-          do  k = 1,km
-            do i = 1,im
-              qtend      = (f2(i,k)-q1(i,k,1))*rdt
-              dq3dt(i,k) = dq3dt(i,k)+qtend*delt
-            enddo
-          enddo
+        idtend=dtidx(index_for_temperature,index_for_cause_pbl)
+        if(idtend>1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-t1)
+        endif
+        idtend=dtidx(100+ntqv,index_for_cause_pbl)
+        if(idtend>1) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
         endif
       endif
 !
@@ -1448,15 +1443,18 @@ c
             enddo
           enddo
         enddo
-        if(ldiag3d .and. .not. gen_tend .and. qdiag3d .and. ntoz>0) then
-          kk=ntoz
-          is = (kk-1) * km
-          do k = 1, km
-            do i = 1, im
-              qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
-              do3dt(i,k) = do3dt(i,k)+qtend*delt
+        if(ldiag3d .and. .not. gen_tend .and. ntoz>0) then
+          idtend=dtidx(ntoz+100,index_for_cause_pbl)
+          if(idtend>1) then
+            kk=ntoz
+            is = (kk-1) * km
+            do k = 1, km
+              do i = 1, im
+                qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
+                dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
+              enddo
             enddo
-          enddo
+          endif
         endif
       endif
 !
@@ -1472,12 +1470,10 @@ c
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
-          do k = 1,km1
-            do i = 1,im
-              ttend = diss(i,k) / cp
-              dt3dt(i,k) = dt3dt(i,k)+dspfac * ttend*delt
-            enddo
-          enddo
+          idtend=dtidx(ntqv+100,index_for_cause_pbl)
+          if(idtend>1) then
+            dtend(:,:,idtend) = dtend(:,:,idtend) + delt*dspfac*diss/cp
+          endif
         endif
       endif
 c
@@ -1556,14 +1552,14 @@ c
          enddo
       enddo
       if(ldiag3d .and. .not. gen_tend) then
-        do k = 1,km
-          do i = 1,im
-            utend = (f1(i,k)-u1(i,k))*rdt
-            vtend = (f2(i,k)-v1(i,k))*rdt
-            du3dt(i,k) = du3dt(i,k) + utend*delt
-            dv3dt(i,k) = dv3dt(i,k) + vtend*delt
-          enddo
-        enddo
+        idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
+        if(idtend>1) then
+          dtend(:,:,idtend)=dtend(:,:,idtend)+delt*rdt*(f1-u1)
+        endif
+        idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
+        if(idtend>1) then
+          dtend(:,:,idtend)=dtend(:,:,idtend)+delt*rdt*(f2-v1)
+        endif
       endif
 !
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
