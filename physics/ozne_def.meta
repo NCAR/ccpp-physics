@@ -1,0 +1,29 @@
+[ccpp-table-properties]
+  name = ozne_def
+  type = module
+  dependencies = machine.F
+
+[ccpp-arg-table]
+  name = ozne_def
+  type = module
+
+[levozp]
+  standard_name = vertical_dimension_of_ozone_forcing_data
+  long_name = number of vertical layers in ozone forcing data
+  units = count
+  dimensions = ()
+  type = integer
+[oz_coeff]
+  standard_name = number_of_coefficients_in_ozone_forcing_data
+  long_name = number of coefficients in ozone forcing data
+  units = index
+  dimensions = ()
+  type = integer
+[oz_pres]
+  standard_name = natural_log_of_ozone_forcing_data_pressure_levels
+  long_name = natural log of ozone forcing data pressure levels
+  units = log(Pa)
+  dimensions = (vertical_dimension_of_ozone_forcing_data)
+  type = real
+  kind = kind_phys
+  active = (index_for_ozone>0)
