@@ -1,7 +1,8 @@
 [ccpp-table-properties]
   name = GFS_rrtmg_setup
   type = scheme
-  dependencies = iounitdef.f,module_bfmicrophysics.f,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,radiation_gases.f,radiation_surface.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f
+  dependencies = iounitdef.f,module_bfmicrophysics.f,physparam.f,radcons.f90,radiation_aerosols.f,radiation_astronomy.f,radiation_clouds.f,
+  dependencies = module_mp_thompson.F90,radiation_gases.f,radiation_surface.f,radlw_main.F90,radlw_param.f,radsw_main.F90,radsw_param.f,
 
 ########################################################################
 [ccpp-arg-table]
@@ -76,14 +77,6 @@
   standard_name = index_for_liquid_cloud_condensate
   long_name = tracer index for cloud condensate (or liquid water)
   units = index
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[num_p2d]
-  standard_name = array_dimension_of_2d_arrays_for_microphysics
-  long_name = number of 2D arrays needed for microphysics
-  units = count
   dimensions = ()
   type = integer
   intent = in
@@ -255,7 +248,7 @@
 
 ########################################################################
 [ccpp-arg-table]
-  name = GFS_rrtmg_setup_run
+  name = GFS_rrtmg_setup_timestep_init
   type = scheme
 [idate]
   standard_name = date_and_time_at_model_initialization

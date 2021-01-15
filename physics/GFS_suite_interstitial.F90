@@ -16,15 +16,16 @@
 !!
     subroutine GFS_suite_interstitial_rad_reset_run (Interstitial, Model, errmsg, errflg)
 
-      use GFS_typedefs, only: GFS_control_type,GFS_interstitial_type
+      use machine,      only: kind_phys
+      use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
 
       implicit none
 
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
       type(GFS_control_type),      intent(in)    :: Model
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      character(len=*),            intent(out)   :: errmsg
+      integer,                     intent(out)   :: errflg
 
       errmsg = ''
       errflg = 0
@@ -51,6 +52,7 @@
 !!
     subroutine GFS_suite_interstitial_phys_reset_run (Interstitial, Model, errmsg, errflg)
 
+      use machine,      only: kind_phys
       use GFS_typedefs, only: GFS_control_type, GFS_interstitial_type
 
       implicit none
@@ -58,8 +60,8 @@
       ! interface variables
       type(GFS_interstitial_type), intent(inout) :: Interstitial
       type(GFS_control_type),      intent(in)    :: Model
-      character(len=*), intent(out) :: errmsg
-      integer, intent(out) :: errflg
+      character(len=*),            intent(out)   :: errmsg
+      integer,                     intent(out)   :: errflg
 
       errmsg = ''
       errflg = 0

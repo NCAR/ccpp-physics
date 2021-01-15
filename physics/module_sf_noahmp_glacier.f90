@@ -1,3 +1,4 @@
+#define CCPP
 !>  \file module_sf_noahmp_glacier.f90
 !!  This file contains the NoahMP Glacier scheme.
 
