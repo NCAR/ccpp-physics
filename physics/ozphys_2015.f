@@ -88,7 +88,7 @@
       errflg = 0
 
       if(ldiag3d) then
-         idtend(1) = dtidx(100+ntoz,index_for_cause_overhead_ozone)     ! was ozp1
+         idtend(1) = dtidx(100+ntoz,index_for_cause_prod_loss)          ! was ozp1
          idtend(2) = dtidx(100+ntoz,index_for_cause_ozmix)              ! was ozp2
          idtend(3) = dtidx(100+ntoz,index_for_cause_temp)               ! was ozp3
          idtend(4) = dtidx(100+ntoz,index_for_cause_overhead_ozone)     ! was ozp4
@@ -171,19 +171,19 @@
         enddo
         if(idtend(1)>1) then
            dtend(:,l,idtend(1)) = dtend(:,l,idtend(1)) + ! was ozp1
-     &          (prod(i,1)-prod(i,2)*prod(i,6))*dt
+     &          (prod(:,1)-prod(:,2)*prod(:,6))*dt
         endif
         if(idtend(2)>1) then
            dtend(:,l,idtend(2)) = dtend(:,l,idtend(2)) + ! was ozp2
-     &          (oz(i,l) - ozib(i))
+     &          (oz(:,l) - ozib(:))
         endif
         if(idtend(3)>1) then
            dtend(:,l,idtend(3)) = dtend(:,l,idtend(3)) + ! was ozp3
-     &          prod(i,3)*(tin(i,l)-prod(i,5))*dt
+     &          prod(:,3)*(tin(:,l)-prod(:,5))*dt
         endif
         if(idtend(4)>1) then
            dtend(:,l,idtend(4)) = dtend(:,l,idtend(4)) + ! was ozp4
-     &       prod(i,4) * (colo3(i,l)-coloz(i,l))*dt
+     &       prod(:,4) * (colo3(:,l)-coloz(:,l))*dt
         endif
       enddo                                ! vertical loop
 !

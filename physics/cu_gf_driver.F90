@@ -881,7 +881,7 @@ contains
             endif
             if(tidx>1) then
               do k=kts,ktf
-                dtend(:,k,tidx) = dtend(:,k,tidx) + cutens(i)*outts(i,k) * dt
+                dtend(:,k,tidx) = dtend(:,k,tidx) + cutens(:)*outts(:,k) * dt
               enddo
             endif
             if(qidx>1) then
@@ -901,17 +901,17 @@ contains
             qidx=dtidx(100+ntqv,index_for_cause_dcnv)
             if(uidx>1) then
               do k=kts,ktf
-                dtend(:,k,uidx) = dtend(:,k,uidx) + (cuten(i)*outu(i,k)+cutenm(i)*outum(i,k)) * dt
+                dtend(:,k,uidx) = dtend(:,k,uidx) + (cuten*outu(:,k)+cutenm*outum(:,k)) * dt
               enddo
             endif
             if(vidx>1) then
               do k=kts,ktf
-                dtend(:,k,vidx) = dtend(:,k,vidx) + (cuten(i)*outv(i,k)+cutenm(i)*outvm(i,k)) * dt
+                dtend(:,k,vidx) = dtend(:,k,vidx) + (cuten*outv(:,k)+cutenm*outvm(:,k)) * dt
               enddo
             endif
             if(tidx>1) then
               do k=kts,ktf
-                dtend(:,k,tidx) = dtend(:,k,tidx) + (cuten(i)*outt(i,k)+cutenm(i)*outtm(i,k)) * dt
+                dtend(:,k,tidx) = dtend(:,k,tidx) + (cuten*outt(:,k)+cutenm*outtm(:,k)) * dt
               enddo
             endif
             if(qidx>1) then

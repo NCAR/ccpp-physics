@@ -1425,11 +1425,21 @@ c
       if(ldiag3d .and. .not. gen_tend) then
         idtend=dtidx(index_for_temperature,index_for_cause_pbl)
         if(idtend>1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) + delt*rdt*(f1-t1)
+          do  k = 1,km
+            do i = 1,im
+              ttend      = (f1(i,k)-t1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+ttend*delt
+            enddo
+          enddo
         endif
         idtend=dtidx(100+ntqv,index_for_cause_pbl)
         if(idtend>1) then
-          dtend(:,:,idtend) = dtend(:,:,idtend) +delt*rdt*(f2-q1(:,:,1))
+          do  k = 1,km
+            do i = 1,im
+              qtend      = (f2(i,k)-q1(i,k,1))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
+            enddo
+          enddo
         endif
       endif
 !
@@ -1470,9 +1480,14 @@ c
           enddo
         enddo
         if(ldiag3d .and. .not. gen_tend) then
-          idtend=dtidx(ntqv+100,index_for_cause_pbl)
+          idtend=dtidx(index_for_temperature,index_for_cause_pbl)
           if(idtend>1) then
-            dtend(:,:,idtend) = dtend(:,:,idtend) + delt*dspfac*diss/cp
+            do k = 1,km1
+              do i = 1,im
+                ttend = diss(i,k) / cp
+                dtend(i,k,idtend) = dtend(i,k,idtend)+dspfac*ttend*delt
+              enddo
+            enddo
           endif
         endif
       endif
@@ -1554,11 +1569,22 @@ c
       if(ldiag3d .and. .not. gen_tend) then
         idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
         if(idtend>1) then
-          dtend(:,:,idtend)=dtend(:,:,idtend)+delt*rdt*(f1-u1)
+          do k = 1,km
+            do i = 1,im
+              utend = (f1(i,k)-u1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + utend*delt
+            enddo
+          enddo
         endif
+
         idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
         if(idtend>1) then
-          dtend(:,:,idtend)=dtend(:,:,idtend)+delt*rdt*(f2-v1)
+          do k = 1,km
+            do i = 1,im
+              vtend = (f2(i,k)-v1(i,k))*rdt
+              dtend(i,k,idtend) = dtend(i,k,idtend) + vtend*delt
+            enddo
+          enddo
         endif
       endif
 !

@@ -707,15 +707,15 @@ SUBROUTINE mynnedmf_wrapper_run(        &
         accum_duvt3dt: if(lssav) then
           if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
             idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
-            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RUBLTEN(i,k)*dtf
+            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RUBLTEN*dtf
 
             idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
-            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RVBLTEN(i,k)*dtf
+            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RVBLTEN*dtf
           endif
           
           if (lsidea .or. (ldiag3d .and. .not. flag_for_pbl_generic_tend)) then
             idtend=dtidx(index_for_temperature,index_for_cause_pbl)
-            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RTHBLTEN(i,k)*exner(i,k)*dtf
+            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RTHBLTEN*exner*dtf
           endif
         endif accum_duvt3dt
         !Update T, U and V:
