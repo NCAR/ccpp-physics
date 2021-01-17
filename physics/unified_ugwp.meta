@@ -207,6 +207,14 @@
   type = logical
   intent = in
   optional = F
+[do_ugwp_v0_nst_only]
+  standard_name = do_ugwp_v0_nst_only
+  long_name = flag to activate ver 0 CIRES UGWP - non-stationary GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [do_gsl_drag_ls_bl]
   standard_name = do_gsl_drag_ls_bl
   long_name = flag to activate GSL drag suite - large-scale GWD and blocking
@@ -272,6 +280,14 @@
 [do_ugwp_v0]
   standard_name = do_ugwp_v0
   long_name = flag to activate ver 0 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v0_nst_only]
+  standard_name = do_ugwp_v0_nst_only
+  long_name = flag to activate ver 0 CIRES UGWP - non-stationary GWD only
   units = flag
   dimensions = ()
   type = logical
@@ -1288,6 +1304,14 @@
 [do_ugwp_v0_orog_only]
   standard_name = do_ugwp_v0_orog_only
   long_name = flag to activate ver 0 CIRES UGWP - orographic GWD only
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[do_ugwp_v0_nst_only]
+  standard_name = do_ugwp_v0_nst_only
+  long_name = flag to activate ver 0 CIRES UGWP - non-stationary GWD only
   units = flag
   dimensions = ()
   type = logical
