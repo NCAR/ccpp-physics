@@ -648,10 +648,9 @@
                        do n=1,size(Diag%dq3dt(1,1,:))
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dq3dt_n     ',  Diag%dq3dt(:,:,n))
                        end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%upd_mf      ',    Diag%upd_mf)
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dwn_mf      ',    Diag%dwn_mf)
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%det_mf      ',    Diag%det_mf)
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%cldcov      ',    Diag%cldcov)
+                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%upd_mf      ',    Diag%upd_mf)
+                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dwn_mf      ',    Diag%dwn_mf)
+                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%det_mf      ',    Diag%det_mf)
                      end if
                      if(Model%lradar) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%refl_10cm   ',  Diag%refl_10cm)
