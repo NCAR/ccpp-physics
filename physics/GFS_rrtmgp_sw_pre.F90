@@ -27,12 +27,11 @@ contains
 !! \htmlinclude GFS_rrtmgp_sw_pre.html
 !!
   subroutine GFS_rrtmgp_sw_pre_run(me, nCol, nLev, lndp_type, n_var_lndp,lndp_var_list,     &  
-       lndp_prt_list, doSWrad, solhr,                                                       &
-       lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl, tsfc, hprime, alvsf,              &
-       alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, lsmask, sfc_wts, p_lay, tv_lay,      &
-       relhum, p_lev, sw_gas_props,                                                         &
-       nday, idxday, coszen, coszdg, sfc_alb_nir_dir, sfc_alb_nir_dif,                      &
-       sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, errmsg, errflg)
+       lndp_prt_list, doSWrad, solhr, lon, coslat, sinlat,  snowd, sncovr, snoalb, zorl,    &
+       tsfg, tsfa, hprime, alvsf, alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, lsmask,   &
+       sfc_wts, p_lay, tv_lay, relhum, p_lev, sw_gas_props, nday, idxday, coszen, coszdg,   &
+       sfc_alb_nir_dir, sfc_alb_nir_dif, sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, sfc_alb_dif, &
+       errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -58,7 +57,8 @@ contains
          sncovr,            & ! Surface snow area fraction (frac)
          snoalb,            & ! Maximum snow albedo (frac)
          zorl,              & ! Surface roughness length (cm)
-         tsfc,              & ! Surface skin temperature (K)
+         tsfg,              & ! Surface ground temperature for radiation (K)
+         tsfa,              & ! Lowest model layer air temperature for radiation (K)         
          hprime,            & ! Standard deviation of subgrid orography (m)
          alvsf,             & ! Mean vis albedo with strong cosz dependency (frac)
          alnsf,             & ! Mean nir albedo with strong cosz dependency (frac)
@@ -84,7 +84,7 @@ contains
          nday                 ! Number of daylit points
     integer, dimension(ncol), intent(out) :: &
          idxday               ! Indices for daylit points
-    real(kind_phys), dimension(ncol), intent(out) :: &
+    real(kind_phys), dimension(ncol), intent(inout) :: &
          coszen,            & ! Cosine of SZA
          coszdg,            & ! Cosine of SZA, daytime
          sfc_alb_dif          ! Mean surface diffused (nIR+uvvis) sw albedo
@@ -132,7 +132,7 @@ contains
        ! ####################################################################################
        alb1d(:) = 0.
        lndp_alb = -999.
-       call setalb (lsmask, snowd, sncovr, snoalb, zorl, coszen, tsfc, tsfc, hprime, alvsf, &
+       call setalb (lsmask, snowd, sncovr, snoalb, zorl, coszen, tsfg, tsfa, hprime, alvsf, &
             alnsf, alvwf, alnwf, facsf, facwf, fice, tisfc, NCOL, alb1d, lndp_alb, sfcalb)
        
        ! Approximate mean surface albedo from vis- and nir-  diffuse values.
@@ -148,8 +148,6 @@ contains
     else
        nday                        = 0
        idxday                      = 0
-       coszen(1:nCol)              = 0.
-       coszdg(1:nCol)              = 0.
        sfc_alb_nir_dir(:,1:nCol)   = 0.
        sfc_alb_nir_dif(:,1:nCol)   = 0.
        sfc_alb_uvvis_dir(:,1:nCol) = 0.
