@@ -1,10 +1,11 @@
 
       subroutine oro_spectral_solver(im, levs,npt,ipt, kref,kdt,me,master, &
         dtp,dxres, taub, u1, v1, t1, xn, yn, bn2, rho, prsi, prsL,         &
-        grav, omega, con_rd, del, sigma, hprime, gamma, theta,             &
+        del, sigma, hprime, gamma, theta,                                  &
         sinlat, xlatd, taup, taud, pkdis)
 ! 
-      USE MACHINE ,      ONLY : kind_phys
+      use machine ,      only : kind_phys
+      use ugwp_common,   only : grav, omega2, rd
 !      
       implicit none
 
@@ -24,7 +25,6 @@
 
       real(kind=kind_phys), intent(in), dimension(im, levs) ::   &
                               u1, v1, t1,  bn2,  rho,   prsl, del
-      real(kind=kind_phys), intent(in) :: grav, omega, con_rd
  
       real(kind=kind_phys), intent(in), dimension(im, levs+1) :: prsi
 !
@@ -44,7 +44,7 @@
       real(kind=kind_phys), parameter  :: mkz2min = mkzmin* mkzmin
       real(kind=kind_phys), parameter  :: kedmin = 1.e-3
       real(kind=kind_phys), parameter  :: kedmax = 350.,axmax=250.e-5
-      real(kind=kind_phys), parameter  :: rtau   = 0.01   ! nonlin-OGW scale 1/10sec
+      real(kind=kind_phys), parameter  :: rtau   = 0.01                  ! nonlin-OGW scale 1/10sec
       real(kind=kind_phys), parameter  :: Linsat2 =0.5
       real(kind=kind_phys), parameter  :: kxmin = 6.28e-3/100.
       real(kind=kind_phys), parameter  :: kxmax = 6.28e-3/5.0
@@ -124,12 +124,12 @@
            wkdis(:,:)    = kedmin
 
            call oro_meanflow(levs, nzi, u1(j,:), v1(j,:), t1(j,:),      &
-     &                       prsi(j,:), prsL(j,:), grav, con_rd,        &
+     &                       prsi(j,:), prsL(j,:),                      &
      &                       del(j,:), rho(i,:),                        &
      &                       bn2(i,:), uzi, rhoi,ktur, kalp,dzi,        &
      &                       xn(i), yn(i))
 
-           fcor2 = (2*omega*sinlat(j))*(2*omega*sinlat(j))*fc_flag
+           fcor2 = omega2*sinlat(j)*omega2*sinlat(j)*fc_flag
 
            k = ksrc
 
@@ -152,11 +152,11 @@
 !
 !
              if (cxoro(iw) > cxmin) then
-               wave_act(iw,k:levs+1) = 0.                 ! crit-level
+               wave_act(iw,k:levs+1) = 0.                      ! crit-level
              else
                cdf2(iw) =  cxoro(iw)*cxoro(iw) -c2f2(iw)
                if ( cdf2(iw) < cxmin2)  then
-                 wave_act(iw,k:levs+1) = 0.               ! coriolis cut-off
+                 wave_act(iw,k:levs+1) = 0.                    ! coriolis cut-off
                else
                  kzw2 = max(Bv2/Cdf2(iw) - akx2(iw), mkz2min)
                  kzw = sqrt(kzw2)
@@ -199,7 +199,7 @@
                  wave_act(iw,k:levs+1) = 0.0
                else  
 !
-! upward propagation w/o reflection
+! upward propagation w/o reflection effects
 !
                   kxw        = akx(iw)
                   kzw        = sqrt(kzw2)
@@ -283,18 +283,17 @@
 !
 !-------------------------------------------------------------      
       subroutine oro_meanflow(nz, nzi, u1, v1, t1, pint, pmid,       &
-     &           grav, con_rd,                                       &
-     &           delp, rho, bn2, uzi, rhoi, ktur, kalp, dzi, xn, yn)
+     &      delp, rho, bn2, uzi, rhoi, ktur, kalp, dzi, xn, yn)
       use machine ,      only : kind_phys
-      use ugwp_common ,  only : velmin, dw2min
+      use ugwp_common ,  only : velmin, dw2min, rdi, grav, rgrav, hpscale, rhp, rh4 
       implicit none
-
+      
       integer :: nz, nzi
       real(kind=kind_phys), dimension(nz  ) ::  u1,  v1, t1, delp, rho, pmid
       real(kind=kind_phys), dimension(nz  ) ::  bn2  ! define at the interfaces
       real(kind=kind_phys), dimension(nz+1) ::  pint
       real(kind=kind_phys)                  ::  xn, yn
-      real(kind=kind_phys),intent(in) :: grav, con_rd
+      
 ! output
  
       real(kind=kind_phys), dimension(nz+1) ::  dzi,  uzi, rhoi, ktur, kalp
@@ -303,24 +302,23 @@
       integer :: i, j, k
       real(kind=kind_phys) :: ui, vi, ti, uz, vz, shr2, rdz, kamp
       real(kind=kind_phys) :: zgrow, zmet, rdpm, ritur, kmol, w1
-      real(kind=kind_phys) :: rgrav, rdi
+     
 ! paremeters
-      real(kind=kind_phys), parameter :: hps = 7000., rpspa = 1.e-5
-      real(kind=kind_phys), parameter :: rhps=1.0/hps
-      real(kind=kind_phys), parameter :: h4= 0.25/hps
-      real(kind=kind_phys), parameter :: rimin = 1.0/8.0, kedmin = 0.01
-      real(kind=kind_phys), parameter :: lturb = 30. ,    uturb = 150.0
+!      real(kind=kind_phys), parameter :: hps = 7000., rpspa = 1.e-5
+!      real(kind=kind_phys), parameter :: rhps=1.0/hps
+!      real(kind=kind_phys), parameter :: h4= 0.25/hps
+      
+      real(kind=kind_phys), parameter :: rimin = 0.125, kedmin = 0.01
+      real(kind=kind_phys), parameter :: lturb = 30. ,  uturb = 150.0
       real(kind=kind_phys), parameter :: lsc2 = lturb*lturb,usc2 = uturb*uturb
-      kalp(1:nzi) = 2.e-7        ! radiative damping
-
-      rgrav = 1.0/grav
-      rdi = 1.0/con_rd
+      
+      kalp(1:nzi) = 2.e-7                     ! radiative damping scale
 
       do k=2, nz
         rdpm    = grav/(pmid(k-1)-pmid(k))
         ui      = .5*(u1(k-1)+u1(k))
         vi      = .5*(v1(k-1)+v1(k))
-        uzi(k)  = Ui*xn + Vi*yn
+        uzi(k)  = ui*xn + vi*yn
         ti      = .5*(t1(k-1)+t1(k))
         rhoi(k) = rdi*pint(k)/ti
         rdz     = rdpm *rhoi(k)
@@ -328,13 +326,13 @@
         uz      = u1(k)-u1(k-1)
         vz      = v1(k)-v1(k-1)
         shr2    = rdz*rdz*(max(uz*uz+vz*vz, dw2min))
-        zmet    = -hps*alog(pint(k)*rpspa)
-        zgrow   = exp(zmet*h4)
-        kmol    =  2.e-5*exp(zmet*rhps)+kedmin
+        zmet    = -hpscale*alog(pint(k)*1.e-5)
+        zgrow   = exp(zmet*rh4)
+        kmol    =  2.e-5*exp(zmet*rhp) + kedmin
         ritur   = max(bn2(k)/shr2, rimin)
         kamp    = sqrt(shr2)*lsc2 *zgrow
         w1      = 1./(1. + 5*ritur)
-        ktur(k) = kamp * w1 * w1 +kmol
+        ktur(k) = kamp * w1 * w1 + kmol
       enddo
 
       k = 1 

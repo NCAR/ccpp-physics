@@ -4,7 +4,6 @@ module cires_ugwpv1_triggers
 
 contains
 
-
 !
 !
 !      
@@ -177,87 +176,8 @@ contains
       tau_gw(i) = tau_amp*flat_gw 
       enddo
 !      
-      end subroutine slat_geos5
+      end subroutine slat_geos5      
       
-      subroutine init_nazdir(con_pi, naz,  xaz,  yaz)
-      implicit none
-      real(kind=kind_phys) :: con_pi
-      integer :: naz
-      real(kind=kind_phys), dimension(naz) :: xaz,  yaz
-      integer :: idir
-      real(kind=kind_phys)    :: phic, drad
-      real(kind=kind_phys)    :: pi2
-      pi2 = 2.0*con_pi
-      drad  = pi2/float(naz)
-      if (naz.ne.4) then     
-        do idir =1, naz
-         Phic = drad*(float(idir)-1.0)
-         xaz(idir) = cos(Phic)
-         yaz(idir) = sin(Phic)
-        enddo
-      else 
-!                                  if (naz.eq.4) then
-          xaz(1) = 1.0     !E
-          yaz(1) = 0.0
-          xaz(2) = 0.0     
-          yaz(2) = 1.0     !N
-          xaz(3) =-1.0     !W
-          yaz(3) = 0.0
-          xaz(4) = 0.0
-          yaz(4) =-1.0     !S
-      endif      
-      end  subroutine init_nazdir
-!=========================================================================
-! Below subroutine that can be activated after "testing" and extra-work"
-!=========================================================================      
-      subroutine  emc_modulation(im , levs,  ntke, tau_ngw, cdmb3, cdmb4, dtp,  &
-                  q_tke, dqdt_tke, del, rain)
-		  
-      integer,   intent(in) :: im , levs,  ntke
-      real(kind=kind_phys), intent(in) ::  cdmb3, cdmb4, dtp
-      real(kind=kind_phys), intent(in)    ::   rain(im)    
-      real(kind=kind_phys), intent(inout) ::   tau_ngw(im)
-      real(kind=kind_phys), intent(in), dimension(im,levs) ::  q_tke, dqdt_tke, del    
-          
-! locals           
- 
-      
-      real(kind=kind_phys) :: turb_fac, tem
-      real(kind=kind_phys) :: rfac, tx1, tke  
- 
-      
-!============      
-!
-! below the "EMC-proposal" in May 2019 without rigorous tests reported elsewhere
-!       can be eliminated due to "lack" of  validations and 
-!     in GFSv16  cdmbgwd(3) =1.0 and  the next if-loop is "cosmetic" proposal 
-!        
-!============ 
-        if (1.0-cdmb3 > 1.0e-6) then 
-	     rfac = 86400000. / dtp                         !???
-!	  
-! in operations cdmbgwd(3) = 1 in GFSv16, and  code below is not executed
-!
-          if (cdmb4 > 0.0) then	    
-            do i=1,im
-              turb_fac = 0.0            
-            if (ntke > 0) then
-              tem   = 0.0
-               do k=1,(levs+levs)/3                          ! ????
-                  tke = q_tke(i,k) + dqdt_tke(i,k) * dtp	      
-                  turb_fac = turb_fac + del(i,k) * tke
-                  tem      = tem      + del(i,k)
-                enddo
-                  turb_fac = turb_fac / tem	      
-             endif           
-              tx1 = cdmb4*min(10.0, max(turb_fac,rain(i)*rfac))
-              tau_ngw(i) = tau_ngw(i) * max(0.1, min(5.0, tx1)) * cdmb3  !????
-            enddo           
-           endif
-	  endif
-       end  subroutine  emc_modulation
-       
-       
 !===============================================
 !
 !   Spontaneous GW triggers by dynamical inbalances (OKW, fronts/jets, and convection)

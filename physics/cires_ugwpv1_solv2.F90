@@ -10,16 +10,10 @@ contains
 !  reflected GWs treated as waves with "negligible" flux,
 !  they are out of given column
 !---------------------------------------------------
-!       call cires_ugwpv1_ngw_solv2(me, master, im,   levs,  kdt, dtp,   &
-!                      tau_ngw, tgrs, ugrs,  vgrs,   q1, prsl, prsi,     &
-!                      zmet, zmeti,prslk,   xlat_d, sinlat, coslat,      &
-!        con_g, con_cp, con_rd, con_rv, con_omega,  con_pi, con_fvirt,   &
-!                      dudt_ngw, dvdt_ngw, dtdt_ngw, kdis_ngw, zngw)
 
       subroutine cires_ugwpv1_ngw_solv2(mpi_id, master, im, levs, kdt, dtp, &
                  tau_ngw, tm , um, vm, qm, prsl, prsi, zmet,  zmeti, prslk, &
                  xlatd, sinlat, coslat,                                     &
-             con_g, con_cp, con_rd, con_rv, con_omega,  con_pi, con_fvirt,  &
 	         pdudt, pdvdt, pdtdt, dked, zngw)               
 !
 !--------------------------------------------------------------------------------
@@ -56,8 +50,6 @@ contains
 ! 
       implicit none
 !
-      real(kind=kind_phys), intent(in) :: con_g, con_cp, con_rd, con_rv, con_omega, con_pi, con_fvirt
-
       real(kind=kind_phys), parameter   :: zsp_gw  = 106.5e3  ! sponge for GWs above the model top
       real(kind=kind_phys), parameter   :: linsat2 = 1.0,  dturb_max = 100.0     
       integer,              parameter   :: ener_norm =0
@@ -201,23 +193,22 @@ contains
 	iPr_max = max(1.0,  iPr_ktgw)  
 	gipr  = grav* Ipr_ktgw    
 !
-! test for input fields
-!	  
-        if (mpi_id == master .and. kdt < -2) then
-              print *, im, levs, dtp, kdt,    ' vay-solv2-v1'
-              print *,  minval(tm), maxval(tm), ' min-max-tm '
-	      print *,  minval(vm), maxval(vm), ' min-max-vm '
-	      print *,  minval(um), maxval(um), ' min-max-um '
-	      print *,  minval(qm), maxval(qm), ' min-max-qm '	
-	      print *,  minval(prsl), maxval(prsl), ' min-max-Pmid '  
-	      print *,  minval(prsi), maxval(prsi), ' min-max-Pint ' 
-	      print *,  minval(zmet), maxval(zmet), ' min-max-Zmid '
-	      print *,  minval(zmeti), maxval(zmeti), ' min-max-Zint ' 	  
-	      print *,  minval(prslk), maxval(prslk), ' min-max-Exner ' 
-	      print *,  minval(tau_ngw), maxval(tau_ngw), ' min-max-taungw '
-	      print *, 	 tau_min,  ' tau_min ',   tamp_mpa, ' tamp_mpa '    	              	      	      
+! test for input fields	  
+!        if (mpi_id == master .and. kdt < -2) then
+!              print *, im, levs, dtp, kdt,    ' vay-solv2-v1'
+!              print *,  minval(tm), maxval(tm), ' min-max-tm '
+!	      print *,  minval(vm), maxval(vm), ' min-max-vm '
+!	      print *,  minval(um), maxval(um), ' min-max-um '
+!	      print *,  minval(qm), maxval(qm), ' min-max-qm '	
+!	      print *,  minval(prsl), maxval(prsl), ' min-max-Pmid '  
+!	      print *,  minval(prsi), maxval(prsi), ' min-max-Pint ' 
+!	      print *,  minval(zmet), maxval(zmet), ' min-max-Zmid '
+!	      print *,  minval(zmeti), maxval(zmeti), ' min-max-Zint ' 	  
+!	      print *,  minval(prslk), maxval(prslk), ' min-max-Exner ' 
+!	      print *,  minval(tau_ngw), maxval(tau_ngw), ' min-max-taungw '
+!	      print *, 	 tau_min,  ' tau_min ',   tamp_mpa, ' tamp_mpa '    	              	      	      
 ! 
-	endif  
+!	endif  
 	
         if (idebug_gwrms == 1) then
 	  tauabs=0.0; wrms =0.0 ; trms =0.0 
@@ -234,7 +225,9 @@ contains
        km1 = ksrc - 1
        kp1 = ksrc + 1
        ktop= levs+1
-	suprf(ktop) = kion(levs)  
+       
+        suprf(ktop) = kion(levs)
+	  
        do k=1,levs
 	   suprf(k) = kion(k)               ! approximate 1-st order damping with Fast super-RF of FV3
             pdvdt(:,k) = 0.0
@@ -246,8 +239,7 @@ contains
 !-----------------------------------------------------------	
 ! column-based j=1,im pjysics with 1D-arrays
 !-----------------------------------------------------------
-       DO j=1, im   
-           
+       DO j=1, im              
          jl =j
 	 tx1           = omega2 * sinlat(j) *rv_kxw       
 	 cf1 = abs(tx1)
@@ -302,26 +294,26 @@ contains
 !   interface mean flow parameters launch -> levs+1
 !       ---------------------------------------------
        do jk= km1,levs
-           tvc = atm(jk)   * (1. +fv*aqm(jk))
-           tvm = atm(jk-1) * (1. +fv*aqm(jk-1))
+           tvc = atm(jk)*(1. +fv*aqm(jk))
+           tvm = atm(jk-1)*(1. +fv*aqm(jk-1))
 	   ptc =  tvc/ prslk(jl, jk)
 	   ptm =  tvm/prslk(jl,jk-1)	   
 !
-           zthm          = 2.0 / (tvc+tvm)
+           zthm          = 2.0/(tvc+tvm)
 	   rhp_wam = zthm*gor
 !interface	   
-           uint(jk)   = 0.5 *(aum(jk-1)+aum(jk))
-           vint(jk)   = 0.5 *(avm(jk-1)+avm(jk))
-           tint(jk)   = 0.5 *(tvc+tvm)	   
+           uint(jk)   = 0.5*(aum(jk-1)+aum(jk))
+           vint(jk)   = 0.5*(avm(jk-1)+avm(jk))
+           tint(jk)   = 0.5*(tvc+tvm)	   
            rhomid(jk) = aprsl(jk)*rdi/atm(jk)
            rhoint(jk) = aprsi(jk)*rdi*zthm                  !  rho = p/(RTv) 
            zdelp          = dz_meti(jk)                     !  >0 ...... dz-meters
            v_zmet(jk)  = 2.*zdelp                           ! 2*kzi*[Z_int(k+1)-Z_int(k)]	   
            zdelm          = 1./dz_met(jk)                   ! 1/dz  ...... 1/meters
 !	   
-!          bvf2 = grav2 * zdelm * (ptc-ptm)/ (ptc + ptm) ! N2=[g/PT]*(dPT/dz)
+!          bvf2 = grav2*zdelm*(ptc-ptm)/(ptc + ptm) ! N2=[g/PT]*(dPT/dz)
 !	   
-           bn2(jk)    = grav2cpd*zthm  * (1.0+rcpdl*(tvc-tvm)*zdelm)
+           bn2(jk)    = grav2cpd*zthm*(1.0+rcpdl*(tvc-tvm)*zdelm)
            bn2(jk)    = max(min(bn2(jk), bnv2max), bnv2min)
            bn(jk)     = sqrt(bn2(jk))   
 	   
@@ -1015,7 +1007,7 @@ contains
 !    
        RETURN    
        
-!=================================       
+!=================================   diag print after "return" ======================    
        if (kdt ==1 .and. mpi_id == master) then
 !      
           print *, ' ugwpv1: nazd-nw-ilaunch=', nazd, nwav,ilaunch, maxval(kvg), ' kvg '

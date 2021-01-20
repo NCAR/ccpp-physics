@@ -2,7 +2,7 @@ module cires_tauamf_data
 
   use machine, only: kind_phys
 !...........................................................................................
-! tabulated GW-sources: GRACILE/Ern et al., 2018 and/or Resolved GWs  from C384-Annual run
+! tabulated GW-sources: GRACILE/Ern et al., 2018 and/or Resolved GWs from C384-Annual run
 !...........................................................................................
 implicit none
 
@@ -25,7 +25,6 @@ contains
     
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg    
-! Tabulated sources 
 !
       
       iernc=NF90_OPEN(trim(ugwp_taufile), nf90_nowrite, ncid)
@@ -76,8 +75,7 @@ contains
     use machine, only: kind_phys
     		 
     implicit none
-!
-!
+    
       integer, intent(in)                                      ::   npts, me, master
       real(kind=kind_phys) ,   dimension(npts), intent(in)     ::   dlat 
            
@@ -86,23 +84,7 @@ contains
       
 !locals
 
-      integer :: i,j, j1, j2
-
-         
-	  
-!
-! weights for tau_limb  w1_j1tau, w2_j2tau
-!
-
-
-     if (me == master)	then
-        print *
-        print *, ' ugwp_tabulated files input '
-!	print *, ' ugwp_taulat ', ugwp_taulat
-!	print *, ' days ', days_limb
-        print *, ' TAU-ugwp ', maxval(tau_limb)*1.e3, minval(tau_limb)*1.e3
-	print *	
-     endif
+      integer :: i,j, j1, j2     
 !     
       do j=1,npts
         j2_tau(j) = ntau_d1y
@@ -119,33 +101,16 @@ contains
 	
         if (j1_tau(j) /= j2_tau(j) ) then
           w2_j2tau(j) = (dlat(j)  - ugwp_taulat(j1_tau(j))) &
-                 / (ugwp_taulat(j2_tau(j))-ugwp_taulat(j1_tau(j)))
-       	 
+                 / (ugwp_taulat(j2_tau(j))-ugwp_taulat(j1_tau(j)))       	 
         else
           w2_j2tau(j) = 1.0
         endif
           w1_j1tau(j) = 1.0 -	w2_j2tau(j)	
-
       enddo
-
       return
-      
-      if (me == master ) then
-  
-223   format( 2x, 'vay-limb',  I4, 5(2x, F10.3))
-      print *, 'ugwp-v1 indx_ugwp ',  size(dlat),  ' npts ', npts
-        do j=1,npts
-	  j1 =  j1_tau(j)
-	  j2 =  j2_tau(j)	  
-	 write(6,223) j,  ugwp_taulat(j1),  dlat(j),  ugwp_taulat(j2), w2_j2tau(j), w1_j1tau(j)
-	enddo 
-	print *
-      
-      endif 	 
     end subroutine cires_indx_ugwp   
     
-    subroutine tau_amf_interp(me, master, im, idate, fhour, j1_tau,j2_tau, ddy_j1, ddy_j2, tau_ddd)
-    
+    subroutine tau_amf_interp(me, master, im, idate, fhour, j1_tau,j2_tau, ddy_j1, ddy_j2, tau_ddd)    
     use machine, only: kind_phys	           
     implicit none
     
@@ -165,7 +130,6 @@ contains
     real(kind=kind_phys)  :: tx1, tx2, w1, w2, fddd 
 !
 ! define day of year ddd ..... from the old-fashioned "GFS-style"
-!   having idate[4] ???
 ! 
          call gfs_idate_calendar(idate, fhour, ddd, fddd)  
     
@@ -196,12 +160,7 @@ contains
 	 tx2 = tau_limb(j1, it2)*ddy_j1(i)+tau_limb(j2, it2)*ddy_j2(i)	 
 	 tau_ddd(i) =  tx1*w1 + w2*tx2
       enddo
-      
-!      if(me == master) then
-!       print *, ' tau_amf_interp : ', fddd, ddd , ' DOY '
-!       print *, ' tau_amf_maxmin : ' , maxval(tau_ddd)*1.e3,  minval(tau_ddd)*1.e3     
-!      endif
-      	            
+             
     end subroutine tau_amf_interp  
     
     subroutine gfs_idate_calendar(idate, fhour, ddd, fddd) 
@@ -235,22 +194,20 @@ contains
       idat(5) = idate(1)
       rinc(1:5)    = 0.
       rinc(2) = fhour
-! get jdat      
+!    
       call w3kind(w3kindreal,w3kindint)
       if(w3kindreal==4) then
         rinc4 = rinc
         call w3movdat(rinc4, idat,jdat)
       else
         call w3movdat(rinc,  idat,jdat)
-      endif
-            
-!!     jdate(8)- date and time (yr, mo, day, [tz], hr, min, sec)
+      endif           
+!     jdate(8)- date and time (yr, mo, day, [tz], hr, min, sec)
       jdow = 0
       jdoy = 0
       jday = 0
       call w3doxdat(jdat,jdow, ddd, jday)
-      fddd = float(ddd) + jdat(5) / 24.
-        
+      fddd = float(ddd) + jdat(5) / 24.        
     end  subroutine gfs_idate_calendar    
     
 end  module cires_tauamf_data

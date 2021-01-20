@@ -13,41 +13,83 @@
     module ugwp_common
 !
      use machine,  only : kind_phys
-!     use physcons, only : pi => con_pi, grav => con_g, rd => con_rd,   &
-!                          rv => con_rv, cpd => con_cp, fv => con_fvirt,&
-!                          arad => con_rerth
+			 
      implicit none
-
-      real(kind=kind_phys), parameter ::  grav =9.81, cpd = 1004.
-      real(kind=kind_phys), parameter ::  rd = 287.0 , rv =461.5      
-      real(kind=kind_phys), parameter ::  grav2 = grav + grav
-      real(kind=kind_phys), parameter ::  rgrav = 1.0/grav, rgrav2= rgrav*rgrav
+     
+      real(kind=kind_phys)   ::  pi, pi2, pih, rad_to_deg, deg_to_rad
+      real(kind=kind_phys)   ::  arad, p0s     
+      real(kind=kind_phys)   ::  grav, grav2, rgrav, rgrav2
+      real(kind=kind_phys)   ::  cpd,  rd, rv, fv            
+      real(kind=kind_phys)   ::  rdi,  rcpd, rcpd2  
+      
+      real(kind=kind_phys)   ::  gor,  gr2,  grcp, gocp, rcpdl, grav2cpd
+      real(kind=kind_phys)   ::  bnv2min, bnv2max
+      real(kind=kind_phys)   ::  dw2min,  velmin, minvel        
+      real(kind=kind_phys)   ::  omega1, omega2,   omega3   
+      real(kind=kind_phys)   ::  hpscale, rhp, rhp2, rh4, rhp4, khp, hpskm
+      real(kind=kind_phys)   ::  mkzmin, mkz2min,  mkzmax, mkz2max, cdmin    
+      real(kind=kind_phys)   ::  rcpdt      
            
-      real(kind=kind_phys), parameter ::  fv   = rv/rd - 1.0  
-      real(kind=kind_phys), parameter ::  rdi  = 1.0 / rd, rcpd = 1./cpd, rcpd2 = 0.5/cpd  
-      real(kind=kind_phys), parameter ::  gor  = grav/rd
-      real(kind=kind_phys), parameter ::  gr2  = grav*gor
-      real(kind=kind_phys), parameter ::  grcp = grav*rcpd, gocp = grcp
-      real(kind=kind_phys), parameter ::  rcpdl    = cpd*rgrav                         ! 1/[g/cp]  == cp/g
-      real(kind=kind_phys), parameter ::  grav2cpd = grav*grcp                         !  g*(g/cp)= g^2/cp
-
-      real(kind=kind_phys), parameter ::  pi = 4.*atan(1.0), pi2 = 2.*pi, pih = .5*pi  
-      real(kind=kind_phys), parameter ::  rad_to_deg=180.0/pi, deg_to_rad=pi/180.0
-
-      real(kind=kind_phys), parameter ::  arad = 6370.e3
+!      real(kind=kind_phys), parameter ::  grav2 = grav + grav
+!      real(kind=kind_phys), parameter ::  rgrav = 1.0/grav, rgrav2= rgrav*rgrav           
+!      real(kind=kind_phys), parameter ::  rdi  = 1.0 / rd, rcpd = 1./cpd, rcpd2 = 0.5/cpd  
+!      real(kind=kind_phys), parameter ::  gor  = grav/rd, rcpdt = 1./(cp*dtp)
+      
+!      real(kind=kind_phys), parameter ::  gr2  = grav*gor
+!      real(kind=kind_phys), parameter ::  grcp = grav*rcpd, gocp = grcp
+!      real(kind=kind_phys), parameter ::  rcpdl    = cpd*rgrav                         ! 1/[g/cp]  == cp/g
+!      real(kind=kind_phys), parameter ::  grav2cpd = grav*grcp                         !  g*(g/cp)= g^2/cp
+!      real(kind=kind_phys), parameter ::  pi2 = 2.*pi, pih = .5*pi  
+!      real(kind=kind_phys), parameter ::  rad_to_deg=180.0/pi, deg_to_rad=pi/180.0
 !               
-      real(kind=kind_phys), parameter ::  bnv2min = (pi2/1800.)*(pi2/1800.)
-      real(kind=kind_phys), parameter ::  bnv2max = (pi2/30.)*(pi2/30.)
-       
-      real(kind=kind_phys), parameter :: dw2min=1.0,  velmin=sqrt(dw2min), minvel = 0.5     
-      real(kind=kind_phys), parameter :: omega1 = pi2/86400.
-      real(kind=kind_phys), parameter :: omega2 = 2.*omega1, omega3 = 3.*omega1     
-      real(kind=kind_phys), parameter :: hpscale= 7000., rhp=1./hpscale, rhp2=.5*rhp, rh4 = 0.25*rhp 
-      real(kind=kind_phys), parameter :: mkzmin = pi2/80.0e3, mkz2min = mkzmin*mkzmin
-      real(kind=kind_phys), parameter :: mkzmax = pi2/500.,  mkz2max = mkzmax*mkzmax 
-      real(kind=kind_phys), parameter :: cdmin  = 2.e-2/mkzmax 
+!      real(kind=kind_phys), parameter ::  bnv2min = (pi2/1800.)*(pi2/1800.)
+!      real(kind=kind_phys), parameter ::  bnv2max = (pi2/30.)*(pi2/30.)      
+!      real(kind=kind_phys), parameter :: dw2min=1.0,  velmin=sqrt(dw2min), minvel = 0.5     
+!      real(kind=kind_phys), parameter :: omega1 = pi2/86400., omega2 = 2.*omega1, omega3 = 3.*omega1     
+!   
+!      real(kind=kind_phys), parameter :: hpscale= 7000., rhp=1./hpscale, rhp2=.5*rhp, rh4 = 0.25*rhp 
+!      real(kind=kind_phys), parameter :: mkzmin = pi2/80.0e3, mkz2min = mkzmin*mkzmin
+!      real(kind=kind_phys), parameter :: mkzmax = pi2/500.,   mkz2max = mkzmax*mkzmax 
+!      real(kind=kind_phys), parameter :: cdmin  = 2.e-2/mkzmax 
+!      real(kind=kind_phys), parameter ::  pi = 4.*atan(1.0),
+!      real(kind=kind_phys), parameter ::  grav =9.81, cpd = 1004.
+!      real(kind=kind_phys), parameter ::  rd = 287.0 , rv =461.5  
+!      real(kind=kind_phys), parameter ::  fv   = rv/rd - 1.0    
+!      real(kind=kind_phys), parameter ::  arad = 6370.e3
         
      end module ugwp_common
+     
+      subroutine init_nazdir(naz,  xaz,  yaz)
+      
+      use machine,     only : kind_phys
+      use ugwp_common, only :  pi2
+      
+      implicit none
+      
+      integer :: naz
+      real(kind=kind_phys), dimension(naz) :: xaz,  yaz
+      integer :: idir
+      real(kind=kind_phys)    :: phic, drad
+      
+      drad  = pi2/float(naz)
+      if (naz.ne.4) then     
+        do idir =1, naz
+         Phic = drad*(float(idir)-1.0)
+         xaz(idir) = cos(Phic)
+         yaz(idir) = sin(Phic)
+        enddo
+      else 
+!                                  if (naz.eq.4) then
+          xaz(1) = 1.0     !E
+          yaz(1) = 0.0
+          xaz(2) = 0.0     
+          yaz(2) = 1.0     !N
+          xaz(3) =-1.0     !W
+          yaz(3) = 0.0
+          xaz(4) = 0.0
+          yaz(4) =-1.0     !S
+      endif      
+      end  subroutine init_nazdir     
 !
 !
 !===================================================
@@ -55,21 +97,14 @@
 !Part-1 init =>   wave dissipation + RFriction
 !
 !===================================================
-     subroutine init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, con_pi,  &
-                                     me, master)
-!				     
-! ccpp-damn con_pi !!!	
-!			     
-!non-ccpp     subroutine init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, me, master)
-!non-ccpp     use ugwp_common, only : pih   
- 
+     subroutine init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, me, master)
+!				      
      use machine ,      only : kind_phys 
-     
+     use ugwp_common,   only : pih, pi  
      
      implicit none
      integer , intent(in)                 :: me, master
      integer , intent(in)                 :: levs
-     real(kind=kind_phys), intent(in)                     :: con_pi  
      real(kind=kind_phys), intent(in)                     :: zkm(levs), pmb(levs)    ! in km-Pa
      real(kind=kind_phys), intent(out), dimension(levs+1) :: kvg, ktg, krad, kion
 !
@@ -94,15 +129,11 @@
      real(kind=kind_phys), parameter :: zdrag  = 100.
      real(kind=kind_phys), parameter :: zgrow  = 50.
 !
-     real(kind=kind_phys) ::    vumol, mumol, keddy, ion_drag
+     real(kind=kind_phys) ::   vumol, mumol, keddy, ion_drag
      real(kind=kind_phys) ::   rf_fv3, rtau_fv3, ptop, pih_dlog       
 !
      real(kind=kind_phys) ::  ae1 ,ae2
 !     
-! ccpp   con_pi
-!     
-     real(kind=kind_phys) :: pih
-     pih = 0.5*con_pi
       
      ptop = pmb(levs)  
      rtau_fv3 = 1./86400./tau_alp
@@ -141,14 +172,14 @@
       kvg(k)  =  kvg(k-1)
       ktg(k)  =  ktg(k-1)
       
-      if (me == master) then
-	  write(6, * ) '  zkm(k), kvg(k), kvg(k)*(6.28/5000.)**2,  kion(k) ... init_global_gwdis'     
-        do k=1, levs, 1
-	  write(6,132) zkm(k), kvg(k), kvg(k)*(6.28/5000.)**2,  kion(k), pmb(k) 
-	enddo      
-      endif
+!      if (me == master) then
+!	  write(6, * ) '  zkm(k), kvg(k), kvg(k)*(6.28/5000.)**2,  kion(k) ... init_global_gwdis'     
+!        do k=1, levs, 1
+!	  write(6,132) zkm(k), kvg(k), kvg(k)*(6.28/5000.)**2,  kion(k), pmb(k) 
+!	enddo      
+!      endif
 !
- 132  format( 2x, F8.3,' dis-scales:', 4(2x, E10.3))    
+! 132  format( 2x, F8.3,' dis-scales:', 4(2x, E10.3))    
                                                           
      end subroutine init_global_gwdis
 !
@@ -161,7 +192,7 @@
 !
 !=========================================================================
      module ugwp_oro_init
-     use machine ,      only : kind_phys
+     use machine ,    only : kind_phys
      use ugwp_common, only : bnv2min, grav, grcp, fv, grav, cpd, grcp, pi
      use ugwp_common, only : mkzmin, mkz2min
      implicit none
@@ -182,6 +213,7 @@
       
       character(len=8)  ::  strver  = 'gfs_2018'
       character(len=8)  ::  strbase = 'gfs_2018'
+      
       real(kind=kind_phys), parameter   ::  rimin=-10., ric=0.25
       
       real(kind=kind_phys), parameter   ::  frmax=10., frc =1.0, frmin =0.01
@@ -190,9 +222,10 @@
       real(kind=kind_phys), parameter   ::  efmin=0.5,    efmax=10.0
       
       real(kind=kind_phys), parameter   ::  rlolev=50000.0
-      integer,parameter ::  mdir = 8
-      real(kind=kind_phys),   parameter ::  fdir=.5*mdir/pi
-
+      integer,              parameter   ::  mdir = 8
+      real(kind=kind_phys), parameter   ::  fdir=mdir/(8.*atan(1.0))
+      real(kind=kind_phys), parameter   ::  zpgeo=2.*atan(1.0)
+      
       integer nwdir(mdir)
       data nwdir/6,7,5,8,2,3,1,4/
       save nwdir
@@ -202,14 +235,14 @@
       real(kind=kind_phys), parameter   :: fcrit_gfs = 0.7, fcrit_v1 = 0.7
       real(kind=kind_phys), parameter   :: fcrit_mtb = 0.7
 
-      real(kind=kind_phys),  parameter  :: zbr_pi  = (1.0/2.0)*pi
-      real(kind=kind_phys),  parameter  :: zbr_ifs = 0.5*pi 
+      real(kind=kind_phys),  parameter  :: zbr_pi  = zpgeo
+      real(kind=kind_phys),  parameter  :: zbr_ifs = zpgeo
  
 !  
  
       real(kind=kind_phys),   parameter ::   kxoro=6.28e-3/200.    !
       real(kind=kind_phys),   parameter ::   coro = 0.0
-      integer,parameter ::   nridge=2
+      integer,parameter ::    nridge=2
       real(kind=kind_phys),   parameter ::   sigma_std=1./100., gamm_std=1.0       
  
       real(kind=kind_phys)    ::  cdmb                      ! scale factors for mtb
@@ -291,8 +324,10 @@
 !
 !=========================================================================
     module ugwp_conv_init
+    
      use machine ,              only : kind_phys
-     use cires_ugwpv1_triggers, only :init_nazdir
+
+     
      implicit none
       real(kind=kind_phys)    ::  eff_con                   ! scale factors for conv GWs
       integer ::  nwcon                     ! number of waves
@@ -313,17 +348,9 @@
       real(kind=kind_phys), allocatable  :: xaz_conv(:), yaz_conv(:)
      contains
 !
-     subroutine init_conv_gws(nwaves, nazdir, nstoch, effac, &
-                              con_pi, arad, lonr, kxw)
-!			      
-! non-ccpp  with use ugwp_common
-!			      
-!    subroutine init_conv_gws(nwaves, nazdir, nstoch, effac, &
-!                              lonr, kxw)
+     subroutine init_conv_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
 !
-!     use ugwp_common,  only : pi2, arad
-
-
+     use ugwp_common,  only : pi2, arad
 
      implicit none
      
@@ -333,7 +360,6 @@
 !      
 ! ccpp
 !      
-      real(kind=kind_phys)    :: con_pi, arad
       
       real(kind=kind_phys)    :: kxw,  effac
       real(kind=kind_phys)    :: work1 = 0.5
@@ -345,7 +371,7 @@
       nstcon   = nstoch
       eff_con  = effac
 
-      con_dlength = 2.0*con_pi*arad/float(lonr)      
+      con_dlength = pi2*arad/float(lonr)      
 !
 ! allocate & define spectra in "selected direction": "dc" "ch(nwaves)"
 !
@@ -370,7 +396,7 @@
       snorm = sum(spf_conv)
       spf_conv = spf_conv/snorm*1.5
  
-      call init_nazdir(con_pi, nazdir,  xaz_conv,  yaz_conv)
+      call init_nazdir(nazdir,  xaz_conv,  yaz_conv)
      end subroutine init_conv_gws
 
 
@@ -383,7 +409,8 @@
 
    module ugwp_fjet_init
    use machine ,              only : kind_phys   
-   use cires_ugwpv1_triggers, only :init_nazdir
+
+   
    
       implicit none
       real(kind=kind_phys)    ::  eff_fj                     ! scale factors for conv GWs
@@ -401,18 +428,14 @@
       real(kind=kind_phys), allocatable  :: xaz_fjet(:), yaz_fjet(:)
      contains
      
-     subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac, &
-                              con_pi, lonr, kxw)
-! non-ccpp
-!			      
-!     subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
-!     use ugwp_common,  only : pi2, arad			      
+     subroutine init_fjet_gws(nwaves, nazdir, nstoch, effac,lonr, kxw) 
+
+     use ugwp_common,  only : pi2, arad			      
 			      
      implicit none
 
       integer :: nwaves, nazdir, nstoch
       integer :: lonr
-      real(kind=kind_phys)    :: con_pi
       real(kind=kind_phys)    :: kxw,  effac , chk
  
       integer :: k
@@ -433,7 +456,7 @@
          ch_fjet(k)  =  chk
          spf_fjet(k) =  1.0
       enddo
-      call init_nazdir(con_pi, nazdir,  xaz_fjet,  yaz_fjet)
+      call init_nazdir(nazdir,  xaz_fjet,  yaz_fjet)
 
      end subroutine init_fjet_gws
 
@@ -444,8 +467,8 @@
 !
      module ugwp_okw_init
 !=========================================================================
-     use machine ,              only : kind_phys      
-     use cires_ugwpv1_triggers, only :init_nazdir
+       use machine ,              only : kind_phys      
+     
        implicit none
 
       real(kind=kind_phys)    ::  eff_okw                     ! scale factors for conv GWs
@@ -463,17 +486,15 @@
 
      contains
 !
-     subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, &
-                             con_pi, lonr, kxw)
+
 			     
-!     subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
-!     use ugwp_common,  only : pi2, arad
+     subroutine init_okw_gws(nwaves, nazdir, nstoch, effac, lonr, kxw)
+     use ugwp_common,  only : pi2, arad
 
      implicit none
 
       integer :: nwaves, nazdir, nstoch
       integer :: lonr
-      real(kind=kind_phys)    :: con_pi
       real(kind=kind_phys)    :: kxw,  effac , chk
  
       integer :: k
@@ -493,10 +514,8 @@
          ch_okwp(k) = chk
          spf_okwp(k) = 1.
       enddo
-
-      call init_nazdir(con_pi, nazdir,  xaz_okwp,  yaz_okwp)
-! non-ccpp     
-!      call init_nazdir(nazdir,  xaz_okwp,  yaz_okwp)
+  
+      call init_nazdir(nazdir,  xaz_okwp,  yaz_okwp)
 !
      end subroutine init_okw_gws
  
@@ -557,10 +576,11 @@
 !
 !
   module ugwp_wmsdis_init
+  
      use machine ,    only : kind_phys    
      use ugwp_common, only : arad, pi, pi2, hpscale, rhp, rhp2, rh4, omega2 
      use ugwp_common, only : bnv2max,  bnv2min, minvel 
-     use ugwp_common, only : mkzmin,  mkz2min, mkzmax, mkz2max, cdmin
+     use ugwp_common, only : mkzmin,  mkz2min, mkzmax, mkz2max, ucrit => cdmin
      
     implicit none
 
@@ -569,7 +589,7 @@
    
       real(kind=kind_phys),     parameter   :: gptwo=2.0
  
-      real(kind=kind_phys) ,     parameter  :: bnfix  = pi2/300., bnfix2= bnfix * bnfix
+      real(kind=kind_phys) ,     parameter  :: bnfix  =  6.28/300., bnfix2= bnfix * bnfix
       real(kind=kind_phys) ,     parameter  :: bnfix4 =  bnfix2 * bnfix2  
       real(kind=kind_phys) ,     parameter  :: bnfix3 =  bnfix2 * bnfix        
 !
@@ -577,7 +597,6 @@
 ! 
       integer  , parameter  :: iazidim=4       ! number of azimuths
       integer  , parameter  :: incdim=25       ! number of discrete cx - spectral elements in launch spectrum
-      real(kind=kind_phys)     , parameter  :: ucrit=cdmin
  
       real(kind=kind_phys) ,     parameter  :: zcimin = 2.5
       real(kind=kind_phys) ,     parameter  :: zcimax = 125.0
@@ -684,13 +703,13 @@
       allocate ( zcosang(nazd), zsinang(nazd) )
       allocate (lzmet(nwav), czmet(nwav), mkzmet(nwav), dczmet(nwav), dmkz(nwav) )   
 
-      if (me == master) then
-         print *, 'ugwp_v1/v0: init_gw_wmsdis_control '
+!      if (me == master) then
+!         print *, 'ugwp_v1/v0: init_gw_wmsdis_control '
 !  
-         print *, 'ugwp_v1/v0: WMS_DIS launch layer ',    ilaunch
-         print *, 'ugwp_v1/v0: WMS_DIS tot_mflux in mpa', tamp_mpa*1000.
-         print *, 'ugwp_v1/v0: WMS_DIS lhmet in km  ' ,   lhmet*1.e-3      	 
-       endif
+!         print *, 'ugwp_v1/v0: WMS_DIS launch layer ',    ilaunch
+!         print *, 'ugwp_v1/v0: WMS_DIS tot_mflux in mpa', tamp_mpa*1000.
+!         print *, 'ugwp_v1/v0: WMS_DIS lhmet in km  ' ,   lhmet*1.e-3      	 
+!       endif
 
        zpexp = gptwo * 0.5                    ! gptwo=2 , zpexp = 1.
 
@@ -763,13 +782,16 @@
 	 enddo
 
 	  zdx = (zci(nwav)-zci(1))/ real(nwav-1)  
-         do inc=1, nwav	    	  
+          do inc=1, nwav	    	  
           zdci(inc) = zdx     
-	 enddo   
+	  enddo   
 	 
-	 cstar = bnfix/zms
-	 rcstar = 1./cstar		  
-
+	  cstar = bnfix/zms
+	  rcstar = 1./cstar	
+	ENDIF                               !   if (version == 1) then 	 
+	 
+	RETURN	  	 
+!===================  Diag prints after return  ====================
          if (me == master) then
            print *
            print *,  'ugwp_v0: zcimin=' , zcimin
@@ -788,15 +810,16 @@
 
            print *
 	   nslope3=nslope+3.0
-        do inc=1, nwav	    	  
-          zcin =zci(inc)*rcstar
-	  fpc =  rcstar*(zcin*zcin)/(1.+ zcin**nslope3)	   	    
-          fpc_dc = fpc * zdci(inc)
-	  write(6,111)  inc, zci(inc), zdci(inc),ucrit, fpc, fpc_dc, 6.28e-3/bnfix*zci(inc)
-        enddo
+         do inc=1, nwav	    	  
+           zcin =zci(inc)*rcstar
+	   fpc =  rcstar*(zcin*zcin)/(1.+ zcin**nslope3)	   	    
+           fpc_dc = fpc * zdci(inc)
+	   write(6,111)  inc, zci(inc), zdci(inc),ucrit, fpc, fpc_dc, 6.28e-3/bnfix*zci(inc)
+          enddo
          endif
 	 
-	 ENDIF                               !   if (version == 1) then 
+
+	 
  111     format( 'wms-zci', i4, 7 (3x, F8.3))
 
      end subroutine initsolv_wmsdis

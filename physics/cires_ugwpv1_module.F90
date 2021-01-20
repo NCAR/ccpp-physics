@@ -10,7 +10,7 @@ module  cires_ugwpv1_module
 !
 !
     use machine,            only : kind_phys
-    use  ugwp_common,       only : arad, pi, pi2, hpscale, rhp, rhp2, rh4 
+    use  ugwp_common,       only : arad, pi, pi2, hpscale, rhp, rhp2, rh4, rhp4, khp, hpskm 
     use  ugwp_wmsdis_init,  only : ilaunch, nslope, lhmet, lzmax, lzmin, lzstar   
     use  ugwp_wmsdis_init,  only : tau_min, tamp_mpa   
 
@@ -22,6 +22,7 @@ module  cires_ugwpv1_module
     logical            :: do_rfdamp       = .false.        ! control for Rayleigh friction inside ugwp_driver
     integer, parameter :: idebug_gwrms=0                   ! control for diag computaions pw wind-temp GW-rms and MF fluxs   
     logical, parameter :: do_adjoro = .false.
+    
     real(kind=kind_phys), parameter    ::  max_kdis = 450.                 ! 400 m2/s
     real(kind=kind_phys), parameter    ::  max_axyz = 450.e-5              ! 400 m/s/day
     real(kind=kind_phys), parameter    ::  max_eps =  max_kdis*4.e-4       ! max_kdis*BN2 
@@ -39,15 +40,8 @@ module  cires_ugwpv1_module
     real(kind=kind_phys), parameter    :: iPr_ktgw =1./3., iPr_spgw=iPr_ktgw 
     real(kind=kind_phys), parameter    :: iPr_turb =1./3., iPr_mol =1.95
  
- 
-    real(kind=kind_phys), parameter    :: hps   = hpscale
-    real(kind=kind_phys), parameter    :: hpskm = hps/1000.
-!
-    real(kind=kind_phys), parameter    :: rhp1=1./hps, rh2=0.5*rhp1, rhp4 = rh2*rh2
-    real(kind=kind_phys), parameter    :: khp =  0.287*rhp1                           ! R/Cp/Hp
-    
     real(kind=kind_phys), parameter    :: cd_ulim = 1.0                 ! critical level precision or Lz ~ 0 ~dz of model 
-    real(kind=kind_phys), parameter    :: linsat = 1.00
+    real(kind=kind_phys), parameter    :: linsat  = 1.00
     real(kind=kind_phys), parameter    :: linsat2 = linsat*linsat
         
     real(kind=kind_phys), parameter    :: ricrit = 0.25
@@ -75,41 +69,26 @@ module  cires_ugwpv1_module
     real(kind=kind_phys)                  :: knob_ugwp_taumin = 0.25e-3
     real(kind=kind_phys)                  :: knob_ugwp_tauamp = 7.75e-3    ! range from 30.e-3 to 3.e-3 ( space-borne values)
     real(kind=kind_phys)                  :: knob_ugwp_lhmet  = 200.e3     ! 200 km
+    
     logical               :: knob_ugwp_tlimb  = .true.    
     character(len=8)      :: knob_ugwp_orosolv='pss-1986'  
     
-    real(kind=kind_phys)                  :: kxw = pi2/200.e3              ! single horizontal wavenumber of ugwp schemes
+    real(kind=kind_phys)  :: kxw = 6.28/200.e3              ! single horizontal wavenumber of ugwp schemes
 !
-! tune-ups for qbo
-!	    
-!    real(kind=kind_phys)                  :: knob_ugwp_qbolev = 500.e2   ! fixed pressure layer in Pa for "launch" of conv-GWs
-!    real(kind=kind_phys)                  :: knob_ugwp_qbosin = 1.86     ! semiannual cycle of tau_qbo_src in radians 
-!    real(kind=kind_phys)                  :: knob_ugwp_qbotav = 2.285e-3 ! additional to "climate" for QBO-sg forcing 
-!    real(kind=kind_phys)                  :: knob_ugwp_qboamp = 1.191e-3 ! additional to "climate" QBO 
-!    real(kind=kind_phys)                  :: knob_ugwp_qbotau = 10.      !  relaxation time scale in days
-!    real(kind=kind_phys)                  :: knob_ugwp_qbolat = 15.      !  qbo-domain for extra-forcing
-!    real(kind=kind_phys)                  :: knob_ugwp_qbowid = 7.5      !  qbo-attenuation for extra-forcing  
-!    character(len=250)     :: knob_ugwp_qbofile='qbo_zmf_2009_2018.nc'!
-!    character(len=250)     :: knob_ugwp_amffile='mern_zmf_amf_12month.nc'
-!     character(len=255)    :: file_limb_tab='ugwp_limb_tau.nc'
-!     integer, parameter    :: ny_tab=73, nt_tab=14
-!     real(kind=kind_phys),    parameter    :: rdy_tab = 1./2.5,  rdd_tab = 1./30. 
-!     integer               :: nqbo_d1y, nqbo_d2z, nqbo_d3t 
-
     integer  :: ugwp_azdir
     integer  :: ugwp_stoch
 
     integer  :: ugwp_src
     integer  :: ugwp_nws
+    
     real(kind=kind_phys)     :: ugwp_effac
-
 !
     integer  :: launch_level = 55
 !
     namelist /cires_ugwp_nml/ knob_ugwp_solver, knob_ugwp_source,knob_ugwp_wvspec, knob_ugwp_azdir,      &
             knob_ugwp_stoch,  knob_ugwp_effac,knob_ugwp_doaxyz,  knob_ugwp_doheat, knob_ugwp_dokdis,     &
             knob_ugwp_ndx4lh, knob_ugwp_version, knob_ugwp_palaunch, knob_ugwp_nslope,  knob_ugwp_lzmax, &
-	    knob_ugwp_lzmin,  knob_ugwp_lzstar, knob_ugwp_lhmet, knob_ugwp_tauamp, knob_ugwp_taumin,     &
+	    knob_ugwp_lzmin,  knob_ugwp_lzstar,  knob_ugwp_lhmet, knob_ugwp_tauamp, knob_ugwp_taumin,    &
 	    knob_ugwp_tlimb,  knob_ugwp_orosolv  
 
 !
@@ -119,17 +98,11 @@ module  cires_ugwpv1_module
    real(kind=kind_phys), allocatable :: kvg(:), ktg(:), krad(:), kion(:)
    real(kind=kind_phys), allocatable :: zkm(:), pmb(:)
    real(kind=kind_phys), allocatable :: rfdis(:), rfdist(:)
-   integer           :: levs_rf
+!
+! RF-not active now
+!   
+   integer                           :: levs_rf
    real(kind=kind_phys)              :: pa_rf, tau_rf
-!...........................................................................................
-! tabulated GW-sources: GRACILE/Ern et al., 2018 and/or Resolved GWs  from C384-Annual run
-!...........................................................................................
-
-!   integer           :: ntau_d1y, ntau_d2t  
-!   real(kind=kind_phys), allocatable :: ugwp_taulat(:)
-!   real(kind=kind_phys), allocatable :: tau_limb(:,:), days_limb(:)
-!   logical           :: flag_alloctau = .false.          
-!   character(len=255):: ugwp_taufile =  'ugwp_limb_tau.nc' 
 !
 ! simple modulation of tau_ngw by the total rain/precip  strength
 !   
@@ -300,11 +273,10 @@ module  cires_ugwpv1_module
       print *, 'cires_ugwpv1 klev_ngw =', launch_level, nint(pmb(launch_level))
    endif   
 !
-! Part-1 :init_global_gwdis               again "damn"-con_pi
-! call init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, me,  master)
+! Part-1 :init_global_gwdis               again "damn"-con_p
 !
-    call init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion, con_pi,     &
-                               me,  master)
+    call init_global_gwdis(levs, zkm, pmb, kvg, ktg, krad, kion,  me,  master)
+			       
 !
 ! Part-2 :init_SOURCES_gws
 !
@@ -321,30 +293,30 @@ module  cires_ugwpv1_module
 
     IF (do_physb_gwsrcs) THEN
 
-      if (me == master) print *, ' do_physb_gwsrcs ',  do_physb_gwsrcs, ' in cires_ugwp_init_modv1 '
+!      if (me == master) print *, ' do_physb_gwsrcs ',  do_physb_gwsrcs, ' in cires_ugwp_init_modv1 '
       if (knob_ugwp_wvspec(4) > 0) then
 ! okw
         call init_okw_gws(knob_ugwp_wvspec(4), knob_ugwp_azdir(4), &
                           knob_ugwp_stoch(4), knob_ugwp_effac(4),  &
-                          con_pi, lonr, kxw )
-        if (me == master) print *, ' init_okw_gws '
+                          lonr, kxw )
+!        if (me == master) print *, ' init_okw_gws '
       endif
 
       if (knob_ugwp_wvspec(3) > 0) then
 ! fronts
         call init_fjet_gws(knob_ugwp_wvspec(3), knob_ugwp_azdir(3), &
                            knob_ugwp_stoch(3), knob_ugwp_effac(3),  &
-                           con_pi, lonr, kxw )
-        if (me == master) print *, ' init_fjet_gws '
+                           lonr, kxw )
+!        if (me == master) print *, ' init_fjet_gws '
       endif
 
       if (knob_ugwp_wvspec(2) > 0) then
 ! conv :   con_pi, con_rerth,
         call init_conv_gws(knob_ugwp_wvspec(2), knob_ugwp_azdir(2), &
                            knob_ugwp_stoch(2), knob_ugwp_effac(2),  &
-                           con_pi, con_rerth, lonr, kxw              )
-        if (me == master)   &
-           print *, ' init_convective GWs ', knob_ugwp_wvspec(2), knob_ugwp_azdir(2)
+                           lonr, kxw              )
+!        if (me == master)   &
+!           print *, ' init_convective GWs ', knob_ugwp_wvspec(2), knob_ugwp_azdir(2)
 
       endif
 
