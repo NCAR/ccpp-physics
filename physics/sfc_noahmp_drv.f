@@ -1,3 +1,4 @@
+#define CCPP
 !>  \file sfc_noahmp_drv.f
 !!  This file contains the NoahMP land surface scheme driver.
 

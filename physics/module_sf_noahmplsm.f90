@@ -1,9 +1,10 @@
+#define CCPP
 !>  \file module_sf_noahmplsm.f90
 !!  This file contains the NoahMP land surface model.
 
 !>\ingroup NoahMP_LSM
 module module_sf_noahmplsm
-#ifndef CCPP  
+#ifndef CCPP
   use  module_wrf_utl
 #endif
 

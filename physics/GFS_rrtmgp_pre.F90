@@ -252,6 +252,15 @@ contains
     ! Temperature at layer-center
     t_lay(1:NCOL,:) = tgrs(1:NCOL,:)
 
+    ! Bound temperature at layer centers.
+    do iCol=1,NCOL
+       do iLay=1,nLev
+          if (t_lay(iCol,iLay) .le. lw_gas_props%get_temp_min()) then
+             t_lay = lw_gas_props%get_temp_min() + epsilon(lw_gas_props%get_temp_min())
+          endif
+       enddo
+    enddo
+
     ! Temperature at layer-interfaces          
     if (top_at_1) then
        tem2da(1:nCol,2:iSFC) = log(p_lay(1:nCol,2:iSFC))
