@@ -1,3 +1,5 @@
+!>\file namelist_soilveg_ruc.F90
+!>\ingroup RUC_lsm
       module namelist_soilveg_ruc
       implicit none
       save

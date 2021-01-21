@@ -26,13 +26,14 @@
       real refsmc1, wltsmc1
 
       NAMELIST /SOIL_VEG_RUC/ SLOPE_DATA, ALBTBL, Z0TBL, LEMITBL,       &
-     &  PCTBL, SHDTBL, &
+     &  PCTBL, SHDTBL,                                                  &
      &  IFORTBL, RSTBL, RGLTBL, HSTBL, SNUPTBL, LAITBL, MAXALB,         &
      &  LPARAM, TOPT_DATA, CMCMAX_DATA, CFACTR_DATA,                    &
      &  RSMAX_DATA, BARE, NATURAL, CROP, URBAN,                         &
      &  DEFINED_VEG, DEFINED_SOIL, DEFINED_SLOPE,                       &
      &  BB, DRYSMC, HC, MAXSMC, REFSMC, SATPSI, SATDK, SATDW,           &
-     &  WLTSMC, QTZ, mosaic_soil, mosaic_lu, REFSMCnoah, WLTSMCnoah
+     &  WLTSMC, QTZ, mosaic_soil, mosaic_lu,                            &
+     &  REFSMCnoah, WLTSMCnoah, MAXSMCnoah
 
       if(ivet.eq.2) then
 ! Using umd veg classification
