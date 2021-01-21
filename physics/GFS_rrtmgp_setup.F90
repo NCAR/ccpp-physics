@@ -13,7 +13,7 @@ module GFS_rrtmgp_setup
                                          iaermdl, ialbflg, iemsflg, ivflip
   implicit none
   
-  public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_run, GFS_rrtmgp_setup_finalize
+  public GFS_rrtmgp_setup_init, GFS_rrtmgp_setup_timestep_init, GFS_rrtmgp_setup_finalize
   
   ! Version tag and last revision date
   character(40), parameter ::                                       &
@@ -27,7 +27,7 @@ module GFS_rrtmgp_setup
   logical ::  &
        is_initialized = .false.
   ! Control flag for the first time of reading climatological ozone data
-  ! (set/reset in subroutines GFS_rrtmgp_setup_init/GFS_rrtmgp_setuup_run, it is used only if 
+  ! (set/reset in subroutines GFS_rrtmgp_setup_init/GFS_rrtmgp_setup_timestep_init, it is used only if 
   ! the control parameter ioznflg=0)
   logical :: loz1st = .true.
   
@@ -151,13 +151,13 @@ contains
   end subroutine GFS_rrtmgp_setup_init
 
   ! #########################################################################################
-  ! SUBROUTINE GFS_rrtmgp_setup_run
+  ! SUBROUTINE GFS_rrtmgp_setup_timestep_init
   ! #########################################################################################
-!> \section arg_table_GFS_rrtmgp_setup_run
-!! \htmlinclude GFS_rrtmgp_setup_run.html
+!> \section arg_table_GFS_rrtmgp_setup_timestep_init
+!! \htmlinclude GFS_rrtmgp_setup_timestep_init.html
 !!
-  subroutine GFS_rrtmgp_setup_run (idate, jdate, deltsw, deltim, lsswr, me, &
-       slag, sdec, cdec, solcon, errmsg, errflg)
+  subroutine GFS_rrtmgp_setup_timestep_init (idate, jdate, deltsw, deltim, lsswr, me, &
+                                             slag, sdec, cdec, solcon, errmsg, errflg)
      
     ! Inputs
     integer,         intent(in)  :: idate(:)
@@ -188,7 +188,7 @@ contains
 
     ! Check initialization state
     if (.not.is_initialized) then
-       write(errmsg, fmt='((a))') 'GFS_rrtmgp_setup_run called before GFS_rrtmgp_setup_init'
+       write(errmsg, fmt='((a))') 'GFS_rrtmgp_setup_timestep_init called before GFS_rrtmgp_setup_init'
        errflg = 1
        return
     end if
@@ -251,7 +251,7 @@ contains
     if ( loz1st ) loz1st = .false.
 
     return
-  end subroutine GFS_rrtmgp_setup_run
+  end subroutine GFS_rrtmgp_setup_timestep_init
 
   ! #########################################################################################
   ! SUBROUTINE GFS_rrtmgp_setup_finalize
@@ -273,4 +273,5 @@ contains
     is_initialized = .false.
     
   end subroutine GFS_rrtmgp_setup_finalize
+
 end module GFS_rrtmgp_setup
