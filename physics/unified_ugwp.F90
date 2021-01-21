@@ -25,6 +25,7 @@
 !! The choice of schemes is activated at runtime by the following namelist options (boolean):
 !!       do_ugwp_v0           -- activates V0 CIRES UGWP scheme - both orographic and non-stationary GWD
 !!       do_ugwp_v0_orog_only -- activates V0 CIRES UGWP scheme - orographic GWD only
+!!       do_ugwp_v0_nst_only  -- activates V0 CIRES UGWP scheme - non-stationary GWD only
 !!       do_gsl_drag_ls_bl    -- activates RAP/HRRR (GSL) large-scale GWD and blocking
 !!       do_gsl_drag_ss       -- activates RAP/HRRR (GSL) small-scale GWD
 !!       do_gsl_drag_tofd     -- activates RAP/HRRR (GSL) turbulent orographic drag
@@ -75,9 +76,9 @@ contains
     subroutine unified_ugwp_init (me, master, nlunit, input_nml_file, logunit, &
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp, cdmbgwd, cgwf,   &
                 con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
-                do_ugwp_v0, do_ugwp_v0_orog_only, do_gsl_drag_ls_bl,           &
-                do_gsl_drag_ss, do_gsl_drag_tofd, do_ugwp_v1,                  &
-                do_ugwp_v1_orog_only, errmsg, errflg)
+                do_ugwp_v0, do_ugwp_v0_orog_only, do_ugwp_v0_nst_only,         &
+                do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,           &
+                do_ugwp_v1, do_ugwp_v1_orog_only, errmsg, errflg)
 
 !----  initialization of unified_ugwp
     implicit none
@@ -98,6 +99,7 @@ contains
     real(kind=kind_phys), intent (in) :: con_p0, con_pi, con_rerth
     logical,              intent (in) :: do_ugwp
     logical,              intent (in) :: do_ugwp_v0, do_ugwp_v0_orog_only,  &
+                                         do_ugwp_v0_nst_only,               &
                                          do_gsl_drag_ls_bl, do_gsl_drag_ss, &
                                          do_gsl_drag_tofd, do_ugwp_v1,      &
                                          do_ugwp_v1_orog_only
@@ -136,11 +138,23 @@ contains
 
     end if
 
+    ! Test to make sure that if ugwp_v0 non-stationary-only is selected that
+    ! ugwp_v1 is not also selected
+    if ( do_ugwp_v0_nst_only .and. (do_ugwp_v1.or.do_ugwp_v1_orog_only) ) then
+
+       write(errmsg,'(*(a))') "Logic error: do_ugwp_v0_nst_only can only be &
+          &selected if both do_ugwp_v1 and do_ugwp_v1_orog_only are not &
+          &selected"
+       errflg = 1
+       return
+
+    end if
+
 
     if (is_initialized) return
 
 
-    if ( do_ugwp_v0 ) then
+    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only ) then
        ! if (do_ugwp .or. cdmbgwd(3) > 0.0) then (deactivate effect of do_ugwp)
        if (cdmbgwd(3) > 0.0) then
          call cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
@@ -148,7 +162,7 @@ contains
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
        else
          write(errmsg,'(*(a))') "Logic error: cires_ugwp_mod_init called but &
-               &do_ugwp_v0 is true and cdmbgwd(3) <= 0"
+               &do_ugwp_v0 or do_ugwp_v0_nst_only is true and cdmbgwd(3) <= 0"
          errflg = 1
          return
        end if
@@ -177,11 +191,13 @@ contains
 !! \htmlinclude unified_ugwp_finalize.html
 !!
 
-    subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v1,errmsg, errflg)
+    subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v0_nst_only,  &
+                                     do_ugwp_v1,errmsg, errflg)
 
     implicit none
 !
-    logical,          intent (in) :: do_ugwp_v0, do_ugwp_v1
+    logical,          intent (in) :: do_ugwp_v0, do_ugwp_v0_nst_only, &
+                                     do_ugwp_v1
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 
@@ -191,7 +207,7 @@ contains
 
     if (.not.is_initialized) return
 
-    if ( do_ugwp_v0 ) call cires_ugwp_mod_finalize()
+    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only ) call cires_ugwp_mod_finalize()
 
     if ( do_ugwp_v1 ) call cires_ugwp_finalize()
 
@@ -234,8 +250,8 @@ contains
          con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
          ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
          ldiag3d, lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,  &
-         do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd, do_ugwp_v1,              &
-         do_ugwp_v1_orog_only, gwd_opt, errmsg, errflg)
+         do_ugwp_v0_nst_only, do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,     &
+         do_ugwp_v1, do_ugwp_v1_orog_only, gwd_opt, errmsg, errflg)
 
     implicit none
 
@@ -303,6 +319,7 @@ contains
 
     ! flags for choosing combination of GW drag schemes to run
     logical,              intent (in) :: do_ugwp_v0, do_ugwp_v0_orog_only,  &
+                                         do_ugwp_v0_nst_only,               &
                                          do_gsl_drag_ls_bl, do_gsl_drag_ss, &
                                          do_gsl_drag_tofd, do_ugwp_v1,      &
                                          do_ugwp_v1_orog_only
@@ -408,7 +425,7 @@ contains
 
     end if
 
-    if ( do_ugwp_v0.or.do_ugwp_v0_orog_only ) then
+    if ( do_ugwp_v0.or.do_ugwp_v0_orog_only.or.do_ugwp_v0_nst_only ) then
 
       do k=1,levs
         do i=1,im
@@ -418,6 +435,10 @@ contains
           Pkdis(i,k) = 0.0
         enddo
       enddo
+
+    end if
+
+    if ( do_ugwp_v0.or.do_ugwp_v0_orog_only ) then
 
       if (cdmbgwd(1) > 0.0 .or. cdmbgwd(2) > 0.0) then
 
@@ -466,7 +487,7 @@ contains
     !
     ! ugwp_v0 non-stationary GW drag
     !
-    if (do_ugwp_v0) then
+    if (do_ugwp_v0.or.do_ugwp_v0_nst_only) then
 
       if (cdmbgwd(3) > 0.0) then
 
@@ -574,7 +595,7 @@ contains
         enddo
       endif
 
-    end if  ! do_ugwp_v0 
+    end if  ! do_ugwp_v0.or.do_ugwp_v0_nst_only 
 
 
     !
