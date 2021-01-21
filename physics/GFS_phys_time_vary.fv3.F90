@@ -28,6 +28,9 @@
       use iccninterp, only : read_cidata, setindxci, ciinterpol
 
       use gcycle_mod, only : gcycle
+      
+      use cires_tauamf_data,   only:  cires_indx_ugwp,  read_tau_amf, tau_amf_interp
+      use cires_tauamf_data,   only:  tau_limb,  days_limb, ugwp_taulat       
 
 #if 0
       !--- variables needed for calculating 'sncovr'
@@ -58,6 +61,7 @@
               jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,                &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
+	      do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
               nthrds, errmsg, errflg)
 
          implicit none
@@ -77,6 +81,10 @@
          integer,              intent(inout) :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
          real(kind_phys),      intent(inout) :: ddy_ci(:), ddx_ci(:)
          integer,              intent(inout) :: imap(:), jmap(:)
+	 
+         logical,              intent(in)    :: do_ugwp_v1		 
+         real(kind_phys),      intent(inout) :: ddy_j1tau(:), ddy_j2tau(:)
+         integer,              intent(inout) :: jindx1_tau(:), jindx2_tau(:)	 	 
 
          integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
@@ -100,6 +108,7 @@
 !$OMP          shared (jindx1_o3,jindx2_o3,ddy_o3,jindx1_h,jindx2_h,ddy_h)          &
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
 !$OMP          shared (jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci,ddx_ci)       &
+!$OMP          shared (do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau)    &
 !$OMP          private (ix,i,j)
 
 !$OMP sections
@@ -176,7 +185,11 @@
            ! No consistency check needed for in/ccn data, all values are
            ! hardcoded in module iccn_def.F and GFS_typedefs.F90
          endif
-
+!$OMP section	 
+!> - Call tau_amf dats for  ugwp_v1
+         if (do_ugwp_v1) then         
+            call read_tau_amf(me, master, errmsg, errflg)            
+         endif     
 !$OMP end sections
 
 ! Need an OpenMP barrier here (implicit in "end sections")
@@ -211,7 +224,12 @@
                            jindx2_ci, ddy_ci, xlon_d,  &
                            iindx1_ci, iindx2_ci, ddx_ci)
          endif
-
+!$OMP section	 
+!> - Call  cires_indx_ugwp to read monthly-mean GW-tau diagnosed from FV3GFS-runs that can resolve GWs
+         if (do_ugwp_v1) then
+            call cires_indx_ugwp (im, me, master, xlat_d, jindx1_tau, jindx2_tau,  &
+                                  ddy_j1tau, ddy_j2tau) 
+         endif
 !$OMP section
          !--- initial calculation of maps local ix -> global i and j
          ix = 0
@@ -273,7 +291,8 @@
             lakefrac, min_seaice, min_lakeice, smc, slc, stc, smois, sh2o, tslb, tiice, tg3, tref,  &
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
-            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk, errmsg, errflg)
+            cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk,                                       &
+	    do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)          	  
 
          implicit none
 
@@ -297,11 +316,19 @@
          real(kind_phys),      intent(in)    :: prsl(:,:)
          integer,              intent(in)    :: seed0
          real(kind_phys),      intent(inout) :: rann(:,:)
+	 
+         logical,              intent(in)    ::	do_ugwp_v1
+         integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
+         real(kind_phys),      intent(in)    :: ddy_j1tau(:),  ddy_j2tau(:)   
+         real(kind_phys),      intent(inout) ::	tau_amf(:)	 
+	 
          ! For gcycle only
          integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil
          integer,              intent(in)    :: lsoil_lsm, kice, ialb, isot, ivegsrc
          character(len=*),     intent(in)    :: input_nml_file(:)
+
          logical,              intent(in)    :: use_ufo, nst_anl, frac_grid
+	 		      	 	  
          real(kind_phys),      intent(in)    :: fhcyc, phour, lakefrac(:), min_seaice, min_lakeice,  &
                                                 xlat_d(:), xlon_d(:)
          real(kind_phys),      intent(inout) :: smc(:,:), slc(:,:), stc(:,:), smois(:,:), sh2o(:,:), &
@@ -310,7 +337,7 @@
                                       facsf(:), facwf(:), alvsf(:), alvwf(:), alnsf(:), alnwf(:),    &
                                       zorli(:), zorll(:), zorlo(:), weasd(:), slope(:), snoalb(:),   &
                                       canopy(:), vfrac(:), vtype(:), stype(:), shdmin(:), shdmax(:), &
-                                      snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
+                                      snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)			      
          !
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
@@ -404,7 +431,13 @@
                             iindx2_ci, ddx_ci,       &
                             levs, prsl, in_nm, ccn_nm)
          endif
-
+	 
+!> - Call  cires_indx_ugwp to read monthly-mean GW-tau diagnosed from FV3GFS-runs that resolve GW-activ
+         if (do_ugwp_v1) then
+          call tau_amf_interp(me, master, im, idate,fhour,                 &
+                   jindx1_tau,  jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf)				   	 
+         endif
+	 
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
          if (nscyc >  0) then
            if (mod(kdt,nscyc) == 1) THEN
@@ -479,7 +512,12 @@
          if (allocated(ciplin)  ) deallocate(ciplin)
          if (allocated(ccnin)   ) deallocate(ccnin)
          if (allocated(ci_pres) ) deallocate(ci_pres)
-
+	 
+         ! Deallocate UGWP-input arrays	 	 
+         if (allocated (ugwp_taulat))  deallocate(ugwp_taulat) 
+         if (allocated (tau_limb))     deallocate (tau_limb)   
+         if (allocated (days_limb))    deallocate(days_limb)
+	   
          is_initialized = .false.
 
       end subroutine GFS_phys_time_vary_finalize

@@ -1,7 +1,7 @@
 [ccpp-table-properties]
   name = GFS_phys_time_vary
   type = scheme
-  dependencies = aerclm_def.F,aerinterp.F90,gcycle.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f,namelist_soilveg.f,ozinterp.f90,ozne_def.f,sfcsub.F
+  dependencies = aerclm_def.F,aerinterp.F90,gcycle.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f,namelist_soilveg.f,ozinterp.f90,ozne_def.f,sfcsub.F,cires_tauamf_data.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -315,6 +315,48 @@
   type = integer
   intent = in
   optional = F
+[do_ugwp_v1]
+  standard_name = do_ugwp_v1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[jindx1_tau]
+  standard_name = index_interp_weight1_taungw
+  long_name = index1 for weight1 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+  optional = F         
+[jindx2_tau]
+  standard_name = index_interp_weight2_taungw
+  long_name = index2 for weight2 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+  optional = F          
+[ddy_j1tau]
+  standard_name = interp_weight1_taungw
+  long_name = interpolation weight1 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = inout  
+  kind = kind_phys
+  optional = F     
+[ddy_j2tau]
+  standard_name = interp_weight2_taungw
+  long_name = interpolation weight2 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = inout
+  kind = kind_phys
+  optional = F 
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -1335,6 +1377,57 @@
   kind = kind_phys
   intent = inout
   optional = F
+[do_ugwp_v1]
+  standard_name = do_ugwp_v1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[jindx1_tau]
+  standard_name = index_interp_weight1_taungw
+  long_name = index1 for weight1 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F         
+[jindx2_tau]
+  standard_name = index_interp_weight2_taungw
+  long_name = index2 for weight2 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F          
+[ddy_j1tau]
+  standard_name = interp_weight1_taungw
+  long_name = interpolation weight1 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = in  
+  kind = kind_phys
+  optional = F     
+[ddy_j2tau]
+  standard_name = interp_weight2_taungw
+  long_name = interpolation weight2 for tau NGWs 
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = in
+  kind = kind_phys
+  optional = F
+[tau_amf]
+  standard_name = ngw_abs_momentum_flux
+  long_name = ngw_absolute_momentum_flux
+  units = various
+  dimensions = (horizontal_loop_extent)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F       
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP

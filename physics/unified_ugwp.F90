@@ -260,8 +260,11 @@ contains
     integer,                 intent(in) :: gwd_opt
     integer,                 intent(in), dimension(im)       :: kpbl
     real(kind=kind_phys),    intent(in), dimension(im)       :: oro, oro_uf, hprime, oc, theta, sigma, gamma
-    real(kind=kind_phys),    intent(in), dimension(im)       :: varss,oc1ss,dx
-    real(kind=kind_phys),    intent(in), dimension(im,4)     :: oa4ss,ol4ss
+    real(kind=kind_phys),    intent(in), dimension(im)       :: varss,oc1ss, dx
+
+!vay-nov 2020
+    real(kind=kind_phys),    intent(in), dimension(im,4)     ::  oa4ss,ol4ss   
+    
     logical,                 intent(in)                      :: flag_for_gwd_generic_tend
     ! elvmax is intent(in) for CIRES UGWP, but intent(inout) for GFS GWDPS
     real(kind=kind_phys),    intent(inout), dimension(im)    :: elvmax
@@ -332,12 +335,11 @@ contains
     real(kind=kind_phys), dimension(im)       :: sgh30
     real(kind=kind_phys), dimension(im, levs) :: Pdvdt, Pdudt
     real(kind=kind_phys), dimension(im, levs) :: Pdtdt, Pkdis
-    real(kind=kind_phys), dimension(im, levs) :: ed_dudt, ed_dvdt, ed_dtdt
-    ! from ugwp_driver_v0.f -> cires_ugwp_initialize.F90 -> module ugwp_wmsdis_init
+ 
     real(kind=kind_phys), parameter :: tamp_mpa=30.e-3
     ! switches that activate impact of OGWs and NGWs (WL* how to deal with them? *WL)
     real(kind=kind_phys), parameter :: pogw=1., pngw=1., pked=1.
-    real(kind=kind_phys), parameter :: fw1_tau=1.0
+
     integer :: nmtvr_temp
 
     real(kind=kind_phys), dimension(:,:), allocatable :: tke
@@ -347,23 +349,6 @@ contains
     real(kind=kind_phys) :: inv_g
     real(kind=kind_phys), dimension(im, levs)   :: zmet  ! geopotential height at model Layer centers
     real(kind=kind_phys), dimension(im, levs+1) :: zmeti ! geopotential height at model layer interfaces
-
-
-    ! ugwp_v1 local variables
-    integer :: y4, month, day,  ddd_ugwp, curdate, curday
-    integer :: hour
-    real(kind=kind_phys) :: hcurdate, hcurday, fhour, fhrday
-    integer :: kdtrest
-    integer :: curday_ugwp
-    integer :: curday_save=20150101
-    logical :: first_qbo=.true.
-    real    ::  hcurday_save =20150101.00
-    save first_qbo, curday_save, hcurday_save
-
-
-    ! ugwp_v1 temporary (local) diagnostic variables from cires_ugwp_solv2_v1
-    real(kind=kind_phys) :: tauabs(im,levs), wrms(im,levs), trms(im,levs)
-
 
     ! Initialize CCPP error handling variables
     errmsg = ''
@@ -405,7 +390,7 @@ contains
          sgh30 = abs(oro - oro_uf)
        ! w/o orographic effects
        else
-         sgh30   = 0.
+         sgh30   = varss
        endif
 
        inv_g = 1./con_g
@@ -564,26 +549,6 @@ contains
         dudt_mtb = 0. ; dudt_ogw = 0. ; dudt_tms = 0.
       endif
 
-#if 0
-    !=============================================================================
-    ! make "ugwp eddy-diffusion" update for gw_dtdt/gw_dudt/gw_dvdt by solving
-    ! vert diffusion equations & update "Statein%tgrs, Statein%ugrs, Statein%vgrs"
-    !=============================================================================
-    ! 3) application of "eddy"-diffusion to "smooth" UGWP-related tendencies
-    !------------------------------------------------------------------------------
-      do k=1,levs
-        do i=1,im
-          ed_dudt(i,k) = 0.0 ; ed_dvdt(i,k) = 0.0 ; ed_dtdt(i,k) = 0.0
-        enddo
-      enddo
-
-      call edmix_ugwp_v0(im, levs, dtp, tgrs, ugrs, vgrs, q1,                &
-           del, prsl, prsi, phil, prslk, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis, &
-           ed_dudt, ed_dvdt, ed_dtdt, me, master, kdt)
-      gw_dtdt = gw_dtdt*(1.-pked) +  ed_dtdt*pked
-      gw_dvdt = gw_dvdt*(1.-pked) +  ed_dvdt*pked
-      gw_dudt = gw_dudt*(1.-pked) +  ed_dudt*pked
-#endif
 
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
         do k=1,levs
@@ -596,160 +561,6 @@ contains
       endif
 
     end if  ! do_ugwp_v0.or.do_ugwp_v0_nst_only 
-
-
-    !
-    ! ugwp_v1 non-stationary GW drag
-    !
-    if (do_ugwp_v1) then
-
-! --------    
-! 2) non-stationary GWs with GEOS-5/MERRA GW-forcing
-!    ----------------------------------------------
-!--------       
-! GMAO GEOS-5/MERRA GW-forcing  lat-dep
-!--------
-       call slat_geos5_tamp_v1(im, tamp_mpa, xlat_d, tau_ngw)
-        
-       y4 = jdat(1); month = jdat(2); day = jdat(3) ; hour = jdat(5)
-        
-       ! fhour = float(hour)+float(jdat(6))/60. + float(jdat(7))/3600.
-       fhour = (kdt-1)*dtp/3600.
-       fhrday  = fhour/24.  - nint(fhour/24.)
-       fhour = fhrday*24.     
-                
-       call calendar_ugwp(y4, month, day, ddd_ugwp)
-       curdate = y4*1000 + ddd_ugwp
-       curday = y4*10000 + month*100 + day
-       hcurdate = float(curdate) + fhrday
-       hcurday  = float(curday)  + fhrday
-!
-       if (mod(fhour,fhzero) == 0 .or. first_qbo) then
-
-         ! call tau_limb_advance(me, master, im, levs, ddd_ugwp, curdate,   &
-         !    j1_tau, j2_tau, ddy_j1tau, ddy_j2tau, tau_sat, kdt )
-        
-         if (first_qbo) kdtrest = kdt        
-         first_qbo = .false.
-         curday_save = curday        
-         hcurday_save= hcurday       
-       endif
-        
-       ! tau_ngw = fw1_tau*tau_ngw + tau_sat*(1.-fw1_tau)
-                
-!       goto 111   
-!       if (mod(fhour,fhzero) == 0 .or. first_qbo) then
-                
-!         call tau_qbo_advance(me, master, im, levs, ddd_ugwp, curdate, &
-!            j1_tau, j2_tau, ddy_j1tau, ddy_j2tau,  j1_qbo, j2_qbo,      &
-!            ddy_j1qbo, ddy_j2qbo, tau_sat, tau_qbo,  uqbo, ax_qbo, kdt     )
-        
-                
-!         if (me == master) then
-!           print *, ' curday_save first_qbo ', curday, curday_save, kdt   
-!           print *, ' hcurdays ', hcurdate,  float(hour)/24.
-!           print *, jdat(5), jdat(6),  jdat(7), (kdt-1)*dtp/3600., ' calendar '           
-!!           print *, ' curday curday_ugwp first_qbo ', hcurday, first_qbo         
-!!           print *, ' vay_tau-limb U' ,  maxval(uqbo), minval(uqbo) 
-!!           print *, ' vay_tau-limb TS' , maxval(tau_sat), minval(tau_sat) 
-!!           print *, ' vay_tau-limb TQ' , maxval(tau_qbo), minval(tau_qbo)                  
-!         endif  
-
-
-!         if (first_qbo) kdtrest = kdt        
-!         first_qbo = .false.
-!         curday_save = curday        
-!         hcurday_save= hcurday       
-!       endif
-        
-
-                
-
-!       if (mod(kdt, 720) == 0 .and. me == master ) then       
-!         print *, ' vay_qbo_U' , maxval(uqbo), minval(uqbo) , kdt                             
-!       endif
-        
-!       wqbo = dtp/taurel
-!       do k =1, levs
-!!          sdexpz =  wqbo*vert_qbo(k)  
-!          sdexpz =  0.25*vert_qbo(k)
-!          do i=1, im
-!!             if (dexpy(i) > 0.0) then
-!             dforc = 0.25
-!!             ugrs(i,k)  = ugrs(i,k)*(1.-dforc) + dforc*uqbo(i,levs+1-k)
-!!             tgrs(i,k)  = tgrs(i,k)*(1.-dforc) + dforc*tqbo(i,levs+1-k)              
-!!             endif 
-!          enddo
-!       enddo      
- 
-! 111      continue
-
-
-       call cires_ugwp_solv2_v1(im,   levs,  dtp,                     &
-                      tgrs, ugrs,  vgrs,   q1, prsl, prsi,            &
-                      zmet, zmeti,prslk, xlat_d, sinlat, coslat,      &
-                      con_g, con_cp, con_rd, con_rv, con_omega,       &
-                      con_pi, con_fvirt,                              & 
-                      gw_dudt, gw_dvdt, gw_dTdt, gw_kdis,             &
-                      tauabs, wrms, trms,   tau_ngw, me, master, kdt)
-
-       if (me == master .and. kdt < 2) then
-         print *
-         write(6,*)'FV3GFS finished fv3_ugwp_solv2_v1  in ugwp_driver_v0 '
-         write(6,*) ' non-stationary GWs with GMAO/MERRA GW-forcing '
-         print *
-       endif
-
-       do k=1,levs
-         do i=1,im
-           gw_dtdt(i,k) = pngw*gw_dtdt(i,k) + pogw*Pdtdt(i,k)
-           gw_dudt(i,k) = pngw*gw_dudt(i,k) + pogw*Pdudt(i,k)
-                !+(uqbo(i,levs+1-k)-ugrs(i,k))/21600.
-           gw_dvdt(i,k) = pngw*gw_dvdt(i,k) + pogw*Pdvdt(i,k)
-           gw_kdis(i,k) = pngw*gw_kdis(i,k)     ! + pogw*Pkdis(i,k)
-         enddo
-       enddo
-
-
-
-
-       if (pogw == 0.0) then
-!        zmtb = 0.;  zogw =0.
-         tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
-         du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
-       endif
-
-!       return
-
-!=============================================================================
-! make "ugwp eddy-diffusion" update for gw_dtdt/gw_dudt/gw_dvdt by solving
-! vert diffusion equations & update "Statein%tgrs, Statein%ugrs, Statein%vgrs"
-!=============================================================================
-!
-! 3) application of "eddy"-diffusion to "smooth" UGWP-related tendencies
-!------------------------------------------------------------------------------
-
-!       ed_dudt(:,:) = 0.0 ; ed_dvdt(:,:) = 0.0 ; ed_dtdt(:,:) = 0.0
-
-
-
-!       call edmix_ugwp_v1(im,   levs, dtp,                       &
-!                        tgrs, ugrs, vgrs, q1, del,               &
-!                         prsl, prsi, phil, prslk,                &
-!                         gw_dudt, gw_dvdt, gw_dTdt, gw_kdis,     &
-!                        ed_dudt, ed_dvdt, ed_dTdt,
-!                         me, master, kdt )
-
-!       do k=1,levs
-!         do i=1,im
-!           gw_dtdt(i,k) = gw_dtdt(i,k) + ed_dtdt(i,k)*pked
-!           gw_dvdt(i,k) = gw_dvdt(i,k) + ed_dvdt(i,k)*pked
-!           gw_dudt(i,k) = gw_dudt(i,k) + ed_dudt(i,k)*pked
-!         enddo
-!       enddo
-
-
-    end if   ! do_ugwp_v1
 
 
     end subroutine unified_ugwp_run
