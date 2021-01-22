@@ -109,7 +109,7 @@ MODULE module_sf_mynn
   REAL, PARAMETER :: COARE_OPT=3.0  ! 3.0 or 3.5
   !For debugging purposes:
   INTEGER, PARAMETER :: debug_code = 0  !0: no extra ouput
-                                        !1: some step-by-step output
+                                        !1: check input
                                         !2: everything - heavy I/O
   LOGICAL, PARAMETER :: compute_diag = .false.
   LOGICAL, PARAMETER :: compute_flux = .false.  !shouldn't need compute 
@@ -122,23 +122,6 @@ MODULE module_sf_mynn
 CONTAINS
 
 !-------------------------------------------------------------------
-!>\ingroup module_sf_mynn_mod
-!> Fill the PSIM and PSIH tables. The subroutine "psi_init" was leveraged from
-!! module_sf_sfclayrev.F, leveraging the work from Pedro Jimenez.
-!! This subroutine returns a blended form from Dyer and Hicks (1974)
-!! and Grachev et al (2000) for unstable conditions and the form
-!! from Cheng and Brutsaert (2005) for stable conditions.
-
-  SUBROUTINE mynn_sf_init_driver(allowed_to_read,psi_opt)
-
-    LOGICAL, INTENT(in) :: allowed_to_read
-    INTEGER, INTENT(IN) :: psi_opt
-
-     !CALL psi_init
-     CALL psi_init(psi_opt)
-
-  END SUBROUTINE mynn_sf_init_driver
-
 !-------------------------------------------------------------------
 !>\ingroup module_sf_mynn_mod
 !! This subroutine
@@ -149,7 +132,7 @@ CONTAINS
               CP,G,ROVCP,R,XLV,                      & !in
               SVP1,SVP2,SVP3,SVPT0,EP1,EP2,KARMAN,   & !in
               ISFFLX,isftcflx,lsm,iz0tlnd,psi_opt,   & !in
-     &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)                                   
+     &        sigmaf,vegtype,shdmax,ivegsrc,         & !intent(in)
      &        z0pert,ztpert,                         & !intent(in)
      &        redrag,sfc_z0_type,                    & !intent(in)
               itimestep,iter,                        & !in
@@ -351,7 +334,8 @@ CONTAINS
       REAL, DIMENSION( ims:ime ), INTENT(IN)    ::                 &
      &                    tskin_ocn, tskin_lnd, tskin_ice,         &
      &                    tsurf_ocn, tsurf_lnd, tsurf_ice,         &
-     &                    snowh_ocn, snowh_lnd, snowh_ice
+     &                    snowh_ocn, snowh_lnd, snowh_ice,         &
+     &                    qsfc_ruc
 
       REAL, DIMENSION( ims:ime), INTENT(INOUT) ::                  &
      &                      ZNT_ocn,   ZNT_lnd,   ZNT_ice,         &
@@ -366,8 +350,7 @@ CONTAINS
      &                      fh2_ocn,   fh2_lnd,   fh2_ice,         &
      &                     HFLX_ocn,  HFLX_lnd,  HFLX_ice,         &
      &                     QFLX_ocn,  QFLX_lnd,  QFLX_ice,         &
-     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice,         &
-     &                                qsfc_ruc
+     &                     qsfc_ocn,  qsfc_lnd,  qsfc_ice
 
 !ADDITIONAL OUTPUT
 !JOE-begin
@@ -545,6 +528,7 @@ CONTAINS
 
       REAL,     PARAMETER  :: XKA=2.4E-5   !molecular diffusivity
       REAL,     PARAMETER  :: PRT=1.       !prandlt number
+      REAL,     PARAMETER  :: snowh_thresh = 50. !mm
       REAL,     INTENT(IN) :: SVP1,SVP2,SVP3,SVPT0,EP1,EP2
       REAL,     INTENT(IN) :: KARMAN,CP,G,ROVCP,R,XLV !,DX
 
@@ -678,11 +662,11 @@ CONTAINS
       IF (debug_code >= 1) THEN
         write(0,*)"ITIMESTEP=",ITIMESTEP," iter=",iter
         DO I=its,ite
-           write(0,*)"=== imortant input to mynnsfclayer, i:", i
+           write(0,*)"=== important input to mynnsfclayer, i:", i
            IF (dry(i)) THEN
              write(0,*)"dry=",dry(i)," pblh=",pblh(i)," tsk=", tskin_lnd(i),&
              " tsurf=", tsurf_lnd(i)," qsfc=", qsfc_lnd(i)," znt=", znt_lnd(i),&
-             " ust=", ust_lnd(i)," snowh=", snowh_lnd(i),"psfcpa=",PSFCPA(i),  &
+             " ust=", ust_lnd(i)," snowh=", snowh_lnd(i)," psfcpa=",PSFCPA(i),  &
              " dz=",dz8w1d(i)," qflx=",qflx(i)," hflx=",hflx(i)," hpbl=",pblh(i)
            ENDIF
            IF (icy(i)) THEN
@@ -860,9 +844,9 @@ CONTAINS
          IF (wet(i)) THEN
             DTHVDZ=(THV1D(I)-THVSK_ocn(I))
             !--------------------------------------------------------
-            !  Calculate the convective velocity scale (WSTAR) and 
-            !  subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS) 
-            !  and Mahrt and Sun (1995, MWR), respectively
+            ! Calculate the convective velocity scale (WSTAR) and 
+            ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS) 
+            ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_ocn(I)*qfx(i)/RHO1D(i),0.)
@@ -884,23 +868,23 @@ CONTAINS
               rb_ocn(I)=MAX(rb_ocn(I),-2.0)
               rb_ocn(I)=MIN(rb_ocn(I), 2.0)
             ELSE
-              rb_ocn(I)=MAX(rb_ocn(I),-10.0)
-              rb_ocn(I)=MIN(rb_ocn(I), 10.0)
+              rb_ocn(I)=MAX(rb_ocn(I),-4.0)
+              rb_ocn(I)=MIN(rb_ocn(I), 4.0)
             ENDIF
          ENDIF ! end water point
 
          IF (dry(i)) THEN
             DTHVDZ=(THV1D(I)-THVSK_lnd(I))
             !--------------------------------------------------------
-            !  Calculate the convective velocity scale (WSTAR) and
-            !  subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
-            !  and Mahrt and Sun (1995, MWR), respectively
+            ! Calculate the convective velocity scale (WSTAR) and
+            ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
+            ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_lnd(I)*qfx(i)/RHO1D(i),0.)
-            !WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
-            !increase height scale, assuming that the non-local transoport
-            !from the mass-flux (plume) mixing exceedsd the PBLH.
+            ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
+            ! increase height scale, assuming that the non-local transoport
+            ! from the mass-flux (plume) mixing exceedsd the PBLH.
             WSTAR(I) = vconvc*(g/TSK_lnd(i)*MIN(1.5*pblh(i),4000.)*fluxc)**onethird
             !--------------------------------------------------------
             ! Mahrt and Sun low-res correction
@@ -924,23 +908,23 @@ CONTAINS
               rb_lnd(I)=MAX(rb_lnd(I),-2.0)
               rb_lnd(I)=MIN(rb_lnd(I), 2.0)
             ELSE
-              rb_lnd(I)=MAX(rb_lnd(I),-10.0)
-              rb_lnd(I)=MIN(rb_lnd(I), 10.0)
+              rb_lnd(I)=MAX(rb_lnd(I),-4.0)
+              rb_lnd(I)=MIN(rb_lnd(I), 4.0)
             ENDIF
          ENDIF ! end land point
 
          IF (icy(i)) THEN
             DTHVDZ=(THV1D(I)-THVSK_ice(I))
             !--------------------------------------------------------
-            !  Calculate the convective velocity scale (WSTAR) and
-            !  subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
-            !  and Mahrt and Sun (1995, MWR), respectively
+            ! Calculate the convective velocity scale (WSTAR) and
+            ! subgrid-scale velocity (VSGD) following Beljaars (1995, QJRMS)
+            ! and Mahrt and Sun (1995, MWR), respectively
             !-------------------------------------------------------
             fluxc = max(hfx(i)/RHO1D(i)/cp                    &
             &    + ep1*THVSK_ice(I)*qfx(i)/RHO1D(i),0.)
-            !WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
-            !increase height scale, assuming that the non-local transport
-            !from the mass-flux (plume) mixing exceedsd the PBLH.
+            ! WSTAR(I) = vconvc*(g/TSK(i)*pblh(i)*fluxc)**onethird
+            ! increase height scale, assuming that the non-local transport
+            ! from the mass-flux (plume) mixing exceedsd the PBLH.
             WSTAR(I) = vconvc*(g/TSK_ice(i)*MIN(1.5*pblh(i),4000.)*fluxc)**onethird
             !--------------------------------------------------------
             ! Mahrt and Sun low-res correction
@@ -958,16 +942,16 @@ CONTAINS
               rb_ice(I)=MAX(rb_ice(I),-2.0)
               rb_ice(I)=MIN(rb_ice(I), 2.0)
             ELSE
-              rb_ice(I)=MAX(rb_ice(I),-10.0)
-              rb_ice(I)=MIN(rb_ice(I), 10.0)
+              rb_ice(I)=MAX(rb_ice(I),-4.0)
+              rb_ice(I)=MIN(rb_ice(I), 4.0)
             ENDIF
-         ENDIF ! end ice point 
+         ENDIF ! end ice point
 
          !NOW CONDENSE THE POSSIBLE WSPD VALUES BY TAKING THE MAXIMUM
          WSPD(I) = MAX(WSPD_ice,WSPD_ocn)
          WSPD(I) = MAX(WSPD_lnd,WSPD(I))
 
-         IF (debug_code >= 1) THEN
+         IF (debug_code == 2) THEN
             write(*,*)"===== After rb calc in mynn sfc layer:"
             write(*,*)"ITIMESTEP=",ITIMESTEP
             write(*,*)"WSPD=", WSPD(I)," WSTAR=", WSTAR(I)," vsgd=",vsgd
@@ -1006,7 +990,7 @@ CONTAINS
        if (sfc_z0_type >= 0) then ! Avoid calculation is using wave model
           ! CALCULATE z0 (znt)
           !--------------------------------------
-          IF (debug_code >= 1) THEN
+          IF (debug_code == 2) THEN
             write(*,*)"=============Input to ZNT over water:"
             write(*,*)"u*:",UST_ocn(i)," wspd=",WSPD(i)," visc=",visc," za=",ZA(I)
           ENDIF
@@ -1046,7 +1030,7 @@ CONTAINS
           ZNTstoch_ocn(I)  = ZNT_ocn(I)
        endif
 
-       IF (debug_code >= 1) THEN
+       IF (debug_code > 1) THEN
           write(*,*)"==========Output ZNT over water:"
           write(*,*)"ZNT:",ZNTstoch_ocn(i)
        ENDIF
@@ -1060,7 +1044,7 @@ CONTAINS
        !--------------------------------------
        !CALCULATE z_t and z_q
        !--------------------------------------
-       IF (debug_code >= 1) THEN
+       IF (debug_code > 1) THEN
           write(*,*)"=============Input to ZT over water:"
           write(*,*)"u*:",UST_ocn(i)," restar=",restar," visc=",visc
        ENDIF
@@ -1108,7 +1092,7 @@ CONTAINS
                                     rstoch1D(i),spp_pbl)
           ENDIF
        ENDIF
-       IF (debug_code >= 1) THEN
+       IF (debug_code > 1) THEN
          write(*,*)"=============Output ZT & ZQ over water:"
          write(*,*)"ZT:",ZT_ocn(i)," ZQ:",ZQ_ocn(i)
        ENDIF
@@ -1180,7 +1164,7 @@ CONTAINS
 
     ENDIF !end land point
 
-    IF (icy(I) .OR. snowh_lnd(i) > 50.) THEN
+    IF (icy(I)) THEN
 
        ! add stochastic perturbaction of ZNT
        if (spp_pbl==1) then
@@ -1248,7 +1232,7 @@ CONTAINS
           !Use brute-force method
           zol(I)=zolrib(rb_ocn(I),ZA(I),ZNTstoch_ocn(I),zt_ocn(I),GZ1OZ0_ocn(I),GZ1OZt_ocn(I),ZOL(I),psi_opt)
           ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),50.)
+          ZOL(I)=MIN(ZOL(I),20.)
 
           zolzt = zol(I)*zt_ocn(I)/ZA(I)                ! zt/L
           zolz0 = zol(I)*ZNTstoch_ocn(I)/ZA(I)          ! z0/L
@@ -1363,7 +1347,7 @@ CONTAINS
           CALL Li_etal_2010(ZOL(I),rb_lnd(I),ZA(I)/ZNTstoch_lnd(I),zratio_lnd(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_lnd(I)*UST_lnd(I),0.0001))
           ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),50.)
+          ZOL(I)=MIN(ZOL(I),20.)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_lnd(i) < 1E-8 .OR. Zt_lnd(i) < 1E-10) THEN
@@ -1381,7 +1365,7 @@ CONTAINS
           !Use brute-force method
           zol(I)=zolrib(rb_lnd(I),ZA(I),ZNTstoch_lnd(I),zt_lnd(I),GZ1OZ0_lnd(I),GZ1OZt_lnd(I),ZOL(I),psi_opt)
           ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),50.)
+          ZOL(I)=MIN(ZOL(I),20.)
 
           zolzt = zol(I)*zt_lnd(I)/ZA(I)                ! zt/L
           zolz0 = zol(I)*ZNTstoch_lnd(I)/ZA(I)          ! z0/L
@@ -1494,7 +1478,7 @@ CONTAINS
           CALL Li_etal_2010(ZOL(I),rb_ice(I),ZA(I)/ZNTstoch_ice(I),zratio_ice(I))
           !ZOL(I)=ZA(I)*KARMAN*G*MOL(I)/(TH1D(I)*MAX(UST_ice(I)*UST_ice(I),0.0001))
           ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),50.)
+          ZOL(I)=MIN(ZOL(I),20.)
 
           IF (debug_code >= 1) THEN
             IF (ZNTstoch_ice(i) < 1E-8 .OR. Zt_ice(i) < 1E-10) THEN
@@ -1512,7 +1496,7 @@ CONTAINS
           !Use brute-force method
           zol(I)=zolrib(rb_ice(I),ZA(I),ZNTstoch_ice(I),zt_ice(I),GZ1OZ0_ice(I),GZ1OZt_ice(I),ZOL(I),psi_opt)
           ZOL(I)=MAX(ZOL(I),0.0)
-          ZOL(I)=MIN(ZOL(I),50.)
+          ZOL(I)=MIN(ZOL(I),20.)
 
           zolzt = zol(I)*zt_ice(I)/ZA(I)                ! zt/L
           zolz0 = zol(I)*ZNTstoch_ice(I)/ZA(I)          ! z0/L
@@ -1634,6 +1618,8 @@ CONTAINS
        WSPDI(I)=MAX(SQRT(U1D(I)*U1D(I)+V1D(I)*V1D(I)), wmin)
        USTM(I)=0.5*USTM(I)+0.5*KARMAN*WSPDI(I)/PSIX_ocn(I)
 
+       ! for possible future changes in sea-ice fraction from 0 to >0:
+       if (.not. icy(i)) ust_ice(i)=ust_ocn(i)
     ENDIF ! end water points
 
     IF (dry(I)) THEN
@@ -1666,6 +1652,9 @@ CONTAINS
 
        !Set ustm = ust over ice.
        USTM(I)=UST_ice(I)
+
+       ! for possible future changes in sea-ice fraction from 1 to <1:
+       if (.not. wet(i)) ust_ocn(i)=ust_ice(i)
     ENDIF ! end ice points
 
     !----------------------------------------------------
@@ -1888,7 +1877,7 @@ CONTAINS
 
       ENDIF
 
-      IF (debug_code >= 1) THEN
+      IF (debug_code > 1) THEN
          write(*,*)"QFX=",QFX(I),"FLQC=",FLQC(I)
          if(icy(i))write(*,*)"ice, MAVAIL:",MAVAIL(I)," u*=",UST_ice(I)," psiq=",PSIQ_ice(i)
          if(dry(i))write(*,*)"lnd, MAVAIL:",MAVAIL(I)," u*=",UST_lnd(I)," psiq=",PSIQ_lnd(i)
@@ -3235,7 +3224,7 @@ END SUBROUTINE SFCLAY1D_mynn
       ! This iterative algorithm was taken from the revised surface layer 
       ! scheme in WRF-ARW, written by Pedro Jimenez and Jimy Dudhia and 
       ! summarized in Jimenez et al. (2012, MWR). This function was adapted
-      ! to input the thermal roughness length, zt, (as well as z0) and use initial                                              
+      ! to input the thermal roughness length, zt, (as well as z0) and use initial
       ! estimate of z/L.
 
       IMPLICIT NONE
@@ -3403,10 +3392,12 @@ END SUBROUTINE SFCLAY1D_mynn
       end function
 !====================================================================
 
-   SUBROUTINE psi_init(psi_opt)
+   SUBROUTINE psi_init(psi_opt,errmsg,errflg)
 
-    INTEGER                   ::      N,psi_opt
-    REAL                      ::      zolf
+    integer                       :: N,psi_opt
+    real                          :: zolf
+    character(len=*), intent(out) :: errmsg
+    integer, intent(out)          :: errflg
 
     if (psi_opt == 0) then
        DO N=0,1000
@@ -3432,6 +3423,16 @@ END SUBROUTINE SFCLAY1D_mynn
           psim_unstab(n)=psim_unstable_full_gfs(zolf)
           psih_unstab(n)=psih_unstable_full_gfs(zolf)
        ENDDO
+    endif
+
+    !Simple test to see if initialization worked:
+    if (psim_stab(1) < 0. .AND. psih_stab(1) < 0. .AND. & 
+        psim_unstab(1) > 0. .AND. psih_unstab(1) > 0.) then
+       errmsg = 'In MYNN SFC, Psi tables have been initialized'
+       errflg = 0
+    else
+       errmsg = 'Error in MYNN SFC: Problem initializing psi tables'
+       errflg = 1
     endif
 
    END SUBROUTINE psi_init
@@ -3558,7 +3559,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
         nzol = int(zolf*100.)
         rzol = zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if(nzol+1 .lt. 1000)then
            psim_stable = psim_stab(nzol) + rzol*(psim_stab(nzol+1)-psim_stab(nzol))
         else
            if (psi_opt == 0) then
@@ -3577,7 +3578,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
         nzol = int(zolf*100.)
         rzol = zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if(nzol+1 .lt. 1000)then
            psih_stable = psih_stab(nzol) + rzol*(psih_stab(nzol+1)-psih_stab(nzol))
         else
            if (psi_opt == 0) then
@@ -3596,7 +3597,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
         nzol = int(-zolf*100.)
         rzol = -zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if(nzol+1 .lt. 1000)then
            psim_unstable = psim_unstab(nzol) + rzol*(psim_unstab(nzol+1)-psim_unstab(nzol))
         else
            if (psi_opt == 0) then
@@ -3615,7 +3616,7 @@ END SUBROUTINE SFCLAY1D_mynn
 
         nzol = int(-zolf*100.)
         rzol = -zolf*100. - nzol
-        if(nzol+1 .le. 1000)then
+        if(nzol+1 .lt. 1000)then
            psih_unstable = psih_unstab(nzol) + rzol*(psih_unstab(nzol+1)-psih_unstab(nzol))
         else
            if (psi_opt == 0) then
