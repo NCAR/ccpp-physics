@@ -71,7 +71,7 @@ contains
                flag_for_scnv_generic_tend,flag_for_dcnv_generic_tend,           &
 ! fixme: delete               ! du3dt_SCNV,dv3dt_SCNV,dt3dt_SCNV,dq3dt_SCNV,                     &
                ! du3dt_DCNV,dv3dt_DCNV,dt3dt_DCNV,dq3dt_DCNV,                     &
-               dtend,dtidx,ntqv,index_for_temperature,index_for_x_wind,         &
+               dtend,dtidx,ntqv,ntiw,ntcw,index_for_temperature,index_for_x_wind,&
                index_for_y_wind,index_for_cause_scnv,index_for_cause_dcnv,      &
                ldiag3d,qci_conv,errmsg,errflg)
 !-------------------------------------------------------------
@@ -102,7 +102,7 @@ contains
    real(kind=kind_phys), optional, intent(inout)            :: dtend(:,:,:)
    integer, intent(in)                                      :: dtidx(:,:), &
         index_for_x_wind, index_for_y_wind, index_for_temperature,         &
-        index_for_cause_scnv, index_for_cause_dcnv, ntqv
+        index_for_cause_scnv, index_for_cause_dcnv, ntqv, ntcw, ntiw
    
    real(kind=kind_phys),  dimension( im , km ), intent(in )    :: forcet,forceqv_spechum,w,phil
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: t,us,vs
@@ -112,6 +112,8 @@ contains
    real(kind=kind_phys),  dimension( im , km, 11 ) :: gdc,gdc2
    real(kind=kind_phys),  dimension( im , km ),     intent(out ) :: cnvw_moist,cnvc
    real(kind=kind_phys),  dimension( im , km ), intent(inout ) :: cliw, clcw
+
+   real(kind=kind_phys), allocatable :: clcw_save(:,:), cliw_save(:,:)
 
    integer, dimension (im), intent(inout) :: hbot,htop,kcnv
    integer,    dimension (im), intent(in) :: xland
@@ -173,7 +175,7 @@ contains
    real(kind=kind_phys), dimension (im)    :: xmbs,xmbs2,xmb,xmbm,xmb_dumm,mconv
 
    integer :: i,j,k,icldck,ipr,jpr,jpr_deep,ipr_deep,uidx,vidx,tidx,qidx
-   integer :: itf,jtf,ktf,iss,jss,nbegin,nend
+   integer :: itf,jtf,ktf,iss,jss,nbegin,nend,cliw_idx,clcw_idx
    integer :: high_resolution
    real(kind=kind_phys)    :: clwtot,clwtot1,excess,tcrit,tscl_kf,dp,dq,sub_spread,subcenter
    real(kind=kind_phys)    :: dsubclw,dsubclws,dsubclwm,dtime_max,ztm,ztq,hfm,qfm,rkbcon,rktop
@@ -188,6 +190,9 @@ contains
 !  gf needs them in w/m2. define hfx and qfx after simple unit conversion
    real(kind=kind_phys), dimension (im)  :: hfx,qfx
    real(kind=kind_phys) tem,tem1,tf,tcr,tcrf
+   real(kind=kind_phys) :: cliw_shal,clcw_shal,tem_shal, cliw_both, weight_sum
+   real(kind=kind_phys) :: cliw_deep,clcw_deep,tem_deep, clcw_both
+   integer :: cliw_deep_idx, clcw_deep_idx, cliw_shal_idx, clcw_shal_idx
 
   !parameter (tf=243.16, tcr=270.16, tcrf=1.0/(tcr-tf)) ! FV3 original
   !parameter (tf=263.16, tcr=273.16, tcrf=1.0/(tcr-tf))
@@ -196,6 +201,30 @@ contains
   ! initialize ccpp error handling variables
      errmsg = ''
      errflg = 0
+
+     if(ldiag3d) then
+       if(flag_for_dcnv_generic_tend) then
+         cliw_deep_idx=1
+         clcw_deep_idx=1
+       else
+         cliw_deep_idx=dtidx(100+ntiw,index_for_cause_dcnv)
+         clcw_deep_idx=dtidx(100+ntcw,index_for_cause_dcnv)
+       endif
+       if(flag_for_scnv_generic_tend) then
+         cliw_shal_idx=1
+         clcw_shal_idx=1
+       else
+         cliw_shal_idx=dtidx(100+ntiw,index_for_cause_scnv)
+         clcw_shal_idx=dtidx(100+ntcw,index_for_cause_scnv)
+       endif
+       if(cliw_deep_idx>1 .or. clcw_deep_idx>1 .or. &
+            cliw_shal_idx>1 .or.  clcw_shal_idx>1) then
+         allocate(clcw_save(im,km), cliw_save(im,km))
+         clcw_save=clcw
+         cliw_save=cliw
+       endif
+     endif
+
 !
 ! Scale specific humidity to dry mixing ratio
 !
@@ -898,7 +927,6 @@ contains
             uidx=dtidx(index_for_x_wind,index_for_cause_dcnv)
             vidx=dtidx(index_for_y_wind,index_for_cause_dcnv)
             tidx=dtidx(index_for_temperature,index_for_cause_dcnv)
-            qidx=dtidx(100+ntqv,index_for_cause_dcnv)
             if(uidx>1) then
               do k=kts,ktf
                 dtend(:,k,uidx) = dtend(:,k,uidx) + (cuten*outu(:,k)+cutenm*outum(:,k)) * dt
@@ -914,6 +942,8 @@ contains
                 dtend(:,k,tidx) = dtend(:,k,tidx) + (cuten*outt(:,k)+cutenm*outtm(:,k)) * dt
               enddo
             endif
+
+            qidx=dtidx(100+ntqv,index_for_cause_dcnv)
             if(qidx>1) then
               do k=kts,ktf
                 do i=its,itf
@@ -923,6 +953,40 @@ contains
                 enddo
               enddo
             endif
+          endif
+          if(allocated(clcw_save)) then
+            do k=kts,ktf
+              do i=its,itf
+                tem_shal = dt*(outqcs(i,k)*cutens(i)+outqcm(i,k)*cutenm(i))
+                tem_deep = dt*(outqc(i,k)*cuten(i)+clw_ten1(k))
+                tem  = tem_shal+tem_deep
+                tem1 = max(0.0, min(1.0, (tcr-t(i,k))*tcrf))
+                weight_sum = abs(tem_shal)+abs(tem_deep)
+                if(weight_sum<1e-12) then
+                  cycle
+                endif
+                
+                if (clcw_save(i,k) .gt. -999.0) then
+                  cliw_both = max(0.,cliw_save(i,k) + tem * tem1) - cliw_save(i,k)
+                  clcw_both = max(0.,clcw_save(i,k) + tem) - clcw_save(i,k)
+                else if(cliw_idx>1) then
+                  cliw_both = max(0.,cliw_save(i,k) + tem) - cliw_save(i,k)
+                  clcw_both = 0
+                endif
+                if(cliw_deep_idx>1) then
+                  dtend(i,k,cliw_deep_idx) = dtend(i,k,cliw_deep_idx) + abs(tem_deep)/weight_sum*cliw_both
+                endif
+                if(clcw_deep_idx>1) then
+                  dtend(i,k,clcw_deep_idx) = dtend(i,k,clcw_deep_idx) + abs(tem_deep)/weight_sum*clcw_both
+                endif
+                if(cliw_shal_idx>1) then
+                  dtend(i,k,cliw_shal_idx) = dtend(i,k,cliw_shal_idx) + abs(tem_shal)/weight_sum*cliw_both
+                endif
+                if(clcw_shal_idx>1) then
+                  dtend(i,k,clcw_shal_idx) = dtend(i,k,clcw_shal_idx) + abs(tem_shal)/weight_sum*clcw_both
+                endif
+              enddo
+            enddo
           endif
         endif
    end subroutine cu_gf_driver_run

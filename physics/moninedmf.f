@@ -1312,18 +1312,17 @@ c
             enddo
           enddo
         enddo
-        if(.not.flag_for_pbl_generic_tend) then
-          idtend1 = dtidx(100+ntoz,index_for_cause_pbl)
-          if(idtend1>1) then
-            kk = ntoz
+        if(.not.flag_for_pbl_generic_tend .and. ldiag3d) then
+          do kk = 2, ntrac
+            idtend1 = dtidx(100+kk,index_for_cause_pbl)
             is = (kk-1) * km
             do k = 1, km
               do i = 1, im
-                qtend = (a2(i,k+is)-q1(i,k,kk))
+                qtend = (a2(i,k+is)-q1(i,k,kk))*rdt
                 dtend(i,k,idtend1) = dtend(i,k,idtend1)+qtend
               enddo
             enddo
-          endif
+          enddo
         endif
       endif
 !

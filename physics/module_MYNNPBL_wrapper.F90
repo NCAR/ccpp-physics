@@ -78,13 +78,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &  sub_thl,sub_sqv,det_thl,det_sqv,&
      &  nupdraft,maxMF,ktop_plume,      &
      &  dudt, dvdt, dtdt,                                  &
-     &  dqdt_water_vapor, dqdt_liquid_cloud,               &
-     &  dqdt_ice_cloud, dqdt_ozone,                        &
-     &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    &
-     &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    &
+     &  dqdt_water_vapor, dqdt_liquid_cloud,               & ! <=== ntqv, ntcw
+     &  dqdt_ice_cloud, dqdt_ozone,                        & ! <=== ntiw, ntoz
+     &  dqdt_cloud_droplet_num_conc, dqdt_ice_num_conc,    & ! <=== ntlnc, ntinc
+     &  dqdt_water_aer_num_conc, dqdt_ice_aer_num_conc,    & ! <=== ntwa, ntia
      &  flag_for_pbl_generic_tend,                         &
-     &  ntqv, dtend, dtidx, index_for_temperature,         &
-     &  index_for_x_wind, index_for_y_wind,                &
+     &  dtend, dtidx, index_for_temperature,               &
+     &  index_for_x_wind, index_for_y_wind, ntke,          &
+     &  ntqv, ntcw, ntiw, ntoz, ntlnc, ntinc, ntwa, ntia,  &
      &  index_for_cause_pbl, htrsw, htrlw, xmu,            &
      &  grav_settling, bl_mynn_tkebudget, bl_mynn_tkeadvect, &
      &  bl_mynn_cloudpdf, bl_mynn_mixlength,               &
@@ -212,8 +213,9 @@ SUBROUTINE mynnedmf_wrapper_run(        &
 !TENDENCY DIAGNOSTICS
       real(kind=kind_phys), intent(inout), optional :: dtend(:,:,:)
       integer, intent(in) :: dtidx(:,:)
-      integer, intent(in) :: index_for_temperature, index_for_x_wind, ntqv, &
+      integer, intent(in) :: index_for_temperature, index_for_x_wind, &
         index_for_y_wind, index_for_cause_pbl
+      integer, intent(in) :: ntoz, ntqv, ntcw, ntiw, ntlnc, ntinc, ntwa, ntia, ntke
 
 !MISC CONFIGURATION OPTIONS
       INTEGER, PARAMETER ::                                 &
@@ -322,6 +324,7 @@ SUBROUTINE mynnedmf_wrapper_run(        &
      &        uoce,voce,vdfg,znt,ts
       integer :: idtend
       real, dimension(im) :: dusfci1,dvsfci1,dtsfci1,dqsfci1
+      real(kind=kind_phys), allocatable :: save_qke_adv(:,:)
 
       ! Initialize CCPP error handling variables
       errmsg = ''
@@ -332,6 +335,14 @@ SUBROUTINE mynnedmf_wrapper_run(        &
          write(0,*)"in mynn wrapper..."
          write(0,*)"flag_init=",flag_init
          write(0,*)"flag_restart=",flag_restart
+      endif
+
+      if(flag_for_pbl_generic_tend .and. ldiag3d) then
+        idtend = dtidx(ntke+100,index_for_cause_pbl)
+        if(idtend>1) then
+          allocate(save_qke_adv(im,levs))
+          save_qke_adv=qke_adv
+        endif
       endif
 
       ! DH* TODO: Use flag_restart to distinguish which fields need
@@ -704,19 +715,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
               dvdt(i,k) = dvdt(i,k) + RVBLTEN(i,k)
            enddo
         enddo
-        accum_duvt3dt: if(lssav) then
-          if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
-            idtend=dtidx(index_for_x_wind,index_for_cause_pbl)
-            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RUBLTEN*dtf
-
-            idtend=dtidx(index_for_y_wind,index_for_cause_pbl)
-            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RVBLTEN*dtf
-          endif
-          
-          if (lsidea .or. (ldiag3d .and. .not. flag_for_pbl_generic_tend)) then
-            idtend=dtidx(index_for_temperature,index_for_cause_pbl)
-            if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + RTHBLTEN*exner*dtf
-          endif
+        accum_duvt3dt: if(ldiag3d .or. lsidea) then
+          call dtend_helper(index_for_x_wind,RUBLTEN)
+          call dtend_helper(index_for_y_wind,RVBLTEN)
+          call dtend_helper(index_for_temperature,RTHBLTEN,exner)
+          call dtend_helper(100+ntoz,dqdt_ozone)
         endif accum_duvt3dt
         !Update T, U and V:
         !do k = 1, levs
@@ -738,6 +741,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)        = 0.0
              enddo
            enddo
+           if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+             call dtend_helper(100+ntqv,RQVBLTEN)
+             call dtend_helper(100+ntcw,RQCBLTEN)
+             call dtend_helper(100+ntiw,RQIBLTEN)
+           endif
            !Update moist species:
            !do k=1,levs
            !  do i=1,im
@@ -762,6 +770,15 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  dqdt_ice_aer_num_conc(i,k)        = RQNIFABLTEN(i,k)
                enddo
              enddo
+             if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+               call dtend_helper(100+ntqv,RQVBLTEN)
+               call dtend_helper(100+ntcw,RQCBLTEN)
+               call dtend_helper(100+ntlnc,RQNCBLTEN)
+               call dtend_helper(100+ntiw,RQIBLTEN)
+               call dtend_helper(100+ntinc,RQNIBLTEN)
+               call dtend_helper(100+ntwa,RQNWFABLTEN)
+               call dtend_helper(100+ntia,RQNIFABLTEN)
+             endif
              !do k=1,levs
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -785,6 +802,12 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                  !dqdt_ozone(i,k)         = 0.0
                enddo
              enddo
+             if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+               call dtend_helper(100+ntqv,RQVBLTEN)
+               call dtend_helper(100+ntcw,RQCBLTEN)
+               call dtend_helper(100+ntiw,RQIBLTEN)
+               call dtend_helper(100+ntinc,RQNIBLTEN)
+             endif
              !do k=1,levs
              !  do i=1,im
              !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -808,6 +831,11 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)         = 0.0
              enddo
            enddo
+           if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+             call dtend_helper(100+ntqv,RQVBLTEN)
+             call dtend_helper(100+ntcw,RQCBLTEN)
+             call dtend_helper(100+ntiw,RQIBLTEN)
+           endif
            !do k=1,levs
            !  do i=1,im
            !    qgrs_water_vapor(i,k)            = qgrs_water_vapor(i,k)    + (RQVBLTEN(i,k)/(1.0+RQVBLTEN(i,k)))*delt
@@ -829,13 +857,13 @@ SUBROUTINE mynnedmf_wrapper_run(        &
                !dqdt_ozone(i,k)         = 0.0
              enddo
            enddo
+           if(ldiag3d .and. .not. flag_for_pbl_generic_tend) then
+             call dtend_helper(100+ntqv,RQVBLTEN)
+             call dtend_helper(100+ntcw,RQCBLTEN)
+             call dtend_helper(100+ntiw,RQIBLTEN)
+           endif
        endif
        
-       if(lssav .and. (ldiag3d .and. qdiag3d .and. .not. flag_for_pbl_generic_tend)) then
-         idtend=dtidx(100+ntqv,index_for_cause_pbl)
-         if(idtend>1) dtend(:,:,idtend) = dtend(:,:,idtend) + dqdt_water_vapor*dtf
-       endif
-
        if (lprnt) then
           print*
           print*,"===Finished with mynn_bl_driver; output:"
@@ -877,6 +905,27 @@ SUBROUTINE mynnedmf_wrapper_run(        &
           print*
        endif
 
+       if(allocated(save_qke_adv)) then
+         deallocate(save_qke_adv)
+       endif
+
+  CONTAINS
+
+    SUBROUTINE dtend_helper(itracer,field,mult)
+      real(kind=kind_phys), intent(in) :: field(im,levs)
+      real(kind=kind_phys), intent(in), optional :: mult(im,levs)
+      integer, intent(in) :: itracer
+      integer :: idtend
+      
+      idtend=dtidx(itracer,index_for_cause_pbl)
+      if(idtend>1) then
+        if(present(mult)) then
+          dtend(:,:,idtend) = dtend(:,:,idtend) + field*dtf*mult
+        else
+          dtend(:,:,idtend) = dtend(:,:,idtend) + field*dtf
+        endif
+      endif
+    END SUBROUTINE dtend_helper
 
   END SUBROUTINE mynnedmf_wrapper_run
 

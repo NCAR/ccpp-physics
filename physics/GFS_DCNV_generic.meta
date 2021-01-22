@@ -82,14 +82,30 @@
   kind = kind_phys
   intent = in
   optional = F
-[gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = water vapor specific humidity updated by physics
+[gq0]
+  standard_name = tracer_concentration_updated_by_physics
+  long_name = tracer concentration updated by physics
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[nsamftrac]
+  standard_name = number_of_tracers_for_samf
+  long_name = number of tracers for scale-aware mass flux schemes
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[ntqv]
+  standard_name = index_for_water_vapor
+  long_name = tracer index for water vapor (specific humidity)
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [save_u]
   standard_name = x_wind_save
@@ -118,14 +134,14 @@
   kind = kind_phys
   intent = inout
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
   units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
   type = real
   kind = kind_phys
-  intent = inout
+  intent = in
   optional = F
 [dqdti]
   standard_name = instantaneous_water_vapor_specific_humidity_tendency_due_to_convection
@@ -135,6 +151,22 @@
   type = real
   kind = kind_phys
   intent = inout
+  optional = F
+[dtidx]
+  standard_name = dtend_outer_index
+  long_name = index in outer dimension of dtend of a tracer-cause pair
+  units = index
+  dimensions = (number_of_tracers_plus_one_hundred,number_of_possible_causes_of_tracer_changes)
+  type = integer
+  intent = in
+  optional = F
+[index_for_cause_dcnv]
+  standard_name = index_for_cause_dcnv
+  long_name = tracer changes caused by deep convection scheme
+  units = index
+  dimensions = ()
+  type = integer
+  intent = in
   optional = F
 [errmsg]
   standard_name = ccpp_error_message
@@ -275,15 +307,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[save_qv]
-  standard_name = water_vapor_specific_humidity_save
-  long_name = water vapor specific humidity before entering a physics scheme
-  units = kg kg-1
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
 [gu0]
   standard_name = x_wind_updated_by_physics
   long_name = zonal wind updated by physics
@@ -306,15 +329,6 @@
   standard_name = air_temperature_updated_by_physics
   long_name = temperature updated by physics
   units = K
-  dimensions = (horizontal_loop_extent,vertical_dimension)
-  type = real
-  kind = kind_phys
-  intent = in
-  optional = F
-[gq0_water_vapor]
-  standard_name = water_vapor_specific_humidity_updated_by_physics
-  long_name = water vapor specific humidity updated by physics
-  units = kg kg-1
   dimensions = (horizontal_loop_extent,vertical_dimension)
   type = real
   kind = kind_phys
@@ -404,6 +418,24 @@
   type = integer
   intent = in
   optional = F
+[gq0]
+  standard_name = tracer_concentration_updated_by_physics
+  long_name = tracer concentration updated by physics
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
+[save_q]
+  standard_name = tracer_concentration_save
+  long_name = tracer concentration before entering a physics scheme
+  units = kg kg-1
+  dimensions = (horizontal_loop_extent,vertical_dimension,number_of_tracers)
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [con_g]
   standard_name = gravitational_acceleration
   long_name = gravitational acceleration
@@ -432,6 +464,14 @@
 [ncnvcld3d]
   standard_name = number_of_convective_3d_cloud_fields
   long_name = number of convective 3d clouds fields
+  units = count
+  dimensions = ()
+  type = integer
+  intent = in
+  optional = F
+[nsamftrac]
+  standard_name = number_of_tracers_for_samf
+  long_name = number of tracers for scale-aware mass flux schemes
   units = count
   dimensions = ()
   type = integer

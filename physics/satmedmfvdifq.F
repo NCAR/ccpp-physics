@@ -1432,6 +1432,7 @@ c
             enddo
           enddo
         endif
+        ! Send tendencies just for QV; other tracers are below.
         idtend=dtidx(100+ntqv,index_for_cause_pbl)
         if(idtend>1) then
           do  k = 1,km
@@ -1453,18 +1454,18 @@ c
             enddo
           enddo
         enddo
-        if(ldiag3d .and. .not. gen_tend .and. ntoz>0) then
-          idtend=dtidx(ntoz+100,index_for_cause_pbl)
-          if(idtend>1) then
-            kk=ntoz
+        if(ldiag3d .and. .not. gen_tend) then
+          ! Send tendencies for all tracers that were selected.
+          do kk = 2, ntrac1
             is = (kk-1) * km
+            idtend = dtidx(kk+100,index_for_cause_pbl)
             do k = 1, km
               do i = 1, im
                 qtend = (f2(i,k+is)-q1(i,k,kk))*rdt
                 dtend(i,k,idtend) = dtend(i,k,idtend)+qtend*delt
               enddo
             enddo
-          endif
+          enddo
         endif
       endif
 !
