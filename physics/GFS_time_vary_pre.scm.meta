@@ -148,6 +148,14 @@
   type = integer
   intent = in
   optional = F
+[no_rad]
+  standard_name = flag_to_deactivate_radiation
+  long_name = logical flag set to true to turn off radiation completely
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
 [sec]
   standard_name = seconds_elapsed_since_model_initialization
   long_name = seconds elapsed since model initialization

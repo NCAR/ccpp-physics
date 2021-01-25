@@ -66,8 +66,9 @@
 !! \htmlinclude GFS_time_vary_pre_run.html
 !!
       subroutine GFS_time_vary_pre_run (jdat, idat, dtp, lsm, lsm_noahmp, nsswr, &
-        nslwr, idate, debug, me, master, nscyc, sec, phour, zhour, fhour, kdt,   &
-        julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg, errflg)
+        nslwr, idate, debug, me, master, nscyc, no_rad, sec, phour, zhour, fhour,&
+        kdt, julian, yearlen, ipt, lprnt, lssav, lsswr, lslwr, solhr, errmsg,    &
+        errflg)
 
         use machine,               only: kind_phys
 
@@ -78,7 +79,7 @@
         integer,                          intent(in)    :: lsm, lsm_noahmp,      &
                                                            nsswr, nslwr, me,     &
                                                            master, nscyc
-        logical,                          intent(in)    :: debug
+        logical,                          intent(in)    :: debug, no_rad
         real(kind=kind_phys),             intent(in)    :: dtp
         
         integer,                          intent(out)   :: kdt, yearlen, ipt
@@ -161,14 +162,17 @@
         ipt    = 1
         lprnt  = .false.
         lssav  = .true.
-
-        !--- radiation triggers
-        lsswr  = (mod(kdt, nsswr) == 1)
-        lslwr  = (mod(kdt, nslwr) == 1)
-        !--- allow for radiation to be called on every physics time step, if needed
-        if (nsswr == 1)  lsswr = .true.
-        if (nslwr == 1)  lslwr = .true.
-
+        
+        if (.not. no_rad) then
+          !--- radiation triggers
+          lsswr  = (mod(kdt, nsswr) == 1)
+          lslwr  = (mod(kdt, nslwr) == 1)
+          
+          !--- allow for radiation to be called on every physics time step, if needed
+          if (nsswr == 1)  lsswr = .true.
+          if (nslwr == 1)  lslwr = .true.
+        end if
+        
         !--- set the solar hour based on a combination of phour and time initial hour
         solhr  = mod(phour+idate(1),con_24)
 
