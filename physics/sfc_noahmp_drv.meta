@@ -1,3 +1,7 @@
+[ccpp-table-properties]
+  name = noahmpdrv
+  type = scheme
+  dependencies = funcphys.f90,machine.F,module_sf_noahmp_glacier.f90,module_sf_noahmplsm.f90,noahmp_tables.f90,set_soilveg.f
 [ccpp-arg-table]
   name = noahmpdrv_init
   type = scheme
@@ -159,8 +163,8 @@
   intent = in
   optional = F
 [dlwflx]
-  standard_name = surface_downwelling_longwave_flux_absorbed_by_ground_over_land
-  long_name = total sky surface downward longwave flux absorbed by the ground over land
+  standard_name = surface_downwelling_longwave_flux
+  long_name = surface downwelling longwave flux at current time
   units = W m-2
   dimensions = (horizontal_dimension)
   type = real
