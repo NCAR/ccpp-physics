@@ -26,7 +26,7 @@ is not intended for use with CCPP v5.
 In this website you will find documentation on various aspects of each 
 parameterization, including a high-level overview of its function, the input/output argument list, 
 and a description of the algorithm. 
-The latest CCPP public release is Version 5.0 (Feburary 2021), and more details on it may be found on the
+More details about this and other CCPP releases may be found on the
 <a href="https://dtcenter.org/community-code/common-community-physics-package-ccpp"> CCPP website </a> hosted by
 the Developmental Testbed Center (DTC).
 

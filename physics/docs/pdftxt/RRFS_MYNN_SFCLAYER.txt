@@ -1,5 +1,5 @@
 /**
-\page RRFS_MYNNSFL MYNN Surface Layer Scheme
+\page SFC_MYNNSFL MYNN Surface Layer Scheme
 \section mynnsfclayer_descrip  Description
 
 The surface layer scheme controls the degree of coupling between the model surface and the atmosphere.

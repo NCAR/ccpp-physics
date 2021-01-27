@@ -48,7 +48,7 @@ parameterizations in suites.
 
 - \b Surface \b Layer 
  - \subpage GFS_SFCLYR
- - \subpage RRFS_MYNNSFL
+ - \subpage SFC_MYNNSFL
 
 - \b Simplified \b Ocean \b and \b Sea \b Ice \b Representation
  - \subpage GFS_NSST
@@ -70,15 +70,15 @@ specific humidity, cloud fraction, water contents for cloud liquid, cloud ice, r
  dynamical tendencies for the same variables and various surface fields, both fixed and variable.
 
 The time integration of the physics suites is based on the following:
-- The tendencies from the different physical processes are computed by the parameterizations or derived in separate interstitial routines
+- The tendencies from the different physical processes are computed by the parameterizations or derived in separate interstitial routines.
 - The first part of the suite, comprised of the parameterizations for radiation, surface layer, surface (land, ocean, and sea ice), boundary layer,
-orographic gravity wave drag, and Rayleigh damping, is computed using a hybrid of parallel and sequential splitting described in Donahue and Caldwell (2018)
+and Rayleigh damping, is computed using a hybrid of parallel and sequential splitting described in Donahue and Caldwell (2018)
 \cite donahue_and_caldwell_2018, a method in which the various parameterizations use the same model state as input but are impacted by the preceding
 parameterizations. The tendencies from the various parameterizations are then added together and used to update the model state.
 - The surface parameterizations (land, ocean and sea ice) are invoked twice in a subcycling loop, with the first time to create a guess, and the second time to
 produce the tendencies.
-- The second part of the physics suite, comprised of the parameterizations of ozone, stratospheric water vapor, deep convection, gravity wave physics,
-shallow convection, and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
+- The second part of the physics suite, comprised of the parameterizations of gravity wave physics, ozone, stratospheric water vapor, deep and shallow convection (if using),
+ and microphysics, is computed using sequential splitting in the order listed above, in which the model state is updated between calls
 to the parameterization.
 - If the in-core saturation adjustment is used (\p do_sat_adj=.true.), it is invoked at shorter timesteps along with the dynamical solver.
 
@@ -86,10 +86,13 @@ to the parameterization.
 
 There are two publicly supported host models that use CCPP v5: the UFS Weather Model used in the Short Range Weather Application (SRW App) and the
 CCPP Single Column Model (SCM). The SRW App supports the use of suites GFS_v15p2 and RRFS_v1alpha, while the SCM supports the use of suites 
-GFS_v15p2, RRFS_v1alpha, csawmg and GSD_v1. Suite GFS_v15p2 is an operational suite that invokes the parameterizations used in the GFS v15 
+GFS_v15p2, GFS_v16beta, RRFS_v1alpha, csawmg and GSD_v1. Suite GFS_v15p2 is an operational suite that invokes the parameterizations used in the GFS v15 
 implemented operationally in June 2019. Other suites are experimental, and targeted for future UFS operational implementations. It should be noted
 that suite RRFS_v1alpha does not include a convective parameterization scheme and is targeted for convective-allowing resolutions of 3-km grid
 spacing. The other suites are primarily targeted for medium-range weather and subseasonal-to-seasonal scales of grid spacing 13-km and coarser. 
+The forcing datasets included in the CCPP SCM v5.0 public release were created by averaging observations and large-eddy simulations over seas that are
+too coarse to resolve convection. Therefore, best results will be obtained with be obtained with the CCPP SCM v5.0 when using suites that include parameterized
+convection.
 
 Table 1.  Physics suite options included in this documentation. 
 \tableofcontents
