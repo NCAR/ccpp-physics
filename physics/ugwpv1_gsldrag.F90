@@ -1,8 +1,9 @@
 !>  \file ugwpv1_gsldrag.F90
-!! This file combines three gravity wave drag schemes under one ("ugwpv1_gsldrag") suite:
-!!      1) The "V0 CIRES UGWP" scheme (cires_ugwp.F90) as implemented in the FV3GFSv16 atmosphere model, which includes:
-!!            a) the "traditional" EMC orograhic gravity wave drag and flow blocking scheme of gwdps.f
-!!            b) the v0 cires ugwp non-stationary GWD scheme
+!! This introduces two gravity wave drag schemes ugwpv1/CIRES and GSL/drag_suite.F90 under "ugwpv1_gsldrag" suite:
+!!      1) The "V1 CIRES UGWP" scheme as tested in the FV3GFSv16-127L atmosphere model and workflow, which includes:
+!!            a) the orograhic gravity wave drag, flow blocking scheme and TOFD (Beljaars et al, 2004).
+!!            b) the v1 CIRE ugwp non-stationary GW scheme, new revision that generate realistic climate of FV3GFS-127L
+!!               in the strato-mesosphere in the multi-year simulations (Annual cycles, SAO and QBO in th tropical dynamics).
 !!      2) The GSL orographic drag suite (drag_suite.F90), as implmeneted in the RAP/HRRR, which includes:
 !!            a) large-scale gravity wave drag and low-level flow blocking -- active at horizontal scales
 !!               down to ~5km (Kim and Arakawa, 1995 \cite kim_and_arakawa_1995; Kim and Doyle, 2005 \cite kim_and_doyle_2005)
@@ -10,8 +11,7 @@
 !!               (Steeneveld et al, 2008 \cite steeneveld_et_al_2008; Tsiringakis et al, 2017 \cite tsiringakis_et_al_2017)
 !!            c) turbulent orographic form drag -- active at horizontal grid ersolutions down to ~1km
 !!               (Beljaars et al, 2004 \cite beljaars_et_al_2004)
-!!      3) The "V1 CIRES UGWP" scheme developed by Valery Yudin (University of Colorado, CIRES)
-!! See Valery Yudin's presentation at 2017 NGGPS PI meeting:
+!! See Valery Yudin's presentation at 2020 UFS User's meeting (Jul 2020):
 !! Gravity waves (GWs): Mesoscale GWs transport momentum, energy (heat) , and create eddy mixing in the whole atmosphere domain; Breaking and dissipating GWs deposit: (a) momentum; (b) heat (energy); and create (c) turbulent mixing of momentum, heat, and tracers
 !! To properly incorporate GW effects (a-c) unresolved by DYCOREs we need GW physics
 !! "Unified": a) all GW effects due to both dissipation/breaking; b) identical GW solvers for all GW sources; c) ability to replace solvers.
@@ -172,7 +172,7 @@ contains
        print *,  '  do_ugwp_v1_orog_only ', do_ugwp_v1_orog_only
        print *,  '  do_gsl_drag_ls_bl ',do_gsl_drag_ls_bl             
         write(errmsg,'(*(a))') " the CIRES <ugwpv1_gsldrag> CCPP-suite intend to &
-	     support <ugwp_v1 with <gsldrag>  but  has Logic error"
+	     support <ugwp_v1> with <gsldrag>  but  has Logic error"
        errflg = 1
        return	    
     endif
@@ -341,9 +341,9 @@ contains
 ! Preference use    (im,levs) rather than (:,:) to avoid memory-leaks
 !                    that found in Nov-Dec 2020
 ! order array-description control-logical 
-!                        other in-variables
-!                        out-variables
-!                        local-variables
+!                         other in-variables
+!                         out-variables
+!                         local-variables
 !
 !  unified GSL and CIRES diagnostics inside CCPP and GFS_typedefs.F90/GFS_diagnostics.F90
 !
@@ -453,7 +453,7 @@ contains
 ! from ugwp_driver_v0.f -> cires_ugwp_initialize.F90 -> module ugwp_wmsdis_init
 !  now in the namelist of cires_ugwp "knob_ugwp_tauamp" controls tamp_mpa 
 !
-!        tamp_mpa =knob_ugwp_tauamp           !amplitude for GEOS-5/MERRA-2
+!        tamp_mpa =knob_ugwp_tauamp                         !amplitude for GEOS-5/MERRA-2
 !------------
 !    real(kind=kind_phys), parameter :: tamp_mpa_v0=30.e-3  ! large flux to help "GFS-ensembles" in July 2019
 
@@ -532,8 +532,7 @@ contains
     ! Run the appropriate large-scale (large-scale GWD + blocking) scheme
     ! Note:  In case of GSL drag_suite, this includes ss and tofd
 
-    if ( do_gsl_drag_ls_bl.or.do_gsl_drag_ss.or.do_gsl_drag_tofd    &
-         .or. do_ugwp_v1_w_gsldrag) then
+    if ( do_gsl_drag_ls_bl.or.do_gsl_drag_ss.or.do_gsl_drag_tofd) then
 !
 ! to do: the zero diag and tendency values assigned inside "drag_suite_run" can be skipped :
 !
@@ -581,7 +580,7 @@ contains
 	  
     else 
 !
-! not gsldrag scheme for example "do_ugwp_v1_orog_only"
+! not gsldrag oro-scheme for example "do_ugwp_v1_orog_only"
 ! 
 	
     if ( do_ugwp_v1_orog_only ) then
@@ -634,9 +633,8 @@ contains
           enddo
         enddo
       endif
-   ENDIF      !     
+   ENDIF           
 !
-
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 ! Begin non-stationary GW schemes
 ! ugwp_v1
