@@ -1,5 +1,5 @@
 !>  \file unified_ugwp.F90
-!! This file combines three gravity wave drag schemes under one ("unified_ugwp") suite:
+!! This file combines three two orographic GW-schemes cires_ugwp.F90 and drag_suite.F90 under "unified_ugwp" suite:
 !!      1) The "V0 CIRES UGWP" scheme (cires_ugwp.F90) as implemented in the FV3GFSv16 atmosphere model, which includes:
 !!            a) the "traditional" EMC orograhic gravity wave drag and flow blocking scheme of gwdps.f
 !!            b) the v0 cires ugwp non-stationary GWD scheme
@@ -10,8 +10,6 @@
 !!               (Steeneveld et al, 2008 \cite steeneveld_et_al_2008; Tsiringakis et al, 2017 \cite tsiringakis_et_al_2017)
 !!            c) turbulent orographic form drag -- active at horizontal grid ersolutions down to ~1km
 !!               (Beljaars et al, 2004 \cite beljaars_et_al_2004)
-!!      3) The "V1 CIRES UGWP" scheme developed by Valery Yudin (University of Colorado, CIRES)
-!! See Valery Yudin's presentation at 2017 NGGPS PI meeting:
 !! Gravity waves (GWs): Mesoscale GWs transport momentum, energy (heat) , and create eddy mixing in the whole atmosphere domain; Breaking and dissipating GWs deposit: (a) momentum; (b) heat (energy); and create (c) turbulent mixing of momentum, heat, and tracers
 !! To properly incorporate GW effects (a-c) unresolved by DYCOREs we need GW physics
 !! "Unified": a) all GW effects due to both dissipation/breaking; b) identical GW solvers for all GW sources; c) ability to replace solvers.
@@ -29,8 +27,6 @@
 !!       do_gsl_drag_ls_bl    -- activates RAP/HRRR (GSL) large-scale GWD and blocking
 !!       do_gsl_drag_ss       -- activates RAP/HRRR (GSL) small-scale GWD
 !!       do_gsl_drag_tofd     -- activates RAP/HRRR (GSL) turbulent orographic drag
-!!       do_ugwp_v1           -- activates V1 CIRES UGWP scheme - both orographic and non-stationary GWD
-!!       do_ugwp_v1_orog_only -- activates V1 CIRES UGWP scheme - orographic GWD only
 !! Note that only one "large-scale" scheme can be activated at a time.
 !!
 
@@ -38,21 +34,11 @@ module unified_ugwp
 
     use machine, only: kind_phys
 
-    use cires_ugwp_module, only: knob_ugwp_version, cires_ugwp_mod_init, cires_ugwp_mod_finalize
-
-    use cires_ugwp_module_v1, only: cires_ugwp_init_v1, cires_ugwp_finalize, calendar_ugwp
-
+!    use cires_ugwp_module,   only: knob_ugwp_version, cires_ugwp_mod_init,   cires_ugwp_mod_finalize
+    use cires_ugwpv0_module, only: knob_ugwp_version, cires_ugwpv0_mod_init, cires_ugwpv0_mod_finalize
     use gwdps, only: gwdps_run
 
     use drag_suite, only: drag_suite_run
-
-    use cires_ugwp_orolm97_v1, only: gwdps_oro_v1
-
-    use cires_ugwp_triggers_v1, only: slat_geos5_tamp_v1
-    
-    ! use cires_ugwp_ngw_utils, only: tau_limb_advance
-    
-    use cires_ugwp_solv2_v1_mod, only: cires_ugwp_solv2_v1
 
     implicit none
 
@@ -78,7 +64,7 @@ contains
                 con_pi, con_rerth, pa_rf_in, tau_rf_in, con_p0, do_ugwp,       &
                 do_ugwp_v0, do_ugwp_v0_orog_only, do_ugwp_v0_nst_only,         &
                 do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,           &
-                do_ugwp_v1, do_ugwp_v1_orog_only, errmsg, errflg)
+                errmsg, errflg)
 
 !----  initialization of unified_ugwp
     implicit none
@@ -101,8 +87,7 @@ contains
     logical,              intent (in) :: do_ugwp_v0, do_ugwp_v0_orog_only,  &
                                          do_ugwp_v0_nst_only,               &
                                          do_gsl_drag_ls_bl, do_gsl_drag_ss, &
-                                         do_gsl_drag_tofd, do_ugwp_v1,      &
-                                         do_ugwp_v1_orog_only
+                                         do_gsl_drag_tofd
 
     character(len=*), intent (in) :: fn_nml2
     !character(len=*), parameter   :: fn_nml='input.nml'
@@ -122,29 +107,12 @@ contains
 
     ! Test to make sure that at most only one large-scale/blocking
     ! orographic drag scheme is chosen
-    if ( (do_ugwp_v0.and.(do_ugwp_v0_orog_only.or.do_gsl_drag_ls_bl.or.    &
-                          do_ugwp_v1.or.do_ugwp_v1_orog_only))        .or. &
-         (do_ugwp_v0_orog_only.and.(do_gsl_drag_ls_bl.or.do_ugwp_v1.or.    &
-                                    do_ugwp_v1_orog_only))            .or. &
-         (do_gsl_drag_ls_bl.and.(do_ugwp_v1.or.do_ugwp_v1_orog_only)) .or. &
-         (do_ugwp_v1.and.do_ugwp_v1_orog_only) ) then
+    if ( (do_ugwp_v0.and.(do_ugwp_v0_orog_only.or.do_gsl_drag_ls_bl)) .or. &
+         (do_ugwp_v0_orog_only.and.do_gsl_drag_ls_bl) ) then
 
        write(errmsg,'(*(a))') "Logic error: Only one large-scale&
           &/blocking scheme (do_ugwp_v0,do_ugwp_v0_orog_only,&
-          &do_gsl_drag_ls_bl,do_ugwp_v1 or &
-          &do_ugwp_v1_orog_only) can be chosen"
-       errflg = 1
-       return
-
-    end if
-
-    ! Test to make sure that if ugwp_v0 non-stationary-only is selected that
-    ! ugwp_v1 is not also selected
-    if ( do_ugwp_v0_nst_only .and. (do_ugwp_v1.or.do_ugwp_v1_orog_only) ) then
-
-       write(errmsg,'(*(a))') "Logic error: do_ugwp_v0_nst_only can only be &
-          &selected if both do_ugwp_v1 and do_ugwp_v1_orog_only are not &
-          &selected"
+          &do_gsl_drag_ls_bl can be chosen"
        errflg = 1
        return
 
@@ -157,7 +125,7 @@ contains
     if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only ) then
        ! if (do_ugwp .or. cdmbgwd(3) > 0.0) then (deactivate effect of do_ugwp)
        if (cdmbgwd(3) > 0.0) then
-         call cires_ugwp_mod_init (me, master, nlunit, input_nml_file, logunit, &
+        call cires_ugwpv0_mod_init(me, master, nlunit, input_nml_file, logunit, &
                                 fn_nml2, lonr, latr, levs, ak, bk, con_p0, dtp, &
                                 cdmbgwd(1:2), cgwf, pa_rf_in, tau_rf_in)
        else
@@ -168,13 +136,6 @@ contains
        end if
     end if
 
-
-    if ( do_ugwp_v1 ) then
-       call cires_ugwp_init_v1 (me, master, nlunit, logunit, jdat, con_pi,      &
-                                con_rerth, fn_nml2, lonr, latr, levs, ak, bk,   &
-                                con_p0, dtp, cdmbgwd(1:2), cgwf, pa_rf_in,      &
-                                tau_rf_in, errmsg, errflg)
-    end if
 
     is_initialized = .true.
 
@@ -192,12 +153,11 @@ contains
 !!
 
     subroutine unified_ugwp_finalize(do_ugwp_v0,do_ugwp_v0_nst_only,  &
-                                     do_ugwp_v1,errmsg, errflg)
+                                     errmsg, errflg)
 
     implicit none
 !
-    logical,          intent (in) :: do_ugwp_v0, do_ugwp_v0_nst_only, &
-                                     do_ugwp_v1
+    logical,          intent (in) :: do_ugwp_v0, do_ugwp_v0_nst_only
     character(len=*), intent(out) :: errmsg
     integer,          intent(out) :: errflg
 
@@ -207,9 +167,7 @@ contains
 
     if (.not.is_initialized) return
 
-    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only ) call cires_ugwp_mod_finalize()
-
-    if ( do_ugwp_v1 ) call cires_ugwp_finalize()
+    if ( do_ugwp_v0 .or. do_ugwp_v0_nst_only )  call cires_ugwpv0_mod_finalize()
 
     is_initialized = .false.
 
@@ -251,7 +209,7 @@ contains
          ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
          ldiag3d, lssav, flag_for_gwd_generic_tend, do_ugwp_v0, do_ugwp_v0_orog_only,  &
          do_ugwp_v0_nst_only, do_gsl_drag_ls_bl, do_gsl_drag_ss, do_gsl_drag_tofd,     &
-         do_ugwp_v1, do_ugwp_v1_orog_only, gwd_opt, errmsg, errflg)
+         gwd_opt, errmsg, errflg)
 
     implicit none
 
@@ -266,7 +224,9 @@ contains
     real(kind=kind_phys),    intent(in), dimension(im,4)     ::  oa4ss,ol4ss   
     
     logical,                 intent(in)                      :: flag_for_gwd_generic_tend
-    ! elvmax is intent(in) for CIRES UGWP, but intent(inout) for GFS GWDPS
+    
+    ! elvmax is intent(in) for CIRES UGWPv1, but intent(inout) for GFS GWDPS
+    
     real(kind=kind_phys),    intent(inout), dimension(im)    :: elvmax
     real(kind=kind_phys),    intent(in), dimension(im, 4)    :: clx, oa4
     real(kind=kind_phys),    intent(in), dimension(im)       :: xlat, xlat_d, sinlat, coslat, area
@@ -324,8 +284,7 @@ contains
     logical,              intent (in) :: do_ugwp_v0, do_ugwp_v0_orog_only,  &
                                          do_ugwp_v0_nst_only,               &
                                          do_gsl_drag_ls_bl, do_gsl_drag_ss, &
-                                         do_gsl_drag_tofd, do_ugwp_v1,      &
-                                         do_ugwp_v1_orog_only
+                                         do_gsl_drag_tofd
 
     character(len=*),        intent(out) :: errmsg
     integer,                 intent(out) :: errflg
@@ -337,8 +296,6 @@ contains
     real(kind=kind_phys), dimension(im, levs) :: Pdtdt, Pkdis
  
     real(kind=kind_phys), parameter :: tamp_mpa=30.e-3
-    ! switches that activate impact of OGWs and NGWs (WL* how to deal with them? *WL)
-    real(kind=kind_phys), parameter :: pogw=1., pngw=1., pked=1.
 
     integer :: nmtvr_temp
 
@@ -356,8 +313,6 @@ contains
 
     ! 1) ORO stationary GWs
     !    ------------------
-
-     zlwb(:)   = 0.
 
     ! Run the appropriate large-scale (large-scale GWD + blocking) scheme
     ! Note:  In case of GSL drag_suite, this includes ss and tofd
@@ -377,37 +332,12 @@ contains
                  cdmbgwd(1:2),me,master,lprnt,ipr,rdxzb,dx,gwd_opt,  &
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
                  errmsg,errflg)
-
-    end if
-
-    if ( do_ugwp_v1.or.do_ugwp_v1_orog_only ) then
-
-       ! Valery's TOFD
-       ! topo paras
-       ! w/ orographic effects
-       if(nmtvr == 14)then
-         ! calculate sgh30 for TOFD
-         sgh30 = abs(oro - oro_uf)
-       ! w/o orographic effects
-       else
-         sgh30   = varss
-       endif
-
-       inv_g = 1./con_g
-       zmeti  = phii*inv_g
-       zmet   = phil*inv_g
-
-       call gwdps_oro_v1 (im, levs,  lonr,   do_tofd,                  &
-                      Pdvdt, Pdudt, Pdtdt, Pkdis,                      &
-                      ugrs , vgrs, tgrs, q1, KPBL, prsi,del,prsl,      &
-                      prslk, zmeti, zmet, dtp, kdt, hprime, oc, oa4,   &
-                      clx, theta, sigma, gamma, elvmax,                &
-                      con_g, con_omega, con_rd, con_cp, con_rv,con_pi, &
-                      con_rerth, con_fvirt, sgh30, DUSFCg, DVSFCg,     &
-                      xlat_d, sinlat, coslat, area,cdmbgwd(1:2), me,   &
-                      master, rdxzb, zmtb, zogw, tau_mtb, tau_ogw,     &
-                      tau_tofd, du3dt_mtb, du3dt_ogw, du3dt_tms)
-
+!
+! put zeros due to xy GSL-drag style: dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls
+!		 
+        tau_mtb  = 0. ; tau_ogw  = 0. ; tau_tofd = 0.
+        dudt_mtb = 0. ; dudt_ogw = 0. ; dudt_tms = 0.
+	
     end if
 
     if ( do_ugwp_v0.or.do_ugwp_v0_orog_only.or.do_ugwp_v0_nst_only ) then
@@ -445,7 +375,7 @@ contains
         if (errflg/=0) return
       endif
 
-      tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
+         tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
       if (ldiag_ugwp) then
         du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
       end if
@@ -477,7 +407,7 @@ contains
       if (cdmbgwd(3) > 0.0) then
 
         ! 2) non-stationary GW-scheme with GMAO/MERRA GW-forcing
-        call slat_geos5_tamp(im, tamp_mpa, xlat_d, tau_ngw)
+        call slat_geos5_tamp_v0(im, tamp_mpa, xlat_d, tau_ngw)
 
         if (abs(1.0-cdmbgwd(3)) > 1.0e-6) then
           if (cdmbgwd(4) > 0.0) then
@@ -520,10 +450,10 @@ contains
 
         do k=1,levs
           do i=1,im
-            gw_dtdt(i,k) = pngw*gw_dtdt(i,k)+ pogw*Pdtdt(i,k)
-            gw_dudt(i,k) = pngw*gw_dudt(i,k)+ pogw*Pdudt(i,k)
-            gw_dvdt(i,k) = pngw*gw_dvdt(i,k)+ pogw*Pdvdt(i,k)
-            gw_kdis(i,k) = pngw*gw_kdis(i,k)+ pogw*Pkdis(i,k)
+            gw_dtdt(i,k) = gw_dtdt(i,k)+ Pdtdt(i,k)
+            gw_dudt(i,k) = gw_dudt(i,k)+ Pdudt(i,k)
+            gw_dvdt(i,k) = gw_dvdt(i,k)+ Pdvdt(i,k)
+            gw_kdis(i,k) = gw_kdis(i,k)+ Pkdis(i,k)
             ! accumulation of tendencies for CCPP to replicate EMC-physics updates (!! removed in latest code commit to VLAB)
             !dudt(i,k) = dudt(i,k) +gw_dudt(i,k)
             !dvdt(i,k) = dvdt(i,k) +gw_dvdt(i,k)
@@ -543,13 +473,7 @@ contains
         enddo
 
       endif  ! cdmbgwd(3) > 0.0
-
-      if (pogw == 0.0) then
-        tau_mtb  = 0. ; tau_ogw  = 0. ; tau_tofd = 0.
-        dudt_mtb = 0. ; dudt_ogw = 0. ; dudt_tms = 0.
-      endif
-
-
+ 
       if(ldiag3d .and. lssav .and. .not. flag_for_gwd_generic_tend) then
         do k=1,levs
           do i=1,im

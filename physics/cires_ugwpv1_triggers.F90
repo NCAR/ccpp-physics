@@ -11,42 +11,6 @@ contains
 !> @{
 !!
 !!
-      subroutine slat_geos5_tamp_v0(im, tau_amp, xlatdeg, tau_gw)
-!=================
-! V0: GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>
-!=================
-      implicit none
-      integer :: im     
-      real(kind=kind_phys)    :: tau_amp, xlatdeg(im), tau_gw(im)
-      real(kind=kind_phys)    :: latdeg, flat_gw, tem
-      integer :: i
-      
-!
-! if-lat
-!
-      do i=1, im
-        latdeg = abs(xlatdeg(i))    
-        if (latdeg < 15.3) then
-          tem = (latdeg-3.0) / 8.0
-          flat_gw = 0.75 * exp(-tem * tem)
-          if (flat_gw < 1.2 .and. latdeg <= 3.0) flat_gw = 0.75
-        elseif (latdeg <  31.0 .and. latdeg >=  15.3) then
-           flat_gw =  0.10
-        elseif (latdeg <  60.0 .and. latdeg >=  31.0) then
-          tem = (latdeg-60.0) / 23.0
-          flat_gw =  0.50 * exp(- tem * tem)
-        elseif (latdeg >=  60.0) then
-          tem = (latdeg-60.0) / 70.0
-          flat_gw =  0.50 * exp(- tem * tem)
-        endif
-        tau_gw(i) = tau_amp*flat_gw 
-      enddo
-!      
-      end subroutine slat_geos5_tamp_v0
-!
-
-      
-!
       subroutine slat_geos5_tamp_v1(im, tau_amp, xlatdeg, tau_gw)
 !=================
 ! V1: GEOS-5 & MERRA-2 lat-dependent GW-source function  tau(z=Zlaunch) =rho*<u'w'>

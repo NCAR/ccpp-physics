@@ -1,13 +1,10 @@
 [ccpp-table-properties]
   name = unified_ugwp
   type = scheme
-  dependencies = machine.F,cires_ugwp_module.F90,ugwp_driver_v0.F,cires_ugwp_triggers.F90
-  dependencies = cires_ugwp_initialize.F90,cires_ugwp_solvers.F90,cires_ugwp_utils.F90
-  dependencies = cires_orowam2017.f,cires_vert_lsatdis.F90,cires_vert_orodis.F90
-  dependencies = cires_vert_wmsdis.F90,cires_ugwp_module_v1.F90,cires_ugwp_triggers_v1.F90
-  dependencies = cires_ugwp_initialize_v1.F90,cires_ugwp_solv2_v1_mod.F90
-  dependencies = cires_ugwp_orolm97_v1.F90,cires_orowam2017.F90,cires_vert_orodis_v1.F90
-  dependencies = gwdps.f,drag_suite.F90
+
+  dependencies=cires_ugwp_triggers.F90,cires_ugwp_initialize.F90
+  dependencies=cires_orowam2017.f, cires_ugwp_module.F90,gwdps.f,machine.F,ugwp_driver_v0.F
+  dependencies=drag_suite.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -239,22 +236,6 @@
   type = logical
   intent = in
   optional = F
-[do_ugwp_v1]
-  standard_name = do_ugwp_v1
-  long_name = flag to activate ver 1 CIRES UGWP
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1_orog_only]
-  standard_name = do_ugwp_v1_orog_only
-  long_name = flag to activate ver 1 CIRES UGWP - orographic GWD only
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
@@ -288,14 +269,6 @@
 [do_ugwp_v0_nst_only]
   standard_name = do_ugwp_v0_nst_only
   long_name = flag to activate ver 0 CIRES UGWP - non-stationary GWD only
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1]
-  standard_name = do_ugwp_v1
-  long_name = flag to activate ver 1 CIRES UGWP
   units = flag
   dimensions = ()
   type = logical
@@ -1336,22 +1309,6 @@
 [do_gsl_drag_tofd]
   standard_name = do_gsl_drag_tofd
   long_name = flag to activate GSL drag suite - turb orog form drag
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1]
-  standard_name = do_ugwp_v1
-  long_name = flag to activate ver 1 CIRES UGWP
-  units = flag
-  dimensions = ()
-  type = logical
-  intent = in
-  optional = F
-[do_ugwp_v1_orog_only]
-  standard_name = do_ugwp_v1_orog_only
-  long_name = flag to activate ver 1 CIRES UGWP - orographic GWD only
   units = flag
   dimensions = ()
   type = logical
