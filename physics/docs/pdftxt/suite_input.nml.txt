@@ -3,7 +3,7 @@
 
 The SCM and the UFS Atmosphere access runtime configurations from file \c input.nml. This file contains
 various namelists records that control aspects of the I/O, dynamics, physics etc. Most physics-related options are in
-records \b &gfs_physics_nml Some schemes have their own namelist records as described below. 
+records \b &gfs_physics_nml . Some schemes have their own namelist records as described below. 
 
 - Namelist \b &gfs_physics_nml pertains to all of the suites used, but some of the variables are only relevant for specific
 parameterizations. Its variables are defined in file GFS_typedefs.F90 in the host model.
@@ -25,30 +25,29 @@ show some variables in the namelist that must match the SDF.
 
 <table>
 <caption id="multi_row">NML Description</caption>
-<tr><th>Option          <th>Scheme                       <th>Description                <th>Default Value
+<tr><th>Option          <th>CCPP scheme or interstitial                       <th>Description                <th>Default Value
 <tr><td colspan="4" align= center>\b General \b options 
-<tr><td>fhzero          <td>gfs_control_type          <td>hour between clearing of diagnostic buckets     <td>0.0     
-<tr><td>h2o_phys        <td>h2ophys                   <td>flag for stratosphere h2o scheme                <td>.false. 
-<tr><td>ldiag3d         <td>gfs_control_type          <td>flag for 3D diagnostic fields                   <td>.false. 
-<tr><td>qdiag3d         <td>gfs_control_type          <td>flag for 3D tracer diagnostic fields            <td>.false.
-<tr><td>lssav           <td>gfs_control_type          <td>flag for storing diagnostics            <td>.false.
-<tr><td>cplflx          <td>gfs_control_type          <td>flag for cplflx collection              <td>.false.
-<tr><td>cplwav          <td>gfs_control_type          <td>flag for cplwav collection              <td>.false.
-<tr><td>cplchm          <td>gfs_control_type          <td>flag for chemistry collection           <td>.false.
-<tr><td>cplwav2atm      <td>gfs_control_type          <td>flag for wave to atm coupling           <td>.false.
-<tr><td>lsidea          <td>gfs_control_type          <td>flag for idealized physics              <td>.false.
+<tr><td>fhzero          <td>GFS_phys_time_vary          <td>hour between clearing of diagnostic buckets     <td>0.0     
+<tr><td>h2o_phys        <td>h2ophys                       <td>flag for stratosphere h2o scheme                <td>.false. 
+<tr><td>ldiag3d         <td>see \a GFS_typedefs.F90       <td>flag for 3D diagnostic fields                   <td>.false. 
+<tr><td>qdiag3d         <td>see \a GFS_typedefs.F90       <td>flag for 3D tracer diagnostic fields            <td>.false.
+<tr><td>lssav           <td>see \a GFS_typedefs.F90       <td>flag for storing diagnostics            <td>.false.
+<tr><td>cplflx          <td>see \a GFS_typedefs.F90       <td>flag for coupled fluxes coupling              <td>.false.
+<tr><td>cplwav          <td>see \a GFS_typedefs.F90       <td>flag for cplwav collection              <td>.false.
+<tr><td>cplchm          <td>see \a GFS_typedefs.F90       <td>flag for coupled chemistry diagnostics           <td>.false.
+<tr><td>cplwav2atm      <td>see \a GFS_typedefs.F90       <td>flag for wave to atm coupling           <td>.false.
+<tr><td>lsidea          <td>rayleigh_damp          <td>flag for idealized physics              <td>.false.
 <tr><td>oz_phys_2015    <td>ozphys_2015               <td>flag for new (2015) ozone physics               <td>.false.
-<tr><td>fhcyc           <td>gfs_control_type          <td>frequency for surface data cycling in hours     <td>0.0 
-<tr><td>use_ufo         <td>gfs_control_type          <td>flag for using unfiltered orography surface option <td>.false.
-<tr><td>pre_rad         <td>gfs_control_type          <td>flag for testing purpose                        <td>.false.
-<tr><td>ncld            <td>gfs_control_type          <td>number of hydrometeors                          <td>1
-<tr><td>do_mynnsfclay   <td>gfs_control_type          <td>flag to activate MYNN-SFCLAY scheme     
+<tr><td>fhcyc           <td>GFS_phys_time_vary    <td>frequency for surface data cycling in hours     <td>0.0 
+<tr><td>use_ufo         <td>GFS_phys_time_vary          <td>flag for using unfiltered orography surface option <td>.false.
+<tr><td>ncld            <td>see \a GFS_typedefs.F90          <td>number of hydrometeors                          <td>1
+<tr><td>do_mynnsfclay   <td>see \a GFS_typedefs.F90          <td>flag to activate MYNN-SFCLAY scheme     
 <tr><td>prslrd0         <td>rayleigh_damp             <td>pressure level above which to apply Rayleigh damping    <td>0.0d0
 <tr><td>ral_ts          <td>rayleigh_damp             <td>time scale for Rayleigh damping in days                <td>0.0d0
-<tr><td>do_sppt           <td>gfs_control_type  <td>flag for stochastic SPPT option                        <td>.false.
-<tr><td>do_shum           <td>gfs_control_type  <td>flag for stochastic SHUM option                        <td>.false.
-<tr><td>do_skeb           <td>gfs_control_type  <td>flag for stochastic SKEB option                        <td>.false.
-<tr><td>do_sfcperts       <td>gfs_control_type  <td>flag for stochastic surface perturbations option       <td>.false.
+<tr><td>do_sppt           <td>GFS_stochastics  <td>flag for stochastic SPPT option                        <td>.false.
+<tr><td>do_shum           <td>GFS_stochastics  <td>flag for stochastic SHUM option                        <td>.false.
+<tr><td>do_skeb           <td>GFS_stochastics  <td>flag for stochastic SKEB option                        <td>.false.
+<tr><td>do_sfcperts       <td>GFS_rrtmg_pre  <td>flag for stochastic surface perturbations option       <td>.false.
 <tr><td>imp_physics     <td>choice of microphysics scheme*      <td>choice of microphysics scheme: \n                
                                                       <ul>
                                                       <li> 11: GFDL microphysics scheme 
@@ -57,12 +56,12 @@ show some variables in the namelist that must match the SDF.
                                                       </ul>
                                                       <td>99
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b radiation \b scheme \b options
-<tr><td>pdfcld          <td>gfs_control_type          <td>flag for PDF clouds                             <td>.false.
-<tr><td>fhswr           <td>gfs_control_type          <td>frequency for shortwave radiation (secs)        <td>3600.
-<tr><td>fhlwr           <td>gfs_control_type          <td>frequency for longwave radiation (secs)         <td>3600.
-<tr><td>levr            <td>gfs_control_type          <td>number of vertical levels for radiation calculations    <td>-99
-<tr><td>nfxr            <td>gfs_control_type          <td>second dimension of radiation input/output array fluxr  <td>39+6
-<tr><td>iflip           <td>gfs_control_type          <td>control flag for vertical index direction \n
+<tr><td>pdfcld          <td>GFS_rrtmg_pre          <td>flag for PDF clouds                             <td>.false.
+<tr><td>fhswr           <td>rrtmg_sw                  <td>frequency for shortwave radiation (secs)        <td>3600.
+<tr><td>fhlwr           <td>rrtmg_lw          <td>frequency for longwave radiation (secs)         <td>3600.
+<tr><td>levr            <td>GFS_rrtmg_setup          <td>number of vertical levels for radiation calculations    <td>-99
+<tr><td>nfxr            <td>GFS_rrtmg_pre          <td>second dimension of radiation input/output array fluxr  <td>39+6
+<tr><td>iflip           <td>GFS_rrtmg_setup        <td>control flag for vertical index direction \n
                                                       <ul>
                                                       <li> 0: index from TOA to surface
                                                       <li> 1: index from surface to TOA
@@ -95,7 +94,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 5: exponential-random overlapping method
                                                       </ul>
                                                       <td>1
-<tr><td>ictm            <td>gfs_control_type          <td> external data time/date control flag    \n
+<tr><td>ictm            <td>GFS_rrtmg_setup          <td> external data time/date control flag    \n
                                                       <ul>
                                                       <li> -2: same as 0, but superimpose seasonal cycle from climatology data set
                                                       <li> -1: use user provided external data for the forecast time, no extrapolation
@@ -105,31 +104,31 @@ show some variables in the namelist that must match the SDF.
                                                       <li> yyyy1: use yyyy data for the forecast. if needed, do extrapolation to match the fcst time
                                                       </ul>
                                                       <td>1
-<tr><td>crick_proof    <td>gfs_control_type           <td>control flag for eliminating CRICK     \n
+<tr><td>crick_proof    <td>GFS_rrtmg_setup           <td>control flag for eliminating CRICK     \n
                                                       <ul>
                                                       <li>.true.: apply layer smoothing to eliminate CRICK
                                                       <li>.false.: do not apply layer smoothing
                                                       </ul>
                                                       <td>.false.
-<tr><td>ccnorm         <td>gfs_control_type           <td>control flag for in-cloud condensate mixing ratio   \n
+<tr><td>ccnorm         <td>GFS_rrtmg_setup           <td>control flag for in-cloud condensate mixing ratio   \n
                                                       <ul>
                                                       <li>.true.: normalize cloud condensate
                                                       <li>.false.: not normalize cloud condensate
                                                       </ul>
                                                       <td>.false.
-<tr><td>norad_precip    <td>gfs_control_type          <td>control flag for not using precip in radiation (Ferrier scheme)  \n       
+<tr><td>norad_precip    <td>GFS_rrtmg_setup          <td>control flag for not using precip in radiation (Ferrier scheme)  \n       
                                                       <ul>
                                                       <li>.true.: snow/rain has no impact on radiation
                                                       <li>.false.: snow/rain has impact on radiation
                                                       </ul>
                                                       <td>.false.
-<tr><td>ialb            <td>gfs_control_type          <td>SW surface albedo control flag: \n 
+<tr><td>ialb            <td>GFS_rrtmg_setup          <td>SW surface albedo control flag: \n 
                                                       <ul>
                                                       <li> 0: using climatology surface albedo scheme for SW 
                                                       <li> 1: using MODIS based land surface albedo for SW   
                                                       </ul>
                                                       <td>0
-<tr><td>iems            <td>gfs_control_type          <td>LW surface emissivity control flag (ab 2-digit integer) : \n 
+<tr><td>iems            <td>GFS_rrtmg_setup          <td>LW surface emissivity control flag (ab 2-digit integer) : \n 
                                                       <ul>
                                                       <li> a: =0 set surface air/ground t same for LW radiation
                                                       <li>    =1 set surface air/ground t diff for LW radiation
@@ -138,7 +137,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li>    =2 future development (not yet)    
                                                       </ul>
                                                       <td>0 
-<tr><td>iaer            <td>gfs_control_type          <td>4-digit aerosol flag (dabc for aermdl, volcanic, LW, SW): \n 
+<tr><td>iaer            <td>GFS_rrtmg_setup          <td>4-digit aerosol flag (dabc for aermdl, volcanic, LW, SW): \n 
                                                       <ul>
                                                       <li> d:tropospheric aerosol model scheme flag \n
                                                              =0 or none, opac-climatology aerosol scheme \n 
@@ -153,7 +152,7 @@ show some variables in the namelist that must match the SDF.
                                                              =1 include tropospheric aerosol in SW
                                                       </ul>
                                                       <td>1
-<tr><td>ico2            <td>gfs_control_type          <td>\f$CO_2\f$ data source control flag:\n 
+<tr><td>ico2            <td>GFS_rrtmg_setup          <td>\f$CO_2\f$ data source control flag:\n 
                                                       <ul>
                                                       <li> 0: prescribed value (380 ppmv) 
                                                       <li> 1: yearly global averaged annual mean from observations 
@@ -174,7 +173,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 2: use McICA with randomly generated permutation seeds
                                                       </ul>
                                                       <td>0
-<tr><td>isol            <td>gfs_control_type          <td>solar constant scheme control flag: \n 
+<tr><td>isol            <td>GFS_rrtmg_setup          <td>solar constant scheme control flag: \n 
                                                       <ul>
                                                       <li> 0: fixed value = 1366.0 \f$W m^{-2}\f$ (old standard) 
                                                       <li> 10: fixed value = 1360.8 \f$W m^{-2}\f$ (new standard)
@@ -207,13 +206,13 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 4: new Tiedtke scheme (CAPS)
                                                       </ul>
                                                       <td>1; set to 2 for GFSv15p2 and GFSv16beta; set to 3 for GSD_v1
-<tr><td>do_deep         <td>gfs_control_type          <td>consistency check for deep convection     <td>.true.
-<tr><td>shal_cnv        <td>gfs_control_type          <td>flag for calling shallow convection            <td>.false.
-<tr><td>lmfshal         <td>gfs_control_type          <td>flag for mass-flux shallow convection scheme in the cloud fraction calculation  <td>shal_cnv .and. (imfshalcnv > 0) 
-<tr><td>lmfdeep2        <td>gfs_control_type          <td>flag for mass-flux deep convection scheme in the cloud fraction calculation <td>imfdeepcnv == 2 .or. 3 .or.4
-<tr><td>random_clds     <td>gfs_control_type          <td>flag for whether clouds are random             <td>.false.
-<tr><td>trans_trac      <td>gfs_control_type          <td>flag for convective transport of tracers       <td>.false.
-<tr><td>cal_pre         <td>gfs_control_type          <td>flag for calling precipitation type algorithm  <td>.false.
+<tr><td>do_deep         <td>see \a GFS_typedefs.F90          <td>consistency check for deep convection     <td>.true.
+<tr><td>shal_cnv        <td>GFS_suite_interstitial          <td>flag for calling shallow convection            <td>.false.
+<tr><td>lmfshal         <td>GFS_rrtmg_pre             <td>flag for mass-flux shallow convection scheme in the cloud fraction calculation  <td>shal_cnv .and. (imfshalcnv > 0) 
+<tr><td>lmfdeep2        <td>GFS_rrtmg_pre        <td>flag for mass-flux deep convection scheme in the cloud fraction calculation <td>imfdeepcnv == 2 .or. 3 .or.4
+<tr><td>random_clds     <td>GFS_phys_time_vary          <td>flag for whether clouds are random             <td>.false.
+<tr><td>trans_trac      <td>GFS_suite_interstitial          <td>flag for convective transport of tracers       <td>.false.
+<tr><td>cal_pre         <td>GFS_phys_time_vary or GFS_MP_generic          <td>flag for calling precipitation type algorithm  <td>.false.
 <tr><td>shcnvcw         <td>samfshalcnv               <td>flag for shallow convective cloud           <td>.false.
 <tr><td>cscnv           <td>cs_conv                   <td>flag for Chikira-Sugiyama deep convection   <td>.false.; set to .T. for csawmg
 <tr><td>do_aw           <td>cs_conv                    <td>flag for Arakawa-Wu scale-awere adjustment          <td>.false.; set to .T. for csawmg
@@ -221,23 +220,23 @@ show some variables in the namelist that must match the SDF.
 <tr><td>do_awdd         <td>cs_conv                    <td>flag to enable treating convective tendencies following Arakwaw-Wu for downdrafts (2013)  <td>.false.
 <tr><td>cs_parm(10)     <td>cs_conv          <td>tunable parameters for Chikira-Sugiyama convection           <td>8.0,4.0,1.0e3,3.5e3,20.0,1.0,-999.,1.,0.6,0. 
 <tr><td colspan="4"  align= center>\b Parameters \b related \b to \b PBL \b scheme \b options
-<tr><td>do_mynnedmf     <td>mynnedmf_wrapper*         <td>flag to activate MYNN-EDMF scheme                      <td>.false. for GFSv15p2 and GFSv16beta
+<tr><td>do_mynnedmf     <td>mynnedmf_wrapper*         <td>flag to activate MYNN-EDMF scheme                      <td>.false. 
 <tr><td>do_myjsfc       <td>myjpbl_wrapper            <td>flag for MYJ surface layer scheme                      <td>.false
-<tr><td>dspheat         <td>gfs_control_type          <td>flag for using TKE dissipative heating to temperature tendency in hybrid EDMF and TKE-EDMF schemes <td>.false.
-<tr><td>satmedmf        <td>gfs_control_type          <td>flag for calling scale-ware TKE-based EDMF PBL scheme           <td>.false.; set to .T. for GFSv15p2 and GFSv16beta
-<tr><td>isatmedmf       <td>gfs_control_type          <td>flag for scale-aware TKE-based moist EDMF scheme \n
+<tr><td>dspheat         <td>satmedmfvdifq , hedmf          <td>flag for using TKE dissipative heating to temperature tendency in hybrid EDMF and TKE-EDMF schemes <td>.false.
+<tr><td>satmedmf        <td>satmedmfvdifq          <td>flag for calling scale-ware TKE-based EDMF PBL scheme      <td>.false.
+<tr><td>isatmedmf       <td>satmedmfvdifq          <td>flag for scale-aware TKE-based moist EDMF scheme \n
                                                       <ul>
                                                       <li> 0: initial version of satmedmf (Nov.2018)
                                                       <li> 1: updated version of satmedmf (as of May 2019)
                                                       </ul>
                                                       <td> 0; set to 0 for GFSv15p2 and csawmg; 1 for GFSv16beta
-<tr><td>hybedmf         <td>gfs_control_type          <td>flag for calling hybrid EDMF PBL scheme        <td>.false.; set to .T. for GFSv15p2 and csawmg   
-<tr><td>shinhong        <td>gfs_control_type          <td>flag for scale-aware Shinhong PBL scheme                 <td>.false.
-<tr><td>do_ysu          <td>gfs_control_type          <td>flag for YSU PBL scheme                                  <td>.false.
-<tr><td>debug           <td>gfs_control_type          <td>flag for debug printout                             <td>.false.
-<tr><td>xkzm_h          <td>satmedmfvdifq, hedmf          <td>background vertical diffusion for heat and q        <td>1.0d0
-<tr><td>xkzm_m          <td>satmedmfvdifq, hedmf           <td>background vertical diffusion for momentum          <td>1.0d0
-<tr><td>xkzm_s          <td>satmedmfvdifq, hedmf           <td>sigma threshold for background mom. diffusion       <td>1.0d0
+<tr><td>hybedmf         <td>hedmf                     <td>flag for calling hybrid EDMF PBL scheme        <td>.false.   
+<tr><td>shinhong        <td>shinhongvdif         <td>flag for scale-aware Shinhong PBL scheme                 <td>.false.
+<tr><td>do_ysu          <td>see \a GFS_typedefs.F90          <td>flag for YSU PBL scheme                                  <td>.false.
+<tr><td>debug           <td>see \a GFS_typedefs.F90          <td>flag for debug printout                             <td>.false.
+<tr><td>xkzm_h          <td>satmedmfvdifq , hedmf          <td>background vertical diffusion for heat and q        <td>1.0d0
+<tr><td>xkzm_m          <td>satmedmfvdifq , hedmf           <td>background vertical diffusion for momentum          <td>1.0d0
+<tr><td>xkzm_s          <td>satmedmfvdifq , hedmf           <td>sigma threshold for background mom. diffusion       <td>1.0d0
 <tr><td>xkzminv         <td>hedmf          <td>maximum background value of heat diffusivity in the inversion layer    <td>0.3
 <tr><td>moninq_fac      <td>hedmf                     <td>atmosphere diffusivity coefficient factor           <td>1.0
 <tr><td>dspfac          <td>satmedmfvdifq     <td>TKE dissipative heating factor                    <td>1.0
@@ -303,13 +302,13 @@ show some variables in the namelist that must match the SDF.
                                                       </ul>
                                                       <td>1
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b surface \b perturbation \b options
-<tr><td>nsfcpert          <td>gfs_control_type  <td>number of weights for stochastic surface perturbation  <td>0
-<tr><td>pertz0            <td>gfs_control_type  <td>magnitude of perturbation of momentum roughness length <td>-999.
-<tr><td>pertzt            <td>gfs_control_type  <td>magnitude of perturbation of heat to momentum roughness length ratio   <td>-999.
-<tr><td>pertshc           <td>gfs_control_type  <td>magnitude of perturbation of soil hydraulic conductivity               <td>-999.
-<tr><td>pertlai           <td>gfs_control_type  <td>magnitude of perturbation of leaf area index           <td>-999.
-<tr><td>pertalb           <td>gfs_control_type  <td>magnitude of surface albedo perturbation               <td>-999.
-<tr><td>pertvegf          <td>gfs_control_type  <td>magnitude of perturbation of vegetation fraction       <td>-999.
+<tr><td>nsfcpert          <td>GFS_surface_generic_pre  <td>number of weights for stochastic surface perturbation  <td>0
+<tr><td>pertz0            <td>GFS_surface_generic_pre  <td>magnitude of perturbation of momentum roughness length <td>-999.
+<tr><td>pertzt            <td>GFS_surface_generic_pre  <td>magnitude of perturbation of heat to momentum roughness length ratio   <td>-999.
+<tr><td>pertshc           <td>GFS_surface_generic_pre  <td>magnitude of perturbation of soil hydraulic conductivity               <td>-999.
+<tr><td>pertlai           <td>GFS_surface_generic_pre  <td>magnitude of perturbation of leaf area index           <td>-999.
+<tr><td>pertalb           <td>GFS_surface_generic_pre  <td>magnitude of surface albedo perturbation               <td>-999.
+<tr><td>pertvegf          <td>GFS_surface_generic_pre  <td>magnitude of perturbation of vegetation fraction       <td>-999.
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b microphysics \b scheme \b options
 <tr><td>lradar            <td>gfdl_cloud_microphys       <td>flag for computing radar reflectivity in Thompson MP scheme       <td>.false.
 <tr><td>sedi_transport    <td>gfdl_cloud_microphys       <td>flag for turning on horizontal momentum transport during sedimentation     <td>.true.
@@ -386,8 +385,8 @@ show some variables in the namelist that must match the SDF.
 <tr><td>ltaerosol       <td>mp_thompson               <td>flag for using aerosol climotology in Thompson MP scheme          <td>.false.
 <tr><td>ttendlim        <td>mp_thompson               <td>temperature tendency limiter per time step in K/s, set to < 0 to deactivate   <td>-999.0
 <tr><td>effr_in         <td>gfdl_cloud_microphys ,mp_thompson ,m_micro          <td>flag for using input cloud effective radii calculation    <td>.false.
-<tr><td>cnvcld          <td>gfs_control_type          <td>flag for convective cloud                      <td>.false.
-<tr><td>lgfdlmprad      <td>gfs_control_type          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
+<tr><td>cnvcld          <td>see GFS_typedefs.F90          <td>flag for convective cloud                      <td>.false.
+<tr><td>lgfdlmprad      <td>GFS_rrtmg_pre          <td>flag for GFDL mp scheme and radiation consistency     <td>.false.
 <tr><td>do_sb_physics   <td>m_micro                   <td>flag for SB2001 autoconversion or accretion   <td>.true.
 <tr><td>do_cldice       <td>m_micro                   <td>flag for cloud ice processes for MG microphysics      <td>.true.
 <tr><td>hetfrz_classnuc <td>m_micro          <td>flag for heterogeneous freezing for MG microphysics            <td>.false.
@@ -497,8 +496,8 @@ show some variables in the namelist that must match the SDF.
 <tr><td>do_cnvgwd         <td>gwdc                 <td>flag for convective GWD      <td>cnvgwd .and. maxval(cdmbgwd(3:4)) == 0.0
 <tr><td>nmtvr           <td>cires_ugwp             <td>number of topographic variables such as variance etc used in the GWD parameterization-10 more added if GSL orographic drag scheme is used <td>14
 <tr><td>cgwf            <td>cires_ugwp ,gwdc      <td>multiplication factor for convective GWD                     <td>0.5d0,0.05d0
-<tr><td>do_gwd            <td>gfs_control_type     <td>flag for gravity wave drag   <td>maxval(cdmbgwd) > 0.0 
-<tr><td>gwd_opt           <td>gfs_control_type     <td>flag for GWD scheme   \n
+<tr><td>do_gwd            <td>see \a GFS_typedefs.F90     <td>flag for gravity wave drag   <td>maxval(cdmbgwd) > 0.0 
+<tr><td>gwd_opt           <td>drag_suite     <td>flag for GWD scheme   \n
                                                    <ul>
                                                    <li>1: original GFS GWD
                                                    <li>3: GSL drag suite
@@ -507,7 +506,7 @@ show some variables in the namelist that must match the SDF.
                                                    </ul>
                                                    <td>1
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b LSM \b options
-<tr><td>lsm             <td>gfs_control_type          <td>flag for land surface model to use    \n
+<tr><td>lsm             <td>see \a GFS_typedefs.F90          <td>flag for land surface model to use    \n
                                                       <ul>
                                                       <li> 1: Noah LSM
                                                       <li> 2: NoahMP LSM
@@ -516,14 +515,14 @@ show some variables in the namelist that must match the SDF.
                                                       <td>1; set to 2 for RRFS_v1alpha;3 for GSD_v1
 <tr><td>lsoil           <td>sfc_drv                   <td>number of soil layers           <td>4; set to 9 for GSD_v1
 <tr><td>rdlai           <td>sfc_drv_ruc               <td>flag to read leaf area index from input files    <td>.false.
-<tr><td>ivegsrc         <td>gfs_control_type          <td>flag for vegetation type dataset choice: \n 
+<tr><td>ivegsrc         <td>sfc_drv, sfc_drv_ruc, noahmpdrv, sfc_diff          <td>flag for vegetation type dataset choice: \n 
                                                       <ul>
                                                       <li> 0: USGS 
                                                       <li> 1: IGBP(20 category): IGBP must be selected if NoahMP is used 
                                                       <li> 2: UMD (13 category) 
                                                       </ul>
                                                       <td>2
-<tr><td>isot            <td>gfs_control_type          <td>flag for soil type dataset choice:\n 
+<tr><td>isot            <td>sfc_drv,sfc_drv_ruc, noahmpdrv          <td>flag for soil type dataset choice:\n 
                                                       <ul> 
                                                       <li> 0: Zobler soil type (9 category) 
                                                       <li> 1: STATSGO soil type (19 category): STATSGO must be selected if NoahMP is used
