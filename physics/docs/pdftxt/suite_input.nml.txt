@@ -41,7 +41,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>fhcyc           <td>GFS_phys_time_vary    <td>frequency for surface data cycling in hours     <td>0.0 
 <tr><td>use_ufo         <td>GFS_phys_time_vary          <td>flag for using unfiltered orography surface option <td>.false.
 <tr><td>ncld            <td>see \a GFS_typedefs.F90          <td>number of hydrometeors                          <td>1
-<tr><td>do_mynnsfclay   <td>see \a GFS_typedefs.F90          <td>flag to activate MYNN-SFCLAY scheme     
+<tr><td>do_mynnsfclay   <td>see \a GFS_typedefs.F90          <td>flag to activate MYNN-SFCLAY scheme     <td>.false.
 <tr><td>prslrd0         <td>rayleigh_damp             <td>pressure level above which to apply Rayleigh damping    <td>0.0d0
 <tr><td>ral_ts          <td>rayleigh_damp             <td>time scale for Rayleigh damping in days                <td>0.0d0
 <tr><td>do_sppt           <td>GFS_stochastics  <td>flag for stochastic SPPT option                        <td>.false.
@@ -187,7 +187,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>swhtr           <td>rrtmg_sw                  <td>flag for output of shortwave heating rate      <td>.true.
 <tr><td>nhfrad          <td>GFS_time_vary_pre         <td>number of timesteps for which to call radiation on physics timestep (coldstarts)     <td>0
 <tr><td colspan="4" align= center>\b Parameters \b related \b to \b cumulus \b schemes
-<tr><td>imfshalcnv      <td>choice of shallow convective scheme*          <td>flag for mass flux shallow convective scheme:\n 
+<tr><td>imfshalcnv      <td>choice of shallow convective scheme          <td>flag for mass flux shallow convective scheme:\n 
                                                       <ul>
                                                       <li> 1:July 2010 version of mass-flux shallow convective scheme (operational as of 2016) 
                                                       <li> 2: scale- & aerosol-aware mass-flux shallow convective scheme (2017) 
@@ -196,8 +196,8 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 0: modified Tiedtke's eddy-diffusion shallow convective scheme 
                                                       <li> -1: no shallow convection used 
                                                       </ul> 
-                                                      <td>1; set to 2 for GFSv15p2 and GFSv16beta; set to 3 for GSD_v1
-<tr><td>imfdeepcnv      <td>choice of deep convective scheme*          <td>flag for mass-flux deep convective scheme:\n 
+                                                      <td>1
+<tr><td>imfdeepcnv      <td>choice of deep convective scheme          <td>flag for mass-flux deep convective scheme:\n 
                                                       <ul>
                                                       <li>-1: Chikira-Sugiyama deep convection (with \b cscnv = .T.)
                                                       <li> 1: July 2010 version of SAS convective scheme (operational version as of 2016) 
@@ -205,7 +205,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 3: scale- & aerosol-aware Grell-Freitas scheme (GSD)
                                                       <li> 4: new Tiedtke scheme (CAPS)
                                                       </ul>
-                                                      <td>1; set to 2 for GFSv15p2 and GFSv16beta; set to 3 for GSD_v1
+                                                      <td>1
 <tr><td>do_deep         <td>see \a GFS_typedefs.F90          <td>consistency check for deep convection     <td>.true.
 <tr><td>shal_cnv        <td>GFS_suite_interstitial          <td>flag for calling shallow convection            <td>.false.
 <tr><td>lmfshal         <td>GFS_rrtmg_pre             <td>flag for mass-flux shallow convection scheme in the cloud fraction calculation  <td>shal_cnv .and. (imfshalcnv > 0) 
@@ -214,8 +214,8 @@ show some variables in the namelist that must match the SDF.
 <tr><td>trans_trac      <td>GFS_suite_interstitial          <td>flag for convective transport of tracers       <td>.false.
 <tr><td>cal_pre         <td>GFS_phys_time_vary or GFS_MP_generic          <td>flag for calling precipitation type algorithm  <td>.false.
 <tr><td>shcnvcw         <td>samfshalcnv               <td>flag for shallow convective cloud           <td>.false.
-<tr><td>cscnv           <td>cs_conv                   <td>flag for Chikira-Sugiyama deep convection   <td>.false.; set to .T. for csawmg
-<tr><td>do_aw           <td>cs_conv                    <td>flag for Arakawa-Wu scale-awere adjustment          <td>.false.; set to .T. for csawmg
+<tr><td>cscnv           <td>cs_conv                   <td>flag for Chikira-Sugiyama deep convection   <td>.false.
+<tr><td>do_aw           <td>cs_conv                    <td>flag for Arakawa-Wu scale-awere adjustment          <td>.false.
 <tr><td>do_shoc         <td>cs_conv                    <td>flag for Simplified Hihger-order Closure (SHOC)     <td>.false.
 <tr><td>do_awdd         <td>cs_conv                    <td>flag to enable treating convective tendencies following Arakwaw-Wu for downdrafts (2013)  <td>.false.
 <tr><td>cs_parm(10)     <td>cs_conv          <td>tunable parameters for Chikira-Sugiyama convection           <td>8.0,4.0,1.0e3,3.5e3,20.0,1.0,-999.,1.,0.6,0. 
@@ -229,7 +229,7 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 0: initial version of satmedmf (Nov.2018)
                                                       <li> 1: updated version of satmedmf (as of May 2019)
                                                       </ul>
-                                                      <td> 0; set to 0 for GFSv15p2 and csawmg; 1 for GFSv16beta
+                                                      <td> 0
 <tr><td>hybedmf         <td>hedmf                     <td>flag for calling hybrid EDMF PBL scheme        <td>.false.   
 <tr><td>shinhong        <td>shinhongvdif         <td>flag for scale-aware Shinhong PBL scheme                 <td>.false.
 <tr><td>do_ysu          <td>see \a GFS_typedefs.F90          <td>flag for YSU PBL scheme                                  <td>.false.
@@ -241,7 +241,7 @@ show some variables in the namelist that must match the SDF.
 <tr><td>moninq_fac      <td>hedmf                     <td>atmosphere diffusivity coefficient factor           <td>1.0
 <tr><td>dspfac          <td>satmedmfvdifq     <td>TKE dissipative heating factor                    <td>1.0
 <tr><td>bl_upfr         <td>satmedmfvdifq             <td>updraft fraction in boundary layer mass flux scheme       <td>0.13
-<tr><td>bl_dnfr         <td>satmedmfvdifq             <td>downdraft fraction in boundary layer mass flux scheme     <td>0.1                                  <td>.false.
+<tr><td>bl_dnfr         <td>satmedmfvdifq             <td>downdraft fraction in boundary layer mass flux scheme     <td>0.1  
 <tr><td>grav_settling   <td>mynnedmf_wrapper          <td>flag to activate gravitational settling of cloud droplets as described in Nakanishi (2000) \cite nakanishi_2000 <td>0
 <tr><td>bl_mynn_mixlength    <td>mynnedmf_wrapper     <td>flag for different version of mixing length formulation \n 
                                                       <ul>
@@ -512,8 +512,8 @@ show some variables in the namelist that must match the SDF.
                                                       <li> 2: NoahMP LSM
                                                       <li> 3: RUC LSM
                                                       </ul>
-                                                      <td>1; set to 2 for RRFS_v1alpha;3 for GSD_v1
-<tr><td>lsoil           <td>sfc_drv                   <td>number of soil layers           <td>4; set to 9 for GSD_v1
+                                                      <td>1
+<tr><td>lsoil           <td>sfc_drv                   <td>number of soil layers           <td>4
 <tr><td>rdlai           <td>sfc_drv_ruc               <td>flag to read leaf area index from input files    <td>.false.
 <tr><td>ivegsrc         <td>sfc_drv, sfc_drv_ruc, noahmpdrv, sfc_diff          <td>flag for vegetation type dataset choice: \n 
                                                       <ul>

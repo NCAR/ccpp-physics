@@ -114,7 +114,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/RRFS_SGSCLOUD.txt   \
                           pdftxt/GFS_RRTMG.txt    \
                           pdftxt/GFS_SFCLYR.txt   \
-                          pdftxt/RRFS_MYNN_SFCLAYER.txt   \
+###                          pdftxt/MYNN_SFCLAYER.txt   \
                           pdftxt/GFS_NSST.txt     \
                           pdftxt/GFS_OCEAN.txt    \
                           pdftxt/GFS_NOAH.txt     \
