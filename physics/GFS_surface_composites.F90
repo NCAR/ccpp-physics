@@ -637,9 +637,8 @@ contains
             else
               tsfco(i) = tsfc(i)
             endif
-            tsfcl(i) = tsfc(i)
-
-            do k=1,kice ! store tiice in stc to reduce output in the nonfrac grid case
+            tsfcl(i)  = tsfc(i)
+            do k=1,min(kice,km) ! store tiice in stc to reduce output in the nonfrac grid case
               stc(i,k) = tiice(i,k)
             enddo
           endif
