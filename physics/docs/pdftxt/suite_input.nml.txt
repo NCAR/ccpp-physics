@@ -3,7 +3,7 @@
 
 The SCM and the UFS Atmosphere access runtime configurations from file \c input.nml. This file contains
 various namelists records that control aspects of the I/O, dynamics, physics etc. Most physics-related options are in
-records \b &gfs_physics_nml . Some schemes have their own namelist records as described below. 
+records \b &gfs_physics_nml. Some schemes have their own namelist records as described below. 
 
 - Namelist \b &gfs_physics_nml pertains to all of the suites used, but some of the variables are only relevant for specific
 parameterizations. Its variables are defined in file GFS_typedefs.F90 in the host model.
@@ -32,8 +32,8 @@ show some variables in the namelist that must match the SDF.
 <tr><td>ldiag3d         <td>see \a GFS_typedefs.F90       <td>flag for 3D diagnostic fields                   <td>.false. 
 <tr><td>qdiag3d         <td>see \a GFS_typedefs.F90       <td>flag for 3D tracer diagnostic fields            <td>.false.
 <tr><td>lssav           <td>see \a GFS_typedefs.F90       <td>flag for storing diagnostics            <td>.false.
-<tr><td>cplflx          <td>see \a GFS_typedefs.F90       <td>flag for coupled fluxes coupling              <td>.false.
-<tr><td>cplwav          <td>see \a GFS_typedefs.F90       <td>flag for cplwav collection              <td>.false.
+<tr><td>cplflx          <td>see \a GFS_typedefs.F90       <td>flag for using fluxes provided by an external model              <td>.false.
+<tr><td>cplwav          <td>see \a GFS_typedefs.F90       <td>flag for using information produced by an external ocean wave model              <td>.false.
 <tr><td>cplchm          <td>see \a GFS_typedefs.F90       <td>flag for coupled chemistry diagnostics           <td>.false.
 <tr><td>cplwav2atm      <td>see \a GFS_typedefs.F90       <td>flag for wave to atm coupling           <td>.false.
 <tr><td>lsidea          <td>rayleigh_damp          <td>flag for idealized physics              <td>.false.

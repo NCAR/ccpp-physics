@@ -31,7 +31,7 @@ transition as grid spacing decreases into a shallow convection scheme
 precipitating convective cloud and shallow convective clouds
 
 \section intra_rough_gf Intraphysics Communication
-The GF scheme passes cloud hydrometeors to the grid-scale microphysics scheme (\ref GSD_THOMPSON ) through detrainment from each 
+The GF scheme passes cloud hydrometeors to the grid-scale microphysics scheme (\ref THOMPSON ) through detrainment from each 
 convective cloud layer containing convective cloud. The detrained condensate interacts with short- and longwave radiation by 
 contributing to the "opaqueness" to radiation of each grid layer. Additionally, detrained condensate is added to any existing condensate,
 to be treated by the complex grid-scale microphysics scheme. This allows for a crude emulation of stratiform precipitation regions

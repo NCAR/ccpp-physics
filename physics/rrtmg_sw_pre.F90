@@ -1,11 +1,11 @@
 !>\file rrtmg_sw_pre.f90
 !! This file contains a subroutine to module_radiation_surface::setalb() to
 !! setup surface albedo for SW radiation.
+
+!>\defgroup rrtmg_sw_pre_mod GFS RRTMG scheme Pre
       module rrtmg_sw_pre
       contains
 
-!>\defgroup rrtmg_sw_pre GFS RRTMG scheme Pre
-!! @{
 !> \section arg_table_rrtmg_sw_pre_init Argument Table
 !!
       subroutine rrtmg_sw_pre_init ()
@@ -97,5 +97,4 @@
       subroutine rrtmg_sw_pre_finalize ()
       end subroutine rrtmg_sw_pre_finalize
 
-!! @}
       end module rrtmg_sw_pre

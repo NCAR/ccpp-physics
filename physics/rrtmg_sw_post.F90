@@ -1,10 +1,10 @@
-!>\file rrtmg_sw_post
+!>\file rrtmg_sw_post.F90
 !! This file contains
+
+!>\defgroup rrtmg_sw_post GFS RRTMG Scheme Post
       module rrtmg_sw_post
       contains
 
-!>\defgroup rrtmg_sw_post GFS RRTMG scheme post
-!! @{
 !> \section arg_table_rrtmg_sw_post_init Argument Table
 !!
       subroutine rrtmg_sw_post_init ()
@@ -130,5 +130,5 @@
 !!
       subroutine rrtmg_sw_post_finalize ()
       end subroutine rrtmg_sw_post_finalize
-!! @}
+
       end module rrtmg_sw_post

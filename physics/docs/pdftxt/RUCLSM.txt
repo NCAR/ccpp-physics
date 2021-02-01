@@ -46,7 +46,7 @@ to soil particles and does not participate in moisture transport.
 - \b Frozen \b soil \b physics algorithm
 RUC LSM has a different approach to take into account freezing and thawing processes in soil.
 - Treatment of \b mixed \b phase \b precipitation
-It accounts for mixed phase precipitation provided by \ref GSD_THOMPSON used in RAP and HRRR.
+It accounts for mixed phase precipitation provided by \ref THOMPSON used in RAP and HRRR.
 - Simple treatment of \b sea \c ice which solves heat diffusion in sea ice and allows evolving snow cover on top of sea ice
 - sub-grid-scale \b heterogeneity of surface parameters in RUC LSM
 With the certain level of confidence in the skill of the model, the next requirement is to provide land static fields and surface 

@@ -2,7 +2,7 @@
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "CCPP Scientific Documentation"
 PROJECT_NUMBER         = ""
-PROJECT_BRIEF          = "v5.0"
+PROJECT_BRIEF          = "v5.0.0"
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO
@@ -158,15 +158,17 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../sfcsub.F  \ 
                         ../gcycle.F90  \
 ### Radiation
-###                        ../GFS_rrtmg_pre.F90             \
-###                        ../rrtmg_sw_pre.F90              \
+                        ../GFS_rrtmg_pre.F90             \
+                        ../GFS_rrtmg_post.F90           \
+                        ../GFS_rrtmg_setup.F90          \
+                        ../rrtmg_sw_pre.F90              \
                         ../module_SGSCloud_RadPre.F90    \
                         ../module_SGSCloud_RadPost.F90   \
                         ../radsw_main.f                  \
-###                        ../rrtmg_sw_post.F90             \
-###                        ../rrtmg_lw_pre.F90              \
+                        ../rrtmg_sw_post.F90             \
+                        ../rrtmg_lw_pre.F90              \
                         ../radlw_main.f                  \
-###                        ../rrtmg_lw_post.F90             \
+                        ../rrtmg_lw_post.F90             \
                         ../radiation_aerosols.f          \
                         ../radiation_astronomy.f         \
                         ../radiation_clouds.f            \
@@ -215,7 +217,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../cires_ugwp_module.F90 \
                         ../cires_ugwp_utils.F90 \
                         ../cires_ugwp_solvers.F90 \
-###                        ../cires_ugwp_post.F90   \
+                        ../cires_ugwp_post.F90   \
 ###                        ../cires_ugwp_initialize.F90 \
                         ../cires_vert_wmsdis.F90 \
                         ../cires_vert_orodis.F90 \
@@ -230,7 +232,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Deep Convection
                         ../samfdeepcnv.f \
 ### Convective Gravity Wave
-                        ../gwdc.f \
+###                        ../gwdc.f \
 ### Shallow Convection
                         ../samfshalcnv.f \
                         ../cnvc90.f \
@@ -241,7 +243,6 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
                         ../module_gfdl_cloud_microphys.F90 \
-###
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
 ### stochy
@@ -250,6 +251,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ###                     ../../stochastic_physics/stochastic_physics.F90  \
 ### CPT
                         ../m_micro.F90       \
+                        ../m_micro_interstitial.F90    \
 ###                        ../micro_mg2_0.F90   \
                         ../micro_mg3_0.F90   \
                         ../micro_mg_utils.F90 \
@@ -260,10 +262,9 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../cs_conv_aw_adj.F90 \
                         ../cs_conv.F90       \
                         ../cu_gf_driver.F90 \
+                        ../cu_gf_driver_pre.F90 \
                         ../cu_gf_deep.F90   \
                         ../cu_gf_sh.F90     \
-                        ../module_MYNNrad_pre.F90 \
-                        ../module_MYNNrad_post.F90 \
                         ../module_MYNNPBL_wrapper.F90 \
                         ../module_bl_mynn.F90   \
 ###                        ../module_MYNNSFC_wrapper.F90 \

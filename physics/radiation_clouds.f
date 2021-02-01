@@ -3071,7 +3071,7 @@
 !> \param mtop   (IX,3),vertical indices for low, mid, hi cloud tops
 !> \param mbot   (IX,3),vertical indices for low, mid, hi cloud bases
 !!
-!>\section detail Detailed Algorithm
+!>\section detail_gethml Detailed Algorithm
 !! @{
       subroutine gethml                                                 &
      &     ( plyr, ptop1, cldtot, cldcnv, dz, de_lgth,                  &       !  ---  inputs:
@@ -3512,7 +3512,7 @@
 !>                          : 1 = latitude and day of year varying value (AER; Oreopoulos, et al., 2012)
 !>  /param decorr_con       : decorrelation length constant
 !!
-!>\section detail Detailed Algorithm
+!>\section detail_get_alpha_exp Detailed Algorithm
 !! @{
       subroutine get_alpha_exp(nlon, nlay, dzlay, iovrlp, latdeg,       &
      &     juldat, yearlen, cldf, alpha)

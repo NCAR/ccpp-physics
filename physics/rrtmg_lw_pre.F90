@@ -1,11 +1,11 @@
 !>\file rrtmg_lw_pre.f90
 !! This file contains a call to module_radiation_surface::setemis() to
 !! setup surface emissivity for LW radiation.
+
+!>\defgroup rrtmg_lw_pre_mod GFS RRTMG scheme pre
       module rrtmg_lw_pre
       contains
 
-!>\defgroup rrtmg_lw_pre GFS RRTMG scheme pre
-!! @{
 !> \section arg_table_rrtmg_lw_pre_init Argument Table
 !!
       subroutine rrtmg_lw_pre_init ()
@@ -53,5 +53,5 @@
 !!
        subroutine rrtmg_lw_pre_finalize ()
        end subroutine rrtmg_lw_pre_finalize
-!! @}
+
        end module rrtmg_lw_pre

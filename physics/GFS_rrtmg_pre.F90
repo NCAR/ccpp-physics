@@ -1,14 +1,15 @@
 !> \file GFS_rrtmg_pre.f90
 !! This file contains
+
+!> \defgroup GFS_rrtmg_pre_mod GFS RRTMG Scheme Pre
+!! @{
       module GFS_rrtmg_pre
 
       public GFS_rrtmg_pre_run
 
       contains
 
-!> \defgroup GFS_rrtmg_pre GFS RRTMG Scheme Pre
-!! @{
-!! \section arg_table_GFS_rrtmg_pre_init Argument Table
+!> \section arg_table_GFS_rrtmg_pre_init Argument Table
 !!
       subroutine GFS_rrtmg_pre_init ()
       end subroutine GFS_rrtmg_pre_init
@@ -941,5 +942,5 @@
       subroutine GFS_rrtmg_pre_finalize ()
       end subroutine GFS_rrtmg_pre_finalize
 
-!! @}
       end module GFS_rrtmg_pre
+!! @}
