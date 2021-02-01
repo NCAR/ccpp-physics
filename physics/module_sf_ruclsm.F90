@@ -506,7 +506,14 @@ CONTAINS
            soilice(k)=0.
            soiliqw(k)=0.
         enddo
-     endif ! init=.true., iter=1
+     else ! .not. init==true.
+       DO J=jts,jte
+         DO i=its,ite
+           SFCRUNOFF(i,j) = 0.
+           UDRUNOFF(i,j) = 0.
+         ENDDO
+       ENDDO
+     endif ! init==.true.
 
 !-----------------------------------------------------------------
 
@@ -6197,7 +6204,13 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 !--- Next 3 lines are for Johansen thermal conduct.
            gamd=(1.-ws)*2700.
            kdry=(0.135*gamd+64.7)/(2700.-0.947*gamd)
-           kas=kqwrtz**qwrtz*kzero**(1.-qwrtz)
+           !kas=kqwrtz**qwrtz*kzero**(1.-qwrtz)
+           !-- one more option from Christa's paper
+           if(qwrtz > 0.2) then
+             kas=kqwrtz**qwrtz*kzero**(1.-qwrtz)
+           else
+             kas=kqwrtz**qwrtz*3.**(1.-qwrtz)
+           endif
 
          DO K=1,NZS1
            tn=tav(k) - 273.15
@@ -6256,13 +6269,13 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
         if((ws-a).lt.0.12)then
            diffu(K)=0.
         else
-           H=max(0.,(soilmoism(K)-a)/(max(1.e-8,(dqm-a))))
+           H=max(0.,(soilmoism(K)+qmin-a)/(max(1.e-8,(dqm-a))))
            facd=1.
         if(a.ne.0.)facd=1.-a/max(1.e-8,soilmoism(K))
           ame=max(1.e-8,dqm-riw*soilicem(K))
 !--- DIFFU is diffusional conductivity of soil water
           diffu(K)=-BCLH*KSAT*PSIS/ame*                             &
-                  (dqm/ame)**3.                                     &
+                  (ws/ame)**3.                                     &
                   *H**(BCLH+2.)*facd
          endif
 
@@ -6288,7 +6301,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
             fach=1.
           if(soilice(k).ne.0.)                                     &
              fach=1.-riw*soilice(k)/max(1.e-8,soilmois(k))
-         am=max(1.e-8,dqm-riw*soilice(k))
+         am=max(1.e-8,ws-riw*soilice(k))
 !--- HYDRO is hydraulic conductivity of soil water
           hydro(K)=min(KSAT,KSAT/am*                                        & 
                   (soiliqw(K)/am)                                  &
@@ -6512,7 +6525,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
 
    REAL    ::  F1,T1,T2,RN
    INTEGER ::  I,I1
-     
+
        I=(TN-1.7315E2)/.05+1
        T1=173.1+FLOAT(I)*.05
        F1=T1+D1*TT(I)-D2
@@ -6523,7 +6536,7 @@ print *,'INFMAX,INFMAX1,HYDRO(1)*SOILIQW(1),-TOTLIQ', &
        T1=173.1+FLOAT(I)*.05
        F1=T1+D1*TT(I)-D2
        RN=F1/(.05+D1*(TT(I+1)-TT(I)))
-       I=I-INT(RN)                      
+       I=I-INT(RN)
        IF(I.GT.5000.OR.I.LT.1) GOTO 1
        IF(I1.NE.I) GOTO 10
        TS=T1-.05*RN

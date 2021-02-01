@@ -519,6 +519,7 @@
                 endif
               enddo
             enddo
+            ! DH* 20201104: don't forget snocvr_ice for RUC LSM (see FV3GFS_io.F90)
           endif
         endif
 #endif
