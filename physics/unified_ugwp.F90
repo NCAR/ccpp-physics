@@ -334,7 +334,7 @@ contains
                  errmsg,errflg)
 !
 ! put zeros due to xy GSL-drag style: dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls
-!		 
+!
         tau_mtb  = 0. ; tau_ogw  = 0. ; tau_tofd = 0.
         dudt_mtb = 0. ; dudt_ogw = 0. ; dudt_tms = 0.
 	
@@ -375,7 +375,7 @@ contains
         if (errflg/=0) return
       endif
 
-         tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
+      tau_mtb   = 0.0  ; tau_ogw   = 0.0 ;  tau_tofd = 0.0
       if (ldiag_ugwp) then
         du3dt_mtb = 0.0  ; du3dt_ogw = 0.0 ;  du3dt_tms= 0.0
       end if
