@@ -180,7 +180,7 @@
      &       im, levs, deltim, fhswr,                                   &
      &       dry, icy, wet,                                             &
      &       use_LW_jacobian, sfculw, sfculw_jac,                       &
-     &       pert_radtend, do_sppt,                                     &
+     &       pert_radtend, do_sppt,ca_global,                           &
 !    &       dry, icy, wet, lprnt, ipr,                                 &
 !  ---  input/output:
      &       dtdt,dtdtnp,                                               &
@@ -212,7 +212,8 @@
 !     integer, intent(in) :: ipr
 !     logical lprnt
       logical, dimension(im), intent(in) :: dry, icy, wet
-      logical, intent(in) :: use_LW_jacobian, pert_radtend,do_sppt
+      logical, intent(in) :: use_LW_jacobian, pert_radtend
+      logical, intent(in) :: do_sppt,ca_global
       real(kind=kind_phys),   intent(in) :: solhr, slag, cdec, sdec,    &
      &                                      deltim, fhswr
 
@@ -360,7 +361,7 @@
           dtdt(i,k)  = dtdt(i,k)  + swh(i,k)*xmu(i)  + hlw(i,k)
         enddo
       enddo
-      if (do_sppt) then
+      if (do_sppt .or. ca_global) then
          if (pert_radtend) then
 ! clear sky
            do k = 1, levs

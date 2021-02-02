@@ -219,7 +219,7 @@
                rain_cpl(:) = rain_cpl(:) + (sppt_wts(:,15) - 1.0)*drain_cpl(:)
                snow_cpl(:) = snow_cpl(:) + (sppt_wts(:,15) - 1.0)*dsnow_cpl(:)
             endif
-!zero out radiative heating tendency for next physics step
+           !zero out radiative heating tendency for next physics step
            dtdtnp(:,:)=0.0
 
          endif
@@ -290,6 +290,8 @@
                rain_cpl(:) = rain_cpl(:) + (ca(:,15) - 1.0)*drain_cpl(:)
                snow_cpl(:) = snow_cpl(:) + (ca(:,15) - 1.0)*dsnow_cpl(:)
             endif
+            !zero out radiative heating tendency for next physics step
+            dtdtnp(:,:)=0.0
 
 
          endif
