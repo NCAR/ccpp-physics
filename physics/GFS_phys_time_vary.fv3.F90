@@ -18,7 +18,7 @@
       use h2ointerp, only : read_h2odata, setindxh2o, h2ointerpol
 
       use aerclm_def, only : aerin, aer_pres, ntrcaer, ntrcaerm
-      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol
+      use aerinterp,  only : read_aerdata, setindxaer, aerinterpol, read_aerdataf
 
       use iccn_def,   only : ciplin, ccnin, ci_pres
       use iccninterp, only : read_cidata, setindxci, ciinterpol
@@ -59,14 +59,17 @@
 
          ! Local variables
          integer :: nb, nblks, nt
-         integer :: i, j, ix
+         integer :: i, j, ix, iamin, iamax, jamin, jamax
          logical :: non_uniform_blocks
          ! Initialize CCPP error handling variables
          errmsg = ''
          errflg = 0
 
          if (is_initialized) return
-
+         iamin=999
+         iamax=-999
+         jamin=999
+         jamax=-999
          nblks = size(Model%blksz)
 
          ! Non-uniform blocks require special handling: instead
@@ -100,6 +103,7 @@
 !$OMP          shared (Model,Data,Interstitial,errmsg,errflg) &
 !$OMP          shared (levozp,oz_coeff,oz_pres)               &
 !$OMP          shared (levh2o,h2o_coeff,h2o_pres)             &
+!$OMP          shared (iamin, iamax, jamin, jamax)            &
 !$OMP          shared (ntrcaer,nblks,nthrds,non_uniform_blocks)
 
 #ifdef OPENMP
@@ -230,14 +234,22 @@
 
 !> - Call setindxaer() to initialize aerosols data
          if (Model%iaerclm) then
-!$OMP do schedule (dynamic,1)
+!$OMP single
+!!!!$OMP do schedule (dynamic,1)
            do nb = 1, nblks
              call setindxaer (Model%blksz(nb), Data(nb)%Grid%xlat_d, Data(nb)%Grid%jindx1_aer,           &
                               Data(nb)%Grid%jindx2_aer, Data(nb)%Grid%ddy_aer, Data(nb)%Grid%xlon_d,     &
                               Data(nb)%Grid%iindx1_aer, Data(nb)%Grid%iindx2_aer, Data(nb)%Grid%ddx_aer, &
                               Model%me, Model%master)
+             iamin=min(minval(Data(nb)%Grid%iindx1_aer), iamin)
+             iamax=max(maxval(Data(nb)%Grid%iindx2_aer), iamax)
+             jamin=min(minval(Data(nb)%Grid%jindx1_aer), jamin)
+             jamax=max(maxval(Data(nb)%Grid%jindx2_aer), jamax)
            enddo
-!$OMP end do
+!!!!$OMP end do
+           call read_aerdataf (iamin, iamax, jamin, jamax, Model%me,Model%master,Model%iflip,            &
+                              Model%idate,errmsg,errflg)
+!$OMP end single
          endif
 
 !> - Call setindxci() to initialize IN and CCN data
@@ -497,7 +509,6 @@
             enddo
           endif
         endif
-
 #if 0
         !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
         if (first_time_step) then

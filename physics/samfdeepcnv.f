@@ -161,7 +161,7 @@
      &                     jmin(im), lmin(im), kbmax(im),
      &                     kbm(im), kmax(im)
 !
-      real(kind=kind_phys) acrt(im),   acrtfct(im)
+!     real(kind=kind_phys) aa1(im),     acrt(im),   acrtfct(im),
       real(kind=kind_phys) aa1(im),     tkemean(im),clamt(im),
      &                     ps(im),      del(im,km), prsl(im,km),
      &                     umean(im),   tauadv(im), gdx(im),
@@ -247,18 +247,18 @@ c  cloud water
      &                     qrcko(im,km),   qrcdo(im,km),
      &                     pwo(im,km),     pwdo(im,km),   c0t(im,km),
      &                     tx1(im),        sumx(im),      cnvwt(im,km)
-     &,                    rhbar(im)
+!    &,                    rhbar(im)
 !
       logical do_aerosols, totflg, cnvflg(im), asqecflg(im), flg(im)
 !
 !    asqecflg: flag for the quasi-equilibrium assumption of Arakawa-Schubert
 !
-      real(kind=kind_phys) pcrit(15), acritt(15), acrit(15)
-      save pcrit, acritt
-      data pcrit/850.,800.,750.,700.,650.,600.,550.,500.,450.,400.,
-     &           350.,300.,250.,200.,150./
-      data acritt/.0633,.0445,.0553,.0664,.075,.1082,.1521,.2216,
-     &           .3151,.3677,.41,.5255,.7663,1.1686,1.6851/
+!     real(kind=kind_phys) pcrit(15), acritt(15), acrit(15)
+!!    save pcrit, acritt
+!     data pcrit/850.,800.,750.,700.,650.,600.,550.,500.,450.,400.,
+!    &           350.,300.,250.,200.,150./
+!     data acritt/.0633,.0445,.0553,.0664,.075,.1082,.1521,.2216,
+!    &           .3151,.3677,.41,.5255,.7663,1.1686,1.6851/
 c  gdas derived acrit
 c     data acritt/.203,.515,.521,.566,.625,.665,.659,.688,
 c    &            .743,.813,.886,.947,1.138,1.377,1.896/
@@ -318,8 +318,8 @@ c
         edt(i)  = 0.
         edto(i) = 0.
         edtx(i) = 0.
-        acrt(i) = 0.
-        acrtfct(i) = 1.
+!       acrt(i) = 0.
+!       acrtfct(i) = 1.
         aa1(i)  = 0.
         aa2(i)  = 0.
         xaa0(i) = 0.
@@ -395,9 +395,9 @@ c
         enddo
       endif
 c
-      do k = 1, 15
-        acrit(k) = acritt(k) * (975. - pcrit(k))
-      enddo
+!     do k = 1, 15
+!       acrit(k) = acritt(k) * (975. - pcrit(k))
+!     enddo
 !
       dt2 = delt
 !     val   =         1200.
@@ -1246,7 +1246,7 @@ c
 !         aa1(i) = 0.
           qcko(i,kb(i)) = qo(i,kb(i))
           qrcko(i,kb(i)) = qo(i,kb(i))
-          rhbar(i) = 0.
+!         rhbar(i) = 0.
         endif
       enddo
 !> - Calculate the moisture content of the entraining/detraining parcel (qcko) and the value it would have if just saturated (qrch), according to equation A.14 in Grell (1993) \cite grell_1993 . Their difference is the amount of convective cloud water (qlk = rain + condensate). Determine the portion of convective cloud water that remains suspended and the portion that is converted into convective precipitation (pwo). Calculate and save the negative cloud work function (aa1) due to water loading. The liquid water in the updraft layer is assumed to be detrained from the layers above the level of the minimum moist static energy into the grid-scale cloud water (dellal).
@@ -1268,7 +1268,7 @@ cj
 cj
               dq = eta(i,k) * (qcko(i,k) - qrch)
 c
-              rhbar(i) = rhbar(i) + qo(i,k) / qeso(i,k)
+!             rhbar(i) = rhbar(i) + qo(i,k) / qeso(i,k)
 c
 c  check if there is excess moisture to release latent heat
 c
@@ -1311,12 +1311,12 @@ c
         enddo
       enddo
 c
-      do i = 1, im
-        if(cnvflg(i)) then
-          indx = ktcon(i) - kb(i) - 1
-          rhbar(i) = rhbar(i) / float(indx)
-        endif
-      enddo
+!     do i = 1, im
+!       if(cnvflg(i)) then
+!         indx = ktcon(i) - kb(i) - 1
+!         rhbar(i) = rhbar(i) / float(indx)
+!       endif
+!     enddo
 c
 c  calculate cloud work function
 c
@@ -2319,56 +2319,56 @@ c
 c
 c  calculate critical cloud work function
 c
-      do i = 1, im
-        if(cnvflg(i)) then
-          if(pfld(i,ktcon(i)) < pcrit(15))then
-            acrt(i)=acrit(15)*(975.-pfld(i,ktcon(i)))
-     &              /(975.-pcrit(15))
-          else if(pfld(i,ktcon(i)) > pcrit(1))then
-            acrt(i)=acrit(1)
-          else
-            k =  int((850. - pfld(i,ktcon(i)))/50.) + 2
-            k = min(k,15)
-            k = max(k,2)
-            acrt(i)=acrit(k)+(acrit(k-1)-acrit(k))*
-     &           (pfld(i,ktcon(i))-pcrit(k))/(pcrit(k-1)-pcrit(k))
-          endif
-        endif
-      enddo
-      do i = 1, im
-        if(cnvflg(i)) then
-          if(islimsk(i) == 1) then
-            w1 = w1l
-            w2 = w2l
-            w3 = w3l
-            w4 = w4l
-          else
-            w1 = w1s
-            w2 = w2s
-            w3 = w3s
-            w4 = w4s
-          endif
+!     do i = 1, im
+!       if(cnvflg(i)) then
+!         if(pfld(i,ktcon(i)) < pcrit(15))then
+!           acrt(i)=acrit(15)*(975.-pfld(i,ktcon(i)))
+!    &              /(975.-pcrit(15))
+!         else if(pfld(i,ktcon(i)) > pcrit(1))then
+!           acrt(i)=acrit(1)
+!         else
+!           k =  int((850. - pfld(i,ktcon(i)))/50.) + 2
+!           k = min(k,15)
+!           k = max(k,2)
+!           acrt(i)=acrit(k)+(acrit(k-1)-acrit(k))*
+!    &           (pfld(i,ktcon(i))-pcrit(k))/(pcrit(k-1)-pcrit(k))
+!         endif
+!       endif
+!     enddo
+!     do i = 1, im
+!       if(cnvflg(i)) then
+!         if(islimsk(i) == 1) then
+!           w1 = w1l
+!           w2 = w2l
+!           w3 = w3l
+!           w4 = w4l
+!         else
+!           w1 = w1s
+!           w2 = w2s
+!           w3 = w3s
+!           w4 = w4s
+!         endif
 c
 c  modify critical cloud workfunction by cloud base vertical velocity
 c
-          if(pdot(i) <= w4) then
-            acrtfct(i) = (pdot(i) - w4) / (w3 - w4)
-          elseif(pdot(i) >= -w4) then
-            acrtfct(i) = - (pdot(i) + w4) / (w4 - w3)
-          else
-            acrtfct(i) = 0.
-          endif
-          val1    =            -1.
-          acrtfct(i) = max(acrtfct(i),val1)
-          val2    =             1.
-          acrtfct(i) = min(acrtfct(i),val2)
-          acrtfct(i) = 1. - acrtfct(i)
+!         if(pdot(i) <= w4) then
+!           acrtfct(i) = (pdot(i) - w4) / (w3 - w4)
+!         elseif(pdot(i) >= -w4) then
+!           acrtfct(i) = - (pdot(i) + w4) / (w4 - w3)
+!         else
+!           acrtfct(i) = 0.
+!         endif
+!         val1    =            -1.
+!         acrtfct(i) = max(acrtfct(i),val1)
+!         val2    =             1.
+!         acrtfct(i) = min(acrtfct(i),val2)
+!         acrtfct(i) = 1. - acrtfct(i)
 c
-c  modify acrtfct(i) by colume mean rh if nhbar(i) is greater than 80 percent
- 
-          if(rhbar(i) >= .8) then
-            acrtfct(i) = acrtfct(i) * (.9 - min(rhbar(i),.9)) * 10.
-          endif
+c  modify acrtfct(i) by colume mean rh if rhbar(i) is greater than 80 percent
+c
+c         if(rhbar(i) >= .8) then
+c           acrtfct(i) = acrtfct(i) * (.9 - min(rhbar(i),.9)) * 10.
+c         endif
 c
 c  modify adjustment time scale by cloud base vertical velocity
 c
@@ -2380,8 +2380,8 @@ c         dtconv(i) = 1800. * (pdot(i) - w2) / (w1 - w2)
 !         dtconv(i) = max(dtconv(i),dtmin)
 !         dtconv(i) = min(dtconv(i),dtmax)
 c
-        endif
-      enddo
+!       endif
+!     enddo
 !
 !  compute convective turn-over time
 !

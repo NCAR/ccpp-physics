@@ -561,7 +561,7 @@
 
       laswflg= (mod(iaerflg,10) > 0)    ! control flag for sw tropospheric aerosol
       lalwflg= (mod(iaerflg/10,10) > 0) ! control flag for lw tropospheric aerosol
-      lavoflg= (iaerflg >= 100)         ! control flag for stratospheric volcanic aeros
+      lavoflg= (mod(iaerflg/100,10) >0) ! control flag for stratospheric volcanic aeros
 
 !> -# Call wrt_aerlog() to write aerosol parameter configuration to output logs.
 
