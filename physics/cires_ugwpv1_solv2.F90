@@ -840,7 +840,7 @@ contains
             dktur(levs) = .5*( dked(jl,levs)+ dked(jl,levs-1))
             dktur(levs+1) = dktur(levs)
 
-         do jk=ksrc,levs
+     do jk=ksrc,levs+1
        ze1 = .5*( dktur(jk) +dktur(jk-1) )
        kvint(jk) = ze1
        ktint(jk) = ze1*iPr_ktgw
@@ -909,14 +909,14 @@ contains
 !
       if (knob_ugwp_dokdis == 2) then
 
-         do jk=km1,levs
-       ze1 = min(.5*(dktur(jk) +dktur(jk-1)), dturb_max)
-       kvint(jk) = kvint(jk) + ze1
-!       ktint(jk) = ktint(jk) + ze1*iPr_ktgw
-     enddo 
+        do jk=ksrc,levs
+          ze1 = min(.5*(dktur(jk) +dktur(jk-1)), dturb_max)
+          kvint(jk) = kvint(jk) + ze1
+!          ktint(jk) = ktint(jk) + ze1*iPr_ktgw
+        enddo 
+        kvint(km1) = kvint(ksrc)
+        kvint(ktop) = kvint(levs)
 
-           kvint(ktop) = kvint(levs)
-           
         dzmetm =  1./dz_met(km1)
         Adif(km1:levs)  =  0.
         Cdif(km1:levs)  =  0.
