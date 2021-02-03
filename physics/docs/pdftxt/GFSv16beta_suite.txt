@@ -24,7 +24,6 @@ The GFS_v16beta physics suite uses the parameterizations in the following order:
  - \ref GFS_SAMFdeep
  - \ref GFS_SAMFshal
  - \ref GFDL_cloud
- - \ref GFS_CALPRECIPTYPE
 
 \section sdf_gfsv16b Suite Definition File 
 \code

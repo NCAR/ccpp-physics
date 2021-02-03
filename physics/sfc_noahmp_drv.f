@@ -1,7 +1,7 @@
 !>  \file sfc_noahmp_drv.f
 !!  This file contains the NoahMP land surface scheme driver.
 
-!>\defgroup NoahMP_LSM NoahMP LSM Model
+!>\defgroup NoahMP_LSM GFS NoahMP LSM Model
 !! \brief This is the NoahMP LSM driver module, with the functionality of 
 !! preparing variables to run the NoahMP LSM subroutine noahmp_sflx(), calling NoahMP LSM and post-processing
 !! variables for return to the parent model suite including unit conversion, as well

@@ -26,7 +26,6 @@ The GSD_v1 physics suite uses the parameterizations in the following order:
    - \ref cu_gf_deep_group
    - \ref cu_gf_sh_group
  - \ref THOMPSON
- - \ref GFS_CALPRECIPTYPE
 
 \section sdf_gsdsuite Suite Definition File 
 \code

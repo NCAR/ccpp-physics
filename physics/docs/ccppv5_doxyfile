@@ -130,7 +130,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
-                          pdftxt/GFS_CALPRECIPTYPE.txt   \
+###                          pdftxt/GFS_CALPRECIPTYPE.txt   \
 ###                          pdftxt/rad_cld.txt             \
                           pdftxt/CPT_CSAW.txt            \
                           pdftxt/CPT_MG3.txt             \
@@ -181,8 +181,8 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../dcyc2.f        \
 ### Land Surface
                         ../sfc_diff.f \
-                        ../module_MYNNSFC_wrapper.F90 \
-                        ../module_sf_mynn.F90         \
+###                        ../module_MYNNSFC_wrapper.F90 \
+###                        ../module_sf_mynn.F90         \
                         ../sfc_nst.f                  \
                         ../sfc_ocean.F                \
                         ../module_nst_model.f90       \

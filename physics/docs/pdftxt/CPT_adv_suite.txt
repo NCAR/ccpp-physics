@@ -18,7 +18,6 @@ The csawmg physics suite uses the parameterizations in the following order:
  - \ref GFS_SAMFshal
  - \ref CPT_MG3
  - \ref mod_cs_conv_aw_adj
- - \ref GFS_CALPRECIPTYPE
 
 \section sdf_cpt_suite Suite Definition File 
 \code

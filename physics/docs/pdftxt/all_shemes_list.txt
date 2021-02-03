@@ -3,84 +3,78 @@
 
 \section allscheme_overview Physical Parameterizations 
 
-In the CCPP, each parameterization is in its own modern Fortran module, which facilitates model development and
-code maintenance. While some individual parameterization can be invoked for the SCM, most host models will assemble the 
-parameterizations in suites. 
+In the CCPP, each parameterization is in its own modern Fortran module (i.e., CCPP-compliant; see rules for scheme to considered CCPP-compliant at 
+<a href="https://ccpp-techdoc.readthedocs.io/en/v4.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>), 
+which facilitates model development and code maintenance. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
 
 
 \b Radiation
  - \subpage GFS_RRTMG 
-   +  rrtmg_sw_pre / rrtmg_sw / rrtmg_sw_post / rrtmg_lw_pre / rrtmg_lw / rrtmg_lw_post    
+   +  CCPP-compliant modules: rrtmg_sw_pre / rrtmg_sw / rrtmg_sw_post / rrtmg_lw_pre / rrtmg_lw / rrtmg_lw_post    
  - \subpage SGSCLOUD_page 
-   +  sgscloud_radpre
+   +  CCPP-compliant module: sgscloud_radpre
 
 \b PBL \b and \b Turbulence
  - \subpage GFS_HEDMF 
-   +  \ref hedmf
+   +  CCPP-compliant module: \ref hedmf
  - \subpage GFS_SATMEDMFVDIFQ 
-   +  \ref satmedmfvdifq
+   +  CCPP-compliant module: \ref satmedmfvdifq
  - \subpage MYNNEDMF 
-   +  mynnedmf_wrapper
+   +  CCPP-compliant module: mynnedmf_wrapper
 
 \b Land \b Surface \b Model
  - \subpage GFS_NOAH 
-   +  lsm_noah
+   +  CCPP-compliant module: lsm_noah
  - \subpage RUCLSM 
-   +  lsm_ruc
+   +  CCPP-compliant module: lsm_ruc
  - \subpage NoahMP 
-   +  \ref noahmpdrv
+   +  CCPP-compliant module: \ref noahmpdrv
 
 \b Cumulus \b Parameterizations
  - \subpage GFS_SAMFdeep 
-   +  \ref samfdeepcnv
+   +  CCPP-compliant module: \ref samfdeepcnv
  - \subpage GFS_SAMFshal 
-   +  \ref samfshalcnv
+   +  CCPP-compliant module: \ref samfshalcnv
  - \subpage CSAW_scheme 
-   +  cs_conv_pre / cs_conv / cs_conv_post / cs_conv_aw_adj
+   +  CCPP-compliant modules: cs_conv_pre / cs_conv / cs_conv_post / cs_conv_aw_adj
  - \subpage CU_GF 
-   +  \ref cu_gf_driver_pre / cu_gf_driver
+   +  CCPP-compliant modules: \ref cu_gf_driver_pre / cu_gf_driver
 
 \b Microphysics
  - \subpage GFDL_cloud 
-   +  fv_sat_adj / gfdl_cloud_microphys
+   +  CCPP-compliant modules: fv_sat_adj / gfdl_cloud_microphys
  - \subpage CPT_MG3 
-   +  \ref m_micro_pre / m_micro / \ref m_micro_post
+   +  CCPP-compliant modules: \ref m_micro_pre / m_micro / \ref m_micro_post
  - \subpage THOMPSON 
-   +  mp_thompson_pre / mp_thompson / mp_thompson_post
+   +  CCPP-compliant modules: mp_thompson_pre / mp_thompson / mp_thompson_post
 
 \b Ozone \b Photochemical \b Production \b and \b Loss
  - \subpage GFS_OZPHYS 
-   +  ozphys_2015
+   +  CCPP-compliant module: ozphys_2015
 
 \b Water \b Vapor \b Photochemical \b Production \b and \b Loss
  - \subpage GFS_H2OPHYS 
-   +  h2ophys
+   +  CCPP-compliant module: h2ophys
 
 \b Gravity \b Wave \b Drag
  - \subpage GFS_UGWP_v0 
-   +  cires_ugwp / cires_ugwp_post
+   +  CCPP-compliant modules: cires_ugwp / cires_ugwp_post
 
 \b Surface \b Layer 
  - \subpage GFS_SFCLYR 
-   +  sfc_diff
+   +  CCPP-compliant module: sfc_diff
 
 \b Simplified \b Ocean \b and \b Sea \b Ice \b Representation
  - \subpage GFS_NSST 
-   +  sfc_nst_pre / sfc_nst / sfc_nst_post
+   +  CCPP-compliant modules: sfc_nst_pre / sfc_nst / sfc_nst_post
  - \subpage GFS_OCEAN 
-   +  sfc_ocean
+   +  CCPP-compliant module: sfc_ocean
  - \subpage GFS_SFCSICE 
-   +  sfc_sice
+   +  CCPP-compliant module: sfc_sice
 
 \b Others
  - \subpage GFS_RAYLEIGH 
-   +  rayleigh_damp
-
-In addition to the physical schemes themselves, this scientific documentation also covers four modules that define physics/radiation functions, parameters and constants:
- - \ref func_phys
- - \ref phy_sparam
- - \ref physcons
- - \ref radcons
+   +  CCPP-compliant module: rayleigh_damp
 
 The input information for the parameterizations includes the values of the gridbox mean prognostic variables (wind components, temperature,
 specific humidity, cloud fraction, water contents for cloud liquid, cloud ice, rain, snow, graupel, and ozone concentration), the provisional
