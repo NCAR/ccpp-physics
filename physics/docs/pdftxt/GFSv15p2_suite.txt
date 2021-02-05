@@ -140,7 +140,7 @@ The GFS_v15p2 physics suite uses the parameterizations in the following order:
     do_ugwp         = .false.
     do_ysu          = .false.
     dspheat         = .true.
-    effr_in         = .false.
+    effr_in         = .true.
     fhcyc           = 0.0
     fhlwr           = 3600.0
     fhswr           = 3600.0
@@ -174,7 +174,7 @@ The GFS_v15p2 physics suite uses the parameterizations in the following order:
     ivegsrc         = 1
     ldiag3d         = .false.
     ldiag_ugwp      = .false.
-    lgfdlmprad      = .false.
+    lgfdlmprad      = .true.
     lheatstrg       = .false.
     lsm             = 1
     lwhtr           = .true.
@@ -193,7 +193,7 @@ The GFS_v15p2 physics suite uses the parameterizations in the following order:
     shal_cnv        = .true.
     shinhong        = .false.
     swhtr           = .true.
-    trans_trac      = .false.
+    trans_trac      = .true.
     use_ufo         = .true.
     xkzm_h          = 1.0
     xkzm_m          = 1.0                                                                                                    
