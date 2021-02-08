@@ -980,7 +980,12 @@ contains
 
      if(parameters%hvt> 0. .and. parameters%hvt <= 1.0) then          !mb: change to 1.0 and 0.2 to reflect
        snowhc = parameters%hvt*exp(-snowh/0.2)             !      changes to hvt in mptable
-       fb     = min(snowh,snowhc)/snowhc
+!      fb     = min(snowh,snowhc)/snowhc
+       if (snowh < snowhc) then
+          fb = snowh/snowhc
+        else
+          fb = 1.0
+       endif
      endif
 
      elai =  lai*(1.-fb)
@@ -1750,6 +1755,10 @@ contains
 ! ground snow cover fraction [niu and yang, 2007, jgr]
 
      fsno = 0.
+    if(snowh <= 1.e-6 .or. sneqv <= 1.e-3) then
+     snowh = 0.0
+     sneqv = 0.0
+    end if
      if(snowh.gt.0.)  then
          bdsno    = sneqv / snowh
          fmelt    = (bdsno/100.)**parameters%mfsno
@@ -3812,7 +3821,7 @@ contains
 
      if(opt_stc == 1 .or. opt_stc == 3) then
      if (snowh > 0.05 .and. tg > tfrz) then
-        tg  = tfrz
+        if(opt_stc == 1) tg  = tfrz
         if(opt_stc == 3) tg  = (1.-fsno)*tg + fsno*tfrz   ! mb: allow tg>0c during melt v3.7
         irg = cir*tg**4 - emg*(1.-emv)*lwdn - emg*emv*sb*tv**4
         shg = csh * (tg         - tah)
@@ -4146,7 +4155,7 @@ contains
 
      if(opt_stc == 1 .or. opt_stc == 3) then
      if (snowh > 0.05 .and. tgb > tfrz) then
-          tgb = tfrz
+          if(opt_stc == 1) tgb = tfrz
           if(opt_stc == 3) tgb  = (1.-fsno)*tgb + fsno*tfrz  ! mb: allow tg>0c during melt v3.7
           irb = cir * tgb**4 - emg*lwdn
           shb = csh * (tgb        - sfctmp)
@@ -4374,7 +4383,7 @@ contains
     tmpch2 = log((2.0 + z0h) / z0h)
 
     if(iter == 1) then
-       fv   = 0.0
+       fv   = 0.1
        moz  = 0.0
        mol  = 0.0
        moz2 = 0.0
@@ -5079,7 +5088,7 @@ contains
        err_est = err_est + (stc(iz)-tbeg(iz)) * dzsnso(iz) * hcpct(iz) / dt
     enddo
 
-    if (opt_stc == 1) then   ! semi-implicit
+    if (opt_stc == 1 .or. opt_stc == 3) then   ! semi-implicit
        err_est = err_est - (ssoil +eflxb)
     else                     ! full-implicit
        ssoil2 = df(isnow+1)*(tg-stc(isnow+1))/(0.5*dzsnso(isnow+1))   !m. barlage
@@ -5188,7 +5197,7 @@ contains
         if (k == isnow+1) then
            ai(k)    =   0.0
            ci(k)    = - df(k)   * ddz(k) / denom(k)
-           if (opt_stc == 1) then
+           if (opt_stc == 1 .or. opt_stc == 3) then
               bi(k) = - ci(k)
            end if                                        
            if (opt_stc == 2) then
