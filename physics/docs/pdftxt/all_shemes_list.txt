@@ -4,7 +4,7 @@
 \section allscheme_overview Physical Parameterizations 
 
 In the CCPP, each parameterization is in its own modern Fortran module (i.e., CCPP-compliant; see rules for scheme to considered CCPP-compliant at 
-<a href="https://ccpp-techdoc.readthedocs.io/en/v4.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>), 
+<a href="https://ccpp-techdoc.readthedocs.io/en/v5.0.0/CompliantPhysicsParams.html"> CCPP-Compliant Physics Parameterizations </a>), 
 which facilitates model development and code maintenance. Additionally, we are listing any pre- and post- interstitials that must accompany the scheme. While some individual parameterization can be invoked for the SCM, most host models will assemble the parameterizations in suites. 
 
 
