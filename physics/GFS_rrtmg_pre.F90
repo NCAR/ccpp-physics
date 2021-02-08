@@ -2,7 +2,6 @@
 !! This file contains
 
 !> \defgroup GFS_rrtmg_pre_mod GFS RRTMG Scheme Pre
-!! @{
       module GFS_rrtmg_pre
 
       public GFS_rrtmg_pre_run
@@ -943,4 +942,3 @@
       end subroutine GFS_rrtmg_pre_finalize
 
       end module GFS_rrtmg_pre
-!! @}

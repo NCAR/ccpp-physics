@@ -196,6 +196,7 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_sf_noahmplsm.f90    \
                         ../module_sf_noahmp_glacier.f90  \
                         ../noahmp_tables.f90          \
+                        ../GFS_surface_generic.F90   \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL

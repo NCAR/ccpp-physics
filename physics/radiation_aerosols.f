@@ -765,7 +765,6 @@
 !> This subroutine defines the one wavenumber solar fluxes based on toa
 !! solar spectral distribution, and define the one wavenumber IR fluxes
 !! based on black-body emission distribution at a predefined temperature.
-!>\section gen_set_spec General Algorithm
       subroutine set_spectrum
 !................................
 !  ---  inputs:   (module constants)
