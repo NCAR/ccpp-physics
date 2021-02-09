@@ -1262,31 +1262,24 @@
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dv_osscol           ', Interstitial%dv_osscol               )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%du_ofdcol           ', Interstitial%du_ofdcol               )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dv_ofdcol           ', Interstitial%dv_ofdcol               )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zobl                ', Interstitial%zobl                    )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zmtb                ', Interstitial%zmtb                    )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zlwb                ', Interstitial%zlwb                    )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zogw                ', Interstitial%zogw                    )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zngw                ', Interstitial%zngw                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_dudt             ', Interstitial%gw_dudt                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_dvdt             ', Interstitial%gw_dvdt                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_dtdt             ', Interstitial%gw_dtdt                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_kdis             ', Interstitial%gw_kdis                 )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_mtb             ', Interstitial%tau_mtb                 )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_ogw             ', Interstitial%tau_ogw                 )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_tofd            ', Interstitial%tau_tofd                )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_ngw             ', Interstitial%tau_ngw                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zmtb                ', Interstitial%zmtb                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zlwb                ', Interstitial%zlwb                    )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zogw                ', Interstitial%zogw                    )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_mtb            ', Interstitial%dudt_mtb                )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_ogw            ', Interstitial%dudt_ogw                )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_tms            ', Interstitial%dudt_tms                )
                      end if
                      ! CIRES UGWP v0
                      if (Model%do_ugwp_v0 .or. Model%do_gsl_drag_ls_bl .or. Model%do_gsl_drag_ss .or. Model%do_gsl_drag_tofd) then
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_dudt             ', Interstitial%gw_dudt                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_dvdt             ', Interstitial%gw_dvdt                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_dtdt             ', Interstitial%gw_dtdt                 )
-                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%gw_kdis             ', Interstitial%gw_kdis                 )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_gw             ', Interstitial%dudt_gw                 )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdt_gw             ', Interstitial%dvdt_gw                 )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dtdt_gw             ', Interstitial%dtdt_gw                 )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%kdis_gw             ', Interstitial%kdis_gw                 )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_mtb             ', Interstitial%tau_mtb                 )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_ogw             ', Interstitial%tau_ogw                 )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_tofd            ', Interstitial%tau_tofd                )
@@ -1299,11 +1292,30 @@
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_tms            ', Interstitial%dudt_tms                )
                      end if
                      !-- GSD drag suite
-                     if (Model%gwd_opt==3 .or. Model%gwd_opt==33) then
+                     if (Model%gwd_opt==3 .or. Model%gwd_opt==33 .or. &
+                         Model%gwd_opt==2 .or. Model%gwd_opt==22) then
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%varss               ', Interstitial%varss                   )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%ocss                ', Interstitial%ocss                    )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%oa4ss               ', Interstitial%oa4ss                   )
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%clxss               ', Interstitial%clxss                   )
+                     end if
+                     if (Model%gwd_opt==33 .or. Model%gwd_opt==22) then
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_ogw            ', Interstitial%dudt_ogw                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdt_ogw            ', Interstitial%dvdt_ogw                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%du_ogwcol           ', Interstitial%du_ogwcol               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dv_ogwcol           ', Interstitial%dv_ogwcol               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_obl            ', Interstitial%dudt_obl                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdt_obl            ', Interstitial%dvdt_obl                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%du_oblcol           ', Interstitial%du_oblcol               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dv_oblcol           ', Interstitial%dv_oblcol               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_oss            ', Interstitial%dudt_oss                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdt_oss            ', Interstitial%dvdt_oss                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%du_osscol           ', Interstitial%du_osscol               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dv_osscol           ', Interstitial%dv_osscol               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_ofd            ', Interstitial%dudt_ofd                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dvdt_ogw            ', Interstitial%dvdt_ogw                )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%du_ofdcol           ', Interstitial%du_ofdcol               )
+                         call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dv_ofdcol           ', Interstitial%dv_ofdcol               )
                      end if
                      ! GFDL and Thompson MP
                      if (Model%imp_physics == Model%imp_physics_gfdl .or. Model%imp_physics == Model%imp_physics_thompson) then

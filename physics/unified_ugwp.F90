@@ -185,7 +185,7 @@ contains
 !>@brief These subroutines and modules execute the CIRES UGWP Version 0
 !>\defgroup unified_ugwp_run Unified Gravity Wave Physics General Algorithm
 !> @{
-!! The physics of NGWs in the UGWP framework (Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, which is introduced in Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander and Dunkerton (1999) \cite alexander_and_dunkerton_1999, and Scinocca (2003) \cite scinocca_2003. The major modification of these GW solvers is represented by the addition of the background dissipation of temperature and winds to the saturation criteria for wave breaking. This feature is important in the mesosphere and thermosphere for WAM applications and it considers appropriate scale-dependent dissipation of waves near the model top lid providing the momentum and energy conservation in the vertical column physics (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP-v0, the modification of Scinocca (2003) \cite scinocca_2003 scheme for NGWs with non-hydrostatic and rotational effects for GW propagations and background dissipation is represented by the subroutine \ref fv3_ugwp_solv2_v0. In the next release of UGWP, additional GW-solvers will be implemented along with physics-based triggering of waves and stochastic approaches for selection of GW modes characterized by horizontal phase velocities, azimuthal directions and magnitude of the vertical momentum flux (VMF).
+!! The physics of NGWs in the UGWP framework (Yudin et al. 2018 \cite yudin_et_al_2018) is represented by four GW-solvers, which is introduced in Lindzen (1981) \cite lindzen_1981, Hines (1997) \cite hines_1997, Alexander and Dunkerton (1999) \cite alexander_and_dunkerton_1999, and Scinocca (2003) \cite scinocca_2003. The major modification of these GW solvers is represented by the addition of the background dissipation of temperature and winds to the saturation criteria for wave breaking. This feature is important in the mesosphere and thermosphere for WAM applications and it considers appropriate scale-dependent dissipation of waves near the model top lid providing the momentum and energy conservation in the vertical column physics (Shaw and Shepherd 2009 \cite shaw_and_shepherd_2009). In the UGWP-v0, the modification of Scinocca (2003) \cite scinocca_2003 scheme for NGWs with non-hydrostatic and rotational effects for GW propagations and backgroufnd dissipation is represented by the subroutine \ref fv3_ugwp_solv2_v0. In the next release of UGWP, additional GW-solvers will be implemented along with physics-based triggering of waves and stochastic approaches for selection of GW modes characterized by horizontal phase velocities, azimuthal directions and magnitude of the vertical momentum flux (VMF).
 !!
 !! In UGWP-v0, the specification for the VMF function is adopted from the GEOS-5 global atmosphere model of GMAO NASA/GSFC, as described in Molod et al. (2015) \cite molod_et_al_2015 and employed in the MERRRA-2 reanalysis (Gelaro et al., 2017 \cite gelaro_et_al_2017). The Fortran subroutine \ref slat_geos5_tamp describes the latitudinal shape of VMF-function as displayed in Figure 3 of Molod et al. (2015) \cite molod_et_al_2015. It shows that the enhanced values of VMF in the equatorial region gives opportunity to simulate the QBO-like oscillations in the equatorial zonal winds and lead to more realistic simulations of the equatorial dynamics in GEOS-5 operational and MERRA-2 reanalysis products. For the first vertically extended version of FV3GFS in the stratosphere and mesosphere, this simplified function of VMF allows us to tune the model climate and to evaluate multi-year simulations of FV3GFS with the MERRA-2 and ERA-5 reanalysis products, along with temperature, ozone, and water vapor observations of current satellite missions. After delivery of the UGWP-code, the EMC group developed and tested approach to modulate the zonal mean NGW forcing by 3D-distributions of the total precipitation as a proxy for the excitation of NGWs by convection and the vertically-integrated  (surface - tropopause) Turbulent Kinetic Energy (TKE). The verification scores with updated NGW forcing, as reported elsewhere by EMC researchers, display noticeable improvements in the forecast scores produced by FV3GFS configuration extended into the mesosphere.
 !!
@@ -203,7 +203,7 @@ contains
          ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,                          &
          del, kpbl, dusfcg, dvsfcg, gw_dudt, gw_dvdt, gw_dtdt, gw_kdis,                &
          tau_tofd, tau_mtb, tau_ogw, tau_ngw, zmtb, zlwb, zogw,                        &
-         dudt_mtb,dudt_ogw, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,                 &
+         dudt_mtb, dudt_tms, du3dt_mtb, du3dt_ogw, du3dt_tms,      &
          dudt, dvdt, dtdt, rdxzb, con_g, con_omega, con_pi, con_cp, con_rd, con_rv,    &
          con_rerth, con_fvirt, rain, ntke, q_tke, dqdt_tke, lprnt, ipr,                &
          ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw, ldu3dt_cgw, ldv3dt_cgw, ldt3dt_cgw,       &
@@ -244,7 +244,6 @@ contains
       &                      dusfc_ss(:),dvsfc_ss(:),             &
       &                      dusfc_fd(:),dvsfc_fd(:)
     real(kind=kind_phys), intent(out) ::                          &
-      &         dtaux2d_ls(:,:),dtauy2d_ls(:,:),                  &
       &         dtaux2d_bl(:,:),dtauy2d_bl(:,:),                  &
       &         dtaux2d_ss(:,:),dtauy2d_ss(:,:),                  &
       &         dtaux2d_fd(:,:),dtauy2d_fd(:,:)
@@ -253,11 +252,12 @@ contains
       &                                     hpbl(im),             &
       &                                     slmsk(im)
 
-    real(kind=kind_phys),    intent(out), dimension(im)      :: dusfcg, dvsfcg
-    real(kind=kind_phys),    intent(out), dimension(im)      :: zmtb, zlwb, zogw, rdxzb
-    real(kind=kind_phys),    intent(out), dimension(im)      :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
-    real(kind=kind_phys),    intent(out), dimension(im, levs):: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
-    real(kind=kind_phys),    intent(out), dimension(im, levs):: dudt_mtb, dudt_ogw, dudt_tms
+    real(kind=kind_phys),    intent(out), dimension(im)         :: dusfcg, dvsfcg
+    real(kind=kind_phys),    intent(out), dimension(im)         :: zmtb, zlwb, zogw, rdxzb
+    real(kind=kind_phys),    intent(out), dimension(im)         :: tau_mtb, tau_ogw, tau_tofd, tau_ngw
+    real(kind=kind_phys),    intent(out), dimension(im, levs)   :: gw_dudt, gw_dvdt, gw_dtdt, gw_kdis
+    real(kind=kind_phys),    intent(out), dimension(:,:)        :: dudt_mtb, dudt_tms
+    real(kind=kind_phys),    intent(out), dimension(:,:)        :: dtaux2d_ls, dtauy2d_ls
 
     ! These arrays are only allocated if ldiag=.true.
     real(kind=kind_phys),    intent(inout), dimension(:,:)      :: ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw
@@ -333,10 +333,10 @@ contains
                  do_gsl_drag_ls_bl,do_gsl_drag_ss,do_gsl_drag_tofd,  &
                  errmsg,errflg)
 !
-! put zeros due to xy GSL-drag style: dtauy2d_ls,dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls
+! put zeros due to xy GSL-drag style: dtaux2d_bl,dtauy2d_bl,dtaux2d_ss.......dusfc_ls,dvsfc_ls
 !
         tau_mtb  = 0. ; tau_ogw  = 0. ; tau_tofd = 0.
-        dudt_mtb = 0. ; dudt_ogw = 0. ; dudt_tms = 0.
+        dudt_mtb = 0. ; dudt_tms = 0.
 	
     end if
 

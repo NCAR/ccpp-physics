@@ -312,7 +312,7 @@ contains
           varss,oc1ss,oa4ss,ol4ss, dx,  xlat, xlat_d, sinlat, coslat, area,             &
           rain, br1, hpbl, kpbl, slmsk,                                                 &
           ugrs, vgrs, tgrs, q1, prsi, prsl, prslk, phii, phil,  del, tau_amf,           &
-          dudt_ogw, dvdt_ogw, dtdt_sso,  du_ogwcol, dv_ogwcol,                          &
+          dudt_ogw, dvdt_ogw, du_ogwcol, dv_ogwcol,                                     &
           dudt_obl, dvdt_obl, du_oblcol, dv_oblcol,                                     &
           dudt_oss, dvdt_oss, du_osscol, dv_osscol,                                     &
           dudt_ofd, dvdt_ofd, du_ofdcol, dv_ofdcol,                                     &
@@ -408,7 +408,7 @@ contains
                             du_ogwcol,  dv_ogwcol,  du_oblcol, dv_oblcol, &       
                             du_osscol,  dv_osscol,  du_ofdcol, dv_ofdcol  
 !
-! we may add later but due to launch in the upper layes ~ mPa comparing to ORO Pa*(0.1)			    
+! we may add later but due to launch in the upper layes ~ mPa comparing to ORO Pa*(0.1)
 !                            du_ngwcol, dv_ngwcol
 
     real(kind=kind_phys), intent(out), dimension(im)  :: dusfcg, dvsfcg
@@ -419,9 +419,9 @@ contains
                           dudt_oss, dvdt_oss, dudt_ofd, dvdt_ofd
 
     real(kind=kind_phys), intent(out) , dimension(im, levs) :: dudt_ngw, dvdt_ngw, kdis_ngw
-    real(kind=kind_phys), intent(out) , dimension(im, levs) :: dudt_gw,  dvdt_gw,  kdis_gw     
+    real(kind=kind_phys), intent(out) , dimension(im, levs) :: dudt_gw,  dvdt_gw,  kdis_gw
     
-    real(kind=kind_phys), intent(out) , dimension(im, levs) :: dtdt_sso, dtdt_ngw, dtdt_gw 
+    real(kind=kind_phys), intent(out) , dimension(im, levs) :: dtdt_ngw, dtdt_gw 
 			  
     real(kind=kind_phys), intent(out) , dimension(im) ::  zogw,  zlwb,  zobl,  zngw
 ! 
