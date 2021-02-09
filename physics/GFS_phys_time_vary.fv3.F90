@@ -2,8 +2,8 @@
 !!  Contains code related to GFS physics suite setup (physics part of time_vary_step)
 
 !>\defgroup mod_GFS_phys_time_vary GFS Physics Time Update
-!! This module contains GFS physics time vary subroutines including ozone, stratospheric water vapor, 
-!! aerosol, IN&CCN and surface properties updates. 
+!! This module contains GFS physics time vary subroutines including ozone, stratospheric water vapor,
+!! aerosol, IN&CCN and surface properties updates.
 !> @{
    module GFS_phys_time_vary
 
@@ -28,14 +28,13 @@
       use iccninterp, only : read_cidata, setindxci, ciinterpol
 
       use gcycle_mod, only : gcycle
-      
-      use cires_tauamf_data,   only:  cires_indx_ugwp,  read_tau_amf, tau_amf_interp
-      use cires_tauamf_data,   only:  tau_limb,  days_limb, ugwp_taulat       
 
-#if 0
+      use cires_tauamf_data,   only:  cires_indx_ugwp,  read_tau_amf, tau_amf_interp
+      use cires_tauamf_data,   only:  tau_limb,  days_limb, ugwp_taulat
+
       !--- variables needed for calculating 'sncovr'
       use namelist_soilveg, only: salp_data, snupx
-#endif
+      use set_soilveg_mod, only: set_soilveg
 
       implicit none
 
@@ -45,9 +44,12 @@
 
       logical :: is_initialized = .false.
 
-      real(kind=kind_phys), parameter :: con_hr  = 3600.0_kind_phys
-      real(kind=kind_phys), parameter :: con_99  =   99.0_kind_phys
-      real(kind=kind_phys), parameter :: con_100 =  100.0_kind_phys
+      real(kind=kind_phys), parameter :: con_hr     = 3600.0_kind_phys
+      real(kind=kind_phys), parameter :: con_99     =   99.0_kind_phys
+      real(kind=kind_phys), parameter :: con_100    =  100.0_kind_phys
+      real(kind=kind_phys), parameter :: drythresh  =  1.e-4_kind_phys
+      real(kind=kind_phys), parameter :: zero       =    0.0_kind_phys
+      real(kind=kind_phys), parameter :: one        =    1.0_kind_phys
 
       contains
 
@@ -61,8 +63,9 @@
               jindx1_o3, jindx2_o3, ddy_o3, ozpl, jindx1_h, jindx2_h, ddy_h, h2opl,                &
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
-	      do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
-              nthrds, errmsg, errflg)
+              do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
+              isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_ruc, min_seaice, fice, landfrac, &
+              vtype, weasd, nthrds, errmsg, errflg)
 
          implicit none
 
@@ -81,16 +84,23 @@
          integer,              intent(inout) :: jindx1_ci(:), jindx2_ci(:), iindx1_ci(:), iindx2_ci(:)
          real(kind_phys),      intent(inout) :: ddy_ci(:), ddx_ci(:)
          integer,              intent(inout) :: imap(:), jmap(:)
-         logical,              intent(in)    :: do_ugwp_v1		 
+         logical,              intent(in)    :: do_ugwp_v1
          real(kind_phys),      intent(inout) :: ddy_j1tau(:), ddy_j2tau(:)
-         integer,              intent(inout) :: jindx1_tau(:), jindx2_tau(:)	 	 
+         integer,              intent(inout) :: jindx1_tau(:), jindx2_tau(:)
+
+         integer,              intent(in)    :: isot, ivegsrc, nlunit
+         real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
+         integer,              intent(in)    :: lsm, lsm_ruc
+         real(kind_phys),      intent(in)    :: min_seaice, fice(:)
+         real(kind_phys),      intent(in)    :: landfrac(:), vtype(:), weasd(:)
 
          integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
          ! Local variables
-         integer :: i, j, ix
+         integer :: i, j, ix, vegtyp
+         real(kind_phys) :: rsnow
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -108,12 +118,14 @@
 !$OMP          shared (jindx1_aer,jindx2_aer,ddy_aer,iindx1_aer,iindx2_aer,ddx_aer) &
 !$OMP          shared (jindx1_ci,jindx2_ci,ddy_ci,iindx1_ci,iindx2_ci,ddx_ci)       &
 !$OMP          shared (do_ugwp_v1,jindx1_tau,jindx2_tau,ddy_j1tau,ddy_j2tau)        &
-!$OMP          private (ix,i,j)
+!$OMP          shared (isot,ivegsrc,nlunit,sncovr,sncovr_ice,lsm,lsm_ruc)           &
+!$OMP          shared (min_seaice,fice,landfrac,vtype,weasd,snupx,salp_data)        &
+!$OMP          private (ix,i,j,rsnow,vegtyp)
 
 !$OMP sections
 
 !$OMP section
-!> - Call read_o3data() to read ozone data 
+!> - Call read_o3data() to read ozone data
          call read_o3data (ntoz, me, master)
 
          ! Consistency check that the hardcoded values for levozp and
@@ -191,6 +203,10 @@
             call read_tau_amf(me, master, errmsg, errflg)
          endif
 
+!$OMP section
+!> - Initialize soil vegetation (needed for sncovr calculation further down)
+         call set_soilveg(me, isot, ivegsrc, nlunit)
+
 !$OMP end sections
 
 ! Need an OpenMP barrier here (implicit in "end sections")
@@ -226,11 +242,11 @@
                            iindx1_ci, iindx2_ci, ddx_ci)
          endif
 
-!$OMP section	 
+!$OMP section
 !> - Call  cires_indx_ugwp to read monthly-mean GW-tau diagnosed from FV3GFS-runs that can resolve GWs
          if (do_ugwp_v1) then
             call cires_indx_ugwp (im, me, master, xlat_d, jindx1_tau, jindx2_tau,  &
-                                  ddy_j1tau, ddy_j2tau) 
+                                  ddy_j1tau, ddy_j2tau)
          endif
 
 !$OMP section
@@ -244,34 +260,38 @@
            enddo
          enddo
 
+!$OMP section
+         !--- if sncovr does not exist in the restart, need to create it
+         if (all(sncovr < zero)) then
+           if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: compute sncovr from weasd and soil vegetation parameters'
+           !--- compute sncovr from existing variables
+           !--- code taken directly from read_fix.f
+           sncovr(:) = zero
+           do ix=1,im
+             if (landfrac(ix) >= drythresh .or. fice(ix) >= min_seaice) then
+               vegtyp = vtype(ix)
+               if (vegtyp == 0) vegtyp = 7
+               rsnow  = 0.001_kind_phys*weasd(ix)/snupx(vegtyp)
+               if (0.001_kind_phys*weasd(ix) < snupx(vegtyp)) then
+                 sncovr(ix) = one - (exp(-salp_data*rsnow) - rsnow*exp(-salp_data))
+               else
+                 sncovr(ix) = one
+               endif
+             endif
+           enddo
+         endif
+
+         !--- For RUC LSM: create sncovr_ice from sncovr
+         if (lsm == lsm_ruc) then
+           if (all(sncovr_ice < zero)) then
+             if (me == master ) write(0,'(a)') 'GFS_phys_time_vary_init: fill sncovr_ice with sncovr for RUC LSM'
+             sncovr_ice(:) = sncovr(:)
+           endif
+         endif
+
 !$OMP end sections
 
 !$OMP end parallel
-
-#if 0
-        !Calculate sncovr if it was read in but empty (from FV3/io/FV3GFS_io.F90/sfc_prop_restart_read)
-        if (first_time_step) then
-          if (nint(Data(1)%Sfcprop%sncovr(1)) == -9999) then
-            !--- compute sncovr from existing variables
-            !--- code taken directly from read_fix.f
-            do nb = 1, nblks
-              do ix = 1, Model%blksz(nb)
-                Data(nb)%Sfcprop%sncovr(ix) = 0.0
-                if (Data(nb)%Sfcprop%slmsk(ix) > 0.001) then
-                  vegtyp = Data(nb)%Sfcprop%vtype(ix)
-                  if (vegtyp == 0) vegtyp = 7
-                  rsnow  = 0.001*Data(nb)%Sfcprop%weasd(ix)/snupx(vegtyp)
-                  if (0.001*Data(nb)%Sfcprop%weasd(ix) < snupx(vegtyp)) then
-                    Data(nb)%Sfcprop%sncovr(ix) = 1.0 - (exp(-salp_data*rsnow) - rsnow*exp(-salp_data))
-                  else
-                    Data(nb)%Sfcprop%sncovr(ix) = 1.0
-                  endif
-                endif
-              enddo
-            enddo
-          endif
-        endif
-#endif
 
          is_initialized = .true.
 
@@ -295,7 +315,7 @@
             tsfc, tsfco, tisfc, hice, fice, facsf, facwf, alvsf, alvwf, alnsf, alnwf, zorli, zorll, &
             zorlo, weasd, slope, snoalb, canopy, vfrac, vtype, stype, shdmin, shdmax, snowd,        &
             cv, cvb, cvt, oro, oro_uf, xlat_d, xlon_d, slmsk,                                       &
-	    do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
+            do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau, tau_amf, errmsg, errflg)
 
          implicit none
 
@@ -320,10 +340,10 @@
          integer,              intent(in)    :: seed0
          real(kind_phys),      intent(inout) :: rann(:,:)
 
-         logical,              intent(in)    ::	do_ugwp_v1
+         logical,              intent(in)    :: do_ugwp_v1
          integer,              intent(in)    :: jindx1_tau(:), jindx2_tau(:)
-         real(kind_phys),      intent(in)    :: ddy_j1tau(:),  ddy_j2tau(:)
-         real(kind_phys),      intent(inout) ::	tau_amf(:)
+         real(kind_phys),      intent(in)    :: ddy_j1tau(:), ddy_j2tau(:)
+         real(kind_phys),      intent(inout) :: tau_amf(:)
 
          ! For gcycle only
          integer,              intent(in)    :: nthrds, nx, ny, nsst, tile_num, nlunit, lsoil
@@ -339,7 +359,7 @@
                                       zorli(:), zorll(:), zorlo(:), weasd(:), slope(:), snoalb(:),   &
                                       canopy(:), vfrac(:), vtype(:), stype(:), shdmin(:), shdmax(:), &
                                       snowd(:), cv(:), cvb(:), cvt(:), oro(:), oro_uf(:), slmsk(:)
-         !
+
          character(len=*),     intent(out)   :: errmsg
          integer,              intent(out)   :: errflg
 
@@ -437,7 +457,7 @@
          if (do_ugwp_v1) then
            call tau_amf_interp(me, master, im, idate, fhour, &
                                jindx1_tau, jindx2_tau,       &
-                               ddy_j1tau, ddy_j2tau, tau_amf)				   	 
+                               ddy_j1tau, ddy_j2tau, tau_amf)
          endif
 
 !> - Call gcycle() to repopulate specific time-varying surface properties for AMIP/forecast runs
@@ -516,9 +536,9 @@
          if (allocated(ci_pres) ) deallocate(ci_pres)
 
          ! Deallocate UGWP-input arrays
-         if (allocated (ugwp_taulat))  deallocate(ugwp_taulat)
-         if (allocated (tau_limb))     deallocate (tau_limb)
-         if (allocated (days_limb))    deallocate(days_limb)
+         if (allocated(ugwp_taulat)) deallocate(ugwp_taulat)
+         if (allocated(tau_limb   )) deallocate(tau_limb)
+         if (allocated(days_limb  )) deallocate(days_limb)
 
          is_initialized = .false.
 
