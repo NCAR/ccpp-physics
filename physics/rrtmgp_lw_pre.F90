@@ -5,6 +5,7 @@ module rrtmgp_lw_pre
        setemis                     ! Routine to compute surface-emissivity
   use mo_gas_optics_rrtmgp,  only: &
        ty_gas_optics_rrtmgp
+  use rrtmgp_lw_gas_optics, only: lw_gas_props
 
   implicit none
 
@@ -25,7 +26,7 @@ contains
 !! \htmlinclude rrtmgp_lw_pre_run.html
 !!
   subroutine rrtmgp_lw_pre_run (doLWrad, nCol, xlon, xlat, slmsk, zorl, snowd, sncovr, &
-       tsfg, tsfa, hprime, lw_gas_props, sfc_emiss_byband, semis, errmsg, errflg)
+       tsfg, tsfa, hprime, sfc_emiss_byband, semis, errmsg, errflg)
     
     ! Inputs
     logical, intent(in) :: &
@@ -42,8 +43,6 @@ contains
          tsfg,          & ! Surface ground temperature for radiation (K)
          tsfa,          & ! Lowest model layer air temperature for radiation (K)
          hprime           ! Standard deviation of subgrid orography
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props     ! RRTMGP DDT: spectral information for LW calculation
 
     ! Outputs 
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(out) :: &

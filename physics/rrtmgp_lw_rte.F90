@@ -10,7 +10,7 @@ module rrtmgp_lw_rte
   use mo_fluxes_byband,       only: ty_fluxes_byband
   use mo_source_functions,    only: ty_source_func_lw
   use rrtmgp_aux,             only: check_error_msg
-
+  use rrtmgp_lw_gas_optics,   only: lw_gas_props
   implicit none
 
   public rrtmgp_lw_rte_init, rrtmgp_lw_rte_run, rrtmgp_lw_rte_finalize
@@ -29,7 +29,7 @@ contains
 !! \htmlinclude rrtmgp_lw_rte_run.html
 !!
   subroutine rrtmgp_lw_rte_run(doLWrad, doLWclrsky, use_LW_jacobian, doGP_lwscat, nCol,    &
-       nLev, p_lev, lw_gas_props, sfc_emiss_byband, sources, lw_optical_props_clrsky,      &
+       nLev, p_lev, sfc_emiss_byband, sources, lw_optical_props_clrsky,      &
        lw_optical_props_clouds, lw_optical_props_aerosol, nGauss_angles, fluxlwUP_allsky,  &
        fluxlwDOWN_allsky, fluxlwUP_clrsky, fluxlwDOWN_clrsky, sfculw_jac, errmsg, errflg)
 
@@ -45,8 +45,6 @@ contains
          nGauss_angles              ! Number of angles used in Gaussian quadrature
     real(kind_phys), dimension(ncol,nLev+1), intent(in) :: &
          p_lev                      ! Pressure @ model layer-interfaces (hPa)
-    type(ty_gas_optics_rrtmgp),intent(in) :: &
-         lw_gas_props               ! RRTMGP DDT: longwave spectral information
     real(kind_phys), dimension(lw_gas_props%get_nband(),ncol), intent(in) :: &
          sfc_emiss_byband           ! Surface emissivity in each band
     type(ty_source_func_lw),intent(in) :: &

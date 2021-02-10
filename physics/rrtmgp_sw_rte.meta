@@ -92,14 +92,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[sw_gas_props]
-  standard_name = coefficients_for_sw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP SW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
-  intent = in
-  optional = F
 [sw_optical_props_clrsky]
   standard_name = shortwave_optical_properties_for_clear_sky
   long_name = Fortran DDT containing RRTMGP optical properties

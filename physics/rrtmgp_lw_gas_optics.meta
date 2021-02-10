@@ -26,21 +26,28 @@
   intent = in
   optional = F
   kind = len=128
-[rrtmgp_nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP
+[gas_concentrations]
+  standard_name = Gas_concentrations_for_RRTMGP_suite
+  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
+  units = DDT
+  dimensions = ()
+  type = ty_gas_concs
+  intent = in
+  optional = F
+[ncol]
+  standard_name = horizontal_loop_extent
+  long_name = horizontal dimension
   units = count
-  dimensions =  ()
+  dimensions = ()
   type = integer
   intent = in
   optional = F
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
+[nLev]
+  standard_name = vertical_dimension
+  long_name = number of vertical levels
+  units = count
+  dimensions = ()
+  type = integer
   intent = in
   optional = F
 [mpirank]
@@ -84,12 +91,13 @@
   type = integer
   intent = out
   optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
+[minGPpres]
+  standard_name = minimum_pressure_in_RRTMGP
+  long_name = minimum pressure allowed in RRTMGP
+  units = Pa
   dimensions = ()
-  type = ty_gas_optics_rrtmgp
+  type = real
+  kind = kind_phys
   intent = out
   optional = F
 
@@ -119,14 +127,6 @@
   units = count
   dimensions = ()
   type = integer
-  intent = in
-  optional = F
-[lw_gas_props]
-  standard_name = coefficients_for_lw_gas_optics
-  long_name = DDT containing spectral information for RRTMGP LW radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_optics_rrtmgp
   intent = in
   optional = F
 [p_lay]
