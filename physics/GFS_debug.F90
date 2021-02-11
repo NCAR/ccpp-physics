@@ -676,10 +676,10 @@
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%exch_m      ',  Diag%exch_m)
                      end if
                      ! UGWP - incomplete list
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dudt_gw       ',  Diag%%dudt_gw)
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvdt_gw       ',  Diag%%dvdt_gw)
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dtdt_gw       ',  Diag%%dtdt_gw)
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%kdis_gw       ',  Diag%%kdis_gw)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dudt_gw       ',  Diag%dudt_gw)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvdt_gw       ',  Diag%dvdt_gw)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dtdt_gw       ',  Diag%dtdt_gw)
+                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%kdis_gw       ',  Diag%kdis_gw)
                      if (Model%do_ugwp_v1 .or. Model%gwd_opt==33 .or. Model%gwd_opt==22) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvdt_ogw      ',  Diag%dvdt_ogw )
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dudt_obl      ',  Diag%dudt_obl )
@@ -696,6 +696,8 @@
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dv_osscol     ',  Diag%dv_osscol)
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%du_ofdcol     ',  Diag%du_ofdcol)
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dv_ofdcol     ',  Diag%dv_ofdcol)
+                     else
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvdt_ogw      ',  Diag%dvdt_ogw)
                      end if
                      ! Statein
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Statein%phii'    ,     Statein%phii)
