@@ -69,7 +69,7 @@ contains
                 me, master, nlunit, input_nml_file, logunit,                   &
                 fn_nml2, jdat, lonr, latr, levs, ak, bk, dtp,                  &
                 con_pi, con_rerth, con_p0,                                     &
-        con_g, con_omega,  con_cp, con_rd, con_rv,con_fvirt,           &
+                con_g, con_omega,  con_cp, con_rd, con_rv,con_fvirt,           &
                 do_ugwp,do_ugwp_v0, do_ugwp_v0_orog_only, do_gsl_drag_ls_bl,   &
                 do_gsl_drag_ss, do_gsl_drag_tofd, do_ugwp_v1,                  &
                 do_ugwp_v1_orog_only, do_ugwp_v1_w_gsldrag, errmsg, errflg)
