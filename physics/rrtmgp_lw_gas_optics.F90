@@ -7,6 +7,7 @@ module rrtmgp_lw_gas_optics
   use mo_optical_props,      only: ty_optical_props_1scl
   use mo_compute_bc,         only: compute_bc
   use rrtmgp_aux,            only: check_error_msg
+  use GFS_rrtmgp_pre,        only: active_gases_array
   use netcdf
   implicit none
 
@@ -70,7 +71,7 @@ contains
        nCol, nLev, mpicomm, mpirank, mpiroot, minGPpres, errmsg, errflg)
 
     ! Inputs
-    type(ty_gas_concs), intent(in) :: &
+    type(ty_gas_concs), intent(inout) :: &
          gas_concentrations  ! RRTMGP DDT: trace gas concentrations (vmr)
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,  & ! RTE-RRTMGP root directory
@@ -266,6 +267,7 @@ contains
     !
 !$omp critical (load_lw_gas_optics)
     ! Longwave k-distribution data.
+    gas_concentrations%gas_name(:) = active_gases_array(:)
     call check_error_msg('rrtmgp_lw_gas_optics_init',lw_gas_props%load(gas_concentrations,  &
          gas_namesLW, key_speciesLW, band2gptLW, band_limsLW, press_refLW, press_ref_tropLW,&
          temp_refLW,  temp_ref_pLW, temp_ref_tLW, vmr_refLW, kmajorLW, kminor_lowerLW,      &
@@ -289,8 +291,8 @@ contains
 !! \section arg_table_rrtmgp_lw_gas_optics_run
 !! \htmlinclude rrtmgp_lw_gas_optics_run.html
 !!
-  subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay,&
-       t_lev, tsfg, gas_concentrations, lw_optical_props_clrsky, sources,  errmsg, errflg)
+  subroutine rrtmgp_lw_gas_optics_run(doLWrad, nCol, nLev, p_lay, p_lev, t_lay, t_lev, tsfg,&
+       gas_concentrations, lw_optical_props_clrsky, sources,  errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &

@@ -29,10 +29,10 @@ contains
 !! \htmlinclude rrtmgp_sw_rte.html
 !!
   subroutine rrtmgp_sw_rte_run(doSWrad, doSWclrsky, nCol, nLev, nDay, idxday, coszen, p_lay, &
-       t_lay, p_lev, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,&
+       t_lay, p_lev, sw_optical_props_clrsky, sfc_alb_nir_dir, sfc_alb_nir_dif,              &
        sfc_alb_uvvis_dir, sfc_alb_uvvis_dif, toa_src_sw, sw_optical_props_clouds,            &
-       sw_optical_props_aerosol, rrtmgp_nGases, active_gases_array, scmpsw, fluxswUP_allsky, &
-       fluxswDOWN_allsky, fluxswUP_clrsky, fluxswDOWN_clrsky, errmsg, errflg)
+       sw_optical_props_aerosol, scmpsw, fluxswUP_allsky, fluxswDOWN_allsky, fluxswUP_clrsky,&
+       fluxswDOWN_clrsky, errmsg, errflg)
 
     ! Inputs
     logical, intent(in) :: &
@@ -63,10 +63,6 @@ contains
          sfc_alb_uvvis_dif          ! Surface albedo (diffuse)
     real(kind_phys), dimension(ncol,sw_gas_props%get_ngpt()), intent(in) :: &
          toa_src_sw                 ! TOA incident spectral flux (W/m2)
-    integer, intent(in) :: &
-         rrtmgp_nGases              ! Number of trace gases active in RRTMGP
-    character(len=*),dimension(rrtmgp_nGases), intent(in) :: &
-         active_gases_array         ! Character array containing trace gases to include in RRTMGP
 
     ! Outputs
     character(len=*), intent(out) :: &

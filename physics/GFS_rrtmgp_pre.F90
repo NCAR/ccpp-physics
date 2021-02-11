@@ -21,6 +21,8 @@ module GFS_rrtmgp_pre
   ! Save trace gas indices.
   integer :: iStr_h2o, iStr_co2, iStr_o3, iStr_n2o, iStr_ch4, iStr_o2, iStr_ccl4, &
        iStr_cfc11, iStr_cfc12, iStr_cfc22 
+    character(len=32),dimension(:),allocatable :: &
+         active_gases_array 
 
   public GFS_rrtmgp_pre_run,GFS_rrtmgp_pre_init,GFS_rrtmgp_pre_finalize  
 contains
@@ -31,25 +33,22 @@ contains
 !! \section arg_table_GFS_rrtmgp_pre_init
 !! \htmlinclude GFS_rrtmgp_pre_init.html
 !!
-  subroutine GFS_rrtmgp_pre_init(nGases, active_gases, gas_concentrations,  errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_init(nGases, active_gases, errmsg, errflg)
     ! Inputs
     integer, intent(in) :: &
-         nGases     ! Number of active gases in RRTMGP
+         nGases       ! Number of active gases in RRTMGP
     character(len=*), intent(in) :: &
          active_gases ! List of active gases from namelist.     
     ! Outputs
-    type(ty_gas_concs),intent(out) :: &
-         gas_concentrations   ! RRTMGP DDT: gas volumne mixing ratios
     character(len=*), intent(out) :: &
-         errmsg     ! Error message
+         errmsg             ! Error message
     integer, intent(out) :: &  
-         errflg     ! Error flag
+         errflg             ! Error flag
 
     ! Local variables
     character(len=1) :: tempstr
     integer :: ij, count
     integer,dimension(nGases,2) :: gasIndices
-    character(len=32),dimension(nGases) :: active_gases_array
 
     ! Initialize
     errmsg = ''
@@ -74,6 +73,7 @@ contains
     gasIndices(nGases,2)=len(trim(active_gases))
     
     ! Now extract the gas names
+    allocate(active_gases_array(nGases))
     do ij=1,nGases
        active_gases_array(ij) = active_gases(gasIndices(ij,1):gasIndices(ij,2))
        if(trim(active_gases_array(ij)) .eq. 'h2o')   istr_h2o       = ij
@@ -88,22 +88,6 @@ contains
        if(trim(active_gases_array(ij)) .eq. 'cfc22') istr_cfc22     = ij
     enddo
 
-    ! Initialze RRTMGP DDTs
-    call check_error_msg('GFS_rrtmgp_pre_init',      &
-         gas_concentrations%init(   active_gases_array))
-    call check_error_msg('GFS_rrtmgp_pre_setvmr_h2o',&
-         gas_concentrations%set_vmr(active_gases_array(iStr_o2),  0._kind_phys))
-    call check_error_msg('GFS_rrtmgp_pre_setvmr_co2',&
-         gas_concentrations%set_vmr(active_gases_array(iStr_co2), 0._kind_phys))
-    call check_error_msg('GFS_rrtmgp_pre_setvmr_ch4',&
-         gas_concentrations%set_vmr(active_gases_array(iStr_ch4), 0._kind_phys))
-    call check_error_msg('GFS_rrtmgp_pre_setvmr_n2o',&
-         gas_concentrations%set_vmr(active_gases_array(iStr_n2o), 0._kind_phys))
-    call check_error_msg('GFS_rrtmgp_pre_setvmr_h2o',&
-         gas_concentrations%set_vmr(active_gases_array(iStr_h2o), 0._kind_phys))
-    call check_error_msg('GFS_rrtmgp_pre_setvmr_o3', &
-         gas_concentrations%set_vmr(active_gases_array(iStr_o3),  0._kind_phys))
-
   end subroutine GFS_rrtmgp_pre_init
 
   ! #########################################################################################
@@ -112,11 +96,10 @@ contains
 !> \section arg_table_GFS_rrtmgp_pre_run
 !! \htmlinclude GFS_rrtmgp_pre_run.html
 !!
-  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr,    &
-       fhlwr, xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, con_eps,&
-       con_epsm1, con_fvirt, con_epsqs, minGPpres,                                       &
-       raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay, tv_lay, relhum, tracer,&
-       gas_concentrations, errmsg, errflg)
+  subroutine GFS_rrtmgp_pre_run(nCol, nLev, nTracers, i_o3, lsswr, lslwr, fhswr, fhlwr,     &
+       xlat, xlon,  prsl, tgrs, prslk, prsi, qgrs, tsfc, con_eps, con_epsm1, con_fvirt,     &
+       con_epsqs, minGPpres, raddt, p_lay, t_lay, p_lev, t_lev, tsfg, tsfa, qs_lay, q_lay,  &
+       tv_lay, relhum, tracer, gas_concentrations, errmsg, errflg)
     
     ! Inputs   
     integer, intent(in)    :: &
@@ -299,22 +282,15 @@ contains
     vmr_h2o = merge((q_lay/(1-q_lay))*amdw, 0., q_lay  .ne. 1.)
     vmr_o3  = merge(o3_lay*amdo3,           0., o3_lay .gt. 0.)
     
-    ! Initialize and populate RRTMGP DDT w/ gas-concentrations
-    active_gases = gas_concentrations%get_gas_names()
-    do iGas=1,gas_concentrations%get_num_gases()
-       if (iGas .eq. istr_o2) call check_error_msg('GFS_rrtmgp_pre_run_setvmr_o2',  &
-            gas_concentrations%set_vmr(trim(active_gases(iGas)), gas_vmr(:,:,4)))
-       if (iGas .eq. istr_co2) call check_error_msg('GFS_rrtmgp_pre_run_setvmr_co2',&
-            gas_concentrations%set_vmr(trim(active_gases(iGas)), gas_vmr(:,:,1)))
-       if (iGas .eq. istr_ch4) call check_error_msg('GFS_rrtmgp_pre_run_setvmr_ch4',&
-            gas_concentrations%set_vmr(trim(active_gases(iGas)), gas_vmr(:,:,3)))
-       if (iGas .eq. istr_n2o) call check_error_msg('GFS_rrtmgp_pre_run_setvmr_n2o',&
-            gas_concentrations%set_vmr(trim(active_gases(iGas)), gas_vmr(:,:,2)))
-       if (iGas .eq. istr_h2o) call check_error_msg('GFS_rrtmgp_pre_run_setvmr_h2o',&
-            gas_concentrations%set_vmr(trim(active_gases(iGas)), vmr_h2o))
-       if (iGas .eq. istr_o3)  call check_error_msg('GFS_rrtmgp_pre_run_setvmr_o3', &
-            gas_concentrations%set_vmr(trim(active_gases(iGas)), vmr_o3))
-    enddo
+    ! Populate RRTMGP DDT w/ gas-concentrations
+    gas_concentrations%gas_name(:)                = active_gases_array(:)
+    gas_concentrations%concs(istr_o2)%conc(:,:)   = gas_vmr(:,:,4)
+    gas_concentrations%concs(istr_co2)%conc(:,:)  = gas_vmr(:,:,1)
+    gas_concentrations%concs(istr_ch4)%conc(:,:)  = gas_vmr(:,:,3)
+    gas_concentrations%concs(istr_n2o)%conc(:,:)  = gas_vmr(:,:,2)
+    gas_concentrations%concs(istr_h2o)%conc(:,:)  = vmr_h2o(:,:)
+    gas_concentrations%concs(istr_o3)%conc(:,:)   = vmr_o3(:,:)
+
     ! #######################################################################################
     ! Radiation time step (output) (Is this really needed?) (Used by some diagnostics)
     ! #######################################################################################

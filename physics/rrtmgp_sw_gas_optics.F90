@@ -7,9 +7,11 @@ module rrtmgp_sw_gas_optics
   use rrtmgp_aux,             only: check_error_msg
   use mo_optical_props,       only: ty_optical_props_2str
   use mo_compute_bc,          only: compute_bc
+  use GFS_rrtmgp_pre,         only: active_gases_array
   use netcdf
 
   implicit none
+
   ! RRTMGP k-distribution LUTs.
   type(ty_gas_optics_rrtmgp) :: sw_gas_props
   integer, dimension(:), allocatable :: &
@@ -69,8 +71,8 @@ contains
 !! \section arg_table_rrtmgp_sw_gas_optics_init
 !! \htmlinclude rrtmgp_sw_gas_optics.html
 !!
-  subroutine rrtmgp_sw_gas_optics_init(nCol, nLev, nThreads, rrtmgp_root_dir, rrtmgp_sw_file_gas, gas_concentrations, &
-       mpicomm, mpirank, mpiroot, errmsg, errflg)
+  subroutine rrtmgp_sw_gas_optics_init(nCol, nLev, nThreads, rrtmgp_root_dir,               &
+       rrtmgp_sw_file_gas, gas_concentrations, mpicomm, mpirank, mpiroot, errmsg, errflg)
 
     ! Inputs
     character(len=128),intent(in) :: &
@@ -83,7 +85,7 @@ contains
          mpicomm,          & ! MPI communicator
          mpirank,          & ! Current MPI rank
          mpiroot             ! Master MPI rank
-   type(ty_gas_concs),intent(in)  :: &
+    type(ty_gas_concs),intent(inout)  :: &
          gas_concentrations  ! RRTMGP DDT containing active trace gases.
  
     ! Outputs
@@ -92,15 +94,11 @@ contains
     integer,          intent(out) :: &
          errflg              ! CCPP error code
 
-    ! Dimensions
-    integer :: &
-         ntemps, npress, ngptsSW, nabsorbers, nextrabsorbers,       &
-         nminorabsorbers, nmixingfracs, nlayers, nbnds, npairs,   &
-         nminor_absorber_intervals_lower, nminor_absorber_intervals_upper, &
-         ncontributors_lower, ncontributors_upper
-
     ! Local variables
-    integer :: status, ncid, dimid, varID, iGas
+    integer :: status, ncid, dimid, varID, iGas, ntemps, npress, ngptsSW, nabsorbers,    &
+         nextrabsorbers, nminorabsorbers, nmixingfracs, nlayers, nbnds, npairs,          &
+         nminor_absorber_intervals_lower, nminor_absorber_intervals_upper,               &
+         ncontributors_lower, ncontributors_upper
     integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: sw_gas_props_file
 
@@ -306,6 +304,7 @@ contains
     !
     ! Shortwave k-distribution data
 !$omp critical (load_sw_gas_optics)
+    gas_concentrations%gas_name(:) = active_gases_array(:)
     call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations,         &
          gas_namesSW, key_speciesSW, band2gptSW, band_limsSW, press_refSW, press_ref_tropSW,&
          temp_refSW, temp_ref_pSW, temp_ref_tSW, vmr_refSW, kmajorSW, kminor_lowerSW,       &
@@ -360,7 +359,7 @@ contains
          sw_optical_props_clrsky ! RRTMGP DDT: clear-sky shortwave optical properties, spectral (tau,ssa,g) 
     real(kind_phys), dimension(nCol,ngptsGPsw), intent(out) :: &
          toa_src_sw              ! TOA incident spectral flux (W/m2)
-    character(len=32), dimension(gas_concentrations%get_num_gases()) :: active_gases
+
     ! Local variables
     integer :: ij,iGas
     real(kind_phys), dimension(ncol,nLev) :: vmrTemp
@@ -375,19 +374,26 @@ contains
 
     toa_src_sw(:,:) = 0._kind_phys
     if (nDay .gt. 0) then
-       active_gases = gas_concentrations%get_gas_names()
+       !active_gases = gas_concentrations%get_gas_names()
        ! Allocate space
        call check_error_msg('rrtmgp_sw_gas_optics_run_alloc_2str',&
             sw_optical_props_clrsky%alloc_2str(nday, nLev, sw_gas_props))
-       call check_error_msg('rrtmgp_sw_gas_optics_run_init_ty_gas_concs',  &
-            gas_concentrations_daylit%init(active_gases))
+
+       gas_concentrations_daylit%ncol = nDay
+       gas_concentrations_daylit%nlay = nLev
+       allocate(gas_concentrations_daylit%gas_name(gas_concentrations%get_num_gases()))
+       allocate(gas_concentrations_daylit%concs(gas_concentrations%get_num_gases()))
+       do iGas=1,gas_concentrations%get_num_gases()
+          allocate(gas_concentrations_daylit%concs(iGas)%conc(nDay, nLev))
+       enddo
+       gas_concentrations_daylit%gas_name(:) = active_gases_array(:)
 
        ! Subset the gas concentrations.
        do iGas=1,gas_concentrations%get_num_gases()
           call check_error_msg('rrtmgp_sw_gas_optics_run_get_vmr',&
-               gas_concentrations%get_vmr(trim(active_gases(iGas)),vmrTemp))
+               gas_concentrations%get_vmr(trim(gas_concentrations_daylit%gas_name(iGas)),vmrTemp))
           call check_error_msg('rrtmgp_sw_gas_optics_run_set_vmr',&
-               gas_concentrations_daylit%set_vmr(trim(active_gases(iGas)),vmrTemp(idxday(1:nday),:)))
+               gas_concentrations_daylit%set_vmr(trim(gas_concentrations_daylit%gas_name(iGas)),vmrTemp(idxday(1:nday),:)))
        enddo
 
        ! Call SW gas-optics

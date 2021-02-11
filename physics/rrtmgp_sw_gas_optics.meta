@@ -56,7 +56,7 @@
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = in
+  intent = inout
   optional = F
 [mpirank]
   standard_name = mpi_rank

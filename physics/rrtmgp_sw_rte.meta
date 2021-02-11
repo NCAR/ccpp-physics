@@ -161,23 +161,6 @@
   kind = kind_phys
   intent = in
   optional = F
-[rrtmgp_nGases]
-  standard_name = number_of_active_gases_used_by_RRTMGP
-  long_name = number of gases available used by RRTMGP
-  units = count
-  dimensions =  ()
-  type = integer
-  intent = in
-  optional = F
-[active_gases_array]
-  standard_name = list_of_active_gases_used_by_RRTMGP
-  long_name = list of active gases used by RRTMGP
-  units = none
-  dimensions =  (number_of_active_gases_used_by_RRTMGP)
-  type = character
-  kind = len=*
-  intent = in
-  optional = F
 [scmpsw]
   standard_name = components_of_surface_downward_shortwave_fluxes
   long_name = derived type for special components of surface downward shortwave fluxes

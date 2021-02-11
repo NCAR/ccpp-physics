@@ -32,7 +32,7 @@
   units = DDT
   dimensions = ()
   type = ty_gas_concs
-  intent = in
+  intent = inout
   optional = F
 [ncol]
   standard_name = horizontal_loop_extent

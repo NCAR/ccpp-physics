@@ -25,14 +25,6 @@
   type = integer  
   intent = in
   optional = F  
-[gas_concentrations]
-  standard_name = Gas_concentrations_for_RRTMGP_suite
-  long_name = DDT containing gas concentrations for RRTMGP radiation scheme
-  units = DDT
-  dimensions = ()
-  type = ty_gas_concs
-  intent = out
-  optional = F
 [errmsg]
   standard_name = ccpp_error_message
   long_name = error message for error handling in CCPP
