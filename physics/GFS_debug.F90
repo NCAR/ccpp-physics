@@ -491,18 +491,19 @@
                      end if
                      ! CCPP/RUC only
                      if (Model%lsm == Model%lsm_ruc) then
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Model%zs',             Model%zs)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%sh2o',         Sfcprop%sh2o)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%smois',        Sfcprop%smois)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tslb',         Sfcprop%tslb)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%clw_surf',     Sfcprop%clw_surf)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%qwv_surf',     Sfcprop%qwv_surf)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%cndm_surf',    Sfcprop%cndm_surf)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%flag_frsoil',  Sfcprop%flag_frsoil)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%rhofr',        Sfcprop%rhofr)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tsnow',        Sfcprop%tsnow)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%snowfallac  ', Sfcprop%snowfallac)
-                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%acsnow      ', Sfcprop%acsnow)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%sh2o',            Sfcprop%sh2o)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%smois',           Sfcprop%smois)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tslb',            Sfcprop%tslb)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%clw_surf_land',   Sfcprop%clw_surf_land)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%clw_surf_ice',    Sfcprop%clw_surf_ice)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%qwv_surf_land',   Sfcprop%qwv_surf_land)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%qwv_surf_ice',    Sfcprop%qwv_surf_ice)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%flag_frsoil',     Sfcprop%flag_frsoil)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%rhofr',           Sfcprop%rhofr)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tsnow_land',      Sfcprop%tsnow_land)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%tsnow_ice',       Sfcprop%tsnow_ice)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%snowfallac_land', Sfcprop%snowfallac_land)
+                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Sfcprop%snowfallac_ice',  Sfcprop%snowfallac_ice)
                      end if
                      ! Radtend
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Radtend%sfcfsw%upfxc', Radtend%sfcfsw(:)%upfxc)
@@ -647,10 +648,9 @@
                        do n=1,size(Diag%dq3dt(1,1,:))
                          call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dq3dt_n     ',  Diag%dq3dt(:,:,n))
                        end do
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%upd_mf      ',    Diag%upd_mf)
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dwn_mf      ',    Diag%dwn_mf)
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%det_mf      ',    Diag%det_mf)
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%cldcov      ',    Diag%cldcov)
+                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%upd_mf      ',    Diag%upd_mf)
+                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dwn_mf      ',    Diag%dwn_mf)
+                       !call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%det_mf      ',    Diag%det_mf)
                      end if
                      if(Model%lradar) then
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%refl_10cm   ',  Diag%refl_10cm)
