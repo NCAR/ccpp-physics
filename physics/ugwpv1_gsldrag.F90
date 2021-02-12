@@ -433,8 +433,8 @@ contains
 !
 ! Version of COORDE updated by CCPP-dev for time-aver
 !
-    real(kind=kind_phys),    intent(inout), dimension(im,levs)   :: ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw
-    real(kind=kind_phys),    intent(inout), dimension(im,levs)   :: ldu3dt_ngw, ldv3dt_ngw, ldt3dt_ngw
+    real(kind=kind_phys),    intent(inout), dimension(:,:)   :: ldu3dt_ogw, ldv3dt_ogw, ldt3dt_ogw
+    real(kind=kind_phys),    intent(inout), dimension(:,:)   :: ldu3dt_ngw, ldv3dt_ngw, ldt3dt_ngw
 
 
 
