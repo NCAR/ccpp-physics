@@ -219,7 +219,7 @@ MODULE module_mp_thompson
       REAL, PRIVATE:: D0i, xm0s, xm0g
 
 !..Min and max radiative effective radius of cloud water, cloud ice, and snow;
-!.. performed by subroutine calc_effectRad
+!.. performed by subroutine calc_effectRad. On purpose, these should stay PUBLIC.
       REAL, PARAMETER:: re_qc_min = 2.50E-6               ! 2.5 microns
       REAL, PARAMETER:: re_qc_max = 50.0E-6               ! 50 microns
       REAL, PARAMETER:: re_qi_min = 2.50E-6               ! 2.5 microns
@@ -440,24 +440,17 @@ MODULE module_mp_thompson
 !! lookup tables in Thomspson scheme.
 !>\section gen_thompson_init thompson_init General Algorithm
 !> @{
-      SUBROUTINE thompson_init(nwfa2d, nifa2d, nwfa, nifa, &
-                               mpicomm, mpirank, mpiroot,  &
+      SUBROUTINE thompson_init(mpicomm, mpirank, mpiroot,  &
                                threads, errmsg, errflg)
 
       IMPLICIT NONE
 
-!..OPTIONAL variables that control application of aerosol-aware scheme
-
-      REAL, DIMENSION(:,:), OPTIONAL, INTENT(IN) :: nwfa, nifa
-      REAL, DIMENSION(:),   OPTIONAL, INTENT(IN) :: nwfa2d, nifa2d
       INTEGER, INTENT(IN) :: mpicomm, mpirank, mpiroot
       INTEGER, INTENT(IN) :: threads
       CHARACTER(len=*), INTENT(INOUT) :: errmsg
       INTEGER,          INTENT(INOUT) :: errflg
 
-
       INTEGER:: i, j, k, l, m, n
-      REAL:: h_01, airmass, niIN3, niCCN3, max_test
       LOGICAL:: micro_init
       real :: stime, etime
 #ifdef SION
@@ -467,13 +460,7 @@ MODULE module_mp_thompson
       LOGICAL, PARAMETER :: precomputed_tables = .FALSE.
 #endif
 
-      is_aerosol_aware = .FALSE.
       micro_init = .FALSE.
-
-      if (present(nwfa2d) .and. &
-          present(nifa2d) .and. &
-          present(nwfa)   .and. &
-          present(nifa)         ) is_aerosol_aware = .true.
 
 !> - Allocate space for lookup tables (J. Michalakes 2009Jun08).
 
