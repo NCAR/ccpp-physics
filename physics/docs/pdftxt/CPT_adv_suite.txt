@@ -18,13 +18,12 @@ The csawmg physics suite uses the parameterizations in the following order:
  - \ref GFS_SAMFshal
  - \ref CPT_MG3
  - \ref mod_cs_conv_aw_adj
- - \ref GFS_CALPRECIPTYPE
 
 \section sdf_cpt_suite Suite Definition File 
 \code
 <?xml version="1.0" encoding="UTF-8"?>
 
-<suite name="SCM_csawmg" lib="ccppphys" ver="4">
+<suite name="SCM_csawmg" lib="ccppphys" ver="5">
   <!-- <init></init> -->
   <group name="time_vary">
     <subcycle loop="1">

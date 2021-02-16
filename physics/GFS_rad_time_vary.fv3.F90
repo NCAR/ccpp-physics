@@ -1,5 +1,7 @@
-!>\file GFS_rad_time_vary.F90
+!>\file GFS_rad_time_vary.fv3.F90
 !!  Contains code related to GFS physics suite setup (radiation part of time_vary_step)
+
+!>\defgroup gfs_rad_time_vary_mod  GFS Radiation Time Update Module
    module GFS_rad_time_vary
 
       implicit none
@@ -10,13 +12,11 @@
 
       contains
 
-!! \section arg_table_GFS_rad_time_vary_init Argument Table
+!> \section arg_table_GFS_rad_time_vary_init Argument Table
 !!
       subroutine GFS_rad_time_vary_init
       end subroutine GFS_rad_time_vary_init
 
-!>\defgroup mod_GFS_rad_time_vary GFS Radiation Time Update
-!> @{
 !> \section arg_table_GFS_rad_time_vary_run Argument Table
 !! \htmlinclude GFS_rad_time_vary_run.html
 !!
@@ -98,7 +98,6 @@
          endif
 
       end subroutine GFS_rad_time_vary_run
-!> @}
  
 !> \section arg_table_GFS_rad_time_vary_finalize Argument Table
 !!

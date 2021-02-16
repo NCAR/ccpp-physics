@@ -1,8 +1,8 @@
 # Doxyfile 1.8.11
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "Common Community Physics Package (CCPP) Scientific Documentation"
+PROJECT_NAME           = "CCPP Scientific Documentation"
 PROJECT_NUMBER         = ""
-PROJECT_BRIEF          = " "
+PROJECT_BRIEF          = "v5.0.0"
 PROJECT_LOGO           = img/dtc_logo.png
 OUTPUT_DIRECTORY       = doc
 CREATE_SUBDIRS         = NO
@@ -29,8 +29,8 @@ OPTIMIZE_OUTPUT_FOR_C  = NO
 OPTIMIZE_OUTPUT_JAVA   = NO
 OPTIMIZE_FOR_FORTRAN   = YES
 OPTIMIZE_OUTPUT_VHDL   = NO
-EXTENSION_MAPPING      = .f=Fortranfixed \
-                         .F=Fortranfixed \
+EXTENSION_MAPPING      = .f=FortranFree \
+                         .F=FortranFree \
                          .F90=FortranFree  \
                          .f90=FortranFree
 MARKDOWN_SUPPORT       = YES
@@ -102,46 +102,51 @@ WARN_FORMAT            =
 WARN_LOGFILE           =
 INPUT                  =  pdftxt/mainpage.txt     \
                           pdftxt/all_shemes_list.txt     \
-                          pdftxt/GFSv15_suite.txt \
-                          pdftxt/GFSv15_suite_TKEEDMF.txt \
-                          pdftxt/CPT_adv_suite.txt   \
+                          pdftxt/GFSv15p2_suite.txt \
+###                          pdftxt/GFSv15p2_no_nsst_suite.txt    \              
+###                          pdftxt/suite_FV3_GFS_v15p2.xml.txt \
+                          pdftxt/GFSv16beta_suite.txt \
+###                          pdftxt/GFSv16beta_no_nsst_suite.txt \
+###                          pdftxt/suite_FV3_GFS_v16beta.xml.txt   \
                           pdftxt/GSD_adv_suite.txt \
+                          pdftxt/CPT_adv_suite.txt   \
+                          pdftxt/RRFS_v1alpha_suite.txt  \
+                          pdftxt/RRFS_SGSCLOUD.txt   \
                           pdftxt/GFS_RRTMG.txt    \
                           pdftxt/GFS_SFCLYR.txt   \
+###                          pdftxt/MYNN_SFCLAYER.txt   \
                           pdftxt/GFS_NSST.txt     \
+                          pdftxt/GFS_OCEAN.txt    \
                           pdftxt/GFS_NOAH.txt     \
                           pdftxt/GFS_SFCSICE.txt  \
                           pdftxt/GFS_HEDMF.txt    \
-                          pdftxt/GFS_SATMEDMF.txt    \
-                          pdftxt/GFS_SATMEDMFVDIFQ.txt \
+                          pdftxt/GFS_SATMEDMFVDIFQ.txt    \
+                          pdftxt/GFS_NOAHMP.txt    \
+                          pdftxt/GFS_UGWPv0.txt   \
                           pdftxt/GFS_GWDPS.txt    \
                           pdftxt/GFS_OZPHYS.txt   \
                           pdftxt/GFS_H2OPHYS.txt  \
                           pdftxt/GFS_RAYLEIGH.txt \
-                          pdftxt/GFS_SAMF.txt     \
                           pdftxt/GFS_SAMFdeep.txt \
-                          pdftxt/GFS_GWDC.txt     \
-                          pdftxt/UGWPv0.txt     \
                           pdftxt/GFS_SAMFshal.txt \
                           pdftxt/GFDL_cloud.txt   \
-###                          pdftxt/GFS_SURFACE_PERT.txt    \
-                          pdftxt/GFS_CALPRECIPTYPE.txt   \
+###                          pdftxt/GFS_CALPRECIPTYPE.txt   \
 ###                          pdftxt/rad_cld.txt             \
                           pdftxt/CPT_CSAW.txt            \
                           pdftxt/CPT_MG3.txt             \
-                          pdftxt/GSD_MYNN_EDMF.txt       \
-                          pdftxt/GSD_CU_GF_deep.txt      \
-                          pdftxt/GSD_RUCLSM.txt          \
-                          pdftxt/GSD_THOMPSON.txt        \
+                          pdftxt/MYNN_EDMF.txt       \
+                          pdftxt/CU_GF_deep.txt      \
+                          pdftxt/RUCLSM.txt          \
+                          pdftxt/THOMPSON.txt        \
 ###                          pdftxt/GFSphys_namelist.txt    \
 ###                          pdftxt/GFS_STOCHY_PHYS.txt     \
                           pdftxt/suite_input.nml.txt    \
-                          pdftxt/NoahMP.txt \
 ### in-core MP
                         ../gfdl_fv_sat_adj.F90    \
 ### time_vary
-                        ../GFS_phys_time_vary.fv3.F90 \
+                        ../GFS_time_vary_pre.fv3.F90 \
                         ../GFS_rad_time_vary.fv3.F90  \
+                        ../GFS_phys_time_vary.fv3.F90 \
                         ../ozne_def.f                 \
                         ../ozinterp.f90               \
                         ../h2o_def.f                 \
@@ -153,8 +158,17 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../sfcsub.F  \ 
                         ../gcycle.F90  \
 ### Radiation
-                        ../radlw_main.f                  \
+                        ../GFS_rrtmg_pre.F90             \
+                        ../GFS_rrtmg_post.F90           \
+                        ../GFS_rrtmg_setup.F90          \
+                        ../rrtmg_sw_pre.F90              \
+                        ../module_SGSCloud_RadPre.F90    \
+                        ../module_SGSCloud_RadPost.F90   \
                         ../radsw_main.f                  \
+                        ../rrtmg_sw_post.F90             \
+                        ../rrtmg_lw_pre.F90              \
+                        ../radlw_main.f                  \
+                        ../rrtmg_lw_post.F90             \
                         ../radiation_aerosols.f          \
                         ../radiation_astronomy.f         \
                         ../radiation_clouds.f            \
@@ -167,18 +181,22 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../dcyc2.f        \
 ### Land Surface
                         ../sfc_diff.f \
-                        ../sfc_nst.f \
-                        ../module_nst_model.f90 \
-                        ../module_nst_parameters.f90 \
+###                        ../module_MYNNSFC_wrapper.F90 \
+###                        ../module_sf_mynn.F90         \
+                        ../sfc_nst.f                  \
+                        ../sfc_ocean.F                \
+                        ../module_nst_model.f90       \
+                        ../module_nst_parameters.f90  \
                         ../module_nst_water_prop.f90  \
-                        ../sfc_drv.f \
-                        ../sflx.f    \
+                        ../sfc_drv.f                  \
+                        ../sflx.f                     \
                         ../namelist_soilveg.f   \
                         ../set_soilveg.f        \
-                        ../sfc_noahmp_drv.f \
-                        ../module_sf_noahmplsm.f90 \
-                        ../module_sf_noahmp_glacier.f90 \
-                        ../noahmp_tables.f90 \
+                        ../sfc_noahmp_drv.f           \
+                        ../module_sf_noahmplsm.f90    \
+                        ../module_sf_noahmp_glacier.f90  \
+                        ../noahmp_tables.f90          \
+                        ../GFS_surface_generic.F90   \
 ### Sea Ice Surface
                         ../sfc_sice.f \
 ### PBL
@@ -186,17 +204,25 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../mfpbl.f \
                         ../tridi.f \
 ### satmedmf
-                        ../satmedmfvdif.F \
-                        ../mfpblt.f         \
-                        ../mfscu.f          \
-                        ../tridi.f          \
-### satmedmfvdifq
-                        ../satmedmfvdifq.F \
+###                     ../satmedmfvdif.F \
+                        ../satmedmfvdifq.F  \
                         ../mfpbltq.f         \
                         ../mfscuq.f          \
                         ../tridi.f          \
 ### Orographic Gravity Wave
+                        ../GFS_GWD_generic.F90 \
+                        ../cires_ugwp.F90    \
                         ../gwdps.f \
+                        ../ugwp_driver_v0.F \
+                        ../cires_ugwp_triggers.F90 \
+                        ../cires_ugwp_module.F90 \
+                        ../cires_ugwp_utils.F90 \
+                        ../cires_ugwp_solvers.F90 \
+                        ../cires_ugwp_post.F90   \
+###                        ../cires_ugwp_initialize.F90 \
+                        ../cires_vert_wmsdis.F90 \
+                        ../cires_vert_orodis.F90 \
+                        ../cires_vert_lsatdis.F90  \
 ### Rayleigh Dampling
                         ../rayleigh_damp.f  \
 ### Prognostic Ozone
@@ -207,14 +233,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### Deep Convection
                         ../samfdeepcnv.f \
 ### Convective Gravity Wave
-                        ../gwdc.f \
+###                        ../gwdc.f \
 ### Shallow Convection
                         ../samfshalcnv.f \
                         ../cnvc90.f \
-### Unified Gravity Wave
-                        ../cires_ugwp.F90 \
-                        ../ugwp_driver_v0.F \
-                        ../cires_ugwp_triggers.F90 \
 ### Microphysics
 ###                        ../gscond.f \
 ###                        ../precpd.f \
@@ -222,15 +244,15 @@ INPUT                  =  pdftxt/mainpage.txt     \
 ### GFDL cloud MP 
                         ../gfdl_cloud_microphys.F90 \
                         ../module_gfdl_cloud_microphys.F90 \
-###
                         ../GFS_MP_generic.F90 \
                         ../calpreciptype.f90   \
 ### stochy
-###                     ../GFS_stochastics.F90   \
+                        ../GFS_stochastics.F90   \
 ###                     ../surface_perturbation.F90 \
 ###                     ../../stochastic_physics/stochastic_physics.F90  \
 ### CPT
                         ../m_micro.F90       \
+                        ../m_micro_interstitial.F90    \
 ###                        ../micro_mg2_0.F90   \
                         ../micro_mg3_0.F90   \
                         ../micro_mg_utils.F90 \
@@ -240,12 +262,10 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../wv_saturation.F   \
                         ../cs_conv_aw_adj.F90 \
                         ../cs_conv.F90       \
-### GSD
                         ../cu_gf_driver.F90 \
+                        ../cu_gf_driver_pre.F90 \
                         ../cu_gf_deep.F90   \
                         ../cu_gf_sh.F90     \
-                        ../module_MYNNrad_pre.F90 \
-                        ../module_MYNNrad_post.F90 \
                         ../module_MYNNPBL_wrapper.F90 \
                         ../module_bl_mynn.F90   \
 ###                        ../module_MYNNSFC_wrapper.F90 \
@@ -261,19 +281,12 @@ INPUT                  =  pdftxt/mainpage.txt     \
                         ../module_mp_thompson.F90 \
                         ../module_mp_radar.F90 \
                         ../mp_thompson_post.F90  \
-### HAFS
-                        ../module_MP_FER_HIRES.F90 \
-                        ../mp_fer_hires.F90   \
-                        ../module_mp_fer_hires_pre.F90 \
 ### utils
                         ../funcphys.f90     \
                         ../physparam.f      \
                         ../physcons.F90     \
                         ../radcons.f90      \
-                        ../mersenne_twister.f \  
-                        compns_stochy.F90   
-
-
+                        ../mersenne_twister.f   
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = *.f \
                          *.F \

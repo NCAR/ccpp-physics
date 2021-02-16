@@ -41,23 +41,6 @@
 !>\ingroup mod_GFS_phys_time_vary
 !! This subroutine reads or interpolates surface climatology data in analysis 
 !! and forecast mode.
-!!\param lugb   the unit number used in this subprogram
-!!\param len    number of points on which sfccyc operates
-!!\param lsoil  number of soil layers 
-!!\param sig1t  sigma level 1 temperature for dead start. it should be on gaussian
-!!              grid. If not dead start, no need for dimension but set to zero as
-!!              in the example below.
-!!\param deltsfc       = fhcyc, frequcy for surface data cycling in hours
-!!\param iy,im,id,ih    year, month, day, and hour of initial state
-!!\param fh     forecast hour
-!!\param rla, rlo   latitude and longitudes of the len points
-!!\param slmsk
-!!\param orog
-!!\param orog_uf
-!!\param use_ufo
-!!\param nst_anl
-!!
-
       subroutine sfccycle(lugb,len,lsoil,sig1t,deltsfc                  &
      &,                   iy,im,id,ih,fh                                &
      &,                   rla, rlo, slmask,orog,orog_uf,use_ufo,nst_anl &

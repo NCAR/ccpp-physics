@@ -1,6 +1,6 @@
 !> \file gfdl_cloud_microphys.F90
 !! This file contains the full GFDL cloud microphysics (Chen and Lin (2013)
-!! \cite chen_and_lin_2013 and Zhou et al. 2019 \cite zhou2019toward).
+!! \cite chen_and_lin_2013 and Zhou et al. 2019 \cite zhou_etal_2019).
 !! The module is paired with 'gfdl_fv_sat_adj', which performs the "fast"
 !! processes
 !>author Shian-Jiann Lin, Linjiong Zhou
