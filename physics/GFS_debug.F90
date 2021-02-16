@@ -681,6 +681,7 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dtdt_gw       ',  Diag%dtdt_gw)
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%kdis_gw       ',  Diag%kdis_gw)
                      if (Model%do_ugwp_v1 .or. Model%gwd_opt==33 .or. Model%gwd_opt==22) then
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dudt_ogw      ',  Diag%dudt_ogw )
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvdt_ogw      ',  Diag%dvdt_ogw )
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dudt_obl      ',  Diag%dudt_obl )
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvdt_obl      ',  Diag%dvdt_obl )
@@ -697,7 +698,7 @@
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%du_ofdcol     ',  Diag%du_ofdcol)
                        call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dv_ofdcol     ',  Diag%dv_ofdcol)
                      else
-                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dvdt_ogw      ',  Diag%dvdt_ogw)
+                       call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Diag%dudt_ogw      ',  Diag%dudt_ogw)
                      end if
                      ! Statein
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Statein%phii'    ,     Statein%phii)
@@ -1264,7 +1265,6 @@
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_ngw             ', Interstitial%tau_ngw                 )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%tau_oss             ', Interstitial%tau_oss                 )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_mtb            ', Interstitial%dudt_mtb                )
-                     call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_ogw            ', Interstitial%dudt_ogw                )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%dudt_tms            ', Interstitial%dudt_tms                )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zmtb                ', Interstitial%zmtb                    )
                      call print_var(mpirank, omprank, blkno, Grid%xlat_d, Grid%xlon_d, 'Interstitial%zlwb                ', Interstitial%zlwb                    )
