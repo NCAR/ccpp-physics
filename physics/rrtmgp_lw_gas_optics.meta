@@ -100,6 +100,15 @@
   kind = kind_phys
   intent = out
   optional = F
+[minGPtemp]
+  standard_name = minimum_temperature_in_RRTMGP
+  long_name = minimum temperature allowed in RRTMGP
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = out
+  optional = F
 
 ########################################################################
 [ccpp-arg-table]
