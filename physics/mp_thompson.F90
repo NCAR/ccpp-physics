@@ -228,7 +228,7 @@ module mp_thompson
 
            ! Ensure we have 1st guess cloud droplet number where mass non-zero but no number.
            where(qc <= 0.0) nc=0.0
-           where(qc > 0 .and. nc <= 0.0) nc = make_DropletNumber(qc*rho, nwfa) * orho
+           where(qc > 0 .and. nc <= 0.0) nc = make_DropletNumber(qc*rho, nwfa*rho) * orho
            where(qc = 0.0 .and. nc > 0.0) nc=0.0
 
            ! Ensure non-negative aerosol number concentrations.
