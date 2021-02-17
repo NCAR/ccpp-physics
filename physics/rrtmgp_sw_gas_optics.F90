@@ -105,14 +105,6 @@ contains
     integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: sw_gas_props_file
 
-    ! Variables to create structured MPI data type
-    integer, parameter :: &
-         nVars = 35 ! Number of fields in DDT
-    integer,dimension(nVars) :: &
-         displacement_array, blocklength_array, type_array
-    integer :: &
-         base, iVar
-
     ! Initialize
     errmsg = ''
     errflg = 0
@@ -159,7 +151,7 @@ contains
        status = nf90_inq_dimid(ncid, 'minor_absorber_intervals_upper', dimid)
        status = nf90_inquire_dimension(ncid, dimid, len=nminor_absorber_intervals_upper)
 
-       ! Allocate space for arrays (all processors)
+       ! Allocate space for arrays
        if (.not. allocated(gas_namesSW))         &
             allocate(gas_namesSW(nabsorbers))
        if (.not. allocated(scaling_gas_lowerSW)) &
@@ -321,117 +313,82 @@ contains
        ! Real scalars
        call mpi_bcast(press_ref_tropSW,                   &
             1, MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_1',mpierr)
        call mpi_bcast(temp_ref_pSW,                       &
             1, MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_2',mpierr)
        call mpi_bcast(temp_ref_tSW,                       &
             1, MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_3',mpierr)
        call mpi_bcast(tsi_defaultSW,                      &
             1, MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_4',mpierr)
        call mpi_bcast(mg_defaultSW,                       &
             1, MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_5',mpierr)
        call mpi_bcast(sb_defaultSW,                       &
             1, MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_6',mpierr)
 
        ! Integer arrays
        call mpi_bcast(kminor_start_lowerSW,               &
             size(kminor_start_lowerSW),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_7',mpierr)
        call mpi_bcast(kminor_start_upperSW,               &
             size(kminor_start_upperSW),     MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_8',mpierr)
        call mpi_bcast(band2gptSW,                         &
             size(band2gptSW),               MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_9',mpierr)
        call mpi_bcast(minor_limits_gpt_lowerSW,           &
             size(minor_limits_gpt_lowerSW), MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_10',mpierr)
        call mpi_bcast(minor_limits_gpt_upperSW,           &
             size(minor_limits_gpt_upperSW), MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_11',mpierr)
        call mpi_bcast(key_speciesSW,                      &
             size(key_speciesSW),            MPI_INTEGER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_12',mpierr)
 
        ! Real arrays
        call mpi_bcast(press_refSW,                        &
             size(press_refSW),              MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_13',mpierr)
        call mpi_bcast(temp_refSW,                         &
             size(temp_refSW),               MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_14',mpierr)
        call mpi_bcast(solar_quietSW,                      &
             size(solar_quietSW),            MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_15',mpierr)
        call mpi_bcast(solar_facularSW,                    &
             size(solar_facularSW),          MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_16',mpierr)
        call mpi_bcast(solar_sunspotSW,                    &
             size(solar_sunspotSW),          MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_17',mpierr)
        call mpi_bcast(band_limsSW,                        &
             size(band_limsSW),              MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_18',mpierr)
        call mpi_bcast(vmr_refSW,                          &
             size(vmr_refSW),                MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_19',mpierr)
        call mpi_bcast(kminor_lowerSW,                     &
             size(kminor_lowerSW),           MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_20',mpierr)
        call mpi_bcast(kminor_upperSW,                     &
             size(kminor_upperSW),           MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_21',mpierr)
        call mpi_bcast(rayl_lowerSW,                       &
             size(rayl_lowerSW),             MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_22',mpierr)
        call mpi_bcast(rayl_upperSW,                       &
             size(rayl_upperSW),             MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_23',mpierr)
        call mpi_bcast(kmajorSW,                           &
             size(kmajorSW),                 MPI_REAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_24',mpierr)
 
        ! Characters
        call mpi_bcast(gas_namesSW,                        &
             size(gas_namesSW),              MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_25',mpierr)
        call mpi_bcast(gas_minorSW,                        &
             size(gas_minorSW),              MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_26',mpierr)
        call mpi_bcast(identifier_minorSW,                 &
             size(identifier_minorSW),       MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_27',mpierr)
        call mpi_bcast(minor_gases_lowerSW,                &
             size(minor_gases_lowerSW),      MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_28',mpierr)
        call mpi_bcast(minor_gases_upperSW,                &
             size(minor_gases_upperSW),      MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_29',mpierr)
        call mpi_bcast(scaling_gas_lowerSW,                &
             size(scaling_gas_lowerSW),      MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_30',mpierr)
        call mpi_bcast(scaling_gas_upperSW,                &
             size(scaling_gas_upperSW),      MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_31',mpierr)
 
        ! Logicals
        call mpi_bcast(minor_scales_with_density_lowerSW,  &
             size(minor_scales_with_density_lowerSW), MPI_LOGICAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_32',mpierr)
        call mpi_bcast(minor_scales_with_density_upperSW,  &
             size(minor_scales_with_density_upperSW), MPI_LOGICAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_33',mpierr)
        call mpi_bcast(scale_by_complement_lowerSW,        &
             size(scale_by_complement_lowerSW),       MPI_LOGICAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_34',mpierr)
        call mpi_bcast(scale_by_complement_upperSW,        &
             size(scale_by_complement_upperSW),       MPI_LOGICAL, mpiroot, mpicomm, mpierr)
-       call check_error_msg('sw_gas_optics_mpi_bcast_35',mpierr)
 
        !
        if (mpirank==mpiroot) write (*,*) '   complete'
