@@ -36,6 +36,13 @@
       use namelist_soilveg, only: salp_data, snupx
       use set_soilveg_mod, only: set_soilveg
 
+      ! --- needed for Noah MP init
+      use noahmp_tables, only: laim_table,saim_table,sla_table,      &
+                               bexp_table,smcmax_table,smcwlt_table, &
+                               dwsat_table,dksat_table,psisat_table, &
+                               isurban_table,isbarren_table,         &
+                               isice_table,iswater_table
+
       implicit none
 
       private
@@ -44,12 +51,13 @@
 
       logical :: is_initialized = .false.
 
-      real(kind=kind_phys), parameter :: con_hr     = 3600.0_kind_phys
-      real(kind=kind_phys), parameter :: con_99     =   99.0_kind_phys
-      real(kind=kind_phys), parameter :: con_100    =  100.0_kind_phys
-      real(kind=kind_phys), parameter :: drythresh  =  1.e-4_kind_phys
-      real(kind=kind_phys), parameter :: zero       =    0.0_kind_phys
-      real(kind=kind_phys), parameter :: one        =    1.0_kind_phys
+      real(kind=kind_phys), parameter :: con_hr        =  3600.0_kind_phys
+      real(kind=kind_phys), parameter :: con_99        =    99.0_kind_phys
+      real(kind=kind_phys), parameter :: con_100       =   100.0_kind_phys
+      real(kind=kind_phys), parameter :: missing_value = 9.99e20_kind_phys
+      real(kind=kind_phys), parameter :: drythresh     =   1.e-4_kind_phys
+      real(kind=kind_phys), parameter :: zero          =     0.0_kind_phys
+      real(kind=kind_phys), parameter :: one           =     1.0_kind_phys
 
       contains
 
@@ -64,8 +72,13 @@
               jindx1_aer, jindx2_aer, ddy_aer, iindx1_aer, iindx2_aer, ddx_aer, aer_nm,            &
               jindx1_ci, jindx2_ci, ddy_ci, iindx1_ci, iindx2_ci, ddx_ci, imap, jmap,              &
               do_ugwp_v1, jindx1_tau, jindx2_tau, ddy_j1tau, ddy_j2tau,                            &
-              isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_ruc, min_seaice, fice, landfrac, &
-              vtype, weasd, nthrds, errmsg, errflg)
+              isot, ivegsrc, nlunit, sncovr, sncovr_ice, lsm, lsm_noahmp, lsm_ruc, min_seaice,     &
+              fice, landfrac, vtype, weasd, lsoil, zs, dzs, lsnow_lsm_lbound, lsnow_lsm_ubound,    &
+              tvxy, tgxy, tahxy, canicexy, canliqxy, eahxy, cmxy, chxy, fwetxy, sneqvoxy, alboldxy,&
+              qsnowxy, wslakexy, taussxy, waxy, wtxy, zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy,   &
+              rtmassxy, woodxy, stblcpxy, fastcpxy, smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, &
+              snliqxy, tsnoxy , smoiseq, zsnsoxy, slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, &
+              nthrds, errmsg, errflg)
 
          implicit none
 
@@ -90,9 +103,57 @@
 
          integer,              intent(in)    :: isot, ivegsrc, nlunit
          real(kind_phys),      intent(inout) :: sncovr(:), sncovr_ice(:)
-         integer,              intent(in)    :: lsm, lsm_ruc
+         integer,              intent(in)    :: lsm, lsm_noahmp, lsm_ruc
          real(kind_phys),      intent(in)    :: min_seaice, fice(:)
-         real(kind_phys),      intent(in)    :: landfrac(:), vtype(:), weasd(:)
+         real(kind_phys),      intent(in)    :: landfrac(:), vtype(:)
+         real(kind_phys),      intent(inout) :: weasd(:)
+
+         ! NoahMP - only allocated when NoahMP is used
+         integer, intent(in) :: lsoil, lsnow_lsm_lbound, lsnow_lsm_ubound
+         real(kind_phys),      intent(in)    :: zs(:)
+         real(kind_phys),      intent(in)    :: dzs(:)
+         real(kind_phys),      intent(inout) :: tvxy(:)
+         real(kind_phys),      intent(inout) :: tgxy(:)
+         real(kind_phys),      intent(inout) :: tahxy(:)
+         real(kind_phys),      intent(inout) :: canicexy(:)
+         real(kind_phys),      intent(inout) :: canliqxy(:)
+         real(kind_phys),      intent(inout) :: eahxy(:)
+         real(kind_phys),      intent(inout) :: cmxy(:)
+         real(kind_phys),      intent(inout) :: chxy(:)
+         real(kind_phys),      intent(inout) :: fwetxy(:)
+         real(kind_phys),      intent(inout) :: sneqvoxy(:)
+         real(kind_phys),      intent(inout) :: alboldxy(:)
+         real(kind_phys),      intent(inout) :: qsnowxy(:)
+         real(kind_phys),      intent(inout) :: wslakexy(:)
+         real(kind_phys),      intent(inout) :: taussxy(:)
+         real(kind_phys),      intent(inout) :: waxy(:)
+         real(kind_phys),      intent(inout) :: wtxy(:)
+         real(kind_phys),      intent(inout) :: zwtxy(:)
+         real(kind_phys),      intent(inout) :: xlaixy(:)
+         real(kind_phys),      intent(inout) :: xsaixy(:)
+         real(kind_phys),      intent(inout) :: lfmassxy(:)
+         real(kind_phys),      intent(inout) :: stmassxy(:)
+         real(kind_phys),      intent(inout) :: rtmassxy(:)
+         real(kind_phys),      intent(inout) :: woodxy(:)
+         real(kind_phys),      intent(inout) :: stblcpxy(:)
+         real(kind_phys),      intent(inout) :: fastcpxy(:)
+         real(kind_phys),      intent(inout) :: smcwtdxy(:)
+         real(kind_phys),      intent(inout) :: deeprechxy(:)
+         real(kind_phys),      intent(inout) :: rechxy(:)
+         real(kind_phys),      intent(inout) :: snowxy(:)
+         real(kind_phys),      intent(inout) :: snicexy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout) :: snliqxy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout) :: tsnoxy (:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout) :: smoiseq(:,:)
+         real(kind_phys),      intent(inout) :: zsnsoxy(:,lsnow_lsm_lbound:)
+         real(kind_phys),      intent(inout) :: slc(:,:)
+         real(kind_phys),      intent(inout) :: smc(:,:)
+         real(kind_phys),      intent(inout) :: stc(:,:)
+         real(kind_phys),      intent(in)    :: tsfcl(:)
+         real(kind_phys),      intent(in)    :: snowd(:)
+         real(kind_phys),      intent(in)    :: canopy(:)
+         real(kind_phys),      intent(in)    :: tg3(:)
+         real(kind_phys),      intent(in)    :: stype(:)
 
          integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
@@ -101,6 +162,14 @@
          ! Local variables
          integer :: i, j, ix, vegtyp
          real(kind_phys) :: rsnow
+
+         !--- Noah MP
+         integer              :: soiltyp, isnow, is, imn
+         real(kind=kind_phys) :: masslai, masssai, snd
+         real(kind=kind_phys) :: bexp, ddz, smcmax, smcwlt, dwsat, dksat, psisat
+
+         real(kind=kind_phys), dimension(:), allocatable :: dzsno
+         real(kind=kind_phys), dimension(:), allocatable :: dzsnso
 
          ! Initialize CCPP error handling variables
          errmsg = ''
@@ -293,7 +362,282 @@
 
 !$OMP end parallel
 
+
+
+         if (lsm == lsm_noahmp) then
+           if (all(tvxy < zero)) then
+
+             allocate(dzsno (lsnow_lsm_lbound:lsnow_lsm_ubound))
+             allocate(dzsnso(lsnow_lsm_lbound:lsoil)           )
+             dzsno(:)    = missing_value
+             dzsnso(:)   = missing_value
+
+             tvxy(:)     = missing_value
+             tgxy(:)     = missing_value
+             tahxy(:)    = missing_value
+             canicexy(:) = missing_value
+             canliqxy(:) = missing_value
+             eahxy(:)    = missing_value
+             cmxy(:)     = missing_value
+             chxy(:)     = missing_value
+             fwetxy(:)   = missing_value
+             sneqvoxy(:) = missing_value
+             alboldxy(:) = missing_value
+             qsnowxy(:)  = missing_value
+             wslakexy(:) = missing_value
+             taussxy(:)  = missing_value
+             waxy(:)     = missing_value
+             wtxy(:)     = missing_value
+             zwtxy(:)    = missing_value
+             xlaixy(:)   = missing_value
+             xsaixy(:)   = missing_value
+
+             lfmassxy(:)   = missing_value
+             stmassxy(:)   = missing_value
+             rtmassxy(:)   = missing_value
+             woodxy(:)     = missing_value
+             stblcpxy(:)   = missing_value
+             fastcpxy(:)   = missing_value
+             smcwtdxy(:)   = missing_value
+             deeprechxy(:) = missing_value
+             rechxy(:)     = missing_value
+
+             snowxy (:)    = missing_value
+             snicexy(:,:)  = missing_value
+             snliqxy(:,:)  = missing_value
+             tsnoxy (:,:)  = missing_value
+             smoiseq(:,:)  = missing_value
+             zsnsoxy(:,:)  = missing_value
+
+             do ix=1,im
+               if (landfrac(ix) >= drythresh) then ! Sfcprop(nb)%
+                 tvxy(ix)     = tsfcl(ix) ! Sfcprop(nb)%
+                 tgxy(ix)     = tsfcl(ix) ! Sfcprop(nb)%
+                 tahxy(ix)    = tsfcl(ix) ! Sfcprop(nb)%
+
+                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > 273.15 ) tvxy(ix)  = 273.15   ! all Sfcprop(nb)%, replace hardcoded value with parameter/constant THIS IS A BUGFIX, (ix) was missing!
+                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > 273.15 ) tgxy(ix)  = 273.15   ! all Sfcprop(nb)%, replace hardcoded value with parameter/constant THIS IS A BUGFIX, (ix) was missing!
+                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > 273.15 ) tahxy(ix) = 273.15   ! all Sfcprop(nb)%, replace hardcoded value with parameter/constant THIS IS A BUGFIX, (ix) was missing!
+
+                 canicexy(ix) = 0.0
+                 canliqxy(ix) = canopy(ix)
+
+                 eahxy(ix)    = 2000.0
+
+!                 eahxy = psfc*qv/(0.622+qv); qv is mixing ratio, converted from sepcific
+!                 humidity specific humidity /(1.0 - specific humidity)
+
+                 cmxy(ix)     = 0.0
+                 chxy(ix)     = 0.0
+                 fwetxy(ix)   = 0.0
+                 sneqvoxy(ix) = weasd(ix)     ! mm
+                 alboldxy(ix) = 0.65 ! DH* REPLACE WITH CONSTANT ?
+                 qsnowxy(ix)  = 0.0
+
+!                 if (srflag(ix) > 0.001) qsnowxy(ix) = tprcp(ix)/dtp
+                 ! already set to 0.0
+                 wslakexy(ix) = 0.0
+                 taussxy(ix)  = 0.0
+
+
+                 waxy(ix)     = 4900.0
+                 wtxy(ix)     = waxy(ix)
+                 zwtxy(ix)    = (25.0 + 2.0) - waxy(ix) / 1000.0 /0.2
+
+                 vegtyp       = vtype(ix)
+                 if (vegtyp == 0) vegtyp = 7
+                 imn          = idate(2) ! DH* MODEL%
+
+                 if ((vegtyp == isbarren_table) .or. (vegtyp == isice_table) .or. (vegtyp == isurban_table) .or. (vegtyp == iswater_table)) then
+
+                   xlaixy(ix)   = 0.0
+                   xsaixy(ix)   = 0.0
+
+                   lfmassxy(ix) = 0.0
+                   stmassxy(ix) = 0.0
+                   rtmassxy(ix) = 0.0
+
+                   woodxy   (ix) = 0.0
+                   stblcpxy (ix) = 0.0
+                   fastcpxy (ix) = 0.0
+
+                 else
+
+                   xlaixy(ix)   = max(laim_table(vegtyp, imn),0.05)
+!                   xsaixy(ix)   = max(saim_table(vegtyp, imn),0.05)
+                   xsaixy(ix)   = max(xlaixy(ix)*0.1,0.05)
+
+                   masslai      = 1000.0 / max(sla_table(vegtyp),1.0)
+                   lfmassxy(ix) = xlaixy(ix)*masslai
+                   masssai      = 1000.0 / 3.0
+                   stmassxy(ix) = xsaixy(ix)* masssai
+
+                   rtmassxy(ix) = 500.0
+
+                   woodxy(ix)   = 500.0
+                   stblcpxy(ix) = 1000.0
+                   fastcpxy(ix) = 1000.0
+
+                 endif  ! non urban ...
+
+                 if (vegtyp == isice_table) then
+                   do is = 1,lsoil
+                     stc(ix,is) = min(stc(ix,is),min(tg3(ix),263.15))
+                     smc(ix,is) = 1
+                     slc(ix,is) = 0
+                   enddo
+                 endif
+
+                 snd = snowd(ix)/1000.0  ! go to m from snwdph
+
+                 if (weasd(ix) /= 0.0 .and. snd == 0.0 ) then
+                   snd = weasd(ix)/1000.0
+                 endif
+
+                 if (vegtyp == 15) then                      ! land ice in MODIS/IGBP
+                   if (weasd(ix) < 0.1) then
+                     weasd(ix) = 0.1
+                     snd       = 0.01
+                   endif
+                 endif
+
+                 if (snd < 0.025 ) then
+                   snowxy(ix)   = 0.0
+                   dzsno(-2:0)  = 0.0
+                 elseif (snd >= 0.025 .and. snd <= 0.05 ) then
+                   snowxy(ix)   = -1.0
+                   dzsno(0)     = snd
+                 elseif (snd > 0.05 .and. snd <= 0.10 ) then
+                   snowxy(ix)   = -2.0
+                   dzsno(-1)    = 0.5*snd
+                   dzsno(0)     = 0.5*snd
+                 elseif (snd > 0.10 .and. snd <= 0.25 ) then
+                   snowxy(ix)   = -2.0
+                   dzsno(-1)    = 0.05
+                   dzsno(0)     = snd - 0.05
+                 elseif (snd > 0.25 .and. snd <= 0.45 ) then
+                   snowxy(ix)   = -3.0
+                   dzsno(-2)    = 0.05
+                   dzsno(-1)    = 0.5*(snd-0.05)
+                   dzsno(0)     = 0.5*(snd-0.05)
+                 elseif (snd > 0.45) then
+                   snowxy(ix)   = -3.0
+                   dzsno(-2)    = 0.05
+                   dzsno(-1)    = 0.20
+                   dzsno(0)     = snd - 0.05 - 0.20
+                 else
+                   errmsg = 'Error in GFS_phys_time_vary.fv3.F90: Problem with the logic assigning snow layers in Noah MP initialization'
+                   errflg = 1
+                   return
+                 endif
+
+! Now we have the snowxy field
+! snice + snliq + tsno allocation and compute them from what we have
+
+                 tsnoxy(ix,:)  = 0.0
+                 snicexy(ix,:) = 0.0
+                 snliqxy(ix,:) = 0.0
+                 zsnsoxy(ix,:) = 0.0
+
+                 isnow = nint(snowxy(ix))+1 ! snowxy <=0.0, dzsno >= 0.0
+
+                 do is = isnow,0
+                   tsnoxy(ix,is)  = tgxy(ix)
+                   snliqxy(ix,is) = 0.0
+                   snicexy(ix,is) = 1.00 * dzsno(is) * weasd(ix)/snd
+                 enddo
+!
+!zsnsoxy, all negative ?
+!
+                 do is = isnow,0
+                   dzsnso(is) = -dzsno(is)
+                 enddo
+
+                 do is = 1,4
+                   dzsnso(is) = -dzs(is)
+                 enddo
+!
+! Assign to zsnsoxy
+!
+                 zsnsoxy(ix,isnow) = dzsnso(isnow)
+                 do is = isnow+1,4
+                   zsnsoxy(ix,is) = zsnsoxy(ix,is-1) + dzsnso(is)
+                 enddo
+!
+! smoiseq
+! Init water table related quantities here
+!
+                 soiltyp  = stype(ix)
+                 if (soiltyp /= 0) then
+                   bexp   = bexp_table(soiltyp)
+                   smcmax = smcmax_table(soiltyp)
+                   smcwlt = smcwlt_table(soiltyp)
+                   dwsat  = dwsat_table(soiltyp)
+                   dksat  = dksat_table(soiltyp)
+                   psisat = -psisat_table(soiltyp)
+                 endif
+
+                 if (vegtyp == isurban_table) then
+                   smcmax = 0.45
+                   smcwlt = 0.40
+                 endif
+
+                 if ((bexp > 0.0) .and. (smcmax > 0.0) .and. (-psisat > 0.0 )) then
+                   do is = 1, lsoil
+                     if ( is == 1 )then
+                       ddz = -zs(is+1) * 0.5
+                     elseif ( is < lsoil ) then
+                       ddz = ( zs(is-1) - zs(is+1) ) * 0.5
+                     else
+                       ddz = zs(is-1) - zs(is)
+                     endif
+                     smoiseq(ix,is) = min(max(find_eq_smc(bexp, dwsat, dksat, ddz, smcmax),1.e-4),smcmax*0.99)
+                   enddo
+                 else                                    ! bexp <= 0.0
+                   smoiseq(ix,1:4) = smcmax
+                 endif                                   ! end the bexp condition
+
+                 smcwtdxy(ix)   = smcmax
+                 deeprechxy(ix) = 0.0
+                 rechxy(ix)     = 0.0
+
+               endif
+
+             enddo ! ix
+
+             deallocate(dzsno)
+             deallocate(dzsnso)
+
+           endif
+         endif   !if Noah MP cold start ends
+
          is_initialized = .true.
+
+      contains
+
+!
+! Use newton-raphson method to find eq soil moisture
+!
+         function find_eq_smc(bexp, dwsat, dksat, ddz, smcmax) result(smc)
+            implicit none
+            real(kind=kind_phys), intent(in) :: bexp, dwsat, dksat, ddz, smcmax
+            real(kind=kind_phys) :: smc
+            real(kind=kind_phys) :: expon, aa, bb, func, dfunc, dx
+            integer :: iter
+            !
+            expon = bexp + 1.
+            aa    = dwsat / ddz
+            bb    = dksat / smcmax ** expon
+            smc = 0.5 * smcmax
+            !
+            do iter = 1,100
+              func  = (smc - smcmax) * aa +  bb * smc ** expon
+              dfunc = aa + bb * expon * smc ** bexp
+              dx    = func / dfunc
+              smc   = smc - dx
+              if ( abs (dx) < 1.e-6_kind_phys) return
+            enddo
+         end function find_eq_smc
 
       end subroutine GFS_phys_time_vary_init
 !! @}
