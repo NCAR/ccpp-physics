@@ -102,7 +102,7 @@ contains
          errflg              ! CCPP error code
 
     ! Local variables
-    integer :: status, ncid, dimid, varID, iGas, mpierr
+    integer :: status, ncid, dimid, varID, iGas, mpierr, iChar
     integer,dimension(:),allocatable :: temp1, temp2, temp3, temp4
     character(len=264) :: sw_gas_props_file
 
@@ -161,7 +161,6 @@ contains
     endif ! On master processor
 
     ! Other processors waiting...
-    write (*,*) '   process waiting... ',mpirank
     call mpi_barrier(mpicomm, mpierr)
 
     ! #######################################################################################
@@ -192,7 +191,6 @@ contains
     ! (ALL processors)
     !
     ! #######################################################################################
-    write (*,*) 'Allocating RRTMGP shortwave k-distribution data ... '
     if (.not. allocated(gas_namesSW))         &
          allocate(gas_namesSW(nabsorbersSW))
     if (.not. allocated(scaling_gas_lowerSW)) &
@@ -354,13 +352,10 @@ contains
        
        ! Close
        status = nf90_close(ncid)
-       if (mpirank==mpiroot) write (*,*) '   complete'
-
 #ifdef MPI
     endif ! Master process
 
     ! Other processors waiting...
-    write (*,*) '   process waiting... ',mpirank
     call mpi_barrier(mpicomm, mpierr)
 
     ! #######################################################################################
@@ -369,83 +364,89 @@ contains
     ! (ALL processors)
     !
     ! #######################################################################################
-    write (*,*) 'MPI Broadcasting RRTMGP shortwave k-distribution data ... '
 
     ! Real scalars
-    call mpi_bcast(press_ref_tropSW, 1,           MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
-    call mpi_bcast(temp_ref_pSW,     1,           MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
-    call mpi_bcast(temp_ref_tSW,     1,           MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
-    call mpi_bcast(tsi_defaultSW,    1,           MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
-    call mpi_bcast(mg_defaultSW,     1,           MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
-    call mpi_bcast(sb_defaultSW,     1,           MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+    call mpi_bcast(press_ref_tropSW, 1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_pSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(temp_ref_tSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(tsi_defaultSW,    1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(mg_defaultSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(sb_defaultSW,     1,           MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     
     ! Integer arrays
     call mpi_bcast(kminor_start_lowerSW,               &
-         size(kminor_start_lowerSW),              MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+         size(kminor_start_lowerSW),              MPI_INTEGER,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(kminor_start_upperSW,               &
-         size(kminor_start_upperSW),              MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+         size(kminor_start_upperSW),              MPI_INTEGER,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(band2gptSW,                         &
-         size(band2gptSW),                        MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+         size(band2gptSW),                        MPI_INTEGER,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(minor_limits_gpt_lowerSW,           &
-         size(minor_limits_gpt_lowerSW),          MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+         size(minor_limits_gpt_lowerSW),          MPI_INTEGER,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(minor_limits_gpt_upperSW,           &
-         size(minor_limits_gpt_upperSW),          MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+         size(minor_limits_gpt_upperSW),          MPI_INTEGER,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(key_speciesSW,                      &
-         size(key_speciesSW),                     MPI_INTEGER,   mpiroot, mpicomm, mpierr)
+         size(key_speciesSW),                     MPI_INTEGER,          mpiroot, mpicomm, mpierr)
     
     ! Real arrays
     call mpi_bcast(press_refSW,                        &
-         size(press_refSW),                       MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(press_refSW),                       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(temp_refSW,                         &
-         size(temp_refSW),                        MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(temp_refSW),                        MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(solar_quietSW,                      &
-         size(solar_quietSW),                     MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(solar_quietSW),                     MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(solar_facularSW,                    &
-         size(solar_facularSW),                   MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(solar_facularSW),                   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(solar_sunspotSW,                    &
-         size(solar_sunspotSW),                   MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(solar_sunspotSW),                   MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(band_limsSW,                        &
-         size(band_limsSW),                       MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(band_limsSW),                       MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(vmr_refSW,                          &
-         size(vmr_refSW),                         MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(vmr_refSW),                         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(kminor_lowerSW,                     &
-         size(kminor_lowerSW),                    MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(kminor_lowerSW),                    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(kminor_upperSW,                     &
-         size(kminor_upperSW),                    MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(kminor_upperSW),                    MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(rayl_lowerSW,                       &
-         size(rayl_lowerSW),                      MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(rayl_lowerSW),                      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(rayl_upperSW,                       &
-         size(rayl_upperSW),                      MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(rayl_upperSW),                      MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     call mpi_bcast(kmajorSW,                           &
-         size(kmajorSW),                          MPI_DOUBLE_PRECISION,      mpiroot, mpicomm, mpierr)
+         size(kmajorSW),                          MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     
     ! Characters
-    call mpi_bcast(gas_namesSW,                        &
-         size(gas_namesSW),                       MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(gas_minorSW,                        &
-         size(gas_minorSW),                       MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(identifier_minorSW,                 &
-         size(identifier_minorSW),                MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(minor_gases_lowerSW,                &
-         size(minor_gases_lowerSW),               MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(minor_gases_upperSW,                &
-         size(minor_gases_upperSW),               MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(scaling_gas_lowerSW,                &
-         size(scaling_gas_lowerSW),               MPI_CHARACTER, mpiroot, mpicomm, mpierr)
-    call mpi_bcast(scaling_gas_upperSW,                &
-         size(scaling_gas_upperSW),               MPI_CHARACTER, mpiroot, mpicomm, mpierr)
+    do iChar=1,nabsorbersSW
+       call mpi_bcast(gas_namesSW(iChar),              &
+         len(gas_namesSW(iChar)),                 MPI_CHARACTER,        mpiroot, mpicomm, mpierr)
+    enddo
+    do iChar=1,nminorabsorbersSW
+       call mpi_bcast(gas_minorSW(iChar),              &
+            len(gas_minorSW(iChar)),              MPI_CHARACTER,        mpiroot, mpicomm, mpierr)
+       call mpi_bcast(identifier_minorSW(iChar),       &
+            len(identifier_minorSW(iChar)),       MPI_CHARACTER,        mpiroot, mpicomm, mpierr)
+    enddo
+    do iChar=1,nminor_absorber_intervals_lowerSW
+       call mpi_bcast(minor_gases_lowerSW(iChar),      &
+            len(minor_gases_lowerSW(iChar)),      MPI_CHARACTER,        mpiroot, mpicomm, mpierr)
+       call mpi_bcast(scaling_gas_lowerSW(iChar),      &
+            len(scaling_gas_lowerSW(iChar)),      MPI_CHARACTER,        mpiroot, mpicomm, mpierr)
+    enddo
+    do iChar=1,nminor_absorber_intervals_upperSW
+       call mpi_bcast(minor_gases_upperSW(iChar),      &
+            len(minor_gases_upperSW(iChar)),      MPI_CHARACTER,        mpiroot, mpicomm, mpierr)
+       call mpi_bcast(scaling_gas_upperSW(iChar),      &
+            len(scaling_gas_upperSW(iChar)),      MPI_CHARACTER,        mpiroot, mpicomm, mpierr)
+    enddo
     
     ! Logicals
     call mpi_bcast(minor_scales_with_density_lowerSW,  &
-         size(minor_scales_with_density_lowerSW), MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+         size(minor_scales_with_density_lowerSW), MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(minor_scales_with_density_upperSW,  &
-         size(minor_scales_with_density_upperSW), MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+         size(minor_scales_with_density_upperSW), MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(scale_by_complement_lowerSW,        &
-         size(scale_by_complement_lowerSW),       MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+         size(scale_by_complement_lowerSW),       MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
     call mpi_bcast(scale_by_complement_upperSW,        &
-         size(scale_by_complement_upperSW),       MPI_LOGICAL,   mpiroot, mpicomm, mpierr)
+         size(scale_by_complement_upperSW),       MPI_LOGICAL,          mpiroot, mpicomm, mpierr)
 
-    write (*,*) '  broadcasting complete'   
     call mpi_barrier(mpicomm, mpierr)
 #endif
 
@@ -454,7 +455,6 @@ contains
     ! Initialize RRTMGP DDT's...
     !
     ! #######################################################################################
-    print*,'gas_minorSW: ',gas_minorSW
 !$omp critical (load_sw_gas_optics)
     gas_concentrations%gas_name(:) = active_gases_array(:)
     call check_error_msg('sw_gas_optics_init',sw_gas_props%load(gas_concentrations,         &
