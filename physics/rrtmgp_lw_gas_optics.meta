@@ -34,22 +34,6 @@
   type = ty_gas_concs
   intent = inout
   optional = F
-[ncol]
-  standard_name = horizontal_loop_extent
-  long_name = horizontal dimension
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
-[nLev]
-  standard_name = vertical_dimension
-  long_name = number of vertical levels
-  units = count
-  dimensions = ()
-  type = integer
-  intent = in
-  optional = F
 [mpirank]
   standard_name = mpi_rank
   long_name = current MPI rank
