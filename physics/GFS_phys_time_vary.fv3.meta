@@ -1,7 +1,8 @@
 [ccpp-table-properties]
   name = GFS_phys_time_vary
   type = scheme
-  dependencies = aerclm_def.F,aerinterp.F90,gcycle.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f,namelist_soilveg.f,set_soilveg.f,ozinterp.f90,ozne_def.f,sfcsub.F
+  dependencies = aerclm_def.F,aerinterp.F90,gcycle.F90,h2o_def.f,h2ointerp.f90,iccn_def.F,iccninterp.F90,machine.F,mersenne_twister.f
+  dependencies = namelist_soilveg.f,set_soilveg.f,ozinterp.f90,ozne_def.f,sfcsub.F,cires_tauamf_data.F90
 
 ########################################################################
 [ccpp-arg-table]
@@ -307,6 +308,48 @@
   type = integer
   intent = inout
   optional = F
+[do_ugwp_v1]
+  standard_name = flag_for_ugwp_version_1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[jindx1_tau]
+  standard_name = lower_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index1 for weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+  optional = F
+[jindx2_tau]
+  standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index2 for weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = inout
+  optional = F
+[ddy_j1tau]
+  standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = inout
+  kind = kind_phys
+  optional = F
+[ddy_j2tau]
+  standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = inout
+  kind = kind_phys
+  optional = F
 [isot]
   standard_name = soil_type_dataset_choice
   long_name = soil type dataset choice
@@ -553,7 +596,7 @@
 [nsswr]
   standard_name = number_of_timesteps_between_shortwave_radiation_calls
   long_name = number of timesteps between shortwave radiation calls
-  units = 
+  units =
   dimensions = ()
   type = integer
   intent = in
@@ -1434,6 +1477,57 @@
   long_name = landmask: sea/land/ice=0/1/2
   units = flag
   dimensions = (horizontal_dimension)
+  type = real
+  kind = kind_phys
+  intent = inout
+  optional = F
+[do_ugwp_v1]
+  standard_name = flag_for_ugwp_version_1
+  long_name = flag to activate ver 1 CIRES UGWP
+  units = flag
+  dimensions = ()
+  type = logical
+  intent = in
+  optional = F
+[jindx1_tau]
+  standard_name = lower_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index1 for weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[jindx2_tau]
+  standard_name = upper_latitude_index_of_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag_for_interpolation
+  long_name = index2 for weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = integer
+  intent = in
+  optional = F
+[ddy_j1tau]
+  standard_name = latitude_interpolation_weight_complement_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight1 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = in
+  kind = kind_phys
+  optional = F
+[ddy_j2tau]
+  standard_name = latitude_interpolation_weight_for_absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = interpolation weight2 for tau NGWs
+  units = none
+  dimensions = (horizontal_loop_extent)
+  type = real
+  intent = in
+  kind = kind_phys
+  optional = F
+[tau_amf]
+  standard_name = absolute_momentum_flux_due_to_nonorographic_gravity_wave_drag
+  long_name = ngw_absolute_momentum_flux
+  units = various
+  dimensions = (horizontal_loop_extent)
   type = real
   kind = kind_phys
   intent = inout
