@@ -1,4 +1,3 @@
-#undef MULTI_GASES
 
 !
 !! ! Module: gfs_phy_tracer_config
@@ -135,7 +134,6 @@ c
 
 !--- fill in met tracers
                       gfs_phy_tracer%vname(1)     = 'spfh'   
-        if(ntoz  > 0) gfs_phy_tracer%vname(ntoz)  = 'o3mr'   
         if(ntcw  > 0) gfs_phy_tracer%vname(ntcw)  = 'clwmr'   
         if(ntiw  > 0) gfs_phy_tracer%vname(ntiw)  = 'climr'   
         if(ntlnc > 0) gfs_phy_tracer%vname(ntlnc) = 'lnc'
@@ -146,10 +144,12 @@ c
         if(ntsnc > 0) gfs_phy_tracer%vname(ntsnc) = 'snc'
         if(ntke  > 0) gfs_phy_tracer%vname(ntke)  = 'tke'   
 #ifdef MULTI_GASES
-        print *,' ++++ nto nto2 ',nto,nto2
+        print *,' ++++ ntoz nto nto2 ',ntoz,nto,nto2
+        if(ntoz  > 0) gfs_phy_tracer%vname(ntoz)  = 'spfo3'   
         if(nto   > 0) gfs_phy_tracer%vname(nto)   = 'spfo'
         if(nto2  > 0) gfs_phy_tracer%vname(nto2)  = 'spfo2'
 #else
+        if(ntoz  > 0) gfs_phy_tracer%vname(ntoz)  = 'o3mr'   
         if(nto   > 0) gfs_phy_tracer%vname(nto)   = 'o'   
         if(nto2  > 0) gfs_phy_tracer%vname(nto2)  = 'o2'   
 #endif
