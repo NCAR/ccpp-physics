@@ -7,12 +7,16 @@ module rrtmgp_sw_cloud_optics
   use rrtmgp_sw_gas_optics,     only: sw_gas_props
   use rrtmgp_aux,               only: check_error_msg
   use netcdf
+#ifdef MPI
+  use mpi
+#endif
 
   implicit none
-
-  public rrtmgp_sw_cloud_optics_init, rrtmgp_sw_cloud_optics_run, rrtmgp_sw_cloud_optics_finalize
   
   type(ty_cloud_optics) :: sw_cloud_props 
+  integer :: &
+       nrghice_fromfileSW, nBandSW, nSize_liqSW, nSize_iceSW, nSizeregSW, &
+       nCoeff_extSW, nCoeff_ssa_gSW, nBoundSW, nPairsSW
   real(kind_phys) :: &
        radliq_facSW,          & ! Factor for calculating LUT interpolation indices for liquid   
        radice_facSW             ! Factor for calculating LUT interpolation indices for ice  
@@ -66,7 +70,7 @@ contains
 !! \section arg_table_rrtmgp_sw_cloud_optics_init
 !! \htmlinclude rrtmgp_lw_cloud_optics.html
 !!
-  subroutine rrtmgp_sw_cloud_optics_init(nCol, nLev, nbndsGPsw, doG_cldoptics, doGP_cldoptics_PADE,             &
+  subroutine rrtmgp_sw_cloud_optics_init(doG_cldoptics, doGP_cldoptics_PADE,             &
        doGP_cldoptics_LUT, nrghice, rrtmgp_root_dir, rrtmgp_sw_file_clouds, mpicomm,     &
        mpirank, mpiroot, errmsg, errflg)
 
@@ -78,12 +82,9 @@ contains
     integer, intent(inout) :: &
          nrghice               ! Number of ice-roughness categories
     integer, intent(in) :: &
-         nbndsGPsw,          & ! Number of bands used in shortwave.
          mpicomm,            & ! MPI communicator
          mpirank,            & ! Current MPI rank
-         mpiroot,            & ! Master MPI rank
-         nCol,               & ! Number of horizontal gridpoints
-         nLev                  ! Number of vertical levels 
+         mpiroot               ! Master MPI rank
     character(len=128),intent(in) :: &
          rrtmgp_root_dir,    & ! RTE-RRTMGP root directory
          rrtmgp_sw_file_clouds ! RRTMGP file containing coefficients used to compute clouds optical properties
@@ -94,15 +95,9 @@ contains
     integer,          intent(out) :: &
          errflg                ! CCPP error code
     
-    ! Dimensions
-    integer :: &
-         nrghice_fromfile, nBand, nSize_liq, nSize_ice, nSizereg,&
-         nCoeff_ext, nCoeff_ssa_g, nBound, nPairs
-
     ! Local variables
-    integer :: status,ncid,dimid,varID
+    integer :: status,ncid,dimid,varID,mpierr
     character(len=264) :: sw_cloud_props_file
-    integer,parameter ::  nrghice_default=2
 
     ! Initialize
     errmsg = ''
@@ -113,61 +108,108 @@ contains
     ! Filenames are set in the physics_nml
     sw_cloud_props_file = trim(rrtmgp_root_dir)//trim(rrtmgp_sw_file_clouds)
 
-    ! On master processor only...
-!    if (mpirank .eq. mpiroot) then
+    ! #######################################################################################
+    !
+    ! Read dimensions for shortwave cloud-optics fields...
+    ! (ONLY master processor(0), if MPI enabled)
+    !
+    ! #######################################################################################
+#ifdef MPI
+    if (mpirank .eq. mpiroot) then
+#endif
+       write (*,*) 'Reading RRTMGP shortwave cloud-optics metadata ... '
+
        ! Open file
        status = nf90_open(trim(sw_cloud_props_file), NF90_NOWRITE, ncid)
 
        ! Read dimensions
        status = nf90_inq_dimid(ncid, 'nband', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nBand)
+       status = nf90_inquire_dimension(ncid, dimid, len=nBandSW)
        status = nf90_inq_dimid(ncid, 'nrghice', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nrghice_fromfile)
+       status = nf90_inquire_dimension(ncid, dimid, len=nrghice_fromfileSW)
        status = nf90_inq_dimid(ncid, 'nsize_liq', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nSize_liq)
+       status = nf90_inquire_dimension(ncid, dimid, len=nSize_liqSW)
        status = nf90_inq_dimid(ncid, 'nsize_ice', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nSize_ice)
+       status = nf90_inquire_dimension(ncid, dimid, len=nSize_iceSW)
        status = nf90_inq_dimid(ncid, 'nsizereg', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nSizereg)
+       status = nf90_inquire_dimension(ncid, dimid, len=nSizeregSW)
        status = nf90_inq_dimid(ncid, 'ncoeff_ext', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nCoeff_ext)
+       status = nf90_inquire_dimension(ncid, dimid, len=nCoeff_extSW)
        status = nf90_inq_dimid(ncid, 'ncoeff_ssa_g', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nCoeff_ssa_g)
+       status = nf90_inquire_dimension(ncid, dimid, len=nCoeff_ssa_gSW)
        status = nf90_inq_dimid(ncid, 'nbound', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nBound)
+       status = nf90_inquire_dimension(ncid, dimid, len=nBoundSW)
        status = nf90_inq_dimid(ncid, 'pair', dimid)
-       status = nf90_inquire_dimension(ncid, dimid, len=nPairs)
- 
-       ! Has the number of ice-roughnesses provided from the namelist?
-       ! If not, use nrghice from cloud-optics file
-       if (nrghice .eq. 0) nrghice = nrghice_fromfile
+       status = nf90_inquire_dimension(ncid, dimid, len=nPairsSW) 
+#ifdef MPI
+    endif ! On master processor
 
-       ! Allocate space for arrays
-       if (doGP_cldoptics_LUT) then
-          allocate(lut_extliqSW(nSize_liq, nBand))
-          allocate(lut_ssaliqSW(nSize_liq, nBand))
-          allocate(lut_asyliqSW(nSize_liq, nBand))
-          allocate(lut_exticeSW(nSize_ice, nBand, nrghice))
-          allocate(lut_ssaiceSW(nSize_ice, nBand, nrghice))
-          allocate(lut_asyiceSW(nSize_ice, nBand, nrghice))
-       endif
-       if (doGP_cldoptics_PADE) then
-          allocate(pade_extliqSW(nBand, nSizeReg,  nCoeff_ext ))
-          allocate(pade_ssaliqSW(nBand, nSizeReg,  nCoeff_ssa_g))
-          allocate(pade_asyliqSW(nBand, nSizeReg,  nCoeff_ssa_g))
-          allocate(pade_exticeSW(nBand, nSizeReg,  nCoeff_ext,   nrghice))
-          allocate(pade_ssaiceSW(nBand, nSizeReg,  nCoeff_ssa_g, nrghice))
-          allocate(pade_asyiceSW(nBand, nSizeReg,  nCoeff_ssa_g, nrghice))
-          allocate(pade_sizereg_extliqSW(nBound))
-          allocate(pade_sizereg_ssaliqSW(nBound))
-          allocate(pade_sizereg_asyliqSW(nBound))
-          allocate(pade_sizereg_exticeSW(nBound))
-          allocate(pade_sizereg_ssaiceSW(nBound))
-          allocate(pade_sizereg_asyiceSW(nBound))
-       endif
-       allocate(band_limsCLDSW(2,nBand))
+    ! Other processors waiting...
+    call mpi_barrier(mpicomm, mpierr)
 
-       ! Read in fields from file
+    ! #######################################################################################
+    !
+    ! Broadcast dimensions...
+    ! (ALL processors)
+    !
+    ! #######################################################################################
+    call mpi_bcast(nBandSW,            1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nSize_liqSW,        1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nSize_iceSW,        1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nSizeregSW,         1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nCoeff_extSW,       1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nCoeff_ssa_gSW,     1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nBoundSW,           1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(nPairsSW,           1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+#endif
+    
+    ! Has the number of ice-roughnesses provided from the namelist?
+    ! If so, override nrghice from cloud-optics file
+    if (nrghice .ne. 0) nrghice_fromfileSW = nrghice
+#ifdef MPI
+    call mpi_bcast(nrghice_fromfileSW, 1, MPI_INTEGER, mpiroot, mpicomm, mpierr)
+#endif
+
+    ! #######################################################################################
+    !
+    ! Allocate space for arrays...
+    ! (ALL processors)
+    !
+    ! #######################################################################################
+    if (doGP_cldoptics_LUT) then
+       allocate(lut_extliqSW(nSize_liqSW, nBandSW))
+       allocate(lut_ssaliqSW(nSize_liqSW, nBandSW))
+       allocate(lut_asyliqSW(nSize_liqSW, nBandSW))
+       allocate(lut_exticeSW(nSize_iceSW, nBandSW, nrghice_fromfileSW))
+       allocate(lut_ssaiceSW(nSize_iceSW, nBandSW, nrghice_fromfileSW))
+       allocate(lut_asyiceSW(nSize_iceSW, nBandSW, nrghice_fromfileSW))
+    endif
+    if (doGP_cldoptics_PADE) then
+       allocate(pade_extliqSW(nBandSW, nSizeRegSW,  nCoeff_extSW ))
+       allocate(pade_ssaliqSW(nBandSW, nSizeRegSW,  nCoeff_ssa_gSW))
+       allocate(pade_asyliqSW(nBandSW, nSizeRegSW,  nCoeff_ssa_gSW))
+       allocate(pade_exticeSW(nBandSW, nSizeRegSW,  nCoeff_extSW,   nrghice_fromfileSW))
+       allocate(pade_ssaiceSW(nBandSW, nSizeRegSW,  nCoeff_ssa_gSW, nrghice_fromfileSW))
+       allocate(pade_asyiceSW(nBandSW, nSizeRegSW,  nCoeff_ssa_gSW, nrghice_fromfileSW))
+       allocate(pade_sizereg_extliqSW(nBoundSW))
+       allocate(pade_sizereg_ssaliqSW(nBoundSW))
+       allocate(pade_sizereg_asyliqSW(nBoundSW))
+       allocate(pade_sizereg_exticeSW(nBoundSW))
+       allocate(pade_sizereg_ssaiceSW(nBoundSW))
+       allocate(pade_sizereg_asyiceSW(nBoundSW))
+    endif
+    allocate(band_limsCLDSW(2,nBandSW))
+
+    ! #######################################################################################
+    !
+    ! Read in data ...
+    ! (ONLY master processor(0), if MPI enabled) 
+    !
+    ! #######################################################################################
+#ifdef MPI
+    call mpi_barrier(mpicomm, mpierr)
+    if (mpirank .eq. mpiroot) then
+#endif 
        if (doGP_cldoptics_LUT) then
           write (*,*) 'Reading RRTMGP shortwave cloud data (LUT) ... '
           status = nf90_inq_varid(ncid,'radliq_lwr',varID)
@@ -241,26 +283,99 @@ contains
 
        ! Close file
        status = nf90_close(ncid)       
-!    endif
 
-    ! Load tables data for RRTMGP cloud-optics  
+#ifdef MPI
+    endif ! Master process
+
+    ! Other processors waiting...
+    call mpi_barrier(mpicomm, mpierr)
+
+    ! #######################################################################################
+    !
+    ! Broadcast data... 
+    ! (ALL processors)
+    !
+    ! #######################################################################################
+
+    ! Real scalars
+    call mpi_bcast(radliq_facSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radice_facSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radliq_lwrSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radliq_uprSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radice_lwrSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    call mpi_bcast(radice_uprSW, 1, MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+
+    ! Real arrays
+    call mpi_bcast(band_limsCLDSW, size(band_limsCLDSW),  &
+         MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     if (doGP_cldoptics_LUT) then
-!$omp critical (load_sw_cloud_props_LUTs)
-       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_limsCLDSW,        &
-            radliq_lwrSW, radliq_uprSW, radliq_facSW, radice_lwrSW, radice_uprSW,  radice_facSW,     &
-            lut_extliqSW, lut_ssaliqSW, lut_asyliqSW, lut_exticeSW, lut_ssaiceSW, lut_asyiceSW))
-!$omp end critical (load_sw_cloud_props_LUTs)
+       call mpi_bcast(lut_extliqSW, size(lut_extliqSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(lut_ssaliqSW, size(lut_ssaliqSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(lut_asyliqSW, size(lut_asyliqSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(lut_exticeSW, size(lut_exticeSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(lut_ssaiceSW, size(lut_ssaiceSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(lut_asyiceSW, size(lut_asyiceSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
     endif
     if (doGP_cldoptics_PADE) then
+       call mpi_bcast(pade_extliqSW, size(pade_extliqSW),                   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_ssaliqSW, size(pade_ssaliqSW),                   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_asyliqSW, size(pade_asyliqSW),                   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_exticeSW, size(pade_exticeSW),                   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_ssaiceSW, size(pade_ssaiceSW),                   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_asyiceSW, size(pade_asyiceSW),                   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_sizereg_extliqSW, size(pade_sizereg_extliqSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_sizereg_ssaliqSW, size(pade_sizereg_ssaliqSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_sizereg_asyliqSW, size(pade_sizereg_asyliqSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_sizereg_exticeSW, size(pade_sizereg_exticeSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_sizereg_ssaiceSW, size(pade_sizereg_ssaiceSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+       call mpi_bcast(pade_sizereg_asyiceSW, size(pade_sizereg_asyiceSW),   &
+            MPI_DOUBLE_PRECISION, mpiroot, mpicomm, mpierr)
+    endif
+#endif
+
+    ! #######################################################################################
+    !   
+    ! Initialize RRTMGP DDT's...
+    !
+    ! #######################################################################################
+    if (doGP_cldoptics_LUT) then
+!$omp critical (load_sw_cloud_props_LUTs)
+       call check_error_msg('sw_cloud_optics_init',sw_cloud_props%load(band_limsCLDSW,      &
+            radliq_lwrSW, radliq_uprSW, radliq_facSW, radice_lwrSW, radice_uprSW,           &
+            radice_facSW, lut_extliqSW, lut_ssaliqSW, lut_asyliqSW, lut_exticeSW,           &
+            lut_ssaiceSW, lut_asyiceSW))
+!$omp end critical (load_sw_cloud_props_LUTs)
+    endif
+
+    if (doGP_cldoptics_PADE) then
 !$omp critical (load_sw_cloud_props_PADE_approx)
-       call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_limsCLDSW,       &
-            pade_extliqSW, pade_ssaliqSW, pade_asyliqSW, pade_exticeSW, pade_ssaiceSW, pade_asyiceSW,&
-            pade_sizereg_extliqSW, pade_sizereg_ssaliqSW, pade_sizereg_asyliqSW,               &
-            pade_sizereg_exticeSW, pade_sizereg_ssaiceSW, pade_sizereg_asyiceSW))
+       call check_error_msg('sw_cloud_optics_init', sw_cloud_props%load(band_limsCLDSW,     &
+            pade_extliqSW, pade_ssaliqSW, pade_asyliqSW, pade_exticeSW, pade_ssaiceSW,      &
+            pade_asyiceSW, pade_sizereg_extliqSW, pade_sizereg_ssaliqSW,                    &
+            pade_sizereg_asyliqSW, pade_sizereg_exticeSW, pade_sizereg_ssaiceSW,            &
+            pade_sizereg_asyiceSW))
 !$omp end critical (load_sw_cloud_props_PADE_approx) 
     endif
+
 !$omp critical (load_sw_cloud_props_nrghice)
-    call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice))
+    call check_error_msg('sw_cloud_optics_init',sw_cloud_props%set_ice_roughness(nrghice_fromfileSW))
 !$omp end critical (load_sw_cloud_props_nrghice)
 
     ! Initialize coefficients for rain and snow(+groupel) cloud optics
@@ -289,9 +404,9 @@ contains
 !! \htmlinclude rrtmgp_sw_cloud_optics.html
 !!
   subroutine rrtmgp_sw_cloud_optics_run(doSWrad, doG_cldoptics, icliq_sw, icice_sw,         &
-       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nCol, nLev, nDay, nbndsGPsw, idxday, nrghice, cld_frac,&
-       cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp, cld_rerain,    &
-       precip_frac, sw_optical_props_cloudsByBand,            &
+       doGP_cldoptics_PADE, doGP_cldoptics_LUT, nCol, nLev, nDay, nbndsGPsw, idxday,        &
+       cld_frac, cld_lwp, cld_reliq, cld_iwp, cld_reice, cld_swp, cld_resnow, cld_rwp,      &
+       cld_rerain, precip_frac, sw_optical_props_cloudsByBand,                              &
        sw_optical_props_precipByBand, cldtausw, errmsg, errflg)
     
     ! Inputs
@@ -305,7 +420,6 @@ contains
          nCol,                & ! Number of horizontal gridpoints
          nLev,                & ! Number of vertical levels
          nday,                & ! Number of daylit points.
-         nrghice,             & ! Number of ice-roughness categories
          icliq_sw,            & ! Choice of treatment of liquid cloud optical properties (RRTMG legacy)
          icice_sw               ! Choice of treatment of ice cloud optical properties (RRTMG legacy) 
     integer,intent(in),dimension(ncol) :: &
@@ -398,9 +512,9 @@ contains
                       ssaw     = min(1._kind_phys-0.000001, ssa_prec/tau_prec)
                       za1      = asyw * asyw
                       za2      = ssaw * za1                      
-                      sw_optical_props_precipByBand%tau(idxday(iDay),iLay,iBand) = (1._kind_phys - za2) * tau_prec
-                      sw_optical_props_precipByBand%ssa(idxday(iDay),iLay,iBand) = (ssaw - za2) / (1._kind_phys - za2)
-                      sw_optical_props_precipByBand%g(idxday(iDay),iLay,iBand)   = asyw/(1+asyw)
+                      sw_optical_props_precipByBand%tau(iDay,iLay,iBand) = (1._kind_phys - za2) * tau_prec
+                      sw_optical_props_precipByBand%ssa(iDay,iLay,iBand) = (ssaw - za2) / (1._kind_phys - za2)
+                      sw_optical_props_precipByBand%g(iDay,iLay,iBand)   = asyw/(1+asyw)
                    enddo
                 endif
              enddo
