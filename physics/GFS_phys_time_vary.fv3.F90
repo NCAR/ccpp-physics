@@ -78,7 +78,7 @@
               qsnowxy, wslakexy, taussxy, waxy, wtxy, zwtxy, xlaixy, xsaixy, lfmassxy, stmassxy,   &
               rtmassxy, woodxy, stblcpxy, fastcpxy, smcwtdxy, deeprechxy, rechxy, snowxy, snicexy, &
               snliqxy, tsnoxy , smoiseq, zsnsoxy, slc, smc, stc, tsfcl, snowd, canopy, tg3, stype, &
-              nthrds, errmsg, errflg)
+              con_t0c, nthrds, errmsg, errflg)
 
          implicit none
 
@@ -154,6 +154,7 @@
          real(kind_phys),      intent(in)    :: canopy(:)
          real(kind_phys),      intent(in)    :: tg3(:)
          real(kind_phys),      intent(in)    :: stype(:)
+         real(kind_phys),      intent(in)    :: con_t0c
 
          integer,              intent(in)    :: nthrds
          character(len=*),     intent(out)   :: errmsg
@@ -362,8 +363,6 @@
 
 !$OMP end parallel
 
-
-
          if (lsm == lsm_noahmp) then
            if (all(tvxy < zero)) then
 
@@ -410,14 +409,14 @@
              zsnsoxy(:,:)  = missing_value
 
              do ix=1,im
-               if (landfrac(ix) >= drythresh) then ! Sfcprop(nb)%
-                 tvxy(ix)     = tsfcl(ix) ! Sfcprop(nb)%
-                 tgxy(ix)     = tsfcl(ix) ! Sfcprop(nb)%
-                 tahxy(ix)    = tsfcl(ix) ! Sfcprop(nb)%
+               if (landfrac(ix) >= drythresh) then
+                 tvxy(ix)     = tsfcl(ix)
+                 tgxy(ix)     = tsfcl(ix)
+                 tahxy(ix)    = tsfcl(ix)
 
-                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > 273.15 ) tvxy(ix)  = 273.15   ! all Sfcprop(nb)%, replace hardcoded value with parameter/constant THIS IS A BUGFIX, (ix) was missing!
-                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > 273.15 ) tgxy(ix)  = 273.15   ! all Sfcprop(nb)%, replace hardcoded value with parameter/constant THIS IS A BUGFIX, (ix) was missing!
-                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > 273.15 ) tahxy(ix) = 273.15   ! all Sfcprop(nb)%, replace hardcoded value with parameter/constant THIS IS A BUGFIX, (ix) was missing!
+                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > con_t0c ) tvxy(ix)  = con_t0c
+                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > con_t0c ) tgxy(ix)  = con_t0c
+                 if (snowd(ix) > 0.01 .and. tsfcl(ix) > con_t0c ) tahxy(ix) = con_t0c
 
                  canicexy(ix) = 0.0
                  canliqxy(ix) = canopy(ix)
@@ -431,7 +430,7 @@
                  chxy(ix)     = 0.0
                  fwetxy(ix)   = 0.0
                  sneqvoxy(ix) = weasd(ix)     ! mm
-                 alboldxy(ix) = 0.65 ! DH* REPLACE WITH CONSTANT ?
+                 alboldxy(ix) = 0.65
                  qsnowxy(ix)  = 0.0
 
 !                 if (srflag(ix) > 0.001) qsnowxy(ix) = tprcp(ix)/dtp
@@ -446,7 +445,7 @@
 
                  vegtyp       = vtype(ix)
                  if (vegtyp == 0) vegtyp = 7
-                 imn          = idate(2) ! DH* MODEL%
+                 imn          = idate(2)
 
                  if ((vegtyp == isbarren_table) .or. (vegtyp == isice_table) .or. (vegtyp == isurban_table) .or. (vegtyp == iswater_table)) then
 

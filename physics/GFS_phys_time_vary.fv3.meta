@@ -881,6 +881,15 @@
   kind = kind_phys
   intent = in
   optional = F
+[con_t0c]
+  standard_name = temperature_at_zero_celsius
+  long_name = temperature at 0 degree Celsius
+  units = K
+  dimensions = ()
+  type = real
+  kind = kind_phys
+  intent = in
+  optional = F
 [nthrds]
   standard_name = omp_threads
   long_name = number of OpenMP threads available for physics schemes
