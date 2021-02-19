@@ -145,9 +145,9 @@ c
         if(ntke  > 0) gfs_phy_tracer%vname(ntke)  = 'tke'   
 #ifdef MULTI_GASES
         print *,' ++++ ntoz nto nto2 ',ntoz,nto,nto2
-        if(ntoz  > 0) gfs_phy_tracer%vname(ntoz)  = 'spfo3'   
-        if(nto   > 0) gfs_phy_tracer%vname(nto)   = 'spfo'
-        if(nto2  > 0) gfs_phy_tracer%vname(nto2)  = 'spfo2'
+        if(ntoz  > 0) gfs_phy_tracer%vname(ntoz)  = 'spo3'   
+        if(nto   > 0) gfs_phy_tracer%vname(nto)   = 'spo'
+        if(nto2  > 0) gfs_phy_tracer%vname(nto2)  = 'spo2'
 #else
         if(ntoz  > 0) gfs_phy_tracer%vname(ntoz)  = 'o3mr'   
         if(nto   > 0) gfs_phy_tracer%vname(nto)   = 'o'   
